@@ -1,0 +1,37 @@
+---
+repos:
+    - repo: https://github.com/pre-commit/pre-commit-hooks
+      rev: v4.6.0
+      hooks:
+          - id: trailing-whitespace
+          - id: check-json
+          - id: check-ast
+          - id: check-merge-conflict
+          - id: check-toml
+          - id: check-yaml
+            args: [--unsafe]
+          - id: debug-statements
+          - id: detect-private-key
+          - id: end-of-file-fixer
+    - repo: https://github.com/pycqa/isort
+      rev: 5.13.2
+      hooks:
+          - id: isort
+            args: [--profile, black, --filter-files]
+            name: isort (python)
+    - repo: https://github.com/ambv/black
+      rev: 24.4.2
+      hooks:
+          - id: black
+            name: Run black formatter
+    - repo: https://github.com/PyCQA/autoflake
+      rev: v2.3.1
+      hooks:
+          - id: autoflake
+            args: [--in-place, --remove-all-unused-imports]
+    - repo: https://github.com/pre-commit/mirrors-mypy
+      rev: v1.10.1
+      hooks:
+          - id: mypy
+            additional_dependencies: [pytest, types-click]
+            args: [--explicit-package-bases]

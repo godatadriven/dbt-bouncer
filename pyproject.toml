@@ -1,0 +1,61 @@
+[tool.black]
+line-length = 99
+include = '/project$|\.pyi?$'
+exclude = '''
+/(
+    \.git
+  | \.hg
+  | \.eggs
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | \.vscode
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+
+[tool.mypy]
+follow_imports = "silent"
+warn_redundant_casts = true
+warn_unused_ignores = true
+disallow_any_generics = true
+check_untyped_defs = true
+no_implicit_reexport = true
+
+[tool.poetry]
+authors = ["Padraic Slattery <pgoslatara@gmail.com>"]
+description = "Configure and enforce conventions for your dbt project."
+license ="MIT"
+maintainers = ["Padraic Slattery <pgoslatara@gmail.com>"]
+name = "dbt-bouncer"
+packages = [
+    { include = "dbt_bouncer" },
+]
+readme = "README.md"
+repository = "https://github.com/godatadriven/dbt-bouncer"
+version = "0.0.0"
+
+[tool.poetry.dependencies]
+python = ">=3.8,<3.13"
+click = "*"
+
+[tool.poetry.dev-dependencies]
+pre-commit = "^3"
+pytest = "*"
+pytest-cov = "*"
+pytest-xdist = "*"
+
+[tool.poetry.scripts]
+dbt_bouncer = "dbt_bouncer.main:cli"
+
+[tool.poetry_bumpversion.file."./dbt_bouncer/version.py"]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
