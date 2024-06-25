@@ -85,7 +85,7 @@ jobs:
               run: poetry install --no-interaction --no-ansi
 
             - name: Run pytest
-              run: make test
+              run: make test | tee pytest-coverage.txt && exit ${PIPESTATUS[0]}
 
             - name: Pytest coverage comment
               if: matrix.python-version == '3.11'
