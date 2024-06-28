@@ -46,6 +46,8 @@ python = ">=3.8,<3.13"
 click = "*"
 
 [tool.poetry.dev-dependencies]
+dbt-core="*"
+dbt-duckdb="*"
 pre-commit = "^3"
 pytest = "*"
 pytest-cov = "*"

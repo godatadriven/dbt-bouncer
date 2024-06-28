@@ -19,6 +19,8 @@ poetry install
 pre-commit install
 ```
 
+Set required environment variables by copying `.env.example` to `.env` and updating the values.
+
 All tests can be run via:
 ```bash
 make test

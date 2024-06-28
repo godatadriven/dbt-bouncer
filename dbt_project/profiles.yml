@@ -1,0 +1,7 @@
+dbt_bouncer:
+  target: dev
+  outputs:
+   dev:
+     type: duckdb
+     path: ':memory:'
+     threads: 8

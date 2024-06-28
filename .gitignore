@@ -161,3 +161,15 @@ cython_debug/
 
 *.ipynb
 pytest-coverage.txt
+
+dbt_project/logs
+!dbt_project/target
+dbt_project/target/compiled
+dbt_project/target/run
+dbt_project/target/graph_summary.json
+dbt_project/target/graph.gpickle
+dbt_project/target/partial_parse.msgpack
+dbt_project/target/perf_info.json
+dbt_project/target/run_results.json
+dbt_project/target/semantic_manifest.json
+dbt_project/.user.yml
