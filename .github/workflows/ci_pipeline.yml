@@ -6,6 +6,9 @@ on:
         branches:
             - main
 
+env:
+  POETRY_VERSION: "1.7.1"
+
 jobs:
     pre-commit:
         name: Run pre-commit
@@ -18,12 +21,21 @@ jobs:
               id: setup-python
               uses: actions/setup-python@v5
 
+            - name: Load cached Poetry installation
+              id: cached-poetry
+              uses: actions/cache@v4
+              with:
+                path: /home/runner/.local
+                key: poetry-cache-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ env.POETRY_VERSION }}
+
             - name: Install Poetry
+              if: steps.cached-poetry.outputs.cache-hit != 'true'
               uses: snok/install-poetry@v1
               with:
-                  virtualenvs-create: true
-                  virtualenvs-in-project: true
-                  installer-parallel: true
+                installer-parallel: true
+                version: ${{ env.POETRY_VERSION }}
+                virtualenvs-create: true
+                virtualenvs-in-project: true
 
             - name: Load cached venv
               id: cached-poetry-dependencies
@@ -66,12 +78,21 @@ jobs:
               with:
                   python-version: ${{ matrix.python-version }}
 
+            - name: Load cached Poetry installation
+              id: cached-poetry
+              uses: actions/cache@v4
+              with:
+                path: /home/runner/.local
+                key: poetry-cache-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ env.POETRY_VERSION }}
+
             - name: Install Poetry
+              if: steps.cached-poetry.outputs.cache-hit != 'true'
               uses: snok/install-poetry@v1
               with:
-                  virtualenvs-create: true
-                  virtualenvs-in-project: true
-                  installer-parallel: true
+                installer-parallel: true
+                version: ${{ env.POETRY_VERSION }}
+                virtualenvs-create: true
+                virtualenvs-in-project: true
 
             - name: Load cached venv
               id: cached-poetry-dependencies
