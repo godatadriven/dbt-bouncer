@@ -1,0 +1,14 @@
+name: 'dbt-bouncer'
+description: 'Configure and enforce conventions for your dbt project.'
+inputs:
+  dbt-project-dir:
+    default: '.'
+    description: 'Directory where your dbt project is located.'
+    required: false
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - dbt_bouncer
+    - --dbt-project-dir
+    - /github/workspace/${{ inputs.dbt-project-dir }}
