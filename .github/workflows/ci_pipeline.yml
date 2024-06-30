@@ -152,6 +152,20 @@ jobs:
             - name: Run e2e test
               run: |
                 docker run --rm \
-                  --volume "$PWD/dbt_project":/app/dbt_project \
+                  --volume "$PWD/dbt_project":/dbt_project \
                   ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:ci \
                   poetry run dbt_bouncer --dbt-project-dir dbt_project
+
+    github-action:
+      needs: [pre-commit]
+      permissions:
+        contents: read
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout
+          uses: actions/checkout@v4
+
+        - name: Run action
+          uses: ./
+          with:
+            dbt-project-dir: dbt_project
