@@ -112,3 +112,22 @@
                     load: false
                     push: true
                     tags: ${{ steps.meta.outputs.tags }}
+
+              - name: Determine if prerelease flag is necessary
+                run: |
+                    [ "${{ inputs.version_bump_type }}" = "prerelease" ] && export PRERELEASE="--prerelease" || export PRERELEASE="--latest"
+                    echo "PRERELEASE: $PRERELEASE"
+                    echo PRERELEASE=$PRERELEASE >> "$GITHUB_ENV"
+
+              - name: Create release
+                env:
+                    GH_TOKEN: ${{ github.token }}
+                run: |
+                    gh release create ${{ steps.version.outputs.version }} \
+                        ./dist/* \
+                        --generate-notes \
+                        --repo ${{ github.repository }} \
+                        --target main \
+                        --title '$${{ steps.version.outputs.version }}' \
+                        $PRELEASE \
+                        --verify-tag
