@@ -154,7 +154,7 @@ jobs:
                 docker run --rm \
                   --volume "$PWD/dbt_project":/dbt_project \
                   ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:ci \
-                  poetry run dbt_bouncer --dbt-project-dir dbt_project
+                  dbt_bouncer --dbt-project-dir dbt_project
 
     github-action:
       needs: [pre-commit]
