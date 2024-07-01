@@ -139,7 +139,7 @@ jobs:
                   echo "PYTHON_VERSION=$PYTHON_VERSION" >> $GITHUB_OUTPUT
 
             - name: Build image
-              uses: docker/build-push-action@v5
+              uses: docker/build-push-action@v6
               with:
                   build-args: PYTHON_VERSION=${{ steps.python-version.outputs.PYTHON_VERSION }}
                   cache-from: type=gha
