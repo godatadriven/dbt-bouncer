@@ -57,3 +57,5 @@ jobs:
               working-directory: ./dbt_project
 
             - uses: godatadriven/dbt-bouncer@0.0.1a4
+              with:
+                dbt-project-dir: ./dbt_project
