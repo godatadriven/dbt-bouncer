@@ -53,7 +53,7 @@ jobs:
               if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
               run: poetry install --no-interaction --no-ansi
 
-            - run: dbt parse
+            - run: poetry run dbt parse
               working-directory: ./dbt_project
 
             - uses: godatadriven/dbt-bouncer@0.0.1a4
