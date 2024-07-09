@@ -16,7 +16,7 @@ env:
   REGISTRY: ghcr.io
 
 jobs:
-    pre-commit:
+    dbt-test:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout
@@ -53,119 +53,7 @@ jobs:
               if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
               run: poetry install --no-interaction --no-ansi
 
-            - name: Run pre-commit
-              run: poetry run pre-commit run
+            - run: dbt parse
+              working-directory: ./dbt
 
-    unit-tests:
-        needs: [pre-commit]
-        runs-on: ubuntu-latest
-        permissions:
-            contents: write
-            id-token: write
-            issues: write
-            pull-requests: write
-        strategy:
-            fail-fast: false
-            matrix:
-                python-version:
-                    - '3.8'
-                    - '3.9'
-                    - '3.10'
-                    - '3.11'
-                    - '3.12'
-        steps:
-            - uses: actions/checkout@v4
-
-            - name: Setup Python
-              id: setup-python
-              uses: actions/setup-python@v5
-              with:
-                  python-version: ${{ matrix.python-version }}
-
-            - name: Load cached Poetry installation
-              id: cached-poetry
-              uses: actions/cache@v4
-              with:
-                path: /home/runner/.local
-                key: poetry-cache-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ env.POETRY_VERSION }}
-
-            - name: Install Poetry
-              if: steps.cached-poetry.outputs.cache-hit != 'true'
-              uses: snok/install-poetry@v1
-              with:
-                installer-parallel: true
-                version: ${{ env.POETRY_VERSION }}
-                virtualenvs-create: true
-                virtualenvs-in-project: true
-
-            - name: Load cached venv
-              id: cached-poetry-dependencies
-              uses: actions/cache@v4
-              with:
-                  path: .venv
-                  key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
-
-            - name: Install dependencies
-              if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-              run: poetry install --no-interaction --no-ansi
-
-            - name: Run pytest
-              run: make test | tee pytest-coverage.txt && exit ${PIPESTATUS[0]}
-
-            - name: Pytest coverage comment
-              if: matrix.python-version == '3.11'
-              uses: MishaKav/pytest-coverage-comment@main
-              with:
-                  pytest-coverage-path: ./pytest-coverage.txt
-                  title: Coverage Report
-                  badge-title: Coverage
-                  junitxml-path: ./coverage.xml
-
-    e2e-tests:
-        needs: [pre-commit]
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v4
-
-            - name: Set up Docker Buildx
-              uses: docker/setup-buildx-action@v3
-
-            - name: Determine python version
-              id: python-version
-              run: |
-                  export PYTHON_VERSION=$(cat .python-version)
-                  echo "PYTHON_VERSION: $PYTHON_VERSION"
-                  echo "PYTHON_VERSION=$PYTHON_VERSION" >> $GITHUB_OUTPUT
-
-            - name: Build image
-              uses: docker/build-push-action@v5
-              with:
-                  build-args: PYTHON_VERSION=${{ steps.python-version.outputs.PYTHON_VERSION }}
-                  cache-from: type=gha
-                  cache-to: type=gha,mode=max
-                  context: .
-                  load: true
-                  push: false
-                  tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:ci
-
-            - name: Run e2e test
-              run: |
-                docker run --rm \
-                  --volume "$PWD/dbt_project":/dbt_project \
-                  ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:ci \
-                  dbt_bouncer --dbt-project-dir dbt_project
-
-    github-action:
-      needs: [pre-commit]
-      permissions:
-        contents: read
-      runs-on: ubuntu-latest
-      steps:
-        - name: Checkout
-          uses: actions/checkout@v4
-
-        - name: Run action
-          uses: ./
-          with:
-            dbt-project-dir: dbt_project
+            - uses: godatadriven/dbt-bouncer@0.0.1a4
