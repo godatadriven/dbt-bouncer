@@ -55,5 +55,5 @@ jobs:
 
             - run: dbt parse
               working-directory: ./dbt
-
+              
             - uses: godatadriven/dbt-bouncer@0.0.1a4
