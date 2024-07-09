@@ -54,6 +54,6 @@ jobs:
               run: poetry install --no-interaction --no-ansi
 
             - run: dbt parse
-              working-directory: ./dbt
-              
+              working-directory: ./dbt_project
+
             - uses: godatadriven/dbt-bouncer@0.0.1a4
