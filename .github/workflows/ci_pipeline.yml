@@ -156,7 +156,7 @@ jobs:
                   ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:ci \
                   dbt-bouncer --dbt-project-dir dbt_project
 
-    github-action:
+    github-action-tests:
       needs: [pre-commit]
       permissions:
         contents: read
