@@ -154,9 +154,9 @@ jobs:
                 docker run --rm \
                   --volume "$PWD/dbt_project":/dbt_project \
                   ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:ci \
-                  dbt_bouncer --dbt-project-dir dbt_project
+                  dbt-bouncer --dbt-project-dir dbt_project
 
-    github-action:
+    github-action-tests:
       needs: [pre-commit]
       permissions:
         contents: read

@@ -54,7 +54,7 @@ pytest-cov = "*"
 pytest-xdist = "*"
 
 [tool.poetry.scripts]
-dbt_bouncer = "dbt_bouncer.main:cli"
+dbt-bouncer = "dbt_bouncer.main:cli"
 
 [tool.poetry_bumpversion.file."./dbt_bouncer/version.py"]
 
