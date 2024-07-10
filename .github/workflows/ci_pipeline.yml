@@ -56,6 +56,13 @@ jobs:
             - run: poetry run dbt parse
               working-directory: ./dbt_project
 
-            - uses: godatadriven/dbt-bouncer@0.0.1a4
+            - uses: godatadriven/dbt-bouncer@v0
               with:
                 dbt-project-dir: ./dbt_project
+
+            - run: docker pull ghcr.io/godatadriven/dbt-bouncer:v0
+            - run: >
+                docker run --rm \
+                  --volume "$PWD/dbt_project":/dbt_project \
+                  ghcr.io/godatadriven/dbt-bouncer:v0 \
+                  poetry run dbt-bouncer --dbt-project-dir dbt_project
