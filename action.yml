@@ -9,6 +9,6 @@ runs:
   using: 'docker'
   image: 'Dockerfile'
   args:
-    - dbt_bouncer
+    - dbt-bouncer
     - --dbt-project-dir
     - /github/workspace/${{ inputs.dbt-project-dir }}

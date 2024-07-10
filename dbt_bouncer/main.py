@@ -13,6 +13,7 @@ from dbt_bouncer.version import version
     required=True,
     type=click.Path(exists=True),
 )
+@click.version_option()
 def cli(dbt_project_dir):
     logger.info(f"Running dbt_bouncer ({version()})...")
     logger.debug(f"{dbt_project_dir=}")
