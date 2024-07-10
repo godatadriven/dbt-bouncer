@@ -72,6 +72,9 @@
               - name: Re-install dbt-bouncer
                 run: poetry install
 
+              - name: Build pex file
+                run: poetry run pex . -c dbt-bouncer -o dbt-bouncer.pex
+
               - name: Save version to env var
                 id: version
                 run: |
@@ -154,3 +157,8 @@
                         --title 'v${{ steps.version.outputs.version }}' \
                         $PRELEASE \
                         --verify-tag
+
+              - name: Upload .pex to release
+                env:
+                    GH_TOKEN: ${{ github.token }}
+                run: gh release upload v${{ steps.version.outputs.version }} dbt-bouncer.pex
