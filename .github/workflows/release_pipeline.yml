@@ -68,6 +68,10 @@
                   poetry version $(git tag --sort version:refname | tail -n 1)
                   poetry version ${{ inputs.version_bump_type }}
 
+              # Need to re-install dbt-bouncer so version bump is visible when `dbt-bouncer --version` is called
+              - name: Re-install dbt-bouncer
+                run: poetry install
+
               - name: Save version to env var
                 id: version
                 run: |
