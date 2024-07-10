@@ -89,11 +89,11 @@
                   git tag -f \
                     -a v${{ steps.version.outputs.version }} \
                     -m "v${{ steps.version.outputs.version }}"
-                  git push origin "v${{ steps.version.outputs.version }}"
+                  git push -f origin "v${{ steps.version.outputs.version }}"
                   git tag -f \
                     -a v${{ steps.version.outputs.major }}.${{ steps.version.outputs.minor }} \
                     -m "v${{ steps.version.outputs.major }}.${{ steps.version.outputs.minor }}"
-                  git push origin "v${{ steps.version.outputs.major }}.${{ steps.version.outputs.minor }}"
+                  git push -f origin "v${{ steps.version.outputs.major }}.${{ steps.version.outputs.minor }}"
                   git tag -f \
                     -a v${{ steps.version.outputs.major }} \
                     -m "v${{ steps.version.outputs.major }}"
