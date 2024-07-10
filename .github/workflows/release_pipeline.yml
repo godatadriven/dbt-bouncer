@@ -97,7 +97,7 @@
                   git tag -f \
                     -a v${{ steps.version.outputs.major }} \
                     -m "v${{ steps.version.outputs.major }}"
-                  git push origin "v${{ steps.version.outputs.major }}"
+                  git push -f origin "v${{ steps.version.outputs.major }}"
 
               - name: Extract metadata (tags, labels) for Docker
                 id: meta
