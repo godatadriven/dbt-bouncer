@@ -86,15 +86,15 @@
                 run: |
                   git config --global user.email "bot@github.com"
                   git config --global user.name "github-actions[bot]"
-                  git tag \
+                  git tag -f \
                     -a v${{ steps.version.outputs.version }} \
                     -m "v${{ steps.version.outputs.version }}"
                   git push origin "v${{ steps.version.outputs.version }}"
-                  git tag \
+                  git tag -f \
                     -a v${{ steps.version.outputs.major }}.${{ steps.version.outputs.minor }} \
                     -m "v${{ steps.version.outputs.major }}.${{ steps.version.outputs.minor }}"
                   git push origin "v${{ steps.version.outputs.major }}.${{ steps.version.outputs.minor }}"
-                  git tag \
+                  git tag -f \
                     -a v${{ steps.version.outputs.major }} \
                     -m "v${{ steps.version.outputs.major }}"
                   git push origin "v${{ steps.version.outputs.major }}"
