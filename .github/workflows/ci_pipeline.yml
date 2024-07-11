@@ -208,7 +208,7 @@ jobs:
             run: poetry install --no-interaction --no-ansi
 
           - name: Build pex file
-            run: poetry run pex . -c dbt-bouncer -o dbt-bouncer.pex
+            run: poetry run pex . -c dbt-bouncer -o ./dist/dbt-bouncer.pex
 
           - name: Test pex file
-            run: ./dbt-bouncer.pex --dbt-project-dir dbt_project
+            run: ./dist/dbt-bouncer.pex --dbt-project-dir dbt_project
