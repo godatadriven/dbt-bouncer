@@ -5,10 +5,13 @@ inputs:
     default: '.'
     description: 'Directory where your dbt project is located.'
     required: false
+
 runs:
-  using: 'docker'
-  image: 'Dockerfile'
-  args:
-    - dbt-bouncer
-    - --dbt-project-dir
-    - /github/workspace/${{ inputs.dbt-project-dir }}
+  using: 'composite'
+
+  steps:
+    - name: Run dbt-bouncer
+      shell: bash
+      run: |
+        ${{ github.action_path }}/dist/dbt-bouncer.pex \
+          --dbt-project-dir ${{ inputs.dbt-project-dir }}

@@ -10,7 +10,7 @@ __pycache__/
 .Python
 build/
 develop-eggs/
-dist/
+# dist/
 downloads/
 eggs/
 .eggs/
@@ -173,4 +173,3 @@ dbt_project/target/perf_info.json
 dbt_project/target/run_results.json
 dbt_project/target/semantic_manifest.json
 dbt_project/.user.yml
-dbt-bouncer.pex
