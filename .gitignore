@@ -162,6 +162,7 @@ cython_debug/
 *.ipynb
 pytest-coverage.txt
 
+dbt_project/dbt_packages
 dbt_project/logs
 !dbt_project/target
 dbt_project/target/compiled

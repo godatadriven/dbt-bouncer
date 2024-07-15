@@ -28,6 +28,10 @@ disallow_any_generics = true
 check_untyped_defs = true
 no_implicit_reexport = true
 
+[[tool.mypy.overrides]]
+ignore_missing_imports = true
+module = "dbt_artifacts_parser.*"
+
 [tool.poetry]
 authors = ["Padraic Slattery <pgoslatara@gmail.com>"]
 description = "Configure and enforce conventions for your dbt project."
@@ -44,6 +48,7 @@ version = "0.0.0"
 [tool.poetry.dependencies]
 python = ">=3.8,<3.13"
 click = "*"
+dbt-artifacts-parser = "^0"
 
 [tool.poetry.group.dev.dependencies]
 dbt-core="*"
