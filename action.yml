@@ -1,9 +1,9 @@
 name: 'dbt-bouncer'
 description: 'Configure and enforce conventions for your dbt project.'
 inputs:
-  dbt-project-dir:
+  dbt-artifacts-dir:
     default: '.'
-    description: 'Directory where your dbt project is located.'
+    description: 'Directory where the dbt artifacts exists, generally the `target` directory inside a dbt project.'
     required: false
 
 runs:
@@ -14,4 +14,4 @@ runs:
       shell: bash
       run: |
         ${{ github.action_path }}/dist/dbt-bouncer.pex \
-          --dbt-project-dir ${{ inputs.dbt-project-dir }}
+          --dbt-artifacts-dir ${{ inputs.dbt-artifacts-dir }}

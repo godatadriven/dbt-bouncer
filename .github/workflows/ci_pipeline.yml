@@ -152,9 +152,9 @@ jobs:
             - name: Run e2e test
               run: |
                 docker run --rm \
-                  --volume "$PWD/dbt_project":/dbt_project \
+                  --volume "$PWD/dbt_project/target":/dbt_project/target \
                   ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:ci \
-                  dbt-bouncer --dbt-project-dir dbt_project
+                  dbt-bouncer --dbt-artifacts-dir dbt_project/target
 
     github-action-tests:
       needs: [pre-commit]
@@ -168,7 +168,7 @@ jobs:
         - name: Run action
           uses: ./
           with:
-            dbt-project-dir: dbt_project
+            dbt-artifacts-dir: dbt_project/target
 
     pex-tests:
       runs-on: ubuntu-latest
@@ -211,4 +211,4 @@ jobs:
             run: poetry run pex . -c dbt-bouncer -o ./dist/dbt-bouncer.pex
 
           - name: Test pex file
-            run: ./dist/dbt-bouncer.pex --dbt-project-dir dbt_project
+            run: ./dist/dbt-bouncer.pex --dbt-artifacts-dir dbt_project/target
