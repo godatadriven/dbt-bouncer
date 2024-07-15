@@ -171,6 +171,7 @@ jobs:
             dbt-project-dir: dbt_project
 
     pex-tests:
+      needs: [pre-commit]
       runs-on: ubuntu-latest
       steps:
           - name: Checkout
