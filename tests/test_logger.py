@@ -20,7 +20,7 @@ def test_logger_debug() -> None:
                 [
                     record
                     for record in records_to_tuples(handler.records)
-                    if record[2].startswith("dbt_project_dir=")
+                    if record[2].startswith("Loading manifest.json from ")
                 ]
             )
             == 1

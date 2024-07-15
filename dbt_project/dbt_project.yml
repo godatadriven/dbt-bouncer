@@ -1,4 +1,4 @@
-name: 'dbt_bouncer'
+name: 'dbt_bouncer_test_project'
 version: '1.0.0'
 config-version: 2
 

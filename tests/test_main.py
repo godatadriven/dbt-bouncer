@@ -17,10 +17,10 @@ def test_cli_happy_path(caplog):
         ],
     )
     assert "Running dbt_bouncer (0.0.0)..." in caplog.text
+    assert "oading manifest.json from dbt_project/target/manifest.json..." in caplog.text
 
 
 def test_cli_dbt_dir_doesnt_exist():
-
     runner = CliRunner()
     result = runner.invoke(
         cli,
@@ -33,7 +33,6 @@ def test_cli_dbt_dir_doesnt_exist():
 
 
 def test_cli_manifest_doesnt_exist(tmp_path):
-
     runner = CliRunner()
     result = runner.invoke(
         cli,
@@ -42,7 +41,7 @@ def test_cli_manifest_doesnt_exist(tmp_path):
             tmp_path,
         ],
     )
-    assert type(result.exception) in [RuntimeError]
+    assert type(result.exception) in [FileNotFoundError]
     assert (
         result.exception.args[0]
         == f"No manifest.json found at {tmp_path / 'target/manifest.json'}."
