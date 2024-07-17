@@ -5,6 +5,7 @@ import click
 from dbt_artifacts_parser.parser import parse_manifest
 
 from dbt_bouncer.logger import logger
+from dbt_bouncer.runner import runner
 from dbt_bouncer.version import version
 
 
@@ -35,15 +36,22 @@ def cli(dbt_artifacts_dir):
     for _, v in manifest_obj.nodes.items():
         if v.package_name == manifest_obj.metadata.project_name:
             if v.resource_type == "model":
-                project_models.append(v)
+                project_models.append(v.model_dump())
             elif v.resource_type == "test":
-                project_tests.append(v)
+                project_tests.append(v.model_dump())
 
     project_sources = []
     for _, v in manifest_obj.sources.items():
         if v.package_name == manifest_obj.metadata.project_name:
-            project_sources.append(v)
+            project_sources.append(v.model_dump())
 
     logger.info(
         f"Parsed `{manifest_obj.metadata.project_name}` project, found {len(project_models)} nodes, {len(project_sources)} sources and {len(project_tests)} tests."
+    )
+
+    logger.info("Running tests...")
+    runner(
+        models=project_models,
+        sources=project_sources,
+        tests=project_tests,
     )

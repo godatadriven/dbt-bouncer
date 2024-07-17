@@ -49,13 +49,13 @@ version = "0.0.0"
 python = ">=3.8,<3.13"
 click = "*"
 dbt-artifacts-parser = "^0"
+pytest = "*"
 
 [tool.poetry.group.dev.dependencies]
 dbt-core="*"
 dbt-duckdb="*"
 pex = "^2"
 pre-commit = "^3"
-pytest = "*"
 pytest-cov = "*"
 pytest-xdist = "*"
 
