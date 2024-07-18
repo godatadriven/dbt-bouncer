@@ -175,15 +175,11 @@ jobs:
         - name: Checkout
           uses: actions/checkout@v4
 
-        - name: Setup Python
-          uses: actions/setup-python@v5
-          with:
-              python-version: ${{ matrix.python-version }}
-
         - name: Run action
           uses: ./
           with:
             dbt-artifacts-dir: dbt_project/target
+
 
     pex-tests:
       needs: [pre-commit]
