@@ -10,6 +10,11 @@ runs:
   using: 'composite'
 
   steps:
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+          update-environment: false
+
     - name: Run dbt-bouncer
       shell: bash
       run: |
