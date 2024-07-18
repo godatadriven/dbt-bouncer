@@ -58,7 +58,7 @@ jobs:
 
             - uses: godatadriven/dbt-bouncer@v0
               with:
-                dbt-project-dir: ./dbt_project
+                dbt-artifacts-dir: ./dbt_project
 
             - run: echo '${{ secrets.PAT_GITHUB }}' | docker login ghcr.io -u pgoslatara --password-stdin
             - run: docker pull ghcr.io/godatadriven/dbt-bouncer:v0
