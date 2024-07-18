@@ -154,7 +154,7 @@ jobs:
                 docker run --rm \
                   --volume "$PWD/dbt_project/target":/dbt_project/target \
                   ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:ci \
-                  dbt-bouncer --dbt-artifacts-dir dbt_project/target
+                  /dbt-bouncer.pex --dbt-artifacts-dir dbt_project/target
 
     github-action-tests:
       needs: [pre-commit]
