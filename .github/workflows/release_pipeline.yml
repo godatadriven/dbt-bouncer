@@ -73,7 +73,7 @@
                 run: poetry install
 
               - name: Build pex file
-                run: poetry run pex . -c dbt-bouncer -o ./dist/dbt-bouncer.pex
+                run: make build-pex
 
               - name: Save version to env var
                 id: version
