@@ -161,12 +161,24 @@ jobs:
       permissions:
         contents: read
       runs-on: ubuntu-latest
+      strategy:
+          fail-fast: false
+          matrix:
+              python-version:
+                  - '3.8'
+                  - '3.9'
+                  - '3.10'
+                  - '3.11'
+                  - '3.12'
+
       steps:
         - name: Checkout
           uses: actions/checkout@v4
 
         - name: Setup Python
           uses: actions/setup-python@v5
+          with:
+              python-version: ${{ matrix.python-version }}
 
         - name: Run action
           uses: ./
@@ -212,7 +224,7 @@ jobs:
             run: poetry install --no-interaction --no-ansi
 
           - name: Build pex file
-            run: poetry run pex . -c dbt-bouncer -o ./dist/dbt-bouncer.pex
+            run: make build-pex
 
           - name: Test pex file
             run: ./dist/dbt-bouncer.pex --dbt-artifacts-dir dbt_project/target

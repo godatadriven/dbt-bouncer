@@ -44,8 +44,8 @@ repos:
     - repo: local
       hooks:
         - id: build-pex
-          entry: poetry
-          args: ['run', 'pex', '.', '-c', 'dbt-bouncer', '-o', './dist/dbt-bouncer.pex']
+          entry: make
+          args: ['build-pex' ]
           language: system
           name: Build .pex
           pass_filenames: false
