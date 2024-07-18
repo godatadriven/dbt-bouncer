@@ -2,81 +2,67 @@ from contextlib import nullcontext as does_not_raise
 
 import pytest
 
-from dbt_bouncer.tests.test_models import populated_model_description
+from dbt_bouncer.tests.test_models import test_populated_model_description
 
 
 @pytest.mark.parametrize(
-    "models,expectation",
+    "model, expectation",
     [
         (
-            [
-                {
-                    "description": "Description that is more than 4 characters.",
-                    "unique_id": "model.package_name.model_1",
-                }
-            ],
+            {
+                "description": "Description that is more than 4 characters.",
+                "unique_id": "model.package_name.model_1",
+            },
             does_not_raise(),
         ),
         (
-            [
-                {
-                    "description": """A
+            {
+                "description": """A
                         multiline
                         description
                         """,
-                    "unique_id": "model.package_name.model_2",
-                }
-            ],
+                "unique_id": "model.package_name.model_2",
+            },
             does_not_raise(),
         ),
         (
-            [
-                {
-                    "description": "",
-                    "unique_id": "model.package_name.model_3",
-                }
-            ],
+            {
+                "description": "",
+                "unique_id": "model.package_name.model_3",
+            },
             pytest.raises(AssertionError),
         ),
         (
-            [
-                {
-                    "description": " ",
-                    "unique_id": "model.package_name.model_4",
-                }
-            ],
+            {
+                "description": " ",
+                "unique_id": "model.package_name.model_4",
+            },
             pytest.raises(AssertionError),
         ),
         (
-            [
-                {
-                    "description": """
+            {
+                "description": """
                         """,
-                    "unique_id": "model.package_name.model_5",
-                }
-            ],
+                "unique_id": "model.package_name.model_5",
+            },
             pytest.raises(AssertionError),
         ),
         (
-            [
-                {
-                    "description": "-",
-                    "unique_id": "model.package_name.model_6",
-                }
-            ],
+            {
+                "description": "-",
+                "unique_id": "model.package_name.model_6",
+            },
             pytest.raises(AssertionError),
         ),
         (
-            [
-                {
-                    "description": "null",
-                    "unique_id": "model.package_name.model_7",
-                }
-            ],
+            {
+                "description": "null",
+                "unique_id": "model.package_name.model_7",
+            },
             pytest.raises(AssertionError),
         ),
     ],
 )
-def test_populated_model_description(models, expectation):
+def test_test_populated_model_description(model, expectation):
     with expectation:
-        populated_model_description(models=models)
+        test_populated_model_description(model=model, request=None)
