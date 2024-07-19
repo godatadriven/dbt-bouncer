@@ -1,4 +1,5 @@
 import inspect
+from pathlib import Path
 from typing import Dict, List
 
 import pytest
@@ -25,8 +26,8 @@ class FixturePlugin(object):
 
 # Inspiration: https://github.com/pytest-dev/pytest-xdist/discussions/957#discussioncomment-7335007
 class MyFunctionItem(pytest.Function):
-    def __init__(self, model, *args, **kwargs):
-        self.model: Dict[str, str] = model
+    def __init__(self, model=None, *args, **kwargs):
+        self.model: Dict[str, str] | None = model
         super().__init__(*args, **kwargs)
 
 
@@ -46,12 +47,21 @@ class GenerateTestsPlugin:
             fixture_info = pytest.Function.from_parent(
                 collector, name=name, callobj=obj
             )._fixtureinfo
-            for model in self.models:
+
+            if "request" in fixture_info.argnames:
+                for model in self.models:
+                    item = MyFunctionItem.from_parent(
+                        parent=collector,
+                        name=name,
+                        fixtureinfo=fixture_info,
+                        model=model,
+                    )
+                    items.append(item)
+            else:
                 item = MyFunctionItem.from_parent(
                     parent=collector,
                     name=name,
                     fixtureinfo=fixture_info,
-                    model=model,
                 )
                 items.append(item)
 
@@ -74,6 +84,6 @@ def runner(
 
     # Run the tests, if one fails then pytest will raise an exception
     pytest.main(
-        ["dbt_bouncer/tests"],
+        [(Path(__file__).parent / "tests").__str__(), "-s"],
         plugins=[fixtures, GenerateTestsPlugin(models)],
     )
