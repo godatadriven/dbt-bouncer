@@ -1,2 +1,0 @@
-export DBT_PROFILES_DIR=dbt_project
-export DBT_PROJECT_DIR=dbt_project
