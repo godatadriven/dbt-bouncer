@@ -49,7 +49,7 @@ def cli(dbt_artifacts_dir):
         f"Parsed `{manifest_obj.metadata.project_name}` project, found {len(project_models)} nodes, {len(project_sources)} sources and {len(project_tests)} tests."
     )
 
-    logger.info("Running tests...")
+    logger.info("Running checks...")
     runner(
         models=project_models,
         sources=project_sources,
