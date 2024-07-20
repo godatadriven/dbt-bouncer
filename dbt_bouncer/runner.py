@@ -1,4 +1,5 @@
 import inspect
+import re
 from pathlib import Path
 from typing import Dict, List
 
@@ -63,15 +64,24 @@ class GenerateTestsPlugin:
                     ).keywords._markers.keys()
                     if "iterate_over_models" in markers:
                         for model in self.models:
-                            item = MyFunctionItem.from_parent(
-                                parent=collector,
-                                name=name,
-                                fixtureinfo=fixture_info,
-                                model=model,
-                                check_config=check_config,
-                            )
-                            item._nodeid = f"{name}::{model['name']}_{check_config['index']}"
-                            items.append(item)
+                            if (
+                                "include" in check_config.keys()
+                                and re.compile(check_config["include"].strip()).match(
+                                    model["path"]
+                                )
+                                is None
+                            ):
+                                pass
+                            else:
+                                item = MyFunctionItem.from_parent(
+                                    parent=collector,
+                                    name=name,
+                                    fixtureinfo=fixture_info,
+                                    model=model,
+                                    check_config=check_config,
+                                )
+                                item._nodeid = f"{name}::{model['name']}_{check_config['index']}"
+                                items.append(item)
                     else:
                         item = MyFunctionItem.from_parent(
                             parent=collector,
@@ -109,7 +119,6 @@ def runner(
             (Path(__file__).parent / "checks").__str__(),
             (Path(__file__).parent / "checks").__str__(),
             "-s",
-            "-vv",
         ],
         plugins=[fixtures, GenerateTestsPlugin(bouncer_config=bouncer_config, models=models)],
     )
