@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+from typing import Dict, List
 
 import click
 import yaml
@@ -37,6 +38,19 @@ def cli(config_file, dbt_artifacts_dir):
     with Path.open(config_path, "r") as fp:
         bouncer_config = yaml.safe_load(fp)
 
+    # Add indices to uniquely identify checks
+    for idx, c in enumerate(bouncer_config["checks"]):
+        c["index"] = idx
+
+    config: Dict[str, List[Dict[str, str]]] = {}
+    for check_name in set([c["name"] for c in bouncer_config["checks"]]):
+        config[check_name] = []
+        for check in bouncer_config["checks"]:
+            if check["name"] == check_name:
+                config[check_name].append(
+                    {k: check[k] for k in set(list(check.keys())) - set(["name"])}
+                )
+
     # Load manifest
     manifest_json_path = Path(dbt_artifacts_dir) / "manifest.json"
     logger.info(f"Loading manifest.json from {manifest_json_path}...")
@@ -68,7 +82,7 @@ def cli(config_file, dbt_artifacts_dir):
 
     logger.info("Running checks...")
     runner(
-        bouncer_config=bouncer_config,
+        bouncer_config=config,
         models=project_models,
         sources=project_sources,
         tests=project_tests,

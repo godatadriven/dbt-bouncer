@@ -28,7 +28,8 @@ class FixturePlugin(object):
 
 # Inspiration: https://github.com/pytest-dev/pytest-xdist/discussions/957#discussioncomment-7335007
 class MyFunctionItem(pytest.Function):
-    def __init__(self, model=None, *args, **kwargs):
+    def __init__(self, check_config, model=None, *args, **kwargs):
+        self.check_config: Dict[str, str] = check_config
         self.model: Dict[str, str] | None = model
         super().__init__(*args, **kwargs)
 
@@ -46,31 +47,38 @@ class GenerateTestsPlugin:
 
     def pytest_pycollect_makeitem(self, collector, name, obj):
         items = []
-        if name in [c["name"] for c in self.bouncer_config["checks"]]:
-            if (inspect.isfunction(obj) or inspect.ismethod(obj)) and (name.startswith("check_")):
-                fixture_info = pytest.Function.from_parent(
-                    collector, name=name, callobj=obj
-                )._fixtureinfo
+        if name in self.bouncer_config.keys():
+            for check_config in self.bouncer_config[name]:
+                if (inspect.isfunction(obj) or inspect.ismethod(obj)) and (
+                    name.startswith("check_")
+                ):
+                    fixture_info = pytest.Function.from_parent(
+                        collector, name=name, callobj=obj
+                    )._fixtureinfo
 
-                markers = pytest.Function.from_parent(
-                    collector, name=name
-                ).keywords._markers.keys()
-                if "iterate_over_models" in markers:
-                    for model in self.models:
+                    markers = pytest.Function.from_parent(
+                        collector, name=name
+                    ).keywords._markers.keys()
+                    if "iterate_over_models" in markers:
+                        for model in self.models:
+                            item = MyFunctionItem.from_parent(
+                                parent=collector,
+                                name=name,
+                                fixtureinfo=fixture_info,
+                                model=model,
+                                check_config=check_config,
+                            )
+                            item._nodeid = f"{name}::{model['name']}_{check_config['index']}"
+                            items.append(item)
+                    else:
                         item = MyFunctionItem.from_parent(
                             parent=collector,
                             name=name,
                             fixtureinfo=fixture_info,
-                            model=model,
+                            check_config=check_config,
                         )
+                        item._nodeid = f"{name}_{check_config['index']}"
                         items.append(item)
-                else:
-                    item = MyFunctionItem.from_parent(
-                        parent=collector,
-                        name=name,
-                        fixtureinfo=fixture_info,
-                    )
-                    items.append(item)
         else:
             logger.debug(f"Skipping check {name} because it is not in the checks list.")
 
@@ -78,7 +86,7 @@ class GenerateTestsPlugin:
 
 
 def runner(
-    bouncer_config: Dict[str, str],
+    bouncer_config: Dict[str, List[Dict[str, str]]],
     models: List[Dict[str, str]],
     sources: List[Dict[str, str]],
     tests: List[Dict[str, str]],
@@ -99,6 +107,7 @@ def runner(
             (Path(__file__).parent / "checks").__str__(),
             (Path(__file__).parent / "checks").__str__(),
             "-s",
+            "-vv",
         ],
         plugins=[fixtures, GenerateTestsPlugin(bouncer_config=bouncer_config, models=models)],
     )

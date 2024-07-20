@@ -2,7 +2,7 @@ import pytest
 
 
 @pytest.mark.iterate_over_models
-def check_populated_model_description(request, model=None):
+def check_populated_model_description(request, check_config=None, model=None):
     """
     Models must have a populated description.
     """
