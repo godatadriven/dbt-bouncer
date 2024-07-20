@@ -1,3 +1,7 @@
+import pytest
+
+
+@pytest.mark.iterate_over_models
 def check_top_level_directories(models, request, check_config=None):
     for model in models:
         top_level_dir = model["path"].split("/")[0]

@@ -50,6 +50,7 @@ def cli(config_file, dbt_artifacts_dir):
                 config[check_name].append(
                     {k: check[k] for k in set(list(check.keys())) - set(["name"])}
                 )
+    logger.debug(f"{config=}")
 
     # Load manifest
     manifest_json_path = Path(dbt_artifacts_dir) / "manifest.json"

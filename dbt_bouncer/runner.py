@@ -49,6 +49,8 @@ class GenerateTestsPlugin:
         items = []
         if name in self.bouncer_config.keys():
             for check_config in self.bouncer_config[name]:
+                logger.debug(f"{check_config=}")
+
                 if (inspect.isfunction(obj) or inspect.ismethod(obj)) and (
                     name.startswith("check_")
                 ):
