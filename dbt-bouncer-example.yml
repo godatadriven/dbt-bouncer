@@ -1,0 +1,3 @@
+checks:
+  - name: check_populated_model_description
+  - name: check_top_level_directories
