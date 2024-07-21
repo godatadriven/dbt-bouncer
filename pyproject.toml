@@ -50,6 +50,7 @@ python = ">=3.8,<3.13"
 click = "*"
 dbt-artifacts-parser = "^0"
 pytest = "*"
+pyyaml = "*"
 
 [tool.poetry.group.dev.dependencies]
 dbt-core="*"
