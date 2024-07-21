@@ -84,6 +84,7 @@ def cli(config_file, dbt_artifacts_dir):
     logger.info("Running checks...")
     runner(
         bouncer_config=config,
+        manifest_obj=manifest_obj,
         models=project_models,
         sources=project_sources,
         tests=project_tests,

@@ -10,9 +10,14 @@ from dbt_bouncer.logger import logger
 
 class FixturePlugin(object):
     def __init__(self):
+        self.manifest_obj_ = None
         self.models_ = None
         self.sources_ = None
         self.tests_ = None
+
+    @pytest.fixture(scope="session")
+    def manifest_obj(self):
+        return self.manifest_obj_
 
     @pytest.fixture(scope="session")
     def models(self):
@@ -99,6 +104,7 @@ class GenerateTestsPlugin:
 
 def runner(
     bouncer_config: Dict[str, List[Dict[str, str]]],
+    manifest_obj: Dict[str, str],
     models: List[Dict[str, str]],
     sources: List[Dict[str, str]],
     tests: List[Dict[str, str]],
@@ -109,7 +115,7 @@ def runner(
 
     # Create a fixture plugin that can be used to inject the manifest into the checks
     fixtures = FixturePlugin()
-    for att in ["models", "sources", "tests"]:
+    for att in ["manifest_obj", "models", "sources", "tests"]:
         setattr(fixtures, att + "_", locals()[att])
 
     # Run the checks, if one fails then pytest will raise an exception
