@@ -1,14 +1,14 @@
 version: 2
 
 models:
-  - name: model_1
+  - name: stg_model_1
     description: Super basic model that has a description and a test
     columns:
       - name: id
         tests:
           - not_null
 
-  - name: model_2
+  - name: stg_model_2
     description: Super basic model that has a description and a test
     columns:
       - name: id

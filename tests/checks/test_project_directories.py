@@ -57,4 +57,4 @@ from dbt_bouncer.checks.check_project_directories import check_top_level_directo
 )
 def test_check_top_level_directories(models, expectation):
     with expectation:
-        check_top_level_directories(models=models)
+        check_top_level_directories(models=models, request=None)
