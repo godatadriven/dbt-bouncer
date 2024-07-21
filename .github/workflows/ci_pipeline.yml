@@ -13,6 +13,7 @@ concurrency:
 env:
   IMAGE_NAME: ${{ github.repository }}
   POETRY_VERSION: "1.7.1"
+  POETRY_VIRTUALENVS_IN_PROJECT: true
   REGISTRY: ghcr.io
 
 jobs:
