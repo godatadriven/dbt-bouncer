@@ -80,7 +80,7 @@ def test_cli_manifest_doesnt_exist(tmp_path):
     )
     assert type(result.exception) in [FileNotFoundError]
     assert (
-        result.exception.args[0]
+        result.exception.args[0]  # type: ignore[union-attr]
         == "No manifest.json found at non-existent-dir/target/manifest.json."
     )
     assert result.exit_code != 0

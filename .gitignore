@@ -160,6 +160,7 @@ cython_debug/
 #.idea/
 
 *.ipynb
+changed_files.txt
 pytest-coverage.txt
 
 dbt_project/dbt_packages

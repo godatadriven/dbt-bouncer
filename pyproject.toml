@@ -53,12 +53,17 @@ pytest = "*"
 pyyaml = "*"
 
 [tool.poetry.group.dev.dependencies]
+autoflake = "*"
+black = "*"
 dbt-core="*"
 dbt-duckdb="*"
+isort = "*"
+mypy = "*"
 pex = "^2"
 pre-commit = "^3"
 pytest-cov = "*"
 pytest-xdist = "*"
+"shandy-sqlfmt" = {version = "*", extras=["shandy-sqlfmt[jinjafmt]"]}
 
 [tool.poetry.scripts]
 dbt-bouncer = "dbt_bouncer.main:cli"

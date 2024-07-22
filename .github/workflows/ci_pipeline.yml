@@ -22,6 +22,8 @@ jobs:
         steps:
             - name: Checkout
               uses: actions/checkout@v4
+              with:
+                fetch-depth: "0"
 
             - name: Setup Python
               uses: ./actions/setup_python_env
@@ -29,7 +31,10 @@ jobs:
                 poetry-version: ${{ env.POETRY_VERSION }}
 
             - name: Run pre-commit
-              run: poetry run pre-commit run
+              run: |
+                git diff --name-status origin/main..HEAD > changed_files.txt
+                cat changed_files.txt
+                cat changed_files.txt | xargs poetry run pre-commit run --files
 
     unit-tests:
         needs: [pre-commit]
