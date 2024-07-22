@@ -41,11 +41,3 @@ repos:
       rev: v0.21.3
       hooks:
         - id: sqlfmt
-    - repo: local
-      hooks:
-        - id: build-pex
-          entry: make
-          args: ['build-pex' ]
-          language: system
-          name: Build .pex
-          pass_filenames: false
