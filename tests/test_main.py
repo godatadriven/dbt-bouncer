@@ -1,4 +1,7 @@
+from pathlib import Path
+
 import pytest
+import yaml
 from click.testing import CliRunner
 
 from dbt_bouncer.main import cli
@@ -7,7 +10,7 @@ from dbt_bouncer.main import cli
 @pytest.mark.parametrize(
     "cli_args",
     [
-        ("--config-file dbt-bouncer-example.yml --dbt-artifacts-dir dbt_project/target"),
+        ("--config-file dbt-bouncer-example.yml"),
     ],
 )
 def test_cli_happy_path(caplog, cli_args):
@@ -29,10 +32,7 @@ def test_cli_happy_path(caplog, cli_args):
     "cli_args",
     [
         (""),
-        ("--config-file dbt-bouncer-example.yml"),
-        ("--dbt-artifacts-dir dbt_project/target"),
-        ("--config-file non-existing.yml --dbt-artifacts-dir dbt_project/target"),
-        ("--config-file dbt-bouncer-example.yml --dbt-artifacts-dir dbt_project"),
+        ("--config-file non-existing.yml"),
     ],
 )
 def test_cli_unhappy_path(caplog, cli_args):
@@ -48,21 +48,6 @@ def test_cli_unhappy_path(caplog, cli_args):
     assert result.exit_code != 0
 
 
-def test_cli_dbt_dir_doesnt_exist():
-    runner = CliRunner()
-    result = runner.invoke(
-        cli,
-        [
-            "--config-file",
-            "dbt-bouncer-example.yml",
-            "--dbt-artifacts-dir",
-            "non-existent-directory/target",
-        ],
-    )
-    assert type(result.exception) in [SystemExit]
-    assert result.exit_code != 0
-
-
 def test_cli_config_doesnt_exist(tmp_path):
     runner = CliRunner()
     result = runner.invoke(
@@ -70,8 +55,6 @@ def test_cli_config_doesnt_exist(tmp_path):
         [
             "--config-file",
             "non-existent-file.yml",
-            "--dbt-artifacts-dir",
-            "dbt_project/target",
         ],
     )
     assert type(result.exception) in [SystemExit]
@@ -79,16 +62,25 @@ def test_cli_config_doesnt_exist(tmp_path):
 
 
 def test_cli_manifest_doesnt_exist(tmp_path):
+    with Path.open(Path("dbt-bouncer-example.yml"), "r") as f:
+        bouncer_config = yaml.safe_load(f)
+
+    bouncer_config["dbt-artifacts-dir"] = "non-existent-dir/target"
+
+    with Path(tmp_path / "dbt-bouncer-example.yml").open("w") as f:
+        yaml.dump(bouncer_config, f)
+
     runner = CliRunner()
     result = runner.invoke(
         cli,
         [
             "--config-file",
-            "dbt-bouncer-example.yml",
-            "--dbt-artifacts-dir",
-            tmp_path,
+            Path(tmp_path / "dbt-bouncer-example.yml").__str__(),
         ],
     )
     assert type(result.exception) in [FileNotFoundError]
-    assert result.exception.args[0] == f"No manifest.json found at {tmp_path / 'manifest.json'}."
+    assert (
+        result.exception.args[0]
+        == "No manifest.json found at non-existent-dir/target/manifest.json."
+    )
     assert result.exit_code != 0

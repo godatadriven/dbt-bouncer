@@ -19,14 +19,8 @@ from dbt_bouncer.version import version
     required=False,
     type=click.Path(exists=True),
 )
-@click.option(
-    "--dbt-artifacts-dir",
-    help="Directory where the dbt artifacts exists, generally the `target` directory inside a dbt project.",
-    required=True,
-    type=click.Path(exists=True),
-)
 @click.version_option()
-def cli(config_file, dbt_artifacts_dir):
+def cli(config_file):
     logger.info(f"Running dbt-bouncer ({version()})...")
 
     # Load config
@@ -53,7 +47,9 @@ def cli(config_file, dbt_artifacts_dir):
     logger.debug(f"{config=}")
 
     # Load manifest
-    manifest_json_path = Path(dbt_artifacts_dir) / "manifest.json"
+    manifest_json_path = (
+        Path(bouncer_config.get("dbt-artifacts-dir", "./target")) / "manifest.json"
+    )
     logger.info(f"Loading manifest.json from {manifest_json_path}...")
     if not manifest_json_path.exists():
         raise FileNotFoundError(f"No manifest.json found at {manifest_json_path}.")

@@ -11,7 +11,9 @@ Configure and enforce conventions for your dbt project.
 
 # How to use
 
-Generate a `manifest.json` by running `dbt parse`. Once completed, run `dbt-bouncer` to validate that your conventions are being maintained.
+1. Generate a `manifest.json` by running `dbt parse`.
+1. Create a `dbt-bouncer.yml` config file.
+1. Run `dbt-bouncer` to validate that your conventions are being maintained. You can use GitHub Actions, Docker or a `.pex` file to run `dbt-bouncer`.
 
 ## GitHub Actions
 
@@ -21,7 +23,7 @@ steps:
 
     - uses: godatadriven/dbt-bouncer@v0
       with:
-        dbt-artifacts-dir: ./<PATH_TO_DBT_PROJECT>/target
+        config-file: ./<PATH_TO_CONFIG_FILE>
 
     ...
 ```
@@ -36,17 +38,17 @@ docker pull ghcr.io/godatadriven/dbt-bouncer:v0
 docker run --rm \
     --volume "$PWD/<PATH_TO_DBT_PROJECT>/target":/<PATH_TO_DBT_PROJECT>/target \
     ghcr.io/godatadriven/dbt-bouncer:v0 \
-    /dbt-bouncer.pex --dbt-artifacts-dir <PATH_TO_DBT_PROJECT>/target
+    /dbt-bouncer.pex --config-file <PATH_TO_CONFIG_FILE>
 ```
 
 ## Pex
 
-You can also run the `.pex` artifact directly once you have a python executable installed:
+You can also run the `.pex` ([Python EXecutable](https://docs.pex-tool.org/whatispex.html#whatispex)) artifact directly once you have a python executable installed:
 
 ```bash
 wget https://github.com/godatadriven/dbt-bouncer/releases/download/vX.X.X/dbt-bouncer.pex -O dbt-bouncer.pex
 
-dbt-bouncer.pex --dbt-artifacts-dir <PATH_TO_DBT_PROJECT>/target
+dbt-bouncer.pex --config-file <PATH_TO_CONFIG_FILE>
 ```
 
 # Development
