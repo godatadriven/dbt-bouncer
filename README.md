@@ -44,7 +44,7 @@ docker run --rm \
 You can also run the `.pex` artifact directly once you have a python executable installed:
 
 ```bash
-wget https://github.com/godatadriven/dbt-bouncer/blob/v0/dist/dbt-bouncer.pex -O dbt-bouncer.pex
+wget https://github.com/godatadriven/dbt-bouncer/releases/download/vX.X.X/dbt-bouncer.pex -O dbt-bouncer.pex
 
 dbt-bouncer.pex --dbt-artifacts-dir <PATH_TO_DBT_PROJECT>/target
 ```

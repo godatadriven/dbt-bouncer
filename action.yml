@@ -1,6 +1,10 @@
 name: 'dbt-bouncer'
 description: 'Configure and enforce conventions for your dbt project.'
 inputs:
+  config-file:
+    default: 'dbt-bouncer.yml'
+    description: 'Location of the YML config file.'
+    required: false
   dbt-artifacts-dir:
     default: '.'
     description: 'Directory where the dbt artifacts exists, generally the `target` directory inside a dbt project.'
@@ -18,5 +22,5 @@ runs:
     - name: Run dbt-bouncer
       shell: bash
       run: |
-        ${{ github.action_path }}/dist/dbt-bouncer.pex \
-          --dbt-artifacts-dir ${{ inputs.dbt-artifacts-dir }}
+        wget https://github.com/godatadriven/dbt-bouncer/releases/download/vX.X.X/dbt-bouncer.pex -O ${{ github.action_path }}/dist/dbt-bouncer.pex
+        ${{ github.action_path }}/dist/dbt-bouncer.pex  --config-file ${{ inputs.config-file }} --dbt-artifacts-dir ${{ inputs.dbt-artifacts-dir }}
