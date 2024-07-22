@@ -3,9 +3,9 @@ from pathlib import Path
 from typing import Dict, List
 
 import click
-import yaml
 from dbt_artifacts_parser.parser import parse_manifest
 
+from dbt_bouncer.config_validator import validate_config_file
 from dbt_bouncer.logger import logger
 from dbt_bouncer.runner import runner
 from dbt_bouncer.version import version
@@ -29,8 +29,7 @@ def cli(config_file):
     if not config_path.exists():  # Shouldn't be needed as click should have already checked this
         raise FileNotFoundError(f"No config file found at {config_path}.")
 
-    with Path.open(config_path, "r") as fp:
-        bouncer_config = yaml.safe_load(fp)
+    bouncer_config = validate_config_file(file=config_path).model_dump()
 
     # Add indices to uniquely identify checks
     for idx, c in enumerate(bouncer_config["checks"]):
@@ -48,7 +47,7 @@ def cli(config_file):
 
     # Load manifest
     manifest_json_path = (
-        Path(bouncer_config.get("dbt-artifacts-dir", "./target")) / "manifest.json"
+        Path(bouncer_config.get("dbt_artifacts_dir", "./target")) / "manifest.json"
     )
     logger.info(f"Loading manifest.json from {manifest_json_path}...")
     if not manifest_json_path.exists():

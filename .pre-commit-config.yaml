@@ -35,7 +35,7 @@ repos:
       rev: v1.10.1
       hooks:
           - id: mypy
-            additional_dependencies: [pytest, types-click, types-pyyaml]
+            additional_dependencies: [pydantic, pytest, types-click, types-pyyaml]
             args: [--explicit-package-bases]
     - repo: https://github.com/tconbeer/sqlfmt
       rev: v0.21.3

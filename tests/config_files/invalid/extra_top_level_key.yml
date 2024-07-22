@@ -1,0 +1,5 @@
+checks:
+  - name: check_model_names
+    include: ^intermediate
+    model_name_pattern: ^int_
+something: else
