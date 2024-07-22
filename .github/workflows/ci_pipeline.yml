@@ -189,7 +189,7 @@ jobs:
                 docker run --rm \
                   --volume "$PWD/dbt_project/target":/dbt_project/target \
                   ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:ci \
-                  /dbt-bouncer.pex --dbt-artifacts-dir dbt_project/target
+                  /dbt-bouncer.pex --config-file dbt-bouncer-example.yml --dbt-artifacts-dir dbt_project/target
 
     github-action-tests:
       needs: [pre-commit]
@@ -258,4 +258,4 @@ jobs:
             run: make build-pex
 
           - name: Test pex file
-            run: ./dist/dbt-bouncer.pex --dbt-artifacts-dir dbt_project/target
+            run: ./dist/dbt-bouncer.pex --config-file dbt-bouncer-example.yml --dbt-artifacts-dir dbt_project/target
