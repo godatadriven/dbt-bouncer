@@ -1,12 +1,12 @@
-def pytest_configure(config):
-    config.addinivalue_line("markers", "iterate_over_models: Tests that should run once per model")
-
-
 import json
 from pathlib import Path
 
 import pytest
 from dbt_artifacts_parser.parser import parse_manifest
+
+
+def pytest_configure(config):
+    config.addinivalue_line("markers", "iterate_over_models: Tests that should run once per model")
 
 
 @pytest.fixture(scope="session")

@@ -15,8 +15,6 @@ def test_logger_debug() -> None:
             [
                 "--config-file",
                 "dbt-bouncer-example.yml",
-                "--dbt-artifacts-dir",
-                "dbt_project/target",
             ],
         )
 
@@ -36,6 +34,6 @@ def test_logger_info(caplog) -> None:
     runner = CliRunner()
     runner.invoke(
         cli,
-        ["--config-file", "dbt-bouncer-example.yml", "--dbt-artifacts-dir", "dbt_project/target"],
+        ["--config-file", "dbt-bouncer-example.yml"],
     )
     assert "Running dbt-bouncer (0.0.0)..." in caplog.text
