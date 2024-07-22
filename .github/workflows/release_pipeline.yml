@@ -42,24 +42,10 @@
                 run: git fetch --prune --unshallow --tags
 
               - name: Setup Python
-                id: setup-python
-                uses: actions/setup-python@v5
-
-              - name: Load cached Poetry installation
-                id: cached-poetry
-                uses: actions/cache@v4
+                uses: ./actions/setup_python_env
                 with:
-                  path: /home/runner/.local
-                  key: poetry-cache-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ env.POETRY_VERSION }}
-
-              - name: Install Poetry
-                if: steps.cached-poetry.outputs.cache-hit != 'true'
-                uses: snok/install-poetry@v1
-                with:
-                  installer-parallel: true
-                  version: ${{ env.POETRY_VERSION }}
-                  virtualenvs-create: true
-                  virtualenvs-in-project: true
+                  install-python-deps: 'false'
+                  poetry-version: ${{ env.POETRY_VERSION }}
 
               - name: Install version bump Poetry plugin
                 run: poetry self add poetry-bumpversion
