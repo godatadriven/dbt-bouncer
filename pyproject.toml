@@ -69,6 +69,7 @@ pytest-xdist = "*"
 dbt-bouncer = "dbt_bouncer.main:cli"
 
 [tool.poetry_bumpversion.file."./dbt_bouncer/version.py"]
+[tool.poetry_bumpversion.file."action.yml"]
 
 [build-system]
 requires = ["poetry-core>=1.6.0"]
