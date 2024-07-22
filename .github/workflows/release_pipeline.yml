@@ -28,14 +28,6 @@
               id-token: write
               packages: write
           steps:
-              - name: Validated users only
-                if: github.actor != 'pgoslatara'
-                run: exit 1
-
-              - name: Only run from `main`
-                if: github.ref_name != github.event.repository.default_branch
-                run: exit 1
-
               - uses: actions/checkout@v4
 
               - name: Fetch tags
@@ -80,6 +72,9 @@
                 run: |
                   git config --global user.email "bot@github.com"
                   git config --global user.name "github-actions[bot]"
+                  git checkout -b branch-v${{ steps.version.outputs.version }}
+                  git add -A
+                  git commit -m "Bumping version to v${{ steps.version.outputs.version }}"
                   git tag -f \
                     -a v${{ steps.version.outputs.version }} \
                     -m "v${{ steps.version.outputs.version }}"
@@ -91,7 +86,7 @@
                   git tag -f \
                     -a v${{ steps.version.outputs.major }} \
                     -m "v${{ steps.version.outputs.major }}"
-                  git push -f origin "v${{ steps.version.outputs.major }}"
+                  git push -f origin "branch-v${{ steps.version.outputs.major }}"
 
               - name: Extract metadata (tags, labels) for Docker
                 id: meta
@@ -140,7 +135,7 @@
                     gh release create v${{ steps.version.outputs.version }} \
                         --generate-notes \
                         --repo ${{ github.repository }} \
-                        --target main \
+                        --target $(git rev-parse --verify HEAD) \
                         --title 'v${{ steps.version.outputs.version }}' \
                         $PRELEASE \
                         --verify-tag
