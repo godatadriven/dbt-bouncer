@@ -7,16 +7,13 @@ inputs:
     required: false
 
 runs:
-  using: 'composite'
+  using: composite
 
   steps:
-    - name: Setup Python
-      uses: actions/setup-python@v5
-      with:
-          update-environment: false
-
     - name: Run dbt-bouncer
       shell: bash
-      run: |
-        wget https://github.com/godatadriven/dbt-bouncer/releases/download/v0.0.0/dbt-bouncer.pex -O ${{ github.action_path }}/dist/dbt-bouncer.pex
-        ${{ github.action_path }}/dist/dbt-bouncer.pex  --config-file ${{ inputs.config-file }}
+      run: >
+        docker run --rm \
+          --volume "$GITHUB_WORKSPACE":/app \
+          ghcr.io/godatadriven/dbt-bouncer:v0.0.0 \
+          /dbt-bouncer/dbt-bouncer.pex --config-file /app/${{ inputs.config-file }}
