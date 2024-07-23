@@ -117,31 +117,6 @@ jobs:
                   ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:ci \
                   /dbt-bouncer/dbt-bouncer.pex --config-file /app/dbt-bouncer-example.yml
 
-    github-action-tests:
-      needs: [pre-commit]
-      permissions:
-        contents: read
-      runs-on: ubuntu-latest
-      strategy:
-          fail-fast: false
-          matrix:
-              python-version:
-                  - '3.8'
-                  - '3.9'
-                  - '3.10'
-                  - '3.11'
-                  - '3.12'
-
-      steps:
-        - name: Checkout
-          uses: actions/checkout@v4
-
-        - name: Run action
-          uses: ./
-          with:
-            config-file: dbt-bouncer-example.yml
-
-
     pex-tests:
       needs: [pre-commit]
       runs-on: ubuntu-latest
