@@ -24,13 +24,9 @@ steps:
     - uses: godatadriven/dbt-bouncer@v0
       with:
         config-file: ./<PATH_TO_CONFIG_FILE>
-        github-actor: <GITHUB_USERNAME>
-        github-token: <GITHUB_TOKEN>
 
     ...
 ```
-
-Note: `GITHUB_USERNAME` and `GITHUB_TOKEN` are used to log in to ghcr.io, as such this token must have read access to packages.
 
 ## Docker
 
