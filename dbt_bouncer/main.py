@@ -65,6 +65,11 @@ def cli(config_file):
 
     logger.debug(f"{manifest_obj.metadata.project_name=}")
 
+    project_macros = []
+    for _, v in manifest_obj.macros.items():
+        if v.package_name == manifest_obj.metadata.project_name:
+            project_macros.append(v.model_dump())
+
     project_models = []
     project_tests = []
     for _, v in manifest_obj.nodes.items():
@@ -80,12 +85,13 @@ def cli(config_file):
             project_sources.append(v.model_dump())
 
     logger.info(
-        f"Parsed `{manifest_obj.metadata.project_name}` project, found {len(project_models)} nodes, {len(project_sources)} sources and {len(project_tests)} tests."
+        f"Parsed `{manifest_obj.metadata.project_name}` project, found {len(project_macros)} macros, {len(project_models)} nodes, {len(project_sources)} sources and {len(project_tests)} tests."
     )
 
     logger.info("Running checks...")
     runner(
         bouncer_config=config,
+        macros=project_macros,
         manifest_obj=manifest_obj,
         models=project_models,
         sources=project_sources,

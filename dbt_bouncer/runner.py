@@ -16,10 +16,15 @@ class DbtBouncerException(Exception):
 
 class FixturePlugin(object):
     def __init__(self):
+        self.macros_ = None
         self.manifest_obj_ = None
         self.models_ = None
         self.sources_ = None
         self.tests_ = None
+
+    @pytest.fixture(scope="session")
+    def macros(self):
+        return self.macros_
 
     @pytest.fixture(scope="session")
     def manifest_obj(self):
@@ -40,8 +45,9 @@ class FixturePlugin(object):
 
 # Inspiration: https://github.com/pytest-dev/pytest-xdist/discussions/957#discussioncomment-7335007
 class MyFunctionItem(pytest.Function):
-    def __init__(self, check_config, model=None, *args, **kwargs):
+    def __init__(self, check_config, macro=None, model=None, *args, **kwargs):
         self.check_config: Dict[str, str] = check_config
+        self.macro: Dict[str, str] | None = macro
         self.model: Dict[str, str] | None = model
         super().__init__(*args, **kwargs)
 
@@ -53,8 +59,9 @@ class GenerateTestsPlugin:
     `pytest_pycollect_makeitem` is one way to get this to work.
     """
 
-    def __init__(self, bouncer_config, models):
+    def __init__(self, bouncer_config, macros, models):
         self.bouncer_config = bouncer_config
+        self.macros = macros
         self.models = models
 
     def pytest_pycollect_makeitem(self, collector, name, obj):
@@ -93,6 +100,26 @@ class GenerateTestsPlugin:
                                 )
                                 item._nodeid = f"{name}::{model['name']}_{check_config['index']}"
                                 items.append(item)
+                    elif "iterate_over_macros" in markers:
+                        for macro in self.macros:
+                            if (
+                                check_config.get("include") is not None
+                                and re.compile(check_config["include"].strip()).match(
+                                    model["path"]
+                                )
+                                is None
+                            ):
+                                pass
+                            else:
+                                item = MyFunctionItem.from_parent(
+                                    parent=collector,
+                                    name=name,
+                                    fixtureinfo=fixture_info,
+                                    macro=macro,
+                                    check_config=check_config,
+                                )
+                                item._nodeid = f"{name}::{macro['name']}_{check_config['index']}"
+                                items.append(item)
                     else:
                         item = MyFunctionItem.from_parent(
                             parent=collector,
@@ -110,6 +137,7 @@ class GenerateTestsPlugin:
 
 def runner(
     bouncer_config: Dict[str, List[Dict[str, str]]],
+    macros: List[Dict[str, str]],
     manifest_obj: Dict[str, str],
     models: List[Dict[str, str]],
     sources: List[Dict[str, str]],
@@ -121,7 +149,7 @@ def runner(
 
     # Create a fixture plugin that can be used to inject the manifest into the checks
     fixtures = FixturePlugin()
-    for att in ["manifest_obj", "models", "sources", "tests"]:
+    for att in ["macros", "manifest_obj", "models", "sources", "tests"]:
         setattr(fixtures, att + "_", locals()[att])
 
     # Run the checks, if one fails then pytest will raise an exception
@@ -132,7 +160,10 @@ def runner(
             (Path(__file__).parent / "checks").__str__(),
             "-s",
         ],
-        plugins=[fixtures, GenerateTestsPlugin(bouncer_config=bouncer_config, models=models)],
+        plugins=[
+            fixtures,
+            GenerateTestsPlugin(bouncer_config=bouncer_config, macros=macros, models=models),
+        ],
     )
 
     if run_checks.value != 0:  # type: ignore[attr-defined]

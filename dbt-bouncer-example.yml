@@ -1,6 +1,9 @@
 dbt-artifacts-dir: dbt_project/target # [Optional] Directory where the dbt artifacts exists, generally the `target` directory inside a dbt project. Defaults to `./target`.
 
 checks:
+  - name: check_macro_name_matches_file_name
+  - name: check_populated_macro_arguments_description
+  - name: check_populated_macro_description
   - name: check_model_names
     include: ^intermediate
     model_name_pattern: ^int_
