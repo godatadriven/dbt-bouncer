@@ -8,6 +8,12 @@ import pytest
 from dbt_bouncer.logger import logger
 
 
+class DbtBouncerException(Exception):
+    def __init__(self, message: str):
+        self.message = message
+        super().__init__(self.message)
+
+
 class FixturePlugin(object):
     def __init__(self):
         self.manifest_obj_ = None
@@ -119,7 +125,7 @@ def runner(
         setattr(fixtures, att + "_", locals()[att])
 
     # Run the checks, if one fails then pytest will raise an exception
-    pytest.main(
+    run_checks = pytest.main(
         [
             "-c",
             (Path(__file__).parent / "checks").__str__(),
@@ -128,3 +134,6 @@ def runner(
         ],
         plugins=[fixtures, GenerateTestsPlugin(bouncer_config=bouncer_config, models=models)],
     )
+
+    if run_checks.value != 0:  # type: ignore[attr-defined]
+        raise DbtBouncerException(f"Checks failed")
