@@ -24,12 +24,14 @@ def cli(config_file):
     logger.info(f"Running dbt-bouncer ({version()})...")
 
     # Load config
-    config_path = Path(config_file)
-    logger.info(f"Loading config from {config_path}...")
+    config_path = Path(__file__).parent.parent / config_file
+    logger.debug(f"Loading config from {config_path}...")
+    logger.info(f"Loading config from {config_file}...")
     if not config_path.exists():  # Shouldn't be needed as click should have already checked this
         raise FileNotFoundError(f"No config file found at {config_path}.")
 
     bouncer_config = validate_config_file(file=config_path).model_dump()
+    logger.debug(f"{bouncer_config=}")
 
     # Add indices to uniquely identify checks
     for idx, c in enumerate(bouncer_config["checks"]):
@@ -47,11 +49,16 @@ def cli(config_file):
 
     # Load manifest
     manifest_json_path = (
-        Path(bouncer_config.get("dbt_artifacts_dir", "./target")) / "manifest.json"
+        config_path.parent / bouncer_config.get("dbt_artifacts_dir", "./target") / "manifest.json"
     )
-    logger.info(f"Loading manifest.json from {manifest_json_path}...")
+    logger.debug(f"Loading manifest.json from {manifest_json_path}...")
+    logger.info(
+        f"Loading manifest.json from {bouncer_config.get('dbt_artifacts_dir', './target')}/manifest.json..."
+    )
     if not manifest_json_path.exists():
-        raise FileNotFoundError(f"No manifest.json found at {manifest_json_path}.")
+        raise FileNotFoundError(
+            f"No manifest.json found at {bouncer_config.get('dbt_artifacts_dir', './target')}/manifest.json."
+        )
 
     with Path.open(manifest_json_path, "r") as fp:
         manifest_obj = parse_manifest(manifest=json.load(fp))

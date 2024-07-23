@@ -15,29 +15,50 @@ repos:
           - id: detect-private-key
           - id: end-of-file-fixer
             exclude: dbt_project/target/manifest.json
-    - repo: https://github.com/pycqa/isort
-      rev: 5.13.2
+    - repo: local
       hooks:
           - id: isort
-            args: [--profile, black, --filter-files]
-            name: isort (python)
-    - repo: https://github.com/ambv/black
-      rev: 24.4.2
+            args: ['--filter-files']
+            entry: isort
+            language: system
+            name: poetry run isort
+            require_serial: true
+            types_or: [cython, pyi, python]
+    - repo: local
       hooks:
           - id: black
+            entry: poetry run black
+            language: system
             name: Run black formatter
-    - repo: https://github.com/PyCQA/autoflake
-      rev: v2.3.1
+            require_serial: true
+            types_or: [python, pyi]
+    - repo: local
       hooks:
           - id: autoflake
-            args: [--in-place, --remove-all-unused-imports]
-    - repo: https://github.com/pre-commit/mirrors-mypy
-      rev: v1.10.1
+            args:
+            - "--in-place"
+            - "--expand-star-imports"
+            - "--remove-duplicate-keys"
+            - "--remove-unused-variables"
+            entry: poetry run autoflake
+            language: system
+            name: autoflake
+            require_serial: true
+            types: [python]
+    - repo: local
       hooks:
           - id: mypy
-            additional_dependencies: [pydantic, pytest, types-click, types-pyyaml]
-            args: [--explicit-package-bases]
-    - repo: https://github.com/tconbeer/sqlfmt
-      rev: v0.21.3
+            args: ["--install-types", "--explicit-package-bases", "--ignore-missing-imports", "--scripts-are-modules", "--non-interactive"]
+            entry: poetry run mypy
+            language: system
+            name: mypy
+            require_serial: true
+            types_or: [python, pyi]
+    - repo: local
       hooks:
         - id: sqlfmt
+          entry: poetry run sqlfmt
+          language: system
+          name: sqlfmt
+          require_serial: true
+          types_or: [sql, jinja]

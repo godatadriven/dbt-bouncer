@@ -36,9 +36,9 @@ Don't use GitHub Actions? You can still use dbt-bouncer via Docker:
 docker pull ghcr.io/godatadriven/dbt-bouncer:v0
 
 docker run --rm \
-    --volume "$PWD/<PATH_TO_DBT_PROJECT>/target":/<PATH_TO_DBT_PROJECT>/target \
-    ghcr.io/godatadriven/dbt-bouncer:v0 \
-    /dbt-bouncer.pex --config-file <PATH_TO_CONFIG_FILE>
+    --volume "$PWD":/app \
+    ghcr.io/godatadriven/dbt-bouncer:vX.X.X \
+    /dbt-bouncer/dbt-bouncer.pex --config-file /app/<PATH_TO_CONFIG_FILE>
 ```
 
 ## Pex
@@ -48,7 +48,7 @@ You can also run the `.pex` ([Python EXecutable](https://docs.pex-tool.org/whati
 ```bash
 wget https://github.com/godatadriven/dbt-bouncer/releases/download/vX.X.X/dbt-bouncer.pex -O dbt-bouncer.pex
 
-dbt-bouncer.pex --config-file <PATH_TO_CONFIG_FILE>
+dbt-bouncer.pex --config-file $PWD/<PATH_TO_CONFIG_FILE>
 ```
 
 # Development

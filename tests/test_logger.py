@@ -26,7 +26,7 @@ def test_logger_debug() -> None:
                     if record[2].startswith("Loading manifest.json from ")
                 ]
             )
-            == 1
+            == 2
         )
 
 
