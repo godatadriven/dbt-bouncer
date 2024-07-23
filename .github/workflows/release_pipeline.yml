@@ -141,9 +141,12 @@
                 env:
                     GH_TOKEN: ${{ github.token }}
                 run: |
+                    export LAST_RELEASE=$(gh release list --repo godatadriven/dbt-bouncer --order desc --json name --limit 1 | jq -r '.[0].name')
+                    echo $LAST_RELEASE
                     gh release create v${{ steps.version.outputs.version }} \
                         --generate-notes \
                         --repo ${{ github.repository }} \
+                        --notes-start-tag $LAST_RELEASE \
                         --target branch-v${{ steps.version.outputs.version }} \
                         --title 'v${{ steps.version.outputs.version }}' \
                         $PRELEASE \
