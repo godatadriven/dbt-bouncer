@@ -1,0 +1,4 @@
+checks:
+  - name: check_model_names
+    include: ^intermediate
+    unknown_key: value

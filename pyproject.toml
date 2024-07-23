@@ -27,6 +27,9 @@ warn_unused_ignores = true
 disallow_any_generics = true
 check_untyped_defs = true
 no_implicit_reexport = true
+plugins = [
+  "pydantic.mypy"
+]
 
 [[tool.mypy.overrides]]
 ignore_missing_imports = true
@@ -49,6 +52,7 @@ version = "0.0.0"
 python = ">=3.8,<3.13"
 click = "^8"
 dbt-artifacts-parser = "^0"
+pydantic = "^2"
 pytest = "^8"
 pyyaml = "^6"
 

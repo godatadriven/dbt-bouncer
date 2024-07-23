@@ -70,7 +70,7 @@ class GenerateTestsPlugin:
                     if "iterate_over_models" in markers:
                         for model in self.models:
                             if (
-                                "include" in check_config.keys()
+                                check_config.get("include") is not None
                                 and re.compile(check_config["include"].strip()).match(
                                     model["path"]
                                 )
