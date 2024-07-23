@@ -38,7 +38,7 @@ docker pull ghcr.io/godatadriven/dbt-bouncer:v0
 docker run --rm \
     --volume "$PWD":/app \
     ghcr.io/godatadriven/dbt-bouncer:vX.X.X \
-    /dbt-bouncer/dbt-bouncer.pex --config-file /app/<PATH_TO_CONFIG_FILE>
+    --config-file /app/<PATH_TO_CONFIG_FILE>
 ```
 
 ## Pex

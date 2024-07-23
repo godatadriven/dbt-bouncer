@@ -5,4 +5,4 @@ WORKDIR /dbt-bouncer
 
 COPY dist/dbt-bouncer.pex ./dbt-bouncer.pex
 
-CMD ["/bin/bash", "-c", "echo 'Expecting commands to be passed in.' && exit 1"]
+ENTRYPOINT [ "/dbt-bouncer/dbt-bouncer.pex" ]

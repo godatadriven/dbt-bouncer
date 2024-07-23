@@ -115,7 +115,7 @@ jobs:
                 docker run --rm \
                   --volume "$PWD":/app \
                   ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:ci \
-                  /dbt-bouncer/dbt-bouncer.pex --config-file /app/dbt-bouncer-example.yml
+                  --config-file /app/dbt-bouncer-example.yml
 
     pex-tests:
       needs: [pre-commit]
