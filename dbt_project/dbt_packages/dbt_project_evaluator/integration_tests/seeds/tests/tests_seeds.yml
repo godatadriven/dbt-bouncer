@@ -1,0 +1,34 @@
+version: 2
+
+seeds:
+  - name: test_fct_missing_primary_key_tests
+    tests:
+      - dbt_utils.equality:
+          name: equality_fct_missing_primary_key_tests
+          compare_model: ref('fct_missing_primary_key_tests')
+          exclude_columns:
+            - resource_type
+            - model_type
+
+  - name: test_fct_test_coverage
+    config:
+      column_types:
+        test_coverage_pct: &float "{{ 'float' if target.type not in ['athena', 'trino'] else 'double' }}"
+        staging_test_coverage_pct: *float
+        intermediate_test_coverage_pct: *float
+        marts_test_coverage_pct: *float
+        other_test_coverage_pct: *float
+    tests:
+      - dbt_utils.equality:
+          name: equality_fct_test_coverage
+          compare_model: ref('fct_test_coverage')
+          compare_columns:
+            - total_models
+            - total_tests
+            - tested_models
+            - "{{ 'test_coverage_pct' if not target.name in ['duckdb', 'databricks', 'trino'] else 'tested_models' }}"
+            - test_to_model_ratio
+            - staging_test_coverage_pct
+            - intermediate_test_coverage_pct
+            - marts_test_coverage_pct
+            - other_test_coverage_pct

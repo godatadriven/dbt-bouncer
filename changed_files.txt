@@ -1,0 +1,6 @@
+M	.github/workflows/ci_pipeline.yml
+M	.pre-commit-config.yaml
+A	changed_files.txt
+M	poetry.lock
+M	pyproject.toml
+M	tests/test_main.py

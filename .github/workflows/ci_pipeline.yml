@@ -5,6 +5,9 @@ on:
     pull_request:
         branches:
             - main
+    push:
+      branches:
+        - test-action
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -56,14 +59,14 @@ jobs:
             - run: poetry run dbt parse
               working-directory: ./dbt_project
 
-            - uses: godatadriven/dbt-bouncer@v0
+            - uses: godatadriven/dbt-bouncer@docker-based-action
               with:
-                dbt-artifacts-dir: ./dbt_project
+                config-file: ./dbt-bouncer-example.yml
 
             - run: echo '${{ secrets.PAT_GITHUB }}' | docker login ghcr.io -u pgoslatara --password-stdin
             - run: docker pull ghcr.io/godatadriven/dbt-bouncer:v0
             - run: >
                 docker run --rm \
-                  --volume "$PWD/dbt_project":/dbt_project \
+                  --volume "$PWD":/app \
                   ghcr.io/godatadriven/dbt-bouncer:v0 \
-                  dbt-bouncer --dbt-project-dir dbt_project
+                  dbt-bouncer/dbt-bouncer.pex --config-file /app/dbt-bouncer-example.yml
