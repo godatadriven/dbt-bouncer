@@ -62,6 +62,7 @@ jobs:
             - uses: godatadriven/dbt-bouncer@docker-based-action
               with:
                 config-file: ./dbt-bouncer-example.yml
+                PAT_GITHUB: ${{ secrets.PAT_GITHUB }}
 
             - run: echo '${{ secrets.PAT_GITHUB }}' | docker login ghcr.io -u pgoslatara --password-stdin
             - run: docker pull ghcr.io/godatadriven/dbt-bouncer:v0
