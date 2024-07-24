@@ -2,7 +2,6 @@ import re
 
 import pytest
 
-from dbt_bouncer.logger import logger
 from dbt_bouncer.utils import flatten, get_check_inputs
 
 
@@ -12,11 +11,13 @@ def check_source_has_meta_keys(request, check_config=None, source=None) -> None:
     The `meta` config for sources must have the specified keys.
     """
 
-    check_config, _, _, source = get_check_inputs(
+    input_vars = get_check_inputs(
         check_config=check_config,
         request=request,
         source=source,
     )
+    check_config = input_vars["check_config"]
+    source = input_vars["source"]
 
     keys_in_meta = list(flatten(source.get("meta")).keys())
 

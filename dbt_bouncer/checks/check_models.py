@@ -11,9 +11,9 @@ def check_model_names(request, check_config=None, model=None):
     Models must have a name that matches the supplied regex.
     """
 
-    check_config, _, model, _ = get_check_inputs(
-        check_config=check_config, model=model, request=request
-    )
+    input_vars = get_check_inputs(check_config=check_config, model=model, request=request)
+    check_config = input_vars["check_config"]
+    model = input_vars["model"]
 
     assert (
         re.compile(check_config["model_name_pattern"].strip()).match(model["name"]) is not None
@@ -26,9 +26,7 @@ def check_populated_model_description(request, check_config=None, model=None):
     Models must have a populated description.
     """
 
-    check_config, _, model, _ = get_check_inputs(
-        check_config=check_config, model=model, request=request
-    )
+    model = get_check_inputs(model=model, request=request)["model"]
 
     assert (
         len(model["description"].strip()) > 4
