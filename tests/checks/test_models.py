@@ -6,7 +6,6 @@ from dbt_bouncer.checks.check_models import (
     check_model_names,
     check_populated_model_description,
 )
-from dbt_bouncer.utils import get_check_inputs
 
 
 @pytest.mark.parametrize(

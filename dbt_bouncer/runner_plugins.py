@@ -3,7 +3,6 @@ import re
 from typing import Dict
 
 import pytest
-from tabulate import tabulate
 
 from dbt_bouncer.logger import logger
 
