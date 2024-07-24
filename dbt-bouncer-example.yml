@@ -13,4 +13,10 @@ checks:
   - name: check_populated_model_description
   - name: check_project_name
     project_name_pattern: ^dbt_bouncer_
+  - name: check_source_has_meta_keys
+    keys:
+      - contact:
+          - email
+          - slack
+      - owner
   - name: check_top_level_directories
