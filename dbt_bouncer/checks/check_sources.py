@@ -3,7 +3,7 @@ import re
 import pytest
 
 from dbt_bouncer.logger import logger
-from dbt_bouncer.utils import flatten
+from dbt_bouncer.utils import flatten, get_check_inputs
 
 
 @pytest.mark.iterate_over_sources
@@ -12,8 +12,11 @@ def check_source_has_meta_keys(request, check_config=None, source=None) -> None:
     The `meta` config for sources must have the specified keys.
     """
 
-    check_config = request.node.check_config if check_config is None else check_config
-    source = request.node.source if source is None else source
+    check_config, _, _, source = get_check_inputs(
+        check_config=check_config,
+        request=request,
+        source=source,
+    )
 
     keys_in_meta = list(flatten(source.get("meta")).keys())
 
