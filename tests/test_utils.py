@@ -1,6 +1,6 @@
 import pytest
 
-from dbt_bouncer.utils import flatten
+from dbt_bouncer.utils import flatten, object_in_path
 
 
 @pytest.mark.parametrize(
@@ -22,3 +22,16 @@ from dbt_bouncer.utils import flatten
 )
 def test_flatten(input, output):
     assert flatten(input) == output
+
+
+@pytest.mark.parametrize(
+    "include_pattern, path, output",
+    [
+        ("^staging", "staging/model_1.sql", True),
+        (None, "staging/model_1.sql", True),
+        ("^staging", "model_1.sql", False),
+        ("^staging", "intermediate/model_1.sql", False),
+    ],
+)
+def test_object_in_path(include_pattern, path, output):
+    assert object_in_path(include_pattern, path) == output

@@ -1,3 +1,6 @@
+import re
+
+
 def flatten(structure, key="", path="", flattened=None):
     """
     Take a dict of arbitrary depth that may contain lists and return a non-nested dict of all pathways.
@@ -34,3 +37,15 @@ def get_check_inputs(check_config=None, macro=None, model=None, request=None, so
         source = source
 
     return {"check_config": check_config, "macro": macro, "model": model, "source": source}
+
+
+def object_in_path(include_pattern: str, path: str) -> bool:
+    """
+    Determine if an object is included in the specified path pattern.
+    If no pattern is specified then all objects are included
+    """
+
+    if include_pattern is not None:
+        return re.compile(include_pattern.strip()).match(path) is not None
+    else:
+        return True

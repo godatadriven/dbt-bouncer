@@ -1,10 +1,10 @@
 import inspect
-import re
 from typing import Dict
 
 import pytest
 
 from dbt_bouncer.logger import logger
+from dbt_bouncer.utils import object_in_path
 
 
 class FixturePlugin(object):
@@ -77,15 +77,7 @@ class GenerateTestsPlugin:
                     ).keywords._markers.keys()  # type: ignore[attr-defined]
                     if "iterate_over_models" in markers:
                         for model in self.models:
-                            if (
-                                check_config.get("include") is not None
-                                and re.compile(check_config["include"].strip()).match(
-                                    model["path"]
-                                )
-                                is None
-                            ):
-                                pass
-                            else:
+                            if object_in_path(check_config.get("include"), model["path"]):
                                 item = MyFunctionItem.from_parent(
                                     parent=collector,
                                     name=name,
@@ -97,15 +89,7 @@ class GenerateTestsPlugin:
                                 items.append(item)
                     elif "iterate_over_macros" in markers:
                         for macro in self.macros:
-                            if (
-                                check_config.get("include") is not None
-                                and re.compile(check_config["include"].strip()).match(
-                                    model["path"]
-                                )
-                                is None
-                            ):
-                                pass
-                            else:
+                            if object_in_path(check_config.get("include"), macro["path"]):
                                 item = MyFunctionItem.from_parent(
                                     parent=collector,
                                     name=name,
@@ -117,15 +101,7 @@ class GenerateTestsPlugin:
                                 items.append(item)
                     elif "iterate_over_sources" in markers:
                         for source in self.sources:
-                            if (
-                                check_config.get("include") is not None
-                                and re.compile(check_config["include"].strip()).match(
-                                    source["path"]
-                                )
-                                is None
-                            ):
-                                pass
-                            else:
+                            if object_in_path(check_config.get("include"), source["path"]):
                                 item = MyFunctionItem.from_parent(
                                     parent=collector,
                                     name=name,
