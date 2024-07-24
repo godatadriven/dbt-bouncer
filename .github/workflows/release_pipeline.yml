@@ -33,11 +33,19 @@
               - name: Fetch tags
                 run: git fetch --prune --unshallow --tags
 
+              - name: Determine python version
+                id: python-version
+                run: |
+                    export PYTHON_VERSION=$(cat .python-version)
+                    echo "PYTHON_VERSION: $PYTHON_VERSION"
+                    echo "PYTHON_VERSION=$PYTHON_VERSION" >> $GITHUB_OUTPUT
+
               - name: Setup Python
                 uses: ./actions/setup_python_env
                 with:
                   install-python-deps: 'false'
                   poetry-version: ${{ env.POETRY_VERSION }}
+                  python-version: ${{ steps.python-version.outputs.PYTHON_VERSION }}
 
               - name: Install version bump Poetry plugin
                 run: poetry self add poetry-bumpversion
@@ -117,13 +125,6 @@
                   password: ${{ secrets.GITHUB_TOKEN }}
                   registry: ${{ env.REGISTRY }}
                   username: ${{ github.actor }}
-
-              - name: Determine python version
-                id: python-version
-                run: |
-                    export PYTHON_VERSION=$(cat .python-version)
-                    echo "PYTHON_VERSION: $PYTHON_VERSION"
-                    echo "PYTHON_VERSION=$PYTHON_VERSION" >> $GITHUB_OUTPUT
 
               - name: Build and push image
                 id: push

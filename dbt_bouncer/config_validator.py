@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Dict, List, Literal, Optional, Union
+from typing import Any, Dict, List, Literal, Optional, Union
 
 import yaml
 from pydantic import BaseModel, ConfigDict, Field
@@ -45,7 +45,7 @@ class CheckProjectName(BaseCheck):
 
 
 class CheckSourceHasMetaKeys(BaseCheck):
-    keys: Optional[Union[Dict[str, str], List[str]]]
+    keys: Optional[Union[Dict[str, Any], List[Any]]]
     name: Literal["check_source_has_meta_keys"]
 
 
