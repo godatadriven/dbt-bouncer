@@ -1,17 +1,13 @@
 import inspect
 import re
+import sys
 from pathlib import Path
 from typing import Dict, List
 
 import pytest
+from tabulate import tabulate
 
 from dbt_bouncer.logger import logger
-
-
-class DbtBouncerException(Exception):
-    def __init__(self, message: str):
-        self.message = message
-        super().__init__(self.message)
 
 
 class FixturePlugin(object):
@@ -135,6 +131,19 @@ class GenerateTestsPlugin:
         return items
 
 
+class ResultsCollector:
+    def __init__(self):
+        self.exitcode = 0
+        self.reports = []
+
+    @pytest.hookimpl(hookwrapper=True)
+    def pytest_runtest_makereport(self):
+        outcome = yield
+        report = outcome.get_result()
+        if report.when == "call":
+            self.reports.append(report)
+
+
 def runner(
     bouncer_config: Dict[str, List[Dict[str, str]]],
     macros: List[Dict[str, str]],
@@ -153,6 +162,7 @@ def runner(
         setattr(fixtures, att + "_", locals()[att])
 
     # Run the checks, if one fails then pytest will raise an exception
+    collector = ResultsCollector()
     run_checks = pytest.main(
         [
             "-c",
@@ -161,10 +171,25 @@ def runner(
             "-s",
         ],
         plugins=[
+            collector,
             fixtures,
             GenerateTestsPlugin(bouncer_config=bouncer_config, macros=macros, models=models),
         ],
     )
-
     if run_checks.value != 0:  # type: ignore[attr-defined]
-        raise DbtBouncerException(f"Checks failed")
+        logger.error(
+            "Failed checks:\n"
+            + tabulate(
+                [
+                    [
+                        report.nodeid,
+                        report._to_json()["longrepr"]["chain"][0][1]["message"].split("\n")[0],
+                    ]
+                    for report in collector.reports
+                    if report.outcome == "failed"
+                ],
+                headers=["Check name", "Failure message"],
+                tablefmt="github",
+            )
+        )
+        sys.exit(1)

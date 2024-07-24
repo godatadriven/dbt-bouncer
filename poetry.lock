@@ -1169,13 +1169,13 @@ files = [
 
 [[package]]
 name = "pex"
-version = "2.11.0"
+version = "2.12.0"
 description = "The PEX packaging toolchain."
 optional = false
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,<3.14,>=2.7"
 files = [
-    {file = "pex-2.11.0-py2.py3-none-any.whl", hash = "sha256:22285310b06dedb45c5ce19d21fa0a5e102caad0030458e53b0cda4975c9a4ef"},
-    {file = "pex-2.11.0.tar.gz", hash = "sha256:9f3394da2c651d4d0adebf0a8e419abf1e37b6302fcbf66de54882281538e29c"},
+    {file = "pex-2.12.0-py2.py3-none-any.whl", hash = "sha256:78a564eb8c242f236ad86e9f8b28d54b1922f26fa26cd3875bd10471f190e501"},
+    {file = "pex-2.12.0.tar.gz", hash = "sha256:68882ddf98814a834eb2485b6ad5590faf6474845b877534dbcb54bf632606ab"},
 ]
 
 [package.extras]
@@ -1757,6 +1757,20 @@ dev = ["build", "hatch"]
 doc = ["sphinx"]
 
 [[package]]
+name = "tabulate"
+version = "0.9.0"
+description = "Pretty-print tabular data"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "tabulate-0.9.0-py3-none-any.whl", hash = "sha256:024ca478df22e9340661486f85298cff5f6dcdba14f3813e8830015b9ed1948f"},
+    {file = "tabulate-0.9.0.tar.gz", hash = "sha256:0095b12bf5966de529c0feb1fa08671671b3368eec77d7ef7ab114be2c068b3c"},
+]
+
+[package.extras]
+widechars = ["wcwidth"]
+
+[[package]]
 name = "text-unidecode"
 version = "1.3"
 description = "The most basic Text::Unidecode port"
@@ -1875,4 +1889,4 @@ test = ["big-O", "importlib-resources", "jaraco.functools", "jaraco.itertools", 
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<3.13"
-content-hash = "fb7554b180e6d66a6c436b845cf47d71417e4923273ada13250086f7aa2d71a8"
+content-hash = "3ff5e6ff42d067502d45cef727102dd2c65d32f3505ec3762fc3751ba13c57b2"
