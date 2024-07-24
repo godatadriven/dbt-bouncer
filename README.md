@@ -1,13 +1,48 @@
-# dbt-bouncer
-
-![CI](https://github.com/godatadriven/dbt-bouncer/actions/workflows/ci_pipeline.yml/badge.svg)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
-Configure and enforce conventions for your dbt project.
-
 <p align="center">
   <img src="./images/logo.webp" alt="dbt-bouncer logo" width="500"/>
 </p>
+
+
+<h2 align="center">
+  Configure and enforce conventions for your dbt project.
+</h2>
+
+<div align="center">
+  <a>
+    <img src="https://img.shields.io/github/release/godatadriven/dbt-bouncer.svg?logo=github">
+  </a>
+  <a>
+    <img src="https://github.com/godatadriven/dbt-bouncer/actions/workflows/ci_pipeline.yml/badge.svg">
+  </a>
+  <a>
+    <img src="https://img.shields.io/badge/License-MIT-yellow.svg">
+  </a>
+  <a>
+    <img src="https://img.shields.io/github/last-commit/godatadriven/dbt-bouncer/main">
+  </a>
+  <a>
+    <img src="https://img.shields.io/github/commits-since/godatadriven/dbt-bouncer/latest">
+  </a>
+</div>
+
+<div align="center">
+  <a>
+    <img alt="Docker Supported" src="https://img.shields.io/badge/Docker%20-Supported-0db7ed?logo=docker">
+  </a>
+  <a>
+    <img alt="GitHub Supported" src="https://img.shields.io/badge/GitHub%20-Supported-333?logo=github">
+  </a>
+</div>
+
+<div align="center">
+  <a>
+    <img src="https://img.shields.io/badge/code%20style-black-000000.svg">
+  </a>
+  <a>
+    <img src="https://www.aschey.tech/tokei/github/godatadriven/dbt-bouncer?category=code">
+  </a>
+</div>
+<br/>
 
 # How to use
 
