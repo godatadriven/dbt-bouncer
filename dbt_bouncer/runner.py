@@ -41,10 +41,11 @@ class FixturePlugin(object):
 
 # Inspiration: https://github.com/pytest-dev/pytest-xdist/discussions/957#discussioncomment-7335007
 class MyFunctionItem(pytest.Function):
-    def __init__(self, check_config, macro=None, model=None, *args, **kwargs):
+    def __init__(self, check_config, macro=None, model=None, source=None, *args, **kwargs):
         self.check_config: Dict[str, str] = check_config
         self.macro: Dict[str, str] | None = macro
         self.model: Dict[str, str] | None = model
+        self.source: Dict[str, str] | None = source
         super().__init__(*args, **kwargs)
 
 
@@ -55,10 +56,11 @@ class GenerateTestsPlugin:
     `pytest_pycollect_makeitem` is one way to get this to work.
     """
 
-    def __init__(self, bouncer_config, macros, models):
+    def __init__(self, bouncer_config, macros, models, sources):
         self.bouncer_config = bouncer_config
         self.macros = macros
         self.models = models
+        self.sources = sources
 
     def pytest_pycollect_makeitem(self, collector, name, obj):
         items = []
@@ -115,6 +117,26 @@ class GenerateTestsPlugin:
                                     check_config=check_config,
                                 )
                                 item._nodeid = f"{name}::{macro['name']}_{check_config['index']}"
+                                items.append(item)
+                    elif "iterate_over_sources" in markers:
+                        for source in self.sources:
+                            if (
+                                check_config.get("include") is not None
+                                and re.compile(check_config["include"].strip()).match(
+                                    source["path"]
+                                )
+                                is None
+                            ):
+                                pass
+                            else:
+                                item = MyFunctionItem.from_parent(
+                                    parent=collector,
+                                    name=name,
+                                    fixtureinfo=fixture_info,
+                                    source=source,
+                                    check_config=check_config,
+                                )
+                                item._nodeid = f"{name}::{source['name']}_{check_config['index']}"
                                 items.append(item)
                     else:
                         item = MyFunctionItem.from_parent(
@@ -173,7 +195,9 @@ def runner(
         plugins=[
             collector,
             fixtures,
-            GenerateTestsPlugin(bouncer_config=bouncer_config, macros=macros, models=models),
+            GenerateTestsPlugin(
+                bouncer_config=bouncer_config, macros=macros, models=models, sources=sources
+            ),
         ],
     )
     if run_checks.value != 0:  # type: ignore[attr-defined]

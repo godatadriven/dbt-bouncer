@@ -4,4 +4,20 @@ sources:
   - name: "source"
     tables:
       - name: source_1
+        meta:
+          contact:
+            email: anna@email.com
+            name:
+              first: Anna
+              last: Anderson
+            slack: |
+              @anna
+          maturity: high
+          owner: Anna
       - name: source_2
+        meta:
+          contact:
+            email: annabelle@email.com
+            slack: |
+              @therealanna
+          owner: Annabelle

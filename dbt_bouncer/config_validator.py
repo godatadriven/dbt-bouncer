@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List, Literal, Optional, Union
+from typing import Dict, List, Literal, Optional, Union
 
 import yaml
 from pydantic import BaseModel, ConfigDict, Field
@@ -44,6 +44,11 @@ class CheckProjectName(BaseCheck):
     project_name_pattern: str = Field(description="Regexp the project name must match.")
 
 
+class CheckSourceHasMetaKeys(BaseCheck):
+    keys: Optional[Union[Dict[str, str], List[str]]]
+    name: Literal["check_source_has_meta_keys"]
+
+
 class CheckTopLevelDirectories(BaseCheck):
     name: Literal["check_top_level_directories"]
 
@@ -56,6 +61,7 @@ CheckConfigs = Annotated[
         CheckPopulatedMacroDescription,
         CheckPopulatedModelDescription,
         CheckProjectName,
+        CheckSourceHasMetaKeys,
         CheckTopLevelDirectories,
     ],
     Field(discriminator="name"),
