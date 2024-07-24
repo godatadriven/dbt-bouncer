@@ -2,7 +2,6 @@ import re
 
 import pytest
 
-from dbt_bouncer.logger import logger
 from dbt_bouncer.utils import get_check_inputs
 
 
