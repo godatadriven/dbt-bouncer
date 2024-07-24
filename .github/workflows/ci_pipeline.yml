@@ -25,10 +25,18 @@ jobs:
               with:
                 fetch-depth: "0"
 
+            - name: Determine python version
+              id: python-version
+              run: |
+                  export PYTHON_VERSION=$(cat .python-version)
+                  echo "PYTHON_VERSION: $PYTHON_VERSION"
+                  echo "PYTHON_VERSION=$PYTHON_VERSION" >> $GITHUB_OUTPUT
+
             - name: Setup Python
               uses: ./actions/setup_python_env
               with:
                 poetry-version: ${{ env.POETRY_VERSION }}
+                python-version: ${{ steps.python-version.outputs.PYTHON_VERSION }}
 
             - name: Run pre-commit
               run: |
@@ -81,10 +89,18 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v4
 
+            - name: Determine python version
+              id: python-version
+              run: |
+                  export PYTHON_VERSION=$(cat .python-version)
+                  echo "PYTHON_VERSION: $PYTHON_VERSION"
+                  echo "PYTHON_VERSION=$PYTHON_VERSION" >> $GITHUB_OUTPUT
+
             - name: Setup Python
               uses: ./actions/setup_python_env
               with:
                 poetry-version: ${{ env.POETRY_VERSION }}
+                python-version: ${{ steps.python-version.outputs.PYTHON_VERSION }}
 
             - name: Build pex file
               run: make build-pex
@@ -124,10 +140,18 @@ jobs:
           - name: Checkout
             uses: actions/checkout@v4
 
+          - name: Determine python version
+            id: python-version
+            run: |
+                export PYTHON_VERSION=$(cat .python-version)
+                echo "PYTHON_VERSION: $PYTHON_VERSION"
+                echo "PYTHON_VERSION=$PYTHON_VERSION" >> $GITHUB_OUTPUT
+
           - name: Setup Python
             uses: ./actions/setup_python_env
             with:
               poetry-version: ${{ env.POETRY_VERSION }}
+              python-version: ${{ steps.python-version.outputs.PYTHON_VERSION }}
 
           - name: Build pex file
             run: make build-pex
