@@ -3,52 +3,10 @@ from contextlib import nullcontext as does_not_raise
 import pytest
 
 from dbt_bouncer.checks.check_macros import (
+    check_macro_arguments_description_populated,
+    check_macro_description_populated,
     check_macro_name_matches_file_name,
-    check_populated_macro_arguments_description,
-    check_populated_macro_description,
 )
-
-
-@pytest.mark.parametrize(
-    "macro, expectation",
-    [
-        (
-            {
-                "name": "macro_1",
-                "path": "macros/macro_1.sql",
-                "unique_id": "macro.package_name.macro_1",
-            },
-            does_not_raise(),
-        ),
-        (
-            {
-                "name": "test_logic_1",
-                "path": "tests/logic_1.sql",
-                "unique_id": "macro.package_name.test_logic_1",
-            },
-            does_not_raise(),
-        ),
-        (
-            {
-                "name": "my_macro_2",
-                "path": "macros/macro_2.sql",
-                "unique_id": "macro.package_name.macro_2",
-            },
-            pytest.raises(AssertionError),
-        ),
-        (
-            {
-                "name": "test_logic_2",
-                "path": "tests/my_logic_1.sql",
-                "unique_id": "macro.package_name.test_logic_2",
-            },
-            pytest.raises(AssertionError),
-        ),
-    ],
-)
-def test_check_macro_name_matches_file_name(macro, expectation):
-    with expectation:
-        check_macro_name_matches_file_name(macro=macro, request=None)
 
 
 @pytest.mark.parametrize(
@@ -125,9 +83,9 @@ def test_check_macro_name_matches_file_name(macro, expectation):
         ),
     ],
 )
-def test_check_populated_macro_arguments_description(macro, expectation):
+def test_check_macro_arguments_description_populated(macro, expectation):
     with expectation:
-        check_populated_macro_arguments_description(macro=macro, request=None)
+        check_macro_arguments_description_populated(macro=macro, request=None)
 
 
 @pytest.mark.parametrize(
@@ -168,6 +126,48 @@ def test_check_populated_macro_arguments_description(macro, expectation):
         ),
     ],
 )
-def test_check_populated_macro_description(macro, expectation):
+def test_check_macro_description_populated(macro, expectation):
     with expectation:
-        check_populated_macro_description(macro=macro, request=None)
+        check_macro_description_populated(macro=macro, request=None)
+
+
+@pytest.mark.parametrize(
+    "macro, expectation",
+    [
+        (
+            {
+                "name": "macro_1",
+                "path": "macros/macro_1.sql",
+                "unique_id": "macro.package_name.macro_1",
+            },
+            does_not_raise(),
+        ),
+        (
+            {
+                "name": "test_logic_1",
+                "path": "tests/logic_1.sql",
+                "unique_id": "macro.package_name.test_logic_1",
+            },
+            does_not_raise(),
+        ),
+        (
+            {
+                "name": "my_macro_2",
+                "path": "macros/macro_2.sql",
+                "unique_id": "macro.package_name.macro_2",
+            },
+            pytest.raises(AssertionError),
+        ),
+        (
+            {
+                "name": "test_logic_2",
+                "path": "tests/my_logic_1.sql",
+                "unique_id": "macro.package_name.test_logic_2",
+            },
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_macro_name_matches_file_name(macro, expectation):
+    with expectation:
+        check_macro_name_matches_file_name(macro=macro, request=None)

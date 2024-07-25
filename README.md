@@ -3,6 +3,9 @@
 </p>
 
 
+<h1 align="center">
+  dbt-bouncer
+</h1>
 <h2 align="center">
   Configure and enforce conventions for your dbt project.
 </h2>
@@ -47,7 +50,7 @@
 # How to use
 
 1. Generate a `manifest.json` by running `dbt parse`.
-1. Create a `dbt-bouncer.yml` config file.
+1. Create a `dbt-bouncer.yml` config file, details [here](#config-file).
 1. Run `dbt-bouncer` to validate that your conventions are being maintained. You can use GitHub Actions, Docker or a `.pex` file to run `dbt-bouncer`.
 
 ## GitHub Actions
@@ -85,6 +88,47 @@ wget https://github.com/godatadriven/dbt-bouncer/releases/download/vX.X.X/dbt-bo
 
 dbt-bouncer.pex --config-file $PWD/<PATH_TO_CONFIG_FILE>
 ```
+
+# Config file
+
+`dbt-bouncer` requires a config file to be provided. This file configures what checks are run. Here is an example config file:
+
+```yaml
+dbt-artifacts-dir: target # [Optional] Directory where the dbt artifacts exists, generally the `target` directory inside a dbt project. Defaults to `./target`.
+
+checks:
+  - name: check_macro_name_matches_file_name
+  - name: check_model_names
+    include: ^staging
+    model_name_pattern: ^stg_
+```
+
+# Checks
+
+:bulb: Click on a check name to see more details.
+
+**Macros**
+
+* [`check_macro_arguments_description_populated`](./dbt_bouncer/checks/checks.md#check_macro_arguments_description_populated): Macro arguments must have a populated description.
+* [`check_macro_description_populated`](./dbt_bouncer/checks/checks.md#check_macro_description_populated): Macros must have a populated description.
+* [`check_macro_name_matches_file_name`](./dbt_bouncer/checks/checks.md#check_macro_name_matches_file_name): Macros names must be the same as the file they are contained in.
+
+**Metadata**
+
+* [`check_project_name`](./dbt_bouncer/checks/checks.md#check_project_name): Enforce that the name of the dbt project matches a supplied regex.
+
+**Miscellaneous**
+
+* [`check_top_level_directories`](./dbt_bouncer/checks/checks.md#check_top_level_directories): Only specified top-level directories are allowed to contain models.
+
+**Models**
+
+* [`check_model_description_populated`](./dbt_bouncer/checks/checks.md#check_model_description_populated): Models must have a populated description.
+* [`check_model_names`](./dbt_bouncer/checks/checks.md#check_model_names): Models must have a name that matches the supplied regex.
+
+**Sources**
+
+* [`check_source_has_meta_keys`](./dbt_bouncer/checks/checks.md#check_source_has_meta_keys): The `meta` config for sources must have the specified keys.
 
 # Development
 

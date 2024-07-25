@@ -3,8 +3,8 @@ from contextlib import nullcontext as does_not_raise
 import pytest
 
 from dbt_bouncer.checks.check_models import (
+    check_model_description_populated,
     check_model_names,
-    check_populated_model_description,
 )
 
 
@@ -147,6 +147,6 @@ def test_check_mode_names(check_config, model, expectation):
         ),
     ],
 )
-def test_check_populated_model_description(model, expectation):
+def test_check_model_description_populated(model, expectation):
     with expectation:
-        check_populated_model_description(model=model, request=None)
+        check_model_description_populated(model=model, request=None)
