@@ -7,12 +7,19 @@ from dbt_bouncer.utils import get_check_inputs
 def check_macro_name_matches_file_name(request, check_config=None, macro=None) -> None:
     """
     Macros names must be the same as the file they are contained in.
+
+    Generic tests are also macros, however to document these tests the "name" value must be precededed with "test_".
     """
 
     macro = get_check_inputs(macro=macro, request=request)["macro"]
-    assert (
-        macro["name"] == macro["path"].split("/")[-1].split(".")[0]
-    ), f"{macro['unique_id']} is not in a file of the same name."
+    if macro["name"].startswith("test_"):
+        assert (
+            macro["name"][5:] == macro["path"].split("/")[-1].split(".")[0]
+        ), f"{macro['unique_id']} is not in a file named `{macro['name'][5:]}.sql`."
+    else:
+        assert (
+            macro["name"] == macro["path"].split("/")[-1].split(".")[0]
+        ), f"{macro['unique_id']} is not in a file of the same name."
 
 
 @pytest.mark.iterate_over_macros
