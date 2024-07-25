@@ -1,7 +1,7 @@
 version: 2
 
 sources:
-  - name: "source"
+  - name: sources_that_dont_really_exist
     tables:
       - name: source_1
         meta:

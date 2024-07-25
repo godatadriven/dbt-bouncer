@@ -1,0 +1,6 @@
+selectors:
+  - name: nodes_to_exclude
+    default: true
+    definition:
+      method: package
+      value: "dbt_bouncer_test_project"
