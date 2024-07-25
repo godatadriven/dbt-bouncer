@@ -19,9 +19,24 @@ build-pex:
 		--script dbt-bouncer
 
 test:
+	$(MAKE) test_unit
+	$(MAKE) test_integration
+
+test_integration:
 	poetry run pytest \
+		-c ./tests \
 		--junitxml=coverage.xml \
 		--cov-report=term-missing:skip-covered \
 		--cov=dbt_bouncer/ \
 		--numprocesses 5 \
-		./tests
+		./tests/integration \
+		$(MAKE_ARGS)
+
+test_unit:
+	poetry run pytest \
+		-c ./tests \
+		--junitxml=coverage.xml \
+		--cov-report=term-missing:skip-covered \
+		--cov=dbt_bouncer/ \
+		--numprocesses 5 \
+		./tests/unit
