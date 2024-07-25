@@ -71,8 +71,6 @@ steps:
 Don't use GitHub Actions? You can still use dbt-bouncer via Docker:
 
 ```bash
-docker pull ghcr.io/godatadriven/dbt-bouncer:v0
-
 docker run --rm \
     --volume "$PWD":/app \
     ghcr.io/godatadriven/dbt-bouncer:vX.X.X \
