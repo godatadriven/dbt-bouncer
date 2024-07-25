@@ -1,16 +1,34 @@
 version: 2
 
 models:
-  - name: stg_model_1
-    description: Super basic model that has a description and a test
+  - name: stg_customers
+    description: Staging table for customer data.
     columns:
-      - name: id
-        tests:
-          - not_null
-
-  - name: stg_model_2
-    description: Super basic model that has a description and a test
-    columns:
-      - name: id
+      - name: customer_id
         tests:
           - unique
+          - not_null
+
+  - name: stg_orders
+    description: Staging table for orders data.
+    columns:
+      - name: order_id
+        tests:
+          - unique
+          - not_null
+      - name: status
+        tests:
+          - accepted_values:
+              values: ['placed', 'shipped', 'completed', 'return_pending', 'returned']
+
+  - name: stg_payments
+    description: Staging table for payment data.
+    columns:
+      - name: payment_id
+        tests:
+          - unique
+          - not_null
+      - name: payment_method
+        tests:
+          - accepted_values:
+              values: ['credit_card', 'coupon', 'bank_transfer', 'gift_card']
