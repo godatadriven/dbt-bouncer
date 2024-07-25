@@ -16,8 +16,20 @@ class BaseCheck(BaseModel):
     )
 
 
+class CheckMacroArgumentsDescriptionPopulated(BaseCheck):
+    name: Literal["check_macro_arguments_description_populated"]
+
+
+class CheckMacroDescriptionPopulated(BaseCheck):
+    name: Literal["check_macro_description_populated"]
+
+
 class CheckMacroNameMatchesFileName(BaseCheck):
     name: Literal["check_macro_name_matches_file_name"]
+
+
+class CheckModelDescriptionPopulated(BaseCheck):
+    name: Literal["check_model_description_populated"]
 
 
 class CheckModelNames(BaseCheck):
@@ -25,18 +37,6 @@ class CheckModelNames(BaseCheck):
 
     name: Literal["check_model_names"]
     model_name_pattern: str = Field(description="Regexp the model name must match.")
-
-
-class CheckPopulatedMacroArgumentsDescription(BaseCheck):
-    name: Literal["check_populated_macro_arguments_description"]
-
-
-class CheckPopulatedMacroDescription(BaseCheck):
-    name: Literal["check_populated_macro_description"]
-
-
-class CheckPopulatedModelDescription(BaseCheck):
-    name: Literal["check_populated_model_description"]
 
 
 class CheckProjectName(BaseCheck):
@@ -55,11 +55,11 @@ class CheckTopLevelDirectories(BaseCheck):
 
 CheckConfigs = Annotated[
     Union[
+        CheckMacroArgumentsDescriptionPopulated,
+        CheckMacroDescriptionPopulated,
         CheckMacroNameMatchesFileName,
+        CheckModelDescriptionPopulated,
         CheckModelNames,
-        CheckPopulatedMacroArgumentsDescription,
-        CheckPopulatedMacroDescription,
-        CheckPopulatedModelDescription,
         CheckProjectName,
         CheckSourceHasMetaKeys,
         CheckTopLevelDirectories,
