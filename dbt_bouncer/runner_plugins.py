@@ -75,41 +75,41 @@ class GenerateTestsPlugin:
                     markers = pytest.Function.from_parent(
                         collector, name=name
                     ).keywords._markers.keys()  # type: ignore[attr-defined]
-                    if "iterate_over_models" in markers:
-                        for model in self.models:
-                            if object_in_path(check_config.get("include"), model["path"]):
+                    if (
+                        len(
+                            set(
+                                [
+                                    "iterate_over_models",
+                                    "iterate_over_macros",
+                                    "iterate_over_sources",
+                                ]
+                            ).intersection(markers)
+                        )
+                        > 0
+                    ):
+                        key = [m for m in markers if m.startswith("iterate_over_")][0].split("_")[
+                            -1
+                        ]
+                        logger.debug(f"{key=}")
+                        for x in self.__getattribute__(key):
+                            if key == "macros":
+                                key, macro, model, source = "macros", x, None, None
+                            elif key == "models":
+                                key, macro, model, source = "models", None, x, None
+                            elif key == "sources":
+                                key, macro, model, source = "source", None, None, x
+
+                            if object_in_path(check_config.get("include"), x["path"]):
                                 item = MyFunctionItem.from_parent(
                                     parent=collector,
                                     name=name,
                                     fixtureinfo=fixture_info,
-                                    model=model,
                                     check_config=check_config,
-                                )
-                                item._nodeid = f"{name}::{model['name']}_{check_config['index']}"
-                                items.append(item)
-                    elif "iterate_over_macros" in markers:
-                        for macro in self.macros:
-                            if object_in_path(check_config.get("include"), macro["path"]):
-                                item = MyFunctionItem.from_parent(
-                                    parent=collector,
-                                    name=name,
-                                    fixtureinfo=fixture_info,
                                     macro=macro,
-                                    check_config=check_config,
-                                )
-                                item._nodeid = f"{name}::{macro['name']}_{check_config['index']}"
-                                items.append(item)
-                    elif "iterate_over_sources" in markers:
-                        for source in self.sources:
-                            if object_in_path(check_config.get("include"), source["path"]):
-                                item = MyFunctionItem.from_parent(
-                                    parent=collector,
-                                    name=name,
-                                    fixtureinfo=fixture_info,
+                                    model=model,
                                     source=source,
-                                    check_config=check_config,
                                 )
-                                item._nodeid = f"{name}::{source['name']}_{check_config['index']}"
+                                item._nodeid = f"{name}::{x['name']}_{check_config['index']}"
                                 items.append(item)
                     else:
                         item = MyFunctionItem.from_parent(
