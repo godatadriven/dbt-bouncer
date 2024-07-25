@@ -70,8 +70,8 @@ jobs:
                 poetry-version: ${{ env.POETRY_VERSION }}
                 python-version: ${{ matrix.python-version }}
 
-            - name: Run pytest
-              run: make test | tee pytest-coverage.txt && exit ${PIPESTATUS[0]}
+            - name: Run pytest (unit tests)
+              run: make test_unit | tee pytest-coverage.txt && exit ${PIPESTATUS[0]}
 
             - name: Pytest coverage comment
               if: matrix.python-version == '3.11'
@@ -81,6 +81,9 @@ jobs:
                   title: Coverage Report
                   badge-title: Coverage
                   junitxml-path: ./coverage.xml
+
+            - name: Run pytest (integration tests)
+              run: make test_integration
 
     e2e-tests:
         needs: [pre-commit]

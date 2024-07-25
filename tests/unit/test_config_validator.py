@@ -7,7 +7,7 @@ from pydantic import ValidationError
 from dbt_bouncer.config_validator import validate_config_file
 
 invalid_configs = []
-for f in Path("./tests/config_files/invalid").glob("*.yml"):
+for f in Path("./tests/unit/config_files/invalid").glob("*.yml"):
     invalid_configs.append(
         (
             f,
@@ -23,7 +23,7 @@ def test_validate_config_file_invalid(file, expectation):
 
 
 valid_configs = []
-for f in Path("./tests/config_files/valid").glob("*.yml"):
+for f in Path("./tests/unit/config_files/valid").glob("*.yml"):
     valid_configs.append(
         (
             f,
