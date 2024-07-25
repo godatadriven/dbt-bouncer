@@ -1,6 +1,9 @@
+build-artifacts:
+	poetry run python ./scripts/generate_artifacts.py
+
 build-pex:
 	poetry run pex . \
-		--interpreter-constraint ">=3.8,<3.13" \
+		--interpreter-constraint ">=3.8.1,<3.13" \
 		--jobs 128 \
 		--max-install-jobs 0 \
 		--output-file ./dist/dbt-bouncer.pex \
