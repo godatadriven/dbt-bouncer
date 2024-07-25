@@ -76,6 +76,9 @@
                     echo "PRERELEASE: $PRERELEASE"
                     echo PRERELEASE=$PRERELEASE >> "$GITHUB_ENV"
 
+              - name: Update .gitignore to no longer ignore dist/
+                run: sed -i '/^dist/d' .gitignore
+
               - name: Tag commit and push
                 run: |
                   git config --global user.email "bot@github.com"
