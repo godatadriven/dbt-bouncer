@@ -74,7 +74,7 @@ def main():
     For the specified dbt versions, build a pex file and generate dbt artifacts in the `./tests` directory.
     """
 
-    dbt_versions = ["1.5", "1.6", "1.7", "1.8"]
+    dbt_versions = ["1.6", "1.7", "1.8"]
 
     for dbt_version in dbt_versions:
         pex_file_name = f"./dist/dbt-{dbt_version.replace('.','')}.pex"

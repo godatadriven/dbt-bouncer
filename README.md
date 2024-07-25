@@ -30,6 +30,9 @@
 
 <div align="center">
   <a>
+    <img alt="dbt" src="https://img.shields.io/badge/dbt%20-%3E%3D1.6-333?logo=dbt">
+  </a>
+  <a>
     <img alt="Docker Supported" src="https://img.shields.io/badge/Docker%20-Supported-0db7ed?logo=docker">
   </a>
   <a>
