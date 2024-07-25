@@ -16,7 +16,15 @@ from dbt_bouncer.checks.check_macros import (
             {
                 "name": "macro_1",
                 "path": "macros/macro_1.sql",
-                "unique_id": "model.package_name.macro_1",
+                "unique_id": "macro.package_name.macro_1",
+            },
+            does_not_raise(),
+        ),
+        (
+            {
+                "name": "test_logic_1",
+                "path": "tests/logic_1.sql",
+                "unique_id": "macro.package_name.test_logic_1",
             },
             does_not_raise(),
         ),
@@ -24,7 +32,15 @@ from dbt_bouncer.checks.check_macros import (
             {
                 "name": "my_macro_2",
                 "path": "macros/macro_2.sql",
-                "unique_id": "model.package_name.macro_2",
+                "unique_id": "macro.package_name.macro_2",
+            },
+            pytest.raises(AssertionError),
+        ),
+        (
+            {
+                "name": "test_logic_2",
+                "path": "tests/my_logic_1.sql",
+                "unique_id": "macro.package_name.test_logic_2",
             },
             pytest.raises(AssertionError),
         ),
