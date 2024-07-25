@@ -1,65 +1,70 @@
 ---
 exclude: '^dist'
 repos:
-    - repo: https://github.com/pre-commit/pre-commit-hooks
-      rev: v4.6.0
+    - repo: https://github.com/godatadriven/dbt-bouncer
+      rev: create-pre-commit-hook
       hooks:
-          - id: trailing-whitespace
-          - id: check-json
-          - id: check-ast
-          - id: check-merge-conflict
-          - id: check-toml
-          - id: check-yaml
-            args: [--unsafe]
-          - id: debug-statements
-          - id: detect-private-key
-          - id: end-of-file-fixer
-            exclude: dbt_project/target/manifest.json
-    - repo: local
-      hooks:
-          - id: isort
-            args: ['--filter-files']
-            entry: isort
-            language: system
-            name: poetry run isort
-            require_serial: true
-            types_or: [cython, pyi, python]
-    - repo: local
-      hooks:
-          - id: black
-            entry: poetry run black
-            language: system
-            name: Run black formatter
-            require_serial: true
-            types_or: [python, pyi]
-    - repo: local
-      hooks:
-          - id: autoflake
-            args:
-            - "--in-place"
-            - "--expand-star-imports"
-            - "--remove-duplicate-keys"
-            - "--remove-unused-variables"
-            - "--remove-all-unused-imports"
-            entry: poetry run autoflake
-            language: system
-            name: autoflake
-            require_serial: true
-            types: [python]
-    - repo: local
-      hooks:
-          - id: mypy
-            args: ["--install-types", "--explicit-package-bases", "--ignore-missing-imports", "--scripts-are-modules", "--non-interactive"]
-            entry: poetry run mypy
-            language: system
-            name: mypy
-            require_serial: true
-            types_or: [python, pyi]
-    - repo: local
-      hooks:
-        - id: sqlfmt
-          entry: poetry run sqlfmt
-          language: system
-          name: sqlfmt
-          require_serial: true
-          types_or: [sql, jinja]
+          - id: dbt-bouncer
+            args: ["--config-file", "./dbt-bouncer-example.yml"]
+    # - repo: https://github.com/pre-commit/pre-commit-hooks
+    #   rev: v4.6.0
+    #   hooks:
+    #       - id: trailing-whitespace
+    #       - id: check-json
+    #       - id: check-ast
+    #       - id: check-merge-conflict
+    #       - id: check-toml
+    #       - id: check-yaml
+    #         args: [--unsafe]
+    #       - id: debug-statements
+    #       - id: detect-private-key
+    #       - id: end-of-file-fixer
+    #         exclude: dbt_project/target/manifest.json
+    # - repo: local
+    #   hooks:
+    #       - id: isort
+    #         args: ['--filter-files']
+    #         entry: isort
+    #         language: system
+    #         name: poetry run isort
+    #         require_serial: true
+    #         types_or: [cython, pyi, python]
+    # - repo: local
+    #   hooks:
+    #       - id: black
+    #         entry: poetry run black
+    #         language: system
+    #         name: Run black formatter
+    #         require_serial: true
+    #         types_or: [python, pyi]
+    # - repo: local
+    #   hooks:
+    #       - id: autoflake
+    #         args:
+    #         - "--in-place"
+    #         - "--expand-star-imports"
+    #         - "--remove-duplicate-keys"
+    #         - "--remove-unused-variables"
+    #         - "--remove-all-unused-imports"
+    #         entry: poetry run autoflake
+    #         language: system
+    #         name: autoflake
+    #         require_serial: true
+    #         types: [python]
+    # - repo: local
+    #   hooks:
+    #       - id: mypy
+    #         args: ["--install-types", "--explicit-package-bases", "--ignore-missing-imports", "--scripts-are-modules", "--non-interactive"]
+    #         entry: poetry run mypy
+    #         language: system
+    #         name: mypy
+    #         require_serial: true
+    #         types_or: [python, pyi]
+    # - repo: local
+    #   hooks:
+    #     - id: sqlfmt
+    #       entry: poetry run sqlfmt
+    #       language: system
+    #       name: sqlfmt
+    #       require_serial: true
+    #       types_or: [sql, jinja]

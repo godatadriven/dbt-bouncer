@@ -1,0 +1,9 @@
+- id: dbt-bouncer
+  description: some description
+  # entry: ./dist/dbt-bouncer.pex
+  entry: hooks/dbt-bouncer.sh
+  # language: system
+  language: script
+  name: dbt-bouncer
+  pass_filenames: false
+  require_serial: true
