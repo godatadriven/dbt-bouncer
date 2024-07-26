@@ -41,7 +41,7 @@
                     echo "PYTHON_VERSION=$PYTHON_VERSION" >> $GITHUB_OUTPUT
 
               - name: Setup Python
-                uses: ./actions/setup_python_env
+                uses: ./.github/actions/setup_python_env
                 with:
                   install-python-deps: 'false'
                   poetry-version: ${{ env.POETRY_VERSION }}
