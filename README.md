@@ -145,5 +145,6 @@ Set required environment variables by copying `.env.example` to `.env` and updat
 
 All tests can be run via:
 ```bash
+make build-artifacts # Rebuilds dbt artifacts used by pytest
 make test
 ```
