@@ -18,20 +18,18 @@ from dbt_bouncer.version import version
     default=Path("dbt-bouncer.yml"),
     help="Location of the YML config file.",
     required=False,
-    type=click.Path(exists=True),
+    type=Path,
 )
 @click.version_option()
 def cli(config_file):
     logger.info(f"Running dbt-bouncer ({version()})...")
 
     # Load config
-    config_path = Path(__file__).parent.parent / config_file
-    logger.debug(f"Loading config from {config_path}...")
     logger.info(f"Loading config from {config_file}...")
-    if not config_path.exists():  # Shouldn't be needed as click should have already checked this
-        raise FileNotFoundError(f"No config file found at {config_path}.")
+    if not config_file.exists():
+        raise FileNotFoundError(f"No config file found at {config_file}.")
 
-    bouncer_config = validate_config_file(file=config_path).model_dump()
+    bouncer_config = validate_config_file(file=config_file).model_dump()
     logger.debug(f"{bouncer_config=}")
 
     # Add indices to uniquely identify checks
@@ -50,7 +48,7 @@ def cli(config_file):
 
     # Load manifest
     manifest_json_path = (
-        config_path.parent / bouncer_config.get("dbt_artifacts_dir", "./target") / "manifest.json"
+        config_file.parent / bouncer_config.get("dbt_artifacts_dir", "./target") / "manifest.json"
     )
     logger.debug(f"Loading manifest.json from {manifest_json_path}...")
     logger.info(
