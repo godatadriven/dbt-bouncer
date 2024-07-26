@@ -39,6 +39,26 @@ def get_check_inputs(check_config=None, macro=None, model=None, request=None, so
     return {"check_config": check_config, "macro": macro, "model": model, "source": source}
 
 
+def make_markdown_table(array):
+    """
+    Transforms a list of lists into a markdown table. The first element is the header row.
+    """
+
+    nl = "\n"
+
+    markdown = nl
+    markdown += f"| {' | '.join(array[0])} |"
+
+    markdown += nl
+    markdown += f"| {' | '.join([':---']*len(array[0]))} |"
+
+    markdown += nl
+    for entry in array[1:]:
+        markdown += f"| {' | '.join(entry)} |{nl}"
+
+    return markdown
+
+
 def object_in_path(include_pattern: str, path: str) -> bool:
     """
     Determine if an object is included in the specified path pattern.

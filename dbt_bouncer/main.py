@@ -20,8 +20,15 @@ from dbt_bouncer.version import version
     required=False,
     type=click.Path(exists=True),
 )
+@click.option(
+    "--send-pr-comment",
+    default=False,
+    help="Send a comment to the GitHub PR with a list of failed checks. Defaults to True when run as a GitHub Action.",
+    required=False,
+    type=click.BOOL,
+)
 @click.version_option()
-def cli(config_file):
+def cli(config_file, send_pr_comment: bool):
     logger.info(f"Running dbt-bouncer ({version()})...")
 
     # Load config
@@ -99,6 +106,7 @@ def cli(config_file):
         macros=project_macros,
         manifest_obj=manifest_obj,
         models=project_models,
+        send_pr_comment=send_pr_comment,
         sources=project_sources,
         tests=project_tests,
     )

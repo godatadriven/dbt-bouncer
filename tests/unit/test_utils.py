@@ -1,6 +1,6 @@
 import pytest
 
-from dbt_bouncer.utils import flatten, object_in_path
+from dbt_bouncer.utils import flatten, make_markdown_table, object_in_path
 
 
 @pytest.mark.parametrize(
@@ -22,6 +22,84 @@ from dbt_bouncer.utils import flatten, object_in_path
 )
 def test_flatten(input, output):
     assert flatten(input) == output
+
+
+@pytest.mark.parametrize(
+    "input, output",
+    [
+        (
+            [
+                [
+                    "col_1",
+                ],
+                [
+                    "a",
+                ],
+                [
+                    "b",
+                ],
+            ],
+            """
+| col_1 |
+| :--- |
+| a |
+| b |
+""",
+        ),
+        (
+            [
+                [
+                    "col_1",
+                    "col_2",
+                ],
+                [
+                    "a",
+                    "1",
+                ],
+                [
+                    "b",
+                    "2",
+                ],
+            ],
+            """
+| col_1 | col_2 |
+| :--- | :--- |
+| a | 1 |
+| b | 2 |
+""",
+        ),
+        (
+            [
+                [
+                    "col_1",
+                    "col_2",
+                    "col_3",
+                ],
+                [
+                    "a",
+                    "1",
+                ],
+                [
+                    "b",
+                    "2",
+                ],
+                [
+                    "c",
+                    "3",
+                ],
+            ],
+            """
+| col_1 | col_2 | col_3 |
+| :--- | :--- | :--- |
+| a | 1 |
+| b | 2 |
+| c | 3 |
+""",
+        ),
+    ],
+)
+def test_make_markdown_table(input, output):
+    assert make_markdown_table(input) == output
 
 
 @pytest.mark.parametrize(
