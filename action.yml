@@ -5,6 +5,12 @@ inputs:
     default: 'dbt-bouncer.yml'
     description: 'Location of the YML config file.'
     required: false
+  send-pr-comment:
+    default: 'true'
+    description: |
+      true: Send a comment to the GitHub PR with a list of failed checks.
+      false: Do not send a comment.
+    required: false
 runs:
   using: composite
 
@@ -15,4 +21,5 @@ runs:
         docker run --rm \
           --volume "$GITHUB_WORKSPACE":/app \
           ghcr.io/godatadriven/dbt-bouncer:v0.0.0 \
-          --config-file /app/${{ inputs.config-file }}
+          --config-file /app/${{ inputs.config-file }} \
+          --send-pr-comment ${{ inputs.send-pr-comment }}
