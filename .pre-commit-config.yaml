@@ -14,7 +14,7 @@ repos:
           - id: debug-statements
           - id: detect-private-key
           - id: end-of-file-fixer
-            exclude: dbt_project/target/manifest.json,tests/fixtures/dbt_15/target/manifest.json,tests/fixtures/dbt_16/target/manifest.json,tests/fixtures/dbt_17/target/manifest.json,tests/fixtures/dbt_18/target/manifest.json
+            exclude: dbt_project/target/manifest.json,tests/fixtures/dbt_16/target/manifest.json,tests/fixtures/dbt_17/target/manifest.json,tests/fixtures/dbt_18/target/manifest.json
     - repo: local
       hooks:
           - id: isort
