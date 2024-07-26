@@ -8,12 +8,12 @@ from dbt_bouncer.utils import object_in_path
 
 
 class FixturePlugin(object):
-    def __init__(self):
-        self.macros_ = None
-        self.manifest_obj_ = None
-        self.models_ = None
-        self.sources_ = None
-        self.tests_ = None
+    def __init__(self, macros, manifest_obj, models, sources, tests):
+        self.macros_ = macros
+        self.manifest_obj_ = manifest_obj
+        self.models_ = models
+        self.sources_ = sources
+        self.tests_ = tests
 
     @pytest.fixture(scope="session")
     def macros(self):
