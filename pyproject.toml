@@ -42,7 +42,7 @@ license ="MIT"
 maintainers = ["Padraic Slattery <pgoslatara@gmail.com>"]
 name = "dbt-bouncer"
 packages = [
-    { include = "dbt_bouncer" },
+    {include = "dbt_bouncer", from = "src"},
 ]
 readme = "README.md"
 repository = "https://github.com/godatadriven/dbt-bouncer"
