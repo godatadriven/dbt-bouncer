@@ -2,7 +2,9 @@ from contextlib import nullcontext as does_not_raise
 
 import pytest
 
-from dbt_bouncer.checks.check_project_directories import check_top_level_directories
+from dbt_bouncer.checks.manifest.check_project_directories import (
+    check_top_level_directories,
+)
 
 
 @pytest.mark.parametrize(
