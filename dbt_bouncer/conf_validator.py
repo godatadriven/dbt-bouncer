@@ -1,55 +1,26 @@
 from pathlib import Path
-from typing import Any, Dict, List, Literal, Optional, Union
+from typing import List, Literal, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field
+from pydantic._internal._model_construction import ModelMetaclass
 from typing_extensions import Annotated
 
+from dbt_bouncer.checks.manifest.check_macros import *  # noqa
+from dbt_bouncer.checks.manifest.check_metadata import *  # noqa
+from dbt_bouncer.checks.manifest.check_models import *  # noqa
+from dbt_bouncer.checks.manifest.check_project_directories import *  # noqa
+from dbt_bouncer.checks.manifest.check_sources import *  # noqa
+from dbt_bouncer.config_validator_base import BaseCheck
 from dbt_bouncer.logger import logger
 
-
-class BaseCheck(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-    include: Optional[str] = Field(
-        default=None, description="Regexp to match which paths to include."
-    )
-
-
-class CheckMacroArgumentsDescriptionPopulated(BaseCheck):
-    name: Literal["check_macro_arguments_description_populated"]
-
-
-class CheckMacroDescriptionPopulated(BaseCheck):
-    name: Literal["check_macro_description_populated"]
-
-
-class CheckMacroNameMatchesFileName(BaseCheck):
-    name: Literal["check_macro_name_matches_file_name"]
-
-
-class CheckModelDescriptionPopulated(BaseCheck):
-    name: Literal["check_model_description_populated"]
-
-
-class CheckModelNames(BaseCheck):
-    model_config = ConfigDict(extra="forbid", protected_namespaces=())
-
-    name: Literal["check_model_names"]
-    model_name_pattern: str = Field(description="Regexp the model name must match.")
-
-
-class CheckProjectName(BaseCheck):
-    name: Literal["check_project_name"]
-    project_name_pattern: str = Field(description="Regexp the project name must match.")
-
-
-class CheckSourceHasMetaKeys(BaseCheck):
-    keys: Optional[Union[Dict[str, Any], List[Any]]]
-    name: Literal["check_source_has_meta_keys"]
-
-
-class CheckTopLevelDirectories(BaseCheck):
-    name: Literal["check_top_level_directories"]
+# Dynamically assemble all Check* classes
+manifest_check_classes = [
+    x for x in globals() if x.startswith("Check") and isinstance(globals()[x], ModelMetaclass)
+]
+ManifestCheckConfigs = Annotated[  # type: ignore[valid-type]
+    Union[tuple(manifest_check_classes)],
+    Field(discriminator="name"),
+]
 
 
 class CheckThatDoesntExistYet(BaseCheck):
@@ -65,22 +36,12 @@ class DbtBouncerConf(BaseModel):
             Field(discriminator="name"),
         ]
     ] = Field(default=[])
-    manifest_checks: List[
+    manifest_checks: List[  # type: ignore[valid-type]
         Annotated[
-            Union[
-                CheckMacroArgumentsDescriptionPopulated,
-                CheckMacroDescriptionPopulated,
-                CheckMacroNameMatchesFileName,
-                CheckModelDescriptionPopulated,
-                CheckModelNames,
-                CheckProjectName,
-                CheckSourceHasMetaKeys,
-                CheckTopLevelDirectories,
-            ],
+            ManifestCheckConfigs,
             Field(discriminator="name"),
         ]
     ] = Field(default=[])
-
     dbt_artifacts_dir: Optional[Path] = Field(alias="dbt-artifacts-dir", default=Path("./target"))
 
 

@@ -93,16 +93,17 @@ dbt-bouncer.pex --config-file $PWD/<PATH_TO_CONFIG_FILE>
 
 ## Python
 
-Install from [pypi.org](https://pypi.org/dbt-bouncer):
+Install from [pypi.org](https://pypi.org/p/dbt-bouncer):
 
 ```shell
 pip install dbt-bouncer
 ```
 
 Run:
+
 ```shell
 dbt-bouncer.pex --config-file $PWD/<PATH_TO_CONFIG_FILE>
-``
+```
 
 # Config file
 
