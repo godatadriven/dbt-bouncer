@@ -16,13 +16,12 @@ runs:
 
   steps:
     - name: Run dbt-bouncer
-      env:
-        GITHUB_REF: ${{ github.ref }}
-        GITHUB_REPOSITORY: ${{ github.repository }}
-        GITHUB_TOKEN: ${{ github.token }}
       shell: bash
       run: >
         docker run --rm \
+          --env GITHUB_REF='${{ github.ref }}' \
+          --env GITHUB_REPOSITORY='${{ github.repository }}' \
+          --env GITHUB_TOKEN='${{ github.token }}' \
           --volume "$GITHUB_WORKSPACE":/app \
           ghcr.io/godatadriven/dbt-bouncer:v0.0.0 \
           --config-file /app/${{ inputs.config-file }} \
