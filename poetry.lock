@@ -1725,13 +1725,13 @@ files = [
 
 [[package]]
 name = "shandy-sqlfmt"
-version = "0.22.0"
+version = "0.23.2"
 description = "sqlfmt formats your dbt SQL files so you don't have to."
 optional = false
 python-versions = "<4.0,>=3.8"
 files = [
-    {file = "shandy_sqlfmt-0.22.0-py3-none-any.whl", hash = "sha256:ecb37c26d4e00df082396c6a45d94cd3dbc2f309291e6b6bae93c0e0dd76b052"},
-    {file = "shandy_sqlfmt-0.22.0.tar.gz", hash = "sha256:f3fd0a9e5fffaed29240e0b6fab3f3b03029cbcab4663b873781cee07a247aa1"},
+    {file = "shandy_sqlfmt-0.23.2-py3-none-any.whl", hash = "sha256:31181541982cfbd3fccc2c8e033e8cb079197d41bf00f788341f5f0910f3361c"},
+    {file = "shandy_sqlfmt-0.23.2.tar.gz", hash = "sha256:dd141c363ac57ffd2deb904e4d470fd69bc85fb8b51d9df2b204c95199af5034"},
 ]
 
 [package.dependencies]
@@ -1904,4 +1904,4 @@ test = ["big-O", "importlib-resources", "jaraco.functools", "jaraco.itertools", 
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8.1,<3.13"
-content-hash = "0c95e778d3a80a99dc478a3ec7df47909427950c43c9ba2133e29e0af73d4112"
+content-hash = "bd25e64619c7f1808a20530ba86b1542f8e97357aeb3559338b086d590c75d9c"
