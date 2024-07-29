@@ -1,10 +1,10 @@
 import logging
 
 from click.testing import CliRunner
+from pytest_helpers import catch_logs, records_to_tuples
 
 from dbt_bouncer.logger import logger
 from dbt_bouncer.main import cli
-from pytest_helpers import catch_logs, records_to_tuples
 
 
 def test_logger_debug() -> None:
@@ -17,7 +17,6 @@ def test_logger_debug() -> None:
                 "dbt-bouncer-example.yml",
             ],
         )
-        print(records_to_tuples(handler.records))
 
         assert (
             len(

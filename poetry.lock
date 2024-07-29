@@ -1169,13 +1169,13 @@ files = [
 
 [[package]]
 name = "pex"
-version = "2.12.0"
+version = "2.12.1"
 description = "The PEX packaging toolchain."
 optional = false
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,<3.14,>=2.7"
 files = [
-    {file = "pex-2.12.0-py2.py3-none-any.whl", hash = "sha256:78a564eb8c242f236ad86e9f8b28d54b1922f26fa26cd3875bd10471f190e501"},
-    {file = "pex-2.12.0.tar.gz", hash = "sha256:68882ddf98814a834eb2485b6ad5590faf6474845b877534dbcb54bf632606ab"},
+    {file = "pex-2.12.1-py2.py3-none-any.whl", hash = "sha256:d219171777c728b8dc315bd5516c31003e868512e8b2bfedcd8de89ab947a74a"},
+    {file = "pex-2.12.1.tar.gz", hash = "sha256:2810fdb11aad413d3645fc97bab5221b2dbc6ee701ee5fe2ac5fdf3e655e1b07"},
 ]
 
 [package.extras]
@@ -1725,13 +1725,13 @@ files = [
 
 [[package]]
 name = "shandy-sqlfmt"
-version = "0.21.4"
+version = "0.23.2"
 description = "sqlfmt formats your dbt SQL files so you don't have to."
 optional = false
 python-versions = "<4.0,>=3.8"
 files = [
-    {file = "shandy_sqlfmt-0.21.4-py3-none-any.whl", hash = "sha256:992f1a7d9b50c4dfdb95a5601b67010ffc274591b10304163c9aad4e38b52099"},
-    {file = "shandy_sqlfmt-0.21.4.tar.gz", hash = "sha256:165c96d1c2d13043ab7fb5555910dadc40d80c31c6bc968b1584988c660d1544"},
+    {file = "shandy_sqlfmt-0.23.2-py3-none-any.whl", hash = "sha256:31181541982cfbd3fccc2c8e033e8cb079197d41bf00f788341f5f0910f3361c"},
+    {file = "shandy_sqlfmt-0.23.2.tar.gz", hash = "sha256:dd141c363ac57ffd2deb904e4d470fd69bc85fb8b51d9df2b204c95199af5034"},
 ]
 
 [package.dependencies]
@@ -1794,6 +1794,17 @@ python-versions = "*"
 files = [
     {file = "text-unidecode-1.3.tar.gz", hash = "sha256:bad6603bb14d279193107714b288be206cac565dfa49aa5b105294dd5c4aab93"},
     {file = "text_unidecode-1.3-py2.py3-none-any.whl", hash = "sha256:1311f10e8b895935241623731c2ba64f4c455287888b18189350b67134a822e8"},
+]
+
+[[package]]
+name = "toml"
+version = "0.10.2"
+description = "Python Library for Tom's Obvious, Minimal Language"
+optional = false
+python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
+files = [
+    {file = "toml-0.10.2-py2.py3-none-any.whl", hash = "sha256:806143ae5bfb6a3c6e736a764057db0e6a0e05e338b5630894a5f779cabb4f9b"},
+    {file = "toml-0.10.2.tar.gz", hash = "sha256:b3bda1d108d5dd99f4a20d24d9c348e91c4db7ab1b749200bded2f839ccbe68f"},
 ]
 
 [[package]]
@@ -1904,4 +1915,4 @@ test = ["big-O", "importlib-resources", "jaraco.functools", "jaraco.itertools", 
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8.1,<3.13"
-content-hash = "8750fb80a6d1edaaba237e628cfaf0a366beccc30ba26378e68e33439ca00114"
+content-hash = "18bba778791b33a4e75132e67a392aad19c6ca4b2ee432f2804af424afb55601"

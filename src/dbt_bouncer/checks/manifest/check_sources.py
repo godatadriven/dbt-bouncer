@@ -1,8 +1,15 @@
 import re
+from typing import Any, Dict, List, Literal, Optional, Union
 
 import pytest
 
+from dbt_bouncer.conf_validator_base import BaseCheck
 from dbt_bouncer.utils import flatten, get_check_inputs
+
+
+class CheckSourceHasMetaKeys(BaseCheck):
+    keys: Optional[Union[Dict[str, Any], List[Any]]]
+    name: Literal["check_source_has_meta_keys"]
 
 
 @pytest.mark.iterate_over_sources

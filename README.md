@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./images/logo.webp" alt="dbt-bouncer logo" width="500"/>
+  <img src="https://github.com/godatadriven/dbt-bouncer/raw/main/images/logo.webp" alt="dbt-bouncer logo" width="500"/>
 </p>
 
 
@@ -54,7 +54,7 @@
 
 1. Generate a `manifest.json` by running `dbt parse`.
 1. Create a `dbt-bouncer.yml` config file, details [here](#config-file).
-1. Run `dbt-bouncer` to validate that your conventions are being maintained. You can use GitHub Actions, Docker or a `.pex` file to run `dbt-bouncer`.
+1. Run `dbt-bouncer` to validate that your conventions are being maintained. You can use GitHub Actions, Docker, a `.pex` file or python to run `dbt-bouncer`.
 
 ## GitHub Actions
 
@@ -65,6 +65,7 @@ steps:
     - uses: godatadriven/dbt-bouncer@v0
       with:
         config-file: ./<PATH_TO_CONFIG_FILE>
+        send-pr-comment: true # optional, defaults to true
 
     ...
 ```
@@ -90,6 +91,19 @@ wget https://github.com/godatadriven/dbt-bouncer/releases/download/vX.X.X/dbt-bo
 dbt-bouncer.pex --config-file $PWD/<PATH_TO_CONFIG_FILE>
 ```
 
+## Python
+
+Install from [pypi.org](https://pypi.org/dbt-bouncer):
+
+```shell
+pip install dbt-bouncer
+```
+
+Run:
+```shell
+dbt-bouncer.pex --config-file $PWD/<PATH_TO_CONFIG_FILE>
+``
+
 # Config file
 
 `dbt-bouncer` requires a config file to be provided. This file configures what checks are run. Here is an example config file:
@@ -97,7 +111,7 @@ dbt-bouncer.pex --config-file $PWD/<PATH_TO_CONFIG_FILE>
 ```yaml
 dbt-artifacts-dir: target # [Optional] Directory where the dbt artifacts exists, generally the `target` directory inside a dbt project. Defaults to `./target`.
 
-checks:
+manifest_checks:
   - name: check_macro_name_matches_file_name
   - name: check_model_names
     include: ^staging

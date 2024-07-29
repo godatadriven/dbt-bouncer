@@ -6,9 +6,10 @@ from typing import Dict, List
 import click
 from dbt_artifacts_parser.parser import parse_manifest
 
-from dbt_bouncer.config_validator import validate_config_file
+from dbt_bouncer.conf_validator import validate_conf
 from dbt_bouncer.logger import logger
 from dbt_bouncer.runner import runner
+from dbt_bouncer.utils import get_dbt_bouncer_config
 from dbt_bouncer.version import version
 
 
@@ -20,26 +21,35 @@ from dbt_bouncer.version import version
     required=False,
     type=Path,
 )
+@click.option(
+    "--send-pr-comment",
+    default=False,
+    help="Send a comment to the GitHub PR with a list of failed checks. Defaults to True when run as a GitHub Action.",
+    required=False,
+    type=click.BOOL,
+)
 @click.version_option()
-def cli(config_file):
+def cli(config_file, send_pr_comment: bool):
     logger.info(f"Running dbt-bouncer ({version()})...")
 
-    # Load config
-    logger.info(f"Loading config from {config_file}...")
-    if not config_file.exists():
-        raise FileNotFoundError(f"No config file found at {config_file}.")
-
-    bouncer_config = validate_config_file(file=config_file).model_dump()
+    conf = get_dbt_bouncer_config(
+        config_file=config_file,
+        config_file_source=click.get_current_context().get_parameter_source("config_file").name,  # type: ignore[union-attr]
+    )
+    logger.debug(f"{conf=}")
+    bouncer_config = validate_conf(conf=conf).model_dump()
     logger.debug(f"{bouncer_config=}")
 
     # Add indices to uniquely identify checks
-    for idx, c in enumerate(bouncer_config["checks"]):
-        c["index"] = idx
+    for k in bouncer_config.keys():
+        if k.endswith("_checks"):
+            for idx, c in enumerate(bouncer_config[k]):
+                c["index"] = idx
 
     config: Dict[str, List[Dict[str, str]]] = {}
-    for check_name in set([c["name"] for c in bouncer_config["checks"]]):
+    for check_name in set([c["name"] for c in bouncer_config["manifest_checks"]]):
         config[check_name] = []
-        for check in bouncer_config["checks"]:
+        for check in bouncer_config["manifest_checks"]:
             if check["name"] == check_name:
                 config[check_name].append(
                     {k: check[k] for k in set(list(check.keys())) - set(["name"])}
@@ -48,7 +58,9 @@ def cli(config_file):
 
     # Load manifest
     manifest_json_path = (
-        config_file.parent / bouncer_config.get("dbt_artifacts_dir", "./target") / "manifest.json"
+        (Path(__file__).parent.parent.parent / config_file).parent
+        / bouncer_config.get("dbt_artifacts_dir", "./target")
+        / "manifest.json"
     )
     logger.debug(f"Loading manifest.json from {manifest_json_path}...")
     logger.info(
@@ -97,6 +109,7 @@ def cli(config_file):
         macros=project_macros,
         manifest_obj=manifest_obj,
         models=project_models,
+        send_pr_comment=send_pr_comment,
         sources=project_sources,
         tests=project_tests,
     )
