@@ -3,7 +3,7 @@ from typing import Literal
 
 from pydantic import Field
 
-from dbt_bouncer.config_validator_base import BaseCheck
+from dbt_bouncer.conf_validator_base import BaseCheck
 from dbt_bouncer.utils import get_check_inputs
 
 

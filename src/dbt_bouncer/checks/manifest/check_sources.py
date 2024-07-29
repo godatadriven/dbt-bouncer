@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Literal, Optional, Union
 
 import pytest
 
-from dbt_bouncer.config_validator_base import BaseCheck
+from dbt_bouncer.conf_validator_base import BaseCheck
 from dbt_bouncer.utils import flatten, get_check_inputs
 
 

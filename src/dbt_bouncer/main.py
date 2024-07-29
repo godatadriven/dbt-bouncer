@@ -19,7 +19,7 @@ from dbt_bouncer.version import version
     default=Path("dbt-bouncer.yml"),
     help="Location of the YML config file.",
     required=False,
-    type=click.Path(exists=False),
+    type=Path,
 )
 @click.option(
     "--send-pr-comment",
@@ -58,7 +58,7 @@ def cli(config_file, send_pr_comment: bool):
 
     # Load manifest
     manifest_json_path = (
-        (Path(__file__).parent.parent / config_file).parent
+        (Path(__file__).parent.parent.parent / config_file).parent
         / bouncer_config.get("dbt_artifacts_dir", "./target")
         / "manifest.json"
     )

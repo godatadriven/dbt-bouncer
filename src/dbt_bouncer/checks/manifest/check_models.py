@@ -4,7 +4,7 @@ from typing import Literal
 import pytest
 from pydantic import ConfigDict, Field
 
-from dbt_bouncer.config_validator_base import BaseCheck
+from dbt_bouncer.conf_validator_base import BaseCheck
 from dbt_bouncer.utils import get_check_inputs
 
 

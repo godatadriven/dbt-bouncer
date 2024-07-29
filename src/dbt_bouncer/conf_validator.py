@@ -10,7 +10,7 @@ from dbt_bouncer.checks.manifest.check_metadata import *  # noqa
 from dbt_bouncer.checks.manifest.check_models import *  # noqa
 from dbt_bouncer.checks.manifest.check_project_directories import *  # noqa
 from dbt_bouncer.checks.manifest.check_sources import *  # noqa
-from dbt_bouncer.config_validator_base import BaseCheck
+from dbt_bouncer.conf_validator_base import BaseCheck
 from dbt_bouncer.logger import logger
 
 # Dynamically assemble all Check* classes

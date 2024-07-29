@@ -28,9 +28,7 @@ def runner(
     """
 
     # Create a fixture plugin that can be used to inject the manifest into the checks
-    fixtures = FixturePlugin()
-    for att in ["macros", "manifest_obj", "models", "sources", "tests"]:
-        setattr(fixtures, att + "_", locals()[att])
+    fixtures = FixturePlugin(macros, manifest_obj, models, sources, tests)
 
     # Run the checks, if one fails then pytest will raise an exception
     collector = ResultsCollector()

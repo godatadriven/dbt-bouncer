@@ -93,7 +93,7 @@ def get_dbt_bouncer_config(config_file: str, config_file_source: str):
 
 def load_config_from_yaml(config_file):
 
-    config_path = Path(__file__).parent.parent / config_file
+    config_path = Path(__file__).parent.parent.parent / config_file
     logger.debug(f"Loading config from {config_path}...")
     logger.debug(f"Loading config from {config_file}...")
     if not config_path.exists():  # Shouldn't be needed as click should have already checked this

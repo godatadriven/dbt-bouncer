@@ -30,7 +30,7 @@ test_integration:
 		-c ./tests \
 		--junitxml=coverage.xml \
 		--cov-report=term-missing:skip-covered \
-		--cov=dbt_bouncer/ \
+		--cov=src/dbt_bouncer/ \
 		--numprocesses 5 \
 		./tests/integration \
 		$(MAKE_ARGS)
@@ -40,6 +40,6 @@ test_unit:
 		-c ./tests \
 		--junitxml=coverage.xml \
 		--cov-report=term-missing:skip-covered \
-		--cov=dbt_bouncer/ \
+		--cov=src/dbt_bouncer/ \
 		--numprocesses 5 \
 		./tests/unit
