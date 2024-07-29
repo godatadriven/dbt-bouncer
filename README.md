@@ -54,7 +54,7 @@
 
 1. Generate a `manifest.json` by running `dbt parse`.
 1. Create a `dbt-bouncer.yml` config file, details [here](#config-file).
-1. Run `dbt-bouncer` to validate that your conventions are being maintained. You can use GitHub Actions, Docker or a `.pex` file to run `dbt-bouncer`.
+1. Run `dbt-bouncer` to validate that your conventions are being maintained. You can use GitHub Actions, Docker, a `.pex` file or python to run `dbt-bouncer`.
 
 ## GitHub Actions
 
@@ -90,6 +90,19 @@ wget https://github.com/godatadriven/dbt-bouncer/releases/download/vX.X.X/dbt-bo
 
 dbt-bouncer.pex --config-file $PWD/<PATH_TO_CONFIG_FILE>
 ```
+
+## Python
+
+Install from [pypi.org](https://pypi.org/dbt-bouncer):
+
+```shell
+pip install dbt-bouncer
+```
+
+Run:
+```shell
+dbt-bouncer.pex --config-file $PWD/<PATH_TO_CONFIG_FILE>
+``
 
 # Config file
 
