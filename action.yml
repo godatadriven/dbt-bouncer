@@ -24,6 +24,6 @@ runs:
       run: >
         docker run --rm \
           --volume "$GITHUB_WORKSPACE":/app \
-          ghcr.io/godatadriven/dbt-bouncer:v0.0.0 \
+          ghcr.io/godatadriven/dbt-bouncer:v0.14.2 \
           --config-file /app/${{ inputs.config-file }} \
           --send-pr-comment ${{ inputs.send-pr-comment }}
