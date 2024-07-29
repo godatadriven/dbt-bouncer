@@ -23,6 +23,6 @@ runs:
           --env GITHUB_REPOSITORY='${{ github.repository }}' \
           --env GITHUB_TOKEN='${{ github.token }}' \
           --volume "$GITHUB_WORKSPACE":/app \
-          ghcr.io/godatadriven/dbt-bouncer:v0.0.0 \
+          ghcr.io/godatadriven/dbt-bouncer:v0.14.4 \
           --config-file /app/${{ inputs.config-file }} \
           --send-pr-comment ${{ inputs.send-pr-comment }}
