@@ -1,3 +1,6 @@
+catalog_checks:
+  - name: check_that_doesnt_exist_yet
+
 manifest_checks:
   - name: check_model_names
     include: ^intermediate

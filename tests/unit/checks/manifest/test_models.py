@@ -2,7 +2,7 @@ from contextlib import nullcontext as does_not_raise
 
 import pytest
 
-from dbt_bouncer.checks.check_models import (
+from dbt_bouncer.checks.manifest.check_models import (
     check_model_description_populated,
     check_model_names,
 )

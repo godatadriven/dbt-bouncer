@@ -18,7 +18,7 @@ def test_github_api_connection():
     """
 
     response = call_github_api(
-        endpoint="user",  # Unfortunately this endpoint doesn't return a `success` key,
+        endpoint="repos/godatadriven/dbt-bouncer",  # Unfortunately this endpoint doesn't return a `success` key,
         method="GET",
     )
     logger.warning(response)

@@ -2,7 +2,7 @@ from contextlib import nullcontext as does_not_raise
 
 import pytest
 
-from dbt_bouncer.checks.check_metadata import check_project_name
+from dbt_bouncer.checks.manifest.check_metadata import check_project_name
 
 
 @pytest.mark.parametrize(
