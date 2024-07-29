@@ -17,6 +17,17 @@ exclude = '''
 )/
 '''
 
+[tool.dbt-bouncer]
+dbt-artifacts-dir = "dbt_project/target"
+
+[[tool.dbt-bouncer.manifest_checks]]
+name = "check_top_level_directories"
+
+[[tool.dbt-bouncer.manifest_checks]]
+name = "check_model_names"
+include = "^staging"
+model_name_pattern = "^stg_"
+
 [tool.isort]
 profile = "black"
 
@@ -73,12 +84,13 @@ pytest = "<9"
 pyyaml = "<7"
 requests = "^2"
 tabulate = "^0"
+toml = "^0"
 
 [tool.poetry.group.dev.dependencies]
 autoflake = "^2"
 black = "^24"
-dbt-core="^1"
-dbt-duckdb="^1"
+dbt-core = "^1"
+dbt-duckdb = "^1"
 isort = "^5"
 mypy = "^1"
 pex = "^2"
@@ -95,5 +107,5 @@ dbt-bouncer = "dbt_bouncer.main:cli"
 [tool.poetry_bumpversion.file."action.yml"]
 
 [build-system]
-requires = ["poetry-core>=1.6.0"]
+requires = ["poetry-core>=1.9.0"]
 build-backend = "poetry.core.masonry.api"
