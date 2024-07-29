@@ -175,6 +175,7 @@ dbt_project/target/run_results.json
 dbt_project/target/semantic_manifest.json
 dbt_project/.user.yml
 dbt_project/package-lock.yml
+dist_pypi/
 tests/fixtures/dbt_16/target/graph_summary.json
 tests/fixtures/dbt_16/target/graph.gpickle
 tests/fixtures/dbt_16/target/partial_parse.msgpack
