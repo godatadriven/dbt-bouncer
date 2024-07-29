@@ -50,6 +50,16 @@ def test_cli_happy_path(caplog, dbt_artifacts_dir, tmp_path):
     assert result.exit_code == 0
 
 
+def test_cli_happy_path_pyproject_toml(caplog):
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+    )
+
+    assert "Loading config from pyproject.toml, if exists..." in caplog.text
+    assert result.exit_code != 1
+
+
 @pytest.mark.parametrize(
     "cli_args",
     [
@@ -70,7 +80,7 @@ def test_cli_unhappy_path(cli_args):
     assert result.exit_code != 0
 
 
-def test_cli_config_doesnt_exist():
+def test_cli_config_file_doesnt_exist():
     runner = CliRunner()
     result = runner.invoke(
         cli,
@@ -79,7 +89,7 @@ def test_cli_config_doesnt_exist():
             "non-existent-file.yml",
         ],
     )
-    assert type(result.exception) in [SystemExit]
+    assert type(result.exception) in [FileNotFoundError]
     assert result.exit_code != 0
 
 

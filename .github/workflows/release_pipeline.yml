@@ -16,12 +16,15 @@
 
   env:
     IMAGE_NAME: ${{ github.repository }}
-    POETRY_VERSION: "1.7.1"
+    POETRY_VERSION: "1.8.3"
     POETRY_VIRTUALENVS_IN_PROJECT: true
     REGISTRY: ghcr.io
 
   jobs:
       build-and-push-image:
+          environment:
+              name: publish
+              url: https://pypi.org/p/dbt-cloud-jobs
           runs-on: ubuntu-latest
           permissions:
               contents: write
@@ -137,6 +140,12 @@
                     load: false
                     push: true
                     tags: ${{ steps.meta.outputs.tags }}
+
+              - name: Build whl
+                run: poetry build
+
+              - name: Publish package distributions to PyPI
+                uses: pypa/gh-action-pypi-publish@release/v1
 
               - name: Create release
                 env:

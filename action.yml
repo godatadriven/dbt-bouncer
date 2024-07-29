@@ -16,6 +16,10 @@ runs:
 
   steps:
     - name: Run dbt-bouncer
+      env:
+        GITHUB_REF: ${{ github.ref }}
+        GITHUB_REPOSITORY: ${{ github.repository }}
+        GITHUB_TOKEN: ${{ github.token }}
       shell: bash
       run: >
         docker run --rm \
