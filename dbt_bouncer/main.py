@@ -6,9 +6,10 @@ from typing import Dict, List
 import click
 from dbt_artifacts_parser.parser import parse_manifest
 
-from dbt_bouncer.config_validator import validate_config_file
+from dbt_bouncer.conf_validator import validate_conf
 from dbt_bouncer.logger import logger
 from dbt_bouncer.runner import runner
+from dbt_bouncer.utils import get_dbt_bouncer_config
 from dbt_bouncer.version import version
 
 
@@ -18,7 +19,7 @@ from dbt_bouncer.version import version
     default=Path("dbt-bouncer.yml"),
     help="Location of the YML config file.",
     required=False,
-    type=click.Path(exists=True),
+    type=click.Path(exists=False),
 )
 @click.option(
     "--send-pr-comment",
@@ -31,14 +32,12 @@ from dbt_bouncer.version import version
 def cli(config_file, send_pr_comment: bool):
     logger.info(f"Running dbt-bouncer ({version()})...")
 
-    # Load config
-    config_path = Path(__file__).parent.parent / config_file
-    logger.debug(f"Loading config from {config_path}...")
-    logger.info(f"Loading config from {config_file}...")
-    if not config_path.exists():  # Shouldn't be needed as click should have already checked this
-        raise FileNotFoundError(f"No config file found at {config_path}.")
-
-    bouncer_config = validate_config_file(file=config_path).model_dump()
+    conf = get_dbt_bouncer_config(
+        config_file=config_file,
+        config_file_source=click.get_current_context().get_parameter_source("config_file").name,  # type: ignore[union-attr]
+    )
+    logger.debug(f"{conf=}")
+    bouncer_config = validate_conf(conf=conf).model_dump()
     logger.debug(f"{bouncer_config=}")
 
     # Add indices to uniquely identify checks
@@ -57,7 +56,9 @@ def cli(config_file, send_pr_comment: bool):
 
     # Load manifest
     manifest_json_path = (
-        config_path.parent / bouncer_config.get("dbt_artifacts_dir", "./target") / "manifest.json"
+        (Path(__file__).parent.parent / config_file).parent
+        / bouncer_config.get("dbt_artifacts_dir", "./target")
+        / "manifest.json"
     )
     logger.debug(f"Loading manifest.json from {manifest_json_path}...")
     logger.info(

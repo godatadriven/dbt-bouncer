@@ -1,7 +1,6 @@
 from pathlib import Path
 from typing import Any, Dict, List, Literal, Optional, Union
 
-import yaml
 from pydantic import BaseModel, ConfigDict, Field
 from typing_extensions import Annotated
 
@@ -68,16 +67,14 @@ CheckConfigs = Annotated[
 ]
 
 
-class DbtBouncerConfigFile(BaseModel):
+class DbtBouncerConf(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     checks: List[CheckConfigs]
     dbt_artifacts_dir: Optional[Path] = Field(alias="dbt-artifacts-dir", default=Path("./target"))
 
 
-def validate_config_file(file: Path) -> DbtBouncerConfigFile:
-    logger.info("Validating config file...")
-    with Path.open(file, "r") as f:
-        definitions = yaml.safe_load(f)
+def validate_conf(conf) -> DbtBouncerConf:
+    logger.info("Validating conf...")
 
-    return DbtBouncerConfigFile(**definitions)
+    return DbtBouncerConf(**conf)

@@ -17,6 +17,17 @@ exclude = '''
 )/
 '''
 
+[tool.dbt-bouncer]
+dbt-artifacts-dir = "dbt_project/target"
+
+[[tool.dbt-bouncer.checks]]
+name = "check_top_level_directories"
+
+[[tool.dbt-bouncer.checks]]
+name = "check_model_names"
+include = "^staging"
+model_name_pattern = "^stg_"
+
 [tool.isort]
 profile = "black"
 
@@ -57,6 +68,7 @@ pytest = "^8"
 pyyaml = "^6"
 requests = "^2"
 tabulate = "^0"
+toml = "^0"
 
 [tool.poetry.group.dev.dependencies]
 autoflake = "^2"
