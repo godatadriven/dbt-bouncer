@@ -41,13 +41,15 @@ def cli(config_file, send_pr_comment: bool):
     logger.debug(f"{bouncer_config=}")
 
     # Add indices to uniquely identify checks
-    for idx, c in enumerate(bouncer_config["checks"]):
-        c["index"] = idx
+    for k in bouncer_config.keys():
+        if k.endswith("_checks"):
+            for idx, c in enumerate(bouncer_config[k]):
+                c["index"] = idx
 
     config: Dict[str, List[Dict[str, str]]] = {}
-    for check_name in set([c["name"] for c in bouncer_config["checks"]]):
+    for check_name in set([c["name"] for c in bouncer_config["manifest_checks"]]):
         config[check_name] = []
-        for check in bouncer_config["checks"]:
+        for check in bouncer_config["manifest_checks"]:
             if check["name"] == check_name:
                 config[check_name].append(
                     {k: check[k] for k in set(list(check.keys())) - set(["name"])}

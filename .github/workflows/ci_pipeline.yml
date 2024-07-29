@@ -11,6 +11,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   IMAGE_NAME: ${{ github.repository }}
   POETRY_VERSION: "1.8.3"
   POETRY_VIRTUALENVS_IN_PROJECT: true

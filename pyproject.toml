@@ -20,10 +20,10 @@ exclude = '''
 [tool.dbt-bouncer]
 dbt-artifacts-dir = "dbt_project/target"
 
-[[tool.dbt-bouncer.checks]]
+[[tool.dbt-bouncer.manifest_checks]]
 name = "check_top_level_directories"
 
-[[tool.dbt-bouncer.checks]]
+[[tool.dbt-bouncer.manifest_checks]]
 name = "check_model_names"
 include = "^staging"
 model_name_pattern = "^stg_"
@@ -48,7 +48,23 @@ module = "dbt_artifacts_parser.*"
 
 [tool.poetry]
 authors = ["Padraic Slattery <pgoslatara@gmail.com>"]
+classifiers = [
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+]
 description = "Configure and enforce conventions for your dbt project."
+keywords = [
+  "python",
+  "cli",
+  "dbt",
+  "CI/CD",
+]
 license ="MIT"
 maintainers = ["Padraic Slattery <pgoslatara@gmail.com>"]
 name = "dbt-bouncer"
@@ -61,11 +77,11 @@ version = "0.0.0"
 
 [tool.poetry.dependencies]
 python = ">=3.8.1,<3.13"
-click = "^8"
+click = "<9"
 dbt-artifacts-parser = "^0"
 pydantic = "^2"
-pytest = "^8"
-pyyaml = "^6"
+pytest = "<9"
+pyyaml = "<7"
 requests = "^2"
 tabulate = "^0"
 toml = "^0"

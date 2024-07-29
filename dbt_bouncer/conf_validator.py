@@ -52,25 +52,35 @@ class CheckTopLevelDirectories(BaseCheck):
     name: Literal["check_top_level_directories"]
 
 
-CheckConfigs = Annotated[
-    Union[
-        CheckMacroArgumentsDescriptionPopulated,
-        CheckMacroDescriptionPopulated,
-        CheckMacroNameMatchesFileName,
-        CheckModelDescriptionPopulated,
-        CheckModelNames,
-        CheckProjectName,
-        CheckSourceHasMetaKeys,
-        CheckTopLevelDirectories,
-    ],
-    Field(discriminator="name"),
-]
+class CheckThatDoesntExistYet(BaseCheck):
+    name: Literal["check_that_doesnt_exist_yet"]
 
 
 class DbtBouncerConf(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    checks: List[CheckConfigs]
+    catalog_checks: List[
+        Annotated[
+            Union[CheckThatDoesntExistYet,],
+            Field(discriminator="name"),
+        ]
+    ] = Field(default=[])
+    manifest_checks: List[
+        Annotated[
+            Union[
+                CheckMacroArgumentsDescriptionPopulated,
+                CheckMacroDescriptionPopulated,
+                CheckMacroNameMatchesFileName,
+                CheckModelDescriptionPopulated,
+                CheckModelNames,
+                CheckProjectName,
+                CheckSourceHasMetaKeys,
+                CheckTopLevelDirectories,
+            ],
+            Field(discriminator="name"),
+        ]
+    ] = Field(default=[])
+
     dbt_artifacts_dir: Optional[Path] = Field(alias="dbt-artifacts-dir", default=Path("./target"))
 
 
