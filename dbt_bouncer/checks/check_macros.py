@@ -1,6 +1,13 @@
+from typing import Literal
+
 import pytest
 
+from dbt_bouncer.config_validator_base import BaseCheck
 from dbt_bouncer.utils import get_check_inputs
+
+
+class CheckMacroArgumentsDescriptionPopulated(BaseCheck):
+    name: Literal["check_macro_arguments_description_populated"]
 
 
 @pytest.mark.iterate_over_macros
@@ -16,6 +23,10 @@ def check_macro_arguments_description_populated(request, check_config=None, macr
         ), f"Argument {arg['name']} in {macro['unique_id']} does not have a populated description."
 
 
+class CheckMacroDescriptionPopulated(BaseCheck):
+    name: Literal["check_macro_description_populated"]
+
+
 @pytest.mark.iterate_over_macros
 def check_macro_description_populated(request, check_config=None, macro=None) -> None:
     """
@@ -26,6 +37,10 @@ def check_macro_description_populated(request, check_config=None, macro=None) ->
     assert (
         len(macro["description"].strip()) > 4
     ), f"{macro['unique_id']} does not have a populated description."
+
+
+class CheckMacroNameMatchesFileName(BaseCheck):
+    name: Literal["check_macro_name_matches_file_name"]
 
 
 @pytest.mark.iterate_over_macros

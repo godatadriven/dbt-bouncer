@@ -1,6 +1,15 @@
 import re
+from typing import Literal
 
+from pydantic import Field
+
+from dbt_bouncer.config_validator_base import BaseCheck
 from dbt_bouncer.utils import get_check_inputs
+
+
+class CheckProjectName(BaseCheck):
+    name: Literal["check_project_name"]
+    project_name_pattern: str = Field(description="Regexp the project name must match.")
 
 
 def check_project_name(manifest_obj, request, check_config=None):

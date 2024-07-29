@@ -1,69 +1,25 @@
 from pathlib import Path
-from typing import Any, Dict, List, Literal, Optional, Union
+from typing import List, Optional, Union
 
 import yaml
 from pydantic import BaseModel, ConfigDict, Field
+from pydantic._internal._model_construction import ModelMetaclass
 from typing_extensions import Annotated
 
+from dbt_bouncer.checks.check_macros import *  # noqa
+from dbt_bouncer.checks.check_metadata import *  # noqa
+from dbt_bouncer.checks.check_models import *  # noqa
+from dbt_bouncer.checks.check_project_directories import *  # noqa
+from dbt_bouncer.checks.check_sources import *  # noqa
 from dbt_bouncer.logger import logger
 
+# Dynamically assemble all Check* classes
+check_classes = [
+    x for x in globals() if x.startswith("Check") and isinstance(globals()[x], ModelMetaclass)
+]
 
-class BaseCheck(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-    include: Optional[str] = Field(
-        default=None, description="Regexp to match which paths to include."
-    )
-
-
-class CheckMacroArgumentsDescriptionPopulated(BaseCheck):
-    name: Literal["check_macro_arguments_description_populated"]
-
-
-class CheckMacroDescriptionPopulated(BaseCheck):
-    name: Literal["check_macro_description_populated"]
-
-
-class CheckMacroNameMatchesFileName(BaseCheck):
-    name: Literal["check_macro_name_matches_file_name"]
-
-
-class CheckModelDescriptionPopulated(BaseCheck):
-    name: Literal["check_model_description_populated"]
-
-
-class CheckModelNames(BaseCheck):
-    model_config = ConfigDict(extra="forbid", protected_namespaces=())
-
-    name: Literal["check_model_names"]
-    model_name_pattern: str = Field(description="Regexp the model name must match.")
-
-
-class CheckProjectName(BaseCheck):
-    name: Literal["check_project_name"]
-    project_name_pattern: str = Field(description="Regexp the project name must match.")
-
-
-class CheckSourceHasMetaKeys(BaseCheck):
-    keys: Optional[Union[Dict[str, Any], List[Any]]]
-    name: Literal["check_source_has_meta_keys"]
-
-
-class CheckTopLevelDirectories(BaseCheck):
-    name: Literal["check_top_level_directories"]
-
-
-CheckConfigs = Annotated[
-    Union[
-        CheckMacroArgumentsDescriptionPopulated,
-        CheckMacroDescriptionPopulated,
-        CheckMacroNameMatchesFileName,
-        CheckModelDescriptionPopulated,
-        CheckModelNames,
-        CheckProjectName,
-        CheckSourceHasMetaKeys,
-        CheckTopLevelDirectories,
-    ],
+CheckConfigs = Annotated[  # type: ignore[valid-type]
+    Union[tuple(check_classes)],
     Field(discriminator="name"),
 ]
 
@@ -71,7 +27,7 @@ CheckConfigs = Annotated[
 class DbtBouncerConfigFile(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    checks: List[CheckConfigs]
+    checks: List[CheckConfigs]  # type: ignore[valid-type]
     dbt_artifacts_dir: Optional[Path] = Field(alias="dbt-artifacts-dir", default=Path("./target"))
 
 
