@@ -5,7 +5,7 @@ import pytest
 import yaml
 from click.testing import CliRunner
 
-from dbt_bouncer.main import cli
+from src.dbt_bouncer.main import cli
 
 artifact_paths = [f.__str__() for f in Path("./tests/fixtures").iterdir()]
 

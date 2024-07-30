@@ -1,6 +1,6 @@
 import pytest
 
-from dbt_bouncer.utils import flatten, make_markdown_table, object_in_path
+from src.dbt_bouncer.utils import flatten, make_markdown_table, object_in_path
 
 
 @pytest.mark.parametrize(
