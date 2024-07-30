@@ -1,4 +1,3 @@
-from pathlib import Path
 from typing import List, Literal, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -42,7 +41,7 @@ class DbtBouncerConf(BaseModel):
             Field(discriminator="name"),
         ]
     ] = Field(default=[])
-    dbt_artifacts_dir: Optional[Path] = Field(default=Path("./target"))
+    dbt_artifacts_dir: Optional[str] = Field(default="./target")
 
 
 def validate_conf(conf) -> DbtBouncerConf:

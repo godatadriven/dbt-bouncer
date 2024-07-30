@@ -8,38 +8,39 @@ from pydantic import ValidationError
 from src.dbt_bouncer.conf_validator import validate_conf
 
 invalid_confs = []
-for f in Path("./tests/unit/confs/invalid").glob("*.yml"):
-    with Path.open(f, "r") as fp:
-        conf = yaml.safe_load(fp)
-
+for f in Path("./tests/unit/config_files/invalid").glob("*.yml"):
     invalid_confs.append(
         (
-            conf,
+            f,
             pytest.raises(ValidationError),
         )
     )
 
 
-@pytest.mark.parametrize("conf, expectation", invalid_confs)
-def test_validate_conf_invalid(conf, expectation):
+@pytest.mark.parametrize("f, expectation", invalid_confs, ids=[f.stem for f, _ in invalid_confs])
+def test_validate_conf_invalid(f, expectation):
+    with Path.open(f, "r") as fp:
+        conf = yaml.safe_load(fp)
+
     with expectation:
         validate_conf(conf=conf)
 
 
 valid_confs = []
-for f in Path("./tests/unit/confs/valid").glob("*.yml"):
-    with Path.open(f, "r") as fp:
-        conf = yaml.safe_load(fp)
+for f in Path("./tests/unit/config_files/valid").glob("*.yml"):
 
     valid_confs.append(
         (
-            conf,
+            f,
             does_not_raise(),
         )
     )
 
 
-@pytest.mark.parametrize("conf, expectation", valid_confs)
-def test_validate_conf_valid(conf, expectation):
+@pytest.mark.parametrize("f, expectation", valid_confs, ids=[f.stem for f, _ in valid_confs])
+def test_validate_conf_valid(f, expectation):
+    with Path.open(f, "r") as fp:
+        conf = yaml.safe_load(fp)
+
     with expectation:
         validate_conf(conf=conf)

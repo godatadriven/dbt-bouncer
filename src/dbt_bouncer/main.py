@@ -1,15 +1,13 @@
-import json
 from enum import Enum
 from pathlib import Path
 from typing import Dict, List
 
 import click
-from dbt_artifacts_parser.parser import parse_manifest
 
 from dbt_bouncer.conf_validator import validate_conf
 from dbt_bouncer.logger import logger
 from dbt_bouncer.runner import runner
-from dbt_bouncer.utils import get_dbt_bouncer_config
+from dbt_bouncer.utils import get_dbt_bouncer_config, load_dbt_artifact
 from dbt_bouncer.version import version
 
 
@@ -40,41 +38,31 @@ def cli(config_file, send_pr_comment: bool):
     bouncer_config = validate_conf(conf=conf).model_dump()
     logger.debug(f"{bouncer_config=}")
 
+    check_categories = [k for k in bouncer_config.keys() if k.endswith("_checks")]
+    logger.debug(f"{check_categories=}")
+
     # Add indices to uniquely identify checks
-    for k in bouncer_config.keys():
-        if k.endswith("_checks"):
-            for idx, c in enumerate(bouncer_config[k]):
-                c["index"] = idx
+    for category in check_categories:
+        for idx, c in enumerate(bouncer_config[category]):
+            c["index"] = idx
 
     config: Dict[str, List[Dict[str, str]]] = {}
-    for check_name in set([c["name"] for c in bouncer_config["manifest_checks"]]):
-        config[check_name] = []
-        for check in bouncer_config["manifest_checks"]:
-            if check["name"] == check_name:
-                config[check_name].append(
-                    {k: check[k] for k in set(list(check.keys())) - set(["name"])}
-                )
+    for category in check_categories:
+        for check_name in set([c["name"] for c in bouncer_config[category]]):
+            config[check_name] = []
+            for check in bouncer_config[category]:
+                if check["name"] == check_name:
+                    config[check_name].append(
+                        {k: check[k] for k in set(list(check.keys())) - set(["name"])}
+                    )
     logger.debug(f"{config=}")
 
-    # Load manifest
-    manifest_json_path = (
-        (Path(__file__).parent.parent.parent / config_file).parent
-        / bouncer_config.get("dbt_artifacts_dir", "./target")
-        / "manifest.json"
-    )
-    logger.debug(f"Loading manifest.json from {manifest_json_path}...")
-    logger.info(
-        f"Loading manifest.json from {bouncer_config.get('dbt_artifacts_dir', './target')}/manifest.json..."
-    )
-    if not manifest_json_path.exists():
-        raise FileNotFoundError(
-            f"No manifest.json found at {bouncer_config.get('dbt_artifacts_dir', './target')}/manifest.json."
+    if "manifest_checks" in check_categories:
+        manifest_obj = load_dbt_artifact(
+            artifact_name="manifest.json",
+            dbt_artifacts_dir=config_file.parent
+            / bouncer_config.get("dbt_artifacts_dir", "./target"),
         )
-
-    with Path.open(manifest_json_path, "r") as fp:
-        manifest_obj = parse_manifest(manifest=json.load(fp))
-
-    logger.debug(f"{manifest_obj.metadata.project_name=}")
 
     project_macros = []
     for _, v in manifest_obj.macros.items():

@@ -1,9 +1,12 @@
 import contextlib
+import json
 import re
 from pathlib import Path
+from typing import Literal
 
 import toml
 import yaml
+from dbt_artifacts_parser.parser import parse_manifest
 
 from dbt_bouncer.logger import logger
 
@@ -53,6 +56,9 @@ def get_dbt_bouncer_config(config_file: str, config_file_source: str):
         2. A file named `dbt_bouncer.yml` in the current working directory.
         3. A `[tool.dbt-bouncer]` section in `pyproject.toml` (in current working directory or parent directories).
     """
+
+    logger.debug(f"{config_file=}")
+    logger.debug(f"{config_file_source=}")
 
     if config_file_source == "COMMANDLINE":
         logger.debug(f"Config file passed via command line: {config_file}")
@@ -105,6 +111,26 @@ def load_config_from_yaml(config_file):
     logger.info(f"Loaded config from {config_file}...")
 
     return conf
+
+
+def load_dbt_artifact(artifact_name: Literal["manifest.json"], dbt_artifacts_dir: str):
+    """
+    Load a dbt artifact from a JSON file to a Pydantic object
+    """
+
+    logger.debug(f"{artifact_name=}")
+    logger.debug(f"{dbt_artifacts_dir=}")
+
+    artifact_path = dbt_artifacts_dir / Path(artifact_name)
+    logger.info(f"Loading {artifact_name} from {artifact_path.absolute()}...")
+    if not artifact_path.exists():
+        raise FileNotFoundError(f"No {artifact_name} found at {artifact_path.absolute()}.")
+
+    if artifact_name == "manifest.json":
+        with Path.open(artifact_path, "r") as fp:
+            manifest_obj = parse_manifest(manifest=json.load(fp))
+
+        return manifest_obj
 
 
 def make_markdown_table(array):

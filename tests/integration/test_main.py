@@ -93,7 +93,7 @@ def test_cli_config_file_doesnt_exist():
     assert result.exit_code != 0
 
 
-def test_cli_manifest_doesnt_exist(tmp_path):
+def test_cli_manifest_doesnt_exist(caplog, tmp_path):
     with Path.open(Path("dbt-bouncer-example.yml"), "r") as f:
         bouncer_config = yaml.safe_load(f)
 
@@ -111,8 +111,5 @@ def test_cli_manifest_doesnt_exist(tmp_path):
         ],
     )
     assert type(result.exception) in [FileNotFoundError]
-    assert (
-        result.exception.args[0]  # type: ignore[union-attr]
-        == "No manifest.json found at non-existent-dir/target/manifest.json."
-    )
+    assert result.exception.args[0].find("No manifest.json found at") == 0  # type: ignore[union-attr]
     assert result.exit_code != 0
