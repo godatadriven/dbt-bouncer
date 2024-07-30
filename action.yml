@@ -21,7 +21,7 @@ runs:
         docker run --rm \
           --env GITHUB_REF='${{ github.ref }}' \
           --env GITHUB_REPOSITORY='${{ github.repository }}' \
-          --env GITHUB_RUN_ID='${{ github.run_number }}' \
+          --env GITHUB_RUN_ID='${{ github.run_id }}' \
           --env GITHUB_TOKEN='${{ github.token }}' \
           --volume "$GITHUB_WORKSPACE":/app \
           ghcr.io/godatadriven/dbt-bouncer:v0.0.0 \
