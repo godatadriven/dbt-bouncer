@@ -12,6 +12,9 @@
                       - major
                       - minor
                       - patch
+                      - premajor
+                      - preminor
+                      - prepatch
                       - prerelease
 
   env:
@@ -75,7 +78,7 @@
 
               - name: Determine if prerelease flag is necessary
                 run: |
-                    [ "${{ inputs.version_bump_type }}" = "prerelease" ] && export PRERELEASE="--prerelease" || export PRERELEASE="--latest"
+                    [ "${{ inputs.version_bump_type }}" = "premajor" ] || [ "${{ inputs.version_bump_type }}" = "preminor" ] || [ "${{ inputs.version_bump_type }}" = "prepatch" ] || [ "${{ inputs.version_bump_type }}" = "prerelease" ] && export PRERELEASE="--prerelease" || export PRERELEASE="--latest"
                     echo "PRERELEASE: $PRERELEASE"
                     echo PRERELEASE=$PRERELEASE >> "$GITHUB_ENV"
 
@@ -161,7 +164,7 @@
                         --notes-start-tag $LAST_RELEASE \
                         --target branch-v${{ steps.version.outputs.version }} \
                         --title 'v${{ steps.version.outputs.version }}' \
-                        $PRELEASE \
+                        $PRERELEASE \
                         --verify-tag
 
               - name: Upload .pex to release
