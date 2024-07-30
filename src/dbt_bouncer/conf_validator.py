@@ -42,7 +42,7 @@ class DbtBouncerConf(BaseModel):
             Field(discriminator="name"),
         ]
     ] = Field(default=[])
-    dbt_artifacts_dir: Optional[Path] = Field(alias="dbt-artifacts-dir", default=Path("./target"))
+    dbt_artifacts_dir: Optional[Path] = Field(default=Path("./target"))
 
 
 def validate_conf(conf) -> DbtBouncerConf:

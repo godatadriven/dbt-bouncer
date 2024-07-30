@@ -15,7 +15,7 @@ def test_cli_happy_path(caplog, dbt_artifacts_dir, tmp_path):
     with Path.open(Path("dbt-bouncer-example.yml"), "r") as f:
         bouncer_config = yaml.safe_load(f)
 
-    bouncer_config["dbt-artifacts-dir"] = (Path(dbt_artifacts_dir) / "target").absolute().__str__()
+    bouncer_config["dbt_artifacts_dir"] = (Path(dbt_artifacts_dir) / "target").absolute().__str__()
 
     config_file = Path(tmp_path / "dbt-bouncer-example.yml")
     with config_file.open("w") as f:
@@ -97,7 +97,7 @@ def test_cli_manifest_doesnt_exist(tmp_path):
     with Path.open(Path("dbt-bouncer-example.yml"), "r") as f:
         bouncer_config = yaml.safe_load(f)
 
-    bouncer_config["dbt-artifacts-dir"] = "non-existent-dir/target"
+    bouncer_config["dbt_artifacts_dir"] = "non-existent-dir/target"
 
     with Path(tmp_path / "dbt-bouncer-example.yml").open("w") as f:
         yaml.dump(bouncer_config, f)
