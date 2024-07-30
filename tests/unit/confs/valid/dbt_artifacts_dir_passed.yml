@@ -1,4 +1,4 @@
-dbt-artifacts-dir: dbt_project/target
+dbt_artifacts_dir: dbt_project/target
 
 manifest_checks:
   - name: check_model_names

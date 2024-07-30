@@ -110,7 +110,7 @@ dbt-bouncer.pex --config-file $PWD/<PATH_TO_CONFIG_FILE>
 `dbt-bouncer` requires a config file to be provided. This file configures what checks are run. Here is an example config file:
 
 ```yaml
-dbt-artifacts-dir: target # [Optional] Directory where the dbt artifacts exists, generally the `target` directory inside a dbt project. Defaults to `./target`.
+dbt_artifacts_dir: target # [Optional] Directory where the dbt artifacts exists, generally the `target` directory inside a dbt project. Defaults to `./target`.
 
 manifest_checks:
   - name: check_macro_name_matches_file_name

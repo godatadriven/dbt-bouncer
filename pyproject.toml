@@ -18,7 +18,7 @@ exclude = '''
 '''
 
 [tool.dbt-bouncer]
-dbt-artifacts-dir = "dbt_project/target"
+dbt_artifacts_dir = "dbt_project/target"
 
 [[tool.dbt-bouncer.manifest_checks]]
 name = "check_top_level_directories"
