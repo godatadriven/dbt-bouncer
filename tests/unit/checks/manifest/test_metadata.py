@@ -2,7 +2,7 @@ from contextlib import nullcontext as does_not_raise
 
 import pytest
 
-from src.dbt_bouncer.checks.manifest.check_metadata import check_project_name
+from src.dbt_bouncer.checks.manifest.check_metadata import CheckProjectName
 
 
 @pytest.mark.parametrize(
@@ -27,7 +27,7 @@ from src.dbt_bouncer.checks.manifest.check_metadata import check_project_name
 )
 def test_check_project_name(check_config, manifest_obj, expectation, request):
     with expectation:
-        check_project_name(
+        CheckProjectName().check_project_name(
             check_config=check_config,
             manifest_obj=manifest_obj,
             request=None,

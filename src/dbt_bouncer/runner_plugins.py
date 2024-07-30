@@ -1,7 +1,8 @@
-import inspect
+import re
 from typing import Dict
 
 import pytest
+from pydantic._internal._model_construction import ModelMetaclass
 
 from dbt_bouncer.logger import logger
 from dbt_bouncer.utils import object_in_path
@@ -61,56 +62,61 @@ class GenerateTestsPlugin:
 
     def pytest_pycollect_makeitem(self, collector, name, obj):
         items = []
-        if name in self.bouncer_config.keys():
-            for check_config in self.bouncer_config[name]:
+        snake_case_name = re.sub(r"(?<!^)(?=[A-Z])", "_", name).lower()
+        if snake_case_name in self.bouncer_config.keys():
+            for check_config in self.bouncer_config[snake_case_name]:
                 logger.debug(f"{check_config=}")
 
-                if (inspect.isfunction(obj) or inspect.ismethod(obj)) and (
-                    name.startswith("check_")
-                ):
+                if isinstance(obj, ModelMetaclass):
                     fixture_info = pytest.Function.from_parent(
                         collector, name=name, callobj=obj
                     )._fixtureinfo
 
-                    markers = pytest.Function.from_parent(
-                        collector, name=name
-                    ).keywords._markers.keys()  # type: ignore[attr-defined]
-                    if (
-                        len(
-                            set(
-                                [
-                                    "iterate_over_models",
-                                    "iterate_over_macros",
-                                    "iterate_over_sources",
-                                ]
-                            ).intersection(markers)
-                        )
-                        > 0
-                    ):
-                        key = [m for m in markers if m.startswith("iterate_over_")][0].split("_")[
-                            -1
+                    func_name = [
+                        method_name for method_name in dir(obj) if method_name.startswith("check_")
+                    ][0]
+                    if "pytestmark" in dir(getattr(obj, func_name)):
+                        markers = [
+                            m.name
+                            for m in getattr(obj, func_name).pytestmark
+                            if m.name.startswith("iterate_over_")
                         ]
-                        logger.debug(f"{key=}")
-                        for x in self.__getattribute__(key):
-                            if key == "macros":
-                                key, macro, model, source = "macros", x, None, None
-                            elif key == "models":
-                                key, macro, model, source = "models", None, x, None
-                            elif key == "sources":
-                                key, macro, model, source = "source", None, None, x
+                        logger.debug(f"{markers=}")
+                        if {
+                            "iterate_over_models",
+                            "iterate_over_macros",
+                            "iterate_over_sources",
+                        }.intersection(markers):
+                            key = [m for m in markers if m.startswith("iterate_over_")][0].split(
+                                "_"
+                            )[-1]
+                            logger.debug(f"{key=}")
+                            for x in self.__getattribute__(key):
+                                if key == "macros":
+                                    key, macro, model, source = "macros", x, None, None
+                                elif key == "models":
+                                    key, macro, model, source = "models", None, x, None
+                                elif key == "sources":
+                                    key, macro, model, source = "source", None, None, x
 
-                            if object_in_path(check_config.get("include"), x["path"]):
-                                item = MyFunctionItem.from_parent(
-                                    parent=collector,
-                                    name=name,
-                                    fixtureinfo=fixture_info,
-                                    check_config=check_config,
-                                    macro=macro,
-                                    model=model,
-                                    source=source,
-                                )
-                                item._nodeid = f"{name}::{x['name']}_{check_config['index']}"
-                                items.append(item)
+                                if object_in_path(check_config.get("include"), x["path"]):
+                                    item = MyFunctionItem.from_parent(
+                                        parent=collector,
+                                        name=name,
+                                        fixtureinfo=fixture_info,
+                                        check_config=check_config,
+                                        macro=macro,
+                                        model=model,
+                                        source=source,
+                                    )
+                                    item._nodeid = (
+                                        f"{snake_case_name}::{x['name']}_{check_config['index']}"
+                                    )
+                                    items.append(item)
+                        else:
+                            raise RuntimeError(
+                                "Likely you've used a new mark (or mis-spelt an existing one). Check the `if` condition for valid marks"
+                            )
                     else:
                         item = MyFunctionItem.from_parent(
                             parent=collector,
@@ -118,7 +124,7 @@ class GenerateTestsPlugin:
                             fixtureinfo=fixture_info,
                             check_config=check_config,
                         )
-                        item._nodeid = f"{name}_{check_config['index']}"
+                        item._nodeid = f"{snake_case_name}_{check_config['index']}"
                         items.append(item)
         else:
             logger.debug(f"Skipping check {name} because it is not in the checks list.")

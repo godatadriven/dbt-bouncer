@@ -3,7 +3,7 @@ from contextlib import nullcontext as does_not_raise
 import pytest
 
 from src.dbt_bouncer.checks.manifest.check_project_directories import (
-    check_top_level_directories,
+    CheckTopLevelDirectories,
 )
 
 
@@ -49,4 +49,4 @@ from src.dbt_bouncer.checks.manifest.check_project_directories import (
 )
 def test_check_top_level_directories(model, expectation):
     with expectation:
-        check_top_level_directories(model=model, request=None)
+        CheckTopLevelDirectories().check_top_level_directories(model=model, request=None)

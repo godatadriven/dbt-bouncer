@@ -2,7 +2,7 @@ from contextlib import nullcontext as does_not_raise
 
 import pytest
 
-from src.dbt_bouncer.checks.manifest.check_sources import check_source_has_meta_keys
+from src.dbt_bouncer.checks.manifest.check_sources import CheckSourceHasMetaKeys
 
 
 @pytest.mark.parametrize(
@@ -60,4 +60,6 @@ from src.dbt_bouncer.checks.manifest.check_sources import check_source_has_meta_
 )
 def test_check_source_has_meta_keys(check_config, source, expectation):
     with expectation:
-        check_source_has_meta_keys(check_config=check_config, source=source, request=None)
+        CheckSourceHasMetaKeys().check_source_has_meta_keys(
+            check_config=check_config, source=source, request=None
+        )

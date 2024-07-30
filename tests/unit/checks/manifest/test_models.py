@@ -3,8 +3,8 @@ from contextlib import nullcontext as does_not_raise
 import pytest
 
 from src.dbt_bouncer.checks.manifest.check_models import (
-    check_model_description_populated,
-    check_model_names,
+    CheckModelDescriptionPopulated,
+    CheckModelNames,
 )
 
 
@@ -86,7 +86,7 @@ from src.dbt_bouncer.checks.manifest.check_models import (
 )
 def test_check_mode_names(check_config, model, expectation):
     with expectation:
-        check_model_names(check_config=check_config, model=model, request=None)
+        CheckModelNames().check_model_names(check_config=check_config, model=model, request=None)
 
 
 @pytest.mark.parametrize(
@@ -149,4 +149,6 @@ def test_check_mode_names(check_config, model, expectation):
 )
 def test_check_model_description_populated(model, expectation):
     with expectation:
-        check_model_description_populated(model=model, request=None)
+        CheckModelDescriptionPopulated().check_model_description_populated(
+            model=model, request=None
+        )

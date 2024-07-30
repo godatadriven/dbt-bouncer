@@ -3,9 +3,9 @@ from contextlib import nullcontext as does_not_raise
 import pytest
 
 from src.dbt_bouncer.checks.manifest.check_macros import (
-    check_macro_arguments_description_populated,
-    check_macro_description_populated,
-    check_macro_name_matches_file_name,
+    CheckMacroArgumentsDescriptionPopulated,
+    CheckMacroDescriptionPopulated,
+    CheckMacroNameMatchesFileName,
 )
 
 
@@ -85,7 +85,9 @@ from src.dbt_bouncer.checks.manifest.check_macros import (
 )
 def test_check_macro_arguments_description_populated(macro, expectation):
     with expectation:
-        check_macro_arguments_description_populated(macro=macro, request=None)
+        CheckMacroArgumentsDescriptionPopulated().check_macro_arguments_description_populated(
+            macro=macro, request=None
+        )
 
 
 @pytest.mark.parametrize(
@@ -128,7 +130,9 @@ def test_check_macro_arguments_description_populated(macro, expectation):
 )
 def test_check_macro_description_populated(macro, expectation):
     with expectation:
-        check_macro_description_populated(macro=macro, request=None)
+        CheckMacroDescriptionPopulated().check_macro_description_populated(
+            macro=macro, request=None
+        )
 
 
 @pytest.mark.parametrize(
@@ -170,4 +174,6 @@ def test_check_macro_description_populated(macro, expectation):
 )
 def test_check_macro_name_matches_file_name(macro, expectation):
     with expectation:
-        check_macro_name_matches_file_name(macro=macro, request=None)
+        CheckMacroNameMatchesFileName().check_macro_name_matches_file_name(
+            macro=macro, request=None
+        )

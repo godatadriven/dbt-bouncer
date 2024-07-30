@@ -37,6 +37,8 @@ def runner(
             "-c",
             (Path(__file__).parent / "checks").__str__(),
             (Path(__file__).parent / "checks").__str__(),
+            "-vvv",
+            "-s",
         ],
         plugins=[
             collector,
