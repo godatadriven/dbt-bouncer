@@ -1,6 +1,93 @@
-import pytest
+from pathlib import Path
 
-from src.dbt_bouncer.utils import flatten, make_markdown_table, object_in_path
+import pytest
+import toml
+
+from src.dbt_bouncer.utils import (
+    flatten,
+    get_dbt_bouncer_config,
+    make_markdown_table,
+    object_in_path,
+)
+
+
+def test_get_dbt_bouncer_config_commandline(tmp_path):
+    config_file = tmp_path / "my_dbt_bouncer.yml"
+    config_file.write_text("test: 1")
+    config = get_dbt_bouncer_config(config_file=str(config_file), config_file_source="COMMANDLINE")
+    assert config == {"test": 1}
+
+
+def test_get_dbt_bouncer_config_default(tmp_path):
+    config_file = tmp_path / "dbt_bouncer.yml"
+    config_file.write_text("test: 1")
+    config = get_dbt_bouncer_config(config_file=str(config_file), config_file_source="DEFAULT")
+    assert config == {"test": 1}
+
+
+PYPROJECT_TOML_SAMPLE_CONFIG = {
+    "dbt_artifacts_dir": "dbt_project/target",
+    "manifest_checks": [
+        {"name": "check_top_level_directories"},
+        {
+            "include": "^staging",
+            "model_name_pattern": "^stg_",
+            "name": "check_model_names",
+        },
+    ],
+}
+
+
+def test_get_dbt_bouncer_config_pyproject_toml(monkeypatch, tmp_path):
+    monkeypatch.chdir(tmp_path)
+
+    pyproject_file = tmp_path / "pyproject.toml"
+    config = {"tool": {"dbt-bouncer": PYPROJECT_TOML_SAMPLE_CONFIG}}
+    with Path.open(pyproject_file, "w") as f:
+        toml.dump(config, f)
+
+    config = get_dbt_bouncer_config(
+        config_file=str("dbt_bouncer.yml"), config_file_source="DEFAULT"
+    )
+
+    assert config == PYPROJECT_TOML_SAMPLE_CONFIG
+
+
+def test_get_dbt_bouncer_config_pyproject_toml_doesnt_exist(monkeypatch, tmp_path):
+    monkeypatch.chdir(tmp_path)
+
+    with pytest.raises(RuntimeError):
+        config = get_dbt_bouncer_config(
+            config_file=str("dbt_bouncer.yml"), config_file_source="DEFAULT"
+        )
+
+
+def test_get_dbt_bouncer_config_pyproject_toml_recursive(monkeypatch, tmp_path):
+    monkeypatch.chdir(Path().cwd() / "tests/unit")
+
+    pyproject_file = tmp_path / "pyproject.toml"
+    config = {"tool": {"dbt-bouncer": PYPROJECT_TOML_SAMPLE_CONFIG}}
+    with Path.open(pyproject_file, "w") as f:
+        toml.dump(config, f)
+
+    config = get_dbt_bouncer_config(
+        config_file=str("dbt_bouncer.yml"), config_file_source="DEFAULT"
+    )
+    assert config == PYPROJECT_TOML_SAMPLE_CONFIG
+
+
+def test_get_dbt_bouncer_config_pyproject_toml_no_bouncer_section(monkeypatch, tmp_path):
+    monkeypatch.chdir(tmp_path)
+
+    pyproject_file = tmp_path / "pyproject.toml"
+    config = {"tool": {"dbt-bouncer-misspelled": PYPROJECT_TOML_SAMPLE_CONFIG}}
+    with Path.open(pyproject_file, "w") as f:
+        toml.dump(config, f)
+
+    with pytest.raises(RuntimeError):
+        config = get_dbt_bouncer_config(
+            config_file=str("dbt_bouncer.yml"), config_file_source="DEFAULT"
+        )
 
 
 @pytest.mark.parametrize(

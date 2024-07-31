@@ -3,5 +3,5 @@ dbt_bouncer:
   outputs:
    dev:
      type: duckdb
-     path: ':memory:'
+     path: ./dbt.duckdb
      threads: 8

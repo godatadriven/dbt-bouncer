@@ -1,9 +1,12 @@
 import contextlib
+import json
 import re
 from pathlib import Path
+from typing import Literal
 
 import toml
 import yaml
+from dbt_artifacts_parser.parser import parse_catalog, parse_manifest
 
 from dbt_bouncer.logger import logger
 
@@ -26,24 +29,34 @@ def flatten(structure, key="", path="", flattened=None):
     return flattened
 
 
-def get_check_inputs(check_config=None, macro=None, model=None, request=None, source=None):
+def get_check_inputs(
+    catalog_node=None, check_config=None, macro=None, model=None, request=None, source=None
+):
     """
     Helper function that is used to account for the difference in how arguments are passed to check functions
     when they are run by `dbt-bouncer` and when they are called by pytest.
     """
 
     if request is not None:
+        catalog_node = request.node.catalog_node
         check_config = request.node.check_config
         macro = request.node.macro
         model = request.node.model
         source = request.node.source
     else:
+        catalog_node = catalog_node
         check_config = check_config
         macro = macro
         model = model
         source = source
 
-    return {"check_config": check_config, "macro": macro, "model": model, "source": source}
+    return {
+        "catalog_node": catalog_node,
+        "check_config": check_config,
+        "macro": macro,
+        "model": model,
+        "source": source,
+    }
 
 
 def get_dbt_bouncer_config(config_file: str, config_file_source: str):
@@ -53,6 +66,9 @@ def get_dbt_bouncer_config(config_file: str, config_file_source: str):
         2. A file named `dbt_bouncer.yml` in the current working directory.
         3. A `[tool.dbt-bouncer]` section in `pyproject.toml` (in current working directory or parent directories).
     """
+
+    logger.debug(f"{config_file=}")
+    logger.debug(f"{config_file_source=}")
 
     if config_file_source == "COMMANDLINE":
         logger.debug(f"Config file passed via command line: {config_file}")
@@ -105,6 +121,34 @@ def load_config_from_yaml(config_file):
     logger.info(f"Loaded config from {config_file}...")
 
     return conf
+
+
+def load_dbt_artifact(
+    artifact_name: Literal["catalog.json", "manifest.json"], dbt_artifacts_dir: str
+):
+    """
+    Load a dbt artifact from a JSON file to a Pydantic object
+    """
+
+    logger.debug(f"{artifact_name=}")
+    logger.debug(f"{dbt_artifacts_dir=}")
+
+    artifact_path = dbt_artifacts_dir / Path(artifact_name)
+    logger.info(f"Loading {artifact_name} from {artifact_path.absolute()}...")
+    if not artifact_path.exists():
+        raise FileNotFoundError(f"No {artifact_name} found at {artifact_path.absolute()}.")
+
+    if artifact_name == "catalog.json":
+        with Path.open(artifact_path, "r") as fp:
+            catalog_obj = parse_catalog(catalog=json.load(fp))
+
+        return catalog_obj
+
+    elif artifact_name == "manifest.json":
+        with Path.open(artifact_path, "r") as fp:
+            manifest_obj = parse_manifest(manifest=json.load(fp))
+
+        return manifest_obj
 
 
 def make_markdown_table(array):

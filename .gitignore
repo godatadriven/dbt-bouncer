@@ -161,6 +161,7 @@ cython_debug/
 
 *.ipynb
 changed_files.txt
+dbt.duckdb
 pytest-coverage.txt
 
 dbt_project/dbt_packages
@@ -169,6 +170,7 @@ dbt_project/target/compiled
 dbt_project/target/run
 dbt_project/target/graph_summary.json
 dbt_project/target/graph.gpickle
+dbt_project/target/index.html
 dbt_project/target/partial_parse.msgpack
 dbt_project/target/perf_info.json
 dbt_project/target/run_results.json
@@ -176,18 +178,24 @@ dbt_project/target/semantic_manifest.json
 dbt_project/.user.yml
 dbt_project/package-lock.yml
 dist_pypi/
+tests/fixtures/dbt_16/target/compiled/
+tests/fixtures/dbt_16/target/index.html
 tests/fixtures/dbt_16/target/graph_summary.json
 tests/fixtures/dbt_16/target/graph.gpickle
 tests/fixtures/dbt_16/target/partial_parse.msgpack
 tests/fixtures/dbt_16/target/perf_info.json
 tests/fixtures/dbt_16/target/run_results.json
 tests/fixtures/dbt_16/target/semantic_manifest.json
+tests/fixtures/dbt_17/target/compiled/
+tests/fixtures/dbt_17/target/index.html
 tests/fixtures/dbt_17/target/graph_summary.json
 tests/fixtures/dbt_17/target/graph.gpickle
 tests/fixtures/dbt_17/target/partial_parse.msgpack
 tests/fixtures/dbt_17/target/perf_info.json
 tests/fixtures/dbt_17/target/run_results.json
 tests/fixtures/dbt_17/target/semantic_manifest.json
+tests/fixtures/dbt_18/target/compiled/
+tests/fixtures/dbt_18/target/index.html
 tests/fixtures/dbt_18/target/graph_summary.json
 tests/fixtures/dbt_18/target/graph.gpickle
 tests/fixtures/dbt_18/target/partial_parse.msgpack

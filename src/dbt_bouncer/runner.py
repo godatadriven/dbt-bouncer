@@ -16,6 +16,7 @@ from dbt_bouncer.runner_plugins import (
 
 def runner(
     bouncer_config: Dict[str, List[Dict[str, str]]],
+    catalog_nodes: List[Dict[str, str]],
     macros: List[Dict[str, str]],
     manifest_obj: Dict[str, str],
     models: List[Dict[str, str]],
@@ -28,7 +29,7 @@ def runner(
     """
 
     # Create a fixture plugin that can be used to inject the manifest into the checks
-    fixtures = FixturePlugin(macros, manifest_obj, models, sources, tests)
+    fixtures = FixturePlugin(catalog_nodes, macros, manifest_obj, models, sources, tests)
 
     # Run the checks, if one fails then pytest will raise an exception
     collector = ResultsCollector()
@@ -42,7 +43,11 @@ def runner(
             collector,
             fixtures,
             GenerateTestsPlugin(
-                bouncer_config=bouncer_config, macros=macros, models=models, sources=sources
+                bouncer_config=bouncer_config,
+                catalog_nodes=catalog_nodes,
+                macros=macros,
+                models=models,
+                sources=sources,
             ),
         ],
     )

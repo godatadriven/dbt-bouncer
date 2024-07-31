@@ -8,12 +8,17 @@ from dbt_bouncer.utils import object_in_path
 
 
 class FixturePlugin(object):
-    def __init__(self, macros, manifest_obj, models, sources, tests):
+    def __init__(self, catalog_nodes, macros, manifest_obj, models, sources, tests):
+        self.catalog_nodes_ = catalog_nodes
         self.macros_ = macros
         self.manifest_obj_ = manifest_obj
         self.models_ = models
         self.sources_ = sources
         self.tests_ = tests
+
+    @pytest.fixture(scope="session")
+    def catalog_nodes(self):
+        return self.catalog_nodes_
 
     @pytest.fixture(scope="session")
     def macros(self):
@@ -38,8 +43,11 @@ class FixturePlugin(object):
 
 # Inspiration: https://github.com/pytest-dev/pytest-xdist/discussions/957#discussioncomment-7335007
 class MyFunctionItem(pytest.Function):
-    def __init__(self, check_config, macro=None, model=None, source=None, *args, **kwargs):
+    def __init__(
+        self, check_config, catalog_node=None, macro=None, model=None, source=None, *args, **kwargs
+    ):
         self.check_config: Dict[str, str] = check_config
+        self.catalog_node: Dict[str, str] | None = catalog_node
         self.macro: Dict[str, str] | None = macro
         self.model: Dict[str, str] | None = model
         self.source: Dict[str, str] | None = source
@@ -53,8 +61,9 @@ class GenerateTestsPlugin:
     `pytest_pycollect_makeitem` is one way to get this to work.
     """
 
-    def __init__(self, bouncer_config, macros, models, sources):
+    def __init__(self, bouncer_config, catalog_nodes, macros, models, sources):
         self.bouncer_config = bouncer_config
+        self.catalog_nodes = catalog_nodes
         self.macros = macros
         self.models = models
         self.sources = sources
@@ -79,6 +88,7 @@ class GenerateTestsPlugin:
                         len(
                             set(
                                 [
+                                    "iterate_over_catalog_nodes",
                                     "iterate_over_models",
                                     "iterate_over_macros",
                                     "iterate_over_sources",
@@ -87,29 +97,42 @@ class GenerateTestsPlugin:
                         )
                         > 0
                     ):
-                        key = [m for m in markers if m.startswith("iterate_over_")][0].split("_")[
-                            -1
-                        ]
+                        key = [m for m in markers if m.startswith("iterate_over_")][0].replace(
+                            "iterate_over_", ""
+                        )
                         logger.debug(f"{key=}")
                         for x in self.__getattribute__(key):
-                            if key == "macros":
-                                key, macro, model, source = "macros", x, None, None
+                            if key == "catalog_nodes":
+                                key = "catalog_nodes"
+                                catalog_node = x
+                                macro = model = source = None
+                            elif key == "macros":
+                                key = "macros"
+                                macro = x
+                                catalog_node = model = source = None
                             elif key == "models":
-                                key, macro, model, source = "models", None, x, None
+                                key = "models"
+                                model = x
+                                catalog_node = macro = source = None
                             elif key == "sources":
-                                key, macro, model, source = "source", None, None, x
+                                key = "sources"
+                                source = x
+                                catalog_node = macro = model = None
 
-                            if object_in_path(check_config.get("include"), x["path"]):
+                            if key == "catalog_nodes" or object_in_path(
+                                check_config.get("include"), x["path"]
+                            ):
                                 item = MyFunctionItem.from_parent(
                                     parent=collector,
                                     name=name,
                                     fixtureinfo=fixture_info,
                                     check_config=check_config,
+                                    catalog_node=catalog_node,
                                     macro=macro,
                                     model=model,
                                     source=source,
                                 )
-                                item._nodeid = f"{name}::{x['name']}_{check_config['index']}"
+                                item._nodeid = f"{name}::{x['unique_id'].split('.')[-1]}_{check_config['index']}"
                                 items.append(item)
                     else:
                         item = MyFunctionItem.from_parent(

@@ -53,11 +53,24 @@ def generate_artifacts(
         ],
         _fg=True,
     )
-    Path(artifact_path).mkdir(exist_ok=True, parents=True)
     sh.python(
         [
             pex_file_name,
             "parse",
+            "--project-dir",
+            "dbt_project",
+            "--profiles-dir",
+            "dbt_project",
+            "--target-path",
+            (Path().cwd() / artifact_path).__str__(),
+        ],
+        _fg=True,
+    )
+    sh.python(
+        [
+            pex_file_name,
+            "docs",
+            "generate",
             "--project-dir",
             "dbt_project",
             "--profiles-dir",
