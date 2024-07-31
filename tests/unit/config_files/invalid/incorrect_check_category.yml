@@ -1,0 +1,7 @@
+catalog_checks:
+  - name: check_column_data_must_end_underscore_date
+
+run_results_checks:
+  - name: check_model_names
+    include: ^intermediate
+    model_name_pattern: ^int_
