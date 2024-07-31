@@ -8,11 +8,12 @@ from dbt_bouncer.utils import object_in_path
 
 
 class FixturePlugin(object):
-    def __init__(self, catalog_nodes, macros, manifest_obj, models, sources, tests):
+    def __init__(self, catalog_nodes, macros, manifest_obj, models, run_results, sources, tests):
         self.catalog_nodes_ = catalog_nodes
         self.macros_ = macros
         self.manifest_obj_ = manifest_obj
         self.models_ = models
+        self.run_results_ = run_results
         self.sources_ = sources
         self.tests_ = tests
 
@@ -33,6 +34,10 @@ class FixturePlugin(object):
         return self.models_
 
     @pytest.fixture(scope="session")
+    def run_results(self):
+        return self.run_results_
+
+    @pytest.fixture(scope="session")
     def sources(self):
         return self.sources_
 
@@ -44,12 +49,21 @@ class FixturePlugin(object):
 # Inspiration: https://github.com/pytest-dev/pytest-xdist/discussions/957#discussioncomment-7335007
 class MyFunctionItem(pytest.Function):
     def __init__(
-        self, check_config, catalog_node=None, macro=None, model=None, source=None, *args, **kwargs
+        self,
+        check_config,
+        catalog_node=None,
+        macro=None,
+        model=None,
+        run_result=None,
+        source=None,
+        *args,
+        **kwargs,
     ):
         self.check_config: Dict[str, str] = check_config
         self.catalog_node: Dict[str, str] | None = catalog_node
         self.macro: Dict[str, str] | None = macro
         self.model: Dict[str, str] | None = model
+        self.run_result: Dict[str, str] | None = run_result
         self.source: Dict[str, str] | None = source
         super().__init__(*args, **kwargs)
 
@@ -61,11 +75,12 @@ class GenerateTestsPlugin:
     `pytest_pycollect_makeitem` is one way to get this to work.
     """
 
-    def __init__(self, bouncer_config, catalog_nodes, macros, models, sources):
+    def __init__(self, bouncer_config, catalog_nodes, macros, models, run_results, sources):
         self.bouncer_config = bouncer_config
         self.catalog_nodes = catalog_nodes
         self.macros = macros
         self.models = models
+        self.run_results = run_results
         self.sources = sources
 
     def pytest_pycollect_makeitem(self, collector, name, obj):
@@ -91,6 +106,7 @@ class GenerateTestsPlugin:
                                     "iterate_over_catalog_nodes",
                                     "iterate_over_models",
                                     "iterate_over_macros",
+                                    "iterate_over_run_results",
                                     "iterate_over_sources",
                                 ]
                             ).intersection(markers)
@@ -103,23 +119,22 @@ class GenerateTestsPlugin:
                         logger.debug(f"{key=}")
                         for x in self.__getattribute__(key):
                             if key == "catalog_nodes":
-                                key = "catalog_nodes"
                                 catalog_node = x
-                                macro = model = source = None
+                                macro = model = run_result = source = None
                             elif key == "macros":
-                                key = "macros"
                                 macro = x
-                                catalog_node = model = source = None
+                                catalog_node = model = run_result = source = None
                             elif key == "models":
-                                key = "models"
                                 model = x
-                                catalog_node = macro = source = None
+                                catalog_node = macro = run_result = source = None
+                            elif key == "run_results":
+                                run_result = x
+                                catalog_node = macro = model = source = None
                             elif key == "sources":
-                                key = "sources"
                                 source = x
-                                catalog_node = macro = model = None
+                                catalog_node = macro = model = run_result = None
 
-                            if key == "catalog_nodes" or object_in_path(
+                            if key in ["catalog_nodes", "run_results"] or object_in_path(
                                 check_config.get("include"), x["path"]
                             ):
                                 item = MyFunctionItem.from_parent(
@@ -130,6 +145,7 @@ class GenerateTestsPlugin:
                                     catalog_node=catalog_node,
                                     macro=macro,
                                     model=model,
+                                    run_result=run_result,
                                     source=source,
                                 )
                                 item._nodeid = f"{name}::{x['unique_id'].split('.')[-1]}_{check_config['index']}"
