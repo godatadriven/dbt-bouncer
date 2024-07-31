@@ -23,3 +23,7 @@ manifest_checks:
           - slack
       - owner
   - name: check_top_level_directories
+
+run_results_checks:
+  - name: check_run_results_max_execution_time
+    max_execution_time: 10

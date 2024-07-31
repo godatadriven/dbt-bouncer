@@ -107,6 +107,23 @@ def cli(config_file, send_pr_comment: bool):
     else:
         project_catalog_nodes = []
 
+    # Run results, must come after manifest is parsed
+    if "run_results_checks" in check_categories:
+        run_results_obj = load_dbt_artifact(
+            artifact_name="run_results.json",
+            dbt_artifacts_dir=config_file.parent
+            / bouncer_config.get("dbt_artifacts_dir", "./target"),
+        )
+
+        project_run_results = []
+        for r in run_results_obj.results:
+            if r.unique_id.split(".")[-2] == manifest_obj.metadata.project_name:
+                project_run_results.append(r.model_dump())
+
+        logger.info(f"Parsed `run_results.json`, found {len(project_run_results)} results.")
+    else:
+        project_run_results = []
+
     logger.info("Running checks...")
     runner(
         bouncer_config=config,
@@ -114,6 +131,7 @@ def cli(config_file, send_pr_comment: bool):
         macros=project_macros,
         manifest_obj=manifest_obj,
         models=project_models,
+        run_results=project_run_results,
         send_pr_comment=send_pr_comment,
         sources=project_sources,
         tests=project_tests,

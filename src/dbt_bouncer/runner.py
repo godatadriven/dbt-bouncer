@@ -20,6 +20,7 @@ def runner(
     macros: List[Dict[str, str]],
     manifest_obj: Dict[str, str],
     models: List[Dict[str, str]],
+    run_results: List[Dict[str, str]],
     send_pr_comment: bool,
     sources: List[Dict[str, str]],
     tests: List[Dict[str, str]],
@@ -29,7 +30,9 @@ def runner(
     """
 
     # Create a fixture plugin that can be used to inject the manifest into the checks
-    fixtures = FixturePlugin(catalog_nodes, macros, manifest_obj, models, sources, tests)
+    fixtures = FixturePlugin(
+        catalog_nodes, macros, manifest_obj, models, run_results, sources, tests
+    )
 
     # Run the checks, if one fails then pytest will raise an exception
     collector = ResultsCollector()
@@ -47,6 +50,7 @@ def runner(
                 catalog_nodes=catalog_nodes,
                 macros=macros,
                 models=models,
+                run_results=run_results,
                 sources=sources,
             ),
         ],

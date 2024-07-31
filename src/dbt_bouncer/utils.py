@@ -6,7 +6,7 @@ from typing import Literal
 
 import toml
 import yaml
-from dbt_artifacts_parser.parser import parse_catalog, parse_manifest
+from dbt_artifacts_parser.parser import parse_catalog, parse_manifest, parse_run_results
 
 from dbt_bouncer.logger import logger
 
@@ -30,7 +30,13 @@ def flatten(structure, key="", path="", flattened=None):
 
 
 def get_check_inputs(
-    catalog_node=None, check_config=None, macro=None, model=None, request=None, source=None
+    catalog_node=None,
+    check_config=None,
+    macro=None,
+    model=None,
+    request=None,
+    run_result=None,
+    source=None,
 ):
     """
     Helper function that is used to account for the difference in how arguments are passed to check functions
@@ -42,12 +48,14 @@ def get_check_inputs(
         check_config = request.node.check_config
         macro = request.node.macro
         model = request.node.model
+        run_result = request.node.run_result
         source = request.node.source
     else:
         catalog_node = catalog_node
         check_config = check_config
         macro = macro
         model = model
+        run_result = run_result
         source = source
 
     return {
@@ -55,6 +63,7 @@ def get_check_inputs(
         "check_config": check_config,
         "macro": macro,
         "model": model,
+        "run_result": run_result,
         "source": source,
     }
 
@@ -124,7 +133,8 @@ def load_config_from_yaml(config_file):
 
 
 def load_dbt_artifact(
-    artifact_name: Literal["catalog.json", "manifest.json"], dbt_artifacts_dir: str
+    artifact_name: Literal["catalog.json", "manifest.json", "run_results.json"],
+    dbt_artifacts_dir: str,
 ):
     """
     Load a dbt artifact from a JSON file to a Pydantic object
@@ -149,6 +159,12 @@ def load_dbt_artifact(
             manifest_obj = parse_manifest(manifest=json.load(fp))
 
         return manifest_obj
+
+    elif artifact_name == "run_results.json":
+        with Path.open(artifact_path, "r") as fp:
+            run_results_obj = parse_run_results(run_results=json.load(fp))
+
+        return run_results_obj
 
 
 def make_markdown_table(array):

@@ -10,6 +10,7 @@ from dbt_bouncer.checks.manifest.check_metadata import *  # noqa
 from dbt_bouncer.checks.manifest.check_models import *  # noqa
 from dbt_bouncer.checks.manifest.check_project_directories import *  # noqa
 from dbt_bouncer.checks.manifest.check_sources import *  # noqa
+from dbt_bouncer.checks.run_results.check_run_results import *  # noqa
 from dbt_bouncer.logger import logger
 
 # Dynamically assemble all Check* classes
@@ -35,6 +36,15 @@ ManifestCheckConfigs = Annotated[  # type: ignore[valid-type]
     Field(discriminator="name"),
 ]
 
+# Run result checks
+run_results_check_classes = [
+    x for x in check_classes if globals()[x].__module__.split(".")[-2] == "run_results"
+]
+RunResultsCheckConfigs = Annotated[  # type: ignore[valid-type]
+    Union[tuple(run_results_check_classes)],
+    Field(discriminator="name"),
+]
+
 
 class DbtBouncerConf(BaseModel):
     model_config = ConfigDict(extra="forbid")
@@ -48,6 +58,12 @@ class DbtBouncerConf(BaseModel):
     manifest_checks: List[  # type: ignore[valid-type]
         Annotated[
             ManifestCheckConfigs,
+            Field(discriminator="name"),
+        ]
+    ] = Field(default=[])
+    run_results_checks: List[  # type: ignore[valid-type]
+        Annotated[
+            RunResultsCheckConfigs,
             Field(discriminator="name"),
         ]
     ] = Field(default=[])
