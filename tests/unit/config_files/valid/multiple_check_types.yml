@@ -1,5 +1,5 @@
 catalog_checks:
-  - name: check_that_doesnt_exist_yet
+  - name: check_column_data_must_end_underscore_date
 
 manifest_checks:
   - name: check_model_names

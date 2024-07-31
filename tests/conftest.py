@@ -6,6 +6,10 @@ from dbt_artifacts_parser.parser import parse_manifest
 
 
 def pytest_configure(config):
+    config.addinivalue_line(
+        "markers",
+        "iterate_over_catalog_nodes: Tests that should run once per node in `catalog.json`",
+    )
     config.addinivalue_line("markers", "iterate_over_macros: Tests that should run once per macro")
     config.addinivalue_line(
         "markers",

@@ -57,12 +57,11 @@ def cli(config_file, send_pr_comment: bool):
                     )
     logger.debug(f"{config=}")
 
-    if "manifest_checks" in check_categories:
-        manifest_obj = load_dbt_artifact(
-            artifact_name="manifest.json",
-            dbt_artifacts_dir=config_file.parent
-            / bouncer_config.get("dbt_artifacts_dir", "./target"),
-        )
+    # Manifest, will always be parsed
+    manifest_obj = load_dbt_artifact(
+        artifact_name="manifest.json",
+        dbt_artifacts_dir=config_file.parent / bouncer_config.get("dbt_artifacts_dir", "./target"),
+    )
 
     project_macros = []
     for _, v in manifest_obj.macros.items():
@@ -88,12 +87,30 @@ def cli(config_file, send_pr_comment: bool):
             project_sources.append(v.model_dump())
 
     logger.info(
-        f"Parsed `{manifest_obj.metadata.project_name}` project, found {len(project_macros)} macros, {len(project_models)} nodes, {len(project_sources)} sources and {len(project_tests)} tests."
+        f"Parsed `manifest.json`, found `{manifest_obj.metadata.project_name}` project, found {len(project_macros)} macros, {len(project_models)} nodes, {len(project_sources)} sources and {len(project_tests)} tests."
     )
+
+    # Catalog, must come after manifest is parsed
+    if "catalog_checks" in check_categories:
+        catalog_obj = load_dbt_artifact(
+            artifact_name="catalog.json",
+            dbt_artifacts_dir=config_file.parent
+            / bouncer_config.get("dbt_artifacts_dir", "./target"),
+        )
+
+        project_catalog_nodes = []
+        for k, v in catalog_obj.nodes.items():
+            if k.split(".")[-2] == manifest_obj.metadata.project_name:
+                project_catalog_nodes.append(v.model_dump())
+
+        logger.info(f"Parsed `catalog.json`, found {len(project_catalog_nodes)} nodes.")
+    else:
+        project_catalog_nodes = []
 
     logger.info("Running checks...")
     runner(
         bouncer_config=config,
+        catalog_nodes=project_catalog_nodes,
         macros=project_macros,
         manifest_obj=manifest_obj,
         models=project_models,

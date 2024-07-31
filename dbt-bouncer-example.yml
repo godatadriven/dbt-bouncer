@@ -1,7 +1,7 @@
 dbt_artifacts_dir: dbt_project/target # [Optional] Directory where the dbt artifacts exists, generally the `target` directory inside a dbt project. Defaults to `./target`.
 
 catalog_checks:
-  - name: check_that_doesnt_exist_yet
+  - name: check_column_data_must_end_underscore_date
 
 manifest_checks:
   - name: check_macro_name_matches_file_name

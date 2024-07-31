@@ -6,7 +6,7 @@ from typing import Literal
 
 import toml
 import yaml
-from dbt_artifacts_parser.parser import parse_manifest
+from dbt_artifacts_parser.parser import parse_catalog, parse_manifest
 
 from dbt_bouncer.logger import logger
 
@@ -29,24 +29,34 @@ def flatten(structure, key="", path="", flattened=None):
     return flattened
 
 
-def get_check_inputs(check_config=None, macro=None, model=None, request=None, source=None):
+def get_check_inputs(
+    catalog_node=None, check_config=None, macro=None, model=None, request=None, source=None
+):
     """
     Helper function that is used to account for the difference in how arguments are passed to check functions
     when they are run by `dbt-bouncer` and when they are called by pytest.
     """
 
     if request is not None:
+        catalog_node = request.node.catalog_node
         check_config = request.node.check_config
         macro = request.node.macro
         model = request.node.model
         source = request.node.source
     else:
+        catalog_node = catalog_node
         check_config = check_config
         macro = macro
         model = model
         source = source
 
-    return {"check_config": check_config, "macro": macro, "model": model, "source": source}
+    return {
+        "catalog_node": catalog_node,
+        "check_config": check_config,
+        "macro": macro,
+        "model": model,
+        "source": source,
+    }
 
 
 def get_dbt_bouncer_config(config_file: str, config_file_source: str):
@@ -113,7 +123,9 @@ def load_config_from_yaml(config_file):
     return conf
 
 
-def load_dbt_artifact(artifact_name: Literal["manifest.json"], dbt_artifacts_dir: str):
+def load_dbt_artifact(
+    artifact_name: Literal["catalog.json", "manifest.json"], dbt_artifacts_dir: str
+):
     """
     Load a dbt artifact from a JSON file to a Pydantic object
     """
@@ -126,7 +138,13 @@ def load_dbt_artifact(artifact_name: Literal["manifest.json"], dbt_artifacts_dir
     if not artifact_path.exists():
         raise FileNotFoundError(f"No {artifact_name} found at {artifact_path.absolute()}.")
 
-    if artifact_name == "manifest.json":
+    if artifact_name == "catalog.json":
+        with Path.open(artifact_path, "r") as fp:
+            catalog_obj = parse_catalog(catalog=json.load(fp))
+
+        return catalog_obj
+
+    elif artifact_name == "manifest.json":
         with Path.open(artifact_path, "r") as fp:
             manifest_obj = parse_manifest(manifest=json.load(fp))
 

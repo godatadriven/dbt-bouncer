@@ -7,14 +7,13 @@ from pydantic import ValidationError
 
 from src.dbt_bouncer.conf_validator import validate_conf
 
-invalid_confs = []
-for f in Path("./tests/unit/config_files/invalid").glob("*.yml"):
-    invalid_confs.append(
-        (
-            f,
-            pytest.raises(ValidationError),
-        )
+invalid_confs = [
+    (
+        f,
+        pytest.raises(ValidationError),
     )
+    for f in Path("./tests/unit/config_files/invalid").glob("*.yml")
+]
 
 
 @pytest.mark.parametrize("f, expectation", invalid_confs, ids=[f.stem for f, _ in invalid_confs])
@@ -26,15 +25,13 @@ def test_validate_conf_invalid(f, expectation):
         validate_conf(conf=conf)
 
 
-valid_confs = []
-for f in Path("./tests/unit/config_files/valid").glob("*.yml"):
-
-    valid_confs.append(
-        (
-            f,
-            does_not_raise(),
-        )
+valid_confs = [
+    (
+        f,
+        does_not_raise(),
     )
+    for f in Path("./tests/unit/config_files/valid").glob("*.yml")
+]
 
 
 @pytest.mark.parametrize("f, expectation", valid_confs, ids=[f.stem for f, _ in valid_confs])
