@@ -1,17 +1,22 @@
+import importlib
+from pathlib import Path
 from typing import List, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field
 from pydantic._internal._model_construction import ModelMetaclass
 from typing_extensions import Annotated
 
-from dbt_bouncer.checks.catalog.check_columns import *  # noqa
-from dbt_bouncer.checks.manifest.check_macros import *  # noqa
-from dbt_bouncer.checks.manifest.check_metadata import *  # noqa
-from dbt_bouncer.checks.manifest.check_models import *  # noqa
-from dbt_bouncer.checks.manifest.check_project_directories import *  # noqa
-from dbt_bouncer.checks.manifest.check_sources import *  # noqa
-from dbt_bouncer.checks.run_results.check_run_results import *  # noqa
 from dbt_bouncer.logger import logger
+
+# Dynamically import all Check classes
+check_files = [f for f in (Path(__file__).parent / "checks").glob("*/*.py") if f.is_file()]
+for check_file in check_files:
+    imported_check_file = importlib.import_module(
+        ".".join([x.replace(".py", "") for x in check_file.parts[-4:]])
+    )
+    for obj in dir(imported_check_file):
+        if isinstance(getattr(imported_check_file, obj), ModelMetaclass):
+            locals()[obj] = getattr(imported_check_file, obj)
 
 # Dynamically assemble all Check* classes
 check_classes = [
