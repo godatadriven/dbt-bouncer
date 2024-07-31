@@ -1,3 +1,20 @@
+# `check_column_data_must_end_underscore_date`
+
+Columns with the type "DATE" must end with "_date".
+
+**Example**:
+```yaml
+catalog_checks:
+    - name: check_column_data_must_end_underscore_date
+```
+
+**Required artifact(s)**:
+
+* catalog.json
+* manifest.json
+
+---
+
 # `check_macro_arguments_description_populated`
 
 Macro arguments must have a populated description.
@@ -8,7 +25,7 @@ Macro arguments must have a populated description.
 
 **Example**:
 ```yaml
-checks:
+manifest_checks:
     - name: check_macro_arguments_description_populated
 ```
 
@@ -28,7 +45,7 @@ Macros must have a populated description.
 
 **Example**:
 ```yaml
-checks:
+manifest_checks:
     - name: check_macro_description_populated
 ```
 
@@ -50,7 +67,7 @@ Generic tests are also macros, however to document these tests the "name" value 
 
 **Example**:
 ```yaml
-checks:
+manifest_checks:
     - name: check_macro_name_matches_file_name
 ```
 
@@ -70,7 +87,7 @@ Models must have a populated description.
 
 **Example**:
 ```yaml
-checks:
+manifest_checks:
     - name: check_model_description_populated
 ```
 
@@ -91,7 +108,7 @@ Models must have a name that matches the supplied regex.
 
 **Example**:
 ```yaml
-checks:
+manifest_checks:
     - name: check_model_names
         include: ^intermediate
         model_name_pattern: ^int_
@@ -117,13 +134,35 @@ Enforce that the name of the dbt project matches a supplied regex. Generally use
 
 **Example**:
 ```yaml
-checks:
+manifest_checks:
     - name: check_project_name
 ```
 
 **Required artifacts(s)**:
 
 * manifest.json
+
+---
+
+# `check_run_results_max_execution_time`
+
+Each result can take a maximum duration (seconds).
+
+**Argument(s)**:
+
+* `max_execution_time`: The maximum execution time (seconds) allowed for a node.
+
+**Example**:
+```yaml
+run_results_checks:
+    - name: check_run_results_max_execution_time
+      max_execution_time: 60
+```
+
+**Required artifacts(s)**:
+
+* manifest.json
+* run_results.json
 
 ---
 
@@ -138,7 +177,7 @@ The `meta` config for sources must have the specified keys.
 
 **Example**:
 ```yaml
-checks:
+manifest_checks:
     - name: check_source_has_meta_keys
       keys:
         - contact:
@@ -159,7 +198,7 @@ Only specified top-level directories are allowed to contain models.
 
 **Example**:
 ```yaml
-checks:
+manifest_checks:
     - name: check_top_level_directories
 ```
 

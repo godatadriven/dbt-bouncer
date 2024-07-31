@@ -52,11 +52,11 @@
 
 # How to use
 
-1. Generate a `manifest.json` by running `dbt parse`.
+1. Generate dbt artifacts by running a dbt command.
 1. Create a `dbt-bouncer.yml` config file, details [here](#config-file).
 1. Run `dbt-bouncer` to validate that your conventions are being maintained. You can use GitHub Actions, Docker, a `.pex` file or python to run `dbt-bouncer`.
 
-## GitHub Actions
+### GitHub Actions
 
 ```yaml
 steps:
@@ -70,7 +70,7 @@ steps:
     ...
 ```
 
-## Docker
+### Docker
 
 Don't use GitHub Actions? You can still use dbt-bouncer via Docker:
 
@@ -81,17 +81,17 @@ docker run --rm \
     --config-file /app/<PATH_TO_CONFIG_FILE>
 ```
 
-## Pex
+### Pex
 
-You can also run the `.pex` ([Python EXecutable](https://docs.pex-tool.org/whatispex.html#whatispex)) artifact directly once you have a python executable installed:
+You can also run the `.pex` ([Python EXecutable](https://docs.pex-tool.org/whatispex.html#whatispex)) artifact directly once you have a python executable (3.8 -> 3.12) installed:
 
 ```bash
 wget https://github.com/godatadriven/dbt-bouncer/releases/download/vX.X.X/dbt-bouncer.pex -O dbt-bouncer.pex
 
-dbt-bouncer.pex --config-file $PWD/<PATH_TO_CONFIG_FILE>
+python dbt-bouncer.pex --config-file $PWD/<PATH_TO_CONFIG_FILE>
 ```
 
-## Python
+### Python
 
 Install from [pypi.org](https://pypi.org/p/dbt-bouncer):
 
@@ -119,32 +119,77 @@ manifest_checks:
     model_name_pattern: ^stg_
 ```
 
+For more example config files, see [here](https://github.com/godatadriven/dbt-bouncer/tree/main/tests/unit/config_files/valid).
+
+Note that the config can also be passed via a `pyproject.toml` file:
+```yaml
+[tool.dbt-bouncer]
+dbt_artifacts_dir = "target"
+
+[[tool.dbt-bouncer.manifest_checks]]
+name = "check_macro_name_matches_file_name"
+
+[[tool.dbt-bouncer.manifest_checks]]
+name = "check_model_names"
+include = "^staging"
+model_name_pattern = "^stg_"
+```
+
 # Checks
 
 :bulb: Click on a check name to see more details.
 
+### Catalog checks
+
+These checks require the following artifact to be present:
+
+* `catalog.json`
+* `manifest.json`
+
+**Columns**
+
+* [`check_column_data_must_end_underscore_date`](./src/dbt_bouncer/checks/checks.md#check_column_data_must_end_underscore_date): Columns with the type "DATE" must end with "_date".
+
+### Manifest checks
+
+These checks require the following artifact to be present:
+
+* `manifest.json`
+
 **Macros**
 
-* [`check_macro_arguments_description_populated`](./dbt_bouncer/checks/checks.md#check_macro_arguments_description_populated): Macro arguments must have a populated description.
-* [`check_macro_description_populated`](./dbt_bouncer/checks/checks.md#check_macro_description_populated): Macros must have a populated description.
-* [`check_macro_name_matches_file_name`](./dbt_bouncer/checks/checks.md#check_macro_name_matches_file_name): Macros names must be the same as the file they are contained in.
+* [`check_macro_arguments_description_populated`](./src/dbt_bouncer/checks/checks.md#check_macro_arguments_description_populated): Macro arguments must have a populated description.
+* [`check_macro_description_populated`](./src/dbt_bouncer/checks/checks.md#check_macro_description_populated): Macros must have a populated description.
+* [`check_macro_name_matches_file_name`](./src/dbt_bouncer/checks/checks.md#check_macro_name_matches_file_name): Macros names must be the same as the file they are contained in.
 
 **Metadata**
 
-* [`check_project_name`](./dbt_bouncer/checks/checks.md#check_project_name): Enforce that the name of the dbt project matches a supplied regex.
+* [`check_project_name`](./src/dbt_bouncer/checks/checks.md#check_project_name): Enforce that the name of the dbt project matches a supplied regex.
 
 **Miscellaneous**
 
-* [`check_top_level_directories`](./dbt_bouncer/checks/checks.md#check_top_level_directories): Only specified top-level directories are allowed to contain models.
+* [`check_top_level_directories`](./src/dbt_bouncer/checks/checks.md#check_top_level_directories): Only specified top-level directories are allowed to contain models.
 
 **Models**
 
-* [`check_model_description_populated`](./dbt_bouncer/checks/checks.md#check_model_description_populated): Models must have a populated description.
-* [`check_model_names`](./dbt_bouncer/checks/checks.md#check_model_names): Models must have a name that matches the supplied regex.
+* [`check_model_description_populated`](./src/dbt_bouncer/checks/checks.md#check_model_description_populated): Models must have a populated description.
+* [`check_model_names`](./src/dbt_bouncer/checks/checks.md#check_model_names): Models must have a name that matches the supplied regex.
 
 **Sources**
 
-* [`check_source_has_meta_keys`](./dbt_bouncer/checks/checks.md#check_source_has_meta_keys): The `meta` config for sources must have the specified keys.
+* [`check_source_has_meta_keys`](./src/dbt_bouncer/checks/checks.md#check_source_has_meta_keys): The `meta` config for sources must have the specified keys.
+
+### Run results checks
+
+These checks require the following artifact to be present:
+
+* `manifest.json`
+* `run_results.json`
+
+**Results**
+
+* [`check_run_results_max_execution_time`](./src/dbt_bouncer/checks/checks.md#check_run_results_max_execution_time): Each result can take a maximum duration (seconds).
+
 
 # Development
 

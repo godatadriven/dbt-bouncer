@@ -17,6 +17,10 @@ def pytest_configure(config):
     )
     config.addinivalue_line(
         "markers",
+        "iterate_over_run_results: Tests that should run once per run result in `run_results.json`",
+    )
+    config.addinivalue_line(
+        "markers",
         "iterate_over_sources: Tests that should run once per source",
     )
     config.addinivalue_line(
