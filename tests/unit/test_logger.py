@@ -3,8 +3,8 @@ import logging
 import pytest
 from click.testing import CliRunner
 
-from src.dbt_bouncer.logger import logger
-from src.dbt_bouncer.main import cli
+from dbt_bouncer.logger import logger
+from dbt_bouncer.main import cli
 from tests.pytest_helpers import catch_logs, records_to_tuples
 
 
