@@ -2,7 +2,7 @@ from contextlib import nullcontext as does_not_raise
 
 import pytest
 
-from src.dbt_bouncer.checks.manifest.check_sources import check_source_has_meta_keys
+from dbt_bouncer.checks.manifest.check_sources import check_source_has_meta_keys
 
 
 @pytest.mark.parametrize(

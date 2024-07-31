@@ -1,8 +1,8 @@
 import pytest
 import requests
 
-from src.dbt_bouncer.github import call_github_api, create_requests_session
-from src.dbt_bouncer.logger import logger
+from dbt_bouncer.github import call_github_api, create_requests_session
+from dbt_bouncer.logger import logger
 
 
 def test_create_requests_session():

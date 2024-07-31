@@ -2,7 +2,7 @@ from contextlib import nullcontext as does_not_raise
 
 import pytest
 
-from src.dbt_bouncer.checks.catalog.check_columns import (
+from dbt_bouncer.checks.catalog.check_columns import (
     check_column_data_must_end_underscore_date,
 )
 

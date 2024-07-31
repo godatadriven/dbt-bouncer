@@ -2,7 +2,7 @@ from contextlib import nullcontext as does_not_raise
 
 import pytest
 
-from src.dbt_bouncer.checks.manifest.check_macros import (
+from dbt_bouncer.checks.manifest.check_macros import (
     check_macro_arguments_description_populated,
     check_macro_description_populated,
     check_macro_name_matches_file_name,

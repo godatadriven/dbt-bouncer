@@ -2,7 +2,7 @@ from contextlib import nullcontext as does_not_raise
 
 import pytest
 
-from src.dbt_bouncer.checks.manifest.check_project_directories import (
+from dbt_bouncer.checks.manifest.check_project_directories import (
     check_top_level_directories,
 )
 

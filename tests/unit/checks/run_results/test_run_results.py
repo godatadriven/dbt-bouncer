@@ -2,7 +2,7 @@ from contextlib import nullcontext as does_not_raise
 
 import pytest
 
-from src.dbt_bouncer.checks.run_results.check_run_results import (
+from dbt_bouncer.checks.run_results.check_run_results import (
     check_run_results_max_execution_time,
 )
 

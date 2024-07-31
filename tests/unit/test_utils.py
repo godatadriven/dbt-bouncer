@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 import toml
 
-from src.dbt_bouncer.utils import (
+from dbt_bouncer.utils import (
     flatten,
     get_dbt_bouncer_config,
     make_markdown_table,
