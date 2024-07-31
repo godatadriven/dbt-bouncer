@@ -1,0 +1,21 @@
+site_name: dbt-bouncer
+
+theme: material
+
+nav:
+  - About: index.md
+  - Checks: checks.md
+
+plugins:
+  - mkdocstrings:
+      handlers:
+        python: 
+          paths: [src/dbt_bouncer/checks/**]
+          options:
+            show_submodules: true
+            show_source: false
+            inherited_members: true
+            filters: ["check_"]
+            show_signature: false
+            heading_level: 3
+
