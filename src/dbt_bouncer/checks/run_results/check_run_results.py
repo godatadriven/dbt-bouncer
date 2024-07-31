@@ -26,11 +26,6 @@ def check_run_results_max_execution_time(request, check_config=None, run_result=
     check_config = input_vars["check_config"]
     run_result = input_vars["run_result"]
 
-    from dbt_bouncer.logger import logger
-
-    logger.warning(f"{check_config=}")
-    logger.warning(f"{run_result=}")
-
     assert (
         run_result["execution_time"] <= check_config["max_execution_time"]
     ), f"`{run_result['unique_id'].split('.')[-1]}` has an execution time ({run_result['execution_time']} greater than permitted ({check_config['max_execution_time']}s)."
