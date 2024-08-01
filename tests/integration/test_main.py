@@ -26,6 +26,14 @@ def test_cli_happy_path(caplog, dbt_artifacts_dir, tmp_path):
 
     assert "Running dbt-bouncer (0.0.0)..." in caplog.text
 
+    summary_count_catalog = 0
+    for record in caplog.messages:
+        if record.startswith("Parsed `catalog.json`, found"):
+            summary_count_catalog += 1
+            nodes_text = re.search(r"\d* nodes", record).group(0)  # type: ignore[union-attr]
+            nodes_num = int(re.search(r"\d*", nodes_text).group(0))  # type: ignore[union-attr]
+            assert nodes_num > 0, f"Only found {nodes_num} macros."
+
     summary_count_manifest = 0
     for record in caplog.messages:
         if record.startswith("Parsed `manifest.json`, found"):
@@ -46,16 +54,17 @@ def test_cli_happy_path(caplog, dbt_artifacts_dir, tmp_path):
             tests_num = int(re.search(r"\d*", tests_text).group(0))  # type: ignore[union-attr]
             assert tests_num > 0, f"Only found {tests_num} tests."
 
-    summary_count_catalog = 0
+    summary_count_run_results = 0
     for record in caplog.messages:
-        if record.startswith("Parsed `catalog.json`, found"):
-            summary_count_catalog += 1
-            nodes_text = re.search(r"\d* nodes", record).group(0)  # type: ignore[union-attr]
+        if record.startswith("Parsed `run_results.json`, found"):
+            summary_count_run_results += 1
+            nodes_text = re.search(r"\d* results", record).group(0)  # type: ignore[union-attr]
             nodes_num = int(re.search(r"\d*", nodes_text).group(0))  # type: ignore[union-attr]
             assert nodes_num > 0, f"Only found {nodes_num} macros."
 
     assert summary_count_manifest == 1
     assert summary_count_catalog == 1
+    assert summary_count_run_results == 1
     assert result.exit_code == 0
 
 

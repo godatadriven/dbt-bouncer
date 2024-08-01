@@ -19,6 +19,7 @@ catalog_checks:
       - INTEGER
       - VARCHAR
 
+
 manifest_checks:
   - name: check_macro_name_matches_file_name
   - name: check_macro_arguments_description_populated

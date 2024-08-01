@@ -163,6 +163,28 @@ manifest_checks:
 
 ---
 
+# `check_run_results_max_gigabytes_billed`
+
+Each result can have a maximum number of gigabytes billed. Note that this only works for the `dbt-bigquery` adapter.
+
+**Argument(s)**:
+
+* `max_gigabytes_billed`: The maximum execution time (seconds) allowed for a node.
+
+**Example**:
+```yaml
+run_results_checks:
+    - name: check_run_results_max_gigabytes_billed
+      max_gigabytes_billed: 100
+```
+
+**Required artifacts(s)**:
+
+* manifest.json
+* run_results.json
+
+---
+
 # `check_run_results_max_execution_time`
 
 Each result can take a maximum duration (seconds).
