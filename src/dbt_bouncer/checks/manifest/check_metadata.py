@@ -1,13 +1,14 @@
 import re
 from typing import Literal
 
-from pydantic import Field
+from pydantic import BaseModel, ConfigDict, Field
 
-from dbt_bouncer.conf_validator_base import BaseCheck
 from dbt_bouncer.utils import get_check_inputs
 
 
-class CheckProjectName(BaseCheck):
+class CheckProjectName(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     name: Literal["check_project_name"]
     project_name_pattern: str = Field(description="Regexp the project name must match.")
 

@@ -102,7 +102,9 @@ def cli(config_file, send_pr_comment: bool):
         project_catalog_nodes = []
         for k, v in catalog_obj.nodes.items():
             if k.split(".")[-2] == manifest_obj.metadata.project_name:
-                project_catalog_nodes.append(v.model_dump())
+                catalog_node = v.model_dump()
+                catalog_node["path"] = manifest_obj.nodes[k].path
+                project_catalog_nodes.append(catalog_node)
 
         logger.info(f"Parsed `catalog.json`, found {len(project_catalog_nodes)} nodes.")
     else:
@@ -119,7 +121,9 @@ def cli(config_file, send_pr_comment: bool):
         project_run_results = []
         for r in run_results_obj.results:
             if r.unique_id.split(".")[-3] == manifest_obj.metadata.project_name:
-                project_run_results.append(r.model_dump())
+                run_result = r.model_dump()
+                run_result["path"] = manifest_obj.nodes[r.unique_id].path
+                project_run_results.append(run_result)
 
         logger.info(f"Parsed `run_results.json`, found {len(project_run_results)} results.")
     else:

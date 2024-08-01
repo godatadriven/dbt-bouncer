@@ -1,0 +1,4 @@
+manifest_checks:
+  - name: check_project_name
+    include: ^staging
+    project_name_pattern: ^dbt_bouncer_

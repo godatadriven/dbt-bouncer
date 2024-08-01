@@ -2,29 +2,35 @@
 
 Columns with specified data type must comply to the specified regexp naming pattern.
 
+**Argument(s)**:
+
+* `column_name_pattern`: Regex pattern to match the model name.
+* `include`: (Optional) Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+* `types`: List of data types. These are specific to the dbt adapter you are using.
+
 **Example**:
 ```yaml
 catalog_checks:
     # DATE columns must end with "_date"
     - name: check_column_name_complies_to_column_type
-        column_name_pattern: .*_date$
-        types:
-            - DATE
+      column_name_pattern: .*_date$
+      types:
+          - DATE
     # BOOLEAN columns must start with "is_"
     - name: check_column_name_complies_to_column_type
-        column_name_pattern: ^is_.*
-        types:
-            - BOOLEAN
+      column_name_pattern: ^is_.*
+      types:
+          - BOOLEAN
     # Columns of all types must consist of lowercase letters and underscores. Note that the specified types depend on the underlying database.
     - name: check_column_name_complies_to_column_type
-        column_name_pattern: ^[a-z_]*$
-        types:
-            - BIGINT
-            - BOOLEAN
-            - DATE
-            - DOUBLE
-            - INTEGER
-            - VARCHAR
+      column_name_pattern: ^[a-z_]*$
+      types:
+          - BIGINT
+          - BOOLEAN
+          - DATE
+          - DOUBLE
+          - INTEGER
+          - VARCHAR
 ```
 
 **Required artifact(s)**:
@@ -103,20 +109,20 @@ Models must have the specified access attribute. Requires dbt 1.7+.
 **Argument(s)**:
 
 * `access`: The access level to apply.
-* `include`: (Optional) Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
+* `include`: (Optional) Regex pattern to match the model path. Only model paths that match the pattern will be checked.
 
 **Example**:
 ```yaml
 manifest_checks:
     - name: check_model_access
-        include: ^intermediate
-        access: protected
+      include: ^intermediate
+      access: protected
     - name: check_model_access
-        include: ^marts
-        access: public
+      include: ^marts
+      access: public
     - name: check_model_access
-        include: ^staging
-        access: protected
+      include: ^staging
+      access: protected
 ```
 
 **Required artifacts(s)**:
@@ -131,7 +137,7 @@ Models must have a populated description.
 
 **Argument(s)**:
 
-* `include`: (Optional) Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
+* `include`: (Optional) Regex pattern to match the model path. Only model paths that match the pattern will be checked.
 
 **Example**:
 ```yaml
@@ -151,18 +157,18 @@ Models must have a name that matches the supplied regex.
 
 **Argument(s)**:
 
-* `include`: (Optional) Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
+* `include`: (Optional) Regex pattern to match the model path. Only model paths that match the pattern will be checked.
 * `model_name_pattern`: Regex pattern to match the model name.
 
 **Example**:
 ```yaml
 manifest_checks:
     - name: check_model_names
-        include: ^intermediate
-        model_name_pattern: ^int_
+      include: ^intermediate
+      model_name_pattern: ^int_
     - name: check_model_names
-        include: ^staging
-        model_name_pattern: ^stg_
+      include: ^staging
+      model_name_pattern: ^stg_
 ```
 
 **Required artifacts(s)**:
@@ -177,7 +183,6 @@ Enforce that the name of the dbt project matches a supplied regex. Generally use
 
 **Argument(s)**:
 
-* `include`: (Optional) Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
 * `project_name_pattern`: Regex pattern to match the project name.
 
 **Example**:
@@ -198,6 +203,7 @@ Each result can have a maximum number of gigabytes billed. Note that this only w
 
 **Argument(s)**:
 
+* `include`: (Optional) Regex pattern to match the node path. Only node paths that match the pattern will be checked.
 * `max_gigabytes_billed`: The maximum gigagbytes billed allowed for a node.
 
 **Example**:
@@ -220,6 +226,7 @@ Each result can take a maximum duration (seconds).
 
 **Argument(s)**:
 
+* `include`: (Optional) Regex pattern to match the node path. Only node paths that match the pattern will be checked.
 * `max_execution_time`: The maximum execution time (seconds) allowed for a node.
 
 **Example**:
@@ -242,7 +249,7 @@ The `meta` config for sources must have the specified keys.
 
 **Argument(s)**:
 
-* `include`: (Optional) Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
+* `include`: (Optional) Regex pattern to match the source path (i.e the `.yml` file where the source is configured). Only source paths that match the pattern will be checked.
 * `key`:
 
 **Example**:
