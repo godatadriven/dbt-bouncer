@@ -18,4 +18,10 @@ clean-targets:
 
 
 models:
-  dbt_bouncer:
+  dbt_bouncer_test_project:
+    intermediate:
+      access: protected
+    marts:
+      access: public
+    staging:
+      access: protected

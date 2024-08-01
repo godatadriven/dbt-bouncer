@@ -172,6 +172,7 @@ These checks require the following artifact to be present:
 
 **Models**
 
+* [`check_model_access`](./src/dbt_bouncer/checks/checks.md#check_model_access): Models must have the specified access attribute.
 * [`check_model_description_populated`](./src/dbt_bouncer/checks/checks.md#check_model_description_populated): Models must have a populated description.
 * [`check_model_names`](./src/dbt_bouncer/checks/checks.md#check_model_names): Models must have a name that matches the supplied regex.
 

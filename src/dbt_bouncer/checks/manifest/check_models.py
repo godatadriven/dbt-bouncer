@@ -8,12 +8,32 @@ from dbt_bouncer.conf_validator_base import BaseCheck
 from dbt_bouncer.utils import get_check_inputs
 
 
+class CheckModelAccess(BaseCheck):
+    access: Literal["private", "protected", "public"]
+    name: Literal["check_model_access"]
+
+
+@pytest.mark.iterate_over_models
+def check_model_access(request, check_config=None, model=None):
+    """
+    Models must have the specified access attribute. Requires dbt 1.7+.
+    """
+
+    input_vars = get_check_inputs(check_config=check_config, model=model, request=request)
+    check_config = input_vars["check_config"]
+    model = input_vars["model"]
+
+    assert (
+        model["access"].value == check_config["access"]
+    ), f"{model['unique_id']} has `{model['access'].value}` access, it should have access `{check_config['access']}`."
+
+
 class CheckModelDescriptionPopulated(BaseCheck):
     name: Literal["check_model_description_populated"]
 
 
 @pytest.mark.iterate_over_models
-def check_model_description_populated(request, check_config=None, model=None):
+def check_model_description_populated(request, model=None):
     """
     Models must have a populated description.
     """

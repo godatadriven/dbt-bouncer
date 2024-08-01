@@ -19,7 +19,6 @@ catalog_checks:
       - INTEGER
       - VARCHAR
 
-
 manifest_checks:
   - name: check_macro_name_matches_file_name
   - name: check_macro_arguments_description_populated
@@ -31,6 +30,15 @@ manifest_checks:
     include: ^staging
     model_name_pattern: ^stg_
   - name: check_model_description_populated
+  - name: check_model_access
+    include: ^intermediate
+    access: protected
+  - name: check_model_access
+    include: ^marts
+    access: public
+  - name: check_model_access
+    include: ^staging
+    access: protected
   - name: check_project_name
     project_name_pattern: ^dbt_bouncer_
   - name: check_source_has_meta_keys

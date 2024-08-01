@@ -11,11 +11,17 @@ artifact_paths = [f.__str__() for f in Path("./tests/fixtures").iterdir()]
 
 
 @pytest.mark.parametrize("dbt_artifacts_dir", artifact_paths, ids=artifact_paths)
-def test_cli_happy_path(caplog, dbt_artifacts_dir, tmp_path):
+def test_cli_happy_path(caplog, dbt_artifacts_dir, request, tmp_path):
     with Path.open(Path("dbt-bouncer-example.yml"), "r") as f:
         bouncer_config = yaml.safe_load(f)
 
     bouncer_config["dbt_artifacts_dir"] = (Path(dbt_artifacts_dir) / "target").absolute().__str__()
+
+    # Remove checks that don't work with dbt 1.6
+    if request.node.callspec.id.endswith("dbt_16"):
+        bouncer_config["manifest_checks"] = [
+            x for x in bouncer_config["manifest_checks"] if x["name"] != "check_model_access"
+        ]
 
     config_file = Path(tmp_path / "dbt-bouncer-example.yml")
     with config_file.open("w") as f:

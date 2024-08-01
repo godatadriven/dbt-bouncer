@@ -96,6 +96,35 @@ manifest_checks:
 
 ---
 
+# `check_model_access`
+
+Models must have the specified access attribute. Requires dbt 1.7+.
+
+**Argument(s)**:
+
+* `access`: The access level to apply.
+* `include`: (Optional) Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
+
+**Example**:
+```yaml
+manifest_checks:
+    - name: check_model_access
+        include: ^intermediate
+        access: protected
+    - name: check_model_access
+        include: ^marts
+        access: public
+    - name: check_model_access
+        include: ^staging
+        access: protected
+```
+
+**Required artifacts(s)**:
+
+* manifest.json
+
+---
+
 # `check_model_description_populated`
 
 Models must have a populated description.
