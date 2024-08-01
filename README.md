@@ -148,7 +148,7 @@ These checks require the following artifact to be present:
 
 **Columns**
 
-* [`check_column_data_must_end_underscore_date`](./src/dbt_bouncer/checks/checks.md#check_column_data_must_end_underscore_date): Columns with the type "DATE" must end with "_date".
+* [`check_column_name_complies_to_column_type`](./src/dbt_bouncer/checks/checks.md#check_column_name_complies_to_column_type): Columns with specified data type must comply to the specified regexp naming pattern.
 
 ### Manifest checks
 

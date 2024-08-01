@@ -1,7 +1,23 @@
 dbt_artifacts_dir: dbt_project/target # [Optional] Directory where the dbt artifacts exists, generally the `target` directory inside a dbt project. Defaults to `./target`.
 
 catalog_checks:
-  - name: check_column_data_must_end_underscore_date
+  - name: check_column_name_complies_to_column_type
+    column_name_pattern: ^is_.*
+    types:
+      - BOOLEAN
+  - name: check_column_name_complies_to_column_type
+    column_name_pattern: .*_date$
+    types:
+      - DATE
+  - name: check_column_name_complies_to_column_type
+    column_name_pattern: ^[a-z_]*$
+    types:
+      - BIGINT
+      - BOOLEAN
+      - DATE
+      - DOUBLE
+      - INTEGER
+      - VARCHAR
 
 manifest_checks:
   - name: check_macro_name_matches_file_name

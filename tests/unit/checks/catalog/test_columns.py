@@ -3,12 +3,12 @@ from contextlib import nullcontext as does_not_raise
 import pytest
 
 from dbt_bouncer.checks.catalog.check_columns import (
-    check_column_data_must_end_underscore_date,
+    check_column_name_complies_to_column_type,
 )
 
 
 @pytest.mark.parametrize(
-    "catalog_node, expectation",
+    "catalog_node, check_config, expectation",
     [
         (
             {
@@ -20,6 +20,7 @@ from dbt_bouncer.checks.catalog.check_columns import (
                 },
                 "unique_id": "model.package_name.model_1",
             },
+            {"column_name_pattern": ".*_date$", "types": ["DATE"]},
             does_not_raise(),
         ),
         (
@@ -40,6 +41,7 @@ from dbt_bouncer.checks.catalog.check_columns import (
                 },
                 "unique_id": "model.package_name.model_1",
             },
+            {"column_name_pattern": ".*_date$", "types": ["DATE"]},
             does_not_raise(),
         ),
         (
@@ -52,10 +54,13 @@ from dbt_bouncer.checks.catalog.check_columns import (
                 },
                 "unique_id": "model.package_name.model_1",
             },
+            {"column_name_pattern": ".*_date$", "types": ["DATE"]},
             pytest.raises(AssertionError),
         ),
     ],
 )
-def test_check_column_data_must_end_underscore_date(catalog_node, expectation):
+def test_check_column_name_complies_to_column_type(catalog_node, check_config, expectation):
     with expectation:
-        check_column_data_must_end_underscore_date(catalog_node=catalog_node, request=None)
+        check_column_name_complies_to_column_type(
+            catalog_node=catalog_node, check_config=check_config, request=None
+        )
