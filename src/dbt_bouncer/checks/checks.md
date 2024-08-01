@@ -198,7 +198,7 @@ Each result can have a maximum number of gigabytes billed. Note that this only w
 
 **Argument(s)**:
 
-* `max_gigabytes_billed`: The maximum execution time (seconds) allowed for a node.
+* `max_gigabytes_billed`: The maximum gigagbytes billed allowed for a node.
 
 **Example**:
 ```yaml
