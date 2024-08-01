@@ -117,7 +117,7 @@ def cli(config_file, send_pr_comment: bool):
 
         project_run_results = []
         for r in run_results_obj.results:
-            if r.unique_id.split(".")[-2] == manifest_obj.metadata.project_name:
+            if r.unique_id.split(".")[-3] == manifest_obj.metadata.project_name:
                 project_run_results.append(r.model_dump())
 
         logger.info(f"Parsed `run_results.json`, found {len(project_run_results)} results.")

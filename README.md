@@ -188,6 +188,7 @@ These checks require the following artifact to be present:
 
 **Results**
 
+* [`check_run_results_max_gigabytes_billed`](./src/dbt_bouncer/checks/checks.md#check_run_results_max_gigabytes_billed): Each result can have a maximum number of gigabytes billed. Note that this only works for the `dbt-bigquery` adapter.
 * [`check_run_results_max_execution_time`](./src/dbt_bouncer/checks/checks.md#check_run_results_max_execution_time): Each result can take a maximum duration (seconds).
 
 
