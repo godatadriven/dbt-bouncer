@@ -1,11 +1,30 @@
-# `check_column_data_must_end_underscore_date`
+# `check_column_name_complies_to_column_type`
 
-Columns with the type "DATE" must end with "_date".
+Columns with specified data type must comply to the specified regexp naming pattern.
 
 **Example**:
 ```yaml
 catalog_checks:
-    - name: check_column_data_must_end_underscore_date
+    # DATE columns must end with "_date"
+    - name: check_column_name_complies_to_column_type
+        column_name_pattern: .*_date$
+        types:
+            - DATE
+    # BOOLEAN columns must start with "is_"
+    - name: check_column_name_complies_to_column_type
+        column_name_pattern: ^is_.*
+        types:
+            - BOOLEAN
+    # Columns of all types must consist of lowercase letters and underscores. Note that the specified types depend on the underlying database.
+    - name: check_column_name_complies_to_column_type
+        column_name_pattern: ^[a-z_]*$
+        types:
+            - BIGINT
+            - BOOLEAN
+            - DATE
+            - DOUBLE
+            - INTEGER
+            - VARCHAR
 ```
 
 **Required artifact(s)**:

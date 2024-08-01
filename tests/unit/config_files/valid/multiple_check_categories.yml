@@ -1,5 +1,8 @@
 catalog_checks:
-  - name: check_column_data_must_end_underscore_date
+  - name: check_column_name_complies_to_column_type
+    column_name_pattern: ^is_.*
+    types:
+      - BOOLEAN
 
 manifest_checks:
   - name: check_model_names
