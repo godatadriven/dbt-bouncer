@@ -1,3 +1,4 @@
+import json
 from enum import Enum
 from pathlib import Path
 from typing import Dict, List
@@ -75,7 +76,7 @@ def cli(config_file, send_pr_comment: bool):
             if (
                 isinstance(v.resource_type, Enum) and v.resource_type.value == "model"
             ) or v.resource_type == "model":  # dbt 1.6  # dbt 1.7+
-                project_models.append(v.model_dump())
+                project_models.append(json.loads(v.model_dump_json()))
             elif (
                 isinstance(v.resource_type, Enum) and v.resource_type.value == "test"
             ) or v.resource_type == "test":  # dbt 1.6  # dbt 1.7+

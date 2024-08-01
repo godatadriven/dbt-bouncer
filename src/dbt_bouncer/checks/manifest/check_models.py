@@ -24,8 +24,8 @@ def check_model_access(request, check_config=None, model=None):
     model = input_vars["model"]
 
     assert (
-        model["access"].value == check_config["access"]
-    ), f"{model['unique_id']} has `{model['access'].value}` access, it should have access `{check_config['access']}`."
+        model["access"] == check_config["access"]
+    ), f"{model['unique_id']} has `{model['access']}` access, it should have access `{check_config['access']}`."
 
 
 class CheckModelDescriptionPopulated(BaseCheck):
