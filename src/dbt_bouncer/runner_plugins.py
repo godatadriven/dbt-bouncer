@@ -134,9 +134,7 @@ class GenerateTestsPlugin:
                                 source = x
                                 catalog_node = macro = model = run_result = None
 
-                            if key in ["catalog_nodes", "run_results"] or object_in_path(
-                                check_config.get("include"), x["path"]
-                            ):
+                            if object_in_path(check_config.get("include"), x["path"]):
                                 item = MyFunctionItem.from_parent(
                                     parent=collector,
                                     name=name,
