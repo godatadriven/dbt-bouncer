@@ -1,11 +1,21 @@
 from contextlib import nullcontext as does_not_raise
+from enum import Enum
 
 import pytest
 
 from dbt_bouncer.checks.manifest.check_models import (
+    check_model_access,
     check_model_description_populated,
     check_model_names,
 )
+
+
+# Source: https://github.com/yu-iskw/dbt-artifacts-parser/blob/main/dbt_artifacts_parser/parsers/manifest/manifest_v10.py#L171
+# Necessary as model_dump does not properly convert enums to json
+class Access(Enum):
+    protected = "protected"
+    private = "private"
+    public = "public"
 
 
 @pytest.mark.parametrize(
@@ -87,6 +97,34 @@ from dbt_bouncer.checks.manifest.check_models import (
 def test_check_mode_names(check_config, model, expectation):
     with expectation:
         check_model_names(check_config=check_config, model=model, request=None)
+
+
+@pytest.mark.parametrize(
+    "check_config, model, expectation",
+    [
+        (
+            {
+                "access": "public",
+            },
+            {
+                "access": Access.public,
+                "unique_id": "model.package_name.stg_model_1",
+            },
+            does_not_raise(),
+        ),
+        (
+            {"access": "public"},
+            {
+                "access": Access.protected,
+                "unique_id": "model.package_name.mart_model_1",
+            },
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_model_access(check_config, model, expectation):
+    with expectation:
+        check_model_access(check_config=check_config, model=model, request=None)
 
 
 @pytest.mark.parametrize(
