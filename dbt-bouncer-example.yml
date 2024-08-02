@@ -21,6 +21,19 @@ catalog_checks:
       - VARCHAR
 
 manifest_checks:
+  - name: check_lineage_permitted_upstream_models
+    include: ^staging
+    upstream_path_pattern: $^
+  - name: check_lineage_permitted_upstream_models
+    include: ^intermediate
+    upstream_path_pattern: ^staging|^intermediate
+  - name: check_lineage_permitted_upstream_models
+    include: ^marts
+    upstream_path_pattern: ^staging|^intermediate
+  - name: check_lineage_seed_cannot_be_used
+    include: ^intermediate|^marts
+  - name: check_lineage_source_cannot_be_used
+    include: ^intermediate|^marts
   - name: check_macro_name_matches_file_name
   - name: check_macro_arguments_description_populated
   - name: check_macro_description_populated

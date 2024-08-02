@@ -21,3 +21,16 @@ sources:
             slack: |
               @therealanna
           owner: Annabelle
+
+  - name: dummy_source
+    tables:
+    - name: customers
+      meta:
+        contact:
+          email: chris@email.com
+          slack: |
+            @chrissy
+        owner: Chris
+      config:
+        external_location: "read_csv('./dbt_project/seeds/raw_customers.csv')"
+        formatter: oldstyle

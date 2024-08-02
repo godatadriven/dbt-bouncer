@@ -40,6 +40,77 @@ catalog_checks:
 
 ---
 
+# `check_lineage_permitted_upstream_models`
+
+Upstream models must have a path that matches the provided `upstream_path_pattern`.
+
+**Argument(s)**:
+
+* `include`: Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+* `upstream_path_pattern`: Regexp pattern to match the upstream model(s) path.
+
+**Example**:
+```yaml
+manifest_checks:
+    - name: check_lineage_permitted_upstream_models
+      include: ^staging
+      upstream_path_pattern: $^
+    - name: check_lineage_permitted_upstream_models
+      include: ^intermediate
+      upstream_path_pattern: ^staging|^intermediate
+    - name: check_lineage_permitted_upstream_models
+      include: ^marts
+      upstream_path_pattern: ^staging|^intermediate
+```
+
+**Required artifact(s)**:
+
+* manifest.json
+
+---
+
+# `check_lineage_seed_cannot_be_used`
+
+Seed cannot be referenced in models with a path that matches the specified `include` config.
+
+**Argument(s)**:
+
+* `include`: Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+
+**Example**:
+```yaml
+manifest_checks:
+    - name: check_lineage_seed_cannot_be_used
+      include: ^intermediate|^marts
+```
+
+**Required artifact(s)**:
+
+* manifest.json
+
+---
+
+# `check_lineage_source_cannot_be_used`
+
+Sources cannot be referenced in models with a path that matches the specified `include` config.
+
+**Argument(s)**:
+
+* `include`: Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+
+**Example**:
+```yaml
+manifest_checks:
+    - name: check_lineage_source_cannot_be_used
+      include: ^intermediate|^marts
+```
+
+**Required artifact(s)**:
+
+* manifest.json
+
+---
+
 # `check_macro_arguments_description_populated`
 
 Macro arguments must have a populated description.
