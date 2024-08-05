@@ -4,6 +4,7 @@ import pytest
 
 from dbt_bouncer.checks.manifest.check_models import (
     check_model_access,
+    check_model_code_does_not_contain_regexp_pattern,
     check_model_description_populated,
     check_model_has_unique_test,
     check_model_names,
@@ -102,6 +103,36 @@ def test_check_model_has_unique_test(check_config, model, tests, expectation):
     with expectation:
         check_model_has_unique_test(
             check_config=check_config, model=model, tests=tests, request=None
+        )
+
+
+@pytest.mark.parametrize(
+    "check_config, model, expectation",
+    [
+        (
+            {"regexp_pattern": ".*[i][f][n][u][l][l].*"},
+            {
+                "raw_code": "select coalesce(a, b) from table",
+                "unique_id": "model.package_name.stg_model_1",
+            },
+            does_not_raise(),
+        ),
+        (
+            {
+                "regexp_pattern": ".*[i][f][n][u][l][l].*",
+            },
+            {
+                "raw_code": "select ifnull(a, b) from table",
+                "unique_id": "model.package_name.stg_model_2",
+            },
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_model_code_does_not_contain_regexp_pattern(check_config, model, expectation):
+    with expectation:
+        check_model_code_does_not_contain_regexp_pattern(
+            check_config=check_config, model=model, request=None
         )
 
 

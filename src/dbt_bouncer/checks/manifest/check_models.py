@@ -46,6 +46,31 @@ def check_model_description_populated(request, model=None):
     ), f"{model['unique_id']} does not have a populated description."
 
 
+class CheckModelCodeDoesNotContainRegexpPattern(BaseCheck):
+    name: Literal["check_model_code_does_not_contain_regexp_pattern"]
+    regexp_pattern: str = Field(
+        description="The regexp pattern that should not be matched by the model code."
+    )
+
+
+@pytest.mark.iterate_over_models
+def check_model_code_does_not_contain_regexp_pattern(request, check_config=None, model=None):
+    """
+    The raw code for a model must not match the specified regexp pattern.
+    """
+
+    input_vars = get_check_inputs(check_config=check_config, model=model, request=request)
+    check_config = input_vars["check_config"]
+    model = input_vars["model"]
+
+    assert (
+        re.compile(check_config["regexp_pattern"].strip(), flags=re.DOTALL).match(
+            model["raw_code"]
+        )
+        is None
+    ), f"{model['unique_id']} contains a banned string: `{check_config['regexp_pattern'].strip()}`."
+
+
 class CheckModelHasUniqueTest(BaseCheck):
     accepted_uniqueness_tests: Optional[List[str]] = Field(
         default=["expect_compound_columns_to_be_unique", "unique"],
