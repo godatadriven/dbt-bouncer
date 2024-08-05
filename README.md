@@ -186,6 +186,10 @@ These checks require the following artifact to be present:
 
 * [`check_source_has_meta_keys`](./src/dbt_bouncer/checks/checks.md#check_source_has_meta_keys): The `meta` config for sources must have the specified keys.
 
+**Tests**
+
+* [`check_model_has_unique_test`](./src/dbt_bouncer/checks/checks.md#check_model_has_unique_test): Models must have a test for uniqueness of a column.
+
 ### Run results checks
 
 These checks require the following artifact to be present:
