@@ -131,6 +131,29 @@ manifest_checks:
 
 ---
 
+# `check_model_code_does_not_contain_regexp_pattern`
+
+The raw code for a model must not match the specified regexp pattern.
+
+**Argument(s)**:
+
+* `include`: (Optional) Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
+* `regexp_pattern`: The regexp pattern that should not be matched by the model code.
+
+**Example**:
+```yaml
+manifest_checks:
+    # Prefer `coalesce` over `ifnull`: https://docs.sqlfluff.com/en/stable/rules.html#sqlfluff.rules.sphinx.Rule_CV02
+    - name: check_model_code_does_not_contain_regexp_pattern
+      regexp_pattern: .*[i][f][n][u][l][l].*
+```
+
+**Required artifacts(s)**:
+
+* manifest.json
+
+---
+
 # `check_macro_description_populated`
 
 Macros must have a populated description.

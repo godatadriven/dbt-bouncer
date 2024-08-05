@@ -37,6 +37,8 @@ manifest_checks:
   - name: check_macro_name_matches_file_name
   - name: check_macro_arguments_description_populated
   - name: check_macro_description_populated
+  - name: check_model_code_does_not_contain_regexp_pattern
+    regexp_pattern: .*[i][f][n][u][l][l].*
   - name: check_model_names
     include: ^intermediate
     model_name_pattern: ^int_
