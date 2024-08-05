@@ -160,7 +160,7 @@ These checks require the following artifact to be present:
 
 * [`check_lineage_permitted_upstream_models`](./src/dbt_bouncer/checks/checks.md#check_lineage_permitted_upstream_models): Upstream models must have a path that matches the provided `upstream_path_pattern`.
 * [`check_lineage_seed_cannot_be_used`](./src/dbt_bouncer/checks/checks.md#check_lineage_seed_cannot_be_used): Seed cannot be referenced in models with a path that matches the specified `include` config.
-* [`check_lineage_source_cannot_be_used`](./src/dbt_bouncer/checks/checks.md#check_lineage_source_cannot_be_used): ources cannot be referenced in models with a path that matches the specified `include` config.
+* [`check_lineage_source_cannot_be_used`](./src/dbt_bouncer/checks/checks.md#check_lineage_source_cannot_be_used): Sources cannot be referenced in models with a path that matches the specified `include` config.
 
 **Macros**
 
