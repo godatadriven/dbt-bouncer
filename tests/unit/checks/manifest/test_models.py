@@ -5,6 +5,7 @@ import pytest
 from dbt_bouncer.checks.manifest.check_models import (
     check_model_access,
     check_model_description_populated,
+    check_model_has_unique_test,
     check_model_names,
 )
 
@@ -35,6 +36,73 @@ from dbt_bouncer.checks.manifest.check_models import (
 def test_check_model_access(check_config, model, expectation):
     with expectation:
         check_model_access(check_config=check_config, model=model, request=None)
+
+
+@pytest.mark.parametrize(
+    "check_config, model, tests, expectation",
+    [
+        (
+            {
+                "accepted_uniqueness_tests": ["expect_compound_columns_to_be_unique", "unique"],
+            },
+            {
+                "unique_id": "model.package_name.stg_model_1",
+            },
+            [
+                {
+                    "attached_node": "model.package_name.stg_model_1",
+                    "test_metadata": {"name": "unique"},
+                }
+            ],
+            does_not_raise(),
+        ),
+        (
+            {
+                "accepted_uniqueness_tests": ["my_custom_test", "unique"],
+            },
+            {
+                "unique_id": "model.package_name.stg_model_2",
+            },
+            [
+                {
+                    "attached_node": "model.package_name.stg_model_2",
+                    "test_metadata": {"name": "my_custom_test"},
+                }
+            ],
+            does_not_raise(),
+        ),
+        (
+            {
+                "accepted_uniqueness_tests": ["unique"],
+            },
+            {
+                "unique_id": "model.package_name.stg_model_3",
+            },
+            [
+                {
+                    "attached_node": "model.package_name.stg_model_3",
+                    "test_metadata": {"name": "expect_compound_columns_to_be_unique"},
+                }
+            ],
+            pytest.raises(AssertionError),
+        ),
+        (
+            {
+                "accepted_uniqueness_tests": ["expect_compound_columns_to_be_unique", "unique"],
+            },
+            {
+                "unique_id": "model.package_name.stg_model_4",
+            },
+            [],
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_model_has_unique_test(check_config, model, tests, expectation):
+    with expectation:
+        check_model_has_unique_test(
+            check_config=check_config, model=model, tests=tests, request=None
+        )
 
 
 @pytest.mark.parametrize(

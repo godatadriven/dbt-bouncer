@@ -202,6 +202,34 @@ manifest_checks:
 
 ---
 
+# `check_model_has_unique_test`
+
+Models must have a test for uniqueness of a column.
+
+**Argument(s)**:
+
+* `accepted_uniqueness_tests`: (Optional) List of tests that are accepted as uniqueness tests. If not provided, defaults to `expect_compound_columns_to_be_unique` and `unique`.
+* `include`: (Optional) Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+
+**Example**:
+```yaml
+manifest_checks:
+    - name: check_model_has_unique_test
+
+    # Example of allowing a custom uniqueness test
+    - name: check_model_has_unique_test
+      accepted_uniqueness_tests:
+        - expect_compound_columns_to_be_unique
+        - my_custom_uniqueness_test
+        - unique
+```
+
+**Required artifacts(s)**:
+
+* manifest.json
+
+---
+
 # `check_model_description_populated`
 
 Models must have a populated description.
