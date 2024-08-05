@@ -64,7 +64,17 @@ manifest_checks:
           - email
           - slack
       - owner
-  - name: check_top_level_directories
+  - name: check_model_directories
+    include: ""
+    permitted_sub_directories:
+      - intermediate
+      - marts
+      - staging
+  - name: check_model_directories
+    include: ^staging
+    permitted_sub_directories:
+      - crm
+      - payments
 
 run_results_checks:
   - name: check_run_results_max_execution_time

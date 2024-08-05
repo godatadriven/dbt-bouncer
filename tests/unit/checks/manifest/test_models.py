@@ -6,6 +6,7 @@ from dbt_bouncer.checks.manifest.check_models import (
     check_model_access,
     check_model_code_does_not_contain_regexp_pattern,
     check_model_description_populated,
+    check_model_directories,
     check_model_has_unique_test,
     check_model_names,
 )
@@ -134,6 +135,40 @@ def test_check_model_code_does_not_contain_regexp_pattern(check_config, model, e
         check_model_code_does_not_contain_regexp_pattern(
             check_config=check_config, model=model, request=None
         )
+
+
+@pytest.mark.parametrize(
+    "check_config, model, expectation",
+    [
+        (
+            {"include": "", "permitted_sub_directories": ["staging", "mart", "intermediate"]},
+            {
+                "path": "staging/stg_model_1.sql",
+                "unique_id": "model.package_name.stg_model_1",
+            },
+            does_not_raise(),
+        ),
+        (
+            {"include": "marts", "permitted_sub_directories": ["finance", "marketing"]},
+            {
+                "path": "marts/finance/marts_model_1.sql",
+                "unique_id": "model.package_name.marts_model_1",
+            },
+            does_not_raise(),
+        ),
+        (
+            {"include": "marts", "permitted_sub_directories": ["finance", "marketing"]},
+            {
+                "path": "marts/sales/marts_model_1.sql",
+                "unique_id": "model.package_name.marts_model_1",
+            },
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_model_directories(check_config, model, expectation):
+    with expectation:
+        check_model_directories(check_config=check_config, model=model, request=None)
 
 
 @pytest.mark.parametrize(
