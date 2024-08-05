@@ -174,6 +174,40 @@ manifest_checks:
 
 ---
 
+# `check_model_directories`
+
+Only specified sub-directories are permitted.
+
+**Argument(s)**:
+
+* `include`: Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
+* `permitted_sub_directories`: List of permitted sub-directories.
+
+**Example**:
+```yaml
+manifest_checks:
+  # Special case for top level directories within `./models`, pass "" to `include`
+  - name: check_top_level_directories
+    include: ""
+    permitted_sub_directories:
+      - intermediate
+      - marts
+      - staging
+
+  # Restrict sub-directories within `./models/staging`
+  - name: check_top_level_directories
+    include: ^staging
+    permitted_sub_directories:
+      - crm
+      - payments
+```
+
+**Required artifacts(s)**:
+
+* manifest.json
+
+---
+
 # `check_macro_name_matches_file_name`
 
 Macros names must be the same as the file they are contained in.
@@ -383,22 +417,6 @@ manifest_checks:
             - email
             - slack
         - owner
-```
-
-**Required artifacts(s)**:
-
-* manifest.json
-
----
-
-# `check_top_level_directories`
-
-Only specified top-level directories are allowed to contain models.
-
-**Example**:
-```yaml
-manifest_checks:
-    - name: check_top_level_directories
 ```
 
 **Required artifacts(s)**:

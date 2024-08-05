@@ -172,15 +172,12 @@ These checks require the following artifact to be present:
 
 * [`check_project_name`](./src/dbt_bouncer/checks/checks.md#check_project_name): Enforce that the name of the dbt project matches a supplied regex.
 
-**Miscellaneous**
-
-* [`check_top_level_directories`](./src/dbt_bouncer/checks/checks.md#check_top_level_directories): Only specified top-level directories are allowed to contain models.
-
 **Models**
 
 * [`check_model_access`](./src/dbt_bouncer/checks/checks.md#check_model_access): Models must have the specified access attribute.
 * [`check_model_code_does_not_contain_regexp_pattern`](./src/dbt_bouncer/checks/checks.md#check_model_code_does_not_contain_regexp_pattern): The raw code for a model must not match the specified regexp pattern.
 * [`check_model_description_populated`](./src/dbt_bouncer/checks/checks.md#check_model_description_populated): Models must have a populated description.
+* [`check_model_directories`](./src/dbt_bouncer/checks/checks.md#check_model_directories): Only specified sub-directories are permitted.
 * [`check_model_names`](./src/dbt_bouncer/checks/checks.md#check_model_names): Models must have a name that matches the supplied regex.
 
 **Sources**

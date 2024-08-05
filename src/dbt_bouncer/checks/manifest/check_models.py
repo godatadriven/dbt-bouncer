@@ -2,7 +2,7 @@ import re
 from typing import List, Literal, Optional
 
 import pytest
-from pydantic import ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from dbt_bouncer.conf_validator_base import BaseCheck
 from dbt_bouncer.logger import logger
@@ -77,6 +77,41 @@ class CheckModelHasUniqueTest(BaseCheck):
         description="List of tests that are accepted as uniqueness tests. If not provided, defaults to `expect_compound_columns_to_be_unique` and `unique`.",
     )
     name: Literal["check_model_has_unique_test"]
+
+
+class CheckModelDirectories(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    include: str = Field(
+        description="Regex pattern to match the model path. Only model paths that match the pattern will be checked."
+    )
+    name: Literal["check_model_directories"]
+    permitted_sub_directories: list[str] = Field(description="List of permitted sub-directories.")
+
+
+@pytest.mark.iterate_over_models
+def check_model_directories(request, check_config=None, model=None):
+    """
+    Only specified sub-directories are permitted.
+    """
+
+    input_vars = get_check_inputs(check_config=check_config, model=model, request=request)
+    include = input_vars["check_config"]["include"]
+    model = input_vars["model"]
+    permitted_sub_directories = input_vars["check_config"]["permitted_sub_directories"]
+
+    # Special case for `models` directory
+    if include == "":
+        assert (
+            model["path"].split("/")[0] in permitted_sub_directories
+        ), f"{model['unique_id']} is located in `{model['path'].split('/')[0]}`, this is not a valid sub- directory."
+    else:
+        matched_path = re.compile(include.strip()).match(model["path"])
+        path_after_match = model["path"][matched_path.end() + 1 :]  # type: ignore[union-attr]
+
+        assert (
+            path_after_match.split("/")[0] in permitted_sub_directories
+        ), f"{model['unique_id']} is located in `{model['path'].split('/')[0]}`, this is not a valid sub- directory."
 
 
 @pytest.mark.iterate_over_models
