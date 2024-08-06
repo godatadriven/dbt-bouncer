@@ -1,6 +1,8 @@
+import re
 from typing import Any, Dict, List, Literal, Optional, Union
 
 import pytest
+from pydantic import Field
 
 from dbt_bouncer.conf_validator_base import BaseCheck
 from dbt_bouncer.utils import find_missing_meta_keys, get_check_inputs
@@ -32,6 +34,26 @@ def check_source_has_meta_keys(request, check_config=None, source=None) -> None:
     assert (
         missing_keys == []
     ), f"{source['unique_id']} is missing the following keys from the `meta` config: {[x.replace('>>', '') for x in missing_keys]}"
+
+
+class CheckSourceNames(BaseCheck):
+    name: Literal["check_source_names"]
+    source_name_pattern: str = Field(description="Regexp the source name must match.")
+
+
+@pytest.mark.iterate_over_sources
+def check_source_names(request, check_config=None, source=None):
+    """
+    Sources must have a name that matches the supplied regex.
+    """
+
+    input_vars = get_check_inputs(check_config=check_config, source=source, request=request)
+    check_config = input_vars["check_config"]
+    source = input_vars["source"]
+
+    assert (
+        re.compile(check_config["source_name_pattern"].strip()).match(source["name"]) is not None
+    ), f"`{source['unique_id'].split('.')[0]}` does not match the supplied regex `({check_config['source_name_pattern'].strip()})`."
 
 
 class CheckSoureNotorphaned(BaseCheck):

@@ -472,6 +472,29 @@ manifest_checks:
 
 ---
 
+# `check_source_names`
+
+Sources must have a name that matches the supplied regex.
+
+**Argument(s)**:
+
+* `include`: (Optional) Regex pattern to match the source path (i.e the `.yml` file where the source is configured). Only source paths that match the pattern will be checked.
+* `source_name_pattern`: Regex pattern to match the source name.
+
+**Example**:
+```yaml
+manifest_checks:
+    - name: check_source_names
+      source_name_pattern: >
+        ^[a-z0-9_]*$
+```
+
+**Required artifacts(s)**:
+
+* manifest.json
+
+---
+
 # `check_source_not_orphaned`
 
 Sources must be referenced in at least one model.
