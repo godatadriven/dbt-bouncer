@@ -406,7 +406,7 @@ The `meta` config for sources must have the specified keys.
 **Argument(s)**:
 
 * `include`: (Optional) Regex pattern to match the source path (i.e the `.yml` file where the source is configured). Only source paths that match the pattern will be checked.
-* `key`:
+* `key`: A list (that may contain sub-lists) of required keys.
 
 **Example**:
 ```yaml
@@ -417,6 +417,26 @@ manifest_checks:
             - email
             - slack
         - owner
+```
+
+**Required artifacts(s)**:
+
+* manifest.json
+
+---
+
+# `check_source_used_by_only_one_model`
+
+Each source can be references by a maximum of one model.
+
+**Argument(s)**:
+
+* `include`: (Optional) Regex pattern to match the source path (i.e the `.yml` file where the source is configured). Only source paths that match the pattern will be checked.
+
+**Example**:
+```yaml
+manifest_checks:
+    - name: check_source_used_by_only_one_model
 ```
 
 **Required artifacts(s)**:

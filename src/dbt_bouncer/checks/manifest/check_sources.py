@@ -38,3 +38,22 @@ def check_source_has_meta_keys(request, check_config=None, source=None) -> None:
     assert (
         missing_keys == []
     ), f"{source['unique_id']} is missing the following keys from the `meta` config: {[x.replace('>>', '') for x in missing_keys]}"
+
+
+class CheckSourceUsedByOnlyOneModel(BaseCheck):
+    name: Literal["check_source_used_by_only_one_model"]
+
+
+@pytest.mark.iterate_over_sources
+def check_source_used_by_only_one_model(models, request, source=None) -> None:
+    """
+    Each source can be references by a maximum of one model.
+    """
+
+    source = get_check_inputs(
+        request=request,
+        source=source,
+    )["source"]
+
+    num_refs = sum(source["unique_id"] in model["depends_on"]["nodes"] for model in models)
+    assert num_refs <= 1, f"Source `{source['unique_id']}` is referenced by more than one model."

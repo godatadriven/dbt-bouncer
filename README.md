@@ -183,6 +183,7 @@ These checks require the following artifact to be present:
 **Sources**
 
 * [`check_source_has_meta_keys`](./src/dbt_bouncer/checks/checks.md#check_source_has_meta_keys): The `meta` config for sources must have the specified keys.
+* [`check_source_used_by_only_one_model`](./src/dbt_bouncer/checks/checks.md#check_source_used_by_only_one_model): Each source can be references by a maximum of one model.
 
 **Tests**
 
