@@ -28,7 +28,7 @@ def test_get_dbt_bouncer_config_default(tmp_path):
 PYPROJECT_TOML_SAMPLE_CONFIG = {
     "dbt_artifacts_dir": "dbt_project/target",
     "manifest_checks": [
-        {"name": "check_top_level_directories"},
+        {"name": "check_model_has_unique_test"},
         {
             "include": "^staging",
             "model_name_pattern": "^stg_",
