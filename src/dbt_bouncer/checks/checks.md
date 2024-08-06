@@ -231,6 +231,28 @@ manifest_checks:
 
 ---
 
+# `check_model_max_fanout`
+
+Models cannot have more than the specified number of downstream models (default: 3).
+
+**Argument(s)**:
+
+* `include`: (Optional) Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
+* `max_downstream_models`: (Optional) The maximum number of permitted downstream models.
+
+**Example**:
+```yaml
+manifest_checks:
+  - name: check_model_max_fanout
+    max_downstream_models: 2
+```
+
+**Required artifacts(s)**:
+
+* manifest.json
+
+---
+
 # `check_macro_name_matches_file_name`
 
 Macros names must be the same as the file they are contained in.

@@ -52,6 +52,8 @@ manifest_checks:
   - name: check_model_has_meta_keys
     keys:
       - maturity
+  - name: check_model_max_fanout
+    max_downstream_models: 2
   - name: check_model_access
     include: ^intermediate
     access: protected

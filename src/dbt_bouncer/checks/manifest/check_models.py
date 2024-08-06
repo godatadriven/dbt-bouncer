@@ -165,6 +165,30 @@ def check_model_has_unique_test(request, tests, check_config=None, model=None):
     ), f"{model['unique_id']} does not have a test for uniqueness of a column."
 
 
+class CheckModelMaxFanout(BaseCheck):
+    max_downstream_models: int = Field(
+        default=3, description="The maximum number of permitted downstream models."
+    )
+    name: Literal["check_model_max_fanout"]
+
+
+@pytest.mark.iterate_over_models
+def check_model_max_fanout(models, request, check_config=None, model=None):
+    """
+    Models cannot have more than the specified number of downstream models (default: 3).
+    """
+
+    input_vars = get_check_inputs(check_config=check_config, model=model, request=request)
+    max_downstream_models = input_vars["check_config"]["max_downstream_models"]
+    model = input_vars["model"]
+
+    num_downstream_models = sum(model["unique_id"] in m["depends_on"]["nodes"] for m in models)
+
+    assert (
+        num_downstream_models <= max_downstream_models
+    ), f"{model['unique_id']} has {num_downstream_models} downstream models, which is more than the permitted maximum of {max_downstream_models}."
+
+
 class CheckModelNames(BaseCheck):
     model_config = ConfigDict(extra="forbid", protected_namespaces=())
 
