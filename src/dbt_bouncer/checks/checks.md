@@ -448,6 +448,26 @@ manifest_checks:
 
 ---
 
+# `check_source_not_orphaned`
+
+Sources must be referenced in at least one model.
+
+**Argument(s)**:
+
+* `include`: (Optional) Regex pattern to match the source path (i.e the `.yml` file where the source is configured). Only source paths that match the pattern will be checked.
+
+**Example**:
+```yaml
+manifest_checks:
+    - name: check_source_not_orphaned
+```
+
+**Required artifacts(s)**:
+
+* manifest.json
+
+---
+
 # `check_source_used_by_only_one_model`
 
 Each source can be references by a maximum of one model.

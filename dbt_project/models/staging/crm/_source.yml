@@ -1,27 +1,6 @@
 version: 2
 
 sources:
-  - name: sources_that_dont_really_exist
-    tables:
-      - name: source_1
-        meta:
-          contact:
-            email: anna@email.com
-            name:
-              first: Anna
-              last: Anderson
-            slack: |
-              @anna
-          maturity: high
-          owner: Anna
-      - name: source_2
-        meta:
-          contact:
-            email: annabelle@email.com
-            slack: |
-              @therealanna
-          owner: Annabelle
-
   - name: dummy_source
     tables:
     - name: customers

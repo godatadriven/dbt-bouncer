@@ -4,6 +4,7 @@ import pytest
 
 from dbt_bouncer.checks.manifest.check_sources import (
     check_source_has_meta_keys,
+    check_source_not_orphaned,
     check_source_used_by_only_one_model,
 )
 
@@ -64,6 +65,56 @@ from dbt_bouncer.checks.manifest.check_sources import (
 def test_check_source_has_meta_keys(check_config, source, expectation):
     with expectation:
         check_source_has_meta_keys(check_config=check_config, source=source, request=None)
+
+
+@pytest.mark.parametrize(
+    "models, source, expectation",
+    [
+        (
+            [
+                {
+                    "unique_id": "model.package_name.model_1",
+                    "depends_on": {"nodes": ["source.package_name.source_1"]},
+                }
+            ],
+            {
+                "unique_id": "source.package_name.source_1",
+            },
+            does_not_raise(),
+        ),
+        (
+            [
+                {
+                    "unique_id": "model.package_name.model_1",
+                    "depends_on": {"nodes": ["source.package_name.source_1"]},
+                },
+                {
+                    "unique_id": "model.package_name.model_2",
+                    "depends_on": {"nodes": ["source.package_name.source_1"]},
+                },
+            ],
+            {
+                "unique_id": "source.package_name.source_1",
+            },
+            does_not_raise(),
+        ),
+        (
+            [
+                {
+                    "unique_id": "model.package_name.model_1",
+                    "depends_on": {"nodes": []},
+                },
+            ],
+            {
+                "unique_id": "source.package_name.source_1",
+            },
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_source_not_orphaned(models, source, expectation):
+    with expectation:
+        check_source_not_orphaned(models=models, source=source, request=None)
 
 
 @pytest.mark.parametrize(
