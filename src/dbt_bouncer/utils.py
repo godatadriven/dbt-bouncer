@@ -2,13 +2,28 @@ import contextlib
 import json
 import re
 from pathlib import Path
-from typing import Literal
+from typing import List, Literal
 
 import toml
 import yaml
 from dbt_artifacts_parser.parser import parse_catalog, parse_manifest, parse_run_results
 
 from dbt_bouncer.logger import logger
+
+
+def find_missing_meta_keys(meta_config, required_keys) -> List[str]:
+    """
+    Find missing keys in a meta config.
+    """
+
+    keys_in_meta = list(flatten(meta_config).keys())
+
+    # Get required keys and convert to a list
+    required_keys = [
+        re.sub(r"(\>{1}\d{1,10})", "", f"{k}>{v}") for k, v in flatten(required_keys).items()
+    ]
+
+    return [x for x in required_keys if x not in keys_in_meta]
 
 
 def flatten(structure, key="", path="", flattened=None):

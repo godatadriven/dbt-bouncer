@@ -330,6 +330,30 @@ manifest_checks:
 
 ---
 
+# `check_model_has_meta_keys`
+
+The `meta` config for models must have the specified keys.
+
+**Argument(s)**:
+
+* `include`: (Optional) Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+* `key`: A list (that may contain sub-lists) of required keys.
+
+**Example**:
+```yaml
+manifest_checks:
+    - name: check_model_has_meta_keys
+      keys:
+        - maturity
+        - owner
+```
+
+**Required artifacts(s)**:
+
+* manifest.json
+
+---
+
 # `check_model_names`
 
 Models must have a name that matches the supplied regex.

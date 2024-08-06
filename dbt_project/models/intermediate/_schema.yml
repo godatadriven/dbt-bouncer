@@ -2,6 +2,9 @@ version: 2
 
 models:
   - name: int_model_1
+    config:
+      meta:
+        maturity: lithium
     description: Super basic model that has a description and a test
     columns:
       - name: id

@@ -1,10 +1,9 @@
-import re
 from typing import Any, Dict, List, Literal, Optional, Union
 
 import pytest
 
 from dbt_bouncer.conf_validator_base import BaseCheck
-from dbt_bouncer.utils import flatten, get_check_inputs
+from dbt_bouncer.utils import find_missing_meta_keys, get_check_inputs
 
 
 class CheckSourceHasMetaKeys(BaseCheck):
@@ -26,15 +25,10 @@ def check_source_has_meta_keys(request, check_config=None, source=None) -> None:
     check_config = input_vars["check_config"]
     source = input_vars["source"]
 
-    keys_in_meta = list(flatten(source.get("meta")).keys())
-
-    # Get required keys and convert to a list
-    specified_keys = check_config["keys"]
-    required_keys = [
-        re.sub(r"(\>{1}\d{1,10})", "", f"{k}>{v}") for k, v in flatten(specified_keys).items()
-    ]
-
-    missing_keys = [x for x in required_keys if x not in keys_in_meta]
+    missing_keys = find_missing_meta_keys(
+        meta_config=source.get("meta"),
+        required_keys=check_config["keys"],
+    )
     assert (
         missing_keys == []
     ), f"{source['unique_id']} is missing the following keys from the `meta` config: {[x.replace('>>', '') for x in missing_keys]}"

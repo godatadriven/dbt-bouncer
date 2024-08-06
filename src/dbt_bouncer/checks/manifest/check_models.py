@@ -1,12 +1,12 @@
 import re
-from typing import List, Literal, Optional
+from typing import Any, Dict, List, Literal, Optional, Union
 
 import pytest
 from pydantic import BaseModel, ConfigDict, Field
 
 from dbt_bouncer.conf_validator_base import BaseCheck
 from dbt_bouncer.logger import logger
-from dbt_bouncer.utils import get_check_inputs
+from dbt_bouncer.utils import find_missing_meta_keys, get_check_inputs
 
 
 class CheckModelAccess(BaseCheck):
@@ -71,14 +71,6 @@ def check_model_code_does_not_contain_regexp_pattern(request, check_config=None,
     ), f"`{model['unique_id']}` contains a banned string: `{check_config['regexp_pattern'].strip()}`."
 
 
-class CheckModelHasUniqueTest(BaseCheck):
-    accepted_uniqueness_tests: Optional[List[str]] = Field(
-        default=["expect_compound_columns_to_be_unique", "unique"],
-        description="List of tests that are accepted as uniqueness tests. If not provided, defaults to `expect_compound_columns_to_be_unique` and `unique`.",
-    )
-    name: Literal["check_model_has_unique_test"]
-
-
 class CheckModelDirectories(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -112,6 +104,42 @@ def check_model_directories(request, check_config=None, model=None):
         assert (
             path_after_match.split("/")[0] in permitted_sub_directories
         ), f"{model['unique_id']} is located in `{model['path'].split('/')[0]}`, this is not a valid sub- directory."
+
+
+class CheckModelHasMetaKeys(BaseCheck):
+    keys: Optional[Union[Dict[str, Any], List[Any]]]
+    name: Literal["check_model_has_meta_keys"]
+
+
+@pytest.mark.iterate_over_models
+def check_model_has_meta_keys(request, check_config=None, model=None) -> None:
+    """
+    The `meta` config for models must have the specified keys.
+    """
+
+    input_vars = get_check_inputs(
+        check_config=check_config,
+        model=model,
+        request=request,
+    )
+    check_config = input_vars["check_config"]
+    model = input_vars["model"]
+
+    missing_keys = find_missing_meta_keys(
+        meta_config=model.get("meta"),
+        required_keys=check_config["keys"],
+    )
+    assert (
+        missing_keys == []
+    ), f"{model['unique_id']} is missing the following keys from the `meta` config: {[x.replace('>>', '') for x in missing_keys]}"
+
+
+class CheckModelHasUniqueTest(BaseCheck):
+    accepted_uniqueness_tests: Optional[List[str]] = Field(
+        default=["expect_compound_columns_to_be_unique", "unique"],
+        description="List of tests that are accepted as uniqueness tests. If not provided, defaults to `expect_compound_columns_to_be_unique` and `unique`.",
+    )
+    name: Literal["check_model_has_unique_test"]
 
 
 @pytest.mark.iterate_over_models
