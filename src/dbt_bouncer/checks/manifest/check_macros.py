@@ -1,6 +1,8 @@
+import re
 from typing import Literal
 
 import pytest
+from pydantic import Field
 
 from dbt_bouncer.conf_validator_base import BaseCheck
 from dbt_bouncer.utils import get_check_inputs
@@ -21,6 +23,31 @@ def check_macro_arguments_description_populated(request, check_config=None, macr
         assert (
             len(arg["description"].strip()) > 4
         ), f"Argument {arg['name']} in {macro['unique_id']} does not have a populated description."
+
+
+class CheckMacroCodeDoesNotContainRegexpPattern(BaseCheck):
+    name: Literal["check_macro_code_does_not_contain_regexp_pattern"]
+    regexp_pattern: str = Field(
+        description="The regexp pattern that should not be matched by the macro code."
+    )
+
+
+@pytest.mark.iterate_over_macros
+def check_macro_code_does_not_contain_regexp_pattern(request, check_config=None, macro=None):
+    """
+    The raw code for a macro must not match the specified regexp pattern.
+    """
+
+    input_vars = get_check_inputs(check_config=check_config, macro=macro, request=request)
+    check_config = input_vars["check_config"]
+    macro = input_vars["macro"]
+
+    assert (
+        re.compile(check_config["regexp_pattern"].strip(), flags=re.DOTALL).match(
+            macro["macro_sql"]
+        )
+        is None
+    ), f"`{macro['unique_id']}` contains a banned string: `{check_config['regexp_pattern'].strip()}`."
 
 
 class CheckMacroDescriptionPopulated(BaseCheck):

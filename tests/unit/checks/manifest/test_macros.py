@@ -4,6 +4,7 @@ import pytest
 
 from dbt_bouncer.checks.manifest.check_macros import (
     check_macro_arguments_description_populated,
+    check_macro_code_does_not_contain_regexp_pattern,
     check_macro_description_populated,
     check_macro_name_matches_file_name,
 )
@@ -86,6 +87,36 @@ from dbt_bouncer.checks.manifest.check_macros import (
 def test_check_macro_arguments_description_populated(macro, expectation):
     with expectation:
         check_macro_arguments_description_populated(macro=macro, request=None)
+
+
+@pytest.mark.parametrize(
+    "check_config, macro, expectation",
+    [
+        (
+            {"regexp_pattern": ".*[i][f][n][u][l][l].*"},
+            {
+                "macro_sql": "{% macro no_makes_sense(a, b) %} select coalesce({{ a }}, {{ b  }}) from table {% endmacro %}",
+                "unique_id": "model.package_name.stg_model_1",
+            },
+            does_not_raise(),
+        ),
+        (
+            {
+                "regexp_pattern": ".*[i][f][n][u][l][l].*",
+            },
+            {
+                "macro_sql": "{% macro no_makes_sense(a, b) %} select ifnull({{ a }}, {{ b  }}) from table {% endmacro %}",
+                "unique_id": "model.package_name.stg_model_2",
+            },
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_macro_code_does_not_contain_regexp_pattern(check_config, macro, expectation):
+    with expectation:
+        check_macro_code_does_not_contain_regexp_pattern(
+            check_config=check_config, macro=macro, request=None
+        )
 
 
 @pytest.mark.parametrize(
