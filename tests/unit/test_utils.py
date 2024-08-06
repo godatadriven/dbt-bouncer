@@ -28,11 +28,11 @@ def test_get_dbt_bouncer_config_default(tmp_path):
 PYPROJECT_TOML_SAMPLE_CONFIG = {
     "dbt_artifacts_dir": "dbt_project/target",
     "manifest_checks": [
-        {"name": "check_top_level_directories"},
+        {"name": "check_model_description_populated"},
         {
-            "include": "^staging",
-            "model_name_pattern": "^stg_",
-            "name": "check_model_names",
+            "include": "^marts",
+            "upstream_path_pattern": "^staging|^intermediate",
+            "name": "check_lineage_permitted_upstream_models",
         },
     ],
 }

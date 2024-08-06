@@ -187,7 +187,7 @@ Only specified sub-directories are permitted.
 ```yaml
 manifest_checks:
   # Special case for top level directories within `./models`, pass "" to `include`
-  - name: check_top_level_directories
+  - name: check_model_directories
     include: ""
     permitted_sub_directories:
       - intermediate
@@ -195,7 +195,7 @@ manifest_checks:
       - staging
 
   # Restrict sub-directories within `./models/staging`
-  - name: check_top_level_directories
+  - name: check_model_directories
     include: ^staging
     permitted_sub_directories:
       - crm
