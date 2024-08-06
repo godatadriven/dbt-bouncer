@@ -86,7 +86,7 @@ class CheckModelDirectories(BaseModel):
         description="Regex pattern to match the model path. Only model paths that match the pattern will be checked."
     )
     name: Literal["check_model_directories"]
-    permitted_sub_directories: list[str] = Field(description="List of permitted sub-directories.")
+    permitted_sub_directories: List[str] = Field(description="List of permitted sub-directories.")
 
 
 @pytest.mark.iterate_over_models
