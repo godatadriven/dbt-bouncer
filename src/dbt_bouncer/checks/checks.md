@@ -177,6 +177,26 @@ manifest_checks:
 
 ---
 
+# `check_model_depends_on_multiple_sources`
+
+Models cannot reference more than one source.
+
+**Argument(s)**:
+
+* `include`: (Optional) Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
+
+**Example**:
+```yaml
+manifest_checks:
+    - name: check_model_depends_on_multiple_sources
+```
+
+**Required artifacts(s)**:
+
+* manifest.json
+
+---
+
 # `check_macro_description_populated`
 
 Macros must have a populated description.

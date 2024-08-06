@@ -177,6 +177,7 @@ These checks require the following artifact to be present:
 
 * [`check_model_access`](./src/dbt_bouncer/checks/checks.md#check_model_access): Models must have the specified access attribute.
 * [`check_model_code_does_not_contain_regexp_pattern`](./src/dbt_bouncer/checks/checks.md#check_model_code_does_not_contain_regexp_pattern): The raw code for a model must not match the specified regexp pattern.
+* [`check_model_depends_on_multiple_sources`](./src/dbt_bouncer/checks/checks.md#check_model_depends_on_multiple_sources): Models cannot reference more than one source.
 * [`check_model_description_populated`](./src/dbt_bouncer/checks/checks.md#check_model_description_populated): Models must have a populated description.
 * [`check_model_directories`](./src/dbt_bouncer/checks/checks.md#check_model_directories): Only specified sub-directories are permitted.
 * [`check_model_has_meta_keys`](./src/dbt_bouncer/checks/checks.md#check_model_has_meta_keys): The `meta` config for models must have the specified keys.

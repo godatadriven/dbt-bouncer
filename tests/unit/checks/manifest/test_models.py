@@ -5,6 +5,7 @@ import pytest
 from dbt_bouncer.checks.manifest.check_models import (
     check_model_access,
     check_model_code_does_not_contain_regexp_pattern,
+    check_model_depends_on_multiple_sources,
     check_model_description_populated,
     check_model_directories,
     check_model_has_meta_keys,
@@ -40,6 +41,32 @@ from dbt_bouncer.checks.manifest.check_models import (
 def test_check_model_access(check_config, model, expectation):
     with expectation:
         check_model_access(check_config=check_config, model=model, request=None)
+
+
+@pytest.mark.parametrize(
+    "model, expectation",
+    [
+        (
+            {
+                "depends_on": {"nodes": ["source.package_name.source_1"]},
+                "unique_id": "model.package_name.stg_model_1",
+            },
+            does_not_raise(),
+        ),
+        (
+            {
+                "depends_on": {
+                    "nodes": ["source.package_name.source_1", "source.package_name.source_2"]
+                },
+                "unique_id": "model.package_name.stg_model_1",
+            },
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_model_depends_on_multiple_sources(model, expectation):
+    with expectation:
+        check_model_depends_on_multiple_sources(model=model, request=None)
 
 
 @pytest.mark.parametrize(

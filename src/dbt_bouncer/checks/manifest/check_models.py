@@ -71,6 +71,21 @@ def check_model_code_does_not_contain_regexp_pattern(request, check_config=None,
     ), f"`{model['unique_id']}` contains a banned string: `{check_config['regexp_pattern'].strip()}`."
 
 
+class CheckModelDependsOnMultipleSources(BaseCheck):
+    name: Literal["check_model_depends_on_multiple_sources"]
+
+
+@pytest.mark.iterate_over_models
+def check_model_depends_on_multiple_sources(request, model=None):
+    """
+    Models cannot reference more than one source.
+    """
+
+    model = get_check_inputs(model=model, request=request)["model"]
+    num_reffed_sources = sum(x.split(".")[0] == "source" for x in model["depends_on"]["nodes"])
+    assert num_reffed_sources <= 1, f"`{model['unique_id']}` references more than one source."
+
+
 class CheckModelDirectories(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
