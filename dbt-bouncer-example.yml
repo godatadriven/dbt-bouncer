@@ -64,6 +64,7 @@ manifest_checks:
           - email
           - slack
       - owner
+  - name: check_source_used_by_only_one_model
   - name: check_model_directories
     include: ""
     permitted_sub_directories:
