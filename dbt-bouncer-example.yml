@@ -69,6 +69,9 @@ manifest_checks:
           - email
           - slack
       - owner
+  - name: check_source_names
+    source_name_pattern: >
+      ^[a-z0-9_]*$
   - name: check_source_not_orphaned
     include: ^staging/payments
   - name: check_source_used_by_only_one_model
