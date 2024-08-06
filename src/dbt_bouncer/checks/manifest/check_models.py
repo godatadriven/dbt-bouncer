@@ -68,7 +68,7 @@ def check_model_code_does_not_contain_regexp_pattern(request, check_config=None,
             model["raw_code"]
         )
         is None
-    ), f"{model['unique_id']} contains a banned string: `{check_config['regexp_pattern'].strip()}`."
+    ), f"`{model['unique_id']}` contains a banned string: `{check_config['regexp_pattern'].strip()}`."
 
 
 class CheckModelHasUniqueTest(BaseCheck):

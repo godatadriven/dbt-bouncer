@@ -165,6 +165,7 @@ These checks require the following artifact to be present:
 **Macros**
 
 * [`check_macro_arguments_description_populated`](./src/dbt_bouncer/checks/checks.md#check_macro_arguments_description_populated): Macro arguments must have a populated description.
+* [`check_macro_code_does_not_contain_regexp_pattern`](./src/dbt_bouncer/checks/checks.md#check_macro_code_does_not_contain_regexp_pattern): The raw code for a macro must not match the specified regexp pattern.
 * [`check_macro_description_populated`](./src/dbt_bouncer/checks/checks.md#check_macro_description_populated): Macros must have a populated description.
 * [`check_macro_name_matches_file_name`](./src/dbt_bouncer/checks/checks.md#check_macro_name_matches_file_name): Macros names must be the same as the file they are contained in.
 
