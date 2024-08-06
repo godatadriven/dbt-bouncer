@@ -137,7 +137,7 @@ The raw code for a model must not match the specified regexp pattern.
 
 **Argument(s)**:
 
-* `include`: (Optional) Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
+* `include`: (Optional) Regex pattern to match the model path. Only model paths that match the pattern will be checked.
 * `regexp_pattern`: The regexp pattern that should not be matched by the model code.
 
 **Example**:
