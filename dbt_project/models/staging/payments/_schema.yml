@@ -3,6 +3,9 @@ version: 2
 models:
   - name: stg_payments
     description: Staging table for payment data.
+    config:
+      meta:
+        maturity: gold
     columns:
       - name: payment_id
         tests:

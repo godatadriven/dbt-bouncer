@@ -7,6 +7,7 @@ from dbt_bouncer.checks.manifest.check_models import (
     check_model_code_does_not_contain_regexp_pattern,
     check_model_description_populated,
     check_model_directories,
+    check_model_has_meta_keys,
     check_model_has_unique_test,
     check_model_names,
 )
@@ -38,6 +39,64 @@ from dbt_bouncer.checks.manifest.check_models import (
 def test_check_model_access(check_config, model, expectation):
     with expectation:
         check_model_access(check_config=check_config, model=model, request=None)
+
+
+@pytest.mark.parametrize(
+    "check_config, model, expectation",
+    [
+        (
+            {"keys": ["owner"]},
+            {
+                "meta": {"owner": "Bob"},
+                "unique_id": "model.package_name.model_1",
+            },
+            does_not_raise(),
+        ),
+        (
+            {"keys": ["owner"]},
+            {
+                "meta": {"maturity": "high", "owner": "Bob"},
+                "unique_id": "model.package_name.model_1",
+            },
+            does_not_raise(),
+        ),
+        (
+            {"keys": ["owner", {"name": ["first", "last"]}]},
+            {
+                "meta": {"name": {"first": "Bob", "last": "Bobbington"}, "owner": "Bob"},
+                "unique_id": "model.package_name.model_1",
+            },
+            does_not_raise(),
+        ),
+        (
+            {"keys": ["owner"]},
+            {
+                "meta": {},
+                "unique_id": "model.package_name.model_1",
+            },
+            pytest.raises(AssertionError),
+        ),
+        (
+            {"keys": ["owner"]},
+            {
+                "meta": {"maturity": "high"},
+                "unique_id": "model.package_name.model_1",
+            },
+            pytest.raises(AssertionError),
+        ),
+        (
+            {"keys": ["owner", {"name": ["first", "last"]}]},
+            {
+                "meta": {"name": {"last": "Bobbington"}, "owner": "Bob"},
+                "unique_id": "model.package_name.model_1",
+            },
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_model_has_meta_keys(check_config, model, expectation):
+    with expectation:
+        check_model_has_meta_keys(check_config=check_config, model=model, request=None)
 
 
 @pytest.mark.parametrize(
