@@ -79,6 +79,26 @@ def check_model_documentation_coverage(models, request, check_config=None):
     ), f"Only {model_description_coverage_pct}% of models have a populated description, this is less than the permitted minimum of {min_model_documentation_coverage_pct}%."
 
 
+class CheckModelDocumentedInSameDirectory(BaseCheck):
+    name: Literal["check_model_documented_in_same_directory"]
+
+
+@pytest.mark.iterate_over_models
+def check_model_documented_in_same_directory(request, model=None) -> None:
+    """
+    Models must be documented in the same directory where they are defined (i.e. `.yml` and `.sql` files are in the same directory).
+    """
+
+    model = get_check_inputs(model=model, request=request)["model"]
+
+    model_doc_dir = model["patch_path"][model["patch_path"].find("models") :].split("/")[1:-1]
+    model_sql_dir = model["path"].split("/")[:-1]
+
+    assert (
+        model_doc_dir == model_sql_dir
+    ), f"`{model['unique_id'].split('.')[-1]}` is documented in a different directory to the `.sql` file: {'/'.join(model_doc_dir)} vs {'/'.join(model_sql_dir)}."
+
+
 class CheckModelCodeDoesNotContainRegexpPattern(BaseCheck):
     name: Literal["check_model_code_does_not_contain_regexp_pattern"]
     regexp_pattern: str = Field(

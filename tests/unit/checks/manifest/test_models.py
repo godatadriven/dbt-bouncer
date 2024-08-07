@@ -9,6 +9,7 @@ from dbt_bouncer.checks.manifest.check_models import (
     check_model_description_populated,
     check_model_directories,
     check_model_documentation_coverage,
+    check_model_documented_in_same_directory,
     check_model_has_meta_keys,
     check_model_has_no_upstream_dependencies,
     check_model_has_unique_test,
@@ -121,6 +122,32 @@ def test_check_model_depends_on_multiple_sources(model, expectation):
 def test_check_model_documentation_coverage(check_config, models, expectation):
     with expectation:
         check_model_documentation_coverage(check_config=check_config, models=models, request=None)
+
+
+@pytest.mark.parametrize(
+    "model, expectation",
+    [
+        (
+            {
+                "patch_path": "package_name://models/staging/_schema.yml",
+                "path": "staging/model_1.sql",
+                "unique_id": "model.package_name.model_1",
+            },
+            does_not_raise(),
+        ),
+        (
+            {
+                "patch_path": "package_name://models/staging/_schema.yml",
+                "path": "staging/finance/model_1.sql",
+                "unique_id": "model.package_name.model_1",
+            },
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_model_documented_in_same_directory(model, expectation):
+    with expectation:
+        check_model_documented_in_same_directory(model=model, request=None)
 
 
 @pytest.mark.parametrize(

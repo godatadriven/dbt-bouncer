@@ -438,6 +438,26 @@ manifest_checks:
 
 ---
 
+# `check_model_documented_in_same_directory`
+
+Models must be documented in the same directory where they are defined (i.e. `.yml` and `.sql` files are in the same directory).
+
+**Argument(s)**:
+
+* `include`: (Optional) Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+
+**Example**:
+```yaml
+manifest_checks:
+    - name: check_model_documented_in_same_directory
+```
+
+**Required artifacts(s)**:
+
+* manifest.json
+
+---
+
 # `check_model_has_meta_keys`
 
 The `meta` config for models must have the specified keys.
