@@ -94,6 +94,7 @@ manifest_checks:
       - crm
       - payments
   - name: check_model_test_coverage
+  - name: check_source_description_populated
 
 run_results_checks:
   - name: check_run_results_max_execution_time

@@ -370,7 +370,7 @@ manifest_checks:
 
 # `check_model_documentation_coverage`
 
-Set the minimum percentage of models that have apopulated description.
+Set the minimum percentage of models that have a populated description.
 
 **Argument(s)**:
 
@@ -573,6 +573,26 @@ run_results_checks:
 
 * manifest.json
 * run_results.json
+
+---
+
+# `check_source_description_populated`
+
+Sources must have a populated description.
+
+**Argument(s)**:
+
+* `include`: (Optional) Regex pattern to match the source path (i.e the `.yml` file where the source is configured). Only source paths that match the pattern will be checked.
+
+**Example**:
+```yaml
+manifest_checks:
+    - name: check_source_description_populated
+```
+
+**Required artifacts(s)**:
+
+* manifest.json
 
 ---
 

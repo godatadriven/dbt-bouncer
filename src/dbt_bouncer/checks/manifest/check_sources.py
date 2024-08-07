@@ -8,6 +8,23 @@ from dbt_bouncer.conf_validator_base import BaseCheck
 from dbt_bouncer.utils import find_missing_meta_keys, get_check_inputs
 
 
+class CheckSourceDescriptionPopulated(BaseCheck):
+    name: Literal["check_source_description_populated"]
+
+
+@pytest.mark.iterate_over_sources
+def check_source_description_populated(request, source=None):
+    """
+    Sources must have a populated description.
+    """
+
+    source = get_check_inputs(source=source, request=request)["source"]
+
+    assert (
+        len(source["description"].strip()) > 4
+    ), f"`{source['unique_id']}` does not have a populated description."
+
+
 class CheckSourceHasMetaKeys(BaseCheck):
     keys: Optional[Union[Dict[str, Any], List[Any]]]
     name: Literal["check_source_has_meta_keys"]

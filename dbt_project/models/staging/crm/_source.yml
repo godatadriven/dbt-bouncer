@@ -4,6 +4,7 @@ sources:
   - name: dummy_source
     tables:
     - name: customers
+      description: This is actually a seed but we are abusing it so we have a realistic source we can use for development.
       meta:
         contact:
           email: chris@email.com

@@ -190,6 +190,7 @@ These checks require the following artifact to be present:
 
 **Sources**
 
+* [`check_source_description_populated`](./src/dbt_bouncer/checks/checks.md#check_source_description_populated): Sources must have a populated description.
 * [`check_source_has_meta_keys`](./src/dbt_bouncer/checks/checks.md#check_source_has_meta_keys): The `meta` config for sources must have the specified keys.
 * [`check_source_names`](./src/dbt_bouncer/checks/checks.md#check_source_names): Sources must have a name that matches the supplied regex.
 * [`check_source_not_orphaned`](./src/dbt_bouncer/checks/checks.md#check_source_not_orphaned): Sources must be referenced in at least one model.

@@ -4,6 +4,7 @@ sources:
   - name: sources_that_dont_really_exist
     tables:
       - name: source_1
+        description: This is the first source that doesn't exist.
         meta:
           contact:
             email: anna@email.com
@@ -15,6 +16,7 @@ sources:
           maturity: high
           owner: Anna
       - name: source_2
+        description: This is the second source that doesn't exist.
         meta:
           contact:
             email: annabelle@email.com
