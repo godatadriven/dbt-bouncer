@@ -149,6 +149,22 @@ def check_model_has_meta_keys(request, check_config=None, model=None) -> None:
     ), f"{model['unique_id']} is missing the following keys from the `meta` config: {[x.replace('>>', '') for x in missing_keys]}"
 
 
+class CheckModelHasNoUpstreamDependencies(BaseCheck):
+    name: Literal["check_model_has_no_upstream_dependencies"]
+
+
+@pytest.mark.iterate_over_models
+def check_model_has_no_upstream_dependencies(request, model=None):
+    """
+    Identify if models have no upstream dependencies as this likely indicates hard-coded tables references.
+    """
+
+    model = get_check_inputs(model=model, request=request)["model"]
+    assert (
+        len(model["depends_on"]["nodes"]) > 0
+    ), f"`{model['unique_id']}` has no upstream dependencies, this likely indicates hard-coded tables references."
+
+
 class CheckModelHasUniqueTest(BaseCheck):
     accepted_uniqueness_tests: Optional[List[str]] = Field(
         default=["expect_compound_columns_to_be_unique", "unique"],

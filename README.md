@@ -181,6 +181,7 @@ These checks require the following artifact to be present:
 * [`check_model_description_populated`](./src/dbt_bouncer/checks/checks.md#check_model_description_populated): Models must have a populated description.
 * [`check_model_directories`](./src/dbt_bouncer/checks/checks.md#check_model_directories): Only specified sub-directories are permitted.
 * [`check_model_has_meta_keys`](./src/dbt_bouncer/checks/checks.md#check_model_has_meta_keys): The `meta` config for models must have the specified keys.
+* [`check_model_has_no_upstream_dependencies`](./src/dbt_bouncer/checks/checks.md#check_model_has_no_upstream_dependencies): Identify if models have no upstream dependencies as this likely indicates hard-coded tables references.
 * [`check_model_max_fanout`](./src/dbt_bouncer/checks/checks.md#check_model_max_fanout): Models cannot have more than the specified number of downstream models (default: 3).
 * [`check_model_names`](./src/dbt_bouncer/checks/checks.md#check_model_names): Models must have a name that matches the supplied regex.
 

@@ -9,6 +9,7 @@ from dbt_bouncer.checks.manifest.check_models import (
     check_model_description_populated,
     check_model_directories,
     check_model_has_meta_keys,
+    check_model_has_no_upstream_dependencies,
     check_model_has_unique_test,
     check_model_max_fanout,
     check_model_names,
@@ -125,6 +126,37 @@ def test_check_model_depends_on_multiple_sources(model, expectation):
 def test_check_model_has_meta_keys(check_config, model, expectation):
     with expectation:
         check_model_has_meta_keys(check_config=check_config, model=model, request=None)
+
+
+@pytest.mark.parametrize(
+    "model, expectation",
+    [
+        (
+            {
+                "depends_on": {"nodes": ["source.package_name.source_1"]},
+                "unique_id": "model.package_name.model_1",
+            },
+            does_not_raise(),
+        ),
+        (
+            {
+                "depends_on": {"nodes": ["model.package_name.stg_model_1"]},
+                "unique_id": "model.package_name.int_model_1",
+            },
+            does_not_raise(),
+        ),
+        (
+            {
+                "depends_on": {"nodes": []},
+                "unique_id": "model.package_name.model_1",
+            },
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_model_has_no_upstream_dependencies(model, expectation):
+    with expectation:
+        check_model_has_no_upstream_dependencies(model=model, request=None)
 
 
 @pytest.mark.parametrize(
