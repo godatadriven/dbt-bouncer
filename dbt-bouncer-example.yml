@@ -56,6 +56,7 @@ manifest_checks:
   - name: check_model_has_meta_keys
     keys:
       - maturity
+  - name: check_model_max_chained_views
   - name: check_model_max_fanout
     max_downstream_models: 2
   - name: check_model_max_upstream_dependencies

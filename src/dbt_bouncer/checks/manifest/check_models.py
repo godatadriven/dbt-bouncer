@@ -253,6 +253,85 @@ def check_model_has_unique_test(request, tests, check_config=None, model=None):
     ), f"{model['unique_id']} does not have a test for uniqueness of a column."
 
 
+class CheckModelMaxChainedViews(BaseCheck):
+    materializations_to_include: List[str] = Field(
+        default=["ephemeral", "view"],
+        description="List of materializations to include in the check. If not provided, defaults to `ephemeral` and `view`.",
+    )
+    max_chained_views: int = Field(
+        default=3,
+        description="The maximum number of upstream dependents that are not tables. Default: 3",
+    )
+    name: Literal["check_model_max_chained_views"]
+
+
+@pytest.mark.iterate_over_models
+def check_model_max_chained_views(manifest_obj, models, request, check_config=None, model=None):
+    """
+    Models cannot have more than the specified number of upstream dependents that are not tables (default: 3).
+    """
+
+    def return_upstream_view_models(
+        materializations,
+        max_chained_views,
+        models,
+        model_unique_ids_to_check,
+        package_name,
+        depth=0,
+    ):
+        """
+        Recursive function to return model unique_id's of upstream models that are views. Depth of recursion can be specified. If no models meet the criteria then an empty list is returned.
+        """
+
+        if depth == max_chained_views or model_unique_ids_to_check == []:
+            return model_unique_ids_to_check
+
+        relevant_upstream_models = []
+        for model in model_unique_ids_to_check:
+            upstream_nodes = list(
+                [m2 for m2 in models if m2["unique_id"] == model][0]["depends_on"]["nodes"]
+            )
+            if upstream_nodes != []:
+                upstream_models = [
+                    m
+                    for m in upstream_nodes
+                    if m.split(".")[0] == "model" and m.split(".")[1] == package_name
+                ]
+                for i in upstream_models:
+                    if [m for m in models if m["unique_id"] == i][0]["config"][
+                        "materialized"
+                    ] in materializations:
+                        relevant_upstream_models.append(i)
+
+        depth += 1
+        return return_upstream_view_models(
+            materializations=materializations,
+            max_chained_views=max_chained_views,
+            models=models,
+            model_unique_ids_to_check=relevant_upstream_models,
+            package_name=package_name,
+            depth=depth,
+        )
+
+    input_vars = get_check_inputs(check_config=check_config, model=model, request=request)
+    materializations_to_include = input_vars["check_config"]["materializations_to_include"]
+    max_chained_views = input_vars["check_config"]["max_chained_views"]
+    model = input_vars["model"]
+
+    assert (
+        len(
+            return_upstream_view_models(
+                materializations=materializations_to_include,
+                max_chained_views=max_chained_views,
+                models=models,
+                model_unique_ids_to_check=[model["unique_id"]],
+                package_name=manifest_obj.metadata.project_name,
+            )
+        )
+        == 0
+    ), f"`{model['unique_id'].split('.')[-1]}` has more than {max_chained_views} upstream dependents that are not tables."
+
+
 class CheckModelMaxFanout(BaseCheck):
     max_downstream_models: int = Field(
         default=3, description="The maximum number of permitted downstream models."

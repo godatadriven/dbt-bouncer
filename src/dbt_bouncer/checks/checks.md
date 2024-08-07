@@ -271,6 +271,28 @@ manifest_checks:
 
 ---
 
+# `check_model_max_chained_views`
+
+Models cannot have more than the specified number of upstream dependents that are not tables (default: 3).
+
+**Argument(s)**:
+
+* `include`: (Optional) Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+* `materializations_to_include`: (Optional) List of materializations to include in the check. If not provided, defaults to `ephemeral` and `view`.
+* `max_chained_views`: (Optional) The maximum number of upstream dependents that are not tables. Default: 3
+
+**Example**:
+```yaml
+manifest_checks:
+  - name: check_model_max_chained_views
+```
+
+**Required artifacts(s)**:
+
+* manifest.json
+
+---
+
 # `check_model_max_fanout`
 
 Models cannot have more than the specified number of downstream models (default: 3).

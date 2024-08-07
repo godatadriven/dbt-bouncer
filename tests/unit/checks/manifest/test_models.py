@@ -13,6 +13,7 @@ from dbt_bouncer.checks.manifest.check_models import (
     check_model_has_meta_keys,
     check_model_has_no_upstream_dependencies,
     check_model_has_unique_test,
+    check_model_max_chained_views,
     check_model_max_fanout,
     check_model_max_upstream_dependencies,
     check_model_names,
@@ -368,6 +369,80 @@ def test_check_model_code_does_not_contain_regexp_pattern(check_config, model, e
 def test_check_model_directories(check_config, model, expectation):
     with expectation:
         check_model_directories(check_config=check_config, model=model, request=None)
+
+
+@pytest.mark.parametrize(
+    "check_config, manifest_obj, model, models, expectation",
+    [
+        (
+            {"materializations_to_include": ["ephemeral", "view"], "max_chained_views": 3},
+            "manifest_obj",
+            {
+                "depends_on": {"nodes": ["model.dbt_bouncer_test_project.model_1"]},
+                "unique_id": "model.dbt_bouncer_test_project.model_0",
+            },
+            [
+                {
+                    "config": {"materialized": "ephemeral"},
+                    "depends_on": {"nodes": ["model.dbt_bouncer_test_project.model_1"]},
+                    "unique_id": "model.dbt_bouncer_test_project.model_0",
+                },
+                {
+                    "config": {"materialized": "ephemeral"},
+                    "depends_on": {"nodes": ["model.dbt_bouncer_test_project.model_2"]},
+                    "unique_id": "model.dbt_bouncer_test_project.model_1",
+                },
+                {
+                    "config": {"materialized": "view"},
+                    "depends_on": {"nodes": []},
+                    "unique_id": "model.dbt_bouncer_test_project.model_2",
+                },
+            ],
+            does_not_raise(),
+        ),
+        (
+            {"materializations_to_include": ["ephemeral", "view"], "max_chained_views": 3},
+            "manifest_obj",
+            {
+                "depends_on": {"nodes": ["model.dbt_bouncer_test_project.model_1"]},
+                "unique_id": "model.dbt_bouncer_test_project.model_0",
+            },
+            [
+                {
+                    "config": {"materialized": "ephemeral"},
+                    "depends_on": {"nodes": ["model.dbt_bouncer_test_project.model_1"]},
+                    "unique_id": "model.dbt_bouncer_test_project.model_0",
+                },
+                {
+                    "config": {"materialized": "ephemeral"},
+                    "depends_on": {"nodes": ["model.dbt_bouncer_test_project.model_2"]},
+                    "unique_id": "model.dbt_bouncer_test_project.model_1",
+                },
+                {
+                    "config": {"materialized": "view"},
+                    "depends_on": {"nodes": ["model.dbt_bouncer_test_project.model_3"]},
+                    "unique_id": "model.dbt_bouncer_test_project.model_2",
+                },
+                {
+                    "config": {"materialized": "view"},
+                    "depends_on": {"nodes": []},
+                    "unique_id": "model.dbt_bouncer_test_project.model_3",
+                },
+            ],
+            pytest.raises(AssertionError),
+        ),
+    ],
+    indirect=["manifest_obj"],
+)
+def test_check_model_max_chained_views(check_config, manifest_obj, model, models, expectation):
+    with expectation:
+        check_model_max_chained_views(
+            check_config=check_config,
+            manifest_obj=manifest_obj,
+            model=model,
+            models=models,
+            request=None,
+        )
 
 
 @pytest.mark.parametrize(
