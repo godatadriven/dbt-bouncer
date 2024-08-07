@@ -185,6 +185,7 @@ These checks require the following artifact to be present:
 * [`check_model_max_fanout`](./src/dbt_bouncer/checks/checks.md#check_model_max_fanout): Models cannot have more than the specified number of downstream models (default: 3).
 * [`check_model_max_upstream_dependencies`](./src/dbt_bouncer/checks/checks.md#check_model_max_upstream_dependencies): Limit the number of upstream dependencies a model has. Default values are 5 for models, 5 for macros, and 1 for sources.
 * [`check_model_names`](./src/dbt_bouncer/checks/checks.md#check_model_names): Models must have a name that matches the supplied regex.
+* [`check_model_test_coverage`](./src/dbt_bouncer/checks/checks.md#check_model_test_coverage): Set the minimum percentage of models that have at least one test.
 
 **Sources**
 

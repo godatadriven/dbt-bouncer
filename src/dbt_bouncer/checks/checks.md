@@ -466,6 +466,28 @@ manifest_checks:
 
 ---
 
+# `check_model_test_coverage`
+
+Set the minimum percentage of models that have at least one test.
+
+**Argument(s)**:
+
+* `include`: (Optional) Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+* `min_model_test_coverage_pct`: The minimum percentage of models that must have at least one test. Default: 100
+
+**Example**:
+```yaml
+manifest_checks:
+    - name: check_model_test_coverage
+      min_model_test_coverage_pct: 90
+```
+
+**Required artifacts(s)**:
+
+* manifest.json
+
+---
+
 # `check_project_name`
 
 Enforce that the name of the dbt project matches a supplied regex. Generally used to enforce that project names conform to something like  `company_<DOMAIN>`.

@@ -14,6 +14,7 @@ from dbt_bouncer.checks.manifest.check_models import (
     check_model_max_fanout,
     check_model_max_upstream_dependencies,
     check_model_names,
+    check_model_test_coverage,
 )
 
 
@@ -604,3 +605,81 @@ def test_check_model_max_upstream_dependencies(check_config, model, expectation)
 def test_check_model_description_populated(model, expectation):
     with expectation:
         check_model_description_populated(model=model, request=None)
+
+
+@pytest.mark.parametrize(
+    "check_config, models, tests, expectation",
+    [
+        (
+            {
+                "min_model_test_coverage_pct": 100,
+            },
+            [
+                {
+                    "unique_id": "model.package_name.model_1",
+                }
+            ],
+            [
+                {
+                    "depends_on": {
+                        "nodes": [
+                            "model.package_name.model_1",
+                        ],
+                    }
+                }
+            ],
+            does_not_raise(),
+        ),
+        (
+            {
+                "min_model_test_coverage_pct": 50,
+            },
+            [
+                {
+                    "unique_id": "model.package_name.model_1",
+                },
+                {
+                    "unique_id": "model.package_name.model_2",
+                },
+            ],
+            [
+                {
+                    "depends_on": {
+                        "nodes": [
+                            "model.package_name.model_1",
+                        ],
+                    }
+                }
+            ],
+            does_not_raise(),
+        ),
+        (
+            {
+                "min_model_test_coverage_pct": 100,
+            },
+            [
+                {
+                    "unique_id": "model.package_name.model_1",
+                },
+                {
+                    "unique_id": "model.package_name.model_2",
+                },
+            ],
+            [
+                {
+                    "depends_on": {
+                        "nodes": [
+                            "model.package_name.model_2",
+                        ],
+                    }
+                }
+            ],
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_model_test_coverage(check_config, models, tests, expectation):
+    with expectation:
+        check_model_test_coverage(
+            check_config=check_config, models=models, tests=tests, request=None
+        )

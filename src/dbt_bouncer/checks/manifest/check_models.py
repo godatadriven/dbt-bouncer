@@ -288,3 +288,39 @@ def check_model_names(request, check_config=None, model=None):
     assert (
         re.compile(check_config["model_name_pattern"].strip()).match(model["name"]) is not None
     ), f"{model['unique_id']} does not match the supplied regex `({check_config['model_name_pattern'].strip()})`."
+
+
+class CheckModelsTestCoverage(BaseCheck):
+    model_config = ConfigDict(extra="forbid", protected_namespaces=())
+
+    name: Literal["check_model_test_coverage"]
+    min_model_test_coverage_pct: int = Field(
+        default=100,
+        description="The minimum percentage of models that must have at least one test. Default: 100",
+        ge=0,
+        le=100,
+    )
+
+
+def check_model_test_coverage(models, request, tests, check_config=None):
+    """
+    Set the minimum percentage of models that have at least one test.
+    """
+
+    min_model_test_coverage_pct = get_check_inputs(check_config=check_config, request=request)[
+        "check_config"
+    ]["min_model_test_coverage_pct"]
+
+    num_models = len(models)
+    models_with_tests = []
+    for model in models:
+        for test in tests:
+            if model["unique_id"] in test["depends_on"]["nodes"]:
+                models_with_tests.append(model["unique_id"])
+                break
+    num_models_with_tests = len(models_with_tests)
+    model_test_coverage_pct = (num_models_with_tests / num_models) * 100
+
+    assert (
+        model_test_coverage_pct >= min_model_test_coverage_pct
+    ), f"Only {model_test_coverage_pct}% of models have at least one test, this is less than the permitted minimum of {min_model_test_coverage_pct}%."

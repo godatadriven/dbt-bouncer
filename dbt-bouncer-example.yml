@@ -92,6 +92,7 @@ manifest_checks:
     permitted_sub_directories:
       - crm
       - payments
+  - name: check_model_test_coverage
 
 run_results_checks:
   - name: check_run_results_max_execution_time
