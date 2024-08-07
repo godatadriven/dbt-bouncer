@@ -194,6 +194,7 @@ These checks require the following artifact to be present:
 * [`check_source_has_meta_keys`](./src/dbt_bouncer/checks/checks.md#check_source_has_meta_keys): The `meta` config for sources must have the specified keys.
 * [`check_source_names`](./src/dbt_bouncer/checks/checks.md#check_source_names): Sources must have a name that matches the supplied regex.
 * [`check_source_not_orphaned`](./src/dbt_bouncer/checks/checks.md#check_source_not_orphaned): Sources must be referenced in at least one model.
+* [`check_source_used_by_models_in_same_directory`](./src/dbt_bouncer/checks/checks.md#check_source_used_by_models_in_same_directory): Sources can only be referenced by models that are located in the same directory where the source is defined.
 * [`check_source_used_by_only_one_model`](./src/dbt_bouncer/checks/checks.md#check_source_used_by_only_one_model): Each source can be references by a maximum of one model.
 
 **Tests**

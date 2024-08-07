@@ -7,6 +7,7 @@ from dbt_bouncer.checks.manifest.check_sources import (
     check_source_has_meta_keys,
     check_source_names,
     check_source_not_orphaned,
+    check_source_used_by_models_in_same_directory,
     check_source_used_by_only_one_model,
 )
 
@@ -210,6 +211,44 @@ def test_check_source_names(check_config, source, expectation):
 def test_check_source_not_orphaned(models, source, expectation):
     with expectation:
         check_source_not_orphaned(models=models, source=source, request=None)
+
+
+@pytest.mark.parametrize(
+    "models, source, expectation",
+    [
+        (
+            [
+                {
+                    "depends_on": {"nodes": ["source.package_name.source_1"]},
+                    "path": "staging/model_1.sql",
+                    "unique_id": "model.package_name.model_1",
+                }
+            ],
+            {
+                "path": "models/staging/_sources.yml",
+                "unique_id": "source.package_name.source_1",
+            },
+            does_not_raise(),
+        ),
+        (
+            [
+                {
+                    "depends_on": {"nodes": ["source.package_name.source_1"]},
+                    "path": "staging/model_1.sql",
+                    "unique_id": "model.package_name.model_1",
+                }
+            ],
+            {
+                "path": "models/_sources.yml",
+                "unique_id": "source.package_name.source_1",
+            },
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_source_used_by_models_in_same_directory(models, source, expectation):
+    with expectation:
+        check_source_used_by_models_in_same_directory(models=models, source=source, request=None)
 
 
 @pytest.mark.parametrize(

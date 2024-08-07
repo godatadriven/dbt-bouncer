@@ -95,6 +95,7 @@ manifest_checks:
       - payments
   - name: check_model_test_coverage
   - name: check_source_description_populated
+  - name: check_source_used_by_models_in_same_directory
 
 run_results_checks:
   - name: check_run_results_max_execution_time
