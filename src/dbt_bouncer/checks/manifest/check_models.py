@@ -46,6 +46,39 @@ def check_model_description_populated(request, model=None):
     ), f"{model['unique_id']} does not have a populated description."
 
 
+class CheckModelsDocumentationCoverage(BaseCheck):
+    name: Literal["check_model_documentation_coverage"]
+    min_model_documentation_coverage_pct: int = Field(
+        default=100,
+        description="The minimum percentage of models that must have a populated description. Default: 100",
+        ge=0,
+        le=100,
+    )
+
+
+def check_model_documentation_coverage(models, request, check_config=None):
+    """
+    Set the minimum percentage of models that have a populated description.
+    """
+
+    min_model_documentation_coverage_pct = get_check_inputs(
+        check_config=check_config, request=request
+    )["check_config"]["min_model_documentation_coverage_pct"]
+
+    num_models = len(models)
+    models_with_description = []
+    for model in models:
+        if len(model["description"].strip()) > 4:
+            models_with_description.append(model["unique_id"])
+
+    num_models_with_descriptions = len(models_with_description)
+    model_description_coverage_pct = (num_models_with_descriptions / num_models) * 100
+
+    assert (
+        model_description_coverage_pct >= min_model_documentation_coverage_pct
+    ), f"Only {model_description_coverage_pct}% of models have a populated description, this is less than the permitted minimum of {min_model_documentation_coverage_pct}%."
+
+
 class CheckModelCodeDoesNotContainRegexpPattern(BaseCheck):
     name: Literal["check_model_code_does_not_contain_regexp_pattern"]
     regexp_pattern: str = Field(
@@ -291,8 +324,6 @@ def check_model_names(request, check_config=None, model=None):
 
 
 class CheckModelsTestCoverage(BaseCheck):
-    model_config = ConfigDict(extra="forbid", protected_namespaces=())
-
     name: Literal["check_model_test_coverage"]
     min_model_test_coverage_pct: int = Field(
         default=100,
@@ -317,8 +348,7 @@ def check_model_test_coverage(models, request, tests, check_config=None):
         for test in tests:
             if model["unique_id"] in test["depends_on"]["nodes"]:
                 models_with_tests.append(model["unique_id"])
-                break
-    num_models_with_tests = len(models_with_tests)
+    num_models_with_tests = len(set(models_with_tests))
     model_test_coverage_pct = (num_models_with_tests / num_models) * 100
 
     assert (

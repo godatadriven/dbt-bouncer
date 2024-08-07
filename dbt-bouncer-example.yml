@@ -67,6 +67,7 @@ manifest_checks:
   - name: check_model_access
     include: ^staging
     access: protected
+  - name: check_model_documentation_coverage
   - name: check_project_name
     project_name_pattern: ^dbt_bouncer_
   - name: check_source_has_meta_keys

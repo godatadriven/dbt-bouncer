@@ -8,6 +8,7 @@ from dbt_bouncer.checks.manifest.check_models import (
     check_model_depends_on_multiple_sources,
     check_model_description_populated,
     check_model_directories,
+    check_model_documentation_coverage,
     check_model_has_meta_keys,
     check_model_has_no_upstream_dependencies,
     check_model_has_unique_test,
@@ -70,6 +71,56 @@ def test_check_model_access(check_config, model, expectation):
 def test_check_model_depends_on_multiple_sources(model, expectation):
     with expectation:
         check_model_depends_on_multiple_sources(model=model, request=None)
+
+
+@pytest.mark.parametrize(
+    "check_config, models, expectation",
+    [
+        (
+            {
+                "min_model_documentation_coverage_pct": 100,
+            },
+            [
+                {
+                    "description": "Model 1 description",
+                    "unique_id": "model.package_name.model_1",
+                }
+            ],
+            does_not_raise(),
+        ),
+        (
+            {
+                "min_model_documentation_coverage_pct": 50,
+            },
+            [
+                {
+                    "description": "Model 1 description",
+                    "unique_id": "model.package_name.model_1",
+                },
+                {
+                    "description": "",
+                    "unique_id": "model.package_name.model_2",
+                },
+            ],
+            does_not_raise(),
+        ),
+        (
+            {
+                "min_model_documentation_coverage_pct": 100,
+            },
+            [
+                {
+                    "description": "",
+                    "unique_id": "model.package_name.model_1",
+                },
+            ],
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_model_documentation_coverage(check_config, models, expectation):
+    with expectation:
+        check_model_documentation_coverage(check_config=check_config, models=models, request=None)
 
 
 @pytest.mark.parametrize(

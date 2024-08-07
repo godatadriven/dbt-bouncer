@@ -368,6 +368,28 @@ manifest_checks:
 
 ---
 
+# `check_model_documentation_coverage`
+
+Set the minimum percentage of models that have apopulated description.
+
+**Argument(s)**:
+
+* `include`: (Optional) Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+* `min_model_documentation_coverage_pct`: The minimum percentage of models that must have a populated description. Default: 100
+
+**Example**:
+```yaml
+manifest_checks:
+    - name: check_model_documentation_coverage
+      min_model_documentation_coverage_pct: 90
+```
+
+**Required artifacts(s)**:
+
+* manifest.json
+
+---
+
 # `check_model_has_unique_test`
 
 Models must have a test for uniqueness of a column.
