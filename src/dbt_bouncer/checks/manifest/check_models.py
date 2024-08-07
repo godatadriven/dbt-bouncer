@@ -220,6 +220,50 @@ def check_model_max_fanout(models, request, check_config=None, model=None):
     ), f"{model['unique_id']} has {num_downstream_models} downstream models, which is more than the permitted maximum of {max_downstream_models}."
 
 
+class CheckModelMaxUpstreamDependencies(BaseCheck):
+    max_upstream_macros: int = Field(
+        default=5, description="The maximum number of permitted upstream macros."
+    )
+    max_upstream_models: int = Field(
+        default=5, description="The maximum number of permitted upstream models."
+    )
+    max_upstream_sources: int = Field(
+        default=1, description="The maximum number of permitted upstream sources."
+    )
+    name: Literal["check_model_max_upstream_dependencies"]
+
+
+@pytest.mark.iterate_over_models
+def check_model_max_upstream_dependencies(request, check_config=None, model=None):
+    """
+    Limit the number of upstream dependencies a model has. Default values are 5 for models, 5 for macros, and 1 for sources.
+    """
+
+    input_vars = get_check_inputs(check_config=check_config, model=model, request=request)
+    max_upstream_macros = input_vars["check_config"]["max_upstream_macros"]
+    max_upstream_models = input_vars["check_config"]["max_upstream_models"]
+    max_upstream_sources = input_vars["check_config"]["max_upstream_sources"]
+    model = input_vars["model"]
+
+    num_upstream_macros = len([m for m in model["depends_on"]["macros"]])
+    num_upstream_models = len(
+        [m for m in model["depends_on"]["nodes"] if m.split(".")[0] == "model"]
+    )
+    num_upstream_sources = len(
+        [m for m in model["depends_on"]["nodes"] if m.split(".")[0] == "source"]
+    )
+
+    assert (
+        num_upstream_macros <= max_upstream_macros
+    ), f"`{model['unique_id']}` has {num_upstream_macros} upstream macros, which is more than the permitted maximum of {max_upstream_macros}."
+    assert (
+        num_upstream_models <= max_upstream_models
+    ), f"`{model['unique_id']}` has {num_upstream_models} upstream models, which is more than the permitted maximum of {max_upstream_models}."
+    assert (
+        num_upstream_sources <= max_upstream_sources
+    ), f"`{model['unique_id']}` has {num_upstream_sources} upstream sources, which is more than the permitted maximum of {max_upstream_sources}."
+
+
 class CheckModelNames(BaseCheck):
     model_config = ConfigDict(extra="forbid", protected_namespaces=())
 

@@ -293,6 +293,30 @@ manifest_checks:
 
 ---
 
+# `check_model_max_upstream_dependencies`
+
+Limit the number of upstream dependencies a model has. Default values are 5 for models, 5 for macros, and 1 for sources.
+
+**Argument(s)**:
+
+* `include`: (Optional) Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+* `max_upsream_macros`: (Optional) The maximum number of permitted upstream models. Default: 5.
+* `max_upstream_models`: (Optional) The maximum number of permitted upstream macros. Default: 5
+* `max_upstream_sources`: (Optional) The maximum number of permitted upstream sources. Default: 1
+
+**Example**:
+```yaml
+manifest_checks:
+  - name: check_model_max_upstream_dependencies
+    max_upstream_models: 3
+```
+
+**Required artifacts(s)**:
+
+* manifest.json
+
+---
+
 # `check_macro_name_matches_file_name`
 
 Macros names must be the same as the file they are contained in.
