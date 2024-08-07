@@ -167,8 +167,12 @@ def check_model_has_no_upstream_dependencies(request, model=None):
 
 class CheckModelHasUniqueTest(BaseCheck):
     accepted_uniqueness_tests: Optional[List[str]] = Field(
-        default=["expect_compound_columns_to_be_unique", "unique"],
-        description="List of tests that are accepted as uniqueness tests. If not provided, defaults to `expect_compound_columns_to_be_unique` and `unique`.",
+        default=[
+            "expect_compound_columns_to_be_unique",
+            "dbt_utils.unique_combination_of_columns",
+            "unique",
+        ],
+        description="List of tests that are accepted as uniqueness tests. If not provided, defaults to `expect_compound_columns_to_be_unique`, `dbt_utils.unique_combination_of_columns` and `unique`.",
     )
     name: Literal["check_model_has_unique_test"]
 
