@@ -27,11 +27,11 @@ def check_exposure_based_on_non_public_models(models, request, exposure=None):
         ):
             model = [m for m in models if m["unique_id"] == model][0]
             if model["access"] != "public":
-                non_public_upstream_dependencies.append(model["unique_id"])
+                non_public_upstream_dependencies.append(model["unique_id"].split(".")[-1])
 
     assert (
         not non_public_upstream_dependencies
-    ), f"{exposure['unique_id']} is based on a model(s) that is not public: {non_public_upstream_dependencies}."
+    ), f"`{exposure['unique_id'].split('.')[-1]}` is based on a model(s) that is not public: {non_public_upstream_dependencies}."
 
 
 class CheckExposureOnView(BaseCheck):
@@ -60,8 +60,8 @@ def check_exposure_based_on_view(models, request, check_config=None, exposure=No
         ):
             model = [m for m in models if m["unique_id"] == model][0]
             if model["config"]["materialized"] in materializations_to_include:
-                non_table_upstream_dependencies.append(model["unique_id"])
+                non_table_upstream_dependencies.append(model["unique_id"].split(".")[-1])
 
     assert (
         not non_table_upstream_dependencies
-    ), f"{exposure['unique_id']} is based on a model that is not a table: {non_table_upstream_dependencies}."
+    ), f"`{exposure['unique_id'].split('.')[-1]}` is based on a model that is not a table: {non_table_upstream_dependencies}."
