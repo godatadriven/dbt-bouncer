@@ -29,6 +29,24 @@ def check_model_access(request, check_config=None, model=None):
     ), f"{model['unique_id']} has `{model['access']}` access, it should have access `{check_config['access']}`."
 
 
+class CheckModelContractsEnforcedForPublicModel(BaseCheck):
+    name: Literal["check_model_contract_enforced_for_public_model"]
+
+
+@pytest.mark.iterate_over_models
+def check_model_contract_enforced_for_public_model(request, model=None):
+    """
+    Public models must have contracts enforced.
+    """
+
+    model = get_check_inputs(model=model, request=request)["model"]
+
+    if model["access"] == "public":
+        assert (
+            model["contract"]["enforced"] is True
+        ), f"`{model['unique_id']}` is a public model but does not have contracts enforced."
+
+
 class CheckModelDescriptionPopulated(BaseCheck):
     name: Literal["check_model_description_populated"]
 

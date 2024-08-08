@@ -36,6 +36,7 @@ manifest_checks:
     include: ^intermediate|^marts
   - name: check_macro_code_does_not_contain_regexp_pattern
     regexp_pattern: .*[i][f][n][u][l][l].*
+  - name: check_model_contract_enforced_for_public_model
   - name: check_macro_name_matches_file_name
   - name: check_macro_arguments_description_populated
   - name: check_macro_description_populated

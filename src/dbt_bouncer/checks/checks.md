@@ -198,6 +198,26 @@ manifest_checks:
 
 ---
 
+# `check_model_contract_enforced_for_public_model`
+
+Public models must have contracts enforced.
+
+**Argument(s)**:
+
+* `include`: (Optional) Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+
+**Example**:
+```yaml
+manifest_checks:
+    - name: check_model_contract_enforced_for_public_model
+```
+
+**Required artifacts(s)**:
+
+* manifest.json
+
+---
+
 # `check_model_depends_on_multiple_sources`
 
 Models cannot reference more than one source.
