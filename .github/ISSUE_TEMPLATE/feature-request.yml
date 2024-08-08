@@ -1,0 +1,28 @@
+name: ✨ Feature
+description: Propose a new feature
+title: "[Feature] <title>"
+labels: ["new_feature"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this feature request!
+  - type: textarea
+    attributes:
+      label: Describe the feature
+      description: A clear and concise description of what you want to add and why.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Who will this benefit?
+      description: |
+        What kind of use case will this feature be useful for? Please be specific and provide examples.
+    validations:
+      required: false
+  - type: input
+    attributes:
+      label: Are you interested in contributing this feature?
+      description: Let us know if you want to write some code, and how we can help.
+    validations:
+      required: false
