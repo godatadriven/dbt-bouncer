@@ -47,6 +47,7 @@ def flatten(structure, key="", path="", flattened=None):
 def get_check_inputs(
     catalog_node=None,
     check_config=None,
+    exposure=None,
     macro=None,
     model=None,
     request=None,
@@ -61,6 +62,7 @@ def get_check_inputs(
     if request is not None:
         catalog_node = request.node.catalog_node
         check_config = request.node.check_config
+        exposure = request.node.exposure
         macro = request.node.macro
         model = request.node.model
         run_result = request.node.run_result
@@ -68,6 +70,7 @@ def get_check_inputs(
     else:
         catalog_node = catalog_node
         check_config = check_config
+        exposure = exposure
         macro = macro
         model = model
         run_result = run_result
@@ -76,6 +79,7 @@ def get_check_inputs(
     return {
         "catalog_node": catalog_node,
         "check_config": check_config,
+        "exposure": exposure,
         "macro": macro,
         "model": model,
         "run_result": run_result,

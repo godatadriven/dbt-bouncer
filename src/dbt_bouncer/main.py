@@ -64,6 +64,11 @@ def cli(config_file, send_pr_comment: bool):
         dbt_artifacts_dir=config_file.parent / bouncer_config.get("dbt_artifacts_dir", "./target"),
     )
 
+    project_exposures = []
+    for _, v in manifest_obj.exposures.items():
+        if v.package_name == manifest_obj.metadata.project_name:
+            project_exposures.append(v.model_dump())
+
     project_macros = []
     for _, v in manifest_obj.macros.items():
         if v.package_name == manifest_obj.metadata.project_name:
@@ -88,7 +93,7 @@ def cli(config_file, send_pr_comment: bool):
             project_sources.append(v.model_dump())
 
     logger.info(
-        f"Parsed `manifest.json`, found `{manifest_obj.metadata.project_name}` project, found {len(project_macros)} macros, {len(project_models)} nodes, {len(project_sources)} sources and {len(project_tests)} tests."
+        f"Parsed `manifest.json`, found `{manifest_obj.metadata.project_name}` project, found {len(project_exposures)} exposures, {len(project_macros)} macros, {len(project_models)} nodes, {len(project_sources)} sources and {len(project_tests)} tests."
     )
 
     # Catalog, must come after manifest is parsed
@@ -133,6 +138,7 @@ def cli(config_file, send_pr_comment: bool):
     runner(
         bouncer_config=config,
         catalog_nodes=project_catalog_nodes,
+        exposures=project_exposures,
         macros=project_macros,
         manifest_obj=manifest_obj,
         models=project_models,

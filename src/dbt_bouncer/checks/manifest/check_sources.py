@@ -8,6 +8,23 @@ from dbt_bouncer.conf_validator_base import BaseCheck
 from dbt_bouncer.utils import find_missing_meta_keys, get_check_inputs
 
 
+class CheckSourceDescriptionPopulated(BaseCheck):
+    name: Literal["check_source_description_populated"]
+
+
+@pytest.mark.iterate_over_sources
+def check_source_description_populated(request, source=None):
+    """
+    Sources must have a populated description.
+    """
+
+    source = get_check_inputs(source=source, request=request)["source"]
+
+    assert (
+        len(source["description"].strip()) > 4
+    ), f"`{source['unique_id']}` does not have a populated description."
+
+
 class CheckSourceHasMetaKeys(BaseCheck):
     keys: Optional[Union[Dict[str, Any], List[Any]]]
     name: Literal["check_source_has_meta_keys"]
@@ -77,6 +94,34 @@ def check_source_not_orphaned(models, request, source=None) -> None:
     ), f"Source `{source['unique_id']}` is orphaned, i.e. not referenced by any model."
 
 
+class CheckSourceUsedByModelsInSameDirectory(BaseCheck):
+    name: Literal["check_source_used_by_models_in_same_directory"]
+
+
+@pytest.mark.iterate_over_sources
+def check_source_used_by_models_in_same_directory(models, request, source=None) -> None:
+    """
+    Sources can only be referenced by models that are located in the same directory where the source is defined.
+    """
+
+    source = get_check_inputs(
+        request=request,
+        source=source,
+    )["source"]
+
+    reffed_models_not_in_same_dir = []
+    for model in models:
+        if (
+            source["unique_id"] in model["depends_on"]["nodes"]
+            and model["path"].split("/")[:-1] != source["path"].split("/")[1:-1]
+        ):
+            reffed_models_not_in_same_dir.append(model["unique_id"].split(".")[0])
+
+    assert (
+        len(reffed_models_not_in_same_dir) == 0
+    ), f"Source `{source['unique_id']}` is referenced by models defined in a different directory: {reffed_models_not_in_same_dir}"
+
+
 class CheckSourceUsedByOnlyOneModel(BaseCheck):
     name: Literal["check_source_used_by_only_one_model"]
 
@@ -84,7 +129,7 @@ class CheckSourceUsedByOnlyOneModel(BaseCheck):
 @pytest.mark.iterate_over_sources
 def check_source_used_by_only_one_model(models, request, source=None) -> None:
     """
-    Each source can be references by a maximum of one model.
+    Each source can be referenced by a maximum of one model.
     """
 
     source = get_check_inputs(

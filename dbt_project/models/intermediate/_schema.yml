@@ -14,4 +14,4 @@ models:
           - not_null
     tests:
           - dbt_expectations.expect_compound_columns_to_be_unique:
-              column_list: ["date_col", "col_string_b"]
+              column_list: ["id", "name"]

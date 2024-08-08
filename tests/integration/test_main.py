@@ -44,6 +44,10 @@ def test_cli_happy_path(caplog, dbt_artifacts_dir, request, tmp_path):
     for record in caplog.messages:
         if record.startswith("Parsed `manifest.json`, found"):
             summary_count_manifest += 1
+            exposures_text = re.search(r"\d* exposures", record).group(0)  # type: ignore[union-attr]
+            exposures_num = int(re.search(r"\d*", exposures_text).group(0))  # type: ignore[union-attr]
+            assert exposures_num > 0, f"Only found {exposures_num} exposures."
+
             macros_text = re.search(r"\d* macros", record).group(0)  # type: ignore[union-attr]
             macros_num = int(re.search(r"\d*", macros_text).group(0))  # type: ignore[union-attr]
             assert macros_num > 0, f"Only found {macros_num} macros."

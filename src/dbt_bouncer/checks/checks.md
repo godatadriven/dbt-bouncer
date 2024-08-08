@@ -1,3 +1,24 @@
+# `check_columns_are_documented_in_public_models`
+
+Columns should have a populated description in public models.
+
+**Argument(s)**:
+
+* `include`: (Optional) Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+
+**Example**:
+```yaml
+catalog_checks:
+    - name: check_columns_are_documented_in_public_models
+```
+
+**Required artifact(s)**:
+
+* catalog.json
+* manifest.json
+
+---
+
 # `check_column_name_complies_to_column_type`
 
 Columns with specified data type must comply to the specified regexp naming pattern.
@@ -36,6 +57,47 @@ catalog_checks:
 **Required artifact(s)**:
 
 * catalog.json
+* manifest.json
+
+---
+
+# `check_exposure_based_on_non_public_models`
+
+Exposures should not be based on views.
+
+**Argument(s)**:
+
+* `include`: (Optional) Regex pattern to match the exposure path (i.e the `.yml` file where the exposure is configured). Only exposure paths that match the pattern will be checked.
+
+**Example**:
+```yaml
+manifest_checks:
+    - name: check_exposure_based_on_non_public_models
+```
+
+**Required artifact(s)**:
+
+* manifest.json
+
+---
+
+# `check_exposure_based_on_view`
+
+Exposures should not be based on views.
+
+**Argument(s)**:
+
+* `include`: (Optional) Regex pattern to match the exposure path (i.e the `.yml` file where the exposure is configured). Only exposure paths that match the pattern will be checked.
+* `materializations_to_include`: (Optional) List of materializations to include in the check. If not provided, defaults to `ephemeral` and `view`.
+
+**Example**:
+```yaml
+manifest_checks:
+    - name: check_exposure_based_on_view
+```
+
+**Required artifact(s)**:
+
 * manifest.json
 
 ---
@@ -177,6 +239,46 @@ manifest_checks:
 
 ---
 
+# `check_model_contract_enforced_for_public_model`
+
+Public models must have contracts enforced.
+
+**Argument(s)**:
+
+* `include`: (Optional) Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+
+**Example**:
+```yaml
+manifest_checks:
+    - name: check_model_contract_enforced_for_public_model
+```
+
+**Required artifacts(s)**:
+
+* manifest.json
+
+---
+
+# `check_model_depends_on_multiple_sources`
+
+Models cannot reference more than one source.
+
+**Argument(s)**:
+
+* `include`: (Optional) Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
+
+**Example**:
+```yaml
+manifest_checks:
+    - name: check_model_depends_on_multiple_sources
+```
+
+**Required artifacts(s)**:
+
+* manifest.json
+
+---
+
 # `check_macro_description_populated`
 
 Macros must have a populated description.
@@ -223,6 +325,94 @@ manifest_checks:
     permitted_sub_directories:
       - crm
       - payments
+```
+
+**Required artifacts(s)**:
+
+* manifest.json
+
+---
+
+# `check_model_has_no_upstream_dependencies`
+
+Identify if models have no upstream dependencies as this likely indicates hard-coded tables references.
+
+**Argument(s)**:
+
+* `include`: (Optional) Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+
+**Example**:
+```yaml
+manifest_checks:
+  - name: check_model_has_no_upstream_dependencies
+```
+
+**Required artifacts(s)**:
+
+* manifest.json
+
+---
+
+# `check_model_max_chained_views`
+
+Models cannot have more than the specified number of upstream dependents that are not tables (default: 3).
+
+**Argument(s)**:
+
+* `include`: (Optional) Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+* `materializations_to_include`: (Optional) List of materializations to include in the check. If not provided, defaults to `ephemeral` and `view`.
+* `max_chained_views`: (Optional) The maximum number of upstream dependents that are not tables. Default: 3
+
+**Example**:
+```yaml
+manifest_checks:
+  - name: check_model_max_chained_views
+```
+
+**Required artifacts(s)**:
+
+* manifest.json
+
+---
+
+# `check_model_max_fanout`
+
+Models cannot have more than the specified number of downstream models (default: 3).
+
+**Argument(s)**:
+
+* `include`: (Optional) Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+* `max_downstream_models`: (Optional) The maximum number of permitted downstream models.
+
+**Example**:
+```yaml
+manifest_checks:
+  - name: check_model_max_fanout
+    max_downstream_models: 2
+```
+
+**Required artifacts(s)**:
+
+* manifest.json
+
+---
+
+# `check_model_max_upstream_dependencies`
+
+Limit the number of upstream dependencies a model has. Default values are 5 for models, 5 for macros, and 1 for sources.
+
+**Argument(s)**:
+
+* `include`: (Optional) Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+* `max_upsream_macros`: (Optional) The maximum number of permitted upstream models. Default: 5.
+* `max_upstream_models`: (Optional) The maximum number of permitted upstream macros. Default: 5
+* `max_upstream_sources`: (Optional) The maximum number of permitted upstream sources. Default: 1
+
+**Example**:
+```yaml
+manifest_checks:
+  - name: check_model_max_upstream_dependencies
+    max_upstream_models: 3
 ```
 
 **Required artifacts(s)**:
@@ -282,13 +472,35 @@ manifest_checks:
 
 ---
 
+# `check_model_documentation_coverage`
+
+Set the minimum percentage of models that have a populated description.
+
+**Argument(s)**:
+
+* `include`: (Optional) Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+* `min_model_documentation_coverage_pct`: The minimum percentage of models that must have a populated description. Default: 100
+
+**Example**:
+```yaml
+manifest_checks:
+    - name: check_model_documentation_coverage
+      min_model_documentation_coverage_pct: 90
+```
+
+**Required artifacts(s)**:
+
+* manifest.json
+
+---
+
 # `check_model_has_unique_test`
 
 Models must have a test for uniqueness of a column.
 
 **Argument(s)**:
 
-* `accepted_uniqueness_tests`: (Optional) List of tests that are accepted as uniqueness tests. If not provided, defaults to `expect_compound_columns_to_be_unique` and `unique`.
+* `accepted_uniqueness_tests`: (Optional) List of tests that are accepted as uniqueness tests. If not provided, defaults to `expect_compound_columns_to_be_unique`, `dbt_utils.unique_combination_of_columns` and `unique`.
 * `include`: (Optional) Regex pattern to match the model path. Only model paths that match the pattern will be checked.
 
 **Example**:
@@ -322,6 +534,26 @@ Models must have a populated description.
 ```yaml
 manifest_checks:
     - name: check_model_description_populated
+```
+
+**Required artifacts(s)**:
+
+* manifest.json
+
+---
+
+# `check_model_documented_in_same_directory`
+
+Models must be documented in the same directory where they are defined (i.e. `.yml` and `.sql` files are in the same directory).
+
+**Argument(s)**:
+
+* `include`: (Optional) Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+
+**Example**:
+```yaml
+manifest_checks:
+    - name: check_model_documented_in_same_directory
 ```
 
 **Required artifacts(s)**:
@@ -372,6 +604,28 @@ manifest_checks:
     - name: check_model_names
       include: ^staging
       model_name_pattern: ^stg_
+```
+
+**Required artifacts(s)**:
+
+* manifest.json
+
+---
+
+# `check_model_test_coverage`
+
+Set the minimum percentage of models that have at least one test.
+
+**Argument(s)**:
+
+* `include`: (Optional) Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+* `min_model_test_coverage_pct`: The minimum percentage of models that must have at least one test. Default: 100
+
+**Example**:
+```yaml
+manifest_checks:
+    - name: check_model_test_coverage
+      min_model_test_coverage_pct: 90
 ```
 
 **Required artifacts(s)**:
@@ -446,6 +700,26 @@ run_results_checks:
 
 ---
 
+# `check_source_description_populated`
+
+Sources must have a populated description.
+
+**Argument(s)**:
+
+* `include`: (Optional) Regex pattern to match the source path (i.e the `.yml` file where the source is configured). Only source paths that match the pattern will be checked.
+
+**Example**:
+```yaml
+manifest_checks:
+    - name: check_source_description_populated
+```
+
+**Required artifacts(s)**:
+
+* manifest.json
+
+---
+
 # `check_source_has_meta_keys`
 
 The `meta` config for sources must have the specified keys.
@@ -507,6 +781,26 @@ Sources must be referenced in at least one model.
 ```yaml
 manifest_checks:
     - name: check_source_not_orphaned
+```
+
+**Required artifacts(s)**:
+
+* manifest.json
+
+---
+
+# `check_source_used_by_models_in_same_directory`
+
+Sources can only be referenced by models that are located in the same directory where the source is defined.
+
+**Argument(s)**:
+
+* `include`: (Optional) Regex pattern to match the source path (i.e the `.yml` file where the source is configured). Only source paths that match the pattern will be checked.
+
+**Example**:
+```yaml
+manifest_checks:
+    - name: check_source_used_by_models_in_same_directory
 ```
 
 **Required artifacts(s)**:

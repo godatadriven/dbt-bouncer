@@ -4,7 +4,73 @@ import pytest
 
 from dbt_bouncer.checks.catalog.check_columns import (
     check_column_name_complies_to_column_type,
+    check_columns_are_documented_in_public_models,
 )
+
+
+@pytest.mark.parametrize(
+    "catalog_node, models, expectation",
+    [
+        (
+            {
+                "columns": {
+                    "col_1": {
+                        "name": "col_1",
+                    },
+                },
+                "unique_id": "model.package_name.model_1",
+            },
+            [
+                {
+                    "access": "public",
+                    "columns": {
+                        "col_1": {
+                            "description": "This is a description",
+                            "name": "col_1",
+                        },
+                    },
+                    "unique_id": "model.package_name.model_1",
+                }
+            ],
+            does_not_raise(),
+        ),
+        (
+            {
+                "columns": {
+                    "col_1": {
+                        "name": "col_1",
+                    },
+                    "col_2": {
+                        "name": "col_2",
+                    },
+                },
+                "unique_id": "model.package_name.model_1",
+            },
+            [
+                {
+                    "access": "public",
+                    "columns": {
+                        "col_1": {
+                            "description": "This is a description",
+                            "name": "col_1",
+                        },
+                        "col_2": {
+                            "description": "",
+                            "name": "col_2",
+                        },
+                    },
+                    "unique_id": "model.package_name.model_1",
+                }
+            ],
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_columns_are_documented_in_public_models(catalog_node, models, expectation):
+    with expectation:
+        check_columns_are_documented_in_public_models(
+            catalog_node=catalog_node, models=models, request=None
+        )
 
 
 @pytest.mark.parametrize(

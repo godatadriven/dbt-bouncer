@@ -5,11 +5,20 @@ import pytest
 from dbt_bouncer.checks.manifest.check_models import (
     check_model_access,
     check_model_code_does_not_contain_regexp_pattern,
+    check_model_contract_enforced_for_public_model,
+    check_model_depends_on_multiple_sources,
     check_model_description_populated,
     check_model_directories,
+    check_model_documentation_coverage,
+    check_model_documented_in_same_directory,
     check_model_has_meta_keys,
+    check_model_has_no_upstream_dependencies,
     check_model_has_unique_test,
+    check_model_max_chained_views,
+    check_model_max_fanout,
+    check_model_max_upstream_dependencies,
     check_model_names,
+    check_model_test_coverage,
 )
 
 
@@ -39,6 +48,142 @@ from dbt_bouncer.checks.manifest.check_models import (
 def test_check_model_access(check_config, model, expectation):
     with expectation:
         check_model_access(check_config=check_config, model=model, request=None)
+
+
+@pytest.mark.parametrize(
+    "model, expectation",
+    [
+        (
+            {
+                "access": "public",
+                "contract": {"enforced": True},
+                "unique_id": "model.package_name.stg_model_1",
+            },
+            does_not_raise(),
+        ),
+        (
+            {
+                "access": "protected",
+                "contract": {"enforced": False},
+                "unique_id": "model.package_name.stg_model_1",
+            },
+            does_not_raise(),
+        ),
+        (
+            {
+                "access": "public",
+                "contract": {"enforced": False},
+                "unique_id": "model.package_name.mart_model_1",
+            },
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_model_contract_enforced_for_public_model(model, expectation):
+    with expectation:
+        check_model_contract_enforced_for_public_model(model=model, request=None)
+
+
+@pytest.mark.parametrize(
+    "model, expectation",
+    [
+        (
+            {
+                "depends_on": {"nodes": ["source.package_name.source_1"]},
+                "unique_id": "model.package_name.stg_model_1",
+            },
+            does_not_raise(),
+        ),
+        (
+            {
+                "depends_on": {
+                    "nodes": ["source.package_name.source_1", "source.package_name.source_2"]
+                },
+                "unique_id": "model.package_name.stg_model_1",
+            },
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_model_depends_on_multiple_sources(model, expectation):
+    with expectation:
+        check_model_depends_on_multiple_sources(model=model, request=None)
+
+
+@pytest.mark.parametrize(
+    "check_config, models, expectation",
+    [
+        (
+            {
+                "min_model_documentation_coverage_pct": 100,
+            },
+            [
+                {
+                    "description": "Model 1 description",
+                    "unique_id": "model.package_name.model_1",
+                }
+            ],
+            does_not_raise(),
+        ),
+        (
+            {
+                "min_model_documentation_coverage_pct": 50,
+            },
+            [
+                {
+                    "description": "Model 1 description",
+                    "unique_id": "model.package_name.model_1",
+                },
+                {
+                    "description": "",
+                    "unique_id": "model.package_name.model_2",
+                },
+            ],
+            does_not_raise(),
+        ),
+        (
+            {
+                "min_model_documentation_coverage_pct": 100,
+            },
+            [
+                {
+                    "description": "",
+                    "unique_id": "model.package_name.model_1",
+                },
+            ],
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_model_documentation_coverage(check_config, models, expectation):
+    with expectation:
+        check_model_documentation_coverage(check_config=check_config, models=models, request=None)
+
+
+@pytest.mark.parametrize(
+    "model, expectation",
+    [
+        (
+            {
+                "patch_path": "package_name://models/staging/_schema.yml",
+                "path": "staging/model_1.sql",
+                "unique_id": "model.package_name.model_1",
+            },
+            does_not_raise(),
+        ),
+        (
+            {
+                "patch_path": "package_name://models/staging/_schema.yml",
+                "path": "staging/finance/model_1.sql",
+                "unique_id": "model.package_name.model_1",
+            },
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_model_documented_in_same_directory(model, expectation):
+    with expectation:
+        check_model_documented_in_same_directory(model=model, request=None)
 
 
 @pytest.mark.parametrize(
@@ -97,6 +242,37 @@ def test_check_model_access(check_config, model, expectation):
 def test_check_model_has_meta_keys(check_config, model, expectation):
     with expectation:
         check_model_has_meta_keys(check_config=check_config, model=model, request=None)
+
+
+@pytest.mark.parametrize(
+    "model, expectation",
+    [
+        (
+            {
+                "depends_on": {"nodes": ["source.package_name.source_1"]},
+                "unique_id": "model.package_name.model_1",
+            },
+            does_not_raise(),
+        ),
+        (
+            {
+                "depends_on": {"nodes": ["model.package_name.stg_model_1"]},
+                "unique_id": "model.package_name.int_model_1",
+            },
+            does_not_raise(),
+        ),
+        (
+            {
+                "depends_on": {"nodes": []},
+                "unique_id": "model.package_name.model_1",
+            },
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_model_has_no_upstream_dependencies(model, expectation):
+    with expectation:
+        check_model_has_no_upstream_dependencies(model=model, request=None)
 
 
 @pytest.mark.parametrize(
@@ -231,6 +407,80 @@ def test_check_model_directories(check_config, model, expectation):
 
 
 @pytest.mark.parametrize(
+    "check_config, manifest_obj, model, models, expectation",
+    [
+        (
+            {"materializations_to_include": ["ephemeral", "view"], "max_chained_views": 3},
+            "manifest_obj",
+            {
+                "depends_on": {"nodes": ["model.dbt_bouncer_test_project.model_1"]},
+                "unique_id": "model.dbt_bouncer_test_project.model_0",
+            },
+            [
+                {
+                    "config": {"materialized": "ephemeral"},
+                    "depends_on": {"nodes": ["model.dbt_bouncer_test_project.model_1"]},
+                    "unique_id": "model.dbt_bouncer_test_project.model_0",
+                },
+                {
+                    "config": {"materialized": "ephemeral"},
+                    "depends_on": {"nodes": ["model.dbt_bouncer_test_project.model_2"]},
+                    "unique_id": "model.dbt_bouncer_test_project.model_1",
+                },
+                {
+                    "config": {"materialized": "view"},
+                    "depends_on": {"nodes": []},
+                    "unique_id": "model.dbt_bouncer_test_project.model_2",
+                },
+            ],
+            does_not_raise(),
+        ),
+        (
+            {"materializations_to_include": ["ephemeral", "view"], "max_chained_views": 3},
+            "manifest_obj",
+            {
+                "depends_on": {"nodes": ["model.dbt_bouncer_test_project.model_1"]},
+                "unique_id": "model.dbt_bouncer_test_project.model_0",
+            },
+            [
+                {
+                    "config": {"materialized": "ephemeral"},
+                    "depends_on": {"nodes": ["model.dbt_bouncer_test_project.model_1"]},
+                    "unique_id": "model.dbt_bouncer_test_project.model_0",
+                },
+                {
+                    "config": {"materialized": "ephemeral"},
+                    "depends_on": {"nodes": ["model.dbt_bouncer_test_project.model_2"]},
+                    "unique_id": "model.dbt_bouncer_test_project.model_1",
+                },
+                {
+                    "config": {"materialized": "view"},
+                    "depends_on": {"nodes": ["model.dbt_bouncer_test_project.model_3"]},
+                    "unique_id": "model.dbt_bouncer_test_project.model_2",
+                },
+                {
+                    "config": {"materialized": "view"},
+                    "depends_on": {"nodes": []},
+                    "unique_id": "model.dbt_bouncer_test_project.model_3",
+                },
+            ],
+            pytest.raises(AssertionError),
+        ),
+    ],
+    indirect=["manifest_obj"],
+)
+def test_check_model_max_chained_views(check_config, manifest_obj, model, models, expectation):
+    with expectation:
+        check_model_max_chained_views(
+            check_config=check_config,
+            manifest_obj=manifest_obj,
+            model=model,
+            models=models,
+            request=None,
+        )
+
+
+@pytest.mark.parametrize(
     "check_config, model, expectation",
     [
         (
@@ -312,6 +562,177 @@ def test_check_mode_names(check_config, model, expectation):
 
 
 @pytest.mark.parametrize(
+    "check_config, model, models, expectation",
+    [
+        (
+            {
+                "max_downstream_models": 1,
+            },
+            {
+                "unique_id": "model.package_name.stg_model_1",
+            },
+            [
+                {
+                    "depends_on": {
+                        "nodes": [
+                            "model.package_name.stg_model_1",
+                        ]
+                    },
+                    "unique_id": "model.package_name.stg_model_2",
+                },
+            ],
+            does_not_raise(),
+        ),
+        (
+            {
+                "max_downstream_models": 1,
+            },
+            {
+                "unique_id": "model.package_name.stg_model_1",
+            },
+            [
+                {
+                    "depends_on": {
+                        "nodes": [
+                            "model.package_name.stg_model_1",
+                        ]
+                    },
+                    "unique_id": "model.package_name.stg_model_2",
+                },
+                {
+                    "depends_on": {
+                        "nodes": [
+                            "model.package_name.stg_model_1",
+                        ]
+                    },
+                    "unique_id": "model.package_name.stg_model_3",
+                },
+            ],
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_model_max_fanout(check_config, model, models, expectation):
+    with expectation:
+        check_model_max_fanout(check_config=check_config, model=model, models=models, request=None)
+
+
+@pytest.mark.parametrize(
+    "check_config, model, expectation",
+    [
+        (
+            {
+                "max_upstream_macros": 5,
+                "max_upstream_models": 5,
+                "max_upstream_sources": 1,
+            },
+            {
+                "depends_on": {
+                    "macros": [
+                        "macro.package_name.macro_1",
+                        "macro.package_name.macro_2",
+                        "macro.package_name.macro_3",
+                        "macro.package_name.macro_4",
+                        "macro.package_name.macro_5",
+                    ],
+                    "nodes": [
+                        "model.package_name.stg_model_1",
+                        "model.package_name.stg_model_2",
+                        "model.package_name.stg_model_3",
+                        "model.package_name.stg_model_4",
+                        "model.package_name.stg_model_5",
+                        "source.package_name.source_1",
+                    ],
+                },
+                "unique_id": "model.package_name.stg_model_1",
+            },
+            does_not_raise(),
+        ),
+        (
+            {
+                "max_upstream_macros": 5,
+                "max_upstream_models": 5,
+                "max_upstream_sources": 1,
+            },
+            {
+                "depends_on": {
+                    "macros": [],
+                    "nodes": [],
+                },
+                "unique_id": "model.package_name.stg_model_1",
+            },
+            does_not_raise(),
+        ),
+        (
+            {
+                "max_upstream_macros": 5,
+                "max_upstream_models": 5,
+                "max_upstream_sources": 1,
+            },
+            {
+                "depends_on": {
+                    "macros": [],
+                    "nodes": [
+                        "source.package_name.source_1",
+                        "source.package_name.source_2",
+                    ],
+                },
+                "unique_id": "model.package_name.stg_model_1",
+            },
+            pytest.raises(AssertionError),
+        ),
+        (
+            {
+                "max_upstream_macros": 5,
+                "max_upstream_models": 5,
+                "max_upstream_sources": 1,
+            },
+            {
+                "depends_on": {
+                    "macros": [
+                        "macro.package_name.macro_1",
+                        "macro.package_name.macro_2",
+                        "macro.package_name.macro_3",
+                        "macro.package_name.macro_4",
+                        "macro.package_name.macro_5",
+                        "macro.package_name.macro_6",
+                    ],
+                    "nodes": [],
+                },
+                "unique_id": "model.package_name.stg_model_1",
+            },
+            pytest.raises(AssertionError),
+        ),
+        (
+            {
+                "max_upstream_macros": 5,
+                "max_upstream_models": 5,
+                "max_upstream_sources": 1,
+            },
+            {
+                "depends_on": {
+                    "macros": [],
+                    "nodes": [
+                        "model.package_name.stg_model_1",
+                        "model.package_name.stg_model_2",
+                        "model.package_name.stg_model_3",
+                        "model.package_name.stg_model_4",
+                        "model.package_name.stg_model_5",
+                        "model.package_name.stg_model_6",
+                    ],
+                },
+                "unique_id": "model.package_name.stg_model_1",
+            },
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_model_max_upstream_dependencies(check_config, model, expectation):
+    with expectation:
+        check_model_max_upstream_dependencies(check_config=check_config, model=model, request=None)
+
+
+@pytest.mark.parametrize(
     "model, expectation",
     [
         (
@@ -372,3 +793,81 @@ def test_check_mode_names(check_config, model, expectation):
 def test_check_model_description_populated(model, expectation):
     with expectation:
         check_model_description_populated(model=model, request=None)
+
+
+@pytest.mark.parametrize(
+    "check_config, models, tests, expectation",
+    [
+        (
+            {
+                "min_model_test_coverage_pct": 100,
+            },
+            [
+                {
+                    "unique_id": "model.package_name.model_1",
+                }
+            ],
+            [
+                {
+                    "depends_on": {
+                        "nodes": [
+                            "model.package_name.model_1",
+                        ],
+                    }
+                }
+            ],
+            does_not_raise(),
+        ),
+        (
+            {
+                "min_model_test_coverage_pct": 50,
+            },
+            [
+                {
+                    "unique_id": "model.package_name.model_1",
+                },
+                {
+                    "unique_id": "model.package_name.model_2",
+                },
+            ],
+            [
+                {
+                    "depends_on": {
+                        "nodes": [
+                            "model.package_name.model_1",
+                        ],
+                    }
+                }
+            ],
+            does_not_raise(),
+        ),
+        (
+            {
+                "min_model_test_coverage_pct": 100,
+            },
+            [
+                {
+                    "unique_id": "model.package_name.model_1",
+                },
+                {
+                    "unique_id": "model.package_name.model_2",
+                },
+            ],
+            [
+                {
+                    "depends_on": {
+                        "nodes": [
+                            "model.package_name.model_2",
+                        ],
+                    }
+                }
+            ],
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_model_test_coverage(check_config, models, tests, expectation):
+    with expectation:
+        check_model_test_coverage(
+            check_config=check_config, models=models, tests=tests, request=None
+        )

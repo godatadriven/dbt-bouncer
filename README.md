@@ -148,6 +148,7 @@ These checks require the following artifact to be present:
 
 **Columns**
 
+* [`check_columns_are_documented_in_public_models`](./src/dbt_bouncer/checks/checks.md#check_columns_are_documented_in_public_models): Columns should have a populated description in public models.
 * [`check_column_name_complies_to_column_type`](./src/dbt_bouncer/checks/checks.md#check_column_name_complies_to_column_type): Columns with specified data type must comply to the specified regexp naming pattern.
 
 ### Manifest checks
@@ -155,6 +156,11 @@ These checks require the following artifact to be present:
 These checks require the following artifact to be present:
 
 * `manifest.json`
+
+**Exposures**
+
+* [`check_exposure_based_on_non_public_models`](./src/dbt_bouncer/checks/checks.md#check_exposure_based_on_non_public_models): Exposures should be based on public models only.
+* [`check_exposure_based_on_view`](./src/dbt_bouncer/checks/checks.md#check_exposure_based_on_view): Exposures should not be based on views.
 
 **Lineage**
 
@@ -176,17 +182,28 @@ These checks require the following artifact to be present:
 **Models**
 
 * [`check_model_access`](./src/dbt_bouncer/checks/checks.md#check_model_access): Models must have the specified access attribute.
+* [`check_model_contract_enforced_for_public_model`](./src/dbt_bouncer/checks/checks.md#check_model_contract_enforced_for_public_model): Public models must have contracts enforced.
 * [`check_model_code_does_not_contain_regexp_pattern`](./src/dbt_bouncer/checks/checks.md#check_model_code_does_not_contain_regexp_pattern): The raw code for a model must not match the specified regexp pattern.
+* [`check_model_depends_on_multiple_sources`](./src/dbt_bouncer/checks/checks.md#check_model_depends_on_multiple_sources): Models cannot reference more than one source.
 * [`check_model_description_populated`](./src/dbt_bouncer/checks/checks.md#check_model_description_populated): Models must have a populated description.
 * [`check_model_directories`](./src/dbt_bouncer/checks/checks.md#check_model_directories): Only specified sub-directories are permitted.
+* [`check_model_documentation_coverage`](./src/dbt_bouncer/checks/checks.md#check_model_documentation_coverage): Set the minimum percentage of models that have a populated description.
+* [`check_model_documented_in_same_directory`](./src/dbt_bouncer/checks/checks.md#check_model_documented_in_same_directory): Models must be documented in the same directory where they are defined (i.e. `.yml` and `.sql` files are in the same directory).
 * [`check_model_has_meta_keys`](./src/dbt_bouncer/checks/checks.md#check_model_has_meta_keys): The `meta` config for models must have the specified keys.
+* [`check_model_has_no_upstream_dependencies`](./src/dbt_bouncer/checks/checks.md#check_model_has_no_upstream_dependencies): Identify if models have no upstream dependencies as this likely indicates hard-coded tables references.
+* [`check_model_max_chained_views`](./src/dbt_bouncer/checks/checks.md#check_model_max_chained_views): Models cannot have more than the specified number of upstream dependents that are not tables (default: 3).
+* [`check_model_max_fanout`](./src/dbt_bouncer/checks/checks.md#check_model_max_fanout): Models cannot have more than the specified number of downstream models (default: 3).
+* [`check_model_max_upstream_dependencies`](./src/dbt_bouncer/checks/checks.md#check_model_max_upstream_dependencies): Limit the number of upstream dependencies a model has. Default values are 5 for models, 5 for macros, and 1 for sources.
 * [`check_model_names`](./src/dbt_bouncer/checks/checks.md#check_model_names): Models must have a name that matches the supplied regex.
+* [`check_model_test_coverage`](./src/dbt_bouncer/checks/checks.md#check_model_test_coverage): Set the minimum percentage of models that have at least one test.
 
 **Sources**
 
+* [`check_source_description_populated`](./src/dbt_bouncer/checks/checks.md#check_source_description_populated): Sources must have a populated description.
 * [`check_source_has_meta_keys`](./src/dbt_bouncer/checks/checks.md#check_source_has_meta_keys): The `meta` config for sources must have the specified keys.
 * [`check_source_names`](./src/dbt_bouncer/checks/checks.md#check_source_names): Sources must have a name that matches the supplied regex.
 * [`check_source_not_orphaned`](./src/dbt_bouncer/checks/checks.md#check_source_not_orphaned): Sources must be referenced in at least one model.
+* [`check_source_used_by_models_in_same_directory`](./src/dbt_bouncer/checks/checks.md#check_source_used_by_models_in_same_directory): Sources can only be referenced by models that are located in the same directory where the source is defined.
 * [`check_source_used_by_only_one_model`](./src/dbt_bouncer/checks/checks.md#check_source_used_by_only_one_model): Each source can be references by a maximum of one model.
 
 **Tests**
