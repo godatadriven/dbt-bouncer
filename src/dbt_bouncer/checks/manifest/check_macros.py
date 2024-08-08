@@ -22,7 +22,7 @@ def check_macro_arguments_description_populated(request, check_config=None, macr
     for arg in macro["arguments"]:
         assert (
             len(arg["description"].strip()) > 4
-        ), f"Argument {arg['name']} in {macro['unique_id']} does not have a populated description."
+        ), f"Argument `{arg['name']}` in {macro['unique_id'].split('.')[-1]} does not have a populated description."
 
 
 class CheckMacroCodeDoesNotContainRegexpPattern(BaseCheck):
@@ -47,7 +47,7 @@ def check_macro_code_does_not_contain_regexp_pattern(request, check_config=None,
             macro["macro_sql"]
         )
         is None
-    ), f"`{macro['unique_id']}` contains a banned string: `{check_config['regexp_pattern'].strip()}`."
+    ), f"`{macro['unique_id'].split('.')[-1]}` contains a banned string: `{check_config['regexp_pattern'].strip()}`."
 
 
 class CheckMacroDescriptionPopulated(BaseCheck):
@@ -63,7 +63,7 @@ def check_macro_description_populated(request, check_config=None, macro=None) ->
     macro = get_check_inputs(check_config=check_config, macro=macro, request=request)["macro"]
     assert (
         len(macro["description"].strip()) > 4
-    ), f"{macro['unique_id']} does not have a populated description."
+    ), f"`{macro['unique_id'].split('.')[-1]}` does not have a populated description."
 
 
 class CheckMacroNameMatchesFileName(BaseCheck):
@@ -86,4 +86,4 @@ def check_macro_name_matches_file_name(request, check_config=None, macro=None) -
     else:
         assert (
             macro["name"] == macro["path"].split("/")[-1].split(".")[0]
-        ), f"{macro['unique_id']} is not in a file of the same name."
+        ), f"`{macro['unique_id'].split('.')[-1]}` is not in a file of the same name."

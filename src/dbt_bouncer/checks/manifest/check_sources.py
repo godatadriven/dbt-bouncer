@@ -50,7 +50,7 @@ def check_source_has_meta_keys(request, check_config=None, source=None) -> None:
     )
     assert (
         missing_keys == []
-    ), f"{source['unique_id']} is missing the following keys from the `meta` config: {[x.replace('>>', '') for x in missing_keys]}"
+    ), f"`{source['unique_id']}` is missing the following keys from the `meta` config: {[x.replace('>>', '') for x in missing_keys]}"
 
 
 class CheckSourceNames(BaseCheck):
