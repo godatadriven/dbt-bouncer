@@ -148,6 +148,7 @@ These checks require the following artifact to be present:
 
 **Columns**
 
+* [`check_columns_are_documented_in_public_models`](./src/dbt_bouncer/checks/checks.md#check_columns_are_documented_in_public_models): Columns should have a populated description in public models.
 * [`check_column_name_complies_to_column_type`](./src/dbt_bouncer/checks/checks.md#check_column_name_complies_to_column_type): Columns with specified data type must comply to the specified regexp naming pattern.
 
 ### Manifest checks

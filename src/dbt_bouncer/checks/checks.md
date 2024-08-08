@@ -1,3 +1,24 @@
+# `check_columns_are_documented_in_public_models`
+
+Columns should have a populated description in public models.
+
+**Argument(s)**:
+
+* `include`: (Optional) Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+
+**Example**:
+```yaml
+catalog_checks:
+    - name: check_columns_are_documented_in_public_models
+```
+
+**Required artifact(s)**:
+
+* catalog.json
+* manifest.json
+
+---
+
 # `check_column_name_complies_to_column_type`
 
 Columns with specified data type must comply to the specified regexp naming pattern.

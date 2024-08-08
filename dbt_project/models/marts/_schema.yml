@@ -24,17 +24,20 @@ models:
       - name: last_name
         description: Customer's last name. PII.
 
-      - name: first_order
+      - name: first_order_date
         description: Date (UTC) of a customer's first order
 
-      - name: most_recent_order
+      - name: most_recent_order_date
         description: Date (UTC) of a customer's most recent order
 
       - name: number_of_orders
         description: Count of the number of orders a customer has placed
 
-      - name: total_order_amount
-        description: Total value (AUD) of a customer's orders
+      - name: is_recurring_customer
+        description: Boolean indicating whether a customer has placed more than five orders
+
+      - name: customer_lifetime_value
+        description: Sum of all payments a customer has made
 
   - name: orders
     description: This table has basic information about orders, as well as some derived facts based on payments

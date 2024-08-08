@@ -7,6 +7,32 @@ from dbt_bouncer.conf_validator_base import BaseCheck
 from dbt_bouncer.utils import get_check_inputs
 
 
+class CheckColumnsAreDocumentedInPublicModels(BaseCheck):
+    name: Literal["check_columns_are_documented_in_public_models"]
+
+
+@pytest.mark.iterate_over_catalog_nodes
+def check_columns_are_documented_in_public_models(models, request, catalog_node=None) -> None:
+    """
+    Columns should have a populated description in public models.
+    """
+
+    catalog_node = get_check_inputs(catalog_node=catalog_node, request=request)["catalog_node"]
+
+    if catalog_node["unique_id"].split(".")[0] == "model":
+        model = [m for m in models if m["unique_id"] == catalog_node["unique_id"]][0]
+        non_complying_columns = []
+        for k, v in catalog_node["columns"].items():
+            if model["access"] == "public":
+                column_config = model["columns"].get(v["name"])
+                if column_config is None or len(column_config.get("description").strip()) < 4:
+                    non_complying_columns.append(v["name"])
+
+        assert (
+            not non_complying_columns
+        ), f"`{catalog_node['unique_id'].split('.')[-1]}` is a public model but has columns that don't have a populated description: {non_complying_columns}"
+
+
 class CheckColumnNameCompliesToColumnType(BaseCheck):
     column_name_pattern: str
     name: Literal["check_column_name_complies_to_column_type"]
@@ -36,4 +62,4 @@ def check_column_name_complies_to_column_type(
 
     assert (
         not non_complying_columns
-    ), f"""`{catalog_node['unique_id'].split('.')[-1]}` has columns that don't comply with the specified regexp pattern (`{check_config['column_name_pattern']}`): {non_complying_columns}"""
+    ), f"`{catalog_node['unique_id'].split('.')[-1]}` has columns that don't comply with the specified regexp pattern (`{check_config['column_name_pattern']}`): {non_complying_columns}"
