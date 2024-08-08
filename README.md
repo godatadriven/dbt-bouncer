@@ -222,21 +222,11 @@ These checks require the following artifact to be present:
 * [`check_run_results_max_gigabytes_billed`](./src/dbt_bouncer/checks/checks.md#check_run_results_max_gigabytes_billed): Each result can have a maximum number of gigabytes billed. Note that this only works for the `dbt-bigquery` adapter.
 * [`check_run_results_max_execution_time`](./src/dbt_bouncer/checks/checks.md#check_run_results_max_execution_time): Each result can take a maximum duration (seconds).
 
+## Reporting bugs and contributing code
 
-# Development
+- Want to report a bug or request a feature? Let us know and open [an issue](https://github.com/godatadriven/dbt-bouncer/issues/new/choose)
+- Want to help us build `dbt-bouncer? Check out the [Contributing Guide](https://github.com/godatadriven/dbt-bouncer/blob/HEAD/CONTRIBUTING.md)
 
-To setup your development environment, fork this repository and run:
+## Code of Conduct
 
-```bash
-poetry shell
-poetry install
-pre-commit install
-```
-
-Set required environment variables by copying `.env.example` to `.env` and updating the values.
-
-All tests can be run via:
-```bash
-make build-artifacts # Rebuilds dbt artifacts used by pytest
-make test
-```
+Everyone interacting in `dbt-bouncer`'s codebase, issue trackers, chat rooms, and mailing lists is expected to follow the [Code of Conduct](./CODE_OF_CONDUCT.md).
