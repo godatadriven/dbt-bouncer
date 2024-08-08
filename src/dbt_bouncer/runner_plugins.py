@@ -8,8 +8,11 @@ from dbt_bouncer.utils import object_in_path
 
 
 class FixturePlugin(object):
-    def __init__(self, catalog_nodes, macros, manifest_obj, models, run_results, sources, tests):
+    def __init__(
+        self, catalog_nodes, exposures, macros, manifest_obj, models, run_results, sources, tests
+    ):
         self.catalog_nodes_ = catalog_nodes
+        self.exposures_ = exposures
         self.macros_ = macros
         self.manifest_obj_ = manifest_obj
         self.models_ = models
@@ -20,6 +23,10 @@ class FixturePlugin(object):
     @pytest.fixture(scope="session")
     def catalog_nodes(self):
         return self.catalog_nodes_
+
+    @pytest.fixture(scope="session")
+    def exposures(self):
+        return self.exposures_
 
     @pytest.fixture(scope="session")
     def macros(self):
@@ -52,6 +59,7 @@ class MyFunctionItem(pytest.Function):
         self,
         check_config,
         catalog_node=None,
+        exposure=None,
         macro=None,
         model=None,
         run_result=None,
@@ -61,6 +69,7 @@ class MyFunctionItem(pytest.Function):
     ):
         self.check_config: Dict[str, str] = check_config
         self.catalog_node: Dict[str, str] | None = catalog_node
+        self.exposure: Dict[str, str] | None = exposure
         self.macro: Dict[str, str] | None = macro
         self.model: Dict[str, str] | None = model
         self.run_result: Dict[str, str] | None = run_result
@@ -75,9 +84,12 @@ class GenerateTestsPlugin:
     `pytest_pycollect_makeitem` is one way to get this to work.
     """
 
-    def __init__(self, bouncer_config, catalog_nodes, macros, models, run_results, sources):
+    def __init__(
+        self, bouncer_config, catalog_nodes, exposures, macros, models, run_results, sources
+    ):
         self.bouncer_config = bouncer_config
         self.catalog_nodes = catalog_nodes
+        self.exposures = exposures
         self.macros = macros
         self.models = models
         self.run_results = run_results
@@ -104,6 +116,7 @@ class GenerateTestsPlugin:
                             set(
                                 [
                                     "iterate_over_catalog_nodes",
+                                    "iterate_over_exposures",
                                     "iterate_over_models",
                                     "iterate_over_macros",
                                     "iterate_over_run_results",
@@ -120,19 +133,22 @@ class GenerateTestsPlugin:
                         for x in self.__getattribute__(key):
                             if key == "catalog_nodes":
                                 catalog_node = x
-                                macro = model = run_result = source = None
+                                exposure = macro = model = run_result = source = None
+                            elif key == "exposures":
+                                exposure = x
+                                catalog_node = macro = model = run_result = source = None
                             elif key == "macros":
                                 macro = x
-                                catalog_node = model = run_result = source = None
+                                catalog_node = exposure = model = run_result = source = None
                             elif key == "models":
                                 model = x
-                                catalog_node = macro = run_result = source = None
+                                catalog_node = exposure = macro = run_result = source = None
                             elif key == "run_results":
                                 run_result = x
-                                catalog_node = macro = model = source = None
+                                catalog_node = exposure = macro = model = source = None
                             elif key == "sources":
                                 source = x
-                                catalog_node = macro = model = run_result = None
+                                catalog_node = exposure = macro = model = run_result = None
 
                             if object_in_path(check_config.get("include"), x["path"]):
                                 item = MyFunctionItem.from_parent(
@@ -141,6 +157,7 @@ class GenerateTestsPlugin:
                                     fixtureinfo=fixture_info,
                                     check_config=check_config,
                                     catalog_node=catalog_node,
+                                    exposure=exposure,
                                     macro=macro,
                                     model=model,
                                     run_result=run_result,

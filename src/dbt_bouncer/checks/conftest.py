@@ -5,6 +5,9 @@ def pytest_configure(config):
     )
     config.addinivalue_line("markers", "iterate_over_macros: Tests that should run once per macro")
     config.addinivalue_line(
+        "markers", "iterate_over_exposures: Tests that should run once per exposure"
+    )
+    config.addinivalue_line(
         "markers",
         "iterate_over_models: Tests that should run once per model",
     )

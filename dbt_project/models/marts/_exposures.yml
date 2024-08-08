@@ -1,0 +1,10 @@
+version: 2
+
+exposures:
+  - name: customers
+    type: dashboard
+    depends_on:
+      - ref('customers')
+    owner:
+      name: Anna Anderson
+      email: anna.anderson@example.com

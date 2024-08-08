@@ -40,6 +40,27 @@ catalog_checks:
 
 ---
 
+# `check_exposure_based_on_view`
+
+Exposures should not be based on views.
+
+**Argument(s)**:
+
+* `include`: (Optional) Regex pattern to match the exposure path (i.e the `.yml` file where the exposure is configured). Only exposure paths that match the pattern will be checked.
+* `materializations_to_include`: (Optional) List of materializations to include in the check. If not provided, defaults to `ephemeral` and `view`.
+
+**Example**:
+```yaml
+manifest_checks:
+    - name: check_exposure_based_on_view
+```
+
+**Required artifact(s)**:
+
+* manifest.json
+
+---
+
 # `check_lineage_permitted_upstream_models`
 
 Upstream models must have a path that matches the provided `upstream_path_pattern`.

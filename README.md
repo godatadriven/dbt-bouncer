@@ -156,6 +156,10 @@ These checks require the following artifact to be present:
 
 * `manifest.json`
 
+**Exposures**
+
+* [`check_exposure_based_on_view`](./src/dbt_bouncer/checks/checks.md#check_exposure_based_on_view): Exposures should not be based on views.
+
 **Lineage**
 
 * [`check_lineage_permitted_upstream_models`](./src/dbt_bouncer/checks/checks.md#check_lineage_permitted_upstream_models): Upstream models must have a path that matches the provided `upstream_path_pattern`.
