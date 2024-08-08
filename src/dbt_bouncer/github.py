@@ -98,4 +98,4 @@ def send_github_comment_failed_checks(failed_checks: List[List[str]]) -> None:
         endpoint=f"repos/{os.environ['GITHUB_REPOSITORY']}/issues/{os.environ['GITHUB_REF'].split('/')[-2]}/comments",
         method="POST",
     )
-    logger.info(f"Comment URL: {r['url']}")
+    logger.info(f"Comment URL: {r['html_url']}")
