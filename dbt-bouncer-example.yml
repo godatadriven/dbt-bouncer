@@ -22,6 +22,8 @@ catalog_checks:
   - name: check_columns_are_documented_in_public_models
 
 manifest_checks:
+  - name: check_exposure_based_on_non_public_models
+  - name: check_exposure_based_on_view
   - name: check_lineage_permitted_upstream_models
     include: ^staging
     upstream_path_pattern: $^

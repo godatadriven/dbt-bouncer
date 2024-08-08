@@ -159,6 +159,7 @@ These checks require the following artifact to be present:
 
 **Exposures**
 
+* [`check_exposure_based_on_non_public_models`](./src/dbt_bouncer/checks/checks.md#check_exposure_based_on_non_public_models): Exposures should be based on public models only.
 * [`check_exposure_based_on_view`](./src/dbt_bouncer/checks/checks.md#check_exposure_based_on_view): Exposures should not be based on views.
 
 **Lineage**

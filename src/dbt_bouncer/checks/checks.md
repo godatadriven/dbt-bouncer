@@ -61,6 +61,26 @@ catalog_checks:
 
 ---
 
+# `check_exposure_based_on_non_public_models`
+
+Exposures should not be based on views.
+
+**Argument(s)**:
+
+* `include`: (Optional) Regex pattern to match the exposure path (i.e the `.yml` file where the exposure is configured). Only exposure paths that match the pattern will be checked.
+
+**Example**:
+```yaml
+manifest_checks:
+    - name: check_exposure_based_on_non_public_models
+```
+
+**Required artifact(s)**:
+
+* manifest.json
+
+---
+
 # `check_exposure_based_on_view`
 
 Exposures should not be based on views.

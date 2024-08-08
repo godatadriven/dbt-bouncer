@@ -8,7 +8,7 @@ with
         select *
         from {{ ref("raw_customers") }}
 
-        union all
+        union distinct
 
         select *
         from {{ source("dummy_source", "customers") }}
