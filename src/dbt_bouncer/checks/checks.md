@@ -376,6 +376,30 @@ manifest_checks:
 
 ---
 
+# `check_model_has_tags`
+
+Models must have the specified tags.
+
+**Argument(s)**:
+
+* `include`: (Optional) Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+* `tags`: List of tags that must be present on the model.
+
+**Example**:
+```yaml
+manifest_checks:
+  - name: check_model_has_tags
+    tags:
+      - tag_1
+      - tag_2
+```
+
+**Required artifacts(s)**:
+
+* manifest.json
+
+---
+
 # `check_model_has_no_upstream_dependencies`
 
 Identify if models have no upstream dependencies as this likely indicates hard-coded tables references.

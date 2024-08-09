@@ -193,6 +193,7 @@ These checks require the following artifact to be present:
 * [`check_model_has_contracts_enforced`](./src/dbt_bouncer/checks/checks.md#check_model_has_contracts_enforced): Model must have contracts enforced.
 * [`check_model_has_meta_keys`](./src/dbt_bouncer/checks/checks.md#check_model_has_meta_keys): The `meta` config for models must have the specified keys.
 * [`check_model_has_no_upstream_dependencies`](./src/dbt_bouncer/checks/checks.md#check_model_has_no_upstream_dependencies): Identify if models have no upstream dependencies as this likely indicates hard-coded tables references.
+* [`check_model_has_tags`](./src/dbt_bouncer/checks/checks.md#check_model_has_tags): Models must have the specified tags.
 * [`check_model_max_chained_views`](./src/dbt_bouncer/checks/checks.md#check_model_max_chained_views): Models cannot have more than the specified number of upstream dependents that are not tables (default: 3).
 * [`check_model_max_fanout`](./src/dbt_bouncer/checks/checks.md#check_model_max_fanout): Models cannot have more than the specified number of downstream models (default: 3).
 * [`check_model_max_upstream_dependencies`](./src/dbt_bouncer/checks/checks.md#check_model_max_upstream_dependencies): Limit the number of upstream dependencies a model has. Default values are 5 for models, 5 for macros, and 1 for sources.

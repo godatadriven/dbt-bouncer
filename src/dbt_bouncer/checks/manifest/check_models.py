@@ -255,6 +255,27 @@ def check_model_has_no_upstream_dependencies(request, model=None):
     ), f"`{model['unique_id'].split('.')[-1]}` has no upstream dependencies, this likely indicates hard-coded tables references."
 
 
+class CheckModelHasTags(BaseCheck):
+    name: Literal["check_model_has_tags"]
+    tags: List[str] = Field(default=[], description="List of tags to check for.")
+
+
+@pytest.mark.iterate_over_models
+def check_model_has_tags(request, check_config=None, model=None):
+    """
+    Models must have the specified tags.
+    """
+
+    input_vars = get_check_inputs(check_config=check_config, model=model, request=request)
+    model = input_vars["model"]
+    tags = input_vars["check_config"]["tags"]
+
+    missing_tags = [tag for tag in tags if tag not in model["tags"]]
+    assert (
+        not missing_tags
+    ), f"`{model['unique_id'].split('.')[-1]}` is missing required tags: {missing_tags}."
+
+
 class CheckModelHasUniqueTest(BaseCheck):
     accepted_uniqueness_tests: Optional[List[str]] = Field(
         default=[

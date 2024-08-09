@@ -25,3 +25,6 @@ models:
       access: public
     staging:
       access: protected
+      crm:
+        tags:
+          - crm

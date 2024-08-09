@@ -14,6 +14,7 @@ from dbt_bouncer.checks.manifest.check_models import (
     check_model_has_contracts_enforced,
     check_model_has_meta_keys,
     check_model_has_no_upstream_dependencies,
+    check_model_has_tags,
     check_model_has_unique_test,
     check_model_max_chained_views,
     check_model_max_fanout,
@@ -298,6 +299,36 @@ def test_check_model_has_meta_keys(check_config, model, expectation):
 def test_check_model_has_no_upstream_dependencies(model, expectation):
     with expectation:
         check_model_has_no_upstream_dependencies(model=model, request=None)
+
+
+@pytest.mark.parametrize(
+    "check_config, model, expectation",
+    [
+        (
+            {
+                "tags": ["tag_1"],
+            },
+            {
+                "tags": ["tag_1"],
+                "unique_id": "model.package_name.stg_model_1",
+            },
+            does_not_raise(),
+        ),
+        (
+            {
+                "tags": ["tag_1"],
+            },
+            {
+                "tags": [],
+                "unique_id": "model.package_name.stg_model_4",
+            },
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_model_has_tags(check_config, model, expectation):
+    with expectation:
+        check_model_has_tags(check_config=check_config, model=model, request=None)
 
 
 @pytest.mark.parametrize(
