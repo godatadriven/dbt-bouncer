@@ -1,3 +1,25 @@
+# `check_columns_are_all_documented``
+`
+
+All columns in a model should be included in the model's properties file, i.e. `.yml` file.
+
+**Argument(s)**:
+
+* `include`: (Optional) Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+
+**Example**:
+```yaml
+catalog_checks:
+    - name: check_columns_are_all_documented
+```
+
+**Required artifact(s)**:
+
+* catalog.json
+* manifest.json
+
+---
+
 # `check_columns_are_documented_in_public_models`
 
 Columns should have a populated description in public models.

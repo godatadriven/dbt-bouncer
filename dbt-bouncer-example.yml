@@ -19,6 +19,8 @@ catalog_checks:
       - DOUBLE
       - INTEGER
       - VARCHAR
+  - name: check_columns_are_all_documented
+    include: ^marts
   - name: check_columns_are_documented_in_public_models
 
 manifest_checks:
