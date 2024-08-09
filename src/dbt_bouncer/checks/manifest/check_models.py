@@ -194,6 +194,23 @@ def check_model_directories(request, check_config=None, model=None):
         ), f"`{model['unique_id'].split('.')[-1]}` is located in `{model['path'].split('/')[0]}`, this is not a valid sub-directory."
 
 
+class CheckModelHasContractsEnforced(BaseCheck):
+    name: Literal["check_model_has_contracts_enforced"]
+
+
+@pytest.mark.iterate_over_models
+def check_model_has_contracts_enforced(request, model=None):
+    """
+    Model must have contracts enforced.
+    """
+
+    model = get_check_inputs(model=model, request=request)["model"]
+
+    assert (
+        model["contract"]["enforced"] is True
+    ), f"`{model['unique_id'].split('.')[-1]}` does not have contracts enforced."
+
+
 class CheckModelHasMetaKeys(BaseCheck):
     keys: Optional[Union[Dict[str, Any], List[Any]]]
     name: Literal["check_model_has_meta_keys"]

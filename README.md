@@ -190,6 +190,7 @@ These checks require the following artifact to be present:
 * [`check_model_directories`](./src/dbt_bouncer/checks/checks.md#check_model_directories): Only specified sub-directories are permitted.
 * [`check_model_documentation_coverage`](./src/dbt_bouncer/checks/checks.md#check_model_documentation_coverage): Set the minimum percentage of models that have a populated description.
 * [`check_model_documented_in_same_directory`](./src/dbt_bouncer/checks/checks.md#check_model_documented_in_same_directory): Models must be documented in the same directory where they are defined (i.e. `.yml` and `.sql` files are in the same directory).
+* [`check_model_has_contracts_enforced`](./src/dbt_bouncer/checks/checks.md#check_model_has_contracts_enforced): Model must have contracts enforced.
 * [`check_model_has_meta_keys`](./src/dbt_bouncer/checks/checks.md#check_model_has_meta_keys): The `meta` config for models must have the specified keys.
 * [`check_model_has_no_upstream_dependencies`](./src/dbt_bouncer/checks/checks.md#check_model_has_no_upstream_dependencies): Identify if models have no upstream dependencies as this likely indicates hard-coded tables references.
 * [`check_model_max_chained_views`](./src/dbt_bouncer/checks/checks.md#check_model_max_chained_views): Models cannot have more than the specified number of upstream dependents that are not tables (default: 3).

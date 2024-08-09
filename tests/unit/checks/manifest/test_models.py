@@ -11,6 +11,7 @@ from dbt_bouncer.checks.manifest.check_models import (
     check_model_directories,
     check_model_documentation_coverage,
     check_model_documented_in_same_directory,
+    check_model_has_contracts_enforced,
     check_model_has_meta_keys,
     check_model_has_no_upstream_dependencies,
     check_model_has_unique_test,
@@ -184,6 +185,30 @@ def test_check_model_documentation_coverage(check_config, models, expectation):
 def test_check_model_documented_in_same_directory(model, expectation):
     with expectation:
         check_model_documented_in_same_directory(model=model, request=None)
+
+
+@pytest.mark.parametrize(
+    "model, expectation",
+    [
+        (
+            {
+                "contract": {"enforced": True},
+                "unique_id": "model.package_name.model_1",
+            },
+            does_not_raise(),
+        ),
+        (
+            {
+                "contract": {"enforced": False},
+                "unique_id": "model.package_name.model_1",
+            },
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_model_has_contracts_enforced(model, expectation):
+    with expectation:
+        check_model_has_contracts_enforced(model=model, request=None)
 
 
 @pytest.mark.parametrize(

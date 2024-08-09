@@ -355,6 +355,27 @@ manifest_checks:
 
 ---
 
+# `check_model_has_contracts_enforced`
+
+Model must have contracts enforced.
+
+**Argument(s)**:
+
+* `include`: (Optional) Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+
+**Example**:
+```yaml
+manifest_checks:
+  - name: check_model_has_contracts_enforced
+    include: ^marts
+```
+
+**Required artifacts(s)**:
+
+* manifest.json
+
+---
+
 # `check_model_has_no_upstream_dependencies`
 
 Identify if models have no upstream dependencies as this likely indicates hard-coded tables references.
