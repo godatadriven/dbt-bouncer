@@ -53,6 +53,25 @@ def check_source_has_meta_keys(request, check_config=None, source=None) -> None:
     ), f"`{source['unique_id']}` is missing the following keys from the `meta` config: {[x.replace('>>', '') for x in missing_keys]}"
 
 
+class CheckSourceHasTags(BaseCheck):
+    name: Literal["check_source_has_tags"]
+    tags: List[str] = Field(default=[], description="List of tags to check for.")
+
+
+@pytest.mark.iterate_over_sources
+def check_source_has_tags(request, check_config=None, source=None):
+    """
+    Sources must have the specified tags.
+    """
+
+    input_vars = get_check_inputs(check_config=check_config, source=source, request=request)
+    source = input_vars["source"]
+    tags = input_vars["check_config"]["tags"]
+
+    missing_tags = [tag for tag in tags if tag not in source["tags"]]
+    assert not missing_tags, f"`{source['unique_id']}` is missing required tags: {missing_tags}."
+
+
 class CheckSourceNames(BaseCheck):
     name: Literal["check_source_names"]
     source_name_pattern: str = Field(description="Regexp the source name must match.")

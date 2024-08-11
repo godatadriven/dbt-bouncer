@@ -5,6 +5,7 @@ import pytest
 from dbt_bouncer.checks.manifest.check_sources import (
     check_source_description_populated,
     check_source_has_meta_keys,
+    check_source_has_tags,
     check_source_names,
     check_source_not_orphaned,
     check_source_used_by_models_in_same_directory,
@@ -131,6 +132,36 @@ def test_check_source_description_populated(source, expectation):
 def test_check_source_has_meta_keys(check_config, source, expectation):
     with expectation:
         check_source_has_meta_keys(check_config=check_config, source=source, request=None)
+
+
+@pytest.mark.parametrize(
+    "check_config, source, expectation",
+    [
+        (
+            {
+                "tags": ["tag_1"],
+            },
+            {
+                "tags": ["tag_1"],
+                "unique_id": "source.package_name.source_1.table_1",
+            },
+            does_not_raise(),
+        ),
+        (
+            {
+                "tags": ["tag_1"],
+            },
+            {
+                "tags": [],
+                "unique_id": "source.package_name.source_1.table_1",
+            },
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_source_has_tags(check_config, source, expectation):
+    with expectation:
+        check_source_has_tags(check_config=check_config, source=source, request=None)
 
 
 @pytest.mark.parametrize(

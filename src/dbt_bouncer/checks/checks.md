@@ -834,6 +834,30 @@ manifest_checks:
 
 ---
 
+# `check_source_has_tags`
+
+Sources must have the specified tags.
+
+**Argument(s)**:
+
+* `include`: (Optional) Regex pattern to match the source path (i.e the `.yml` file where the source is configured). Only source paths that match the pattern will be checked.
+* `tags`: List of tags that must be present on the model.
+
+**Example**:
+```yaml
+manifest_checks:
+    - name: check_source_has_tags
+     tags:
+      - tag_1
+      - tag_2
+```
+
+**Required artifacts(s)**:
+
+* manifest.json
+
+---
+
 # `check_source_names`
 
 Sources must have a name that matches the supplied regex.

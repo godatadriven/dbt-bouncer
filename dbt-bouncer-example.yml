@@ -113,6 +113,9 @@ manifest_checks:
           - email
           - slack
       - owner
+  - name: check_source_has_tags
+    tags:
+      - example_tag
   - name: check_source_names
     source_name_pattern: >
       ^[a-z0-9_]*$

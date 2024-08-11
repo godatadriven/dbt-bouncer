@@ -14,3 +14,5 @@ sources:
       config:
         external_location: "read_csv('./dbt_project/seeds/raw_customers.csv')"
         formatter: oldstyle
+      tags:
+        - example_tag
