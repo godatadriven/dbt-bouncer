@@ -6,6 +6,7 @@ from dbt_bouncer.checks.manifest.check_sources import (
     check_source_description_populated,
     check_source_has_meta_keys,
     check_source_has_tags,
+    check_source_loader_populated,
     check_source_names,
     check_source_not_orphaned,
     check_source_used_by_models_in_same_directory,
@@ -74,6 +75,30 @@ from dbt_bouncer.checks.manifest.check_sources import (
 def test_check_source_description_populated(source, expectation):
     with expectation:
         check_source_description_populated(source=source, request=None)
+
+
+@pytest.mark.parametrize(
+    "source, expectation",
+    [
+        (
+            {
+                "loader": "Fivetran",
+                "unique_id": "source.package_name.model_1",
+            },
+            does_not_raise(),
+        ),
+        (
+            {
+                "loader": "",
+                "unique_id": "source.package_name.model_7",
+            },
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_source_loader_populated(source, expectation):
+    with expectation:
+        check_source_loader_populated(source=source, request=None)
 
 
 @pytest.mark.parametrize(

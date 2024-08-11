@@ -107,6 +107,7 @@ manifest_checks:
 
   # Sources
   - name: check_source_description_populated
+  - name: check_source_loader_populated
   - name: check_source_has_meta_keys
     keys:
       - contact:

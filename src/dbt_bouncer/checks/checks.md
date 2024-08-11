@@ -808,6 +808,26 @@ manifest_checks:
 
 ---
 
+# `check_source_loader_populated`
+
+Sources must have a populated loader.
+
+**Argument(s)**:
+
+* `include`: (Optional) Regex pattern to match the source path (i.e the `.yml` file where the source is configured). Only source paths that match the pattern will be checked.
+
+**Example**:
+```yaml
+manifest_checks:
+    - name: check_source_loader_populated
+```
+
+**Required artifacts(s)**:
+
+* manifest.json
+
+---
+
 # `check_source_has_meta_keys`
 
 The `meta` config for sources must have the specified keys.

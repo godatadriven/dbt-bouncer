@@ -2,6 +2,8 @@ version: 2
 
 sources:
   - name: sources_that_dont_really_exist
+    loader: python_script
+
     tables:
       - name: source_1
         description: This is the first source that doesn't exist.

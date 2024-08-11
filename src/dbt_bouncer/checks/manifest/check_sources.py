@@ -72,6 +72,21 @@ def check_source_has_tags(request, check_config=None, source=None):
     assert not missing_tags, f"`{source['unique_id']}` is missing required tags: {missing_tags}."
 
 
+class CheckSourceLoaderPopulated(BaseCheck):
+    name: Literal["check_source_loader_populated"]
+
+
+@pytest.mark.iterate_over_sources
+def check_source_loader_populated(request, source=None):
+    """
+    Sources must have a populated loader.
+    """
+
+    source = get_check_inputs(source=source, request=request)["source"]
+
+    assert source["loader"] != "", f"`{source['unique_id']}` does not have a populated loader."
+
+
 class CheckSourceNames(BaseCheck):
     name: Literal["check_source_names"]
     source_name_pattern: str = Field(description="Regexp the source name must match.")
