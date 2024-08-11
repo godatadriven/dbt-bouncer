@@ -808,6 +808,26 @@ manifest_checks:
 
 ---
 
+# `check_source_freshness_populated`
+
+Sources must have a populated freshness.
+
+**Argument(s)**:
+
+* `include`: (Optional) Regex pattern to match the source path (i.e the `.yml` file where the source is configured). Only source paths that match the pattern will be checked.
+
+**Example**:
+```yaml
+manifest_checks:
+    - name: check_source_freshness_populated
+```
+
+**Required artifacts(s)**:
+
+* manifest.json
+
+---
+
 # `check_source_loader_populated`
 
 Sources must have a populated loader.

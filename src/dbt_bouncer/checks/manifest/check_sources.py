@@ -25,6 +25,27 @@ def check_source_description_populated(request, source=None):
     ), f"`{source['unique_id']}` does not have a populated description."
 
 
+class CheckSourceFreshnessPopulated(BaseCheck):
+    name: Literal["check_source_freshness_populated"]
+
+
+@pytest.mark.iterate_over_sources
+def check_source_freshness_populated(request, source=None):
+    """
+    Sources must have a populated freshness.
+    """
+
+    source = get_check_inputs(source=source, request=request)["source"]
+
+    assert (
+        source["freshness"]["error_after"]["count"] is not None
+        and source["freshness"]["error_after"]["period"] is not None
+    ) or (
+        source["freshness"]["warn_after"]["count"] is not None
+        and source["freshness"]["warn_after"]["period"] is not None
+    ), f"`{source['unique_id']}` does not have a populated freshness."
+
+
 class CheckSourceHasMetaKeys(BaseCheck):
     keys: Optional[Union[Dict[str, Any], List[Any]]]
     name: Literal["check_source_has_meta_keys"]

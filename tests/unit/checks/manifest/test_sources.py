@@ -4,6 +4,7 @@ import pytest
 
 from dbt_bouncer.checks.manifest.check_sources import (
     check_source_description_populated,
+    check_source_freshness_populated,
     check_source_has_meta_keys,
     check_source_has_tags,
     check_source_loader_populated,
@@ -75,6 +76,60 @@ from dbt_bouncer.checks.manifest.check_sources import (
 def test_check_source_description_populated(source, expectation):
     with expectation:
         check_source_description_populated(source=source, request=None)
+
+
+@pytest.mark.parametrize(
+    "source, expectation",
+    [
+        (
+            {
+                "freshness": {
+                    "warn_after": {"count": 25, "period": "hour"},
+                    "error_after": {"count": None, "period": None},
+                    "filter": None,
+                },
+                "unique_id": "source.package_name.source_1.table_1",
+            },
+            does_not_raise(),
+        ),
+        (
+            {
+                "freshness": {
+                    "warn_after": {"count": None, "period": None},
+                    "error_after": {"count": 25, "period": "hour"},
+                    "filter": None,
+                },
+                "unique_id": "source.package_name.source_1.table_2",
+            },
+            does_not_raise(),
+        ),
+        (
+            {
+                "freshness": {
+                    "warn_after": {"count": 25, "period": "hour"},
+                    "error_after": {"count": 49, "period": "hour"},
+                    "filter": None,
+                },
+                "unique_id": "source.package_name.source_1.table_3",
+            },
+            does_not_raise(),
+        ),
+        (
+            {
+                "freshness": {
+                    "warn_after": {"count": None, "period": None},
+                    "error_after": {"count": None, "period": None},
+                    "filter": None,
+                },
+                "unique_id": "source.package_name.source_1.table_4",
+            },
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_source_freshness_populated(source, expectation):
+    with expectation:
+        check_source_freshness_populated(source=source, request=None)
 
 
 @pytest.mark.parametrize(
