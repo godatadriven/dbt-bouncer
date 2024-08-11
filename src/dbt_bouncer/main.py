@@ -111,9 +111,24 @@ def cli(config_file, send_pr_comment: bool):
                 catalog_node["path"] = manifest_obj.nodes[k].path
                 project_catalog_nodes.append(catalog_node)
 
-        logger.info(f"Parsed `catalog.json`, found {len(project_catalog_nodes)} nodes.")
+        project_catalog_sources = []
+        for (
+            k,
+            v,
+        ) in (
+            catalog_obj.sources.items()
+        ):  # Doesn't work with dbt-duckdb for some reason, need to test using different adapter
+            if k.split(".")[1] == manifest_obj.metadata.project_name:
+                catalog_source = v.model_dump()
+                catalog_source["path"] = manifest_obj.sources[k].path
+                project_catalog_sources.append(catalog_source)
+
+        logger.info(
+            f"Parsed `catalog.json`, found {len(project_catalog_nodes)} nodes and {len(project_catalog_sources)} sources."
+        )
     else:
         project_catalog_nodes = []
+        project_catalog_sources = []
 
     # Run results, must come after manifest is parsed
     if "run_results_checks" in check_categories:
@@ -138,6 +153,7 @@ def cli(config_file, send_pr_comment: bool):
     runner(
         bouncer_config=config,
         catalog_nodes=project_catalog_nodes,
+        catalog_sources=project_catalog_sources,
         exposures=project_exposures,
         macros=project_macros,
         manifest_obj=manifest_obj,

@@ -767,6 +767,27 @@ run_results_checks:
 
 ---
 
+# `check_source_columns_are_all_documented`
+
+All columns in a source should be included in the source's properties file, i.e. `.yml` file.
+
+**Argument(s)**:
+
+* `include`: (Optional) Regex pattern to match the source path (i.e the `.yml` file where the source is configured). Only source paths that match the pattern will be checked.
+
+**Example**:
+```yaml
+catalog_checks:
+    - name: check_source_columns_are_all_documented
+```
+
+**Required artifacts(s)**:
+
+* catalog.json
+* manifest.json
+
+---
+
 # `check_source_description_populated`
 
 Sources must have a populated description.

@@ -9,9 +9,19 @@ from dbt_bouncer.utils import object_in_path
 
 class FixturePlugin(object):
     def __init__(
-        self, catalog_nodes, exposures, macros, manifest_obj, models, run_results, sources, tests
+        self,
+        catalog_nodes,
+        catalog_sources,
+        exposures,
+        macros,
+        manifest_obj,
+        models,
+        run_results,
+        sources,
+        tests,
     ):
         self.catalog_nodes_ = catalog_nodes
+        self.catalog_sources_ = catalog_sources
         self.exposures_ = exposures
         self.macros_ = macros
         self.manifest_obj_ = manifest_obj
@@ -23,6 +33,10 @@ class FixturePlugin(object):
     @pytest.fixture(scope="session")
     def catalog_nodes(self):
         return self.catalog_nodes_
+
+    @pytest.fixture(scope="session")
+    def catalog_sources(self):
+        return self.catalog_sources_
 
     @pytest.fixture(scope="session")
     def exposures(self):
@@ -59,6 +73,7 @@ class MyFunctionItem(pytest.Function):
         self,
         check_config,
         catalog_node=None,
+        catalog_source=None,
         exposure=None,
         macro=None,
         model=None,
@@ -69,6 +84,7 @@ class MyFunctionItem(pytest.Function):
     ):
         self.check_config: Dict[str, str] = check_config
         self.catalog_node: Dict[str, str] | None = catalog_node
+        self.catalog_source: Dict[str, str] | None = catalog_source
         self.exposure: Dict[str, str] | None = exposure
         self.macro: Dict[str, str] | None = macro
         self.model: Dict[str, str] | None = model
@@ -85,10 +101,19 @@ class GenerateTestsPlugin:
     """
 
     def __init__(
-        self, bouncer_config, catalog_nodes, exposures, macros, models, run_results, sources
+        self,
+        bouncer_config,
+        catalog_nodes,
+        catalog_sources,
+        exposures,
+        macros,
+        models,
+        run_results,
+        sources,
     ):
         self.bouncer_config = bouncer_config
         self.catalog_nodes = catalog_nodes
+        self.catalog_sources = catalog_sources
         self.exposures = exposures
         self.macros = macros
         self.models = models
@@ -116,6 +141,7 @@ class GenerateTestsPlugin:
                             set(
                                 [
                                     "iterate_over_catalog_nodes",
+                                    "iterate_over_catalog_sources",
                                     "iterate_over_exposures",
                                     "iterate_over_models",
                                     "iterate_over_macros",
@@ -133,22 +159,39 @@ class GenerateTestsPlugin:
                         for x in self.__getattribute__(key):
                             if key == "catalog_nodes":
                                 catalog_node = x
-                                exposure = macro = model = run_result = source = None
+                                catalog_source = exposure = macro = model = run_result = source = (
+                                    None
+                                )
+                            elif key == "catalog_sources":
+                                catalog_source = x
+                                catalog_node = exposure = macro = model = run_result = source = (
+                                    None
+                                )
                             elif key == "exposures":
                                 exposure = x
-                                catalog_node = macro = model = run_result = source = None
+                                catalog_node = catalog_source = macro = model = run_result = (
+                                    source
+                                ) = None
                             elif key == "macros":
                                 macro = x
-                                catalog_node = exposure = model = run_result = source = None
+                                catalog_node = catalog_source = exposure = model = run_result = (
+                                    source
+                                ) = None
                             elif key == "models":
                                 model = x
-                                catalog_node = exposure = macro = run_result = source = None
+                                catalog_node = catalog_source = exposure = macro = run_result = (
+                                    source
+                                ) = None
                             elif key == "run_results":
                                 run_result = x
-                                catalog_node = exposure = macro = model = source = None
+                                catalog_node = catalog_source = exposure = macro = model = (
+                                    source
+                                ) = None
                             elif key == "sources":
                                 source = x
-                                catalog_node = exposure = macro = model = run_result = None
+                                catalog_node = catalog_source = exposure = macro = model = (
+                                    run_result
+                                ) = None
 
                             if object_in_path(check_config.get("include"), x["path"]):
                                 item = MyFunctionItem.from_parent(
@@ -157,6 +200,7 @@ class GenerateTestsPlugin:
                                     fixtureinfo=fixture_info,
                                     check_config=check_config,
                                     catalog_node=catalog_node,
+                                    catalog_source=catalog_source,
                                     exposure=exposure,
                                     macro=macro,
                                     model=model,

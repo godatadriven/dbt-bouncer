@@ -152,6 +152,10 @@ These checks require the following artifact to be present:
 * [`check_columns_are_documented_in_public_models`](./src/dbt_bouncer/checks/checks.md#check_columns_are_documented_in_public_models): Columns should have a populated description in public models.
 * [`check_column_name_complies_to_column_type`](./src/dbt_bouncer/checks/checks.md#check_column_name_complies_to_column_type): Columns with specified data type must comply to the specified regexp naming pattern.
 
+**Sources**
+
+* [`check_source_columns_are_all_documented`](./src/dbt_bouncer/checks/checks.md#check_source_columns_are_all_documented): All columns in a source should be included in the source's properties file, i.e. `.yml` file.
+
 ### Manifest checks
 
 These checks require the following artifact to be present:
