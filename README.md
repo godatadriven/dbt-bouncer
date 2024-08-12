@@ -102,7 +102,7 @@ pip install dbt-bouncer
 Run:
 
 ```shell
-dbt-bouncer --config-file $PWD/<PATH_TO_CONFIG_FILE>
+dbt-bouncer --config-file <PATH_TO_CONFIG_FILE>
 ```
 
 # Config file

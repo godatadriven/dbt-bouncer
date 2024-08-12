@@ -109,7 +109,7 @@ def get_dbt_bouncer_config(config_file: str, config_file_source: str):
     if config_file_source == "DEFAULT":
         logger.debug(f"Using default value for config file: {config_file}")
         with contextlib.suppress(FileNotFoundError):
-            return load_config_from_yaml(config_file)
+            return load_config_from_yaml(Path.cwd() / config_file)
 
     # Read config from pyproject.toml
     logger.info("Loading config from pyproject.toml, if exists...")
@@ -130,9 +130,9 @@ def get_dbt_bouncer_config(config_file: str, config_file_source: str):
         logger.debug(f"{pyproject_toml_dir / 'pyproject.toml'=}")
 
         toml_cfg = toml.load(pyproject_toml_dir / "pyproject.toml")
-        try:
+        if "dbt-bouncer" in toml_cfg["tool"].keys():
             conf = [v for k, v in toml_cfg["tool"].items() if k == "dbt-bouncer"][0]
-        except IndexError:
+        else:
             raise RuntimeError(
                 "Please ensure your pyproject.toml file is correctly configured to work with `dbt-bouncer`. Alternatively, you can pass the path to your config file via the `--config-file` flag."
             )
@@ -141,7 +141,7 @@ def get_dbt_bouncer_config(config_file: str, config_file_source: str):
 
 def load_config_from_yaml(config_file):
 
-    config_path = Path(__file__).parent.parent.parent / config_file
+    config_path = Path().cwd() / config_file
     logger.debug(f"Loading config from {config_path}...")
     logger.debug(f"Loading config from {config_file}...")
     if not config_path.exists():  # Shouldn't be needed as click should have already checked this
