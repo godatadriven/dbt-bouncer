@@ -228,6 +228,15 @@ def test_check_macro_name_matches_file_name(macro, expectation):
         ),
         (
             {
+                "name": "test_macro",
+                "patch_path": "package_name://tests/generic/tests.yml",
+                "path": "tests/generic/test_macro.sql",
+                "unique_id": "macro.package_name.test_macro",
+            },
+            does_not_raise(),
+        ),
+        (
+            {
                 "name": "macro_3",
                 "patch_path": "package_name://macros/macros.yml",
                 "path": "macros/macro_3.sql",
