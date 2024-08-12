@@ -7,6 +7,7 @@ from dbt_bouncer.checks.manifest.check_sources import (
     check_source_has_meta_keys,
     check_source_names,
     check_source_not_orphaned,
+    check_source_property_file_location,
     check_source_used_by_models_in_same_directory,
     check_source_used_by_only_one_model,
 )
@@ -211,6 +212,51 @@ def test_check_source_names(check_config, source, expectation):
 def test_check_source_not_orphaned(models, source, expectation):
     with expectation:
         check_source_not_orphaned(models=models, source=source, request=None)
+
+
+@pytest.mark.parametrize(
+    "source, expectation",
+    [
+        (
+            {
+                "path": "models/staging/crm/_crm__sources.yml",
+                "unique_id": "source.package_name.source_1.table_1",
+            },
+            does_not_raise(),
+        ),
+        (
+            {
+                "path": "models/staging/crm/_crm__source.yml",
+                "unique_id": "source.package_name.source_1.table_1",
+            },
+            pytest.raises(AssertionError),
+        ),
+        (
+            {
+                "path": "models/staging/crm/__source.yml",
+                "unique_id": "source.package_name.source_1.table_1",
+            },
+            pytest.raises(AssertionError),
+        ),
+        (
+            {
+                "path": "models/staging/crm/_staging__source.yml",
+                "unique_id": "source.package_name.source_1.table_1",
+            },
+            pytest.raises(AssertionError),
+        ),
+        (
+            {
+                "path": "models/staging/crm/crm__source.yml",
+                "unique_id": "source.package_name.source_1.table_1",
+            },
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_source_property_file_location(source, expectation):
+    with expectation:
+        check_source_property_file_location(source=source, request=None)
 
 
 @pytest.mark.parametrize(

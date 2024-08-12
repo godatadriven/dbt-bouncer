@@ -7,6 +7,7 @@ from dbt_bouncer.checks.manifest.check_macros import (
     check_macro_code_does_not_contain_regexp_pattern,
     check_macro_description_populated,
     check_macro_name_matches_file_name,
+    check_macro_property_file_location,
 )
 
 
@@ -202,3 +203,49 @@ def test_check_macro_description_populated(macro, expectation):
 def test_check_macro_name_matches_file_name(macro, expectation):
     with expectation:
         check_macro_name_matches_file_name(macro=macro, request=None)
+
+
+@pytest.mark.parametrize(
+    "macro, expectation",
+    [
+        (
+            {
+                "name": "macro_1",
+                "patch_path": "package_name://macros/_macros.yml",
+                "path": "macros/macro_1.sql",
+                "unique_id": "macro.package_name.macro_1",
+            },
+            does_not_raise(),
+        ),
+        (
+            {
+                "name": "macro_2",
+                "patch_path": "package_name://macros/dir1/_dir1__macros.yml",
+                "path": "macros/dir1/macro_2.sql",
+                "unique_id": "macro.package_name.macro_2",
+            },
+            does_not_raise(),
+        ),
+        (
+            {
+                "name": "macro_3",
+                "patch_path": "package_name://macros/macros.yml",
+                "path": "macros/macro_3.sql",
+                "unique_id": "macro.package_name.macro_3",
+            },
+            pytest.raises(AssertionError),
+        ),
+        (
+            {
+                "name": "macro_4",
+                "patch_path": "package_name://macros/dir1/__macros.yml",
+                "path": "macros/dir1/macro_4.sql",
+                "unique_id": "macro.package_name.macro_4",
+            },
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_macro_property_file_location(macro, expectation):
+    with expectation:
+        check_macro_property_file_location(macro=macro, request=None)

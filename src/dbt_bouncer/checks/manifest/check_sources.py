@@ -94,6 +94,32 @@ def check_source_not_orphaned(models, request, source=None) -> None:
     ), f"Source `{source['unique_id']}` is orphaned, i.e. not referenced by any model."
 
 
+class CheckSourcePropertyFileLocation(BaseCheck):
+    name: Literal["check_source_property_file_location"]
+
+
+@pytest.mark.iterate_over_sources
+def check_source_property_file_location(request, source=None):
+    """
+    Source properties files must follow the guidance provided by dbt [here](https://docs.getdbt.com/best-practices/how-we-structure/1-guide-overview).
+    """
+
+    source = get_check_inputs(source=source, request=request)["source"]
+
+    path_cleaned = source["path"].replace("models/staging", "")
+    expected_substring = "_".join(path_cleaned.split("/")[:-1])
+
+    assert path_cleaned.split("/")[-1].startswith(
+        "_"
+    ), f"The properties file for `{source['unique_id']}` (`{path_cleaned}`) does not start with an underscore."
+    assert (
+        expected_substring in path_cleaned
+    ), f"The properties file for `{source['unique_id']}` (`{path_cleaned}`) does not contain the expected substring (`{expected_substring}`)."
+    assert path_cleaned.split("/")[-1].endswith(
+        "__sources.yml"
+    ), f"The properties file for `{source['unique_id']}` (`{path_cleaned}`) does not end with `__sources.yml`."
+
+
 class CheckSourceUsedByModelsInSameDirectory(BaseCheck):
     name: Literal["check_source_used_by_models_in_same_directory"]
 
