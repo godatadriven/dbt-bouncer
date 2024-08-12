@@ -235,6 +235,14 @@ These checks require the following artifact to be present:
 * [`check_run_results_max_gigabytes_billed`](./src/dbt_bouncer/checks/checks.md#check_run_results_max_gigabytes_billed): Each result can have a maximum number of gigabytes billed. Note that this only works for the `dbt-bigquery` adapter.
 * [`check_run_results_max_execution_time`](./src/dbt_bouncer/checks/checks.md#check_run_results_max_execution_time): Each result can take a maximum duration (seconds).
 
+## Saving results to a file
+
+It is possible to the outcome of a run, and associated metadata, to a `.json` file. This file will contain all the checks that were run, both failed checks and successful checks. This can be achieved by using the `--output-file` flag:
+
+```bash
+dbt-bouncer --config-file <PATH_TO_CONFIG_FILE> --output-file <PATH_TO_OUTPUT_FILE>
+```
+
 ## Reporting bugs and contributing code
 
 - Want to report a bug or request a feature? Let us know and open [an issue](https://github.com/godatadriven/dbt-bouncer/issues/new/choose)

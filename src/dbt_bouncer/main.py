@@ -39,6 +39,12 @@ from dbt_bouncer.version import version
 def cli(config_file: Path, output_file: Union[None, Path], send_pr_comment: bool):
     logger.info(f"Running dbt-bouncer ({version()})...")
 
+    # Validate output file has `.json` extension
+    if output_file and not output_file.suffix == "json":
+        raise RuntimeError(
+            f"Output file must have a `.json` extension. Got `{output_file.suffix}`."
+        )
+
     conf = get_dbt_bouncer_config(
         config_file=config_file,
         config_file_source=click.get_current_context().get_parameter_source("config_file").name,  # type: ignore[union-attr]
