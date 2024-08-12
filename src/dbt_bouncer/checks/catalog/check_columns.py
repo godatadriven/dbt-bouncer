@@ -87,3 +87,5 @@ def check_columns_are_documented_in_public_models(models, request, catalog_node=
         assert (
             not non_complying_columns
         ), f"`{catalog_node['unique_id'].split('.')[-1]}` is a public model but has columns that don't have a populated description: {non_complying_columns}"
+
+    assert 1 == 2

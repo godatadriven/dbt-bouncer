@@ -87,4 +87,6 @@ def runner(
         )
         if send_pr_comment:
             send_github_comment_failed_checks(failed_checks=failed_checks)
+
+        logger.error("`dbt-bouncer` failed. Please check the logs above for more details.")
         sys.exit(1)

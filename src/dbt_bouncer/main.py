@@ -97,7 +97,7 @@ def cli(config_file: PosixPath, send_pr_comment: bool):
     )
 
     # Catalog, must come after manifest is parsed
-    if "catalog_checks" in check_categories:
+    if bouncer_config["catalog_checks"] != []:
         catalog_obj = load_dbt_artifact(
             artifact_name="catalog.json",
             dbt_artifacts_dir=config_file.parent
@@ -131,7 +131,7 @@ def cli(config_file: PosixPath, send_pr_comment: bool):
         project_catalog_sources = []
 
     # Run results, must come after manifest is parsed
-    if "run_results_checks" in check_categories:
+    if bouncer_config["run_results_checks"] != []:
         run_results_obj = load_dbt_artifact(
             artifact_name="run_results.json",
             dbt_artifacts_dir=config_file.parent
