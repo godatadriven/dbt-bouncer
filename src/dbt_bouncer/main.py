@@ -1,7 +1,8 @@
 import json
+import sys
 from enum import Enum
-from pathlib import Path, PosixPath
-from typing import Dict, List
+from pathlib import Path
+from typing import Dict, List, Union
 
 import click
 
@@ -21,6 +22,13 @@ from dbt_bouncer.version import version
     type=Path,
 )
 @click.option(
+    "--output-file",
+    default=None,
+    help="Location of the json file where check metadata will be saved.",
+    required=False,
+    type=Path,
+)
+@click.option(
     "--send-pr-comment",
     default=False,
     help="Send a comment to the GitHub PR with a list of failed checks. Defaults to True when run as a GitHub Action.",
@@ -28,7 +36,7 @@ from dbt_bouncer.version import version
     type=click.BOOL,
 )
 @click.version_option()
-def cli(config_file: PosixPath, send_pr_comment: bool):
+def cli(config_file: Path, output_file: Union[None, Path], send_pr_comment: bool):
     logger.info(f"Running dbt-bouncer ({version()})...")
 
     conf = get_dbt_bouncer_config(
@@ -150,7 +158,7 @@ def cli(config_file: PosixPath, send_pr_comment: bool):
         project_run_results = []
 
     logger.info("Running checks...")
-    runner(
+    results = runner(
         bouncer_config=config,
         catalog_nodes=project_catalog_nodes,
         catalog_sources=project_catalog_sources,
@@ -158,8 +166,10 @@ def cli(config_file: PosixPath, send_pr_comment: bool):
         macros=project_macros,
         manifest_obj=manifest_obj,
         models=project_models,
+        output_file=output_file,
         run_results=project_run_results,
         send_pr_comment=send_pr_comment,
         sources=project_sources,
         tests=project_tests,
     )
+    sys.exit(results[0])

@@ -161,6 +161,7 @@ cython_debug/
 
 *.ipynb
 changed_files.txt
+coverage.json
 dbt.duckdb
 pytest-coverage.txt
 
