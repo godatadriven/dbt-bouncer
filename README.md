@@ -148,8 +148,13 @@ These checks require the following artifact to be present:
 
 **Columns**
 
+* [`check_columns_are_all_documented`](./src/dbt_bouncer/checks/checks.md#check_columns_are_all_documented): All columns in a model should be included in the model's properties file, i.e. `.yml` file.
 * [`check_columns_are_documented_in_public_models`](./src/dbt_bouncer/checks/checks.md#check_columns_are_documented_in_public_models): Columns should have a populated description in public models.
 * [`check_column_name_complies_to_column_type`](./src/dbt_bouncer/checks/checks.md#check_column_name_complies_to_column_type): Columns with specified data type must comply to the specified regexp naming pattern.
+
+**Sources**
+
+* [`check_source_columns_are_all_documented`](./src/dbt_bouncer/checks/checks.md#check_source_columns_are_all_documented): All columns in a source should be included in the source's properties file, i.e. `.yml` file.
 
 ### Manifest checks
 
@@ -190,8 +195,10 @@ These checks require the following artifact to be present:
 * [`check_model_directories`](./src/dbt_bouncer/checks/checks.md#check_model_directories): Only specified sub-directories are permitted.
 * [`check_model_documentation_coverage`](./src/dbt_bouncer/checks/checks.md#check_model_documentation_coverage): Set the minimum percentage of models that have a populated description.
 * [`check_model_documented_in_same_directory`](./src/dbt_bouncer/checks/checks.md#check_model_documented_in_same_directory): Models must be documented in the same directory where they are defined (i.e. `.yml` and `.sql` files are in the same directory).
+* [`check_model_has_contracts_enforced`](./src/dbt_bouncer/checks/checks.md#check_model_has_contracts_enforced): Model must have contracts enforced.
 * [`check_model_has_meta_keys`](./src/dbt_bouncer/checks/checks.md#check_model_has_meta_keys): The `meta` config for models must have the specified keys.
 * [`check_model_has_no_upstream_dependencies`](./src/dbt_bouncer/checks/checks.md#check_model_has_no_upstream_dependencies): Identify if models have no upstream dependencies as this likely indicates hard-coded tables references.
+* [`check_model_has_tags`](./src/dbt_bouncer/checks/checks.md#check_model_has_tags): Models must have the specified tags.
 * [`check_model_max_chained_views`](./src/dbt_bouncer/checks/checks.md#check_model_max_chained_views): Models cannot have more than the specified number of upstream dependents that are not tables (default: 3).
 * [`check_model_max_fanout`](./src/dbt_bouncer/checks/checks.md#check_model_max_fanout): Models cannot have more than the specified number of downstream models (default: 3).
 * [`check_model_max_upstream_dependencies`](./src/dbt_bouncer/checks/checks.md#check_model_max_upstream_dependencies): Limit the number of upstream dependencies a model has. Default values are 5 for models, 5 for macros, and 1 for sources.
@@ -202,7 +209,10 @@ These checks require the following artifact to be present:
 **Sources**
 
 * [`check_source_description_populated`](./src/dbt_bouncer/checks/checks.md#check_source_description_populated): Sources must have a populated description.
+* [`check_source_freshness_populated`](./src/dbt_bouncer/checks/checks.md#check_source_freshness_populated): Sources must have a populated freshness.
+* [`check_source_loader_populated`](./src/dbt_bouncer/checks/checks.md#check_source_loader_populated): Sources must have a populated loader.
 * [`check_source_has_meta_keys`](./src/dbt_bouncer/checks/checks.md#check_source_has_meta_keys): The `meta` config for sources must have the specified keys.
+* [`check_source_has_tags`](./src/dbt_bouncer/checks/checks.md#check_source_has_tags): Sources must have the specified tags.
 * [`check_source_names`](./src/dbt_bouncer/checks/checks.md#check_source_names): Sources must have a name that matches the supplied regex.
 * [`check_source_not_orphaned`](./src/dbt_bouncer/checks/checks.md#check_source_not_orphaned): Sources must be referenced in at least one model.
 * [`check_source_property_file_location`](./src/dbt_bouncer/checks/checks.md#check_source_property_file_location): Source properties files must follow the guidance provided by dbt [here](https://docs.getdbt.com/best-practices/how-we-structure/1-guide-overview).

@@ -19,7 +19,10 @@ catalog_checks:
       - DOUBLE
       - INTEGER
       - VARCHAR
+  - name: check_columns_are_all_documented
+    include: ^marts
   - name: check_columns_are_documented_in_public_models
+  - name: check_source_columns_are_all_documented
 
 manifest_checks:
   # Exposures
@@ -77,11 +80,17 @@ manifest_checks:
       - payments
   - name: check_model_documentation_coverage
   - name: check_model_documented_in_same_directory
+  - name: check_model_has_contracts_enforced
+    include: ^marts
   - name: check_model_has_meta_keys
     keys:
       - maturity
   - name: check_model_has_no_upstream_dependencies
     include: ^((?!int_model_1).)*$
+  - name: check_model_has_tags
+    include: ^staging/crm
+    tags:
+      - crm
   - name: check_model_has_unique_test
   - name: check_model_max_chained_views
   - name: check_model_max_fanout
@@ -100,12 +109,17 @@ manifest_checks:
 
   # Sources
   - name: check_source_description_populated
+  - name: check_source_freshness_populated
+  - name: check_source_loader_populated
   - name: check_source_has_meta_keys
     keys:
       - contact:
           - email
           - slack
       - owner
+  - name: check_source_has_tags
+    tags:
+      - example_tag
   - name: check_source_names
     source_name_pattern: >
       ^[a-z0-9_]*$

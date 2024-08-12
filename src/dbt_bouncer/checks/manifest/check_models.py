@@ -194,6 +194,23 @@ def check_model_directories(request, check_config=None, model=None):
         ), f"`{model['unique_id'].split('.')[-1]}` is located in `{model['path'].split('/')[0]}`, this is not a valid sub-directory."
 
 
+class CheckModelHasContractsEnforced(BaseCheck):
+    name: Literal["check_model_has_contracts_enforced"]
+
+
+@pytest.mark.iterate_over_models
+def check_model_has_contracts_enforced(request, model=None):
+    """
+    Model must have contracts enforced.
+    """
+
+    model = get_check_inputs(model=model, request=request)["model"]
+
+    assert (
+        model["contract"]["enforced"] is True
+    ), f"`{model['unique_id'].split('.')[-1]}` does not have contracts enforced."
+
+
 class CheckModelHasMetaKeys(BaseCheck):
     keys: Optional[Union[Dict[str, Any], List[Any]]]
     name: Literal["check_model_has_meta_keys"]
@@ -236,6 +253,27 @@ def check_model_has_no_upstream_dependencies(request, model=None):
     assert (
         len(model["depends_on"]["nodes"]) > 0
     ), f"`{model['unique_id'].split('.')[-1]}` has no upstream dependencies, this likely indicates hard-coded tables references."
+
+
+class CheckModelHasTags(BaseCheck):
+    name: Literal["check_model_has_tags"]
+    tags: List[str] = Field(default=[], description="List of tags to check for.")
+
+
+@pytest.mark.iterate_over_models
+def check_model_has_tags(request, check_config=None, model=None):
+    """
+    Models must have the specified tags.
+    """
+
+    input_vars = get_check_inputs(check_config=check_config, model=model, request=request)
+    model = input_vars["model"]
+    tags = input_vars["check_config"]["tags"]
+
+    missing_tags = [tag for tag in tags if tag not in model["tags"]]
+    assert (
+        not missing_tags
+    ), f"`{model['unique_id'].split('.')[-1]}` is missing required tags: {missing_tags}."
 
 
 class CheckModelHasUniqueTest(BaseCheck):

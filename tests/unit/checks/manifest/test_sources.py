@@ -4,7 +4,10 @@ import pytest
 
 from dbt_bouncer.checks.manifest.check_sources import (
     check_source_description_populated,
+    check_source_freshness_populated,
     check_source_has_meta_keys,
+    check_source_has_tags,
+    check_source_loader_populated,
     check_source_names,
     check_source_not_orphaned,
     check_source_property_file_location,
@@ -77,6 +80,84 @@ def test_check_source_description_populated(source, expectation):
 
 
 @pytest.mark.parametrize(
+    "source, expectation",
+    [
+        (
+            {
+                "freshness": {
+                    "warn_after": {"count": 25, "period": "hour"},
+                    "error_after": {"count": None, "period": None},
+                    "filter": None,
+                },
+                "unique_id": "source.package_name.source_1.table_1",
+            },
+            does_not_raise(),
+        ),
+        (
+            {
+                "freshness": {
+                    "warn_after": {"count": None, "period": None},
+                    "error_after": {"count": 25, "period": "hour"},
+                    "filter": None,
+                },
+                "unique_id": "source.package_name.source_1.table_2",
+            },
+            does_not_raise(),
+        ),
+        (
+            {
+                "freshness": {
+                    "warn_after": {"count": 25, "period": "hour"},
+                    "error_after": {"count": 49, "period": "hour"},
+                    "filter": None,
+                },
+                "unique_id": "source.package_name.source_1.table_3",
+            },
+            does_not_raise(),
+        ),
+        (
+            {
+                "freshness": {
+                    "warn_after": {"count": None, "period": None},
+                    "error_after": {"count": None, "period": None},
+                    "filter": None,
+                },
+                "unique_id": "source.package_name.source_1.table_4",
+            },
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_source_freshness_populated(source, expectation):
+    with expectation:
+        check_source_freshness_populated(source=source, request=None)
+
+
+@pytest.mark.parametrize(
+    "source, expectation",
+    [
+        (
+            {
+                "loader": "Fivetran",
+                "unique_id": "source.package_name.model_1",
+            },
+            does_not_raise(),
+        ),
+        (
+            {
+                "loader": "",
+                "unique_id": "source.package_name.model_7",
+            },
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_source_loader_populated(source, expectation):
+    with expectation:
+        check_source_loader_populated(source=source, request=None)
+
+
+@pytest.mark.parametrize(
     "check_config, source, expectation",
     [
         (
@@ -132,6 +213,36 @@ def test_check_source_description_populated(source, expectation):
 def test_check_source_has_meta_keys(check_config, source, expectation):
     with expectation:
         check_source_has_meta_keys(check_config=check_config, source=source, request=None)
+
+
+@pytest.mark.parametrize(
+    "check_config, source, expectation",
+    [
+        (
+            {
+                "tags": ["tag_1"],
+            },
+            {
+                "tags": ["tag_1"],
+                "unique_id": "source.package_name.source_1.table_1",
+            },
+            does_not_raise(),
+        ),
+        (
+            {
+                "tags": ["tag_1"],
+            },
+            {
+                "tags": [],
+                "unique_id": "source.package_name.source_1.table_1",
+            },
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_source_has_tags(check_config, source, expectation):
+    with expectation:
+        check_source_has_tags(check_config=check_config, source=source, request=None)
 
 
 @pytest.mark.parametrize(
