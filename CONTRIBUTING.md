@@ -110,10 +110,10 @@ There are multiple targets in the `makefile` to run common test suites, most not
 
 ```shell
 # Runs unit tests
-make test_unit
+make test-unit
 
 # Runs integration tests
-make test_integration
+make test-integration
 
 # Runs all tests
 make test
