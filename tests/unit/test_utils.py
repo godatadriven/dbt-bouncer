@@ -63,7 +63,8 @@ def test_get_dbt_bouncer_config_pyproject_toml_doesnt_exist(monkeypatch, tmp_pat
 
 
 def test_get_dbt_bouncer_config_pyproject_toml_recursive(monkeypatch, tmp_path):
-    monkeypatch.chdir(Path().cwd() / "tests/unit")
+    Path.mkdir(tmp_path / "test")
+    monkeypatch.chdir(tmp_path / "test")
 
     pyproject_file = tmp_path / "pyproject.toml"
     config = {"tool": {"dbt-bouncer": PYPROJECT_TOML_SAMPLE_CONFIG}}

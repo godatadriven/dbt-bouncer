@@ -1,6 +1,6 @@
 import json
 from enum import Enum
-from pathlib import Path
+from pathlib import Path, PosixPath
 from typing import Dict, List
 
 import click
@@ -28,7 +28,7 @@ from dbt_bouncer.version import version
     type=click.BOOL,
 )
 @click.version_option()
-def cli(config_file, send_pr_comment: bool):
+def cli(config_file: PosixPath, send_pr_comment: bool):
     logger.info(f"Running dbt-bouncer ({version()})...")
 
     conf = get_dbt_bouncer_config(
