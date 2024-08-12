@@ -87,3 +87,36 @@ def check_macro_name_matches_file_name(request, check_config=None, macro=None) -
         assert (
             macro["name"] == macro["path"].split("/")[-1].split(".")[0]
         ), f"`{macro['unique_id'].split('.')[-1]}` is not in a file of the same name."
+
+
+class CheckMacroPropertyFileLocation(BaseCheck):
+    name: Literal["check_macro_property_file_location"]
+
+
+@pytest.mark.iterate_over_macros
+def check_macro_property_file_location(request, macro=None):
+    """
+    Macro properties files must follow the guidance provided by dbt [here](https://docs.getdbt.com/best-practices/how-we-structure/5-the-rest-of-the-project#how-we-use-the-other-folders).
+    """
+
+    macro = get_check_inputs(macro=macro, request=request)["macro"]
+
+    expected_substr = "_".join(macro["path"][6:].split("/")[:-1])
+    properties_yml_name = macro["patch_path"].split("/")[-1]
+
+    if macro["path"].startswith("tests/"):  # Do not check generic tests (which are also macros)
+        pass
+    elif expected_substr == "":  # i.e. macro in ./macros
+        assert (
+            properties_yml_name == "_macros.yml"
+        ), f"The properties file for `{macro['name']}` (`{properties_yml_name}`) should be `_macros.yml`."
+    else:
+        assert properties_yml_name.startswith(
+            "_"
+        ), f"The properties file for `{macro['name']}` (`{properties_yml_name}`) does not start with an underscore."
+        assert (
+            expected_substr in properties_yml_name
+        ), f"The properties file for `{macro['name']}` (`{properties_yml_name}`) does not contain the expected substring (`{expected_substr}`)."
+        assert properties_yml_name.endswith(
+            "__macros.yml"
+        ), f"The properties file for `{macro['name'].split('.')[-1]}` (`{properties_yml_name}`) does not end with `__macros.yml`."

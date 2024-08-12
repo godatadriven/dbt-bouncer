@@ -18,6 +18,7 @@ from dbt_bouncer.checks.manifest.check_models import (
     check_model_max_fanout,
     check_model_max_upstream_dependencies,
     check_model_names,
+    check_model_property_file_location,
     check_model_test_coverage,
 )
 
@@ -730,6 +731,64 @@ def test_check_model_max_fanout(check_config, model, models, expectation):
 def test_check_model_max_upstream_dependencies(check_config, model, expectation):
     with expectation:
         check_model_max_upstream_dependencies(check_config=check_config, model=model, request=None)
+
+
+@pytest.mark.parametrize(
+    "model, expectation",
+    [
+        (
+            {
+                "patch_path": "package_name://models/staging/crm/_stg_crm__models.yml",
+                "path": "staging/crm/stg_model_1.sql",
+                "unique_id": "model.package_name.stg_model_1",
+            },
+            does_not_raise(),
+        ),
+        (
+            {
+                "patch_path": "package_name://models/staging/crm/_int_crm__models.yml",
+                "path": "intermediate/crm/stg_model_1.sql",
+                "unique_id": "model.package_name.stg_model_1",
+            },
+            does_not_raise(),
+        ),
+        (
+            {
+                "patch_path": "package_name://models/marts/crm/_crm__models.yml",
+                "path": "marts/crm/stg_model_1.sql",
+                "unique_id": "model.package_name.stg_model_1",
+            },
+            does_not_raise(),
+        ),
+        (
+            {
+                "patch_path": "package_name://models/staging/crm/_staging_crm__models.yml",
+                "path": "staging/crm/stg_model_1.sql",
+                "unique_id": "model.package_name.stg_model_1",
+            },
+            pytest.raises(AssertionError),
+        ),
+        (
+            {
+                "patch_path": "package_name://models/staging/crm/_models.yml",
+                "path": "staging/crm/stg_model_1.sql",
+                "unique_id": "model.package_name.stg_model_1",
+            },
+            pytest.raises(AssertionError),
+        ),
+        (
+            {
+                "patch_path": "package_name://models/staging/crm/_schema.yml",
+                "path": "staging/crm/stg_model_1.sql",
+                "unique_id": "model.package_name.stg_model_1",
+            },
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_model_property_file_location(model, expectation):
+    with expectation:
+        check_model_property_file_location(model=model, request=None)
 
 
 @pytest.mark.parametrize(
