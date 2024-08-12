@@ -510,6 +510,26 @@ manifest_checks:
 
 ---
 
+# `check_macro_property_file_location`
+
+Macro properties files must follow the guidance provided by dbt [here](https://docs.getdbt.com/best-practices/how-we-structure/5-the-rest-of-the-project#how-we-use-the-other-folders).
+
+**Argument(s)**:
+
+* `include`: (Optional) Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
+
+**Example**:
+```yaml
+manifest_checks:
+    - name: check_macro_property_file_location
+```
+
+**Required artifacts(s)**:
+
+* manifest.json
+
+---
+
 # `check_model_access`
 
 Models must have the specified access attribute. Requires dbt 1.7+.
@@ -671,6 +691,26 @@ manifest_checks:
     - name: check_model_names
       include: ^staging
       model_name_pattern: ^stg_
+```
+
+**Required artifacts(s)**:
+
+* manifest.json
+
+---
+
+# `check_model_property_file_location`
+
+Model properties files must follow the guidance provided by dbt [here](https://docs.getdbt.com/best-practices/how-we-structure/1-guide-overview).
+
+**Argument(s)**:
+
+* `include`: (Optional) Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+
+**Example**:
+```yaml
+manifest_checks:
+    - name: check_model_property_file_location
 ```
 
 **Required artifacts(s)**:
@@ -913,6 +953,26 @@ manifest_checks:
     - name: check_source_names
       source_name_pattern: >
         ^[a-z0-9_]*$
+```
+
+**Required artifacts(s)**:
+
+* manifest.json
+
+---
+
+# `check_source_property_file_location`
+
+Source properties files must follow the guidance provided by dbt [here](https://docs.getdbt.com/best-practices/how-we-structure/1-guide-overview).
+
+**Argument(s)**:
+
+* `include`: (Optional) Regex pattern to match the source path (i.e the `.yml` file where the source is configured). Only source paths that match the pattern will be checked.
+
+**Example**:
+```yaml
+manifest_checks:
+    - name: check_source_property_file_location
 ```
 
 **Required artifacts(s)**:

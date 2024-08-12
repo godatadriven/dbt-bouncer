@@ -6,7 +6,3 @@ macros:
     arguments:
       - name: amount
         description: A column that contains values in cents
-
-  - name: generate_schema_name
-    description: |
-      A macro that uses the DBT_DATASET env var only when using the dev target. On the stg and prd targets this env var is not used. This ensures that systems that read from the stg and prd BigQuery instances can use the same dataset and table names, they only need to vary the GCP project id.

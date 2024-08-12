@@ -50,6 +50,7 @@ manifest_checks:
     regexp_pattern: .*[i][f][n][u][l][l].*
   - name: check_macro_description_populated
   - name: check_macro_name_matches_file_name
+  - name: check_macro_property_file_location
 
   # Models
   - name: check_model_access
@@ -104,6 +105,7 @@ manifest_checks:
   - name: check_model_test_coverage
   - name: check_project_name
     project_name_pattern: ^dbt_bouncer_
+  - name: check_model_property_file_location
 
   # Sources
   - name: check_source_description_populated
@@ -123,6 +125,7 @@ manifest_checks:
       ^[a-z0-9_]*$
   - name: check_source_not_orphaned
     include: ^staging/payments
+  - name: check_source_property_file_location
   - name: check_source_used_by_models_in_same_directory
   - name: check_source_used_by_only_one_model
 

@@ -179,6 +179,7 @@ These checks require the following artifact to be present:
 * [`check_macro_code_does_not_contain_regexp_pattern`](./src/dbt_bouncer/checks/checks.md#check_macro_code_does_not_contain_regexp_pattern): The raw code for a macro must not match the specified regexp pattern.
 * [`check_macro_description_populated`](./src/dbt_bouncer/checks/checks.md#check_macro_description_populated): Macros must have a populated description.
 * [`check_macro_name_matches_file_name`](./src/dbt_bouncer/checks/checks.md#check_macro_name_matches_file_name): Macros names must be the same as the file they are contained in.
+* [`check_macro_property_file_location`](./src/dbt_bouncer/checks/checks.md#check_macro_property_file_location): Macro properties files must follow the guidance provided by dbt [here](https://docs.getdbt.com/best-practices/how-we-structure/5-the-rest-of-the-project#how-we-use-the-other-folders).
 
 **Metadata**
 
@@ -202,6 +203,7 @@ These checks require the following artifact to be present:
 * [`check_model_max_fanout`](./src/dbt_bouncer/checks/checks.md#check_model_max_fanout): Models cannot have more than the specified number of downstream models (default: 3).
 * [`check_model_max_upstream_dependencies`](./src/dbt_bouncer/checks/checks.md#check_model_max_upstream_dependencies): Limit the number of upstream dependencies a model has. Default values are 5 for models, 5 for macros, and 1 for sources.
 * [`check_model_names`](./src/dbt_bouncer/checks/checks.md#check_model_names): Models must have a name that matches the supplied regex.
+* [`check_model_property_file_location`](./src/dbt_bouncer/checks/checks.md#check_model_property_file_location): Model properties files must follow the guidance provided by dbt [here](https://docs.getdbt.com/best-practices/how-we-structure/1-guide-overview).
 * [`check_model_test_coverage`](./src/dbt_bouncer/checks/checks.md#check_model_test_coverage): Set the minimum percentage of models that have at least one test.
 
 **Sources**
@@ -213,6 +215,7 @@ These checks require the following artifact to be present:
 * [`check_source_has_tags`](./src/dbt_bouncer/checks/checks.md#check_source_has_tags): Sources must have the specified tags.
 * [`check_source_names`](./src/dbt_bouncer/checks/checks.md#check_source_names): Sources must have a name that matches the supplied regex.
 * [`check_source_not_orphaned`](./src/dbt_bouncer/checks/checks.md#check_source_not_orphaned): Sources must be referenced in at least one model.
+* [`check_source_property_file_location`](./src/dbt_bouncer/checks/checks.md#check_source_property_file_location): Source properties files must follow the guidance provided by dbt [here](https://docs.getdbt.com/best-practices/how-we-structure/1-guide-overview).
 * [`check_source_used_by_models_in_same_directory`](./src/dbt_bouncer/checks/checks.md#check_source_used_by_models_in_same_directory): Sources can only be referenced by models that are located in the same directory where the source is defined.
 * [`check_source_used_by_only_one_model`](./src/dbt_bouncer/checks/checks.md#check_source_used_by_only_one_model): Each source can be references by a maximum of one model.
 

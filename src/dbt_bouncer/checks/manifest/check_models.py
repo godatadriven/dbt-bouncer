@@ -480,6 +480,37 @@ def check_model_names(request, check_config=None, model=None):
     ), f"`{model['unique_id'].split('.')[-1]}` does not match the supplied regex `({check_config['model_name_pattern'].strip()})`."
 
 
+class CheckModelPropertyFileLocation(BaseCheck):
+    name: Literal["check_model_property_file_location"]
+
+
+@pytest.mark.iterate_over_models
+def check_model_property_file_location(request, model=None):
+    """
+    Model properties files must follow the guidance provided by dbt [here](https://docs.getdbt.com/best-practices/how-we-structure/1-guide-overview).
+    """
+
+    model = get_check_inputs(model=model, request=request)["model"]
+
+    expected_substr = (
+        "_".join(model["path"].split("/")[:-1])
+        .replace("staging", "stg")
+        .replace("intermediate", "int")
+        .replace("marts", "")
+    )
+    properties_yml_name = model["patch_path"].split("/")[-1]
+
+    assert properties_yml_name.startswith(
+        "_"
+    ), f"The properties file for `{model['unique_id'].split('.')[-1]}` (`{properties_yml_name}`) does not start with an underscore."
+    assert (
+        expected_substr in properties_yml_name
+    ), f"The properties file for `{model['unique_id'].split('.')[-1]}` (`{properties_yml_name}`) does not contain the expected substring (`{expected_substr}`)."
+    assert properties_yml_name.endswith(
+        "__models.yml"
+    ), f"The properties file for `{model['unique_id'].split('.')[-1]}` (`{properties_yml_name}`) does not end with `__models.yml`."
+
+
 class CheckModelsTestCoverage(BaseCheck):
     name: Literal["check_model_test_coverage"]
     min_model_test_coverage_pct: int = Field(
