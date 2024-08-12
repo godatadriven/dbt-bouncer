@@ -22,10 +22,10 @@ build-pex:
 		--script dbt-bouncer
 
 test:
-	$(MAKE) test_unit
-	$(MAKE) test_integration
+	$(MAKE) test-unit
+	$(MAKE) test-integration
 
-test_integration:
+test-integration:
 	poetry run pytest \
 		-c ./tests \
 		--junitxml=coverage.xml \
@@ -35,7 +35,7 @@ test_integration:
 		./tests/integration \
 		$(MAKE_ARGS)
 
-test_unit:
+test-unit:
 	poetry run pytest \
 		-c ./tests \
 		--junitxml=coverage.xml \
@@ -44,7 +44,7 @@ test_unit:
 		--numprocesses 5 \
 		./tests/unit
 
-test_github:
+test-github:
 	poetry run pytest \
 		-c ./tests \
 		--junitxml=coverage.xml \
