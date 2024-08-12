@@ -1,3 +1,4 @@
+import json
 import re
 from pathlib import Path
 
@@ -78,6 +79,50 @@ def test_cli_happy_path(caplog, dbt_artifacts_dir, request, tmp_path):
     assert result.exit_code == 0
 
 
+def test_cli_coverage(caplog, tmp_path):
+    # Config file
+    bouncer_config = {
+        "dbt_artifacts_dir": ".",
+        "manifest_checks": [
+            {
+                "name": "check_model_directories",
+                "include": "",
+                "permitted_sub_directories": ["staging"],
+            }
+        ],
+    }
+
+    with Path(tmp_path / "dbt-bouncer.yml").open("w") as f:
+        yaml.dump(bouncer_config, f)
+
+    # Manifest file
+    with Path.open(Path("./dbt_project/target/manifest.json"), "r") as f:
+        manifest = json.load(f)
+
+    with Path.open(tmp_path / "manifest.json", "w") as f:
+        json.dump(manifest, f)
+
+    # Run dbt-bouncer
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        [
+            "--config-file",
+            Path(tmp_path / "dbt-bouncer.yml").__str__(),
+            "--output-file",
+            tmp_path / "coverage.json",
+        ],
+    )
+    with Path.open(tmp_path / "coverage.json", "r") as f:
+        coverage = json.load(f)
+
+    assert (tmp_path / "coverage.json").exists()
+    assert len(coverage) > 1
+    assert f"Saving coverage file to `{tmp_path}/coverage.json`" in caplog.text
+    assert "`dbt-bouncer` failed. Please check the logs above for more details." in caplog.text
+    assert result.exit_code == 1
+
+
 def test_cli_happy_path_pyproject_toml(caplog):
     runner = CliRunner()
     result = runner.invoke(
@@ -97,7 +142,7 @@ def test_cli_happy_path_pyproject_toml(caplog):
 )
 def test_cli_unhappy_path(cli_args):
     """
-    Test the happy path, just need to ensure that the CLI starts up and calculates the input parameters correctly.
+    Test the unhappy path, just need to ensure that the CLI starts up and calculates the input parameters correctly.
     """
 
     runner = CliRunner()
@@ -121,7 +166,44 @@ def test_cli_config_file_doesnt_exist():
     assert result.exit_code != 0
 
 
-def test_cli_manifest_doesnt_exist(caplog, tmp_path):
+def test_cli_error_message(caplog, tmp_path):
+    # Config file
+    bouncer_config = {
+        "dbt_artifacts_dir": ".",
+        "manifest_checks": [
+            {
+                "name": "check_model_directories",
+                "include": "",
+                "permitted_sub_directories": ["staging"],
+            }
+        ],
+    }
+
+    with Path(tmp_path / "dbt-bouncer.yml").open("w") as f:
+        yaml.dump(bouncer_config, f)
+
+    # Manifest file
+    with Path.open(Path("./dbt_project/target/manifest.json"), "r") as f:
+        manifest = json.load(f)
+
+    with Path.open(tmp_path / "manifest.json", "w") as f:
+        json.dump(manifest, f)
+
+    # Run dbt-bouncer
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        [
+            "--config-file",
+            Path(tmp_path / "dbt-bouncer.yml").__str__(),
+        ],
+    )
+
+    assert "`dbt-bouncer` failed. Please check the logs above for more details." in caplog.text
+    assert result.exit_code == 1
+
+
+def test_cli_manifest_doesnt_exist(tmp_path):
     with Path.open(Path("dbt-bouncer-example.yml"), "r") as f:
         bouncer_config = yaml.safe_load(f)
 

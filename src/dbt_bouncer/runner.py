@@ -1,6 +1,6 @@
-import sys
+import json
 from pathlib import Path
-from typing import Dict, List
+from typing import Any, Dict, List, Optional, Union
 
 import pytest
 from tabulate import tabulate
@@ -22,11 +22,13 @@ def runner(
     macros: List[Dict[str, str]],
     manifest_obj: Dict[str, str],
     models: List[Dict[str, str]],
+    output_file: Union[None, Path],
     run_results: List[Dict[str, str]],
     send_pr_comment: bool,
     sources: List[Dict[str, str]],
     tests: List[Dict[str, str]],
-) -> None:
+    checks_dir: Optional[None | Path] = Path(__file__).parent / "checks",
+) -> tuple[int, List[Any]]:
     """
     Run pytest using fixtures from artifacts.
     """
@@ -49,8 +51,8 @@ def runner(
     run_checks = pytest.main(
         [
             "-c",
-            (Path(__file__).parent / "checks").__str__(),
-            (Path(__file__).parent / "checks").__str__(),
+            checks_dir.__str__(),
+            checks_dir.__str__(),
         ],
         plugins=[
             collector,
@@ -67,14 +69,18 @@ def runner(
             ),
         ],
     )
-    if run_checks.value != 0:  # type: ignore[attr-defined]
+    results = [report._to_json() for report in collector.reports]
+    num_failed_checks = len([report for report in collector.reports if report.outcome == "failed"])
+
+    if num_failed_checks > 0:
+        logger.error("`dbt-bouncer` failed. Please check the logs above for more details.")
         failed_checks = [
             [
-                report.nodeid,
-                report._to_json()["longrepr"]["chain"][0][1]["message"].split("\n")[0],
+                r["nodeid"],
+                r["longrepr"]["chain"][0][1]["message"].split("\n")[0],
             ]
-            for report in collector.reports
-            if report.outcome == "failed"
+            for r in results
+            if r["outcome"] == "failed"
         ]
         logger.debug(f"{failed_checks=}")
         logger.error(
@@ -85,6 +91,17 @@ def runner(
                 tablefmt="github",
             )
         )
+
         if send_pr_comment:
             send_github_comment_failed_checks(failed_checks=failed_checks)
-        sys.exit(1)
+
+    if output_file is not None:
+        coverage_file = Path().cwd() / output_file
+        logger.info(f"Saving coverage file to `{coverage_file}`.")
+        with Path.open(coverage_file, "w") as f:
+            json.dump(
+                results,
+                f,
+            )
+
+    return 1 if run_checks != 0 else 0, results
