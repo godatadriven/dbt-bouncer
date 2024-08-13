@@ -3,10 +3,65 @@ from contextlib import nullcontext as does_not_raise
 import pytest
 
 from dbt_bouncer.checks.catalog.check_columns import (
+    check_column_has_specified_test,
     check_column_name_complies_to_column_type,
     check_columns_are_all_documented,
     check_columns_are_documented_in_public_models,
 )
+
+
+@pytest.mark.parametrize(
+    "catalog_node, check_config, tests, expectation",
+    [
+        (
+            {
+                "columns": {
+                    "col_1": {
+                        "name": "col_1",
+                    },
+                },
+                "unique_id": "model.package_name.model_1",
+            },
+            {"column_name_pattern": ".*_1$", "test_name": "unique"},
+            [
+                {
+                    "attached_node": "model.package_name.model_1",
+                    "column_name": "col_1",
+                    "test_metadata": {
+                        "name": "unique",
+                    },
+                }
+            ],
+            does_not_raise(),
+        ),
+        (
+            {
+                "columns": {
+                    "col_1": {
+                        "name": "col_1",
+                    },
+                },
+                "unique_id": "model.package_name.model_1",
+            },
+            {"column_name_pattern": ".*_1$", "test_name": "unique"},
+            [
+                {
+                    "attached_node": "model.package_name.model_1",
+                    "column_name": "col_1",
+                    "test_metadata": {
+                        "name": "not_null",
+                    },
+                }
+            ],
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_column_has_specified_test(catalog_node, check_config, tests, expectation):
+    with expectation:
+        check_column_has_specified_test(
+            catalog_node=catalog_node, check_config=check_config, tests=tests, request=None
+        )
 
 
 @pytest.mark.parametrize(
