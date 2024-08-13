@@ -41,6 +41,8 @@ models:
       - name: is_recurring_customer
         data_type: boolean
         description: Boolean indicating whether a customer has placed more than five orders
+        tests:
+          - not_null
 
       - name: customer_lifetime_value
         data_type: double

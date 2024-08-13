@@ -19,6 +19,9 @@ catalog_checks:
       - DOUBLE
       - INTEGER
       - VARCHAR
+  - name: check_column_has_specified_test
+    column_name_pattern: ^is_.*
+    test_name: not_null
   - name: check_columns_are_all_documented
     include: ^marts
   - name: check_columns_are_documented_in_public_models
