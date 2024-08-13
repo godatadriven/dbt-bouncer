@@ -40,7 +40,7 @@ def cli(config_file: Path, output_file: Union[None, Path], send_pr_comment: bool
     logger.info(f"Running dbt-bouncer ({version()})...")
 
     # Validate output file has `.json` extension
-    if output_file and not output_file.suffix == "json":
+    if output_file and not output_file.suffix == ".json":
         raise RuntimeError(
             f"Output file must have a `.json` extension. Got `{output_file.suffix}`."
         )

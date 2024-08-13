@@ -87,3 +87,45 @@ def check_columns_are_documented_in_public_models(models, request, catalog_node=
         assert (
             not non_complying_columns
         ), f"`{catalog_node['unique_id'].split('.')[-1]}` is a public model but has columns that don't have a populated description: {non_complying_columns}"
+
+
+class CheckColumnHasSpecifiedTest(BaseCheck):
+    column_name_pattern: str
+    name: Literal["check_column_has_specified_test"]
+    test_name: str
+
+
+@pytest.mark.iterate_over_catalog_nodes
+def check_column_has_specified_test(request, tests, check_config=None, catalog_node=None) -> None:
+    """
+    Columns that match the specified regexp pattern must have a specified test.
+    """
+
+    input_vars = get_check_inputs(
+        catalog_node=catalog_node, check_config=check_config, request=request
+    )
+    catalog_node = input_vars["catalog_node"]
+    column_name_pattern = input_vars["check_config"]["column_name_pattern"]
+    test_name = input_vars["check_config"]["test_name"]
+
+    columns_to_check = [
+        v["name"]
+        for _, v in catalog_node["columns"].items()
+        if re.compile(column_name_pattern.strip()).match(v["name"]) is not None
+    ]
+    relevant_tests = [
+        t
+        for t in tests
+        if t["test_metadata"]["name"] == test_name
+        and t["attached_node"] == catalog_node["unique_id"]
+    ]
+    non_complying_columns = [
+        c
+        for c in columns_to_check
+        if f"{catalog_node['unique_id']}.{c}"
+        not in [f'{t["attached_node"]}.{t["column_name"]}' for t in relevant_tests]
+    ]
+
+    assert (
+        not non_complying_columns
+    ), f"`{catalog_node['unique_id'].split('.')[-1]}` has columns that should have a `{test_name}` test: {non_complying_columns}"
