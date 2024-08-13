@@ -1,3 +1,6 @@
+# TODO Remove after this program no longer support Python 3.8.*
+from __future__ import annotations
+
 import json
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
@@ -27,7 +30,7 @@ def runner(
     send_pr_comment: bool,
     sources: List[Dict[str, str]],
     tests: List[Dict[str, str]],
-    checks_dir: Optional[None | Path] = Path(__file__).parent / "checks",
+    checks_dir: Optional[Union[None, Path]] = Path(__file__).parent / "checks",
 ) -> tuple[int, List[Any]]:
     """
     Run pytest using fixtures from artifacts.
