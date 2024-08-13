@@ -1,37 +1,20 @@
-# `check_columns_are_all_documented``
+# `check_column_has_specified_test`
 `
 
-All columns in a model should be included in the model's properties file, i.e. `.yml` file.
+Columns that match the specified regexp pattern must have a specified test.
 
 **Argument(s)**:
 
+* `column_name_pattern`: Regex pattern to match the model name.
 * `include`: (Optional) Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+* `test_name`: Name of the test to check for.
 
 **Example**:
 ```yaml
 catalog_checks:
-    - name: check_columns_are_all_documented
-```
-
-**Required artifact(s)**:
-
-* catalog.json
-* manifest.json
-
----
-
-# `check_columns_are_documented_in_public_models`
-
-Columns should have a populated description in public models.
-
-**Argument(s)**:
-
-* `include`: (Optional) Regex pattern to match the model path. Only model paths that match the pattern will be checked.
-
-**Example**:
-```yaml
-catalog_checks:
-    - name: check_columns_are_documented_in_public_models
+    - name: check_column_has_specified_test
+      column_name_pattern: ^is_.*
+      test_name: not_null
 ```
 
 **Required artifact(s)**:
@@ -74,6 +57,49 @@ catalog_checks:
           - DOUBLE
           - INTEGER
           - VARCHAR
+```
+
+**Required artifact(s)**:
+
+* catalog.json
+* manifest.json
+
+---
+
+# `check_columns_are_all_documented`
+`
+
+All columns in a model should be included in the model's properties file, i.e. `.yml` file.
+
+**Argument(s)**:
+
+* `include`: (Optional) Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+
+**Example**:
+```yaml
+catalog_checks:
+    - name: check_columns_are_all_documented
+```
+
+**Required artifact(s)**:
+
+* catalog.json
+* manifest.json
+
+---
+
+# `check_columns_are_documented_in_public_models`
+
+Columns should have a populated description in public models.
+
+**Argument(s)**:
+
+* `include`: (Optional) Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+
+**Example**:
+```yaml
+catalog_checks:
+    - name: check_columns_are_documented_in_public_models
 ```
 
 **Required artifact(s)**:

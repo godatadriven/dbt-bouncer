@@ -148,9 +148,10 @@ These checks require the following artifact to be present:
 
 **Columns**
 
+* [`check_column_has_specified_test`](./src/dbt_bouncer/checks/checks.md#check_column_has_specified_test): Columns that match the specified regexp pattern must have a specified test.
+* [`check_column_name_complies_to_column_type`](./src/dbt_bouncer/checks/checks.md#check_column_name_complies_to_column_type): Columns with specified data type must comply to the specified regexp naming pattern.
 * [`check_columns_are_all_documented`](./src/dbt_bouncer/checks/checks.md#check_columns_are_all_documented): All columns in a model should be included in the model's properties file, i.e. `.yml` file.
 * [`check_columns_are_documented_in_public_models`](./src/dbt_bouncer/checks/checks.md#check_columns_are_documented_in_public_models): Columns should have a populated description in public models.
-* [`check_column_name_complies_to_column_type`](./src/dbt_bouncer/checks/checks.md#check_column_name_complies_to_column_type): Columns with specified data type must comply to the specified regexp naming pattern.
 
 **Sources**
 
