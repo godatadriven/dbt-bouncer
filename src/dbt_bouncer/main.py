@@ -143,9 +143,11 @@ def cli(
             catalog_obj.sources.items()
         ):  # Doesn't work with dbt-duckdb for some reason, need to test using different adapter
             if k.split(".")[1] == manifest_obj.metadata.project_name:
-                catalog_source = v.model_dump()
-                catalog_source["path"] = manifest_obj.sources[k].path
-                project_catalog_sources.append(catalog_source)
+                project_catalog_sources.append(
+                    DbtBouncerCatalog(
+                        **{"node": v, "path": manifest_obj.sources[k].path, "unique_id": k}
+                    )
+                )
 
         logger.info(
             f"Parsed `catalog.json`, found {len(project_catalog_nodes)} nodes and {len(project_catalog_sources)} sources."

@@ -25,7 +25,7 @@ catalog_checks:
   - name: check_columns_are_all_documented
     include: ^marts
   - name: check_columns_are_documented_in_public_models
-  # - name: check_source_columns_are_all_documented
+  - name: check_source_columns_are_all_documented
 
 manifest_checks:
   # Exposures

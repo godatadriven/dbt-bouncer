@@ -18,14 +18,12 @@ def check_source_columns_are_all_documented(sources, request, catalog_source=Non
 
     catalog_source = get_check_inputs(catalog_source=catalog_source, request=request)[
         "catalog_source"
-    ]
+    ].node
 
-    source = [s for s in sources if s["unique_id"] == catalog_source["unique_id"]][0]
+    source = [s for s in sources if s["unique_id"] == catalog_source.unique_id][0]
     undocumented_columns = [
-        v["name"]
-        for _, v in catalog_source["columns"].items()
-        if v["name"] not in source["columns"].keys()
+        v.name for _, v in catalog_source.columns.items() if v.name not in source["columns"].keys()
     ]
     assert (
         not undocumented_columns
-    ), f"`{catalog_source['unique_id']}` has columns that are not included in the sources properties file: {undocumented_columns}"
+    ), f"`{catalog_source.unique_id}` has columns that are not included in the sources properties file: {undocumented_columns}"
