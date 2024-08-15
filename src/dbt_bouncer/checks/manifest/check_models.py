@@ -165,6 +165,9 @@ class CheckModelDirectories(BaseModel):
     include: str = Field(
         description="Regex pattern to match the model path. Only model paths that match the pattern will be checked."
     )
+    index: Optional[int] = Field(
+        default=None, description="Index to uniquely identify the check, calculated at runtime."
+    )
     name: Literal["check_model_directories"]
     permitted_sub_directories: List[str] = Field(description="List of permitted sub-directories.")
 

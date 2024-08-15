@@ -1,3 +1,6 @@
+# TODO Remove after this program no longer support Python 3.8.*
+from __future__ import annotations
+
 import inspect
 from typing import Dict
 
@@ -135,7 +138,7 @@ class GenerateTestsPlugin:
 
                     markers = pytest.Function.from_parent(
                         collector, name=name
-                    ).keywords._markers.keys()  # type: ignore[attr-defined]
+                    ).keywords._markers.keys()
                     if (
                         len(
                             set(
@@ -193,7 +196,7 @@ class GenerateTestsPlugin:
                                     run_result
                                 ) = None
 
-                            if object_in_path(check_config.get("include"), x["path"]):
+                            if object_in_path(check_config.get("include"), x.path):
                                 item = MyFunctionItem.from_parent(
                                     parent=collector,
                                     name=name,
@@ -207,7 +210,9 @@ class GenerateTestsPlugin:
                                     run_result=run_result,
                                     source=source,
                                 )
-                                item._nodeid = f"{name}::{x['unique_id'].split('.')[-1]}_{check_config['index']}"
+                                item._nodeid = (
+                                    f"{name}::{x.unique_id.split('.')[-1]}_{check_config['index']}"
+                                )
 
                                 items.append(item)
                     else:

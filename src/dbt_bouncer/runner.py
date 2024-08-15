@@ -52,11 +52,7 @@ def runner(
     # Run the checks, if one fails then pytest will raise an exception
     collector = ResultsCollector()
     run_checks = pytest.main(
-        [
-            "-c",
-            checks_dir.__str__(),
-            checks_dir.__str__(),
-        ],
+        ["-c", checks_dir.__str__(), checks_dir.__str__(), "-s", "-vvv"],
         plugins=[
             collector,
             fixtures,

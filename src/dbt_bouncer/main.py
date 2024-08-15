@@ -54,43 +54,47 @@ def cli(
         config_file_source=click.get_current_context().get_parameter_source("config_file").name,  # type: ignore[union-attr]
     )
     logger.debug(f"{conf=}")
-    bouncer_config = validate_conf(conf=conf).model_dump()
+    bouncer_config = validate_conf(conf=conf)
     logger.debug(f"{bouncer_config=}")
 
-    check_categories = [k for k in bouncer_config.keys() if k.endswith("_checks")]
+    check_categories = [
+        k
+        for k in dir(bouncer_config)
+        if k.endswith("_checks") and getattr(bouncer_config, k) != []
+    ]
     logger.debug(f"{check_categories=}")
 
     # Add indices to uniquely identify checks
     for category in check_categories:
-        for idx, c in enumerate(bouncer_config[category]):
-            c["index"] = idx
+        for idx, c in enumerate(getattr(bouncer_config, category)):
+            c.index = idx
 
     config: Dict[str, List[Dict[str, str]]] = {}
     for category in check_categories:
-        for check_name in set([c["name"] for c in bouncer_config[category]]):
+        for check_name in set([c.name for c in getattr(bouncer_config, category)]):
             config[check_name] = []
-            for check in bouncer_config[category]:
-                if check["name"] == check_name:
+            for check in getattr(bouncer_config, category):
+                if check.name == check_name:
                     config[check_name].append(
-                        {k: check[k] for k in set(list(check.keys())) - set(["name"])}
+                        {k: v for k, v in check.model_dump().items() if k != "name"}
                     )
     logger.debug(f"{config=}")
 
     # Manifest, will always be parsed
     manifest_obj = load_dbt_artifact(
         artifact_name="manifest.json",
-        dbt_artifacts_dir=config_file.parent / bouncer_config.get("dbt_artifacts_dir", "./target"),
+        dbt_artifacts_dir=config_file.parent / bouncer_config.dbt_artifacts_dir,
     )
 
     project_exposures = []
     for _, v in manifest_obj.exposures.items():
         if v.package_name == manifest_obj.metadata.project_name:
-            project_exposures.append(v.model_dump())
+            project_exposures.append(v)
 
     project_macros = []
     for _, v in manifest_obj.macros.items():
         if v.package_name == manifest_obj.metadata.project_name:
-            project_macros.append(v.model_dump())
+            project_macros.append(v)
 
     project_models = []
     project_tests = []
@@ -115,11 +119,10 @@ def cli(
     )
 
     # Catalog, must come after manifest is parsed
-    if bouncer_config["catalog_checks"] != []:
+    if bouncer_config.catalog_checks != []:
         catalog_obj = load_dbt_artifact(
             artifact_name="catalog.json",
-            dbt_artifacts_dir=config_file.parent
-            / bouncer_config.get("dbt_artifacts_dir", "./target"),
+            dbt_artifacts_dir=config_file.parent / bouncer_config.dbt_artifacts_dir,
         )
 
         project_catalog_nodes = []
@@ -149,7 +152,7 @@ def cli(
         project_catalog_sources = []
 
     # Run results, must come after manifest is parsed
-    if bouncer_config["run_results_checks"] != []:
+    if bouncer_config.run_results_checks != []:
         run_results_obj = load_dbt_artifact(
             artifact_name="run_results.json",
             dbt_artifacts_dir=config_file.parent
