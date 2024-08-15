@@ -1,8 +1,9 @@
+import os
 from pathlib import Path
+from unittest import mock
 
 import pytest
 import toml
-from pytest import MonkeyPatch
 
 from dbt_bouncer.utils import (
     create_github_comment_file,
@@ -16,19 +17,15 @@ from dbt_bouncer.utils import (
 def test_create_github_comment_file(monkeypatch, tmp_path):
     monkeypatch.chdir(tmp_path)
 
-    with MonkeyPatch.context() as mp:
-        mp.setenv("GITHUB_REPOSITORY", "org/repo")
-        mp.setenv("GITHUB_RUN_ID", "123")
-
+    with mock.patch.dict(os.environ, clear=True):
         failed_checks = [
             ["check_model_description_populated", "message_1"],
             ["check_model_description_populated", "message_2"],
         ]
         create_github_comment_file(failed_checks)
         assert (
-            Path("github-comment.md").read_text()
-            == "## **Failed `dbt-bouncer`** checks\n\n\n| Check name | Failure message |\n| :--- | :--- |\n| check_model_description_populated | message_1 |\n| check_model_description_populated | message_2 |\n\n\nSent from this [GitHub Action workflow run](https://github.com/org/repo/actions/runs/123)."
-        )
+            tmp_path / "github-comment.md"
+        ).read_text() == "## **Failed `dbt-bouncer`** checks\n\n\n| Check name | Failure message |\n| :--- | :--- |\n| check_model_description_populated | message_1 |\n| check_model_description_populated | message_2 |\n\n\nSent from this [GitHub Action workflow run](https://github.com/None/actions/runs/None)."
 
 
 def test_get_dbt_bouncer_config_commandline(tmp_path):
