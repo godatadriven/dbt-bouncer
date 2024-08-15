@@ -1,31 +1,31 @@
 dbt_artifacts_dir: dbt_project/target # [Optional] Directory where the dbt artifacts exists, generally the `target` directory inside a dbt project. Defaults to `./target`.
 
-# catalog_checks:
-#   - name: check_column_name_complies_to_column_type
-#     column_name_pattern: ^is_.*
-#     types:
-#       - BOOLEAN
-#   - name: check_column_name_complies_to_column_type
-#     column_name_pattern: .*_date$
-#     include: ^staging # Not a good idea, here for demonstration purposes only
-#     types:
-#       - DATE
-#   - name: check_column_name_complies_to_column_type
-#     column_name_pattern: ^[a-z_]*$
-#     types:
-#       - BIGINT
-#       - BOOLEAN
-#       - DATE
-#       - DOUBLE
-#       - INTEGER
-#       - VARCHAR
-#   - name: check_column_has_specified_test
-#     column_name_pattern: ^is_.*
-#     test_name: not_null
-#   - name: check_columns_are_all_documented
-#     include: ^marts
-#   - name: check_columns_are_documented_in_public_models
-#   - name: check_source_columns_are_all_documented
+catalog_checks:
+  - name: check_column_name_complies_to_column_type
+    column_name_pattern: ^is_.*
+    types:
+      - BOOLEAN
+  - name: check_column_name_complies_to_column_type
+    column_name_pattern: .*_date$
+    include: ^staging # Not a good idea, here for demonstration purposes only
+    types:
+      - DATE
+  - name: check_column_name_complies_to_column_type
+    column_name_pattern: ^[a-z_]*$
+    types:
+      - BIGINT
+      - BOOLEAN
+      - DATE
+      - DOUBLE
+      - INTEGER
+      - VARCHAR
+  - name: check_column_has_specified_test
+    column_name_pattern: ^is_.*
+    test_name: not_null
+  - name: check_columns_are_all_documented
+    include: ^marts
+  - name: check_columns_are_documented_in_public_models
+  # - name: check_source_columns_are_all_documented
 
 manifest_checks:
   # Exposures

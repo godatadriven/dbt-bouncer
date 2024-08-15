@@ -8,7 +8,7 @@ import click
 
 from dbt_bouncer.conf_validator import validate_conf
 from dbt_bouncer.logger import logger
-from dbt_bouncer.parsers import DbtBouncerResult
+from dbt_bouncer.parsers import DbtBouncerCatalog, DbtBouncerResult
 from dbt_bouncer.runner import runner
 from dbt_bouncer.utils import get_dbt_bouncer_config, load_dbt_artifact
 from dbt_bouncer.version import version
@@ -129,9 +129,11 @@ def cli(
         project_catalog_nodes = []
         for k, v in catalog_obj.nodes.items():
             if k.split(".")[-2] == manifest_obj.metadata.project_name:
-                catalog_node = v.model_dump()
-                catalog_node["path"] = manifest_obj.nodes[k].path
-                project_catalog_nodes.append(catalog_node)
+                project_catalog_nodes.append(
+                    DbtBouncerCatalog(
+                        **{"node": v, "path": manifest_obj.nodes[k].path, "unique_id": k}
+                    )
+                )
 
         project_catalog_sources = []
         for (
