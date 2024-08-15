@@ -25,7 +25,7 @@ def create_github_comment_file(failed_checks: List[List[str]]) -> None:
 
     logger.debug(f"{md_formatted_comment=}")
 
-    if os.environ.get("CI", None):
+    if os.environ.get("GITHUB_REPOSITORY", None) is not None:
         comment_file = "/app/github-comment.md"
     else:
         comment_file = "github-comment.md"
