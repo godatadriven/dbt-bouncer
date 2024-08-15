@@ -113,7 +113,7 @@ def cli(
     project_sources = []
     for _, v in manifest_obj.sources.items():
         if v.package_name == manifest_obj.metadata.project_name:
-            project_sources.append(v.model_dump())
+            project_sources.append(v)
 
     logger.info(
         f"Parsed `manifest.json`, found `{manifest_obj.metadata.project_name}` project, found {len(project_exposures)} exposures, {len(project_macros)} macros, {len(project_models)} nodes, {len(project_sources)} sources and {len(project_tests)} tests."
@@ -136,12 +136,11 @@ def cli(
                 )
 
         project_catalog_sources = []
+        # Doesn't work with dbt-duckdb for some reason, need to test using different adapter
         for (
             k,
             v,
-        ) in (
-            catalog_obj.sources.items()
-        ):  # Doesn't work with dbt-duckdb for some reason, need to test using different adapter
+        ) in catalog_obj.sources.items():
             if k.split(".")[1] == manifest_obj.metadata.project_name:
                 project_catalog_sources.append(
                     DbtBouncerCatalog(
