@@ -8,6 +8,7 @@ import click
 
 from dbt_bouncer.conf_validator import validate_conf
 from dbt_bouncer.logger import logger
+from dbt_bouncer.parsers import DbtBouncerResult
 from dbt_bouncer.runner import runner
 from dbt_bouncer.utils import get_dbt_bouncer_config, load_dbt_artifact
 from dbt_bouncer.version import version
@@ -155,16 +156,15 @@ def cli(
     if bouncer_config.run_results_checks != []:
         run_results_obj = load_dbt_artifact(
             artifact_name="run_results.json",
-            dbt_artifacts_dir=config_file.parent
-            / bouncer_config.get("dbt_artifacts_dir", "./target"),
+            dbt_artifacts_dir=config_file.parent / bouncer_config.dbt_artifacts_dir,
         )
 
         project_run_results = []
         for r in run_results_obj.results:
             if r.unique_id.split(".")[-3] == manifest_obj.metadata.project_name:
-                run_result = r.model_dump()
-                run_result["path"] = manifest_obj.nodes[r.unique_id].path
-                project_run_results.append(run_result)
+                project_run_results.append(
+                    DbtBouncerResult(**{"path": manifest_obj.nodes[r.unique_id].path, "result": r})
+                )
 
         logger.info(f"Parsed `run_results.json`, found {len(project_run_results)} results.")
     else:

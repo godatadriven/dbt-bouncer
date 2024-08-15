@@ -132,7 +132,7 @@ manifest_checks:
 #   - name: check_source_used_by_models_in_same_directory
 #   - name: check_source_used_by_only_one_model
 
-# run_results_checks:
-#   - name: check_run_results_max_execution_time
-#     include: ^staging # Not a good idea, here for demonstration purposes only
-#     max_execution_time: 10
+run_results_checks:
+  - name: check_run_results_max_execution_time
+    include: ^staging # Not a good idea, here for demonstration purposes only
+    max_execution_time: 10
