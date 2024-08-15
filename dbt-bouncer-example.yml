@@ -32,20 +32,20 @@ manifest_checks:
   - name: check_exposure_based_on_non_public_models
   - name: check_exposure_based_on_view
 
-#   # Lineage
-#   - name: check_lineage_permitted_upstream_models
-#     include: ^staging
-#     upstream_path_pattern: $^
-#   - name: check_lineage_permitted_upstream_models
-#     include: ^intermediate
-#     upstream_path_pattern: ^staging|^intermediate
-#   - name: check_lineage_permitted_upstream_models
-#     include: ^marts
-#     upstream_path_pattern: ^staging|^intermediate
-#   - name: check_lineage_seed_cannot_be_used
-#     include: ^intermediate|^marts
-#   - name: check_lineage_source_cannot_be_used
-#     include: ^intermediate|^marts
+  # Lineage
+  - name: check_lineage_permitted_upstream_models
+    include: ^staging
+    upstream_path_pattern: $^
+  - name: check_lineage_permitted_upstream_models
+    include: ^intermediate
+    upstream_path_pattern: ^staging|^intermediate
+  - name: check_lineage_permitted_upstream_models
+    include: ^marts
+    upstream_path_pattern: ^staging|^intermediate
+  - name: check_lineage_seed_cannot_be_used
+    include: ^intermediate|^marts
+  - name: check_lineage_source_cannot_be_used
+    include: ^intermediate|^marts
 
   # Macros
   - name: check_macro_arguments_description_populated
@@ -55,60 +55,60 @@ manifest_checks:
   - name: check_macro_name_matches_file_name
   - name: check_macro_property_file_location
 
-#   # Models
-#   - name: check_model_access
-#     include: ^intermediate
-#     access: protected
-#   - name: check_model_access
-#     include: ^marts
-#     access: public
-#   - name: check_model_access
-#     include: ^staging
-#     access: protected
-#   - name: check_model_code_does_not_contain_regexp_pattern
-#     regexp_pattern: .*[i][f][n][u][l][l].*
-#   - name: check_model_contract_enforced_for_public_model
-#   - name: check_model_depends_on_multiple_sources
-#   - name: check_model_description_populated
-  # - name: check_model_directories
-  #   include: ""
-  #   permitted_sub_directories:
-  #     - intermediate
-  #     - marts
-  #     - staging
-#   - name: check_model_directories
-#     include: ^staging
-#     permitted_sub_directories:
-#       - crm
-#       - payments
-#   - name: check_model_documentation_coverage
-#   - name: check_model_documented_in_same_directory
-#   - name: check_model_has_contracts_enforced
-#     include: ^marts
-#   - name: check_model_has_meta_keys
-#     keys:
-#       - maturity
-#   - name: check_model_has_no_upstream_dependencies
-#     include: ^((?!int_model_1).)*$
-#   - name: check_model_has_tags
-#     include: ^staging/crm
-#     tags:
-#       - crm
-#   - name: check_model_has_unique_test
-#   - name: check_model_max_chained_views
-#   - name: check_model_max_fanout
-#     max_downstream_models: 2
-#   - name: check_model_max_upstream_dependencies
-#   - name: check_model_names
-#     include: ^intermediate
-#     model_name_pattern: ^int_
-#   - name: check_model_names
-#     include: ^staging
-#     model_name_pattern: ^stg_
-#   - name: check_model_test_coverage
-#   - name: check_project_name
-#     project_name_pattern: ^dbt_bouncer_
-#   - name: check_model_property_file_location
+  # Models
+  - name: check_model_access
+    include: ^intermediate
+    access: protected
+  - name: check_model_access
+    include: ^marts
+    access: public
+  - name: check_model_access
+    include: ^staging
+    access: protected
+  - name: check_model_code_does_not_contain_regexp_pattern
+    regexp_pattern: .*[i][f][n][u][l][l].*
+  - name: check_model_contract_enforced_for_public_model
+  - name: check_model_depends_on_multiple_sources
+  - name: check_model_description_populated
+  - name: check_model_directories
+    include: ""
+    permitted_sub_directories:
+      - intermediate
+      - marts
+      - staging
+  - name: check_model_directories
+    include: ^staging
+    permitted_sub_directories:
+      - crm
+      - payments
+  - name: check_model_documentation_coverage
+  - name: check_model_documented_in_same_directory
+  - name: check_model_has_contracts_enforced
+    include: ^marts
+  - name: check_model_has_meta_keys
+    keys:
+      - maturity
+  - name: check_model_has_no_upstream_dependencies
+    include: ^((?!int_model_1).)*$
+  - name: check_model_has_tags
+    include: ^staging/crm
+    tags:
+      - crm
+  - name: check_model_has_unique_test
+  - name: check_model_max_chained_views
+  - name: check_model_max_fanout
+    max_downstream_models: 2
+  - name: check_model_max_upstream_dependencies
+  - name: check_model_names
+    include: ^intermediate
+    model_name_pattern: ^int_
+  - name: check_model_names
+    include: ^staging
+    model_name_pattern: ^stg_
+  - name: check_model_test_coverage
+  - name: check_project_name
+    project_name_pattern: ^dbt_bouncer_
+  - name: check_model_property_file_location
 
   # Sources
   - name: check_source_description_populated

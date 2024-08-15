@@ -143,7 +143,7 @@ def check_source_not_orphaned(models, request, source=None) -> None:
         source=source,
     )["source"]
 
-    num_refs = sum(source.unique_id in model["depends_on"]["nodes"] for model in models)
+    num_refs = sum(source.unique_id in model.depends_on.nodes for model in models)
     assert (
         num_refs >= 1
     ), f"Source `{source.unique_id}` is orphaned, i.e. not referenced by any model."
@@ -193,10 +193,10 @@ def check_source_used_by_models_in_same_directory(models, request, source=None) 
     reffed_models_not_in_same_dir = []
     for model in models:
         if (
-            source.unique_id in model["depends_on"]["nodes"]
-            and model["path"].split("/")[:-1] != source.path.split("/")[1:-1]
+            source.unique_id in model.depends_on.nodes
+            and model.path.split("/")[:-1] != source.path.split("/")[1:-1]
         ):
-            reffed_models_not_in_same_dir.append(model["unique_id"].split(".")[0])
+            reffed_models_not_in_same_dir.append(model.unique_id.split(".")[0])
 
     assert (
         len(reffed_models_not_in_same_dir) == 0
@@ -218,5 +218,5 @@ def check_source_used_by_only_one_model(models, request, source=None) -> None:
         source=source,
     )["source"]
 
-    num_refs = sum(source.unique_id in model["depends_on"]["nodes"] for model in models)
+    num_refs = sum(source.unique_id in model.depends_on.nodes for model in models)
     assert num_refs <= 1, f"Source `{source.unique_id}` is referenced by more than one model."

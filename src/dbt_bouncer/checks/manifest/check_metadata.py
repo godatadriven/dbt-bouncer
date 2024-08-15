@@ -1,5 +1,5 @@
 import re
-from typing import Literal
+from typing import Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -9,6 +9,9 @@ from dbt_bouncer.utils import get_check_inputs
 class CheckProjectName(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
+    index: Optional[int] = Field(
+        default=None, description="Index to uniquely identify the check, calculated at runtime."
+    )
     name: Literal["check_project_name"]
     project_name_pattern: str = Field(description="Regexp the project name must match.")
 

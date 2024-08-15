@@ -25,9 +25,9 @@ def check_exposure_based_on_non_public_models(models, request, exposure=None):
             model.split(".")[0] == "model"
             and model.split(".")[1] == exposure.unique_id.split(".")[1]
         ):
-            model = [m for m in models if m["unique_id"] == model][0]
-            if model["access"] != "public":
-                non_public_upstream_dependencies.append(model["unique_id"].split(".")[-1])
+            model = [m for m in models if m.unique_id == model][0]
+            if model.access.value != "public":
+                non_public_upstream_dependencies.append(model.unique_id.split(".")[-1])
 
     assert (
         not non_public_upstream_dependencies
@@ -58,9 +58,9 @@ def check_exposure_based_on_view(models, request, check_config=None, exposure=No
             model.split(".")[0] == "model"
             and model.split(".")[1] == exposure.unique_id.split(".")[1]
         ):
-            model = [m for m in models if m["unique_id"] == model][0]
-            if model["config"]["materialized"] in materializations_to_include:
-                non_table_upstream_dependencies.append(model["unique_id"].split(".")[-1])
+            model = [m for m in models if m.unique_id == model][0]
+            if model.config.materialized in materializations_to_include:
+                non_table_upstream_dependencies.append(model.unique_id.split(".")[-1])
 
     assert (
         not non_table_upstream_dependencies

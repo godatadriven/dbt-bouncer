@@ -54,11 +54,9 @@ def check_columns_are_all_documented(models, request, catalog_node=None) -> None
     ].node
 
     if catalog_node.unique_id.split(".")[0] == "model":
-        model = [m for m in models if m["unique_id"] == catalog_node.unique_id][0]
+        model = [m for m in models if m.unique_id == catalog_node.unique_id][0]
         undocumented_columns = [
-            v.name
-            for _, v in catalog_node.columns.items()
-            if v.name not in model["columns"].keys()
+            v.name for _, v in catalog_node.columns.items() if v.name not in model.columns.keys()
         ]
         assert (
             not undocumented_columns
@@ -80,11 +78,11 @@ def check_columns_are_documented_in_public_models(models, request, catalog_node=
     ].node
 
     if catalog_node.unique_id.split(".")[0] == "model":
-        model = [m for m in models if m["unique_id"] == catalog_node.unique_id][0]
+        model = [m for m in models if m.unique_id == catalog_node.unique_id][0]
         non_complying_columns = []
         for k, v in catalog_node.columns.items():
-            if model["access"] == "public":
-                column_config = model["columns"].get(v.name)
+            if model.access == "public":
+                column_config = model.columns.get(v.name)
                 if column_config is None or len(column_config.get("description").strip()) < 4:
                     non_complying_columns.append(v.name)
 

@@ -25,8 +25,8 @@ def check_model_access(request, check_config=None, model=None):
     model = input_vars["model"]
 
     assert (
-        model["access"] == check_config["access"]
-    ), f"`{model['unique_id'].split('.')[-1]}` has `{model['access']}` access, it should have access `{check_config['access']}`."
+        model.access.value == check_config["access"]
+    ), f"`{model.unique_id.split('.')[-1]}` has `{model.access.value}` access, it should have access `{check_config['access']}`."
 
 
 class CheckModelContractsEnforcedForPublicModel(BaseCheck):
@@ -41,10 +41,10 @@ def check_model_contract_enforced_for_public_model(request, model=None):
 
     model = get_check_inputs(model=model, request=request)["model"]
 
-    if model["access"] == "public":
+    if model.access.value == "public":
         assert (
-            model["contract"]["enforced"] is True
-        ), f"`{model['unique_id'].split('.')[-1]}` is a public model but does not have contracts enforced."
+            model.contract.enforced is True
+        ), f"`{model.unique_id.split('.')[-1]}` is a public model but does not have contracts enforced."
 
 
 class CheckModelDescriptionPopulated(BaseCheck):
@@ -60,8 +60,8 @@ def check_model_description_populated(request, model=None):
     model = get_check_inputs(model=model, request=request)["model"]
 
     assert (
-        len(model["description"].strip()) > 4
-    ), f"`{model['unique_id'].split('.')[-1]}` does not have a populated description."
+        len(model.description.strip()) > 4
+    ), f"`{model.unique_id.split('.')[-1]}` does not have a populated description."
 
 
 class CheckModelsDocumentationCoverage(BaseCheck):
@@ -86,8 +86,8 @@ def check_model_documentation_coverage(models, request, check_config=None):
     num_models = len(models)
     models_with_description = []
     for model in models:
-        if len(model["description"].strip()) > 4:
-            models_with_description.append(model["unique_id"])
+        if len(model.description.strip()) > 4:
+            models_with_description.append(model.unique_id)
 
     num_models_with_descriptions = len(models_with_description)
     model_description_coverage_pct = (num_models_with_descriptions / num_models) * 100
@@ -109,12 +109,12 @@ def check_model_documented_in_same_directory(request, model=None) -> None:
 
     model = get_check_inputs(model=model, request=request)["model"]
 
-    model_doc_dir = model["patch_path"][model["patch_path"].find("models") :].split("/")[1:-1]
-    model_sql_dir = model["path"].split("/")[:-1]
+    model_doc_dir = model.patch_path[model.patch_path.find("models") :].split("/")[1:-1]
+    model_sql_dir = model.path.split("/")[:-1]
 
     assert (
         model_doc_dir == model_sql_dir
-    ), f"`{model['unique_id'].split('.')[-1]}` is documented in a different directory to the `.sql` file: `{'/'.join(model_doc_dir)}` vs `{'/'.join(model_sql_dir)}`."
+    ), f"`{model.unique_id.split('.')[-1]}` is documented in a different directory to the `.sql` file: `{'/'.join(model_doc_dir)}` vs `{'/'.join(model_sql_dir)}`."
 
 
 class CheckModelCodeDoesNotContainRegexpPattern(BaseCheck):
@@ -135,11 +135,9 @@ def check_model_code_does_not_contain_regexp_pattern(request, check_config=None,
     model = input_vars["model"]
 
     assert (
-        re.compile(check_config["regexp_pattern"].strip(), flags=re.DOTALL).match(
-            model["raw_code"]
-        )
+        re.compile(check_config["regexp_pattern"].strip(), flags=re.DOTALL).match(model.raw_code)
         is None
-    ), f"`{model['unique_id'].split('.')[-1]}` contains a banned string: `{check_config['regexp_pattern'].strip()}`."
+    ), f"`{model.unique_id.split('.')[-1]}` contains a banned string: `{check_config['regexp_pattern'].strip()}`."
 
 
 class CheckModelDependsOnMultipleSources(BaseCheck):
@@ -153,10 +151,11 @@ def check_model_depends_on_multiple_sources(request, model=None):
     """
 
     model = get_check_inputs(model=model, request=request)["model"]
-    num_reffed_sources = sum(x.split(".")[0] == "source" for x in model["depends_on"]["nodes"])
+
+    num_reffed_sources = sum(x.split(".")[0] == "source" for x in model.depends_on.nodes)
     assert (
         num_reffed_sources <= 1
-    ), f"`{model['unique_id'].split('.')[-1]}` references more than one source."
+    ), f"`{model.unique_id.split('.')[-1]}` references more than one source."
 
 
 class CheckModelDirectories(BaseModel):
@@ -186,15 +185,15 @@ def check_model_directories(request, check_config=None, model=None):
     # Special case for `models` directory
     if include == "":
         assert (
-            model["path"].split("/")[0] in permitted_sub_directories
-        ), f"{model['unique_id']} is located in `{model['path'].split('/')[0]}`, this is not a valid sub- directory."
+            model.path.split("/")[0] in permitted_sub_directories
+        ), f"{model.unique_id} is located in `{model.path.split('/')[0]}`, this is not a valid sub- directory."
     else:
-        matched_path = re.compile(include.strip()).match(model["path"])
-        path_after_match = model["path"][matched_path.end() + 1 :]  # type: ignore[union-attr]
+        matched_path = re.compile(include.strip()).match(model.path)
+        path_after_match = model.path[matched_path.end() + 1 :]  # type: ignore[union-attr]
 
         assert (
             path_after_match.split("/")[0] in permitted_sub_directories
-        ), f"`{model['unique_id'].split('.')[-1]}` is located in `{model['path'].split('/')[0]}`, this is not a valid sub-directory."
+        ), f"`{model.unique_id.split('.')[-1]}` is located in `{model.path.split('/')[0]}`, this is not a valid sub-directory."
 
 
 class CheckModelHasContractsEnforced(BaseCheck):
@@ -210,8 +209,8 @@ def check_model_has_contracts_enforced(request, model=None):
     model = get_check_inputs(model=model, request=request)["model"]
 
     assert (
-        model["contract"]["enforced"] is True
-    ), f"`{model['unique_id'].split('.')[-1]}` does not have contracts enforced."
+        model.contract.enforced is True
+    ), f"`{model.unique_id.split('.')[-1]}` does not have contracts enforced."
 
 
 class CheckModelHasMetaKeys(BaseCheck):
@@ -234,12 +233,12 @@ def check_model_has_meta_keys(request, check_config=None, model=None) -> None:
     model = input_vars["model"]
 
     missing_keys = find_missing_meta_keys(
-        meta_config=model.get("meta"),
+        meta_config=model.meta,
         required_keys=check_config["keys"],
     )
     assert (
         missing_keys == []
-    ), f"`{model['unique_id'].split('.')[-1]}` is missing the following keys from the `meta` config: {[x.replace('>>', '') for x in missing_keys]}"
+    ), f"`{model.unique_id.split('.')[-1]}` is missing the following keys from the `meta` config: {[x.replace('>>', '') for x in missing_keys]}"
 
 
 class CheckModelHasNoUpstreamDependencies(BaseCheck):
@@ -254,8 +253,8 @@ def check_model_has_no_upstream_dependencies(request, model=None):
 
     model = get_check_inputs(model=model, request=request)["model"]
     assert (
-        len(model["depends_on"]["nodes"]) > 0
-    ), f"`{model['unique_id'].split('.')[-1]}` has no upstream dependencies, this likely indicates hard-coded tables references."
+        len(model.depends_on.nodes) > 0
+    ), f"`{model.unique_id.split('.')[-1]}` has no upstream dependencies, this likely indicates hard-coded tables references."
 
 
 class CheckModelHasTags(BaseCheck):
@@ -273,10 +272,10 @@ def check_model_has_tags(request, check_config=None, model=None):
     model = input_vars["model"]
     tags = input_vars["check_config"]["tags"]
 
-    missing_tags = [tag for tag in tags if tag not in model["tags"]]
+    missing_tags = [tag for tag in tags if tag not in model.tags]
     assert (
         not missing_tags
-    ), f"`{model['unique_id'].split('.')[-1]}` is missing required tags: {missing_tags}."
+    ), f"`{model.unique_id.split('.')[-1]}` is missing required tags: {missing_tags}."
 
 
 class CheckModelHasUniqueTest(BaseCheck):
@@ -305,13 +304,13 @@ def check_model_has_unique_test(request, tests, check_config=None, model=None):
     logger.debug(f"{accepted_uniqueness_tests=}")
 
     num_unique_tests = sum(
-        test["attached_node"] == model["unique_id"]
+        test["attached_node"] == model.unique_id
         and test["test_metadata"].get("name") in accepted_uniqueness_tests
         for test in tests
     )
     assert (
         num_unique_tests >= 1
-    ), f"`{model['unique_id'].split('.')[-1]}` does not have a test for uniqueness of a column."
+    ), f"`{model.unique_id.split('.')[-1]}` does not have a test for uniqueness of a column."
 
 
 class CheckModelMaxChainedViews(BaseCheck):
@@ -350,7 +349,7 @@ def check_model_max_chained_views(manifest_obj, models, request, check_config=No
         relevant_upstream_models = []
         for model in model_unique_ids_to_check:
             upstream_nodes = list(
-                [m2 for m2 in models if m2["unique_id"] == model][0]["depends_on"]["nodes"]
+                [m2 for m2 in models if m2.unique_id == model][0].depends_on.nodes
             )
             if upstream_nodes != []:
                 upstream_models = [
@@ -359,9 +358,9 @@ def check_model_max_chained_views(manifest_obj, models, request, check_config=No
                     if m.split(".")[0] == "model" and m.split(".")[1] == package_name
                 ]
                 for i in upstream_models:
-                    if [m for m in models if m["unique_id"] == i][0]["config"][
-                        "materialized"
-                    ] in materializations:
+                    if [m for m in models if m.unique_id == i][
+                        0
+                    ].config.materialized in materializations:
                         relevant_upstream_models.append(i)
 
         depth += 1
@@ -385,12 +384,12 @@ def check_model_max_chained_views(manifest_obj, models, request, check_config=No
                 materializations=materializations_to_include,
                 max_chained_views=max_chained_views,
                 models=models,
-                model_unique_ids_to_check=[model["unique_id"]],
+                model_unique_ids_to_check=[model.unique_id],
                 package_name=manifest_obj.metadata.project_name,
             )
         )
         == 0
-    ), f"`{model['unique_id'].split('.')[-1]}` has more than {max_chained_views} upstream dependents that are not tables."
+    ), f"`{model.unique_id.split('.')[-1]}` has more than {max_chained_views} upstream dependents that are not tables."
 
 
 class CheckModelMaxFanout(BaseCheck):
@@ -410,11 +409,11 @@ def check_model_max_fanout(models, request, check_config=None, model=None):
     max_downstream_models = input_vars["check_config"]["max_downstream_models"]
     model = input_vars["model"]
 
-    num_downstream_models = sum(model["unique_id"] in m["depends_on"]["nodes"] for m in models)
+    num_downstream_models = sum(model.unique_id in m.depends_on.nodes for m in models)
 
     assert (
         num_downstream_models <= max_downstream_models
-    ), f"`{model['unique_id'].split('.')[-1]}` has {num_downstream_models} downstream models, which is more than the permitted maximum of {max_downstream_models}."
+    ), f"`{model.unique_id.split('.')[-1]}` has {num_downstream_models} downstream models, which is more than the permitted maximum of {max_downstream_models}."
 
 
 class CheckModelMaxUpstreamDependencies(BaseCheck):
@@ -442,23 +441,19 @@ def check_model_max_upstream_dependencies(request, check_config=None, model=None
     max_upstream_sources = input_vars["check_config"]["max_upstream_sources"]
     model = input_vars["model"]
 
-    num_upstream_macros = len([m for m in model["depends_on"]["macros"]])
-    num_upstream_models = len(
-        [m for m in model["depends_on"]["nodes"] if m.split(".")[0] == "model"]
-    )
-    num_upstream_sources = len(
-        [m for m in model["depends_on"]["nodes"] if m.split(".")[0] == "source"]
-    )
+    num_upstream_macros = len([m for m in model.depends_on.macros])
+    num_upstream_models = len([m for m in model.depends_on.nodes if m.split(".")[0] == "model"])
+    num_upstream_sources = len([m for m in model.depends_on.nodes if m.split(".")[0] == "source"])
 
     assert (
         num_upstream_macros <= max_upstream_macros
-    ), f"`{model['unique_id'].split('.')[-1]}` has {num_upstream_macros} upstream macros, which is more than the permitted maximum of {max_upstream_macros}."
+    ), f"`{model.unique_id.split('.')[-1]}` has {num_upstream_macros} upstream macros, which is more than the permitted maximum of {max_upstream_macros}."
     assert (
         num_upstream_models <= max_upstream_models
-    ), f"`{model['unique_id'].split('.')[-1]}` has {num_upstream_models} upstream models, which is more than the permitted maximum of {max_upstream_models}."
+    ), f"`{model.unique_id.split('.')[-1]}` has {num_upstream_models} upstream models, which is more than the permitted maximum of {max_upstream_models}."
     assert (
         num_upstream_sources <= max_upstream_sources
-    ), f"`{model['unique_id'].split('.')[-1]}` has {num_upstream_sources} upstream sources, which is more than the permitted maximum of {max_upstream_sources}."
+    ), f"`{model.unique_id.split('.')[-1]}` has {num_upstream_sources} upstream sources, which is more than the permitted maximum of {max_upstream_sources}."
 
 
 class CheckModelNames(BaseCheck):
@@ -479,8 +474,8 @@ def check_model_names(request, check_config=None, model=None):
     model = input_vars["model"]
 
     assert (
-        re.compile(check_config["model_name_pattern"].strip()).match(model["name"]) is not None
-    ), f"`{model['unique_id'].split('.')[-1]}` does not match the supplied regex `({check_config['model_name_pattern'].strip()})`."
+        re.compile(check_config["model_name_pattern"].strip()).match(model.name) is not None
+    ), f"`{model.unique_id.split('.')[-1]}` does not match the supplied regex `({check_config['model_name_pattern'].strip()})`."
 
 
 class CheckModelPropertyFileLocation(BaseCheck):
@@ -496,22 +491,22 @@ def check_model_property_file_location(request, model=None):
     model = get_check_inputs(model=model, request=request)["model"]
 
     expected_substr = (
-        "_".join(model["path"].split("/")[:-1])
+        "_".join(model.path.split("/")[:-1])
         .replace("staging", "stg")
         .replace("intermediate", "int")
         .replace("marts", "")
     )
-    properties_yml_name = model["patch_path"].split("/")[-1]
+    properties_yml_name = model.patch_path.split("/")[-1]
 
     assert properties_yml_name.startswith(
         "_"
-    ), f"The properties file for `{model['unique_id'].split('.')[-1]}` (`{properties_yml_name}`) does not start with an underscore."
+    ), f"The properties file for `{model.unique_id.split('.')[-1]}` (`{properties_yml_name}`) does not start with an underscore."
     assert (
         expected_substr in properties_yml_name
-    ), f"The properties file for `{model['unique_id'].split('.')[-1]}` (`{properties_yml_name}`) does not contain the expected substring (`{expected_substr}`)."
+    ), f"The properties file for `{model.unique_id.split('.')[-1]}` (`{properties_yml_name}`) does not contain the expected substring (`{expected_substr}`)."
     assert properties_yml_name.endswith(
         "__models.yml"
-    ), f"The properties file for `{model['unique_id'].split('.')[-1]}` (`{properties_yml_name}`) does not end with `__models.yml`."
+    ), f"The properties file for `{model.unique_id.split('.')[-1]}` (`{properties_yml_name}`) does not end with `__models.yml`."
 
 
 class CheckModelsTestCoverage(BaseCheck):
@@ -537,8 +532,8 @@ def check_model_test_coverage(models, request, tests, check_config=None):
     models_with_tests = []
     for model in models:
         for test in tests:
-            if model["unique_id"] in test["depends_on"]["nodes"]:
-                models_with_tests.append(model["unique_id"])
+            if model.unique_id in test["depends_on"]["nodes"]:
+                models_with_tests.append(model.unique_id)
     num_models_with_tests = len(set(models_with_tests))
     model_test_coverage_pct = (num_models_with_tests / num_models) * 100
 
