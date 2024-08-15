@@ -45,9 +45,9 @@ runs:
           ${{ steps.assemble-output-file-param.outputs.output-file-param }}
 
     - name: Send PR comment
-      if: always() && ${{ inputs.send-pr-comment }} == 'true' && ${{ steps.run-dbt-bouncer.outputs.exit_code != 0 }}
+      if: always() && inputs.send-pr-comment == 'true' && steps.run-dbt-bouncer.outcome != 'success'
       shell: bash
       run: >
-        gh pr comment ${{ github.pull_request.number }} \
+        gh pr comment ${{ github.event.number }} \
           --repo ${{ github.repository }} \
-          --body-file /app/github-comment.md
+          --body-file github-comment.md
