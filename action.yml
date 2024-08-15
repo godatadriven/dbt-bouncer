@@ -24,7 +24,7 @@ runs:
       shell: bash
       run: >
         if [[ "${{ inputs.output-file }}" = "" ]]; then
-          echo "output-file-param=''" >> $GITHUB_OUTPUT
+          echo "output-file-param=" >> $GITHUB_OUTPUT
         else
           echo "output-file-param=--output-file /app/${{ inputs.output-file }}" >> $GITHUB_OUTPUT
         fi
@@ -45,7 +45,7 @@ runs:
           ${{ steps.assemble-output-file-param.outputs.output-file-param }}
 
     - name: Send PR comment
-      if: ${{ inputs.send-pr-comment }} == 'true' && ${{ steps.run-dbt-bouncer.outputs.exit_code != 0 }}
+      if: always() && ${{ inputs.send-pr-comment }} == 'true' && ${{ steps.run-dbt-bouncer.outputs.exit_code != 0 }}
       shell: bash
       run: >
         gh pr comment ${{ github.pull_request.number }} \
