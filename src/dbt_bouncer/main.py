@@ -22,21 +22,25 @@ from dbt_bouncer.version import version
     type=Path,
 )
 @click.option(
+    "--create-pr-comment-file",
+    default=False,
+    help="Create a `github-comment.md` file that will be sent to GitHub as a PR comment. Defaults to True when run as a GitHub Action.",
+    required=False,
+    type=click.BOOL,
+)
+@click.option(
     "--output-file",
     default=None,
     help="Location of the json file where check metadata will be saved.",
     required=False,
     type=Path,
 )
-@click.option(
-    "--send-pr-comment",
-    default=False,
-    help="Send a comment to the GitHub PR with a list of failed checks. Defaults to True when run as a GitHub Action.",
-    required=False,
-    type=click.BOOL,
-)
 @click.version_option()
-def cli(config_file: Path, output_file: Union[None, Path], send_pr_comment: bool):
+def cli(
+    config_file: Path,
+    create_pr_comment_file: bool,
+    output_file: Union[None, Path],
+):
     logger.info(f"Running dbt-bouncer ({version()})...")
 
     # Validate output file has `.json` extension
@@ -168,13 +172,13 @@ def cli(config_file: Path, output_file: Union[None, Path], send_pr_comment: bool
         bouncer_config=config,
         catalog_nodes=project_catalog_nodes,
         catalog_sources=project_catalog_sources,
+        create_pr_comment_file=create_pr_comment_file,
         exposures=project_exposures,
         macros=project_macros,
         manifest_obj=manifest_obj,
         models=project_models,
         output_file=output_file,
         run_results=project_run_results,
-        send_pr_comment=send_pr_comment,
         sources=project_sources,
         tests=project_tests,
     )

@@ -41,4 +41,12 @@ runs:
           ghcr.io/godatadriven/dbt-bouncer:v0.0.0 \
           --config-file /app/${{ inputs.config-file }} \
           ${{ steps.assemble-output-file-param.outputs.output-file-param }} \
-          --send-pr-comment ${{ inputs.send-pr-comment }}
+          --create-pr-comment-file ${{ inputs.send-pr-comment }}
+
+    - name: Send PR comment
+      if: ${{ inputs.send-pr-comment }} == 'true'
+      shell: bash
+      run: >
+        gh pr comment ${{ github.pull_request.number }} \
+          --repo ${{ github.repository }} \
+          --body-file /app/github-comment.md

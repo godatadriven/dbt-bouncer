@@ -43,12 +43,3 @@ test-unit:
 		--cov=src/dbt_bouncer/ \
 		--numprocesses 5 \
 		./tests/unit
-
-test-github:
-	poetry run pytest \
-		-c ./tests \
-		--junitxml=coverage.xml \
-		--cov-report=term-missing:skip-covered \
-		--cov=src/dbt_bouncer/ \
-		--numprocesses 5 \
-		./tests/github

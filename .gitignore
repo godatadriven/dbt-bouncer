@@ -163,6 +163,7 @@ cython_debug/
 changed_files.txt
 coverage.json
 dbt.duckdb
+github-comment.md
 pytest-coverage.txt
 
 dbt_project/dbt_packages

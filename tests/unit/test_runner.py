@@ -15,6 +15,7 @@ def test_runner_coverage(caplog, tmp_path):
         },
         catalog_nodes=[],
         catalog_sources=[],
+        create_pr_comment_file=False,
         exposures=[],
         macros=[],
         manifest_obj=parse_manifest(
@@ -49,7 +50,6 @@ def test_runner_coverage(caplog, tmp_path):
         ],
         output_file=tmp_path / "coverage.json",
         run_results=[],
-        send_pr_comment=False,
         sources=[],
         tests=[],
         checks_dir=Path("./src/dbt_bouncer/checks"),
@@ -73,6 +73,7 @@ def test_runner_failure():
         },
         catalog_nodes=[],
         catalog_sources=[],
+        create_pr_comment_file=False,
         exposures=[],
         macros=[],
         manifest_obj=parse_manifest(
@@ -107,7 +108,6 @@ def test_runner_failure():
         ],
         output_file=None,
         run_results=[],
-        send_pr_comment=False,
         sources=[],
         tests=[],
         checks_dir=Path("./src/dbt_bouncer/checks"),
@@ -124,6 +124,7 @@ def test_runner_success():
         },
         catalog_nodes=[],
         catalog_sources=[],
+        create_pr_comment_file=False,
         exposures=[],
         macros=[],
         manifest_obj=parse_manifest(
@@ -158,7 +159,6 @@ def test_runner_success():
         ],
         output_file=None,
         run_results=[],
-        send_pr_comment=False,
         sources=[],
         tests=[],
         checks_dir=Path("./src/dbt_bouncer/checks"),
