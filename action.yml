@@ -30,6 +30,7 @@ runs:
         fi
 
     - name: Run dbt-bouncer
+      id: run-dbt-bouncer
       shell: bash
       run: >
         docker run --rm \
@@ -44,7 +45,7 @@ runs:
           ${{ steps.assemble-output-file-param.outputs.output-file-param }}
 
     - name: Send PR comment
-      if: ${{ inputs.send-pr-comment }} == 'true'
+      if: ${{ inputs.send-pr-comment }} == 'true' && ${{ steps.run-dbt-bouncer.outputs.exit_code != 0 }}
       shell: bash
       run: >
         gh pr comment ${{ github.pull_request.number }} \
