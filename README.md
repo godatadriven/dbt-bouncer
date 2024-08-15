@@ -65,6 +65,7 @@ steps:
     - uses: godatadriven/dbt-bouncer@v0
       with:
         config-file: ./<PATH_TO_CONFIG_FILE>
+        output-file: results.json # optional, default does not save a results file
         send-pr-comment: true # optional, defaults to true
 
     ...
