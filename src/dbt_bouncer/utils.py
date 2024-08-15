@@ -1,5 +1,6 @@
 import contextlib
 import json
+import os
 import re
 from pathlib import Path
 from typing import List, Literal
@@ -9,6 +10,28 @@ import yaml
 from dbt_artifacts_parser.parser import parse_catalog, parse_manifest, parse_run_results
 
 from dbt_bouncer.logger import logger
+
+
+def create_github_comment_file(failed_checks: List[List[str]]) -> None:
+    """
+    Create a markdown file containing a comment for GitHub.
+    """
+
+    md_formatted_comment = make_markdown_table(
+        [["Check name", "Failure message"]] + list(sorted(failed_checks))
+    )
+
+    md_formatted_comment = f"## **Failed `dbt-bouncer`** checks\n\n{md_formatted_comment}\n\nSent from this [GitHub Action workflow run](https://github.com/{os.environ['GITHUB_REPOSITORY']}/actions/runs/{os.environ['GITHUB_RUN_ID']})."  # Would like to be more specific and include the job ID, but it's not exposed as an environment variable: https://github.com/actions/runner/issues/324
+
+    logger.debug(f"{md_formatted_comment=}")
+
+    if os.environ.get("CI", None):
+        comment_file = "/app/github-comment.md"
+    else:
+        comment_file = "github-comment.md"
+
+    with open(comment_file, "w") as f:
+        f.write(md_formatted_comment)
 
 
 def find_missing_meta_keys(meta_config, required_keys) -> List[str]:

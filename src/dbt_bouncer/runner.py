@@ -8,26 +8,26 @@ from typing import Any, Dict, List, Optional, Union
 import pytest
 from tabulate import tabulate
 
-from dbt_bouncer.github import send_github_comment_failed_checks
 from dbt_bouncer.logger import logger
 from dbt_bouncer.runner_plugins import (
     FixturePlugin,
     GenerateTestsPlugin,
     ResultsCollector,
 )
+from dbt_bouncer.utils import create_github_comment_file
 
 
 def runner(
     bouncer_config: Dict[str, List[Dict[str, str]]],
     catalog_nodes: List[Dict[str, str]],
     catalog_sources: List[Dict[str, str]],
+    create_pr_comment_file: bool,
     exposures: List[Dict[str, str]],
     macros: List[Dict[str, str]],
     manifest_obj: Dict[str, str],
     models: List[Dict[str, str]],
     output_file: Union[None, Path],
     run_results: List[Dict[str, str]],
-    send_pr_comment: bool,
     sources: List[Dict[str, str]],
     tests: List[Dict[str, str]],
     checks_dir: Optional[Union[None, Path]] = Path(__file__).parent / "checks",
@@ -95,8 +95,8 @@ def runner(
             )
         )
 
-        if send_pr_comment:
-            send_github_comment_failed_checks(failed_checks=failed_checks)
+        if create_pr_comment_file:
+            create_github_comment_file(failed_checks=failed_checks)
 
     if output_file is not None:
         coverage_file = Path().cwd() / output_file
