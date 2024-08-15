@@ -81,9 +81,9 @@ def check_columns_are_documented_in_public_models(models, request, catalog_node=
         model = [m for m in models if m.unique_id == catalog_node.unique_id][0]
         non_complying_columns = []
         for k, v in catalog_node.columns.items():
-            if model.access == "public":
+            if model.access.value == "public":
                 column_config = model.columns.get(v.name)
-                if column_config is None or len(column_config.get("description").strip()) < 4:
+                if column_config is None or len(column_config.description.strip()) < 4:
                     non_complying_columns.append(v.name)
 
         assert (
@@ -110,6 +110,12 @@ def check_column_has_specified_test(request, tests, check_config=None, catalog_n
     column_name_pattern = input_vars["check_config"]["column_name_pattern"]
     test_name = input_vars["check_config"]["test_name"]
 
+    from dbt_bouncer.logger import logger
+
+    logger.warning(f"{tests[0]=}")
+    logger.warning(f"{type(tests)=}")
+    logger.warning(f"{type(tests[0])=}")
+
     columns_to_check = [
         v.name
         for _, v in catalog_node.columns.items()
@@ -118,13 +124,13 @@ def check_column_has_specified_test(request, tests, check_config=None, catalog_n
     relevant_tests = [
         t
         for t in tests
-        if t["test_metadata"]["name"] == test_name and t["attached_node"] == catalog_node.unique_id
+        if t.test_metadata.name == test_name and t.attached_node == catalog_node.unique_id
     ]
     non_complying_columns = [
         c
         for c in columns_to_check
         if f"{catalog_node.unique_id}.{c}"
-        not in [f'{t["attached_node"]}.{t["column_name"]}' for t in relevant_tests]
+        not in [f"{t.attached_node}.{t.column_name}" for t in relevant_tests]
     ]
 
     assert (

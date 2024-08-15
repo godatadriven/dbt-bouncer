@@ -107,7 +107,7 @@ def cli(
             elif (
                 isinstance(v.resource_type, Enum) and v.resource_type.value == "test"
             ) or v.resource_type == "test":  # dbt 1.6  # dbt 1.7+
-                project_tests.append(v.model_dump())
+                project_tests.append(v)
 
     project_sources = []
     for _, v in manifest_obj.sources.items():

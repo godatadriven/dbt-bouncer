@@ -304,8 +304,8 @@ def check_model_has_unique_test(request, tests, check_config=None, model=None):
     logger.debug(f"{accepted_uniqueness_tests=}")
 
     num_unique_tests = sum(
-        test["attached_node"] == model.unique_id
-        and test["test_metadata"].get("name") in accepted_uniqueness_tests
+        test.attached_node == model.unique_id
+        and test.test_metadata.name in accepted_uniqueness_tests
         for test in tests
     )
     assert (
@@ -532,7 +532,7 @@ def check_model_test_coverage(models, request, tests, check_config=None):
     models_with_tests = []
     for model in models:
         for test in tests:
-            if model.unique_id in test["depends_on"]["nodes"]:
+            if model.unique_id in test.depends_on.nodes:
                 models_with_tests.append(model.unique_id)
     num_models_with_tests = len(set(models_with_tests))
     model_test_coverage_pct = (num_models_with_tests / num_models) * 100
