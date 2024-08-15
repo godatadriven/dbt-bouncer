@@ -30,6 +30,7 @@ def create_github_comment_file(failed_checks: List[List[str]]) -> None:
     else:
         comment_file = "github-comment.md"
 
+    logger.info(f"Writing comment for GitHub to {comment_file}...")
     with open(comment_file, "w") as f:
         f.write(md_formatted_comment)
 

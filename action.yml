@@ -40,8 +40,8 @@ runs:
           --volume "$GITHUB_WORKSPACE":/app \
           ghcr.io/godatadriven/dbt-bouncer:v0.0.0 \
           --config-file /app/${{ inputs.config-file }} \
-          ${{ steps.assemble-output-file-param.outputs.output-file-param }} \
-          --create-pr-comment-file ${{ inputs.send-pr-comment }}
+          --create-pr-comment-file ${{ inputs.send-pr-comment }} \
+          ${{ steps.assemble-output-file-param.outputs.output-file-param }}
 
     - name: Send PR comment
       if: ${{ inputs.send-pr-comment }} == 'true'
