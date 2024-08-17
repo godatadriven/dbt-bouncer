@@ -1,6 +1,7 @@
 import re
 from typing import Literal, Optional
 
+from dbt_artifacts_parser.parsers.manifest.manifest_v12 import ManifestV12
 from pydantic import BaseModel, ConfigDict, Field
 
 from dbt_bouncer.utils import get_check_inputs
@@ -16,7 +17,7 @@ class CheckProjectName(BaseModel):
     project_name_pattern: str = Field(description="Regexp the project name must match.")
 
 
-def check_project_name(manifest_obj, request, check_config=None):
+def check_project_name(manifest_obj: ManifestV12, request, check_config=None):
     """
     Enforce that the name of the dbt project matches a supplied regex. Generally used to enforce that project names conform to something like  `company_<DOMAIN>`.
     """

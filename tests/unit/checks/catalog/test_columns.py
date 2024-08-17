@@ -9,14 +9,14 @@ from dbt_bouncer.checks.catalog.check_columns import (
     check_columns_are_all_documented,
     check_columns_are_documented_in_public_models,
 )
-from dbt_bouncer.parsers import DbtBouncerCatalog
+from dbt_bouncer.parsers import DbtBouncerCatalogNode
 
 
 @pytest.mark.parametrize(
     "catalog_node, check_config, tests, expectation",
     [
         (
-            DbtBouncerCatalog(
+            DbtBouncerCatalogNode(
                 **{
                     "node": {
                         "columns": {
@@ -63,7 +63,7 @@ from dbt_bouncer.parsers import DbtBouncerCatalog
             does_not_raise(),
         ),
         (
-            DbtBouncerCatalog(
+            DbtBouncerCatalogNode(
                 **{
                     "node": {
                         "columns": {
@@ -122,7 +122,7 @@ def test_check_column_has_specified_test(catalog_node, check_config, tests, expe
     "catalog_node, models, expectation",
     [
         (
-            DbtBouncerCatalog(
+            DbtBouncerCatalogNode(
                 **{
                     "node": {
                         "columns": {
@@ -180,7 +180,7 @@ def test_check_column_has_specified_test(catalog_node, check_config, tests, expe
             does_not_raise(),
         ),
         (
-            DbtBouncerCatalog(
+            DbtBouncerCatalogNode(
                 **{
                     "node": {
                         "columns": {
@@ -243,7 +243,7 @@ def test_check_columns_are_all_documented(catalog_node, models, expectation):
     "catalog_node, models, expectation",
     [
         (
-            DbtBouncerCatalog(
+            DbtBouncerCatalogNode(
                 **{
                     "node": {
                         "columns": {
@@ -293,7 +293,7 @@ def test_check_columns_are_all_documented(catalog_node, models, expectation):
             does_not_raise(),
         ),
         (
-            DbtBouncerCatalog(
+            DbtBouncerCatalogNode(
                 **{
                     "node": {
                         "columns": {
@@ -366,7 +366,7 @@ def test_check_columns_are_documented_in_public_models(catalog_node, models, exp
     "catalog_node, check_config, expectation",
     [
         (
-            DbtBouncerCatalog(
+            DbtBouncerCatalogNode(
                 **{
                     "node": {
                         "columns": {
@@ -392,7 +392,7 @@ def test_check_columns_are_documented_in_public_models(catalog_node, models, exp
             does_not_raise(),
         ),
         (
-            DbtBouncerCatalog(
+            DbtBouncerCatalogNode(
                 **{
                     "node": {
                         "columns": {
@@ -428,7 +428,7 @@ def test_check_columns_are_documented_in_public_models(catalog_node, models, exp
             does_not_raise(),
         ),
         (
-            DbtBouncerCatalog(
+            DbtBouncerCatalogNode(
                 **{
                     "node": {
                         "columns": {

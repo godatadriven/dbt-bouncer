@@ -2,6 +2,7 @@ import re
 from typing import Literal
 
 import pytest
+from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Macros
 from pydantic import Field
 
 from dbt_bouncer.conf_validator_base import BaseCheck
@@ -13,7 +14,9 @@ class CheckMacroArgumentsDescriptionPopulated(BaseCheck):
 
 
 @pytest.mark.iterate_over_macros
-def check_macro_arguments_description_populated(request, check_config=None, macro=None) -> None:
+def check_macro_arguments_description_populated(
+    request, check_config=None, macro: Macros = None
+) -> None:
     """
     Macro arguments must have a populated description.
     """
@@ -33,7 +36,9 @@ class CheckMacroCodeDoesNotContainRegexpPattern(BaseCheck):
 
 
 @pytest.mark.iterate_over_macros
-def check_macro_code_does_not_contain_regexp_pattern(request, check_config=None, macro=None):
+def check_macro_code_does_not_contain_regexp_pattern(
+    request, check_config=None, macro: Macros = None
+):
     """
     The raw code for a macro must not match the specified regexp pattern.
     """
@@ -53,7 +58,7 @@ class CheckMacroDescriptionPopulated(BaseCheck):
 
 
 @pytest.mark.iterate_over_macros
-def check_macro_description_populated(request, check_config=None, macro=None) -> None:
+def check_macro_description_populated(request, check_config=None, macro: Macros = None) -> None:
     """
     Macros must have a populated description.
     """
@@ -69,7 +74,7 @@ class CheckMacroNameMatchesFileName(BaseCheck):
 
 
 @pytest.mark.iterate_over_macros
-def check_macro_name_matches_file_name(request, check_config=None, macro=None) -> None:
+def check_macro_name_matches_file_name(request, check_config=None, macro: Macros = None) -> None:
     """
     Macros names must be the same as the file they are contained in.
 
@@ -92,7 +97,7 @@ class CheckMacroPropertyFileLocation(BaseCheck):
 
 
 @pytest.mark.iterate_over_macros
-def check_macro_property_file_location(request, macro=None):
+def check_macro_property_file_location(request, macro: Macros = None):
     """
     Macro properties files must follow the guidance provided by dbt [here](https://docs.getdbt.com/best-practices/how-we-structure/5-the-rest-of-the-project#how-we-use-the-other-folders).
     """

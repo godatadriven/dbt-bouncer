@@ -2,26 +2,34 @@
 from __future__ import annotations
 
 import inspect
-from typing import Dict
+from typing import Dict, List, Union
 
 import pytest
+from dbt_artifacts_parser.parsers.manifest.manifest_v12 import (
+    Exposures,
+    Macros,
+    ManifestV12,
+    Nodes4,
+    Nodes6,
+)
 
 from dbt_bouncer.logger import logger
+from dbt_bouncer.parsers import DbtBouncerCatalogNode, DbtBouncerResult
 from dbt_bouncer.utils import object_in_path
 
 
 class FixturePlugin(object):
     def __init__(
         self,
-        catalog_nodes,
-        catalog_sources,
-        exposures,
-        macros,
-        manifest_obj,
-        models,
-        run_results,
-        sources,
-        tests,
+        catalog_nodes: List[DbtBouncerCatalogNode],
+        catalog_sources: List[DbtBouncerCatalogNode],
+        exposures: List[Exposures],
+        macros: List[Macros],
+        manifest_obj: ManifestV12,
+        models: List[Nodes4],
+        run_results: List[DbtBouncerResult],
+        sources: List[Nodes6],
+        tests: List[Nodes4],
     ):
         self.catalog_nodes_ = catalog_nodes
         self.catalog_sources_ = catalog_sources
@@ -74,25 +82,25 @@ class FixturePlugin(object):
 class MyFunctionItem(pytest.Function):
     def __init__(
         self,
-        check_config,
-        catalog_node=None,
-        catalog_source=None,
-        exposure=None,
-        macro=None,
-        model=None,
-        run_result=None,
-        source=None,
+        check_config: Dict[str, Union[Dict[str, str], str]],
+        catalog_node: DbtBouncerCatalogNode = None,
+        catalog_source: DbtBouncerCatalogNode = None,
+        exposure: Exposures = None,
+        macro: Macros = None,
+        model: Nodes4 = None,
+        run_result: DbtBouncerResult = None,
+        source: Nodes6 = None,
         *args,
         **kwargs,
     ):
-        self.check_config: Dict[str, str] = check_config
-        self.catalog_node: Dict[str, str] | None = catalog_node
-        self.catalog_source: Dict[str, str] | None = catalog_source
-        self.exposure: Dict[str, str] | None = exposure
-        self.macro: Dict[str, str] | None = macro
-        self.model: Dict[str, str] | None = model
-        self.run_result: Dict[str, str] | None = run_result
-        self.source: Dict[str, str] | None = source
+        self.check_config = check_config
+        self.catalog_node = catalog_node
+        self.catalog_source = catalog_source
+        self.exposure = exposure
+        self.macro = macro
+        self.model = model
+        self.run_result = run_result
+        self.source = source
         super().__init__(*args, **kwargs)
 
 

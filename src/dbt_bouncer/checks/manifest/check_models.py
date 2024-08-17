@@ -2,6 +2,7 @@ import re
 from typing import Any, Dict, List, Literal, Optional, Union
 
 import pytest
+from dbt_artifacts_parser.parsers.manifest.manifest_v12 import ManifestV12, Nodes4
 from pydantic import BaseModel, ConfigDict, Field
 
 from dbt_bouncer.conf_validator_base import BaseCheck
@@ -15,7 +16,7 @@ class CheckModelAccess(BaseCheck):
 
 
 @pytest.mark.iterate_over_models
-def check_model_access(request, check_config=None, model=None):
+def check_model_access(request, check_config=None, model: Nodes4 = None):
     """
     Models must have the specified access attribute. Requires dbt 1.7+.
     """
@@ -34,7 +35,7 @@ class CheckModelContractsEnforcedForPublicModel(BaseCheck):
 
 
 @pytest.mark.iterate_over_models
-def check_model_contract_enforced_for_public_model(request, model=None):
+def check_model_contract_enforced_for_public_model(request, model: Nodes4 = None):
     """
     Public models must have contracts enforced.
     """
@@ -52,7 +53,7 @@ class CheckModelDescriptionPopulated(BaseCheck):
 
 
 @pytest.mark.iterate_over_models
-def check_model_description_populated(request, model=None):
+def check_model_description_populated(request, model: Nodes4 = None):
     """
     Models must have a populated description.
     """
@@ -74,7 +75,7 @@ class CheckModelsDocumentationCoverage(BaseCheck):
     )
 
 
-def check_model_documentation_coverage(models, request, check_config=None):
+def check_model_documentation_coverage(models: List[Nodes4], request, check_config=None):
     """
     Set the minimum percentage of models that have a populated description.
     """
@@ -102,7 +103,7 @@ class CheckModelDocumentedInSameDirectory(BaseCheck):
 
 
 @pytest.mark.iterate_over_models
-def check_model_documented_in_same_directory(request, model=None) -> None:
+def check_model_documented_in_same_directory(request, model: Nodes4 = None) -> None:
     """
     Models must be documented in the same directory where they are defined (i.e. `.yml` and `.sql` files are in the same directory).
     """
@@ -125,7 +126,9 @@ class CheckModelCodeDoesNotContainRegexpPattern(BaseCheck):
 
 
 @pytest.mark.iterate_over_models
-def check_model_code_does_not_contain_regexp_pattern(request, check_config=None, model=None):
+def check_model_code_does_not_contain_regexp_pattern(
+    request, check_config=None, model: Nodes4 = None
+):
     """
     The raw code for a model must not match the specified regexp pattern.
     """
@@ -145,7 +148,7 @@ class CheckModelDependsOnMultipleSources(BaseCheck):
 
 
 @pytest.mark.iterate_over_models
-def check_model_depends_on_multiple_sources(request, model=None):
+def check_model_depends_on_multiple_sources(request, model: Nodes4 = None):
     """
     Models cannot reference more than one source.
     """
@@ -172,7 +175,7 @@ class CheckModelDirectories(BaseModel):
 
 
 @pytest.mark.iterate_over_models
-def check_model_directories(request, check_config=None, model=None):
+def check_model_directories(request, check_config=None, model: Nodes4 = None):
     """
     Only specified sub-directories are permitted.
     """
@@ -201,7 +204,7 @@ class CheckModelHasContractsEnforced(BaseCheck):
 
 
 @pytest.mark.iterate_over_models
-def check_model_has_contracts_enforced(request, model=None):
+def check_model_has_contracts_enforced(request, model: Nodes4 = None):
     """
     Model must have contracts enforced.
     """
@@ -219,7 +222,7 @@ class CheckModelHasMetaKeys(BaseCheck):
 
 
 @pytest.mark.iterate_over_models
-def check_model_has_meta_keys(request, check_config=None, model=None) -> None:
+def check_model_has_meta_keys(request, check_config=None, model: Nodes4 = None) -> None:
     """
     The `meta` config for models must have the specified keys.
     """
@@ -246,7 +249,7 @@ class CheckModelHasNoUpstreamDependencies(BaseCheck):
 
 
 @pytest.mark.iterate_over_models
-def check_model_has_no_upstream_dependencies(request, model=None):
+def check_model_has_no_upstream_dependencies(request, model: Nodes4 = None):
     """
     Identify if models have no upstream dependencies as this likely indicates hard-coded tables references.
     """
@@ -263,7 +266,7 @@ class CheckModelHasTags(BaseCheck):
 
 
 @pytest.mark.iterate_over_models
-def check_model_has_tags(request, check_config=None, model=None):
+def check_model_has_tags(request, check_config=None, model: Nodes4 = None):
     """
     Models must have the specified tags.
     """
@@ -291,7 +294,9 @@ class CheckModelHasUniqueTest(BaseCheck):
 
 
 @pytest.mark.iterate_over_models
-def check_model_has_unique_test(request, tests, check_config=None, model=None):
+def check_model_has_unique_test(
+    request, tests: List[Nodes4], check_config=None, model: Nodes4 = None
+):
     """
     Models must have a test for uniqueness of a column.
     """
@@ -326,7 +331,13 @@ class CheckModelMaxChainedViews(BaseCheck):
 
 
 @pytest.mark.iterate_over_models
-def check_model_max_chained_views(manifest_obj, models, request, check_config=None, model=None):
+def check_model_max_chained_views(
+    manifest_obj: ManifestV12,
+    models: List[Nodes4],
+    request,
+    check_config=None,
+    model: Nodes4 = None,
+):
     """
     Models cannot have more than the specified number of upstream dependents that are not tables (default: 3).
     """
@@ -400,7 +411,7 @@ class CheckModelMaxFanout(BaseCheck):
 
 
 @pytest.mark.iterate_over_models
-def check_model_max_fanout(models, request, check_config=None, model=None):
+def check_model_max_fanout(models: List[Nodes4], request, check_config=None, model: Nodes4 = None):
     """
     Models cannot have more than the specified number of downstream models (default: 3).
     """
@@ -430,7 +441,7 @@ class CheckModelMaxUpstreamDependencies(BaseCheck):
 
 
 @pytest.mark.iterate_over_models
-def check_model_max_upstream_dependencies(request, check_config=None, model=None):
+def check_model_max_upstream_dependencies(request, check_config=None, model: Nodes4 = None):
     """
     Limit the number of upstream dependencies a model has. Default values are 5 for models, 5 for macros, and 1 for sources.
     """
@@ -464,7 +475,7 @@ class CheckModelNames(BaseCheck):
 
 
 @pytest.mark.iterate_over_models
-def check_model_names(request, check_config=None, model=None):
+def check_model_names(request, check_config=None, model: Nodes4 = None):
     """
     Models must have a name that matches the supplied regex.
     """
@@ -483,7 +494,7 @@ class CheckModelPropertyFileLocation(BaseCheck):
 
 
 @pytest.mark.iterate_over_models
-def check_model_property_file_location(request, model=None):
+def check_model_property_file_location(request, model: Nodes4 = None):
     """
     Model properties files must follow the guidance provided by dbt [here](https://docs.getdbt.com/best-practices/how-we-structure/1-guide-overview).
     """
@@ -519,7 +530,9 @@ class CheckModelsTestCoverage(BaseCheck):
     )
 
 
-def check_model_test_coverage(models, request, tests, check_config=None):
+def check_model_test_coverage(
+    models: List[Nodes4], request, tests: List[Nodes4], check_config=None
+):
     """
     Set the minimum percentage of models that have at least one test.
     """

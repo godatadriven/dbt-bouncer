@@ -3,12 +3,21 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, List, Optional, Union
 
 import pytest
+from dbt_artifacts_parser.parsers.manifest.manifest_v12 import (
+    Exposures,
+    Macros,
+    ManifestV12,
+    Nodes4,
+    Nodes6,
+)
 from tabulate import tabulate
 
+from dbt_bouncer.conf_validator import DbtBouncerConf
 from dbt_bouncer.logger import logger
+from dbt_bouncer.parsers import DbtBouncerCatalogNode, DbtBouncerResult
 from dbt_bouncer.runner_plugins import (
     FixturePlugin,
     GenerateTestsPlugin,
@@ -18,18 +27,18 @@ from dbt_bouncer.utils import create_github_comment_file
 
 
 def runner(
-    bouncer_config: Dict[str, List[Dict[str, str]]],
-    catalog_nodes: List[Dict[str, str]],
-    catalog_sources: List[Dict[str, str]],
+    bouncer_config: DbtBouncerConf,
+    catalog_nodes: List[DbtBouncerCatalogNode],
+    catalog_sources: List[DbtBouncerCatalogNode],
     create_pr_comment_file: bool,
-    exposures: List[Dict[str, str]],
-    macros: List[Dict[str, str]],
-    manifest_obj: Dict[str, str],
-    models: List[Dict[str, str]],
+    exposures: List[Exposures],
+    macros: List[Macros],
+    manifest_obj: ManifestV12,
+    models: List[Nodes4],
     output_file: Union[None, Path],
-    run_results: List[Dict[str, str]],
-    sources: List[Dict[str, str]],
-    tests: List[Dict[str, str]],
+    run_results: List[DbtBouncerResult],
+    sources: List[Nodes6],
+    tests: List[Nodes6],
     checks_dir: Optional[Union[None, Path]] = Path(__file__).parent / "checks",
 ) -> tuple[int, List[Any]]:
     """

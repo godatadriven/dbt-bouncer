@@ -6,14 +6,14 @@ from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Sources
 from dbt_bouncer.checks.catalog.check_catalog_sources import (
     check_source_columns_are_all_documented,
 )
-from dbt_bouncer.parsers import DbtBouncerCatalog
+from dbt_bouncer.parsers import DbtBouncerCatalogNode
 
 
 @pytest.mark.parametrize(
     "catalog_source, sources, expectation",
     [
         (
-            DbtBouncerCatalog(
+            DbtBouncerCatalogNode(
                 **{
                     "node": {
                         "columns": {
@@ -69,7 +69,7 @@ from dbt_bouncer.parsers import DbtBouncerCatalog
             does_not_raise(),
         ),
         (
-            DbtBouncerCatalog(
+            DbtBouncerCatalogNode(
                 **{
                     "node": {
                         "columns": {

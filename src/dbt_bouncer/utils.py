@@ -3,13 +3,27 @@ import json
 import os
 import re
 from pathlib import Path
-from typing import List, Literal
+from typing import Any, Dict, List, Literal, Mapping, Union
 
 import toml
 import yaml
 from dbt_artifacts_parser.parser import parse_catalog, parse_manifest, parse_run_results
+from dbt_artifacts_parser.parsers.catalog.catalog_v1 import CatalogV1
+from dbt_artifacts_parser.parsers.manifest.manifest_v10 import ManifestV10
+from dbt_artifacts_parser.parsers.manifest.manifest_v11 import ManifestV11
+from dbt_artifacts_parser.parsers.manifest.manifest_v12 import (
+    Exposures,
+    Macros,
+    ManifestV12,
+    Nodes4,
+    Nodes6,
+)
+from dbt_artifacts_parser.parsers.run_results.run_results_v4 import RunResultsV4
+from dbt_artifacts_parser.parsers.run_results.run_results_v5 import RunResultsV5
+from dbt_artifacts_parser.parsers.run_results.run_results_v6 import RunResultsV6
 
 from dbt_bouncer.logger import logger
+from dbt_bouncer.parsers import DbtBouncerCatalogNode, DbtBouncerResult
 
 
 def create_github_comment_file(failed_checks: List[List[str]]) -> None:
@@ -50,7 +64,7 @@ def find_missing_meta_keys(meta_config, required_keys) -> List[str]:
     return [x for x in required_keys if x not in keys_in_meta]
 
 
-def flatten(structure, key="", path="", flattened=None):
+def flatten(structure: Any, key: str = "", path: str = "", flattened=None):
     """
     Take a dict of arbitrary depth that may contain lists and return a non-nested dict of all pathways.
     """
@@ -69,16 +83,27 @@ def flatten(structure, key="", path="", flattened=None):
 
 
 def get_check_inputs(
-    catalog_node=None,
-    catalog_source=None,
-    check_config=None,
-    exposure=None,
-    macro=None,
-    model=None,
+    catalog_node: DbtBouncerCatalogNode = None,
+    catalog_source: DbtBouncerCatalogNode = None,
+    check_config: Union[Dict[str, Union[Dict[str, str], str]], None] = None,
+    exposure: Exposures = None,
+    macro: Macros = None,
+    model: Nodes4 = None,
     request=None,
-    run_result=None,
-    source=None,
-):
+    run_result: DbtBouncerResult = None,
+    source: Nodes6 = None,
+) -> Dict[
+    str,
+    Union[
+        DbtBouncerCatalogNode,
+        Dict[str, Union[Dict[str, str], str]],
+        Exposures,
+        Macros,
+        Nodes4,
+        DbtBouncerResult,
+        Nodes6,
+    ],
+]:
     """
     Helper function that is used to account for the difference in how arguments are passed to check functions
     when they are run by `dbt-bouncer` and when they are called by pytest.
@@ -115,7 +140,7 @@ def get_check_inputs(
     }
 
 
-def get_dbt_bouncer_config(config_file: str, config_file_source: str):
+def get_dbt_bouncer_config(config_file: str, config_file_source: str) -> Mapping[str, Any]:
     """
     Get the config for dbt-bouncer. This is fetched from (in order):
         1. The file passed via the `--config=file` CLI flag.
@@ -128,7 +153,7 @@ def get_dbt_bouncer_config(config_file: str, config_file_source: str):
 
     if config_file_source == "COMMANDLINE":
         logger.debug(f"Config file passed via command line: {config_file}")
-        return load_config_from_yaml(config_file)
+        return load_config_from_yaml(Path(config_file))
 
     if config_file_source == "DEFAULT":
         logger.debug(f"Using default value for config file: {config_file}")
@@ -163,7 +188,7 @@ def get_dbt_bouncer_config(config_file: str, config_file_source: str):
     return conf
 
 
-def load_config_from_yaml(config_file):
+def load_config_from_yaml(config_file: Path) -> Mapping[str, Any]:
 
     config_path = Path().cwd() / config_file
     logger.debug(f"Loading config from {config_path}...")
@@ -182,7 +207,9 @@ def load_config_from_yaml(config_file):
 def load_dbt_artifact(
     artifact_name: Literal["catalog.json", "manifest.json", "run_results.json"],
     dbt_artifacts_dir: str,
-):
+) -> Union[
+    CatalogV1, ManifestV10, ManifestV11, ManifestV12, RunResultsV4, RunResultsV5, RunResultsV6
+]:
     """
     Load a dbt artifact from a JSON file to a Pydantic object
     """
@@ -214,7 +241,7 @@ def load_dbt_artifact(
         return run_results_obj
 
 
-def make_markdown_table(array):
+def make_markdown_table(array: List[List[str]]) -> str:
     """
     Transforms a list of lists into a markdown table. The first element is the header row.
     """

@@ -11,7 +11,7 @@ from dbt_artifacts_parser.parsers.run_results.run_results_v6 import Result
 from pydantic import BaseModel
 
 
-class DbtBouncerCatalog(BaseModel):
+class DbtBouncerCatalogNode(BaseModel):
     node: CatalogTable
     path: str
     unique_id: str

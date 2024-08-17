@@ -7,7 +7,7 @@ import click
 
 from dbt_bouncer.conf_validator import validate_conf
 from dbt_bouncer.logger import logger
-from dbt_bouncer.parsers import DbtBouncerCatalog, DbtBouncerResult
+from dbt_bouncer.parsers import DbtBouncerCatalogNode, DbtBouncerResult
 from dbt_bouncer.runner import runner
 from dbt_bouncer.utils import get_dbt_bouncer_config, load_dbt_artifact
 from dbt_bouncer.version import version
@@ -40,7 +40,7 @@ def cli(
     config_file: Path,
     create_pr_comment_file: bool,
     output_file: Union[None, Path],
-):
+) -> None:
     logger.info(f"Running dbt-bouncer ({version()})...")
 
     # Validate output file has `.json` extension
@@ -129,7 +129,7 @@ def cli(
         for k, v in catalog_obj.nodes.items():
             if k.split(".")[-2] == manifest_obj.metadata.project_name:
                 project_catalog_nodes.append(
-                    DbtBouncerCatalog(
+                    DbtBouncerCatalogNode(
                         **{"node": v, "path": manifest_obj.nodes[k].path, "unique_id": k}
                     )
                 )
@@ -142,7 +142,7 @@ def cli(
         ) in catalog_obj.sources.items():
             if k.split(".")[1] == manifest_obj.metadata.project_name:
                 project_catalog_sources.append(
-                    DbtBouncerCatalog(
+                    DbtBouncerCatalogNode(
                         **{"node": v, "path": manifest_obj.sources[k].path, "unique_id": k}
                     )
                 )

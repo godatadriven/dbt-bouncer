@@ -4,6 +4,7 @@ import pytest
 from pydantic import Field
 
 from dbt_bouncer.conf_validator_base import BaseCheck
+from dbt_bouncer.parsers import DbtBouncerResult
 from dbt_bouncer.utils import get_check_inputs
 
 
@@ -15,7 +16,9 @@ class CheckRunResultsMaxGigabytesBilled(BaseCheck):
 
 
 @pytest.mark.iterate_over_run_results
-def check_run_results_max_gigabytes_billed(request, check_config=None, run_result=None) -> None:
+def check_run_results_max_gigabytes_billed(
+    request, check_config=None, run_result: DbtBouncerResult = None
+) -> None:
     """
     Each result can have a maximum number of gigabytes billed. Note that this only works for the `dbt-bigquery` adapter.
     """
@@ -41,7 +44,9 @@ class CheckRunResultsMaxExecutionTime(BaseCheck):
 
 
 @pytest.mark.iterate_over_run_results
-def check_run_results_max_execution_time(request, check_config=None, run_result=None) -> None:
+def check_run_results_max_execution_time(
+    request, check_config=None, run_result: DbtBouncerResult = None
+) -> None:
     """
     Each result can take a maximum duration (seconds).
     """
