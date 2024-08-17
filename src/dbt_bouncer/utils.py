@@ -15,7 +15,6 @@ from dbt_artifacts_parser.parsers.manifest.manifest_v12 import (
     Exposures,
     Macros,
     ManifestV12,
-    Nodes4,
     Nodes6,
 )
 from dbt_artifacts_parser.parsers.run_results.run_results_v4 import RunResultsV4
@@ -23,7 +22,7 @@ from dbt_artifacts_parser.parsers.run_results.run_results_v5 import RunResultsV5
 from dbt_artifacts_parser.parsers.run_results.run_results_v6 import RunResultsV6
 
 from dbt_bouncer.logger import logger
-from dbt_bouncer.parsers import DbtBouncerCatalogNode, DbtBouncerResult
+from dbt_bouncer.parsers import DbtBouncerCatalogNode, DbtBouncerModel, DbtBouncerResult
 
 
 def create_github_comment_file(failed_checks: List[List[str]]) -> None:
@@ -88,7 +87,7 @@ def get_check_inputs(
     check_config: Union[Dict[str, Union[Dict[str, str], str]], None] = None,
     exposure: Exposures = None,
     macro: Macros = None,
-    model: Nodes4 = None,
+    model: DbtBouncerModel = None,
     request=None,
     run_result: DbtBouncerResult = None,
     source: Nodes6 = None,
@@ -99,7 +98,7 @@ def get_check_inputs(
         Dict[str, Union[Dict[str, str], str]],
         Exposures,
         Macros,
-        Nodes4,
+        DbtBouncerModel,
         DbtBouncerResult,
         Nodes6,
     ],
@@ -115,7 +114,7 @@ def get_check_inputs(
         check_config = request.node.check_config
         exposure = request.node.exposure
         macro = request.node.macro
-        model = request.node.model
+        model = getattr(request.node.model, "model", lambda: None)
         run_result = getattr(request.node.run_result, "result", lambda: None)
         source = request.node.source
     else:

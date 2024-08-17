@@ -9,12 +9,11 @@ from dbt_artifacts_parser.parsers.manifest.manifest_v12 import (
     Exposures,
     Macros,
     ManifestV12,
-    Nodes4,
     Nodes6,
 )
 
 from dbt_bouncer.logger import logger
-from dbt_bouncer.parsers import DbtBouncerCatalogNode, DbtBouncerResult
+from dbt_bouncer.parsers import DbtBouncerCatalogNode, DbtBouncerModel, DbtBouncerResult
 from dbt_bouncer.utils import object_in_path
 
 
@@ -26,10 +25,10 @@ class FixturePlugin(object):
         exposures: List[Exposures],
         macros: List[Macros],
         manifest_obj: ManifestV12,
-        models: List[Nodes4],
+        models: List[DbtBouncerModel],
         run_results: List[DbtBouncerResult],
         sources: List[Nodes6],
-        tests: List[Nodes4],
+        tests: List[DbtBouncerModel],
     ):
         self.catalog_nodes_ = catalog_nodes
         self.catalog_sources_ = catalog_sources
@@ -63,7 +62,7 @@ class FixturePlugin(object):
 
     @pytest.fixture(scope="session")
     def models(self):
-        return self.models_
+        return [m.model for m in self.models_]
 
     @pytest.fixture(scope="session")
     def run_results(self):
@@ -87,7 +86,7 @@ class MyFunctionItem(pytest.Function):
         catalog_source: DbtBouncerCatalogNode = None,
         exposure: Exposures = None,
         macro: Macros = None,
-        model: Nodes4 = None,
+        model: DbtBouncerModel = None,
         run_result: DbtBouncerResult = None,
         source: Nodes6 = None,
         *args,

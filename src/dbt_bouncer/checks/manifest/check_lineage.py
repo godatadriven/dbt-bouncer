@@ -2,9 +2,10 @@ import re
 from typing import List, Literal, Optional
 
 import pytest
-from dbt_artifacts_parser.parsers.manifest.manifest_v12 import ManifestV12, Nodes4
+from dbt_artifacts_parser.parsers.manifest.manifest_v12 import ManifestV12
 from pydantic import BaseModel, ConfigDict, Field
 
+from dbt_bouncer.parsers import DbtBouncerModel
 from dbt_bouncer.utils import get_check_inputs
 
 
@@ -26,10 +27,10 @@ class CheckLineagePermittedUpstreamModels(BaseModel):
 @pytest.mark.iterate_over_models
 def check_lineage_permitted_upstream_models(
     manifest_obj: ManifestV12,
-    models: List[Nodes4],
+    models: List[DbtBouncerModel],
     request,
     check_config=None,
-    model: Nodes4 = None,
+    model: DbtBouncerModel = None,
 ):
     """
     Upstream models must have a path that matches the provided `upstream_path_pattern`.
@@ -70,7 +71,7 @@ class CheckLineageSeedCannotBeUsed(BaseModel):
 
 
 @pytest.mark.iterate_over_models
-def check_lineage_seed_cannot_be_used(request, model: Nodes4 = None):
+def check_lineage_seed_cannot_be_used(request, model: DbtBouncerModel = None):
     """
     Seed cannot be referenced in models with a path that matches the specified `include` config.
     """
@@ -95,7 +96,7 @@ class CheckLineageSourceCannotBeUsed(BaseModel):
 
 
 @pytest.mark.iterate_over_models
-def check_lineage_source_cannot_be_used(request, model: Nodes4 = None):
+def check_lineage_source_cannot_be_used(request, model: DbtBouncerModel = None):
     """
     Sources cannot be referenced in models with a path that matches the specified `include` config.
     """

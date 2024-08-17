@@ -2,10 +2,11 @@ import re
 from typing import Any, Dict, List, Literal, Optional, Union
 
 import pytest
-from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Nodes4, Nodes6
+from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Nodes6
 from pydantic import Field
 
 from dbt_bouncer.conf_validator_base import BaseCheck
+from dbt_bouncer.parsers import DbtBouncerModel
 from dbt_bouncer.utils import find_missing_meta_keys, get_check_inputs
 
 
@@ -134,7 +135,9 @@ class CheckSoureNotorphaned(BaseCheck):
 
 
 @pytest.mark.iterate_over_sources
-def check_source_not_orphaned(models: List[Nodes4], request, source: Nodes6 = None) -> None:
+def check_source_not_orphaned(
+    models: List[DbtBouncerModel], request, source: Nodes6 = None
+) -> None:
     """
     Sources must be referenced in at least one model.
     """
@@ -182,7 +185,7 @@ class CheckSourceUsedByModelsInSameDirectory(BaseCheck):
 
 @pytest.mark.iterate_over_sources
 def check_source_used_by_models_in_same_directory(
-    models: List[Nodes4], request, source: Nodes6 = None
+    models: List[DbtBouncerModel], request, source: Nodes6 = None
 ) -> None:
     """
     Sources can only be referenced by models that are located in the same directory where the source is defined.
@@ -212,7 +215,7 @@ class CheckSourceUsedByOnlyOneModel(BaseCheck):
 
 @pytest.mark.iterate_over_sources
 def check_source_used_by_only_one_model(
-    models: List[Nodes4], request, source: Nodes6 = None
+    models: List[DbtBouncerModel], request, source: Nodes6 = None
 ) -> None:
     """
     Each source can be referenced by a maximum of one model.

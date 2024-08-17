@@ -2,10 +2,9 @@ import re
 from typing import List, Literal
 
 import pytest
-from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Nodes4
 
 from dbt_bouncer.conf_validator_base import BaseCheck
-from dbt_bouncer.parsers import DbtBouncerCatalogNode
+from dbt_bouncer.parsers import DbtBouncerCatalogNode, DbtBouncerModel
 from dbt_bouncer.utils import get_check_inputs
 
 
@@ -47,7 +46,7 @@ class CheckColumnsAreAllDocumented(BaseCheck):
 
 @pytest.mark.iterate_over_catalog_nodes
 def check_columns_are_all_documented(
-    models: List[Nodes4], request, catalog_node: DbtBouncerCatalogNode = None
+    models: List[DbtBouncerModel], request, catalog_node: DbtBouncerCatalogNode = None
 ) -> None:
     """
     All columns in a model should be included in the model's properties file, i.e. `.yml` file.
@@ -71,7 +70,7 @@ class CheckColumnsAreDocumentedInPublicModels(BaseCheck):
 
 @pytest.mark.iterate_over_catalog_nodes
 def check_columns_are_documented_in_public_models(
-    models: List[Nodes4], request, catalog_node: DbtBouncerCatalogNode = None
+    models: List[DbtBouncerModel], request, catalog_node: DbtBouncerCatalogNode = None
 ) -> None:
     """
     Columns should have a populated description in public models.
@@ -101,7 +100,10 @@ class CheckColumnHasSpecifiedTest(BaseCheck):
 
 @pytest.mark.iterate_over_catalog_nodes
 def check_column_has_specified_test(
-    request, tests: List[Nodes4], check_config=None, catalog_node: DbtBouncerCatalogNode = None
+    request,
+    tests: List[DbtBouncerModel],
+    check_config=None,
+    catalog_node: DbtBouncerCatalogNode = None,
 ) -> None:
     """
     Columns that match the specified regexp pattern must have a specified test.

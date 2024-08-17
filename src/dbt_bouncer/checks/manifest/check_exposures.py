@@ -1,10 +1,11 @@
 from typing import List, Literal
 
 import pytest
-from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Exposures, Nodes4
+from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Exposures
 from pydantic import Field
 
 from dbt_bouncer.conf_validator_base import BaseCheck
+from dbt_bouncer.parsers import DbtBouncerModel
 from dbt_bouncer.utils import get_check_inputs
 
 
@@ -14,7 +15,7 @@ class CheckExposureOnNonPublicModels(BaseCheck):
 
 @pytest.mark.iterate_over_exposures
 def check_exposure_based_on_non_public_models(
-    models: List[Nodes4], request, exposure: Exposures = None
+    models: List[DbtBouncerModel], request, exposure: Exposures = None
 ):
     """
     Exposures should be based on public models only.
@@ -47,7 +48,7 @@ class CheckExposureOnView(BaseCheck):
 
 @pytest.mark.iterate_over_exposures
 def check_exposure_based_on_view(
-    models: List[Nodes4], request, check_config=None, exposure: Exposures = None
+    models: List[DbtBouncerModel], request, check_config=None, exposure: Exposures = None
 ):
     """
     Exposures should not be based on views.

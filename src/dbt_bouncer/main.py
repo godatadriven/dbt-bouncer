@@ -7,7 +7,7 @@ import click
 
 from dbt_bouncer.conf_validator import validate_conf
 from dbt_bouncer.logger import logger
-from dbt_bouncer.parsers import DbtBouncerCatalogNode, DbtBouncerResult
+from dbt_bouncer.parsers import DbtBouncerCatalogNode, DbtBouncerModel, DbtBouncerResult
 from dbt_bouncer.runner import runner
 from dbt_bouncer.utils import get_dbt_bouncer_config, load_dbt_artifact
 from dbt_bouncer.version import version
@@ -98,12 +98,14 @@ def cli(
 
     project_models = []
     project_tests = []
-    for _, v in manifest_obj.nodes.items():
+    for k, v in manifest_obj.nodes.items():
         if v.package_name == manifest_obj.metadata.project_name:
             if (
                 isinstance(v.resource_type, Enum) and v.resource_type.value == "model"
             ) or v.resource_type == "model":  # dbt 1.6  # dbt 1.7+
-                project_models.append(v)
+                project_models.append(
+                    DbtBouncerModel(**{"model": v, "path": v.path, "unique_id": k})
+                )
             elif (
                 isinstance(v.resource_type, Enum) and v.resource_type.value == "test"
             ) or v.resource_type == "test":  # dbt 1.6  # dbt 1.7+
