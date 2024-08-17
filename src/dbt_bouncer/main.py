@@ -160,12 +160,17 @@ def cli(
             artifact_name="run_results.json",
             dbt_artifacts_dir=config_file.parent / bouncer_config.dbt_artifacts_dir,
         )
-
         project_run_results = []
         for r in run_results_obj.results:
-            if r.unique_id.split(".")[-3] == manifest_obj.metadata.project_name:
+            if r.unique_id.split(".")[1] == manifest_obj.metadata.project_name:
                 project_run_results.append(
-                    DbtBouncerResult(**{"path": manifest_obj.nodes[r.unique_id].path, "result": r})
+                    DbtBouncerResult(
+                        **{
+                            "path": manifest_obj.nodes[r.unique_id].path,
+                            "result": r,
+                            "unique_id": r.unique_id,
+                        }
+                    )
                 )
 
         logger.info(f"Parsed `run_results.json`, found {len(project_run_results)} results.")

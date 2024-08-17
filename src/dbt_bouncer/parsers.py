@@ -20,3 +20,4 @@ class DbtBouncerCatalogNode(BaseModel):
 class DbtBouncerResult(BaseModel):
     path: str
     result: Union[RunResultOutputv4, RunResultOutputv5, Result]
+    unique_id: str

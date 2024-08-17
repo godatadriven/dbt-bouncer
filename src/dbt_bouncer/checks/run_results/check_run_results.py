@@ -29,11 +29,16 @@ def check_run_results_max_gigabytes_billed(
     check_config = input_vars["check_config"]
     run_result = input_vars["run_result"]
 
-    gigabytes_billed = run_result["adapter_response"]["bytes_billed"] / (1000**3)
+    try:
+        gigabytes_billed = run_result.result.adapter_response["bytes_billed"] / (1000**3)
+    except KeyError:
+        raise RuntimeError(
+            "`bytes_billed` not found in adapter response. Are you using the `dbt-bigquery` adapter?"
+        )
 
     assert (
         gigabytes_billed < check_config["max_gigabytes_billed"]
-    ), f"`{run_result['unique_id'].split('.')[-2]}` results in ({gigabytes_billed} billed bytes, this is greater than permitted ({check_config['max_gigabytes_billed']})."
+    ), f"`{run_result.unique_id.split('.')[-2]}` results in ({gigabytes_billed} billed bytes, this is greater than permitted ({check_config['max_gigabytes_billed']})."
 
 
 class CheckRunResultsMaxExecutionTime(BaseCheck):
@@ -58,5 +63,5 @@ def check_run_results_max_execution_time(
     run_result = input_vars["run_result"]
 
     assert (
-        run_result["execution_time"] <= check_config["max_execution_time"]
-    ), f"`{run_result['unique_id'].split('.')[-1]}` has an execution time ({run_result['execution_time']} greater than permitted ({check_config['max_execution_time']}s)."
+        run_result.result.execution_time <= check_config["max_execution_time"]
+    ), f"`{run_result.unique_id.split('.')[-1]}` has an execution time ({run_result.result.execution_time} greater than permitted ({check_config['max_execution_time']}s)."
