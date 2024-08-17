@@ -9,20 +9,18 @@ import toml
 import yaml
 from dbt_artifacts_parser.parser import parse_catalog, parse_manifest, parse_run_results
 from dbt_artifacts_parser.parsers.catalog.catalog_v1 import CatalogV1
-from dbt_artifacts_parser.parsers.manifest.manifest_v10 import ManifestV10
-from dbt_artifacts_parser.parsers.manifest.manifest_v11 import ManifestV11
-from dbt_artifacts_parser.parsers.manifest.manifest_v12 import (
-    Exposures,
-    Macros,
-    ManifestV12,
-    Nodes6,
-)
+from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Exposures, Macros, Nodes6
 from dbt_artifacts_parser.parsers.run_results.run_results_v4 import RunResultsV4
 from dbt_artifacts_parser.parsers.run_results.run_results_v5 import RunResultsV5
 from dbt_artifacts_parser.parsers.run_results.run_results_v6 import RunResultsV6
 
 from dbt_bouncer.logger import logger
-from dbt_bouncer.parsers import DbtBouncerCatalogNode, DbtBouncerModel, DbtBouncerResult
+from dbt_bouncer.parsers import (
+    DbtBouncerCatalogNode,
+    DbtBouncerManifest,
+    DbtBouncerModel,
+    DbtBouncerResult,
+)
 
 
 def create_github_comment_file(failed_checks: List[List[str]]) -> None:
@@ -206,9 +204,7 @@ def load_config_from_yaml(config_file: Path) -> Mapping[str, Any]:
 def load_dbt_artifact(
     artifact_name: Literal["catalog.json", "manifest.json", "run_results.json"],
     dbt_artifacts_dir: str,
-) -> Union[
-    CatalogV1, ManifestV10, ManifestV11, ManifestV12, RunResultsV4, RunResultsV5, RunResultsV6
-]:
+) -> Union[CatalogV1, DbtBouncerManifest, RunResultsV4, RunResultsV5, RunResultsV6]:
     """
     Load a dbt artifact from a JSON file to a Pydantic object
     """
@@ -231,7 +227,7 @@ def load_dbt_artifact(
         with Path.open(artifact_path, "r") as fp:
             manifest_obj = parse_manifest(manifest=json.load(fp))
 
-        return manifest_obj
+        return DbtBouncerManifest(**{"manifest": manifest_obj})
 
     elif artifact_name == "run_results.json":
         with Path.open(artifact_path, "r") as fp:

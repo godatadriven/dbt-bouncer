@@ -87,19 +87,19 @@ def cli(
     )
 
     project_exposures = []
-    for _, v in manifest_obj.exposures.items():
-        if v.package_name == manifest_obj.metadata.project_name:
+    for _, v in manifest_obj.manifest.exposures.items():
+        if v.package_name == manifest_obj.manifest.metadata.project_name:
             project_exposures.append(v)
 
     project_macros = []
-    for _, v in manifest_obj.macros.items():
-        if v.package_name == manifest_obj.metadata.project_name:
+    for _, v in manifest_obj.manifest.macros.items():
+        if v.package_name == manifest_obj.manifest.metadata.project_name:
             project_macros.append(v)
 
     project_models = []
     project_tests = []
-    for k, v in manifest_obj.nodes.items():
-        if v.package_name == manifest_obj.metadata.project_name:
+    for k, v in manifest_obj.manifest.nodes.items():
+        if v.package_name == manifest_obj.manifest.metadata.project_name:
             if (
                 isinstance(v.resource_type, Enum) and v.resource_type.value == "model"
             ) or v.resource_type == "model":  # dbt 1.6  # dbt 1.7+
@@ -112,12 +112,12 @@ def cli(
                 project_tests.append(v)
 
     project_sources = []
-    for _, v in manifest_obj.sources.items():
-        if v.package_name == manifest_obj.metadata.project_name:
+    for _, v in manifest_obj.manifest.sources.items():
+        if v.package_name == manifest_obj.manifest.metadata.project_name:
             project_sources.append(v)
 
     logger.info(
-        f"Parsed `manifest.json`, found `{manifest_obj.metadata.project_name}` project, found {len(project_exposures)} exposures, {len(project_macros)} macros, {len(project_models)} nodes, {len(project_sources)} sources and {len(project_tests)} tests."
+        f"Parsed `manifest.json`, found `{manifest_obj.manifest.metadata.project_name}` project, found {len(project_exposures)} exposures, {len(project_macros)} macros, {len(project_models)} nodes, {len(project_sources)} sources and {len(project_tests)} tests."
     )
 
     # Catalog, must come after manifest is parsed
@@ -129,10 +129,10 @@ def cli(
 
         project_catalog_nodes = []
         for k, v in catalog_obj.nodes.items():
-            if k.split(".")[-2] == manifest_obj.metadata.project_name:
+            if k.split(".")[-2] == manifest_obj.manifest.metadata.project_name:
                 project_catalog_nodes.append(
                     DbtBouncerCatalogNode(
-                        **{"node": v, "path": manifest_obj.nodes[k].path, "unique_id": k}
+                        **{"node": v, "path": manifest_obj.manifest.nodes[k].path, "unique_id": k}
                     )
                 )
 
@@ -142,10 +142,14 @@ def cli(
             k,
             v,
         ) in catalog_obj.sources.items():
-            if k.split(".")[1] == manifest_obj.metadata.project_name:
+            if k.split(".")[1] == manifest_obj.manifest.metadata.project_name:
                 project_catalog_sources.append(
                     DbtBouncerCatalogNode(
-                        **{"node": v, "path": manifest_obj.sources[k].path, "unique_id": k}
+                        **{
+                            "node": v,
+                            "path": manifest_obj.manifest.sources[k].path,
+                            "unique_id": k,
+                        }
                     )
                 )
 
@@ -164,11 +168,11 @@ def cli(
         )
         project_run_results = []
         for r in run_results_obj.results:
-            if r.unique_id.split(".")[1] == manifest_obj.metadata.project_name:
+            if r.unique_id.split(".")[1] == manifest_obj.manifest.metadata.project_name:
                 project_run_results.append(
                     DbtBouncerResult(
                         **{
-                            "path": manifest_obj.nodes[r.unique_id].path,
+                            "path": manifest_obj.manifest.nodes[r.unique_id].path,
                             "result": r,
                             "unique_id": r.unique_id,
                         }

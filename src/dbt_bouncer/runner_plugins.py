@@ -5,15 +5,15 @@ import inspect
 from typing import Dict, List, Union
 
 import pytest
-from dbt_artifacts_parser.parsers.manifest.manifest_v12 import (
-    Exposures,
-    Macros,
-    ManifestV12,
-    Nodes6,
-)
+from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Exposures, Macros, Nodes6
 
 from dbt_bouncer.logger import logger
-from dbt_bouncer.parsers import DbtBouncerCatalogNode, DbtBouncerModel, DbtBouncerResult
+from dbt_bouncer.parsers import (
+    DbtBouncerCatalogNode,
+    DbtBouncerManifest,
+    DbtBouncerModel,
+    DbtBouncerResult,
+)
 from dbt_bouncer.utils import object_in_path
 
 
@@ -24,7 +24,7 @@ class FixturePlugin(object):
         catalog_sources: List[DbtBouncerCatalogNode],
         exposures: List[Exposures],
         macros: List[Macros],
-        manifest_obj: ManifestV12,
+        manifest_obj: DbtBouncerManifest,
         models: List[DbtBouncerModel],
         run_results: List[DbtBouncerResult],
         sources: List[Nodes6],

@@ -6,17 +6,17 @@ from pathlib import Path
 from typing import Any, List, Optional, Union
 
 import pytest
-from dbt_artifacts_parser.parsers.manifest.manifest_v12 import (
-    Exposures,
-    Macros,
-    ManifestV12,
-    Nodes6,
-)
+from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Exposures, Macros, Nodes6
 from tabulate import tabulate
 
 from dbt_bouncer.conf_validator import DbtBouncerConf
 from dbt_bouncer.logger import logger
-from dbt_bouncer.parsers import DbtBouncerCatalogNode, DbtBouncerModel, DbtBouncerResult
+from dbt_bouncer.parsers import (
+    DbtBouncerCatalogNode,
+    DbtBouncerManifest,
+    DbtBouncerModel,
+    DbtBouncerResult,
+)
 from dbt_bouncer.runner_plugins import (
     FixturePlugin,
     GenerateTestsPlugin,
@@ -32,7 +32,7 @@ def runner(
     create_pr_comment_file: bool,
     exposures: List[Exposures],
     macros: List[Macros],
-    manifest_obj: ManifestV12,
+    manifest_obj: DbtBouncerManifest,
     models: List[DbtBouncerModel],
     output_file: Union[None, Path],
     run_results: List[DbtBouncerResult],

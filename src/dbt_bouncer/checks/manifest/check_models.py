@@ -2,12 +2,11 @@ import re
 from typing import Any, Dict, List, Literal, Optional, Union
 
 import pytest
-from dbt_artifacts_parser.parsers.manifest.manifest_v12 import ManifestV12
 from pydantic import BaseModel, ConfigDict, Field
 
 from dbt_bouncer.conf_validator_base import BaseCheck
 from dbt_bouncer.logger import logger
-from dbt_bouncer.parsers import DbtBouncerModel
+from dbt_bouncer.parsers import DbtBouncerManifest, DbtBouncerModel
 from dbt_bouncer.utils import find_missing_meta_keys, get_check_inputs
 
 
@@ -333,7 +332,7 @@ class CheckModelMaxChainedViews(BaseCheck):
 
 @pytest.mark.iterate_over_models
 def check_model_max_chained_views(
-    manifest_obj: ManifestV12,
+    manifest_obj: DbtBouncerManifest,
     models: List[DbtBouncerModel],
     request,
     check_config=None,
@@ -397,7 +396,7 @@ def check_model_max_chained_views(
                 max_chained_views=max_chained_views,
                 models=models,
                 model_unique_ids_to_check=[model.unique_id],
-                package_name=manifest_obj.metadata.project_name,
+                package_name=manifest_obj.manifest.metadata.project_name,
             )
         )
         == 0

@@ -1,13 +1,15 @@
 from typing import Union
 
 from dbt_artifacts_parser.parsers.catalog.catalog_v1 import CatalogTable
+from dbt_artifacts_parser.parsers.manifest.manifest_v10 import ManifestV10
 from dbt_artifacts_parser.parsers.manifest.manifest_v10 import (
     ModelNode as ModelNode_v10,
 )
+from dbt_artifacts_parser.parsers.manifest.manifest_v11 import ManifestV11
 from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
     ModelNode as ModelNode_v11,
 )
-from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Nodes4
+from dbt_artifacts_parser.parsers.manifest.manifest_v12 import ManifestV12, Nodes4
 from dbt_artifacts_parser.parsers.run_results.run_results_v4 import (
     RunResultOutput as RunResultOutput_v4,
 )
@@ -22,6 +24,10 @@ class DbtBouncerCatalogNode(BaseModel):
     node: CatalogTable
     path: str
     unique_id: str
+
+
+class DbtBouncerManifest(BaseModel):
+    manifest: Union[ManifestV10, ManifestV11, ManifestV12]
 
 
 class DbtBouncerModel(BaseModel):

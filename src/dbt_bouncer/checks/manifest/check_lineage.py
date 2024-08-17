@@ -2,10 +2,9 @@ import re
 from typing import List, Literal, Optional
 
 import pytest
-from dbt_artifacts_parser.parsers.manifest.manifest_v12 import ManifestV12
 from pydantic import BaseModel, ConfigDict, Field
 
-from dbt_bouncer.parsers import DbtBouncerModel
+from dbt_bouncer.parsers import DbtBouncerManifest, DbtBouncerModel
 from dbt_bouncer.utils import get_check_inputs
 
 
@@ -26,7 +25,7 @@ class CheckLineagePermittedUpstreamModels(BaseModel):
 
 @pytest.mark.iterate_over_models
 def check_lineage_permitted_upstream_models(
-    manifest_obj: ManifestV12,
+    manifest_obj: DbtBouncerManifest,
     models: List[DbtBouncerModel],
     request,
     check_config=None,
@@ -43,7 +42,8 @@ def check_lineage_permitted_upstream_models(
     upstream_models = [
         x
         for x in model.depends_on.nodes
-        if x.split(".")[0] == "model" and x.split(".")[1] == manifest_obj.metadata.project_name
+        if x.split(".")[0] == "model"
+        and x.split(".")[1] == manifest_obj.manifest.metadata.project_name
     ]
     not_permitted_upstream_models = [
         upstream_model
