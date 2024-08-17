@@ -1,6 +1,7 @@
 from contextlib import nullcontext as does_not_raise
 
 import pytest
+from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Nodes4, Sources
 
 from dbt_bouncer.checks.manifest.check_sources import (
     check_source_description_populated,
@@ -20,56 +21,147 @@ from dbt_bouncer.checks.manifest.check_sources import (
     "source, expectation",
     [
         (
-            {
-                "description": "Description that is more than 4 characters.",
-                "unique_id": "source.package_name.model_1",
-            },
+            Sources(
+                **{
+                    "description": "Description that is more than 4 characters.",
+                    "fqn": ["package_name", "source_1", "table_1"],
+                    "identifier": "table_1",
+                    "loader": "",
+                    "name": "table_1",
+                    "original_file_path": "models/staging/_sources.yml",
+                    "package_name": "package_name",
+                    "path": "models/staging/_sources.yml",
+                    "resource_type": "source",
+                    "schema": "main",
+                    "source_description": "",
+                    "source_name": "source_1",
+                    "unique_id": "source.package_name.source_1.table_1",
+                }
+            ),
             does_not_raise(),
         ),
         (
-            {
-                "description": """A
-                        multiline
-                        description
-                        """,
-                "unique_id": "source.package_name.model_2",
-            },
+            Sources(
+                **{
+                    "description": """A
+                            multiline
+                            description
+                            """,
+                    "fqn": ["package_name", "source_1", "table_1"],
+                    "identifier": "table_1",
+                    "loader": "",
+                    "name": "table_1",
+                    "original_file_path": "models/staging/_sources.yml",
+                    "package_name": "package_name",
+                    "path": "models/staging/_sources.yml",
+                    "resource_type": "source",
+                    "schema": "main",
+                    "source_description": "",
+                    "source_name": "source_1",
+                    "unique_id": "source.package_name.source_1.table_1",
+                }
+            ),
             does_not_raise(),
         ),
         (
-            {
-                "description": "",
-                "unique_id": "source.package_name.model_3",
-            },
+            Sources(
+                **{
+                    "description": "",
+                    "fqn": ["package_name", "source_1", "table_1"],
+                    "identifier": "table_1",
+                    "loader": "",
+                    "name": "table_1",
+                    "original_file_path": "models/staging/_sources.yml",
+                    "package_name": "package_name",
+                    "path": "models/staging/_sources.yml",
+                    "resource_type": "source",
+                    "schema": "main",
+                    "source_description": "",
+                    "source_name": "source_1",
+                    "unique_id": "source.package_name.source_1.table_1",
+                }
+            ),
             pytest.raises(AssertionError),
         ),
         (
-            {
-                "description": " ",
-                "unique_id": "source.package_name.model_4",
-            },
+            Sources(
+                **{
+                    "description": " ",
+                    "fqn": ["package_name", "source_1", "table_1"],
+                    "identifier": "table_1",
+                    "loader": "",
+                    "name": "table_1",
+                    "original_file_path": "models/staging/_sources.yml",
+                    "package_name": "package_name",
+                    "path": "models/staging/_sources.yml",
+                    "resource_type": "source",
+                    "schema": "main",
+                    "source_description": "",
+                    "source_name": "source_1",
+                    "unique_id": "source.package_name.source_1.table_1",
+                }
+            ),
             pytest.raises(AssertionError),
         ),
         (
-            {
-                "description": """
-                        """,
-                "unique_id": "source.package_name.model_5",
-            },
+            Sources(
+                **{
+                    "description": """
+                            """,
+                    "fqn": ["package_name", "source_1", "table_1"],
+                    "identifier": "table_1",
+                    "loader": "",
+                    "name": "table_1",
+                    "original_file_path": "models/staging/_sources.yml",
+                    "package_name": "package_name",
+                    "path": "models/staging/_sources.yml",
+                    "resource_type": "source",
+                    "schema": "main",
+                    "source_description": "",
+                    "source_name": "source_1",
+                    "unique_id": "source.package_name.source_1.table_1",
+                }
+            ),
             pytest.raises(AssertionError),
         ),
         (
-            {
-                "description": "-",
-                "unique_id": "source.package_name.model_6",
-            },
+            Sources(
+                **{
+                    "description": "-",
+                    "fqn": ["package_name", "source_1", "table_1"],
+                    "identifier": "table_1",
+                    "loader": "",
+                    "name": "table_1",
+                    "original_file_path": "models/staging/_sources.yml",
+                    "package_name": "package_name",
+                    "path": "models/staging/_sources.yml",
+                    "resource_type": "source",
+                    "schema": "main",
+                    "source_description": "",
+                    "source_name": "source_1",
+                    "unique_id": "source.package_name.source_1.table_1",
+                }
+            ),
             pytest.raises(AssertionError),
         ),
         (
-            {
-                "description": "null",
-                "unique_id": "source.package_name.model_7",
-            },
+            Sources(
+                **{
+                    "description": "null",
+                    "fqn": ["package_name", "source_1", "table_1"],
+                    "identifier": "table_1",
+                    "loader": "",
+                    "name": "table_1",
+                    "original_file_path": "models/staging/_sources.yml",
+                    "package_name": "package_name",
+                    "path": "models/staging/_sources.yml",
+                    "resource_type": "source",
+                    "schema": "main",
+                    "source_description": "",
+                    "source_name": "source_1",
+                    "unique_id": "source.package_name.source_1.table_1",
+                }
+            ),
             pytest.raises(AssertionError),
         ),
     ],
@@ -83,47 +175,103 @@ def test_check_source_description_populated(source, expectation):
     "source, expectation",
     [
         (
-            {
-                "freshness": {
-                    "warn_after": {"count": 25, "period": "hour"},
-                    "error_after": {"count": None, "period": None},
-                    "filter": None,
-                },
-                "unique_id": "source.package_name.source_1.table_1",
-            },
+            Sources(
+                **{
+                    "description": "Description that is more than 4 characters.",
+                    "fqn": ["package_name", "source_1", "table_1"],
+                    "freshness": {
+                        "warn_after": {"count": 25, "period": "hour"},
+                        "error_after": {"count": None, "period": None},
+                        "filter": None,
+                    },
+                    "identifier": "table_1",
+                    "loader": "",
+                    "name": "table_1",
+                    "original_file_path": "models/staging/_sources.yml",
+                    "package_name": "package_name",
+                    "path": "models/staging/_sources.yml",
+                    "resource_type": "source",
+                    "schema": "main",
+                    "source_description": "",
+                    "source_name": "source_1",
+                    "unique_id": "source.package_name.source_1.table_1",
+                }
+            ),
             does_not_raise(),
         ),
         (
-            {
-                "freshness": {
-                    "warn_after": {"count": None, "period": None},
-                    "error_after": {"count": 25, "period": "hour"},
-                    "filter": None,
-                },
-                "unique_id": "source.package_name.source_1.table_2",
-            },
+            Sources(
+                **{
+                    "description": "Description that is more than 4 characters.",
+                    "fqn": ["package_name", "source_1", "table_1"],
+                    "freshness": {
+                        "warn_after": {"count": None, "period": None},
+                        "error_after": {"count": 25, "period": "hour"},
+                        "filter": None,
+                    },
+                    "identifier": "table_1",
+                    "loader": "",
+                    "name": "table_1",
+                    "original_file_path": "models/staging/_sources.yml",
+                    "package_name": "package_name",
+                    "path": "models/staging/_sources.yml",
+                    "resource_type": "source",
+                    "schema": "main",
+                    "source_description": "",
+                    "source_name": "source_1",
+                    "unique_id": "source.package_name.source_1.table_1",
+                }
+            ),
             does_not_raise(),
         ),
         (
-            {
-                "freshness": {
-                    "warn_after": {"count": 25, "period": "hour"},
-                    "error_after": {"count": 49, "period": "hour"},
-                    "filter": None,
-                },
-                "unique_id": "source.package_name.source_1.table_3",
-            },
+            Sources(
+                **{
+                    "description": "Description that is more than 4 characters.",
+                    "fqn": ["package_name", "source_1", "table_1"],
+                    "freshness": {
+                        "warn_after": {"count": 25, "period": "hour"},
+                        "error_after": {"count": 49, "period": "hour"},
+                        "filter": None,
+                    },
+                    "identifier": "table_1",
+                    "loader": "",
+                    "name": "table_1",
+                    "original_file_path": "models/staging/_sources.yml",
+                    "package_name": "package_name",
+                    "path": "models/staging/_sources.yml",
+                    "resource_type": "source",
+                    "schema": "main",
+                    "source_description": "",
+                    "source_name": "source_1",
+                    "unique_id": "source.package_name.source_1.table_1",
+                }
+            ),
             does_not_raise(),
         ),
         (
-            {
-                "freshness": {
-                    "warn_after": {"count": None, "period": None},
-                    "error_after": {"count": None, "period": None},
-                    "filter": None,
-                },
-                "unique_id": "source.package_name.source_1.table_4",
-            },
+            Sources(
+                **{
+                    "description": "Description that is more than 4 characters.",
+                    "fqn": ["package_name", "source_1", "table_1"],
+                    "freshness": {
+                        "warn_after": {"count": None, "period": None},
+                        "error_after": {"count": None, "period": None},
+                        "filter": None,
+                    },
+                    "identifier": "table_1",
+                    "loader": "",
+                    "name": "table_1",
+                    "original_file_path": "models/staging/_sources.yml",
+                    "package_name": "package_name",
+                    "path": "models/staging/_sources.yml",
+                    "resource_type": "source",
+                    "schema": "main",
+                    "source_description": "",
+                    "source_name": "source_1",
+                    "unique_id": "source.package_name.source_1.table_1",
+                }
+            ),
             pytest.raises(AssertionError),
         ),
     ],
@@ -137,17 +285,43 @@ def test_check_source_freshness_populated(source, expectation):
     "source, expectation",
     [
         (
-            {
-                "loader": "Fivetran",
-                "unique_id": "source.package_name.model_1",
-            },
+            Sources(
+                **{
+                    "description": "Description that is more than 4 characters.",
+                    "fqn": ["package_name", "source_1", "table_1"],
+                    "identifier": "table_1",
+                    "loader": "Fivetran",
+                    "name": "table_1",
+                    "original_file_path": "models/staging/_sources.yml",
+                    "package_name": "package_name",
+                    "path": "models/staging/_sources.yml",
+                    "resource_type": "source",
+                    "schema": "main",
+                    "source_description": "",
+                    "source_name": "source_1",
+                    "unique_id": "source.package_name.source_1.table_1",
+                }
+            ),
             does_not_raise(),
         ),
         (
-            {
-                "loader": "",
-                "unique_id": "source.package_name.model_7",
-            },
+            Sources(
+                **{
+                    "description": "Description that is more than 4 characters.",
+                    "fqn": ["package_name", "source_1", "table_1"],
+                    "identifier": "table_1",
+                    "loader": "",
+                    "name": "table_1",
+                    "original_file_path": "models/staging/_sources.yml",
+                    "package_name": "package_name",
+                    "path": "models/staging/_sources.yml",
+                    "resource_type": "source",
+                    "schema": "main",
+                    "source_description": "",
+                    "source_name": "source_1",
+                    "unique_id": "source.package_name.source_1.table_1",
+                }
+            ),
             pytest.raises(AssertionError),
         ),
     ],
@@ -162,50 +336,134 @@ def test_check_source_loader_populated(source, expectation):
     [
         (
             {"keys": ["owner"]},
-            {
-                "meta": {"owner": "Bob"},
-                "unique_id": "source.package_name.source_1",
-            },
+            Sources(
+                **{
+                    "description": "Description that is more than 4 characters.",
+                    "fqn": ["package_name", "source_1", "table_1"],
+                    "identifier": "table_1",
+                    "loader": "",
+                    "meta": {"owner": "Bob"},
+                    "name": "table_1",
+                    "original_file_path": "models/staging/_sources.yml",
+                    "package_name": "package_name",
+                    "path": "models/staging/_sources.yml",
+                    "resource_type": "source",
+                    "schema": "main",
+                    "source_description": "",
+                    "source_name": "source_1",
+                    "unique_id": "source.package_name.source_1.table_1",
+                }
+            ),
             does_not_raise(),
         ),
         (
             {"keys": ["owner"]},
-            {
-                "meta": {"maturity": "high", "owner": "Bob"},
-                "unique_id": "source.package_name.source_1",
-            },
+            Sources(
+                **{
+                    "description": "Description that is more than 4 characters.",
+                    "fqn": ["package_name", "source_1", "table_1"],
+                    "identifier": "table_1",
+                    "loader": "",
+                    "meta": {"maturity": "high", "owner": "Bob"},
+                    "name": "table_1",
+                    "original_file_path": "models/staging/_sources.yml",
+                    "package_name": "package_name",
+                    "path": "models/staging/_sources.yml",
+                    "resource_type": "source",
+                    "schema": "main",
+                    "source_description": "",
+                    "source_name": "source_1",
+                    "unique_id": "source.package_name.source_1.table_1",
+                }
+            ),
             does_not_raise(),
         ),
         (
             {"keys": ["owner", {"name": ["first", "last"]}]},
-            {
-                "meta": {"name": {"first": "Bob", "last": "Bobbington"}, "owner": "Bob"},
-                "unique_id": "source.package_name.source_1",
-            },
+            Sources(
+                **{
+                    "description": "Description that is more than 4 characters.",
+                    "fqn": ["package_name", "source_1", "table_1"],
+                    "identifier": "table_1",
+                    "loader": "",
+                    "meta": {"name": {"first": "Bob", "last": "Bobbington"}, "owner": "Bob"},
+                    "name": "table_1",
+                    "original_file_path": "models/staging/_sources.yml",
+                    "package_name": "package_name",
+                    "path": "models/staging/_sources.yml",
+                    "resource_type": "source",
+                    "schema": "main",
+                    "source_description": "",
+                    "source_name": "source_1",
+                    "unique_id": "source.package_name.source_1.table_1",
+                }
+            ),
             does_not_raise(),
         ),
         (
             {"keys": ["owner"]},
-            {
-                "meta": {},
-                "unique_id": "source.package_name.source_1",
-            },
+            Sources(
+                **{
+                    "description": "Description that is more than 4 characters.",
+                    "fqn": ["package_name", "source_1", "table_1"],
+                    "identifier": "table_1",
+                    "loader": "",
+                    "meta": {},
+                    "name": "table_1",
+                    "original_file_path": "models/staging/_sources.yml",
+                    "package_name": "package_name",
+                    "path": "models/staging/_sources.yml",
+                    "resource_type": "source",
+                    "schema": "main",
+                    "source_description": "",
+                    "source_name": "source_1",
+                    "unique_id": "source.package_name.source_1.table_1",
+                }
+            ),
             pytest.raises(AssertionError),
         ),
         (
             {"keys": ["owner"]},
-            {
-                "meta": {"maturity": "high"},
-                "unique_id": "source.package_name.source_1",
-            },
+            Sources(
+                **{
+                    "description": "Description that is more than 4 characters.",
+                    "fqn": ["package_name", "source_1", "table_1"],
+                    "identifier": "table_1",
+                    "loader": "",
+                    "meta": {"maturity": "high"},
+                    "name": "table_1",
+                    "original_file_path": "models/staging/_sources.yml",
+                    "package_name": "package_name",
+                    "path": "models/staging/_sources.yml",
+                    "resource_type": "source",
+                    "schema": "main",
+                    "source_description": "",
+                    "source_name": "source_1",
+                    "unique_id": "source.package_name.source_1.table_1",
+                }
+            ),
             pytest.raises(AssertionError),
         ),
         (
             {"keys": ["owner", {"name": ["first", "last"]}]},
-            {
-                "meta": {"name": {"last": "Bobbington"}, "owner": "Bob"},
-                "unique_id": "source.package_name.source_1",
-            },
+            Sources(
+                **{
+                    "description": "Description that is more than 4 characters.",
+                    "fqn": ["package_name", "source_1", "table_1"],
+                    "identifier": "table_1",
+                    "loader": "",
+                    "meta": {"name": {"last": "Bobbington"}, "owner": "Bob"},
+                    "name": "table_1",
+                    "original_file_path": "models/staging/_sources.yml",
+                    "package_name": "package_name",
+                    "path": "models/staging/_sources.yml",
+                    "resource_type": "source",
+                    "schema": "main",
+                    "source_description": "",
+                    "source_name": "source_1",
+                    "unique_id": "source.package_name.source_1.table_1",
+                }
+            ),
             pytest.raises(AssertionError),
         ),
     ],
@@ -222,20 +480,48 @@ def test_check_source_has_meta_keys(check_config, source, expectation):
             {
                 "tags": ["tag_1"],
             },
-            {
-                "tags": ["tag_1"],
-                "unique_id": "source.package_name.source_1.table_1",
-            },
+            Sources(
+                **{
+                    "description": "",
+                    "fqn": ["package_name", "source_1", "table_1"],
+                    "identifier": "table_1",
+                    "loader": "",
+                    "name": "table_1",
+                    "original_file_path": "models/staging/_sources.yml",
+                    "package_name": "package_name",
+                    "path": "models/staging/_sources.yml",
+                    "resource_type": "source",
+                    "schema": "main",
+                    "source_description": "",
+                    "source_name": "source_1",
+                    "tags": ["tag_1"],
+                    "unique_id": "source.package_name.source_1.table_1",
+                }
+            ),
             does_not_raise(),
         ),
         (
             {
                 "tags": ["tag_1"],
             },
-            {
-                "tags": [],
-                "unique_id": "source.package_name.source_1.table_1",
-            },
+            Sources(
+                **{
+                    "description": "",
+                    "fqn": ["package_name", "source_1", "table_1"],
+                    "identifier": "table_1",
+                    "loader": "",
+                    "name": "table_1",
+                    "original_file_path": "models/staging/_sources.yml",
+                    "package_name": "package_name",
+                    "path": "models/staging/_sources.yml",
+                    "resource_type": "source",
+                    "schema": "main",
+                    "source_description": "",
+                    "source_name": "source_1",
+                    "tags": [],
+                    "unique_id": "source.package_name.source_1.table_1",
+                }
+            ),
             pytest.raises(AssertionError),
         ),
     ],
@@ -252,20 +538,48 @@ def test_check_source_has_tags(check_config, source, expectation):
             {
                 "source_name_pattern": "^[a-z_]*$",
             },
-            {
-                "name": "model_a",
-                "unique_id": "source.package_name.model_a",
-            },
+            Sources(
+                **{
+                    "description": "",
+                    "fqn": ["package_name", "source_1", "model_a"],
+                    "identifier": "model_a",
+                    "loader": "",
+                    "name": "model_a",
+                    "original_file_path": "models/staging/_sources.yml",
+                    "package_name": "package_name",
+                    "path": "models/staging/_sources.yml",
+                    "resource_type": "source",
+                    "schema": "main",
+                    "source_description": "",
+                    "source_name": "source_1",
+                    "tags": ["tag_1"],
+                    "unique_id": "source.package_name.source_1.model_a",
+                }
+            ),
             does_not_raise(),
         ),
         (
             {
                 "source_name_pattern": "^[a-z_]*$",
             },
-            {
-                "name": "model_1",
-                "unique_id": "source.package_name.model_1",
-            },
+            Sources(
+                **{
+                    "description": "",
+                    "fqn": ["package_name", "source_1", "model_1"],
+                    "identifier": "model_1",
+                    "loader": "",
+                    "name": "model_1",
+                    "original_file_path": "models/staging/_sources.yml",
+                    "package_name": "package_name",
+                    "path": "models/staging/_sources.yml",
+                    "resource_type": "source",
+                    "schema": "main",
+                    "source_description": "",
+                    "source_name": "source_1",
+                    "tags": ["tag_1"],
+                    "unique_id": "source.package_name.source_1.model_1",
+                }
+            ),
             pytest.raises(AssertionError),
         ),
     ],
@@ -280,42 +594,159 @@ def test_check_source_names(check_config, source, expectation):
     [
         (
             [
-                {
-                    "unique_id": "model.package_name.model_1",
-                    "depends_on": {"nodes": ["source.package_name.source_1"]},
+                Nodes4(
+                    **{
+                        "alias": "model_1",
+                        "checksum": {"name": "sha256", "checksum": ""},
+                        "columns": {
+                            "col_1": {
+                                "index": 1,
+                                "name": "col_1",
+                                "type": "INTEGER",
+                            },
+                        },
+                        "depends_on": {"nodes": ["source.package_name.source_1.table_1"]},
+                        "fqn": ["package_name", "model_1"],
+                        "name": "model_1",
+                        "original_file_path": "model_1.sql",
+                        "package_name": "package_name",
+                        "path": "model_1.sql",
+                        "resource_type": "model",
+                        "schema": "main",
+                        "unique_id": "model.package_name.model_1",
+                    }
+                )
+            ],
+            Sources(
+                **{
+                    "description": "",
+                    "fqn": ["package_name", "source_1", "table_1"],
+                    "identifier": "table_1",
+                    "loader": "",
+                    "name": "table_1",
+                    "original_file_path": "models/staging/_sources.yml",
+                    "package_name": "package_name",
+                    "path": "models/staging/_sources.yml",
+                    "resource_type": "source",
+                    "schema": "main",
+                    "source_description": "",
+                    "source_name": "source_1",
+                    "tags": ["tag_1"],
+                    "unique_id": "source.package_name.source_1.table_1",
                 }
-            ],
-            {
-                "unique_id": "source.package_name.source_1",
-            },
+            ),
             does_not_raise(),
         ),
         (
             [
-                {
-                    "unique_id": "model.package_name.model_1",
-                    "depends_on": {"nodes": ["source.package_name.source_1"]},
-                },
-                {
-                    "unique_id": "model.package_name.model_2",
-                    "depends_on": {"nodes": ["source.package_name.source_1"]},
-                },
+                Nodes4(
+                    **{
+                        "alias": "model_1",
+                        "checksum": {"name": "sha256", "checksum": ""},
+                        "columns": {
+                            "col_1": {
+                                "index": 1,
+                                "name": "col_1",
+                                "type": "INTEGER",
+                            },
+                        },
+                        "depends_on": {"nodes": ["source.package_name.source_1.table_1"]},
+                        "fqn": ["package_name", "model_1"],
+                        "name": "model_1",
+                        "original_file_path": "model_1.sql",
+                        "package_name": "package_name",
+                        "path": "model_1.sql",
+                        "resource_type": "model",
+                        "schema": "main",
+                        "unique_id": "model.package_name.model_1",
+                    }
+                ),
+                Nodes4(
+                    **{
+                        "alias": "model_2",
+                        "checksum": {"name": "sha256", "checksum": ""},
+                        "columns": {
+                            "col_1": {
+                                "index": 1,
+                                "name": "col_1",
+                                "type": "INTEGER",
+                            },
+                        },
+                        "depends_on": {"nodes": ["source.package_name.source_1.table_1"]},
+                        "fqn": ["package_name", "model_2"],
+                        "name": "model_2",
+                        "original_file_path": "model_2.sql",
+                        "package_name": "package_name",
+                        "path": "model_2.sql",
+                        "resource_type": "model",
+                        "schema": "main",
+                        "unique_id": "model.package_name.model_2",
+                    }
+                ),
             ],
-            {
-                "unique_id": "source.package_name.source_1",
-            },
+            Sources(
+                **{
+                    "description": "",
+                    "fqn": ["package_name", "source_1", "table_1"],
+                    "identifier": "table_1",
+                    "loader": "",
+                    "name": "table_1",
+                    "original_file_path": "models/staging/_sources.yml",
+                    "package_name": "package_name",
+                    "path": "models/staging/_sources.yml",
+                    "resource_type": "source",
+                    "schema": "main",
+                    "source_description": "",
+                    "source_name": "source_1",
+                    "tags": ["tag_1"],
+                    "unique_id": "source.package_name.source_1.table_1",
+                }
+            ),
             does_not_raise(),
         ),
         (
             [
-                {
-                    "unique_id": "model.package_name.model_1",
-                    "depends_on": {"nodes": []},
-                },
+                Nodes4(
+                    **{
+                        "alias": "model_2",
+                        "checksum": {"name": "sha256", "checksum": ""},
+                        "columns": {
+                            "col_1": {
+                                "index": 1,
+                                "name": "col_1",
+                                "type": "INTEGER",
+                            },
+                        },
+                        "depends_on": {"nodes": []},
+                        "fqn": ["package_name", "model_2"],
+                        "name": "model_2",
+                        "original_file_path": "model_2.sql",
+                        "package_name": "package_name",
+                        "path": "model_2.sql",
+                        "resource_type": "model",
+                        "schema": "main",
+                        "unique_id": "model.package_name.model_2",
+                    }
+                )
             ],
-            {
-                "unique_id": "source.package_name.source_1",
-            },
+            Sources(
+                **{
+                    "description": "",
+                    "fqn": ["package_name", "source_1", "table_1"],
+                    "identifier": "table_1",
+                    "loader": "",
+                    "name": "table_1",
+                    "original_file_path": "models/staging/_sources.yml",
+                    "package_name": "package_name",
+                    "path": "models/staging/_sources.yml",
+                    "resource_type": "source",
+                    "schema": "main",
+                    "source_description": "",
+                    "source_name": "source_1",
+                    "tags": ["tag_1"],
+                    "unique_id": "source.package_name.source_1.table_1",
+                }
+            ),
             pytest.raises(AssertionError),
         ),
     ],
@@ -329,38 +760,108 @@ def test_check_source_not_orphaned(models, source, expectation):
     "source, expectation",
     [
         (
-            {
-                "path": "models/staging/crm/_crm__sources.yml",
-                "unique_id": "source.package_name.source_1.table_1",
-            },
+            Sources(
+                **{
+                    "description": "",
+                    "fqn": ["package_name", "source_1", "table_1"],
+                    "identifier": "table_1",
+                    "loader": "",
+                    "name": "table_1",
+                    "original_file_path": "models/staging/crm/_crm__sources.yml",
+                    "package_name": "package_name",
+                    "path": "models/staging/crm/_crm__sources.yml",
+                    "resource_type": "source",
+                    "schema": "main",
+                    "source_description": "",
+                    "source_name": "source_1",
+                    "tags": ["tag_1"],
+                    "unique_id": "source.package_name.source_1.table_1",
+                }
+            ),
             does_not_raise(),
         ),
         (
-            {
-                "path": "models/staging/crm/_crm__source.yml",
-                "unique_id": "source.package_name.source_1.table_1",
-            },
+            Sources(
+                **{
+                    "description": "",
+                    "fqn": ["package_name", "source_1", "table_1"],
+                    "identifier": "table_1",
+                    "loader": "",
+                    "name": "table_1",
+                    "original_file_path": "models/staging/crm/_crm__source.yml",
+                    "package_name": "package_name",
+                    "path": "models/staging/crm/_crm__source.yml",
+                    "resource_type": "source",
+                    "schema": "main",
+                    "source_description": "",
+                    "source_name": "source_1",
+                    "tags": ["tag_1"],
+                    "unique_id": "source.package_name.source_1.table_1",
+                }
+            ),
             pytest.raises(AssertionError),
         ),
         (
-            {
-                "path": "models/staging/crm/__source.yml",
-                "unique_id": "source.package_name.source_1.table_1",
-            },
+            Sources(
+                **{
+                    "description": "",
+                    "fqn": ["package_name", "source_1", "table_1"],
+                    "identifier": "table_1",
+                    "loader": "",
+                    "name": "table_1",
+                    "original_file_path": "models/staging/crm/__source.yml",
+                    "package_name": "package_name",
+                    "path": "models/staging/crm/__source.yml",
+                    "resource_type": "source",
+                    "schema": "main",
+                    "source_description": "",
+                    "source_name": "source_1",
+                    "tags": ["tag_1"],
+                    "unique_id": "source.package_name.source_1.table_1",
+                }
+            ),
             pytest.raises(AssertionError),
         ),
         (
-            {
-                "path": "models/staging/crm/_staging__source.yml",
-                "unique_id": "source.package_name.source_1.table_1",
-            },
+            Sources(
+                **{
+                    "description": "",
+                    "fqn": ["package_name", "source_1", "table_1"],
+                    "identifier": "table_1",
+                    "loader": "",
+                    "name": "table_1",
+                    "original_file_path": "models/staging/crm/_staging__source.yml",
+                    "package_name": "package_name",
+                    "path": "models/staging/crm/_staging__source.yml",
+                    "resource_type": "source",
+                    "schema": "main",
+                    "source_description": "",
+                    "source_name": "source_1",
+                    "tags": ["tag_1"],
+                    "unique_id": "source.package_name.source_1.table_1",
+                }
+            ),
             pytest.raises(AssertionError),
         ),
         (
-            {
-                "path": "models/staging/crm/crm__source.yml",
-                "unique_id": "source.package_name.source_1.table_1",
-            },
+            Sources(
+                **{
+                    "description": "",
+                    "fqn": ["package_name", "source_1", "table_1"],
+                    "identifier": "table_1",
+                    "loader": "",
+                    "name": "table_1",
+                    "original_file_path": "models/staging/crm/crm__source.yml",
+                    "package_name": "package_name",
+                    "path": "models/staging/crm/crm__source.yml",
+                    "resource_type": "source",
+                    "schema": "main",
+                    "source_description": "",
+                    "source_name": "source_1",
+                    "tags": ["tag_1"],
+                    "unique_id": "source.package_name.source_1.table_1",
+                }
+            ),
             pytest.raises(AssertionError),
         ),
     ],
@@ -375,30 +876,92 @@ def test_check_source_property_file_location(source, expectation):
     [
         (
             [
-                {
-                    "depends_on": {"nodes": ["source.package_name.source_1"]},
-                    "path": "staging/model_1.sql",
-                    "unique_id": "model.package_name.model_1",
-                }
+                Nodes4(
+                    **{
+                        "alias": "model_2",
+                        "checksum": {"name": "sha256", "checksum": ""},
+                        "columns": {
+                            "col_1": {
+                                "index": 1,
+                                "name": "col_1",
+                                "type": "INTEGER",
+                            },
+                        },
+                        "depends_on": {"nodes": ["source.package_name.source_1.table_1"]},
+                        "fqn": ["package_name", "model_2"],
+                        "name": "model_2",
+                        "original_file_path": "models/staging/model_2.sql",
+                        "package_name": "package_name",
+                        "path": "staging/model_2.sql",
+                        "resource_type": "model",
+                        "schema": "main",
+                        "unique_id": "model.package_name.model_2",
+                    }
+                )
             ],
-            {
-                "path": "models/staging/_sources.yml",
-                "unique_id": "source.package_name.source_1",
-            },
+            Sources(
+                **{
+                    "description": "",
+                    "fqn": ["package_name", "source_1", "table_1"],
+                    "identifier": "table_1",
+                    "loader": "",
+                    "name": "table_1",
+                    "original_file_path": "models/staging/_sources.yml",
+                    "package_name": "package_name",
+                    "path": "models/staging/_sources.yml",
+                    "resource_type": "source",
+                    "schema": "main",
+                    "source_description": "",
+                    "source_name": "source_1",
+                    "tags": ["tag_1"],
+                    "unique_id": "source.package_name.source_1.table_1",
+                }
+            ),
             does_not_raise(),
         ),
         (
             [
-                {
-                    "depends_on": {"nodes": ["source.package_name.source_1"]},
-                    "path": "staging/model_1.sql",
-                    "unique_id": "model.package_name.model_1",
-                }
+                Nodes4(
+                    **{
+                        "alias": "model_2",
+                        "checksum": {"name": "sha256", "checksum": ""},
+                        "columns": {
+                            "col_1": {
+                                "index": 1,
+                                "name": "col_1",
+                                "type": "INTEGER",
+                            },
+                        },
+                        "depends_on": {"nodes": ["source.package_name.source_1.table_1"]},
+                        "fqn": ["package_name", "model_2"],
+                        "name": "model_2",
+                        "original_file_path": "models/staging/model_2.sql",
+                        "package_name": "package_name",
+                        "path": "staging/model_2.sql",
+                        "resource_type": "model",
+                        "schema": "main",
+                        "unique_id": "model.package_name.model_2",
+                    }
+                )
             ],
-            {
-                "path": "models/_sources.yml",
-                "unique_id": "source.package_name.source_1",
-            },
+            Sources(
+                **{
+                    "description": "",
+                    "fqn": ["package_name", "source_1", "table_1"],
+                    "identifier": "table_1",
+                    "loader": "",
+                    "name": "table_1",
+                    "original_file_path": "models/_sources.yml",
+                    "package_name": "package_name",
+                    "path": "models/_sources.yml",
+                    "resource_type": "source",
+                    "schema": "main",
+                    "source_description": "",
+                    "source_name": "source_1",
+                    "tags": ["tag_1"],
+                    "unique_id": "source.package_name.source_1.table_1",
+                }
+            ),
             pytest.raises(AssertionError),
         ),
     ],
@@ -413,42 +976,159 @@ def test_check_source_used_by_models_in_same_directory(models, source, expectati
     [
         (
             [
-                {
-                    "unique_id": "model.package_name.model_1",
-                    "depends_on": {"nodes": ["source.package_name.source_1"]},
-                }
+                Nodes4(
+                    **{
+                        "alias": "model_2",
+                        "checksum": {"name": "sha256", "checksum": ""},
+                        "columns": {
+                            "col_1": {
+                                "index": 1,
+                                "name": "col_1",
+                                "type": "INTEGER",
+                            },
+                        },
+                        "depends_on": {"nodes": ["source.package_name.source_1.table_1"]},
+                        "fqn": ["package_name", "model_2"],
+                        "name": "model_2",
+                        "original_file_path": "models/staging/model_2.sql",
+                        "package_name": "package_name",
+                        "path": "staging/model_2.sql",
+                        "resource_type": "model",
+                        "schema": "main",
+                        "unique_id": "model.package_name.model_2",
+                    }
+                )
             ],
-            {
-                "unique_id": "source.package_name.source_1",
-            },
+            Sources(
+                **{
+                    "description": "",
+                    "fqn": ["package_name", "source_1", "table_1"],
+                    "identifier": "table_1",
+                    "loader": "",
+                    "name": "table_1",
+                    "original_file_path": "models/_sources.yml",
+                    "package_name": "package_name",
+                    "path": "models/_sources.yml",
+                    "resource_type": "source",
+                    "schema": "main",
+                    "source_description": "",
+                    "source_name": "source_1",
+                    "tags": ["tag_1"],
+                    "unique_id": "source.package_name.source_1.table_1",
+                }
+            ),
             does_not_raise(),
         ),
         (
             [
-                {
-                    "unique_id": "model.package_name.model_1",
-                    "depends_on": {"nodes": []},
-                }
+                Nodes4(
+                    **{
+                        "alias": "model_2",
+                        "checksum": {"name": "sha256", "checksum": ""},
+                        "columns": {
+                            "col_1": {
+                                "index": 1,
+                                "name": "col_1",
+                                "type": "INTEGER",
+                            },
+                        },
+                        "depends_on": {"nodes": []},
+                        "fqn": ["package_name", "model_2"],
+                        "name": "model_2",
+                        "original_file_path": "models/staging/model_2.sql",
+                        "package_name": "package_name",
+                        "path": "staging/model_2.sql",
+                        "resource_type": "model",
+                        "schema": "main",
+                        "unique_id": "model.package_name.model_2",
+                    }
+                )
             ],
-            {
-                "unique_id": "source.package_name.source_1",
-            },
+            Sources(
+                **{
+                    "description": "",
+                    "fqn": ["package_name", "source_1", "table_1"],
+                    "identifier": "table_1",
+                    "loader": "",
+                    "name": "table_1",
+                    "original_file_path": "models/_sources.yml",
+                    "package_name": "package_name",
+                    "path": "models/_sources.yml",
+                    "resource_type": "source",
+                    "schema": "main",
+                    "source_description": "",
+                    "source_name": "source_1",
+                    "tags": ["tag_1"],
+                    "unique_id": "source.package_name.source_1.table_1",
+                }
+            ),
             does_not_raise(),
         ),
         (
             [
-                {
-                    "unique_id": "model.package_name.model_1",
-                    "depends_on": {"nodes": ["source.package_name.source_1"]},
-                },
-                {
-                    "unique_id": "model.package_name.model_2",
-                    "depends_on": {"nodes": ["source.package_name.source_1"]},
-                },
+                Nodes4(
+                    **{
+                        "alias": "model_1",
+                        "checksum": {"name": "sha256", "checksum": ""},
+                        "columns": {
+                            "col_1": {
+                                "index": 1,
+                                "name": "col_1",
+                                "type": "INTEGER",
+                            },
+                        },
+                        "depends_on": {"nodes": ["source.package_name.source_1.table_1"]},
+                        "fqn": ["package_name", "model_1"],
+                        "name": "model_1",
+                        "original_file_path": "models/staging/model_1.sql",
+                        "package_name": "package_name",
+                        "path": "staging/model_1.sql",
+                        "resource_type": "model",
+                        "schema": "main",
+                        "unique_id": "model.package_name.model_1",
+                    }
+                ),
+                Nodes4(
+                    **{
+                        "alias": "model_2",
+                        "checksum": {"name": "sha256", "checksum": ""},
+                        "columns": {
+                            "col_1": {
+                                "index": 1,
+                                "name": "col_1",
+                                "type": "INTEGER",
+                            },
+                        },
+                        "depends_on": {"nodes": ["source.package_name.source_1.table_1"]},
+                        "fqn": ["package_name", "model_2"],
+                        "name": "model_2",
+                        "original_file_path": "models/staging/model_2.sql",
+                        "package_name": "package_name",
+                        "path": "staging/model_2.sql",
+                        "resource_type": "model",
+                        "schema": "main",
+                        "unique_id": "model.package_name.model_2",
+                    }
+                ),
             ],
-            {
-                "unique_id": "source.package_name.source_1",
-            },
+            Sources(
+                **{
+                    "description": "",
+                    "fqn": ["package_name", "source_1", "table_1"],
+                    "identifier": "table_1",
+                    "loader": "",
+                    "name": "table_1",
+                    "original_file_path": "models/_sources.yml",
+                    "package_name": "package_name",
+                    "path": "models/_sources.yml",
+                    "resource_type": "source",
+                    "schema": "main",
+                    "source_description": "",
+                    "source_name": "source_1",
+                    "tags": ["tag_1"],
+                    "unique_id": "source.package_name.source_1.table_1",
+                }
+            ),
             pytest.raises(AssertionError),
         ),
     ],

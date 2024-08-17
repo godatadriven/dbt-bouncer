@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 
 from dbt_artifacts_parser.parser import parse_manifest
+from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Nodes4
 
 from dbt_bouncer.runner import runner
 
@@ -42,11 +43,29 @@ def test_runner_coverage(caplog, tmp_path):
             }
         ),
         models=[
-            {
-                "description": "This is a description",
-                "path": "staging/stg_payments.sql",
-                "unique_id": "model.dbt_bouncer_test_project.stg_payments",
-            }
+            Nodes4(
+                **{
+                    "access": "public",
+                    "alias": "stg_payments",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                    },
+                    "description": "This is a description",
+                    "fqn": ["dbt_bouncer_test_project", "stg_payments"],
+                    "name": "stg_payments",
+                    "original_file_path": "models/staging/stg_payments.sql",
+                    "package_name": "dbt_bouncer_test_project",
+                    "path": "staging/stg_payments.sql",
+                    "resource_type": "model",
+                    "schema": "main",
+                    "unique_id": "model.dbt_bouncer_test_project.stg_payments",
+                }
+            ),
         ],
         output_file=tmp_path / "coverage.json",
         run_results=[],
@@ -100,11 +119,29 @@ def test_runner_failure():
             }
         ),
         models=[
-            {
-                "description": "",
-                "path": "staging/stg_payments.sql",
-                "unique_id": "model.dbt_bouncer_test_project.stg_payments",
-            }
+            Nodes4(
+                **{
+                    "access": "public",
+                    "alias": "stg_payments",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                    },
+                    "description": "",
+                    "fqn": ["dbt_bouncer_test_project", "stg_payments"],
+                    "name": "stg_payments",
+                    "original_file_path": "models/staging/stg_payments.sql",
+                    "package_name": "dbt_bouncer_test_project",
+                    "path": "staging/stg_payments.sql",
+                    "resource_type": "model",
+                    "schema": "main",
+                    "unique_id": "model.dbt_bouncer_test_project.stg_payments",
+                }
+            ),
         ],
         output_file=None,
         run_results=[],
@@ -151,11 +188,29 @@ def test_runner_success():
             }
         ),
         models=[
-            {
-                "description": "This is a description",
-                "path": "staging/stg_payments.sql",
-                "unique_id": "model.dbt_bouncer_test_project.stg_payments",
-            }
+            Nodes4(
+                **{
+                    "access": "public",
+                    "alias": "stg_payments",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                    },
+                    "description": "This is a description",
+                    "fqn": ["dbt_bouncer_test_project", "stg_payments"],
+                    "name": "stg_payments",
+                    "original_file_path": "models/staging/stg_payments.sql",
+                    "package_name": "dbt_bouncer_test_project",
+                    "path": "staging/stg_payments.sql",
+                    "resource_type": "model",
+                    "schema": "main",
+                    "unique_id": "model.dbt_bouncer_test_project.stg_payments",
+                }
+            ),
         ],
         output_file=None,
         run_results=[],

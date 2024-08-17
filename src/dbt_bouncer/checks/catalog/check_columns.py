@@ -110,12 +110,6 @@ def check_column_has_specified_test(request, tests, check_config=None, catalog_n
     column_name_pattern = input_vars["check_config"]["column_name_pattern"]
     test_name = input_vars["check_config"]["test_name"]
 
-    from dbt_bouncer.logger import logger
-
-    logger.warning(f"{tests[0]=}")
-    logger.warning(f"{type(tests)=}")
-    logger.warning(f"{type(tests[0])=}")
-
     columns_to_check = [
         v.name
         for _, v in catalog_node.columns.items()
