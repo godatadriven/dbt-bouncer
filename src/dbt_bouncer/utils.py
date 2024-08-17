@@ -9,7 +9,7 @@ import toml
 import yaml
 from dbt_artifacts_parser.parser import parse_catalog, parse_manifest, parse_run_results
 from dbt_artifacts_parser.parsers.catalog.catalog_v1 import CatalogV1
-from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Exposures, Macros, Nodes6
+from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Exposures, Macros
 from dbt_artifacts_parser.parsers.run_results.run_results_v4 import RunResultsV4
 from dbt_artifacts_parser.parsers.run_results.run_results_v5 import RunResultsV5
 from dbt_artifacts_parser.parsers.run_results.run_results_v6 import RunResultsV6
@@ -20,6 +20,7 @@ from dbt_bouncer.parsers import (
     DbtBouncerManifest,
     DbtBouncerModel,
     DbtBouncerResult,
+    DbtBouncerSource,
 )
 
 
@@ -88,7 +89,7 @@ def get_check_inputs(
     model: DbtBouncerModel = None,
     request=None,
     run_result: DbtBouncerResult = None,
-    source: Nodes6 = None,
+    source: DbtBouncerSource = None,
 ) -> Dict[
     str,
     Union[
@@ -98,7 +99,7 @@ def get_check_inputs(
         Macros,
         DbtBouncerModel,
         DbtBouncerResult,
-        Nodes6,
+        DbtBouncerSource,
     ],
 ]:
     """
@@ -114,7 +115,7 @@ def get_check_inputs(
         macro = request.node.macro
         model = getattr(request.node.model, "model", lambda: None)
         run_result = getattr(request.node.run_result, "result", lambda: None)
-        source = request.node.source
+        source = getattr(request.node.source, "source", lambda: None)
     else:
         catalog_node = getattr(catalog_node, "node", lambda: None)
         catalog_source = getattr(catalog_source, "node", lambda: None)

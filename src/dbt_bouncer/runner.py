@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any, List, Optional, Union
 
 import pytest
-from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Exposures, Macros, Nodes6
+from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Exposures, Macros
 from tabulate import tabulate
 
 from dbt_bouncer.conf_validator import DbtBouncerConf
@@ -16,6 +16,7 @@ from dbt_bouncer.parsers import (
     DbtBouncerManifest,
     DbtBouncerModel,
     DbtBouncerResult,
+    DbtBouncerSource,
 )
 from dbt_bouncer.runner_plugins import (
     FixturePlugin,
@@ -36,8 +37,8 @@ def runner(
     models: List[DbtBouncerModel],
     output_file: Union[None, Path],
     run_results: List[DbtBouncerResult],
-    sources: List[Nodes6],
-    tests: List[Nodes6],
+    sources: List[DbtBouncerSource],
+    tests: List[DbtBouncerModel],
     checks_dir: Optional[Union[None, Path]] = Path(__file__).parent / "checks",
 ) -> tuple[int, List[Any]]:
     """

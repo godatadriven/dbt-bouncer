@@ -1,10 +1,9 @@
 from typing import List, Literal
 
 import pytest
-from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Nodes6
 
 from dbt_bouncer.conf_validator_base import BaseCheck
-from dbt_bouncer.parsers import DbtBouncerCatalogNode
+from dbt_bouncer.parsers import DbtBouncerCatalogNode, DbtBouncerSource
 from dbt_bouncer.utils import get_check_inputs
 
 
@@ -14,7 +13,7 @@ class CheckSourceColumnsAreAllDocumented(BaseCheck):
 
 @pytest.mark.iterate_over_catalog_sources
 def check_source_columns_are_all_documented(
-    sources: List[Nodes6], request, catalog_source: DbtBouncerCatalogNode = None
+    sources: List[DbtBouncerSource], request, catalog_source: DbtBouncerCatalogNode = None
 ) -> None:
     """
     All columns in a source should be included in the source's properties file, i.e. `.yml` file.

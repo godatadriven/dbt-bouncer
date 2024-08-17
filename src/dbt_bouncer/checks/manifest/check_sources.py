@@ -2,11 +2,10 @@ import re
 from typing import Any, Dict, List, Literal, Optional, Union
 
 import pytest
-from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Nodes6
 from pydantic import Field
 
 from dbt_bouncer.conf_validator_base import BaseCheck
-from dbt_bouncer.parsers import DbtBouncerModel
+from dbt_bouncer.parsers import DbtBouncerModel, DbtBouncerSource
 from dbt_bouncer.utils import find_missing_meta_keys, get_check_inputs
 
 
@@ -15,7 +14,7 @@ class CheckSourceDescriptionPopulated(BaseCheck):
 
 
 @pytest.mark.iterate_over_sources
-def check_source_description_populated(request, source: Nodes6 = None):
+def check_source_description_populated(request, source: DbtBouncerSource = None):
     """
     Sources must have a populated description.
     """
@@ -32,7 +31,7 @@ class CheckSourceFreshnessPopulated(BaseCheck):
 
 
 @pytest.mark.iterate_over_sources
-def check_source_freshness_populated(request, source: Nodes6 = None):
+def check_source_freshness_populated(request, source: DbtBouncerSource = None):
     """
     Sources must have a populated freshness.
     """
@@ -54,7 +53,9 @@ class CheckSourceHasMetaKeys(BaseCheck):
 
 
 @pytest.mark.iterate_over_sources
-def check_source_has_meta_keys(request, check_config=None, source: Nodes6 = None) -> None:
+def check_source_has_meta_keys(
+    request, check_config=None, source: DbtBouncerSource = None
+) -> None:
     """
     The `meta` config for sources must have the specified keys.
     """
@@ -82,7 +83,7 @@ class CheckSourceHasTags(BaseCheck):
 
 
 @pytest.mark.iterate_over_sources
-def check_source_has_tags(request, check_config=None, source: Nodes6 = None):
+def check_source_has_tags(request, check_config=None, source: DbtBouncerSource = None):
     """
     Sources must have the specified tags.
     """
@@ -100,7 +101,7 @@ class CheckSourceLoaderPopulated(BaseCheck):
 
 
 @pytest.mark.iterate_over_sources
-def check_source_loader_populated(request, source: Nodes6 = None):
+def check_source_loader_populated(request, source: DbtBouncerSource = None):
     """
     Sources must have a populated loader.
     """
@@ -116,7 +117,7 @@ class CheckSourceNames(BaseCheck):
 
 
 @pytest.mark.iterate_over_sources
-def check_source_names(request, check_config=None, source: Nodes6 = None):
+def check_source_names(request, check_config=None, source: DbtBouncerSource = None):
     """
     Sources must have a name that matches the supplied regex.
     """
@@ -136,7 +137,7 @@ class CheckSoureNotorphaned(BaseCheck):
 
 @pytest.mark.iterate_over_sources
 def check_source_not_orphaned(
-    models: List[DbtBouncerModel], request, source: Nodes6 = None
+    models: List[DbtBouncerModel], request, source: DbtBouncerSource = None
 ) -> None:
     """
     Sources must be referenced in at least one model.
@@ -158,7 +159,7 @@ class CheckSourcePropertyFileLocation(BaseCheck):
 
 
 @pytest.mark.iterate_over_sources
-def check_source_property_file_location(request, source: Nodes6 = None):
+def check_source_property_file_location(request, source: DbtBouncerSource = None):
     """
     Source properties files must follow the guidance provided by dbt [here](https://docs.getdbt.com/best-practices/how-we-structure/1-guide-overview).
     """
@@ -185,7 +186,7 @@ class CheckSourceUsedByModelsInSameDirectory(BaseCheck):
 
 @pytest.mark.iterate_over_sources
 def check_source_used_by_models_in_same_directory(
-    models: List[DbtBouncerModel], request, source: Nodes6 = None
+    models: List[DbtBouncerModel], request, source: DbtBouncerSource = None
 ) -> None:
     """
     Sources can only be referenced by models that are located in the same directory where the source is defined.
@@ -215,7 +216,7 @@ class CheckSourceUsedByOnlyOneModel(BaseCheck):
 
 @pytest.mark.iterate_over_sources
 def check_source_used_by_only_one_model(
-    models: List[DbtBouncerModel], request, source: Nodes6 = None
+    models: List[DbtBouncerModel], request, source: DbtBouncerSource = None
 ) -> None:
     """
     Each source can be referenced by a maximum of one model.

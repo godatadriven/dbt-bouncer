@@ -7,7 +7,12 @@ import click
 
 from dbt_bouncer.conf_validator import validate_conf
 from dbt_bouncer.logger import logger
-from dbt_bouncer.parsers import DbtBouncerCatalogNode, DbtBouncerModel, DbtBouncerResult
+from dbt_bouncer.parsers import (
+    DbtBouncerCatalogNode,
+    DbtBouncerModel,
+    DbtBouncerResult,
+    DbtBouncerSource,
+)
 from dbt_bouncer.runner import runner
 from dbt_bouncer.utils import get_dbt_bouncer_config, load_dbt_artifact
 from dbt_bouncer.version import version
@@ -114,7 +119,9 @@ def cli(
     project_sources = []
     for _, v in manifest_obj.manifest.sources.items():
         if v.package_name == manifest_obj.manifest.metadata.project_name:
-            project_sources.append(v)
+            project_sources.append(
+                DbtBouncerSource(**{"source": v, "path": v.path, "unique_id": k})
+            )
 
     logger.info(
         f"Parsed `manifest.json`, found `{manifest_obj.manifest.metadata.project_name}` project, found {len(project_exposures)} exposures, {len(project_macros)} macros, {len(project_models)} nodes, {len(project_sources)} sources and {len(project_tests)} tests."

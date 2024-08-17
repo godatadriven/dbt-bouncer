@@ -5,7 +5,7 @@ import inspect
 from typing import Dict, List, Union
 
 import pytest
-from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Exposures, Macros, Nodes6
+from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Exposures, Macros
 
 from dbt_bouncer.logger import logger
 from dbt_bouncer.parsers import (
@@ -13,6 +13,7 @@ from dbt_bouncer.parsers import (
     DbtBouncerManifest,
     DbtBouncerModel,
     DbtBouncerResult,
+    DbtBouncerSource,
 )
 from dbt_bouncer.utils import object_in_path
 
@@ -27,7 +28,7 @@ class FixturePlugin(object):
         manifest_obj: DbtBouncerManifest,
         models: List[DbtBouncerModel],
         run_results: List[DbtBouncerResult],
-        sources: List[Nodes6],
+        sources: List[DbtBouncerSource],
         tests: List[DbtBouncerModel],
     ):
         self.catalog_nodes_ = catalog_nodes
@@ -88,7 +89,7 @@ class MyFunctionItem(pytest.Function):
         macro: Macros = None,
         model: DbtBouncerModel = None,
         run_result: DbtBouncerResult = None,
-        source: Nodes6 = None,
+        source: DbtBouncerSource = None,
         *args,
         **kwargs,
     ):
