@@ -30,7 +30,7 @@ def check_run_results_max_gigabytes_billed(
     run_result = input_vars["run_result"]
 
     try:
-        gigabytes_billed = run_result.result.adapter_response["bytes_billed"] / (1000**3)
+        gigabytes_billed = run_result.adapter_response["bytes_billed"] / (1000**3)
     except KeyError:
         raise RuntimeError(
             "`bytes_billed` not found in adapter response. Are you using the `dbt-bigquery` adapter?"
@@ -63,5 +63,5 @@ def check_run_results_max_execution_time(
     run_result = input_vars["run_result"]
 
     assert (
-        run_result.result.execution_time <= check_config["max_execution_time"]
-    ), f"`{run_result.unique_id.split('.')[-1]}` has an execution time ({run_result.result.execution_time} greater than permitted ({check_config['max_execution_time']}s)."
+        run_result.execution_time <= check_config["max_execution_time"]
+    ), f"`{run_result.unique_id.split('.')[-1]}` has an execution time ({run_result.execution_time} greater than permitted ({check_config['max_execution_time']}s)."

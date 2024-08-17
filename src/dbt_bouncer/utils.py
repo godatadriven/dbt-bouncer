@@ -110,22 +110,22 @@ def get_check_inputs(
     """
 
     if request is not None:
-        catalog_node = request.node.catalog_node
-        catalog_source = request.node.catalog_source
+        catalog_node = getattr(request.node.catalog_node, "node", lambda: None)
+        catalog_source = getattr(request.node.catalog_source, "node", lambda: None)
         check_config = request.node.check_config
         exposure = request.node.exposure
         macro = request.node.macro
         model = request.node.model
-        run_result = request.node.run_result
+        run_result = getattr(request.node.run_result, "result", lambda: None)
         source = request.node.source
     else:
-        catalog_node = catalog_node
-        catalog_source = catalog_source
+        catalog_node = getattr(catalog_node, "node", lambda: None)
+        catalog_source = getattr(catalog_source, "node", lambda: None)
         check_config = check_config
         exposure = exposure
         macro = macro
         model = model
-        run_result = run_result
+        run_result = getattr(run_result, "result", lambda: None)
         source = source
 
     return {

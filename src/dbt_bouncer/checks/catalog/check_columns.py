@@ -26,7 +26,7 @@ def check_column_name_complies_to_column_type(
     input_vars = get_check_inputs(
         catalog_node=catalog_node, check_config=check_config, request=request
     )
-    catalog_node = input_vars["catalog_node"].node
+    catalog_node = input_vars["catalog_node"]
     check_config = input_vars["check_config"]
 
     non_complying_columns = [
@@ -53,9 +53,7 @@ def check_columns_are_all_documented(
     All columns in a model should be included in the model's properties file, i.e. `.yml` file.
     """
 
-    catalog_node = get_check_inputs(catalog_node=catalog_node, request=request)[
-        "catalog_node"
-    ].node
+    catalog_node = get_check_inputs(catalog_node=catalog_node, request=request)["catalog_node"]
 
     if catalog_node.unique_id.split(".")[0] == "model":
         model = [m for m in models if m.unique_id == catalog_node.unique_id][0]
@@ -79,9 +77,7 @@ def check_columns_are_documented_in_public_models(
     Columns should have a populated description in public models.
     """
 
-    catalog_node = get_check_inputs(catalog_node=catalog_node, request=request)[
-        "catalog_node"
-    ].node
+    catalog_node = get_check_inputs(catalog_node=catalog_node, request=request)["catalog_node"]
 
     if catalog_node.unique_id.split(".")[0] == "model":
         model = [m for m in models if m.unique_id == catalog_node.unique_id][0]
@@ -114,7 +110,7 @@ def check_column_has_specified_test(
     input_vars = get_check_inputs(
         catalog_node=catalog_node, check_config=check_config, request=request
     )
-    catalog_node = input_vars["catalog_node"].node
+    catalog_node = input_vars["catalog_node"]
     column_name_pattern = input_vars["check_config"]["column_name_pattern"]
     test_name = input_vars["check_config"]["test_name"]
 

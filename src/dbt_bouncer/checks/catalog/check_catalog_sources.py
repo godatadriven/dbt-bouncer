@@ -22,7 +22,7 @@ def check_source_columns_are_all_documented(
 
     catalog_source = get_check_inputs(catalog_source=catalog_source, request=request)[
         "catalog_source"
-    ].node
+    ]
 
     source = [s for s in sources if s.unique_id == catalog_source.unique_id][0]
     undocumented_columns = [
