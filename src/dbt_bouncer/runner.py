@@ -17,6 +17,7 @@ from dbt_bouncer.parsers import (
     DbtBouncerModel,
     DbtBouncerResult,
     DbtBouncerSource,
+    DbtBouncerTest,
 )
 from dbt_bouncer.runner_plugins import (
     FixturePlugin,
@@ -38,7 +39,7 @@ def runner(
     output_file: Union[None, Path],
     run_results: List[DbtBouncerResult],
     sources: List[DbtBouncerSource],
-    tests: List[DbtBouncerModel],
+    tests: List[DbtBouncerTest],
     checks_dir: Optional[Union[None, Path]] = Path(__file__).parent / "checks",
 ) -> tuple[int, List[Any]]:
     """

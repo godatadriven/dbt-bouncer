@@ -14,6 +14,7 @@ from dbt_bouncer.parsers import (
     DbtBouncerModel,
     DbtBouncerResult,
     DbtBouncerSource,
+    DbtBouncerTest,
 )
 from dbt_bouncer.utils import object_in_path
 
@@ -29,7 +30,7 @@ class FixturePlugin(object):
         models: List[DbtBouncerModel],
         run_results: List[DbtBouncerResult],
         sources: List[DbtBouncerSource],
-        tests: List[DbtBouncerModel],
+        tests: List[DbtBouncerTest],
     ):
         self.catalog_nodes_ = catalog_nodes
         self.catalog_sources_ = catalog_sources
@@ -75,7 +76,7 @@ class FixturePlugin(object):
 
     @pytest.fixture(scope="session")
     def tests(self):
-        return self.tests_
+        return [t.test for t in self.tests_]
 
 
 # Inspiration: https://github.com/pytest-dev/pytest-xdist/discussions/957#discussioncomment-7335007

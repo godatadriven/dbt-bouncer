@@ -12,6 +12,7 @@ from dbt_bouncer.parsers import (
     DbtBouncerModel,
     DbtBouncerResult,
     DbtBouncerSource,
+    DbtBouncerTest,
 )
 from dbt_bouncer.runner import runner
 from dbt_bouncer.utils import get_dbt_bouncer_config, load_dbt_artifact
@@ -113,8 +114,8 @@ def cli(
                 )
             elif (
                 isinstance(v.resource_type, Enum) and v.resource_type.value == "test"
-            ) or v.resource_type == "test":  # dbt 1.6  # dbt 1.7+
-                project_tests.append(v)
+            ) or v.resource_type == "test":
+                project_tests.append(DbtBouncerTest(**{"path": v.path, "test": v, "unique_id": k}))
 
     project_sources = []
     for _, v in manifest_obj.manifest.sources.items():

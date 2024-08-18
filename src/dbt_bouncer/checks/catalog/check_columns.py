@@ -4,7 +4,7 @@ from typing import List, Literal
 import pytest
 
 from dbt_bouncer.conf_validator_base import BaseCheck
-from dbt_bouncer.parsers import DbtBouncerCatalogNode, DbtBouncerModel
+from dbt_bouncer.parsers import DbtBouncerCatalogNode, DbtBouncerModel, DbtBouncerTest
 from dbt_bouncer.utils import get_check_inputs
 
 
@@ -101,7 +101,7 @@ class CheckColumnHasSpecifiedTest(BaseCheck):
 @pytest.mark.iterate_over_catalog_nodes
 def check_column_has_specified_test(
     request,
-    tests: List[DbtBouncerModel],
+    tests: List[DbtBouncerTest],
     check_config=None,
     catalog_node: DbtBouncerCatalogNode = None,
 ) -> None:
