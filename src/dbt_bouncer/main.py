@@ -1,5 +1,4 @@
 import sys
-from enum import Enum
 from pathlib import Path
 from typing import Dict, List, Union
 
@@ -8,14 +7,13 @@ import click
 from dbt_bouncer.conf_validator import validate_conf
 from dbt_bouncer.logger import logger
 from dbt_bouncer.parsers import (
-    DbtBouncerCatalogNode,
-    DbtBouncerModel,
-    DbtBouncerResult,
-    DbtBouncerSource,
-    DbtBouncerTest,
+    load_dbt_artifact,
+    parse_catalog_artifact,
+    parse_manifest_artifact,
+    parse_run_results_artifact,
 )
 from dbt_bouncer.runner import runner
-from dbt_bouncer.utils import get_dbt_bouncer_config, load_dbt_artifact
+from dbt_bouncer.utils import get_dbt_bouncer_config
 from dbt_bouncer.version import version
 
 
@@ -86,83 +84,26 @@ def cli(
                     )
     logger.debug(f"{config=}")
 
+    dbt_artifacts_dir = config_file.parent / bouncer_config.dbt_artifacts_dir
+
     # Manifest, will always be parsed
     manifest_obj = load_dbt_artifact(
         artifact_name="manifest.json",
-        dbt_artifacts_dir=config_file.parent / bouncer_config.dbt_artifacts_dir,
+        dbt_artifacts_dir=dbt_artifacts_dir,
     )
 
-    project_exposures = []
-    for _, v in manifest_obj.manifest.exposures.items():
-        if v.package_name == manifest_obj.manifest.metadata.project_name:
-            project_exposures.append(v)
-
-    project_macros = []
-    for _, v in manifest_obj.manifest.macros.items():
-        if v.package_name == manifest_obj.manifest.metadata.project_name:
-            project_macros.append(v)
-
-    project_models = []
-    project_tests = []
-    for k, v in manifest_obj.manifest.nodes.items():
-        if v.package_name == manifest_obj.manifest.metadata.project_name:
-            if (
-                isinstance(v.resource_type, Enum) and v.resource_type.value == "model"
-            ) or v.resource_type == "model":  # dbt 1.6  # dbt 1.7+
-                project_models.append(
-                    DbtBouncerModel(**{"model": v, "path": v.path, "unique_id": k})
-                )
-            elif (
-                isinstance(v.resource_type, Enum) and v.resource_type.value == "test"
-            ) or v.resource_type == "test":
-                project_tests.append(DbtBouncerTest(**{"path": v.path, "test": v, "unique_id": k}))
-
-    project_sources = []
-    for _, v in manifest_obj.manifest.sources.items():
-        if v.package_name == manifest_obj.manifest.metadata.project_name:
-            project_sources.append(
-                DbtBouncerSource(**{"source": v, "path": v.path, "unique_id": k})
-            )
-
-    logger.info(
-        f"Parsed `manifest.json`, found `{manifest_obj.manifest.metadata.project_name}` project, found {len(project_exposures)} exposures, {len(project_macros)} macros, {len(project_models)} nodes, {len(project_sources)} sources and {len(project_tests)} tests."
+    project_exposures, project_macros, project_models, project_tests, project_sources = (
+        parse_manifest_artifact(
+            artifact_dir=dbt_artifacts_dir,
+            manifest_obj=manifest_obj,
+        )
     )
 
     # Catalog, must come after manifest is parsed
     if bouncer_config.catalog_checks != []:
-        catalog_obj = load_dbt_artifact(
-            artifact_name="catalog.json",
-            dbt_artifacts_dir=config_file.parent / bouncer_config.dbt_artifacts_dir,
-        )
-
-        project_catalog_nodes = []
-        for k, v in catalog_obj.nodes.items():
-            if k.split(".")[-2] == manifest_obj.manifest.metadata.project_name:
-                project_catalog_nodes.append(
-                    DbtBouncerCatalogNode(
-                        **{"node": v, "path": manifest_obj.manifest.nodes[k].path, "unique_id": k}
-                    )
-                )
-
-        project_catalog_sources = []
-        # Doesn't work with dbt-duckdb for some reason, need to test using different adapter
-        for (
-            k,
-            v,
-        ) in catalog_obj.sources.items():
-            if k.split(".")[1] == manifest_obj.manifest.metadata.project_name:
-                project_catalog_sources.append(
-                    DbtBouncerCatalogNode(
-                        **{
-                            "node": v,
-                            "path": manifest_obj.manifest.sources[k].path,
-                            "unique_id": k,
-                        }
-                    )
-                )
-
-        logger.info(
-            f"Parsed `catalog.json`, found {len(project_catalog_nodes)} nodes and {len(project_catalog_sources)} sources."
+        project_catalog_nodes, project_catalog_sources = parse_catalog_artifact(
+            artifact_dir=dbt_artifacts_dir,
+            manifest_obj=manifest_obj,
         )
     else:
         project_catalog_nodes = []
@@ -170,24 +111,10 @@ def cli(
 
     # Run results, must come after manifest is parsed
     if bouncer_config.run_results_checks != []:
-        run_results_obj = load_dbt_artifact(
-            artifact_name="run_results.json",
-            dbt_artifacts_dir=config_file.parent / bouncer_config.dbt_artifacts_dir,
+        project_run_results = parse_run_results_artifact(
+            artifact_dir=dbt_artifacts_dir,
+            manifest_obj=manifest_obj,
         )
-        project_run_results = []
-        for r in run_results_obj.results:
-            if r.unique_id.split(".")[1] == manifest_obj.manifest.metadata.project_name:
-                project_run_results.append(
-                    DbtBouncerResult(
-                        **{
-                            "path": manifest_obj.manifest.nodes[r.unique_id].path,
-                            "result": r,
-                            "unique_id": r.unique_id,
-                        }
-                    )
-                )
-
-        logger.info(f"Parsed `run_results.json`, found {len(project_run_results)} results.")
     else:
         project_run_results = []
 
