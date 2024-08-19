@@ -1,9 +1,11 @@
 from typing import List, Literal
 
 import pytest
+from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Exposures
 from pydantic import Field
 
 from dbt_bouncer.conf_validator_base import BaseCheck
+from dbt_bouncer.parsers import DbtBouncerModel
 from dbt_bouncer.utils import get_check_inputs
 
 
@@ -12,7 +14,9 @@ class CheckExposureOnNonPublicModels(BaseCheck):
 
 
 @pytest.mark.iterate_over_exposures
-def check_exposure_based_on_non_public_models(models, request, exposure=None):
+def check_exposure_based_on_non_public_models(
+    models: List[DbtBouncerModel], request, exposure: Exposures = None
+):
     """
     Exposures should be based on public models only.
     """
@@ -20,18 +24,18 @@ def check_exposure_based_on_non_public_models(models, request, exposure=None):
     exposure = get_check_inputs(exposure=exposure, request=request)["exposure"]
 
     non_public_upstream_dependencies = []
-    for model in exposure["depends_on"]["nodes"]:
+    for model in exposure.depends_on.nodes:
         if (
             model.split(".")[0] == "model"
-            and model.split(".")[1] == exposure["unique_id"].split(".")[1]
+            and model.split(".")[1] == exposure.unique_id.split(".")[1]
         ):
-            model = [m for m in models if m["unique_id"] == model][0]
-            if model["access"] != "public":
-                non_public_upstream_dependencies.append(model["unique_id"].split(".")[-1])
+            model = [m for m in models if m.unique_id == model][0]
+            if model.access.value != "public":
+                non_public_upstream_dependencies.append(model.unique_id.split(".")[-1])
 
     assert (
         not non_public_upstream_dependencies
-    ), f"`{exposure['unique_id'].split('.')[-1]}` is based on a model(s) that is not public: {non_public_upstream_dependencies}."
+    ), f"`{exposure.unique_id.split('.')[-1]}` is based on a model(s) that is not public: {non_public_upstream_dependencies}."
 
 
 class CheckExposureOnView(BaseCheck):
@@ -43,7 +47,9 @@ class CheckExposureOnView(BaseCheck):
 
 
 @pytest.mark.iterate_over_exposures
-def check_exposure_based_on_view(models, request, check_config=None, exposure=None):
+def check_exposure_based_on_view(
+    models: List[DbtBouncerModel], request, check_config=None, exposure: Exposures = None
+):
     """
     Exposures should not be based on views.
     """
@@ -53,15 +59,15 @@ def check_exposure_based_on_view(models, request, check_config=None, exposure=No
     materializations_to_include = input_vars["check_config"]["materializations_to_include"]
 
     non_table_upstream_dependencies = []
-    for model in exposure["depends_on"]["nodes"]:
+    for model in exposure.depends_on.nodes:
         if (
             model.split(".")[0] == "model"
-            and model.split(".")[1] == exposure["unique_id"].split(".")[1]
+            and model.split(".")[1] == exposure.unique_id.split(".")[1]
         ):
-            model = [m for m in models if m["unique_id"] == model][0]
-            if model["config"]["materialized"] in materializations_to_include:
-                non_table_upstream_dependencies.append(model["unique_id"].split(".")[-1])
+            model = [m for m in models if m.unique_id == model][0]
+            if model.config.materialized in materializations_to_include:
+                non_table_upstream_dependencies.append(model.unique_id.split(".")[-1])
 
     assert (
         not non_table_upstream_dependencies
-    ), f"`{exposure['unique_id'].split('.')[-1]}` is based on a model that is not a table: {non_table_upstream_dependencies}."
+    ), f"`{exposure.unique_id.split('.')[-1]}` is based on a model that is not a table: {non_table_upstream_dependencies}."

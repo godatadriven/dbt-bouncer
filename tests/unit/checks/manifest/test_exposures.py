@@ -1,6 +1,7 @@
 from contextlib import nullcontext as does_not_raise
 
 import pytest
+from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Exposures, Nodes4
 
 from dbt_bouncer.checks.manifest.check_exposures import (
     check_exposure_based_on_non_public_models,
@@ -12,30 +13,94 @@ from dbt_bouncer.checks.manifest.check_exposures import (
     "exposure, models, expectation",
     [
         (
-            {
-                "depends_on": {"nodes": ["model.dbt_bouncer_test_project.model_1"]},
-                "name": "exposure_1",
-                "unique_id": "exposure.dbt_bouncer_test_project.exposure_1",
-            },
+            Exposures(
+                **{
+                    "depends_on": {"nodes": ["model.package_name.model_1"]},
+                    "fqn": ["package_name", "marts", "finance", "exposure_1"],
+                    "name": "exposure_1",
+                    "original_file_path": "models/marts/finance/_exposures.yml",
+                    "owner": {"email": "anna.anderson@example.com", "name": "Anna Anderson"},
+                    "package_name": "package_name",
+                    "path": "marts/finance/_exposures.yml",
+                    "resource_type": "exposure",
+                    "type": "dashboard",
+                    "unique_id": "exposure.package_name.exposure_1",
+                },
+            ),
             [
-                {
-                    "access": "public",
-                    "unique_id": "model.dbt_bouncer_test_project.model_1",
-                }
+                Nodes4(
+                    **{
+                        "access": "public",
+                        "alias": "model_1",
+                        "checksum": {"name": "sha256", "checksum": ""},
+                        "columns": {
+                            "col_1": {
+                                "index": 1,
+                                "name": "col_1",
+                                "type": "INTEGER",
+                            },
+                            "col_2": {
+                                "index": 2,
+                                "name": "col_2",
+                                "type": "INTEGER",
+                            },
+                        },
+                        "fqn": ["package_name", "model_1"],
+                        "name": "model_1",
+                        "original_file_path": "model_1.sql",
+                        "package_name": "package_name",
+                        "path": "model_1.sql",
+                        "resource_type": "model",
+                        "schema": "main",
+                        "unique_id": "model.package_name.model_1",
+                    }
+                )
             ],
             does_not_raise(),
         ),
         (
-            {
-                "depends_on": {"nodes": ["model.dbt_bouncer_test_project.model_1"]},
-                "name": "exposure_1",
-                "unique_id": "exposure.dbt_bouncer_test_project.exposure_1",
-            },
+            Exposures(
+                **{
+                    "depends_on": {"nodes": ["model.package_name.model_1"]},
+                    "fqn": ["package_name", "marts", "finance", "exposure_1"],
+                    "name": "exposure_1",
+                    "original_file_path": "models/marts/finance/_exposures.yml",
+                    "owner": {"email": "anna.anderson@example.com", "name": "Anna Anderson"},
+                    "package_name": "package_name",
+                    "path": "marts/finance/_exposures.yml",
+                    "resource_type": "exposure",
+                    "type": "dashboard",
+                    "unique_id": "exposure.package_name.exposure_1",
+                },
+            ),
             [
-                {
-                    "access": "protected",
-                    "unique_id": "model.dbt_bouncer_test_project.model_1",
-                }
+                Nodes4(
+                    **{
+                        "access": "protected",
+                        "alias": "model_1",
+                        "checksum": {"name": "sha256", "checksum": ""},
+                        "columns": {
+                            "col_1": {
+                                "index": 1,
+                                "name": "col_1",
+                                "type": "INTEGER",
+                            },
+                            "col_2": {
+                                "index": 2,
+                                "name": "col_2",
+                                "type": "INTEGER",
+                            },
+                        },
+                        "fqn": ["package_name", "model_1"],
+                        "name": "model_1",
+                        "original_file_path": "model_1.sql",
+                        "package_name": "package_name",
+                        "path": "model_1.sql",
+                        "resource_type": "model",
+                        "schema": "main",
+                        "unique_id": "model.package_name.model_1",
+                    }
+                )
             ],
             pytest.raises(AssertionError),
         ),
@@ -51,55 +116,175 @@ def test_check_exposure_based_on_non_public_models(exposure, models, expectation
     [
         (
             {"materializations_to_include": ["ephemeral", "view"]},
-            {
-                "depends_on": {"nodes": ["model.dbt_bouncer_test_project.model_1"]},
-                "name": "exposure_1",
-                "unique_id": "exposure.dbt_bouncer_test_project.exposure_1",
-            },
+            Exposures(
+                **{
+                    "depends_on": {"nodes": ["model.package_name.model_1"]},
+                    "fqn": ["package_name", "marts", "finance", "exposure_1"],
+                    "name": "exposure_1",
+                    "original_file_path": "models/marts/finance/_exposures.yml",
+                    "owner": {"email": "anna.anderson@example.com", "name": "Anna Anderson"},
+                    "package_name": "package_name",
+                    "path": "marts/finance/_exposures.yml",
+                    "resource_type": "exposure",
+                    "type": "dashboard",
+                    "unique_id": "exposure.package_name.exposure_1",
+                },
+            ),
             [
-                {
-                    "config": {"materialized": "table"},
-                    "unique_id": "model.dbt_bouncer_test_project.model_1",
-                }
+                Nodes4(
+                    **{
+                        "access": "protected",
+                        "alias": "model_1",
+                        "checksum": {"name": "sha256", "checksum": ""},
+                        "config": {"materialized": "table"},
+                        "columns": {
+                            "col_1": {
+                                "index": 1,
+                                "name": "col_1",
+                                "type": "INTEGER",
+                            },
+                            "col_2": {
+                                "index": 2,
+                                "name": "col_2",
+                                "type": "INTEGER",
+                            },
+                        },
+                        "fqn": ["package_name", "model_1"],
+                        "name": "model_1",
+                        "original_file_path": "model_1.sql",
+                        "package_name": "package_name",
+                        "path": "model_1.sql",
+                        "resource_type": "model",
+                        "schema": "main",
+                        "unique_id": "model.package_name.model_1",
+                    }
+                )
             ],
             does_not_raise(),
         ),
         (
             {"materializations_to_include": ["ephemeral", "view"]},
-            {
-                "depends_on": {
-                    "nodes": [
-                        "model.dbt_bouncer_test_project.model_1",
-                        "model.dbt_bouncer_test_project.model_2",
-                    ]
+            Exposures(
+                **{
+                    "depends_on": {
+                        "nodes": ["model.package_name.model_1", "model.package_name.model_2"]
+                    },
+                    "fqn": ["package_name", "marts", "finance", "exposure_1"],
+                    "name": "exposure_1",
+                    "original_file_path": "models/marts/finance/_exposures.yml",
+                    "owner": {"email": "anna.anderson@example.com", "name": "Anna Anderson"},
+                    "package_name": "package_name",
+                    "path": "marts/finance/_exposures.yml",
+                    "resource_type": "exposure",
+                    "type": "dashboard",
+                    "unique_id": "exposure.package_name.exposure_1",
                 },
-                "name": "exposure_1",
-                "unique_id": "exposure.dbt_bouncer_test_project.exposure_1",
-            },
+            ),
             [
-                {
-                    "config": {"materialized": "view"},
-                    "unique_id": "model.dbt_bouncer_test_project.model_1",
-                },
-                {
-                    "config": {"materialized": "table"},
-                    "unique_id": "model.dbt_bouncer_test_project.model_2",
-                },
+                Nodes4(
+                    **{
+                        "access": "protected",
+                        "alias": "model_1",
+                        "checksum": {"name": "sha256", "checksum": ""},
+                        "config": {"materialized": "view"},
+                        "columns": {
+                            "col_1": {
+                                "index": 1,
+                                "name": "col_1",
+                                "type": "INTEGER",
+                            },
+                            "col_2": {
+                                "index": 2,
+                                "name": "col_2",
+                                "type": "INTEGER",
+                            },
+                        },
+                        "fqn": ["package_name", "model_1"],
+                        "name": "model_1",
+                        "original_file_path": "model_1.sql",
+                        "package_name": "package_name",
+                        "path": "model_1.sql",
+                        "resource_type": "model",
+                        "schema": "main",
+                        "unique_id": "model.package_name.model_1",
+                    }
+                ),
+                Nodes4(
+                    **{
+                        "access": "protected",
+                        "alias": "model_2",
+                        "checksum": {"name": "sha256", "checksum": ""},
+                        "config": {"materialized": "table"},
+                        "columns": {
+                            "col_1": {
+                                "index": 1,
+                                "name": "col_1",
+                                "type": "INTEGER",
+                            },
+                            "col_2": {
+                                "index": 2,
+                                "name": "col_2",
+                                "type": "INTEGER",
+                            },
+                        },
+                        "fqn": ["package_name", "model_2"],
+                        "name": "model_2",
+                        "original_file_path": "model_2.sql",
+                        "package_name": "package_name",
+                        "path": "model_2.sql",
+                        "resource_type": "model",
+                        "schema": "main",
+                        "unique_id": "model.package_name.model_2",
+                    }
+                ),
             ],
             pytest.raises(AssertionError),
         ),
         (
             {"materializations_to_include": ["ephemeral", "view"]},
-            {
-                "depends_on": {"nodes": ["model.dbt_bouncer_test_project.model_1"]},
-                "name": "exposure_1",
-                "unique_id": "exposure.dbt_bouncer_test_project.exposure_1",
-            },
+            Exposures(
+                **{
+                    "depends_on": {"nodes": ["model.package_name.model_1"]},
+                    "fqn": ["package_name", "marts", "finance", "exposure_1"],
+                    "name": "exposure_1",
+                    "original_file_path": "models/marts/finance/_exposures.yml",
+                    "owner": {"email": "anna.anderson@example.com", "name": "Anna Anderson"},
+                    "package_name": "package_name",
+                    "path": "marts/finance/_exposures.yml",
+                    "resource_type": "exposure",
+                    "type": "dashboard",
+                    "unique_id": "exposure.package_name.exposure_1",
+                },
+            ),
             [
-                {
-                    "config": {"materialized": "view"},
-                    "unique_id": "model.dbt_bouncer_test_project.model_1",
-                }
+                Nodes4(
+                    **{
+                        "access": "protected",
+                        "alias": "model_1",
+                        "checksum": {"name": "sha256", "checksum": ""},
+                        "config": {"materialized": "view"},
+                        "columns": {
+                            "col_1": {
+                                "index": 1,
+                                "name": "col_1",
+                                "type": "INTEGER",
+                            },
+                            "col_2": {
+                                "index": 2,
+                                "name": "col_2",
+                                "type": "INTEGER",
+                            },
+                        },
+                        "fqn": ["package_name", "model_1"],
+                        "name": "model_1",
+                        "original_file_path": "model_1.sql",
+                        "package_name": "package_name",
+                        "path": "model_1.sql",
+                        "resource_type": "model",
+                        "schema": "main",
+                        "unique_id": "model.package_name.model_1",
+                    }
+                ),
             ],
             pytest.raises(AssertionError),
         ),

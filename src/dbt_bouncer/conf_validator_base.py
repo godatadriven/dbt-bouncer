@@ -9,3 +9,6 @@ class BaseCheck(BaseModel):
     include: Optional[str] = Field(
         default=None, description="Regexp to match which paths to include."
     )
+    index: Optional[int] = Field(
+        default=None, description="Index to uniquely identify the check, calculated at runtime."
+    )

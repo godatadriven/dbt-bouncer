@@ -1,6 +1,6 @@
 import importlib
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field
 from pydantic._internal._model_construction import ModelMetaclass
@@ -75,7 +75,7 @@ class DbtBouncerConf(BaseModel):
     dbt_artifacts_dir: Optional[str] = Field(default="./target")
 
 
-def validate_conf(conf) -> DbtBouncerConf:
+def validate_conf(conf: Dict[str, Any]) -> DbtBouncerConf:
     logger.info("Validating conf...")
 
     return DbtBouncerConf(**conf)

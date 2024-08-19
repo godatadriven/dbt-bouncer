@@ -1,15 +1,20 @@
 import contextlib
-import json
 import os
 import re
 from pathlib import Path
-from typing import List, Literal
+from typing import Any, Dict, List, Mapping, Union
 
 import toml
 import yaml
-from dbt_artifacts_parser.parser import parse_catalog, parse_manifest, parse_run_results
+from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Exposures, Macros
 
 from dbt_bouncer.logger import logger
+from dbt_bouncer.parsers import (
+    DbtBouncerCatalogNode,
+    DbtBouncerModel,
+    DbtBouncerResult,
+    DbtBouncerSource,
+)
 
 
 def create_github_comment_file(failed_checks: List[List[str]]) -> None:
@@ -50,7 +55,7 @@ def find_missing_meta_keys(meta_config, required_keys) -> List[str]:
     return [x for x in required_keys if x not in keys_in_meta]
 
 
-def flatten(structure, key="", path="", flattened=None):
+def flatten(structure: Any, key: str = "", path: str = "", flattened=None):
     """
     Take a dict of arbitrary depth that may contain lists and return a non-nested dict of all pathways.
     """
@@ -69,38 +74,49 @@ def flatten(structure, key="", path="", flattened=None):
 
 
 def get_check_inputs(
-    catalog_node=None,
-    catalog_source=None,
-    check_config=None,
-    exposure=None,
-    macro=None,
-    model=None,
+    catalog_node: DbtBouncerCatalogNode = None,
+    catalog_source: DbtBouncerCatalogNode = None,
+    check_config: Union[Dict[str, Union[Dict[str, str], str]], None] = None,
+    exposure: Exposures = None,
+    macro: Macros = None,
+    model: DbtBouncerModel = None,
     request=None,
-    run_result=None,
-    source=None,
-):
+    run_result: DbtBouncerResult = None,
+    source: DbtBouncerSource = None,
+) -> Dict[
+    str,
+    Union[
+        DbtBouncerCatalogNode,
+        Dict[str, Union[Dict[str, str], str]],
+        Exposures,
+        Macros,
+        DbtBouncerModel,
+        DbtBouncerResult,
+        DbtBouncerSource,
+    ],
+]:
     """
     Helper function that is used to account for the difference in how arguments are passed to check functions
     when they are run by `dbt-bouncer` and when they are called by pytest.
     """
 
     if request is not None:
-        catalog_node = request.node.catalog_node
-        catalog_source = request.node.catalog_source
+        catalog_node = getattr(request.node.catalog_node, "node", lambda: None)
+        catalog_source = getattr(request.node.catalog_source, "node", lambda: None)
         check_config = request.node.check_config
         exposure = request.node.exposure
         macro = request.node.macro
-        model = request.node.model
-        run_result = request.node.run_result
-        source = request.node.source
+        model = getattr(request.node.model, "model", lambda: None)
+        run_result = getattr(request.node.run_result, "result", lambda: None)
+        source = getattr(request.node.source, "source", lambda: None)
     else:
-        catalog_node = catalog_node
-        catalog_source = catalog_source
+        catalog_node = getattr(catalog_node, "node", lambda: None)
+        catalog_source = getattr(catalog_source, "node", lambda: None)
         check_config = check_config
         exposure = exposure
         macro = macro
         model = model
-        run_result = run_result
+        run_result = getattr(run_result, "result", lambda: None)
         source = source
 
     return {
@@ -115,7 +131,7 @@ def get_check_inputs(
     }
 
 
-def get_dbt_bouncer_config(config_file: str, config_file_source: str):
+def get_dbt_bouncer_config(config_file: str, config_file_source: str) -> Mapping[str, Any]:
     """
     Get the config for dbt-bouncer. This is fetched from (in order):
         1. The file passed via the `--config=file` CLI flag.
@@ -128,7 +144,7 @@ def get_dbt_bouncer_config(config_file: str, config_file_source: str):
 
     if config_file_source == "COMMANDLINE":
         logger.debug(f"Config file passed via command line: {config_file}")
-        return load_config_from_yaml(config_file)
+        return load_config_from_yaml(Path(config_file))
 
     if config_file_source == "DEFAULT":
         logger.debug(f"Using default value for config file: {config_file}")
@@ -163,7 +179,7 @@ def get_dbt_bouncer_config(config_file: str, config_file_source: str):
     return conf
 
 
-def load_config_from_yaml(config_file):
+def load_config_from_yaml(config_file: Path) -> Mapping[str, Any]:
 
     config_path = Path().cwd() / config_file
     logger.debug(f"Loading config from {config_path}...")
@@ -179,42 +195,7 @@ def load_config_from_yaml(config_file):
     return conf
 
 
-def load_dbt_artifact(
-    artifact_name: Literal["catalog.json", "manifest.json", "run_results.json"],
-    dbt_artifacts_dir: str,
-):
-    """
-    Load a dbt artifact from a JSON file to a Pydantic object
-    """
-
-    logger.debug(f"{artifact_name=}")
-    logger.debug(f"{dbt_artifacts_dir=}")
-
-    artifact_path = dbt_artifacts_dir / Path(artifact_name)
-    logger.info(f"Loading {artifact_name} from {artifact_path.absolute()}...")
-    if not artifact_path.exists():
-        raise FileNotFoundError(f"No {artifact_name} found at {artifact_path.absolute()}.")
-
-    if artifact_name == "catalog.json":
-        with Path.open(artifact_path, "r") as fp:
-            catalog_obj = parse_catalog(catalog=json.load(fp))
-
-        return catalog_obj
-
-    elif artifact_name == "manifest.json":
-        with Path.open(artifact_path, "r") as fp:
-            manifest_obj = parse_manifest(manifest=json.load(fp))
-
-        return manifest_obj
-
-    elif artifact_name == "run_results.json":
-        with Path.open(artifact_path, "r") as fp:
-            run_results_obj = parse_run_results(run_results=json.load(fp))
-
-        return run_results_obj
-
-
-def make_markdown_table(array):
+def make_markdown_table(array: List[List[str]]) -> str:
     """
     Transforms a list of lists into a markdown table. The first element is the header row.
     """

@@ -1,24 +1,36 @@
+# TODO Remove after this program no longer support Python 3.8.*
+from __future__ import annotations
+
 import inspect
-from typing import Dict
+from typing import Dict, List, Union
 
 import pytest
+from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Exposures, Macros
 
 from dbt_bouncer.logger import logger
+from dbt_bouncer.parsers import (
+    DbtBouncerCatalogNode,
+    DbtBouncerManifest,
+    DbtBouncerModel,
+    DbtBouncerResult,
+    DbtBouncerSource,
+    DbtBouncerTest,
+)
 from dbt_bouncer.utils import object_in_path
 
 
 class FixturePlugin(object):
     def __init__(
         self,
-        catalog_nodes,
-        catalog_sources,
-        exposures,
-        macros,
-        manifest_obj,
-        models,
-        run_results,
-        sources,
-        tests,
+        catalog_nodes: List[DbtBouncerCatalogNode],
+        catalog_sources: List[DbtBouncerCatalogNode],
+        exposures: List[Exposures],
+        macros: List[Macros],
+        manifest_obj: DbtBouncerManifest,
+        models: List[DbtBouncerModel],
+        run_results: List[DbtBouncerResult],
+        sources: List[DbtBouncerSource],
+        tests: List[DbtBouncerTest],
     ):
         self.catalog_nodes_ = catalog_nodes
         self.catalog_sources_ = catalog_sources
@@ -52,7 +64,7 @@ class FixturePlugin(object):
 
     @pytest.fixture(scope="session")
     def models(self):
-        return self.models_
+        return [m.model for m in self.models_]
 
     @pytest.fixture(scope="session")
     def run_results(self):
@@ -64,32 +76,32 @@ class FixturePlugin(object):
 
     @pytest.fixture(scope="session")
     def tests(self):
-        return self.tests_
+        return [t.test for t in self.tests_]
 
 
 # Inspiration: https://github.com/pytest-dev/pytest-xdist/discussions/957#discussioncomment-7335007
 class MyFunctionItem(pytest.Function):
     def __init__(
         self,
-        check_config,
-        catalog_node=None,
-        catalog_source=None,
-        exposure=None,
-        macro=None,
-        model=None,
-        run_result=None,
-        source=None,
+        check_config: Dict[str, Union[Dict[str, str], str]],
+        catalog_node: DbtBouncerCatalogNode = None,
+        catalog_source: DbtBouncerCatalogNode = None,
+        exposure: Exposures = None,
+        macro: Macros = None,
+        model: DbtBouncerModel = None,
+        run_result: DbtBouncerResult = None,
+        source: DbtBouncerSource = None,
         *args,
         **kwargs,
     ):
-        self.check_config: Dict[str, str] = check_config
-        self.catalog_node: Dict[str, str] | None = catalog_node
-        self.catalog_source: Dict[str, str] | None = catalog_source
-        self.exposure: Dict[str, str] | None = exposure
-        self.macro: Dict[str, str] | None = macro
-        self.model: Dict[str, str] | None = model
-        self.run_result: Dict[str, str] | None = run_result
-        self.source: Dict[str, str] | None = source
+        self.check_config = check_config
+        self.catalog_node = catalog_node
+        self.catalog_source = catalog_source
+        self.exposure = exposure
+        self.macro = macro
+        self.model = model
+        self.run_result = run_result
+        self.source = source
         super().__init__(*args, **kwargs)
 
 
@@ -193,7 +205,7 @@ class GenerateTestsPlugin:
                                     run_result
                                 ) = None
 
-                            if object_in_path(check_config.get("include"), x["path"]):
+                            if object_in_path(check_config.get("include"), x.path):
                                 item = MyFunctionItem.from_parent(
                                     parent=collector,
                                     name=name,
@@ -207,7 +219,9 @@ class GenerateTestsPlugin:
                                     run_result=run_result,
                                     source=source,
                                 )
-                                item._nodeid = f"{name}::{x['unique_id'].split('.')[-1]}_{check_config['index']}"
+                                item._nodeid = (
+                                    f"{name}::{x.unique_id.split('.')[-1]}_{check_config['index']}"
+                                )
 
                                 items.append(item)
                     else:

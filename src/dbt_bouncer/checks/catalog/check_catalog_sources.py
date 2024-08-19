@@ -1,8 +1,9 @@
-from typing import Literal
+from typing import List, Literal
 
 import pytest
 
 from dbt_bouncer.conf_validator_base import BaseCheck
+from dbt_bouncer.parsers import DbtBouncerCatalogNode, DbtBouncerSource
 from dbt_bouncer.utils import get_check_inputs
 
 
@@ -11,7 +12,9 @@ class CheckSourceColumnsAreAllDocumented(BaseCheck):
 
 
 @pytest.mark.iterate_over_catalog_sources
-def check_source_columns_are_all_documented(sources, request, catalog_source=None) -> None:
+def check_source_columns_are_all_documented(
+    sources: List[DbtBouncerSource], request, catalog_source: DbtBouncerCatalogNode = None
+) -> None:
     """
     All columns in a source should be included in the source's properties file, i.e. `.yml` file.
     """
@@ -20,12 +23,10 @@ def check_source_columns_are_all_documented(sources, request, catalog_source=Non
         "catalog_source"
     ]
 
-    source = [s for s in sources if s["unique_id"] == catalog_source["unique_id"]][0]
+    source = [s for s in sources if s.unique_id == catalog_source.unique_id][0]
     undocumented_columns = [
-        v["name"]
-        for _, v in catalog_source["columns"].items()
-        if v["name"] not in source["columns"].keys()
+        v.name for _, v in catalog_source.columns.items() if v.name not in source.columns.keys()
     ]
     assert (
         not undocumented_columns
-    ), f"`{catalog_source['unique_id']}` has columns that are not included in the sources properties file: {undocumented_columns}"
+    ), f"`{catalog_source.unique_id}` has columns that are not included in the sources properties file: {undocumented_columns}"
