@@ -1,13 +1,15 @@
+# mypy: disable-error-code="union-attr"
+
 import re
 from typing import Any, Dict, List, Literal, Optional, Union
 
 import pytest
+from _pytest.fixtures import TopRequest
 from pydantic import BaseModel, ConfigDict, Field
 
 from dbt_bouncer.conf_validator_base import BaseCheck
-from dbt_bouncer.logger import logger
 from dbt_bouncer.parsers import DbtBouncerManifest, DbtBouncerModel
-from dbt_bouncer.utils import find_missing_meta_keys, get_check_inputs
+from dbt_bouncer.utils import bouncer_check, find_missing_meta_keys
 
 
 class CheckModelAccess(BaseCheck):
@@ -16,18 +18,20 @@ class CheckModelAccess(BaseCheck):
 
 
 @pytest.mark.iterate_over_models
-def check_model_access(request, check_config=None, model: DbtBouncerModel = None):
+@bouncer_check
+def check_model_access(
+    request: TopRequest,
+    access: Union[None, str] = None,
+    model: Union[DbtBouncerModel, None] = None,
+    **kwargs,
+) -> None:
     """
     Models must have the specified access attribute. Requires dbt 1.7+.
     """
 
-    input_vars = get_check_inputs(check_config=check_config, model=model, request=request)
-    check_config = input_vars["check_config"]
-    model = input_vars["model"]
-
     assert (
-        model.access.value == check_config["access"]
-    ), f"`{model.unique_id.split('.')[-1]}` has `{model.access.value}` access, it should have access `{check_config['access']}`."
+        model.access.value == access
+    ), f"`{model.unique_id.split('.')[-1]}` has `{model.access.value}` access, it should have access `{access}`."
 
 
 class CheckModelContractsEnforcedForPublicModel(BaseCheck):
@@ -35,12 +39,13 @@ class CheckModelContractsEnforcedForPublicModel(BaseCheck):
 
 
 @pytest.mark.iterate_over_models
-def check_model_contract_enforced_for_public_model(request, model: DbtBouncerModel = None):
+@bouncer_check
+def check_model_contract_enforced_for_public_model(
+    request: TopRequest, model: Union[DbtBouncerModel, None] = None, **kwargs
+) -> None:
     """
     Public models must have contracts enforced.
     """
-
-    model = get_check_inputs(model=model, request=request)["model"]
 
     if model.access.value == "public":
         assert (
@@ -53,12 +58,13 @@ class CheckModelDescriptionPopulated(BaseCheck):
 
 
 @pytest.mark.iterate_over_models
-def check_model_description_populated(request, model: DbtBouncerModel = None):
+@bouncer_check
+def check_model_description_populated(
+    request: TopRequest, model: Union[DbtBouncerModel, None] = None, **kwargs
+) -> None:
     """
     Models must have a populated description.
     """
-
-    model = get_check_inputs(model=model, request=request)["model"]
 
     assert (
         len(model.description.strip()) > 4
@@ -75,14 +81,16 @@ class CheckModelsDocumentationCoverage(BaseCheck):
     )
 
 
-def check_model_documentation_coverage(models: List[DbtBouncerModel], request, check_config=None):
+@bouncer_check
+def check_model_documentation_coverage(
+    request: TopRequest,
+    models: List[DbtBouncerModel],
+    min_model_documentation_coverage_pct: Union[float, None] = None,
+    **kwargs,
+) -> None:
     """
     Set the minimum percentage of models that have a populated description.
     """
-
-    min_model_documentation_coverage_pct = get_check_inputs(
-        check_config=check_config, request=request
-    )["check_config"]["min_model_documentation_coverage_pct"]
 
     num_models = len(models)
     models_with_description = []
@@ -94,7 +102,7 @@ def check_model_documentation_coverage(models: List[DbtBouncerModel], request, c
     model_description_coverage_pct = (num_models_with_descriptions / num_models) * 100
 
     assert (
-        model_description_coverage_pct >= min_model_documentation_coverage_pct
+        model_description_coverage_pct >= min_model_documentation_coverage_pct  # type: ignore[operator]
     ), f"Only {model_description_coverage_pct}% of models have a populated description, this is less than the permitted minimum of {min_model_documentation_coverage_pct}%."
 
 
@@ -103,12 +111,13 @@ class CheckModelDocumentedInSameDirectory(BaseCheck):
 
 
 @pytest.mark.iterate_over_models
-def check_model_documented_in_same_directory(request, model: DbtBouncerModel = None) -> None:
+@bouncer_check
+def check_model_documented_in_same_directory(
+    request: TopRequest, model: Union[DbtBouncerModel, None] = None, **kwargs
+) -> None:
     """
     Models must be documented in the same directory where they are defined (i.e. `.yml` and `.sql` files are in the same directory).
     """
-
-    model = get_check_inputs(model=model, request=request)["model"]
 
     model_doc_dir = model.patch_path[model.patch_path.find("models") :].split("/")[1:-1]
     model_sql_dir = model.path.split("/")[:-1]
@@ -126,21 +135,20 @@ class CheckModelCodeDoesNotContainRegexpPattern(BaseCheck):
 
 
 @pytest.mark.iterate_over_models
+@bouncer_check
 def check_model_code_does_not_contain_regexp_pattern(
-    request, check_config=None, model: DbtBouncerModel = None
-):
+    request: TopRequest,
+    model: Union[DbtBouncerModel, None] = None,
+    regexp_pattern: Union[None, str] = None,
+    **kwargs,
+) -> None:
     """
     The raw code for a model must not match the specified regexp pattern.
     """
 
-    input_vars = get_check_inputs(check_config=check_config, model=model, request=request)
-    check_config = input_vars["check_config"]
-    model = input_vars["model"]
-
     assert (
-        re.compile(check_config["regexp_pattern"].strip(), flags=re.DOTALL).match(model.raw_code)
-        is None
-    ), f"`{model.unique_id.split('.')[-1]}` contains a banned string: `{check_config['regexp_pattern'].strip()}`."
+        re.compile(regexp_pattern.strip(), flags=re.DOTALL).match(model.raw_code) is None
+    ), f"`{model.unique_id.split('.')[-1]}` contains a banned string: `{regexp_pattern.strip()}`."
 
 
 class CheckModelDependsOnMultipleSources(BaseCheck):
@@ -148,12 +156,13 @@ class CheckModelDependsOnMultipleSources(BaseCheck):
 
 
 @pytest.mark.iterate_over_models
-def check_model_depends_on_multiple_sources(request, model: DbtBouncerModel = None):
+@bouncer_check
+def check_model_depends_on_multiple_sources(
+    request: TopRequest, model: Union[DbtBouncerModel, None] = None, **kwargs
+) -> None:
     """
     Models cannot reference more than one source.
     """
-
-    model = get_check_inputs(model=model, request=request)["model"]
 
     num_reffed_sources = sum(x.split(".")[0] == "source" for x in model.depends_on.nodes)
     assert (
@@ -175,27 +184,29 @@ class CheckModelDirectories(BaseModel):
 
 
 @pytest.mark.iterate_over_models
-def check_model_directories(request, check_config=None, model: DbtBouncerModel = None):
+@bouncer_check
+def check_model_directories(
+    request: TopRequest,
+    include: Union[None, str] = None,
+    model: Union[DbtBouncerModel, None] = None,
+    permitted_sub_directories: Union[List[str], None] = None,
+    **kwargs,
+) -> None:
     """
     Only specified sub-directories are permitted.
     """
 
-    input_vars = get_check_inputs(check_config=check_config, model=model, request=request)
-    include = input_vars["check_config"]["include"]
-    model = input_vars["model"]
-    permitted_sub_directories = input_vars["check_config"]["permitted_sub_directories"]
-
     # Special case for `models` directory
     if include == "":
         assert (
-            model.path.split("/")[0] in permitted_sub_directories
+            model.path.split("/")[0] in permitted_sub_directories  # type: ignore[operator]
         ), f"{model.unique_id} is located in `{model.path.split('/')[0]}`, this is not a valid sub- directory."
     else:
         matched_path = re.compile(include.strip()).match(model.path)
         path_after_match = model.path[matched_path.end() + 1 :]  # type: ignore[union-attr]
 
         assert (
-            path_after_match.split("/")[0] in permitted_sub_directories
+            path_after_match.split("/")[0] in permitted_sub_directories  # type: ignore[operator]
         ), f"`{model.unique_id.split('.')[-1]}` is located in `{model.path.split('/')[0]}`, this is not a valid sub-directory."
 
 
@@ -204,12 +215,13 @@ class CheckModelHasContractsEnforced(BaseCheck):
 
 
 @pytest.mark.iterate_over_models
-def check_model_has_contracts_enforced(request, model: DbtBouncerModel = None):
+@bouncer_check
+def check_model_has_contracts_enforced(
+    request: TopRequest, model: Union[DbtBouncerModel, None] = None, **kwargs
+) -> None:
     """
     Model must have contracts enforced.
     """
-
-    model = get_check_inputs(model=model, request=request)["model"]
 
     assert (
         model.contract.enforced is True
@@ -222,22 +234,20 @@ class CheckModelHasMetaKeys(BaseCheck):
 
 
 @pytest.mark.iterate_over_models
-def check_model_has_meta_keys(request, check_config=None, model: DbtBouncerModel = None) -> None:
+@bouncer_check
+def check_model_has_meta_keys(
+    request: TopRequest,
+    keys: Union[Dict[str, Dict[str, str]], None] = None,
+    model: Union[DbtBouncerModel, None] = None,
+    **kwargs,
+) -> None:
     """
     The `meta` config for models must have the specified keys.
     """
 
-    input_vars = get_check_inputs(
-        check_config=check_config,
-        model=model,
-        request=request,
-    )
-    check_config = input_vars["check_config"]
-    model = input_vars["model"]
-
     missing_keys = find_missing_meta_keys(
         meta_config=model.meta,
-        required_keys=check_config["keys"],
+        required_keys=keys,
     )
     assert (
         missing_keys == []
@@ -249,12 +259,14 @@ class CheckModelHasNoUpstreamDependencies(BaseCheck):
 
 
 @pytest.mark.iterate_over_models
-def check_model_has_no_upstream_dependencies(request, model: DbtBouncerModel = None):
+@bouncer_check
+def check_model_has_no_upstream_dependencies(
+    request: TopRequest, model: Union[DbtBouncerModel, None] = None, **kwargs
+) -> None:
     """
     Identify if models have no upstream dependencies as this likely indicates hard-coded tables references.
     """
 
-    model = get_check_inputs(model=model, request=request)["model"]
     assert (
         len(model.depends_on.nodes) > 0
     ), f"`{model.unique_id.split('.')[-1]}` has no upstream dependencies, this likely indicates hard-coded tables references."
@@ -266,14 +278,16 @@ class CheckModelHasTags(BaseCheck):
 
 
 @pytest.mark.iterate_over_models
-def check_model_has_tags(request, check_config=None, model: DbtBouncerModel = None):
+@bouncer_check
+def check_model_has_tags(
+    request: TopRequest,
+    model: Union[DbtBouncerModel, None] = None,
+    tags: Union[List[str], None] = None,
+    **kwargs,
+) -> None:
     """
     Models must have the specified tags.
     """
-
-    input_vars = get_check_inputs(check_config=check_config, model=model, request=request)
-    model = input_vars["model"]
-    tags = input_vars["check_config"]["tags"]
 
     missing_tags = [tag for tag in tags if tag not in model.tags]
     assert (
@@ -294,23 +308,21 @@ class CheckModelHasUniqueTest(BaseCheck):
 
 
 @pytest.mark.iterate_over_models
+@bouncer_check
 def check_model_has_unique_test(
-    request, tests: List[DbtBouncerModel], check_config=None, model: DbtBouncerModel = None
-):
+    request: TopRequest,
+    tests: List[DbtBouncerModel],
+    accepted_uniqueness_tests: Union[List[str], None] = None,
+    model: Union[DbtBouncerModel, None] = None,
+    **kwargs,
+) -> None:
     """
     Models must have a test for uniqueness of a column.
     """
 
-    input_vars = get_check_inputs(check_config=check_config, model=model, request=request)
-    check_config = input_vars["check_config"]
-    model = input_vars["model"]
-
-    accepted_uniqueness_tests = check_config["accepted_uniqueness_tests"]
-    logger.debug(f"{accepted_uniqueness_tests=}")
-
     num_unique_tests = sum(
         test.attached_node == model.unique_id
-        and test.test_metadata.name in accepted_uniqueness_tests
+        and test.test_metadata.name in accepted_uniqueness_tests  # type: ignore[operator]
         for test in tests
     )
     assert (
@@ -331,13 +343,16 @@ class CheckModelMaxChainedViews(BaseCheck):
 
 
 @pytest.mark.iterate_over_models
+@bouncer_check
 def check_model_max_chained_views(
     manifest_obj: DbtBouncerManifest,
     models: List[DbtBouncerModel],
-    request,
-    check_config=None,
-    model: DbtBouncerModel = None,
-):
+    request: TopRequest,
+    materializations_to_include: Union[List[str], None] = None,
+    max_chained_views: Union[int, None] = None,
+    model: Union[DbtBouncerModel, None] = None,
+    **kwargs,
+) -> None:
     """
     Models cannot have more than the specified number of upstream dependents that are not tables (default: 3).
     """
@@ -384,11 +399,6 @@ def check_model_max_chained_views(
             depth=depth,
         )
 
-    input_vars = get_check_inputs(check_config=check_config, model=model, request=request)
-    materializations_to_include = input_vars["check_config"]["materializations_to_include"]
-    max_chained_views = input_vars["check_config"]["max_chained_views"]
-    model = input_vars["model"]
-
     assert (
         len(
             return_upstream_view_models(
@@ -411,20 +421,22 @@ class CheckModelMaxFanout(BaseCheck):
 
 
 @pytest.mark.iterate_over_models
+@bouncer_check
 def check_model_max_fanout(
-    models: List[DbtBouncerModel], request, check_config=None, model: DbtBouncerModel = None
-):
+    models: List[DbtBouncerModel],
+    request: TopRequest,
+    max_downstream_models: Union[int, None] = None,
+    model: Union[DbtBouncerModel, None] = None,
+    **kwargs,
+) -> None:
     """
     Models cannot have more than the specified number of downstream models (default: 3).
     """
 
-    input_vars = get_check_inputs(check_config=check_config, model=model, request=request)
-    max_downstream_models = input_vars["check_config"]["max_downstream_models"]
-    model = input_vars["model"]
     num_downstream_models = sum(model.unique_id in m.depends_on.nodes for m in models)
 
     assert (
-        num_downstream_models <= max_downstream_models
+        num_downstream_models <= max_downstream_models  # type: ignore[operator]
     ), f"`{model.unique_id.split('.')[-1]}` has {num_downstream_models} downstream models, which is more than the permitted maximum of {max_downstream_models}."
 
 
@@ -442,31 +454,31 @@ class CheckModelMaxUpstreamDependencies(BaseCheck):
 
 
 @pytest.mark.iterate_over_models
+@bouncer_check
 def check_model_max_upstream_dependencies(
-    request, check_config=None, model: DbtBouncerModel = None
-):
+    request: TopRequest,
+    max_upstream_macros: Union[int, None] = None,
+    max_upstream_models: Union[int, None] = None,
+    max_upstream_sources: Union[int, None] = None,
+    model: Union[DbtBouncerModel, None] = None,
+    **kwargs,
+) -> None:
     """
     Limit the number of upstream dependencies a model has. Default values are 5 for models, 5 for macros, and 1 for sources.
     """
-
-    input_vars = get_check_inputs(check_config=check_config, model=model, request=request)
-    max_upstream_macros = input_vars["check_config"]["max_upstream_macros"]
-    max_upstream_models = input_vars["check_config"]["max_upstream_models"]
-    max_upstream_sources = input_vars["check_config"]["max_upstream_sources"]
-    model = input_vars["model"]
 
     num_upstream_macros = len([m for m in model.depends_on.macros])
     num_upstream_models = len([m for m in model.depends_on.nodes if m.split(".")[0] == "model"])
     num_upstream_sources = len([m for m in model.depends_on.nodes if m.split(".")[0] == "source"])
 
     assert (
-        num_upstream_macros <= max_upstream_macros
+        num_upstream_macros <= max_upstream_macros  # type: ignore[operator]
     ), f"`{model.unique_id.split('.')[-1]}` has {num_upstream_macros} upstream macros, which is more than the permitted maximum of {max_upstream_macros}."
     assert (
-        num_upstream_models <= max_upstream_models
+        num_upstream_models <= max_upstream_models  # type: ignore[operator]
     ), f"`{model.unique_id.split('.')[-1]}` has {num_upstream_models} upstream models, which is more than the permitted maximum of {max_upstream_models}."
     assert (
-        num_upstream_sources <= max_upstream_sources
+        num_upstream_sources <= max_upstream_sources  # type: ignore[operator]
     ), f"`{model.unique_id.split('.')[-1]}` has {num_upstream_sources} upstream sources, which is more than the permitted maximum of {max_upstream_sources}."
 
 
@@ -478,18 +490,20 @@ class CheckModelNames(BaseCheck):
 
 
 @pytest.mark.iterate_over_models
-def check_model_names(request, check_config=None, model: DbtBouncerModel = None):
+@bouncer_check
+def check_model_names(
+    request: TopRequest,
+    model: Union[DbtBouncerModel, None] = None,
+    model_name_pattern: Union[None, str] = None,
+    **kwargs,
+) -> None:
     """
     Models must have a name that matches the supplied regex.
     """
 
-    input_vars = get_check_inputs(check_config=check_config, model=model, request=request)
-    check_config = input_vars["check_config"]
-    model = input_vars["model"]
-
     assert (
-        re.compile(check_config["model_name_pattern"].strip()).match(model.name) is not None
-    ), f"`{model.unique_id.split('.')[-1]}` does not match the supplied regex `({check_config['model_name_pattern'].strip()})`."
+        re.compile(model_name_pattern.strip()).match(model.name) is not None
+    ), f"`{model.unique_id.split('.')[-1]}` does not match the supplied regex `{model_name_pattern.strip()})`."
 
 
 class CheckModelPropertyFileLocation(BaseCheck):
@@ -497,12 +511,13 @@ class CheckModelPropertyFileLocation(BaseCheck):
 
 
 @pytest.mark.iterate_over_models
-def check_model_property_file_location(request, model: DbtBouncerModel = None):
+@bouncer_check
+def check_model_property_file_location(
+    request: TopRequest, model: Union[DbtBouncerModel, None] = None, **kwargs
+) -> None:
     """
     Model properties files must follow the guidance provided by dbt [here](https://docs.getdbt.com/best-practices/how-we-structure/1-guide-overview).
     """
-
-    model = get_check_inputs(model=model, request=request)["model"]
 
     expected_substr = (
         "_".join(model.path.split("/")[:-1])
@@ -533,16 +548,17 @@ class CheckModelsTestCoverage(BaseCheck):
     )
 
 
+@bouncer_check
 def check_model_test_coverage(
-    models: List[DbtBouncerModel], request, tests: List[DbtBouncerModel], check_config=None
-):
+    models: List[DbtBouncerModel],
+    request: TopRequest,
+    tests: List[DbtBouncerModel],
+    min_model_test_coverage_pct: Union[int, None] = None,
+    **kwargs,
+) -> None:
     """
     Set the minimum percentage of models that have at least one test.
     """
-
-    min_model_test_coverage_pct = get_check_inputs(check_config=check_config, request=request)[
-        "check_config"
-    ]["min_model_test_coverage_pct"]
 
     num_models = len(models)
     models_with_tests = []
@@ -554,5 +570,5 @@ def check_model_test_coverage(
     model_test_coverage_pct = (num_models_with_tests / num_models) * 100
 
     assert (
-        model_test_coverage_pct >= min_model_test_coverage_pct
+        model_test_coverage_pct >= min_model_test_coverage_pct  # type: ignore[operator]
     ), f"Only {model_test_coverage_pct}% of models have at least one test, this is less than the permitted minimum of {min_model_test_coverage_pct}%."

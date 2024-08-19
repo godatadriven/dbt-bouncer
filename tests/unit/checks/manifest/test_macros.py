@@ -120,10 +120,9 @@ def test_check_macro_arguments_description_populated(macro, expectation):
 
 
 @pytest.mark.parametrize(
-    "check_config, macro, expectation",
+    "macro, regexp_pattern, expectation",
     [
         (
-            {"regexp_pattern": ".*[i][f][n][u][l][l].*"},
             Macros(
                 **{
                     "arguments": [
@@ -145,12 +144,10 @@ def test_check_macro_arguments_description_populated(macro, expectation):
                     "unique_id": "macro.package_name.macro_1",
                 }
             ),
+            ".*[i][f][n][u][l][l].*",
             does_not_raise(),
         ),
         (
-            {
-                "regexp_pattern": ".*[i][f][n][u][l][l].*",
-            },
             Macros(
                 **{
                     "arguments": [
@@ -172,14 +169,15 @@ def test_check_macro_arguments_description_populated(macro, expectation):
                     "unique_id": "macro.package_name.macro_1",
                 }
             ),
+            ".*[i][f][n][u][l][l].*",
             pytest.raises(AssertionError),
         ),
     ],
 )
-def test_check_macro_code_does_not_contain_regexp_pattern(check_config, macro, expectation):
+def test_check_macro_code_does_not_contain_regexp_pattern(macro, regexp_pattern, expectation):
     with expectation:
         check_macro_code_does_not_contain_regexp_pattern(
-            check_config=check_config, macro=macro, request=None
+            macro=macro, regexp_pattern=regexp_pattern, request=None
         )
 
 

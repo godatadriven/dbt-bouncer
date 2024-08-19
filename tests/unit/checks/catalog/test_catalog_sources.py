@@ -1,42 +1,38 @@
 from contextlib import nullcontext as does_not_raise
 
 import pytest
+from dbt_artifacts_parser.parsers.catalog.catalog_v1 import CatalogTable
 from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Sources
 
 from dbt_bouncer.checks.catalog.check_catalog_sources import (
     check_source_columns_are_all_documented,
 )
-from dbt_bouncer.parsers import DbtBouncerCatalogNode
 
 
 @pytest.mark.parametrize(
     "catalog_source, sources, expectation",
     [
         (
-            DbtBouncerCatalogNode(
+            CatalogTable(
                 **{
-                    "node": {
-                        "columns": {
-                            "col_1": {
-                                "index": 1,
-                                "name": "col_1",
-                                "type": "INTEGER",
-                            },
-                            "col_2": {
-                                "index": 2,
-                                "name": "col_2",
-                                "type": "INTEGER",
-                            },
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
                         },
-                        "metadata": {
-                            "name": "table_1",
-                            "schema": "main",
-                            "type": "VIEW",
+                        "col_2": {
+                            "index": 2,
+                            "name": "col_2",
+                            "type": "INTEGER",
                         },
-                        "stats": {},
-                        "unique_id": "source.package_name.source_1.table_1",
                     },
-                    "path": "path/to/source_1.yml",
+                    "metadata": {
+                        "name": "table_1",
+                        "schema": "main",
+                        "type": "VIEW",
+                    },
+                    "stats": {},
                     "unique_id": "source.package_name.source_1.table_1",
                 }
             ),
@@ -69,30 +65,26 @@ from dbt_bouncer.parsers import DbtBouncerCatalogNode
             does_not_raise(),
         ),
         (
-            DbtBouncerCatalogNode(
+            CatalogTable(
                 **{
-                    "node": {
-                        "columns": {
-                            "col_1": {
-                                "index": 1,
-                                "name": "col_1",
-                                "type": "INTEGER",
-                            },
-                            "col_2": {
-                                "index": 1,
-                                "name": "col_2",
-                                "type": "INTEGER",
-                            },
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
                         },
-                        "metadata": {
-                            "name": "table_1",
-                            "schema": "main",
-                            "type": "VIEW",
+                        "col_2": {
+                            "index": 1,
+                            "name": "col_2",
+                            "type": "INTEGER",
                         },
-                        "stats": {},
-                        "unique_id": "source.package_name.source_1.table_1",
                     },
-                    "path": "path/to/source_1.yml",
+                    "metadata": {
+                        "name": "table_1",
+                        "schema": "main",
+                        "type": "VIEW",
+                    },
+                    "stats": {},
                     "unique_id": "source.package_name.source_1.table_1",
                 }
             ),

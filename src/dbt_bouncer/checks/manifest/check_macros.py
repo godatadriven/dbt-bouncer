@@ -1,12 +1,15 @@
+# mypy: disable-error-code="union-attr"
+
 import re
-from typing import Literal
+from typing import Literal, Union
 
 import pytest
+from _pytest.fixtures import TopRequest
 from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Macros
 from pydantic import Field
 
 from dbt_bouncer.conf_validator_base import BaseCheck
-from dbt_bouncer.utils import get_check_inputs
+from dbt_bouncer.utils import bouncer_check
 
 
 class CheckMacroArgumentsDescriptionPopulated(BaseCheck):
@@ -14,14 +17,14 @@ class CheckMacroArgumentsDescriptionPopulated(BaseCheck):
 
 
 @pytest.mark.iterate_over_macros
+@bouncer_check
 def check_macro_arguments_description_populated(
-    request, check_config=None, macro: Macros = None
+    request: TopRequest, macro: Union[Macros, None] = None, **kwargs
 ) -> None:
     """
     Macro arguments must have a populated description.
     """
 
-    macro = get_check_inputs(check_config=check_config, macro=macro, request=request)["macro"]
     for arg in macro.arguments:
         assert (
             len(arg.description.strip()) > 4
@@ -36,21 +39,20 @@ class CheckMacroCodeDoesNotContainRegexpPattern(BaseCheck):
 
 
 @pytest.mark.iterate_over_macros
+@bouncer_check
 def check_macro_code_does_not_contain_regexp_pattern(
-    request, check_config=None, macro: Macros = None
-):
+    request: TopRequest,
+    macro: Union[Macros, None] = None,
+    regexp_pattern: Union[None, str] = None,
+    **kwargs,
+) -> None:
     """
     The raw code for a macro must not match the specified regexp pattern.
     """
 
-    input_vars = get_check_inputs(check_config=check_config, macro=macro, request=request)
-    check_config = input_vars["check_config"]
-    macro = input_vars["macro"]
-
     assert (
-        re.compile(check_config["regexp_pattern"].strip(), flags=re.DOTALL).match(macro.macro_sql)
-        is None
-    ), f"`{macro.unique_id.split('.')[-1]}` contains a banned string: `{check_config['regexp_pattern'].strip()}`."
+        re.compile(regexp_pattern.strip(), flags=re.DOTALL).match(macro.macro_sql) is None
+    ), f"`{macro.unique_id.split('.')[-1]}` contains a banned string: `{regexp_pattern.strip()}`."
 
 
 class CheckMacroDescriptionPopulated(BaseCheck):
@@ -58,12 +60,14 @@ class CheckMacroDescriptionPopulated(BaseCheck):
 
 
 @pytest.mark.iterate_over_macros
-def check_macro_description_populated(request, check_config=None, macro: Macros = None) -> None:
+@bouncer_check
+def check_macro_description_populated(
+    request: TopRequest, macro: Union[Macros, None] = None, **kwargs
+) -> None:
     """
     Macros must have a populated description.
     """
 
-    macro = get_check_inputs(check_config=check_config, macro=macro, request=request)["macro"]
     assert (
         len(macro.description.strip()) > 4
     ), f"`{macro.unique_id.split('.')[-1]}` does not have a populated description."
@@ -74,14 +78,16 @@ class CheckMacroNameMatchesFileName(BaseCheck):
 
 
 @pytest.mark.iterate_over_macros
-def check_macro_name_matches_file_name(request, check_config=None, macro: Macros = None) -> None:
+@bouncer_check
+def check_macro_name_matches_file_name(
+    request: TopRequest, macro: Union[Macros, None] = None, **kwargs
+) -> None:
     """
     Macros names must be the same as the file they are contained in.
 
     Generic tests are also macros, however to document these tests the "name" value must be precededed with "test_".
     """
 
-    macro = get_check_inputs(macro=macro, request=request)["macro"]
     if macro.name.startswith("test_"):
         assert (
             macro.name[5:] == macro.path.split("/")[-1].split(".")[0]
@@ -97,12 +103,13 @@ class CheckMacroPropertyFileLocation(BaseCheck):
 
 
 @pytest.mark.iterate_over_macros
-def check_macro_property_file_location(request, macro: Macros = None):
+@bouncer_check
+def check_macro_property_file_location(
+    request: TopRequest, macro: Union[Macros, None] = None, **kwargs
+) -> None:
     """
     Macro properties files must follow the guidance provided by dbt [here](https://docs.getdbt.com/best-practices/how-we-structure/5-the-rest-of-the-project#how-we-use-the-other-folders).
     """
-
-    macro = get_check_inputs(macro=macro, request=request)["macro"]
 
     expected_substr = "_".join(macro.path[6:].split("/")[:-1])
     properties_yml_name = macro.patch_path.split("/")[-1]

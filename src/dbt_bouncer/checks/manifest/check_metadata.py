@@ -1,10 +1,13 @@
-import re
-from typing import Literal, Optional
+# mypy: disable-error-code="union-attr"
 
+import re
+from typing import Literal, Optional, Union
+
+from _pytest.fixtures import TopRequest
 from pydantic import BaseModel, ConfigDict, Field
 
 from dbt_bouncer.parsers import DbtBouncerManifest
-from dbt_bouncer.utils import get_check_inputs
+from dbt_bouncer.utils import bouncer_check
 
 
 class CheckProjectName(BaseModel):
@@ -17,16 +20,18 @@ class CheckProjectName(BaseModel):
     project_name_pattern: str = Field(description="Regexp the project name must match.")
 
 
-def check_project_name(manifest_obj: DbtBouncerManifest, request, check_config=None):
+@bouncer_check
+def check_project_name(
+    manifest_obj: DbtBouncerManifest,
+    request: TopRequest,
+    project_name_pattern: Union[None, str] = None,
+    **kwargs,
+) -> None:
     """
     Enforce that the name of the dbt project matches a supplied regex. Generally used to enforce that project names conform to something like  `company_<DOMAIN>`.
     """
 
-    check_config = get_check_inputs(check_config=check_config, request=request)["check_config"]
-
     assert (
-        re.compile(check_config["project_name_pattern"].strip()).match(
-            manifest_obj.manifest.metadata.project_name
-        )
+        re.compile(project_name_pattern.strip()).match(manifest_obj.manifest.metadata.project_name)
         is not None
-    ), f"Project name (`{manifest_obj.manifest.metadata.project_name}`) does not conform to the supplied regex `({check_config['project_name_pattern'].strip()})`."
+    ), f"Project name (`{manifest_obj.manifest.metadata.project_name}`) does not conform to the supplied regex `({project_name_pattern.strip()})`."

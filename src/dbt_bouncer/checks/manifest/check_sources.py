@@ -1,12 +1,15 @@
+# mypy: disable-error-code="union-attr"
+
 import re
 from typing import Any, Dict, List, Literal, Optional, Union
 
 import pytest
+from _pytest.fixtures import TopRequest
 from pydantic import Field
 
 from dbt_bouncer.conf_validator_base import BaseCheck
 from dbt_bouncer.parsers import DbtBouncerModel, DbtBouncerSource
-from dbt_bouncer.utils import find_missing_meta_keys, get_check_inputs
+from dbt_bouncer.utils import bouncer_check, find_missing_meta_keys
 
 
 class CheckSourceDescriptionPopulated(BaseCheck):
@@ -14,12 +17,13 @@ class CheckSourceDescriptionPopulated(BaseCheck):
 
 
 @pytest.mark.iterate_over_sources
-def check_source_description_populated(request, source: DbtBouncerSource = None):
+@bouncer_check
+def check_source_description_populated(
+    request: TopRequest, source: Union[DbtBouncerSource, None] = None, **kwargs
+) -> None:
     """
     Sources must have a populated description.
     """
-
-    source = get_check_inputs(source=source, request=request)["source"]
 
     assert (
         len(source.description.strip()) > 4
@@ -31,12 +35,13 @@ class CheckSourceFreshnessPopulated(BaseCheck):
 
 
 @pytest.mark.iterate_over_sources
-def check_source_freshness_populated(request, source: DbtBouncerSource = None):
+@bouncer_check
+def check_source_freshness_populated(
+    request: TopRequest, source: Union[DbtBouncerSource, None] = None, **kwargs
+) -> None:
     """
     Sources must have a populated freshness.
     """
-
-    source = get_check_inputs(source=source, request=request)["source"]
 
     assert (
         source.freshness.error_after.count is not None
@@ -53,24 +58,20 @@ class CheckSourceHasMetaKeys(BaseCheck):
 
 
 @pytest.mark.iterate_over_sources
+@bouncer_check
 def check_source_has_meta_keys(
-    request, check_config=None, source: DbtBouncerSource = None
+    request,
+    keys: Union[Dict[str, Dict[str, str]], None] = None,
+    source: Union[DbtBouncerSource, None] = None,
+    **kwargs,
 ) -> None:
     """
     The `meta` config for sources must have the specified keys.
     """
 
-    input_vars = get_check_inputs(
-        check_config=check_config,
-        request=request,
-        source=source,
-    )
-    check_config = input_vars["check_config"]
-    source = input_vars["source"]
-
     missing_keys = find_missing_meta_keys(
         meta_config=source.meta,
-        required_keys=check_config["keys"],
+        required_keys=keys,
     )
     assert (
         missing_keys == []
@@ -83,14 +84,16 @@ class CheckSourceHasTags(BaseCheck):
 
 
 @pytest.mark.iterate_over_sources
-def check_source_has_tags(request, check_config=None, source: DbtBouncerSource = None):
+@bouncer_check
+def check_source_has_tags(
+    request: TopRequest,
+    source: Union[DbtBouncerSource, None] = None,
+    tags: Union[None, str] = None,
+    **kwargs,
+) -> None:
     """
     Sources must have the specified tags.
     """
-
-    input_vars = get_check_inputs(check_config=check_config, source=source, request=request)
-    source = input_vars["source"]
-    tags = input_vars["check_config"]["tags"]
 
     missing_tags = [tag for tag in tags if tag not in source.tags]
     assert not missing_tags, f"`{source.unique_id}` is missing required tags: {missing_tags}."
@@ -101,12 +104,13 @@ class CheckSourceLoaderPopulated(BaseCheck):
 
 
 @pytest.mark.iterate_over_sources
-def check_source_loader_populated(request, source: DbtBouncerSource = None):
+@bouncer_check
+def check_source_loader_populated(
+    request: TopRequest, source: Union[DbtBouncerSource, None] = None, **kwargs
+) -> None:
     """
     Sources must have a populated loader.
     """
-
-    source = get_check_inputs(source=source, request=request)["source"]
 
     assert source.loader != "", f"`{source.unique_id}` does not have a populated loader."
 
@@ -117,18 +121,20 @@ class CheckSourceNames(BaseCheck):
 
 
 @pytest.mark.iterate_over_sources
-def check_source_names(request, check_config=None, source: DbtBouncerSource = None):
+@bouncer_check
+def check_source_names(
+    request: TopRequest,
+    source: Union[DbtBouncerSource, None] = None,
+    source_name_pattern: Union[None, str] = None,
+    **kwargs,
+) -> None:
     """
     Sources must have a name that matches the supplied regex.
     """
 
-    input_vars = get_check_inputs(check_config=check_config, source=source, request=request)
-    check_config = input_vars["check_config"]
-    source = input_vars["source"]
-
     assert (
-        re.compile(check_config["source_name_pattern"].strip()).match(source.name) is not None
-    ), f"`{source.unique_id.split('.')[0]}` does not match the supplied regex `({check_config['source_name_pattern'].strip()})`."
+        re.compile(source_name_pattern.strip()).match(source.name) is not None
+    ), f"`{source.unique_id.split('.')[0]}` does not match the supplied regex `({source_name_pattern.strip()})`."
 
 
 class CheckSoureNotorphaned(BaseCheck):
@@ -136,17 +142,16 @@ class CheckSoureNotorphaned(BaseCheck):
 
 
 @pytest.mark.iterate_over_sources
+@bouncer_check
 def check_source_not_orphaned(
-    models: List[DbtBouncerModel], request, source: DbtBouncerSource = None
+    models: List[DbtBouncerModel],
+    request: TopRequest,
+    source: Union[DbtBouncerSource, None] = None,
+    **kwargs,
 ) -> None:
     """
     Sources must be referenced in at least one model.
     """
-
-    source = get_check_inputs(
-        request=request,
-        source=source,
-    )["source"]
 
     num_refs = sum(source.unique_id in model.depends_on.nodes for model in models)
     assert (
@@ -159,12 +164,13 @@ class CheckSourcePropertyFileLocation(BaseCheck):
 
 
 @pytest.mark.iterate_over_sources
-def check_source_property_file_location(request, source: DbtBouncerSource = None):
+@bouncer_check
+def check_source_property_file_location(
+    request: TopRequest, source: Union[DbtBouncerSource, None] = None, **kwargs
+) -> None:
     """
     Source properties files must follow the guidance provided by dbt [here](https://docs.getdbt.com/best-practices/how-we-structure/1-guide-overview).
     """
-
-    source = get_check_inputs(source=source, request=request)["source"]
 
     path_cleaned = source.path.replace("models/staging", "")
     expected_substring = "_".join(path_cleaned.split("/")[:-1])
@@ -185,17 +191,16 @@ class CheckSourceUsedByModelsInSameDirectory(BaseCheck):
 
 
 @pytest.mark.iterate_over_sources
+@bouncer_check
 def check_source_used_by_models_in_same_directory(
-    models: List[DbtBouncerModel], request, source: DbtBouncerSource = None
+    models: List[DbtBouncerModel],
+    request: TopRequest,
+    source: Union[DbtBouncerSource, None] = None,
+    **kwargs,
 ) -> None:
     """
     Sources can only be referenced by models that are located in the same directory where the source is defined.
     """
-
-    source = get_check_inputs(
-        request=request,
-        source=source,
-    )["source"]
 
     reffed_models_not_in_same_dir = []
     for model in models:
@@ -215,17 +220,16 @@ class CheckSourceUsedByOnlyOneModel(BaseCheck):
 
 
 @pytest.mark.iterate_over_sources
+@bouncer_check
 def check_source_used_by_only_one_model(
-    models: List[DbtBouncerModel], request, source: DbtBouncerSource = None
+    models: List[DbtBouncerModel],
+    request: TopRequest,
+    source: Union[DbtBouncerSource, None] = None,
+    **kwargs,
 ) -> None:
     """
     Each source can be referenced by a maximum of one model.
     """
-
-    source = get_check_inputs(
-        request=request,
-        source=source,
-    )["source"]
 
     num_refs = sum(source.unique_id in model.depends_on.nodes for model in models)
     assert num_refs <= 1, f"Source `{source.unique_id}` is referenced by more than one model."

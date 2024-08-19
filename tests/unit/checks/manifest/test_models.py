@@ -27,12 +27,10 @@ from dbt_bouncer.checks.manifest.check_models import (
 
 
 @pytest.mark.parametrize(
-    "check_config, model, expectation",
+    "access, model, expectation",
     [
         (
-            {
-                "access": "public",
-            },
+            "public",
             Nodes4(
                 **{
                     "access": "public",
@@ -58,7 +56,7 @@ from dbt_bouncer.checks.manifest.check_models import (
             does_not_raise(),
         ),
         (
-            {"access": "public"},
+            "public",
             Nodes4(
                 **{
                     "access": "protected",
@@ -85,9 +83,9 @@ from dbt_bouncer.checks.manifest.check_models import (
         ),
     ],
 )
-def test_check_model_access(check_config, model, expectation):
+def test_check_model_access(access, model, expectation):
     with expectation:
-        check_model_access(check_config=check_config, model=model, request=None)
+        check_model_access(access=access, model=model, request=None)
 
 
 @pytest.mark.parametrize(
@@ -241,12 +239,10 @@ def test_check_model_depends_on_multiple_sources(model, expectation):
 
 
 @pytest.mark.parametrize(
-    "check_config, models, expectation",
+    "min_model_documentation_coverage_pct, models, expectation",
     [
         (
-            {
-                "min_model_documentation_coverage_pct": 100,
-            },
+            100,
             [
                 Nodes4(
                     **{
@@ -274,9 +270,7 @@ def test_check_model_depends_on_multiple_sources(model, expectation):
             does_not_raise(),
         ),
         (
-            {
-                "min_model_documentation_coverage_pct": 50,
-            },
+            50,
             [
                 Nodes4(
                     **{
@@ -326,9 +320,7 @@ def test_check_model_depends_on_multiple_sources(model, expectation):
             does_not_raise(),
         ),
         (
-            {
-                "min_model_documentation_coverage_pct": 100,
-            },
+            100,
             [
                 Nodes4(
                     **{
@@ -357,9 +349,15 @@ def test_check_model_depends_on_multiple_sources(model, expectation):
         ),
     ],
 )
-def test_check_model_documentation_coverage(check_config, models, expectation):
+def test_check_model_documentation_coverage(
+    min_model_documentation_coverage_pct, models, expectation
+):
     with expectation:
-        check_model_documentation_coverage(check_config=check_config, models=models, request=None)
+        check_model_documentation_coverage(
+            min_model_documentation_coverage_pct=min_model_documentation_coverage_pct,
+            models=models,
+            request=None,
+        )
 
 
 @pytest.mark.parametrize(
@@ -483,10 +481,10 @@ def test_check_model_has_contracts_enforced(model, expectation):
 
 
 @pytest.mark.parametrize(
-    "check_config, model, expectation",
+    "keys, model, expectation",
     [
         (
-            {"keys": ["owner"]},
+            ["owner"],
             Nodes4(
                 **{
                     "alias": "model_1",
@@ -512,7 +510,7 @@ def test_check_model_has_contracts_enforced(model, expectation):
             does_not_raise(),
         ),
         (
-            {"keys": ["owner"]},
+            ["owner"],
             Nodes4(
                 **{
                     "alias": "model_1",
@@ -538,7 +536,7 @@ def test_check_model_has_contracts_enforced(model, expectation):
             does_not_raise(),
         ),
         (
-            {"keys": ["owner", {"name": ["first", "last"]}]},
+            ["owner", {"name": ["first", "last"]}],
             Nodes4(
                 **{
                     "alias": "model_1",
@@ -564,7 +562,7 @@ def test_check_model_has_contracts_enforced(model, expectation):
             does_not_raise(),
         ),
         (
-            {"keys": ["owner"]},
+            ["owner"],
             Nodes4(
                 **{
                     "alias": "model_1",
@@ -590,7 +588,7 @@ def test_check_model_has_contracts_enforced(model, expectation):
             pytest.raises(AssertionError),
         ),
         (
-            {"keys": ["owner"]},
+            ["owner"],
             Nodes4(
                 **{
                     "alias": "model_1",
@@ -616,7 +614,7 @@ def test_check_model_has_contracts_enforced(model, expectation):
             pytest.raises(AssertionError),
         ),
         (
-            {"keys": ["owner", {"name": ["first", "last"]}]},
+            ["owner", {"name": ["first", "last"]}],
             Nodes4(
                 **{
                     "alias": "model_1",
@@ -643,9 +641,9 @@ def test_check_model_has_contracts_enforced(model, expectation):
         ),
     ],
 )
-def test_check_model_has_meta_keys(check_config, model, expectation):
+def test_check_model_has_meta_keys(keys, model, expectation):
     with expectation:
-        check_model_has_meta_keys(check_config=check_config, model=model, request=None)
+        check_model_has_meta_keys(keys=keys, model=model, request=None)
 
 
 @pytest.mark.parametrize(
@@ -734,12 +732,9 @@ def test_check_model_has_no_upstream_dependencies(model, expectation):
 
 
 @pytest.mark.parametrize(
-    "check_config, model, expectation",
+    "model, tags, expectation",
     [
         (
-            {
-                "tags": ["tag_1"],
-            },
             Nodes4(
                 **{
                     "alias": "model_1",
@@ -763,12 +758,10 @@ def test_check_model_has_no_upstream_dependencies(model, expectation):
                     "unique_id": "model.package_name.model_1",
                 }
             ),
+            ["tag_1"],
             does_not_raise(),
         ),
         (
-            {
-                "tags": ["tag_1"],
-            },
             Nodes4(
                 **{
                     "alias": "model_1",
@@ -792,22 +785,21 @@ def test_check_model_has_no_upstream_dependencies(model, expectation):
                     "unique_id": "model.package_name.model_1",
                 }
             ),
+            ["tag_1"],
             pytest.raises(AssertionError),
         ),
     ],
 )
-def test_check_model_has_tags(check_config, model, expectation):
+def test_check_model_has_tags(model, tags, expectation):
     with expectation:
-        check_model_has_tags(check_config=check_config, model=model, request=None)
+        check_model_has_tags(model=model, tags=tags, request=None)
 
 
 @pytest.mark.parametrize(
-    "check_config, model, tests, expectation",
+    "accepted_uniqueness_tests, model, tests, expectation",
     [
         (
-            {
-                "accepted_uniqueness_tests": ["expect_compound_columns_to_be_unique", "unique"],
-            },
+            ["expect_compound_columns_to_be_unique", "unique"],
             Nodes4(
                 **{
                     "alias": "model_1",
@@ -853,9 +845,7 @@ def test_check_model_has_tags(check_config, model, expectation):
             does_not_raise(),
         ),
         (
-            {
-                "accepted_uniqueness_tests": ["my_custom_test", "unique"],
-            },
+            ["my_custom_test", "unique"],
             Nodes4(
                 **{
                     "alias": "model_1",
@@ -901,9 +891,7 @@ def test_check_model_has_tags(check_config, model, expectation):
             does_not_raise(),
         ),
         (
-            {
-                "accepted_uniqueness_tests": ["unique"],
-            },
+            ["unique"],
             Nodes4(
                 **{
                     "alias": "model_1",
@@ -949,9 +937,7 @@ def test_check_model_has_tags(check_config, model, expectation):
             pytest.raises(AssertionError),
         ),
         (
-            {
-                "accepted_uniqueness_tests": ["expect_compound_columns_to_be_unique", "unique"],
-            },
+            ["expect_compound_columns_to_be_unique", "unique"],
             Nodes4(
                 **{
                     "alias": "model_1",
@@ -978,18 +964,20 @@ def test_check_model_has_tags(check_config, model, expectation):
         ),
     ],
 )
-def test_check_model_has_unique_test(check_config, model, tests, expectation):
+def test_check_model_has_unique_test(accepted_uniqueness_tests, model, tests, expectation):
     with expectation:
         check_model_has_unique_test(
-            check_config=check_config, model=model, tests=tests, request=None
+            accepted_uniqueness_tests=accepted_uniqueness_tests,
+            model=model,
+            tests=tests,
+            request=None,
         )
 
 
 @pytest.mark.parametrize(
-    "check_config, model, expectation",
+    "model, regexp_pattern, expectation",
     [
         (
-            {"regexp_pattern": ".*[i][f][n][u][l][l].*"},
             Nodes4(
                 **{
                     "alias": "model_1",
@@ -1012,12 +1000,10 @@ def test_check_model_has_unique_test(check_config, model, tests, expectation):
                     "unique_id": "model.package_name.model_1",
                 }
             ),
+            ".*[i][f][n][u][l][l].*",
             does_not_raise(),
         ),
         (
-            {
-                "regexp_pattern": ".*[i][f][n][u][l][l].*",
-            },
             Nodes4(
                 **{
                     "alias": "model_1",
@@ -1040,22 +1026,23 @@ def test_check_model_has_unique_test(check_config, model, tests, expectation):
                     "unique_id": "model.package_name.model_1",
                 }
             ),
+            ".*[i][f][n][u][l][l].*",
             pytest.raises(AssertionError),
         ),
     ],
 )
-def test_check_model_code_does_not_contain_regexp_pattern(check_config, model, expectation):
+def test_check_model_code_does_not_contain_regexp_pattern(model, regexp_pattern, expectation):
     with expectation:
         check_model_code_does_not_contain_regexp_pattern(
-            check_config=check_config, model=model, request=None
+            model=model, regexp_pattern=regexp_pattern, request=None
         )
 
 
 @pytest.mark.parametrize(
-    "check_config, model, expectation",
+    "include, model, permitted_sub_directories, expectation",
     [
         (
-            {"include": "", "permitted_sub_directories": ["staging", "mart", "intermediate"]},
+            "",
             Nodes4(
                 **{
                     "alias": "model_1",
@@ -1077,10 +1064,11 @@ def test_check_model_code_does_not_contain_regexp_pattern(check_config, model, e
                     "unique_id": "model.package_name.model_1",
                 }
             ),
+            ["staging", "mart", "intermediate"],
             does_not_raise(),
         ),
         (
-            {"include": "marts", "permitted_sub_directories": ["finance", "marketing"]},
+            "marts",
             Nodes4(
                 **{
                     "alias": "model_1",
@@ -1102,10 +1090,11 @@ def test_check_model_code_does_not_contain_regexp_pattern(check_config, model, e
                     "unique_id": "model.package_name.model_1",
                 }
             ),
+            ["finance", "marketing"],
             does_not_raise(),
         ),
         (
-            {"include": "marts", "permitted_sub_directories": ["finance", "marketing"]},
+            "marts",
             Nodes4(
                 **{
                     "alias": "model_1",
@@ -1127,21 +1116,28 @@ def test_check_model_code_does_not_contain_regexp_pattern(check_config, model, e
                     "unique_id": "model.package_name.model_1",
                 }
             ),
+            ["finance", "marketing"],
             pytest.raises(AssertionError),
         ),
     ],
 )
-def test_check_model_directories(check_config, model, expectation):
+def test_check_model_directories(include, model, permitted_sub_directories, expectation):
     with expectation:
-        check_model_directories(check_config=check_config, model=model, request=None)
+        check_model_directories(
+            include=include,
+            model=model,
+            permitted_sub_directories=permitted_sub_directories,
+            request=None,
+        )
 
 
 @pytest.mark.parametrize(
-    "check_config, manifest_obj, model, models, expectation",
+    "manifest_obj, materializations_to_include, max_chained_views, model, models, expectation",
     [
         (
-            {"materializations_to_include": ["ephemeral", "view"], "max_chained_views": 3},
             "manifest_obj",
+            ["ephemeral", "view"],
+            3,
             Nodes4(
                 **{
                     "alias": "model_0",
@@ -1238,8 +1234,9 @@ def test_check_model_directories(check_config, model, expectation):
             does_not_raise(),
         ),
         (
-            {"materializations_to_include": ["ephemeral", "view"], "max_chained_views": 3},
             "manifest_obj",
+            ["ephemeral", "view"],
+            3,
             Nodes4(
                 **{
                     "alias": "model_0",
@@ -1361,11 +1358,14 @@ def test_check_model_directories(check_config, model, expectation):
     ],
     indirect=["manifest_obj"],
 )
-def test_check_model_max_chained_views(check_config, manifest_obj, model, models, expectation):
+def test_check_model_max_chained_views(
+    manifest_obj, materializations_to_include, max_chained_views, model, models, expectation
+):
     with expectation:
         check_model_max_chained_views(
-            check_config=check_config,
             manifest_obj=manifest_obj,
+            materializations_to_include=materializations_to_include,
+            max_chained_views=max_chained_views,
             model=model,
             models=models,
             request=None,
@@ -1373,12 +1373,11 @@ def test_check_model_max_chained_views(check_config, manifest_obj, model, models
 
 
 @pytest.mark.parametrize(
-    "check_config, model, expectation",
+    "include, model_name_pattern, model, expectation",
     [
         (
-            {
-                "model_name_pattern": "^stg_",
-            },
+            "",
+            "^stg_",
             Nodes4(
                 **{
                     "alias": "stg_model_1",
@@ -1403,10 +1402,8 @@ def test_check_model_max_chained_views(check_config, manifest_obj, model, models
             does_not_raise(),
         ),
         (
-            {
-                "include": "^staging",
-                "model_name_pattern": "^stg_",
-            },
+            "^staging",
+            "^stg_",
             Nodes4(
                 **{
                     "alias": "stg_model_2",
@@ -1431,10 +1428,8 @@ def test_check_model_max_chained_views(check_config, manifest_obj, model, models
             does_not_raise(),
         ),
         (
-            {
-                "include": "^intermediate",
-                "model_name_pattern": "^stg_",
-            },
+            "^intermediate",
+            "^stg_",
             Nodes4(
                 **{
                     "alias": "stg_model_3",
@@ -1459,10 +1454,8 @@ def test_check_model_max_chained_views(check_config, manifest_obj, model, models
             does_not_raise(),
         ),
         (
-            {
-                "include": "^intermediate",
-                "model_name_pattern": "^int_",
-            },
+            "^intermediate",
+            "^int_",
             Nodes4(
                 **{
                     "alias": "int_model_1",
@@ -1487,10 +1480,8 @@ def test_check_model_max_chained_views(check_config, manifest_obj, model, models
             does_not_raise(),
         ),
         (
-            {
-                "include": "^intermediate",
-                "model_name_pattern": "^int_",
-            },
+            "^intermediate",
+            "^int_",
             Nodes4(
                 **{
                     "alias": "model_1",
@@ -1515,10 +1506,8 @@ def test_check_model_max_chained_views(check_config, manifest_obj, model, models
             pytest.raises(AssertionError),
         ),
         (
-            {
-                "include": "^intermediate",
-                "model_name_pattern": "^int_",
-            },
+            "^intermediate",
+            "^int_",
             Nodes4(
                 **{
                     "alias": "model_int_2",
@@ -1544,18 +1533,18 @@ def test_check_model_max_chained_views(check_config, manifest_obj, model, models
         ),
     ],
 )
-def test_check_mode_names(check_config, model, expectation):
+def test_check_mode_names(include, model_name_pattern, model, expectation):
     with expectation:
-        check_model_names(check_config=check_config, model=model, request=None)
+        check_model_names(
+            include=include, model_name_pattern=model_name_pattern, model=model, request=None
+        )
 
 
 @pytest.mark.parametrize(
-    "check_config, model, models, expectation",
+    "max_downstream_models, model, models, expectation",
     [
         (
-            {
-                "max_downstream_models": 1,
-            },
+            1,
             Nodes4(
                 **{
                     "alias": "stg_model_1",
@@ -1608,9 +1597,7 @@ def test_check_mode_names(check_config, model, expectation):
             does_not_raise(),
         ),
         (
-            {
-                "max_downstream_models": 1,
-            },
+            1,
             Nodes4(
                 **{
                     "alias": "stg_model_1",
@@ -1690,20 +1677,20 @@ def test_check_mode_names(check_config, model, expectation):
         ),
     ],
 )
-def test_check_model_max_fanout(check_config, model, models, expectation):
+def test_check_model_max_fanout(max_downstream_models, model, models, expectation):
     with expectation:
-        check_model_max_fanout(check_config=check_config, model=model, models=models, request=None)
+        check_model_max_fanout(
+            max_downstream_models=max_downstream_models, model=model, models=models, request=None
+        )
 
 
 @pytest.mark.parametrize(
-    "check_config, model, expectation",
+    "max_upstream_macros, max_upstream_models, max_upstream_sources, model, expectation",
     [
         (
-            {
-                "max_upstream_macros": 5,
-                "max_upstream_models": 5,
-                "max_upstream_sources": 1,
-            },
+            5,
+            5,
+            1,
             Nodes4(
                 **{
                     "alias": "model_1",
@@ -1746,11 +1733,9 @@ def test_check_model_max_fanout(check_config, model, models, expectation):
             does_not_raise(),
         ),
         (
-            {
-                "max_upstream_macros": 5,
-                "max_upstream_models": 5,
-                "max_upstream_sources": 1,
-            },
+            5,
+            5,
+            1,
             Nodes4(
                 **{
                     "alias": "model_1",
@@ -1780,11 +1765,9 @@ def test_check_model_max_fanout(check_config, model, models, expectation):
             does_not_raise(),
         ),
         (
-            {
-                "max_upstream_macros": 5,
-                "max_upstream_models": 5,
-                "max_upstream_sources": 1,
-            },
+            5,
+            5,
+            1,
             Nodes4(
                 **{
                     "alias": "model_1",
@@ -1817,11 +1800,9 @@ def test_check_model_max_fanout(check_config, model, models, expectation):
             pytest.raises(AssertionError),
         ),
         (
-            {
-                "max_upstream_macros": 5,
-                "max_upstream_models": 5,
-                "max_upstream_sources": 1,
-            },
+            5,
+            5,
+            1,
             Nodes4(
                 **{
                     "alias": "model_1",
@@ -1858,11 +1839,9 @@ def test_check_model_max_fanout(check_config, model, models, expectation):
             pytest.raises(AssertionError),
         ),
         (
-            {
-                "max_upstream_macros": 5,
-                "max_upstream_models": 5,
-                "max_upstream_sources": 1,
-            },
+            5,
+            5,
+            1,
             Nodes4(
                 **{
                     "alias": "model_1",
@@ -1900,9 +1879,17 @@ def test_check_model_max_fanout(check_config, model, models, expectation):
         ),
     ],
 )
-def test_check_model_max_upstream_dependencies(check_config, model, expectation):
+def test_check_model_max_upstream_dependencies(
+    max_upstream_macros, max_upstream_models, max_upstream_sources, model, expectation
+):
     with expectation:
-        check_model_max_upstream_dependencies(check_config=check_config, model=model, request=None)
+        check_model_max_upstream_dependencies(
+            max_upstream_macros=max_upstream_macros,
+            max_upstream_models=max_upstream_models,
+            max_upstream_sources=max_upstream_sources,
+            model=model,
+            request=None,
+        )
 
 
 @pytest.mark.parametrize(
@@ -2255,12 +2242,10 @@ def test_check_model_description_populated(model, expectation):
 
 
 @pytest.mark.parametrize(
-    "check_config, models, tests, expectation",
+    "min_model_test_coverage_pct, models, tests, expectation",
     [
         (
-            {
-                "min_model_test_coverage_pct": 100,
-            },
+            100,
             [
                 Nodes4(
                     **{
@@ -2313,9 +2298,7 @@ def test_check_model_description_populated(model, expectation):
             does_not_raise(),
         ),
         (
-            {
-                "min_model_test_coverage_pct": 50,
-            },
+            50,
             [
                 Nodes4(
                     **{
@@ -2389,9 +2372,7 @@ def test_check_model_description_populated(model, expectation):
             does_not_raise(),
         ),
         (
-            {
-                "min_model_test_coverage_pct": 100,
-            },
+            100,
             [
                 Nodes4(
                     **{
@@ -2466,8 +2447,11 @@ def test_check_model_description_populated(model, expectation):
         ),
     ],
 )
-def test_check_model_test_coverage(check_config, models, tests, expectation):
+def test_check_model_test_coverage(min_model_test_coverage_pct, models, tests, expectation):
     with expectation:
         check_model_test_coverage(
-            check_config=check_config, models=models, tests=tests, request=None
+            min_model_test_coverage_pct=min_model_test_coverage_pct,
+            models=models,
+            tests=tests,
+            request=None,
         )

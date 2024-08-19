@@ -1,12 +1,15 @@
-from typing import List, Literal
+# mypy: disable-error-code="union-attr"
+
+from typing import List, Literal, Union
 
 import pytest
+from _pytest.fixtures import TopRequest
 from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Exposures
 from pydantic import Field
 
 from dbt_bouncer.conf_validator_base import BaseCheck
 from dbt_bouncer.parsers import DbtBouncerModel
-from dbt_bouncer.utils import get_check_inputs
+from dbt_bouncer.utils import bouncer_check
 
 
 class CheckExposureOnNonPublicModels(BaseCheck):
@@ -14,14 +17,16 @@ class CheckExposureOnNonPublicModels(BaseCheck):
 
 
 @pytest.mark.iterate_over_exposures
+@bouncer_check
 def check_exposure_based_on_non_public_models(
-    models: List[DbtBouncerModel], request, exposure: Exposures = None
-):
+    models: List[DbtBouncerModel],
+    request: TopRequest,
+    exposure: Union[Exposures, None] = None,
+    **kwargs,
+) -> None:
     """
     Exposures should be based on public models only.
     """
-
-    exposure = get_check_inputs(exposure=exposure, request=request)["exposure"]
 
     non_public_upstream_dependencies = []
     for model in exposure.depends_on.nodes:
@@ -47,16 +52,17 @@ class CheckExposureOnView(BaseCheck):
 
 
 @pytest.mark.iterate_over_exposures
+@bouncer_check
 def check_exposure_based_on_view(
-    models: List[DbtBouncerModel], request, check_config=None, exposure: Exposures = None
-):
+    models: List[DbtBouncerModel],
+    request: TopRequest,
+    exposure: Union[Exposures, None] = None,
+    materializations_to_include: Union[List[str], None] = None,
+    **kwargs,
+) -> None:
     """
     Exposures should not be based on views.
     """
-
-    input_vars = get_check_inputs(check_config=check_config, exposure=exposure, request=request)
-    exposure = input_vars["exposure"]
-    materializations_to_include = input_vars["check_config"]["materializations_to_include"]
 
     non_table_upstream_dependencies = []
     for model in exposure.depends_on.nodes:
@@ -65,7 +71,7 @@ def check_exposure_based_on_view(
             and model.split(".")[1] == exposure.unique_id.split(".")[1]
         ):
             model = [m for m in models if m.unique_id == model][0]
-            if model.config.materialized in materializations_to_include:
+            if model.config.materialized in materializations_to_include:  # type: ignore[operator]
                 non_table_upstream_dependencies.append(model.unique_id.split(".")[-1])
 
     assert (

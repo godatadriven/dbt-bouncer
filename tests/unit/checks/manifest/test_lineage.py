@@ -11,12 +11,9 @@ from dbt_bouncer.checks.manifest.check_lineage import (
 
 
 @pytest.mark.parametrize(
-    "check_config, manifest_obj, model, models, expectation",
+    "manifest_obj, model, models, upstream_path_pattern, expectation",
     [
         (
-            {
-                "upstream_path_pattern": "^staging",
-            },
             "manifest_obj",
             Nodes4(
                 **{
@@ -63,12 +60,10 @@ from dbt_bouncer.checks.manifest.check_lineage import (
                     }
                 )
             ],
+            "^staging",
             does_not_raise(),
         ),
         (
-            {
-                "upstream_path_pattern": "^staging",
-            },
             "manifest_obj",
             Nodes4(
                 **{
@@ -93,12 +88,10 @@ from dbt_bouncer.checks.manifest.check_lineage import (
                 }
             ),
             [],
+            "^staging",
             does_not_raise(),
         ),
         (
-            {
-                "upstream_path_pattern": "^intermediate",
-            },
             "manifest_obj",
             Nodes4(
                 **{
@@ -145,20 +138,21 @@ from dbt_bouncer.checks.manifest.check_lineage import (
                     }
                 ),
             ],
+            "^intermediate",
             pytest.raises(AssertionError),
         ),
     ],
     indirect=["manifest_obj"],
 )
 def test_check_lineage_permitted_upstream_models(
-    check_config, manifest_obj, model, models, expectation
+    manifest_obj, model, models, upstream_path_pattern, expectation
 ):
     with expectation:
         check_lineage_permitted_upstream_models(
-            check_config=check_config,
             manifest_obj=manifest_obj,
             model=model,
             models=models,
+            upstream_path_pattern=upstream_path_pattern,
             request=None,
         )
 

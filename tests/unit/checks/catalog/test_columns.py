@@ -1,6 +1,7 @@
 from contextlib import nullcontext as does_not_raise
 
 import pytest
+from dbt_artifacts_parser.parsers.catalog.catalog_v1 import CatalogTable
 from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Nodes4, Nodes6
 
 from dbt_bouncer.checks.catalog.check_columns import (
@@ -9,36 +10,32 @@ from dbt_bouncer.checks.catalog.check_columns import (
     check_columns_are_all_documented,
     check_columns_are_documented_in_public_models,
 )
-from dbt_bouncer.parsers import DbtBouncerCatalogNode
 
 
 @pytest.mark.parametrize(
-    "catalog_node, check_config, tests, expectation",
+    "catalog_node, column_name_pattern, test_name, tests, expectation",
     [
         (
-            DbtBouncerCatalogNode(
+            CatalogTable(
                 **{
-                    "node": {
-                        "columns": {
-                            "col_1": {
-                                "index": 1,
-                                "name": "col_1",
-                                "type": "INTEGER",
-                            },
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
                         },
-                        "metadata": {
-                            "name": "table_1",
-                            "schema": "main",
-                            "type": "VIEW",
-                        },
-                        "stats": {},
-                        "unique_id": "model.package_name.model_1",
                     },
-                    "path": "marts/finance/_models.yml",
+                    "metadata": {
+                        "name": "table_1",
+                        "schema": "main",
+                        "type": "VIEW",
+                    },
+                    "stats": {},
                     "unique_id": "model.package_name.model_1",
                 }
             ),
-            {"column_name_pattern": ".*_1$", "test_name": "unique"},
+            ".*_1$",
+            "unique",
             [
                 Nodes6(
                     **{
@@ -68,29 +65,26 @@ from dbt_bouncer.parsers import DbtBouncerCatalogNode
             does_not_raise(),
         ),
         (
-            DbtBouncerCatalogNode(
+            CatalogTable(
                 **{
-                    "node": {
-                        "columns": {
-                            "col_1": {
-                                "index": 1,
-                                "name": "col_1",
-                                "type": "INTEGER",
-                            },
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
                         },
-                        "metadata": {
-                            "name": "table_1",
-                            "schema": "main",
-                            "type": "VIEW",
-                        },
-                        "stats": {},
-                        "unique_id": "model.package_name.model_1",
                     },
-                    "path": "marts/finance/_models.yml",
+                    "metadata": {
+                        "name": "table_1",
+                        "schema": "main",
+                        "type": "VIEW",
+                    },
+                    "stats": {},
                     "unique_id": "model.package_name.model_1",
                 }
             ),
-            {"column_name_pattern": ".*_1$", "test_name": "unique"},
+            ".*_1$",
+            "unique",
             [
                 Nodes6(
                     **{
@@ -116,10 +110,16 @@ from dbt_bouncer.parsers import DbtBouncerCatalogNode
         ),
     ],
 )
-def test_check_column_has_specified_test(catalog_node, check_config, tests, expectation):
+def test_check_column_has_specified_test(
+    catalog_node, column_name_pattern, test_name, tests, expectation
+):
     with expectation:
         check_column_has_specified_test(
-            catalog_node=catalog_node, check_config=check_config, tests=tests, request=None
+            catalog_node=catalog_node,
+            column_name_pattern=column_name_pattern,
+            test_name=test_name,
+            tests=tests,
+            request=None,
         )
 
 
@@ -127,30 +127,26 @@ def test_check_column_has_specified_test(catalog_node, check_config, tests, expe
     "catalog_node, models, expectation",
     [
         (
-            DbtBouncerCatalogNode(
+            CatalogTable(
                 **{
-                    "node": {
-                        "columns": {
-                            "col_1": {
-                                "index": 1,
-                                "name": "col_1",
-                                "type": "INTEGER",
-                            },
-                            "col_2": {
-                                "index": 2,
-                                "name": "col_2",
-                                "type": "INTEGER",
-                            },
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
                         },
-                        "metadata": {
-                            "name": "table_1",
-                            "schema": "main",
-                            "type": "VIEW",
+                        "col_2": {
+                            "index": 2,
+                            "name": "col_2",
+                            "type": "INTEGER",
                         },
-                        "stats": {},
-                        "unique_id": "model.package_name.model_1",
                     },
-                    "path": "marts/finance/_models.yml",
+                    "metadata": {
+                        "name": "table_1",
+                        "schema": "main",
+                        "type": "VIEW",
+                    },
+                    "stats": {},
                     "unique_id": "model.package_name.model_1",
                 }
             ),
@@ -185,30 +181,26 @@ def test_check_column_has_specified_test(catalog_node, check_config, tests, expe
             does_not_raise(),
         ),
         (
-            DbtBouncerCatalogNode(
+            CatalogTable(
                 **{
-                    "node": {
-                        "columns": {
-                            "col_1": {
-                                "index": 1,
-                                "name": "col_1",
-                                "type": "INTEGER",
-                            },
-                            "col_2": {
-                                "index": 2,
-                                "name": "col_2",
-                                "type": "INTEGER",
-                            },
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
                         },
-                        "metadata": {
-                            "name": "table_1",
-                            "schema": "main",
-                            "type": "VIEW",
+                        "col_2": {
+                            "index": 2,
+                            "name": "col_2",
+                            "type": "INTEGER",
                         },
-                        "stats": {},
-                        "unique_id": "model.package_name.model_2",
                     },
-                    "path": "marts/finance/_models.yml",
+                    "metadata": {
+                        "name": "table_1",
+                        "schema": "main",
+                        "type": "VIEW",
+                    },
+                    "stats": {},
                     "unique_id": "model.package_name.model_2",
                 }
             ),
@@ -248,25 +240,21 @@ def test_check_columns_are_all_documented(catalog_node, models, expectation):
     "catalog_node, models, expectation",
     [
         (
-            DbtBouncerCatalogNode(
+            CatalogTable(
                 **{
-                    "node": {
-                        "columns": {
-                            "col_1": {
-                                "index": 1,
-                                "name": "col_1",
-                                "type": "INTEGER",
-                            },
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
                         },
-                        "metadata": {
-                            "name": "table_1",
-                            "schema": "main",
-                            "type": "VIEW",
-                        },
-                        "stats": {},
-                        "unique_id": "model.package_name.model_1",
                     },
-                    "path": "marts/finance/_models.yml",
+                    "metadata": {
+                        "name": "table_1",
+                        "schema": "main",
+                        "type": "VIEW",
+                    },
+                    "stats": {},
                     "unique_id": "model.package_name.model_1",
                 }
             ),
@@ -298,30 +286,26 @@ def test_check_columns_are_all_documented(catalog_node, models, expectation):
             does_not_raise(),
         ),
         (
-            DbtBouncerCatalogNode(
+            CatalogTable(
                 **{
-                    "node": {
-                        "columns": {
-                            "col_1": {
-                                "index": 1,
-                                "name": "col_1",
-                                "type": "INTEGER",
-                            },
-                            "col_2": {
-                                "index": 2,
-                                "name": "col_2",
-                                "type": "INTEGER",
-                            },
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
                         },
-                        "metadata": {
-                            "name": "table_1",
-                            "schema": "main",
-                            "type": "VIEW",
+                        "col_2": {
+                            "index": 2,
+                            "name": "col_2",
+                            "type": "INTEGER",
                         },
-                        "stats": {},
-                        "unique_id": "model.package_name.model_1",
                     },
-                    "path": "marts/finance/_models.yml",
+                    "metadata": {
+                        "name": "table_1",
+                        "schema": "main",
+                        "type": "VIEW",
+                    },
+                    "stats": {},
                     "unique_id": "model.package_name.model_1",
                 }
             ),
@@ -368,100 +352,96 @@ def test_check_columns_are_documented_in_public_models(catalog_node, models, exp
 
 
 @pytest.mark.parametrize(
-    "catalog_node, check_config, expectation",
+    "catalog_node, column_name_pattern, types, expectation",
     [
         (
-            DbtBouncerCatalogNode(
+            CatalogTable(
                 **{
-                    "node": {
-                        "columns": {
-                            "col_1_date": {
-                                "index": 1,
-                                "name": "col_1_date",
-                                "type": "DATE",
-                            },
+                    "columns": {
+                        "col_1_date": {
+                            "index": 1,
+                            "name": "col_1_date",
+                            "type": "DATE",
                         },
-                        "metadata": {
-                            "name": "table_1",
-                            "schema": "main",
-                            "type": "VIEW",
-                        },
-                        "stats": {},
-                        "unique_id": "model.package_name.model_1",
                     },
-                    "path": "marts/finance/_models.yml",
+                    "metadata": {
+                        "name": "table_1",
+                        "schema": "main",
+                        "type": "VIEW",
+                    },
+                    "stats": {},
                     "unique_id": "model.package_name.model_1",
                 }
             ),
-            {"column_name_pattern": ".*_date$", "types": ["DATE"]},
+            ".*_date$",
+            ["DATE"],
             does_not_raise(),
         ),
         (
-            DbtBouncerCatalogNode(
+            CatalogTable(
                 **{
-                    "node": {
-                        "columns": {
-                            "col_1_date": {
-                                "index": 1,
-                                "name": "col_1_date",
-                                "type": "DATE",
-                            },
-                            "col_2_date": {
-                                "index": 2,
-                                "name": "col_2_date",
-                                "type": "DATE",
-                            },
-                            "col_3": {
-                                "index": 3,
-                                "name": "col_3",
-                                "type": "VARCHAR",
-                            },
+                    "columns": {
+                        "col_1_date": {
+                            "index": 1,
+                            "name": "col_1_date",
+                            "type": "DATE",
                         },
-                        "metadata": {
-                            "name": "table_1",
-                            "schema": "main",
-                            "type": "VIEW",
+                        "col_2_date": {
+                            "index": 2,
+                            "name": "col_2_date",
+                            "type": "DATE",
                         },
-                        "stats": {},
-                        "unique_id": "model.package_name.model_1",
+                        "col_3": {
+                            "index": 3,
+                            "name": "col_3",
+                            "type": "VARCHAR",
+                        },
                     },
-                    "path": "marts/finance/_models.yml",
+                    "metadata": {
+                        "name": "table_1",
+                        "schema": "main",
+                        "type": "VIEW",
+                    },
+                    "stats": {},
                     "unique_id": "model.package_name.model_1",
                 }
             ),
-            {"column_name_pattern": ".*_date$", "types": ["DATE"]},
+            ".*_date$",
+            ["DATE"],
             does_not_raise(),
         ),
         (
-            DbtBouncerCatalogNode(
+            CatalogTable(
                 **{
-                    "node": {
-                        "columns": {
-                            "col_1": {
-                                "index": 1,
-                                "name": "col_1",
-                                "type": "DATE",
-                            },
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "DATE",
                         },
-                        "metadata": {
-                            "name": "table_1",
-                            "schema": "main",
-                            "type": "VIEW",
-                        },
-                        "stats": {},
-                        "unique_id": "model.package_name.model_1",
                     },
-                    "path": "marts/finance/_models.yml",
+                    "metadata": {
+                        "name": "table_1",
+                        "schema": "main",
+                        "type": "VIEW",
+                    },
+                    "stats": {},
                     "unique_id": "model.package_name.model_1",
                 }
             ),
-            {"column_name_pattern": ".*_date$", "types": ["DATE"]},
+            ".*_date$",
+            ["DATE"],
             pytest.raises(AssertionError),
         ),
     ],
 )
-def test_check_column_name_complies_to_column_type(catalog_node, check_config, expectation):
+def test_check_column_name_complies_to_column_type(
+    catalog_node, column_name_pattern, types, expectation
+):
     with expectation:
         check_column_name_complies_to_column_type(
-            catalog_node=catalog_node, check_config=check_config, request=None
+            catalog_node=catalog_node,
+            column_name_pattern=column_name_pattern,
+            types=types,
+            request=None,
         )

@@ -1,11 +1,15 @@
+# mypy: disable-error-code="union-attr"
+
 import re
-from typing import List, Literal
+from typing import List, Literal, Union
 
 import pytest
+from _pytest.fixtures import TopRequest
+from dbt_artifacts_parser.parsers.catalog.catalog_v1 import CatalogTable
 
 from dbt_bouncer.conf_validator_base import BaseCheck
-from dbt_bouncer.parsers import DbtBouncerCatalogNode, DbtBouncerModel, DbtBouncerTest
-from dbt_bouncer.utils import get_check_inputs
+from dbt_bouncer.parsers import DbtBouncerModel, DbtBouncerTest
+from dbt_bouncer.utils import bouncer_check
 
 
 class CheckColumnNameCompliesToColumnType(BaseCheck):
@@ -15,29 +19,27 @@ class CheckColumnNameCompliesToColumnType(BaseCheck):
 
 
 @pytest.mark.iterate_over_catalog_nodes
+@bouncer_check
 def check_column_name_complies_to_column_type(
-    request, check_config=None, catalog_node: DbtBouncerCatalogNode = None
+    request: TopRequest,
+    catalog_node: Union[CatalogTable, None] = None,
+    column_name_pattern: Union[None, str] = None,
+    types: Union[List[str], None] = None,
+    **kwargs,
 ) -> None:
     """
     Columns with specified data types must comply to the specified regexp naming pattern.
     """
 
-    input_vars = get_check_inputs(
-        catalog_node=catalog_node, check_config=check_config, request=request
-    )
-    catalog_node = input_vars["catalog_node"]
-    check_config = input_vars["check_config"]
-
     non_complying_columns = [
         v.name
         for _, v in catalog_node.columns.items()
-        if v.type in check_config["types"]
-        and re.compile(check_config["column_name_pattern"].strip()).match(v.name) is None
+        if v.type in types and re.compile(column_name_pattern.strip()).match(v.name) is None  # type: ignore[operator]
     ]
 
     assert (
         not non_complying_columns
-    ), f"`{catalog_node.unique_id.split('.')[-1]}` has columns that don't comply with the specified regexp pattern (`{check_config['column_name_pattern']}`): {non_complying_columns}"
+    ), f"`{catalog_node.unique_id.split('.')[-1]}` has columns that don't comply with the specified regexp pattern (`{column_name_pattern}`): {non_complying_columns}"
 
 
 class CheckColumnsAreAllDocumented(BaseCheck):
@@ -45,14 +47,16 @@ class CheckColumnsAreAllDocumented(BaseCheck):
 
 
 @pytest.mark.iterate_over_catalog_nodes
+@bouncer_check
 def check_columns_are_all_documented(
-    models: List[DbtBouncerModel], request, catalog_node: DbtBouncerCatalogNode = None
+    models: List[DbtBouncerModel],
+    request: TopRequest,
+    catalog_node: Union[CatalogTable, None] = None,
+    **kwargs,
 ) -> None:
     """
     All columns in a model should be included in the model's properties file, i.e. `.yml` file.
     """
-
-    catalog_node = get_check_inputs(catalog_node=catalog_node, request=request)["catalog_node"]
 
     if catalog_node.unique_id.split(".")[0] == "model":
         model = [m for m in models if m.unique_id == catalog_node.unique_id][0]
@@ -69,14 +73,16 @@ class CheckColumnsAreDocumentedInPublicModels(BaseCheck):
 
 
 @pytest.mark.iterate_over_catalog_nodes
+@bouncer_check
 def check_columns_are_documented_in_public_models(
-    models: List[DbtBouncerModel], request, catalog_node: DbtBouncerCatalogNode = None
+    models: List[DbtBouncerModel],
+    request: TopRequest,
+    catalog_node: Union[CatalogTable, None] = None,
+    **kwargs,
 ) -> None:
     """
     Columns should have a populated description in public models.
     """
-
-    catalog_node = get_check_inputs(catalog_node=catalog_node, request=request)["catalog_node"]
 
     if catalog_node.unique_id.split(".")[0] == "model":
         model = [m for m in models if m.unique_id == catalog_node.unique_id][0]
@@ -99,22 +105,18 @@ class CheckColumnHasSpecifiedTest(BaseCheck):
 
 
 @pytest.mark.iterate_over_catalog_nodes
+@bouncer_check
 def check_column_has_specified_test(
-    request,
+    request: TopRequest,
     tests: List[DbtBouncerTest],
-    check_config=None,
-    catalog_node: DbtBouncerCatalogNode = None,
+    catalog_node: Union[CatalogTable, None] = None,
+    column_name_pattern: Union[None, str] = None,
+    test_name: Union[None, str] = None,
+    **kwargs,
 ) -> None:
     """
     Columns that match the specified regexp pattern must have a specified test.
     """
-
-    input_vars = get_check_inputs(
-        catalog_node=catalog_node, check_config=check_config, request=request
-    )
-    catalog_node = input_vars["catalog_node"]
-    column_name_pattern = input_vars["check_config"]["column_name_pattern"]
-    test_name = input_vars["check_config"]["test_name"]
 
     columns_to_check = [
         v.name
