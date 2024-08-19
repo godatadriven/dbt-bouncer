@@ -2,50 +2,53 @@
 from __future__ import annotations
 
 import json
+import warnings
 from enum import Enum
 from pathlib import Path
 from typing import List, Literal, Union
 
-from dbt_artifacts_parser.parser import parse_catalog, parse_manifest, parse_run_results
-from dbt_artifacts_parser.parsers.catalog.catalog_v1 import CatalogTable, CatalogV1
-from dbt_artifacts_parser.parsers.manifest.manifest_v10 import (
-    GenericTestNode as GenericTestNode_v10,
-)
-from dbt_artifacts_parser.parsers.manifest.manifest_v10 import ManifestV10
-from dbt_artifacts_parser.parsers.manifest.manifest_v10 import (
-    ModelNode as ModelNode_v10,
-)
-from dbt_artifacts_parser.parsers.manifest.manifest_v10 import (
-    SourceDefinition as SourceDefinition_v10,
-)
-from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
-    GenericTestNode as GenericTestNode_v11,
-)
-from dbt_artifacts_parser.parsers.manifest.manifest_v11 import ManifestV11
-from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
-    ModelNode as ModelNode_v11,
-)
-from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
-    SourceDefinition as SourceDefinition_v11,
-)
-from dbt_artifacts_parser.parsers.manifest.manifest_v12 import (
-    Exposures,
-    Macros,
-    ManifestV12,
-    Nodes4,
-    Nodes6,
-    Sources,
-)
-from dbt_artifacts_parser.parsers.run_results.run_results_v4 import (
-    RunResultOutput as RunResultOutput_v4,
-)
-from dbt_artifacts_parser.parsers.run_results.run_results_v4 import RunResultsV4
-from dbt_artifacts_parser.parsers.run_results.run_results_v5 import (
-    RunResultOutput as RunResultOutput_v5,
-)
-from dbt_artifacts_parser.parsers.run_results.run_results_v5 import RunResultsV5
-from dbt_artifacts_parser.parsers.run_results.run_results_v6 import Result, RunResultsV6
-from pydantic import BaseModel
+with warnings.catch_warnings():
+    warnings.filterwarnings("ignore", category=UserWarning)
+    from dbt_artifacts_parser.parser import parse_catalog, parse_manifest, parse_run_results
+    from dbt_artifacts_parser.parsers.catalog.catalog_v1 import CatalogTable, CatalogV1
+    from dbt_artifacts_parser.parsers.manifest.manifest_v10 import (
+        GenericTestNode as GenericTestNode_v10,
+    )
+    from dbt_artifacts_parser.parsers.manifest.manifest_v10 import ManifestV10
+    from dbt_artifacts_parser.parsers.manifest.manifest_v10 import (
+        ModelNode as ModelNode_v10,
+    )
+    from dbt_artifacts_parser.parsers.manifest.manifest_v10 import (
+        SourceDefinition as SourceDefinition_v10,
+    )
+    from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
+        GenericTestNode as GenericTestNode_v11,
+    )
+    from dbt_artifacts_parser.parsers.manifest.manifest_v11 import ManifestV11
+    from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
+        ModelNode as ModelNode_v11,
+    )
+    from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
+        SourceDefinition as SourceDefinition_v11,
+    )
+    from dbt_artifacts_parser.parsers.manifest.manifest_v12 import (
+        Exposures,
+        Macros,
+        ManifestV12,
+        Nodes4,
+        Nodes6,
+        Sources,
+    )
+    from dbt_artifacts_parser.parsers.run_results.run_results_v4 import (
+        RunResultOutput as RunResultOutput_v4,
+    )
+    from dbt_artifacts_parser.parsers.run_results.run_results_v4 import RunResultsV4
+    from dbt_artifacts_parser.parsers.run_results.run_results_v5 import (
+        RunResultOutput as RunResultOutput_v5,
+    )
+    from dbt_artifacts_parser.parsers.run_results.run_results_v5 import RunResultsV5
+    from dbt_artifacts_parser.parsers.run_results.run_results_v6 import Result, RunResultsV6
+    from pydantic import BaseModel
 
 from dbt_bouncer.logger import logger
 
