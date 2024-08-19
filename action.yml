@@ -39,7 +39,7 @@ runs:
           --env GITHUB_RUN_ID='${{ github.run_id }}' \
           --env GITHUB_TOKEN='${{ github.token }}' \
           --volume "$GITHUB_WORKSPACE":/app \
-          ghcr.io/godatadriven/dbt-bouncer:v0.0.0 \
+          ghcr.io/godatadriven/dbt-bouncer:v0.20.0 \
           --config-file /app/${{ inputs.config-file }} \
           --create-pr-comment-file ${{ inputs.send-pr-comment }} \
           ${{ steps.assemble-output-file-param.outputs.output-file-param }}
