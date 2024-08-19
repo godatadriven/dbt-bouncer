@@ -147,7 +147,7 @@ class GenerateTestsPlugin:
 
                     markers = pytest.Function.from_parent(
                         collector, name=name
-                    ).keywords._markers.keys()
+                    ).keywords._markers.keys()  # type: ignore[attr-defined]
                     if (
                         len(
                             set(
