@@ -6,29 +6,25 @@ from dbt_bouncer.checks.manifest.check_metadata import check_project_name
 
 
 @pytest.mark.parametrize(
-    "check_config, manifest_obj, expectation",
+    "manifest_obj, project_name_pattern, expectation",
     [
         (
-            {
-                "project_name_pattern": "^dbt_bouncer_",
-            },
             "manifest_obj",
+            "^dbt_bouncer_",
             does_not_raise(),
         ),
         (
-            {
-                "project_name_pattern": "^company_",
-            },
             "manifest_obj",
+            "^company_",
             pytest.raises(AssertionError),
         ),
     ],
     indirect=["manifest_obj"],
 )
-def test_check_project_name(check_config, manifest_obj, expectation, request):
+def test_check_project_name(manifest_obj, project_name_pattern, expectation):
     with expectation:
         check_project_name(
-            check_config=check_config,
             manifest_obj=manifest_obj,
+            project_name_pattern=project_name_pattern,
             request=None,
         )

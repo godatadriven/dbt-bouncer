@@ -1,11 +1,14 @@
+# mypy: disable-error-code="union-attr"
+
 import re
-from typing import List, Literal, Optional
+from typing import List, Literal, Optional, Union
 
 import pytest
+from _pytest.fixtures import TopRequest
 from pydantic import BaseModel, ConfigDict, Field
 
 from dbt_bouncer.parsers import DbtBouncerManifest, DbtBouncerModel
-from dbt_bouncer.utils import get_check_inputs
+from dbt_bouncer.utils import bouncer_check
 
 
 class CheckLineagePermittedUpstreamModels(BaseModel):
@@ -24,20 +27,18 @@ class CheckLineagePermittedUpstreamModels(BaseModel):
 
 
 @pytest.mark.iterate_over_models
+@bouncer_check
 def check_lineage_permitted_upstream_models(
     manifest_obj: DbtBouncerManifest,
     models: List[DbtBouncerModel],
-    request,
-    check_config=None,
-    model: DbtBouncerModel = None,
-):
+    request: TopRequest,
+    model: Union[DbtBouncerModel, None] = None,
+    upstream_path_pattern: Union[None, str] = None,
+    **kwargs,
+) -> None:
     """
     Upstream models must have a path that matches the provided `upstream_path_pattern`.
     """
-
-    input_vars = get_check_inputs(check_config=check_config, model=model, request=request)
-    check_config = input_vars["check_config"]
-    model = input_vars["model"]
 
     upstream_models = [
         x
@@ -48,7 +49,7 @@ def check_lineage_permitted_upstream_models(
     not_permitted_upstream_models = [
         upstream_model
         for upstream_model in upstream_models
-        if re.compile(check_config["upstream_path_pattern"].strip()).match(
+        if re.compile(upstream_path_pattern.strip()).match(
             [m for m in models if m.unique_id == upstream_model][0].path
         )
         is None
@@ -71,12 +72,13 @@ class CheckLineageSeedCannotBeUsed(BaseModel):
 
 
 @pytest.mark.iterate_over_models
-def check_lineage_seed_cannot_be_used(request, model: DbtBouncerModel = None):
+@bouncer_check
+def check_lineage_seed_cannot_be_used(
+    request: TopRequest, model: Union[DbtBouncerModel, None] = None, **kwargs
+) -> None:
     """
     Seed cannot be referenced in models with a path that matches the specified `include` config.
     """
-
-    model = get_check_inputs(model=model, request=request)["model"]
 
     assert not [
         x for x in model.depends_on.nodes if x.split(".")[0] == "seed"
@@ -96,12 +98,13 @@ class CheckLineageSourceCannotBeUsed(BaseModel):
 
 
 @pytest.mark.iterate_over_models
-def check_lineage_source_cannot_be_used(request, model: DbtBouncerModel = None):
+@bouncer_check
+def check_lineage_source_cannot_be_used(
+    request: TopRequest, model: Union[DbtBouncerModel, None] = None, **kwargs
+) -> None:
     """
     Sources cannot be referenced in models with a path that matches the specified `include` config.
     """
-
-    model = get_check_inputs(model=model, request=request)["model"]
 
     assert not [
         x for x in model.depends_on.nodes if x.split(".")[0] == "source"

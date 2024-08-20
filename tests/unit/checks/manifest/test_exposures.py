@@ -112,10 +112,9 @@ def test_check_exposure_based_on_non_public_models(exposure, models, expectation
 
 
 @pytest.mark.parametrize(
-    "check_config, exposure, models, expectation",
+    "exposure, materializations_to_include, models, expectation",
     [
         (
-            {"materializations_to_include": ["ephemeral", "view"]},
             Exposures(
                 **{
                     "depends_on": {"nodes": ["model.package_name.model_1"]},
@@ -130,6 +129,7 @@ def test_check_exposure_based_on_non_public_models(exposure, models, expectation
                     "unique_id": "exposure.package_name.exposure_1",
                 },
             ),
+            ["ephemeral", "view"],
             [
                 Nodes4(
                     **{
@@ -163,7 +163,6 @@ def test_check_exposure_based_on_non_public_models(exposure, models, expectation
             does_not_raise(),
         ),
         (
-            {"materializations_to_include": ["ephemeral", "view"]},
             Exposures(
                 **{
                     "depends_on": {
@@ -180,6 +179,7 @@ def test_check_exposure_based_on_non_public_models(exposure, models, expectation
                     "unique_id": "exposure.package_name.exposure_1",
                 },
             ),
+            ["ephemeral", "view"],
             [
                 Nodes4(
                     **{
@@ -241,7 +241,6 @@ def test_check_exposure_based_on_non_public_models(exposure, models, expectation
             pytest.raises(AssertionError),
         ),
         (
-            {"materializations_to_include": ["ephemeral", "view"]},
             Exposures(
                 **{
                     "depends_on": {"nodes": ["model.package_name.model_1"]},
@@ -256,6 +255,7 @@ def test_check_exposure_based_on_non_public_models(exposure, models, expectation
                     "unique_id": "exposure.package_name.exposure_1",
                 },
             ),
+            ["ephemeral", "view"],
             [
                 Nodes4(
                     **{
@@ -290,8 +290,11 @@ def test_check_exposure_based_on_non_public_models(exposure, models, expectation
         ),
     ],
 )
-def test_check_exposure_based_on_view(check_config, exposure, models, expectation):
+def test_check_exposure_based_on_view(exposure, materializations_to_include, models, expectation):
     with expectation:
         check_exposure_based_on_view(
-            check_config=check_config, exposure=exposure, models=models, request=None
+            exposure=exposure,
+            materializations_to_include=materializations_to_include,
+            models=models,
+            request=None,
         )

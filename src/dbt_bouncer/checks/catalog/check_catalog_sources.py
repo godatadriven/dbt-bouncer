@@ -1,10 +1,13 @@
-from typing import List, Literal
+# mypy: disable-error-code="union-attr"
+
+from typing import List, Literal, Union
 
 import pytest
+from _pytest.fixtures import TopRequest
 
 from dbt_bouncer.conf_validator_base import BaseCheck
 from dbt_bouncer.parsers import DbtBouncerCatalogNode, DbtBouncerSource
-from dbt_bouncer.utils import get_check_inputs
+from dbt_bouncer.utils import bouncer_check
 
 
 class CheckSourceColumnsAreAllDocumented(BaseCheck):
@@ -12,16 +15,16 @@ class CheckSourceColumnsAreAllDocumented(BaseCheck):
 
 
 @pytest.mark.iterate_over_catalog_sources
+@bouncer_check
 def check_source_columns_are_all_documented(
-    sources: List[DbtBouncerSource], request, catalog_source: DbtBouncerCatalogNode = None
+    sources: List[DbtBouncerSource],
+    request: TopRequest,
+    catalog_source: Union[DbtBouncerCatalogNode, None] = None,
+    **kwargs,
 ) -> None:
     """
     All columns in a source should be included in the source's properties file, i.e. `.yml` file.
     """
-
-    catalog_source = get_check_inputs(catalog_source=catalog_source, request=request)[
-        "catalog_source"
-    ]
 
     source = [s for s in sources if s.unique_id == catalog_source.unique_id][0]
     undocumented_columns = [

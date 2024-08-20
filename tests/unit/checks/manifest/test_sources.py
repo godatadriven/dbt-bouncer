@@ -332,10 +332,10 @@ def test_check_source_loader_populated(source, expectation):
 
 
 @pytest.mark.parametrize(
-    "check_config, source, expectation",
+    "keys, source, expectation",
     [
         (
-            {"keys": ["owner"]},
+            ["owner"],
             Sources(
                 **{
                     "description": "Description that is more than 4 characters.",
@@ -357,7 +357,7 @@ def test_check_source_loader_populated(source, expectation):
             does_not_raise(),
         ),
         (
-            {"keys": ["owner"]},
+            ["owner"],
             Sources(
                 **{
                     "description": "Description that is more than 4 characters.",
@@ -379,7 +379,7 @@ def test_check_source_loader_populated(source, expectation):
             does_not_raise(),
         ),
         (
-            {"keys": ["owner", {"name": ["first", "last"]}]},
+            ["owner", {"name": ["first", "last"]}],
             Sources(
                 **{
                     "description": "Description that is more than 4 characters.",
@@ -401,7 +401,7 @@ def test_check_source_loader_populated(source, expectation):
             does_not_raise(),
         ),
         (
-            {"keys": ["owner"]},
+            ["owner"],
             Sources(
                 **{
                     "description": "Description that is more than 4 characters.",
@@ -423,7 +423,7 @@ def test_check_source_loader_populated(source, expectation):
             pytest.raises(AssertionError),
         ),
         (
-            {"keys": ["owner"]},
+            ["owner"],
             Sources(
                 **{
                     "description": "Description that is more than 4 characters.",
@@ -445,7 +445,7 @@ def test_check_source_loader_populated(source, expectation):
             pytest.raises(AssertionError),
         ),
         (
-            {"keys": ["owner", {"name": ["first", "last"]}]},
+            ["owner", {"name": ["first", "last"]}],
             Sources(
                 **{
                     "description": "Description that is more than 4 characters.",
@@ -468,18 +468,15 @@ def test_check_source_loader_populated(source, expectation):
         ),
     ],
 )
-def test_check_source_has_meta_keys(check_config, source, expectation):
+def test_check_source_has_meta_keys(keys, source, expectation):
     with expectation:
-        check_source_has_meta_keys(check_config=check_config, source=source, request=None)
+        check_source_has_meta_keys(keys=keys, source=source, request=None)
 
 
 @pytest.mark.parametrize(
-    "check_config, source, expectation",
+    "source, tags, expectation",
     [
         (
-            {
-                "tags": ["tag_1"],
-            },
             Sources(
                 **{
                     "description": "",
@@ -498,12 +495,10 @@ def test_check_source_has_meta_keys(check_config, source, expectation):
                     "unique_id": "source.package_name.source_1.table_1",
                 }
             ),
+            ["tag_1"],
             does_not_raise(),
         ),
         (
-            {
-                "tags": ["tag_1"],
-            },
             Sources(
                 **{
                     "description": "",
@@ -522,22 +517,21 @@ def test_check_source_has_meta_keys(check_config, source, expectation):
                     "unique_id": "source.package_name.source_1.table_1",
                 }
             ),
+            ["tag_1"],
             pytest.raises(AssertionError),
         ),
     ],
 )
-def test_check_source_has_tags(check_config, source, expectation):
+def test_check_source_has_tags(source, tags, expectation):
     with expectation:
-        check_source_has_tags(check_config=check_config, source=source, request=None)
+        check_source_has_tags(source=source, tags=tags, request=None)
 
 
 @pytest.mark.parametrize(
-    "check_config, source, expectation",
+    "source_name_pattern, source, expectation",
     [
         (
-            {
-                "source_name_pattern": "^[a-z_]*$",
-            },
+            "^[a-z_]*$",
             Sources(
                 **{
                     "description": "",
@@ -559,9 +553,7 @@ def test_check_source_has_tags(check_config, source, expectation):
             does_not_raise(),
         ),
         (
-            {
-                "source_name_pattern": "^[a-z_]*$",
-            },
+            "^[a-z_]*$",
             Sources(
                 **{
                     "description": "",
@@ -584,9 +576,9 @@ def test_check_source_has_tags(check_config, source, expectation):
         ),
     ],
 )
-def test_check_source_names(check_config, source, expectation):
+def test_check_source_names(source_name_pattern, source, expectation):
     with expectation:
-        check_source_names(check_config=check_config, source=source, request=None)
+        check_source_names(source_name_pattern=source_name_pattern, source=source, request=None)
 
 
 @pytest.mark.parametrize(

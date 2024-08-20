@@ -1,20 +1,159 @@
+# mypy: disable-error-code="union-attr"
+
 import contextlib
 import os
 import re
+from functools import wraps
 from pathlib import Path
-from typing import Any, Dict, List, Mapping, Union
+from typing import Any, List, Mapping, Union
 
 import toml
 import yaml
-from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Exposures, Macros
+from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Exposures
 
 from dbt_bouncer.logger import logger
 from dbt_bouncer.parsers import (
-    DbtBouncerCatalogNode,
+    DbtBouncerManifest,
     DbtBouncerModel,
-    DbtBouncerResult,
     DbtBouncerSource,
+    DbtBouncerTest,
 )
+
+
+def bouncer_check(func):
+    @wraps(func)
+    def wrapper(
+        exposures: Union[List[Exposures], None] = None,
+        manifest_obj: Union[DbtBouncerManifest, None] = None,
+        models: Union[List[DbtBouncerModel], None] = None,
+        sources: Union[List[DbtBouncerSource], None] = None,
+        tests: Union[List[DbtBouncerTest], None] = None,
+        **kwargs,
+    ):
+        request = kwargs.get("request")
+        if request is not None:
+            # From provided check_config
+            accepted_uniqueness_tests = request.node.check_config.get("accepted_uniqueness_tests")
+            access = request.node.check_config.get("access")
+            column_name_pattern = request.node.check_config.get("column_name_pattern")
+            include = request.node.check_config.get("include")
+            keys = request.node.check_config.get("keys")
+            materializations_to_include = request.node.check_config.get(
+                "materializations_to_include"
+            )
+            max_chained_views = request.node.check_config.get("max_chained_views")
+            max_downstream_models = request.node.check_config.get("max_downstream_models")
+            max_execution_time = request.node.check_config.get("max_execution_time")
+            max_gigabytes_billed = request.node.check_config.get("max_gigabytes_billed")
+            max_upstream_macros = request.node.check_config.get("max_upstream_macros")
+            max_upstream_models = request.node.check_config.get("max_upstream_models")
+            max_upstream_sources = request.node.check_config.get("max_upstream_sources")
+            min_model_documentation_coverage_pct = request.node.check_config.get(
+                "min_model_documentation_coverage_pct"
+            )
+            min_model_test_coverage_pct = request.node.check_config.get(
+                "min_model_test_coverage_pct"
+            )
+            model_name_pattern = request.node.check_config.get("model_name_pattern")
+            permitted_sub_directories = request.node.check_config.get("permitted_sub_directories")
+            project_name_pattern = request.node.check_config.get("project_name_pattern")
+            regexp_pattern = request.node.check_config.get("regexp_pattern")
+            source_name_pattern = request.node.check_config.get("source_name_pattern")
+            tags = request.node.check_config.get("tags")
+            test_name = request.node.check_config.get("test_name")
+            types = request.node.check_config.get("types")
+            upstream_path_pattern = request.node.check_config.get("upstream_path_pattern")
+
+            # Variables from `iterate_over_*` markers
+            catalog_node = getattr(request.node.catalog_node, "node", lambda: None)
+            catalog_source = getattr(request.node.catalog_source, "node", lambda: None)
+            exposure = request.node.exposure
+            macro = request.node.macro
+            model = getattr(request.node.model, "model", lambda: None)
+            run_result = getattr(request.node.run_result, "result", lambda: None)
+            source = getattr(request.node.source, "source", lambda: None)
+        else:
+            # From provided check_config
+            accepted_uniqueness_tests = kwargs.get("accepted_uniqueness_tests")
+            access = kwargs.get("access")
+            column_name_pattern = kwargs.get("column_name_pattern")
+            include = kwargs.get("include")
+            keys = kwargs.get("keys")
+            materializations_to_include = kwargs.get("materializations_to_include")
+            max_chained_views = kwargs.get("max_chained_views")
+            max_downstream_models = kwargs.get("max_downstream_models")
+            max_execution_time = kwargs.get("max_execution_time")
+            max_gigabytes_billed = kwargs.get("max_gigabytes_billed")
+            max_upstream_macros = kwargs.get("max_upstream_macros")
+            max_upstream_models = kwargs.get("max_upstream_models")
+            max_upstream_sources = kwargs.get("max_upstream_sources")
+            min_model_documentation_coverage_pct = kwargs.get(
+                "min_model_documentation_coverage_pct"
+            )
+            min_model_test_coverage_pct = kwargs.get("min_model_test_coverage_pct")
+            model_name_pattern = kwargs.get("model_name_pattern")
+            permitted_sub_directories = kwargs.get("permitted_sub_directories")
+            project_name_pattern = kwargs.get("project_name_pattern")
+            regexp_pattern = kwargs.get("regexp_pattern")
+            source_name_pattern = kwargs.get("source_name_pattern")
+            tags = kwargs.get("tags")
+            test_name = kwargs.get("test_name")
+            types = kwargs.get("types")
+            upstream_path_pattern = kwargs.get("upstream_path_pattern")
+
+            # Variables from `iterate_over_*` markers
+            catalog_node = kwargs.get("catalog_node")
+            catalog_source = kwargs.get("catalog_source")
+            exposure = kwargs.get("exposure")
+            macro = kwargs.get("macro")
+            model = kwargs.get("model")
+            run_result = kwargs.get("run_result")
+            source = kwargs.get("source")
+
+        func(
+            # From provided check_config
+            accepted_uniqueness_tests=accepted_uniqueness_tests,
+            access=access,
+            column_name_pattern=column_name_pattern,
+            include=include,
+            keys=keys,
+            materializations_to_include=materializations_to_include,
+            max_chained_views=max_chained_views,
+            max_downstream_models=max_downstream_models,
+            max_execution_time=max_execution_time,
+            max_gigabytes_billed=max_gigabytes_billed,
+            max_upstream_macros=max_upstream_macros,
+            max_upstream_models=max_upstream_models,
+            max_upstream_sources=max_upstream_sources,
+            min_model_documentation_coverage_pct=min_model_documentation_coverage_pct,
+            min_model_test_coverage_pct=min_model_test_coverage_pct,
+            model_name_pattern=model_name_pattern,
+            permitted_sub_directories=permitted_sub_directories,
+            project_name_pattern=project_name_pattern,
+            regexp_pattern=regexp_pattern,
+            request=request,
+            source_name_pattern=source_name_pattern,
+            tags=tags,
+            test_name=test_name,
+            types=types,
+            upstream_path_pattern=upstream_path_pattern,
+            # Variables from `iterate_over_*` markers
+            catalog_node=catalog_node,
+            catalog_source=catalog_source,
+            exposure=exposure,
+            model=model,
+            macro=macro,
+            run_result=run_result,
+            source=source,
+            # Fixtures from `FixturePlugin`
+            exposures=exposures,
+            manifest_obj=manifest_obj,
+            models=models,
+            sources=sources,
+            tests=tests,
+        )
+
+    return wrapper
 
 
 def create_github_comment_file(failed_checks: List[List[str]]) -> None:
@@ -71,64 +210,6 @@ def flatten(structure: Any, key: str = "", path: str = "", flattened=None):
         for new_key, value in structure.items():
             flatten(value, new_key, path + ">" + key, flattened)
     return flattened
-
-
-def get_check_inputs(
-    catalog_node: DbtBouncerCatalogNode = None,
-    catalog_source: DbtBouncerCatalogNode = None,
-    check_config: Union[Dict[str, Union[Dict[str, str], str]], None] = None,
-    exposure: Exposures = None,
-    macro: Macros = None,
-    model: DbtBouncerModel = None,
-    request=None,
-    run_result: DbtBouncerResult = None,
-    source: DbtBouncerSource = None,
-) -> Dict[
-    str,
-    Union[
-        DbtBouncerCatalogNode,
-        Dict[str, Union[Dict[str, str], str]],
-        Exposures,
-        Macros,
-        DbtBouncerModel,
-        DbtBouncerResult,
-        DbtBouncerSource,
-    ],
-]:
-    """
-    Helper function that is used to account for the difference in how arguments are passed to check functions
-    when they are run by `dbt-bouncer` and when they are called by pytest.
-    """
-
-    if request is not None:
-        catalog_node = getattr(request.node.catalog_node, "node", lambda: None)
-        catalog_source = getattr(request.node.catalog_source, "node", lambda: None)
-        check_config = request.node.check_config
-        exposure = request.node.exposure
-        macro = request.node.macro
-        model = getattr(request.node.model, "model", lambda: None)
-        run_result = getattr(request.node.run_result, "result", lambda: None)
-        source = getattr(request.node.source, "source", lambda: None)
-    else:
-        catalog_node = getattr(catalog_node, "node", lambda: None)
-        catalog_source = getattr(catalog_source, "node", lambda: None)
-        check_config = check_config
-        exposure = exposure
-        macro = macro
-        model = model
-        run_result = getattr(run_result, "result", lambda: None)
-        source = source
-
-    return {
-        "catalog_node": catalog_node,
-        "catalog_source": catalog_source,
-        "check_config": check_config,
-        "exposure": exposure,
-        "macro": macro,
-        "model": model,
-        "run_result": run_result,
-        "source": source,
-    }
 
 
 def get_dbt_bouncer_config(config_file: str, config_file_source: str) -> Mapping[str, Any]:
