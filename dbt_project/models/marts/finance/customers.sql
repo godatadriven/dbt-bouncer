@@ -1,3 +1,5 @@
+{{ config(materialized="table") }}
+
 with
     customers as (select * from {{ ref("stg_customers") }}),
 
@@ -40,6 +42,9 @@ with
             customer_orders.first_order_date,
             customer_orders.most_recent_order_date,
             customer_orders.number_of_orders,
+            if(
+                customer_orders.number_of_orders > 5, true, false
+            ) as is_recurring_customer,
             customer_payments.total_amount as customer_lifetime_value
 
         from customers

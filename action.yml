@@ -5,6 +5,10 @@ inputs:
     default: 'dbt-bouncer.yml'
     description: 'Location of the YML config file.'
     required: false
+  output-file:
+    default: ''
+    description: 'Name of the json file where check metadata will be saved.'
+    required: false
   send-pr-comment:
     default: 'true'
     description: |
@@ -15,7 +19,18 @@ runs:
   using: composite
 
   steps:
+    - name: Assemble `output-file` parameter
+      id: assemble-output-file-param
+      shell: bash
+      run: >
+        if [[ "${{ inputs.output-file }}" = "" ]]; then
+          echo "output-file-param=" >> $GITHUB_OUTPUT
+        else
+          echo "output-file-param=--output-file /app/${{ inputs.output-file }}" >> $GITHUB_OUTPUT
+        fi
+
     - name: Run dbt-bouncer
+      id: run-dbt-bouncer
       shell: bash
       run: >
         docker run --rm \
@@ -26,4 +41,13 @@ runs:
           --volume "$GITHUB_WORKSPACE":/app \
           ghcr.io/godatadriven/dbt-bouncer:v0.0.0 \
           --config-file /app/${{ inputs.config-file }} \
-          --send-pr-comment ${{ inputs.send-pr-comment }}
+          --create-pr-comment-file ${{ inputs.send-pr-comment }} \
+          ${{ steps.assemble-output-file-param.outputs.output-file-param }}
+
+    - name: Send PR comment
+      if: always() && inputs.send-pr-comment == 'true' && steps.run-dbt-bouncer.outcome != 'success'
+      shell: bash
+      run: >
+        gh pr comment ${{ github.event.number }} \
+          --repo ${{ github.repository }} \
+          --body-file github-comment.md

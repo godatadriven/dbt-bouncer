@@ -3,43 +3,70 @@ version: 2
 models:
   - name: customers
     description: This table has basic information about a customer, as well as some derived facts based on a customer's orders
+    access: public
+    config:
+      contract:
+        enforced: true
+      meta:
+        maturity: gold
 
     columns:
       - name: customer_id
+        data_type: bigint
         description: This is a unique identifier for a customer
         tests:
           - unique
           - not_null
 
       - name: first_name
+        data_type: string
         description: Customer's first name. PII.
 
       - name: last_name
+        data_type: string
         description: Customer's last name. PII.
 
-      - name: first_order
+      - name: first_order_date
+        data_type: date
         description: Date (UTC) of a customer's first order
 
-      - name: most_recent_order
+      - name: most_recent_order_date
+        data_type: date
         description: Date (UTC) of a customer's most recent order
 
       - name: number_of_orders
+        data_type: bigint
         description: Count of the number of orders a customer has placed
 
-      - name: total_order_amount
-        description: Total value (AUD) of a customer's orders
+      - name: is_recurring_customer
+        data_type: boolean
+        description: Boolean indicating whether a customer has placed more than five orders
+        tests:
+          - not_null
+
+      - name: customer_lifetime_value
+        data_type: double
+        description: Sum of all payments a customer has made
 
   - name: orders
     description: This table has basic information about orders, as well as some derived facts based on payments
+    access: public
+    config:
+      contract:
+        enforced: true
+      meta:
+        maturity: gold
 
     columns:
       - name: order_id
+        data_type: integer
         tests:
           - unique
           - not_null
         description: This is a unique identifier for an order
 
       - name: customer_id
+        data_type: integer
         description: Foreign key to the customers table
         tests:
           - not_null
@@ -48,35 +75,42 @@ models:
               field: customer_id
 
       - name: order_date
+        data_type: date
         description: Date (UTC) that the order was placed
 
       - name: status
+        data_type: string
         description: '{{ doc("orders_status") }}'
         tests:
           - accepted_values:
               values: ['placed', 'shipped', 'completed', 'return_pending', 'returned']
 
       - name: amount
+        data_type: double
         description: Total amount (AUD) of the order
         tests:
           - not_null
 
       - name: credit_card_amount
+        data_type: double
         description: Amount of the order (AUD) paid for by credit card
         tests:
           - not_null
 
       - name: coupon_amount
+        data_type: double
         description: Amount of the order (AUD) paid for by coupon
         tests:
           - not_null
 
       - name: bank_transfer_amount
+        data_type: double
         description: Amount of the order (AUD) paid for by bank transfer
         tests:
           - not_null
 
       - name: gift_card_amount
+        data_type: double
         description: Amount of the order (AUD) paid for by gift card
         tests:
           - not_null

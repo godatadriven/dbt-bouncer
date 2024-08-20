@@ -1,0 +1,26 @@
+version: 2
+
+models:
+  - name: int_disabled_model
+    config:
+      meta:
+        maturity: lead
+    description: A disabled model to be more representative of a real dbt project.
+    tests:
+      - dbt_expectations.expect_compound_columns_to_be_unique:
+          column_list: ["id", "name"]
+
+  - name: int_model_1
+    config:
+      meta:
+        maturity: lithium
+    description: Super basic model that has a description and a test
+    columns:
+      - name: id
+        tests:
+          - values_below_threshold:
+              threshold: 10
+          - not_null
+    tests:
+          - dbt_expectations.expect_compound_columns_to_be_unique:
+              column_list: ["id", "name"]

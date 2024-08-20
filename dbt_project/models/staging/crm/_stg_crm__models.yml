@@ -3,6 +3,9 @@ version: 2
 models:
   - name: stg_customers
     description: Staging table for customer data.
+    config:
+      meta:
+        maturity: gold
     columns:
       - name: customer_id
         tests:
@@ -11,6 +14,9 @@ models:
 
   - name: stg_orders
     description: Staging table for orders data.
+    config:
+      meta:
+        maturity: gold
     columns:
       - name: order_id
         tests:
@@ -20,15 +26,3 @@ models:
         tests:
           - accepted_values:
               values: ['placed', 'shipped', 'completed', 'return_pending', 'returned']
-
-  - name: stg_payments
-    description: Staging table for payment data.
-    columns:
-      - name: payment_id
-        tests:
-          - unique
-          - not_null
-      - name: payment_method
-        tests:
-          - accepted_values:
-              values: ['credit_card', 'coupon', 'bank_transfer', 'gift_card']

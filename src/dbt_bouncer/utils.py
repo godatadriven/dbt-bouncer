@@ -1,17 +1,204 @@
+# mypy: disable-error-code="union-attr"
+
 import contextlib
-import json
+import os
 import re
+import warnings
+from functools import wraps
 from pathlib import Path
-from typing import Literal
+from typing import Any, List, Mapping, Union
 
 import toml
 import yaml
-from dbt_artifacts_parser.parser import parse_catalog, parse_manifest, parse_run_results
+
+with warnings.catch_warnings():
+    warnings.filterwarnings("ignore", category=UserWarning)
+    from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Exposures
 
 from dbt_bouncer.logger import logger
+from dbt_bouncer.parsers import (
+    DbtBouncerManifest,
+    DbtBouncerModel,
+    DbtBouncerSource,
+    DbtBouncerTest,
+)
 
 
-def flatten(structure, key="", path="", flattened=None):
+def bouncer_check(func):
+    @wraps(func)
+    def wrapper(
+        exposures: Union[List[Exposures], None] = None,
+        manifest_obj: Union[DbtBouncerManifest, None] = None,
+        models: Union[List[DbtBouncerModel], None] = None,
+        sources: Union[List[DbtBouncerSource], None] = None,
+        tests: Union[List[DbtBouncerTest], None] = None,
+        **kwargs,
+    ):
+        request = kwargs.get("request")
+        if request is not None:
+            # From provided check_config
+            accepted_uniqueness_tests = request.node.check_config.get("accepted_uniqueness_tests")
+            access = request.node.check_config.get("access")
+            column_name_pattern = request.node.check_config.get("column_name_pattern")
+            include = request.node.check_config.get("include")
+            keys = request.node.check_config.get("keys")
+            materializations_to_include = request.node.check_config.get(
+                "materializations_to_include"
+            )
+            max_chained_views = request.node.check_config.get("max_chained_views")
+            max_downstream_models = request.node.check_config.get("max_downstream_models")
+            max_execution_time = request.node.check_config.get("max_execution_time")
+            max_gigabytes_billed = request.node.check_config.get("max_gigabytes_billed")
+            max_upstream_macros = request.node.check_config.get("max_upstream_macros")
+            max_upstream_models = request.node.check_config.get("max_upstream_models")
+            max_upstream_sources = request.node.check_config.get("max_upstream_sources")
+            min_model_documentation_coverage_pct = request.node.check_config.get(
+                "min_model_documentation_coverage_pct"
+            )
+            min_model_test_coverage_pct = request.node.check_config.get(
+                "min_model_test_coverage_pct"
+            )
+            model_name_pattern = request.node.check_config.get("model_name_pattern")
+            permitted_sub_directories = request.node.check_config.get("permitted_sub_directories")
+            project_name_pattern = request.node.check_config.get("project_name_pattern")
+            regexp_pattern = request.node.check_config.get("regexp_pattern")
+            source_name_pattern = request.node.check_config.get("source_name_pattern")
+            tags = request.node.check_config.get("tags")
+            test_name = request.node.check_config.get("test_name")
+            types = request.node.check_config.get("types")
+            upstream_path_pattern = request.node.check_config.get("upstream_path_pattern")
+
+            # Variables from `iterate_over_*` markers
+            catalog_node = getattr(request.node.catalog_node, "node", lambda: None)
+            catalog_source = getattr(request.node.catalog_source, "node", lambda: None)
+            exposure = request.node.exposure
+            macro = request.node.macro
+            model = getattr(request.node.model, "model", lambda: None)
+            run_result = getattr(request.node.run_result, "result", lambda: None)
+            source = getattr(request.node.source, "source", lambda: None)
+        else:
+            # From provided check_config
+            accepted_uniqueness_tests = kwargs.get("accepted_uniqueness_tests")
+            access = kwargs.get("access")
+            column_name_pattern = kwargs.get("column_name_pattern")
+            include = kwargs.get("include")
+            keys = kwargs.get("keys")
+            materializations_to_include = kwargs.get("materializations_to_include")
+            max_chained_views = kwargs.get("max_chained_views")
+            max_downstream_models = kwargs.get("max_downstream_models")
+            max_execution_time = kwargs.get("max_execution_time")
+            max_gigabytes_billed = kwargs.get("max_gigabytes_billed")
+            max_upstream_macros = kwargs.get("max_upstream_macros")
+            max_upstream_models = kwargs.get("max_upstream_models")
+            max_upstream_sources = kwargs.get("max_upstream_sources")
+            min_model_documentation_coverage_pct = kwargs.get(
+                "min_model_documentation_coverage_pct"
+            )
+            min_model_test_coverage_pct = kwargs.get("min_model_test_coverage_pct")
+            model_name_pattern = kwargs.get("model_name_pattern")
+            permitted_sub_directories = kwargs.get("permitted_sub_directories")
+            project_name_pattern = kwargs.get("project_name_pattern")
+            regexp_pattern = kwargs.get("regexp_pattern")
+            source_name_pattern = kwargs.get("source_name_pattern")
+            tags = kwargs.get("tags")
+            test_name = kwargs.get("test_name")
+            types = kwargs.get("types")
+            upstream_path_pattern = kwargs.get("upstream_path_pattern")
+
+            # Variables from `iterate_over_*` markers
+            catalog_node = kwargs.get("catalog_node")
+            catalog_source = kwargs.get("catalog_source")
+            exposure = kwargs.get("exposure")
+            macro = kwargs.get("macro")
+            model = kwargs.get("model")
+            run_result = kwargs.get("run_result")
+            source = kwargs.get("source")
+
+        func(
+            # From provided check_config
+            accepted_uniqueness_tests=accepted_uniqueness_tests,
+            access=access,
+            column_name_pattern=column_name_pattern,
+            include=include,
+            keys=keys,
+            materializations_to_include=materializations_to_include,
+            max_chained_views=max_chained_views,
+            max_downstream_models=max_downstream_models,
+            max_execution_time=max_execution_time,
+            max_gigabytes_billed=max_gigabytes_billed,
+            max_upstream_macros=max_upstream_macros,
+            max_upstream_models=max_upstream_models,
+            max_upstream_sources=max_upstream_sources,
+            min_model_documentation_coverage_pct=min_model_documentation_coverage_pct,
+            min_model_test_coverage_pct=min_model_test_coverage_pct,
+            model_name_pattern=model_name_pattern,
+            permitted_sub_directories=permitted_sub_directories,
+            project_name_pattern=project_name_pattern,
+            regexp_pattern=regexp_pattern,
+            request=request,
+            source_name_pattern=source_name_pattern,
+            tags=tags,
+            test_name=test_name,
+            types=types,
+            upstream_path_pattern=upstream_path_pattern,
+            # Variables from `iterate_over_*` markers
+            catalog_node=catalog_node,
+            catalog_source=catalog_source,
+            exposure=exposure,
+            model=model,
+            macro=macro,
+            run_result=run_result,
+            source=source,
+            # Fixtures from `FixturePlugin`
+            exposures=exposures,
+            manifest_obj=manifest_obj,
+            models=models,
+            sources=sources,
+            tests=tests,
+        )
+
+    return wrapper
+
+
+def create_github_comment_file(failed_checks: List[List[str]]) -> None:
+    """
+    Create a markdown file containing a comment for GitHub.
+    """
+
+    md_formatted_comment = make_markdown_table(
+        [["Check name", "Failure message"]] + list(sorted(failed_checks))
+    )
+
+    md_formatted_comment = f"## **Failed `dbt-bouncer`** checks\n\n{md_formatted_comment}\n\nSent from this [GitHub Action workflow run](https://github.com/{os.environ.get('GITHUB_REPOSITORY',None)}/actions/runs/{os.environ.get('GITHUB_RUN_ID', None)})."  # Would like to be more specific and include the job ID, but it's not exposed as an environment variable: https://github.com/actions/runner/issues/324
+
+    logger.debug(f"{md_formatted_comment=}")
+
+    if os.environ.get("GITHUB_REPOSITORY", None) is not None:
+        comment_file = "/app/github-comment.md"
+    else:
+        comment_file = "github-comment.md"
+
+    logger.info(f"Writing comment for GitHub to {comment_file}...")
+    with open(comment_file, "w") as f:
+        f.write(md_formatted_comment)
+
+
+def find_missing_meta_keys(meta_config, required_keys) -> List[str]:
+    """
+    Find missing keys in a meta config.
+    """
+
+    keys_in_meta = list(flatten(meta_config).keys())
+
+    # Get required keys and convert to a list
+    required_keys = [
+        re.sub(r"(\>{1}\d{1,10})", "", f"{k}>{v}") for k, v in flatten(required_keys).items()
+    ]
+
+    return [x for x in required_keys if x not in keys_in_meta]
+
+
+def flatten(structure: Any, key: str = "", path: str = "", flattened=None):
     """
     Take a dict of arbitrary depth that may contain lists and return a non-nested dict of all pathways.
     """
@@ -29,46 +216,7 @@ def flatten(structure, key="", path="", flattened=None):
     return flattened
 
 
-def get_check_inputs(
-    catalog_node=None,
-    check_config=None,
-    macro=None,
-    model=None,
-    request=None,
-    run_result=None,
-    source=None,
-):
-    """
-    Helper function that is used to account for the difference in how arguments are passed to check functions
-    when they are run by `dbt-bouncer` and when they are called by pytest.
-    """
-
-    if request is not None:
-        catalog_node = request.node.catalog_node
-        check_config = request.node.check_config
-        macro = request.node.macro
-        model = request.node.model
-        run_result = request.node.run_result
-        source = request.node.source
-    else:
-        catalog_node = catalog_node
-        check_config = check_config
-        macro = macro
-        model = model
-        run_result = run_result
-        source = source
-
-    return {
-        "catalog_node": catalog_node,
-        "check_config": check_config,
-        "macro": macro,
-        "model": model,
-        "run_result": run_result,
-        "source": source,
-    }
-
-
-def get_dbt_bouncer_config(config_file: str, config_file_source: str):
+def get_dbt_bouncer_config(config_file: str, config_file_source: str) -> Mapping[str, Any]:
     """
     Get the config for dbt-bouncer. This is fetched from (in order):
         1. The file passed via the `--config=file` CLI flag.
@@ -81,12 +229,12 @@ def get_dbt_bouncer_config(config_file: str, config_file_source: str):
 
     if config_file_source == "COMMANDLINE":
         logger.debug(f"Config file passed via command line: {config_file}")
-        return load_config_from_yaml(config_file)
+        return load_config_from_yaml(Path(config_file))
 
     if config_file_source == "DEFAULT":
         logger.debug(f"Using default value for config file: {config_file}")
         with contextlib.suppress(FileNotFoundError):
-            return load_config_from_yaml(config_file)
+            return load_config_from_yaml(Path.cwd() / config_file)
 
     # Read config from pyproject.toml
     logger.info("Loading config from pyproject.toml, if exists...")
@@ -107,18 +255,18 @@ def get_dbt_bouncer_config(config_file: str, config_file_source: str):
         logger.debug(f"{pyproject_toml_dir / 'pyproject.toml'=}")
 
         toml_cfg = toml.load(pyproject_toml_dir / "pyproject.toml")
-        try:
+        if "dbt-bouncer" in toml_cfg["tool"].keys():
             conf = [v for k, v in toml_cfg["tool"].items() if k == "dbt-bouncer"][0]
-        except IndexError:
+        else:
             raise RuntimeError(
                 "Please ensure your pyproject.toml file is correctly configured to work with `dbt-bouncer`. Alternatively, you can pass the path to your config file via the `--config-file` flag."
             )
     return conf
 
 
-def load_config_from_yaml(config_file):
+def load_config_from_yaml(config_file: Path) -> Mapping[str, Any]:
 
-    config_path = Path(__file__).parent.parent.parent / config_file
+    config_path = Path().cwd() / config_file
     logger.debug(f"Loading config from {config_path}...")
     logger.debug(f"Loading config from {config_file}...")
     if not config_path.exists():  # Shouldn't be needed as click should have already checked this
@@ -132,42 +280,7 @@ def load_config_from_yaml(config_file):
     return conf
 
 
-def load_dbt_artifact(
-    artifact_name: Literal["catalog.json", "manifest.json", "run_results.json"],
-    dbt_artifacts_dir: str,
-):
-    """
-    Load a dbt artifact from a JSON file to a Pydantic object
-    """
-
-    logger.debug(f"{artifact_name=}")
-    logger.debug(f"{dbt_artifacts_dir=}")
-
-    artifact_path = dbt_artifacts_dir / Path(artifact_name)
-    logger.info(f"Loading {artifact_name} from {artifact_path.absolute()}...")
-    if not artifact_path.exists():
-        raise FileNotFoundError(f"No {artifact_name} found at {artifact_path.absolute()}.")
-
-    if artifact_name == "catalog.json":
-        with Path.open(artifact_path, "r") as fp:
-            catalog_obj = parse_catalog(catalog=json.load(fp))
-
-        return catalog_obj
-
-    elif artifact_name == "manifest.json":
-        with Path.open(artifact_path, "r") as fp:
-            manifest_obj = parse_manifest(manifest=json.load(fp))
-
-        return manifest_obj
-
-    elif artifact_name == "run_results.json":
-        with Path.open(artifact_path, "r") as fp:
-            run_results_obj = parse_run_results(run_results=json.load(fp))
-
-        return run_results_obj
-
-
-def make_markdown_table(array):
+def make_markdown_table(array: List[List[str]]) -> str:
     """
     Transforms a list of lists into a markdown table. The first element is the header row.
     """

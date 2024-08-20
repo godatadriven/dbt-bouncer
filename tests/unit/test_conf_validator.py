@@ -5,7 +5,7 @@ import pytest
 import yaml
 from pydantic import ValidationError
 
-from src.dbt_bouncer.conf_validator import validate_conf
+from dbt_bouncer.conf_validator import validate_conf
 
 invalid_confs = [
     (

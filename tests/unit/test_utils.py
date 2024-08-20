@@ -1,14 +1,31 @@
+import os
 from pathlib import Path
+from unittest import mock
 
 import pytest
 import toml
 
-from src.dbt_bouncer.utils import (
+from dbt_bouncer.utils import (
+    create_github_comment_file,
     flatten,
     get_dbt_bouncer_config,
     make_markdown_table,
     object_in_path,
 )
+
+
+def test_create_github_comment_file(monkeypatch, tmp_path):
+    monkeypatch.chdir(tmp_path)
+
+    with mock.patch.dict(os.environ, clear=True):
+        failed_checks = [
+            ["check_model_description_populated", "message_1"],
+            ["check_model_description_populated", "message_2"],
+        ]
+        create_github_comment_file(failed_checks)
+        assert (
+            tmp_path / "github-comment.md"
+        ).read_text() == "## **Failed `dbt-bouncer`** checks\n\n\n| Check name | Failure message |\n| :--- | :--- |\n| check_model_description_populated | message_1 |\n| check_model_description_populated | message_2 |\n\n\nSent from this [GitHub Action workflow run](https://github.com/None/actions/runs/None)."
 
 
 def test_get_dbt_bouncer_config_commandline(tmp_path):
@@ -28,7 +45,7 @@ def test_get_dbt_bouncer_config_default(tmp_path):
 PYPROJECT_TOML_SAMPLE_CONFIG = {
     "dbt_artifacts_dir": "dbt_project/target",
     "manifest_checks": [
-        {"name": "check_top_level_directories"},
+        {"name": "check_model_has_unique_test"},
         {
             "include": "^staging",
             "model_name_pattern": "^stg_",
@@ -57,13 +74,12 @@ def test_get_dbt_bouncer_config_pyproject_toml_doesnt_exist(monkeypatch, tmp_pat
     monkeypatch.chdir(tmp_path)
 
     with pytest.raises(RuntimeError):
-        config = get_dbt_bouncer_config(
-            config_file=str("dbt_bouncer.yml"), config_file_source="DEFAULT"
-        )
+        get_dbt_bouncer_config(config_file=str("dbt_bouncer.yml"), config_file_source="DEFAULT")
 
 
 def test_get_dbt_bouncer_config_pyproject_toml_recursive(monkeypatch, tmp_path):
-    monkeypatch.chdir(Path().cwd() / "tests/unit")
+    Path.mkdir(tmp_path / "test")
+    monkeypatch.chdir(tmp_path / "test")
 
     pyproject_file = tmp_path / "pyproject.toml"
     config = {"tool": {"dbt-bouncer": PYPROJECT_TOML_SAMPLE_CONFIG}}
