@@ -131,7 +131,7 @@ def check_source_names(request, check_config=None, source: DbtBouncerSource = No
     ), f"`{source.unique_id.split('.')[0]}` does not match the supplied regex `({check_config['source_name_pattern'].strip()})`."
 
 
-class CheckSoureNotorphaned(BaseCheck):
+class CheckSourceNotOrphaned(BaseCheck):
     name: Literal["check_source_not_orphaned"]
 
 
