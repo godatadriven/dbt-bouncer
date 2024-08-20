@@ -1,8 +1,11 @@
 import json
+import warnings
 from pathlib import Path
 
-from dbt_artifacts_parser.parser import parse_manifest
-from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Nodes4
+with warnings.catch_warnings():
+    warnings.filterwarnings("ignore", category=UserWarning)
+    from dbt_artifacts_parser.parser import parse_manifest
+    from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Nodes4
 
 from dbt_bouncer.parsers import DbtBouncerModel
 from dbt_bouncer.runner import runner

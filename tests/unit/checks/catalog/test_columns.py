@@ -1,8 +1,12 @@
+import warnings
 from contextlib import nullcontext as does_not_raise
 
 import pytest
-from dbt_artifacts_parser.parsers.catalog.catalog_v1 import CatalogTable
-from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Nodes4, Nodes6
+
+with warnings.catch_warnings():
+    warnings.filterwarnings("ignore", category=UserWarning)
+    from dbt_artifacts_parser.parsers.catalog.catalog_v1 import CatalogTable
+    from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Nodes4, Nodes6
 
 from dbt_bouncer.checks.catalog.check_columns import (
     check_column_has_specified_test,

@@ -2,10 +2,14 @@
 from __future__ import annotations
 
 import inspect
+import warnings
 from typing import Dict, List, Union
 
 import pytest
-from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Exposures, Macros
+
+with warnings.catch_warnings():
+    warnings.filterwarnings("ignore", category=UserWarning)
+    from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Exposures, Macros
 
 from dbt_bouncer.logger import logger
 from dbt_bouncer.parsers import (

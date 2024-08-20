@@ -3,13 +3,17 @@
 import contextlib
 import os
 import re
+import warnings
 from functools import wraps
 from pathlib import Path
 from typing import Any, List, Mapping, Union
 
 import toml
 import yaml
-from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Exposures
+
+with warnings.catch_warnings():
+    warnings.filterwarnings("ignore", category=UserWarning)
+    from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Exposures
 
 from dbt_bouncer.logger import logger
 from dbt_bouncer.parsers import (

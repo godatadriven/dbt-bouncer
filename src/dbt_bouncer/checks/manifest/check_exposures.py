@@ -1,10 +1,15 @@
 # mypy: disable-error-code="union-attr"
 
+import warnings
 from typing import List, Literal, Union
 
 import pytest
 from _pytest.fixtures import TopRequest
-from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Exposures
+
+with warnings.catch_warnings():
+    warnings.filterwarnings("ignore", category=UserWarning)
+    from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Exposures
+
 from pydantic import Field
 
 from dbt_bouncer.conf_validator_base import BaseCheck

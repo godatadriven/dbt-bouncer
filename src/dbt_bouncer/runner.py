@@ -2,11 +2,16 @@
 from __future__ import annotations
 
 import json
+import warnings
 from pathlib import Path
 from typing import Any, List, Optional, Union
 
 import pytest
-from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Exposures, Macros
+
+with warnings.catch_warnings():
+    warnings.filterwarnings("ignore", category=UserWarning)
+    from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Exposures, Macros
+
 from tabulate import tabulate
 
 from dbt_bouncer.conf_validator import DbtBouncerConf

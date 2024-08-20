@@ -1,7 +1,11 @@
+import warnings
 from contextlib import nullcontext as does_not_raise
 
 import pytest
-from dbt_artifacts_parser.parsers.run_results.run_results_v6 import Result
+
+with warnings.catch_warnings():
+    warnings.filterwarnings("ignore", category=UserWarning)
+    from dbt_artifacts_parser.parsers.run_results.run_results_v6 import Result
 
 from dbt_bouncer.checks.run_results.check_run_results import (
     check_run_results_max_execution_time,
