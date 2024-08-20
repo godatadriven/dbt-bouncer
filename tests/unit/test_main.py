@@ -42,7 +42,7 @@ def test_cli_coverage_non_json(caplog, tmp_path):
         ],
     )
 
-    assert type(result.exception) == RuntimeError
+    assert isinstance(result.exception, RuntimeError)
     assert (
         result.exception.args[0].find("Output file must have a `.json` extension. Got `.js`.") == 0
     )
