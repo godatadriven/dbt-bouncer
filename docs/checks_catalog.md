@@ -1,0 +1,3 @@
+# Catalog Checks
+
+::: catalog

@@ -139,6 +139,32 @@ jobs:
                   ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:ci \
                   --config-file /app/dbt-bouncer-example.yml
 
+    mkdocs-build:
+      needs: [pre-commit]
+      runs-on: ubuntu-latest
+      steps:
+          - name: Checkout
+            uses: actions/checkout@v4
+
+          - name: checkout-merge
+            uses: check-spelling/checkout-merge@v0.0.5
+
+          - name: Determine python version
+            id: python-version
+            run: |
+                export PYTHON_VERSION=$(cat .python-version)
+                echo "PYTHON_VERSION: $PYTHON_VERSION"
+                echo "PYTHON_VERSION=$PYTHON_VERSION" >> $GITHUB_OUTPUT
+
+          - name: Setup Python
+            uses: ./.github/actions/setup_python_env
+            with:
+              poetry-version: ${{ env.POETRY_VERSION }}
+              python-version: ${{ steps.python-version.outputs.PYTHON_VERSION }}
+
+          - name: Build docs website
+            run: poetry run mkdocs build
+
     pex-tests:
       needs: [pre-commit]
       runs-on: ubuntu-latest
