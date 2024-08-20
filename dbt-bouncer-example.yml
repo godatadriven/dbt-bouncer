@@ -89,7 +89,7 @@ manifest_checks:
     keys:
       - maturity
   - name: check_model_has_no_upstream_dependencies
-    include: ^((?!int_model_1).)*$
+    include: ^((?!int_*).)*$
   - name: check_model_has_tags
     include: ^staging/crm
     tags:
