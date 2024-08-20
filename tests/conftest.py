@@ -1,8 +1,12 @@
 import json
+import warnings
 from pathlib import Path
 
 import pytest
-from dbt_artifacts_parser.parser import parse_manifest
+
+with warnings.catch_warnings():
+    warnings.filterwarnings("ignore", category=UserWarning)
+    from dbt_artifacts_parser.parser import parse_manifest
 
 from dbt_bouncer.parsers import DbtBouncerManifest
 

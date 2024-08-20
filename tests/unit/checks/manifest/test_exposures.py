@@ -1,7 +1,11 @@
+import warnings
 from contextlib import nullcontext as does_not_raise
 
 import pytest
-from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Exposures, Nodes4
+
+with warnings.catch_warnings():
+    warnings.filterwarnings("ignore", category=UserWarning)
+    from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Exposures, Nodes4
 
 from dbt_bouncer.checks.manifest.check_exposures import (
     check_exposure_based_on_non_public_models,

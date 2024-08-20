@@ -48,7 +48,7 @@ with warnings.catch_warnings():
     )
     from dbt_artifacts_parser.parsers.run_results.run_results_v5 import RunResultsV5
     from dbt_artifacts_parser.parsers.run_results.run_results_v6 import Result, RunResultsV6
-    from pydantic import BaseModel
+from pydantic import BaseModel
 
 from dbt_bouncer.logger import logger
 
