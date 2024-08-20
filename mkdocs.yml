@@ -1,0 +1,72 @@
+edit_uri: docs/
+repo_name: godatadriven/dbt-bouncer
+repo_url: https://github.com/godatadriven/dbt-bouncer
+site_name: dbt-bouncer
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.details
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+
+nav:
+  - Home: index.md
+  - Getting Started: getting_started.md
+  - Config File: config_file.md
+  - "Checks: Catalog": checks_catalog.md
+  - "Checks: Manifest": checks_manifest.md
+  - "Checks: Run Results": checks_run_results.md
+  - Contributing: CONTRIBUTING.md
+
+plugins:
+  - git-revision-date-localized:
+      enable_creation_date: true
+  - mkdocstrings:
+      handlers:
+        python:
+          paths:
+            - src/dbt_bouncer/checks
+          options:
+            group_by_category: false
+            heading_level: 1
+            inherited_members: true
+            members_order: source
+            show_bases: false
+            show_docstring_classes: false
+            show_if_no_docstring: true
+            show_root_toc_entry: false
+            show_source: true
+            show_signature: false
+            show_submodules: true
+            summary: true
+  - search
+
+theme:
+  favicon: assets/logo.png
+  features:
+    - content.action.edit
+    - content.code.annotate
+    - navigation.expand
+    - navigation.indexes
+    - navigation.instant
+    - navigation.instant.progress
+    - navigation.prune
+    - navigation.sections
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.tracking
+    - navigation.top
+    - toc.follow
+    - toc.integrate
+  icon:
+    edit: material/pencil
+    repo: fontawesome/brands/github
+    view: material/eye
+  logo: assets/logo.png
+  name: material
+  palette:
+    primary: deep orange

@@ -171,3 +171,28 @@
                 env:
                     GH_TOKEN: ${{ github.token }}
                 run: gh release upload v${{ steps.version.outputs.version }} ./dist/dbt-bouncer.pex
+
+      mkdocs-deploy:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: checkout-merge
+              uses: check-spelling/checkout-merge@v0.0.5
+
+            - name: Determine python version
+              id: python-version
+              run: |
+                  export PYTHON_VERSION=$(cat .python-version)
+                  echo "PYTHON_VERSION: $PYTHON_VERSION"
+                  echo "PYTHON_VERSION=$PYTHON_VERSION" >> $GITHUB_OUTPUT
+
+            - name: Setup Python
+              uses: ./.github/actions/setup_python_env
+              with:
+                poetry-version: ${{ env.POETRY_VERSION }}
+                python-version: ${{ steps.python-version.outputs.PYTHON_VERSION }}
+
+            - name: Deploy docs website
+              run: poetry run mkdocs gh-deploy --force

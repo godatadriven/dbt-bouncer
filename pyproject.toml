@@ -100,6 +100,13 @@ pytest-xdist = "^3"
 sh = "^2"
 "shandy-sqlfmt" = {version = "^0", extras=["shandy-sqlfmt[jinjafmt]"]}
 
+[tool.poetry.group.docs.dependencies]
+mkdocs = "^1"
+mkdocstrings = {extras = ["python"], version = "^0"}
+mkdocs-git-revision-date-localized-plugin = "^1"
+mkdocs-material = "^9"
+pymdown-extensions = {extras = ["details"], version = "^10"}
+
 [tool.poetry.scripts]
 dbt-bouncer = "dbt_bouncer.main:cli"
 
