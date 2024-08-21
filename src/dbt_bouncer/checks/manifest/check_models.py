@@ -112,7 +112,12 @@ def check_model_description_populated(
     ), f"`{model.unique_id.split('.')[-1]}` does not have a populated description."
 
 
-class CheckModelsDocumentationCoverage(BaseCheck):
+class CheckModelsDocumentationCoverage(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    index: Optional[int] = Field(
+        default=None, description="Index to uniquely identify the check, calculated at runtime."
+    )
     name: Literal["check_model_documentation_coverage"]
     min_model_documentation_coverage_pct: int = Field(
         default=100,
@@ -779,7 +784,12 @@ def check_model_property_file_location(
     ), f"The properties file for `{model.unique_id.split('.')[-1]}` (`{properties_yml_name}`) does not end with `__models.yml`."
 
 
-class CheckModelsTestCoverage(BaseCheck):
+class CheckModelsTestCoverage(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    index: Optional[int] = Field(
+        default=None, description="Index to uniquely identify the check, calculated at runtime."
+    )
     name: Literal["check_model_test_coverage"]
     min_model_test_coverage_pct: float = Field(
         default=100,
