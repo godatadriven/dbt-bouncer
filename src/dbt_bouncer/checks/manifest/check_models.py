@@ -52,7 +52,7 @@ def check_model_access(
 
     assert (
         model.access.value == access
-    ), f"`{model.unique_id.split('.')[-1]}` has `{model.access.value}` access, it should have access `{access}`."
+    ), f"`{model.name}` has `{model.access.value}` access, it should have access `{access}`."
 
 
 class CheckModelContractsEnforcedForPublicModel(BaseCheck):
@@ -81,7 +81,7 @@ def check_model_contract_enforced_for_public_model(
     if model.access.value == "public":
         assert (
             model.contract.enforced is True
-        ), f"`{model.unique_id.split('.')[-1]}` is a public model but does not have contracts enforced."
+        ), f"`{model.name}` is a public model but does not have contracts enforced."
 
 
 class CheckModelDescriptionPopulated(BaseCheck):
@@ -109,7 +109,7 @@ def check_model_description_populated(
 
     assert (
         len(model.description.strip()) > 4
-    ), f"`{model.unique_id.split('.')[-1]}` does not have a populated description."
+    ), f"`{model.name}` does not have a populated description."
 
 
 class CheckModelsDocumentationCoverage(BaseModel):
@@ -189,7 +189,7 @@ def check_model_documented_in_same_directory(
 
     assert (
         model_doc_dir == model_sql_dir
-    ), f"`{model.unique_id.split('.')[-1]}` is documented in a different directory to the `.sql` file: `{'/'.join(model_doc_dir)}` vs `{'/'.join(model_sql_dir)}`."
+    ), f"`{model.name}` is documented in a different directory to the `.sql` file: `{'/'.join(model_doc_dir)}` vs `{'/'.join(model_sql_dir)}`."
 
 
 class CheckModelCodeDoesNotContainRegexpPattern(BaseCheck):
@@ -224,7 +224,7 @@ def check_model_code_does_not_contain_regexp_pattern(
 
     assert (
         re.compile(regexp_pattern.strip(), flags=re.DOTALL).match(model.raw_code) is None
-    ), f"`{model.unique_id.split('.')[-1]}` contains a banned string: `{regexp_pattern.strip()}`."
+    ), f"`{model.name}` contains a banned string: `{regexp_pattern.strip()}`."
 
 
 class CheckModelDependsOnMultipleSources(BaseCheck):
@@ -251,9 +251,7 @@ def check_model_depends_on_multiple_sources(
     """
 
     num_reffed_sources = sum(x.split(".")[0] == "source" for x in model.depends_on.nodes)
-    assert (
-        num_reffed_sources <= 1
-    ), f"`{model.unique_id.split('.')[-1]}` references more than one source."
+    assert num_reffed_sources <= 1, f"`{model.name}` references more than one source."
 
 
 class CheckModelDirectories(BaseModel):
@@ -309,14 +307,14 @@ def check_model_directories(
     if include == "":
         assert (
             model.path.split("/")[0] in permitted_sub_directories  # type: ignore[operator]
-        ), f"{model.unique_id} is located in `{model.path.split('/')[0]}`, this is not a valid sub- directory."
+        ), f"`{model.name}` is located in `{model.path.split('/')[0]}`, this is not a valid sub- directory."
     else:
         matched_path = re.compile(include.strip()).match(model.path)
         path_after_match = model.path[matched_path.end() + 1 :]  # type: ignore[union-attr]
 
         assert (
             path_after_match.split("/")[0] in permitted_sub_directories  # type: ignore[operator]
-        ), f"`{model.unique_id.split('.')[-1]}` is located in `{model.path.split('/')[0]}`, this is not a valid sub-directory."
+        ), f"`{model.name}` is located in `{model.path.split('/')[0]}`, this is not a valid sub-directory."
 
 
 class CheckModelHasContractsEnforced(BaseCheck):
@@ -343,9 +341,7 @@ def check_model_has_contracts_enforced(
         ```
     """
 
-    assert (
-        model.contract.enforced is True
-    ), f"`{model.unique_id.split('.')[-1]}` does not have contracts enforced."
+    assert model.contract.enforced is True, f"`{model.name}` does not have contracts enforced."
 
 
 class CheckModelHasMetaKeys(BaseCheck):
@@ -385,7 +381,7 @@ def check_model_has_meta_keys(
     )
     assert (
         missing_keys == []
-    ), f"`{model.unique_id.split('.')[-1]}` is missing the following keys from the `meta` config: {[x.replace('>>', '') for x in missing_keys]}"
+    ), f"`{model.name}` is missing the following keys from the `meta` config: {[x.replace('>>', '') for x in missing_keys]}"
 
 
 class CheckModelHasNoUpstreamDependencies(BaseCheck):
@@ -413,7 +409,7 @@ def check_model_has_no_upstream_dependencies(
 
     assert (
         len(model.depends_on.nodes) > 0
-    ), f"`{model.unique_id.split('.')[-1]}` has no upstream dependencies, this likely indicates hard-coded tables references."
+    ), f"`{model.name}` has no upstream dependencies, this likely indicates hard-coded tables references."
 
 
 class CheckModelHasTags(BaseCheck):
@@ -448,9 +444,7 @@ def check_model_has_tags(
     """
 
     missing_tags = [tag for tag in tags if tag not in model.tags]
-    assert (
-        not missing_tags
-    ), f"`{model.unique_id.split('.')[-1]}` is missing required tags: {missing_tags}."
+    assert not missing_tags, f"`{model.name}` is missing required tags: {missing_tags}."
 
 
 class CheckModelHasUniqueTest(BaseCheck):
@@ -504,7 +498,7 @@ def check_model_has_unique_test(
     )
     assert (
         num_unique_tests >= 1
-    ), f"`{model.unique_id.split('.')[-1]}` does not have a test for uniqueness of a column."
+    ), f"`{model.name}` does not have a test for uniqueness of a column."
 
 
 class CheckModelMaxChainedViews(BaseCheck):
@@ -606,7 +600,7 @@ def check_model_max_chained_views(
             )
         )
         == 0
-    ), f"`{model.unique_id.split('.')[-1]}` has more than {max_chained_views} upstream dependents that are not tables."
+    ), f"`{model.name}` has more than {max_chained_views} upstream dependents that are not tables."
 
 
 class CheckModelMaxFanout(BaseCheck):
@@ -643,7 +637,7 @@ def check_model_max_fanout(
 
     assert (
         num_downstream_models <= max_downstream_models  # type: ignore[operator]
-    ), f"`{model.unique_id.split('.')[-1]}` has {num_downstream_models} downstream models, which is more than the permitted maximum of {max_downstream_models}."
+    ), f"`{model.name}` has {num_downstream_models} downstream models, which is more than the permitted maximum of {max_downstream_models}."
 
 
 class CheckModelMaxUpstreamDependencies(BaseCheck):
@@ -693,13 +687,13 @@ def check_model_max_upstream_dependencies(
 
     assert (
         num_upstream_macros <= max_upstream_macros  # type: ignore[operator]
-    ), f"`{model.unique_id.split('.')[-1]}` has {num_upstream_macros} upstream macros, which is more than the permitted maximum of {max_upstream_macros}."
+    ), f"`{model.name}` has {num_upstream_macros} upstream macros, which is more than the permitted maximum of {max_upstream_macros}."
     assert (
         num_upstream_models <= max_upstream_models  # type: ignore[operator]
-    ), f"`{model.unique_id.split('.')[-1]}` has {num_upstream_models} upstream models, which is more than the permitted maximum of {max_upstream_models}."
+    ), f"`{model.name}` has {num_upstream_models} upstream models, which is more than the permitted maximum of {max_upstream_models}."
     assert (
         num_upstream_sources <= max_upstream_sources  # type: ignore[operator]
-    ), f"`{model.unique_id.split('.')[-1]}` has {num_upstream_sources} upstream sources, which is more than the permitted maximum of {max_upstream_sources}."
+    ), f"`{model.name}` has {num_upstream_sources} upstream sources, which is more than the permitted maximum of {max_upstream_sources}."
 
 
 class CheckModelNames(BaseCheck):
@@ -739,7 +733,7 @@ def check_model_names(
 
     assert (
         re.compile(model_name_pattern.strip()).match(model.name) is not None
-    ), f"`{model.unique_id.split('.')[-1]}` does not match the supplied regex `{model_name_pattern.strip()})`."
+    ), f"`{model.name}` does not match the supplied regex `{model_name_pattern.strip()})`."
 
 
 class CheckModelPropertyFileLocation(BaseCheck):
@@ -775,13 +769,13 @@ def check_model_property_file_location(
 
     assert properties_yml_name.startswith(
         "_"
-    ), f"The properties file for `{model.unique_id.split('.')[-1]}` (`{properties_yml_name}`) does not start with an underscore."
+    ), f"The properties file for `{model.name}` (`{properties_yml_name}`) does not start with an underscore."
     assert (
         expected_substr in properties_yml_name
-    ), f"The properties file for `{model.unique_id.split('.')[-1]}` (`{properties_yml_name}`) does not contain the expected substring (`{expected_substr}`)."
+    ), f"The properties file for `{model.name}` (`{properties_yml_name}`) does not contain the expected substring (`{expected_substr}`)."
     assert properties_yml_name.endswith(
         "__models.yml"
-    ), f"The properties file for `{model.unique_id.split('.')[-1]}` (`{properties_yml_name}`) does not end with `__models.yml`."
+    ), f"The properties file for `{model.name}` (`{properties_yml_name}`) does not end with `__models.yml`."
 
 
 class CheckModelsTestCoverage(BaseModel):

@@ -38,7 +38,7 @@ def check_source_description_populated(
 
     assert (
         len(source.description.strip()) > 4
-    ), f"`{source.unique_id}` does not have a populated description."
+    ), f"`{source.source_name}.{source.name}` does not have a populated description."
 
 
 class CheckSourceFreshnessPopulated(BaseCheck):
@@ -70,7 +70,7 @@ def check_source_freshness_populated(
     ) or (
         source.freshness.warn_after.count is not None
         and source.freshness.warn_after.period is not None
-    ), f"`{source.unique_id}` does not have a populated freshness."
+    ), f"`{source.source_name}.{source.name}` does not have a populated freshness."
 
 
 class CheckSourceHasMetaKeys(BaseCheck):
@@ -112,7 +112,7 @@ def check_source_has_meta_keys(
     )
     assert (
         missing_keys == []
-    ), f"`{source.unique_id}` is missing the following keys from the `meta` config: {[x.replace('>>', '') for x in missing_keys]}"
+    ), f"`{source.source_name}.{source.name}` is missing the following keys from the `meta` config: {[x.replace('>>', '') for x in missing_keys]}"
 
 
 class CheckSourceHasTags(BaseCheck):
@@ -149,7 +149,9 @@ def check_source_has_tags(
     """
 
     missing_tags = [tag for tag in tags if tag not in source.tags]
-    assert not missing_tags, f"`{source.unique_id}` is missing required tags: {missing_tags}."
+    assert (
+        not missing_tags
+    ), f"`{source.source_name}.{source.name}` is missing required tags: {missing_tags}."
 
 
 class CheckSourceLoaderPopulated(BaseCheck):
@@ -175,7 +177,9 @@ def check_source_loader_populated(
         ```
     """
 
-    assert source.loader != "", f"`{source.unique_id}` does not have a populated loader."
+    assert (
+        source.loader != ""
+    ), f"`{source.source_name}.{source.name}` does not have a populated loader."
 
 
 class CheckSourceNames(BaseCheck):
@@ -210,7 +214,7 @@ def check_source_names(
 
     assert (
         re.compile(source_name_pattern.strip()).match(source.name) is not None
-    ), f"`{source.unique_id.split('.')[0]}` does not match the supplied regex `({source_name_pattern.strip()})`."
+    ), f"`{source.source_name}.{source.name}` does not match the supplied regex `({source_name_pattern.strip()})`."
 
 
 class CheckSourceNotOrphaned(BaseCheck):
@@ -242,7 +246,7 @@ def check_source_not_orphaned(
     num_refs = sum(source.unique_id in model.depends_on.nodes for model in models)
     assert (
         num_refs >= 1
-    ), f"Source `{source.unique_id}` is orphaned, i.e. not referenced by any model."
+    ), f"Source `{source.source_name}.{source.name}` is orphaned, i.e. not referenced by any model."
 
 
 class CheckSourcePropertyFileLocation(BaseCheck):
@@ -273,13 +277,13 @@ def check_source_property_file_location(
 
     assert path_cleaned.split("/")[-1].startswith(
         "_"
-    ), f"The properties file for `{source.unique_id}` (`{path_cleaned}`) does not start with an underscore."
+    ), f"The properties file for `{source.source_name}.{source.name}` (`{path_cleaned}`) does not start with an underscore."
     assert (
         expected_substring in path_cleaned
-    ), f"The properties file for `{source.unique_id}` (`{path_cleaned}`) does not contain the expected substring (`{expected_substring}`)."
+    ), f"The properties file for `{source.source_name}.{source.name}` (`{path_cleaned}`) does not contain the expected substring (`{expected_substring}`)."
     assert path_cleaned.split("/")[-1].endswith(
         "__sources.yml"
-    ), f"The properties file for `{source.unique_id}` (`{path_cleaned}`) does not end with `__sources.yml`."
+    ), f"The properties file for `{source.source_name}.{source.name}` (`{path_cleaned}`) does not end with `__sources.yml`."
 
 
 class CheckSourceUsedByModelsInSameDirectory(BaseCheck):
@@ -318,7 +322,7 @@ def check_source_used_by_models_in_same_directory(
 
     assert (
         len(reffed_models_not_in_same_dir) == 0
-    ), f"Source `{source.unique_id}` is referenced by models defined in a different directory: {reffed_models_not_in_same_dir}"
+    ), f"Source `{source.source_name}.{source.name}` is referenced by models defined in a different directory: {reffed_models_not_in_same_dir}"
 
 
 class CheckSourceUsedByOnlyOneModel(BaseCheck):
@@ -348,4 +352,6 @@ def check_source_used_by_only_one_model(
     """
 
     num_refs = sum(source.unique_id in model.depends_on.nodes for model in models)
-    assert num_refs <= 1, f"Source `{source.unique_id}` is referenced by more than one model."
+    assert (
+        num_refs <= 1
+    ), f"Source `{source.source_name}.{source.name}` is referenced by more than one model."

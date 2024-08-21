@@ -71,7 +71,7 @@ def check_lineage_permitted_upstream_models(
     ]
     assert (
         not not_permitted_upstream_models
-    ), f"`{model.unique_id.split('.')[-1]}` references upstream models that are not permitted: {[m.split('.')[-1] for m in not_permitted_upstream_models]}."
+    ), f"`{model.name}` references upstream models that are not permitted: {[m.split('.')[-1] for m in not_permitted_upstream_models]}."
 
 
 class CheckLineageSeedCannotBeUsed(BaseModel):
@@ -106,7 +106,7 @@ def check_lineage_seed_cannot_be_used(
 
     assert not [
         x for x in model.depends_on.nodes if x.split(".")[0] == "seed"
-    ], f"`{model.unique_id.split('.')[-1]}` references a seed even though this is not permitted."
+    ], f"`{model.name}` references a seed even though this is not permitted."
 
 
 class CheckLineageSourceCannotBeUsed(BaseModel):
@@ -141,4 +141,4 @@ def check_lineage_source_cannot_be_used(
 
     assert not [
         x for x in model.depends_on.nodes if x.split(".")[0] == "source"
-    ], f"`{model.unique_id.split('.')[-1]}` references a source even though this is not permitted."
+    ], f"`{model.name}` references a source even though this is not permitted."
