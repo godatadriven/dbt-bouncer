@@ -4,6 +4,8 @@ repo_url: https://github.com/godatadriven/dbt-bouncer
 site_name: dbt-bouncer
 
 markdown_extensions:
+  - admonition
+  - mkdocs-click
   - pymdownx.highlight:
       anchor_linenums: true
       line_spans: __span
@@ -17,9 +19,12 @@ nav:
   - Home: index.md
   - Getting Started: getting_started.md
   - Config File: config_file.md
-  - "Checks: Catalog": checks_catalog.md
-  - "Checks: Manifest": checks_manifest.md
-  - "Checks: Run Results": checks_run_results.md
+  - Checks:
+    - index: checks/index.md
+    - "Catalog Checks": checks/checks_catalog.md
+    - "Manifest Checks": checks/checks_manifest.md
+    - "Run Results Checks": checks/checks_run_results.md
+  - CLI: cli.md
   - Contributing: CONTRIBUTING.md
 
 plugins:
@@ -31,6 +36,8 @@ plugins:
           paths:
             - src/dbt_bouncer/checks
           options:
+            docstring_style: google
+            filters: ["check_"]
             group_by_category: false
             heading_level: 1
             inherited_members: true
@@ -50,6 +57,7 @@ theme:
   features:
     - content.action.edit
     - content.code.annotate
+    - content.code.copy
     - navigation.expand
     - navigation.indexes
     - navigation.instant

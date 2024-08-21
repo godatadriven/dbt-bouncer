@@ -31,6 +31,16 @@ def check_exposure_based_on_non_public_models(
 ) -> None:
     """
     Exposures should be based on public models only.
+
+    Receives:
+        exposure (Exposures): The Exposures object to check.
+        include (Optional[str]): Regex pattern to match the exposure path (i.e the .yml file where the exposure is configured). Only exposure paths that match the pattern will be checked.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_exposure_based_on_non_public_models
+        ```
     """
 
     non_public_upstream_dependencies = []
@@ -51,7 +61,6 @@ def check_exposure_based_on_non_public_models(
 class CheckExposureOnView(BaseCheck):
     materializations_to_include: List[str] = Field(
         default=["ephemeral", "view"],
-        description="List of materializations to include in the check. If not provided, defaults to `ephemeral` and `view`.",
     )
     name: Literal["check_exposure_based_on_view"]
 
@@ -67,6 +76,25 @@ def check_exposure_based_on_view(
 ) -> None:
     """
     Exposures should not be based on views.
+
+    Receives:
+        exposure (Exposures): The Exposures object to check.
+        include (Optional[str]): Regex pattern to match the exposure path (i.e the .yml file where the exposure is configured). Only exposure paths that match the pattern will be checked.
+        materializations_to_include (Optional[List[str]]): List of materializations to include in the check. If not provided, defaults to `ephemeral` and `view`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_exposure_based_on_view
+        ```
+        ```yaml
+        manifest_checks:
+            - name: check_exposure_based_on_view
+              materializations_to_include:
+                - ephemeral
+                - my_custom_materialization
+                - view
+        ```
     """
 
     non_table_upstream_dependencies = []

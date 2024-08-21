@@ -4,7 +4,6 @@ from typing import Literal, Union
 
 import pytest
 from _pytest.fixtures import TopRequest
-from pydantic import Field
 
 from dbt_bouncer.conf_validator_base import BaseCheck
 from dbt_bouncer.parsers import DbtBouncerResult
@@ -12,9 +11,7 @@ from dbt_bouncer.utils import bouncer_check
 
 
 class CheckRunResultsMaxGigabytesBilled(BaseCheck):
-    max_gigabytes_billed: float = Field(
-        description="The maximum gigagbytes billed allowed for a node."
-    )
+    max_gigabytes_billed: float
     name: Literal["check_run_results_max_gigabytes_billed"]
 
 
@@ -27,7 +24,23 @@ def check_run_results_max_gigabytes_billed(
     **kwargs,
 ) -> None:
     """
-    Each result can have a maximum number of gigabytes billed. Note that this only works for the `dbt-bigquery` adapter.
+    Each result can have a maximum number of gigabytes billed.
+
+    !!! note
+
+        Note that this check only works for the `dbt-bigquery` adapter.
+
+    Receives:
+        include (Optional[str]): Regex pattern to match the resource path. Only resource paths that match the pattern will be checked.
+        max_gigabytes_billed (float): The maximum gigabytes billed allowed for a node.
+        run_result (DbtBouncerResult): The DbtBouncerResult object to check.
+
+    Example(s):
+        ```yaml
+        run_results_checks:
+            - name: check_run_results_max_gigabytes_billed
+              max_gigabytes_billed: 100
+        ```
     """
 
     try:
@@ -43,9 +56,7 @@ def check_run_results_max_gigabytes_billed(
 
 
 class CheckRunResultsMaxExecutionTime(BaseCheck):
-    max_execution_time: float = Field(
-        description="The maximum execution time (seconds) allowed for a node."
-    )
+    max_execution_time: float
     name: Literal["check_run_results_max_execution_time"]
 
 
@@ -59,6 +70,18 @@ def check_run_results_max_execution_time(
 ) -> None:
     """
     Each result can take a maximum duration (seconds).
+
+    Receives:
+        include (Optional[str]): Regex pattern to match the resource path. Only resource paths that match the pattern will be checked.
+        max_execution_time (float): The maximum execution time (seconds) allowed for a node.
+        run_result (DbtBouncerResult): The DbtBouncerResult object to check.
+
+    Example(s):
+        ```yaml
+        run_results_checks:
+            - name: check_run_results_max_execution_time
+              max_execution_time: 60
+        ```
     """
 
     assert (

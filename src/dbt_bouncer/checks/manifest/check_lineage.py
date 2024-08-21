@@ -14,16 +14,12 @@ from dbt_bouncer.utils import bouncer_check
 class CheckLineagePermittedUpstreamModels(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    include: str = Field(
-        description="Regex pattern to match the model path. Only model paths that match the pattern will be checked."
-    )
+    include: str
     index: Optional[int] = Field(
         default=None, description="Index to uniquely identify the check, calculated at runtime."
     )
     name: Literal["check_lineage_permitted_upstream_models"]
-    upstream_path_pattern: str = Field(
-        description="Regexp pattern to match the upstream model(s) path."
-    )
+    upstream_path_pattern: str
 
 
 @pytest.mark.iterate_over_models
@@ -38,6 +34,25 @@ def check_lineage_permitted_upstream_models(
 ) -> None:
     """
     Upstream models must have a path that matches the provided `upstream_path_pattern`.
+
+    Receives:
+        include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        model (DbtBouncerModel): The DbtBouncerModel object to check.
+        upstream_path_pattern (str): Regexp pattern to match the upstream model(s) path.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_lineage_permitted_upstream_models
+              include: ^staging
+              upstream_path_pattern: $^
+            - name: check_lineage_permitted_upstream_models
+              include: ^intermediate
+              upstream_path_pattern: ^staging|^intermediate
+            - name: check_lineage_permitted_upstream_models
+              include: ^marts
+              upstream_path_pattern: ^staging|^intermediate
+        ```
     """
 
     upstream_models = [
@@ -62,9 +77,7 @@ def check_lineage_permitted_upstream_models(
 class CheckLineageSeedCannotBeUsed(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    include: str = Field(
-        description="Regex pattern to match the model path. Only model paths that match the pattern will be checked."
-    )
+    include: str
     index: Optional[int] = Field(
         default=None, description="Index to uniquely identify the check, calculated at runtime."
     )
@@ -78,6 +91,17 @@ def check_lineage_seed_cannot_be_used(
 ) -> None:
     """
     Seed cannot be referenced in models with a path that matches the specified `include` config.
+
+    Receives:
+        include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        model (DbtBouncerModel): The DbtBouncerModel object to check.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_lineage_seed_cannot_be_used
+              include: ^intermediate|^marts
+        ```
     """
 
     assert not [
@@ -88,9 +112,7 @@ def check_lineage_seed_cannot_be_used(
 class CheckLineageSourceCannotBeUsed(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    include: str = Field(
-        description="Regex pattern to match the model path. Only model paths that match the pattern will be checked."
-    )
+    include: str
     index: Optional[int] = Field(
         default=None, description="Index to uniquely identify the check, calculated at runtime."
     )
@@ -104,6 +126,17 @@ def check_lineage_source_cannot_be_used(
 ) -> None:
     """
     Sources cannot be referenced in models with a path that matches the specified `include` config.
+
+    Receives:
+        include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        model (DbtBouncerModel): The DbtBouncerModel object to check.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_lineage_source_cannot_be_used
+              include: ^intermediate|^marts
+        ```
     """
 
     assert not [

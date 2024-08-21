@@ -17,7 +17,7 @@ class CheckProjectName(BaseModel):
         default=None, description="Index to uniquely identify the check, calculated at runtime."
     )
     name: Literal["check_project_name"]
-    project_name_pattern: str = Field(description="Regexp the project name must match.")
+    project_name_pattern: str
 
 
 @bouncer_check
@@ -29,6 +29,16 @@ def check_project_name(
 ) -> None:
     """
     Enforce that the name of the dbt project matches a supplied regex. Generally used to enforce that project names conform to something like  `company_<DOMAIN>`.
+
+    Receives:
+        project_name_pattern str: Regex pattern to match the project name.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_project_name
+              project_name_pattern: ^awesome_company_
+        ```
     """
 
     assert (
