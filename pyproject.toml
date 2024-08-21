@@ -103,6 +103,7 @@ sh = "^2"
 [tool.poetry.group.docs.dependencies]
 mkdocs = "^1"
 mkdocstrings = {extras = ["python"], version = "^0"}
+mkdocs-click = "^0"
 mkdocs-git-revision-date-localized-plugin = "^1"
 mkdocs-material = "^9"
 pymdown-extensions = {extras = ["details"], version = "^10"}

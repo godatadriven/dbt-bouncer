@@ -3,7 +3,7 @@
 1. Generate dbt artifacts by running a dbt command:
 
     - `dbt parse` to generate a `manifest.json` artifact.
-    - `dbt docs generate` to generate a `catalog.json` artifact (necessary if you are using [catalog checks](./checks_catalog.md)).
+    - `dbt docs generate` to generate a `catalog.json` artifact (necessary if you are using [catalog checks](./checks/checks_catalog.md)).
 
 1. Create a `dbt-bouncer.yml` config file, details [here](./config_file.md).
 

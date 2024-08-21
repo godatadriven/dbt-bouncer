@@ -24,6 +24,16 @@ def check_source_columns_are_all_documented(
 ) -> None:
     """
     All columns in a source should be included in the source's properties file, i.e. `.yml` file.
+
+    Receives:
+        catalog_source (DbtBouncerCatalogNode): The DbtBouncerCatalogNode object to check.
+        include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
+
+    Example(s):
+        ```yaml
+        catalog_checks:
+            - name: check_source_columns_are_all_documented
+        ```
     """
 
     source = [s for s in sources if s.unique_id == catalog_source.unique_id][0]

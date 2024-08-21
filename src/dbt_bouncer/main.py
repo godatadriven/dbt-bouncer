@@ -28,7 +28,8 @@ from dbt_bouncer.version import version
 @click.option(
     "--create-pr-comment-file",
     default=False,
-    help="Create a `github-comment.md` file that will be sent to GitHub as a PR comment. Defaults to True when run as a GitHub Action.",
+    help="Create a `github-comment.md` file that will be sent to GitHub as a PR comment. Defaults to True when `dbt-bouncer` is run as a GitHub Action.",
+    hidden=True,
     required=False,
     type=click.BOOL,
 )

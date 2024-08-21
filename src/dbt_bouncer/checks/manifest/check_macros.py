@@ -11,7 +11,6 @@ with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
     from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Macros
 
-from pydantic import Field
 
 from dbt_bouncer.conf_validator_base import BaseCheck
 from dbt_bouncer.utils import bouncer_check
@@ -28,6 +27,22 @@ def check_macro_arguments_description_populated(
 ) -> None:
     """
     Macro arguments must have a populated description.
+
+    Receives:
+        include (Optional[str]): Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
+        macro (Macros): The Macro object to check.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_macro_arguments_description_populated
+        ```
+        ```yaml
+        # Only "common" macros need to have their arguments populated
+        manifest_checks:
+            - name: check_macro_arguments_description_populated
+              include: macros/common
+        ```
     """
 
     for arg in macro.arguments:
@@ -38,9 +53,7 @@ def check_macro_arguments_description_populated(
 
 class CheckMacroCodeDoesNotContainRegexpPattern(BaseCheck):
     name: Literal["check_macro_code_does_not_contain_regexp_pattern"]
-    regexp_pattern: str = Field(
-        description="The regexp pattern that should not be matched by the macro code."
-    )
+    regexp_pattern: str
 
 
 @pytest.mark.iterate_over_macros
@@ -51,8 +64,20 @@ def check_macro_code_does_not_contain_regexp_pattern(
     regexp_pattern: Union[None, str] = None,
     **kwargs,
 ) -> None:
-    """
-    The raw code for a macro must not match the specified regexp pattern.
+    """The raw code for a macro must not match the specified regexp pattern.
+
+    Receives:
+        include (Optional[str]): Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
+        macro (Macros): The Macro object to check.
+        regexp_pattern (str): The regexp pattern that should not be matched by the macro code.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            # Prefer `coalesce` over `ifnull`: https://docs.sqlfluff.com/en/stable/rules.html#sqlfluff.rules.sphinx.Rule_CV02
+            - name: check_macro_code_does_not_contain_regexp_pattern
+              regexp_pattern: .*[i][f][n][u][l][l].*
+        ```
     """
 
     assert (
@@ -71,6 +96,22 @@ def check_macro_description_populated(
 ) -> None:
     """
     Macros must have a populated description.
+
+    Receives:
+        include (Optional[str]): Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
+        macro (Macros): The Macro object to check.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_macro_description_populated
+        ```
+        ```yaml
+        # Only "common" macros need to have a populated description
+        manifest_checks:
+            - name: check_macro_description_populated
+              include: macros/common
+        ```
     """
 
     assert (
@@ -91,6 +132,16 @@ def check_macro_name_matches_file_name(
     Macros names must be the same as the file they are contained in.
 
     Generic tests are also macros, however to document these tests the "name" value must be precededed with "test_".
+
+    Receives:
+        include (Optional[str]): Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
+        macro (Macros): The Macro object to check.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_macro_name_matches_file_name
+        ```
     """
 
     if macro.name.startswith("test_"):
@@ -114,6 +165,16 @@ def check_macro_property_file_location(
 ) -> None:
     """
     Macro properties files must follow the guidance provided by dbt [here](https://docs.getdbt.com/best-practices/how-we-structure/5-the-rest-of-the-project#how-we-use-the-other-folders).
+
+    Receives:
+        include (Optional[str]): Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
+        macro (Macros): The Macro object to check.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_macro_property_file_location
+        ```
     """
 
     expected_substr = "_".join(macro.path[6:].split("/")[:-1])
