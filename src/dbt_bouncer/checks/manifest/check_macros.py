@@ -48,7 +48,7 @@ def check_macro_arguments_description_populated(
     for arg in macro.arguments:
         assert (
             len(arg.description.strip()) > 4
-        ), f"Argument `{arg.name}` in {macro.unique_id.split('.')[-1]} does not have a populated description."
+        ), f"Argument `{arg.name}` in {macro.name} does not have a populated description."
 
 
 class CheckMacroCodeDoesNotContainRegexpPattern(BaseCheck):
@@ -82,7 +82,7 @@ def check_macro_code_does_not_contain_regexp_pattern(
 
     assert (
         re.compile(regexp_pattern.strip(), flags=re.DOTALL).match(macro.macro_sql) is None
-    ), f"`{macro.unique_id.split('.')[-1]}` contains a banned string: `{regexp_pattern.strip()}`."
+    ), f"`{macro.name}` contains a banned string: `{regexp_pattern.strip()}`."
 
 
 class CheckMacroDescriptionPopulated(BaseCheck):
@@ -116,7 +116,7 @@ def check_macro_description_populated(
 
     assert (
         len(macro.description.strip()) > 4
-    ), f"`{macro.unique_id.split('.')[-1]}` does not have a populated description."
+    ), f"`{macro.name}` does not have a populated description."
 
 
 class CheckMacroNameMatchesFileName(BaseCheck):
@@ -151,7 +151,7 @@ def check_macro_name_matches_file_name(
     else:
         assert (
             macro.name == macro.path.split("/")[-1].split(".")[0]
-        ), f"`{macro.unique_id.split('.')[-1]}` is not in a file of the same name."
+        ), f"`{macro.name}` is not in a file of the same name."
 
 
 class CheckMacroPropertyFileLocation(BaseCheck):
@@ -195,4 +195,4 @@ def check_macro_property_file_location(
         ), f"The properties file for `{macro.name}` (`{properties_yml_name}`) does not contain the expected substring (`{expected_substr}`)."
         assert properties_yml_name.endswith(
             "__macros.yml"
-        ), f"The properties file for `{macro.name.split('.')[-1]}` (`{properties_yml_name}`) does not end with `__macros.yml`."
+        ), f"The properties file for `{macro.name.name}` (`{properties_yml_name}`) does not end with `__macros.yml`."

@@ -38,7 +38,7 @@ plugins:
           options:
             docstring_style: google
             filters: ["check_"]
-            group_by_category: false
+            group_by_category: true
             heading_level: 1
             inherited_members: true
             members_order: source
