@@ -37,6 +37,7 @@ def check_column_name_complies_to_column_type(
     Receives:
         catalog_node (CatalogTable): The CatalogTable object to check.
         column_name_pattern: (str): Regex pattern to match the model name.
+        exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
 
     Example(s):
@@ -99,6 +100,7 @@ def check_columns_are_all_documented(
 
     Receives:
         catalog_node (CatalogTable): The CatalogTable object to check.
+        exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
 
     Example(s):
@@ -135,6 +137,7 @@ def check_columns_are_documented_in_public_models(
 
     Receives:
         catalog_node (CatalogTable): The CatalogTable object to check.
+        exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
 
     Example(s):
@@ -180,6 +183,7 @@ def check_column_has_specified_test(
     Receives:
         catalog_node (CatalogTable): The CatalogTable object to check.
         column_name_pattern (str): Regex pattern to match the column name.
+        exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
         test_name (str): Name of the test to check for.
 

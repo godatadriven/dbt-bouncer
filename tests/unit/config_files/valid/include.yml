@@ -1,15 +1,16 @@
 catalog_checks:
   - name: check_column_name_complies_to_column_type
     column_name_pattern: ^is_.*
+    include: ^staging
     types:
       - BOOLEAN
 
 manifest_checks:
   - name: check_model_names
-    include: ^intermediate
+    include: ^staging
     model_name_pattern: ^int_
 
 run_results_checks:
   - name: check_run_results_max_execution_time
-    exclude: ^staging
+    include: ^staging
     max_execution_time_seconds: 10

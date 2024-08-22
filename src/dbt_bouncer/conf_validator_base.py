@@ -6,6 +6,9 @@ from pydantic import BaseModel, ConfigDict, Field
 class BaseCheck(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
+    exclude: Optional[str] = Field(
+        default=None, description="Regexp to match which paths to exclude."
+    )
     include: Optional[str] = Field(
         default=None, description="Regexp to match which paths to include."
     )

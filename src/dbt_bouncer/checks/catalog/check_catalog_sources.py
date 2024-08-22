@@ -27,6 +27,7 @@ def check_source_columns_are_all_documented(
 
     Receives:
         catalog_source (DbtBouncerCatalogNode): The DbtBouncerCatalogNode object to check.
+        exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
 
     Example(s):

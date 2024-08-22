@@ -35,6 +35,7 @@ def check_macro_arguments_description_populated(
     Macro arguments must have a populated description.
 
     Receives:
+        exclude (Optional[str]): Regex pattern to match the macro path. Macro paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
         macro (Macros): The Macro object to check.
 
@@ -47,7 +48,7 @@ def check_macro_arguments_description_populated(
         # Only "common" macros need to have their arguments populated
         manifest_checks:
             - name: check_macro_arguments_description_populated
-              include: macros/common
+              include: ^macros/common
         ```
     """
 
@@ -96,6 +97,7 @@ def check_macro_code_does_not_contain_regexp_pattern(
     """The raw code for a macro must not match the specified regexp pattern.
 
     Receives:
+        exclude (Optional[str]): Regex pattern to match the macro path. Macro paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
         macro (Macros): The Macro object to check.
         regexp_pattern (str): The regexp pattern that should not be matched by the macro code.
@@ -127,6 +129,7 @@ def check_macro_description_populated(
     Macros must have a populated description.
 
     Receives:
+        exclude (Optional[str]): Regex pattern to match the macro path. Macro paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
         macro (Macros): The Macro object to check.
 
@@ -139,7 +142,7 @@ def check_macro_description_populated(
         # Only "common" macros need to have a populated description
         manifest_checks:
             - name: check_macro_description_populated
-              include: macros/common
+              include: ^macros/common
         ```
     """
 
@@ -163,6 +166,7 @@ def check_macro_name_matches_file_name(
     Generic tests are also macros, however to document these tests the "name" value must be precededed with "test_".
 
     Receives:
+        exclude (Optional[str]): Regex pattern to match the macro path. Macro paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
         macro (Macros): The Macro object to check.
 
@@ -196,6 +200,7 @@ def check_macro_property_file_location(
     Macro properties files must follow the guidance provided by dbt [here](https://docs.getdbt.com/best-practices/how-we-structure/5-the-rest-of-the-project#how-we-use-the-other-folders).
 
     Receives:
+        exclude (Optional[str]): Regex pattern to match the macro path. Macro paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
         macro (Macros): The Macro object to check.
 
