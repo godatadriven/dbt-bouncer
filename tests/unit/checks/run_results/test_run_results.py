@@ -54,7 +54,7 @@ def test_check_run_results_max_gigabytes_billed(max_gigabytes_billed, run_result
 
 
 @pytest.mark.parametrize(
-    "max_execution_time, run_result, expectation",
+    "max_execution_time_seconds, run_result, expectation",
     [
         (
             10,
@@ -100,8 +100,10 @@ def test_check_run_results_max_gigabytes_billed(max_gigabytes_billed, run_result
         ),
     ],
 )
-def test_check_run_results_max_execution_time(max_execution_time, run_result, expectation):
+def test_check_run_results_max_execution_time(max_execution_time_seconds, run_result, expectation):
     with expectation:
         check_run_results_max_execution_time(
-            max_execution_time=max_execution_time, run_result=run_result, request=None
+            max_execution_time_seconds=max_execution_time_seconds,
+            run_result=run_result,
+            request=None,
         )
