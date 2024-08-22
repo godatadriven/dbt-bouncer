@@ -46,7 +46,7 @@ Example options:
 - `Exposures`: The path to the properties file where the source is defined, e.g. `^marts/finance` will match exposures defined in `./models/marts/finance/_exposures.yml`.
 - `Macros`: The path to the macro file, e.g. `^macros/system` will match files like `./macros/system/generate_schema_name.sql`.
 - `Models`: The path to the model file, e.g. `^marts` will match files like `./models/marts/customers.sql`.
-- `Run Results`: The path to the file associated with the resource, e.g. `^finance/.*\.csv$` will match seeds in `./seeds/finance`, `^staging` will match models in `./models/staging`.
+- `Run Results`: The path to the file associated with the resource, e.g. `^finance/.*\.csv$` will match seeds in `./seeds/finance`, `^staging` will match models and tests in `./models/staging`.
 - `Sources`: The path to the properties file where the source is defined, e.g. `^staging/crm` will match sources defined in `./models/staging/crm/_crm__sources.yml`.
 
 To determine if a check accepts these arguments view the [Checks page](./checks/index.md).
