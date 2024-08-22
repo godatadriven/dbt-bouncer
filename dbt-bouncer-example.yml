@@ -3,6 +3,7 @@ dbt_artifacts_dir: dbt_project/target # [Optional] Directory where the dbt artif
 catalog_checks:
   - name: check_column_name_complies_to_column_type
     column_name_pattern: ^is_.*
+    exclude: ^staging
     types:
       - BOOLEAN
   - name: check_column_name_complies_to_column_type
@@ -26,6 +27,7 @@ catalog_checks:
     include: ^marts
   - name: check_columns_are_documented_in_public_models
   - name: check_source_columns_are_all_documented
+    exclude: ^staging/crm # Not a good idea, here for demonstration purposes only
 
 manifest_checks:
   # Exposures
@@ -133,6 +135,8 @@ manifest_checks:
   - name: check_source_used_by_only_one_model
 
 run_results_checks:
+  # Not a good idea, here for demonstration purposes only
   - name: check_run_results_max_execution_time
-    include: ^staging # Not a good idea, here for demonstration purposes only
+    include: ^staging
     max_execution_time: 10
+    exclude: ^staging/crm

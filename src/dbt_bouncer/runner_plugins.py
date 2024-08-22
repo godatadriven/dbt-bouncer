@@ -151,7 +151,7 @@ class GenerateTestsPlugin:
 
                     markers = pytest.Function.from_parent(
                         collector, name=name
-                    ).keywords._markers.keys()  # type: ignore[attr-defined]
+                    ).keywords._markers.keys()
                     if (
                         len(
                             set(
@@ -209,7 +209,10 @@ class GenerateTestsPlugin:
                                     run_result
                                 ) = None
 
-                            if object_in_path(check_config.get("include"), x.path):
+                            if object_in_path(check_config.get("include"), x.path) and not (
+                                check_config.get("exclude") is not None
+                                and object_in_path(check_config.get("exclude"), x.path)
+                            ):
                                 item = MyFunctionItem.from_parent(
                                     parent=collector,
                                     name=name,

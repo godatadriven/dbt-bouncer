@@ -40,6 +40,7 @@ def bouncer_check(func):
             accepted_uniqueness_tests = request.node.check_config.get("accepted_uniqueness_tests")
             access = request.node.check_config.get("access")
             column_name_pattern = request.node.check_config.get("column_name_pattern")
+            exclude = request.node.check_config.get("exclude")
             include = request.node.check_config.get("include")
             keys = request.node.check_config.get("keys")
             materializations_to_include = request.node.check_config.get(
@@ -82,6 +83,7 @@ def bouncer_check(func):
             access = kwargs.get("access")
             column_name_pattern = kwargs.get("column_name_pattern")
             include = kwargs.get("include")
+            exclude = kwargs.get("exclude")
             keys = kwargs.get("keys")
             materializations_to_include = kwargs.get("materializations_to_include")
             max_chained_views = kwargs.get("max_chained_views")
@@ -119,6 +121,7 @@ def bouncer_check(func):
             accepted_uniqueness_tests=accepted_uniqueness_tests,
             access=access,
             column_name_pattern=column_name_pattern,
+            exclude=exclude,
             include=include,
             keys=keys,
             materializations_to_include=materializations_to_include,
