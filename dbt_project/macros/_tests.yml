@@ -3,3 +3,10 @@ version: 2
 macros:
   - name: test_values_below_threshold
     description: Test that all numeric values in a column are below a specified threshold.
+    arguments:
+      - name: model
+        description: The model to test
+      - name: column_name
+        description: The column to test
+      - name: threshold
+        description: The threshold value

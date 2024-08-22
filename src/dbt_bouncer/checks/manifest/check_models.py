@@ -365,7 +365,7 @@ def check_model_has_meta_keys(
     Receives:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
-        keys: (NestedDict): A list (that may contain sub-lists) of required keys.
+        keys (NestedDict): A list (that may contain sub-lists) of required keys.
         model (DbtBouncerModel): The DbtBouncerModel object to check.
 
     Example(s):

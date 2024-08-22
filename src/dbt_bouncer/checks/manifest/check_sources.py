@@ -94,7 +94,7 @@ def check_source_has_meta_keys(
     Receives:
         exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
-        keys: (NestedDict): A list (that may contain sub-lists) of required keys.
+        keys (NestedDict): A list (that may contain sub-lists) of required keys.
         source (DbtBouncerSource): The DbtBouncerSource object to check.
 
     Example(s):

@@ -48,7 +48,9 @@ def bouncer_check(func):
             )
             max_chained_views = request.node.check_config.get("max_chained_views")
             max_downstream_models = request.node.check_config.get("max_downstream_models")
-            max_execution_time = request.node.check_config.get("max_execution_time")
+            max_execution_time_seconds = request.node.check_config.get(
+                "max_execution_time_seconds"
+            )
             max_gigabytes_billed = request.node.check_config.get("max_gigabytes_billed")
             max_upstream_macros = request.node.check_config.get("max_upstream_macros")
             max_upstream_models = request.node.check_config.get("max_upstream_models")
@@ -88,7 +90,7 @@ def bouncer_check(func):
             materializations_to_include = kwargs.get("materializations_to_include")
             max_chained_views = kwargs.get("max_chained_views")
             max_downstream_models = kwargs.get("max_downstream_models")
-            max_execution_time = kwargs.get("max_execution_time")
+            max_execution_time_seconds = kwargs.get("max_execution_time_seconds")
             max_gigabytes_billed = kwargs.get("max_gigabytes_billed")
             max_upstream_macros = kwargs.get("max_upstream_macros")
             max_upstream_models = kwargs.get("max_upstream_models")
@@ -127,7 +129,7 @@ def bouncer_check(func):
             materializations_to_include=materializations_to_include,
             max_chained_views=max_chained_views,
             max_downstream_models=max_downstream_models,
-            max_execution_time=max_execution_time,
+            max_execution_time_seconds=max_execution_time_seconds,
             max_gigabytes_billed=max_gigabytes_billed,
             max_upstream_macros=max_upstream_macros,
             max_upstream_models=max_upstream_models,

@@ -138,5 +138,5 @@ run_results_checks:
   # Not a good idea, here for demonstration purposes only
   - name: check_run_results_max_execution_time
     include: ^staging
-    max_execution_time: 10
     exclude: ^staging/crm
+    max_execution_time_seconds: 10
