@@ -13,4 +13,4 @@ manifest_checks:
 run_results_checks:
   - name: check_run_results_max_execution_time
     exclude: ^staging
-    max_execution_time: 10
+    max_execution_time_seconds: 10
