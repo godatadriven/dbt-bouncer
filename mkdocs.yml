@@ -2,6 +2,11 @@ edit_uri: docs/
 repo_name: godatadriven/dbt-bouncer
 repo_url: https://github.com/godatadriven/dbt-bouncer
 site_name: dbt-bouncer
+site_url: https://godatadriven.github.io/dbt-bouncer/
+
+extra:
+  version:
+    provider: mike
 
 markdown_extensions:
   - admonition
@@ -53,6 +58,7 @@ plugins:
   - search
 
 theme:
+  custom_dir: docs/overrides
   favicon: assets/logo.png
   features:
     - content.action.edit

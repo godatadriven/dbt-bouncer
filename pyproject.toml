@@ -103,6 +103,7 @@ sh = "^2"
 "shandy-sqlfmt" = {version = "^0", extras=["shandy-sqlfmt[jinjafmt]"]}
 
 [tool.poetry.group.docs.dependencies]
+mike = "^2"
 mkdocs = "^1"
 mkdocstrings = {extras = ["python"], version = "^0"}
 mkdocs-click = "^0"
