@@ -216,7 +216,9 @@ def parse_run_results_artifact(
     project_run_results = [
         DbtBouncerResult(
             **{
-                "path": manifest_obj.manifest.nodes[r.unique_id].path,
+                "path": manifest_obj.manifest.nodes[r.unique_id].original_file_path.replace(
+                    "models/", ""
+                ),
                 "result": r,
                 "unique_id": r.unique_id,
             }

@@ -227,7 +227,7 @@ class GenerateTestsPlugin:
                                     source=source,
                                 )
                                 item._nodeid = (
-                                    f"{name}::{x.unique_id.split('.')[-1]}_{check_config['index']}"
+                                    f"{name}::{x.unique_id.split('.')[2]}_{check_config['index']}"
                                 )
 
                                 items.append(item)
