@@ -56,7 +56,7 @@ def check_run_results_max_gigabytes_billed(
 
 
 class CheckRunResultsMaxExecutionTime(BaseCheck):
-    max_execution_time: float
+    max_execution_time_seconds: float
     name: Literal["check_run_results_max_execution_time"]
 
 
@@ -64,7 +64,7 @@ class CheckRunResultsMaxExecutionTime(BaseCheck):
 @bouncer_check
 def check_run_results_max_execution_time(
     request: TopRequest,
-    max_execution_time: Union[float, None] = None,
+    max_execution_time_seconds: Union[float, None] = None,
     run_result: Union[DbtBouncerResult, None] = None,
     **kwargs,
 ) -> None:
@@ -73,17 +73,23 @@ def check_run_results_max_execution_time(
 
     Receives:
         include (Optional[str]): Regex pattern to match the resource path. Only resource paths that match the pattern will be checked.
-        max_execution_time (float): The maximum execution time (seconds) allowed for a node.
+        max_execution_time_seconds (float): The maximum execution time (seconds) allowed for a node.
         run_result (DbtBouncerResult): The DbtBouncerResult object to check.
 
     Example(s):
         ```yaml
         run_results_checks:
             - name: check_run_results_max_execution_time
-              max_execution_time: 60
+              max_execution_time_seconds: 60
+        ```
+        ```yaml
+        run_results_checks:
+            - name: check_run_results_max_execution_time
+              include: ^staging # Not a good idea, here for demonstration purposes only
+              max_execution_time_seconds: 10
         ```
     """
 
     assert (
-        run_result.execution_time <= max_execution_time
-    ), f"`{run_result.unique_id.split('.')[-1]}` has an execution time ({run_result.execution_time} greater than permitted ({max_execution_time}s)."
+        run_result.execution_time <= max_execution_time_seconds
+    ), f"`{run_result.unique_id.split('.')[-1]}` has an execution time ({run_result.execution_time} greater than permitted ({max_execution_time_seconds}s)."
