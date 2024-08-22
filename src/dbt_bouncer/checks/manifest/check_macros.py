@@ -11,9 +11,15 @@ with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
     from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Macros
 
+import jinja2
+from jinja2_simple_tags import StandaloneTag
 
 from dbt_bouncer.conf_validator_base import BaseCheck
 from dbt_bouncer.utils import bouncer_check
+
+
+class TagExtension(StandaloneTag):
+    tags = {"endtest", "test"}
 
 
 class CheckMacroArgumentsDescriptionPopulated(BaseCheck):
@@ -45,10 +51,33 @@ def check_macro_arguments_description_populated(
         ```
     """
 
-    for arg in macro.arguments:
-        assert (
-            len(arg.description.strip()) > 4
-        ), f"Argument `{arg.name}` in {macro.name} does not have a populated description."
+    environment = jinja2.Environment(extensions=[TagExtension])
+    ast = environment.parse(macro.macro_sql)
+
+    # Assume macro is a "true" macro, if not see if it's a generic test
+    try:
+        macro_arguments = [a.name for a in ast.body[0].args]  # type: ignore[attr-defined]
+    except AttributeError:
+        test_macro = [x for x in ast.body if not isinstance(x.nodes[0], jinja2.nodes.Call)][0]  # type: ignore[attr-defined]
+        macro_arguments = [x.name for x in test_macro.nodes if isinstance(x, jinja2.nodes.Name)]  # type: ignore[attr-defined]
+
+    # macro_arguments: List of args parsed from macro SQL
+    # macro.arguments: List of args manually added to the properties file
+
+    non_complying_args = []
+    for arg in macro_arguments:
+        macro_doc_raw = [x for x in macro.arguments if x.name == arg]
+        if macro_doc_raw == []:
+            non_complying_args.append(arg)
+        elif (
+            arg not in [x.name for x in macro.arguments]
+            or len(macro_doc_raw[0].description.strip()) <= 4
+        ):
+            non_complying_args.append(arg)
+
+    assert (
+        non_complying_args == []
+    ), f"Macro `{macro.name}` does not have a populated description for the following argument(s): {non_complying_args}."
 
 
 class CheckMacroCodeDoesNotContainRegexpPattern(BaseCheck):
@@ -82,7 +111,7 @@ def check_macro_code_does_not_contain_regexp_pattern(
 
     assert (
         re.compile(regexp_pattern.strip(), flags=re.DOTALL).match(macro.macro_sql) is None
-    ), f"`{macro.name}` contains a banned string: `{regexp_pattern.strip()}`."
+    ), f"Macro `{macro.name}` contains a banned string: `{regexp_pattern.strip()}`."
 
 
 class CheckMacroDescriptionPopulated(BaseCheck):
@@ -116,7 +145,7 @@ def check_macro_description_populated(
 
     assert (
         len(macro.description.strip()) > 4
-    ), f"`{macro.name}` does not have a populated description."
+    ), f"Macro `{macro.name}` does not have a populated description."
 
 
 class CheckMacroNameMatchesFileName(BaseCheck):
@@ -147,11 +176,11 @@ def check_macro_name_matches_file_name(
     if macro.name.startswith("test_"):
         assert (
             macro.name[5:] == macro.path.split("/")[-1].split(".")[0]
-        ), f"{macro.unique_id} is not in a file named `{macro.name[5:]}.sql`."
+        ), f"Macro `{macro.unique_id}` is not in a file named `{macro.name[5:]}.sql`."
     else:
         assert (
             macro.name == macro.path.split("/")[-1].split(".")[0]
-        ), f"`{macro.name}` is not in a file of the same name."
+        ), f"Macro `{macro.name}` is not in a file of the same name."
 
 
 class CheckMacroPropertyFileLocation(BaseCheck):
