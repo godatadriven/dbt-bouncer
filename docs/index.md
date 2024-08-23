@@ -6,7 +6,7 @@
 
 `dbt-bouncer` is an open-source tool that allows you to configure and enforce conventions for your dbt project. The conventions are run against dbt's artifact files (think `./target/manifest.json`) resulting in speedy tests. Conventions can be specified in a `.yml` file, allowing maximum customisation to the conventions you wish to follow (or create 😀).
 
-Click [here](./getting_started.md) to view our `Getting Started` guide.
+Check out our [`Getting Started`](./getting_started.md) guide.
 
 ## Terminology
 
@@ -16,6 +16,6 @@ Click [here](./getting_started.md) to view our `Getting Started` guide.
 
 ## About
 
-`dbt-bouncer` is free software, released under the MIT license. It originated at Xebia Data in Amsterdam, Netherlands. Source code is available on Github [here](https://github.com/godatadriven/dbt-bouncer).
+`dbt-bouncer` is free software, released under the MIT license. It originated at Xebia Data in Amsterdam, Netherlands. Source code is available on [GitHub](https://github.com/godatadriven/dbt-bouncer).
 
 All contributions, in the form of bug reports, pull requests, feedback or discussion are welcome. See the [contributing guide](./CONTRIBUTING.md) for more information.

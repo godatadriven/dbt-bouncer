@@ -4,6 +4,7 @@
 
     - `dbt parse` to generate a `manifest.json` artifact.
     - `dbt docs generate` to generate a `catalog.json` artifact (necessary if you are using [catalog checks](./checks/checks_catalog.md)).
+    - `dbt run` (or any other command that implies it e.g. `dbt build`) to generate a `run_results.json` artifact (necessary if you are using [run results checks](./checks/checks_run_results.md)).
 
 1. Create a `dbt-bouncer.yml` config file, details [here](./config_file.md).
 

@@ -52,7 +52,7 @@
 
 ## Documentation
 
-All documentation can be found on `dbt-score` [documentation website](https://godatadriven.github.io/dbt-bouncer/).
+All documentation can be found on `dbt-bouncer` [documentation website](https://godatadriven.github.io/dbt-bouncer/).
 
 ## Reporting bugs and contributing code
 
