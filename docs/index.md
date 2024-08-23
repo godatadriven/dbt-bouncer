@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://github.com/godatadriven/dbt-bouncer/raw/main/images/logo.webp" alt="dbt-bouncer logo" width="500"/>
+  <img src="https://github.com/godatadriven/dbt-bouncer/raw/main/images/logo.svg" alt="dbt-bouncer logo" width="500"/>
 </p>
 
 ## Welcome to dbt-bouncer
