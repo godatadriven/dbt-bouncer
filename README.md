@@ -62,5 +62,3 @@ All documentation can be found on `dbt-score` [documentation website](https://go
 ## Code of Conduct
 
 Everyone interacting in `dbt-bouncer`'s codebase, issue trackers, chat rooms, and mailing lists is expected to follow the [Code of Conduct](./CODE_OF_CONDUCT.md).
-
-Sentence added via the GitHub UI.
