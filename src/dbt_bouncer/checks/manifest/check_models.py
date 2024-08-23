@@ -485,6 +485,7 @@ def check_model_has_unique_test(
         ```yaml
         manifest_checks:
           - name: check_model_has_unique_test
+          - include: ^fct_|^dim_
         ```
         ```yaml
         manifest_checks:
