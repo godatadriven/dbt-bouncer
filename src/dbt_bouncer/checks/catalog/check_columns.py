@@ -34,7 +34,7 @@ def check_column_name_complies_to_column_type(
     """
     Columns with specified data types must comply to the specified regexp naming pattern.
 
-    Arguments:
+    Receives:
         catalog_node (CatalogTable): The CatalogTable object to check.
         column_name_pattern: (str): Regex pattern to match the model name.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
@@ -98,7 +98,7 @@ def check_columns_are_all_documented(
     """
     All columns in a model should be included in the model's properties file, i.e. `.yml` file.
 
-    Arguments:
+    Receives:
         catalog_node (CatalogTable): The CatalogTable object to check.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
@@ -135,7 +135,7 @@ def check_columns_are_documented_in_public_models(
     """
     Columns should have a populated description in public models.
 
-    Arguments:
+    Receives:
         catalog_node (CatalogTable): The CatalogTable object to check.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
@@ -180,7 +180,7 @@ def check_column_has_specified_test(
     """
     Columns that match the specified regexp pattern must have a specified test.
 
-    Arguments:
+    Receives:
         catalog_node (CatalogTable): The CatalogTable object to check.
         column_name_pattern (str): Regex pattern to match the column name.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.

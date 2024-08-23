@@ -32,7 +32,7 @@ def check_exposure_based_on_non_public_models(
     """
     Exposures should be based on public models only.
 
-    Arguments:
+    Receives:
         exclude (Optional[str]): Regex pattern to match the exposure path (i.e the .yml file where the exposure is configured). Exposure paths that match the pattern will not be checked.
         exposure (Exposures): The Exposures object to check.
         include (Optional[str]): Regex pattern to match the exposure path (i.e the .yml file where the exposure is configured). Only exposure paths that match the pattern will be checked.
@@ -75,7 +75,7 @@ def check_exposure_based_on_view(
     """
     Exposures should not be based on views.
 
-    Arguments:
+    Receives:
         exclude (Optional[str]): Regex pattern to match the exposure path (i.e the .yml file where the exposure is configured). Exposure paths that match the pattern will not be checked.
         exposure (Exposures): The Exposures object to check.
         include (Optional[str]): Regex pattern to match the exposure path (i.e the .yml file where the exposure is configured). Only exposure paths that match the pattern will be checked.

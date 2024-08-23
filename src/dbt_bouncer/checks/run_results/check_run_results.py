@@ -30,7 +30,7 @@ def check_run_results_max_gigabytes_billed(
 
         Note that this check only works for the `dbt-bigquery` adapter.
 
-    Arguments:
+    Receives:
         exclude (Optional[str]): Regex pattern to match the resource path. Resource paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the resource path. Only resource paths that match the pattern will be checked.
         max_gigabytes_billed (float): The maximum gigabytes billed allowed for a node.
@@ -72,7 +72,7 @@ def check_run_results_max_execution_time(
     """
     Each result can take a maximum duration (seconds).
 
-    Arguments:
+    Receives:
         exclude (Optional[str]): Regex pattern to match the resource path. Resource paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the resource path. Only resource paths that match the pattern will be checked.
         max_execution_time_seconds (float): The maximum execution time (seconds) allowed for a node.
