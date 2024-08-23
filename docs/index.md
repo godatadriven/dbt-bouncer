@@ -6,7 +6,7 @@
 
 `dbt-bouncer` is an open-source tool that allows you to configure and enforce conventions for your dbt project. The conventions are run against dbt's artifact files (think `./target/manifest.json`) resulting in speedy tests. Conventions can be specified in a `.yml` file, allowing maximum customisation to the conventions you wish to follow (or create 😀).
 
-Click [here](./getting_started.md) to view our `Getting Started` guide.
+Check out our [`Getting Started`](./getting_started.md) guide.
 
 ## Terminology
 
