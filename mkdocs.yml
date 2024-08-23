@@ -25,7 +25,7 @@ nav:
   - Getting Started: getting_started.md
   - Config File: config_file.md
   - Checks:
-    - index: checks/index.md
+    - Checks: checks/index.md
     - "Catalog Checks": checks/checks_catalog.md
     - "Manifest Checks": checks/checks_manifest.md
     - "Run Results Checks": checks/checks_run_results.md
