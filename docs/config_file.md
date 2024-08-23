@@ -3,7 +3,7 @@
 `dbt-bouncer` requires a config file which determines what checks are run.
 The following options are available, in order of priority:
 
-1. A file passed via the `--config=file` CLI flag.
+1. A file passed via the `--config-file` CLI flag.
 2. A file named `dbt-bouncer.yml` in the current working directory.
 3. A `[tool.dbt-bouncer]` section in `pyproject.toml`.
 
