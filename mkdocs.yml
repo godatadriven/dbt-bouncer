@@ -33,8 +33,7 @@ nav:
   - Contributing: CONTRIBUTING.md
 
 plugins:
-  - git-revision-date-localized:
-      enable_creation_date: true
+  - git-revision-date-localized
   - mkdocstrings:
       handlers:
         python:
