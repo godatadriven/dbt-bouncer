@@ -16,6 +16,6 @@ Check out our [`Getting Started`](./getting_started.md) guide.
 
 ## About
 
-`dbt-bouncer` is free software, released under the MIT license. It originated at Xebia Data in Amsterdam, Netherlands. Source code is available on Github [here](https://github.com/godatadriven/dbt-bouncer).
+`dbt-bouncer` is free software, released under the MIT license. It originated at Xebia Data in Amsterdam, Netherlands. Source code is available on [Github](https://github.com/godatadriven/dbt-bouncer).
 
 All contributions, in the form of bug reports, pull requests, feedback or discussion are welcome. See the [contributing guide](./CONTRIBUTING.md) for more information.
