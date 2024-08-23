@@ -225,7 +225,7 @@ def get_dbt_bouncer_config(config_file: str, config_file_source: str) -> Mapping
     """
     Get the config for dbt-bouncer. This is fetched from (in order):
         1. The file passed via the `--config=file` CLI flag.
-        2. A file named `dbt_bouncer.yml` in the current working directory.
+        2. A file named `dbt-bouncer.yml` in the current working directory.
         3. A `[tool.dbt-bouncer]` section in `pyproject.toml` (in current working directory or parent directories).
     """
 
