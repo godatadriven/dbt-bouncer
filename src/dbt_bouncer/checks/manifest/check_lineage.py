@@ -29,7 +29,7 @@ def check_lineage_permitted_upstream_models(
     """
     Upstream models must have a path that matches the provided `upstream_path_pattern`.
 
-    Receives:
+    Arguments:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
         model (DbtBouncerModel): The DbtBouncerModel object to check.
@@ -81,7 +81,7 @@ def check_lineage_seed_cannot_be_used(
     """
     Seed cannot be referenced in models with a path that matches the specified `include` config.
 
-    Receives:
+    Arguments:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
         model (DbtBouncerModel): The DbtBouncerModel object to check.
@@ -111,7 +111,7 @@ def check_lineage_source_cannot_be_used(
     """
     Sources cannot be referenced in models with a path that matches the specified `include` config.
 
-    Receives:
+    Arguments:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
         model (DbtBouncerModel): The DbtBouncerModel object to check.

@@ -34,7 +34,7 @@ def check_macro_arguments_description_populated(
     """
     Macro arguments must have a populated description.
 
-    Receives:
+    Arguments:
         exclude (Optional[str]): Regex pattern to match the macro path. Macro paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
         macro (Macros): The Macro object to check.
@@ -96,7 +96,7 @@ def check_macro_code_does_not_contain_regexp_pattern(
 ) -> None:
     """The raw code for a macro must not match the specified regexp pattern.
 
-    Receives:
+    Arguments:
         exclude (Optional[str]): Regex pattern to match the macro path. Macro paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
         macro (Macros): The Macro object to check.
@@ -128,7 +128,7 @@ def check_macro_description_populated(
     """
     Macros must have a populated description.
 
-    Receives:
+    Arguments:
         exclude (Optional[str]): Regex pattern to match the macro path. Macro paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
         macro (Macros): The Macro object to check.
@@ -165,7 +165,7 @@ def check_macro_name_matches_file_name(
 
     Generic tests are also macros, however to document these tests the "name" value must be precededed with "test_".
 
-    Receives:
+    Arguments:
         exclude (Optional[str]): Regex pattern to match the macro path. Macro paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
         macro (Macros): The Macro object to check.
@@ -199,7 +199,7 @@ def check_macro_property_file_location(
     """
     Macro properties files must follow the guidance provided by dbt [here](https://docs.getdbt.com/best-practices/how-we-structure/5-the-rest-of-the-project#how-we-use-the-other-folders).
 
-    Receives:
+    Arguments:
         exclude (Optional[str]): Regex pattern to match the macro path. Macro paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
         macro (Macros): The Macro object to check.

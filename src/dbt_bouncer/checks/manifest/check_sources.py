@@ -25,7 +25,7 @@ def check_source_description_populated(
     """
     Sources must have a populated description.
 
-    Receives:
+    Arguments:
         exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
         source (DbtBouncerSource): The DbtBouncerSource object to check.
@@ -54,7 +54,7 @@ def check_source_freshness_populated(
     """
     Sources must have a populated freshness.
 
-    Receives:
+    Arguments:
         exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
         source (DbtBouncerSource): The DbtBouncerSource object to check.
@@ -91,7 +91,7 @@ def check_source_has_meta_keys(
     """
     The `meta` config for sources must have the specified keys.
 
-    Receives:
+    Arguments:
         exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
         keys (NestedDict): A list (that may contain sub-lists) of required keys.
@@ -136,7 +136,7 @@ def check_source_has_tags(
     """
     Sources must have the specified tags.
 
-    Receives:
+    Arguments:
         exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
         source (DbtBouncerSource): The DbtBouncerSource object to check.
@@ -170,7 +170,7 @@ def check_source_loader_populated(
     """
     Sources must have a populated loader.
 
-    Receives:
+    Arguments:
         exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
         source (DbtBouncerSource): The DbtBouncerSource object to check.
@@ -203,7 +203,7 @@ def check_source_names(
     """
     Sources must have a name that matches the supplied regex.
 
-    Receives:
+    Arguments:
         exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
         source (DbtBouncerSource): The DbtBouncerSource object to check.
@@ -238,7 +238,7 @@ def check_source_not_orphaned(
     """
     Sources must be referenced in at least one model.
 
-    Receives:
+    Arguments:
         exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
         source (DbtBouncerSource): The DbtBouncerSource object to check.
@@ -268,7 +268,7 @@ def check_source_property_file_location(
     """
     Source properties files must follow the guidance provided by dbt [here](https://docs.getdbt.com/best-practices/how-we-structure/1-guide-overview).
 
-    Receives:
+    Arguments:
         exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
         source (DbtBouncerSource): The DbtBouncerSource object to check.
@@ -309,7 +309,7 @@ def check_source_used_by_models_in_same_directory(
     """
     Sources can only be referenced by models that are located in the same directory where the source is defined.
 
-    Receives:
+    Arguments:
         exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
         source (DbtBouncerSource): The DbtBouncerSource object to check.
@@ -349,7 +349,7 @@ def check_source_used_by_only_one_model(
     """
     Each source can be referenced by a maximum of one model.
 
-    Receives:
+    Arguments:
         exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
         source (DbtBouncerSource): The DbtBouncerSource object to check.

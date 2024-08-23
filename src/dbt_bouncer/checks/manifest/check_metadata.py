@@ -30,7 +30,7 @@ def check_project_name(
     """
     Enforce that the name of the dbt project matches a supplied regex. Generally used to enforce that project names conform to something like  `company_<DOMAIN>`.
 
-    Receives:
+    Arguments:
         project_name_pattern str: Regex pattern to match the project name.
 
     Example(s):

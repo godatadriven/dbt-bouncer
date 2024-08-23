@@ -29,7 +29,7 @@ def check_model_access(
     """
     Models must have the specified access attribute. Requires dbt 1.7+.
 
-    Receives:
+    Arguments:
         access (Literal["private", "protected", "public"]): The access level to check for.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
@@ -68,7 +68,7 @@ def check_model_contract_enforced_for_public_model(
     """
     Public models must have contracts enforced.
 
-    Receives:
+    Arguments:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
         model (DbtBouncerModel): The DbtBouncerModel object to check.
@@ -98,7 +98,7 @@ def check_model_description_populated(
     """
     Models must have a populated description.
 
-    Receives:
+    Arguments:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
         model (DbtBouncerModel): The DbtBouncerModel object to check.
@@ -139,7 +139,7 @@ def check_model_documentation_coverage(
     """
     Set the minimum percentage of models that have a populated description.
 
-    Receives:
+    Arguments:
         min_model_documentation_coverage_pct (float): The minimum percentage of models that must have a populated description. Default: 100.
 
     Example(s):
@@ -176,7 +176,7 @@ def check_model_documented_in_same_directory(
     """
     Models must be documented in the same directory where they are defined (i.e. `.yml` and `.sql` files are in the same directory).
 
-    Receives:
+    Arguments:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
         model (DbtBouncerModel): The DbtBouncerModel object to check.
@@ -212,7 +212,7 @@ def check_model_code_does_not_contain_regexp_pattern(
     """
     The raw code for a model must not match the specified regexp pattern.
 
-    Receives:
+    Arguments:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
         model (DbtBouncerModel): The DbtBouncerModel object to check.
@@ -244,7 +244,7 @@ def check_model_depends_on_multiple_sources(
     """
     Models cannot reference more than one source.
 
-    Receives:
+    Arguments:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
         model (DbtBouncerModel): The DbtBouncerModel object to check.
@@ -277,7 +277,7 @@ def check_model_directories(
     """
     Only specified sub-directories are permitted.
 
-    Receives:
+    Arguments:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked. Special case: if you want to check `./models`, pass "" to `include`.
         model (DbtBouncerModel): The DbtBouncerModel object to check.
@@ -330,7 +330,7 @@ def check_model_has_contracts_enforced(
     """
     Model must have contracts enforced.
 
-    Receives:
+    Arguments:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
         model (DbtBouncerModel): The DbtBouncerModel object to check.
@@ -362,7 +362,7 @@ def check_model_has_meta_keys(
     """
     The `meta` config for models must have the specified keys.
 
-    Receives:
+    Arguments:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
         keys (NestedDict): A list (that may contain sub-lists) of required keys.
@@ -399,7 +399,7 @@ def check_model_has_no_upstream_dependencies(
     """
     Identify if models have no upstream dependencies as this likely indicates hard-coded tables references.
 
-    Receives:
+    Arguments:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
         model (DbtBouncerModel): The DbtBouncerModel object to check.
@@ -432,7 +432,7 @@ def check_model_has_tags(
     """
     Models must have the specified tags.
 
-    Receives:
+    Arguments:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
         model (DbtBouncerModel): The DbtBouncerModel object to check.
@@ -475,7 +475,7 @@ def check_model_has_unique_test(
     """
     Models must have a test for uniqueness of a column.
 
-    Receives:
+    Arguments:
         accepted_uniqueness_tests (Optional[List[str]]): List of tests that are accepted as uniqueness tests. If not provided, defaults to `expect_compound_columns_to_be_unique`, `dbt_utils.unique_combination_of_columns` and `unique`.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
@@ -531,7 +531,7 @@ def check_model_max_chained_views(
     """
     Models cannot have more than the specified number of upstream dependents that are not tables (default: 3).
 
-    Receives:
+    Arguments:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
         materializations_to_include (Optional[List[str]]): List of materializations to include in the check. If not provided, defaults to `ephemeral` and `view`.
@@ -627,7 +627,7 @@ def check_model_max_fanout(
     """
     Models cannot have more than the specified number of downstream models (default: 3).
 
-    Receives:
+    Arguments:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
         max_downstream_models (Optional[int]): The maximum number of permitted downstream models. Default: 3
@@ -674,7 +674,7 @@ def check_model_max_upstream_dependencies(
     """
     Limit the number of upstream dependencies a model has. Default values are 5 for models, 5 for macros, and 1 for sources.
 
-    Receives:
+    Arguments:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
         max_upstream_macros (Optional[int]): The maximum number of permitted upstream macros. Default: 5
@@ -723,7 +723,7 @@ def check_model_names(
     """
     Models must have a name that matches the supplied regex.
 
-    Receives:
+    Arguments:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
         model_name_pattern (str): Regexp the model name must match.
@@ -758,7 +758,7 @@ def check_model_property_file_location(
     """
     Model properties files must follow the guidance provided by dbt [here](https://docs.getdbt.com/best-practices/how-we-structure/1-guide-overview).
 
-    Receives:
+    Arguments:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
         model (DbtBouncerModel): The DbtBouncerModel object to check.
@@ -814,7 +814,7 @@ def check_model_test_coverage(
     """
     Set the minimum percentage of models that have at least one test.
 
-    Receives:
+    Arguments:
         min_model_test_coverage_pct (float): The minimum percentage of models that must have at least one test. Default: 100
 
     Example(s):
