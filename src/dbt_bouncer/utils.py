@@ -37,39 +37,65 @@ def bouncer_check(func):
         request = kwargs.get("request")
         if request is not None:
             # From provided check_config
-            accepted_uniqueness_tests = request.node.check_config.get("accepted_uniqueness_tests")
-            access = request.node.check_config.get("access")
-            column_name_pattern = request.node.check_config.get("column_name_pattern")
-            exclude = request.node.check_config.get("exclude")
-            include = request.node.check_config.get("include")
-            keys = request.node.check_config.get("keys")
-            materializations_to_include = request.node.check_config.get(
-                "materializations_to_include"
+            accepted_uniqueness_tests = getattr(
+                request.node.check_config, "accepted_uniqueness_tests", lambda: None
             )
-            max_chained_views = request.node.check_config.get("max_chained_views")
-            max_downstream_models = request.node.check_config.get("max_downstream_models")
-            max_execution_time_seconds = request.node.check_config.get(
-                "max_execution_time_seconds"
+            access = getattr(request.node.check_config, "access", lambda: None)
+            column_name_pattern = getattr(
+                request.node.check_config, "column_name_pattern", lambda: None
             )
-            max_gigabytes_billed = request.node.check_config.get("max_gigabytes_billed")
-            max_upstream_macros = request.node.check_config.get("max_upstream_macros")
-            max_upstream_models = request.node.check_config.get("max_upstream_models")
-            max_upstream_sources = request.node.check_config.get("max_upstream_sources")
-            min_model_documentation_coverage_pct = request.node.check_config.get(
-                "min_model_documentation_coverage_pct"
+            exclude = getattr(request.node.check_config, "exclude", lambda: None)
+            include = getattr(request.node.check_config, "include", lambda: None)
+            keys = getattr(request.node.check_config, "keys", lambda: None)
+            materializations_to_include = getattr(
+                request.node.check_config, "materializations_to_include", lambda: None
             )
-            min_model_test_coverage_pct = request.node.check_config.get(
-                "min_model_test_coverage_pct"
+            max_chained_views = getattr(
+                request.node.check_config, "max_chained_views", lambda: None
             )
-            model_name_pattern = request.node.check_config.get("model_name_pattern")
-            permitted_sub_directories = request.node.check_config.get("permitted_sub_directories")
-            project_name_pattern = request.node.check_config.get("project_name_pattern")
-            regexp_pattern = request.node.check_config.get("regexp_pattern")
-            source_name_pattern = request.node.check_config.get("source_name_pattern")
-            tags = request.node.check_config.get("tags")
-            test_name = request.node.check_config.get("test_name")
-            types = request.node.check_config.get("types")
-            upstream_path_pattern = request.node.check_config.get("upstream_path_pattern")
+            max_downstream_models = getattr(
+                request.node.check_config, "max_downstream_models", lambda: None
+            )
+            max_execution_time_seconds = getattr(
+                request.node.check_config, "max_execution_time_seconds", lambda: None
+            )
+            max_gigabytes_billed = getattr(
+                request.node.check_config, "max_gigabytes_billed", lambda: None
+            )
+            max_upstream_macros = getattr(
+                request.node.check_config, "max_upstream_macros", lambda: None
+            )
+            max_upstream_models = getattr(
+                request.node.check_config, "max_upstream_models", lambda: None
+            )
+            max_upstream_sources = getattr(
+                request.node.check_config, "max_upstream_sources", lambda: None
+            )
+            min_model_documentation_coverage_pct = getattr(
+                request.node.check_config, "min_model_documentation_coverage_pct", lambda: None
+            )
+            min_model_test_coverage_pct = getattr(
+                request.node.check_config, "min_model_test_coverage_pct", lambda: None
+            )
+            model_name_pattern = getattr(
+                request.node.check_config, "model_name_pattern", lambda: None
+            )
+            permitted_sub_directories = getattr(
+                request.node.check_config, "permitted_sub_directories", lambda: None
+            )
+            project_name_pattern = getattr(
+                request.node.check_config, "project_name_pattern", lambda: None
+            )
+            regexp_pattern = getattr(request.node.check_config, "regexp_pattern", lambda: None)
+            source_name_pattern = getattr(
+                request.node.check_config, "source_name_pattern", lambda: None
+            )
+            tags = getattr(request.node.check_config, "tags", lambda: None)
+            test_name = getattr(request.node.check_config, "test_name", lambda: None)
+            types = getattr(request.node.check_config, "types", lambda: None)
+            upstream_path_pattern = getattr(
+                request.node.check_config, "upstream_path_pattern", lambda: None
+            )
 
             # Variables from `iterate_over_*` markers
             catalog_node = getattr(request.node.catalog_node, "node", lambda: None)

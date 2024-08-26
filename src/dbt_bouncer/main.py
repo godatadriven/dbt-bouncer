@@ -80,9 +80,7 @@ def cli(
             config[check_name] = []
             for check in getattr(bouncer_config, category):
                 if check.name == check_name:
-                    config[check_name].append(
-                        {k: v for k, v in check.model_dump().items() if k != "name"}
-                    )
+                    config[check_name].append(check)
     logger.debug(f"{config=}")
 
     dbt_artifacts_dir = config_file.parent / bouncer_config.dbt_artifacts_dir

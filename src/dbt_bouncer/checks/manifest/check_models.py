@@ -380,7 +380,7 @@ def check_model_has_meta_keys(
 
     missing_keys = find_missing_meta_keys(
         meta_config=model.meta,
-        required_keys=keys,
+        required_keys=keys.model_dump(),
     )
     assert (
         missing_keys == []
