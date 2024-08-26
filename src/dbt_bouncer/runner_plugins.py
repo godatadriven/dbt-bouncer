@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import inspect
+import logging
 import warnings
 from typing import Dict, List, Union
 
@@ -11,7 +12,6 @@ with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
     from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Exposures, Macros, UnitTests
 
-from dbt_bouncer.logger import logger
 from dbt_bouncer.parsers import (
     DbtBouncerCatalogNode,
     DbtBouncerManifest,
@@ -150,7 +150,7 @@ class GenerateTestsPlugin:
         items = []
         if name in self.bouncer_config.keys():
             for check_config in self.bouncer_config[name]:
-                logger.debug(f"{check_config=}")
+                logging.debug(f"{check_config=}")
 
                 if (inspect.isfunction(obj) or inspect.ismethod(obj)) and (
                     name.startswith("check_")
@@ -182,7 +182,7 @@ class GenerateTestsPlugin:
                         key = [m for m in markers if m.startswith("iterate_over_")][0].replace(
                             "iterate_over_", ""
                         )
-                        logger.debug(f"{key=}")
+                        logging.debug(f"{key=}")
                         for x in self.__getattribute__(key):
                             if key == "catalog_nodes":
                                 catalog_node = x
@@ -225,9 +225,9 @@ class GenerateTestsPlugin:
                                     run_result
                                 ) = source = None
 
-                            if object_in_path(check_config.get("include"), x.path) and not (
-                                check_config.get("exclude") is not None
-                                and object_in_path(check_config.get("exclude"), x.path)
+                            if object_in_path(check_config.include, x.path) and not (
+                                check_config.exclude is not None
+                                and object_in_path(check_config.exclude, x.path)
                             ):
                                 item = MyFunctionItem.from_parent(
                                     parent=collector,
@@ -244,7 +244,7 @@ class GenerateTestsPlugin:
                                     unit_test=unit_test,
                                 )
                                 item._nodeid = (
-                                    f"{name}::{x.unique_id.split('.')[2]}_{check_config['index']}"
+                                    f"{name}::{x.unique_id.split('.')[2]}_{check_config.index}"
                                 )
 
                                 items.append(item)
@@ -255,10 +255,10 @@ class GenerateTestsPlugin:
                             fixtureinfo=fixture_info,
                             check_config=check_config,
                         )
-                        item._nodeid = f"{name}_{check_config['index']}"
+                        item._nodeid = f"{name}_{check_config.index}"
                         items.append(item)
         else:
-            logger.debug(f"Skipping check {name} because it is not in the checks list.")
+            logging.debug(f"Skipping check {name} because it is not in the checks list.")
 
         return items
 

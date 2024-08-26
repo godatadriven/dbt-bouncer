@@ -15,6 +15,11 @@ inputs:
       true: Send a comment to the GitHub PR with a list of failed checks.
       false: Do not send a comment.
     required: false
+  verbose:
+    default: 'false'
+    description: Run dbt-bouncer in verbose mode.
+    required: false
+
 runs:
   using: composite
 
@@ -27,6 +32,16 @@ runs:
           echo "output-file-param=" >> $GITHUB_OUTPUT
         else
           echo "output-file-param=--output-file /app/${{ inputs.output-file }}" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Assemble `verbose` parameter
+      id: assemble-verbose-param
+      shell: bash
+      run: >
+        if [[ "${{ inputs.verbose }}" = "" ]]; then
+          echo "verbose-param=" >> $GITHUB_OUTPUT
+        else
+          echo "verbose-param=-v" >> $GITHUB_OUTPUT
         fi
 
     - name: Run dbt-bouncer
@@ -42,7 +57,7 @@ runs:
           ghcr.io/godatadriven/dbt-bouncer:v0.0.0 \
           --config-file /app/${{ inputs.config-file }} \
           --create-pr-comment-file ${{ inputs.send-pr-comment }} \
-          ${{ steps.assemble-output-file-param.outputs.output-file-param }}
+          ${{ steps.assemble-output-file-param.outputs.output-file-param }} ${{ steps.assemble-verbose-param.outputs.verbose-param }}
 
     - name: Send PR comment
       if: always() && inputs.send-pr-comment == 'true' && steps.run-dbt-bouncer.outcome != 'success'

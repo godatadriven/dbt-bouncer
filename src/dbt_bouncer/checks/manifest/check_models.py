@@ -19,9 +19,9 @@ with warnings.catch_warnings():
         UnitTests,
     )
 
-import semver
+import logging
 
-from dbt_bouncer.logger import logger
+import semver
 
 
 class CheckModelAccess(BaseCheck):
@@ -391,7 +391,7 @@ def check_model_has_meta_keys(
 
     missing_keys = find_missing_meta_keys(
         meta_config=model.meta,
-        required_keys=keys,
+        required_keys=keys.model_dump(),
     )
     assert (
         missing_keys == []
@@ -568,7 +568,7 @@ def check_model_has_unit_tests(
             num_unit_tests >= minimum_number_of_unit_tests  # type: ignore[operator]
         ), f"`{model.name}` has {num_unit_tests} unit tests, this is less than the minimum of {minimum_number_of_unit_tests}."
     else:
-        logger.warning(
+        logging.warning(
             "The `check_model_has_unit_tests` check is only supported for dbt 1.8.0 and above."
         )
 
@@ -712,6 +712,48 @@ def check_model_max_fanout(
     assert (
         num_downstream_models <= max_downstream_models  # type: ignore[operator]
     ), f"`{model.name}` has {num_downstream_models} downstream models, which is more than the permitted maximum of {max_downstream_models}."
+
+
+class CheckModelMaxNumberOfLines(BaseCheck):
+    name: Literal["check_model_max_number_of_lines"]
+    max_number_of_lines: int = Field(default=100)
+
+
+@pytest.mark.iterate_over_models
+@bouncer_check
+def check_model_max_number_of_lines(
+    request: TopRequest,
+    max_number_of_lines: Union[int, None] = None,
+    model: Union[DbtBouncerModel, None] = None,
+    **kwargs,
+) -> None:
+    """
+    Models may not have more than the specified number of lines.
+
+    Receives:
+        exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
+        include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern
+        will be checked.
+        max_number_of_lines (int): The maximum number of permitted lines. Default: 100.
+        model (DbtBouncerModel): The DbtBouncerModel object to check.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_model_max_number_of_lines
+        ```
+        ```yaml
+        manifest_checks:
+            - name: check_model_max_number_of_lines
+              max_number_of_lines: 150
+        ```
+    """
+
+    actual_number_of_lines = model.raw_code.count("\n") + 1
+
+    assert (
+        actual_number_of_lines <= max_number_of_lines
+    ), f"`{model.name}` has {actual_number_of_lines} lines, this is more than the maximum permitted number of lines ({max_number_of_lines})."
 
 
 class CheckModelMaxUpstreamDependencies(BaseCheck):

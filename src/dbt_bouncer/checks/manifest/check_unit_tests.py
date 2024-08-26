@@ -16,9 +16,10 @@ with warnings.catch_warnings():
         UnitTests,
     )
 
+import logging
+
 import semver
 
-from dbt_bouncer.logger import logger
 from dbt_bouncer.parsers import DbtBouncerManifest
 
 
@@ -63,7 +64,7 @@ def check_unit_test_expect_format(
             unit_test.expect.format.value in permitted_formats  # type: ignore[operator]
         ), f"Unit test `{unit_test.name}` has an `expect` format that is not permitted. Permitted formats are: {permitted_formats}."
     else:
-        logger.warning(
+        logging.warning(
             "The `check_unit_test_expect_format` check is only supported for dbt 1.8.0 and above."
         )
 
@@ -110,6 +111,6 @@ def check_unit_test_given_formats(
             e in permitted_formats for e in given_formats  # type: ignore[operator]
         ), f"Unit test `{unit_test.name}` has given formats which are not permitted. Permitted formats are: {permitted_formats}."
     else:
-        logger.warning(
+        logging.warning(
             "The `check_unit_test_given_formats` check is only supported for dbt 1.8.0 and above."
         )
