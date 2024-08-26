@@ -8,6 +8,9 @@ extra:
   version:
     provider: mike
 
+extra_css:
+  - stylesheets/extra.css
+
 markdown_extensions:
   - admonition
   - mkdocs-click
@@ -82,4 +85,4 @@ theme:
   logo: assets/logo.png
   name: material
   palette:
-    primary: deep orange
+    primary: custom
