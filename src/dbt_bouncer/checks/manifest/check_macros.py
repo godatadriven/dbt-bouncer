@@ -6,6 +6,7 @@ from typing import Literal, Union
 
 import pytest
 from _pytest.fixtures import TopRequest
+from pydantic import Field
 
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
@@ -37,7 +38,7 @@ def check_macro_arguments_description_populated(
     Receives:
         exclude (Optional[str]): Regex pattern to match the macro path. Macro paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
-        macro (Macros): The Macro object to check.
+        macro (Macros): The Macros object to check.
 
     Example(s):
         ```yaml
@@ -99,7 +100,7 @@ def check_macro_code_does_not_contain_regexp_pattern(
     Receives:
         exclude (Optional[str]): Regex pattern to match the macro path. Macro paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
-        macro (Macros): The Macro object to check.
+        macro (Macros): The Macros object to check.
         regexp_pattern (str): The regexp pattern that should not be matched by the macro code.
 
     Example(s):
@@ -131,7 +132,7 @@ def check_macro_description_populated(
     Receives:
         exclude (Optional[str]): Regex pattern to match the macro path. Macro paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
-        macro (Macros): The Macro object to check.
+        macro (Macros): The Macros object to check.
 
     Example(s):
         ```yaml
@@ -151,6 +152,47 @@ def check_macro_description_populated(
     ), f"Macro `{macro.name}` does not have a populated description."
 
 
+class CheckMacroMaxNumberOfLines(BaseCheck):
+    name: Literal["check_macro_max_number_of_lines"]
+    max_number_of_lines: int = Field(default=50)
+
+
+@pytest.mark.iterate_over_macros
+@bouncer_check
+def check_macro_max_number_of_lines(
+    request: TopRequest,
+    macro: Union[Macros, None] = None,
+    max_number_of_lines: Union[int, None] = None,
+    **kwargs,
+) -> None:
+    """
+    Macros may not have more than the specified number of lines0.
+
+    Receives:
+        exclude (Optional[str]): Regex pattern to match the macro path. Macro paths that match the pattern will not be checked.
+        include (Optional[str]): Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
+        macro (Macros): The Macros object to check.
+        max_number_of_lines (int): The maximum number of permitted lines. Default: 50.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_macro_max_number_of_lines
+        ```
+        ```yaml
+        manifest_checks:
+            - name: check_macro_max_number_of_lines
+              max_number_of_lines: 100
+        ```
+    """
+
+    actual_number_of_lines = macro.macro_sql.count("\n") + 1
+
+    assert (
+        actual_number_of_lines <= max_number_of_lines
+    ), f"Macro `{macro.name}` has {actual_number_of_lines} lines, this is more than the maximum permitted number of lines ({max_number_of_lines})."
+
+
 class CheckMacroNameMatchesFileName(BaseCheck):
     name: Literal["check_macro_name_matches_file_name"]
 
@@ -168,7 +210,7 @@ def check_macro_name_matches_file_name(
     Receives:
         exclude (Optional[str]): Regex pattern to match the macro path. Macro paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
-        macro (Macros): The Macro object to check.
+        macro (Macros): The Macros object to check.
 
     Example(s):
         ```yaml
@@ -202,7 +244,7 @@ def check_macro_property_file_location(
     Receives:
         exclude (Optional[str]): Regex pattern to match the macro path. Macro paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
-        macro (Macros): The Macro object to check.
+        macro (Macros): The Macros object to check.
 
     Example(s):
         ```yaml
