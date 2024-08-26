@@ -1,6 +1,10 @@
 dbt_artifacts_dir: dbt_project/target # [Optional] Directory where the dbt artifacts exists, generally the `target` directory inside a dbt project. Defaults to `./target`.
+# exclude: ^staging # Optional, here for demonstration purposes only
+# include: ^marts # Optional, here for demonstration purposes only
 
 catalog_checks:
+  - name: check_column_description_populated
+    include: ^marts
   - name: check_column_name_complies_to_column_type
     column_name_pattern: ^is_.*
     exclude: ^staging
@@ -34,7 +38,7 @@ manifest_checks:
   - name: check_exposure_based_on_non_public_models
   - name: check_exposure_based_on_view
 
-  # Lineage
+#   # Lineage
   - name: check_lineage_permitted_upstream_models
     include: ^staging
     upstream_path_pattern: $^
@@ -54,6 +58,7 @@ manifest_checks:
   - name: check_macro_code_does_not_contain_regexp_pattern
     regexp_pattern: .*[i][f][n][u][l][l].*
   - name: check_macro_description_populated
+  - name: check_macro_max_number_of_lines
   - name: check_macro_name_matches_file_name
   - name: check_macro_property_file_location
 
@@ -100,7 +105,10 @@ manifest_checks:
   - name: check_model_max_chained_views
   - name: check_model_max_fanout
     max_downstream_models: 2
+  - name: check_model_max_number_of_lines
   - name: check_model_max_upstream_dependencies
+  - name: check_model_has_unit_tests
+    include: ^marts
   - name: check_model_names
     include: ^intermediate
     model_name_pattern: ^int_
@@ -133,6 +141,10 @@ manifest_checks:
   - name: check_source_property_file_location
   - name: check_source_used_by_models_in_same_directory
   - name: check_source_used_by_only_one_model
+
+  # Unit tests
+  - name: check_unit_test_expect_format
+  - name: check_unit_test_given_formats
 
 run_results_checks:
   # Not a good idea, here for demonstration purposes only

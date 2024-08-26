@@ -87,6 +87,7 @@ pyyaml = "<7"
 requests = "^2"
 tabulate = "^0"
 toml = "^0"
+semver = "^3"
 
 [tool.poetry.group.dev.dependencies]
 autoflake = "^2"

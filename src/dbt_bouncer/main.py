@@ -1,11 +1,11 @@
-import sys
+import logging
 from pathlib import Path
 from typing import Dict, List, Union
 
 import click
 
 from dbt_bouncer.conf_validator import validate_conf
-from dbt_bouncer.logger import logger
+from dbt_bouncer.logger import configure_console_logging
 from dbt_bouncer.parsers import (
     load_dbt_artifact,
     parse_catalog_artifact,
@@ -40,13 +40,18 @@ from dbt_bouncer.version import version
     required=False,
     type=Path,
 )
+@click.option("-v", "--verbosity", help="Verbosity.", default=0, count=True)
+@click.pass_context
 @click.version_option()
 def cli(
+    ctx: click.Context,
     config_file: Path,
     create_pr_comment_file: bool,
     output_file: Union[None, Path],
+    verbosity: int,
 ) -> None:
-    logger.info(f"Running dbt-bouncer ({version()})...")
+    configure_console_logging(verbosity)
+    logging.info(f"Running dbt-bouncer ({version()})...")
 
     # Validate output file has `.json` extension
     if output_file and not output_file.suffix == ".json":
@@ -58,16 +63,16 @@ def cli(
         config_file=config_file,
         config_file_source=click.get_current_context().get_parameter_source("config_file").name,  # type: ignore[union-attr]
     )
-    logger.debug(f"{conf=}")
+    logging.debug(f"{conf=}")
     bouncer_config = validate_conf(conf=conf)
-    logger.debug(f"{bouncer_config=}")
+    logging.debug(f"{bouncer_config=}")
 
     check_categories = [
         k
         for k in dir(bouncer_config)
         if k.endswith("_checks") and getattr(bouncer_config, k) != []
     ]
-    logger.debug(f"{check_categories=}")
+    logging.debug(f"{check_categories=}")
 
     # Add indices to uniquely identify checks
     for category in check_categories:
@@ -80,10 +85,17 @@ def cli(
             config[check_name] = []
             for check in getattr(bouncer_config, category):
                 if check.name == check_name:
-                    config[check_name].append(
-                        {k: v for k, v in check.model_dump().items() if k != "name"}
-                    )
-    logger.debug(f"{config=}")
+                    # info = {k: v for k, v in check.model_dump().items() if k != "name"}
+
+                    # Handle global `exclude` and `include` args
+                    if bouncer_config.include and not check.include:
+                        check.include = bouncer_config.include
+                    if bouncer_config.exclude and not check.exclude:
+                        check.exclude = bouncer_config.exclude
+
+                    config[check_name].append(check)
+
+    logging.debug(f"{config=}")
 
     dbt_artifacts_dir = config_file.parent / bouncer_config.dbt_artifacts_dir
 
@@ -93,11 +105,16 @@ def cli(
         dbt_artifacts_dir=dbt_artifacts_dir,
     )
 
-    project_exposures, project_macros, project_models, project_tests, project_sources = (
-        parse_manifest_artifact(
-            artifact_dir=dbt_artifacts_dir,
-            manifest_obj=manifest_obj,
-        )
+    (
+        project_exposures,
+        project_macros,
+        project_models,
+        project_sources,
+        project_tests,
+        project_unit_tests,
+    ) = parse_manifest_artifact(
+        artifact_dir=dbt_artifacts_dir,
+        manifest_obj=manifest_obj,
     )
 
     # Catalog, must come after manifest is parsed
@@ -119,7 +136,7 @@ def cli(
     else:
         project_run_results = []
 
-    logger.info("Running checks...")
+    logging.info("Running checks...")
     results = runner(
         bouncer_config=config,
         catalog_nodes=project_catalog_nodes,
@@ -133,5 +150,6 @@ def cli(
         run_results=project_run_results,
         sources=project_sources,
         tests=project_tests,
+        unit_tests=project_unit_tests,
     )
-    sys.exit(results[0])
+    ctx.exit(results[0])

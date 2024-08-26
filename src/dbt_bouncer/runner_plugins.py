@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import inspect
+import logging
 import warnings
 from typing import Dict, List, Union
 
@@ -9,9 +10,8 @@ import pytest
 
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
-    from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Exposures, Macros
+    from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Exposures, Macros, UnitTests
 
-from dbt_bouncer.logger import logger
 from dbt_bouncer.parsers import (
     DbtBouncerCatalogNode,
     DbtBouncerManifest,
@@ -35,6 +35,7 @@ class FixturePlugin(object):
         run_results: List[DbtBouncerResult],
         sources: List[DbtBouncerSource],
         tests: List[DbtBouncerTest],
+        unit_tests: List[UnitTests],
     ):
         self.catalog_nodes_ = catalog_nodes
         self.catalog_sources_ = catalog_sources
@@ -45,6 +46,7 @@ class FixturePlugin(object):
         self.run_results_ = run_results
         self.sources_ = sources
         self.tests_ = tests
+        self.unit_tests_ = unit_tests
 
     @pytest.fixture(scope="session")
     def catalog_nodes(self):
@@ -82,6 +84,10 @@ class FixturePlugin(object):
     def tests(self):
         return [t.test for t in self.tests_]
 
+    @pytest.fixture(scope="session")
+    def unit_tests(self):
+        return self.unit_tests_
+
 
 # Inspiration: https://github.com/pytest-dev/pytest-xdist/discussions/957#discussioncomment-7335007
 class MyFunctionItem(pytest.Function):
@@ -95,6 +101,7 @@ class MyFunctionItem(pytest.Function):
         model: DbtBouncerModel = None,
         run_result: DbtBouncerResult = None,
         source: DbtBouncerSource = None,
+        unit_test: UnitTests = None,
         *args,
         **kwargs,
     ):
@@ -106,6 +113,7 @@ class MyFunctionItem(pytest.Function):
         self.model = model
         self.run_result = run_result
         self.source = source
+        self.unit_test = unit_test
         super().__init__(*args, **kwargs)
 
 
@@ -126,6 +134,7 @@ class GenerateTestsPlugin:
         models,
         run_results,
         sources,
+        unit_tests,
     ):
         self.bouncer_config = bouncer_config
         self.catalog_nodes = catalog_nodes
@@ -135,12 +144,13 @@ class GenerateTestsPlugin:
         self.models = models
         self.run_results = run_results
         self.sources = sources
+        self.unit_tests = unit_tests
 
     def pytest_pycollect_makeitem(self, collector, name, obj):
         items = []
         if name in self.bouncer_config.keys():
             for check_config in self.bouncer_config[name]:
-                logger.debug(f"{check_config=}")
+                logging.debug(f"{check_config=}")
 
                 if (inspect.isfunction(obj) or inspect.ismethod(obj)) and (
                     name.startswith("check_")
@@ -163,6 +173,7 @@ class GenerateTestsPlugin:
                                     "iterate_over_macros",
                                     "iterate_over_run_results",
                                     "iterate_over_sources",
+                                    "iterate_over_unit_tests",
                                 ]
                             ).intersection(markers)
                         )
@@ -171,47 +182,52 @@ class GenerateTestsPlugin:
                         key = [m for m in markers if m.startswith("iterate_over_")][0].replace(
                             "iterate_over_", ""
                         )
-                        logger.debug(f"{key=}")
+                        logging.debug(f"{key=}")
                         for x in self.__getattribute__(key):
                             if key == "catalog_nodes":
                                 catalog_node = x
                                 catalog_source = exposure = macro = model = run_result = source = (
-                                    None
-                                )
+                                    unit_test
+                                ) = None
                             elif key == "catalog_sources":
                                 catalog_source = x
                                 catalog_node = exposure = macro = model = run_result = source = (
-                                    None
-                                )
+                                    unit_test
+                                ) = None
                             elif key == "exposures":
                                 exposure = x
                                 catalog_node = catalog_source = macro = model = run_result = (
                                     source
-                                ) = None
+                                ) = unit_test = None
                             elif key == "macros":
                                 macro = x
                                 catalog_node = catalog_source = exposure = model = run_result = (
                                     source
-                                ) = None
+                                ) = unit_test = None
                             elif key == "models":
                                 model = x
                                 catalog_node = catalog_source = exposure = macro = run_result = (
                                     source
-                                ) = None
+                                ) = unit_test = None
                             elif key == "run_results":
                                 run_result = x
                                 catalog_node = catalog_source = exposure = macro = model = (
                                     source
-                                ) = None
+                                ) = unit_test = None
                             elif key == "sources":
                                 source = x
                                 catalog_node = catalog_source = exposure = macro = model = (
                                     run_result
-                                ) = None
+                                ) = unit_test = None
+                            elif key == "unit_tests":
+                                unit_test = x
+                                catalog_node = catalog_source = exposure = macro = model = (
+                                    run_result
+                                ) = source = None
 
-                            if object_in_path(check_config.get("include"), x.path) and not (
-                                check_config.get("exclude") is not None
-                                and object_in_path(check_config.get("exclude"), x.path)
+                            if object_in_path(check_config.include, x.path) and not (
+                                check_config.exclude is not None
+                                and object_in_path(check_config.exclude, x.path)
                             ):
                                 item = MyFunctionItem.from_parent(
                                     parent=collector,
@@ -225,9 +241,10 @@ class GenerateTestsPlugin:
                                     model=model,
                                     run_result=run_result,
                                     source=source,
+                                    unit_test=unit_test,
                                 )
                                 item._nodeid = (
-                                    f"{name}::{x.unique_id.split('.')[2]}_{check_config['index']}"
+                                    f"{name}::{x.unique_id.split('.')[2]}_{check_config.index}"
                                 )
 
                                 items.append(item)
@@ -238,10 +255,10 @@ class GenerateTestsPlugin:
                             fixtureinfo=fixture_info,
                             check_config=check_config,
                         )
-                        item._nodeid = f"{name}_{check_config['index']}"
+                        item._nodeid = f"{name}_{check_config.index}"
                         items.append(item)
         else:
-            logger.debug(f"Skipping check {name} because it is not in the checks list.")
+            logging.debug(f"Skipping check {name} because it is not in the checks list.")
 
         return items
 

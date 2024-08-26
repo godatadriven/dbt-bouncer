@@ -1,13 +1,12 @@
+import logging
 from pathlib import Path
 
 import sh
 
-from dbt_bouncer.logger import logger
-
 
 def build_pex_file(dbt_version, pex_file_name):
     if not Path(pex_file_name).exists():
-        logger.info(f"Building pex file for dbt version {dbt_version}")
+        logging.info(f"Building pex file for dbt version {dbt_version}")
         sh.poetry(
             [
                 "run",
@@ -40,7 +39,7 @@ def generate_artifacts(
     artifact_path,
     pex_file_name,
 ):
-    logger.info(f"Generating dbt artifacts for dbt version {dbt_version}")
+    logging.info(f"Generating dbt artifacts for dbt version {dbt_version}")
     Path(artifact_path).mkdir(exist_ok=True, parents=True)
     sh.python(
         [

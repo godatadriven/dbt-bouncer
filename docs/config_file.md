@@ -45,12 +45,42 @@ Most (but not all) checks accept the following optional arguments:
 - `exclude`: Regexp to match which paths to exclude.
 - `include`: Regexp to match which paths to include.
 
-Example uses:
+Example per resource type:
 
 - `Exposures`: The path to the properties file where the source is defined, e.g. `^marts/finance` will match exposures defined in `./models/marts/finance/_exposures.yml`.
 - `Macros`: The path to the macro file, e.g. `^macros/system` will match files like `./macros/system/generate_schema_name.sql`.
 - `Models`: The path to the model file, e.g. `^marts` will match files like `./models/marts/customers.sql`.
-- `Run Results`: The path to the file associated with the resource, e.g. `^finance/.*\.csv$` will match seeds in `./seeds/finance`, `^staging` will match models and tests in `./models/staging`.
+- `Run results`: The path to the file associated with the resource, e.g. `^finance/.*\.csv$` will match seeds in `./seeds/finance`, `^staging` will match models and tests in `./models/staging`.
 - `Sources`: The path to the properties file where the source is defined, e.g. `^staging/crm` will match sources defined in `./models/staging/crm/_crm__sources.yml`.
+- `Unit tests`: The path to the properties file where the unit test is defined, e.g. `^staging/crm` will match unit tests defined in `^staging/crm/_stg_crm__unit_tests.yml`.
 
 To determine if a check accepts these arguments view the [Checks page](./checks/index.md).
+
+!!! note
+
+    `exclude` and `include` can be specified at both the check level and the global level. Should both levels be specified, then the check level is applied. All the below examples result in the `check_model_names` check being run on all models in `./models/staging`:
+
+    ```yaml
+    # Specify `include` at the check level only
+    manifest_checks:
+      - name: check_model_names
+        include: ^staging
+        model_name_pattern: ^stg_
+    ```
+
+    ```yaml
+    # Specify `include` at the check and global levels
+    include: ^marts
+    manifest_checks:
+      - name: check_model_names
+        include: ^staging
+        model_name_pattern: ^stg_
+    ```
+
+    ```yaml
+    # Specify `include` at the global level only
+    include: ^staging
+    manifest_checks:
+      - name: check_model_names
+        model_name_pattern: ^stg_
+    ```
