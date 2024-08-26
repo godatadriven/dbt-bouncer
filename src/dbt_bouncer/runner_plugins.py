@@ -209,9 +209,9 @@ class GenerateTestsPlugin:
                                     run_result
                                 ) = None
 
-                            if object_in_path(check_config.get("include"), x.path) and not (
-                                check_config.get("exclude") is not None
-                                and object_in_path(check_config.get("exclude"), x.path)
+                            if object_in_path(check_config.include, x.path) and not (
+                                check_config.exclude is not None
+                                and object_in_path(check_config.exclude, x.path)
                             ):
                                 item = MyFunctionItem.from_parent(
                                     parent=collector,
@@ -227,7 +227,7 @@ class GenerateTestsPlugin:
                                     source=source,
                                 )
                                 item._nodeid = (
-                                    f"{name}::{x.unique_id.split('.')[2]}_{check_config['index']}"
+                                    f"{name}::{x.unique_id.split('.')[2]}_{check_config.index}"
                                 )
 
                                 items.append(item)
@@ -238,7 +238,7 @@ class GenerateTestsPlugin:
                             fixtureinfo=fixture_info,
                             check_config=check_config,
                         )
-                        item._nodeid = f"{name}_{check_config['index']}"
+                        item._nodeid = f"{name}_{check_config.index}"
                         items.append(item)
         else:
             logging.debug(f"Skipping check {name} because it is not in the checks list.")

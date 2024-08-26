@@ -1,5 +1,4 @@
 import logging
-import sys
 from pathlib import Path
 from typing import Dict, List, Union
 
@@ -42,9 +41,14 @@ from dbt_bouncer.version import version
     type=Path,
 )
 @click.option("-v", "--verbosity", help="Verbosity.", default=0, count=True)
+@click.pass_context
 @click.version_option()
 def cli(
-    config_file: Path, create_pr_comment_file: bool, output_file: Union[None, Path], verbosity: int
+    ctx: click.Context,
+    config_file: Path,
+    create_pr_comment_file: bool,
+    output_file: Union[None, Path],
+    verbosity: int,
 ) -> None:
     configure_console_logging(verbosity)
     logging.info(f"Running dbt-bouncer ({version()})...")
@@ -81,9 +85,16 @@ def cli(
             config[check_name] = []
             for check in getattr(bouncer_config, category):
                 if check.name == check_name:
-                    config[check_name].append(
-                        {k: v for k, v in check.model_dump().items() if k != "name"}
-                    )
+                    # info = {k: v for k, v in check.model_dump().items() if k != "name"}
+
+                    # Handle global `exclude` and `include` args
+                    if bouncer_config.include and not check.include:
+                        check.include = bouncer_config.include
+                    if bouncer_config.exclude and not check.exclude:
+                        check.exclude = bouncer_config.exclude
+
+                    config[check_name].append(check)
+
     logging.debug(f"{config=}")
 
     dbt_artifacts_dir = config_file.parent / bouncer_config.dbt_artifacts_dir
@@ -135,4 +146,4 @@ def cli(
         sources=project_sources,
         tests=project_tests,
     )
-    sys.exit(results[0])
+    ctx.exit(results[0])

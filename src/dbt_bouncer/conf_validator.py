@@ -7,8 +7,6 @@ from pydantic import BaseModel, ConfigDict, Field
 from pydantic._internal._model_construction import ModelMetaclass
 from typing_extensions import Annotated
 
-# from dbt_bouncer.logging import logging
-
 # Dynamically import all Check classes
 check_files = [f for f in (Path(__file__).parent / "checks").glob("*/*.py") if f.is_file()]
 for check_file in check_files:
@@ -73,7 +71,14 @@ class DbtBouncerConf(BaseModel):
             Field(discriminator="name"),
         ]
     ] = Field(default=[])
+
     dbt_artifacts_dir: Optional[str] = Field(default="./target")
+    exclude: Optional[str] = Field(
+        default=None, description="Regexp to match which paths to exclude."
+    )
+    include: Optional[str] = Field(
+        default=None, description="Regexp to match which paths to include."
+    )
 
 
 def validate_conf(conf: Dict[str, Any]) -> DbtBouncerConf:

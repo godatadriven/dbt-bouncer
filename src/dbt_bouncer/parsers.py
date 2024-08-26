@@ -52,8 +52,6 @@ with warnings.catch_warnings():
 
 from pydantic import BaseModel
 
-# from dbt_bouncer.logging import logging
-
 
 class DbtBouncerCatalogNode(BaseModel):
     node: CatalogTable

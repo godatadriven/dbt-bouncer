@@ -29,6 +29,7 @@ nav:
     - "Manifest Checks": checks/checks_manifest.md
     - "Catalog Checks": checks/checks_catalog.md
     - "Run Results Checks": checks/checks_run_results.md
+  - FAQ: faq.md
   - CLI: cli.md
   - Contributing: CONTRIBUTING.md
 
@@ -58,7 +59,7 @@ plugins:
 
 theme:
   custom_dir: docs/overrides
-  favicon: assets/logo.png
+  favicon: assets/logo.svg
   features:
     - content.action.edit
     - content.code.annotate
@@ -79,7 +80,7 @@ theme:
     edit: material/pencil
     repo: fontawesome/brands/github
     view: material/eye
-  logo: assets/logo.png
+  logo: assets/logo.svg
   name: material
   palette:
     primary: deep orange

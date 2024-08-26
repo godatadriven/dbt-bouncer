@@ -17,6 +17,49 @@ from dbt_bouncer.parsers import DbtBouncerModel, DbtBouncerTest
 from dbt_bouncer.utils import bouncer_check
 
 
+class CheckColumnDescriptionPopulated(BaseCheck):
+    name: Literal["check_column_description_populated"]
+
+
+@pytest.mark.iterate_over_catalog_nodes
+@bouncer_check
+def check_column_description_populated(
+    models: List[DbtBouncerModel],
+    request: TopRequest,
+    catalog_node: Union[CatalogTable, None] = None,
+    **kwargs,
+) -> None:
+    """
+    Columns must have a populated description.
+
+    Receives:
+        catalog_node (CatalogTable): The CatalogTable object to check.
+        exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
+        include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_column_description_populated
+              include: ^marts
+        ```
+    """
+
+    if catalog_node.unique_id.split(".")[0] == "model":
+        model = [m for m in models if m.unique_id == catalog_node.unique_id][0]
+        non_complying_columns = []
+        for _, v in catalog_node.columns.items():
+            if (
+                model.columns.get(v.name) is None
+                or len(model.columns[v.name].description.strip()) <= 4
+            ):
+                non_complying_columns.append(v.name)
+
+        assert (
+            not non_complying_columns
+        ), f"`{catalog_node.unique_id.split('.')[-1]}` has columns that do not have a populated description: {non_complying_columns}"
+
+
 class CheckColumnNameCompliesToColumnType(BaseCheck):
     column_name_pattern: str
     name: Literal["check_column_name_complies_to_column_type"]
