@@ -1,10 +1,11 @@
+import logging
 from pathlib import Path
 from typing import Dict, List, Union
 
 import click
 
 from dbt_bouncer.conf_validator import validate_conf
-from dbt_bouncer.logger import logger
+from dbt_bouncer.logger import configure_console_logging
 from dbt_bouncer.parsers import (
     load_dbt_artifact,
     parse_catalog_artifact,
@@ -39,6 +40,7 @@ from dbt_bouncer.version import version
     required=False,
     type=Path,
 )
+@click.option("-v", "--verbosity", help="Verbosity.", default=0, count=True)
 @click.pass_context
 @click.version_option()
 def cli(
@@ -46,8 +48,10 @@ def cli(
     config_file: Path,
     create_pr_comment_file: bool,
     output_file: Union[None, Path],
+    verbosity: int,
 ) -> None:
-    logger.info(f"Running dbt-bouncer ({version()})...")
+    configure_console_logging(verbosity)
+    logging.info(f"Running dbt-bouncer ({version()})...")
 
     # Validate output file has `.json` extension
     if output_file and not output_file.suffix == ".json":
@@ -59,16 +63,16 @@ def cli(
         config_file=config_file,
         config_file_source=click.get_current_context().get_parameter_source("config_file").name,  # type: ignore[union-attr]
     )
-    logger.debug(f"{conf=}")
+    logging.debug(f"{conf=}")
     bouncer_config = validate_conf(conf=conf)
-    logger.debug(f"{bouncer_config=}")
+    logging.debug(f"{bouncer_config=}")
 
     check_categories = [
         k
         for k in dir(bouncer_config)
         if k.endswith("_checks") and getattr(bouncer_config, k) != []
     ]
-    logger.debug(f"{check_categories=}")
+    logging.debug(f"{check_categories=}")
 
     # Add indices to uniquely identify checks
     for category in check_categories:
@@ -91,7 +95,7 @@ def cli(
 
                     config[check_name].append(check)
 
-    logger.debug(f"{config=}")
+    logging.debug(f"{config=}")
 
     dbt_artifacts_dir = config_file.parent / bouncer_config.dbt_artifacts_dir
 
@@ -127,7 +131,7 @@ def cli(
     else:
         project_run_results = []
 
-    logger.info("Running checks...")
+    logging.info("Running checks...")
     results = runner(
         bouncer_config=config,
         catalog_nodes=project_catalog_nodes,

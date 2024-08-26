@@ -24,11 +24,18 @@ class CustomFormatter(logging.Formatter):
         return formatter.format(record)
 
 
-logger = logging.getLogger(__name__)
-logger.propagate = True
-logger.setLevel(
-    str(os.getenv("LOG_LEVEL")) if os.getenv("LOG_LEVEL") is not None else logging.INFO
-)
-handler = logging.StreamHandler()
-handler.setFormatter(CustomFormatter())
-logger.addHandler(handler)
+def configure_console_logging(verbosity: int):
+    logger = logging.getLogger("")
+    logger.propagate = True
+    logger.setLevel(logging.DEBUG)  # handlers filter the level
+
+    # Override via env var
+    if os.getenv("LOG_LEVEL") is not None:
+        loglevel = logging.DEBUG
+    else:
+        loglevel = logging.INFO if verbosity == 0 else max(2 - verbosity, 0) * 10
+
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(loglevel)
+    console_handler.setFormatter(CustomFormatter())
+    logger.addHandler(console_handler)

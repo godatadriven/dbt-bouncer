@@ -12,6 +12,7 @@ with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
     from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Macros
 
+
 import jinja2
 from jinja2_simple_tags import StandaloneTag
 
