@@ -9,11 +9,133 @@ with warnings.catch_warnings():
     from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Nodes4, Nodes6
 
 from dbt_bouncer.checks.catalog.check_columns import (
+    check_column_description_populated,
     check_column_has_specified_test,
     check_column_name_complies_to_column_type,
     check_columns_are_all_documented,
     check_columns_are_documented_in_public_models,
 )
+
+
+@pytest.mark.parametrize(
+    "catalog_node, models, expectation",
+    [
+        (
+            CatalogTable(
+                **{
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                        "col_2": {
+                            "index": 2,
+                            "name": "col_2",
+                            "type": "INTEGER",
+                        },
+                    },
+                    "metadata": {
+                        "name": "table_1",
+                        "schema": "main",
+                        "type": "VIEW",
+                    },
+                    "stats": {},
+                    "unique_id": "model.package_name.model_1",
+                }
+            ),
+            [
+                Nodes4(
+                    **{
+                        "alias": "model_1",
+                        "checksum": {"name": "sha256", "checksum": ""},
+                        "columns": {
+                            "col_1": {
+                                "description": "This is a description",
+                                "index": 1,
+                                "name": "col_1",
+                                "type": "INTEGER",
+                            },
+                            "col_2": {
+                                "description": "This is a description",
+                                "index": 2,
+                                "name": "col_2",
+                                "type": "INTEGER",
+                            },
+                        },
+                        "fqn": ["package_name", "model_1"],
+                        "name": "model_1",
+                        "original_file_path": "model_1.sql",
+                        "package_name": "package_name",
+                        "path": "model_1.sql",
+                        "resource_type": "model",
+                        "schema": "main",
+                        "unique_id": "model.package_name.model_1",
+                    }
+                )
+            ],
+            does_not_raise(),
+        ),
+        (
+            CatalogTable(
+                **{
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                        "col_2": {
+                            "index": 2,
+                            "name": "col_2",
+                            "type": "INTEGER",
+                        },
+                    },
+                    "metadata": {
+                        "name": "table_1",
+                        "schema": "main",
+                        "type": "VIEW",
+                    },
+                    "stats": {},
+                    "unique_id": "model.package_name.model_2",
+                }
+            ),
+            [
+                Nodes4(
+                    **{
+                        "alias": "model_2",
+                        "checksum": {"name": "sha256", "checksum": ""},
+                        "columns": {
+                            "col_1": {
+                                "description": "This is a description",
+                                "index": 1,
+                                "name": "col_1",
+                                "type": "INTEGER",
+                            },
+                            "col_2": {
+                                "index": 2,
+                                "name": "col_2",
+                                "type": "INTEGER",
+                            },
+                        },
+                        "fqn": ["package_name", "model_2"],
+                        "name": "model_2",
+                        "original_file_path": "model_2.sql",
+                        "package_name": "package_name",
+                        "path": "model_2.sql",
+                        "resource_type": "model",
+                        "schema": "main",
+                        "unique_id": "model.package_name.model_2",
+                    }
+                )
+            ],
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_column_description_populated(catalog_node, models, expectation):
+    with expectation:
+        check_column_description_populated(catalog_node=catalog_node, models=models, request=None)
 
 
 @pytest.mark.parametrize(
