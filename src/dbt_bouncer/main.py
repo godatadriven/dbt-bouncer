@@ -1,4 +1,3 @@
-import sys
 from pathlib import Path
 from typing import Dict, List, Union
 
@@ -40,8 +39,10 @@ from dbt_bouncer.version import version
     required=False,
     type=Path,
 )
+@click.pass_context
 @click.version_option()
 def cli(
+    ctx: click.Context,
     config_file: Path,
     create_pr_comment_file: bool,
     output_file: Union[None, Path],
@@ -141,4 +142,4 @@ def cli(
         sources=project_sources,
         tests=project_tests,
     )
-    sys.exit(results[0])
+    ctx.exit(results[0])

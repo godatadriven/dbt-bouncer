@@ -52,6 +52,7 @@ def bouncer_check(func):
                 "max_execution_time_seconds"
             )
             max_gigabytes_billed = request.node.check_config.get("max_gigabytes_billed")
+            max_number_of_lines = request.node.check_config.get("max_number_of_lines")
             max_upstream_macros = request.node.check_config.get("max_upstream_macros")
             max_upstream_models = request.node.check_config.get("max_upstream_models")
             max_upstream_sources = request.node.check_config.get("max_upstream_sources")
@@ -92,6 +93,7 @@ def bouncer_check(func):
             max_downstream_models = kwargs.get("max_downstream_models")
             max_execution_time_seconds = kwargs.get("max_execution_time_seconds")
             max_gigabytes_billed = kwargs.get("max_gigabytes_billed")
+            max_number_of_lines = kwargs.get("max_number_of_lines")
             max_upstream_macros = kwargs.get("max_upstream_macros")
             max_upstream_models = kwargs.get("max_upstream_models")
             max_upstream_sources = kwargs.get("max_upstream_sources")
@@ -131,6 +133,7 @@ def bouncer_check(func):
             max_downstream_models=max_downstream_models,
             max_execution_time_seconds=max_execution_time_seconds,
             max_gigabytes_billed=max_gigabytes_billed,
+            max_number_of_lines=max_number_of_lines,
             max_upstream_macros=max_upstream_macros,
             max_upstream_models=max_upstream_models,
             max_upstream_sources=max_upstream_sources,

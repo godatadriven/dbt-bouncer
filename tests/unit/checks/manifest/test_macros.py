@@ -11,6 +11,7 @@ from dbt_bouncer.checks.manifest.check_macros import (
     check_macro_arguments_description_populated,
     check_macro_code_does_not_contain_regexp_pattern,
     check_macro_description_populated,
+    check_macro_max_number_of_lines,
     check_macro_name_matches_file_name,
     check_macro_property_file_location,
 )
@@ -274,6 +275,48 @@ def test_check_macro_code_does_not_contain_regexp_pattern(macro, regexp_pattern,
 def test_check_macro_description_populated(macro, expectation):
     with expectation:
         check_macro_description_populated(macro=macro, request=None)
+
+
+@pytest.mark.parametrize(
+    "macro, max_number_of_lines, expectation",
+    [
+        (
+            Macros(
+                **{
+                    "macro_sql": '{% macro generate_schema_name(custom_schema_name, node) -%}\n    {#\n        Enter this block when run on stg or prd (except for CICD runs).\n        We want the same dataset and table names to be used across all environments.\n        For example, `marts.dim_customer` should exist in stg and prd, i.e. there should be no references to the project in the dataset name.\n        This will allow other tooling (BI, CICD scripts, etc.) to work across all environments without the need for differing logic per environment.\n    #}\n    {% if env_var("DBT_CICD_RUN", "false") == "true" %} {{ env_var("DBT_DATASET") }}\n\n    {% elif target.name in ["stg", "prd"] and env_var(\n        "DBT_CICD_RUN", "false"\n    ) == "false" %}\n\n        {{ node.config.schema }}\n\n    {% else %} {{ default__generate_schema_name(custom_schema_name, node) }}\n\n    {%- endif -%}\n\n{%- endmacro %}',
+                    "name": "macro_1",
+                    "original_file_path": "macros/macro_1.sql",
+                    "package_name": "package_name",
+                    "path": "macros/macro_1.sql",
+                    "resource_type": "macro",
+                    "unique_id": "macro.package_name.macro_1",
+                }
+            ),
+            50,
+            does_not_raise(),
+        ),
+        (
+            Macros(
+                **{
+                    "macro_sql": '{% macro generate_schema_name(custom_schema_name, node) -%}\n    {#\n        Enter this block when run on stg or prd (except for CICD runs).\n        We want the same dataset and table names to be used across all environments.\n        For example, `marts.dim_customer` should exist in stg and prd, i.e. there should be no references to the project in the dataset name.\n        This will allow other tooling (BI, CICD scripts, etc.) to work across all environments without the need for differing logic per environment.\n    #}\n    {% if env_var("DBT_CICD_RUN", "false") == "true" %} {{ env_var("DBT_DATASET") }}\n\n    {% elif target.name in ["stg", "prd"] and env_var(\n        "DBT_CICD_RUN", "false"\n    ) == "false" %}\n\n        {{ node.config.schema }}\n\n    {% else %} {{ default__generate_schema_name(custom_schema_name, node) }}\n\n    {%- endif -%}\n\n{%- endmacro %}',
+                    "name": "test_logic_2",
+                    "original_file_path": "macros/test_logic_2.sql",
+                    "package_name": "package_name",
+                    "path": "tests/test_logic_2.sql",
+                    "resource_type": "macro",
+                    "unique_id": "macro.package_name.test_logic_2",
+                }
+            ),
+            10,
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_macro_max_number_of_lines(max_number_of_lines, macro, expectation):
+    with expectation:
+        check_macro_max_number_of_lines(
+            max_number_of_lines=max_number_of_lines, macro=macro, request=None
+        )
 
 
 @pytest.mark.parametrize(
