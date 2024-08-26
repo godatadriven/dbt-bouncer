@@ -16,6 +16,9 @@
           steps:
               - uses: actions/checkout@v4
 
+              - name: Fetch tags
+                run: git fetch --prune --unshallow --tags
+
               - name: Determine python version
                 id: python-version
                 run: |
@@ -30,4 +33,7 @@
                   python-version: ${{ steps.python-version.outputs.PYTHON_VERSION }}
 
               - name: Deploy docs website
-                run: poetry run mike deploy --push --update-aliases latest
+                run: |
+                  git config --global user.email "bot@github.com"
+                  git config --global user.name "github-actions[bot]"
+                  poetry run mike deploy --push --update-aliases latest
