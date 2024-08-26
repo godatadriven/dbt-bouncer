@@ -23,6 +23,7 @@ from dbt_bouncer.checks.manifest.check_models import (
     check_model_has_unique_test,
     check_model_max_chained_views,
     check_model_max_fanout,
+    check_model_max_number_of_lines,
     check_model_max_upstream_dependencies,
     check_model_names,
     check_model_property_file_location,
@@ -1685,6 +1686,72 @@ def test_check_model_max_fanout(max_downstream_models, model, models, expectatio
     with expectation:
         check_model_max_fanout(
             max_downstream_models=max_downstream_models, model=model, models=models, request=None
+        )
+
+
+@pytest.mark.parametrize(
+    "max_number_of_lines, model, expectation",
+    [
+        (
+            100,
+            Nodes4(
+                **{
+                    "alias": "model_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                    },
+                    "fqn": ["package_name", "model_1"],
+                    "name": "model_1",
+                    "original_file_path": "models/staging/crm/stg_model_1.sql",
+                    "package_name": "package_name",
+                    "patch_path": "package_name://models/staging/crm/_stg_crm__models.yml",
+                    "path": "staging/crm/stg_model_1.sql",
+                    "raw_code": 'with\n    source as (\n\n        {#-\n    Normally we would select from the table here, but we are using seeds to load\n    our data in this project\n    #}\n        select * from {{ ref("raw_orders") }}\n\n    ),\n\n    renamed as (\n\n        select id as order_id, user_id as customer_id, order_date, status from source\n\n    )\n\nselect *\nfrom renamed',
+                    "resource_type": "model",
+                    "schema": "main",
+                    "unique_id": "model.package_name.model_1",
+                }
+            ),
+            does_not_raise(),
+        ),
+        (
+            10,
+            Nodes4(
+                **{
+                    "alias": "model_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                    },
+                    "fqn": ["package_name", "model_1"],
+                    "name": "model_1",
+                    "original_file_path": "models/staging/crm/stg_model_1.sql",
+                    "package_name": "package_name",
+                    "patch_path": "package_name://models/staging/crm/_schema.yml",
+                    "path": "staging/crm/stg_model_1.sql",
+                    "raw_code": 'with\n    source as (\n\n        {#-\n    Normally we would select from the table here, but we are using seeds to load\n    our data in this project\n    #}\n        select * from {{ ref("raw_orders") }}\n\n    ),\n\n    renamed as (\n\n        select id as order_id, user_id as customer_id, order_date, status from source\n\n    )\n\nselect *\nfrom renamed',
+                    "resource_type": "model",
+                    "schema": "main",
+                    "unique_id": "model.package_name.model_1",
+                }
+            ),
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_model_max_number_of_lines(max_number_of_lines, model, expectation):
+    with expectation:
+        check_model_max_number_of_lines(
+            max_number_of_lines=max_number_of_lines, model=model, request=None
         )
 
 
