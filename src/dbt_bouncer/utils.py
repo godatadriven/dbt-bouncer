@@ -50,6 +50,24 @@ def bouncer_check(func):
             materializations_to_include = getattr(
                 request.node.check_config, "materializations_to_include", lambda: None
             )
+            max_gigabytes_billed = getattr(
+                request.node.check_config, "max_gigabytes_billed", lambda: None
+            )
+            max_number_of_lines = getattr(
+                request.node.check_config, "max_number_of_lines", lambda: None
+            )
+            max_upstream_macros = getattr(
+                request.node.check_config, "max_upstream_macros", lambda: None
+            )
+            max_upstream_models = getattr(
+                request.node.check_config, "max_upstream_models", lambda: None
+            )
+            max_upstream_sources = getattr(
+                request.node.check_config, "max_upstream_sources", lambda: None
+            )
+            min_model_documentation_coverage_pct = getattr(
+                request.node.check_config, "min_model_documentation_coverage_pct", lambda: None
+            )
             max_chained_views = getattr(
                 request.node.check_config, "max_chained_views", lambda: None
             )
@@ -110,14 +128,15 @@ def bouncer_check(func):
             accepted_uniqueness_tests = kwargs.get("accepted_uniqueness_tests")
             access = kwargs.get("access")
             column_name_pattern = kwargs.get("column_name_pattern")
-            include = kwargs.get("include")
             exclude = kwargs.get("exclude")
+            include = kwargs.get("include")
             keys = kwargs.get("keys")
             materializations_to_include = kwargs.get("materializations_to_include")
             max_chained_views = kwargs.get("max_chained_views")
             max_downstream_models = kwargs.get("max_downstream_models")
             max_execution_time_seconds = kwargs.get("max_execution_time_seconds")
             max_gigabytes_billed = kwargs.get("max_gigabytes_billed")
+            max_number_of_lines = kwargs.get("max_number_of_lines")
             max_upstream_macros = kwargs.get("max_upstream_macros")
             max_upstream_models = kwargs.get("max_upstream_models")
             max_upstream_sources = kwargs.get("max_upstream_sources")
@@ -157,6 +176,7 @@ def bouncer_check(func):
             max_downstream_models=max_downstream_models,
             max_execution_time_seconds=max_execution_time_seconds,
             max_gigabytes_billed=max_gigabytes_billed,
+            max_number_of_lines=max_number_of_lines,
             max_upstream_macros=max_upstream_macros,
             max_upstream_models=max_upstream_models,
             max_upstream_sources=max_upstream_sources,

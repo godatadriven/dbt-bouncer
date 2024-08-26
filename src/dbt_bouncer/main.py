@@ -1,4 +1,3 @@
-import sys
 from pathlib import Path
 from typing import Dict, List, Union
 
@@ -40,8 +39,10 @@ from dbt_bouncer.version import version
     required=False,
     type=Path,
 )
+@click.pass_context
 @click.version_option()
 def cli(
+    ctx: click.Context,
     config_file: Path,
     create_pr_comment_file: bool,
     output_file: Union[None, Path],
@@ -80,7 +81,16 @@ def cli(
             config[check_name] = []
             for check in getattr(bouncer_config, category):
                 if check.name == check_name:
+                    # info = {k: v for k, v in check.model_dump().items() if k != "name"}
+
+                    # Handle global `exclude` and `include` args
+                    if bouncer_config.include and not check.include:
+                        check.include = bouncer_config.include
+                    if bouncer_config.exclude and not check.exclude:
+                        check.exclude = bouncer_config.exclude
+
                     config[check_name].append(check)
+
     logger.debug(f"{config=}")
 
     dbt_artifacts_dir = config_file.parent / bouncer_config.dbt_artifacts_dir
@@ -132,4 +142,4 @@ def cli(
         sources=project_sources,
         tests=project_tests,
     )
-    sys.exit(results[0])
+    ctx.exit(results[0])
