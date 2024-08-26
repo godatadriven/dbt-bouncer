@@ -10,7 +10,7 @@ import pytest
 
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
-    from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Exposures, Macros
+    from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Exposures, Macros, UnitTests
 
 from tabulate import tabulate
 
@@ -45,6 +45,7 @@ def runner(
     run_results: List[DbtBouncerResult],
     sources: List[DbtBouncerSource],
     tests: List[DbtBouncerTest],
+    unit_tests: List[UnitTests],
     checks_dir: Optional[Union[None, Path]] = Path(__file__).parent / "checks",
 ) -> tuple[int, List[Any]]:
     """
@@ -62,6 +63,7 @@ def runner(
         run_results,
         sources,
         tests,
+        unit_tests,
     )
 
     # Run the checks, if one fails then pytest will raise an exception
@@ -80,6 +82,7 @@ def runner(
                 models=models,
                 run_results=run_results,
                 sources=sources,
+                unit_tests=unit_tests,
             ),
         ],
     )

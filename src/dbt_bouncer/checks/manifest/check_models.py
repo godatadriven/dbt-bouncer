@@ -1,6 +1,7 @@
 # mypy: disable-error-code="union-attr"
 
 import re
+import warnings
 from typing import List, Literal, Optional, Union
 
 import pytest
@@ -11,6 +12,16 @@ from dbt_bouncer.checks.common import NestedDict
 from dbt_bouncer.conf_validator_base import BaseCheck
 from dbt_bouncer.parsers import DbtBouncerManifest, DbtBouncerModel
 from dbt_bouncer.utils import bouncer_check, find_missing_meta_keys
+
+with warnings.catch_warnings():
+    warnings.filterwarnings("ignore", category=UserWarning)
+    from dbt_artifacts_parser.parsers.manifest.manifest_v12 import (
+        UnitTests,
+    )
+
+import semver
+
+from dbt_bouncer.logger import logger
 
 
 class CheckModelAccess(BaseCheck):
@@ -506,6 +517,60 @@ def check_model_has_unique_test(
     assert (
         num_unique_tests >= 1
     ), f"`{model.name}` does not have a test for uniqueness of a column."
+
+
+class CheckModelHasUnitTests(BaseCheck):
+    minimum_number_of_unit_tests: int = Field(default=1)
+    name: Literal["check_model_has_unit_tests"]
+
+
+@pytest.mark.iterate_over_models
+@bouncer_check
+def check_model_has_unit_tests(
+    manifest_obj: DbtBouncerManifest,
+    request: TopRequest,
+    unit_tests: List[UnitTests],
+    minimum_number_of_unit_tests: Union[int, None] = None,
+    model: Union[DbtBouncerModel, None] = None,
+    **kwargs,
+) -> None:
+    """
+    Models must have more than the specified number of unit tests.
+
+    Receives:
+        exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
+        include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        minimum_number_of_unit_tests (Optional[int]): The minimum number of unit tests that a model must have. Default: 1.
+        model (DbtBouncerModel): The DbtBouncerModel object to check.
+
+    !!! warning
+
+        This check is only supported for dbt 1.8.0 and above.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_model_has_unit_tests
+              include: ^marts
+        ```
+        ```yaml
+        manifest_checks:
+            - name: check_model_has_unit_tests
+              minimum_number_of_unit_tests: 2
+        ```
+    """
+
+    if semver.Version.parse(manifest_obj.manifest.metadata.dbt_version) >= "1.8.0":
+        num_unit_tests = len(
+            [t.unique_id for t in unit_tests if t.depends_on.nodes[0] == model.unique_id]
+        )
+        assert (
+            num_unit_tests >= minimum_number_of_unit_tests  # type: ignore[operator]
+        ), f"`{model.name}` has {num_unit_tests} unit tests, this is less than the minimum of {minimum_number_of_unit_tests}."
+    else:
+        logger.warning(
+            "The `check_model_has_unit_tests` check is only supported for dbt 1.8.0 and above."
+        )
 
 
 class CheckModelMaxChainedViews(BaseCheck):
