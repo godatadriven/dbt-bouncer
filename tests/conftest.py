@@ -40,6 +40,10 @@ def pytest_configure(config):
         "filterwarnings",
         "ignore::UserWarning",
     )
+    config.addinivalue_line(
+        "markers",
+        "iterate_over_unit_tests: Tests that should run once per unit test",
+    )
 
 
 @pytest.fixture(scope="session")

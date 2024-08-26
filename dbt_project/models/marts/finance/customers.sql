@@ -45,7 +45,7 @@ with
             if(
                 customer_orders.number_of_orders > 5, true, false
             ) as is_recurring_customer,
-            customer_payments.total_amount as customer_lifetime_value
+            coalesce(customer_payments.total_amount, 0) as customer_lifetime_value
 
         from customers
 

@@ -105,11 +105,16 @@ def cli(
         dbt_artifacts_dir=dbt_artifacts_dir,
     )
 
-    project_exposures, project_macros, project_models, project_tests, project_sources = (
-        parse_manifest_artifact(
-            artifact_dir=dbt_artifacts_dir,
-            manifest_obj=manifest_obj,
-        )
+    (
+        project_exposures,
+        project_macros,
+        project_models,
+        project_sources,
+        project_tests,
+        project_unit_tests,
+    ) = parse_manifest_artifact(
+        artifact_dir=dbt_artifacts_dir,
+        manifest_obj=manifest_obj,
     )
 
     # Catalog, must come after manifest is parsed
@@ -145,5 +150,6 @@ def cli(
         run_results=project_run_results,
         sources=project_sources,
         tests=project_tests,
+        unit_tests=project_unit_tests,
     )
     ctx.exit(results[0])
