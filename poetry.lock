@@ -1379,7 +1379,6 @@ files = [
     {file = "msgpack-1.0.8-cp39-cp39-musllinux_1_1_x86_64.whl", hash = "sha256:5fbb160554e319f7b22ecf530a80a3ff496d38e8e07ae763b9e82fadfe96f273"},
     {file = "msgpack-1.0.8-cp39-cp39-win32.whl", hash = "sha256:f9af38a89b6a5c04b7d18c492c8ccf2aee7048aff1ce8437c4683bb5a1df893d"},
     {file = "msgpack-1.0.8-cp39-cp39-win_amd64.whl", hash = "sha256:ed59dd52075f8fc91da6053b12e8c89e37aa043f8986efd89e61fae69dc1b011"},
-    {file = "msgpack-1.0.8-py3-none-any.whl", hash = "sha256:24f727df1e20b9876fa6e95f840a2a2651e34c0ad147676356f4bf5fbb0206ca"},
     {file = "msgpack-1.0.8.tar.gz", hash = "sha256:95c02b0e27e706e48d0e5426d1710ca78e0f0628d6e89d5b5a5b91a5f12274f3"},
 ]
 
@@ -1534,13 +1533,13 @@ files = [
 
 [[package]]
 name = "pex"
-version = "2.16.2"
+version = "2.17.0"
 description = "The PEX packaging toolchain."
 optional = false
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,<3.14,>=2.7"
 files = [
-    {file = "pex-2.16.2-py2.py3-none-any.whl", hash = "sha256:8610b5bf7731c98d871421ff21e769e8fcf42ea56aa4ac7f8a271f2405733f24"},
-    {file = "pex-2.16.2.tar.gz", hash = "sha256:feb2f1e9819a741915759fc221ee6119447acdfc3e0aaa5bbe5800c39fa10003"},
+    {file = "pex-2.17.0-py2.py3-none-any.whl", hash = "sha256:aa7358ed52f53232f4d151afbba00b1a21ea08e149d0043dfe823b663574c0f9"},
+    {file = "pex-2.17.0.tar.gz", hash = "sha256:5d2ae868523fa10b78ef994014dcc01b752e4ea7e568a5680be8ccb0b30b257f"},
 ]
 
 [package.extras]
