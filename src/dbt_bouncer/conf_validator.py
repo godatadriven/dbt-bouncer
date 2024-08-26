@@ -72,7 +72,14 @@ class DbtBouncerConf(BaseModel):
             Field(discriminator="name"),
         ]
     ] = Field(default=[])
+
     dbt_artifacts_dir: Optional[str] = Field(default="./target")
+    exclude: Optional[str] = Field(
+        default=None, description="Regexp to match which paths to exclude."
+    )
+    include: Optional[str] = Field(
+        default=None, description="Regexp to match which paths to include."
+    )
 
 
 def validate_conf(conf: Dict[str, Any]) -> DbtBouncerConf:

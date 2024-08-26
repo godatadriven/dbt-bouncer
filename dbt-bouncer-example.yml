@@ -1,4 +1,6 @@
 dbt_artifacts_dir: dbt_project/target # [Optional] Directory where the dbt artifacts exists, generally the `target` directory inside a dbt project. Defaults to `./target`.
+# exclude: ^staging # Optional, here for demonstration purposes only
+# include: ^marts # Optional, here for demonstration purposes only
 
 catalog_checks:
   - name: check_column_description_populated
@@ -36,7 +38,7 @@ manifest_checks:
   - name: check_exposure_based_on_non_public_models
   - name: check_exposure_based_on_view
 
-  # Lineage
+#   # Lineage
   - name: check_lineage_permitted_upstream_models
     include: ^staging
     upstream_path_pattern: $^
