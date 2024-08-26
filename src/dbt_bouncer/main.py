@@ -81,15 +81,15 @@ def cli(
             config[check_name] = []
             for check in getattr(bouncer_config, category):
                 if check.name == check_name:
-                    info = {k: v for k, v in check.model_dump().items() if k != "name"}
+                    # info = {k: v for k, v in check.model_dump().items() if k != "name"}
 
                     # Handle global `exclude` and `include` args
-                    if bouncer_config.include and not info["include"]:
-                        info["include"] = bouncer_config.include
-                    if bouncer_config.exclude and not info["exclude"]:
-                        info["exclude"] = bouncer_config.exclude
+                    if bouncer_config.include and not check.include:
+                        check.include = bouncer_config.include
+                    if bouncer_config.exclude and not check.exclude:
+                        check.exclude = bouncer_config.exclude
 
-                    config[check_name].append(info)
+                    config[check_name].append(check)
 
     logger.debug(f"{config=}")
 

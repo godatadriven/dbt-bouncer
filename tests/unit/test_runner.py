@@ -7,6 +7,7 @@ with warnings.catch_warnings():
     from dbt_artifacts_parser.parser import parse_manifest
     from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Nodes4
 
+from dbt_bouncer.checks.manifest.check_models import CheckModelDescriptionPopulated
 from dbt_bouncer.parsers import DbtBouncerModel
 from dbt_bouncer.runner import runner
 
@@ -15,7 +16,14 @@ def test_runner_coverage(caplog, tmp_path):
     results = runner(
         bouncer_config={
             "check_model_description_populated": [
-                {"catalog_checks": [], "run_results_checks": [], "index": 0}
+                CheckModelDescriptionPopulated(
+                    **{
+                        "exclude": None,
+                        "include": None,
+                        "index": 0,
+                        "name": "check_model_description_populated",
+                    }
+                )
             ]
         },
         catalog_nodes=[],
@@ -97,7 +105,14 @@ def test_runner_failure():
     results = runner(
         bouncer_config={
             "check_model_description_populated": [
-                {"catalog_checks": [], "run_results_checks": [], "index": 0}
+                CheckModelDescriptionPopulated(
+                    **{
+                        "exclude": None,
+                        "include": None,
+                        "index": 0,
+                        "name": "check_model_description_populated",
+                    }
+                )
             ]
         },
         catalog_nodes=[],
@@ -172,7 +187,14 @@ def test_runner_success():
     results = runner(
         bouncer_config={
             "check_model_description_populated": [
-                {"catalog_checks": [], "run_results_checks": [], "index": 0}
+                CheckModelDescriptionPopulated(
+                    **{
+                        "exclude": None,
+                        "include": None,
+                        "index": 0,
+                        "name": "check_model_description_populated",
+                    }
+                )
             ]
         },
         catalog_nodes=[],
