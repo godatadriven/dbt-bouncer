@@ -97,8 +97,8 @@ def bouncer_check(func):
             min_model_test_coverage_pct = getattr(
                 request.node.check_config, "min_model_test_coverage_pct", lambda: None
             )
-            minimum_number_of_unit_tests = getattr(
-                request.node.check_config, "minimum_number_of_unit_tests", lambda: None
+            min_number_of_unit_tests = getattr(
+                request.node.check_config, "min_number_of_unit_tests", lambda: None
             )
             model_name_pattern = getattr(
                 request.node.check_config, "model_name_pattern", lambda: None
@@ -153,7 +153,7 @@ def bouncer_check(func):
                 "min_model_documentation_coverage_pct"
             )
             min_model_test_coverage_pct = kwargs.get("min_model_test_coverage_pct")
-            minimum_number_of_unit_tests = kwargs.get("minimum_number_of_unit_tests")
+            min_number_of_unit_tests = kwargs.get("min_number_of_unit_tests")
             model_name_pattern = kwargs.get("model_name_pattern")
             permitted_formats = kwargs.get("permitted_formats")
             permitted_sub_directories = kwargs.get("permitted_sub_directories")
@@ -194,7 +194,7 @@ def bouncer_check(func):
             max_upstream_sources=max_upstream_sources,
             min_model_documentation_coverage_pct=min_model_documentation_coverage_pct,
             min_model_test_coverage_pct=min_model_test_coverage_pct,
-            minimum_number_of_unit_tests=minimum_number_of_unit_tests,
+            min_number_of_unit_tests=min_number_of_unit_tests,
             model_name_pattern=model_name_pattern,
             permitted_formats=permitted_formats,
             permitted_sub_directories=permitted_sub_directories,

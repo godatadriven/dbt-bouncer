@@ -520,7 +520,7 @@ def check_model_has_unique_test(
 
 
 class CheckModelHasUnitTests(BaseCheck):
-    minimum_number_of_unit_tests: int = Field(default=1)
+    min_number_of_unit_tests: int = Field(default=1)
     name: Literal["check_model_has_unit_tests"]
 
 
@@ -530,7 +530,7 @@ def check_model_has_unit_tests(
     manifest_obj: DbtBouncerManifest,
     request: TopRequest,
     unit_tests: List[UnitTests],
-    minimum_number_of_unit_tests: Union[int, None] = None,
+    min_number_of_unit_tests: Union[int, None] = None,
     model: Union[DbtBouncerModel, None] = None,
     **kwargs,
 ) -> None:
@@ -540,7 +540,7 @@ def check_model_has_unit_tests(
     Receives:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
-        minimum_number_of_unit_tests (Optional[int]): The minimum number of unit tests that a model must have. Default: 1.
+        min_number_of_unit_tests (Optional[int]): The minimum number of unit tests that a model must have. Default: 1.
         model (DbtBouncerModel): The DbtBouncerModel object to check.
 
     !!! warning
@@ -556,7 +556,7 @@ def check_model_has_unit_tests(
         ```yaml
         manifest_checks:
             - name: check_model_has_unit_tests
-              minimum_number_of_unit_tests: 2
+              min_number_of_unit_tests: 2
         ```
     """
 
@@ -565,8 +565,8 @@ def check_model_has_unit_tests(
             [t.unique_id for t in unit_tests if t.depends_on.nodes[0] == model.unique_id]
         )
         assert (
-            num_unit_tests >= minimum_number_of_unit_tests  # type: ignore[operator]
-        ), f"`{model.name}` has {num_unit_tests} unit tests, this is less than the minimum of {minimum_number_of_unit_tests}."
+            num_unit_tests >= min_number_of_unit_tests  # type: ignore[operator]
+        ), f"`{model.name}` has {num_unit_tests} unit tests, this is less than the minimum of {min_number_of_unit_tests}."
     else:
         logging.warning(
             "The `check_model_has_unit_tests` check is only supported for dbt 1.8.0 and above."

@@ -982,7 +982,7 @@ def test_check_model_has_unique_test(accepted_uniqueness_tests, model, tests, ex
 
 
 @pytest.mark.parametrize(
-    "manifest_obj, minimum_number_of_unit_tests, model, unit_tests, expectation",
+    "manifest_obj, min_number_of_unit_tests, model, unit_tests, expectation",
     [
         (
             "manifest_obj",
@@ -1082,12 +1082,12 @@ def test_check_model_has_unique_test(accepted_uniqueness_tests, model, tests, ex
     indirect=["manifest_obj"],
 )
 def test_check_model_has_unit_tests(
-    manifest_obj, minimum_number_of_unit_tests, model, unit_tests, expectation
+    manifest_obj, min_number_of_unit_tests, model, unit_tests, expectation
 ):
     with expectation:
         check_model_has_unit_tests(
             manifest_obj=manifest_obj,
-            minimum_number_of_unit_tests=minimum_number_of_unit_tests,
+            min_number_of_unit_tests=min_number_of_unit_tests,
             model=model,
             unit_tests=unit_tests,
             request=None,
