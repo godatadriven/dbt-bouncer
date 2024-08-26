@@ -167,7 +167,7 @@ def check_macro_max_number_of_lines(
     **kwargs,
 ) -> None:
     """
-    Macros may not have more than the specified number of lines0.
+    Macros may not have more than the specified number of lines.
 
     Receives:
         exclude (Optional[str]): Regex pattern to match the macro path. Macro paths that match the pattern will not be checked.
