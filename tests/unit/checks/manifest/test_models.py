@@ -5,7 +5,7 @@ import pytest
 
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
-    from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Nodes4, Nodes6
+    from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Nodes4, Nodes6, UnitTests
 
 from dbt_bouncer.checks.common import NestedDict
 from dbt_bouncer.checks.manifest.check_models import (
@@ -22,6 +22,7 @@ from dbt_bouncer.checks.manifest.check_models import (
     check_model_has_no_upstream_dependencies,
     check_model_has_tags,
     check_model_has_unique_test,
+    check_model_has_unit_tests,
     check_model_max_chained_views,
     check_model_max_fanout,
     check_model_max_number_of_lines,
@@ -976,6 +977,119 @@ def test_check_model_has_unique_test(accepted_uniqueness_tests, model, tests, ex
             accepted_uniqueness_tests=accepted_uniqueness_tests,
             model=model,
             tests=tests,
+            request=None,
+        )
+
+
+@pytest.mark.parametrize(
+    "manifest_obj, min_number_of_unit_tests, model, unit_tests, expectation",
+    [
+        (
+            "manifest_obj",
+            1,
+            Nodes4(
+                **{
+                    "alias": "model_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                    },
+                    "fqn": ["package_name", "model_1"],
+                    "name": "model_1",
+                    "original_file_path": "model_1.sql",
+                    "package_name": "package_name",
+                    "path": "staging/finance/model_1.sql",
+                    "resource_type": "model",
+                    "schema": "main",
+                    "unique_id": "model.package_name.model_1",
+                }
+            ),
+            [
+                UnitTests(
+                    **{
+                        "depends_on": {
+                            "nodes": [
+                                "model.package_name.model_1",
+                            ]
+                        },
+                        "expect": {"format": "dict", "rows": [{"id": 1}]},
+                        "fqn": ["package_name", "staging", "crm", "model_1", "unit_test_1"],
+                        "given": [{"input": "ref(input_1)", "format": "csv"}],
+                        "model": "model_1",
+                        "name": "unit_test_1",
+                        "original_file_path": "models/staging/crm/_crm__source.yml",
+                        "resource_type": "unit_test",
+                        "package_name": "package_name",
+                        "path": "staging/crm/_crm__source.yml",
+                        "unique_id": "unit_test.package_name.model_1.unit_test_1",
+                    }
+                ),
+            ],
+            does_not_raise(),
+        ),
+        (
+            "manifest_obj",
+            2,
+            Nodes4(
+                **{
+                    "alias": "model_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                    },
+                    "fqn": ["package_name", "model_1"],
+                    "name": "model_1",
+                    "original_file_path": "model_1.sql",
+                    "package_name": "package_name",
+                    "path": "staging/finance/model_1.sql",
+                    "resource_type": "model",
+                    "schema": "main",
+                    "unique_id": "model.package_name.model_1",
+                }
+            ),
+            [
+                UnitTests(
+                    **{
+                        "depends_on": {
+                            "nodes": [
+                                "model.package_name.model_1",
+                            ]
+                        },
+                        "expect": {"format": "dict", "rows": [{"id": 1}]},
+                        "fqn": ["package_name", "staging", "crm", "model_1", "unit_test_1"],
+                        "given": [{"input": "ref(input_1)", "format": "csv"}],
+                        "model": "model_1",
+                        "name": "unit_test_1",
+                        "original_file_path": "models/staging/crm/_crm__source.yml",
+                        "resource_type": "unit_test",
+                        "package_name": "package_name",
+                        "path": "staging/crm/_crm__source.yml",
+                        "unique_id": "unit_test.package_name.model_1.unit_test_1",
+                    }
+                ),
+            ],
+            pytest.raises(AssertionError),
+        ),
+    ],
+    indirect=["manifest_obj"],
+)
+def test_check_model_has_unit_tests(
+    manifest_obj, min_number_of_unit_tests, model, unit_tests, expectation
+):
+    with expectation:
+        check_model_has_unit_tests(
+            manifest_obj=manifest_obj,
+            min_number_of_unit_tests=min_number_of_unit_tests,
+            model=model,
+            unit_tests=unit_tests,
             request=None,
         )
 

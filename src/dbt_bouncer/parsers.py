@@ -8,6 +8,8 @@ from enum import Enum
 from pathlib import Path
 from typing import List, Literal, Union
 
+import semver
+
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
     from dbt_artifacts_parser.parser import parse_catalog, parse_manifest, parse_run_results
@@ -34,6 +36,7 @@ with warnings.catch_warnings():
     )
     from dbt_artifacts_parser.parsers.manifest.manifest_v12 import (
         Exposures,
+        UnitTests,
         Macros,
         ManifestV12,
         Nodes4,
@@ -162,8 +165,9 @@ def parse_manifest_artifact(artifact_dir: Path, manifest_obj: DbtBouncerManifest
     List[Exposures],
     List[Macros],
     List[DbtBouncerModel],
-    List[DbtBouncerTest],
     List[DbtBouncerSource],
+    List[DbtBouncerTest],
+    List[UnitTests],
 ]:
     project_exposures = [
         v
@@ -193,16 +197,32 @@ def parse_manifest_artifact(artifact_dir: Path, manifest_obj: DbtBouncerManifest
             if v.package_name == manifest_obj.manifest.metadata.project_name:
                 project_tests.append(DbtBouncerTest(**{"path": v.path, "test": v, "unique_id": k}))
 
+    if semver.Version.parse(manifest_obj.manifest.metadata.dbt_version) >= "1.8.0":
+        project_unit_tests = [
+            v
+            for _, v in manifest_obj.manifest.unit_tests.items()
+            if v.package_name == manifest_obj.manifest.metadata.project_name
+        ]
+    else:
+        project_unit_tests = []
+
     project_sources = [
         DbtBouncerSource(**{"source": v, "path": v.path, "unique_id": k})
         for _, v in manifest_obj.manifest.sources.items()
         if v.package_name == manifest_obj.manifest.metadata.project_name
     ]
     logging.info(
-        f"Parsed `manifest.json`, found `{manifest_obj.manifest.metadata.project_name}` project, found {len(project_exposures)} exposures, {len(project_macros)} macros, {len(project_models)} nodes, {len(project_sources)} sources and {len(project_tests)} tests."
+        f"Parsed `manifest.json`, found `{manifest_obj.manifest.metadata.project_name}` project, found {len(project_exposures)} exposures, {len(project_macros)} macros, {len(project_models)} nodes, {len(project_sources)} sources, {len(project_tests)} tests and {len(project_unit_tests)} unit tests."
     )
 
-    return project_exposures, project_macros, project_models, project_tests, project_sources
+    return (
+        project_exposures,
+        project_macros,
+        project_models,
+        project_sources,
+        project_tests,
+        project_unit_tests,
+    )
 
 
 def parse_run_results_artifact(
@@ -215,7 +235,11 @@ def parse_run_results_artifact(
     project_run_results = [
         DbtBouncerResult(
             **{
-                "path": manifest_obj.manifest.nodes[r.unique_id].original_file_path[7:],
+                "path": (
+                    manifest_obj.manifest.nodes[r.unique_id].original_file_path[7:]
+                    if r.unique_id in manifest_obj.manifest.nodes
+                    else manifest_obj.manifest.unit_tests[r.unique_id].original_file_path[7:]
+                ),
                 "result": r,
                 "unique_id": r.unique_id,
             }

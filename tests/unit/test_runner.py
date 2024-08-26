@@ -98,6 +98,7 @@ def test_runner_coverage(caplog, tmp_path):
         run_results=[],
         sources=[],
         tests=[],
+        unit_tests=[],
         checks_dir=Path("./src/dbt_bouncer/checks"),
     )
 
@@ -190,6 +191,7 @@ def test_runner_failure():
         run_results=[],
         sources=[],
         tests=[],
+        unit_tests=[],
         checks_dir=Path("./src/dbt_bouncer/checks"),
     )
     assert results[0] == 1
@@ -275,6 +277,7 @@ def test_runner_success():
         run_results=[],
         sources=[],
         tests=[],
+        unit_tests=[],
         checks_dir=Path("./src/dbt_bouncer/checks"),
     )
     assert results[0] == 0

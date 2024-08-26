@@ -13,7 +13,7 @@ import yaml
 
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
-    from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Exposures
+    from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Exposures, UnitTests
 
 import logging
 
@@ -33,6 +33,7 @@ def bouncer_check(func):
         models: Union[List[DbtBouncerModel], None] = None,
         sources: Union[List[DbtBouncerSource], None] = None,
         tests: Union[List[DbtBouncerTest], None] = None,
+        unit_tests: Union[List[UnitTests], None] = None,
         **kwargs,
     ):
         request = kwargs.get("request")
@@ -96,8 +97,14 @@ def bouncer_check(func):
             min_model_test_coverage_pct = getattr(
                 request.node.check_config, "min_model_test_coverage_pct", lambda: None
             )
+            min_number_of_unit_tests = getattr(
+                request.node.check_config, "min_number_of_unit_tests", lambda: None
+            )
             model_name_pattern = getattr(
                 request.node.check_config, "model_name_pattern", lambda: None
+            )
+            permitted_formats = getattr(
+                request.node.check_config, "permitted_formats", lambda: None
             )
             permitted_sub_directories = getattr(
                 request.node.check_config, "permitted_sub_directories", lambda: None
@@ -124,6 +131,7 @@ def bouncer_check(func):
             model = getattr(request.node.model, "model", lambda: None)
             run_result = getattr(request.node.run_result, "result", lambda: None)
             source = getattr(request.node.source, "source", lambda: None)
+            unit_test = request.node.unit_test
         else:
             # From provided check_config
             accepted_uniqueness_tests = kwargs.get("accepted_uniqueness_tests")
@@ -145,7 +153,9 @@ def bouncer_check(func):
                 "min_model_documentation_coverage_pct"
             )
             min_model_test_coverage_pct = kwargs.get("min_model_test_coverage_pct")
+            min_number_of_unit_tests = kwargs.get("min_number_of_unit_tests")
             model_name_pattern = kwargs.get("model_name_pattern")
+            permitted_formats = kwargs.get("permitted_formats")
             permitted_sub_directories = kwargs.get("permitted_sub_directories")
             project_name_pattern = kwargs.get("project_name_pattern")
             regexp_pattern = kwargs.get("regexp_pattern")
@@ -163,6 +173,7 @@ def bouncer_check(func):
             model = kwargs.get("model")
             run_result = kwargs.get("run_result")
             source = kwargs.get("source")
+            unit_test = kwargs.get("unit_test")
 
         func(
             # From provided check_config
@@ -183,7 +194,9 @@ def bouncer_check(func):
             max_upstream_sources=max_upstream_sources,
             min_model_documentation_coverage_pct=min_model_documentation_coverage_pct,
             min_model_test_coverage_pct=min_model_test_coverage_pct,
+            min_number_of_unit_tests=min_number_of_unit_tests,
             model_name_pattern=model_name_pattern,
+            permitted_formats=permitted_formats,
             permitted_sub_directories=permitted_sub_directories,
             project_name_pattern=project_name_pattern,
             regexp_pattern=regexp_pattern,
@@ -201,12 +214,14 @@ def bouncer_check(func):
             macro=macro,
             run_result=run_result,
             source=source,
+            unit_test=unit_test,
             # Fixtures from `FixturePlugin`
             exposures=exposures,
             manifest_obj=manifest_obj,
             models=models,
             sources=sources,
             tests=tests,
+            unit_tests=unit_tests,
         )
 
     return wrapper
