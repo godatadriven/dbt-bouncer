@@ -15,7 +15,8 @@ with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
     from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Exposures
 
-from dbt_bouncer.logger import logger
+import logging
+
 from dbt_bouncer.parsers import (
     DbtBouncerManifest,
     DbtBouncerModel,
@@ -176,14 +177,14 @@ def create_github_comment_file(failed_checks: List[List[str]]) -> None:
 
     md_formatted_comment = f"## **Failed `dbt-bouncer`** checks\n\n{md_formatted_comment}\n\nSent from this [GitHub Action workflow run](https://github.com/{os.environ.get('GITHUB_REPOSITORY',None)}/actions/runs/{os.environ.get('GITHUB_RUN_ID', None)})."  # Would like to be more specific and include the job ID, but it's not exposed as an environment variable: https://github.com/actions/runner/issues/324
 
-    logger.debug(f"{md_formatted_comment=}")
+    logging.debug(f"{md_formatted_comment=}")
 
     if os.environ.get("GITHUB_REPOSITORY", None) is not None:
         comment_file = "/app/github-comment.md"
     else:
         comment_file = "github-comment.md"
 
-    logger.info(f"Writing comment for GitHub to {comment_file}...")
+    logging.info(f"Writing comment for GitHub to {comment_file}...")
     with open(comment_file, "w") as f:
         f.write(md_formatted_comment)
 
@@ -229,20 +230,20 @@ def get_dbt_bouncer_config(config_file: str, config_file_source: str) -> Mapping
         3. A `[tool.dbt-bouncer]` section in `pyproject.toml` (in current working directory or parent directories).
     """
 
-    logger.debug(f"{config_file=}")
-    logger.debug(f"{config_file_source=}")
+    logging.debug(f"{config_file=}")
+    logging.debug(f"{config_file_source=}")
 
     if config_file_source == "COMMANDLINE":
-        logger.debug(f"Config file passed via command line: {config_file}")
+        logging.debug(f"Config file passed via command line: {config_file}")
         return load_config_from_yaml(Path(config_file))
 
     if config_file_source == "DEFAULT":
-        logger.debug(f"Using default value for config file: {config_file}")
+        logging.debug(f"Using default value for config file: {config_file}")
         with contextlib.suppress(FileNotFoundError):
             return load_config_from_yaml(Path.cwd() / config_file)
 
     # Read config from pyproject.toml
-    logger.info("Loading config from pyproject.toml, if exists...")
+    logging.info("Loading config from pyproject.toml, if exists...")
     if (Path().cwd() / "pyproject.toml").exists():
         pyproject_toml_dir = Path().cwd()
     else:
@@ -252,12 +253,12 @@ def get_dbt_bouncer_config(config_file: str, config_file_source: str) -> Mapping
         )  # i.e. look in parent directories for a pyproject.toml file
 
     if pyproject_toml_dir is None:
-        logger.debug("No pyproject.toml found.")
+        logging.debug("No pyproject.toml found.")
         raise RuntimeError(
             "No pyproject.toml found. Please ensure you have a pyproject.toml file in the root of your project correctly configured to work with `dbt-bouncer`. Alternatively, you can pass the path to your config file via the `--config-file` flag."
         )
     else:
-        logger.debug(f"{pyproject_toml_dir / 'pyproject.toml'=}")
+        logging.debug(f"{pyproject_toml_dir / 'pyproject.toml'=}")
 
         toml_cfg = toml.load(pyproject_toml_dir / "pyproject.toml")
         if "dbt-bouncer" in toml_cfg["tool"].keys():
@@ -272,15 +273,15 @@ def get_dbt_bouncer_config(config_file: str, config_file_source: str) -> Mapping
 def load_config_from_yaml(config_file: Path) -> Mapping[str, Any]:
 
     config_path = Path().cwd() / config_file
-    logger.debug(f"Loading config from {config_path}...")
-    logger.debug(f"Loading config from {config_file}...")
+    logging.debug(f"Loading config from {config_path}...")
+    logging.debug(f"Loading config from {config_file}...")
     if not config_path.exists():  # Shouldn't be needed as click should have already checked this
         raise FileNotFoundError(f"No config file found at {config_path}.")
 
     with Path.open(config_path, "r") as f:
         conf = yaml.safe_load(f)
 
-    logger.info(f"Loaded config from {config_file}...")
+    logging.info(f"Loaded config from {config_file}...")
 
     return conf
 

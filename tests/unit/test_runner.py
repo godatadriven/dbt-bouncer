@@ -7,11 +7,14 @@ with warnings.catch_warnings():
     from dbt_artifacts_parser.parser import parse_manifest
     from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Nodes4
 
+
+from dbt_bouncer.logger import configure_console_logging
 from dbt_bouncer.parsers import DbtBouncerModel
 from dbt_bouncer.runner import runner
 
 
 def test_runner_coverage(caplog, tmp_path):
+    configure_console_logging(verbosity=0)
     results = runner(
         bouncer_config={
             "check_model_description_populated": [

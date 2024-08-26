@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import inspect
+import logging
 import warnings
 from typing import Dict, List, Union
 
@@ -11,7 +12,6 @@ with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
     from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Exposures, Macros
 
-from dbt_bouncer.logger import logger
 from dbt_bouncer.parsers import (
     DbtBouncerCatalogNode,
     DbtBouncerManifest,
@@ -140,7 +140,7 @@ class GenerateTestsPlugin:
         items = []
         if name in self.bouncer_config.keys():
             for check_config in self.bouncer_config[name]:
-                logger.debug(f"{check_config=}")
+                logging.debug(f"{check_config=}")
 
                 if (inspect.isfunction(obj) or inspect.ismethod(obj)) and (
                     name.startswith("check_")
@@ -171,7 +171,7 @@ class GenerateTestsPlugin:
                         key = [m for m in markers if m.startswith("iterate_over_")][0].replace(
                             "iterate_over_", ""
                         )
-                        logger.debug(f"{key=}")
+                        logging.debug(f"{key=}")
                         for x in self.__getattribute__(key):
                             if key == "catalog_nodes":
                                 catalog_node = x
@@ -241,7 +241,7 @@ class GenerateTestsPlugin:
                         item._nodeid = f"{name}_{check_config['index']}"
                         items.append(item)
         else:
-            logger.debug(f"Skipping check {name} because it is not in the checks list.")
+            logging.debug(f"Skipping check {name} because it is not in the checks list.")
 
         return items
 

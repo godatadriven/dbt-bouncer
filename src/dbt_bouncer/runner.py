@@ -12,10 +12,12 @@ with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
     from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Exposures, Macros
 
+import logging
+
+import click
 from tabulate import tabulate
 
 from dbt_bouncer.conf_validator import DbtBouncerConf
-from dbt_bouncer.logger import logger
 from dbt_bouncer.parsers import (
     DbtBouncerCatalogNode,
     DbtBouncerManifest,
@@ -64,10 +66,19 @@ def runner(
         tests,
     )
 
+    pytest_args = [
+        "-c",
+        checks_dir.__str__(),
+        checks_dir.__str__(),
+    ]
+    verbosity = click.get_current_context().get_parameter_source("verbosity").value  # type: ignore[union-attr]
+    if verbosity == 1:
+        pytest_args.append("-v")
+
     # Run the checks, if one fails then pytest will raise an exception
     collector = ResultsCollector()
     run_checks = pytest.main(
-        ["-c", checks_dir.__str__(), checks_dir.__str__(), "-s", "-vvv"],
+        pytest_args,
         plugins=[
             collector,
             fixtures,
@@ -87,7 +98,7 @@ def runner(
     num_failed_checks = len([report for report in collector.reports if report.outcome == "failed"])
 
     if num_failed_checks > 0:
-        logger.error("`dbt-bouncer` failed. Please check the logs above for more details.")
+        logging.error("`dbt-bouncer` failed. Please check the logs above for more details.")
         failed_checks = [
             [
                 r["nodeid"],
@@ -96,8 +107,8 @@ def runner(
             for r in results
             if r["outcome"] == "failed"
         ]
-        logger.debug(f"{failed_checks=}")
-        logger.error(
+        logging.debug(f"{failed_checks=}")
+        logging.error(
             "Failed checks:\n"
             + tabulate(
                 failed_checks,
@@ -111,7 +122,7 @@ def runner(
 
     if output_file is not None:
         coverage_file = Path().cwd() / output_file
-        logger.info(f"Saving coverage file to `{coverage_file}`.")
+        logging.info(f"Saving coverage file to `{coverage_file}`.")
         with Path.open(coverage_file, "w") as f:
             json.dump(
                 results,

@@ -1,4 +1,5 @@
 import importlib
+import logging
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
@@ -6,7 +7,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from pydantic._internal._model_construction import ModelMetaclass
 from typing_extensions import Annotated
 
-from dbt_bouncer.logger import logger
+# from dbt_bouncer.logging import logging
 
 # Dynamically import all Check classes
 check_files = [f for f in (Path(__file__).parent / "checks").glob("*/*.py") if f.is_file()]
@@ -76,6 +77,6 @@ class DbtBouncerConf(BaseModel):
 
 
 def validate_conf(conf: Dict[str, Any]) -> DbtBouncerConf:
-    logger.info("Validating conf...")
+    logging.info("Validating conf...")
 
     return DbtBouncerConf(**conf)

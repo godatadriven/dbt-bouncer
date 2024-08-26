@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import warnings
 from enum import Enum
 from pathlib import Path
@@ -48,9 +49,10 @@ with warnings.catch_warnings():
     )
     from dbt_artifacts_parser.parsers.run_results.run_results_v5 import RunResultsV5
     from dbt_artifacts_parser.parsers.run_results.run_results_v6 import Result, RunResultsV6
+
 from pydantic import BaseModel
 
-from dbt_bouncer.logger import logger
+# from dbt_bouncer.logging import logging
 
 
 class DbtBouncerCatalogNode(BaseModel):
@@ -95,11 +97,11 @@ def load_dbt_artifact(
     Load a dbt artifact from a JSON file to a Pydantic object
     """
 
-    logger.debug(f"{artifact_name=}")
-    logger.debug(f"{dbt_artifacts_dir=}")
+    logging.debug(f"{artifact_name=}")
+    logging.debug(f"{dbt_artifacts_dir=}")
 
     artifact_path = dbt_artifacts_dir / Path(artifact_name)
-    logger.info(f"Loading {artifact_name} from {artifact_path.absolute()}...")
+    logging.info(f"Loading {artifact_name} from {artifact_path.absolute()}...")
     if not artifact_path.exists():
         raise FileNotFoundError(f"No {artifact_name} found at {artifact_path.absolute()}.")
 
@@ -129,7 +131,6 @@ def parse_catalog_artifact(
         artifact_name="catalog.json",
         dbt_artifacts_dir=artifact_dir,
     )
-
     project_catalog_nodes = [
         DbtBouncerCatalogNode(
             **{
@@ -152,7 +153,7 @@ def parse_catalog_artifact(
         for k, v in catalog_obj.sources.items()
         if k.split(".")[1] == manifest_obj.manifest.metadata.project_name
     ]
-    logger.info(
+    logging.info(
         f"Parsed `catalog.json`, found {len(project_catalog_nodes)} nodes and {len(project_catalog_sources)} sources."
     )
 
@@ -199,7 +200,7 @@ def parse_manifest_artifact(artifact_dir: Path, manifest_obj: DbtBouncerManifest
         for _, v in manifest_obj.manifest.sources.items()
         if v.package_name == manifest_obj.manifest.metadata.project_name
     ]
-    logger.info(
+    logging.info(
         f"Parsed `manifest.json`, found `{manifest_obj.manifest.metadata.project_name}` project, found {len(project_exposures)} exposures, {len(project_macros)} macros, {len(project_models)} nodes, {len(project_sources)} sources and {len(project_tests)} tests."
     )
 
@@ -224,5 +225,5 @@ def parse_run_results_artifact(
         for r in run_results_obj.results
         if r.unique_id.split(".")[1] == manifest_obj.manifest.metadata.project_name
     ]
-    logger.info(f"Parsed `run_results.json`, found {len(project_run_results)} results.")
+    logging.info(f"Parsed `run_results.json`, found {len(project_run_results)} results.")
     return project_run_results
