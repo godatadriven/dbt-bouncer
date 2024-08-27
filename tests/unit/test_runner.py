@@ -89,7 +89,7 @@ def test_runner_coverage(caplog, tmp_path):
                             "unique_id": "model.dbt_bouncer_test_project.stg_payments",
                         }
                     ),
-                    "path": "models/staging/stg_payments.sql",
+                    "original_file_path": "models/staging/stg_payments.sql",
                     "unique_id": "model.dbt_bouncer_test_project.stg_payments",
                 }
             )
@@ -182,7 +182,7 @@ def test_runner_failure():
                             "unique_id": "model.dbt_bouncer_test_project.stg_payments",
                         }
                     ),
-                    "path": "models/staging/stg_payments.sql",
+                    "original_file_path": "models/staging/stg_payments.sql",
                     "unique_id": "model.dbt_bouncer_test_project.stg_payments",
                 }
             )
@@ -268,7 +268,7 @@ def test_runner_success():
                             "unique_id": "model.dbt_bouncer_test_project.stg_payments",
                         }
                     ),
-                    "path": "models/staging/stg_payments.sql",
+                    "original_file_path": "models/staging/stg_payments.sql",
                     "unique_id": "model.dbt_bouncer_test_project.stg_payments",
                 }
             )

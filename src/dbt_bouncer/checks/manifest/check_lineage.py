@@ -39,14 +39,14 @@ def check_lineage_permitted_upstream_models(
         ```yaml
         manifest_checks:
             - name: check_lineage_permitted_upstream_models
-              include: ^staging
+              include: ^models/staging
               upstream_path_pattern: $^
             - name: check_lineage_permitted_upstream_models
-              include: ^intermediate
-              upstream_path_pattern: ^staging|^intermediate
+              include: ^models/intermediate
+              upstream_path_pattern: ^models/staging|^models/intermediate
             - name: check_lineage_permitted_upstream_models
-              include: ^marts
-              upstream_path_pattern: ^staging|^intermediate
+              include: ^models/marts
+              upstream_path_pattern: ^models/staging|^models/intermediate
         ```
     """
 
@@ -60,7 +60,7 @@ def check_lineage_permitted_upstream_models(
         upstream_model
         for upstream_model in upstream_models
         if re.compile(upstream_path_pattern.strip()).match(
-            [m for m in models if m.unique_id == upstream_model][0].path
+            [m for m in models if m.unique_id == upstream_model][0].original_file_path
         )
         is None
     ]
@@ -90,7 +90,7 @@ def check_lineage_seed_cannot_be_used(
         ```yaml
         manifest_checks:
             - name: check_lineage_seed_cannot_be_used
-              include: ^intermediate|^marts
+              include: ^models/intermediate|^models/marts
         ```
     """
 
@@ -120,7 +120,7 @@ def check_lineage_source_cannot_be_used(
         ```yaml
         manifest_checks:
             - name: check_lineage_source_cannot_be_used
-              include: ^intermediate|^marts
+              include: ^models/intermediate|^models/marts
         ```
     """
 

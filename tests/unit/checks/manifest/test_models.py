@@ -384,7 +384,7 @@ def test_check_model_documentation_coverage(
                     },
                     "fqn": ["package_name", "model_1"],
                     "name": "model_1",
-                    "original_file_path": "model_1.sql",
+                    "original_file_path": "models/staging/model_1.sql",
                     "package_name": "package_name",
                     "patch_path": "package_name://models/staging/_schema.yml",
                     "path": "staging/model_1.sql",
@@ -409,7 +409,7 @@ def test_check_model_documentation_coverage(
                     },
                     "fqn": ["package_name", "model_1"],
                     "name": "model_1",
-                    "original_file_path": "model_1.sql",
+                    "original_file_path": "models/staging/finance/model_1.sql",
                     "package_name": "package_name",
                     "patch_path": "package_name://models/staging/_schema.yml",
                     "path": "staging/finance/model_1.sql",
@@ -1162,7 +1162,7 @@ def test_check_model_code_does_not_contain_regexp_pattern(model, regexp_pattern,
     "include, model, permitted_sub_directories, expectation",
     [
         (
-            "",
+            "models",
             Nodes4(
                 **{
                     "alias": "model_1",
@@ -1188,7 +1188,7 @@ def test_check_model_code_does_not_contain_regexp_pattern(model, regexp_pattern,
             does_not_raise(),
         ),
         (
-            "marts",
+            "models/marts",
             Nodes4(
                 **{
                     "alias": "model_1",
@@ -1214,7 +1214,7 @@ def test_check_model_code_does_not_contain_regexp_pattern(model, regexp_pattern,
             does_not_raise(),
         ),
         (
-            "marts",
+            "models/marts",
             Nodes4(
                 **{
                     "alias": "model_1",

@@ -41,7 +41,7 @@ def check_column_description_populated(
         ```yaml
         manifest_checks:
             - name: check_column_description_populated
-              include: ^marts
+              include: ^models/marts
         ```
     """
 

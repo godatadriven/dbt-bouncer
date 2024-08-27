@@ -14,7 +14,7 @@ def test_cli_coverage_non_json(tmp_path):
         "manifest_checks": [
             {
                 "name": "check_model_directories",
-                "include": "",
+                "include": "models",
                 "permitted_sub_directories": ["staging"],
             }
         ],
@@ -56,7 +56,7 @@ def test_cli_exclude(tmp_path):
         "manifest_checks": [
             {
                 "access": "protected",
-                "exclude": "^staging",
+                "exclude": "^models/staging",
                 "name": "check_model_access",
             }
         ],
@@ -104,8 +104,8 @@ def test_cli_exclude_and_include(tmp_path):
         "manifest_checks": [
             {
                 "access": "protected",
-                "exclude": "^staging/crm",
-                "include": "^staging",
+                "exclude": "^models/staging/crm",
+                "include": "^models/staging",
                 "name": "check_model_access",
             }
         ],
@@ -154,7 +154,7 @@ def test_cli_global_exclude(tmp_path):
     # Config file
     bouncer_config = {
         "dbt_artifacts_dir": ".",
-        "exclude": "^staging",
+        "exclude": "^models/staging",
         "manifest_checks": [
             {
                 "access": "protected",
@@ -202,11 +202,11 @@ def test_cli_global_and_local_include(tmp_path):
     # Config file
     bouncer_config = {
         "dbt_artifacts_dir": ".",
-        "include": "^marts",
+        "include": "^models/marts",
         "manifest_checks": [
             {
                 "access": "protected",
-                "include": "^staging",
+                "include": "^models/staging",
                 "name": "check_model_access",
             }
         ],
@@ -249,8 +249,8 @@ def test_cli_global_exclude_and_include(tmp_path):
     # Config file
     bouncer_config = {
         "dbt_artifacts_dir": ".",
-        "exclude": "^staging/crm",
-        "include": "^staging",
+        "exclude": "^models/staging/crm",
+        "include": "^models/staging",
         "manifest_checks": [
             {
                 "access": "protected",
@@ -302,11 +302,11 @@ def test_cli_global_exclude_and_local_include(tmp_path):
     # Config file
     bouncer_config = {
         "dbt_artifacts_dir": ".",
-        "exclude": "^staging/crm",
+        "exclude": "^models/staging/crm",
         "manifest_checks": [
             {
                 "access": "protected",
-                "include": "^staging",
+                "include": "^models/staging",
                 "name": "check_model_access",
             }
         ],
@@ -355,7 +355,7 @@ def test_cli_global_include(tmp_path):
     # Config file
     bouncer_config = {
         "dbt_artifacts_dir": ".",
-        "include": "^staging",
+        "include": "^models/staging",
         "manifest_checks": [
             {
                 "access": "protected",
@@ -404,7 +404,7 @@ def test_cli_include(tmp_path):
         "manifest_checks": [
             {
                 "access": "protected",
-                "include": "^staging",
+                "include": "^models/staging",
                 "name": "check_model_access",
             }
         ],

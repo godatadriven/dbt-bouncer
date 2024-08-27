@@ -222,11 +222,11 @@ def check_macro_name_matches_file_name(
 
     if macro.name.startswith("test_"):
         assert (
-            macro.name[5:] == macro.path.split("/")[-1].split(".")[0]
+            macro.name[5:] == macro.original_file_path.split("/")[-1].split(".")[0]
         ), f"Macro `{macro.unique_id}` is not in a file named `{macro.name[5:]}.sql`."
     else:
         assert (
-            macro.name == macro.path.split("/")[-1].split(".")[0]
+            macro.name == macro.original_file_path.split("/")[-1].split(".")[0]
         ), f"Macro `{macro.name}` is not in a file of the same name."
 
 
@@ -254,10 +254,12 @@ def check_macro_property_file_location(
         ```
     """
 
-    expected_substr = "_".join(macro.path[6:].split("/")[:-1])
+    expected_substr = "_".join(macro.original_file_path[6:].split("/")[:-1])
     properties_yml_name = macro.patch_path.split("/")[-1]
 
-    if macro.path.startswith("tests/"):  # Do not check generic tests (which are also macros)
+    if macro.original_file_path.startswith(
+        "tests/"
+    ):  # Do not check generic tests (which are also macros)
         pass
     elif expected_substr == "":  # i.e. macro in ./macros
         assert (

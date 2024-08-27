@@ -87,7 +87,7 @@ def check_run_results_max_execution_time(
         ```yaml
         run_results_checks:
             - name: check_run_results_max_execution_time
-              include: ^staging # Not a good idea, here for demonstration purposes only
+              include: ^models/staging # Not a good idea, here for demonstration purposes only
               max_execution_time_seconds: 10
         ```
     """

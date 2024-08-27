@@ -58,7 +58,7 @@ from pydantic import BaseModel
 
 class DbtBouncerCatalogNode(BaseModel):
     node: CatalogTable
-    path: str
+    original_file_path: str
     unique_id: str
 
 
@@ -68,24 +68,24 @@ class DbtBouncerManifest(BaseModel):
 
 class DbtBouncerModel(BaseModel):
     model: Union[ModelNode_v10, ModelNode_v11, Nodes4]
-    path: str
+    original_file_path: str
     unique_id: str
 
 
 class DbtBouncerResult(BaseModel):
-    path: str
+    original_file_path: str
     result: Union[RunResultOutput_v4, RunResultOutput_v5, Result]
     unique_id: str
 
 
 class DbtBouncerSource(BaseModel):
-    path: str
+    original_file_path: str
     source: Union[SourceDefinition_v10, SourceDefinition_v11, Sources]
     unique_id: str
 
 
 class DbtBouncerTest(BaseModel):
-    path: str
+    original_file_path: str
     test: Union[GenericTestNode_v10, GenericTestNode_v11, Nodes6]
     unique_id: str
 
@@ -136,7 +136,7 @@ def parse_catalog_artifact(
         DbtBouncerCatalogNode(
             **{
                 "node": v,
-                "path": manifest_obj.manifest.nodes[k].path,
+                "original_file_path": manifest_obj.manifest.nodes[k].original_file_path,
                 "unique_id": k,
             }
         )
@@ -147,7 +147,7 @@ def parse_catalog_artifact(
         DbtBouncerCatalogNode(
             **{
                 "node": v,
-                "path": manifest_obj.manifest.sources[k].path,
+                "original_file_path": manifest_obj.manifest.sources[k].original_file_path,
                 "unique_id": k,
             }
         )
@@ -189,13 +189,19 @@ def parse_manifest_artifact(artifact_dir: Path, manifest_obj: DbtBouncerManifest
                 v.package_name == manifest_obj.manifest.metadata.project_name
             ):  # dbt 1.6  # dbt 1.7+
                 project_models.append(
-                    DbtBouncerModel(**{"model": v, "path": v.path, "unique_id": k})
+                    DbtBouncerModel(
+                        **{"model": v, "original_file_path": v.original_file_path, "unique_id": k}
+                    )
                 )
         elif (
             isinstance(v.resource_type, Enum) and v.resource_type.value == "test"
         ) or v.resource_type == "test":
             if v.package_name == manifest_obj.manifest.metadata.project_name:
-                project_tests.append(DbtBouncerTest(**{"path": v.path, "test": v, "unique_id": k}))
+                project_tests.append(
+                    DbtBouncerTest(
+                        **{"original_file_path": v.original_file_path, "test": v, "unique_id": k}
+                    )
+                )
 
     if semver.Version.parse(manifest_obj.manifest.metadata.dbt_version) >= "1.8.0":
         project_unit_tests = [
@@ -207,7 +213,9 @@ def parse_manifest_artifact(artifact_dir: Path, manifest_obj: DbtBouncerManifest
         project_unit_tests = []
 
     project_sources = [
-        DbtBouncerSource(**{"source": v, "path": v.path, "unique_id": k})
+        DbtBouncerSource(
+            **{"original_file_path": v.original_file_path, "source": v, "unique_id": k}
+        )
         for _, v in manifest_obj.manifest.sources.items()
         if v.package_name == manifest_obj.manifest.metadata.project_name
     ]
@@ -235,7 +243,7 @@ def parse_run_results_artifact(
     project_run_results = [
         DbtBouncerResult(
             **{
-                "path": (
+                "original_file_path": (
                     manifest_obj.manifest.nodes[r.unique_id].original_file_path[7:]
                     if r.unique_id in manifest_obj.manifest.nodes
                     else manifest_obj.manifest.unit_tests[r.unique_id].original_file_path[7:]
