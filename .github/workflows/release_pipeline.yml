@@ -176,4 +176,6 @@
                 run: git fetch origin gh-pages --depth=1
 
               - name: Deploy docs website
-                run: poetry run mike deploy --push --update-aliases v${{ steps.version.outputs.version }} stable
+                run: |
+                  poetry run mike deploy --push --update-aliases v${{ steps.version.outputs.version }} stable
+                  poetry run mike set-default --push stable

@@ -6,6 +6,9 @@ site_url: https://godatadriven.github.io/dbt-bouncer/
 
 extra:
   version:
+    alias: true
+    canonical_version: stable
+    default: stable
     provider: mike
 
 extra_css:
