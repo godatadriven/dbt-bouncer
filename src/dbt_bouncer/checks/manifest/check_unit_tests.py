@@ -28,13 +28,11 @@ class CheckUnitTestExpectFormats(BaseCheck):
     permitted_formats: List[Literal["csv", "dict", "sql"]] = Field(default=["csv", "dict", "sql"])
 
 
-@pytest.mark.iterate_over_unit_tests
-@bouncer_check
 def check_unit_test_expect_format(
     manifest_obj: DbtBouncerManifest,
-    request: TopRequest,
+unit_test: UnitTests,
     permitted_formats: Union[List[Literal["csv", "dict", "sql"]], None] = None,
-    unit_test: Union[UnitTests, None] = None,
+    
     **kwargs,
 ) -> None:
     """
@@ -73,14 +71,11 @@ class CheckUnitTestGivenFormats(BaseCheck):
     name: Literal["check_unit_test_given_formats"]
     permitted_formats: List[Literal["csv", "dict", "sql"]] = Field(default=["csv", "dict", "sql"])
 
-
-@pytest.mark.iterate_over_unit_tests
-@bouncer_check
 def check_unit_test_given_formats(
     manifest_obj: DbtBouncerManifest,
-    request: TopRequest,
+    unit_test: UnitTests,
     permitted_formats: Union[List[Literal["csv", "dict", "sql"]], None] = None,
-    unit_test: Union[UnitTests, None] = None,
+    
     **kwargs,
 ) -> None:
     """

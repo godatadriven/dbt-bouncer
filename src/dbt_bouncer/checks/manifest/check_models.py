@@ -11,7 +11,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from dbt_bouncer.checks.common import NestedDict
 from dbt_bouncer.conf_validator_base import BaseCheck
 from dbt_bouncer.parsers import DbtBouncerManifest, DbtBouncerModel
-from dbt_bouncer.utils import bouncer_check, find_missing_meta_keys
+from dbt_bouncer.utils import bouncer_check, find_missing_meta_keys, bouncer_check_v2
 
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
@@ -29,12 +29,9 @@ class CheckModelAccess(BaseCheck):
     name: Literal["check_model_access"]
 
 
-@pytest.mark.iterate_over_models
-@bouncer_check
 def check_model_access(
-    request: TopRequest,
-    access: Union[None, str] = None,
-    model: Union[DbtBouncerModel, None] = None,
+    access: str,
+    model: DbtBouncerModel,
     **kwargs,
 ) -> None:
     """
@@ -61,7 +58,7 @@ def check_model_access(
               include: ^models/staging
         ```
     """
-
+    
     assert (
         model.access.value == access
     ), f"`{model.name}` has `{model.access.value}` access, it should have access `{access}`."
@@ -71,10 +68,8 @@ class CheckModelContractsEnforcedForPublicModel(BaseCheck):
     name: Literal["check_model_contract_enforced_for_public_model"]
 
 
-@pytest.mark.iterate_over_models
-@bouncer_check
 def check_model_contract_enforced_for_public_model(
-    request: TopRequest, model: Union[DbtBouncerModel, None] = None, **kwargs
+    model: DbtBouncerModel, **kwargs
 ) -> None:
     """
     Public models must have contracts enforced.
@@ -97,14 +92,37 @@ def check_model_contract_enforced_for_public_model(
         ), f"`{model.name}` is a public model but does not have contracts enforced."
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 class CheckModelDescriptionPopulated(BaseCheck):
     name: Literal["check_model_description_populated"]
 
 
-@pytest.mark.iterate_over_models
-@bouncer_check
 def check_model_description_populated(
-    request: TopRequest, model: Union[DbtBouncerModel, None] = None, **kwargs
+     model: DbtBouncerModel, **kwargs
 ) -> None:
     """
     Models must have a populated description.
@@ -140,9 +158,8 @@ class CheckModelsDocumentationCoverage(BaseModel):
     )
 
 
-@bouncer_check
+
 def check_model_documentation_coverage(
-    request: TopRequest,
     models: List[DbtBouncerModel],
     min_model_documentation_coverage_pct: Union[float, None] = None,
     **kwargs,
@@ -179,10 +196,8 @@ class CheckModelDocumentedInSameDirectory(BaseCheck):
     name: Literal["check_model_documented_in_same_directory"]
 
 
-@pytest.mark.iterate_over_models
-@bouncer_check
 def check_model_documented_in_same_directory(
-    request: TopRequest, model: Union[DbtBouncerModel, None] = None, **kwargs
+     model: DbtBouncerModel, **kwargs
 ) -> None:
     """
     Models must be documented in the same directory where they are defined (i.e. `.yml` and `.sql` files are in the same directory).
@@ -212,12 +227,9 @@ class CheckModelCodeDoesNotContainRegexpPattern(BaseCheck):
     regexp_pattern: str
 
 
-@pytest.mark.iterate_over_models
-@bouncer_check
 def check_model_code_does_not_contain_regexp_pattern(
-    request: TopRequest,
-    model: Union[DbtBouncerModel, None] = None,
-    regexp_pattern: Union[None, str] = None,
+    model: DbtBouncerModel,
+    regexp_pattern: str,
     **kwargs,
 ) -> None:
     """
@@ -250,7 +262,7 @@ class CheckModelDependsOnMultipleSources(BaseCheck):
 @pytest.mark.iterate_over_models
 @bouncer_check
 def check_model_depends_on_multiple_sources(
-    request: TopRequest, model: Union[DbtBouncerModel, None] = None, **kwargs
+    model: DbtBouncerModel, **kwargs
 ) -> None:
     """
     Models cannot reference more than one source.
@@ -276,13 +288,10 @@ class CheckModelDirectories(BaseCheck):
     permitted_sub_directories: List[str]
 
 
-@pytest.mark.iterate_over_models
-@bouncer_check
 def check_model_directories(
-    request: TopRequest,
-    include: Union[None, str] = None,
-    model: Union[DbtBouncerModel, None] = None,
-    permitted_sub_directories: Union[List[str], None] = None,
+    include: None,
+    model: DbtBouncerModel,
+    permitted_sub_directories: List[str],
     **kwargs,
 ) -> None:
     """
@@ -326,10 +335,8 @@ class CheckModelHasContractsEnforced(BaseCheck):
     name: Literal["check_model_has_contracts_enforced"]
 
 
-@pytest.mark.iterate_over_models
-@bouncer_check
 def check_model_has_contracts_enforced(
-    request: TopRequest, model: Union[DbtBouncerModel, None] = None, **kwargs
+    model: DbtBouncerModel, **kwargs
 ) -> None:
     """
     Model must have contracts enforced.
@@ -355,12 +362,9 @@ class CheckModelHasMetaKeys(BaseCheck):
     name: Literal["check_model_has_meta_keys"]
 
 
-@pytest.mark.iterate_over_models
-@bouncer_check
 def check_model_has_meta_keys(
-    request: TopRequest,
-    keys: Union[NestedDict, None] = None,
-    model: Union[DbtBouncerModel, None] = None,
+    keys: NestedDict,
+    model: DbtBouncerModel,
     **kwargs,
 ) -> None:
     """
@@ -395,10 +399,8 @@ class CheckModelHasNoUpstreamDependencies(BaseCheck):
     name: Literal["check_model_has_no_upstream_dependencies"]
 
 
-@pytest.mark.iterate_over_models
-@bouncer_check
 def check_model_has_no_upstream_dependencies(
-    request: TopRequest, model: Union[DbtBouncerModel, None] = None, **kwargs
+     model: DbtBouncerModel, **kwargs
 ) -> None:
     """
     Identify if models have no upstream dependencies as this likely indicates hard-coded tables references.
@@ -425,13 +427,10 @@ class CheckModelHasTags(BaseCheck):
     tags: List[str] = Field(default=[])
 
 
-@pytest.mark.iterate_over_models
-@bouncer_check
 def check_model_has_tags(
-    request: TopRequest,
-    model: Union[DbtBouncerModel, None] = None,
-    tags: Union[List[str], None] = None,
-    **kwargs,
+    model: DbtBouncerModel,
+    tags: List[str],
+    **kwargs
 ) -> None:
     """
     Models must have the specified tags.
@@ -467,13 +466,10 @@ class CheckModelHasUniqueTest(BaseCheck):
     name: Literal["check_model_has_unique_test"]
 
 
-@pytest.mark.iterate_over_models
-@bouncer_check
 def check_model_has_unique_test(
-    request: TopRequest,
-    tests: List[DbtBouncerModel],
+    model:DbtBouncerModel,
+    tests: DbtBouncerModel,
     accepted_uniqueness_tests: Union[List[str], None] = None,
-    model: Union[DbtBouncerModel, None] = None,
     **kwargs,
 ) -> None:
     """

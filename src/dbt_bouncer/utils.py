@@ -1,5 +1,14 @@
 # mypy: disable-error-code="union-attr"
 
+import importlib
+import logging
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Union
+
+from pydantic import BaseModel, ConfigDict, Field
+from pydantic._internal._model_construction import ModelMetaclass
+from typing_extensions import Annotated
+
 import contextlib
 import os
 import re
@@ -227,6 +236,56 @@ def bouncer_check(func):
     return wrapper
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def bouncer_check_v2(iterate_over=None):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(
+            *args,
+            **kwargs,
+        ):
+            # model = None
+            # logging.error(iterate_over)
+            # return func(access="public", iterate_over=iterate_over, model=model)
+            return func(*args, **kwargs)
+        # logging.error(iterate_over)
+        return wrapper
+    return decorator
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
 def create_github_comment_file(failed_checks: List[List[str]]) -> None:
     """
     Create a markdown file containing a comment for GitHub.
@@ -329,6 +388,8 @@ def get_dbt_bouncer_config(config_file: str, config_file_source: str) -> Mapping
                 "Please ensure your pyproject.toml file is correctly configured to work with `dbt-bouncer`. Alternatively, you can pass the path to your config file via the `--config-file` flag."
             )
     return conf
+
+
 
 
 def load_config_from_yaml(config_file: Path) -> Mapping[str, Any]:

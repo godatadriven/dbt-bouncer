@@ -17,10 +17,8 @@ class CheckSourceDescriptionPopulated(BaseCheck):
     name: Literal["check_source_description_populated"]
 
 
-@pytest.mark.iterate_over_sources
-@bouncer_check
 def check_source_description_populated(
-    request: TopRequest, source: Union[DbtBouncerSource, None] = None, **kwargs
+    source:DbtBouncerSource, **kwargs
 ) -> None:
     """
     Sources must have a populated description.
@@ -46,10 +44,8 @@ class CheckSourceFreshnessPopulated(BaseCheck):
     name: Literal["check_source_freshness_populated"]
 
 
-@pytest.mark.iterate_over_sources
-@bouncer_check
 def check_source_freshness_populated(
-    request: TopRequest, source: Union[DbtBouncerSource, None] = None, **kwargs
+     source: DbtBouncerSource, **kwargs
 ) -> None:
     """
     Sources must have a populated freshness.
@@ -80,12 +76,10 @@ class CheckSourceHasMetaKeys(BaseCheck):
     name: Literal["check_source_has_meta_keys"]
 
 
-@pytest.mark.iterate_over_sources
-@bouncer_check
 def check_source_has_meta_keys(
-    request,
-    keys: Union[NestedDict, None] = None,
-    source: Union[DbtBouncerSource, None] = None,
+    
+    keys: NestedDict,
+    source: DbtBouncerSource,
     **kwargs,
 ) -> None:
     """
@@ -128,9 +122,8 @@ class CheckSourceHasTags(BaseCheck):
 @pytest.mark.iterate_over_sources
 @bouncer_check
 def check_source_has_tags(
-    request: TopRequest,
-    source: Union[DbtBouncerSource, None] = None,
-    tags: Union[None, str] = None,
+    source:DbtBouncerSource,
+    tags: list[str],
     **kwargs,
 ) -> None:
     """
@@ -162,10 +155,8 @@ class CheckSourceLoaderPopulated(BaseCheck):
     name: Literal["check_source_loader_populated"]
 
 
-@pytest.mark.iterate_over_sources
-@bouncer_check
 def check_source_loader_populated(
-    request: TopRequest, source: Union[DbtBouncerSource, None] = None, **kwargs
+ source:DbtBouncerSource, **kwargs
 ) -> None:
     """
     Sources must have a populated loader.
@@ -191,13 +182,9 @@ class CheckSourceNames(BaseCheck):
     name: Literal["check_source_names"]
     source_name_pattern: str
 
-
-@pytest.mark.iterate_over_sources
-@bouncer_check
 def check_source_names(
-    request: TopRequest,
-    source: Union[DbtBouncerSource, None] = None,
-    source_name_pattern: Union[None, str] = None,
+    source: DbtBouncerSource,
+    source_name_pattern: str,
     **kwargs,
 ) -> None:
     """
@@ -227,12 +214,9 @@ class CheckSourceNotOrphaned(BaseCheck):
     name: Literal["check_source_not_orphaned"]
 
 
-@pytest.mark.iterate_over_sources
-@bouncer_check
 def check_source_not_orphaned(
     models: List[DbtBouncerModel],
-    request: TopRequest,
-    source: Union[DbtBouncerSource, None] = None,
+    source: DbtBouncerSource,
     **kwargs,
 ) -> None:
     """
@@ -259,11 +243,8 @@ def check_source_not_orphaned(
 class CheckSourcePropertyFileLocation(BaseCheck):
     name: Literal["check_source_property_file_location"]
 
-
-@pytest.mark.iterate_over_sources
-@bouncer_check
 def check_source_property_file_location(
-    request: TopRequest, source: Union[DbtBouncerSource, None] = None, **kwargs
+ source:DbtBouncerSource, **kwargs
 ) -> None:
     """
     Source properties files must follow the guidance provided by dbt [here](https://docs.getdbt.com/best-practices/how-we-structure/1-guide-overview).
@@ -297,13 +278,9 @@ def check_source_property_file_location(
 class CheckSourceUsedByModelsInSameDirectory(BaseCheck):
     name: Literal["check_source_used_by_models_in_same_directory"]
 
-
-@pytest.mark.iterate_over_sources
-@bouncer_check
 def check_source_used_by_models_in_same_directory(
     models: List[DbtBouncerModel],
-    request: TopRequest,
-    source: Union[DbtBouncerSource, None] = None,
+    source: DbtBouncerSource,
     **kwargs,
 ) -> None:
     """
@@ -338,13 +315,9 @@ def check_source_used_by_models_in_same_directory(
 class CheckSourceUsedByOnlyOneModel(BaseCheck):
     name: Literal["check_source_used_by_only_one_model"]
 
-
-@pytest.mark.iterate_over_sources
-@bouncer_check
 def check_source_used_by_only_one_model(
     models: List[DbtBouncerModel],
-    request: TopRequest,
-    source: Union[DbtBouncerSource, None] = None,
+    source: DbtBouncerSource,
     **kwargs,
 ) -> None:
     """

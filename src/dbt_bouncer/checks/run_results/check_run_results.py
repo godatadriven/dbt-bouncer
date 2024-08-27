@@ -6,7 +6,7 @@ import pytest
 from _pytest.fixtures import TopRequest
 
 from dbt_bouncer.conf_validator_base import BaseCheck
-from dbt_bouncer.parsers import DbtBouncerResult
+from dbt_bouncer.parsers import DbtBouncerRunResult
 from dbt_bouncer.utils import bouncer_check
 
 
@@ -15,12 +15,9 @@ class CheckRunResultsMaxGigabytesBilled(BaseCheck):
     name: Literal["check_run_results_max_gigabytes_billed"]
 
 
-@pytest.mark.iterate_over_run_results
-@bouncer_check
 def check_run_results_max_gigabytes_billed(
-    request: TopRequest,
-    max_gigabytes_billed: Union[float, None] = None,
-    run_result: Union[DbtBouncerResult, None] = None,
+    max_gigabytes_billed: float,
+    run_result: DbtBouncerRunResult,
     **kwargs,
 ) -> None:
     """
@@ -61,12 +58,9 @@ class CheckRunResultsMaxExecutionTime(BaseCheck):
     name: Literal["check_run_results_max_execution_time"]
 
 
-@pytest.mark.iterate_over_run_results
-@bouncer_check
 def check_run_results_max_execution_time(
-    request: TopRequest,
-    max_execution_time_seconds: Union[float, None] = None,
-    run_result: Union[DbtBouncerResult, None] = None,
+    max_execution_time_seconds: float,
+    run_result: DbtBouncerRunResult,
     **kwargs,
 ) -> None:
     """

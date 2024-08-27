@@ -14,12 +14,10 @@ class CheckSourceColumnsAreAllDocumented(BaseCheck):
     name: Literal["check_source_columns_are_all_documented"]
 
 
-@pytest.mark.iterate_over_catalog_sources
-@bouncer_check
 def check_source_columns_are_all_documented(
     sources: List[DbtBouncerSource],
-    request: TopRequest,
-    catalog_source: Union[DbtBouncerCatalogNode, None] = None,
+    
+    catalog_source:DbtBouncerCatalogNode,
     **kwargs,
 ) -> None:
     """

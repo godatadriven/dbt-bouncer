@@ -57,7 +57,7 @@ from pydantic import BaseModel
 
 
 class DbtBouncerCatalogNode(BaseModel):
-    node: CatalogTable
+    catalog_node: CatalogTable
     original_file_path: str
     unique_id: str
 
@@ -72,9 +72,9 @@ class DbtBouncerModel(BaseModel):
     unique_id: str
 
 
-class DbtBouncerResult(BaseModel):
+class DbtBouncerRunResult(BaseModel):
     original_file_path: str
-    result: Union[RunResultOutput_v4, RunResultOutput_v5, Result]
+    run_result: Union[RunResultOutput_v4, RunResultOutput_v5, Result]
     unique_id: str
 
 
@@ -135,7 +135,7 @@ def parse_catalog_artifact(
     project_catalog_nodes = [
         DbtBouncerCatalogNode(
             **{
-                "node": v,
+                "catalog_node": v,
                 "original_file_path": manifest_obj.manifest.nodes[k].original_file_path,
                 "unique_id": k,
             }
@@ -146,7 +146,7 @@ def parse_catalog_artifact(
     project_catalog_sources = [
         DbtBouncerCatalogNode(
             **{
-                "node": v,
+                "catalog_node": v,
                 "original_file_path": manifest_obj.manifest.sources[k].original_file_path,
                 "unique_id": k,
             }
@@ -235,20 +235,20 @@ def parse_manifest_artifact(artifact_dir: Path, manifest_obj: DbtBouncerManifest
 
 def parse_run_results_artifact(
     artifact_dir: Path, manifest_obj: DbtBouncerManifest
-) -> List[DbtBouncerResult]:
+) -> List[DbtBouncerRunResult]:
     run_results_obj: Union[RunResultsV4, RunResultsV5, RunResultsV6] = load_dbt_artifact(
         artifact_name="run_results.json",
         dbt_artifacts_dir=artifact_dir,
     )
     project_run_results = [
-        DbtBouncerResult(
+        DbtBouncerRunResult(
             **{
                 "original_file_path": (
-                    manifest_obj.manifest.nodes[r.unique_id].original_file_path[7:]
+                    manifest_obj.manifest.nodes[r.unique_id].original_file_path
                     if r.unique_id in manifest_obj.manifest.nodes
-                    else manifest_obj.manifest.unit_tests[r.unique_id].original_file_path[7:]
+                    else manifest_obj.manifest.unit_tests[r.unique_id].original_file_path
                 ),
-                "result": r,
+                "run_result": r,
                 "unique_id": r.unique_id,
             }
         )

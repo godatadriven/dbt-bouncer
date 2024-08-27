@@ -21,12 +21,9 @@ class CheckColumnDescriptionPopulated(BaseCheck):
     name: Literal["check_column_description_populated"]
 
 
-@pytest.mark.iterate_over_catalog_nodes
-@bouncer_check
 def check_column_description_populated(
     models: List[DbtBouncerModel],
-    request: TopRequest,
-    catalog_node: Union[CatalogTable, None] = None,
+    catalog_node: CatalogTable,
     **kwargs,
 ) -> None:
     """
@@ -65,12 +62,8 @@ class CheckColumnNameCompliesToColumnType(BaseCheck):
     name: Literal["check_column_name_complies_to_column_type"]
     types: List[str]
 
-
-@pytest.mark.iterate_over_catalog_nodes
-@bouncer_check
 def check_column_name_complies_to_column_type(
-    request: TopRequest,
-    catalog_node: Union[CatalogTable, None] = None,
+    catalog_node: CatalogTable,
     column_name_pattern: Union[None, str] = None,
     types: Union[List[str], None] = None,
     **kwargs,
@@ -130,13 +123,9 @@ def check_column_name_complies_to_column_type(
 class CheckColumnsAreAllDocumented(BaseCheck):
     name: Literal["check_columns_are_all_documented"]
 
-
-@pytest.mark.iterate_over_catalog_nodes
-@bouncer_check
 def check_columns_are_all_documented(
     models: List[DbtBouncerModel],
-    request: TopRequest,
-    catalog_node: Union[CatalogTable, None] = None,
+    catalog_node: CatalogTable,
     **kwargs,
 ) -> None:
     """
@@ -167,13 +156,9 @@ def check_columns_are_all_documented(
 class CheckColumnsAreDocumentedInPublicModels(BaseCheck):
     name: Literal["check_columns_are_documented_in_public_models"]
 
-
-@pytest.mark.iterate_over_catalog_nodes
-@bouncer_check
 def check_columns_are_documented_in_public_models(
     models: List[DbtBouncerModel],
-    request: TopRequest,
-    catalog_node: Union[CatalogTable, None] = None,
+    catalog_node: CatalogTable,
     **kwargs,
 ) -> None:
     """
@@ -211,12 +196,9 @@ class CheckColumnHasSpecifiedTest(BaseCheck):
     test_name: str
 
 
-@pytest.mark.iterate_over_catalog_nodes
-@bouncer_check
 def check_column_has_specified_test(
-    request: TopRequest,
     tests: List[DbtBouncerTest],
-    catalog_node: Union[CatalogTable, None] = None,
+    catalog_node: CatalogTable,
     column_name_pattern: Union[None, str] = None,
     test_name: Union[None, str] = None,
     **kwargs,

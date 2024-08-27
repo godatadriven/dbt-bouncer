@@ -22,12 +22,9 @@ class CheckExposureOnNonPublicModels(BaseCheck):
     name: Literal["check_exposure_based_on_non_public_models"]
 
 
-@pytest.mark.iterate_over_exposures
-@bouncer_check
 def check_exposure_based_on_non_public_models(
+    exposure: Exposures,
     models: List[DbtBouncerModel],
-    request: TopRequest,
-    exposure: Union[Exposures, None] = None,
     **kwargs,
 ) -> None:
     """
@@ -64,12 +61,9 @@ class CheckExposureOnView(BaseCheck):
     name: Literal["check_exposure_based_on_view"]
 
 
-@pytest.mark.iterate_over_exposures
-@bouncer_check
 def check_exposure_based_on_view(
+    exposure:Exposures,
     models: List[DbtBouncerModel],
-    request: TopRequest,
-    exposure: Union[Exposures, None] = None,
     materializations_to_include: Union[List[str], None] = None,
     **kwargs,
 ) -> None:
