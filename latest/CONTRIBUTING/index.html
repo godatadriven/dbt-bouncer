@@ -793,6 +793,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#adding-a-new-check" class="md-nav__link">
+    <span class="md-ellipsis">
+      Adding a new check
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#submitting-a-pull-request" class="md-nav__link">
     <span class="md-ellipsis">
       Submitting a Pull Request
@@ -927,8 +936,48 @@
 </blockquote>
 <h3 id="assorted-development-tips">Assorted development tips</h3>
 <ul>
-<li>Append <code># type: ignore</code> to the end of a line if you need to disable <code>mypy</code> on that line.</li>
+<li>Append <code># type: ignore</code> to the end of a line if you need to disable <code>mypy</code> on that line, preferably with the specific rule to ignore such as <code># type: ignore[union-attr]</code>.</li>
 </ul>
+<h2 id="adding-a-new-check">Adding a new check</h2>
+<p>To add a new check follow the below steps:</p>
+<ol>
+<li>In <code>./src/dbt_bouncer/checks</code> choose the appropriate directory for your check. For example, if your check only requires the <code>manifest.json</code> then use the <code>manifest</code> directory, if your check requires the <code>catalog.json</code> then use the <code>catalog</code> directory.</li>
+<li>Within the chosen directory assess if a suitable file already exists. For example, if your check applies to a model then <code>manifest/check_models.py</code> is a suitable location.</li>
+<li>
+<p>Within the chosen file, add both a class and a function:</p>
+<ul>
+<li>
+<p><code>class</code>: The class is a pydantic model defining the input arguments and must meet the following criteria:</p>
+<ul>
+<li>Start with "Check".</li>
+<li>Inherit from <code>dbt_bouncer.conf_validator_base.BaseCheck</code>.</li>
+<li>Have a <code>name</code> attribute that is a string.</li>
+<li>Not use <code>description</code> in a <code>Field</code>.</li>
+<li>A <code>default</code> value provided for optional input arguments.</li>
+</ul>
+</li>
+<li>
+<p><code>function</code>: The function must meet the following criteria:</p>
+<ul>
+<li>Have the <code>@pytest.mark.iterate_&lt;RESOURCE_TYPE&gt;</code> decorator applied if the check is designed to iterate over a resource type.</li>
+<li>Have the <code>@bouncer_check</code> decorator applied.</li>
+<li>Be called after the snake case equivalent of the <code>name</code> attribute of the created class.</li>
+<li>Accept <code>request</code> as a required argument.</li>
+<li>Accept <code>**kwargs</code>.</li>
+<li>Have a doc string that includes a description of the check, a list of possible input arguments and at least one example.</li>
+<li>A clear message in the event of a failure.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>After the check is added, add the check to <code>dbt-bouncer-example.yml</code> and run <code>dbt-bouncer --config-file dbt-bouncer-example.yml</code> to ensure the check succeeds.</p>
+</li>
+<li>(Optional) If the dbt project located in <code>./dbt_project</code> needs to be updated then do so and also run <code>make build-artifacts</code> to generate the new test artifacts.</li>
+<li>Add at least one happy path and one unhappy path test to <code>./tests</code>. The appropriate test file will be the one matching the directory of the check. For example, if the check is in <code>./src/dbt_bouncer/checks/catalog/check_columns.py</code> then the test file will be <code>./tests/unit/checks/catalog/test_columns.py</code>.</li>
+<li>Run <code>make test</code> to ensure the tests pass.</li>
+<li>Open a PR 🎉!</li>
+</ol>
 <h2 id="submitting-a-pull-request">Submitting a Pull Request</h2>
 <p>Code can be merged into the current development branch <code>main</code> by opening a pull request. If the proposal looks like it's on the right track, then a <code>dbt-bouncer</code> maintainer will review the PR. They may suggest code revision for style or clarity, or request that you add unit or integration test(s). These are good things! We believe that, with a little bit of help, anyone can contribute high-quality code. Once merged, your contribution will be available for the next release of <code>dbt-bouncer</code>.</p>
 <p>Automated tests run via GitHub Actions. If you're a first-time contributor, all tests will require a maintainer to approve.</p>
@@ -953,7 +1002,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">August 20, 2024</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">August 27, 2024</span>
   </span>
 
     
