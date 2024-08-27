@@ -4,17 +4,12 @@ import re
 import warnings
 from typing import List, Literal, Union
 
-import pytest
-from _pytest.fixtures import TopRequest
-
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
     from dbt_artifacts_parser.parsers.catalog.catalog_v1 import CatalogTable
 
-
 from dbt_bouncer.conf_validator_base import BaseCheck
 from dbt_bouncer.parsers import DbtBouncerModel, DbtBouncerTest
-from dbt_bouncer.utils import bouncer_check
 
 
 class CheckColumnDescriptionPopulated(BaseCheck):
@@ -61,6 +56,7 @@ class CheckColumnNameCompliesToColumnType(BaseCheck):
     column_name_pattern: str
     name: Literal["check_column_name_complies_to_column_type"]
     types: List[str]
+
 
 def check_column_name_complies_to_column_type(
     catalog_node: CatalogTable,
@@ -123,6 +119,7 @@ def check_column_name_complies_to_column_type(
 class CheckColumnsAreAllDocumented(BaseCheck):
     name: Literal["check_columns_are_all_documented"]
 
+
 def check_columns_are_all_documented(
     models: List[DbtBouncerModel],
     catalog_node: CatalogTable,
@@ -155,6 +152,7 @@ def check_columns_are_all_documented(
 
 class CheckColumnsAreDocumentedInPublicModels(BaseCheck):
     name: Literal["check_columns_are_documented_in_public_models"]
+
 
 def check_columns_are_documented_in_public_models(
     models: List[DbtBouncerModel],
@@ -199,8 +197,8 @@ class CheckColumnHasSpecifiedTest(BaseCheck):
 def check_column_has_specified_test(
     tests: List[DbtBouncerTest],
     catalog_node: CatalogTable,
-    column_name_pattern: Union[None, str] = None,
-    test_name: Union[None, str] = None,
+    column_name_pattern: str,
+    test_name: str,
     **kwargs,
 ) -> None:
     """

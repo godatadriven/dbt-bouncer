@@ -1534,13 +1534,13 @@ files = [
 
 [[package]]
 name = "pex"
-version = "2.16.2"
+version = "2.17.0"
 description = "The PEX packaging toolchain."
 optional = false
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,<3.14,>=2.7"
 files = [
-    {file = "pex-2.16.2-py2.py3-none-any.whl", hash = "sha256:8610b5bf7731c98d871421ff21e769e8fcf42ea56aa4ac7f8a271f2405733f24"},
-    {file = "pex-2.16.2.tar.gz", hash = "sha256:feb2f1e9819a741915759fc221ee6119447acdfc3e0aaa5bbe5800c39fa10003"},
+    {file = "pex-2.17.0-py2.py3-none-any.whl", hash = "sha256:aa7358ed52f53232f4d151afbba00b1a21ea08e149d0043dfe823b663574c0f9"},
+    {file = "pex-2.17.0.tar.gz", hash = "sha256:5d2ae868523fa10b78ef994014dcc01b752e4ea7e568a5680be8ccb0b30b257f"},
 ]
 
 [package.extras]
@@ -2512,20 +2512,24 @@ test = ["pytest (>=6.0.0)", "setuptools (>=65)"]
 
 [[package]]
 name = "zipp"
-version = "3.20.0"
+version = "3.20.1"
 description = "Backport of pathlib-compatible object wrapper for zip files"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "zipp-3.20.0-py3-none-any.whl", hash = "sha256:58da6168be89f0be59beb194da1250516fdaa062ccebd30127ac65d30045e10d"},
-    {file = "zipp-3.20.0.tar.gz", hash = "sha256:0145e43d89664cfe1a2e533adc75adafed82fe2da404b4bbb6b026c0157bdb31"},
+    {file = "zipp-3.20.1-py3-none-any.whl", hash = "sha256:9960cd8967c8f85a56f920d5d507274e74f9ff813a0ab8889a5b5be2daf44064"},
+    {file = "zipp-3.20.1.tar.gz", hash = "sha256:c22b14cc4763c5a5b04134207736c107db42e9d3ef2d9779d465f5f1bcba572b"},
 ]
 
 [package.extras]
+check = ["pytest-checkdocs (>=2.4)", "pytest-ruff (>=0.2.1)"]
+cover = ["pytest-cov"]
 doc = ["furo", "jaraco.packaging (>=9.3)", "jaraco.tidelift (>=1.4)", "rst.linker (>=1.9)", "sphinx (>=3.5)", "sphinx-lint"]
-test = ["big-O", "importlib-resources", "jaraco.functools", "jaraco.itertools", "jaraco.test", "more-itertools", "pytest (>=6,!=8.1.*)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=2.2)", "pytest-ignore-flaky", "pytest-mypy", "pytest-ruff (>=0.2.1)"]
+enabler = ["pytest-enabler (>=2.2)"]
+test = ["big-O", "importlib-resources", "jaraco.functools", "jaraco.itertools", "jaraco.test", "more-itertools", "pytest (>=6,!=8.1.*)", "pytest-ignore-flaky"]
+type = ["pytest-mypy"]
 
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8.1,<3.13"
-content-hash = "2a4f8aadba9d73976f14bf6a312a80569e1bf2f9340258b1292690400f2e8047"
+content-hash = "3524ad6b4ed691ae32ac74aba7e18e5a70565342a1c19c128780accb289f60db"

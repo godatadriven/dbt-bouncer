@@ -4,8 +4,6 @@ import re
 import warnings
 from typing import Literal, Union
 
-import pytest
-from _pytest.fixtures import TopRequest
 from pydantic import Field
 
 with warnings.catch_warnings():
@@ -17,7 +15,6 @@ import jinja2
 from jinja2_simple_tags import StandaloneTag
 
 from dbt_bouncer.conf_validator_base import BaseCheck
-from dbt_bouncer.utils import bouncer_check
 
 
 class TagExtension(StandaloneTag):

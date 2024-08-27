@@ -3,12 +3,9 @@
 import warnings
 from typing import List, Literal, Union
 
-import pytest
-from _pytest.fixtures import TopRequest
 from pydantic import Field
 
 from dbt_bouncer.conf_validator_base import BaseCheck
-from dbt_bouncer.utils import bouncer_check
 
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
@@ -30,9 +27,8 @@ class CheckUnitTestExpectFormats(BaseCheck):
 
 def check_unit_test_expect_format(
     manifest_obj: DbtBouncerManifest,
-unit_test: UnitTests,
+    unit_test: UnitTests,
     permitted_formats: Union[List[Literal["csv", "dict", "sql"]], None] = None,
-    
     **kwargs,
 ) -> None:
     """
@@ -71,11 +67,11 @@ class CheckUnitTestGivenFormats(BaseCheck):
     name: Literal["check_unit_test_given_formats"]
     permitted_formats: List[Literal["csv", "dict", "sql"]] = Field(default=["csv", "dict", "sql"])
 
+
 def check_unit_test_given_formats(
     manifest_obj: DbtBouncerManifest,
     unit_test: UnitTests,
     permitted_formats: Union[List[Literal["csv", "dict", "sql"]], None] = None,
-    
     **kwargs,
 ) -> None:
     """

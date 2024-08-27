@@ -102,7 +102,7 @@ def load_dbt_artifact(
     logging.debug(f"{dbt_artifacts_dir=}")
 
     artifact_path = dbt_artifacts_dir / Path(artifact_name)
-    logging.info(f"Loading {artifact_name} from {artifact_path.absolute()}...")
+    logging.debug(f"Loading {artifact_name} from {artifact_path.absolute()}...")
     if not artifact_path.exists():
         raise FileNotFoundError(f"No {artifact_name} found at {artifact_path.absolute()}.")
 

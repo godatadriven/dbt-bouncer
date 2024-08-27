@@ -1,13 +1,9 @@
 # mypy: disable-error-code="union-attr"
 
-from typing import List, Literal, Union
-
-import pytest
-from _pytest.fixtures import TopRequest
+from typing import List, Literal
 
 from dbt_bouncer.conf_validator_base import BaseCheck
 from dbt_bouncer.parsers import DbtBouncerCatalogNode, DbtBouncerSource
-from dbt_bouncer.utils import bouncer_check
 
 
 class CheckSourceColumnsAreAllDocumented(BaseCheck):
@@ -16,8 +12,7 @@ class CheckSourceColumnsAreAllDocumented(BaseCheck):
 
 def check_source_columns_are_all_documented(
     sources: List[DbtBouncerSource],
-    
-    catalog_source:DbtBouncerCatalogNode,
+    catalog_source: DbtBouncerCatalogNode,
     **kwargs,
 ) -> None:
     """

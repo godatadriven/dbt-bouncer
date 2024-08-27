@@ -1,25 +1,21 @@
 # mypy: disable-error-code="union-attr"
 
 import re
-from typing import List, Literal, Union
+from typing import List, Literal
 
-import pytest
-from _pytest.fixtures import TopRequest
 from pydantic import Field
 
 from dbt_bouncer.checks.common import NestedDict
 from dbt_bouncer.conf_validator_base import BaseCheck
 from dbt_bouncer.parsers import DbtBouncerModel, DbtBouncerSource
-from dbt_bouncer.utils import bouncer_check, find_missing_meta_keys
+from dbt_bouncer.utils import find_missing_meta_keys
 
 
 class CheckSourceDescriptionPopulated(BaseCheck):
     name: Literal["check_source_description_populated"]
 
 
-def check_source_description_populated(
-    source:DbtBouncerSource, **kwargs
-) -> None:
+def check_source_description_populated(source: DbtBouncerSource, **kwargs) -> None:
     """
     Sources must have a populated description.
 
@@ -44,9 +40,7 @@ class CheckSourceFreshnessPopulated(BaseCheck):
     name: Literal["check_source_freshness_populated"]
 
 
-def check_source_freshness_populated(
-     source: DbtBouncerSource, **kwargs
-) -> None:
+def check_source_freshness_populated(source: DbtBouncerSource, **kwargs) -> None:
     """
     Sources must have a populated freshness.
 
@@ -77,7 +71,6 @@ class CheckSourceHasMetaKeys(BaseCheck):
 
 
 def check_source_has_meta_keys(
-    
     keys: NestedDict,
     source: DbtBouncerSource,
     **kwargs,
@@ -119,10 +112,8 @@ class CheckSourceHasTags(BaseCheck):
     )
 
 
-@pytest.mark.iterate_over_sources
-@bouncer_check
 def check_source_has_tags(
-    source:DbtBouncerSource,
+    source: DbtBouncerSource,
     tags: list[str],
     **kwargs,
 ) -> None:
@@ -155,9 +146,7 @@ class CheckSourceLoaderPopulated(BaseCheck):
     name: Literal["check_source_loader_populated"]
 
 
-def check_source_loader_populated(
- source:DbtBouncerSource, **kwargs
-) -> None:
+def check_source_loader_populated(source: DbtBouncerSource, **kwargs) -> None:
     """
     Sources must have a populated loader.
 
@@ -181,6 +170,7 @@ def check_source_loader_populated(
 class CheckSourceNames(BaseCheck):
     name: Literal["check_source_names"]
     source_name_pattern: str
+
 
 def check_source_names(
     source: DbtBouncerSource,
@@ -243,9 +233,8 @@ def check_source_not_orphaned(
 class CheckSourcePropertyFileLocation(BaseCheck):
     name: Literal["check_source_property_file_location"]
 
-def check_source_property_file_location(
- source:DbtBouncerSource, **kwargs
-) -> None:
+
+def check_source_property_file_location(source: DbtBouncerSource, **kwargs) -> None:
     """
     Source properties files must follow the guidance provided by dbt [here](https://docs.getdbt.com/best-practices/how-we-structure/1-guide-overview).
 
@@ -277,6 +266,7 @@ def check_source_property_file_location(
 
 class CheckSourceUsedByModelsInSameDirectory(BaseCheck):
     name: Literal["check_source_used_by_models_in_same_directory"]
+
 
 def check_source_used_by_models_in_same_directory(
     models: List[DbtBouncerModel],
@@ -314,6 +304,7 @@ def check_source_used_by_models_in_same_directory(
 
 class CheckSourceUsedByOnlyOneModel(BaseCheck):
     name: Literal["check_source_used_by_only_one_model"]
+
 
 def check_source_used_by_only_one_model(
     models: List[DbtBouncerModel],

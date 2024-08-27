@@ -4,14 +4,12 @@ import re
 import warnings
 from typing import List, Literal, Optional, Union
 
-import pytest
-from _pytest.fixtures import TopRequest
 from pydantic import BaseModel, ConfigDict, Field
 
 from dbt_bouncer.checks.common import NestedDict
 from dbt_bouncer.conf_validator_base import BaseCheck
 from dbt_bouncer.parsers import DbtBouncerManifest, DbtBouncerModel
-from dbt_bouncer.utils import bouncer_check, find_missing_meta_keys, bouncer_check_v2
+from dbt_bouncer.utils import find_missing_meta_keys
 
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
@@ -58,7 +56,7 @@ def check_model_access(
               include: ^models/staging
         ```
     """
-    
+
     assert (
         model.access.value == access
     ), f"`{model.name}` has `{model.access.value}` access, it should have access `{access}`."
@@ -68,9 +66,7 @@ class CheckModelContractsEnforcedForPublicModel(BaseCheck):
     name: Literal["check_model_contract_enforced_for_public_model"]
 
 
-def check_model_contract_enforced_for_public_model(
-    model: DbtBouncerModel, **kwargs
-) -> None:
+def check_model_contract_enforced_for_public_model(model: DbtBouncerModel, **kwargs) -> None:
     """
     Public models must have contracts enforced.
 
@@ -92,38 +88,11 @@ def check_model_contract_enforced_for_public_model(
         ), f"`{model.name}` is a public model but does not have contracts enforced."
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 class CheckModelDescriptionPopulated(BaseCheck):
     name: Literal["check_model_description_populated"]
 
 
-def check_model_description_populated(
-     model: DbtBouncerModel, **kwargs
-) -> None:
+def check_model_description_populated(model: DbtBouncerModel, **kwargs) -> None:
     """
     Models must have a populated description.
 
@@ -156,7 +125,6 @@ class CheckModelsDocumentationCoverage(BaseModel):
         ge=0,
         le=100,
     )
-
 
 
 def check_model_documentation_coverage(
@@ -196,9 +164,7 @@ class CheckModelDocumentedInSameDirectory(BaseCheck):
     name: Literal["check_model_documented_in_same_directory"]
 
 
-def check_model_documented_in_same_directory(
-     model: DbtBouncerModel, **kwargs
-) -> None:
+def check_model_documented_in_same_directory(model: DbtBouncerModel, **kwargs) -> None:
     """
     Models must be documented in the same directory where they are defined (i.e. `.yml` and `.sql` files are in the same directory).
 
@@ -259,11 +225,7 @@ class CheckModelDependsOnMultipleSources(BaseCheck):
     name: Literal["check_model_depends_on_multiple_sources"]
 
 
-@pytest.mark.iterate_over_models
-@bouncer_check
-def check_model_depends_on_multiple_sources(
-    model: DbtBouncerModel, **kwargs
-) -> None:
+def check_model_depends_on_multiple_sources(model: DbtBouncerModel, **kwargs) -> None:
     """
     Models cannot reference more than one source.
 
@@ -289,7 +251,7 @@ class CheckModelDirectories(BaseCheck):
 
 
 def check_model_directories(
-    include: None,
+    include: str,
     model: DbtBouncerModel,
     permitted_sub_directories: List[str],
     **kwargs,
@@ -327,7 +289,7 @@ def check_model_directories(
     path_after_match = model.original_file_path[matched_path.end() + 1 :]  # type: ignore[union-attr]
 
     assert (
-        path_after_match.split("/")[0] in permitted_sub_directories  # type: ignore[operator]
+        path_after_match.split("/")[0] in permitted_sub_directories
     ), f"`{model.name}` is located in `{model.original_file_path.split('/')[1]}`, this is not a valid sub-directory. {path_after_match.split('/')[0]}"
 
 
@@ -335,9 +297,7 @@ class CheckModelHasContractsEnforced(BaseCheck):
     name: Literal["check_model_has_contracts_enforced"]
 
 
-def check_model_has_contracts_enforced(
-    model: DbtBouncerModel, **kwargs
-) -> None:
+def check_model_has_contracts_enforced(model: DbtBouncerModel, **kwargs) -> None:
     """
     Model must have contracts enforced.
 
@@ -399,9 +359,7 @@ class CheckModelHasNoUpstreamDependencies(BaseCheck):
     name: Literal["check_model_has_no_upstream_dependencies"]
 
 
-def check_model_has_no_upstream_dependencies(
-     model: DbtBouncerModel, **kwargs
-) -> None:
+def check_model_has_no_upstream_dependencies(model: DbtBouncerModel, **kwargs) -> None:
     """
     Identify if models have no upstream dependencies as this likely indicates hard-coded tables references.
 
@@ -427,11 +385,7 @@ class CheckModelHasTags(BaseCheck):
     tags: List[str] = Field(default=[])
 
 
-def check_model_has_tags(
-    model: DbtBouncerModel,
-    tags: List[str],
-    **kwargs
-) -> None:
+def check_model_has_tags(model: DbtBouncerModel, tags: List[str], **kwargs) -> None:
     """
     Models must have the specified tags.
 
@@ -467,7 +421,7 @@ class CheckModelHasUniqueTest(BaseCheck):
 
 
 def check_model_has_unique_test(
-    model:DbtBouncerModel,
+    model: DbtBouncerModel,
     tests: DbtBouncerModel,
     accepted_uniqueness_tests: Union[List[str], None] = None,
     **kwargs,
@@ -513,14 +467,11 @@ class CheckModelHasUnitTests(BaseCheck):
     name: Literal["check_model_has_unit_tests"]
 
 
-@pytest.mark.iterate_over_models
-@bouncer_check
 def check_model_has_unit_tests(
     manifest_obj: DbtBouncerManifest,
-    request: TopRequest,
     unit_tests: List[UnitTests],
+    model: DbtBouncerModel,
     min_number_of_unit_tests: Union[int, None] = None,
-    model: Union[DbtBouncerModel, None] = None,
     **kwargs,
 ) -> None:
     """
@@ -572,15 +523,12 @@ class CheckModelMaxChainedViews(BaseCheck):
     name: Literal["check_model_max_chained_views"]
 
 
-@pytest.mark.iterate_over_models
-@bouncer_check
 def check_model_max_chained_views(
     manifest_obj: DbtBouncerManifest,
     models: List[DbtBouncerModel],
-    request: TopRequest,
+    model: DbtBouncerModel,
     materializations_to_include: Union[List[str], None] = None,
     max_chained_views: Union[int, None] = None,
-    model: Union[DbtBouncerModel, None] = None,
     **kwargs,
 ) -> None:
     """
@@ -670,13 +618,10 @@ class CheckModelMaxFanout(BaseCheck):
     name: Literal["check_model_max_fanout"]
 
 
-@pytest.mark.iterate_over_models
-@bouncer_check
 def check_model_max_fanout(
+    model: DbtBouncerModel,
     models: List[DbtBouncerModel],
-    request: TopRequest,
     max_downstream_models: Union[int, None] = None,
-    model: Union[DbtBouncerModel, None] = None,
     **kwargs,
 ) -> None:
     """
@@ -708,12 +653,9 @@ class CheckModelMaxNumberOfLines(BaseCheck):
     max_number_of_lines: int = Field(default=100)
 
 
-@pytest.mark.iterate_over_models
-@bouncer_check
 def check_model_max_number_of_lines(
-    request: TopRequest,
+    model: DbtBouncerModel,
     max_number_of_lines: Union[int, None] = None,
-    model: Union[DbtBouncerModel, None] = None,
     **kwargs,
 ) -> None:
     """
@@ -758,14 +700,11 @@ class CheckModelMaxUpstreamDependencies(BaseCheck):
     name: Literal["check_model_max_upstream_dependencies"]
 
 
-@pytest.mark.iterate_over_models
-@bouncer_check
 def check_model_max_upstream_dependencies(
-    request: TopRequest,
+    model: DbtBouncerModel,
     max_upstream_macros: Union[int, None] = None,
     max_upstream_models: Union[int, None] = None,
     max_upstream_sources: Union[int, None] = None,
-    model: Union[DbtBouncerModel, None] = None,
     **kwargs,
 ) -> None:
     """
@@ -809,12 +748,9 @@ class CheckModelNames(BaseCheck):
     model_name_pattern: str
 
 
-@pytest.mark.iterate_over_models
-@bouncer_check
 def check_model_names(
-    request: TopRequest,
-    model: Union[DbtBouncerModel, None] = None,
-    model_name_pattern: Union[None, str] = None,
+    model: DbtBouncerModel,
+    model_name_pattern: str,
     **kwargs,
 ) -> None:
     """
@@ -847,11 +783,7 @@ class CheckModelPropertyFileLocation(BaseCheck):
     name: Literal["check_model_property_file_location"]
 
 
-@pytest.mark.iterate_over_models
-@bouncer_check
-def check_model_property_file_location(
-    request: TopRequest, model: Union[DbtBouncerModel, None] = None, **kwargs
-) -> None:
+def check_model_property_file_location(model: DbtBouncerModel, **kwargs) -> None:
     """
     Model properties files must follow the guidance provided by dbt [here](https://docs.getdbt.com/best-practices/how-we-structure/1-guide-overview).
 
@@ -900,10 +832,8 @@ class CheckModelsTestCoverage(BaseModel):
     )
 
 
-@bouncer_check
 def check_model_test_coverage(
     models: List[DbtBouncerModel],
-    request: TopRequest,
     tests: List[DbtBouncerModel],
     min_model_test_coverage_pct: Union[float, None] = None,
     **kwargs,

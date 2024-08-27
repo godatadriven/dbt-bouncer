@@ -3,19 +3,14 @@
 import warnings
 from typing import List, Literal, Union
 
-import pytest
-from _pytest.fixtures import TopRequest
-
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
     from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Exposures
-
 
 from pydantic import Field
 
 from dbt_bouncer.conf_validator_base import BaseCheck
 from dbt_bouncer.parsers import DbtBouncerModel
-from dbt_bouncer.utils import bouncer_check
 
 
 class CheckExposureOnNonPublicModels(BaseCheck):
@@ -62,7 +57,7 @@ class CheckExposureOnView(BaseCheck):
 
 
 def check_exposure_based_on_view(
-    exposure:Exposures,
+    exposure: Exposures,
     models: List[DbtBouncerModel],
     materializations_to_include: Union[List[str], None] = None,
     **kwargs,

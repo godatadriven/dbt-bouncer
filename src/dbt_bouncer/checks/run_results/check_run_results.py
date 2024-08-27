@@ -1,13 +1,9 @@
 # mypy: disable-error-code="union-attr"
 
-from typing import Literal, Union
-
-import pytest
-from _pytest.fixtures import TopRequest
+from typing import Literal
 
 from dbt_bouncer.conf_validator_base import BaseCheck
 from dbt_bouncer.parsers import DbtBouncerRunResult
-from dbt_bouncer.utils import bouncer_check
 
 
 class CheckRunResultsMaxGigabytesBilled(BaseCheck):
