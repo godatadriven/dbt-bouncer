@@ -138,7 +138,37 @@ poetry run pytest ./tests/unit/checks/catalog/test_columns.py::test_check_column
 
 ### Assorted development tips
 
-* Append `# type: ignore` to the end of a line if you need to disable `mypy` on that line.
+* Append `# type: ignore` to the end of a line if you need to disable `mypy` on that line, preferably with the specific rule to ignore such as `# type: ignore[union-attr]`.
+
+## Adding a new check
+
+To add a new check follow the below steps:
+
+1. In `./src/dbt_bouncer/checks` choose the appropriate directory for your check. For example, if your check only requires the `manifest.json` then use the `manifest` directory, if your check requires the `catalog.json` then use the `catalog` directory.
+1. Within the chosen directory assess if a suitable file already exists. For example, if your check applies to a model then `manifest/check_models.py` is a suitable location.
+1. Within the chosen file, add both a class and a function:
+
+    - `class`: The class is a pydantic model defining the input arguments and must meet the following criteria:
+        - Start with "Check".
+        - Inherit from `dbt_bouncer.conf_validator_base.BaseCheck`.
+        - Have a `name` attribute that is a string.
+        - Not use `description` in a `Field`.
+        - A `default` value provided for optional input arguments.
+
+    - `function`: The function must meet the following criteria:
+        - Have the `@pytest.mark.iterate_<RESOURCE_TYPE>` decorator applied if the check is designed to iterate over a resource type.
+        - Have the `@bouncer_check` decorator applied.
+        - Be called after the snake case equivalent of the `name` attribute of the created class.
+        - Accept `request` as a required argument.
+        - Accept `**kwargs`.
+        - Have a doc string that includes a description of the check, a list of possible input arguments and at least one example.
+        - A clear message in the event of a failure.
+
+1. After the check is added, add the check to `dbt-bouncer-example.yml` and run `dbt-bouncer --config-file dbt-bouncer-example.yml` to ensure the check succeeds.
+1. (Optional) If the dbt project located in `./dbt_project` needs to be updated then do so and also run `make build-artifacts` to generate the new test artifacts.
+1. Add at least one happy path and one unhappy path test to `./tests`. The appropriate test file will be the one matching the directory of the check. For example, if the check is in `./src/dbt_bouncer/checks/catalog/check_columns.py` then the test file will be `./tests/unit/checks/catalog/test_columns.py`.
+1. Run `make test` to ensure the tests pass.
+1. Open a PR 🎉!
 
 ## Submitting a Pull Request
 

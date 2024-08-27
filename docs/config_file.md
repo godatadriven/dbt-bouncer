@@ -4,8 +4,8 @@
 The following options are available, in order of priority:
 
 1. A file passed via the `--config-file` CLI flag.
-2. A file named `dbt-bouncer.yml` in the current working directory.
-3. A `[tool.dbt-bouncer]` section in `pyproject.toml`.
+1. A file named `dbt-bouncer.yml` in the current working directory.
+1. A `[tool.dbt-bouncer]` section in `pyproject.toml`.
 
 Here is an example config file in `yaml`:
 

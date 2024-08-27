@@ -87,3 +87,7 @@ wget https://github.com/godatadriven/dbt-bouncer/releases/download/vX.X.X/dbt-bo
 
 python dbt-bouncer.pex --config-file $PWD/<PATH_TO_CONFIG_FILE>
 ```
+
+## How to add a check to `dbt-bouncer`
+
+See [Adding a new check](./CONTRIBUTING.md#adding-a-new-check).
