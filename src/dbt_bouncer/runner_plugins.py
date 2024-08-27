@@ -225,9 +225,9 @@ class GenerateTestsPlugin:
                                     run_result
                                 ) = source = None
 
-                            if object_in_path(check_config.include, x.path) and not (
+                            if object_in_path(check_config.include, x.original_file_path) and not (
                                 check_config.exclude is not None
-                                and object_in_path(check_config.exclude, x.path)
+                                and object_in_path(check_config.exclude, x.original_file_path)
                             ):
                                 item = MyFunctionItem.from_parent(
                                     parent=collector,

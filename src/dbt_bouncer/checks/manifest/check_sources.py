@@ -280,7 +280,7 @@ def check_source_property_file_location(
         ```
     """
 
-    path_cleaned = source.path.replace("models/staging", "")
+    path_cleaned = source.original_file_path.replace("models/staging", "")
     expected_substring = "_".join(path_cleaned.split("/")[:-1])
 
     assert path_cleaned.split("/")[-1].startswith(
@@ -325,7 +325,8 @@ def check_source_used_by_models_in_same_directory(
     for model in models:
         if (
             source.unique_id in model.depends_on.nodes
-            and model.path.split("/")[:-1] != source.path.split("/")[1:-1]
+            and model.original_file_path.split("/")[:-1]
+            != source.original_file_path.split("/")[:-1]
         ):
             reffed_models_not_in_same_dir.append(model.unique_id.split(".")[0])
 

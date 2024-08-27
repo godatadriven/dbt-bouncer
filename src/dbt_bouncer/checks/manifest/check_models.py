@@ -52,13 +52,13 @@ def check_model_access(
             # Align with dbt best practices that marts should be `public`, everything else should be `protected`
             - name: check_model_access
               access: protected
-              include: ^intermediate
+              include: ^models/intermediate
             - name: check_model_access
               access: public
-              include: ^marts
+              include: ^models/marts
             - name: check_model_access
               access: protected
-              include: ^staging
+              include: ^models/staging
         ```
     """
 
@@ -199,8 +199,8 @@ def check_model_documented_in_same_directory(
         ```
     """
 
-    model_doc_dir = model.patch_path[model.patch_path.find("models") :].split("/")[1:-1]
-    model_sql_dir = model.path.split("/")[:-1]
+    model_doc_dir = model.patch_path[model.patch_path.find("models") :].split("/")[:-1]
+    model_sql_dir = model.original_file_path.split("/")[:-1]
 
     assert (
         model_doc_dir == model_sql_dir
@@ -297,10 +297,9 @@ def check_model_directories(
     Example(s):
         ```yaml
         manifest_checks:
-        # Special case for top level directories within `./models`, pass "" to `include`
         - name: check_model_directories
-            include: ""
-            permitted_sub_directories:
+          include: models
+          permitted_sub_directories:
             - intermediate
             - marts
             - staging
@@ -308,25 +307,19 @@ def check_model_directories(
         ```yaml
         # Restrict sub-directories within `./models/staging`
         - name: check_model_directories
-            include: ^staging
-            permitted_sub_directories:
+          include: ^models/staging
+          permitted_sub_directories:
             - crm
             - payments
         ```
     """
 
-    # Special case for `models` directory
-    if include == "":
-        assert (
-            model.path.split("/")[0] in permitted_sub_directories  # type: ignore[operator]
-        ), f"`{model.name}` is located in `{model.path.split('/')[0]}`, this is not a valid sub-directory."
-    else:
-        matched_path = re.compile(include.strip()).match(model.path)
-        path_after_match = model.path[matched_path.end() + 1 :]  # type: ignore[union-attr]
+    matched_path = re.compile(include.strip()).match(model.original_file_path)
+    path_after_match = model.original_file_path[matched_path.end() + 1 :]  # type: ignore[union-attr]
 
-        assert (
-            path_after_match.split("/")[0] in permitted_sub_directories  # type: ignore[operator]
-        ), f"`{model.name}` is located in `{model.path.split('/')[0]}`, this is not a valid sub-directory."
+    assert (
+        path_after_match.split("/")[0] in permitted_sub_directories  # type: ignore[operator]
+    ), f"`{model.name}` is located in `{model.original_file_path.split('/')[1]}`, this is not a valid sub-directory. {path_after_match.split('/')[0]}"
 
 
 class CheckModelHasContractsEnforced(BaseCheck):
@@ -350,7 +343,7 @@ def check_model_has_contracts_enforced(
         ```yaml
         manifest_checks:
             - name: check_model_has_contracts_enforced
-                include: ^marts
+              include: ^models/marts
         ```
     """
 
@@ -496,7 +489,7 @@ def check_model_has_unique_test(
         ```yaml
         manifest_checks:
           - name: check_model_has_unique_test
-            include: ^fct_|^dim_
+            include: ^models/marts
         ```
         ```yaml
         manifest_checks:
@@ -551,7 +544,7 @@ def check_model_has_unit_tests(
         ```yaml
         manifest_checks:
             - name: check_model_has_unit_tests
-              include: ^marts
+              include: ^models/marts
         ```
         ```yaml
         manifest_checks:
@@ -841,10 +834,10 @@ def check_model_names(
         ```yaml
         manifest_checks:
             - name: check_model_names
-              include: ^intermediate
+              include: ^models/intermediate
               model_name_pattern: ^int_
             - name: check_model_names
-              include: ^staging
+              include: ^models/staging
               model_name_pattern: ^stg_
         ```
     """
@@ -879,7 +872,7 @@ def check_model_property_file_location(
     """
 
     expected_substr = (
-        "_".join(model.path.split("/")[:-1])
+        "_".join(model.original_file_path.split("/")[1:-1])
         .replace("staging", "stg")
         .replace("intermediate", "int")
         .replace("marts", "")
