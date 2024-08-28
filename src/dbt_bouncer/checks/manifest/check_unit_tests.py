@@ -47,6 +47,7 @@ def check_unit_test_expect_format(
     Other Parameters:
         exclude (Optional[str]): Regex pattern to match the unit test path (i.e the .yml file where the unit test is configured). Unit test paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the unit test path (i.e the .yml file where the unit test is configured). Only unit test paths that match the pattern will be checked.
+        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml
@@ -94,6 +95,7 @@ def check_unit_test_given_formats(
     Other Parameters:
         exclude (Optional[str]): Regex pattern to match the unit test path (i.e the .yml file where the unit test is configured). Unit test paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the unit test path (i.e the .yml file where the unit test is configured). Only unit test paths that match the pattern will be checked.
+        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml

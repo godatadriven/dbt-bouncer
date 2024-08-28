@@ -22,6 +22,7 @@ def check_source_description_populated(source: DbtBouncerSource, **kwargs) -> No
     Other Parameters:
         exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
+        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml
@@ -48,6 +49,7 @@ def check_source_freshness_populated(source: DbtBouncerSource, **kwargs) -> None
     Other Parameters:
         exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
+        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml
@@ -84,6 +86,7 @@ def check_source_has_meta_keys(
     Other Parameters:
         exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
+        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml
@@ -125,6 +128,7 @@ def check_source_has_tags(
     Other Parameters:
         exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
+        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml
@@ -155,6 +159,7 @@ def check_source_loader_populated(source: DbtBouncerSource, **kwargs) -> None:
     Other Parameters:
         exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
+        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml
@@ -187,6 +192,7 @@ def check_source_names(
     Other Parameters:
         exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
+        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml
@@ -220,6 +226,7 @@ def check_source_not_orphaned(
     Other Parameters:
         exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
+        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml
@@ -247,6 +254,7 @@ def check_source_property_file_location(source: DbtBouncerSource, **kwargs) -> N
     Other Parameters:
         exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
+        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml
@@ -295,6 +303,7 @@ def check_source_used_by_models_in_same_directory(
     Other Parameters:
         exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
+        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml
@@ -335,6 +344,7 @@ def check_source_used_by_only_one_model(
     Other Parameters:
         exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
+        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml

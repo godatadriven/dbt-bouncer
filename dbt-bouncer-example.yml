@@ -1,6 +1,7 @@
 dbt_artifacts_dir: dbt_project/target # [Optional] Directory where the dbt artifacts exists, generally the `target` directory inside a dbt project. Defaults to `./target`.
 # exclude: ^models/staging # Optional, here for demonstration purposes only
 # include: ^models/marts # Optional, here for demonstration purposes only
+# severity: warn # Optional, useful when applying `dbt-bouncer` to an existing dbt project.
 
 catalog_checks:
   - name: check_column_description_populated
@@ -70,6 +71,7 @@ manifest_checks:
   - name: check_model_access
     include: ^models/intermediate
     access: protected
+    severity: warn
   - name: check_model_access
     include: ^models/marts
     access: public

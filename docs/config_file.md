@@ -38,7 +38,9 @@ model_name_pattern = "^stg_"
 
 For more example config files, see [here](https://github.com/godatadriven/dbt-bouncer/tree/main/tests/unit/config_files/valid).
 
-### Common arguments
+## Common arguments
+
+### Exclude and Include
 
 Most (but not all) checks accept the following optional arguments:
 
@@ -58,7 +60,7 @@ To determine if a check accepts these arguments view the [Checks page](./checks/
 
 !!! note
 
-    `exclude` and `include` can be specified at both the check level and the global level. Should both levels be specified, then the check level is applied. All the below examples result in the `check_model_names` check being run on all models in `./models/staging`:
+    `exclude` and `include` can be specified at both the check level and the global level. Should both levels be specified, then the **check** level is applied. All the below examples result in the `check_model_names` check being run on all models in `./models/staging`:
 
     ```yaml
     # Specify `include` at the check level only
@@ -83,4 +85,54 @@ To determine if a check accepts these arguments view the [Checks page](./checks/
     manifest_checks:
       - name: check_model_names
         model_name_pattern: ^stg_
+    ```
+
+### Severity
+
+All checks accept a `severity` argument, valid values are:
+
+- `error`: If the check fails then `dbt-bouncer` will return a non-zero exit code.
+- `warn`: If the check fails then `dbt-bouncer` will return a non-zero exit code.
+
+`severity` can also be specified globally, this is useful when applying `dbt-bouncer` to a pre-existing dbt project. It allows you to run `dbt-bouncer`, identify the checks that fail and address the failures in your own time without receiving non-zero exit codes:
+
+```yaml
+# Specify `severity` at the global levels: all checks will have a `warn` severity, avoiding non-zero exit codes.
+severity: warn
+
+manifest_checks:
+  - name: check_exposure_based_on_view
+  ...
+```
+
+!!! note
+
+    `severity` can be specified at both the check level and the global level. Should both levels be specified, then the **global** level is applied.
+
+    ```yaml
+    # No `severity` specified: check will have an `error` severity.
+    manifest_checks:
+      - name: check_exposure_based_on_view
+    ```
+
+    ```yaml
+    # Specify `severity` at the check level only: check will have a `warn` severity.
+    manifest_checks:
+      - name: check_exposure_based_on_view
+        severity: warn
+    ```
+
+    ```yaml
+    # Specify `severity` at the check and global levels: check will have a `warn` severity.
+    severity: warn
+    manifest_checks:
+      - name: check_exposure_based_on_view
+        severity: error
+    ```
+
+    ```yaml
+    # Specify `severity` at the global level only: check will have a `warn` severity.
+    severity: warn
+    manifest_checks:
+      - name: check_exposure_based_on_view
     ```

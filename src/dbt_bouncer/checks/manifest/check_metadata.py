@@ -17,6 +17,10 @@ class CheckProjectName(BaseModel):
     )
     name: Literal["check_project_name"]
     project_name_pattern: str
+    severity: Optional[Literal["error", "warn"]] = Field(
+        default="error",
+        description="Severity of the check, one of 'error' or 'warn'.",
+    )
 
 
 def check_project_name(
@@ -29,6 +33,7 @@ def check_project_name(
     Parameters:
         manifest_obj (DbtBouncerManifest): The manifest object.
         project_name_pattern (str): Regex pattern to match the project name.
+        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml
