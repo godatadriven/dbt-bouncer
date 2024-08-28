@@ -18,7 +18,7 @@ from dbt_bouncer.checks.manifest.check_macros import (
 
 
 @pytest.mark.parametrize(
-    "macro, expectation",
+    ("macro", "expectation"),
     [
         (
             Macros(
@@ -40,7 +40,7 @@ from dbt_bouncer.checks.manifest.check_macros import (
                     "path": "macros/macro_1.sql",
                     "resource_type": "macro",
                     "unique_id": "macro.package_name.macro_1",
-                }
+                },
             ),
             does_not_raise(),
         ),
@@ -64,7 +64,7 @@ from dbt_bouncer.checks.manifest.check_macros import (
                     "path": "macros/macro_1.sql",
                     "resource_type": "macro",
                     "unique_id": "macro.package_name.macro_1",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),
@@ -88,7 +88,7 @@ from dbt_bouncer.checks.manifest.check_macros import (
                     "path": "macros/macro_1.sql",
                     "resource_type": "macro",
                     "unique_id": "macro.package_name.macro_1",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),
@@ -113,7 +113,7 @@ from dbt_bouncer.checks.manifest.check_macros import (
                     "path": "macros/macro_1.sql",
                     "resource_type": "macro",
                     "unique_id": "macro.package_name.macro_1",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),
@@ -133,7 +133,7 @@ from dbt_bouncer.checks.manifest.check_macros import (
                     "path": "macros/macro_1.sql",
                     "resource_type": "macro",
                     "unique_id": "macro.package_name.macro_1",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),
@@ -147,7 +147,7 @@ def test_check_macro_arguments_description_populated(macro, expectation):
 
 
 @pytest.mark.parametrize(
-    "macro, regexp_pattern, expectation",
+    ("macro", "regexp_pattern", "expectation"),
     [
         (
             Macros(
@@ -169,7 +169,7 @@ def test_check_macro_arguments_description_populated(macro, expectation):
                     "path": "macros/macro_1.sql",
                     "resource_type": "macro",
                     "unique_id": "macro.package_name.macro_1",
-                }
+                },
             ),
             ".*[i][f][n][u][l][l].*",
             does_not_raise(),
@@ -194,14 +194,18 @@ def test_check_macro_arguments_description_populated(macro, expectation):
                     "path": "macros/macro_1.sql",
                     "resource_type": "macro",
                     "unique_id": "macro.package_name.macro_1",
-                }
+                },
             ),
             ".*[i][f][n][u][l][l].*",
             pytest.raises(AssertionError),
         ),
     ],
 )
-def test_check_macro_code_does_not_contain_regexp_pattern(macro, regexp_pattern, expectation):
+def test_check_macro_code_does_not_contain_regexp_pattern(
+    macro,
+    regexp_pattern,
+    expectation,
+):
     with expectation:
         check_macro_code_does_not_contain_regexp_pattern(
             macro=macro,
@@ -210,7 +214,7 @@ def test_check_macro_code_does_not_contain_regexp_pattern(macro, regexp_pattern,
 
 
 @pytest.mark.parametrize(
-    "macro, expectation",
+    ("macro", "expectation"),
     [
         (
             Macros(
@@ -223,7 +227,7 @@ def test_check_macro_code_does_not_contain_regexp_pattern(macro, regexp_pattern,
                     "path": "macros/macro_1.sql",
                     "resource_type": "macro",
                     "unique_id": "macro.package_name.macro_1",
-                }
+                },
             ),
             does_not_raise(),
         ),
@@ -238,7 +242,7 @@ def test_check_macro_code_does_not_contain_regexp_pattern(macro, regexp_pattern,
                     "path": "macros/macro_1.sql",
                     "resource_type": "macro",
                     "unique_id": "macro.package_name.macro_1",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),
@@ -253,7 +257,7 @@ def test_check_macro_code_does_not_contain_regexp_pattern(macro, regexp_pattern,
                     "path": "macros/macro_1.sql",
                     "resource_type": "macro",
                     "unique_id": "macro.package_name.macro_1",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),
@@ -269,7 +273,7 @@ def test_check_macro_code_does_not_contain_regexp_pattern(macro, regexp_pattern,
                     "path": "macros/macro_1.sql",
                     "resource_type": "macro",
                     "unique_id": "macro.package_name.macro_1",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),
@@ -283,7 +287,7 @@ def test_check_macro_description_populated(macro, expectation):
 
 
 @pytest.mark.parametrize(
-    "macro, max_number_of_lines, expectation",
+    ("macro", "max_number_of_lines", "expectation"),
     [
         (
             Macros(
@@ -295,7 +299,7 @@ def test_check_macro_description_populated(macro, expectation):
                     "path": "macros/macro_1.sql",
                     "resource_type": "macro",
                     "unique_id": "macro.package_name.macro_1",
-                }
+                },
             ),
             50,
             does_not_raise(),
@@ -310,7 +314,7 @@ def test_check_macro_description_populated(macro, expectation):
                     "path": "tests/test_logic_2.sql",
                     "resource_type": "macro",
                     "unique_id": "macro.package_name.test_logic_2",
-                }
+                },
             ),
             10,
             pytest.raises(AssertionError),
@@ -326,7 +330,7 @@ def test_check_macro_max_number_of_lines(max_number_of_lines, macro, expectation
 
 
 @pytest.mark.parametrize(
-    "macro, expectation",
+    ("macro", "expectation"),
     [
         (
             Macros(
@@ -338,7 +342,7 @@ def test_check_macro_max_number_of_lines(max_number_of_lines, macro, expectation
                     "path": "macros/macro_1.sql",
                     "resource_type": "macro",
                     "unique_id": "macro.package_name.macro_1",
-                }
+                },
             ),
             does_not_raise(),
         ),
@@ -352,7 +356,7 @@ def test_check_macro_max_number_of_lines(max_number_of_lines, macro, expectation
                     "path": "tests/logic_1.sql",
                     "resource_type": "macro",
                     "unique_id": "macro.package_name.test_logic_1",
-                }
+                },
             ),
             does_not_raise(),
         ),
@@ -366,7 +370,7 @@ def test_check_macro_max_number_of_lines(max_number_of_lines, macro, expectation
                     "path": "macros/macro_2.sql",
                     "resource_type": "macro",
                     "unique_id": "macro.package_name.macro_2",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),
@@ -380,7 +384,7 @@ def test_check_macro_max_number_of_lines(max_number_of_lines, macro, expectation
                     "path": "tests/test_logic_2.sql",
                     "resource_type": "macro",
                     "unique_id": "macro.package_name.test_logic_2",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),
@@ -394,7 +398,7 @@ def test_check_macro_name_matches_file_name(macro, expectation):
 
 
 @pytest.mark.parametrize(
-    "macro, expectation",
+    ("macro", "expectation"),
     [
         (
             Macros(
@@ -407,7 +411,7 @@ def test_check_macro_name_matches_file_name(macro, expectation):
                     "path": "macros/macro_1.sql",
                     "resource_type": "macro",
                     "unique_id": "macro.package_name.macro_1",
-                }
+                },
             ),
             does_not_raise(),
         ),
@@ -422,7 +426,7 @@ def test_check_macro_name_matches_file_name(macro, expectation):
                     "path": "macros/dir1/macro_1.sql",
                     "resource_type": "macro",
                     "unique_id": "macro.package_name.macro_1",
-                }
+                },
             ),
             does_not_raise(),
         ),
@@ -437,7 +441,7 @@ def test_check_macro_name_matches_file_name(macro, expectation):
                     "path": "tests/generic/test_macro.sql",
                     "resource_type": "macro",
                     "unique_id": "macro.package_name.test_macro",
-                }
+                },
             ),
             does_not_raise(),
         ),
@@ -452,7 +456,7 @@ def test_check_macro_name_matches_file_name(macro, expectation):
                     "path": "macros/macro_1.sql",
                     "resource_type": "macro",
                     "unique_id": "macro.package_name.macro_1",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),
@@ -467,7 +471,7 @@ def test_check_macro_name_matches_file_name(macro, expectation):
                     "path": "macros/dir1/macro_1.sql",
                     "resource_type": "macro",
                     "unique_id": "macro.package_name.macro_1",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),

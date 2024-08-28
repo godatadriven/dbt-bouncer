@@ -14,7 +14,7 @@ from dbt_bouncer.checks.manifest.check_unit_tests import (
 
 
 @pytest.mark.parametrize(
-    "manifest_obj, permitted_formats, unit_test, expectation",
+    ("manifest_obj", "permitted_formats", "unit_test", "expectation"),
     [
         (
             "manifest_obj",
@@ -33,7 +33,7 @@ from dbt_bouncer.checks.manifest.check_unit_tests import (
                     "package_name": "package_name",
                     "path": "staging/crm/_crm__source.yml",
                     "unique_id": "unit_test.package_name.model_1.unit_test_1",
-                }
+                },
             ),
             does_not_raise(),
         ),
@@ -52,14 +52,19 @@ from dbt_bouncer.checks.manifest.check_unit_tests import (
                     "package_name": "package_name",
                     "path": "staging/crm/_crm__source.yml",
                     "unique_id": "unit_test.package_name.model_1.unit_test_1",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),
     ],
     indirect=["manifest_obj"],
 )
-def test_check_unit_test_expect_format(manifest_obj, permitted_formats, unit_test, expectation):
+def test_check_unit_test_expect_format(
+    manifest_obj,
+    permitted_formats,
+    unit_test,
+    expectation,
+):
     with expectation:
         check_unit_test_expect_format(
             manifest_obj=manifest_obj,
@@ -69,7 +74,7 @@ def test_check_unit_test_expect_format(manifest_obj, permitted_formats, unit_tes
 
 
 @pytest.mark.parametrize(
-    "manifest_obj, permitted_formats, unit_test, expectation",
+    ("manifest_obj", "permitted_formats", "unit_test", "expectation"),
     [
         (
             "manifest_obj",
@@ -90,7 +95,7 @@ def test_check_unit_test_expect_format(manifest_obj, permitted_formats, unit_tes
                     "package_name": "package_name",
                     "path": "staging/crm/_crm__source.yml",
                     "unique_id": "unit_test.package_name.model_1.unit_test_1",
-                }
+                },
             ),
             does_not_raise(),
         ),
@@ -113,14 +118,19 @@ def test_check_unit_test_expect_format(manifest_obj, permitted_formats, unit_tes
                     "package_name": "package_name",
                     "path": "staging/crm/_crm__source.yml",
                     "unique_id": "unit_test.package_name.model_1.unit_test_1",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),
     ],
     indirect=["manifest_obj"],
 )
-def test_check_unit_test_given_formats(manifest_obj, permitted_formats, unit_test, expectation):
+def test_check_unit_test_given_formats(
+    manifest_obj,
+    permitted_formats,
+    unit_test,
+    expectation,
+):
     with expectation:
         check_unit_test_given_formats(
             manifest_obj=manifest_obj,

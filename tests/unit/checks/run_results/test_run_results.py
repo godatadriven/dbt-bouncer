@@ -14,7 +14,7 @@ from dbt_bouncer.checks.run_results.check_run_results import (
 
 
 @pytest.mark.parametrize(
-    "max_gigabytes_billed, run_result, expectation",
+    ("max_gigabytes_billed", "run_result", "expectation"),
     [
         (
             10,
@@ -26,7 +26,7 @@ from dbt_bouncer.checks.run_results.check_run_results import (
                     "thread_id": "Thread-1",
                     "timing": [],
                     "unique_id": "model.package_name.model_1",
-                }
+                },
             ),
             does_not_raise(),
         ),
@@ -40,13 +40,17 @@ from dbt_bouncer.checks.run_results.check_run_results import (
                     "thread_id": "Thread-1",
                     "timing": [],
                     "unique_id": "model.package_name.model_1",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),
     ],
 )
-def test_check_run_results_max_gigabytes_billed(max_gigabytes_billed, run_result, expectation):
+def test_check_run_results_max_gigabytes_billed(
+    max_gigabytes_billed,
+    run_result,
+    expectation,
+):
     with expectation:
         check_run_results_max_gigabytes_billed(
             max_gigabytes_billed=max_gigabytes_billed,
@@ -55,7 +59,7 @@ def test_check_run_results_max_gigabytes_billed(max_gigabytes_billed, run_result
 
 
 @pytest.mark.parametrize(
-    "max_execution_time_seconds, run_result, expectation",
+    ("max_execution_time_seconds", "run_result", "expectation"),
     [
         (
             10,
@@ -67,7 +71,7 @@ def test_check_run_results_max_gigabytes_billed(max_gigabytes_billed, run_result
                     "thread_id": "Thread-1",
                     "timing": [],
                     "unique_id": "model.package_name.model_1",
-                }
+                },
             ),
             does_not_raise(),
         ),
@@ -81,7 +85,7 @@ def test_check_run_results_max_gigabytes_billed(max_gigabytes_billed, run_result
                     "thread_id": "Thread-1",
                     "timing": [],
                     "unique_id": "model.package_name.model_1",
-                }
+                },
             ),
             does_not_raise(),
         ),
@@ -95,13 +99,17 @@ def test_check_run_results_max_gigabytes_billed(max_gigabytes_billed, run_result
                     "thread_id": "Thread-1",
                     "timing": [],
                     "unique_id": "model.package_name.model_1",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),
     ],
 )
-def test_check_run_results_max_execution_time(max_execution_time_seconds, run_result, expectation):
+def test_check_run_results_max_execution_time(
+    max_execution_time_seconds,
+    run_result,
+    expectation,
+):
     with expectation:
         check_run_results_max_execution_time(
             max_execution_time_seconds=max_execution_time_seconds,

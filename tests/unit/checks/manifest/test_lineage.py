@@ -15,7 +15,7 @@ from dbt_bouncer.checks.manifest.check_lineage import (
 
 
 @pytest.mark.parametrize(
-    "manifest_obj, model, models, upstream_path_pattern, expectation",
+    ("manifest_obj", "model", "models", "upstream_path_pattern", "expectation"),
     [
         (
             "manifest_obj",
@@ -30,7 +30,9 @@ from dbt_bouncer.checks.manifest.check_lineage import (
                             "type": "INTEGER",
                         },
                     },
-                    "depends_on": {"nodes": ["model.dbt_bouncer_test_project.stg_model_1"]},
+                    "depends_on": {
+                        "nodes": ["model.dbt_bouncer_test_project.stg_model_1"],
+                    },
                     "fqn": ["dbt_bouncer_test_project", "int_model"],
                     "name": "int_model",
                     "original_file_path": "intermediate/int_model.sql",
@@ -39,7 +41,7 @@ from dbt_bouncer.checks.manifest.check_lineage import (
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.dbt_bouncer_test_project.int_model",
-                }
+                },
             ),
             [
                 Nodes4(
@@ -61,8 +63,8 @@ from dbt_bouncer.checks.manifest.check_lineage import (
                         "resource_type": "model",
                         "schema": "main",
                         "unique_id": "model.dbt_bouncer_test_project.stg_model_1",
-                    }
-                )
+                    },
+                ),
             ],
             "^staging",
             does_not_raise(),
@@ -89,7 +91,7 @@ from dbt_bouncer.checks.manifest.check_lineage import (
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.dbt_bouncer_test_project.int_model",
-                }
+                },
             ),
             [],
             "^staging",
@@ -108,7 +110,9 @@ from dbt_bouncer.checks.manifest.check_lineage import (
                             "type": "INTEGER",
                         },
                     },
-                    "depends_on": {"nodes": ["model.dbt_bouncer_test_project.mart_other_model"]},
+                    "depends_on": {
+                        "nodes": ["model.dbt_bouncer_test_project.mart_other_model"],
+                    },
                     "fqn": ["dbt_bouncer_test_project", "mart_model"],
                     "name": "mart_model",
                     "original_file_path": "marts/mart_model.sql",
@@ -117,7 +121,7 @@ from dbt_bouncer.checks.manifest.check_lineage import (
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.dbt_bouncer_test_project.mart_model",
-                }
+                },
             ),
             [
                 Nodes4(
@@ -139,7 +143,7 @@ from dbt_bouncer.checks.manifest.check_lineage import (
                         "resource_type": "model",
                         "schema": "main",
                         "unique_id": "model.dbt_bouncer_test_project.mart_other_model",
-                    }
+                    },
                 ),
             ],
             "^intermediate",
@@ -149,7 +153,11 @@ from dbt_bouncer.checks.manifest.check_lineage import (
     indirect=["manifest_obj"],
 )
 def test_check_lineage_permitted_upstream_models(
-    manifest_obj, model, models, upstream_path_pattern, expectation
+    manifest_obj,
+    model,
+    models,
+    upstream_path_pattern,
+    expectation,
 ):
     with expectation:
         check_lineage_permitted_upstream_models(
@@ -161,7 +169,7 @@ def test_check_lineage_permitted_upstream_models(
 
 
 @pytest.mark.parametrize(
-    "model, expectation",
+    ("model", "expectation"),
     [
         (
             Nodes4(
@@ -184,7 +192,7 @@ def test_check_lineage_permitted_upstream_models(
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.int_model_2",
-                }
+                },
             ),
             does_not_raise(),
         ),
@@ -209,7 +217,7 @@ def test_check_lineage_permitted_upstream_models(
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.int_model_2",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),
@@ -223,7 +231,7 @@ def test_check_lineage_seed_cannot_be_used(model, expectation):
 
 
 @pytest.mark.parametrize(
-    "model, expectation",
+    ("model", "expectation"),
     [
         (
             Nodes4(
@@ -246,7 +254,7 @@ def test_check_lineage_seed_cannot_be_used(model, expectation):
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.int_model_2",
-                }
+                },
             ),
             does_not_raise(),
         ),
@@ -271,7 +279,7 @@ def test_check_lineage_seed_cannot_be_used(model, expectation):
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.int_model_2",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),

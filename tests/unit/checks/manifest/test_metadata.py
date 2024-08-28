@@ -6,7 +6,7 @@ from dbt_bouncer.checks.manifest.check_metadata import check_project_name
 
 
 @pytest.mark.parametrize(
-    "manifest_obj, project_name_pattern, expectation",
+    ("manifest_obj", "project_name_pattern", "expectation"),
     [
         (
             "manifest_obj",

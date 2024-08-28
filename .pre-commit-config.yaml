@@ -17,35 +17,20 @@ repos:
             exclude: dbt_project/target/manifest.json,tests/fixtures/dbt_16/target/manifest.json,tests/fixtures/dbt_17/target/manifest.json,tests/fixtures/dbt_18/target/manifest.json
     - repo: local
       hooks:
-          - id: isort
-            args: ['--filter-files']
-            entry: isort
-            language: system
-            name: poetry run isort
-            require_serial: true
-            types_or: [cython, pyi, python]
+        - id: ruff
+          name: ruff
+          entry: poetry run ruff check --force-exclude --config pyproject.toml --fix
+          language: python
+          types_or: [python, pyi, jupyter]
+          require_serial: true
     - repo: local
       hooks:
-          - id: black
-            entry: poetry run black
-            language: system
-            name: Run black formatter
-            require_serial: true
-            types_or: [python, pyi]
-    - repo: local
-      hooks:
-          - id: autoflake
-            args:
-            - "--in-place"
-            - "--expand-star-imports"
-            - "--remove-duplicate-keys"
-            - "--remove-unused-variables"
-            - "--remove-all-unused-imports"
-            entry: poetry run autoflake
-            language: system
-            name: autoflake
-            require_serial: true
-            types: [python]
+        - id: ruff-format
+          name: ruff-format
+          entry: poetry run ruff format --force-exclude --config pyproject.toml
+          language: python
+          types_or: [python, pyi, jupyter]
+          require_serial: true
     - repo: local
       hooks:
           - id: mypy

@@ -16,7 +16,7 @@ def test_cli_coverage_non_json(tmp_path):
                 "name": "check_model_directories",
                 "include": "models",
                 "permitted_sub_directories": ["staging"],
-            }
+            },
         ],
     }
 
@@ -44,7 +44,10 @@ def test_cli_coverage_non_json(tmp_path):
 
     assert isinstance(result.exception, RuntimeError)
     assert (
-        result.exception.args[0].find("Output file must have a `.json` extension. Got `.js`.") == 0
+        result.exception.args[0].find(
+            "Output file must have a `.json` extension. Got `.js`.",
+        )
+        == 0
     )
     assert result.exit_code == 1
 
@@ -58,7 +61,7 @@ def test_cli_exclude(tmp_path):
                 "access": "protected",
                 "exclude": "^models/staging",
                 "name": "check_model_access",
-            }
+            },
         ],
     }
 
@@ -74,7 +77,7 @@ def test_cli_exclude(tmp_path):
 
     # Run dbt-bouncer
     runner = CliRunner()
-    result = runner.invoke(
+    runner.invoke(
         cli,
         [
             "--config-file",
@@ -107,7 +110,7 @@ def test_cli_exclude_and_include(tmp_path):
                 "exclude": "^models/staging/crm",
                 "include": "^models/staging",
                 "name": "check_model_access",
-            }
+            },
         ],
     }
 
@@ -123,7 +126,7 @@ def test_cli_exclude_and_include(tmp_path):
 
     # Run dbt-bouncer
     runner = CliRunner()
-    result = runner.invoke(
+    runner.invoke(
         cli,
         [
             "--config-file",
@@ -147,7 +150,9 @@ def test_cli_exclude_and_include(tmp_path):
     for i in [
         "check_model_access:0:stg_payments",
     ]:
-        assert i in [x["check_run_id"] for x in coverage], f"`{i}` not in `coverage.json`."
+        assert i in [
+            x["check_run_id"] for x in coverage
+        ], f"`{i}` not in `coverage.json`."
 
 
 def test_cli_global_exclude(tmp_path):
@@ -159,7 +164,7 @@ def test_cli_global_exclude(tmp_path):
             {
                 "access": "protected",
                 "name": "check_model_access",
-            }
+            },
         ],
     }
 
@@ -175,7 +180,7 @@ def test_cli_global_exclude(tmp_path):
 
     # Run dbt-bouncer
     runner = CliRunner()
-    result = runner.invoke(
+    runner.invoke(
         cli,
         [
             "--config-file",
@@ -208,7 +213,7 @@ def test_cli_global_and_local_include(tmp_path):
                 "access": "protected",
                 "include": "^models/staging",
                 "name": "check_model_access",
-            }
+            },
         ],
     }
 
@@ -224,7 +229,7 @@ def test_cli_global_and_local_include(tmp_path):
 
     # Run dbt-bouncer
     runner = CliRunner()
-    result = runner.invoke(
+    runner.invoke(
         cli,
         [
             "--config-file",
@@ -242,7 +247,9 @@ def test_cli_global_and_local_include(tmp_path):
         "check_model_access:0:stg_orders",
         "check_model_access:0:stg_payments",
     ]:
-        assert i in [x["check_run_id"] for x in coverage], f"`{i}` not in `coverage.json`."
+        assert i in [
+            x["check_run_id"] for x in coverage
+        ], f"`{i}` not in `coverage.json`."
 
 
 def test_cli_global_exclude_and_include(tmp_path):
@@ -255,7 +262,7 @@ def test_cli_global_exclude_and_include(tmp_path):
             {
                 "access": "protected",
                 "name": "check_model_access",
-            }
+            },
         ],
     }
 
@@ -271,7 +278,7 @@ def test_cli_global_exclude_and_include(tmp_path):
 
     # Run dbt-bouncer
     runner = CliRunner()
-    result = runner.invoke(
+    runner.invoke(
         cli,
         [
             "--config-file",
@@ -295,7 +302,9 @@ def test_cli_global_exclude_and_include(tmp_path):
     for i in [
         "check_model_access:0:stg_payments",
     ]:
-        assert i in [x["check_run_id"] for x in coverage], f"`{i}` not in `coverage.json`."
+        assert i in [
+            x["check_run_id"] for x in coverage
+        ], f"`{i}` not in `coverage.json`."
 
 
 def test_cli_global_exclude_and_local_include(tmp_path):
@@ -308,7 +317,7 @@ def test_cli_global_exclude_and_local_include(tmp_path):
                 "access": "protected",
                 "include": "^models/staging",
                 "name": "check_model_access",
-            }
+            },
         ],
     }
 
@@ -324,7 +333,7 @@ def test_cli_global_exclude_and_local_include(tmp_path):
 
     # Run dbt-bouncer
     runner = CliRunner()
-    result = runner.invoke(
+    runner.invoke(
         cli,
         [
             "--config-file",
@@ -348,7 +357,9 @@ def test_cli_global_exclude_and_local_include(tmp_path):
     for i in [
         "check_model_access:0:stg_payments",
     ]:
-        assert i in [x["check_run_id"] for x in coverage], f"`{i}` not in `coverage.json`."
+        assert i in [
+            x["check_run_id"] for x in coverage
+        ], f"`{i}` not in `coverage.json`."
 
 
 def test_cli_global_include(tmp_path):
@@ -360,7 +371,7 @@ def test_cli_global_include(tmp_path):
             {
                 "access": "protected",
                 "name": "check_model_access",
-            }
+            },
         ],
     }
 
@@ -376,7 +387,7 @@ def test_cli_global_include(tmp_path):
 
     # Run dbt-bouncer
     runner = CliRunner()
-    result = runner.invoke(
+    runner.invoke(
         cli,
         [
             "--config-file",
@@ -394,7 +405,9 @@ def test_cli_global_include(tmp_path):
         "check_model_access:0:stg_orders",
         "check_model_access:0:stg_payments",
     ]:
-        assert i in [x["check_run_id"] for x in coverage], f"`{i}` not in `coverage.json`."
+        assert i in [
+            x["check_run_id"] for x in coverage
+        ], f"`{i}` not in `coverage.json`."
 
 
 def test_cli_include(tmp_path):
@@ -406,7 +419,7 @@ def test_cli_include(tmp_path):
                 "access": "protected",
                 "include": "^models/staging",
                 "name": "check_model_access",
-            }
+            },
         ],
     }
 
@@ -422,7 +435,7 @@ def test_cli_include(tmp_path):
 
     # Run dbt-bouncer
     runner = CliRunner()
-    result = runner.invoke(
+    runner.invoke(
         cli,
         [
             "--config-file",
@@ -440,4 +453,6 @@ def test_cli_include(tmp_path):
         "check_model_access:0:stg_orders",
         "check_model_access:0:stg_payments",
     ]:
-        assert i in [x["check_run_id"] for x in coverage], f"`{i}` not in `coverage.json`."
+        assert i in [
+            x["check_run_id"] for x in coverage
+        ], f"`{i}` not in `coverage.json`."
