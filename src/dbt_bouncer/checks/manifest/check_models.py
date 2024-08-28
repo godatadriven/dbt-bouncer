@@ -2,16 +2,14 @@
 
 import re
 import warnings
-from typing import List, Literal, Optional, Union
+from typing import List, Literal, Optional
 
-import pytest
-from _pytest.fixtures import TopRequest
 from pydantic import BaseModel, ConfigDict, Field
 
 from dbt_bouncer.checks.common import NestedDict
 from dbt_bouncer.conf_validator_base import BaseCheck
-from dbt_bouncer.parsers import DbtBouncerManifest, DbtBouncerModel
-from dbt_bouncer.utils import bouncer_check, find_missing_meta_keys
+from dbt_bouncer.parsers import DbtBouncerManifest, DbtBouncerModel, DbtBouncerTest
+from dbt_bouncer.utils import find_missing_meta_keys
 
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
@@ -29,22 +27,21 @@ class CheckModelAccess(BaseCheck):
     name: Literal["check_model_access"]
 
 
-@pytest.mark.iterate_over_models
-@bouncer_check
 def check_model_access(
-    request: TopRequest,
-    access: Union[None, str] = None,
-    model: Union[DbtBouncerModel, None] = None,
+    access: str,
+    model: DbtBouncerModel,
     **kwargs,
 ) -> None:
     """
     Models must have the specified access attribute. Requires dbt 1.7+.
 
-    Receives:
+    Parameters:
         access (Literal["private", "protected", "public"]): The access level to check for.
+        model (DbtBouncerModel): The DbtBouncerModel object to check.
+
+    Other parameters:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
-        model (DbtBouncerModel): The DbtBouncerModel object to check.
 
     Example(s):
         ```yaml
@@ -71,18 +68,16 @@ class CheckModelContractsEnforcedForPublicModel(BaseCheck):
     name: Literal["check_model_contract_enforced_for_public_model"]
 
 
-@pytest.mark.iterate_over_models
-@bouncer_check
-def check_model_contract_enforced_for_public_model(
-    request: TopRequest, model: Union[DbtBouncerModel, None] = None, **kwargs
-) -> None:
+def check_model_contract_enforced_for_public_model(model: DbtBouncerModel, **kwargs) -> None:
     """
     Public models must have contracts enforced.
 
-    Receives:
+    Parameters:
+        model (DbtBouncerModel): The DbtBouncerModel object to check.
+
+    Other parameters:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
-        model (DbtBouncerModel): The DbtBouncerModel object to check.
 
     Example(s):
         ```yaml
@@ -101,18 +96,16 @@ class CheckModelDescriptionPopulated(BaseCheck):
     name: Literal["check_model_description_populated"]
 
 
-@pytest.mark.iterate_over_models
-@bouncer_check
-def check_model_description_populated(
-    request: TopRequest, model: Union[DbtBouncerModel, None] = None, **kwargs
-) -> None:
+def check_model_description_populated(model: DbtBouncerModel, **kwargs) -> None:
     """
     Models must have a populated description.
 
-    Receives:
+    Parameters:
+        model (DbtBouncerModel): The DbtBouncerModel object to check.
+
+    Other parameters:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
-        model (DbtBouncerModel): The DbtBouncerModel object to check.
 
     Example(s):
         ```yaml
@@ -140,18 +133,21 @@ class CheckModelsDocumentationCoverage(BaseModel):
     )
 
 
-@bouncer_check
 def check_model_documentation_coverage(
-    request: TopRequest,
     models: List[DbtBouncerModel],
-    min_model_documentation_coverage_pct: Union[float, None] = None,
+    min_model_documentation_coverage_pct: float = 100,
     **kwargs,
 ) -> None:
     """
     Set the minimum percentage of models that have a populated description.
 
-    Receives:
-        min_model_documentation_coverage_pct (float): The minimum percentage of models that must have a populated description. Default: 100.
+    Parameters:
+        min_model_documentation_coverage_pct (float): The minimum percentage of models that must have a populated description.
+        models (List[DbtBouncerModel]): List of DbtBouncerModel objects parsed from `manifest.json`.
+
+    Other parameters:
+        exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
+        include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
 
     Example(s):
         ```yaml
@@ -171,7 +167,7 @@ def check_model_documentation_coverage(
     model_description_coverage_pct = (num_models_with_descriptions / num_models) * 100
 
     assert (
-        model_description_coverage_pct >= min_model_documentation_coverage_pct  # type: ignore[operator]
+        model_description_coverage_pct >= min_model_documentation_coverage_pct
     ), f"Only {model_description_coverage_pct}% of models have a populated description, this is less than the permitted minimum of {min_model_documentation_coverage_pct}%."
 
 
@@ -179,18 +175,16 @@ class CheckModelDocumentedInSameDirectory(BaseCheck):
     name: Literal["check_model_documented_in_same_directory"]
 
 
-@pytest.mark.iterate_over_models
-@bouncer_check
-def check_model_documented_in_same_directory(
-    request: TopRequest, model: Union[DbtBouncerModel, None] = None, **kwargs
-) -> None:
+def check_model_documented_in_same_directory(model: DbtBouncerModel, **kwargs) -> None:
     """
     Models must be documented in the same directory where they are defined (i.e. `.yml` and `.sql` files are in the same directory).
 
-    Receives:
+    Parameters:
+        model (DbtBouncerModel): The DbtBouncerModel object to check.
+
+    Other parameters:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
-        model (DbtBouncerModel): The DbtBouncerModel object to check.
 
     Example(s):
         ```yaml
@@ -212,22 +206,21 @@ class CheckModelCodeDoesNotContainRegexpPattern(BaseCheck):
     regexp_pattern: str
 
 
-@pytest.mark.iterate_over_models
-@bouncer_check
 def check_model_code_does_not_contain_regexp_pattern(
-    request: TopRequest,
-    model: Union[DbtBouncerModel, None] = None,
-    regexp_pattern: Union[None, str] = None,
+    model: DbtBouncerModel,
+    regexp_pattern: str,
     **kwargs,
 ) -> None:
     """
     The raw code for a model must not match the specified regexp pattern.
 
-    Receives:
-        exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
-        include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+    Parameters:
         model (DbtBouncerModel): The DbtBouncerModel object to check.
         regexp_pattern (str): The regexp pattern that should not be matched by the model code.
+
+    Other parameters:
+        exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
+        include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
 
     Example(s):
         ```yaml
@@ -247,18 +240,16 @@ class CheckModelDependsOnMultipleSources(BaseCheck):
     name: Literal["check_model_depends_on_multiple_sources"]
 
 
-@pytest.mark.iterate_over_models
-@bouncer_check
-def check_model_depends_on_multiple_sources(
-    request: TopRequest, model: Union[DbtBouncerModel, None] = None, **kwargs
-) -> None:
+def check_model_depends_on_multiple_sources(model: DbtBouncerModel, **kwargs) -> None:
     """
     Models cannot reference more than one source.
 
-    Receives:
+    Parameters:
+        model (DbtBouncerModel): The DbtBouncerModel object to check.
+
+    Other parameters:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
-        model (DbtBouncerModel): The DbtBouncerModel object to check.
 
     Example(s):
         ```yaml
@@ -276,21 +267,17 @@ class CheckModelDirectories(BaseCheck):
     permitted_sub_directories: List[str]
 
 
-@pytest.mark.iterate_over_models
-@bouncer_check
 def check_model_directories(
-    request: TopRequest,
-    include: Union[None, str] = None,
-    model: Union[DbtBouncerModel, None] = None,
-    permitted_sub_directories: Union[List[str], None] = None,
+    include: str,
+    model: DbtBouncerModel,
+    permitted_sub_directories: List[str],
     **kwargs,
 ) -> None:
     """
     Only specified sub-directories are permitted.
 
-    Receives:
-        exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
-        include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked. Special case: if you want to check `./models`, pass "" to `include`.
+    Parameters:
+        include (str): Regex pattern to the directory to check.
         model (DbtBouncerModel): The DbtBouncerModel object to check.
         permitted_sub_directories (List[str]): List of permitted sub-directories.
 
@@ -318,7 +305,7 @@ def check_model_directories(
     path_after_match = model.original_file_path[matched_path.end() + 1 :]  # type: ignore[union-attr]
 
     assert (
-        path_after_match.split("/")[0] in permitted_sub_directories  # type: ignore[operator]
+        path_after_match.split("/")[0] in permitted_sub_directories
     ), f"`{model.name}` is located in `{model.original_file_path.split('/')[1]}`, this is not a valid sub-directory. {path_after_match.split('/')[0]}"
 
 
@@ -326,18 +313,16 @@ class CheckModelHasContractsEnforced(BaseCheck):
     name: Literal["check_model_has_contracts_enforced"]
 
 
-@pytest.mark.iterate_over_models
-@bouncer_check
-def check_model_has_contracts_enforced(
-    request: TopRequest, model: Union[DbtBouncerModel, None] = None, **kwargs
-) -> None:
+def check_model_has_contracts_enforced(model: DbtBouncerModel, **kwargs) -> None:
     """
     Model must have contracts enforced.
 
-    Receives:
+    Parameters:
+        model (DbtBouncerModel): The DbtBouncerModel object to check.
+
+    Other parameters:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
-        model (DbtBouncerModel): The DbtBouncerModel object to check.
 
     Example(s):
         ```yaml
@@ -355,22 +340,21 @@ class CheckModelHasMetaKeys(BaseCheck):
     name: Literal["check_model_has_meta_keys"]
 
 
-@pytest.mark.iterate_over_models
-@bouncer_check
 def check_model_has_meta_keys(
-    request: TopRequest,
-    keys: Union[NestedDict, None] = None,
-    model: Union[DbtBouncerModel, None] = None,
+    keys: NestedDict,
+    model: DbtBouncerModel,
     **kwargs,
 ) -> None:
     """
     The `meta` config for models must have the specified keys.
 
-    Receives:
-        exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
-        include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+    Parameters:
         keys (NestedDict): A list (that may contain sub-lists) of required keys.
         model (DbtBouncerModel): The DbtBouncerModel object to check.
+
+    Other parameters:
+        exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
+        include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
 
     Example(s):
         ```yaml
@@ -384,7 +368,7 @@ def check_model_has_meta_keys(
 
     missing_keys = find_missing_meta_keys(
         meta_config=model.meta,
-        required_keys=keys.model_dump(),
+        required_keys=keys,
     )
     assert (
         missing_keys == []
@@ -395,18 +379,16 @@ class CheckModelHasNoUpstreamDependencies(BaseCheck):
     name: Literal["check_model_has_no_upstream_dependencies"]
 
 
-@pytest.mark.iterate_over_models
-@bouncer_check
-def check_model_has_no_upstream_dependencies(
-    request: TopRequest, model: Union[DbtBouncerModel, None] = None, **kwargs
-) -> None:
+def check_model_has_no_upstream_dependencies(model: DbtBouncerModel, **kwargs) -> None:
     """
     Identify if models have no upstream dependencies as this likely indicates hard-coded tables references.
 
-    Receives:
+    Parameters:
+        model (DbtBouncerModel): The DbtBouncerModel object to check.
+
+    Other parameters:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
-        model (DbtBouncerModel): The DbtBouncerModel object to check.
 
     Example(s):
         ```yaml
@@ -422,25 +404,20 @@ def check_model_has_no_upstream_dependencies(
 
 class CheckModelHasTags(BaseCheck):
     name: Literal["check_model_has_tags"]
-    tags: List[str] = Field(default=[])
+    tags: List[str]
 
 
-@pytest.mark.iterate_over_models
-@bouncer_check
-def check_model_has_tags(
-    request: TopRequest,
-    model: Union[DbtBouncerModel, None] = None,
-    tags: Union[List[str], None] = None,
-    **kwargs,
-) -> None:
+def check_model_has_tags(model: DbtBouncerModel, tags: List[str], **kwargs) -> None:
     """
     Models must have the specified tags.
 
-    Receives:
-        exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
-        include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+    Parameters:
         model (DbtBouncerModel): The DbtBouncerModel object to check.
         tags (List[str]): List of tags to check for.
+
+    Other parameters:
+        exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
+        include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
 
     Example(s):
         ```yaml
@@ -467,23 +444,27 @@ class CheckModelHasUniqueTest(BaseCheck):
     name: Literal["check_model_has_unique_test"]
 
 
-@pytest.mark.iterate_over_models
-@bouncer_check
 def check_model_has_unique_test(
-    request: TopRequest,
-    tests: List[DbtBouncerModel],
-    accepted_uniqueness_tests: Union[List[str], None] = None,
-    model: Union[DbtBouncerModel, None] = None,
+    model: DbtBouncerModel,
+    tests: DbtBouncerTest,
+    accepted_uniqueness_tests: List[str] = [
+        "expect_compound_columns_to_be_unique",
+        "dbt_utils.unique_combination_of_columns",
+        "unique",
+    ],
     **kwargs,
 ) -> None:
     """
     Models must have a test for uniqueness of a column.
 
-    Receives:
-        accepted_uniqueness_tests (Optional[List[str]]): List of tests that are accepted as uniqueness tests. If not provided, defaults to `expect_compound_columns_to_be_unique`, `dbt_utils.unique_combination_of_columns` and `unique`.
+    Parameters:
+        accepted_uniqueness_tests (Optional[List[str]]): List of tests that are accepted as uniqueness tests.
+        model (DbtBouncerModel): The DbtBouncerModel object to check.
+        tests (List[DbtBouncerTest]): List of DbtBouncerTest objects parsed from `manifest.json`.
+
+    Other parameters:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
-        model (DbtBouncerModel): The DbtBouncerModel object to check.
 
     Example(s):
         ```yaml
@@ -504,7 +485,7 @@ def check_model_has_unique_test(
 
     num_unique_tests = sum(
         test.attached_node == model.unique_id
-        and test.test_metadata.name in accepted_uniqueness_tests  # type: ignore[operator]
+        and test.test_metadata.name in accepted_uniqueness_tests
         for test in tests
     )
     assert (
@@ -517,24 +498,25 @@ class CheckModelHasUnitTests(BaseCheck):
     name: Literal["check_model_has_unit_tests"]
 
 
-@pytest.mark.iterate_over_models
-@bouncer_check
 def check_model_has_unit_tests(
     manifest_obj: DbtBouncerManifest,
-    request: TopRequest,
+    model: DbtBouncerModel,
     unit_tests: List[UnitTests],
-    min_number_of_unit_tests: Union[int, None] = None,
-    model: Union[DbtBouncerModel, None] = None,
+    min_number_of_unit_tests: int = 1,
     **kwargs,
 ) -> None:
     """
     Models must have more than the specified number of unit tests.
 
-    Receives:
+    Parameters:
+        manifest_obj (DbtBouncerManifest): The DbtBouncerManifest object parsed from `manifest.json`.
+        min_number_of_unit_tests (Optional[int]): The minimum number of unit tests that a model must have.
+        model (DbtBouncerModel): The DbtBouncerModel object to check.
+        unit_tests (List[UnitTests]): List of UnitTests objects parsed from `manifest.json`.
+
+    Other parameters:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
-        min_number_of_unit_tests (Optional[int]): The minimum number of unit tests that a model must have. Default: 1.
-        model (DbtBouncerModel): The DbtBouncerModel object to check.
 
     !!! warning
 
@@ -558,7 +540,7 @@ def check_model_has_unit_tests(
             [t.unique_id for t in unit_tests if t.depends_on.nodes[0] == model.unique_id]
         )
         assert (
-            num_unit_tests >= min_number_of_unit_tests  # type: ignore[operator]
+            num_unit_tests >= min_number_of_unit_tests
         ), f"`{model.name}` has {num_unit_tests} unit tests, this is less than the minimum of {min_number_of_unit_tests}."
     else:
         logging.warning(
@@ -576,26 +558,26 @@ class CheckModelMaxChainedViews(BaseCheck):
     name: Literal["check_model_max_chained_views"]
 
 
-@pytest.mark.iterate_over_models
-@bouncer_check
 def check_model_max_chained_views(
     manifest_obj: DbtBouncerManifest,
+    model: DbtBouncerModel,
     models: List[DbtBouncerModel],
-    request: TopRequest,
-    materializations_to_include: Union[List[str], None] = None,
-    max_chained_views: Union[int, None] = None,
-    model: Union[DbtBouncerModel, None] = None,
+    materializations_to_include: List[str] = ["ephemeral", "view"],
+    max_chained_views: int = 3,
     **kwargs,
 ) -> None:
     """
-    Models cannot have more than the specified number of upstream dependents that are not tables (default: 3).
+    Models cannot have more than the specified number of upstream dependents that are not tables.
 
-    Receives:
+    Parameters:
+        materializations_to_include (Optional[List[str]]): List of materializations to include in the check.
+        max_chained_views (Optional[int]): The maximum number of upstream dependents that are not tables.
+        model (DbtBouncerModel): The DbtBouncerModel object to check.
+        models (List[DbtBouncerModel]): List of DbtBouncerModel objects parsed from `manifest.json`.
+
+    Other parameters:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
-        materializations_to_include (Optional[List[str]]): List of materializations to include in the check. If not provided, defaults to `ephemeral` and `view`.
-        max_chained_views (Optional[int]): The maximum number of upstream dependents that are not tables. Default: 3
-        model (DbtBouncerModel): The DbtBouncerModel object to check.
 
     Example(s):
         ```yaml
@@ -674,23 +656,23 @@ class CheckModelMaxFanout(BaseCheck):
     name: Literal["check_model_max_fanout"]
 
 
-@pytest.mark.iterate_over_models
-@bouncer_check
 def check_model_max_fanout(
+    model: DbtBouncerModel,
     models: List[DbtBouncerModel],
-    request: TopRequest,
-    max_downstream_models: Union[int, None] = None,
-    model: Union[DbtBouncerModel, None] = None,
+    max_downstream_models: int = 3,
     **kwargs,
 ) -> None:
     """
-    Models cannot have more than the specified number of downstream models (default: 3).
+    Models cannot have more than the specified number of downstream models.
 
-    Receives:
+    Parameters:
+        max_downstream_models (Optional[int]): The maximum number of permitted downstream models.
+        model (DbtBouncerModel): The DbtBouncerModel object to check.
+        models (List[DbtBouncerModel]): List of DbtBouncerModel objects parsed from `manifest.json`.
+
+    Other parameters:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
-        max_downstream_models (Optional[int]): The maximum number of permitted downstream models. Default: 3
-        model (DbtBouncerModel): The DbtBouncerModel object to check.
 
     Example(s):
         ```yaml
@@ -703,7 +685,7 @@ def check_model_max_fanout(
     num_downstream_models = sum(model.unique_id in m.depends_on.nodes for m in models)
 
     assert (
-        num_downstream_models <= max_downstream_models  # type: ignore[operator]
+        num_downstream_models <= max_downstream_models
     ), f"`{model.name}` has {num_downstream_models} downstream models, which is more than the permitted maximum of {max_downstream_models}."
 
 
@@ -712,23 +694,22 @@ class CheckModelMaxNumberOfLines(BaseCheck):
     max_number_of_lines: int = Field(default=100)
 
 
-@pytest.mark.iterate_over_models
-@bouncer_check
 def check_model_max_number_of_lines(
-    request: TopRequest,
-    max_number_of_lines: Union[int, None] = None,
-    model: Union[DbtBouncerModel, None] = None,
+    model: DbtBouncerModel,
+    max_number_of_lines: int = 100,
     **kwargs,
 ) -> None:
     """
     Models may not have more than the specified number of lines.
 
-    Receives:
-        exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
-        include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern
-        will be checked.
-        max_number_of_lines (int): The maximum number of permitted lines. Default: 100.
+    Parameters:
+        max_number_of_lines (int): The maximum number of permitted lines.
+
         model (DbtBouncerModel): The DbtBouncerModel object to check.
+
+    Other parameters:
+        exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
+        include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
 
     Example(s):
         ```yaml
@@ -762,26 +743,25 @@ class CheckModelMaxUpstreamDependencies(BaseCheck):
     name: Literal["check_model_max_upstream_dependencies"]
 
 
-@pytest.mark.iterate_over_models
-@bouncer_check
 def check_model_max_upstream_dependencies(
-    request: TopRequest,
-    max_upstream_macros: Union[int, None] = None,
-    max_upstream_models: Union[int, None] = None,
-    max_upstream_sources: Union[int, None] = None,
-    model: Union[DbtBouncerModel, None] = None,
+    model: DbtBouncerModel,
+    max_upstream_macros: int = 5,
+    max_upstream_models: int = 5,
+    max_upstream_sources: int = 1,
     **kwargs,
 ) -> None:
     """
-    Limit the number of upstream dependencies a model has. Default values are 5 for models, 5 for macros, and 1 for sources.
+    Limit the number of upstream dependencies a model has.
 
-    Receives:
+    Parameters:
+        max_upstream_macros (Optional[int]): The maximum number of permitted upstream macros.
+        max_upstream_models (Optional[int]): The maximum number of permitted upstream models.
+        max_upstream_sources (Optional[int]): The maximum number of permitted upstream sources.
+        model (DbtBouncerModel): The DbtBouncerModel object to check.
+
+    Other parameters:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
-        max_upstream_macros (Optional[int]): The maximum number of permitted upstream macros. Default: 5
-        max_upstream_models (Optional[int]): The maximum number of permitted upstream models. Default: 5
-        max_upstream_sources (Optional[int]): The maximum number of permitted upstream sources. Default: 1
-        model (DbtBouncerModel): The DbtBouncerModel object to check.
 
     Example(s):
         ```yaml
@@ -796,13 +776,13 @@ def check_model_max_upstream_dependencies(
     num_upstream_sources = len([m for m in model.depends_on.nodes if m.split(".")[0] == "source"])
 
     assert (
-        num_upstream_macros <= max_upstream_macros  # type: ignore[operator]
+        num_upstream_macros <= max_upstream_macros
     ), f"`{model.name}` has {num_upstream_macros} upstream macros, which is more than the permitted maximum of {max_upstream_macros}."
     assert (
-        num_upstream_models <= max_upstream_models  # type: ignore[operator]
+        num_upstream_models <= max_upstream_models
     ), f"`{model.name}` has {num_upstream_models} upstream models, which is more than the permitted maximum of {max_upstream_models}."
     assert (
-        num_upstream_sources <= max_upstream_sources  # type: ignore[operator]
+        num_upstream_sources <= max_upstream_sources
     ), f"`{model.name}` has {num_upstream_sources} upstream sources, which is more than the permitted maximum of {max_upstream_sources}."
 
 
@@ -813,22 +793,21 @@ class CheckModelNames(BaseCheck):
     model_name_pattern: str
 
 
-@pytest.mark.iterate_over_models
-@bouncer_check
 def check_model_names(
-    request: TopRequest,
-    model: Union[DbtBouncerModel, None] = None,
-    model_name_pattern: Union[None, str] = None,
+    model: DbtBouncerModel,
+    model_name_pattern: str,
     **kwargs,
 ) -> None:
     """
     Models must have a name that matches the supplied regex.
 
-    Receives:
+    Parameters:
+        model (DbtBouncerModel): The DbtBouncerModel object to check.
+        model_name_pattern (str): Regexp the model name must match.
+
+    Other parameters:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
-        model_name_pattern (str): Regexp the model name must match.
-        model (DbtBouncerModel): The DbtBouncerModel object to check.
 
     Example(s):
         ```yaml
@@ -851,18 +830,16 @@ class CheckModelPropertyFileLocation(BaseCheck):
     name: Literal["check_model_property_file_location"]
 
 
-@pytest.mark.iterate_over_models
-@bouncer_check
-def check_model_property_file_location(
-    request: TopRequest, model: Union[DbtBouncerModel, None] = None, **kwargs
-) -> None:
+def check_model_property_file_location(model: DbtBouncerModel, **kwargs) -> None:
     """
     Model properties files must follow the guidance provided by dbt [here](https://docs.getdbt.com/best-practices/how-we-structure/1-guide-overview).
 
-    Receives:
+    Parameters:
+        model (DbtBouncerModel): The DbtBouncerModel object to check.
+
+    Other parameters:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
-        model (DbtBouncerModel): The DbtBouncerModel object to check.
 
     Example(s):
         ```yaml
@@ -904,19 +881,20 @@ class CheckModelsTestCoverage(BaseModel):
     )
 
 
-@bouncer_check
 def check_model_test_coverage(
     models: List[DbtBouncerModel],
-    request: TopRequest,
-    tests: List[DbtBouncerModel],
-    min_model_test_coverage_pct: Union[float, None] = None,
+    tests: List[DbtBouncerTest],
+    min_model_test_coverage_pct: float = 100,
     **kwargs,
 ) -> None:
     """
     Set the minimum percentage of models that have at least one test.
 
-    Receives:
-        min_model_test_coverage_pct (float): The minimum percentage of models that must have at least one test. Default: 100
+    Parameters:
+        min_model_test_coverage_pct (float): The minimum percentage of models that must have at least one test.
+        models (List[DbtBouncerModel]): List of DbtBouncerModel objects parsed from `manifest.json`.
+        tests (List[DbtBouncerTest]): List of DbtBouncerTest objects parsed from `manifest.json`.
+
 
     Example(s):
         ```yaml
@@ -936,5 +914,5 @@ def check_model_test_coverage(
     model_test_coverage_pct = (num_models_with_tests / num_models) * 100
 
     assert (
-        model_test_coverage_pct >= min_model_test_coverage_pct  # type: ignore[operator]
+        model_test_coverage_pct >= min_model_test_coverage_pct
     ), f"Only {model_test_coverage_pct}% of models have at least one test, this is less than the permitted minimum of {min_model_test_coverage_pct}%."

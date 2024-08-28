@@ -1,32 +1,26 @@
-# mypy: disable-error-code="union-attr"
-
-from typing import List, Literal, Union
-
-import pytest
-from _pytest.fixtures import TopRequest
+from typing import List, Literal
 
 from dbt_bouncer.conf_validator_base import BaseCheck
 from dbt_bouncer.parsers import DbtBouncerCatalogNode, DbtBouncerSource
-from dbt_bouncer.utils import bouncer_check
 
 
 class CheckSourceColumnsAreAllDocumented(BaseCheck):
     name: Literal["check_source_columns_are_all_documented"]
 
 
-@pytest.mark.iterate_over_catalog_sources
-@bouncer_check
 def check_source_columns_are_all_documented(
+    catalog_source: DbtBouncerCatalogNode,
     sources: List[DbtBouncerSource],
-    request: TopRequest,
-    catalog_source: Union[DbtBouncerCatalogNode, None] = None,
     **kwargs,
 ) -> None:
     """
     All columns in a source should be included in the source's properties file, i.e. `.yml` file.
 
-    Receives:
+    Parameters:
         catalog_source (DbtBouncerCatalogNode): The DbtBouncerCatalogNode object to check.
+        sources (List[DbtBouncerSource]): List of DbtBouncerSource objects parsed from `catalog.json`.
+
+    Other parameters:
         exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
 

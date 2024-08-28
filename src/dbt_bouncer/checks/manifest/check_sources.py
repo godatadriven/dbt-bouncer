@@ -1,34 +1,28 @@
 # mypy: disable-error-code="union-attr"
 
 import re
-from typing import List, Literal, Union
-
-import pytest
-from _pytest.fixtures import TopRequest
-from pydantic import Field
+from typing import List, Literal
 
 from dbt_bouncer.checks.common import NestedDict
 from dbt_bouncer.conf_validator_base import BaseCheck
 from dbt_bouncer.parsers import DbtBouncerModel, DbtBouncerSource
-from dbt_bouncer.utils import bouncer_check, find_missing_meta_keys
+from dbt_bouncer.utils import find_missing_meta_keys
 
 
 class CheckSourceDescriptionPopulated(BaseCheck):
     name: Literal["check_source_description_populated"]
 
 
-@pytest.mark.iterate_over_sources
-@bouncer_check
-def check_source_description_populated(
-    request: TopRequest, source: Union[DbtBouncerSource, None] = None, **kwargs
-) -> None:
+def check_source_description_populated(source: DbtBouncerSource, **kwargs) -> None:
     """
     Sources must have a populated description.
 
-    Receives:
+    Parameters:
+        source (DbtBouncerSource): The DbtBouncerSource object to check.
+
+    Other parameters:
         exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
-        source (DbtBouncerSource): The DbtBouncerSource object to check.
 
     Example(s):
         ```yaml
@@ -46,18 +40,16 @@ class CheckSourceFreshnessPopulated(BaseCheck):
     name: Literal["check_source_freshness_populated"]
 
 
-@pytest.mark.iterate_over_sources
-@bouncer_check
-def check_source_freshness_populated(
-    request: TopRequest, source: Union[DbtBouncerSource, None] = None, **kwargs
-) -> None:
+def check_source_freshness_populated(source: DbtBouncerSource, **kwargs) -> None:
     """
     Sources must have a populated freshness.
 
-    Receives:
+    Parameters:
+        source (DbtBouncerSource): The DbtBouncerSource object to check.
+
+    Other parameters:
         exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
-        source (DbtBouncerSource): The DbtBouncerSource object to check.
 
     Example(s):
         ```yaml
@@ -80,22 +72,21 @@ class CheckSourceHasMetaKeys(BaseCheck):
     name: Literal["check_source_has_meta_keys"]
 
 
-@pytest.mark.iterate_over_sources
-@bouncer_check
 def check_source_has_meta_keys(
-    request,
-    keys: Union[NestedDict, None] = None,
-    source: Union[DbtBouncerSource, None] = None,
+    keys: NestedDict,
+    source: DbtBouncerSource,
     **kwargs,
 ) -> None:
     """
     The `meta` config for sources must have the specified keys.
 
-    Receives:
-        exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
-        include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
+    Parameters:
         keys (NestedDict): A list (that may contain sub-lists) of required keys.
         source (DbtBouncerSource): The DbtBouncerSource object to check.
+
+    Other parameters:
+        exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
+        include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
 
     Example(s):
         ```yaml
@@ -111,7 +102,7 @@ def check_source_has_meta_keys(
 
     missing_keys = find_missing_meta_keys(
         meta_config=source.meta,
-        required_keys=keys.model_dump(),
+        required_keys=keys,
     )
     assert (
         missing_keys == []
@@ -120,27 +111,24 @@ def check_source_has_meta_keys(
 
 class CheckSourceHasTags(BaseCheck):
     name: Literal["check_source_has_tags"]
-    tags: List[str] = Field(
-        default=[],
-    )
+    tags: List[str]
 
 
-@pytest.mark.iterate_over_sources
-@bouncer_check
 def check_source_has_tags(
-    request: TopRequest,
-    source: Union[DbtBouncerSource, None] = None,
-    tags: Union[None, str] = None,
+    source: DbtBouncerSource,
+    tags: List[str],
     **kwargs,
 ) -> None:
     """
     Sources must have the specified tags.
 
-    Receives:
-        exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
-        include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
+    Parameters:
         source (DbtBouncerSource): The DbtBouncerSource object to check.
         tags (List[str]): List of tags to check for.
+
+    Other parameters:
+        exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
+        include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
 
     Example(s):
         ```yaml
@@ -162,18 +150,16 @@ class CheckSourceLoaderPopulated(BaseCheck):
     name: Literal["check_source_loader_populated"]
 
 
-@pytest.mark.iterate_over_sources
-@bouncer_check
-def check_source_loader_populated(
-    request: TopRequest, source: Union[DbtBouncerSource, None] = None, **kwargs
-) -> None:
+def check_source_loader_populated(source: DbtBouncerSource, **kwargs) -> None:
     """
     Sources must have a populated loader.
 
-    Receives:
+    Parameters:
+        source (DbtBouncerSource): The DbtBouncerSource object to check.
+
+    Other parameters:
         exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
-        source (DbtBouncerSource): The DbtBouncerSource object to check.
 
     Example(s):
         ```yaml
@@ -192,22 +178,21 @@ class CheckSourceNames(BaseCheck):
     source_name_pattern: str
 
 
-@pytest.mark.iterate_over_sources
-@bouncer_check
 def check_source_names(
-    request: TopRequest,
-    source: Union[DbtBouncerSource, None] = None,
-    source_name_pattern: Union[None, str] = None,
+    source: DbtBouncerSource,
+    source_name_pattern: str,
     **kwargs,
 ) -> None:
     """
     Sources must have a name that matches the supplied regex.
 
-    Receives:
-        exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
-        include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
+    Parameters:
         source (DbtBouncerSource): The DbtBouncerSource object to check.
         source_name_pattern (str): Regexp the source name must match.
+
+    Other parameters:
+        exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
+        include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
 
     Example(s):
         ```yaml
@@ -227,21 +212,21 @@ class CheckSourceNotOrphaned(BaseCheck):
     name: Literal["check_source_not_orphaned"]
 
 
-@pytest.mark.iterate_over_sources
-@bouncer_check
 def check_source_not_orphaned(
     models: List[DbtBouncerModel],
-    request: TopRequest,
-    source: Union[DbtBouncerSource, None] = None,
+    source: DbtBouncerSource,
     **kwargs,
 ) -> None:
     """
     Sources must be referenced in at least one model.
 
-    Receives:
+    Parameters:
+        models (List[DbtBouncerModel]): List of DbtBouncerModel objects parsed from `manifest.json`.
+        source (DbtBouncerSource): The DbtBouncerSource object to check.
+
+    Other parameters:
         exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
-        source (DbtBouncerSource): The DbtBouncerSource object to check.
 
     Example(s):
         ```yaml
@@ -260,18 +245,16 @@ class CheckSourcePropertyFileLocation(BaseCheck):
     name: Literal["check_source_property_file_location"]
 
 
-@pytest.mark.iterate_over_sources
-@bouncer_check
-def check_source_property_file_location(
-    request: TopRequest, source: Union[DbtBouncerSource, None] = None, **kwargs
-) -> None:
+def check_source_property_file_location(source: DbtBouncerSource, **kwargs) -> None:
     """
     Source properties files must follow the guidance provided by dbt [here](https://docs.getdbt.com/best-practices/how-we-structure/1-guide-overview).
 
-    Receives:
+    Parameters:
+        source (DbtBouncerSource): The DbtBouncerSource object to check.
+
+    Other parameters:
         exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
-        source (DbtBouncerSource): The DbtBouncerSource object to check.
 
     Example(s):
         ```yaml
@@ -298,21 +281,21 @@ class CheckSourceUsedByModelsInSameDirectory(BaseCheck):
     name: Literal["check_source_used_by_models_in_same_directory"]
 
 
-@pytest.mark.iterate_over_sources
-@bouncer_check
 def check_source_used_by_models_in_same_directory(
     models: List[DbtBouncerModel],
-    request: TopRequest,
-    source: Union[DbtBouncerSource, None] = None,
+    source: DbtBouncerSource,
     **kwargs,
 ) -> None:
     """
     Sources can only be referenced by models that are located in the same directory where the source is defined.
 
-    Receives:
+    Parameters:
+        models (List[DbtBouncerModel]): List of DbtBouncerModel objects parsed from `manifest.json`.
+        source (DbtBouncerSource): The DbtBouncerSource object to check.
+
+    Other parameters:
         exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
-        source (DbtBouncerSource): The DbtBouncerSource object to check.
 
     Example(s):
         ```yaml
@@ -339,21 +322,21 @@ class CheckSourceUsedByOnlyOneModel(BaseCheck):
     name: Literal["check_source_used_by_only_one_model"]
 
 
-@pytest.mark.iterate_over_sources
-@bouncer_check
 def check_source_used_by_only_one_model(
     models: List[DbtBouncerModel],
-    request: TopRequest,
-    source: Union[DbtBouncerSource, None] = None,
+    source: DbtBouncerSource,
     **kwargs,
 ) -> None:
     """
     Each source can be referenced by a maximum of one model.
 
-    Receives:
+    Parameters:
+        models (List[DbtBouncerModel]): List of DbtBouncerModel objects parsed from `manifest.json`.
+        source (DbtBouncerSource): The DbtBouncerSource object to check.
+
+    Other parameters:
         exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
-        source (DbtBouncerSource): The DbtBouncerSource object to check.
 
     Example(s):
         ```yaml

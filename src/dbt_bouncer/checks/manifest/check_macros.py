@@ -2,10 +2,8 @@
 
 import re
 import warnings
-from typing import Literal, Union
+from typing import Literal
 
-import pytest
-from _pytest.fixtures import TopRequest
 from pydantic import Field
 
 with warnings.catch_warnings():
@@ -17,7 +15,6 @@ import jinja2
 from jinja2_simple_tags import StandaloneTag
 
 from dbt_bouncer.conf_validator_base import BaseCheck
-from dbt_bouncer.utils import bouncer_check
 
 
 class TagExtension(StandaloneTag):
@@ -28,18 +25,16 @@ class CheckMacroArgumentsDescriptionPopulated(BaseCheck):
     name: Literal["check_macro_arguments_description_populated"]
 
 
-@pytest.mark.iterate_over_macros
-@bouncer_check
-def check_macro_arguments_description_populated(
-    request: TopRequest, macro: Union[Macros, None] = None, **kwargs
-) -> None:
+def check_macro_arguments_description_populated(macro: Macros, **kwargs) -> None:
     """
     Macro arguments must have a populated description.
 
-    Receives:
+    Parameters:
+        macro (Macros): The Macros object to check.
+
+    Other parameters:
         exclude (Optional[str]): Regex pattern to match the macro path. Macro paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
-        macro (Macros): The Macros object to check.
 
     Example(s):
         ```yaml
@@ -88,21 +83,20 @@ class CheckMacroCodeDoesNotContainRegexpPattern(BaseCheck):
     regexp_pattern: str
 
 
-@pytest.mark.iterate_over_macros
-@bouncer_check
 def check_macro_code_does_not_contain_regexp_pattern(
-    request: TopRequest,
-    macro: Union[Macros, None] = None,
-    regexp_pattern: Union[None, str] = None,
+    macro: Macros,
+    regexp_pattern: str,
     **kwargs,
 ) -> None:
     """The raw code for a macro must not match the specified regexp pattern.
 
-    Receives:
-        exclude (Optional[str]): Regex pattern to match the macro path. Macro paths that match the pattern will not be checked.
-        include (Optional[str]): Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
+    Parameters:
         macro (Macros): The Macros object to check.
         regexp_pattern (str): The regexp pattern that should not be matched by the macro code.
+
+    Other parameters:
+        exclude (Optional[str]): Regex pattern to match the macro path. Macro paths that match the pattern will not be checked.
+        include (Optional[str]): Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
 
     Example(s):
         ```yaml
@@ -122,18 +116,16 @@ class CheckMacroDescriptionPopulated(BaseCheck):
     name: Literal["check_macro_description_populated"]
 
 
-@pytest.mark.iterate_over_macros
-@bouncer_check
-def check_macro_description_populated(
-    request: TopRequest, macro: Union[Macros, None] = None, **kwargs
-) -> None:
+def check_macro_description_populated(macro: Macros, **kwargs) -> None:
     """
     Macros must have a populated description.
 
-    Receives:
+    Parameters:
+        macro (Macros): The Macros object to check.
+
+    Other parameters:
         exclude (Optional[str]): Regex pattern to match the macro path. Macro paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
-        macro (Macros): The Macros object to check.
 
     Example(s):
         ```yaml
@@ -158,22 +150,21 @@ class CheckMacroMaxNumberOfLines(BaseCheck):
     max_number_of_lines: int = Field(default=50)
 
 
-@pytest.mark.iterate_over_macros
-@bouncer_check
 def check_macro_max_number_of_lines(
-    request: TopRequest,
-    macro: Union[Macros, None] = None,
-    max_number_of_lines: Union[int, None] = None,
+    macro: Macros,
+    max_number_of_lines: int = 50,
     **kwargs,
 ) -> None:
     """
     Macros may not have more than the specified number of lines.
 
-    Receives:
+    Parameters:
+        macro (Macros): The Macros object to check.
+        max_number_of_lines (int): The maximum number of permitted lines.
+
+    Other parameters:
         exclude (Optional[str]): Regex pattern to match the macro path. Macro paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
-        macro (Macros): The Macros object to check.
-        max_number_of_lines (int): The maximum number of permitted lines. Default: 50.
 
     Example(s):
         ```yaml
@@ -198,20 +189,18 @@ class CheckMacroNameMatchesFileName(BaseCheck):
     name: Literal["check_macro_name_matches_file_name"]
 
 
-@pytest.mark.iterate_over_macros
-@bouncer_check
-def check_macro_name_matches_file_name(
-    request: TopRequest, macro: Union[Macros, None] = None, **kwargs
-) -> None:
+def check_macro_name_matches_file_name(macro: Macros, **kwargs) -> None:
     """
     Macros names must be the same as the file they are contained in.
 
-    Generic tests are also macros, however to document these tests the "name" value must be precededed with "test_".
+    Generic tests are also macros, however to document these tests the "name" value must be preceded with "test_".
 
-    Receives:
+    Parameters:
+        macro (Macros): The Macros object to check.
+
+    Other parameters:
         exclude (Optional[str]): Regex pattern to match the macro path. Macro paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
-        macro (Macros): The Macros object to check.
 
     Example(s):
         ```yaml
@@ -234,18 +223,16 @@ class CheckMacroPropertyFileLocation(BaseCheck):
     name: Literal["check_macro_property_file_location"]
 
 
-@pytest.mark.iterate_over_macros
-@bouncer_check
-def check_macro_property_file_location(
-    request: TopRequest, macro: Union[Macros, None] = None, **kwargs
-) -> None:
+def check_macro_property_file_location(macro: Macros, **kwargs) -> None:
     """
     Macro properties files must follow the guidance provided by dbt [here](https://docs.getdbt.com/best-practices/how-we-structure/5-the-rest-of-the-project#how-we-use-the-other-folders).
 
-    Receives:
+    Parameters:
+        macro (Macros): The Macros object to check.
+
+    Other parameters:
         exclude (Optional[str]): Regex pattern to match the macro path. Macro paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
-        macro (Macros): The Macros object to check.
 
     Example(s):
         ```yaml

@@ -65,7 +65,6 @@ def test_check_unit_test_expect_format(manifest_obj, permitted_formats, unit_tes
             manifest_obj=manifest_obj,
             permitted_formats=permitted_formats,
             unit_test=unit_test,
-            request=None,
         )
 
 
@@ -127,5 +126,4 @@ def test_check_unit_test_given_formats(manifest_obj, permitted_formats, unit_tes
             manifest_obj=manifest_obj,
             permitted_formats=permitted_formats,
             unit_test=unit_test,
-            request=None,
         )

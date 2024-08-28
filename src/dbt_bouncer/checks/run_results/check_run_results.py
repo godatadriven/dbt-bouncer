@@ -1,13 +1,9 @@
 # mypy: disable-error-code="union-attr"
 
-from typing import Literal, Union
-
-import pytest
-from _pytest.fixtures import TopRequest
+from typing import Literal
 
 from dbt_bouncer.conf_validator_base import BaseCheck
-from dbt_bouncer.parsers import DbtBouncerResult
-from dbt_bouncer.utils import bouncer_check
+from dbt_bouncer.parsers import DbtBouncerRunResult
 
 
 class CheckRunResultsMaxGigabytesBilled(BaseCheck):
@@ -15,12 +11,9 @@ class CheckRunResultsMaxGigabytesBilled(BaseCheck):
     name: Literal["check_run_results_max_gigabytes_billed"]
 
 
-@pytest.mark.iterate_over_run_results
-@bouncer_check
 def check_run_results_max_gigabytes_billed(
-    request: TopRequest,
-    max_gigabytes_billed: Union[float, None] = None,
-    run_result: Union[DbtBouncerResult, None] = None,
+    max_gigabytes_billed: float,
+    run_result: DbtBouncerRunResult,
     **kwargs,
 ) -> None:
     """
@@ -30,11 +23,13 @@ def check_run_results_max_gigabytes_billed(
 
         Note that this check only works for the `dbt-bigquery` adapter.
 
-    Receives:
+    Parameters:
+        max_gigabytes_billed (float): The maximum number of gigabytes billed.
+        run_result (DbtBouncerRunResult): The DbtBouncerRunResult object to check.
+
+    Other parameters:
         exclude (Optional[str]): Regex pattern to match the resource path. Resource paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the resource path. Only resource paths that match the pattern will be checked.
-        max_gigabytes_billed (float): The maximum gigabytes billed allowed for a node.
-        run_result (DbtBouncerResult): The DbtBouncerResult object to check.
 
     Example(s):
         ```yaml
@@ -61,22 +56,21 @@ class CheckRunResultsMaxExecutionTime(BaseCheck):
     name: Literal["check_run_results_max_execution_time"]
 
 
-@pytest.mark.iterate_over_run_results
-@bouncer_check
 def check_run_results_max_execution_time(
-    request: TopRequest,
-    max_execution_time_seconds: Union[float, None] = None,
-    run_result: Union[DbtBouncerResult, None] = None,
+    max_execution_time_seconds: float,
+    run_result: DbtBouncerRunResult,
     **kwargs,
 ) -> None:
     """
     Each result can take a maximum duration (seconds).
 
-    Receives:
+    Parameters:
+        max_execution_time_seconds (float): The maximum execution time (seconds) allowed for a node.
+        run_result (DbtBouncerRunResult): The DbtBouncerRunResult object to check.
+
+    Other parameters:
         exclude (Optional[str]): Regex pattern to match the resource path. Resource paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the resource path. Only resource paths that match the pattern will be checked.
-        max_execution_time_seconds (float): The maximum execution time (seconds) allowed for a node.
-        run_result (DbtBouncerResult): The DbtBouncerResult object to check.
 
     Example(s):
         ```yaml

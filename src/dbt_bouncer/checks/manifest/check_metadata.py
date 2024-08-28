@@ -1,13 +1,11 @@
 # mypy: disable-error-code="union-attr"
 
 import re
-from typing import Literal, Optional, Union
+from typing import Literal, Optional
 
-from _pytest.fixtures import TopRequest
 from pydantic import BaseModel, ConfigDict, Field
 
 from dbt_bouncer.parsers import DbtBouncerManifest
-from dbt_bouncer.utils import bouncer_check
 
 
 class CheckProjectName(BaseModel):
@@ -20,18 +18,17 @@ class CheckProjectName(BaseModel):
     project_name_pattern: str
 
 
-@bouncer_check
 def check_project_name(
     manifest_obj: DbtBouncerManifest,
-    request: TopRequest,
-    project_name_pattern: Union[None, str] = None,
+    project_name_pattern: str,
     **kwargs,
 ) -> None:
     """
     Enforce that the name of the dbt project matches a supplied regex. Generally used to enforce that project names conform to something like  `company_<DOMAIN>`.
 
-    Receives:
-        project_name_pattern str: Regex pattern to match the project name.
+    Parameters:
+        manifest_obj (DbtBouncerManifest): The manifest object.
+        project_name_pattern (str): Regex pattern to match the project name.
 
     Example(s):
         ```yaml

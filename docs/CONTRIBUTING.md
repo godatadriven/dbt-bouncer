@@ -156,12 +156,9 @@ To add a new check follow the below steps:
         - A `default` value provided for optional input arguments.
 
     - `function`: The function must meet the following criteria:
-        - Have the `@pytest.mark.iterate_<RESOURCE_TYPE>` decorator applied if the check is designed to iterate over a resource type.
-        - Have the `@bouncer_check` decorator applied.
         - Be called after the snake case equivalent of the `name` attribute of the created class.
-        - Accept `request` as a required argument.
         - Accept `**kwargs`.
-        - Have a doc string that includes a description of the check, a list of possible input arguments and at least one example.
+        - Have a doc string that includes a description of the check, a list of possible input parameters and at least one example.
         - A clear message in the event of a failure.
 
 1. After the check is added, add the check to `dbt-bouncer-example.yml` and run `dbt-bouncer --config-file dbt-bouncer-example.yml` to ensure the check succeeds.

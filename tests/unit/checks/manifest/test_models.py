@@ -7,7 +7,6 @@ with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
     from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Nodes4, Nodes6, UnitTests
 
-from dbt_bouncer.checks.common import NestedDict
 from dbt_bouncer.checks.manifest.check_models import (
     check_model_access,
     check_model_code_does_not_contain_regexp_pattern,
@@ -92,7 +91,10 @@ from dbt_bouncer.checks.manifest.check_models import (
 )
 def test_check_model_access(access, model, expectation):
     with expectation:
-        check_model_access(access=access, model=model, request=None)
+        check_model_access(
+            access=access,
+            model=model,
+        )
 
 
 @pytest.mark.parametrize(
@@ -180,7 +182,9 @@ def test_check_model_access(access, model, expectation):
 )
 def test_check_model_contract_enforced_for_public_model(model, expectation):
     with expectation:
-        check_model_contract_enforced_for_public_model(model=model, request=None)
+        check_model_contract_enforced_for_public_model(
+            model=model,
+        )
 
 
 @pytest.mark.parametrize(
@@ -242,7 +246,9 @@ def test_check_model_contract_enforced_for_public_model(model, expectation):
 )
 def test_check_model_depends_on_multiple_sources(model, expectation):
     with expectation:
-        check_model_depends_on_multiple_sources(model=model, request=None)
+        check_model_depends_on_multiple_sources(
+            model=model,
+        )
 
 
 @pytest.mark.parametrize(
@@ -363,7 +369,6 @@ def test_check_model_documentation_coverage(
         check_model_documentation_coverage(
             min_model_documentation_coverage_pct=min_model_documentation_coverage_pct,
             models=models,
-            request=None,
         )
 
 
@@ -424,7 +429,9 @@ def test_check_model_documentation_coverage(
 )
 def test_check_model_documented_in_same_directory(model, expectation):
     with expectation:
-        check_model_documented_in_same_directory(model=model, request=None)
+        check_model_documented_in_same_directory(
+            model=model,
+        )
 
 
 @pytest.mark.parametrize(
@@ -484,14 +491,16 @@ def test_check_model_documented_in_same_directory(model, expectation):
 )
 def test_check_model_has_contracts_enforced(model, expectation):
     with expectation:
-        check_model_has_contracts_enforced(model=model, request=None)
+        check_model_has_contracts_enforced(
+            model=model,
+        )
 
 
 @pytest.mark.parametrize(
     "keys, model, expectation",
     [
         (
-            NestedDict(["owner"]),
+            ["owner"],
             Nodes4(
                 **{
                     "alias": "model_1",
@@ -517,7 +526,7 @@ def test_check_model_has_contracts_enforced(model, expectation):
             does_not_raise(),
         ),
         (
-            NestedDict(["owner"]),
+            ["owner"],
             Nodes4(
                 **{
                     "alias": "model_1",
@@ -543,7 +552,7 @@ def test_check_model_has_contracts_enforced(model, expectation):
             does_not_raise(),
         ),
         (
-            NestedDict(["owner", {"name": ["first", "last"]}]),
+            ["owner", {"name": ["first", "last"]}],
             Nodes4(
                 **{
                     "alias": "model_1",
@@ -569,7 +578,7 @@ def test_check_model_has_contracts_enforced(model, expectation):
             does_not_raise(),
         ),
         (
-            NestedDict(["owner"]),
+            ["owner"],
             Nodes4(
                 **{
                     "alias": "model_1",
@@ -595,7 +604,7 @@ def test_check_model_has_contracts_enforced(model, expectation):
             pytest.raises(AssertionError),
         ),
         (
-            NestedDict(["owner"]),
+            ["owner"],
             Nodes4(
                 **{
                     "alias": "model_1",
@@ -621,7 +630,7 @@ def test_check_model_has_contracts_enforced(model, expectation):
             pytest.raises(AssertionError),
         ),
         (
-            NestedDict(["owner", {"name": ["first", "last"]}]),
+            ["owner", {"name": ["first", "last"]}],
             Nodes4(
                 **{
                     "alias": "model_1",
@@ -650,7 +659,10 @@ def test_check_model_has_contracts_enforced(model, expectation):
 )
 def test_check_model_has_meta_keys(keys, model, expectation):
     with expectation:
-        check_model_has_meta_keys(keys=keys, model=model, request=None)
+        check_model_has_meta_keys(
+            keys=keys,
+            model=model,
+        )
 
 
 @pytest.mark.parametrize(
@@ -735,7 +747,9 @@ def test_check_model_has_meta_keys(keys, model, expectation):
 )
 def test_check_model_has_no_upstream_dependencies(model, expectation):
     with expectation:
-        check_model_has_no_upstream_dependencies(model=model, request=None)
+        check_model_has_no_upstream_dependencies(
+            model=model,
+        )
 
 
 @pytest.mark.parametrize(
@@ -799,7 +813,10 @@ def test_check_model_has_no_upstream_dependencies(model, expectation):
 )
 def test_check_model_has_tags(model, tags, expectation):
     with expectation:
-        check_model_has_tags(model=model, tags=tags, request=None)
+        check_model_has_tags(
+            model=model,
+            tags=tags,
+        )
 
 
 @pytest.mark.parametrize(
@@ -977,7 +994,6 @@ def test_check_model_has_unique_test(accepted_uniqueness_tests, model, tests, ex
             accepted_uniqueness_tests=accepted_uniqueness_tests,
             model=model,
             tests=tests,
-            request=None,
         )
 
 
@@ -1090,7 +1106,6 @@ def test_check_model_has_unit_tests(
             min_number_of_unit_tests=min_number_of_unit_tests,
             model=model,
             unit_tests=unit_tests,
-            request=None,
         )
 
 
@@ -1154,7 +1169,8 @@ def test_check_model_has_unit_tests(
 def test_check_model_code_does_not_contain_regexp_pattern(model, regexp_pattern, expectation):
     with expectation:
         check_model_code_does_not_contain_regexp_pattern(
-            model=model, regexp_pattern=regexp_pattern, request=None
+            model=model,
+            regexp_pattern=regexp_pattern,
         )
 
 
@@ -1247,7 +1263,6 @@ def test_check_model_directories(include, model, permitted_sub_directories, expe
             include=include,
             model=model,
             permitted_sub_directories=permitted_sub_directories,
-            request=None,
         )
 
 
@@ -1488,7 +1503,6 @@ def test_check_model_max_chained_views(
             max_chained_views=max_chained_views,
             model=model,
             models=models,
-            request=None,
         )
 
 
@@ -1656,7 +1670,9 @@ def test_check_model_max_chained_views(
 def test_check_mode_names(include, model_name_pattern, model, expectation):
     with expectation:
         check_model_names(
-            include=include, model_name_pattern=model_name_pattern, model=model, request=None
+            include=include,
+            model_name_pattern=model_name_pattern,
+            model=model,
         )
 
 
@@ -1800,7 +1816,9 @@ def test_check_mode_names(include, model_name_pattern, model, expectation):
 def test_check_model_max_fanout(max_downstream_models, model, models, expectation):
     with expectation:
         check_model_max_fanout(
-            max_downstream_models=max_downstream_models, model=model, models=models, request=None
+            max_downstream_models=max_downstream_models,
+            model=model,
+            models=models,
         )
 
 
@@ -1866,7 +1884,8 @@ def test_check_model_max_fanout(max_downstream_models, model, models, expectatio
 def test_check_model_max_number_of_lines(max_number_of_lines, model, expectation):
     with expectation:
         check_model_max_number_of_lines(
-            max_number_of_lines=max_number_of_lines, model=model, request=None
+            max_number_of_lines=max_number_of_lines,
+            model=model,
         )
 
 
@@ -2074,7 +2093,6 @@ def test_check_model_max_upstream_dependencies(
             max_upstream_models=max_upstream_models,
             max_upstream_sources=max_upstream_sources,
             model=model,
-            request=None,
         )
 
 
@@ -2235,7 +2253,9 @@ def test_check_model_max_upstream_dependencies(
 )
 def test_check_model_property_file_location(model, expectation):
     with expectation:
-        check_model_property_file_location(model=model, request=None)
+        check_model_property_file_location(
+            model=model,
+        )
 
 
 @pytest.mark.parametrize(
@@ -2424,7 +2444,9 @@ def test_check_model_property_file_location(model, expectation):
 )
 def test_check_model_description_populated(model, expectation):
     with expectation:
-        check_model_description_populated(model=model, request=None)
+        check_model_description_populated(
+            model=model,
+        )
 
 
 @pytest.mark.parametrize(
@@ -2639,5 +2661,4 @@ def test_check_model_test_coverage(min_model_test_coverage_pct, models, tests, e
             min_model_test_coverage_pct=min_model_test_coverage_pct,
             models=models,
             tests=tests,
-            request=None,
         )

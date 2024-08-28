@@ -157,7 +157,6 @@ def test_check_lineage_permitted_upstream_models(
             model=model,
             models=models,
             upstream_path_pattern=upstream_path_pattern,
-            request=None,
         )
 
 
@@ -218,7 +217,9 @@ def test_check_lineage_permitted_upstream_models(
 )
 def test_check_lineage_seed_cannot_be_used(model, expectation):
     with expectation:
-        check_lineage_seed_cannot_be_used(model=model, request=None)
+        check_lineage_seed_cannot_be_used(
+            model=model,
+        )
 
 
 @pytest.mark.parametrize(
@@ -278,4 +279,6 @@ def test_check_lineage_seed_cannot_be_used(model, expectation):
 )
 def test_check_lineage_source_cannot_be_used(model, expectation):
     with expectation:
-        check_lineage_source_cannot_be_used(model=model, request=None)
+        check_lineage_source_cannot_be_used(
+            model=model,
+        )

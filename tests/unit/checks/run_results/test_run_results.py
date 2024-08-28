@@ -49,7 +49,8 @@ from dbt_bouncer.checks.run_results.check_run_results import (
 def test_check_run_results_max_gigabytes_billed(max_gigabytes_billed, run_result, expectation):
     with expectation:
         check_run_results_max_gigabytes_billed(
-            max_gigabytes_billed=max_gigabytes_billed, run_result=run_result, request=None
+            max_gigabytes_billed=max_gigabytes_billed,
+            run_result=run_result,
         )
 
 
@@ -105,5 +106,4 @@ def test_check_run_results_max_execution_time(max_execution_time_seconds, run_re
         check_run_results_max_execution_time(
             max_execution_time_seconds=max_execution_time_seconds,
             run_result=run_result,
-            request=None,
         )

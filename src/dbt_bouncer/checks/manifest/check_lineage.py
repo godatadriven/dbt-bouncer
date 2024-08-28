@@ -1,14 +1,10 @@
 # mypy: disable-error-code="union-attr"
 
 import re
-from typing import List, Literal, Union
-
-import pytest
-from _pytest.fixtures import TopRequest
+from typing import List, Literal
 
 from dbt_bouncer.conf_validator_base import BaseCheck
 from dbt_bouncer.parsers import DbtBouncerManifest, DbtBouncerModel
-from dbt_bouncer.utils import bouncer_check
 
 
 class CheckLineagePermittedUpstreamModels(BaseCheck):
@@ -16,24 +12,25 @@ class CheckLineagePermittedUpstreamModels(BaseCheck):
     upstream_path_pattern: str
 
 
-@pytest.mark.iterate_over_models
-@bouncer_check
 def check_lineage_permitted_upstream_models(
     manifest_obj: DbtBouncerManifest,
+    model: DbtBouncerModel,
     models: List[DbtBouncerModel],
-    request: TopRequest,
-    model: Union[DbtBouncerModel, None] = None,
-    upstream_path_pattern: Union[None, str] = None,
+    upstream_path_pattern: str,
     **kwargs,
 ) -> None:
     """
     Upstream models must have a path that matches the provided `upstream_path_pattern`.
 
-    Receives:
+    Parameters:
+        manifest_obj (DbtBouncerManifest): The manifest object.
+        model (DbtBouncerModel): The DbtBouncerModel object to check.
+        models (List[DbtBouncerModel]): List of DbtBouncerModel objects parsed from `manifest.json`.
+        upstream_path_pattern (str): Regexp pattern to match the upstream model(s) path.
+
+    Other parameters:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
-        model (DbtBouncerModel): The DbtBouncerModel object to check.
-        upstream_path_pattern (str): Regexp pattern to match the upstream model(s) path.
 
     Example(s):
         ```yaml
@@ -73,18 +70,16 @@ class CheckLineageSeedCannotBeUsed(BaseCheck):
     name: Literal["check_lineage_seed_cannot_be_used"]
 
 
-@pytest.mark.iterate_over_models
-@bouncer_check
-def check_lineage_seed_cannot_be_used(
-    request: TopRequest, model: Union[DbtBouncerModel, None] = None, **kwargs
-) -> None:
+def check_lineage_seed_cannot_be_used(model: DbtBouncerModel, **kwargs) -> None:
     """
     Seed cannot be referenced in models with a path that matches the specified `include` config.
 
-    Receives:
+    Parameters:
+        model (DbtBouncerModel): The DbtBouncerModel object to check.
+
+    Other parameters:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
-        model (DbtBouncerModel): The DbtBouncerModel object to check.
 
     Example(s):
         ```yaml
@@ -103,18 +98,16 @@ class CheckLineageSourceCannotBeUsed(BaseCheck):
     name: Literal["check_lineage_source_cannot_be_used"]
 
 
-@pytest.mark.iterate_over_models
-@bouncer_check
-def check_lineage_source_cannot_be_used(
-    request: TopRequest, model: Union[DbtBouncerModel, None] = None, **kwargs
-) -> None:
+def check_lineage_source_cannot_be_used(model: DbtBouncerModel, **kwargs) -> None:
     """
     Sources cannot be referenced in models with a path that matches the specified `include` config.
 
-    Receives:
+    Parameters:
+        model (DbtBouncerModel): The DbtBouncerModel object to check.
+
+    Other parameters:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
-        model (DbtBouncerModel): The DbtBouncerModel object to check.
 
     Example(s):
         ```yaml
