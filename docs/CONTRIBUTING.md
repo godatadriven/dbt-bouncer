@@ -38,7 +38,6 @@ There are some tools that will be helpful to you in developing locally. While th
 
 These are the tools used in `dbt-bouncer` development and testing:
 
-- [`black`](https://github.com/psf/black) for code formatting.
 - [`click`](https://click.palletsprojects.com/en/8.1.x/) to create our CLI interface.
 - [GitHub Actions](https://github.com/features/actions) for automating tests and checks, once a PR is pushed to the `dbt-bouncer` repository.
 - [`make`](https://users.cs.duke.edu/~ola/courses/programming/Makefiles/Makefiles.html) to run multiple setup or test steps in combination.
@@ -47,6 +46,7 @@ These are the tools used in `dbt-bouncer` development and testing:
 - [`pre-commit`](https://pre-commit.com) to easily run those checks.
 - [`Pydantic`](https://docs.pydantic.dev/latest/) to validate our configuration file.
 - [`pytest`](https://docs.pytest.org/en/latest/) to define, discover, and run tests.
+- [`Ruff`](https://github.com/astral-sh/ruff) to lint and format python code.
 
 A deep understanding of these tools in not required to effectively contribute to `dbt-bouncer`, but we recommend checking out the attached documentation if you're interested in learning more about each one.
 
