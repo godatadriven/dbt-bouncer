@@ -1,5 +1,3 @@
-# mypy: disable-error-code="union-attr"
-
 from typing import List, Literal
 
 from dbt_bouncer.conf_validator_base import BaseCheck
@@ -11,15 +9,18 @@ class CheckSourceColumnsAreAllDocumented(BaseCheck):
 
 
 def check_source_columns_are_all_documented(
-    sources: List[DbtBouncerSource],
     catalog_source: DbtBouncerCatalogNode,
+    sources: List[DbtBouncerSource],
     **kwargs,
 ) -> None:
     """
     All columns in a source should be included in the source's properties file, i.e. `.yml` file.
 
-    Receives:
+    Parameters:
         catalog_source (DbtBouncerCatalogNode): The DbtBouncerCatalogNode object to check.
+        sources (List[DbtBouncerSource]): List of DbtBouncerSource objects parsed from `catalog.json`.
+
+    Other parameters:
         exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
 

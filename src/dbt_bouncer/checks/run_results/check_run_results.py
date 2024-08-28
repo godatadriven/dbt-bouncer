@@ -23,11 +23,13 @@ def check_run_results_max_gigabytes_billed(
 
         Note that this check only works for the `dbt-bigquery` adapter.
 
-    Receives:
+    Parameters:
+        max_gigabytes_billed (float): The maximum number of gigabytes billed.
+        run_result (DbtBouncerRunResult): The DbtBouncerRunResult object to check.
+
+    Other parameters:
         exclude (Optional[str]): Regex pattern to match the resource path. Resource paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the resource path. Only resource paths that match the pattern will be checked.
-        max_gigabytes_billed (float): The maximum gigabytes billed allowed for a node.
-        run_result (DbtBouncerResult): The DbtBouncerResult object to check.
 
     Example(s):
         ```yaml
@@ -62,11 +64,13 @@ def check_run_results_max_execution_time(
     """
     Each result can take a maximum duration (seconds).
 
-    Receives:
+    Parameters:
+        max_execution_time_seconds (float): The maximum execution time (seconds) allowed for a node.
+        run_result (DbtBouncerRunResult): The DbtBouncerRunResult object to check.
+
+    Other parameters:
         exclude (Optional[str]): Regex pattern to match the resource path. Resource paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the resource path. Only resource paths that match the pattern will be checked.
-        max_execution_time_seconds (float): The maximum execution time (seconds) allowed for a node.
-        run_result (DbtBouncerResult): The DbtBouncerResult object to check.
 
     Example(s):
         ```yaml

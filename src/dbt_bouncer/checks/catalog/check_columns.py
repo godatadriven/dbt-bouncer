@@ -2,7 +2,7 @@
 
 import re
 import warnings
-from typing import List, Literal, Union
+from typing import List, Literal
 
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
@@ -17,15 +17,18 @@ class CheckColumnDescriptionPopulated(BaseCheck):
 
 
 def check_column_description_populated(
-    models: List[DbtBouncerModel],
     catalog_node: CatalogTable,
+    models: List[DbtBouncerModel],
     **kwargs,
 ) -> None:
     """
     Columns must have a populated description.
 
-    Receives:
+    Parameters:
         catalog_node (CatalogTable): The CatalogTable object to check.
+        models (List[DbtBouncerModel]): List of DbtBouncerModel objects parsed from `manifest.json`.
+
+    Other parameters:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
 
@@ -60,16 +63,19 @@ class CheckColumnNameCompliesToColumnType(BaseCheck):
 
 def check_column_name_complies_to_column_type(
     catalog_node: CatalogTable,
-    column_name_pattern: Union[None, str] = None,
-    types: Union[List[str], None] = None,
+    column_name_pattern: str,
+    types: List[str],
     **kwargs,
 ) -> None:
     """
     Columns with specified data types must comply to the specified regexp naming pattern.
 
-    Receives:
+    Parameters:
         catalog_node (CatalogTable): The CatalogTable object to check.
         column_name_pattern: (str): Regex pattern to match the model name.
+        type (List[str]): List of data types to check.
+
+    Other parameters:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
 
@@ -108,7 +114,7 @@ def check_column_name_complies_to_column_type(
     non_complying_columns = [
         v.name
         for _, v in catalog_node.columns.items()
-        if v.type in types and re.compile(column_name_pattern.strip()).match(v.name) is None  # type: ignore[operator]
+        if v.type in types and re.compile(column_name_pattern.strip()).match(v.name) is None
     ]
 
     assert (
@@ -121,15 +127,18 @@ class CheckColumnsAreAllDocumented(BaseCheck):
 
 
 def check_columns_are_all_documented(
-    models: List[DbtBouncerModel],
     catalog_node: CatalogTable,
+    models: List[DbtBouncerModel],
     **kwargs,
 ) -> None:
     """
     All columns in a model should be included in the model's properties file, i.e. `.yml` file.
 
-    Receives:
+    Parameters:
         catalog_node (CatalogTable): The CatalogTable object to check.
+        models (List[DbtBouncerModel]): List of DbtBouncerModel objects parsed from `manifest.json`.
+
+    Other parameters:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
 
@@ -155,15 +164,18 @@ class CheckColumnsAreDocumentedInPublicModels(BaseCheck):
 
 
 def check_columns_are_documented_in_public_models(
-    models: List[DbtBouncerModel],
     catalog_node: CatalogTable,
+    models: List[DbtBouncerModel],
     **kwargs,
 ) -> None:
     """
     Columns should have a populated description in public models.
 
-    Receives:
+    Parameters:
         catalog_node (CatalogTable): The CatalogTable object to check.
+        models (List[DbtBouncerModel]): List of DbtBouncerModel objects parsed from `manifest.json`.
+
+    Other parameters:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
 
@@ -195,21 +207,24 @@ class CheckColumnHasSpecifiedTest(BaseCheck):
 
 
 def check_column_has_specified_test(
-    tests: List[DbtBouncerTest],
     catalog_node: CatalogTable,
     column_name_pattern: str,
     test_name: str,
+    tests: List[DbtBouncerTest],
     **kwargs,
 ) -> None:
     """
     Columns that match the specified regexp pattern must have a specified test.
 
-    Receives:
+    Parameters:
         catalog_node (CatalogTable): The CatalogTable object to check.
         column_name_pattern (str): Regex pattern to match the column name.
+        test_name (str): Name of the test to check for.
+        tests (List[DbtBouncerTest]): List of DbtBouncerTest objects parsed from `manifest.json`.
+
+    Other parameters:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
-        test_name (str): Name of the test to check for.
 
     Example(s):
         ```yaml

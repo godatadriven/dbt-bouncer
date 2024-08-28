@@ -1,7 +1,7 @@
 # mypy: disable-error-code="union-attr"
 
 import warnings
-from typing import List, Literal, Union
+from typing import List, Literal
 
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
@@ -25,9 +25,11 @@ def check_exposure_based_on_non_public_models(
     """
     Exposures should be based on public models only.
 
-    Receives:
-        exclude (Optional[str]): Regex pattern to match the exposure path (i.e the .yml file where the exposure is configured). Exposure paths that match the pattern will not be checked.
+    Parameters:
         exposure (Exposures): The Exposures object to check.
+
+    Other parameters:
+        exclude (Optional[str]): Regex pattern to match the exposure path (i.e the .yml file where the exposure is configured). Exposure paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the exposure path (i.e the .yml file where the exposure is configured). Only exposure paths that match the pattern will be checked.
 
     Example(s):
@@ -59,17 +61,19 @@ class CheckExposureOnView(BaseCheck):
 def check_exposure_based_on_view(
     exposure: Exposures,
     models: List[DbtBouncerModel],
-    materializations_to_include: Union[List[str], None] = None,
+    materializations_to_include: List[str] = ["ephemeral", "view"],
     **kwargs,
 ) -> None:
     """
     Exposures should not be based on views.
 
-    Receives:
-        exclude (Optional[str]): Regex pattern to match the exposure path (i.e the .yml file where the exposure is configured). Exposure paths that match the pattern will not be checked.
+    Parameters:
         exposure (Exposures): The Exposures object to check.
+        materializations_to_include (Optional[List[str]]): List of materializations to include in the check.
+
+    Other parameters:
+        exclude (Optional[str]): Regex pattern to match the exposure path (i.e the .yml file where the exposure is configured). Exposure paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the exposure path (i.e the .yml file where the exposure is configured). Only exposure paths that match the pattern will be checked.
-        materializations_to_include (Optional[List[str]]): List of materializations to include in the check. If not provided, defaults to `ephemeral` and `view`.
 
     Example(s):
         ```yaml
@@ -90,7 +94,7 @@ def check_exposure_based_on_view(
     for model in exposure.depends_on.nodes:
         if model.split(".")[0] == "model" and model.split(".")[1] == exposure.package_name:
             model = [m for m in models if m.unique_id == model][0]
-            if model.config.materialized in materializations_to_include:  # type: ignore[operator]
+            if model.config.materialized in materializations_to_include:
                 non_table_upstream_dependencies.append(model.name)
 
     assert (

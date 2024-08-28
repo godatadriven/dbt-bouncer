@@ -1,0 +1,29 @@
+<p><span class="doc-section-title">Other Parameters (passed via config file):</span></p>
+<table>
+    <thead>
+    <tr>
+        <th>{{ lang.t("Name") }}</th>
+        <th>{{ lang.t("Type") }}</th>
+        <th>{{ lang.t("Description") }}</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for parameter in section.value %}
+        <tr class="doc-section-item">
+        <td><code>{{ parameter.name }}</code></td>
+        <td>
+            {% if parameter.annotation %}
+            {% with expression = parameter.annotation %}
+                <code>{% include "expression"|get_template with context %}</code>
+            {% endwith %}
+            {% endif %}
+        </td>
+        <td>
+            <div class="doc-md-description">
+            {{ parameter.description|convert_markdown(heading_level, html_id) }}
+            </div>
+        </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>

@@ -14,19 +14,23 @@ class CheckLineagePermittedUpstreamModels(BaseCheck):
 
 def check_lineage_permitted_upstream_models(
     manifest_obj: DbtBouncerManifest,
-    models: List[DbtBouncerModel],
     model: DbtBouncerModel,
+    models: List[DbtBouncerModel],
     upstream_path_pattern: str,
     **kwargs,
 ) -> None:
     """
     Upstream models must have a path that matches the provided `upstream_path_pattern`.
 
-    Receives:
+    Parameters:
+        manifest_obj (DbtBouncerManifest): The manifest object.
+        model (DbtBouncerModel): The DbtBouncerModel object to check.
+        models (List[DbtBouncerModel]): List of DbtBouncerModel objects parsed from `manifest.json`.
+        upstream_path_pattern (str): Regexp pattern to match the upstream model(s) path.
+
+    Other parameters:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
-        model (DbtBouncerModel): The DbtBouncerModel object to check.
-        upstream_path_pattern (str): Regexp pattern to match the upstream model(s) path.
 
     Example(s):
         ```yaml
@@ -70,10 +74,12 @@ def check_lineage_seed_cannot_be_used(model: DbtBouncerModel, **kwargs) -> None:
     """
     Seed cannot be referenced in models with a path that matches the specified `include` config.
 
-    Receives:
+    Parameters:
+        model (DbtBouncerModel): The DbtBouncerModel object to check.
+
+    Other parameters:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
-        model (DbtBouncerModel): The DbtBouncerModel object to check.
 
     Example(s):
         ```yaml
@@ -96,10 +102,12 @@ def check_lineage_source_cannot_be_used(model: DbtBouncerModel, **kwargs) -> Non
     """
     Sources cannot be referenced in models with a path that matches the specified `include` config.
 
-    Receives:
+    Parameters:
+        model (DbtBouncerModel): The DbtBouncerModel object to check.
+
+    Other parameters:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
-        model (DbtBouncerModel): The DbtBouncerModel object to check.
 
     Example(s):
         ```yaml

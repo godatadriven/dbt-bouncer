@@ -1,7 +1,7 @@
 # mypy: disable-error-code="union-attr"
 
 import warnings
-from typing import List, Literal, Union
+from typing import List, Literal
 
 from pydantic import Field
 
@@ -28,21 +28,24 @@ class CheckUnitTestExpectFormats(BaseCheck):
 def check_unit_test_expect_format(
     manifest_obj: DbtBouncerManifest,
     unit_test: UnitTests,
-    permitted_formats: Union[List[Literal["csv", "dict", "sql"]], None] = None,
+    permitted_formats: List[Literal["csv", "dict", "sql"]] = ["csv", "dict", "sql"],
     **kwargs,
 ) -> None:
     """
     Unit tests can only use the specified formats.
 
-    Receives:
-        exclude (Optional[str]): Regex pattern to match the unit test path (i.e the .yml file where the unit test is configured). Unit test paths that match the pattern will not be checked.
-        include (Optional[str]): Regex pattern to match the unit test path (i.e the .yml file where the unit test is configured). Only unit test paths that match the pattern will be checked.
-        permitted_formats (Optional[List[Literal["csv", "dict", "sql"]]]): A list of formats that are allowed to be used for `expect` input in a unit test.
-        unit_test (UnitTests): The UnitTests object to check.
-
     !!! warning
 
         This check is only supported for dbt 1.8.0 and above.
+
+    Parameters:
+        manifest_obj (DbtBouncerManifest): The DbtBouncerManifest object parsed from `manifest.json`.
+        permitted_formats (Optional[List[Literal["csv", "dict", "sql"]]]): A list of formats that are allowed to be used for `expect` input in a unit test.
+        unit_test (UnitTests): The UnitTests object to check.
+
+    Other parameters:
+        exclude (Optional[str]): Regex pattern to match the unit test path (i.e the .yml file where the unit test is configured). Unit test paths that match the pattern will not be checked.
+        include (Optional[str]): Regex pattern to match the unit test path (i.e the .yml file where the unit test is configured). Only unit test paths that match the pattern will be checked.
 
     Example(s):
         ```yaml
@@ -55,7 +58,7 @@ def check_unit_test_expect_format(
 
     if semver.Version.parse(manifest_obj.manifest.metadata.dbt_version) >= "1.8.0":
         assert (
-            unit_test.expect.format.value in permitted_formats  # type: ignore[operator]
+            unit_test.expect.format.value in permitted_formats
         ), f"Unit test `{unit_test.name}` has an `expect` format that is not permitted. Permitted formats are: {permitted_formats}."
     else:
         logging.warning(
@@ -71,21 +74,24 @@ class CheckUnitTestGivenFormats(BaseCheck):
 def check_unit_test_given_formats(
     manifest_obj: DbtBouncerManifest,
     unit_test: UnitTests,
-    permitted_formats: Union[List[Literal["csv", "dict", "sql"]], None] = None,
+    permitted_formats: List[Literal["csv", "dict", "sql"]] = ["csv", "dict", "sql"],
     **kwargs,
 ) -> None:
     """
     Unit tests can only use the specified formats.
 
-    Receives:
-        exclude (Optional[str]): Regex pattern to match the unit test path (i.e the .yml file where the unit test is configured). Unit test paths that match the pattern will not be checked.
-        include (Optional[str]): Regex pattern to match the unit test path (i.e the .yml file where the unit test is configured). Only unit test paths that match the pattern will be checked.
-        permitted_formats (Optional[List[Literal["csv", "dict", "sql"]]]): A list of formats that are allowed to be used for `given` inputs in a unit test.
-        unit_test (UnitTests): The UnitTests object to check.
-
     !!! warning
 
         This check is only supported for dbt 1.8.0 and above.
+
+    Parameters:
+        manifest_obj (DbtBouncerManifest): The DbtBouncerManifest object parsed from `manifest.json`.
+        permitted_formats (Optional[List[Literal["csv", "dict", "sql"]]]): A list of formats that are allowed to be used for `expect` input in a unit test.
+        unit_test (UnitTests): The UnitTests object to check.
+
+    Other parameters:
+        exclude (Optional[str]): Regex pattern to match the unit test path (i.e the .yml file where the unit test is configured). Unit test paths that match the pattern will not be checked.
+        include (Optional[str]): Regex pattern to match the unit test path (i.e the .yml file where the unit test is configured). Only unit test paths that match the pattern will be checked.
 
     Example(s):
         ```yaml
@@ -99,7 +105,7 @@ def check_unit_test_given_formats(
     if semver.Version.parse(manifest_obj.manifest.metadata.dbt_version) >= "1.8.0":
         given_formats = [i.format.value for i in unit_test.given]
         assert all(
-            e in permitted_formats for e in given_formats  # type: ignore[operator]
+            e in permitted_formats for e in given_formats
         ), f"Unit test `{unit_test.name}` has given formats which are not permitted. Permitted formats are: {permitted_formats}."
     else:
         logging.warning(
