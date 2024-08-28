@@ -14,6 +14,7 @@ import importlib
 import logging
 import traceback
 
+from progress.bar import Bar
 from tabulate import tabulate
 
 from dbt_bouncer.conf_validator import DbtBouncerConf
@@ -119,6 +120,7 @@ def runner(
 
     logging.info(f"Assembled {len(checks_to_run)} checks, running...")
 
+    bar = Bar("Running checks...", max=len(checks_to_run))
     for check in checks_to_run:
         logging.debug(f"Running {check['check_run_id']}...")
         try:
@@ -131,6 +133,8 @@ def runner(
             logging.debug(f"Check {check['check_run_id']} failed: {failure_message}")
             check["outcome"] = "failed"
             check["failure_message"] = failure_message
+        bar.next()
+    bar.finish()
 
     results = [
         {
