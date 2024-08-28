@@ -141,7 +141,9 @@ from dbt_bouncer.checks.manifest.check_macros import (
 )
 def test_check_macro_arguments_description_populated(macro, expectation):
     with expectation:
-        check_macro_arguments_description_populated(macro=macro, request=None)
+        check_macro_arguments_description_populated(
+            macro=macro,
+        )
 
 
 @pytest.mark.parametrize(
@@ -202,7 +204,8 @@ def test_check_macro_arguments_description_populated(macro, expectation):
 def test_check_macro_code_does_not_contain_regexp_pattern(macro, regexp_pattern, expectation):
     with expectation:
         check_macro_code_does_not_contain_regexp_pattern(
-            macro=macro, regexp_pattern=regexp_pattern, request=None
+            macro=macro,
+            regexp_pattern=regexp_pattern,
         )
 
 
@@ -274,7 +277,9 @@ def test_check_macro_code_does_not_contain_regexp_pattern(macro, regexp_pattern,
 )
 def test_check_macro_description_populated(macro, expectation):
     with expectation:
-        check_macro_description_populated(macro=macro, request=None)
+        check_macro_description_populated(
+            macro=macro,
+        )
 
 
 @pytest.mark.parametrize(
@@ -315,7 +320,8 @@ def test_check_macro_description_populated(macro, expectation):
 def test_check_macro_max_number_of_lines(max_number_of_lines, macro, expectation):
     with expectation:
         check_macro_max_number_of_lines(
-            max_number_of_lines=max_number_of_lines, macro=macro, request=None
+            max_number_of_lines=max_number_of_lines,
+            macro=macro,
         )
 
 
@@ -382,7 +388,9 @@ def test_check_macro_max_number_of_lines(max_number_of_lines, macro, expectation
 )
 def test_check_macro_name_matches_file_name(macro, expectation):
     with expectation:
-        check_macro_name_matches_file_name(macro=macro, request=None)
+        check_macro_name_matches_file_name(
+            macro=macro,
+        )
 
 
 @pytest.mark.parametrize(
@@ -467,4 +475,6 @@ def test_check_macro_name_matches_file_name(macro, expectation):
 )
 def test_check_macro_property_file_location(macro, expectation):
     with expectation:
-        check_macro_property_file_location(macro=macro, request=None)
+        check_macro_property_file_location(
+            macro=macro,
+        )

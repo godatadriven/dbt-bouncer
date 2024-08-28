@@ -26,5 +26,4 @@ def test_check_project_name(manifest_obj, project_name_pattern, expectation):
         check_project_name(
             manifest_obj=manifest_obj,
             project_name_pattern=project_name_pattern,
-            request=None,
         )

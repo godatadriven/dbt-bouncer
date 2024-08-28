@@ -173,7 +173,9 @@ from dbt_bouncer.checks.manifest.check_sources import (
 )
 def test_check_source_description_populated(source, expectation):
     with expectation:
-        check_source_description_populated(source=source, request=None)
+        check_source_description_populated(
+            source=source,
+        )
 
 
 @pytest.mark.parametrize(
@@ -283,7 +285,9 @@ def test_check_source_description_populated(source, expectation):
 )
 def test_check_source_freshness_populated(source, expectation):
     with expectation:
-        check_source_freshness_populated(source=source, request=None)
+        check_source_freshness_populated(
+            source=source,
+        )
 
 
 @pytest.mark.parametrize(
@@ -333,7 +337,9 @@ def test_check_source_freshness_populated(source, expectation):
 )
 def test_check_source_loader_populated(source, expectation):
     with expectation:
-        check_source_loader_populated(source=source, request=None)
+        check_source_loader_populated(
+            source=source,
+        )
 
 
 @pytest.mark.parametrize(
@@ -475,7 +481,10 @@ def test_check_source_loader_populated(source, expectation):
 )
 def test_check_source_has_meta_keys(keys, source, expectation):
     with expectation:
-        check_source_has_meta_keys(keys=keys, source=source, request=None)
+        check_source_has_meta_keys(
+            keys=keys,
+            source=source,
+        )
 
 
 @pytest.mark.parametrize(
@@ -529,7 +538,10 @@ def test_check_source_has_meta_keys(keys, source, expectation):
 )
 def test_check_source_has_tags(source, tags, expectation):
     with expectation:
-        check_source_has_tags(source=source, tags=tags, request=None)
+        check_source_has_tags(
+            source=source,
+            tags=tags,
+        )
 
 
 @pytest.mark.parametrize(
@@ -583,7 +595,10 @@ def test_check_source_has_tags(source, tags, expectation):
 )
 def test_check_source_names(source_name_pattern, source, expectation):
     with expectation:
-        check_source_names(source_name_pattern=source_name_pattern, source=source, request=None)
+        check_source_names(
+            source_name_pattern=source_name_pattern,
+            source=source,
+        )
 
 
 @pytest.mark.parametrize(
@@ -750,7 +765,10 @@ def test_check_source_names(source_name_pattern, source, expectation):
 )
 def test_check_source_not_orphaned(models, source, expectation):
     with expectation:
-        check_source_not_orphaned(models=models, source=source, request=None)
+        check_source_not_orphaned(
+            models=models,
+            source=source,
+        )
 
 
 @pytest.mark.parametrize(
@@ -865,7 +883,9 @@ def test_check_source_not_orphaned(models, source, expectation):
 )
 def test_check_source_property_file_location(source, expectation):
     with expectation:
-        check_source_property_file_location(source=source, request=None)
+        check_source_property_file_location(
+            source=source,
+        )
 
 
 @pytest.mark.parametrize(
@@ -965,7 +985,10 @@ def test_check_source_property_file_location(source, expectation):
 )
 def test_check_source_used_by_models_in_same_directory(models, source, expectation):
     with expectation:
-        check_source_used_by_models_in_same_directory(models=models, source=source, request=None)
+        check_source_used_by_models_in_same_directory(
+            models=models,
+            source=source,
+        )
 
 
 @pytest.mark.parametrize(
@@ -1132,4 +1155,7 @@ def test_check_source_used_by_models_in_same_directory(models, source, expectati
 )
 def test_check_source_used_by_only_one_model(models, source, expectation):
     with expectation:
-        check_source_used_by_only_one_model(models=models, source=source, request=None)
+        check_source_used_by_only_one_model(
+            models=models,
+            source=source,
+        )

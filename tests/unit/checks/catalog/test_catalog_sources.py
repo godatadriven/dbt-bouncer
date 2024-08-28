@@ -122,5 +122,6 @@ from dbt_bouncer.checks.catalog.check_catalog_sources import (
 def test_check_source_columns_are_all_documented(catalog_source, sources, expectation):
     with expectation:
         check_source_columns_are_all_documented(
-            catalog_source=catalog_source, sources=sources, request=None
+            catalog_source=catalog_source,
+            sources=sources,
         )

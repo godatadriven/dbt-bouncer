@@ -112,7 +112,10 @@ from dbt_bouncer.checks.manifest.check_exposures import (
 )
 def test_check_exposure_based_on_non_public_models(exposure, models, expectation):
     with expectation:
-        check_exposure_based_on_non_public_models(exposure=exposure, models=models, request=None)
+        check_exposure_based_on_non_public_models(
+            exposure=exposure,
+            models=models,
+        )
 
 
 @pytest.mark.parametrize(
@@ -300,5 +303,4 @@ def test_check_exposure_based_on_view(exposure, materializations_to_include, mod
             exposure=exposure,
             materializations_to_include=materializations_to_include,
             models=models,
-            request=None,
         )

@@ -135,7 +135,10 @@ from dbt_bouncer.checks.catalog.check_columns import (
 )
 def test_check_column_description_populated(catalog_node, models, expectation):
     with expectation:
-        check_column_description_populated(catalog_node=catalog_node, models=models, request=None)
+        check_column_description_populated(
+            catalog_node=catalog_node,
+            models=models,
+        )
 
 
 @pytest.mark.parametrize(
@@ -245,7 +248,6 @@ def test_check_column_has_specified_test(
             column_name_pattern=column_name_pattern,
             test_name=test_name,
             tests=tests,
-            request=None,
         )
 
 
@@ -359,7 +361,10 @@ def test_check_column_has_specified_test(
 )
 def test_check_columns_are_all_documented(catalog_node, models, expectation):
     with expectation:
-        check_columns_are_all_documented(catalog_node=catalog_node, models=models, request=None)
+        check_columns_are_all_documented(
+            catalog_node=catalog_node,
+            models=models,
+        )
 
 
 @pytest.mark.parametrize(
@@ -473,7 +478,8 @@ def test_check_columns_are_all_documented(catalog_node, models, expectation):
 def test_check_columns_are_documented_in_public_models(catalog_node, models, expectation):
     with expectation:
         check_columns_are_documented_in_public_models(
-            catalog_node=catalog_node, models=models, request=None
+            catalog_node=catalog_node,
+            models=models,
         )
 
 
@@ -569,5 +575,4 @@ def test_check_column_name_complies_to_column_type(
             catalog_node=catalog_node,
             column_name_pattern=column_name_pattern,
             types=types,
-            request=None,
         )
