@@ -42,7 +42,7 @@
 
 <div align="center">
   <a>
-	<img src="https://img.shields.io/badge/code%20style-black-000000.svg">
+	<img src="https://img.shields.io/badge/style-ruff-41B5BE?style=flat">
   </a>
   <a>
 	<img src="https://www.aschey.tech/tokei/github/godatadriven/dbt-bouncer?category=code">
