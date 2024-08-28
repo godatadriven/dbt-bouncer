@@ -32,9 +32,19 @@ nav:
   - Config File: config_file.md
   - Checks:
     - Checks: checks/index.md
-    - "Manifest Checks": checks/checks_manifest.md
-    - "Catalog Checks": checks/checks_catalog.md
-    - "Run Results Checks": checks/checks_run_results.md
+    - Catalog:
+      - Catalog Sources: checks/catalog/check_catalog_sources.md
+      - Columns: checks/catalog/check_columns.md
+    - Manifest:
+      - Exposures: checks/manifest/check_exposures.md
+      - Lineage: checks/manifest/check_lineage.md
+      - Macros: checks/manifest/check_macros.md
+      - Metadata: checks/manifest/check_metadata.md
+      - Models: checks/manifest/check_models.md
+      - Sources: checks/manifest/check_sources.md
+      - Unit Tests: checks/manifest/check_unit_tests.md
+    - Run Results:
+      - Run Results: checks/run_results/check_run_results.md
   - FAQ: faq.md
   - CLI: cli.md
   - Contributing: CONTRIBUTING.md
