@@ -4,4 +4,4 @@
 
     The below checks require both `manifest.json` and `run_results.json` to be present.
 
-::: run_results
+::: run_results.check_run_results
