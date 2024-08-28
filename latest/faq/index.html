@@ -630,8 +630,8 @@
   
 
 
-<h1 id="frequently-asked-questions">Frequently Asked Questions</h1>
-<h2 id="can-other-tools-perform-the-same-checks-as-dbt-bouncer">Can other tools perform the same checks as <code>dbt-bouncer</code>?</h2>
+<h1 id="frequently-asked-questions">Frequently Asked Questions<a class="headerlink" href="#frequently-asked-questions" title="Permanent link">#</a></h1>
+<h2 id="can-other-tools-perform-the-same-checks-as-dbt-bouncer">Can other tools perform the same checks as <code>dbt-bouncer</code>?<a class="headerlink" href="#can-other-tools-perform-the-same-checks-as-dbt-bouncer" title="Permanent link">#</a></h2>
 <p>There are several other tools that perform similar tasks as <code>dbt-bouncer</code>.</p>
 <ul>
 <li><a href="">dbt-checkpoint</a>: A collection of <code>pre-commit</code> hooks for dbt projects. Tests are written in python. Configuration is performed via <code>.pre-commit-config.yaml</code>. Provided the dbt artifacts have already been generated, <code>dbt-checkpoint</code> does not need access to the underlying database. The hooks execute when a new commit is made, as such <code>dbt-checkpoint</code> is designed to be run only as part of <code>pre-commit</code>.</li>
@@ -651,7 +651,7 @@
 <p class="admonition-title">Tip</p>
 <p><code>dbt-bouncer</code> can perform all the tests currently included in <code>dbt-checkpoint</code>, <code>dbt-project-evaluator</code> and <code>dbt-score</code>. If you see an existing test that is not possible with <code>dbt-bouncer</code>, open an <a href="https://github.com/godatadriven/dbt-bouncer/issues">issue</a> and we'll add it!</p>
 </div>
-<h2 id="how-to-set-up-dbt-bouncer-in-a-monorepo">How to set up <code>dbt-bouncer</code> in a monorepo?</h2>
+<h2 id="how-to-set-up-dbt-bouncer-in-a-monorepo">How to set up <code>dbt-bouncer</code> in a monorepo?<a class="headerlink" href="#how-to-set-up-dbt-bouncer-in-a-monorepo" title="Permanent link">#</a></h2>
 <p>A monorepo may consist of one directory with a dbt project and other directories with unrelated code. It may be desired for <code>dbt-bouncer</code> to be configured from the root directory. Sample directory tree:</p>
 <div class="language-shell highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>.
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>├──<span class="w"> </span>dbt-bouncer.yml

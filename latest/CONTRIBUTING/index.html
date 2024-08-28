@@ -841,20 +841,20 @@
   
 
 
-<h1 id="contributing-to-dbt-bouncer">Contributing to <code>dbt-bouncer</code></h1>
+<h1 id="contributing-to-dbt-bouncer">Contributing to <code>dbt-bouncer</code><a class="headerlink" href="#contributing-to-dbt-bouncer" title="Permanent link">#</a></h1>
 <p><code>dbt-bouncer</code> is open source software. Whether you are a seasoned open source contributor or a first-time committer, we welcome and encourage you to contribute code, documentation, ideas, or problem statements to this project.</p>
-<h2 id="about-this-document">About this document</h2>
+<h2 id="about-this-document">About this document<a class="headerlink" href="#about-this-document" title="Permanent link">#</a></h2>
 <p>There are many ways to contribute to the ongoing development of <code>dbt-bouncer</code>, such as by participating in discussions and issues.</p>
 <p>The rest of this document serves as a more granular guide for contributing code changes to <code>dbt-bouncer</code> (this repository). It is not intended as a guide for using <code>dbt-bouncer</code>, and some pieces assume a level of familiarity with Python development (virtualenvs, <code>Poetry</code>, etc). Specific code snippets in this guide assume you are using macOS or Linux and are comfortable with the command line.</p>
 <p>If you get stuck, we're happy to help! Just open an issue or draft PR and we'll do our best to help out.</p>
-<h3 id="note">Note</h3>
+<h3 id="note">Note<a class="headerlink" href="#note" title="Permanent link">#</a></h3>
 <ul>
 <li><strong>Branches:</strong> All pull requests from community contributors should target the <code>main</code> branch (default).</li>
 </ul>
-<h2 id="getting-the-code">Getting the code</h2>
-<h3 id="installing-git">Installing git</h3>
+<h2 id="getting-the-code">Getting the code<a class="headerlink" href="#getting-the-code" title="Permanent link">#</a></h2>
+<h3 id="installing-git">Installing git<a class="headerlink" href="#installing-git" title="Permanent link">#</a></h3>
 <p>You will need <code>git</code> in order to download and modify the <code>dbt-bouncer</code> source code. On macOS, the best way to download git is to just install <a href="https://developer.apple.com/support/xcode/">Xcode</a>.</p>
-<h3 id="contributors">Contributors</h3>
+<h3 id="contributors">Contributors<a class="headerlink" href="#contributors" title="Permanent link">#</a></h3>
 <p>You can contribute to <code>dbt-bouncer</code> by forking the <code>dbt-bouncer</code> repository. For a detailed overview on forking, check out the <a href="https://help.github.com/en/articles/fork-a-repo">GitHub docs on forking</a>. In short, you will need to:</p>
 <ol>
 <li>Fork the <code>dbt-bouncer</code> repository.</li>
@@ -863,9 +863,9 @@
 <li>Push changes to your fork.</li>
 <li>Open a pull request against <code>godatadriven/dbt-bouncer</code> from your forked repository.</li>
 </ol>
-<h2 id="setting-up-an-environment">Setting up an environment</h2>
+<h2 id="setting-up-an-environment">Setting up an environment<a class="headerlink" href="#setting-up-an-environment" title="Permanent link">#</a></h2>
 <p>There are some tools that will be helpful to you in developing locally. While this is the list relevant for <code>dbt-bouncer</code> development, many of these tools are used commonly across open-source python projects.</p>
-<h3 id="tools">Tools</h3>
+<h3 id="tools">Tools<a class="headerlink" href="#tools" title="Permanent link">#</a></h3>
 <p>These are the tools used in <code>dbt-bouncer</code> development and testing:</p>
 <ul>
 <li><a href="https://click.palletsprojects.com/en/8.1.x/"><code>click</code></a> to create our CLI interface.</li>
@@ -879,38 +879,38 @@
 <li><a href="https://github.com/astral-sh/ruff"><code>Ruff</code></a> to lint and format python code.</li>
 </ul>
 <p>A deep understanding of these tools in not required to effectively contribute to <code>dbt-bouncer</code>, but we recommend checking out the attached documentation if you're interested in learning more about each one.</p>
-<h4 id="virtual-environments">Virtual environments</h4>
+<h4 id="virtual-environments">Virtual environments<a class="headerlink" href="#virtual-environments" title="Permanent link">#</a></h4>
 <p>We strongly recommend using virtual environments when developing code in <code>dbt-bouncer</code>. We recommend creating this virtualenv in the root of the <code>dbt-bouncer</code> repository. To create a new virtualenv, run:</p>
 <div class="language-shell highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>poetry<span class="w"> </span>shell
 </span></code></pre></div>
 <p>This will create a new Python virtual environment.</p>
-<h4 id="setting-environment-variables">Setting environment variables</h4>
+<h4 id="setting-environment-variables">Setting environment variables<a class="headerlink" href="#setting-environment-variables" title="Permanent link">#</a></h4>
 <p>Set required environment variables by copying <code>.env.example</code> to <code>.env</code> and updating the values.</p>
-<h2 id="running-dbt-bouncer-in-development">Running <code>dbt-bouncer</code> in development</h2>
-<h3 id="installation">Installation</h3>
+<h2 id="running-dbt-bouncer-in-development">Running <code>dbt-bouncer</code> in development<a class="headerlink" href="#running-dbt-bouncer-in-development" title="Permanent link">#</a></h2>
+<h3 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">#</a></h3>
 <p>First make sure that you set up your <code>virtualenv</code> as described in <a href="#setting-up-an-environment">Setting up an environment</a>. Next, install <code>dbt-bouncer</code>, its dependencies and <code>pre-commit</code>:</p>
 <div class="language-shell highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>poetry<span class="w"> </span>install
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>poetry<span class="w"> </span>run<span class="w"> </span>pre-commit<span class="w"> </span>install
 </span></code></pre></div>
 <p>When installed in this way, any changes you make to your local copy of the source code will be reflected immediately in your next <code>dbt-bouncer</code> run.</p>
-<h3 id="running-dbt-bouncer">Running <code>dbt-bouncer</code></h3>
+<h3 id="running-dbt-bouncer">Running <code>dbt-bouncer</code><a class="headerlink" href="#running-dbt-bouncer" title="Permanent link">#</a></h3>
 <p>With your virtualenv activated, the <code>dbt-bouncer</code> script should point back to the source code you've cloned on your machine. You can verify this by running <code>which dbt-bouncer</code>. This command should show you a path to an executable in your virtualenv. You can run <code>dbt-bouncer</code> using the provided example configuration file via:</p>
 <div class="language-shell highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>poetry<span class="w"> </span>run<span class="w"> </span>dbt-bouncer<span class="w"> </span>--config-file<span class="w"> </span>dbt-bouncer-example.yml
 </span></code></pre></div>
-<h2 id="testing">Testing</h2>
+<h2 id="testing">Testing<a class="headerlink" href="#testing" title="Permanent link">#</a></h2>
 <p>Once you're able to manually test that your code change is working as expected, it's important to run existing automated tests, as well as adding some new ones. These tests will ensure that:
 - Your code changes do not unexpectedly break other established functionality
 - Your code changes can handle all known edge cases
 - The functionality you're adding will <em>keep</em> working in the future</p>
-<h3 id="note_1">Note</h3>
+<h3 id="note_1">Note<a class="headerlink" href="#note_1" title="Permanent link">#</a></h3>
 <ul>
 <li><strong>Generating dbt artifacts:</strong> If you change the configuration of the dbt project located in <code>dbt_project</code> then you will need to re-generate the dbt artifacts used in testing. To do so, run:</li>
 </ul>
 <div class="language-shell highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>make<span class="w"> </span>build-artifacts
 </span></code></pre></div>
-<h3 id="test-commands">Test commands</h3>
+<h3 id="test-commands">Test commands<a class="headerlink" href="#test-commands" title="Permanent link">#</a></h3>
 <p>There are a few methods for running tests locally.</p>
-<h4 id="makefile"><code>makefile</code></h4>
+<h4 id="makefile"><code>makefile</code><a class="headerlink" href="#makefile" title="Permanent link">#</a></h4>
 <p>There are multiple targets in the <code>makefile</code> to run common test suites, most notably:</p>
 <div class="language-shell highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># Runs unit tests</span>
 </span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>make<span class="w"> </span>test-unit
@@ -921,9 +921,9 @@
 </span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="c1"># Runs all tests</span>
 </span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>make<span class="w"> </span><span class="nb">test</span>
 </span></code></pre></div>
-<h4 id="pre-commit"><code>pre-commit</code></h4>
+<h4 id="pre-commit"><code>pre-commit</code><a class="headerlink" href="#pre-commit" title="Permanent link">#</a></h4>
 <p><a href="https://pre-commit.com"><code>pre-commit</code></a> takes care of running all code-checks for formatting and linting. Run <code>poetry run pre-commit install</code> to install <code>pre-commit</code> in your local environment. Once this is done you can use the git pre-commit hooks to ensure proper formatting and linting.</p>
-<h4 id="pytest"><code>pytest</code></h4>
+<h4 id="pytest"><code>pytest</code><a class="headerlink" href="#pytest" title="Permanent link">#</a></h4>
 <p>Finally, you can also run a specific test or group of tests using <a href="https://docs.pytest.org/en/latest/"><code>pytest</code></a> directly. With a virtualenv active and dev dependencies installed you can do things like:</p>
 <div class="language-shell highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># run all unit tests in a file</span>
 </span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>./tests/unit/checks/catalog/test_columns.py
@@ -934,11 +934,11 @@
 <blockquote>
 <p>See <a href="https://docs.pytest.org/en/8.1.x/how-to/usage.html">pytest usage docs</a> for an overview of useful command-line options.</p>
 </blockquote>
-<h3 id="assorted-development-tips">Assorted development tips</h3>
+<h3 id="assorted-development-tips">Assorted development tips<a class="headerlink" href="#assorted-development-tips" title="Permanent link">#</a></h3>
 <ul>
 <li>Append <code># type: ignore</code> to the end of a line if you need to disable <code>mypy</code> on that line, preferably with the specific rule to ignore such as <code># type: ignore[union-attr]</code>.</li>
 </ul>
-<h2 id="adding-a-new-check">Adding a new check</h2>
+<h2 id="adding-a-new-check">Adding a new check<a class="headerlink" href="#adding-a-new-check" title="Permanent link">#</a></h2>
 <p>To add a new check follow the below steps:</p>
 <ol>
 <li>In <code>./src/dbt_bouncer/checks</code> choose the appropriate directory for your check. For example, if your check only requires the <code>manifest.json</code> then use the <code>manifest</code> directory, if your check requires the <code>catalog.json</code> then use the <code>catalog</code> directory.</li>
@@ -975,7 +975,7 @@
 <li>Run <code>make test</code> to ensure the tests pass.</li>
 <li>Open a PR 🎉!</li>
 </ol>
-<h2 id="submitting-a-pull-request">Submitting a Pull Request</h2>
+<h2 id="submitting-a-pull-request">Submitting a Pull Request<a class="headerlink" href="#submitting-a-pull-request" title="Permanent link">#</a></h2>
 <p>Code can be merged into the current development branch <code>main</code> by opening a pull request. If the proposal looks like it's on the right track, then a <code>dbt-bouncer</code> maintainer will review the PR. They may suggest code revision for style or clarity, or request that you add unit or integration test(s). These are good things! We believe that, with a little bit of help, anyone can contribute high-quality code. Once merged, your contribution will be available for the next release of <code>dbt-bouncer</code>.</p>
 <p>Automated tests run via GitHub Actions. If you're a first-time contributor, all tests will require a maintainer to approve.</p>
 <p>Once all tests are passing and your PR has been approved, a <code>dbt-bouncer</code> maintainer will merge your changes into the active development branch. And that's it! Happy developing :tada:</p>

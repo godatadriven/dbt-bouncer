@@ -670,7 +670,7 @@
 
   <h1>Getting Started</h1>
 
-<h2 id="how-to-run-dbt-bouncer">How to run <code>dbt-bouncer</code></h2>
+<h2 id="how-to-run-dbt-bouncer">How to run <code>dbt-bouncer</code><a class="headerlink" href="#how-to-run-dbt-bouncer" title="Permanent link">#</a></h2>
 <ol>
 <li>
 <p>Generate dbt artifacts by running a dbt command:</p>
@@ -687,7 +687,7 @@
 <p>Run <code>dbt-bouncer</code> to validate that your conventions are being maintained.</p>
 </li>
 </ol>
-<h3 id="python">Python</h3>
+<h3 id="python">Python<a class="headerlink" href="#python" title="Permanent link">#</a></h3>
 <p>Install from <a href="https://pypi.org/p/dbt-bouncer">pypi.org</a>:</p>
 <div class="language-shell highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pip<span class="w"> </span>install<span class="w"> </span>dbt-bouncer
 </span></code></pre></div>
@@ -711,7 +711,7 @@
 </span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="nv">conf</span><span class="o">={</span><span class="s1">&#39;dbt_artifacts_dir&#39;</span>:<span class="w"> </span><span class="s1">&#39;dbt_project/target&#39;</span>,<span class="w"> </span><span class="s1">&#39;catalog_checks&#39;</span>:<span class="w"> </span><span class="o">[{</span><span class="s1">&#39;name&#39;</span>:<span class="w"> </span><span class="s1">&#39;check_column_name_complies_to_column_type&#39;</span>,<span class="w"> </span><span class="s1">&#39;column_name_pattern&#39;</span>:<span class="w"> </span><span class="s1">&#39;^is_.*&#39;</span>,<span class="w"> </span><span class="s1">&#39;exclude&#39;</span>:<span class="w"> </span><span class="s1">&#39;^staging&#39;</span>,<span class="w"> </span><span class="s1">&#39;types&#39;</span>:<span class="w"> </span><span class="o">[</span><span class="s1">&#39;BOOLEAN&#39;</span><span class="o">]}]}</span>
 </span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>Validating<span class="w"> </span>conf...
 </span></code></pre></div>
-<h3 id="github-actions">GitHub Actions</h3>
+<h3 id="github-actions">GitHub Actions<a class="headerlink" href="#github-actions" title="Permanent link">#</a></h3>
 <p>Run <code>dbt-bouncer</code> as part of your CI pipeline:
 <div class="language-yaml highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nt">steps</span><span class="p">:</span>
 </span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">...</span>
@@ -726,20 +726,20 @@
 </span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 </span></code></pre></div></p>
 <p>We recommend pinning both a major and minor version number.</p>
-<h3 id="docker">Docker</h3>
+<h3 id="docker">Docker<a class="headerlink" href="#docker" title="Permanent link">#</a></h3>
 <p>Run <code>dbt-bouncer</code> via Docker:</p>
 <div class="language-shell highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span><span class="se">\</span>
 </span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">    </span>--volume<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$PWD</span><span class="s2">&quot;</span>:/app<span class="w"> </span><span class="se">\</span>
 </span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">    </span>ghcr.io/godatadriven/dbt-bouncer:vX.X.X<span class="w"> </span><span class="se">\</span>
 </span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">    </span>--config-file<span class="w"> </span>/app/&lt;PATH_TO_CONFIG_FILE&gt;
 </span></code></pre></div>
-<h3 id="pex">Pex</h3>
+<h3 id="pex">Pex<a class="headerlink" href="#pex" title="Permanent link">#</a></h3>
 <p>You can also run the <code>.pex</code> (<a href="https://docs.pex-tool.org/whatispex.html#whatispex">Python EXecutable</a>) artifact directly once you have a python executable (3.8 -&gt; 3.12) installed:</p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>wget<span class="w"> </span>https://github.com/godatadriven/dbt-bouncer/releases/download/vX.X.X/dbt-bouncer.pex<span class="w"> </span>-O<span class="w"> </span>dbt-bouncer.pex
 </span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>
 </span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>python<span class="w"> </span>dbt-bouncer.pex<span class="w"> </span>--config-file<span class="w"> </span><span class="nv">$PWD</span>/&lt;PATH_TO_CONFIG_FILE&gt;
 </span></code></pre></div>
-<h2 id="how-to-add-a-check-to-dbt-bouncer">How to add a check to <code>dbt-bouncer</code></h2>
+<h2 id="how-to-add-a-check-to-dbt-bouncer">How to add a check to <code>dbt-bouncer</code><a class="headerlink" href="#how-to-add-a-check-to-dbt-bouncer" title="Permanent link">#</a></h2>
 <p>See <a href="../CONTRIBUTING/#adding-a-new-check">Adding a new check</a>.</p>
 
 
