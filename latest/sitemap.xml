@@ -2,52 +2,52 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://godatadriven.github.io/dbt-bouncer/latest/</loc>
-         <lastmod>2024-08-27</lastmod>
+         <lastmod>2024-08-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://godatadriven.github.io/dbt-bouncer/latest/CONTRIBUTING/</loc>
-         <lastmod>2024-08-27</lastmod>
+         <lastmod>2024-08-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://godatadriven.github.io/dbt-bouncer/latest/cli/</loc>
-         <lastmod>2024-08-27</lastmod>
+         <lastmod>2024-08-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://godatadriven.github.io/dbt-bouncer/latest/config_file/</loc>
-         <lastmod>2024-08-27</lastmod>
+         <lastmod>2024-08-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://godatadriven.github.io/dbt-bouncer/latest/faq/</loc>
-         <lastmod>2024-08-27</lastmod>
+         <lastmod>2024-08-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://godatadriven.github.io/dbt-bouncer/latest/getting_started/</loc>
-         <lastmod>2024-08-27</lastmod>
+         <lastmod>2024-08-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://godatadriven.github.io/dbt-bouncer/latest/checks/</loc>
-         <lastmod>2024-08-27</lastmod>
+         <lastmod>2024-08-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://godatadriven.github.io/dbt-bouncer/latest/checks/checks_catalog/</loc>
-         <lastmod>2024-08-27</lastmod>
+         <lastmod>2024-08-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://godatadriven.github.io/dbt-bouncer/latest/checks/checks_manifest/</loc>
-         <lastmod>2024-08-27</lastmod>
+         <lastmod>2024-08-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://godatadriven.github.io/dbt-bouncer/latest/checks/checks_run_results/</loc>
-         <lastmod>2024-08-27</lastmod>
+         <lastmod>2024-08-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
 </urlset>
