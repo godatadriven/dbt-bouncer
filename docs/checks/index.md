@@ -1,5 +1,15 @@
 `dbt-bouncer` runs checks against artifacts from dbt. These checks fall into three categories:
 
-- [Manifest Checks](./checks_manifest.md)
-- [Catalog Checks](./checks_catalog.md)
-- [Run Results Checks](./checks_run_results.md)
+- Catalog checks:
+    - [Catalog Sources](./catalog/check_catalog_sources.md)
+    - [Columns](./catalog/check_columns.md)
+- Manifest checks:
+    - [Exposures](./manifest/check_exposures.md)
+    - [Lineage](./manifest/check_lineage.md)
+    - [Macros](./manifest/check_macros.md)
+    - [Metadata](./manifest/check_metadata.md)
+    - [Models](./manifest/check_models.md)
+    - [Sources](./manifest/check_sources.md)
+    - [Unit Tests](./manifest/check_unit_tests.md)
+- Run Results checks:
+    - [Run Results](./run_results/check_run_results.md)

@@ -1,7 +1,7 @@
-# Manifest Checks
+# Manifest Checks: Models
 
 !!! note
 
     The below checks require `manifest.json` to be present.
 
-::: manifest
+::: manifest.check_models
