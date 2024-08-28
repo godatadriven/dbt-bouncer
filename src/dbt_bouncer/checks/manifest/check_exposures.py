@@ -83,7 +83,7 @@ def check_exposure_based_on_view(
         ```yaml
         manifest_checks:
             - name: check_exposure_based_on_view
-              materializations_to_include:
+                materializations_to_include:
                 - ephemeral
                 - my_custom_materialization
                 - view

@@ -73,7 +73,7 @@ def check_column_name_complies_to_column_type(
     Parameters:
         catalog_node (CatalogTable): The CatalogTable object to check.
         column_name_pattern: (str): Regex pattern to match the model name.
-        type (List[str]): List of data types to check.
+        types (List[str]): List of data types to check.
 
     Other parameters:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.

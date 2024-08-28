@@ -143,7 +143,7 @@ def check_model_documentation_coverage(
 
     Parameters:
         min_model_documentation_coverage_pct (float): The minimum percentage of models that must have a populated description.
-        model (DbtBouncerModel): The DbtBouncerModel object to check.
+        models (List[DbtBouncerModel]): List of DbtBouncerModel objects parsed from `manifest.json`.
 
     Other parameters:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
