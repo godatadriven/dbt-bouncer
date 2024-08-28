@@ -3,17 +3,12 @@
 # TODO Remove after this program no longer support Python 3.8.*
 from __future__ import annotations
 
-import json
-import warnings
-from pathlib import Path
-from typing import TYPE_CHECKING, Any, List, Union
-
-with warnings.catch_warnings():
-    warnings.filterwarnings("ignore", category=UserWarning)
-
 import importlib
+import json
 import logging
 import traceback
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, List, Union
 
 from progress.bar import Bar
 from tabulate import tabulate
@@ -159,31 +154,43 @@ def runner(
             "check_run_id": c["check_run_id"],
             "failure_message": c.get("failure_message"),
             "outcome": c["outcome"],
+            "severity": c["severity"],
         }
         for c in checks_to_run
     ]
-    num_failed_checks = len([c for c in results if c["outcome"] == "failed"])
-    num_succeeded_checks = len([c for c in results if c["outcome"] == "success"])
+    num_checks_error = len(
+        [c for c in results if c["outcome"] == "failed" and c["severity"] == "error"]
+    )
+    num_checks_warn = len(
+        [c for c in results if c["outcome"] == "failed" and c["severity"] == "warn"]
+    )
+    num_checks_success = len([c for c in results if c["outcome"] == "success"])
     logging.info(
-        f"Summary: {num_succeeded_checks} checks passed, {num_failed_checks} checks failed.",
+        f"SUCCESS={num_checks_success} WARN={num_checks_warn} ERROR={num_checks_error}",
     )
 
-    if num_failed_checks > 0:
-        logging.error(
-            "`dbt-bouncer` failed. Please check the logs above for more details.",
+    if num_checks_error > 0 or num_checks_warn > 0:
+        logger = logging.error if num_checks_error > 0 else logging.warning
+        logger(
+            f"`dbt-bouncer` {'failed' if num_checks_error > 0 else 'has warnings'}. Please see below for more details or run `dbt-bouncer` with the `-v` flag...",
         )
         failed_checks = [
-            {"check_run_id": r["check_run_id"], "failure_message": r["failure_message"]}
+            {
+                "check_run_id": r["check_run_id"],
+                "severity": r["severity"],
+                "failure_message": r["failure_message"],
+            }
             for r in results
             if r["outcome"] == "failed"
         ]
         logging.debug(f"{failed_checks=}")
-        logging.error(
-            "Failed checks:\n"  # noqa: G003
+        logger(
+            ("Failed checks:\n" if num_checks_error > 0 else "Warning checks:\n")
             + tabulate(
                 failed_checks,
                 headers={
                     "check_run_id": "Check name",
+                    "severity": "Severity",
                     "failure_message": "Failure message",
                 },
                 tablefmt="github",
@@ -202,4 +209,4 @@ def runner(
                 f,
             )
 
-    return 1 if num_failed_checks != 0 else 0, results
+    return 1 if num_checks_error != 0 else 0, results

@@ -41,6 +41,7 @@ def check_model_access(
     Other Parameters:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml
@@ -79,6 +80,7 @@ def check_model_contract_enforced_for_public_model(
     Other Parameters:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml
@@ -106,6 +108,7 @@ def check_model_description_populated(model: DbtBouncerModel, **kwargs) -> None:
     Other Parameters:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml
@@ -132,6 +135,10 @@ class CheckModelsDocumentationCoverage(BaseModel):
         ge=0,
         le=100,
     )
+    severity: Optional[Literal["error", "warn"]] = Field(
+        default="error",
+        description="Severity of the check, one of 'error' or 'warn'.",
+    )
 
 
 def check_model_documentation_coverage(
@@ -146,8 +153,7 @@ def check_model_documentation_coverage(
         models (List[DbtBouncerModel]): List of DbtBouncerModel objects parsed from `manifest.json`.
 
     Other Parameters:
-        exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
-        include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml
@@ -184,6 +190,7 @@ def check_model_documented_in_same_directory(model: DbtBouncerModel, **kwargs) -
     Other Parameters:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml
@@ -219,6 +226,7 @@ def check_model_code_does_not_contain_regexp_pattern(
     Other Parameters:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml
@@ -248,6 +256,7 @@ def check_model_depends_on_multiple_sources(model: DbtBouncerModel, **kwargs) ->
     Other Parameters:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml
@@ -321,6 +330,7 @@ def check_model_has_contracts_enforced(model: DbtBouncerModel, **kwargs) -> None
     Other Parameters:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml
@@ -354,6 +364,7 @@ def check_model_has_meta_keys(
     Other Parameters:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml
@@ -387,6 +398,7 @@ def check_model_has_no_upstream_dependencies(model: DbtBouncerModel, **kwargs) -
     Other Parameters:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml
@@ -415,6 +427,7 @@ def check_model_has_tags(model: DbtBouncerModel, tags: List[str], **kwargs) -> N
     Other Parameters:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml
@@ -463,6 +476,7 @@ def check_model_has_unique_test(
     Other Parameters:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml
@@ -514,6 +528,7 @@ def check_model_has_unit_tests(
     Other Parameters:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     !!! warning
 
@@ -578,6 +593,7 @@ def check_model_max_chained_views(
     Other Parameters:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml
@@ -677,6 +693,7 @@ def check_model_max_fanout(
     Other Parameters:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml
@@ -713,6 +730,7 @@ def check_model_max_number_of_lines(
     Other Parameters:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml
@@ -764,6 +782,7 @@ def check_model_max_upstream_dependencies(
     Other Parameters:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml
@@ -813,6 +832,7 @@ def check_model_names(
     Other Parameters:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml
@@ -844,6 +864,7 @@ def check_model_property_file_location(model: DbtBouncerModel, **kwargs) -> None
     Other Parameters:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml
@@ -884,6 +905,10 @@ class CheckModelsTestCoverage(BaseModel):
         ge=0,
         le=100,
     )
+    severity: Optional[Literal["error", "warn"]] = Field(
+        default="error",
+        description="Severity of the check, one of 'error' or 'warn'.",
+    )
 
 
 def check_model_test_coverage(
@@ -898,6 +923,9 @@ def check_model_test_coverage(
         min_model_test_coverage_pct (float): The minimum percentage of models that must have at least one test.
         models (List[DbtBouncerModel]): List of DbtBouncerModel objects parsed from `manifest.json`.
         tests (List[DbtBouncerTest]): List of DbtBouncerTest objects parsed from `manifest.json`.
+
+    Other Parameters:
+        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
 
     Example(s):

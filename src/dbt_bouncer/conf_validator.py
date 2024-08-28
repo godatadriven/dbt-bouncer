@@ -1,7 +1,7 @@
 import importlib
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Literal, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field
 from pydantic._internal._model_construction import ModelMetaclass
@@ -86,6 +86,10 @@ class DbtBouncerConf(BaseModel):
     include: Optional[str] = Field(
         default=None,
         description="Regexp to match which paths to include.",
+    )
+    severity: Union[Literal["error", "warn"], None] = Field(
+        default=None,
+        description="Severity of the check, one of 'error' or 'warn'.",
     )
 
 

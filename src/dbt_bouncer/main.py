@@ -71,6 +71,13 @@ def cli(
         .get_parameter_source("config_file")
         .name,  # type: ignore[union-attr]
     )
+
+    # Handle `severity` at the global level
+    if conf.get("severity"):
+        logging.info(f"Setting `severity` for all checks to `{conf['severity']}`.")
+        for c in conf["manifest_checks"]:
+            c["severity"] = conf["severity"]
+
     logging.debug(f"{conf=}")
     bouncer_config = validate_conf(conf=conf)
     logging.debug(f"{bouncer_config=}")

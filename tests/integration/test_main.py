@@ -124,7 +124,7 @@ def test_cli_coverage(caplog, tmp_path):
     assert len(coverage) > 1
     assert f"Saving coverage file to `{tmp_path}/coverage.json`" in caplog.text
     assert (
-        "`dbt-bouncer` failed. Please check the logs above for more details."
+        "`dbt-bouncer` failed. Please see below for more details or run `dbt-bouncer` with the `-v` flag..."
         in caplog.text
     )
     assert result.exit_code == 1
@@ -204,7 +204,7 @@ def test_cli_error_message(caplog, tmp_path):
     )
 
     assert (
-        "`dbt-bouncer` failed. Please check the logs above for more details."
+        "`dbt-bouncer` failed. Please see below for more details or run `dbt-bouncer` with the `-v` flag..."
         in caplog.text
     )
     assert result.exit_code == 1

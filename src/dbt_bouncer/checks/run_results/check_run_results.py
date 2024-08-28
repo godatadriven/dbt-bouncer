@@ -29,6 +29,7 @@ def check_run_results_max_gigabytes_billed(
     Other Parameters:
         exclude (Optional[str]): Regex pattern to match the resource path. Resource paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the resource path. Only resource paths that match the pattern will be checked.
+        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Raises: # noqa:DOC502
         KeyError: If the `dbt-bigquery` adapter is not used.
@@ -72,6 +73,7 @@ def check_run_results_max_execution_time(
     Other Parameters:
         exclude (Optional[str]): Regex pattern to match the resource path. Resource paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the resource path. Only resource paths that match the pattern will be checked.
+        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml
