@@ -116,7 +116,7 @@ class CheckSourceHasTags(BaseCheck):
 
 def check_source_has_tags(
     source: DbtBouncerSource,
-    tags: list[str],
+    tags: List[str],
     **kwargs,
 ) -> None:
     """
