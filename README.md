@@ -56,8 +56,8 @@ All documentation can be found on `dbt-bouncer` [documentation website](https://
 
 ## Reporting bugs and contributing code
 
-- Want to report a bug or request a feature? Let us know and open [an issue](https://github.com/godatadriven/dbt-bouncer/issues/new/choose)
-- Want to help us build `dbt-bouncer? Check out the [Contributing Guide](https://github.com/godatadriven/dbt-bouncer/blob/HEAD/docs/CONTRIBUTING.md)
+- Want to report a bug or request a feature? Let us know and open [an issue](https://github.com/godatadriven/dbt-bouncer/issues/new/choose).
+- Want to help us build `dbt-bouncer`? Check out the [Contributing Guide](https://github.com/godatadriven/dbt-bouncer/blob/HEAD/docs/CONTRIBUTING.md).
 
 ## Code of Conduct
 
