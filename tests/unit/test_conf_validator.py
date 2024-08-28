@@ -16,7 +16,11 @@ invalid_confs = [
 ]
 
 
-@pytest.mark.parametrize("f, expectation", invalid_confs, ids=[f.stem for f, _ in invalid_confs])
+@pytest.mark.parametrize(
+    ("f", "expectation"),
+    invalid_confs,
+    ids=[f.stem for f, _ in invalid_confs],
+)
 def test_validate_conf_invalid(f, expectation):
     with Path.open(f, "r") as fp:
         conf = yaml.safe_load(fp)
@@ -34,7 +38,11 @@ valid_confs = [
 ]
 
 
-@pytest.mark.parametrize("f, expectation", valid_confs, ids=[f.stem for f, _ in valid_confs])
+@pytest.mark.parametrize(
+    ("f", "expectation"),
+    valid_confs,
+    ids=[f.stem for f, _ in valid_confs],
+)
 def test_validate_conf_valid(f, expectation):
     with Path.open(f, "r") as fp:
         conf = yaml.safe_load(fp)

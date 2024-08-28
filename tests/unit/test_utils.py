@@ -24,21 +24,28 @@ def test_create_github_comment_file(monkeypatch, tmp_path):
         ]
         create_github_comment_file(failed_checks)
         assert (
-            tmp_path / "github-comment.md"
-        ).read_text() == "## **Failed `dbt-bouncer`** checks\n\n\n| Check name | Failure message |\n| :--- | :--- |\n| check_model_description_populated | message_1 |\n| check_model_description_populated | message_2 |\n\n\nSent from this [GitHub Action workflow run](https://github.com/None/actions/runs/None)."
+            (tmp_path / "github-comment.md").read_text()
+            == "## **Failed `dbt-bouncer`** checks\n\n\n| Check name | Failure message |\n| :--- | :--- |\n| check_model_description_populated | message_1 |\n| check_model_description_populated | message_2 |\n\n\nSent from this [GitHub Action workflow run](https://github.com/None/actions/runs/None)."
+        )
 
 
 def test_get_dbt_bouncer_config_commandline(tmp_path):
     config_file = tmp_path / "my_dbt_bouncer.yml"
     config_file.write_text("test: 1")
-    config = get_dbt_bouncer_config(config_file=str(config_file), config_file_source="COMMANDLINE")
+    config = get_dbt_bouncer_config(
+        config_file=str(config_file),
+        config_file_source="COMMANDLINE",
+    )
     assert config == {"test": 1}
 
 
 def test_get_dbt_bouncer_config_default(tmp_path):
     config_file = tmp_path / "dbt_bouncer.yml"
     config_file.write_text("test: 1")
-    config = get_dbt_bouncer_config(config_file=str(config_file), config_file_source="DEFAULT")
+    config = get_dbt_bouncer_config(
+        config_file=str(config_file),
+        config_file_source="DEFAULT",
+    )
     assert config == {"test": 1}
 
 
@@ -64,7 +71,8 @@ def test_get_dbt_bouncer_config_pyproject_toml(monkeypatch, tmp_path):
         toml.dump(config, f)
 
     config = get_dbt_bouncer_config(
-        config_file=str("dbt_bouncer.yml"), config_file_source="DEFAULT"
+        config_file=str("dbt_bouncer.yml"),
+        config_file_source="DEFAULT",
     )
 
     assert config == PYPROJECT_TOML_SAMPLE_CONFIG
@@ -74,7 +82,10 @@ def test_get_dbt_bouncer_config_pyproject_toml_doesnt_exist(monkeypatch, tmp_pat
     monkeypatch.chdir(tmp_path)
 
     with pytest.raises(RuntimeError):
-        get_dbt_bouncer_config(config_file=str("dbt_bouncer.yml"), config_file_source="DEFAULT")
+        get_dbt_bouncer_config(
+            config_file=str("dbt_bouncer.yml"),
+            config_file_source="DEFAULT",
+        )
 
 
 def test_get_dbt_bouncer_config_pyproject_toml_recursive(monkeypatch, tmp_path):
@@ -87,12 +98,16 @@ def test_get_dbt_bouncer_config_pyproject_toml_recursive(monkeypatch, tmp_path):
         toml.dump(config, f)
 
     config = get_dbt_bouncer_config(
-        config_file=str("dbt_bouncer.yml"), config_file_source="DEFAULT"
+        config_file=str("dbt_bouncer.yml"),
+        config_file_source="DEFAULT",
     )
     assert config == PYPROJECT_TOML_SAMPLE_CONFIG
 
 
-def test_get_dbt_bouncer_config_pyproject_toml_no_bouncer_section(monkeypatch, tmp_path):
+def test_get_dbt_bouncer_config_pyproject_toml_no_bouncer_section(
+    monkeypatch,
+    tmp_path,
+):
     monkeypatch.chdir(tmp_path)
 
     pyproject_file = tmp_path / "pyproject.toml"
@@ -102,12 +117,13 @@ def test_get_dbt_bouncer_config_pyproject_toml_no_bouncer_section(monkeypatch, t
 
     with pytest.raises(RuntimeError):
         config = get_dbt_bouncer_config(
-            config_file=str("dbt_bouncer.yml"), config_file_source="DEFAULT"
+            config_file=str("dbt_bouncer.yml"),
+            config_file_source="DEFAULT",
         )
 
 
 @pytest.mark.parametrize(
-    "input, output",
+    ("data_in", "data_out"),
     [
         (
             {"a": 1, "b": 2},
@@ -123,12 +139,12 @@ def test_get_dbt_bouncer_config_pyproject_toml_no_bouncer_section(monkeypatch, t
         ),
     ],
 )
-def test_flatten(input, output):
-    assert flatten(input) == output
+def test_flatten(data_in, data_out):
+    assert flatten(data_in) == data_out
 
 
 @pytest.mark.parametrize(
-    "input, output",
+    ("data_in", "data_out"),
     [
         (
             [
@@ -201,12 +217,12 @@ def test_flatten(input, output):
         ),
     ],
 )
-def test_make_markdown_table(input, output):
-    assert make_markdown_table(input) == output
+def test_make_markdown_table(data_in, data_out):
+    assert make_markdown_table(data_in) == data_out
 
 
 @pytest.mark.parametrize(
-    "include_pattern, path, output",
+    ("include_pattern", "path", "output"),
     [
         ("^staging", "staging/model_1.sql", True),
         (None, "staging/model_1.sql", True),

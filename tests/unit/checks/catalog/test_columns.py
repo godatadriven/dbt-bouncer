@@ -18,7 +18,7 @@ from dbt_bouncer.checks.catalog.check_columns import (
 
 
 @pytest.mark.parametrize(
-    "catalog_node, models, expectation",
+    ("catalog_node", "models", "expectation"),
     [
         (
             CatalogTable(
@@ -42,7 +42,7 @@ from dbt_bouncer.checks.catalog.check_columns import (
                     },
                     "stats": {},
                     "unique_id": "model.package_name.model_1",
-                }
+                },
             ),
             [
                 Nodes4(
@@ -71,8 +71,8 @@ from dbt_bouncer.checks.catalog.check_columns import (
                         "resource_type": "model",
                         "schema": "main",
                         "unique_id": "model.package_name.model_1",
-                    }
-                )
+                    },
+                ),
             ],
             does_not_raise(),
         ),
@@ -98,7 +98,7 @@ from dbt_bouncer.checks.catalog.check_columns import (
                     },
                     "stats": {},
                     "unique_id": "model.package_name.model_2",
-                }
+                },
             ),
             [
                 Nodes4(
@@ -126,8 +126,8 @@ from dbt_bouncer.checks.catalog.check_columns import (
                         "resource_type": "model",
                         "schema": "main",
                         "unique_id": "model.package_name.model_2",
-                    }
-                )
+                    },
+                ),
             ],
             pytest.raises(AssertionError),
         ),
@@ -142,7 +142,7 @@ def test_check_column_description_populated(catalog_node, models, expectation):
 
 
 @pytest.mark.parametrize(
-    "catalog_node, column_name_pattern, test_name, tests, expectation",
+    ("catalog_node", "column_name_pattern", "test_name", "tests", "expectation"),
     [
         (
             CatalogTable(
@@ -161,7 +161,7 @@ def test_check_column_description_populated(catalog_node, models, expectation):
                     },
                     "stats": {},
                     "unique_id": "model.package_name.model_1",
-                }
+                },
             ),
             ".*_1$",
             "unique",
@@ -188,7 +188,7 @@ def test_check_column_description_populated(catalog_node, models, expectation):
                             "name": "unique",
                         },
                         "unique_id": "test.package_name.not_null_model_1_unique.cf6c17daed",
-                    }
+                    },
                 ),
             ],
             does_not_raise(),
@@ -210,7 +210,7 @@ def test_check_column_description_populated(catalog_node, models, expectation):
                     },
                     "stats": {},
                     "unique_id": "model.package_name.model_1",
-                }
+                },
             ),
             ".*_1$",
             "unique",
@@ -221,7 +221,12 @@ def test_check_column_description_populated(catalog_node, models, expectation):
                         "attached_node": "model.package_name.model_1",
                         "checksum": {"name": "none", "checksum": ""},
                         "column_name": "col_1",
-                        "fqn": ["package_name", "marts", "finance", "not_null_model_1_not_null"],
+                        "fqn": [
+                            "package_name",
+                            "marts",
+                            "finance",
+                            "not_null_model_1_not_null",
+                        ],
                         "name": "not_null_model_1_not_null",
                         "original_file_path": "models/marts/finance/_finance__models.yml",
                         "package_name": "package_name",
@@ -232,15 +237,19 @@ def test_check_column_description_populated(catalog_node, models, expectation):
                             "name": "not_null",
                         },
                         "unique_id": "test.package_name.not_null_model_1_not_null.cf6c17daed",
-                    }
-                )
+                    },
+                ),
             ],
             pytest.raises(AssertionError),
         ),
     ],
 )
 def test_check_column_has_specified_test(
-    catalog_node, column_name_pattern, test_name, tests, expectation
+    catalog_node,
+    column_name_pattern,
+    test_name,
+    tests,
+    expectation,
 ):
     with expectation:
         check_column_has_specified_test(
@@ -252,7 +261,7 @@ def test_check_column_has_specified_test(
 
 
 @pytest.mark.parametrize(
-    "catalog_node, models, expectation",
+    ("catalog_node", "models", "expectation"),
     [
         (
             CatalogTable(
@@ -276,7 +285,7 @@ def test_check_column_has_specified_test(
                     },
                     "stats": {},
                     "unique_id": "model.package_name.model_1",
-                }
+                },
             ),
             [
                 Nodes4(
@@ -303,8 +312,8 @@ def test_check_column_has_specified_test(
                         "resource_type": "model",
                         "schema": "main",
                         "unique_id": "model.package_name.model_1",
-                    }
-                )
+                    },
+                ),
             ],
             does_not_raise(),
         ),
@@ -330,7 +339,7 @@ def test_check_column_has_specified_test(
                     },
                     "stats": {},
                     "unique_id": "model.package_name.model_2",
-                }
+                },
             ),
             [
                 Nodes4(
@@ -352,8 +361,8 @@ def test_check_column_has_specified_test(
                         "resource_type": "model",
                         "schema": "main",
                         "unique_id": "model.package_name.model_2",
-                    }
-                )
+                    },
+                ),
             ],
             pytest.raises(AssertionError),
         ),
@@ -368,7 +377,7 @@ def test_check_columns_are_all_documented(catalog_node, models, expectation):
 
 
 @pytest.mark.parametrize(
-    "catalog_node, models, expectation",
+    ("catalog_node", "models", "expectation"),
     [
         (
             CatalogTable(
@@ -387,7 +396,7 @@ def test_check_columns_are_all_documented(catalog_node, models, expectation):
                     },
                     "stats": {},
                     "unique_id": "model.package_name.model_1",
-                }
+                },
             ),
             [
                 Nodes4(
@@ -411,8 +420,8 @@ def test_check_columns_are_all_documented(catalog_node, models, expectation):
                         "resource_type": "model",
                         "schema": "main",
                         "unique_id": "model.package_name.model_1",
-                    }
-                )
+                    },
+                ),
             ],
             does_not_raise(),
         ),
@@ -438,7 +447,7 @@ def test_check_columns_are_all_documented(catalog_node, models, expectation):
                     },
                     "stats": {},
                     "unique_id": "model.package_name.model_1",
-                }
+                },
             ),
             [
                 Nodes4(
@@ -468,14 +477,18 @@ def test_check_columns_are_all_documented(catalog_node, models, expectation):
                         "resource_type": "model",
                         "schema": "main",
                         "unique_id": "model.package_name.model_1",
-                    }
-                )
+                    },
+                ),
             ],
             pytest.raises(AssertionError),
         ),
     ],
 )
-def test_check_columns_are_documented_in_public_models(catalog_node, models, expectation):
+def test_check_columns_are_documented_in_public_models(
+    catalog_node,
+    models,
+    expectation,
+):
     with expectation:
         check_columns_are_documented_in_public_models(
             catalog_node=catalog_node,
@@ -484,7 +497,7 @@ def test_check_columns_are_documented_in_public_models(catalog_node, models, exp
 
 
 @pytest.mark.parametrize(
-    "catalog_node, column_name_pattern, types, expectation",
+    ("catalog_node", "column_name_pattern", "types", "expectation"),
     [
         (
             CatalogTable(
@@ -503,7 +516,7 @@ def test_check_columns_are_documented_in_public_models(catalog_node, models, exp
                     },
                     "stats": {},
                     "unique_id": "model.package_name.model_1",
-                }
+                },
             ),
             ".*_date$",
             ["DATE"],
@@ -536,7 +549,7 @@ def test_check_columns_are_documented_in_public_models(catalog_node, models, exp
                     },
                     "stats": {},
                     "unique_id": "model.package_name.model_1",
-                }
+                },
             ),
             ".*_date$",
             ["DATE"],
@@ -559,7 +572,7 @@ def test_check_columns_are_documented_in_public_models(catalog_node, models, exp
                     },
                     "stats": {},
                     "unique_id": "model.package_name.model_1",
-                }
+                },
             ),
             ".*_date$",
             ["DATE"],
@@ -568,7 +581,10 @@ def test_check_columns_are_documented_in_public_models(catalog_node, models, exp
     ],
 )
 def test_check_column_name_complies_to_column_type(
-    catalog_node, column_name_pattern, types, expectation
+    catalog_node,
+    column_name_pattern,
+    types,
+    expectation,
 ):
     with expectation:
         check_column_name_complies_to_column_type(

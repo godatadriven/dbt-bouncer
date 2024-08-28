@@ -14,7 +14,7 @@ from dbt_bouncer.checks.manifest.check_exposures import (
 
 
 @pytest.mark.parametrize(
-    "exposure, models, expectation",
+    ("exposure", "models", "expectation"),
     [
         (
             Exposures(
@@ -23,7 +23,10 @@ from dbt_bouncer.checks.manifest.check_exposures import (
                     "fqn": ["package_name", "marts", "finance", "exposure_1"],
                     "name": "exposure_1",
                     "original_file_path": "models/marts/finance/_exposures.yml",
-                    "owner": {"email": "anna.anderson@example.com", "name": "Anna Anderson"},
+                    "owner": {
+                        "email": "anna.anderson@example.com",
+                        "name": "Anna Anderson",
+                    },
                     "package_name": "package_name",
                     "path": "marts/finance/_exposures.yml",
                     "resource_type": "exposure",
@@ -57,8 +60,8 @@ from dbt_bouncer.checks.manifest.check_exposures import (
                         "resource_type": "model",
                         "schema": "main",
                         "unique_id": "model.package_name.model_1",
-                    }
-                )
+                    },
+                ),
             ],
             does_not_raise(),
         ),
@@ -69,7 +72,10 @@ from dbt_bouncer.checks.manifest.check_exposures import (
                     "fqn": ["package_name", "marts", "finance", "exposure_1"],
                     "name": "exposure_1",
                     "original_file_path": "models/marts/finance/_exposures.yml",
-                    "owner": {"email": "anna.anderson@example.com", "name": "Anna Anderson"},
+                    "owner": {
+                        "email": "anna.anderson@example.com",
+                        "name": "Anna Anderson",
+                    },
                     "package_name": "package_name",
                     "path": "marts/finance/_exposures.yml",
                     "resource_type": "exposure",
@@ -103,8 +109,8 @@ from dbt_bouncer.checks.manifest.check_exposures import (
                         "resource_type": "model",
                         "schema": "main",
                         "unique_id": "model.package_name.model_1",
-                    }
-                )
+                    },
+                ),
             ],
             pytest.raises(AssertionError),
         ),
@@ -119,7 +125,7 @@ def test_check_exposure_based_on_non_public_models(exposure, models, expectation
 
 
 @pytest.mark.parametrize(
-    "exposure, materializations_to_include, models, expectation",
+    ("exposure", "materializations_to_include", "models", "expectation"),
     [
         (
             Exposures(
@@ -128,7 +134,10 @@ def test_check_exposure_based_on_non_public_models(exposure, models, expectation
                     "fqn": ["package_name", "marts", "finance", "exposure_1"],
                     "name": "exposure_1",
                     "original_file_path": "models/marts/finance/_exposures.yml",
-                    "owner": {"email": "anna.anderson@example.com", "name": "Anna Anderson"},
+                    "owner": {
+                        "email": "anna.anderson@example.com",
+                        "name": "Anna Anderson",
+                    },
                     "package_name": "package_name",
                     "path": "marts/finance/_exposures.yml",
                     "resource_type": "exposure",
@@ -164,8 +173,8 @@ def test_check_exposure_based_on_non_public_models(exposure, models, expectation
                         "resource_type": "model",
                         "schema": "main",
                         "unique_id": "model.package_name.model_1",
-                    }
-                )
+                    },
+                ),
             ],
             does_not_raise(),
         ),
@@ -173,12 +182,18 @@ def test_check_exposure_based_on_non_public_models(exposure, models, expectation
             Exposures(
                 **{
                     "depends_on": {
-                        "nodes": ["model.package_name.model_1", "model.package_name.model_2"]
+                        "nodes": [
+                            "model.package_name.model_1",
+                            "model.package_name.model_2",
+                        ],
                     },
                     "fqn": ["package_name", "marts", "finance", "exposure_1"],
                     "name": "exposure_1",
                     "original_file_path": "models/marts/finance/_exposures.yml",
-                    "owner": {"email": "anna.anderson@example.com", "name": "Anna Anderson"},
+                    "owner": {
+                        "email": "anna.anderson@example.com",
+                        "name": "Anna Anderson",
+                    },
                     "package_name": "package_name",
                     "path": "marts/finance/_exposures.yml",
                     "resource_type": "exposure",
@@ -214,7 +229,7 @@ def test_check_exposure_based_on_non_public_models(exposure, models, expectation
                         "resource_type": "model",
                         "schema": "main",
                         "unique_id": "model.package_name.model_1",
-                    }
+                    },
                 ),
                 Nodes4(
                     **{
@@ -242,7 +257,7 @@ def test_check_exposure_based_on_non_public_models(exposure, models, expectation
                         "resource_type": "model",
                         "schema": "main",
                         "unique_id": "model.package_name.model_2",
-                    }
+                    },
                 ),
             ],
             pytest.raises(AssertionError),
@@ -254,7 +269,10 @@ def test_check_exposure_based_on_non_public_models(exposure, models, expectation
                     "fqn": ["package_name", "marts", "finance", "exposure_1"],
                     "name": "exposure_1",
                     "original_file_path": "models/marts/finance/_exposures.yml",
-                    "owner": {"email": "anna.anderson@example.com", "name": "Anna Anderson"},
+                    "owner": {
+                        "email": "anna.anderson@example.com",
+                        "name": "Anna Anderson",
+                    },
                     "package_name": "package_name",
                     "path": "marts/finance/_exposures.yml",
                     "resource_type": "exposure",
@@ -290,14 +308,19 @@ def test_check_exposure_based_on_non_public_models(exposure, models, expectation
                         "resource_type": "model",
                         "schema": "main",
                         "unique_id": "model.package_name.model_1",
-                    }
+                    },
                 ),
             ],
             pytest.raises(AssertionError),
         ),
     ],
 )
-def test_check_exposure_based_on_view(exposure, materializations_to_include, models, expectation):
+def test_check_exposure_based_on_view(
+    exposure,
+    materializations_to_include,
+    models,
+    expectation,
+):
     with expectation:
         check_exposure_based_on_view(
             exposure=exposure,

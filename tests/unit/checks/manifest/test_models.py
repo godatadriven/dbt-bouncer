@@ -5,7 +5,11 @@ import pytest
 
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
-    from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Nodes4, Nodes6, UnitTests
+    from dbt_artifacts_parser.parsers.manifest.manifest_v12 import (
+        Nodes4,
+        Nodes6,
+        UnitTests,
+    )
 
 from dbt_bouncer.checks.manifest.check_models import (
     check_model_access,
@@ -33,7 +37,7 @@ from dbt_bouncer.checks.manifest.check_models import (
 
 
 @pytest.mark.parametrize(
-    "access, model, expectation",
+    ("access", "model", "expectation"),
     [
         (
             "public",
@@ -57,7 +61,7 @@ from dbt_bouncer.checks.manifest.check_models import (
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.model_2",
-                }
+                },
             ),
             does_not_raise(),
         ),
@@ -83,7 +87,7 @@ from dbt_bouncer.checks.manifest.check_models import (
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.model_2",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),
@@ -98,7 +102,7 @@ def test_check_model_access(access, model, expectation):
 
 
 @pytest.mark.parametrize(
-    "model, expectation",
+    ("model", "expectation"),
     [
         (
             Nodes4(
@@ -122,7 +126,7 @@ def test_check_model_access(access, model, expectation):
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.model_2",
-                }
+                },
             ),
             does_not_raise(),
         ),
@@ -148,7 +152,7 @@ def test_check_model_access(access, model, expectation):
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.model_2",
-                }
+                },
             ),
             does_not_raise(),
         ),
@@ -174,7 +178,7 @@ def test_check_model_access(access, model, expectation):
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.model_2",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),
@@ -188,7 +192,7 @@ def test_check_model_contract_enforced_for_public_model(model, expectation):
 
 
 @pytest.mark.parametrize(
-    "model, expectation",
+    ("model", "expectation"),
     [
         (
             Nodes4(
@@ -211,7 +215,7 @@ def test_check_model_contract_enforced_for_public_model(model, expectation):
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.model_2",
-                }
+                },
             ),
             does_not_raise(),
         ),
@@ -228,7 +232,10 @@ def test_check_model_contract_enforced_for_public_model(model, expectation):
                         },
                     },
                     "depends_on": {
-                        "nodes": ["source.package_name.source_1", "source.package_name.source_2"]
+                        "nodes": [
+                            "source.package_name.source_1",
+                            "source.package_name.source_2",
+                        ],
                     },
                     "fqn": ["package_name", "model_2"],
                     "name": "model_2",
@@ -238,7 +245,7 @@ def test_check_model_contract_enforced_for_public_model(model, expectation):
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.model_2",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),
@@ -252,7 +259,7 @@ def test_check_model_depends_on_multiple_sources(model, expectation):
 
 
 @pytest.mark.parametrize(
-    "min_model_documentation_coverage_pct, models, expectation",
+    ("min_model_documentation_coverage_pct", "models", "expectation"),
     [
         (
             100,
@@ -277,7 +284,7 @@ def test_check_model_depends_on_multiple_sources(model, expectation):
                         "resource_type": "model",
                         "schema": "main",
                         "unique_id": "model.package_name.model_2",
-                    }
+                    },
                 ),
             ],
             does_not_raise(),
@@ -305,7 +312,7 @@ def test_check_model_depends_on_multiple_sources(model, expectation):
                         "resource_type": "model",
                         "schema": "main",
                         "unique_id": "model.package_name.model_1",
-                    }
+                    },
                 ),
                 Nodes4(
                     **{
@@ -327,7 +334,7 @@ def test_check_model_depends_on_multiple_sources(model, expectation):
                         "resource_type": "model",
                         "schema": "main",
                         "unique_id": "model.package_name.model_2",
-                    }
+                    },
                 ),
             ],
             does_not_raise(),
@@ -355,7 +362,7 @@ def test_check_model_depends_on_multiple_sources(model, expectation):
                         "resource_type": "model",
                         "schema": "main",
                         "unique_id": "model.package_name.model_2",
-                    }
+                    },
                 ),
             ],
             pytest.raises(AssertionError),
@@ -363,7 +370,9 @@ def test_check_model_depends_on_multiple_sources(model, expectation):
     ],
 )
 def test_check_model_documentation_coverage(
-    min_model_documentation_coverage_pct, models, expectation
+    min_model_documentation_coverage_pct,
+    models,
+    expectation,
 ):
     with expectation:
         check_model_documentation_coverage(
@@ -373,7 +382,7 @@ def test_check_model_documentation_coverage(
 
 
 @pytest.mark.parametrize(
-    "model, expectation",
+    ("model", "expectation"),
     [
         (
             Nodes4(
@@ -396,7 +405,7 @@ def test_check_model_documentation_coverage(
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.model_1",
-                }
+                },
             ),
             does_not_raise(),
         ),
@@ -421,7 +430,7 @@ def test_check_model_documentation_coverage(
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.model_1",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),
@@ -435,7 +444,7 @@ def test_check_model_documented_in_same_directory(model, expectation):
 
 
 @pytest.mark.parametrize(
-    "model, expectation",
+    ("model", "expectation"),
     [
         (
             Nodes4(
@@ -458,7 +467,7 @@ def test_check_model_documented_in_same_directory(model, expectation):
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.model_1",
-                }
+                },
             ),
             does_not_raise(),
         ),
@@ -483,7 +492,7 @@ def test_check_model_documented_in_same_directory(model, expectation):
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.model_1",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),
@@ -497,7 +506,7 @@ def test_check_model_has_contracts_enforced(model, expectation):
 
 
 @pytest.mark.parametrize(
-    "keys, model, expectation",
+    ("keys", "model", "expectation"),
     [
         (
             ["owner"],
@@ -521,7 +530,7 @@ def test_check_model_has_contracts_enforced(model, expectation):
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.model_1",
-                }
+                },
             ),
             does_not_raise(),
         ),
@@ -547,7 +556,7 @@ def test_check_model_has_contracts_enforced(model, expectation):
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.model_1",
-                }
+                },
             ),
             does_not_raise(),
         ),
@@ -565,7 +574,10 @@ def test_check_model_has_contracts_enforced(model, expectation):
                         },
                     },
                     "fqn": ["package_name", "model_1"],
-                    "meta": {"name": {"first": "Bob", "last": "Bobbington"}, "owner": "Bob"},
+                    "meta": {
+                        "name": {"first": "Bob", "last": "Bobbington"},
+                        "owner": "Bob",
+                    },
                     "name": "model_1",
                     "original_file_path": "model_1.sql",
                     "package_name": "package_name",
@@ -573,7 +585,7 @@ def test_check_model_has_contracts_enforced(model, expectation):
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.model_1",
-                }
+                },
             ),
             does_not_raise(),
         ),
@@ -599,7 +611,7 @@ def test_check_model_has_contracts_enforced(model, expectation):
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.model_1",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),
@@ -625,7 +637,7 @@ def test_check_model_has_contracts_enforced(model, expectation):
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.model_1",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),
@@ -651,7 +663,7 @@ def test_check_model_has_contracts_enforced(model, expectation):
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.model_1",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),
@@ -666,7 +678,7 @@ def test_check_model_has_meta_keys(keys, model, expectation):
 
 
 @pytest.mark.parametrize(
-    "model, expectation",
+    ("model", "expectation"),
     [
         (
             Nodes4(
@@ -689,7 +701,7 @@ def test_check_model_has_meta_keys(keys, model, expectation):
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.model_1",
-                }
+                },
             ),
             does_not_raise(),
         ),
@@ -714,7 +726,7 @@ def test_check_model_has_meta_keys(keys, model, expectation):
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.int_model_1",
-                }
+                },
             ),
             does_not_raise(),
         ),
@@ -739,7 +751,7 @@ def test_check_model_has_meta_keys(keys, model, expectation):
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.model_1",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),
@@ -753,7 +765,7 @@ def test_check_model_has_no_upstream_dependencies(model, expectation):
 
 
 @pytest.mark.parametrize(
-    "model, tags, expectation",
+    ("model", "tags", "expectation"),
     [
         (
             Nodes4(
@@ -777,7 +789,7 @@ def test_check_model_has_no_upstream_dependencies(model, expectation):
                     "schema": "main",
                     "tags": ["tag_1"],
                     "unique_id": "model.package_name.model_1",
-                }
+                },
             ),
             ["tag_1"],
             does_not_raise(),
@@ -804,7 +816,7 @@ def test_check_model_has_no_upstream_dependencies(model, expectation):
                     "schema": "main",
                     "tags": [],
                     "unique_id": "model.package_name.model_1",
-                }
+                },
             ),
             ["tag_1"],
             pytest.raises(AssertionError),
@@ -820,7 +832,7 @@ def test_check_model_has_tags(model, tags, expectation):
 
 
 @pytest.mark.parametrize(
-    "accepted_uniqueness_tests, model, tests, expectation",
+    ("accepted_uniqueness_tests", "model", "tests", "expectation"),
     [
         (
             ["expect_compound_columns_to_be_unique", "unique"],
@@ -843,7 +855,7 @@ def test_check_model_has_tags(model, tags, expectation):
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.model_1",
-                }
+                },
             ),
             [
                 Nodes6(
@@ -852,7 +864,12 @@ def test_check_model_has_tags(model, tags, expectation):
                         "attached_node": "model.package_name.model_1",
                         "checksum": {"name": "none", "checksum": ""},
                         "column_name": "col_1",
-                        "fqn": ["package_name", "marts", "finance", "not_null_model_1_unique"],
+                        "fqn": [
+                            "package_name",
+                            "marts",
+                            "finance",
+                            "not_null_model_1_unique",
+                        ],
                         "name": "not_null_model_1_unique",
                         "original_file_path": "models/marts/finance/_finance__models.yml",
                         "package_name": "package_name",
@@ -863,8 +880,8 @@ def test_check_model_has_tags(model, tags, expectation):
                             "name": "unique",
                         },
                         "unique_id": "test.package_name.not_null_model_1_unique.cf6c17daed",
-                    }
-                )
+                    },
+                ),
             ],
             does_not_raise(),
         ),
@@ -889,7 +906,7 @@ def test_check_model_has_tags(model, tags, expectation):
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.model_1",
-                }
+                },
             ),
             [
                 Nodes6(
@@ -898,7 +915,12 @@ def test_check_model_has_tags(model, tags, expectation):
                         "attached_node": "model.package_name.model_1",
                         "checksum": {"name": "none", "checksum": ""},
                         "column_name": "col_1",
-                        "fqn": ["package_name", "marts", "finance", "not_null_model_1_unique"],
+                        "fqn": [
+                            "package_name",
+                            "marts",
+                            "finance",
+                            "not_null_model_1_unique",
+                        ],
                         "name": "not_null_model_1_unique",
                         "original_file_path": "models/marts/finance/_finance__models.yml",
                         "package_name": "package_name",
@@ -909,8 +931,8 @@ def test_check_model_has_tags(model, tags, expectation):
                             "name": "my_custom_test",
                         },
                         "unique_id": "test.package_name.not_null_model_1_unique.cf6c17daed",
-                    }
-                )
+                    },
+                ),
             ],
             does_not_raise(),
         ),
@@ -935,7 +957,7 @@ def test_check_model_has_tags(model, tags, expectation):
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.model_1",
-                }
+                },
             ),
             [
                 Nodes6(
@@ -944,7 +966,12 @@ def test_check_model_has_tags(model, tags, expectation):
                         "attached_node": "model.package_name.model_1",
                         "checksum": {"name": "none", "checksum": ""},
                         "column_name": "col_1",
-                        "fqn": ["package_name", "marts", "finance", "not_null_model_1_unique"],
+                        "fqn": [
+                            "package_name",
+                            "marts",
+                            "finance",
+                            "not_null_model_1_unique",
+                        ],
                         "name": "not_null_model_1_unique",
                         "original_file_path": "models/marts/finance/_finance__models.yml",
                         "package_name": "package_name",
@@ -955,8 +982,8 @@ def test_check_model_has_tags(model, tags, expectation):
                             "name": "expect_compound_columns_to_be_unique",
                         },
                         "unique_id": "test.package_name.not_null_model_1_unique.cf6c17daed",
-                    }
-                )
+                    },
+                ),
             ],
             pytest.raises(AssertionError),
         ),
@@ -981,14 +1008,19 @@ def test_check_model_has_tags(model, tags, expectation):
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.model_1",
-                }
+                },
             ),
             [],
             pytest.raises(AssertionError),
         ),
     ],
 )
-def test_check_model_has_unique_test(accepted_uniqueness_tests, model, tests, expectation):
+def test_check_model_has_unique_test(
+    accepted_uniqueness_tests,
+    model,
+    tests,
+    expectation,
+):
     with expectation:
         check_model_has_unique_test(
             accepted_uniqueness_tests=accepted_uniqueness_tests,
@@ -998,7 +1030,7 @@ def test_check_model_has_unique_test(accepted_uniqueness_tests, model, tests, ex
 
 
 @pytest.mark.parametrize(
-    "manifest_obj, min_number_of_unit_tests, model, unit_tests, expectation",
+    ("manifest_obj", "min_number_of_unit_tests", "model", "unit_tests", "expectation"),
     [
         (
             "manifest_obj",
@@ -1022,7 +1054,7 @@ def test_check_model_has_unique_test(accepted_uniqueness_tests, model, tests, ex
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.model_1",
-                }
+                },
             ),
             [
                 UnitTests(
@@ -1030,10 +1062,16 @@ def test_check_model_has_unique_test(accepted_uniqueness_tests, model, tests, ex
                         "depends_on": {
                             "nodes": [
                                 "model.package_name.model_1",
-                            ]
+                            ],
                         },
                         "expect": {"format": "dict", "rows": [{"id": 1}]},
-                        "fqn": ["package_name", "staging", "crm", "model_1", "unit_test_1"],
+                        "fqn": [
+                            "package_name",
+                            "staging",
+                            "crm",
+                            "model_1",
+                            "unit_test_1",
+                        ],
                         "given": [{"input": "ref(input_1)", "format": "csv"}],
                         "model": "model_1",
                         "name": "unit_test_1",
@@ -1042,7 +1080,7 @@ def test_check_model_has_unique_test(accepted_uniqueness_tests, model, tests, ex
                         "package_name": "package_name",
                         "path": "staging/crm/_crm__source.yml",
                         "unique_id": "unit_test.package_name.model_1.unit_test_1",
-                    }
+                    },
                 ),
             ],
             does_not_raise(),
@@ -1069,7 +1107,7 @@ def test_check_model_has_unique_test(accepted_uniqueness_tests, model, tests, ex
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.model_1",
-                }
+                },
             ),
             [
                 UnitTests(
@@ -1077,10 +1115,16 @@ def test_check_model_has_unique_test(accepted_uniqueness_tests, model, tests, ex
                         "depends_on": {
                             "nodes": [
                                 "model.package_name.model_1",
-                            ]
+                            ],
                         },
                         "expect": {"format": "dict", "rows": [{"id": 1}]},
-                        "fqn": ["package_name", "staging", "crm", "model_1", "unit_test_1"],
+                        "fqn": [
+                            "package_name",
+                            "staging",
+                            "crm",
+                            "model_1",
+                            "unit_test_1",
+                        ],
                         "given": [{"input": "ref(input_1)", "format": "csv"}],
                         "model": "model_1",
                         "name": "unit_test_1",
@@ -1089,7 +1133,7 @@ def test_check_model_has_unique_test(accepted_uniqueness_tests, model, tests, ex
                         "package_name": "package_name",
                         "path": "staging/crm/_crm__source.yml",
                         "unique_id": "unit_test.package_name.model_1.unit_test_1",
-                    }
+                    },
                 ),
             ],
             pytest.raises(AssertionError),
@@ -1098,7 +1142,11 @@ def test_check_model_has_unique_test(accepted_uniqueness_tests, model, tests, ex
     indirect=["manifest_obj"],
 )
 def test_check_model_has_unit_tests(
-    manifest_obj, min_number_of_unit_tests, model, unit_tests, expectation
+    manifest_obj,
+    min_number_of_unit_tests,
+    model,
+    unit_tests,
+    expectation,
 ):
     with expectation:
         check_model_has_unit_tests(
@@ -1110,7 +1158,7 @@ def test_check_model_has_unit_tests(
 
 
 @pytest.mark.parametrize(
-    "model, regexp_pattern, expectation",
+    ("model", "regexp_pattern", "expectation"),
     [
         (
             Nodes4(
@@ -1133,7 +1181,7 @@ def test_check_model_has_unit_tests(
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.model_1",
-                }
+                },
             ),
             ".*[i][f][n][u][l][l].*",
             does_not_raise(),
@@ -1159,14 +1207,18 @@ def test_check_model_has_unit_tests(
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.model_1",
-                }
+                },
             ),
             ".*[i][f][n][u][l][l].*",
             pytest.raises(AssertionError),
         ),
     ],
 )
-def test_check_model_code_does_not_contain_regexp_pattern(model, regexp_pattern, expectation):
+def test_check_model_code_does_not_contain_regexp_pattern(
+    model,
+    regexp_pattern,
+    expectation,
+):
     with expectation:
         check_model_code_does_not_contain_regexp_pattern(
             model=model,
@@ -1175,7 +1227,7 @@ def test_check_model_code_does_not_contain_regexp_pattern(model, regexp_pattern,
 
 
 @pytest.mark.parametrize(
-    "include, model, permitted_sub_directories, expectation",
+    ("include", "model", "permitted_sub_directories", "expectation"),
     [
         (
             "models",
@@ -1198,7 +1250,7 @@ def test_check_model_code_does_not_contain_regexp_pattern(model, regexp_pattern,
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.model_1",
-                }
+                },
             ),
             ["staging", "mart", "intermediate"],
             does_not_raise(),
@@ -1224,7 +1276,7 @@ def test_check_model_code_does_not_contain_regexp_pattern(model, regexp_pattern,
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.model_1",
-                }
+                },
             ),
             ["finance", "marketing"],
             does_not_raise(),
@@ -1250,14 +1302,19 @@ def test_check_model_code_does_not_contain_regexp_pattern(model, regexp_pattern,
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.model_1",
-                }
+                },
             ),
             ["finance", "marketing"],
             pytest.raises(AssertionError),
         ),
     ],
 )
-def test_check_model_directories(include, model, permitted_sub_directories, expectation):
+def test_check_model_directories(
+    include,
+    model,
+    permitted_sub_directories,
+    expectation,
+):
     with expectation:
         check_model_directories(
             include=include,
@@ -1267,7 +1324,14 @@ def test_check_model_directories(include, model, permitted_sub_directories, expe
 
 
 @pytest.mark.parametrize(
-    "manifest_obj, materializations_to_include, max_chained_views, model, models, expectation",
+    (
+        "manifest_obj",
+        "materializations_to_include",
+        "max_chained_views",
+        "model",
+        "models",
+        "expectation",
+    ),
     [
         (
             "manifest_obj",
@@ -1293,7 +1357,7 @@ def test_check_model_directories(include, model, permitted_sub_directories, expe
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.dbt_bouncer_test_project.model_0",
-                }
+                },
             ),
             [
                 Nodes4(
@@ -1308,7 +1372,9 @@ def test_check_model_directories(include, model, permitted_sub_directories, expe
                             },
                         },
                         "config": {"materialized": "ephemeral"},
-                        "depends_on": {"nodes": ["model.dbt_bouncer_test_project.model_1"]},
+                        "depends_on": {
+                            "nodes": ["model.dbt_bouncer_test_project.model_1"],
+                        },
                         "fqn": ["dbt_bouncer_test_project", "model_1"],
                         "name": "model_0",
                         "original_file_path": "models/marts/sales/model_0.sql",
@@ -1317,7 +1383,7 @@ def test_check_model_directories(include, model, permitted_sub_directories, expe
                         "resource_type": "model",
                         "schema": "main",
                         "unique_id": "model.dbt_bouncer_test_project.model_0",
-                    }
+                    },
                 ),
                 Nodes4(
                     **{
@@ -1331,7 +1397,9 @@ def test_check_model_directories(include, model, permitted_sub_directories, expe
                             },
                         },
                         "config": {"materialized": "ephemeral"},
-                        "depends_on": {"nodes": ["model.dbt_bouncer_test_project.model_2"]},
+                        "depends_on": {
+                            "nodes": ["model.dbt_bouncer_test_project.model_2"],
+                        },
                         "fqn": ["dbt_bouncer_test_project", "model_1"],
                         "name": "model_1",
                         "original_file_path": "models/marts/sales/model_1.sql",
@@ -1340,7 +1408,7 @@ def test_check_model_directories(include, model, permitted_sub_directories, expe
                         "resource_type": "model",
                         "schema": "main",
                         "unique_id": "model.dbt_bouncer_test_project.model_1",
-                    }
+                    },
                 ),
                 Nodes4(
                     **{
@@ -1363,7 +1431,7 @@ def test_check_model_directories(include, model, permitted_sub_directories, expe
                         "resource_type": "model",
                         "schema": "main",
                         "unique_id": "model.dbt_bouncer_test_project.model_2",
-                    }
+                    },
                 ),
             ],
             does_not_raise(),
@@ -1392,7 +1460,7 @@ def test_check_model_directories(include, model, permitted_sub_directories, expe
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.dbt_bouncer_test_project.model_0",
-                }
+                },
             ),
             [
                 Nodes4(
@@ -1407,7 +1475,9 @@ def test_check_model_directories(include, model, permitted_sub_directories, expe
                             },
                         },
                         "config": {"materialized": "ephemeral"},
-                        "depends_on": {"nodes": ["model.dbt_bouncer_test_project.model_1"]},
+                        "depends_on": {
+                            "nodes": ["model.dbt_bouncer_test_project.model_1"],
+                        },
                         "fqn": ["dbt_bouncer_test_project", "model_1"],
                         "name": "model_0",
                         "original_file_path": "models/marts/sales/model_0.sql",
@@ -1416,7 +1486,7 @@ def test_check_model_directories(include, model, permitted_sub_directories, expe
                         "resource_type": "model",
                         "schema": "main",
                         "unique_id": "model.dbt_bouncer_test_project.model_0",
-                    }
+                    },
                 ),
                 Nodes4(
                     **{
@@ -1430,7 +1500,9 @@ def test_check_model_directories(include, model, permitted_sub_directories, expe
                             },
                         },
                         "config": {"materialized": "ephemeral"},
-                        "depends_on": {"nodes": ["model.dbt_bouncer_test_project.model_2"]},
+                        "depends_on": {
+                            "nodes": ["model.dbt_bouncer_test_project.model_2"],
+                        },
                         "fqn": ["dbt_bouncer_test_project", "model_1"],
                         "name": "model_1",
                         "original_file_path": "models/marts/sales/model_1.sql",
@@ -1439,7 +1511,7 @@ def test_check_model_directories(include, model, permitted_sub_directories, expe
                         "resource_type": "model",
                         "schema": "main",
                         "unique_id": "model.dbt_bouncer_test_project.model_1",
-                    }
+                    },
                 ),
                 Nodes4(
                     **{
@@ -1453,7 +1525,9 @@ def test_check_model_directories(include, model, permitted_sub_directories, expe
                             },
                         },
                         "config": {"materialized": "view"},
-                        "depends_on": {"nodes": ["model.dbt_bouncer_test_project.model_3"]},
+                        "depends_on": {
+                            "nodes": ["model.dbt_bouncer_test_project.model_3"],
+                        },
                         "fqn": ["dbt_bouncer_test_project", "model_1"],
                         "name": "model_2",
                         "original_file_path": "models/marts/sales/model_2.sql",
@@ -1462,7 +1536,7 @@ def test_check_model_directories(include, model, permitted_sub_directories, expe
                         "resource_type": "model",
                         "schema": "main",
                         "unique_id": "model.dbt_bouncer_test_project.model_2",
-                    }
+                    },
                 ),
                 Nodes4(
                     **{
@@ -1485,7 +1559,7 @@ def test_check_model_directories(include, model, permitted_sub_directories, expe
                         "resource_type": "model",
                         "schema": "main",
                         "unique_id": "model.dbt_bouncer_test_project.model_3",
-                    }
+                    },
                 ),
             ],
             pytest.raises(AssertionError),
@@ -1494,7 +1568,12 @@ def test_check_model_directories(include, model, permitted_sub_directories, expe
     indirect=["manifest_obj"],
 )
 def test_check_model_max_chained_views(
-    manifest_obj, materializations_to_include, max_chained_views, model, models, expectation
+    manifest_obj,
+    materializations_to_include,
+    max_chained_views,
+    model,
+    models,
+    expectation,
 ):
     with expectation:
         check_model_max_chained_views(
@@ -1507,7 +1586,7 @@ def test_check_model_max_chained_views(
 
 
 @pytest.mark.parametrize(
-    "include, model_name_pattern, model, expectation",
+    ("include", "model_name_pattern", "model", "expectation"),
     [
         (
             "",
@@ -1531,7 +1610,7 @@ def test_check_model_max_chained_views(
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.stg_model_1",
-                }
+                },
             ),
             does_not_raise(),
         ),
@@ -1557,7 +1636,7 @@ def test_check_model_max_chained_views(
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.stg_model_2",
-                }
+                },
             ),
             does_not_raise(),
         ),
@@ -1583,7 +1662,7 @@ def test_check_model_max_chained_views(
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.stg_model_3",
-                }
+                },
             ),
             does_not_raise(),
         ),
@@ -1609,7 +1688,7 @@ def test_check_model_max_chained_views(
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.int_model_1",
-                }
+                },
             ),
             does_not_raise(),
         ),
@@ -1635,7 +1714,7 @@ def test_check_model_max_chained_views(
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.model_1",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),
@@ -1661,7 +1740,7 @@ def test_check_model_max_chained_views(
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.model_int_2",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),
@@ -1677,7 +1756,7 @@ def test_check_mode_names(include, model_name_pattern, model, expectation):
 
 
 @pytest.mark.parametrize(
-    "max_downstream_models, model, models, expectation",
+    ("max_downstream_models", "model", "models", "expectation"),
     [
         (
             1,
@@ -1700,7 +1779,7 @@ def test_check_mode_names(include, model_name_pattern, model, expectation):
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.stg_model_1",
-                }
+                },
             ),
             [
                 Nodes4(
@@ -1717,7 +1796,7 @@ def test_check_mode_names(include, model_name_pattern, model, expectation):
                         "depends_on": {
                             "nodes": [
                                 "model.package_name.stg_model_1",
-                            ]
+                            ],
                         },
                         "fqn": ["package_name", "stg_model_2"],
                         "name": "stg_model_2",
@@ -1727,7 +1806,7 @@ def test_check_mode_names(include, model_name_pattern, model, expectation):
                         "resource_type": "model",
                         "schema": "main",
                         "unique_id": "model.package_name.stg_model_2",
-                    }
+                    },
                 ),
             ],
             does_not_raise(),
@@ -1753,7 +1832,7 @@ def test_check_mode_names(include, model_name_pattern, model, expectation):
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.stg_model_1",
-                }
+                },
             ),
             [
                 Nodes4(
@@ -1770,7 +1849,7 @@ def test_check_mode_names(include, model_name_pattern, model, expectation):
                         "depends_on": {
                             "nodes": [
                                 "model.package_name.stg_model_1",
-                            ]
+                            ],
                         },
                         "fqn": ["package_name", "stg_model_2"],
                         "name": "stg_model_2",
@@ -1780,7 +1859,7 @@ def test_check_mode_names(include, model_name_pattern, model, expectation):
                         "resource_type": "model",
                         "schema": "main",
                         "unique_id": "model.package_name.stg_model_2",
-                    }
+                    },
                 ),
                 Nodes4(
                     **{
@@ -1796,7 +1875,7 @@ def test_check_mode_names(include, model_name_pattern, model, expectation):
                         "depends_on": {
                             "nodes": [
                                 "model.package_name.stg_model_1",
-                            ]
+                            ],
                         },
                         "fqn": ["package_name", "stg_model_3"],
                         "name": "stg_model_3",
@@ -1806,7 +1885,7 @@ def test_check_mode_names(include, model_name_pattern, model, expectation):
                         "resource_type": "model",
                         "schema": "main",
                         "unique_id": "model.package_name.stg_model_3",
-                    }
+                    },
                 ),
             ],
             pytest.raises(AssertionError),
@@ -1823,7 +1902,7 @@ def test_check_model_max_fanout(max_downstream_models, model, models, expectatio
 
 
 @pytest.mark.parametrize(
-    "max_number_of_lines, model, expectation",
+    ("max_number_of_lines", "model", "expectation"),
     [
         (
             100,
@@ -1848,7 +1927,7 @@ def test_check_model_max_fanout(max_downstream_models, model, models, expectatio
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.model_1",
-                }
+                },
             ),
             does_not_raise(),
         ),
@@ -1875,7 +1954,7 @@ def test_check_model_max_fanout(max_downstream_models, model, models, expectatio
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.model_1",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),
@@ -1890,7 +1969,13 @@ def test_check_model_max_number_of_lines(max_number_of_lines, model, expectation
 
 
 @pytest.mark.parametrize(
-    "max_upstream_macros, max_upstream_models, max_upstream_sources, model, expectation",
+    (
+        "max_upstream_macros",
+        "max_upstream_models",
+        "max_upstream_sources",
+        "model",
+        "expectation",
+    ),
     [
         (
             5,
@@ -1933,7 +2018,7 @@ def test_check_model_max_number_of_lines(max_number_of_lines, model, expectation
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.stg_model_1",
-                }
+                },
             ),
             does_not_raise(),
         ),
@@ -1965,7 +2050,7 @@ def test_check_model_max_number_of_lines(max_number_of_lines, model, expectation
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.stg_model_1",
-                }
+                },
             ),
             does_not_raise(),
         ),
@@ -2000,7 +2085,7 @@ def test_check_model_max_number_of_lines(max_number_of_lines, model, expectation
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.stg_model_1",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),
@@ -2039,7 +2124,7 @@ def test_check_model_max_number_of_lines(max_number_of_lines, model, expectation
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.stg_model_1",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),
@@ -2078,14 +2163,18 @@ def test_check_model_max_number_of_lines(max_number_of_lines, model, expectation
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.stg_model_1",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),
     ],
 )
 def test_check_model_max_upstream_dependencies(
-    max_upstream_macros, max_upstream_models, max_upstream_sources, model, expectation
+    max_upstream_macros,
+    max_upstream_models,
+    max_upstream_sources,
+    model,
+    expectation,
 ):
     with expectation:
         check_model_max_upstream_dependencies(
@@ -2097,7 +2186,7 @@ def test_check_model_max_upstream_dependencies(
 
 
 @pytest.mark.parametrize(
-    "model, expectation",
+    ("model", "expectation"),
     [
         (
             Nodes4(
@@ -2120,7 +2209,7 @@ def test_check_model_max_upstream_dependencies(
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.model_1",
-                }
+                },
             ),
             does_not_raise(),
         ),
@@ -2145,7 +2234,7 @@ def test_check_model_max_upstream_dependencies(
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.model_1",
-                }
+                },
             ),
             does_not_raise(),
         ),
@@ -2170,7 +2259,7 @@ def test_check_model_max_upstream_dependencies(
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.model_1",
-                }
+                },
             ),
             does_not_raise(),
         ),
@@ -2195,7 +2284,7 @@ def test_check_model_max_upstream_dependencies(
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.model_1",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),
@@ -2220,7 +2309,7 @@ def test_check_model_max_upstream_dependencies(
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.model_1",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),
@@ -2245,7 +2334,7 @@ def test_check_model_max_upstream_dependencies(
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.model_1",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),
@@ -2259,7 +2348,7 @@ def test_check_model_property_file_location(model, expectation):
 
 
 @pytest.mark.parametrize(
-    "model, expectation",
+    ("model", "expectation"),
     [
         (
             Nodes4(
@@ -2282,7 +2371,7 @@ def test_check_model_property_file_location(model, expectation):
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.model_1",
-                }
+                },
             ),
             does_not_raise(),
         ),
@@ -2310,7 +2399,7 @@ def test_check_model_property_file_location(model, expectation):
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.model_1",
-                }
+                },
             ),
             does_not_raise(),
         ),
@@ -2335,7 +2424,7 @@ def test_check_model_property_file_location(model, expectation):
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.model_1",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),
@@ -2360,7 +2449,7 @@ def test_check_model_property_file_location(model, expectation):
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.model_1",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),
@@ -2386,7 +2475,7 @@ def test_check_model_property_file_location(model, expectation):
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.model_1",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),
@@ -2411,7 +2500,7 @@ def test_check_model_property_file_location(model, expectation):
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.model_1",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),
@@ -2436,7 +2525,7 @@ def test_check_model_property_file_location(model, expectation):
                     "resource_type": "model",
                     "schema": "main",
                     "unique_id": "model.package_name.model_1",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),
@@ -2450,7 +2539,7 @@ def test_check_model_description_populated(model, expectation):
 
 
 @pytest.mark.parametrize(
-    "min_model_test_coverage_pct, models, tests, expectation",
+    ("min_model_test_coverage_pct", "models", "tests", "expectation"),
     [
         (
             100,
@@ -2474,7 +2563,7 @@ def test_check_model_description_populated(model, expectation):
                         "resource_type": "model",
                         "schema": "main",
                         "unique_id": "model.package_name.model_1",
-                    }
+                    },
                 ),
             ],
             [
@@ -2489,7 +2578,12 @@ def test_check_model_description_populated(model, expectation):
                                 "model.package_name.model_1",
                             ],
                         },
-                        "fqn": ["package_name", "marts", "finance", "not_null_model_1_unique"],
+                        "fqn": [
+                            "package_name",
+                            "marts",
+                            "finance",
+                            "not_null_model_1_unique",
+                        ],
                         "name": "not_null_model_1_unique",
                         "original_file_path": "models/marts/finance/_finance__models.yml",
                         "package_name": "package_name",
@@ -2500,8 +2594,8 @@ def test_check_model_description_populated(model, expectation):
                             "name": "expect_compound_columns_to_be_unique",
                         },
                         "unique_id": "test.package_name.not_null_model_1_unique.cf6c17daed",
-                    }
-                )
+                    },
+                ),
             ],
             does_not_raise(),
         ),
@@ -2527,7 +2621,7 @@ def test_check_model_description_populated(model, expectation):
                         "resource_type": "model",
                         "schema": "main",
                         "unique_id": "model.package_name.model_1",
-                    }
+                    },
                 ),
                 Nodes4(
                     **{
@@ -2548,7 +2642,7 @@ def test_check_model_description_populated(model, expectation):
                         "resource_type": "model",
                         "schema": "main",
                         "unique_id": "model.package_name.model_2",
-                    }
+                    },
                 ),
             ],
             [
@@ -2563,7 +2657,12 @@ def test_check_model_description_populated(model, expectation):
                                 "model.package_name.model_1",
                             ],
                         },
-                        "fqn": ["package_name", "marts", "finance", "not_null_model_1_unique"],
+                        "fqn": [
+                            "package_name",
+                            "marts",
+                            "finance",
+                            "not_null_model_1_unique",
+                        ],
                         "name": "not_null_model_1_unique",
                         "original_file_path": "models/marts/finance/_finance__models.yml",
                         "package_name": "package_name",
@@ -2574,8 +2673,8 @@ def test_check_model_description_populated(model, expectation):
                             "name": "expect_compound_columns_to_be_unique",
                         },
                         "unique_id": "test.package_name.not_null_model_1_unique.cf6c17daed",
-                    }
-                )
+                    },
+                ),
             ],
             does_not_raise(),
         ),
@@ -2601,7 +2700,7 @@ def test_check_model_description_populated(model, expectation):
                         "resource_type": "model",
                         "schema": "main",
                         "unique_id": "model.package_name.model_1",
-                    }
+                    },
                 ),
                 Nodes4(
                     **{
@@ -2622,7 +2721,7 @@ def test_check_model_description_populated(model, expectation):
                         "resource_type": "model",
                         "schema": "main",
                         "unique_id": "model.package_name.model_2",
-                    }
+                    },
                 ),
             ],
             [
@@ -2637,7 +2736,12 @@ def test_check_model_description_populated(model, expectation):
                                 "model.package_name.model_2",
                             ],
                         },
-                        "fqn": ["package_name", "marts", "finance", "not_null_model_1_unique"],
+                        "fqn": [
+                            "package_name",
+                            "marts",
+                            "finance",
+                            "not_null_model_1_unique",
+                        ],
                         "name": "not_null_model_1_unique",
                         "original_file_path": "models/marts/finance/_finance__models.yml",
                         "package_name": "package_name",
@@ -2648,14 +2752,19 @@ def test_check_model_description_populated(model, expectation):
                             "name": "expect_compound_columns_to_be_unique",
                         },
                         "unique_id": "test.package_name.not_null_model_1_unique.cf6c17daed",
-                    }
-                )
+                    },
+                ),
             ],
             pytest.raises(AssertionError),
         ),
     ],
 )
-def test_check_model_test_coverage(min_model_test_coverage_pct, models, tests, expectation):
+def test_check_model_test_coverage(
+    min_model_test_coverage_pct,
+    models,
+    tests,
+    expectation,
+):
     with expectation:
         check_model_test_coverage(
             min_model_test_coverage_pct=min_model_test_coverage_pct,

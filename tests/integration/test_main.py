@@ -16,12 +16,16 @@ def test_cli_happy_path(caplog, dbt_artifacts_dir, request, tmp_path):
     with Path.open(Path("dbt-bouncer-example.yml"), "r") as f:
         bouncer_config = yaml.safe_load(f)
 
-    bouncer_config["dbt_artifacts_dir"] = (Path(dbt_artifacts_dir) / "target").absolute().__str__()
+    bouncer_config["dbt_artifacts_dir"] = (
+        (Path(dbt_artifacts_dir) / "target").absolute().__str__()
+    )
 
     # Remove checks that don't work with dbt 1.6
     if request.node.callspec.id.endswith("dbt_16"):
         bouncer_config["manifest_checks"] = [
-            x for x in bouncer_config["manifest_checks"] if x["name"] != "check_model_access"
+            x
+            for x in bouncer_config["manifest_checks"]
+            if x["name"] != "check_model_access"
         ]
 
     config_file = Path(tmp_path / "dbt-bouncer-example.yml")
@@ -88,7 +92,7 @@ def test_cli_coverage(caplog, tmp_path):
                 "name": "check_model_directories",
                 "include": "",
                 "permitted_sub_directories": ["staging"],
-            }
+            },
         ],
     }
 
@@ -119,7 +123,10 @@ def test_cli_coverage(caplog, tmp_path):
     assert (tmp_path / "coverage.json").exists()
     assert len(coverage) > 1
     assert f"Saving coverage file to `{tmp_path}/coverage.json`" in caplog.text
-    assert "`dbt-bouncer` failed. Please check the logs above for more details." in caplog.text
+    assert (
+        "`dbt-bouncer` failed. Please check the logs above for more details."
+        in caplog.text
+    )
     assert result.exit_code == 1
 
 
@@ -141,10 +148,7 @@ def test_cli_happy_path_pyproject_toml(caplog):
     ],
 )
 def test_cli_unhappy_path(cli_args):
-    """
-    Test the unhappy path, just need to ensure that the CLI starts up and calculates the input parameters correctly.
-    """
-
+    """Test the unhappy path, just need to ensure that the CLI starts up and calculates the input parameters correctly."""
     runner = CliRunner()
     result = runner.invoke(
         cli,
@@ -175,7 +179,7 @@ def test_cli_error_message(caplog, tmp_path):
                 "name": "check_model_directories",
                 "include": "",
                 "permitted_sub_directories": ["staging"],
-            }
+            },
         ],
     }
 
@@ -199,7 +203,10 @@ def test_cli_error_message(caplog, tmp_path):
         ],
     )
 
-    assert "`dbt-bouncer` failed. Please check the logs above for more details." in caplog.text
+    assert (
+        "`dbt-bouncer` failed. Please check the logs above for more details."
+        in caplog.text
+    )
     assert result.exit_code == 1
 
 

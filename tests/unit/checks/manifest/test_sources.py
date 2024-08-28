@@ -22,7 +22,7 @@ from dbt_bouncer.checks.manifest.check_sources import (
 
 
 @pytest.mark.parametrize(
-    "source, expectation",
+    ("source", "expectation"),
     [
         (
             Sources(
@@ -40,7 +40,7 @@ from dbt_bouncer.checks.manifest.check_sources import (
                     "source_description": "",
                     "source_name": "source_1",
                     "unique_id": "source.package_name.source_1.table_1",
-                }
+                },
             ),
             does_not_raise(),
         ),
@@ -63,7 +63,7 @@ from dbt_bouncer.checks.manifest.check_sources import (
                     "source_description": "",
                     "source_name": "source_1",
                     "unique_id": "source.package_name.source_1.table_1",
-                }
+                },
             ),
             does_not_raise(),
         ),
@@ -83,7 +83,7 @@ from dbt_bouncer.checks.manifest.check_sources import (
                     "source_description": "",
                     "source_name": "source_1",
                     "unique_id": "source.package_name.source_1.table_1",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),
@@ -103,7 +103,7 @@ from dbt_bouncer.checks.manifest.check_sources import (
                     "source_description": "",
                     "source_name": "source_1",
                     "unique_id": "source.package_name.source_1.table_1",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),
@@ -124,7 +124,7 @@ from dbt_bouncer.checks.manifest.check_sources import (
                     "source_description": "",
                     "source_name": "source_1",
                     "unique_id": "source.package_name.source_1.table_1",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),
@@ -144,7 +144,7 @@ from dbt_bouncer.checks.manifest.check_sources import (
                     "source_description": "",
                     "source_name": "source_1",
                     "unique_id": "source.package_name.source_1.table_1",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),
@@ -164,7 +164,7 @@ from dbt_bouncer.checks.manifest.check_sources import (
                     "source_description": "",
                     "source_name": "source_1",
                     "unique_id": "source.package_name.source_1.table_1",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),
@@ -178,7 +178,7 @@ def test_check_source_description_populated(source, expectation):
 
 
 @pytest.mark.parametrize(
-    "source, expectation",
+    ("source", "expectation"),
     [
         (
             Sources(
@@ -201,7 +201,7 @@ def test_check_source_description_populated(source, expectation):
                     "source_description": "",
                     "source_name": "source_1",
                     "unique_id": "source.package_name.source_1.table_1",
-                }
+                },
             ),
             does_not_raise(),
         ),
@@ -226,7 +226,7 @@ def test_check_source_description_populated(source, expectation):
                     "source_description": "",
                     "source_name": "source_1",
                     "unique_id": "source.package_name.source_1.table_1",
-                }
+                },
             ),
             does_not_raise(),
         ),
@@ -251,7 +251,7 @@ def test_check_source_description_populated(source, expectation):
                     "source_description": "",
                     "source_name": "source_1",
                     "unique_id": "source.package_name.source_1.table_1",
-                }
+                },
             ),
             does_not_raise(),
         ),
@@ -276,7 +276,7 @@ def test_check_source_description_populated(source, expectation):
                     "source_description": "",
                     "source_name": "source_1",
                     "unique_id": "source.package_name.source_1.table_1",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),
@@ -290,7 +290,7 @@ def test_check_source_freshness_populated(source, expectation):
 
 
 @pytest.mark.parametrize(
-    "source, expectation",
+    ("source", "expectation"),
     [
         (
             Sources(
@@ -308,7 +308,7 @@ def test_check_source_freshness_populated(source, expectation):
                     "source_description": "",
                     "source_name": "source_1",
                     "unique_id": "source.package_name.source_1.table_1",
-                }
+                },
             ),
             does_not_raise(),
         ),
@@ -328,7 +328,7 @@ def test_check_source_freshness_populated(source, expectation):
                     "source_description": "",
                     "source_name": "source_1",
                     "unique_id": "source.package_name.source_1.table_1",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),
@@ -342,7 +342,7 @@ def test_check_source_loader_populated(source, expectation):
 
 
 @pytest.mark.parametrize(
-    "keys, source, expectation",
+    ("keys", "source", "expectation"),
     [
         (
             ["owner"],
@@ -362,7 +362,7 @@ def test_check_source_loader_populated(source, expectation):
                     "source_description": "",
                     "source_name": "source_1",
                     "unique_id": "source.package_name.source_1.table_1",
-                }
+                },
             ),
             does_not_raise(),
         ),
@@ -384,7 +384,7 @@ def test_check_source_loader_populated(source, expectation):
                     "source_description": "",
                     "source_name": "source_1",
                     "unique_id": "source.package_name.source_1.table_1",
-                }
+                },
             ),
             does_not_raise(),
         ),
@@ -396,7 +396,10 @@ def test_check_source_loader_populated(source, expectation):
                     "fqn": ["package_name", "source_1", "table_1"],
                     "identifier": "table_1",
                     "loader": "",
-                    "meta": {"name": {"first": "Bob", "last": "Bobbington"}, "owner": "Bob"},
+                    "meta": {
+                        "name": {"first": "Bob", "last": "Bobbington"},
+                        "owner": "Bob",
+                    },
                     "name": "table_1",
                     "original_file_path": "models/staging/_sources.yml",
                     "package_name": "package_name",
@@ -406,7 +409,7 @@ def test_check_source_loader_populated(source, expectation):
                     "source_description": "",
                     "source_name": "source_1",
                     "unique_id": "source.package_name.source_1.table_1",
-                }
+                },
             ),
             does_not_raise(),
         ),
@@ -428,7 +431,7 @@ def test_check_source_loader_populated(source, expectation):
                     "source_description": "",
                     "source_name": "source_1",
                     "unique_id": "source.package_name.source_1.table_1",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),
@@ -450,7 +453,7 @@ def test_check_source_loader_populated(source, expectation):
                     "source_description": "",
                     "source_name": "source_1",
                     "unique_id": "source.package_name.source_1.table_1",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),
@@ -472,7 +475,7 @@ def test_check_source_loader_populated(source, expectation):
                     "source_description": "",
                     "source_name": "source_1",
                     "unique_id": "source.package_name.source_1.table_1",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),
@@ -487,7 +490,7 @@ def test_check_source_has_meta_keys(keys, source, expectation):
 
 
 @pytest.mark.parametrize(
-    "source, tags, expectation",
+    ("source", "tags", "expectation"),
     [
         (
             Sources(
@@ -506,7 +509,7 @@ def test_check_source_has_meta_keys(keys, source, expectation):
                     "source_name": "source_1",
                     "tags": ["tag_1"],
                     "unique_id": "source.package_name.source_1.table_1",
-                }
+                },
             ),
             ["tag_1"],
             does_not_raise(),
@@ -528,7 +531,7 @@ def test_check_source_has_meta_keys(keys, source, expectation):
                     "source_name": "source_1",
                     "tags": [],
                     "unique_id": "source.package_name.source_1.table_1",
-                }
+                },
             ),
             ["tag_1"],
             pytest.raises(AssertionError),
@@ -544,7 +547,7 @@ def test_check_source_has_tags(source, tags, expectation):
 
 
 @pytest.mark.parametrize(
-    "source_name_pattern, source, expectation",
+    ("source_name_pattern", "source", "expectation"),
     [
         (
             "^[a-z_]*$",
@@ -564,7 +567,7 @@ def test_check_source_has_tags(source, tags, expectation):
                     "source_name": "source_1",
                     "tags": ["tag_1"],
                     "unique_id": "source.package_name.source_1.model_a",
-                }
+                },
             ),
             does_not_raise(),
         ),
@@ -586,7 +589,7 @@ def test_check_source_has_tags(source, tags, expectation):
                     "source_name": "source_1",
                     "tags": ["tag_1"],
                     "unique_id": "source.package_name.source_1.model_1",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),
@@ -601,7 +604,7 @@ def test_check_source_names(source_name_pattern, source, expectation):
 
 
 @pytest.mark.parametrize(
-    "models, source, expectation",
+    ("models", "source", "expectation"),
     [
         (
             [
@@ -616,7 +619,9 @@ def test_check_source_names(source_name_pattern, source, expectation):
                                 "type": "INTEGER",
                             },
                         },
-                        "depends_on": {"nodes": ["source.package_name.source_1.table_1"]},
+                        "depends_on": {
+                            "nodes": ["source.package_name.source_1.table_1"],
+                        },
                         "fqn": ["package_name", "model_1"],
                         "name": "model_1",
                         "original_file_path": "model_1.sql",
@@ -625,8 +630,8 @@ def test_check_source_names(source_name_pattern, source, expectation):
                         "resource_type": "model",
                         "schema": "main",
                         "unique_id": "model.package_name.model_1",
-                    }
-                )
+                    },
+                ),
             ],
             Sources(
                 **{
@@ -644,7 +649,7 @@ def test_check_source_names(source_name_pattern, source, expectation):
                     "source_name": "source_1",
                     "tags": ["tag_1"],
                     "unique_id": "source.package_name.source_1.table_1",
-                }
+                },
             ),
             does_not_raise(),
         ),
@@ -661,7 +666,9 @@ def test_check_source_names(source_name_pattern, source, expectation):
                                 "type": "INTEGER",
                             },
                         },
-                        "depends_on": {"nodes": ["source.package_name.source_1.table_1"]},
+                        "depends_on": {
+                            "nodes": ["source.package_name.source_1.table_1"],
+                        },
                         "fqn": ["package_name", "model_1"],
                         "name": "model_1",
                         "original_file_path": "model_1.sql",
@@ -670,7 +677,7 @@ def test_check_source_names(source_name_pattern, source, expectation):
                         "resource_type": "model",
                         "schema": "main",
                         "unique_id": "model.package_name.model_1",
-                    }
+                    },
                 ),
                 Nodes4(
                     **{
@@ -683,7 +690,9 @@ def test_check_source_names(source_name_pattern, source, expectation):
                                 "type": "INTEGER",
                             },
                         },
-                        "depends_on": {"nodes": ["source.package_name.source_1.table_1"]},
+                        "depends_on": {
+                            "nodes": ["source.package_name.source_1.table_1"],
+                        },
                         "fqn": ["package_name", "model_2"],
                         "name": "model_2",
                         "original_file_path": "model_2.sql",
@@ -692,7 +701,7 @@ def test_check_source_names(source_name_pattern, source, expectation):
                         "resource_type": "model",
                         "schema": "main",
                         "unique_id": "model.package_name.model_2",
-                    }
+                    },
                 ),
             ],
             Sources(
@@ -711,7 +720,7 @@ def test_check_source_names(source_name_pattern, source, expectation):
                     "source_name": "source_1",
                     "tags": ["tag_1"],
                     "unique_id": "source.package_name.source_1.table_1",
-                }
+                },
             ),
             does_not_raise(),
         ),
@@ -737,8 +746,8 @@ def test_check_source_names(source_name_pattern, source, expectation):
                         "resource_type": "model",
                         "schema": "main",
                         "unique_id": "model.package_name.model_2",
-                    }
-                )
+                    },
+                ),
             ],
             Sources(
                 **{
@@ -756,7 +765,7 @@ def test_check_source_names(source_name_pattern, source, expectation):
                     "source_name": "source_1",
                     "tags": ["tag_1"],
                     "unique_id": "source.package_name.source_1.table_1",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),
@@ -771,7 +780,7 @@ def test_check_source_not_orphaned(models, source, expectation):
 
 
 @pytest.mark.parametrize(
-    "source, expectation",
+    ("source", "expectation"),
     [
         (
             Sources(
@@ -790,7 +799,7 @@ def test_check_source_not_orphaned(models, source, expectation):
                     "source_name": "source_1",
                     "tags": ["tag_1"],
                     "unique_id": "source.package_name.source_1.table_1",
-                }
+                },
             ),
             does_not_raise(),
         ),
@@ -811,7 +820,7 @@ def test_check_source_not_orphaned(models, source, expectation):
                     "source_name": "source_1",
                     "tags": ["tag_1"],
                     "unique_id": "source.package_name.source_1.table_1",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),
@@ -832,7 +841,7 @@ def test_check_source_not_orphaned(models, source, expectation):
                     "source_name": "source_1",
                     "tags": ["tag_1"],
                     "unique_id": "source.package_name.source_1.table_1",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),
@@ -853,7 +862,7 @@ def test_check_source_not_orphaned(models, source, expectation):
                     "source_name": "source_1",
                     "tags": ["tag_1"],
                     "unique_id": "source.package_name.source_1.table_1",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),
@@ -874,7 +883,7 @@ def test_check_source_not_orphaned(models, source, expectation):
                     "source_name": "source_1",
                     "tags": ["tag_1"],
                     "unique_id": "source.package_name.source_1.table_1",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),
@@ -888,7 +897,7 @@ def test_check_source_property_file_location(source, expectation):
 
 
 @pytest.mark.parametrize(
-    "models, source, expectation",
+    ("models", "source", "expectation"),
     [
         (
             [
@@ -903,7 +912,9 @@ def test_check_source_property_file_location(source, expectation):
                                 "type": "INTEGER",
                             },
                         },
-                        "depends_on": {"nodes": ["source.package_name.source_1.table_1"]},
+                        "depends_on": {
+                            "nodes": ["source.package_name.source_1.table_1"],
+                        },
                         "fqn": ["package_name", "model_2"],
                         "name": "model_2",
                         "original_file_path": "models/staging/model_2.sql",
@@ -912,8 +923,8 @@ def test_check_source_property_file_location(source, expectation):
                         "resource_type": "model",
                         "schema": "main",
                         "unique_id": "model.package_name.model_2",
-                    }
-                )
+                    },
+                ),
             ],
             Sources(
                 **{
@@ -931,7 +942,7 @@ def test_check_source_property_file_location(source, expectation):
                     "source_name": "source_1",
                     "tags": ["tag_1"],
                     "unique_id": "source.package_name.source_1.table_1",
-                }
+                },
             ),
             does_not_raise(),
         ),
@@ -948,7 +959,9 @@ def test_check_source_property_file_location(source, expectation):
                                 "type": "INTEGER",
                             },
                         },
-                        "depends_on": {"nodes": ["source.package_name.source_1.table_1"]},
+                        "depends_on": {
+                            "nodes": ["source.package_name.source_1.table_1"],
+                        },
                         "fqn": ["package_name", "model_2"],
                         "name": "model_2",
                         "original_file_path": "models/staging/model_2.sql",
@@ -957,8 +970,8 @@ def test_check_source_property_file_location(source, expectation):
                         "resource_type": "model",
                         "schema": "main",
                         "unique_id": "model.package_name.model_2",
-                    }
-                )
+                    },
+                ),
             ],
             Sources(
                 **{
@@ -976,7 +989,7 @@ def test_check_source_property_file_location(source, expectation):
                     "source_name": "source_1",
                     "tags": ["tag_1"],
                     "unique_id": "source.package_name.source_1.table_1",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),
@@ -991,7 +1004,7 @@ def test_check_source_used_by_models_in_same_directory(models, source, expectati
 
 
 @pytest.mark.parametrize(
-    "models, source, expectation",
+    ("models", "source", "expectation"),
     [
         (
             [
@@ -1006,7 +1019,9 @@ def test_check_source_used_by_models_in_same_directory(models, source, expectati
                                 "type": "INTEGER",
                             },
                         },
-                        "depends_on": {"nodes": ["source.package_name.source_1.table_1"]},
+                        "depends_on": {
+                            "nodes": ["source.package_name.source_1.table_1"],
+                        },
                         "fqn": ["package_name", "model_2"],
                         "name": "model_2",
                         "original_file_path": "models/staging/model_2.sql",
@@ -1015,8 +1030,8 @@ def test_check_source_used_by_models_in_same_directory(models, source, expectati
                         "resource_type": "model",
                         "schema": "main",
                         "unique_id": "model.package_name.model_2",
-                    }
-                )
+                    },
+                ),
             ],
             Sources(
                 **{
@@ -1034,7 +1049,7 @@ def test_check_source_used_by_models_in_same_directory(models, source, expectati
                     "source_name": "source_1",
                     "tags": ["tag_1"],
                     "unique_id": "source.package_name.source_1.table_1",
-                }
+                },
             ),
             does_not_raise(),
         ),
@@ -1060,8 +1075,8 @@ def test_check_source_used_by_models_in_same_directory(models, source, expectati
                         "resource_type": "model",
                         "schema": "main",
                         "unique_id": "model.package_name.model_2",
-                    }
-                )
+                    },
+                ),
             ],
             Sources(
                 **{
@@ -1079,7 +1094,7 @@ def test_check_source_used_by_models_in_same_directory(models, source, expectati
                     "source_name": "source_1",
                     "tags": ["tag_1"],
                     "unique_id": "source.package_name.source_1.table_1",
-                }
+                },
             ),
             does_not_raise(),
         ),
@@ -1096,7 +1111,9 @@ def test_check_source_used_by_models_in_same_directory(models, source, expectati
                                 "type": "INTEGER",
                             },
                         },
-                        "depends_on": {"nodes": ["source.package_name.source_1.table_1"]},
+                        "depends_on": {
+                            "nodes": ["source.package_name.source_1.table_1"],
+                        },
                         "fqn": ["package_name", "model_1"],
                         "name": "model_1",
                         "original_file_path": "models/staging/model_1.sql",
@@ -1105,7 +1122,7 @@ def test_check_source_used_by_models_in_same_directory(models, source, expectati
                         "resource_type": "model",
                         "schema": "main",
                         "unique_id": "model.package_name.model_1",
-                    }
+                    },
                 ),
                 Nodes4(
                     **{
@@ -1118,7 +1135,9 @@ def test_check_source_used_by_models_in_same_directory(models, source, expectati
                                 "type": "INTEGER",
                             },
                         },
-                        "depends_on": {"nodes": ["source.package_name.source_1.table_1"]},
+                        "depends_on": {
+                            "nodes": ["source.package_name.source_1.table_1"],
+                        },
                         "fqn": ["package_name", "model_2"],
                         "name": "model_2",
                         "original_file_path": "models/staging/model_2.sql",
@@ -1127,7 +1146,7 @@ def test_check_source_used_by_models_in_same_directory(models, source, expectati
                         "resource_type": "model",
                         "schema": "main",
                         "unique_id": "model.package_name.model_2",
-                    }
+                    },
                 ),
             ],
             Sources(
@@ -1146,7 +1165,7 @@ def test_check_source_used_by_models_in_same_directory(models, source, expectati
                     "source_name": "source_1",
                     "tags": ["tag_1"],
                     "unique_id": "source.package_name.source_1.table_1",
-                }
+                },
             ),
             pytest.raises(AssertionError),
         ),
