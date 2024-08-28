@@ -99,7 +99,6 @@ def test_runner_coverage(caplog, tmp_path):
         sources=[],
         tests=[],
         unit_tests=[],
-        checks_dir=Path("./src/dbt_bouncer/checks"),
     )
 
     with Path.open(tmp_path / "coverage.json", "r") as f:
@@ -192,7 +191,6 @@ def test_runner_failure():
         sources=[],
         tests=[],
         unit_tests=[],
-        checks_dir=Path("./src/dbt_bouncer/checks"),
     )
     assert results[0] == 1
 
@@ -278,6 +276,5 @@ def test_runner_success():
         sources=[],
         tests=[],
         unit_tests=[],
-        checks_dir=Path("./src/dbt_bouncer/checks"),
     )
     assert results[0] == 0

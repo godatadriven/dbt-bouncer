@@ -4,7 +4,7 @@ from __future__ import annotations
 import json
 import warnings
 from pathlib import Path
-from typing import Any, List, Optional, Union
+from typing import Any, List, Union
 
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
@@ -42,7 +42,6 @@ def runner(
     sources: List[DbtBouncerSource],
     tests: List[DbtBouncerTest],
     unit_tests: List[UnitTests],
-    checks_dir: Optional[Union[None, Path]] = Path(__file__).parent / "checks",
 ) -> tuple[int, List[Any]]:
     """
     Run dbt-bouncer checks.
@@ -87,24 +86,37 @@ def runner(
             iterate_over_value = valid_iterate_over_values.intersection(
                 set(locals()[check.name].__annotations__.keys())
             )
-            assert (
-                len(iterate_over_value) == 1
-            ), f"Check {check.name} must have one and only one of {valid_iterate_over_values}"
-            iterate_value = list(iterate_over_value)[0]
-            x = iterate_value
 
-            for i in locals()[f"{x}s"]:
-                if resource_in_path(check, i):
-                    check_run_id = f"{check.name}:{check.index}:{i.unique_id.split('.')[2]}"
-                    checks_to_run.append(
-                        {
-                            **{
-                                "check_run_id": check_run_id,
-                            },
-                            **check.model_dump(),
-                            **{x: getattr(i, x, i)},
-                        }
-                    )
+            if len(iterate_over_value) == 1:
+                iterate_value = list(iterate_over_value)[0]
+
+                for i in locals()[f"{iterate_value}s"]:
+                    if resource_in_path(check, i):
+                        check_run_id = f"{check.name}:{check.index}:{i.unique_id.split('.')[2]}"
+                        checks_to_run.append(
+                            {
+                                **{
+                                    "check_run_id": check_run_id,
+                                },
+                                **check.model_dump(),
+                                **{iterate_value: getattr(i, iterate_value, i)},
+                            }
+                        )
+            elif len(iterate_over_value) > 1:
+                raise RuntimeError(
+                    f"Check {check.name} has multiple iterate_over_value values: {iterate_over_value}"
+                )
+            else:
+                check_run_id = f"{check.name}:{check.index}"
+                checks_to_run.append(
+                    {
+                        **{
+                            "check_run_id": check_run_id,
+                        },
+                        **check.model_dump(),
+                    }
+                )
+
     logging.info(f"Assembled {len(checks_to_run)} checks, running...")
 
     for check in checks_to_run:

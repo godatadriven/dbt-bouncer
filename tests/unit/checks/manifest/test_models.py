@@ -7,7 +7,6 @@ with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
     from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Nodes4, Nodes6, UnitTests
 
-from dbt_bouncer.checks.common import NestedDict
 from dbt_bouncer.checks.manifest.check_models import (
     check_model_access,
     check_model_code_does_not_contain_regexp_pattern,
@@ -501,7 +500,7 @@ def test_check_model_has_contracts_enforced(model, expectation):
     "keys, model, expectation",
     [
         (
-            NestedDict(["owner"]),
+            ["owner"],
             Nodes4(
                 **{
                     "alias": "model_1",
@@ -527,7 +526,7 @@ def test_check_model_has_contracts_enforced(model, expectation):
             does_not_raise(),
         ),
         (
-            NestedDict(["owner"]),
+            ["owner"],
             Nodes4(
                 **{
                     "alias": "model_1",
@@ -553,7 +552,7 @@ def test_check_model_has_contracts_enforced(model, expectation):
             does_not_raise(),
         ),
         (
-            NestedDict(["owner", {"name": ["first", "last"]}]),
+            ["owner", {"name": ["first", "last"]}],
             Nodes4(
                 **{
                     "alias": "model_1",
@@ -579,7 +578,7 @@ def test_check_model_has_contracts_enforced(model, expectation):
             does_not_raise(),
         ),
         (
-            NestedDict(["owner"]),
+            ["owner"],
             Nodes4(
                 **{
                     "alias": "model_1",
@@ -605,7 +604,7 @@ def test_check_model_has_contracts_enforced(model, expectation):
             pytest.raises(AssertionError),
         ),
         (
-            NestedDict(["owner"]),
+            ["owner"],
             Nodes4(
                 **{
                     "alias": "model_1",
@@ -631,7 +630,7 @@ def test_check_model_has_contracts_enforced(model, expectation):
             pytest.raises(AssertionError),
         ),
         (
-            NestedDict(["owner", {"name": ["first", "last"]}]),
+            ["owner", {"name": ["first", "last"]}],
             Nodes4(
                 **{
                     "alias": "model_1",

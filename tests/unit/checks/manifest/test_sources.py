@@ -7,7 +7,6 @@ with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
     from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Nodes4, Sources
 
-from dbt_bouncer.checks.common import NestedDict
 from dbt_bouncer.checks.manifest.check_sources import (
     check_source_description_populated,
     check_source_freshness_populated,
@@ -346,7 +345,7 @@ def test_check_source_loader_populated(source, expectation):
     "keys, source, expectation",
     [
         (
-            NestedDict(["owner"]),
+            ["owner"],
             Sources(
                 **{
                     "description": "Description that is more than 4 characters.",
@@ -368,7 +367,7 @@ def test_check_source_loader_populated(source, expectation):
             does_not_raise(),
         ),
         (
-            NestedDict(["owner"]),
+            ["owner"],
             Sources(
                 **{
                     "description": "Description that is more than 4 characters.",
@@ -390,7 +389,7 @@ def test_check_source_loader_populated(source, expectation):
             does_not_raise(),
         ),
         (
-            NestedDict(["owner", {"name": ["first", "last"]}]),
+            ["owner", {"name": ["first", "last"]}],
             Sources(
                 **{
                     "description": "Description that is more than 4 characters.",
@@ -412,7 +411,7 @@ def test_check_source_loader_populated(source, expectation):
             does_not_raise(),
         ),
         (
-            NestedDict(["owner"]),
+            ["owner"],
             Sources(
                 **{
                     "description": "Description that is more than 4 characters.",
@@ -434,7 +433,7 @@ def test_check_source_loader_populated(source, expectation):
             pytest.raises(AssertionError),
         ),
         (
-            NestedDict(["owner"]),
+            ["owner"],
             Sources(
                 **{
                     "description": "Description that is more than 4 characters.",
@@ -456,7 +455,7 @@ def test_check_source_loader_populated(source, expectation):
             pytest.raises(AssertionError),
         ),
         (
-            NestedDict(["owner", {"name": ["first", "last"]}]),
+            ["owner", {"name": ["first", "last"]}],
             Sources(
                 **{
                     "description": "Description that is more than 4 characters.",

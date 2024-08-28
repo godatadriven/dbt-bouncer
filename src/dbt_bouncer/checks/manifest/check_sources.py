@@ -98,7 +98,7 @@ def check_source_has_meta_keys(
 
     missing_keys = find_missing_meta_keys(
         meta_config=source.meta,
-        required_keys=keys.model_dump(),
+        required_keys=keys,
     )
     assert (
         missing_keys == []

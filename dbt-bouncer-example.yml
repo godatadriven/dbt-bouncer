@@ -34,11 +34,11 @@ catalog_checks:
     exclude: ^models/staging/crm # Not a good idea, here for demonstration purposes only
 
 manifest_checks:
-#   # Exposures
+  # Exposures
   - name: check_exposure_based_on_non_public_models
   - name: check_exposure_based_on_view
 
-#   # Lineage
+  # Lineage
   - name: check_lineage_permitted_upstream_models
     include: ^models/staging
     upstream_path_pattern: $^
@@ -63,14 +63,13 @@ manifest_checks:
   - name: check_macro_property_file_location
 
   # Metadata
-  # - name: check_project_name
-  #   project_name_pattern: ^dbt_bouncer_
+  - name: check_project_name
+    project_name_pattern: ^dbt_bouncer_
 
   # Models
   - name: check_model_access
     include: ^models/intermediate
     access: protected
-    # access: public
   - name: check_model_access
     include: ^models/marts
     access: public
@@ -93,13 +92,13 @@ manifest_checks:
     permitted_sub_directories:
       - crm
       - payments
-  # - name: check_model_documentation_coverage
+  - name: check_model_documentation_coverage
   - name: check_model_documented_in_same_directory
   - name: check_model_has_contracts_enforced
     include: ^models/marts
-#   - name: check_model_has_meta_keys
-#     keys:
-#       - maturity
+  - name: check_model_has_meta_keys
+    keys:
+      - maturity
   - name: check_model_has_no_upstream_dependencies
     include: ^((?!int_*).)*$
   - name: check_model_has_tags
@@ -120,19 +119,19 @@ manifest_checks:
   - name: check_model_names
     include: ^models/staging
     model_name_pattern: ^stg_
-  # - name: check_model_test_coverage
+  - name: check_model_test_coverage
   - name: check_model_property_file_location
 
   # Sources
   - name: check_source_description_populated
   - name: check_source_freshness_populated
   - name: check_source_loader_populated
-  # - name: check_source_has_meta_keys
-  #   keys:
-  #     - contact:
-  #         - email
-  #         - slack
-  #     - owner
+  - name: check_source_has_meta_keys
+    keys:
+      - contact:
+          - email
+          - slack
+      - owner
   - name: check_source_has_tags
     tags:
       - example_tag
