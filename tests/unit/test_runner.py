@@ -31,9 +31,9 @@ def test_runner_coverage(caplog, tmp_path):
                         "include": None,
                         "index": 0,
                         "name": "check_model_description_populated",
-                    }
-                )
-            ]
+                    },
+                ),
+            ],
         },
         catalog_nodes=[],
         catalog_sources=[],
@@ -61,7 +61,7 @@ def test_runner_coverage(caplog, tmp_path):
                 "semantic_models": {},
                 "sources": {},
                 "unit_tests": {},
-            }
+            },
         ),
         models=[
             DbtBouncerModel(
@@ -87,12 +87,12 @@ def test_runner_coverage(caplog, tmp_path):
                             "resource_type": "model",
                             "schema": "main",
                             "unique_id": "model.dbt_bouncer_test_project.stg_payments",
-                        }
+                        },
                     ),
                     "original_file_path": "models/staging/stg_payments.sql",
                     "unique_id": "model.dbt_bouncer_test_project.stg_payments",
-                }
-            )
+                },
+            ),
         ],
         output_file=tmp_path / "coverage.json",
         run_results=[],
@@ -123,9 +123,9 @@ def test_runner_failure():
                         "include": None,
                         "index": 0,
                         "name": "check_model_description_populated",
-                    }
-                )
-            ]
+                    },
+                ),
+            ],
         },
         catalog_nodes=[],
         catalog_sources=[],
@@ -153,7 +153,7 @@ def test_runner_failure():
                 "semantic_models": {},
                 "sources": {},
                 "unit_tests": {},
-            }
+            },
         ),
         models=[
             DbtBouncerModel(
@@ -179,12 +179,12 @@ def test_runner_failure():
                             "resource_type": "model",
                             "schema": "main",
                             "unique_id": "model.dbt_bouncer_test_project.stg_payments",
-                        }
+                        },
                     ),
                     "original_file_path": "models/staging/stg_payments.sql",
                     "unique_id": "model.dbt_bouncer_test_project.stg_payments",
-                }
-            )
+                },
+            ),
         ],
         output_file=None,
         run_results=[],
@@ -208,9 +208,9 @@ def test_runner_success():
                         "include": None,
                         "index": 0,
                         "name": "check_model_description_populated",
-                    }
-                )
-            ]
+                    },
+                ),
+            ],
         },
         catalog_nodes=[],
         catalog_sources=[],
@@ -238,7 +238,7 @@ def test_runner_success():
                 "semantic_models": {},
                 "sources": {},
                 "unit_tests": {},
-            }
+            },
         ),
         models=[
             DbtBouncerModel(
@@ -264,12 +264,12 @@ def test_runner_success():
                             "resource_type": "model",
                             "schema": "main",
                             "unique_id": "model.dbt_bouncer_test_project.stg_payments",
-                        }
+                        },
                     ),
                     "original_file_path": "models/staging/stg_payments.sql",
                     "unique_id": "model.dbt_bouncer_test_project.stg_payments",
-                }
-            )
+                },
+            ),
         ],
         output_file=None,
         run_results=[],

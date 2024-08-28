@@ -1,8 +1,11 @@
 import logging
 import os
+from typing import ClassVar
 
 
 class CustomFormatter(logging.Formatter):
+    """Base class for custom logger."""
+
     grey = "\x1b[38;20m"
     yellow = "\x1b[33;20m"
     red = "\x1b[31;20m"
@@ -10,7 +13,7 @@ class CustomFormatter(logging.Formatter):
     reset = "\x1b[0m"
     log_format: str = "%(asctime)s - %(levelname)s: %(message)s"
 
-    FORMATS = {
+    FORMATS: ClassVar = {
         logging.DEBUG: grey + log_format + reset,
         logging.INFO: grey + log_format + reset,
         logging.WARNING: yellow + log_format + reset,
@@ -19,12 +22,19 @@ class CustomFormatter(logging.Formatter):
     }
 
     def format(self, record: logging.LogRecord) -> str:
+        """Set the format of a log record.
+
+        Returns:
+            str: The formatted log record.
+
+        """
         log_fmt = self.FORMATS.get(record.levelno)
         formatter = logging.Formatter(log_fmt)
         return formatter.format(record)
 
 
 def configure_console_logging(verbosity: int):
+    """Initialise a logger with the specified log level."""
     logger = logging.getLogger("")
     logger.propagate = True
     logger.setLevel(logging.DEBUG)  # handlers filter the level

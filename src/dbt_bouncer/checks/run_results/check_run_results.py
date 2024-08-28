@@ -16,8 +16,7 @@ def check_run_results_max_gigabytes_billed(
     run_result: DbtBouncerRunResult,
     **kwargs,
 ) -> None:
-    """
-    Each result can have a maximum number of gigabytes billed.
+    """Each result can have a maximum number of gigabytes billed.
 
     !!! note
 
@@ -27,9 +26,12 @@ def check_run_results_max_gigabytes_billed(
         max_gigabytes_billed (float): The maximum number of gigabytes billed.
         run_result (DbtBouncerRunResult): The DbtBouncerRunResult object to check.
 
-    Other parameters:
+    Other Parameters:
         exclude (Optional[str]): Regex pattern to match the resource path. Resource paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the resource path. Only resource paths that match the pattern will be checked.
+
+    Raises: # noqa:DOC502
+        KeyError: If the `dbt-bigquery` adapter is not used.
 
     Example(s):
         ```yaml
@@ -37,14 +39,14 @@ def check_run_results_max_gigabytes_billed(
             - name: check_run_results_max_gigabytes_billed
               max_gigabytes_billed: 100
         ```
-    """
 
+    """
     try:
         gigabytes_billed = run_result.adapter_response["bytes_billed"] / (1000**3)
-    except KeyError:
-        raise RuntimeError(
-            "`bytes_billed` not found in adapter response. Are you using the `dbt-bigquery` adapter?"
-        )
+    except KeyError as e:
+        raise RuntimeError(  # noqa: DOC501
+            "`bytes_billed` not found in adapter response. Are you using the `dbt-bigquery` adapter?",
+        ) from e
 
     assert (
         gigabytes_billed < max_gigabytes_billed
@@ -61,14 +63,13 @@ def check_run_results_max_execution_time(
     run_result: DbtBouncerRunResult,
     **kwargs,
 ) -> None:
-    """
-    Each result can take a maximum duration (seconds).
+    """Each result can take a maximum duration (seconds).
 
     Parameters:
         max_execution_time_seconds (float): The maximum execution time (seconds) allowed for a node.
         run_result (DbtBouncerRunResult): The DbtBouncerRunResult object to check.
 
-    Other parameters:
+    Other Parameters:
         exclude (Optional[str]): Regex pattern to match the resource path. Resource paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the resource path. Only resource paths that match the pattern will be checked.
 
@@ -84,8 +85,8 @@ def check_run_results_max_execution_time(
               include: ^models/staging # Not a good idea, here for demonstration purposes only
               max_execution_time_seconds: 10
         ```
-    """
 
+    """
     assert (
         run_result.execution_time <= max_execution_time_seconds
     ), f"`{run_result.unique_id.split('.')[-1]}` has an execution time ({run_result.execution_time} greater than permitted ({max_execution_time_seconds}s)."

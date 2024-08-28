@@ -50,18 +50,26 @@ def cli(
     output_file: Union[None, Path],
     verbosity: int,
 ) -> None:
+    """Entrypoint for dbt-bouncer.
+
+    Raises:
+        RuntimeError: If output file has an invalid extension.
+
+    """
     configure_console_logging(verbosity)
     logging.info(f"Running dbt-bouncer ({version()})...")
 
     # Validate output file has `.json` extension
     if output_file and not output_file.suffix == ".json":
         raise RuntimeError(
-            f"Output file must have a `.json` extension. Got `{output_file.suffix}`."
+            f"Output file must have a `.json` extension. Got `{output_file.suffix}`.",
         )
 
     conf = get_dbt_bouncer_config(
         config_file=config_file,
-        config_file_source=click.get_current_context().get_parameter_source("config_file").name,  # type: ignore[union-attr]
+        config_file_source=click.get_current_context()
+        .get_parameter_source("config_file")
+        .name,  # type: ignore[union-attr]
     )
     logging.debug(f"{conf=}")
     bouncer_config = validate_conf(conf=conf)
@@ -81,7 +89,7 @@ def cli(
 
     config: Dict[str, List[Dict[str, str]]] = {}
     for category in check_categories:
-        for check_name in set([c.name for c in getattr(bouncer_config, category)]):
+        for check_name in {c.name for c in getattr(bouncer_config, category)}:
             config[check_name] = []
             for check in getattr(bouncer_config, category):
                 if check.name == check_name:
@@ -113,7 +121,6 @@ def cli(
         project_tests,
         project_unit_tests,
     ) = parse_manifest_artifact(
-        artifact_dir=dbt_artifacts_dir,
         manifest_obj=manifest_obj,
     )
 

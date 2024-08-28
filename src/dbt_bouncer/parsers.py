@@ -9,10 +9,15 @@ from pathlib import Path
 from typing import List, Literal, Union
 
 import semver
+from pydantic import BaseModel
 
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
-    from dbt_artifacts_parser.parser import parse_catalog, parse_manifest, parse_run_results
+    from dbt_artifacts_parser.parser import (
+        parse_catalog,
+        parse_manifest,
+        parse_run_results,
+    )
     from dbt_artifacts_parser.parsers.catalog.catalog_v1 import CatalogTable, CatalogV1
     from dbt_artifacts_parser.parsers.manifest.manifest_v10 import (
         GenericTestNode as GenericTestNode_v10,
@@ -36,12 +41,12 @@ with warnings.catch_warnings():
     )
     from dbt_artifacts_parser.parsers.manifest.manifest_v12 import (
         Exposures,
-        UnitTests,
         Macros,
         ManifestV12,
         Nodes4,
         Nodes6,
         Sources,
+        UnitTests,
     )
     from dbt_artifacts_parser.parsers.run_results.run_results_v4 import (
         RunResultOutput as RunResultOutput_v4,
@@ -51,40 +56,53 @@ with warnings.catch_warnings():
         RunResultOutput as RunResultOutput_v5,
     )
     from dbt_artifacts_parser.parsers.run_results.run_results_v5 import RunResultsV5
-    from dbt_artifacts_parser.parsers.run_results.run_results_v6 import Result, RunResultsV6
-
-from pydantic import BaseModel
+    from dbt_artifacts_parser.parsers.run_results.run_results_v6 import (
+        Result,
+        RunResultsV6,
+    )
 
 
 class DbtBouncerCatalogNode(BaseModel):
+    """Model for all nodes in `catalog.json`."""
+
     catalog_node: CatalogTable
     original_file_path: str
     unique_id: str
 
 
 class DbtBouncerManifest(BaseModel):
+    """Model for all manifest objects."""
+
     manifest: Union[ManifestV10, ManifestV11, ManifestV12]
 
 
 class DbtBouncerModel(BaseModel):
+    """Model for all model nodes in `manifest.json`."""
+
     model: Union[ModelNode_v10, ModelNode_v11, Nodes4]
     original_file_path: str
     unique_id: str
 
 
 class DbtBouncerRunResult(BaseModel):
+    """Model for all results in `run_results.json`."""
+
     original_file_path: str
     run_result: Union[RunResultOutput_v4, RunResultOutput_v5, Result]
     unique_id: str
 
 
 class DbtBouncerSource(BaseModel):
+    """Model for all source nodes in `manifest.json`."""
+
     original_file_path: str
     source: Union[SourceDefinition_v10, SourceDefinition_v11, Sources]
     unique_id: str
 
 
 class DbtBouncerTest(BaseModel):
+    """Model for all test nodes in `manifest.json`."""
+
     original_file_path: str
     test: Union[GenericTestNode_v10, GenericTestNode_v11, Nodes6]
     unique_id: str
@@ -94,17 +112,26 @@ def load_dbt_artifact(
     artifact_name: Literal["catalog.json", "manifest.json", "run_results.json"],
     dbt_artifacts_dir: Path,
 ) -> Union[CatalogV1, DbtBouncerManifest, RunResultsV4, RunResultsV5, RunResultsV6]:
-    """
-    Load a dbt artifact from a JSON file to a Pydantic object
-    """
+    """Load a dbt artifact from a JSON file to a Pydantic object.
 
+    Returns:
+        Union[CatalogV1, DbtBouncerManifest, RunResultsV4, RunResultsV5, RunResultsV6]:
+            The dbt artifact loaded as a Pydantic object.
+
+    Raises:
+        FileNotFoundError:
+            If the artifact file does not exist.
+
+    """
     logging.debug(f"{artifact_name=}")
     logging.debug(f"{dbt_artifacts_dir=}")
 
     artifact_path = dbt_artifacts_dir / Path(artifact_name)
     logging.debug(f"Loading {artifact_name} from {artifact_path.absolute()}...")
     if not artifact_path.exists():
-        raise FileNotFoundError(f"No {artifact_name} found at {artifact_path.absolute()}.")
+        raise FileNotFoundError(
+            f"No {artifact_name} found at {artifact_path.absolute()}.",
+        )
 
     if artifact_name == "catalog.json":
         with Path.open(artifact_path, "r") as fp:
@@ -126,8 +153,16 @@ def load_dbt_artifact(
 
 
 def parse_catalog_artifact(
-    artifact_dir: Path, manifest_obj: DbtBouncerManifest
+    artifact_dir: Path,
+    manifest_obj: DbtBouncerManifest,
 ) -> tuple[List[DbtBouncerCatalogNode], List[DbtBouncerCatalogNode]]:
+    """Parse the catalog.json artifact.
+
+    Returns:
+        List[DbtBouncerCatalogNode]: List of catalog nodes for the project.
+        List[DbtBouncerCatalogNode]: List of catalog nodes for the project sources.
+
+    """
     catalog_obj: CatalogV1 = load_dbt_artifact(
         artifact_name="catalog.json",
         dbt_artifacts_dir=artifact_dir,
@@ -138,7 +173,7 @@ def parse_catalog_artifact(
                 "catalog_node": v,
                 "original_file_path": manifest_obj.manifest.nodes[k].original_file_path,
                 "unique_id": k,
-            }
+            },
         )
         for k, v in catalog_obj.nodes.items()
         if k.split(".")[-2] == manifest_obj.manifest.metadata.project_name
@@ -147,21 +182,25 @@ def parse_catalog_artifact(
         DbtBouncerCatalogNode(
             **{
                 "catalog_node": v,
-                "original_file_path": manifest_obj.manifest.sources[k].original_file_path,
+                "original_file_path": manifest_obj.manifest.sources[
+                    k
+                ].original_file_path,
                 "unique_id": k,
-            }
+            },
         )
         for k, v in catalog_obj.sources.items()
         if k.split(".")[1] == manifest_obj.manifest.metadata.project_name
     ]
     logging.info(
-        f"Parsed `catalog.json`, found {len(project_catalog_nodes)} nodes and {len(project_catalog_sources)} sources."
+        f"Parsed `catalog.json`, found {len(project_catalog_nodes)} nodes and {len(project_catalog_sources)} sources.",
     )
 
     return project_catalog_nodes, project_catalog_sources
 
 
-def parse_manifest_artifact(artifact_dir: Path, manifest_obj: DbtBouncerManifest) -> tuple[
+def parse_manifest_artifact(
+    manifest_obj: DbtBouncerManifest,
+) -> tuple[
     List[Exposures],
     List[Macros],
     List[DbtBouncerModel],
@@ -169,6 +208,17 @@ def parse_manifest_artifact(artifact_dir: Path, manifest_obj: DbtBouncerManifest
     List[DbtBouncerTest],
     List[UnitTests],
 ]:
+    """Parse the manifest.json artifact.
+
+    Returns:
+        - project_exposures: List of exposures in the project.
+        - project_macros: List of macros in the project.
+        - project_models: List of models in the project.
+        - project_sources: List of sources in the project.
+        - project_tests: List of tests in the project.
+        - project_unit_tests: List of unit tests in the project.
+
+    """
     project_exposures = [
         v
         for _, v in manifest_obj.manifest.exposures.items()
@@ -190,18 +240,26 @@ def parse_manifest_artifact(artifact_dir: Path, manifest_obj: DbtBouncerManifest
             ):  # dbt 1.6  # dbt 1.7+
                 project_models.append(
                     DbtBouncerModel(
-                        **{"model": v, "original_file_path": v.original_file_path, "unique_id": k}
-                    )
+                        **{
+                            "model": v,
+                            "original_file_path": v.original_file_path,
+                            "unique_id": k,
+                        },
+                    ),
                 )
         elif (
-            isinstance(v.resource_type, Enum) and v.resource_type.value == "test"
-        ) or v.resource_type == "test":
-            if v.package_name == manifest_obj.manifest.metadata.project_name:
-                project_tests.append(
-                    DbtBouncerTest(
-                        **{"original_file_path": v.original_file_path, "test": v, "unique_id": k}
-                    )
-                )
+            (isinstance(v.resource_type, Enum) and v.resource_type.value == "test")
+            or v.resource_type == "test"
+        ) and v.package_name == manifest_obj.manifest.metadata.project_name:
+            project_tests.append(
+                DbtBouncerTest(
+                    **{
+                        "original_file_path": v.original_file_path,
+                        "test": v,
+                        "unique_id": k,
+                    },
+                ),
+            )
 
     if semver.Version.parse(manifest_obj.manifest.metadata.dbt_version) >= "1.8.0":
         project_unit_tests = [
@@ -214,13 +272,13 @@ def parse_manifest_artifact(artifact_dir: Path, manifest_obj: DbtBouncerManifest
 
     project_sources = [
         DbtBouncerSource(
-            **{"original_file_path": v.original_file_path, "source": v, "unique_id": k}
+            **{"original_file_path": v.original_file_path, "source": v, "unique_id": k},
         )
         for _, v in manifest_obj.manifest.sources.items()
         if v.package_name == manifest_obj.manifest.metadata.project_name
     ]
     logging.info(
-        f"Parsed `manifest.json`, found `{manifest_obj.manifest.metadata.project_name}` project, found {len(project_exposures)} exposures, {len(project_macros)} macros, {len(project_models)} nodes, {len(project_sources)} sources, {len(project_tests)} tests and {len(project_unit_tests)} unit tests."
+        f"Parsed `manifest.json`, found `{manifest_obj.manifest.metadata.project_name}` project, found {len(project_exposures)} exposures, {len(project_macros)} macros, {len(project_models)} nodes, {len(project_sources)} sources, {len(project_tests)} tests and {len(project_unit_tests)} unit tests.",
     )
 
     return (
@@ -234,11 +292,20 @@ def parse_manifest_artifact(artifact_dir: Path, manifest_obj: DbtBouncerManifest
 
 
 def parse_run_results_artifact(
-    artifact_dir: Path, manifest_obj: DbtBouncerManifest
+    artifact_dir: Path,
+    manifest_obj: DbtBouncerManifest,
 ) -> List[DbtBouncerRunResult]:
-    run_results_obj: Union[RunResultsV4, RunResultsV5, RunResultsV6] = load_dbt_artifact(
-        artifact_name="run_results.json",
-        dbt_artifacts_dir=artifact_dir,
+    """Parse the run_results.json artifact.
+
+    Returns:
+        List[DbtBouncerRunResult]: A list of DbtBouncerRunResult objects.
+
+    """
+    run_results_obj: Union[RunResultsV4, RunResultsV5, RunResultsV6] = (
+        load_dbt_artifact(
+            artifact_name="run_results.json",
+            dbt_artifacts_dir=artifact_dir,
+        )
     )
     project_run_results = [
         DbtBouncerRunResult(
@@ -246,14 +313,18 @@ def parse_run_results_artifact(
                 "original_file_path": (
                     manifest_obj.manifest.nodes[r.unique_id].original_file_path
                     if r.unique_id in manifest_obj.manifest.nodes
-                    else manifest_obj.manifest.unit_tests[r.unique_id].original_file_path
+                    else manifest_obj.manifest.unit_tests[
+                        r.unique_id
+                    ].original_file_path
                 ),
                 "run_result": r,
                 "unique_id": r.unique_id,
-            }
+            },
         )
         for r in run_results_obj.results
         if r.unique_id.split(".")[1] == manifest_obj.manifest.metadata.project_name
     ]
-    logging.info(f"Parsed `run_results.json`, found {len(project_run_results)} results.")
+    logging.info(
+        f"Parsed `run_results.json`, found {len(project_run_results)} results.",
+    )
     return project_run_results

@@ -14,7 +14,7 @@ from dbt_bouncer.checks.catalog.check_catalog_sources import (
 
 
 @pytest.mark.parametrize(
-    "catalog_source, sources, expectation",
+    ("catalog_source", "sources", "expectation"),
     [
         (
             CatalogTable(
@@ -38,7 +38,7 @@ from dbt_bouncer.checks.catalog.check_catalog_sources import (
                     },
                     "stats": {},
                     "unique_id": "source.package_name.source_1.table_1",
-                }
+                },
             ),
             [
                 Sources(
@@ -63,8 +63,8 @@ from dbt_bouncer.checks.catalog.check_catalog_sources import (
                         "source_description": "",
                         "source_name": "source_1",
                         "unique_id": "source.package_name.source_1.table_1",
-                    }
-                )
+                    },
+                ),
             ],
             does_not_raise(),
         ),
@@ -90,7 +90,7 @@ from dbt_bouncer.checks.catalog.check_catalog_sources import (
                     },
                     "stats": {},
                     "unique_id": "source.package_name.source_1.table_1",
-                }
+                },
             ),
             [
                 Sources(
@@ -112,8 +112,8 @@ from dbt_bouncer.checks.catalog.check_catalog_sources import (
                         "source_description": "",
                         "source_name": "source_1",
                         "unique_id": "source.package_name.source_1.table_1",
-                    }
-                )
+                    },
+                ),
             ],
             pytest.raises(AssertionError),
         ),

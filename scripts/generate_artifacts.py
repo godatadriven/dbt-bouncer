@@ -5,6 +5,7 @@ import sh
 
 
 def build_pex_file(dbt_version, pex_file_name):
+    """Build a pex file of `dbt-bouncer` if it does not already exist."""
     if not Path(pex_file_name).exists():
         logging.info(f"Building pex file for dbt version {dbt_version}")
         sh.poetry(
@@ -39,6 +40,7 @@ def generate_artifacts(
     artifact_path,
     pex_file_name,
 ):
+    """Generate dbt artifacts for all specified versions of dbt. These artifacts are used in testing."""
     logging.info(f"Generating dbt artifacts for dbt version {dbt_version}")
     Path(artifact_path).mkdir(exist_ok=True, parents=True)
     sh.python(
@@ -82,19 +84,18 @@ def generate_artifacts(
 
 
 def main():
-    """
-    For the specified dbt versions, build a pex file and generate dbt artifacts in the `./tests` directory.
-    """
-
+    """For the specified dbt versions, build a pex file and generate dbt artifacts in the `./tests` directory."""
     dbt_versions = ["1.6", "1.7", "1.8"]
 
     for dbt_version in dbt_versions:
-        pex_file_name = f"./dist/dbt-{dbt_version.replace('.','')}.pex"
-        artifact_path = f"./tests/fixtures/dbt_{dbt_version.replace('.','')}/target"
+        pex_file_name = f"./dist/dbt-{dbt_version.replace('.', '')}.pex"
+        artifact_path = f"./tests/fixtures/dbt_{dbt_version.replace('.', '')}/target"
 
         build_pex_file(dbt_version=dbt_version, pex_file_name=pex_file_name)
         generate_artifacts(
-            dbt_version=dbt_version, artifact_path=artifact_path, pex_file_name=pex_file_name
+            dbt_version=dbt_version,
+            artifact_path=artifact_path,
+            pex_file_name=pex_file_name,
         )
 
 
