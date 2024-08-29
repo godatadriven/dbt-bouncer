@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import importlib
-import itertools
 import json
 import logging
 import operator
@@ -39,6 +38,7 @@ def runner(
     bouncer_config: DbtBouncerConf,
     catalog_nodes: List[DbtBouncerCatalogNode],
     catalog_sources: List[DbtBouncerCatalogNode],
+    check_categories: List[str],
     create_pr_comment_file: bool,
     exposures: List[Exposures],
     macros: List[Macros],
@@ -84,17 +84,12 @@ def runner(
         "unit_tests": unit_tests,
     }
 
-    list_of_checks = list(
-        itertools.chain.from_iterable(
-            [
-                getattr(bouncer_config, i)
-                for i in bouncer_config.model_dump()
-                if i.endswith("_checks")
-            ]
-        )
-    )
+    list_of_check_configs = []
+    for check_category in check_categories:
+        list_of_check_configs.extend(getattr(bouncer_config, check_category))
+
     checks_to_run = []
-    for check in sorted(list_of_checks, key=operator.attrgetter("index")):
+    for check in sorted(list_of_check_configs, key=operator.attrgetter("index")):
         valid_iterate_over_values = {
             "catalog_node",
             "catalog_source",

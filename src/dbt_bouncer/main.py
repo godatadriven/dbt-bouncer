@@ -127,6 +127,7 @@ def cli(
         bouncer_config=bouncer_config,
         catalog_nodes=project_catalog_nodes,
         catalog_sources=project_catalog_sources,
+        check_categories=check_categories,
         create_pr_comment_file=create_pr_comment_file,
         exposures=project_exposures,
         macros=project_macros,
