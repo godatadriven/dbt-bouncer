@@ -103,46 +103,22 @@ def cli(
 
     dbt_artifacts_dir = config_file.parent / bouncer_config.dbt_artifacts_dir
 
-    from dbt_bouncer.parsers import load_dbt_artifact, parse_manifest_artifact
+    from dbt_bouncer.parsers import parse_dbt_artifacts
 
-    # Manifest, will always be parsed
-    manifest_obj = load_dbt_artifact(
-        artifact_name="manifest.json",
-        dbt_artifacts_dir=dbt_artifacts_dir,
-    )
     (
+        manifest_obj,
         project_exposures,
         project_macros,
         project_models,
         project_sources,
         project_tests,
         project_unit_tests,
-    ) = parse_manifest_artifact(
-        manifest_obj=manifest_obj,
+        project_catalog_nodes,
+        project_catalog_sources,
+        project_run_results,
+    ) = parse_dbt_artifacts(
+        bouncer_config=bouncer_config, dbt_artifacts_dir=dbt_artifacts_dir
     )
-
-    # Catalog, must come after manifest is parsed
-    from dbt_bouncer.parsers import parse_catalog_artifact
-
-    if bouncer_config.catalog_checks != []:
-        project_catalog_nodes, project_catalog_sources = parse_catalog_artifact(
-            artifact_dir=dbt_artifacts_dir,
-            manifest_obj=manifest_obj,
-        )
-    else:
-        project_catalog_nodes = []
-        project_catalog_sources = []
-
-    # Run results, must come after manifest is parsed
-    from dbt_bouncer.parsers import parse_run_results_artifact
-
-    if bouncer_config.run_results_checks != []:
-        project_run_results = parse_run_results_artifact(
-            artifact_dir=dbt_artifacts_dir,
-            manifest_obj=manifest_obj,
-        )
-    else:
-        project_run_results = []
 
     logging.info("Running checks...")
     from dbt_bouncer.runner import runner
