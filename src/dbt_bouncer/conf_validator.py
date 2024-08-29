@@ -93,7 +93,7 @@ class DbtBouncerConf(BaseModel):
     )
 
 
-def validate_conf(conf: Dict[str, Any]) -> DbtBouncerConf:
+def validate_conf(config_file_contents: Dict[str, Any]) -> DbtBouncerConf:
     """Valiate the configuration and return the Pydantic model.
 
     Returns:
@@ -102,4 +102,4 @@ def validate_conf(conf: Dict[str, Any]) -> DbtBouncerConf:
     """
     logging.info("Validating conf...")
 
-    return DbtBouncerConf(**conf)
+    return DbtBouncerConf(**config_file_contents)

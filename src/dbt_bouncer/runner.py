@@ -4,8 +4,10 @@
 from __future__ import annotations
 
 import importlib
+import itertools
 import json
 import logging
+import operator
 import traceback
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, List, Union
@@ -82,54 +84,62 @@ def runner(
         "unit_tests": unit_tests,
     }
 
+    list_of_checks = list(
+        itertools.chain.from_iterable(
+            [
+                getattr(bouncer_config, i)
+                for i in bouncer_config.model_dump()
+                if i.endswith("_checks")
+            ]
+        )
+    )
     checks_to_run = []
-    for _, v in sorted(bouncer_config.items()):
-        for check in v:
-            valid_iterate_over_values = {
-                "catalog_node",
-                "catalog_source",
-                "exposure",
-                "macro",
-                "model",
-                "run_result",
-                "source",
-                "unit_test",
-            }
-            iterate_over_value = valid_iterate_over_values.intersection(
-                set(locals()[check.name].__annotations__.keys()),
-            )
+    for check in sorted(list_of_checks, key=operator.attrgetter("index")):
+        valid_iterate_over_values = {
+            "catalog_node",
+            "catalog_source",
+            "exposure",
+            "macro",
+            "model",
+            "run_result",
+            "source",
+            "unit_test",
+        }
+        iterate_over_value = valid_iterate_over_values.intersection(
+            set(locals()[check.name].__annotations__.keys()),
+        )
 
-            if len(iterate_over_value) == 1:
-                iterate_value = next(iter(iterate_over_value))
+        if len(iterate_over_value) == 1:
+            iterate_value = next(iter(iterate_over_value))
 
-                for i in locals()[f"{iterate_value}s"]:
-                    if resource_in_path(check, i):
-                        check_run_id = (
-                            f"{check.name}:{check.index}:{i.unique_id.split('.')[2]}"
-                        )
-                        checks_to_run.append(
-                            {
-                                **{
-                                    "check_run_id": check_run_id,
-                                },
-                                **check.model_dump(),
-                                **{iterate_value: getattr(i, iterate_value, i)},
+            for i in locals()[f"{iterate_value}s"]:
+                if resource_in_path(check, i):
+                    check_run_id = (
+                        f"{check.name}:{check.index}:{i.unique_id.split('.')[2]}"
+                    )
+                    checks_to_run.append(
+                        {
+                            **{
+                                "check_run_id": check_run_id,
                             },
-                        )
-            elif len(iterate_over_value) > 1:
-                raise RuntimeError(
-                    f"Check {check.name} has multiple iterate_over_value values: {iterate_over_value}",
-                )
-            else:
-                check_run_id = f"{check.name}:{check.index}"
-                checks_to_run.append(
-                    {
-                        **{
-                            "check_run_id": check_run_id,
+                            **check.model_dump(),
+                            **{iterate_value: getattr(i, iterate_value, i)},
                         },
-                        **check.model_dump(),
+                    )
+        elif len(iterate_over_value) > 1:
+            raise RuntimeError(
+                f"Check {check.name} has multiple iterate_over_value values: {iterate_over_value}",
+            )
+        else:
+            check_run_id = f"{check.name}:{check.index}"
+            checks_to_run.append(
+                {
+                    **{
+                        "check_run_id": check_run_id,
                     },
-                )
+                    **check.model_dump(),
+                },
+            )
 
     logging.info(f"Assembled {len(checks_to_run)} checks, running...")
 

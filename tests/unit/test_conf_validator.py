@@ -26,7 +26,7 @@ def test_validate_conf_invalid(f, expectation):
         conf = yaml.safe_load(fp)
 
     with expectation:
-        validate_conf(conf=conf)
+        validate_conf(config_file_contents=conf)
 
 
 valid_confs = [
@@ -48,4 +48,4 @@ def test_validate_conf_valid(f, expectation):
         conf = yaml.safe_load(fp)
 
     with expectation:
-        validate_conf(conf=conf)
+        validate_conf(config_file_contents=conf)

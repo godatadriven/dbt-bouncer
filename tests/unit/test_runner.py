@@ -12,6 +12,7 @@ from unittest.mock import MagicMock
 from click.globals import push_context
 
 from dbt_bouncer.checks.manifest.check_models import CheckModelDescriptionPopulated
+from dbt_bouncer.conf_validator import DbtBouncerConf
 from dbt_bouncer.logger import configure_console_logging
 from dbt_bouncer.parsers import DbtBouncerModel
 from dbt_bouncer.runner import runner
@@ -23,18 +24,20 @@ def test_runner_coverage(caplog, tmp_path):
     push_context(ctx)
 
     results = runner(
-        bouncer_config={
-            "check_model_description_populated": [
-                CheckModelDescriptionPopulated(
-                    **{
-                        "exclude": None,
-                        "include": None,
-                        "index": 0,
-                        "name": "check_model_description_populated",
-                    },
-                ),
-            ],
-        },
+        bouncer_config=DbtBouncerConf(
+            **{
+                "manifest_checks": [
+                    CheckModelDescriptionPopulated(
+                        **{
+                            "exclude": None,
+                            "include": None,
+                            "index": 0,
+                            "name": "check_model_description_populated",
+                        },
+                    ),
+                ]
+            }
+        ),
         catalog_nodes=[],
         catalog_sources=[],
         create_pr_comment_file=False,
@@ -115,18 +118,20 @@ def test_runner_failure():
     push_context(ctx)
 
     results = runner(
-        bouncer_config={
-            "check_model_description_populated": [
-                CheckModelDescriptionPopulated(
-                    **{
-                        "exclude": None,
-                        "include": None,
-                        "index": 0,
-                        "name": "check_model_description_populated",
-                    },
-                ),
-            ],
-        },
+        bouncer_config=DbtBouncerConf(
+            **{
+                "manifest_checks": [
+                    CheckModelDescriptionPopulated(
+                        **{
+                            "exclude": None,
+                            "include": None,
+                            "index": 0,
+                            "name": "check_model_description_populated",
+                        },
+                    ),
+                ]
+            }
+        ),
         catalog_nodes=[],
         catalog_sources=[],
         create_pr_comment_file=False,
@@ -200,18 +205,20 @@ def test_runner_success():
     push_context(ctx)
 
     results = runner(
-        bouncer_config={
-            "check_model_description_populated": [
-                CheckModelDescriptionPopulated(
-                    **{
-                        "exclude": None,
-                        "include": None,
-                        "index": 0,
-                        "name": "check_model_description_populated",
-                    },
-                ),
-            ],
-        },
+        bouncer_config=DbtBouncerConf(
+            **{
+                "manifest_checks": [
+                    CheckModelDescriptionPopulated(
+                        **{
+                            "exclude": None,
+                            "include": None,
+                            "index": 0,
+                            "name": "check_model_description_populated",
+                        },
+                    ),
+                ]
+            }
+        ),
         catalog_nodes=[],
         catalog_sources=[],
         create_pr_comment_file=False,
