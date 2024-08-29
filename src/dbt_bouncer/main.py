@@ -88,12 +88,11 @@ def cli(
     ]
     logging.debug(f"{check_categories=}")
 
-    # Add indices to uniquely identify checks
     for category in check_categories:
-        for idx, c in enumerate(getattr(bouncer_config, category)):
-            c.index = idx
+        for idx, check in enumerate(getattr(bouncer_config, category)):
+            # Add indices to uniquely identify checks
+            check.index = idx
 
-        for check in getattr(bouncer_config, category):
             # Handle global `exclude` and `include` args
             if bouncer_config.include and not check.include:
                 check.include = bouncer_config.include
