@@ -1,23 +1,23 @@
 # mypy: disable-error-code="union-attr"
 
-import warnings
-from typing import List, Literal
+import logging
+from typing import TYPE_CHECKING, List, Literal
 
+import semver
 from pydantic import Field
 
 from dbt_bouncer.conf_validator_base import BaseCheck
 
-with warnings.catch_warnings():
-    warnings.filterwarnings("ignore", category=UserWarning)
-    from dbt_artifacts_parser.parsers.manifest.manifest_v12 import (
-        UnitTests,
-    )
+if TYPE_CHECKING:
+    import warnings
 
-import logging
+    from dbt_bouncer.parsers import DbtBouncerManifest
 
-import semver
-
-from dbt_bouncer.parsers import DbtBouncerManifest
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", category=UserWarning)
+        from dbt_artifacts_parser.parsers.manifest.manifest_v12 import (
+            UnitTests,
+        )
 
 
 class CheckUnitTestExpectFormats(BaseCheck):
@@ -28,8 +28,8 @@ class CheckUnitTestExpectFormats(BaseCheck):
 
 
 def check_unit_test_expect_format(
-    manifest_obj: DbtBouncerManifest,
-    unit_test: UnitTests,
+    manifest_obj: "DbtBouncerManifest",
+    unit_test: "UnitTests",
     permitted_formats: List[Literal["csv", "dict", "sql"]] = ["csv", "dict", "sql"],  # noqa: B006
     **kwargs,
 ) -> None:
@@ -76,8 +76,8 @@ class CheckUnitTestGivenFormats(BaseCheck):
 
 
 def check_unit_test_given_formats(
-    manifest_obj: DbtBouncerManifest,
-    unit_test: UnitTests,
+    manifest_obj: "DbtBouncerManifest",
+    unit_test: "UnitTests",
     permitted_formats: List[Literal["csv", "dict", "sql"]] = ["csv", "dict", "sql"],  # noqa: B006
     **kwargs,
 ) -> None:

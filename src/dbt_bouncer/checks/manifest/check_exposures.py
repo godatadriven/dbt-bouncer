@@ -1,16 +1,20 @@
 # mypy: disable-error-code="union-attr"
 
-import warnings
-from typing import List, Literal
 
-with warnings.catch_warnings():
-    warnings.filterwarnings("ignore", category=UserWarning)
-    from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Exposures
+from typing import TYPE_CHECKING, List, Literal
 
 from pydantic import Field
 
 from dbt_bouncer.conf_validator_base import BaseCheck
-from dbt_bouncer.parsers import DbtBouncerModel
+
+if TYPE_CHECKING:
+    import warnings
+
+    from dbt_bouncer.parsers import DbtBouncerModel
+
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", category=UserWarning)
+        from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Exposures
 
 
 class CheckExposureOnNonPublicModels(BaseCheck):
@@ -18,8 +22,8 @@ class CheckExposureOnNonPublicModels(BaseCheck):
 
 
 def check_exposure_based_on_non_public_models(
-    exposure: Exposures,
-    models: List[DbtBouncerModel],
+    exposure: "Exposures",
+    models: List["DbtBouncerModel"],
     **kwargs,
 ) -> None:
     """Exposures should be based on public models only.
@@ -60,8 +64,8 @@ class CheckExposureOnView(BaseCheck):
 
 
 def check_exposure_based_on_view(
-    exposure: Exposures,
-    models: List[DbtBouncerModel],
+    exposure: "Exposures",
+    models: List["DbtBouncerModel"],
     materializations_to_include: List[str] = ["ephemeral", "view"],  # noqa: B006
     **kwargs,
 ) -> None:

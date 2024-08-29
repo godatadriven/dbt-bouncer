@@ -1,10 +1,12 @@
 # mypy: disable-error-code="union-attr"
 
 import re
-from typing import List, Literal
+from typing import TYPE_CHECKING, List, Literal
 
 from dbt_bouncer.conf_validator_base import BaseCheck
-from dbt_bouncer.parsers import DbtBouncerManifest, DbtBouncerModel
+
+if TYPE_CHECKING:
+    from dbt_bouncer.parsers import DbtBouncerManifest, DbtBouncerModel
 
 
 class CheckLineagePermittedUpstreamModels(BaseCheck):
@@ -13,9 +15,9 @@ class CheckLineagePermittedUpstreamModels(BaseCheck):
 
 
 def check_lineage_permitted_upstream_models(
-    manifest_obj: DbtBouncerManifest,
-    model: DbtBouncerModel,
-    models: List[DbtBouncerModel],
+    manifest_obj: "DbtBouncerManifest",
+    model: "DbtBouncerModel",
+    models: List["DbtBouncerModel"],
     upstream_path_pattern: str,
     **kwargs,
 ) -> None:
@@ -68,7 +70,7 @@ class CheckLineageSeedCannotBeUsed(BaseCheck):
     name: Literal["check_lineage_seed_cannot_be_used"]
 
 
-def check_lineage_seed_cannot_be_used(model: DbtBouncerModel, **kwargs) -> None:
+def check_lineage_seed_cannot_be_used(model: "DbtBouncerModel", **kwargs) -> None:
     """Seed cannot be referenced in models with a path that matches the specified `include` config.
 
     Parameters:
@@ -96,7 +98,7 @@ class CheckLineageSourceCannotBeUsed(BaseCheck):
     name: Literal["check_lineage_source_cannot_be_used"]
 
 
-def check_lineage_source_cannot_be_used(model: DbtBouncerModel, **kwargs) -> None:
+def check_lineage_source_cannot_be_used(model: "DbtBouncerModel", **kwargs) -> None:
     """Sources cannot be referenced in models with a path that matches the specified `include` config.
 
     Parameters:

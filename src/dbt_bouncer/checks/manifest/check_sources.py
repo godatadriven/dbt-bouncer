@@ -1,11 +1,14 @@
 # mypy: disable-error-code="union-attr"
 
 import re
-from typing import List, Literal
+from typing import TYPE_CHECKING, List, Literal
 
-from dbt_bouncer.checks.common import NestedDict
+if TYPE_CHECKING:
+    from dbt_bouncer.checks.common import NestedDict
+    from dbt_bouncer.parsers import DbtBouncerModel, DbtBouncerSource
+
+
 from dbt_bouncer.conf_validator_base import BaseCheck
-from dbt_bouncer.parsers import DbtBouncerModel, DbtBouncerSource
 from dbt_bouncer.utils import find_missing_meta_keys
 
 
@@ -13,7 +16,7 @@ class CheckSourceDescriptionPopulated(BaseCheck):
     name: Literal["check_source_description_populated"]
 
 
-def check_source_description_populated(source: DbtBouncerSource, **kwargs) -> None:
+def check_source_description_populated(source: "DbtBouncerSource", **kwargs) -> None:
     """Sources must have a populated description.
 
     Parameters:
@@ -40,7 +43,7 @@ class CheckSourceFreshnessPopulated(BaseCheck):
     name: Literal["check_source_freshness_populated"]
 
 
-def check_source_freshness_populated(source: DbtBouncerSource, **kwargs) -> None:
+def check_source_freshness_populated(source: "DbtBouncerSource", **kwargs) -> None:
     """Sources must have a populated freshness.
 
     Parameters:
@@ -68,13 +71,13 @@ def check_source_freshness_populated(source: DbtBouncerSource, **kwargs) -> None
 
 
 class CheckSourceHasMetaKeys(BaseCheck):
-    keys: NestedDict
+    keys: "NestedDict"
     name: Literal["check_source_has_meta_keys"]
 
 
 def check_source_has_meta_keys(
-    keys: NestedDict,
-    source: DbtBouncerSource,
+    keys: "NestedDict",
+    source: "DbtBouncerSource",
     **kwargs,
 ) -> None:
     """The `meta` config for sources must have the specified keys.
@@ -115,7 +118,7 @@ class CheckSourceHasTags(BaseCheck):
 
 
 def check_source_has_tags(
-    source: DbtBouncerSource,
+    source: "DbtBouncerSource",
     tags: List[str],
     **kwargs,
 ) -> None:
@@ -150,7 +153,7 @@ class CheckSourceLoaderPopulated(BaseCheck):
     name: Literal["check_source_loader_populated"]
 
 
-def check_source_loader_populated(source: DbtBouncerSource, **kwargs) -> None:
+def check_source_loader_populated(source: "DbtBouncerSource", **kwargs) -> None:
     """Sources must have a populated loader.
 
     Parameters:
@@ -179,7 +182,7 @@ class CheckSourceNames(BaseCheck):
 
 
 def check_source_names(
-    source: DbtBouncerSource,
+    source: "DbtBouncerSource",
     source_name_pattern: str,
     **kwargs,
 ) -> None:
@@ -213,8 +216,8 @@ class CheckSourceNotOrphaned(BaseCheck):
 
 
 def check_source_not_orphaned(
-    models: List[DbtBouncerModel],
-    source: DbtBouncerSource,
+    models: List["DbtBouncerModel"],
+    source: "DbtBouncerSource",
     **kwargs,
 ) -> None:
     """Sources must be referenced in at least one model.
@@ -245,7 +248,7 @@ class CheckSourcePropertyFileLocation(BaseCheck):
     name: Literal["check_source_property_file_location"]
 
 
-def check_source_property_file_location(source: DbtBouncerSource, **kwargs) -> None:
+def check_source_property_file_location(source: "DbtBouncerSource", **kwargs) -> None:
     """Source properties files must follow the guidance provided by dbt [here](https://docs.getdbt.com/best-practices/how-we-structure/1-guide-overview).
 
     Parameters:
@@ -290,8 +293,8 @@ class CheckSourceUsedByModelsInSameDirectory(BaseCheck):
 
 
 def check_source_used_by_models_in_same_directory(
-    models: List[DbtBouncerModel],
-    source: DbtBouncerSource,
+    models: List["DbtBouncerModel"],
+    source: "DbtBouncerSource",
     **kwargs,
 ) -> None:
     """Sources can only be referenced by models that are located in the same directory where the source is defined.
@@ -331,8 +334,8 @@ class CheckSourceUsedByOnlyOneModel(BaseCheck):
 
 
 def check_source_used_by_only_one_model(
-    models: List[DbtBouncerModel],
-    source: DbtBouncerSource,
+    models: List["DbtBouncerModel"],
+    source: "DbtBouncerSource",
     **kwargs,
 ) -> None:
     """Each source can be referenced by a maximum of one model.

@@ -1,7 +1,9 @@
-from typing import List, Literal
+from typing import TYPE_CHECKING, List, Literal
 
 from dbt_bouncer.conf_validator_base import BaseCheck
-from dbt_bouncer.parsers import DbtBouncerCatalogNode, DbtBouncerSource
+
+if TYPE_CHECKING:
+    from dbt_bouncer.parsers import DbtBouncerCatalogNode, DbtBouncerSource
 
 
 class CheckSourceColumnsAreAllDocumented(BaseCheck):
@@ -9,8 +11,8 @@ class CheckSourceColumnsAreAllDocumented(BaseCheck):
 
 
 def check_source_columns_are_all_documented(
-    catalog_source: DbtBouncerCatalogNode,
-    sources: List[DbtBouncerSource],
+    catalog_source: "DbtBouncerCatalogNode",
+    sources: List["DbtBouncerSource"],
     **kwargs,
 ) -> None:
     """All columns in a source should be included in the source's properties file, i.e. `.yml` file.

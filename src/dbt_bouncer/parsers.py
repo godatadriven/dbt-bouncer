@@ -13,11 +13,6 @@ from pydantic import BaseModel
 
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
-    from dbt_artifacts_parser.parser import (
-        parse_catalog,
-        parse_manifest,
-        parse_run_results,
-    )
     from dbt_artifacts_parser.parsers.catalog.catalog_v1 import CatalogTable, CatalogV1
     from dbt_artifacts_parser.parsers.manifest.manifest_v10 import (
         GenericTestNode as GenericTestNode_v10,
@@ -134,18 +129,33 @@ def load_dbt_artifact(
         )
 
     if artifact_name == "catalog.json":
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", category=UserWarning)
+            from dbt_artifacts_parser.parser import (
+                parse_catalog,
+            )
         with Path.open(artifact_path, "r") as fp:
             catalog_obj = parse_catalog(catalog=json.load(fp))
 
         return catalog_obj
 
     elif artifact_name == "manifest.json":
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", category=UserWarning)
+            from dbt_artifacts_parser.parser import (
+                parse_manifest,
+            )
         with Path.open(artifact_path, "r") as fp:
             manifest_obj = parse_manifest(manifest=json.load(fp))
 
         return DbtBouncerManifest(**{"manifest": manifest_obj})
 
     elif artifact_name == "run_results.json":
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", category=UserWarning)
+            from dbt_artifacts_parser.parser import (
+                parse_run_results,
+            )
         with Path.open(artifact_path, "r") as fp:
             run_results_obj = parse_run_results(run_results=json.load(fp))
 
@@ -307,6 +317,7 @@ def parse_run_results_artifact(
             dbt_artifacts_dir=artifact_dir,
         )
     )
+
     project_run_results = [
         DbtBouncerRunResult(
             **{

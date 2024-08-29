@@ -1,9 +1,11 @@
 # mypy: disable-error-code="union-attr"
 
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 from dbt_bouncer.conf_validator_base import BaseCheck
-from dbt_bouncer.parsers import DbtBouncerRunResult
+
+if TYPE_CHECKING:
+    from dbt_bouncer.parsers import DbtBouncerRunResult
 
 
 class CheckRunResultsMaxGigabytesBilled(BaseCheck):
@@ -13,7 +15,7 @@ class CheckRunResultsMaxGigabytesBilled(BaseCheck):
 
 def check_run_results_max_gigabytes_billed(
     max_gigabytes_billed: float,
-    run_result: DbtBouncerRunResult,
+    run_result: "DbtBouncerRunResult",
     **kwargs,
 ) -> None:
     """Each result can have a maximum number of gigabytes billed.
@@ -61,7 +63,7 @@ class CheckRunResultsMaxExecutionTime(BaseCheck):
 
 def check_run_results_max_execution_time(
     max_execution_time_seconds: float,
-    run_result: DbtBouncerRunResult,
+    run_result: "DbtBouncerRunResult",
     **kwargs,
 ) -> None:
     """Each result can take a maximum duration (seconds).

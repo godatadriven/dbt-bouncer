@@ -4,16 +4,7 @@ from typing import Dict, List, Union
 
 import click
 
-from dbt_bouncer.conf_validator import validate_conf
 from dbt_bouncer.logger import configure_console_logging
-from dbt_bouncer.parsers import (
-    load_dbt_artifact,
-    parse_catalog_artifact,
-    parse_manifest_artifact,
-    parse_run_results_artifact,
-)
-from dbt_bouncer.runner import runner
-from dbt_bouncer.utils import get_dbt_bouncer_config
 from dbt_bouncer.version import version
 
 
@@ -65,6 +56,9 @@ def cli(
             f"Output file must have a `.json` extension. Got `{output_file.suffix}`.",
         )
 
+    # Using local imports to speed up CLI startup
+    from dbt_bouncer.utils import get_dbt_bouncer_config
+
     conf = get_dbt_bouncer_config(
         config_file=config_file,
         config_file_source=click.get_current_context()
@@ -79,6 +73,8 @@ def cli(
             c["severity"] = conf["severity"]
 
     logging.debug(f"{conf=}")
+    from dbt_bouncer.conf_validator import validate_conf
+
     bouncer_config = validate_conf(conf=conf)
     logging.debug(f"{bouncer_config=}")
 
@@ -114,12 +110,13 @@ def cli(
 
     dbt_artifacts_dir = config_file.parent / bouncer_config.dbt_artifacts_dir
 
+    from dbt_bouncer.parsers import load_dbt_artifact, parse_manifest_artifact
+
     # Manifest, will always be parsed
     manifest_obj = load_dbt_artifact(
         artifact_name="manifest.json",
         dbt_artifacts_dir=dbt_artifacts_dir,
     )
-
     (
         project_exposures,
         project_macros,
@@ -132,6 +129,8 @@ def cli(
     )
 
     # Catalog, must come after manifest is parsed
+    from dbt_bouncer.parsers import parse_catalog_artifact
+
     if bouncer_config.catalog_checks != []:
         project_catalog_nodes, project_catalog_sources = parse_catalog_artifact(
             artifact_dir=dbt_artifacts_dir,
@@ -142,6 +141,8 @@ def cli(
         project_catalog_sources = []
 
     # Run results, must come after manifest is parsed
+    from dbt_bouncer.parsers import parse_run_results_artifact
+
     if bouncer_config.run_results_checks != []:
         project_run_results = parse_run_results_artifact(
             artifact_dir=dbt_artifacts_dir,
@@ -151,6 +152,8 @@ def cli(
         project_run_results = []
 
     logging.info("Running checks...")
+    from dbt_bouncer.runner import runner
+
     results = runner(
         bouncer_config=config,
         catalog_nodes=project_catalog_nodes,

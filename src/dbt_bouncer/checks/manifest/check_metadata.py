@@ -1,11 +1,12 @@
 # mypy: disable-error-code="union-attr"
 
 import re
-from typing import Literal, Optional
+from typing import TYPE_CHECKING, Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from dbt_bouncer.parsers import DbtBouncerManifest
+if TYPE_CHECKING:
+    from dbt_bouncer.parsers import DbtBouncerManifest
 
 
 class CheckProjectName(BaseModel):
@@ -24,7 +25,7 @@ class CheckProjectName(BaseModel):
 
 
 def check_project_name(
-    manifest_obj: DbtBouncerManifest,
+    manifest_obj: "DbtBouncerManifest",
     project_name_pattern: str,
     **kwargs,
 ) -> None:
@@ -33,6 +34,8 @@ def check_project_name(
     Parameters:
         manifest_obj (DbtBouncerManifest): The manifest object.
         project_name_pattern (str): Regex pattern to match the project name.
+
+    Other Parameters:
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
