@@ -1,6 +1,5 @@
 """RE-usable functions for dbt-bouncer."""
 
-import contextlib
 import logging
 import os
 import re
@@ -83,18 +82,18 @@ def flatten(structure: Any, key: str = "", path: str = "", flattened=None):
     return flattened
 
 
-def get_dbt_bouncer_config(
+def get_config_file_path(
     config_file: str,
     config_file_source: str,
-) -> Mapping[str, Any]:
-    """Get the config for dbt-bouncer. This is fetched from (in order):
+) -> Path:
+    """Get the path to the config file for dbt-bouncer. This is fetched from (in order):
 
     1. The file passed via the `--config-file` CLI flag.
     2. A file named `dbt-bouncer.yml` in the current working directory.
     3. A `[tool.dbt-bouncer]` section in `pyproject.toml` (in current working directory or parent directories).
 
     Returns:
-        Mapping[str, Any]: Config for dbt-bouncer.
+        Path: Config file for dbt-bouncer.
 
     Raises:
         RuntimeError: If no config file is found.
@@ -105,12 +104,13 @@ def get_dbt_bouncer_config(
 
     if config_file_source == "COMMANDLINE":
         logging.debug(f"Config file passed via command line: {config_file}")
-        return load_config_from_yaml(Path(config_file))
+        return Path(config_file)
 
     if config_file_source == "DEFAULT":
         logging.debug(f"Using default value for config file: {config_file}")
-        with contextlib.suppress(FileNotFoundError):
-            return load_config_from_yaml(Path.cwd() / config_file)
+        config_file_path = Path.cwd() / config_file
+        if config_file_path.exists():
+            return config_file_path
 
     # Read config from pyproject.toml
     logging.info("Loading config from pyproject.toml, if exists...")
@@ -126,22 +126,39 @@ def get_dbt_bouncer_config(
             None,  # type: ignore[arg-type]
         )  # i.e. look in parent directories for a pyproject.toml file
 
-    if pyproject_toml_dir is None:
-        logging.debug("No pyproject.toml found.")
-        raise RuntimeError(
-            "No pyproject.toml found. Please ensure you have a pyproject.toml file in the root of your project correctly configured to work with `dbt-bouncer`. Alternatively, you can pass the path to your config file via the `--config-file` flag.",
-        )
-    else:
-        logging.debug(f"{pyproject_toml_dir / 'pyproject.toml'=}")
+        if pyproject_toml_dir is None:
+            logging.debug("No pyproject.toml found.")
+            raise RuntimeError(
+                "No pyproject.toml found. Please ensure you have a pyproject.toml file in the root of your project correctly configured to work with `dbt-bouncer`. Alternatively, you can pass the path to your config file via the `--config-file` flag.",
+            )
 
-        toml_cfg = toml.load(pyproject_toml_dir / "pyproject.toml")
+    return pyproject_toml_dir / "pyproject.toml"
+
+
+def load_config_file_contents(config_file_path: Path) -> Mapping[str, Any]:
+    """Load the contents of the config file.
+
+    Returns:
+        Mapping[str, Any]: Config for dbt-bouncer.
+
+    Raises:
+        RuntimeError: If the config file type is not supported or does not contain the expected keys.
+
+    """
+    if config_file_path.suffix in [".yml", ".yaml"]:
+        return load_config_from_yaml(config_file_path)
+    elif config_file_path.suffix in [".toml"]:
+        toml_cfg = toml.load(config_file_path)
         if "dbt-bouncer" in toml_cfg["tool"]:
-            conf = next(v for k, v in toml_cfg["tool"].items() if k == "dbt-bouncer")
+            return next(v for k, v in toml_cfg["tool"].items() if k == "dbt-bouncer")
         else:
             raise RuntimeError(
                 "Please ensure your pyproject.toml file is correctly configured to work with `dbt-bouncer`. Alternatively, you can pass the path to your config file via the `--config-file` flag.",
             )
-    return conf
+    else:
+        raise RuntimeError(
+            f"Config file must be either a `pyproject.toml`, `.yaml` or `.yaml file. Got {config_file_path.suffix}."
+        )
 
 
 def load_config_from_yaml(config_file: Path) -> Mapping[str, Any]:

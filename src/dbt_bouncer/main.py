@@ -57,14 +57,15 @@ def cli(
         )
 
     # Using local imports to speed up CLI startup
-    from dbt_bouncer.utils import get_dbt_bouncer_config
+    from dbt_bouncer.utils import get_config_file_path, load_config_file_contents
 
-    config_file_contents = get_dbt_bouncer_config(
+    config_file_path = get_config_file_path(
         config_file=config_file,
         config_file_source=click.get_current_context()
         .get_parameter_source("config_file")
         .name,  # type: ignore[union-attr]
     )
+    config_file_contents = load_config_file_contents(config_file_path)
 
     # Handle `severity` at the global level
     if config_file_contents.get("severity"):
