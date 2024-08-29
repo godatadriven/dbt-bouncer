@@ -1,15 +1,17 @@
 # mypy: disable-error-code="union-attr"
 
 import re
-import warnings
-from typing import List, Literal
+from typing import TYPE_CHECKING, List, Literal
 
-with warnings.catch_warnings():
-    warnings.filterwarnings("ignore", category=UserWarning)
-    from dbt_artifacts_parser.parsers.catalog.catalog_v1 import CatalogTable
+if TYPE_CHECKING:
+    import warnings
+
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", category=UserWarning)
+        from dbt_artifacts_parser.parsers.catalog.catalog_v1 import CatalogTable
+    from dbt_bouncer.parsers import DbtBouncerModel, DbtBouncerTest
 
 from dbt_bouncer.conf_validator_base import BaseCheck
-from dbt_bouncer.parsers import DbtBouncerModel, DbtBouncerTest
 
 
 class CheckColumnDescriptionPopulated(BaseCheck):
@@ -17,8 +19,8 @@ class CheckColumnDescriptionPopulated(BaseCheck):
 
 
 def check_column_description_populated(
-    catalog_node: CatalogTable,
-    models: List[DbtBouncerModel],
+    catalog_node: "CatalogTable",
+    models: List["DbtBouncerModel"],
     **kwargs,
 ) -> None:
     """Columns must have a populated description.
@@ -60,7 +62,7 @@ class CheckColumnNameCompliesToColumnType(BaseCheck):
 
 
 def check_column_name_complies_to_column_type(
-    catalog_node: CatalogTable,
+    catalog_node: "CatalogTable",
     column_name_pattern: str,
     types: List[str],
     **kwargs,
@@ -124,8 +126,8 @@ class CheckColumnsAreAllDocumented(BaseCheck):
 
 
 def check_columns_are_all_documented(
-    catalog_node: CatalogTable,
-    models: List[DbtBouncerModel],
+    catalog_node: "CatalogTable",
+    models: List["DbtBouncerModel"],
     **kwargs,
 ) -> None:
     """All columns in a model should be included in the model's properties file, i.e. `.yml` file.
@@ -161,8 +163,8 @@ class CheckColumnsAreDocumentedInPublicModels(BaseCheck):
 
 
 def check_columns_are_documented_in_public_models(
-    catalog_node: CatalogTable,
-    models: List[DbtBouncerModel],
+    catalog_node: "CatalogTable",
+    models: List["DbtBouncerModel"],
     **kwargs,
 ) -> None:
     """Columns should have a populated description in public models.
@@ -202,10 +204,10 @@ class CheckColumnHasSpecifiedTest(BaseCheck):
 
 
 def check_column_has_specified_test(
-    catalog_node: CatalogTable,
+    catalog_node: "CatalogTable",
     column_name_pattern: str,
     test_name: str,
-    tests: List[DbtBouncerTest],
+    tests: List["DbtBouncerTest"],
     **kwargs,
 ) -> None:
     """Columns that match the specified regexp pattern must have a specified test.

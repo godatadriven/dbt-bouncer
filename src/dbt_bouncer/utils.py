@@ -4,15 +4,11 @@ import contextlib
 import logging
 import os
 import re
-import warnings
 from pathlib import Path
 from typing import Any, List, Mapping
 
 import toml
 import yaml
-
-with warnings.catch_warnings():
-    warnings.filterwarnings("ignore", category=UserWarning)
 
 
 def create_github_comment_file(failed_checks: List[List[str]]) -> None:
