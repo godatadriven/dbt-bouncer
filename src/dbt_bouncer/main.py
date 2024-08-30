@@ -57,7 +57,10 @@ def cli(
         )
 
     # Using local imports to speed up CLI startup
-    from dbt_bouncer.utils import get_config_file_path, load_config_file_contents
+    from dbt_bouncer.config_file_validator import (
+        get_config_file_path,
+        load_config_file_contents,
+    )
 
     config_file_path = get_config_file_path(
         config_file=config_file,
@@ -76,7 +79,7 @@ def cli(
             c["severity"] = config_file_contents["severity"]
 
     logging.debug(f"{config_file_contents=}")
-    from dbt_bouncer.conf_validator import validate_conf
+    from dbt_bouncer.config_file_validator import validate_conf
 
     bouncer_config = validate_conf(config_file_contents=config_file_contents)
     del config_file_contents

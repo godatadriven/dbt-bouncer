@@ -1,15 +1,11 @@
 import os
-from pathlib import Path
 from unittest import mock
 
 import pytest
-import toml
 
 from dbt_bouncer.utils import (
     create_github_comment_file,
     flatten,
-    get_config_file_path,
-    load_config_file_contents,
     make_markdown_table,
     object_in_path,
 )
@@ -28,96 +24,6 @@ def test_create_github_comment_file(monkeypatch, tmp_path):
             (tmp_path / "github-comment.md").read_text()
             == "## **Failed `dbt-bouncer`** checks\n\n\n| Check name | Failure message |\n| :--- | :--- |\n| check_model_description_populated | message_1 |\n| check_model_description_populated | message_2 |\n\n\nSent from this [GitHub Action workflow run](https://github.com/None/actions/runs/None)."
         )
-
-
-def test_get_file_config_path_commandline(tmp_path):
-    config_file = tmp_path / "my_dbt_bouncer.yml"
-    config_file.write_text("test: 1")
-    config_file_path = get_config_file_path(
-        config_file=str(config_file),
-        config_file_source="COMMANDLINE",
-    )
-    assert config_file_path == config_file
-
-
-def test_get_file_config_path_default(tmp_path):
-    config_file = tmp_path / "dbt_bouncer.yml"
-    config_file.write_text("test: 1")
-    config_file_path = get_config_file_path(
-        config_file=str(config_file),
-        config_file_source="DEFAULT",
-    )
-    assert config_file_path == config_file
-
-
-PYPROJECT_TOML_SAMPLE_CONFIG = {
-    "dbt_artifacts_dir": "dbt_project/target",
-    "manifest_checks": [
-        {"name": "check_model_has_unique_test"},
-        {
-            "include": "^staging",
-            "model_name_pattern": "^stg_",
-            "name": "check_model_names",
-        },
-    ],
-}
-
-
-def test_get_file_config_path_pyproject_toml(monkeypatch, tmp_path):
-    monkeypatch.chdir(tmp_path)
-
-    pyproject_file = tmp_path / "pyproject.toml"
-    config = {"tool": {"dbt-bouncer": PYPROJECT_TOML_SAMPLE_CONFIG}}
-    with Path.open(pyproject_file, "w") as f:
-        toml.dump(config, f)
-
-    config_file_path = get_config_file_path(
-        config_file=str("dbt_bouncer.yml"),
-        config_file_source="DEFAULT",
-    )
-
-    assert config_file_path == pyproject_file
-
-
-def test_get_file_config_path_pyproject_toml_doesnt_exist(monkeypatch, tmp_path):
-    monkeypatch.chdir(tmp_path)
-
-    with pytest.raises(RuntimeError):
-        get_config_file_path(
-            config_file=str("dbt_bouncer.yml"),
-            config_file_source="DEFAULT",
-        )
-
-
-def test_get_file_config_path_pyproject_toml_recursive(monkeypatch, tmp_path):
-    Path.mkdir(tmp_path / "test")
-    monkeypatch.chdir(tmp_path / "test")
-
-    pyproject_file = tmp_path / "pyproject.toml"
-    config = {"tool": {"dbt-bouncer": PYPROJECT_TOML_SAMPLE_CONFIG}}
-    with Path.open(pyproject_file, "w") as f:
-        toml.dump(config, f)
-
-    config_file_path = get_config_file_path(
-        config_file=str("dbt_bouncer.yml"),
-        config_file_source="DEFAULT",
-    )
-    assert config_file_path == pyproject_file
-
-
-def test_load_config_file_contents_pyproject_toml_no_bouncer_section(
-    monkeypatch,
-    tmp_path,
-):
-    monkeypatch.chdir(tmp_path)
-
-    pyproject_file = tmp_path / "pyproject.toml"
-    config = {"tool": {"dbt-bouncer-misspelled": PYPROJECT_TOML_SAMPLE_CONFIG}}
-    with Path.open(pyproject_file, "w") as f:
-        toml.dump(config, f)
-
-    with pytest.raises(RuntimeError):
-        config = load_config_file_contents(config_file_path=tmp_path / "pyproject.toml")
 
 
 @pytest.mark.parametrize(

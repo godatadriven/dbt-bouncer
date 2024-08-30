@@ -8,8 +8,8 @@ from typing import TYPE_CHECKING, List, Literal, Optional
 import semver
 from pydantic import BaseModel, ConfigDict, Field
 
+from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import NestedDict
-from dbt_bouncer.conf_validator_base import BaseCheck
 from dbt_bouncer.utils import find_missing_meta_keys
 
 if TYPE_CHECKING:

@@ -27,7 +27,7 @@ if TYPE_CHECKING:
         UnitTests,
     )
 
-    from dbt_bouncer.conf_validator import DbtBouncerConf
+    from dbt_bouncer.config_file_validator import DbtBouncerConf
     from dbt_bouncer.parsers import (
         DbtBouncerCatalogNode,
         DbtBouncerManifest,

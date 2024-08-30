@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     from dbt_bouncer.parsers import DbtBouncerModel, DbtBouncerSource
 
 
-from dbt_bouncer.conf_validator_base import BaseCheck
+from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.utils import find_missing_meta_keys
 
 

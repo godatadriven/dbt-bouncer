@@ -12,7 +12,7 @@ from unittest.mock import MagicMock
 from click.globals import push_context
 
 from dbt_bouncer.checks.manifest.check_models import CheckModelDescriptionPopulated
-from dbt_bouncer.conf_validator import DbtBouncerConf
+from dbt_bouncer.config_file_validator import DbtBouncerConf
 from dbt_bouncer.logger import configure_console_logging
 from dbt_bouncer.parsers import DbtBouncerModel
 from dbt_bouncer.runner import runner

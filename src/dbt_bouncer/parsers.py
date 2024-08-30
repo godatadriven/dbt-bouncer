@@ -12,7 +12,7 @@ import semver
 from pydantic import BaseModel
 
 if TYPE_CHECKING:
-    from dbt_bouncer.conf_validator import DbtBouncerConf
+    from dbt_bouncer.config_file_validator import DbtBouncerConf
 
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
