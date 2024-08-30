@@ -6,10 +6,13 @@ import logging
 import warnings
 from enum import Enum
 from pathlib import Path
-from typing import List, Literal, Union
+from typing import TYPE_CHECKING, List, Literal, Union
 
 import semver
 from pydantic import BaseModel
+
+if TYPE_CHECKING:
+    from dbt_bouncer.config_file_validator import DbtBouncerConf
 
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
@@ -208,6 +211,94 @@ def parse_catalog_artifact(
     return project_catalog_nodes, project_catalog_sources
 
 
+def parse_dbt_artifacts(
+    bouncer_config: DbtBouncerConf, dbt_artifacts_dir: Path
+) -> tuple[
+    DbtBouncerManifest,
+    List[Exposures],
+    List[Macros],
+    List[DbtBouncerModel],
+    List[DbtBouncerSource],
+    List[DbtBouncerTest],
+    List[UnitTests],
+    List[DbtBouncerCatalogNode],
+    List[DbtBouncerCatalogNode],
+    List[DbtBouncerRunResult],
+]:
+    """Parse all required dbt artifacts.
+
+    Args:
+        bouncer_config (DbtBouncerConf): All checks to be run.
+        dbt_artifacts_dir (Path): Path to directory where artifacts are located.
+
+    Returns:
+        DbtBouncerManifest: The manifest object.
+        List[DbtBouncerExposure]: List of exposures in the project.
+        List[DbtBouncerMacro]: List of macros in the project.
+        List[DbtBouncerModel]: List of models in the project.
+        List[DbtBouncerSource]: List of sources in the project.
+        List[DbtBouncerTest]: List of tests in the project.
+        List[DbtBouncerUnitTest]: List of unit tests in the project.
+        List[DbtBouncerCatalogNode]: List of catalog nodes for the project.
+        List[DbtBouncerCatalogNode]: List of catalog nodes for the project sources.
+        List[DbtBouncerRunResult]: A list of DbtBouncerRunResult objects.
+
+    """
+    from dbt_bouncer.parsers import load_dbt_artifact, parse_manifest_artifact
+
+    # Manifest, will always be parsed
+    manifest_obj = load_dbt_artifact(
+        artifact_name="manifest.json",
+        dbt_artifacts_dir=dbt_artifacts_dir,
+    )
+    (
+        project_exposures,
+        project_macros,
+        project_models,
+        project_sources,
+        project_tests,
+        project_unit_tests,
+    ) = parse_manifest_artifact(
+        manifest_obj=manifest_obj,
+    )
+
+    # Catalog, must come after manifest is parsed
+    from dbt_bouncer.parsers import parse_catalog_artifact
+
+    if bouncer_config.catalog_checks != []:
+        project_catalog_nodes, project_catalog_sources = parse_catalog_artifact(
+            artifact_dir=dbt_artifacts_dir,
+            manifest_obj=manifest_obj,
+        )
+    else:
+        project_catalog_nodes = []
+        project_catalog_sources = []
+
+    # Run results, must come after manifest is parsed
+    from dbt_bouncer.parsers import parse_run_results_artifact
+
+    if bouncer_config.run_results_checks != []:
+        project_run_results = parse_run_results_artifact(
+            artifact_dir=dbt_artifacts_dir,
+            manifest_obj=manifest_obj,
+        )
+    else:
+        project_run_results = []
+
+    return (
+        manifest_obj,
+        project_exposures,
+        project_macros,
+        project_models,
+        project_sources,
+        project_tests,
+        project_unit_tests,
+        project_catalog_nodes,
+        project_catalog_sources,
+        project_run_results,
+    )
+
+
 def parse_manifest_artifact(
     manifest_obj: DbtBouncerManifest,
 ) -> tuple[
@@ -221,12 +312,12 @@ def parse_manifest_artifact(
     """Parse the manifest.json artifact.
 
     Returns:
-        - project_exposures: List of exposures in the project.
-        - project_macros: List of macros in the project.
-        - project_models: List of models in the project.
-        - project_sources: List of sources in the project.
-        - project_tests: List of tests in the project.
-        - project_unit_tests: List of unit tests in the project.
+        List[DbtBouncerExposure]: List of exposures in the project.
+        List[DbtBouncerMacro]: List of macros in the project.
+        List[DbtBouncerModel]: List of models in the project.
+        List[DbtBouncerSource]: List of sources in the project.
+        List[DbtBouncerTest]: List of tests in the project.
+        List[DbtBouncerUnitTest]: List of unit tests in the project.
 
     """
     project_exposures = [

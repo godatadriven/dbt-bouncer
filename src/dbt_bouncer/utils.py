@@ -1,14 +1,21 @@
-"""RE-usable functions for dbt-bouncer."""
+"""Re-usable functions for dbt-bouncer."""
 
-import contextlib
+# TODO Remove after this program no longer support Python 3.8.*
+from __future__ import annotations
+
+import importlib
 import logging
 import os
 import re
+from functools import lru_cache
+from importlib.machinery import SourceFileLoader
 from pathlib import Path
-from typing import Any, List, Mapping
+from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Union
 
-import toml
 import yaml
+
+if TYPE_CHECKING:
+    import function
 
 
 def create_github_comment_file(failed_checks: List[List[str]]) -> None:
@@ -83,65 +90,41 @@ def flatten(structure: Any, key: str = "", path: str = "", flattened=None):
     return flattened
 
 
-def get_dbt_bouncer_config(
-    config_file: str,
-    config_file_source: str,
-) -> Mapping[str, Any]:
-    """Get the config for dbt-bouncer. This is fetched from (in order):
-
-    1. The file passed via the `--config-file` CLI flag.
-    2. A file named `dbt-bouncer.yml` in the current working directory.
-    3. A `[tool.dbt-bouncer]` section in `pyproject.toml` (in current working directory or parent directories).
+@lru_cache
+def get_check_objects() -> Dict[str, Union[function, Any]]:
+    """Get list of Check* classes and check_* functions.
 
     Returns:
-        Mapping[str, Any]: Config for dbt-bouncer.
+        Dict[str, Union[function, Any]]: Dictionary of Check* classes and check_* functions.
 
-    Raises:
-        RuntimeError: If no config file is found.
-
-    """  # noqa: D400, D415
-    logging.debug(f"{config_file=}")
-    logging.debug(f"{config_file_source=}")
-
-    if config_file_source == "COMMANDLINE":
-        logging.debug(f"Config file passed via command line: {config_file}")
-        return load_config_from_yaml(Path(config_file))
-
-    if config_file_source == "DEFAULT":
-        logging.debug(f"Using default value for config file: {config_file}")
-        with contextlib.suppress(FileNotFoundError):
-            return load_config_from_yaml(Path.cwd() / config_file)
-
-    # Read config from pyproject.toml
-    logging.info("Loading config from pyproject.toml, if exists...")
-    if (Path().cwd() / "pyproject.toml").exists():
-        pyproject_toml_dir = Path().cwd()
-    else:
-        pyproject_toml_dir = next(
-            (
-                parent
-                for parent in Path().cwd().parents
-                if (parent / "pyproject.toml").exists()
-            ),
-            None,  # type: ignore[arg-type]
-        )  # i.e. look in parent directories for a pyproject.toml file
-
-    if pyproject_toml_dir is None:
-        logging.debug("No pyproject.toml found.")
-        raise RuntimeError(
-            "No pyproject.toml found. Please ensure you have a pyproject.toml file in the root of your project correctly configured to work with `dbt-bouncer`. Alternatively, you can pass the path to your config file via the `--config-file` flag.",
+    """
+    check_objects: Dict[str, Union[function, Any]] = {
+        "classes": [],
+        "functions": [],
+    }
+    check_files = [
+        f for f in (Path(__file__).parent / "checks").glob("*/*.py") if f.is_file()
+    ]
+    for check_file in check_files:
+        check_qual_name = ".".join(
+            [x.replace(".py", "") for x in check_file.parts[-4:]]
         )
-    else:
-        logging.debug(f"{pyproject_toml_dir / 'pyproject.toml'=}")
+        imported_check_file = importlib.import_module(check_qual_name)
 
-        toml_cfg = toml.load(pyproject_toml_dir / "pyproject.toml")
-        if "dbt-bouncer" in toml_cfg["tool"]:
-            conf = next(v for k, v in toml_cfg["tool"].items() if k == "dbt-bouncer")
-        else:
-            raise RuntimeError(
-                "Please ensure your pyproject.toml file is correctly configured to work with `dbt-bouncer`. Alternatively, you can pass the path to your config file via the `--config-file` flag.",
-            )
-    return conf
+        for obj in dir(imported_check_file):
+            loader = SourceFileLoader(obj, check_file.absolute().__str__())
+            spec = importlib.util.spec_from_loader(loader.name, loader)
+            locals()[obj] = importlib.util.module_from_spec(spec)  # type: ignore[arg-type]
+            loader.exec_module(locals()[obj])
+            if obj.startswith("Check"):
+                check_objects["classes"].append(locals()[obj])
+            elif obj.startswith("check_"):
+                check_objects["functions"].append(locals()[obj])
+
+    logging.debug(
+        f"Loaded {len(check_objects['classes'])} `Check*` classes and {len(check_objects['functions'])} `check)*` functions."
+    )
+    return check_objects
 
 
 def load_config_from_yaml(config_file: Path) -> Mapping[str, Any]:

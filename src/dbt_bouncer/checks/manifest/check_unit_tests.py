@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, List, Literal
 import semver
 from pydantic import Field
 
-from dbt_bouncer.conf_validator_base import BaseCheck
+from dbt_bouncer.check_base import BaseCheck
 
 if TYPE_CHECKING:
     import warnings
