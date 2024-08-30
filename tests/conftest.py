@@ -17,6 +17,3 @@ def manifest_obj():
     with Path.open(manifest_json_path, "r") as fp:
         manifest_obj = parse_manifest(manifest=json.load(fp))
     return DbtBouncerManifest(**{"manifest": manifest_obj})
-
-
-""
