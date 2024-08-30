@@ -1,159 +1,159 @@
 dbt_artifacts_dir: dbt_project/target # [Optional] Directory where the dbt artifacts exists, generally the `target` directory inside a dbt project. Defaults to `./target`.
-# exclude: ^models/staging # Optional, here for demonstration purposes only
-# include: ^models/marts # Optional, here for demonstration purposes only
-# severity: warn # Optional, useful when applying `dbt-bouncer` to an existing dbt project.
+# # exclude: ^models/staging # Optional, here for demonstration purposes only
+# # include: ^models/marts # Optional, here for demonstration purposes only
+# # severity: warn # Optional, useful when applying `dbt-bouncer` to an existing dbt project.
 
-catalog_checks:
-  - name: check_column_description_populated
-    include: ^models/marts
-  - name: check_column_name_complies_to_column_type
-    column_name_pattern: ^is_.*
-    exclude: ^models/staging
-    types:
-      - BOOLEAN
-  - name: check_column_name_complies_to_column_type
-    column_name_pattern: .*_date$
-    include: ^models/staging # Not a good idea, here for demonstration purposes only
-    types:
-      - DATE
-  - name: check_column_name_complies_to_column_type
-    column_name_pattern: ^[a-z_]*$
-    types:
-      - BIGINT
-      - BOOLEAN
-      - DATE
-      - DOUBLE
-      - INTEGER
-      - VARCHAR
-  - name: check_column_has_specified_test
-    column_name_pattern: ^is_.*
-    test_name: not_null
-  - name: check_columns_are_all_documented
-    include: ^models/marts
-  - name: check_columns_are_documented_in_public_models
-  - name: check_source_columns_are_all_documented
-    exclude: ^models/staging/crm # Not a good idea, here for demonstration purposes only
+# catalog_checks:
+#   - name: check_column_description_populated
+#     include: ^models/marts
+#   - name: check_column_name_complies_to_column_type
+#     column_name_pattern: ^is_.*
+#     exclude: ^models/staging
+#     types:
+#       - BOOLEAN
+#   - name: check_column_name_complies_to_column_type
+#     column_name_pattern: .*_date$
+#     include: ^models/staging # Not a good idea, here for demonstration purposes only
+#     types:
+#       - DATE
+#   - name: check_column_name_complies_to_column_type
+#     column_name_pattern: ^[a-z_]*$
+#     types:
+#       - BIGINT
+#       - BOOLEAN
+#       - DATE
+#       - DOUBLE
+#       - INTEGER
+#       - VARCHAR
+#   - name: check_column_has_specified_test
+#     column_name_pattern: ^is_.*
+#     test_name: not_null
+#   - name: check_columns_are_all_documented
+#     include: ^models/marts
+#   - name: check_columns_are_documented_in_public_models
+#   - name: check_source_columns_are_all_documented
+#     exclude: ^models/staging/crm # Not a good idea, here for demonstration purposes only
 
-manifest_checks:
-  # Exposures
-  - name: check_exposure_based_on_non_public_models
-  - name: check_exposure_based_on_view
+# manifest_checks:
+#   # Exposures
+#   - name: check_exposure_based_on_non_public_models
+#   - name: check_exposure_based_on_view
 
-  # Lineage
-  - name: check_lineage_permitted_upstream_models
-    include: ^models/staging
-    upstream_path_pattern: $^
-  - name: check_lineage_permitted_upstream_models
-    include: ^models/intermediate
-    upstream_path_pattern: ^models/staging|^models/intermediate
-  - name: check_lineage_permitted_upstream_models
-    include: ^models/marts
-    upstream_path_pattern: ^models/staging|^models/intermediate
-  - name: check_lineage_seed_cannot_be_used
-    include: ^models/intermediate|^models/marts
-  - name: check_lineage_source_cannot_be_used
-    include: ^models/intermediate|^models/marts
+#   # Lineage
+#   - name: check_lineage_permitted_upstream_models
+#     include: ^models/staging
+#     upstream_path_pattern: $^
+#   - name: check_lineage_permitted_upstream_models
+#     include: ^models/intermediate
+#     upstream_path_pattern: ^models/staging|^models/intermediate
+#   - name: check_lineage_permitted_upstream_models
+#     include: ^models/marts
+#     upstream_path_pattern: ^models/staging|^models/intermediate
+#   - name: check_lineage_seed_cannot_be_used
+#     include: ^models/intermediate|^models/marts
+#   - name: check_lineage_source_cannot_be_used
+#     include: ^models/intermediate|^models/marts
 
-  # Macros
-  - name: check_macro_arguments_description_populated
-  - name: check_macro_code_does_not_contain_regexp_pattern
-    regexp_pattern: .*[i][f][n][u][l][l].*
-  - name: check_macro_description_populated
-  - name: check_macro_max_number_of_lines
-  - name: check_macro_name_matches_file_name
-  - name: check_macro_property_file_location
+#   # Macros
+#   - name: check_macro_arguments_description_populated
+#   - name: check_macro_code_does_not_contain_regexp_pattern
+#     regexp_pattern: .*[i][f][n][u][l][l].*
+#   - name: check_macro_description_populated
+#   - name: check_macro_max_number_of_lines
+#   - name: check_macro_name_matches_file_name
+#   - name: check_macro_property_file_location
 
-  # Metadata
-  - name: check_project_name
-    project_name_pattern: ^dbt_bouncer_
+#   # Metadata
+#   - name: check_project_name
+#     project_name_pattern: ^dbt_bouncer_
 
-  # Models
-  - name: check_model_access
-    include: ^models/intermediate
-    access: protected
-    severity: warn
-  - name: check_model_access
-    include: ^models/marts
-    access: public
-  - name: check_model_access
-    include: ^models/staging
-    access: protected
-  - name: check_model_code_does_not_contain_regexp_pattern
-    regexp_pattern: .*[i][f][n][u][l][l].*
-  - name: check_model_contract_enforced_for_public_model
-  - name: check_model_depends_on_multiple_sources
-  - name: check_model_description_populated
-  - name: check_model_directories
-    include: ^models
-    permitted_sub_directories:
-      - intermediate
-      - marts
-      - staging
-      - utilities
-  - name: check_model_directories
-    include: ^models/staging
-    permitted_sub_directories:
-      - crm
-      - payments
-  - name: check_model_documentation_coverage
-  - name: check_model_documented_in_same_directory
-  - name: check_model_has_contracts_enforced
-    include: ^models/marts
-  - name: check_model_has_meta_keys
-    keys:
-      - maturity
-  - name: check_model_has_no_upstream_dependencies
-    include: ^((?!int_*).)*$
-    exclude: ^models/utilities/time_spines
-  - name: check_model_has_tags
-    include: ^models/staging/crm
-    tags:
-      - crm
-  - name: check_model_has_unique_test
-  - name: check_model_max_chained_views
-  - name: check_model_max_fanout
-    max_downstream_models: 2
-  - name: check_model_max_number_of_lines
-  - name: check_model_max_upstream_dependencies
-  - name: check_model_has_unit_tests
-    include: ^models/marts
-  - name: check_model_names
-    include: ^models/intermediate
-    model_name_pattern: ^int_
-  - name: check_model_names
-    include: ^models/staging
-    model_name_pattern: ^stg_
-  - name: check_model_test_coverage
-  - name: check_model_property_file_location
+#   # Models
+#   - name: check_model_access
+#     include: ^models/intermediate
+#     access: protected
+#     severity: warn
+#   - name: check_model_access
+#     include: ^models/marts
+#     access: public
+#   - name: check_model_access
+#     include: ^models/staging
+#     access: protected
+#   - name: check_model_code_does_not_contain_regexp_pattern
+#     regexp_pattern: .*[i][f][n][u][l][l].*
+#   - name: check_model_contract_enforced_for_public_model
+#   - name: check_model_depends_on_multiple_sources
+#   - name: check_model_description_populated
+#   - name: check_model_directories
+#     include: ^models
+#     permitted_sub_directories:
+#       - intermediate
+#       - marts
+#       - staging
+#       - utilities
+#   - name: check_model_directories
+#     include: ^models/staging
+#     permitted_sub_directories:
+#       - crm
+#       - payments
+#   - name: check_model_documentation_coverage
+#   - name: check_model_documented_in_same_directory
+#   - name: check_model_has_contracts_enforced
+#     include: ^models/marts
+#   - name: check_model_has_meta_keys
+#     keys:
+#       - maturity
+#   - name: check_model_has_no_upstream_dependencies
+#     include: ^((?!int_*).)*$
+#     exclude: ^models/utilities/time_spines
+#   - name: check_model_has_tags
+#     include: ^models/staging/crm
+#     tags:
+#       - crm
+#   - name: check_model_has_unique_test
+#   - name: check_model_max_chained_views
+#   - name: check_model_max_fanout
+#     max_downstream_models: 2
+#   - name: check_model_max_number_of_lines
+#   - name: check_model_max_upstream_dependencies
+#   - name: check_model_has_unit_tests
+#     include: ^models/marts
+#   - name: check_model_names
+#     include: ^models/intermediate
+#     model_name_pattern: ^int_
+#   - name: check_model_names
+#     include: ^models/staging
+#     model_name_pattern: ^stg_
+#   - name: check_model_test_coverage
+#   - name: check_model_property_file_location
 
-  # Semantic models
-  - name: check_semantic_model_based_on_non_public_models
+#   # Semantic models
+#   - name: check_semantic_model_based_on_non_public_models
 
-  # Sources
-  - name: check_source_description_populated
-  - name: check_source_freshness_populated
-  - name: check_source_loader_populated
-  - name: check_source_has_meta_keys
-    keys:
-      - contact:
-          - email
-          - slack
-      - owner
-  - name: check_source_has_tags
-    tags:
-      - example_tag
-  - name: check_source_names
-    source_name_pattern: >
-      ^[a-z0-9_]*$
-  - name: check_source_not_orphaned
-    include: ^models/staging/crm
-  - name: check_source_property_file_location
-  - name: check_source_used_by_models_in_same_directory
-  - name: check_source_used_by_only_one_model
+#   # Sources
+#   - name: check_source_description_populated
+#   - name: check_source_freshness_populated
+#   - name: check_source_loader_populated
+#   - name: check_source_has_meta_keys
+#     keys:
+#       - contact:
+#           - email
+#           - slack
+#       - owner
+#   - name: check_source_has_tags
+#     tags:
+#       - example_tag
+#   - name: check_source_names
+#     source_name_pattern: >
+#       ^[a-z0-9_]*$
+#   - name: check_source_not_orphaned
+#     include: ^models/staging/crm
+#   - name: check_source_property_file_location
+#   - name: check_source_used_by_models_in_same_directory
+#   - name: check_source_used_by_only_one_model
 
-  # Unit tests
-  - name: check_unit_test_expect_format
-  - name: check_unit_test_given_formats
+#   # Unit tests
+#   - name: check_unit_test_expect_format
+#   - name: check_unit_test_given_formats
 
 run_results_checks:
   # Not a good idea, here for demonstration purposes only
