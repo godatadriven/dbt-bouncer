@@ -48,6 +48,14 @@ conf={'dbt_artifacts_dir': 'dbt_project/target', 'catalog_checks': [{'name': 'ch
 Validating conf...
 ```
 
+### Running as an executable using [uv](https://github.com/astral-sh/uv)
+
+Run `dbt-bouncer` as a standalone Python executable using `uv`:
+
+```shell
+uvx dbt-bouncer --config-file <PATH_TO_CONFIG_FILE>
+```
+
 ### GitHub Actions
 
 Run `dbt-bouncer` as part of your CI pipeline:
