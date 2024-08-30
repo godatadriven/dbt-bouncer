@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Literal, Mapping, Optional, Union
+from typing import Any, ClassVar, Dict, List, Literal, Mapping, Optional, Union
 
 import toml
 from pydantic import BaseModel, ConfigDict, Field
@@ -8,59 +8,63 @@ from typing_extensions import Annotated
 
 from dbt_bouncer.utils import get_check_objects, load_config_from_yaml
 
-check_classes: List[Dict[str, Union[Any, str]]] = [
-    {"class": getattr(x, x.__name__), "source_file": x.__file__}
-    for x in get_check_objects()["classes"]
-]
-
-# Catalog checks
-catalog_check_classes = [
-    x["class"] for x in check_classes if x["source_file"].split("/")[-2] == "catalog"
-]
-CatalogCheckConfigs = Annotated[  # type: ignore[valid-type]
-    Union[tuple(catalog_check_classes)],
-    Field(discriminator="name"),
-]
-
-# Manifest checks
-manifest_check_classes = [
-    x["class"] for x in check_classes if x["source_file"].split("/")[-2] == "manifest"
-]
-ManifestCheckConfigs = Annotated[  # type: ignore[valid-type]
-    Union[tuple(manifest_check_classes)],
-    Field(discriminator="name"),
-]
-
-# Run result checks
-run_results_check_classes = [
-    x["class"]
-    for x in check_classes
-    if x["source_file"].split("/")[-2] == "run_results"
-]
-RunResultsCheckConfigs = Annotated[  # type: ignore[valid-type]
-    Union[tuple(run_results_check_classes)],
-    Field(discriminator="name"),
-]
-
 
 class DbtBouncerConf(BaseModel):
     """Base model for the config file contents."""
 
     model_config = ConfigDict(extra="forbid")
 
-    catalog_checks: List[  # type: ignore[valid-type]
+    check_classes: List[Dict[str, Union[Any, str]]] = [
+        {"class": getattr(x, x.__name__), "source_file": x.__file__}
+        for x in get_check_objects()["classes"]
+    ]
+
+    # Catalog checks
+    catalog_check_classes: ClassVar = [
+        x["class"]
+        for x in check_classes
+        if x["source_file"].split("/")[-2] == "catalog"
+    ]
+    CatalogCheckConfigs: ClassVar = Annotated[
+        Union[tuple(catalog_check_classes)],
+        Field(discriminator="name"),
+    ]
+
+    # Manifest checks
+    manifest_check_classes: ClassVar = [
+        x["class"]
+        for x in check_classes
+        if x["source_file"].split("/")[-2] == "manifest"
+    ]
+    ManifestCheckConfigs: ClassVar = Annotated[
+        Union[tuple(manifest_check_classes)],
+        Field(discriminator="name"),
+    ]
+
+    # Run result checks
+    run_results_check_classes: ClassVar = [
+        x["class"]
+        for x in check_classes
+        if x["source_file"].split("/")[-2] == "run_results"
+    ]
+    RunResultsCheckConfigs: ClassVar = Annotated[
+        Union[tuple(run_results_check_classes)],
+        Field(discriminator="name"),
+    ]
+
+    catalog_checks: List[
         Annotated[
             CatalogCheckConfigs,
             Field(discriminator="name"),
         ]
     ] = Field(default=[])
-    manifest_checks: List[  # type: ignore[valid-type]
+    manifest_checks: List[
         Annotated[
             ManifestCheckConfigs,
             Field(discriminator="name"),
         ]
     ] = Field(default=[])
-    run_results_checks: List[  # type: ignore[valid-type]
+    run_results_checks: List[
         Annotated[
             RunResultsCheckConfigs,
             Field(discriminator="name"),
@@ -161,8 +165,8 @@ def load_config_file_contents(config_file_path: Path) -> Mapping[str, Any]:
         )
 
 
-def validate_conf(config_file_contents: Dict[str, Any]) -> DbtBouncerConf:
-    """Valiate the configuration and return the Pydantic model.
+def validate_conf(config_file_contents: Dict[str, Any]) -> "DbtBouncerConf":
+    """Validate the configuration and return the Pydantic model.
 
     Returns:
         DbtBouncerConf: The validated configuration.

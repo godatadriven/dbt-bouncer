@@ -165,7 +165,7 @@ def runner(
     )
     num_checks_success = len([c for c in results if c["outcome"] == "success"])
     logging.info(
-        f"SUCCESS={num_checks_success} WARN={num_checks_warn} ERROR={num_checks_error}",
+        f"Done. SUCCESS={num_checks_success} WARN={num_checks_warn} ERROR={num_checks_error}",
     )
 
     if num_checks_error > 0 or num_checks_warn > 0:
