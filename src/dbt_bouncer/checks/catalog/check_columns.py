@@ -11,7 +11,7 @@ if TYPE_CHECKING:
         from dbt_artifacts_parser.parsers.catalog.catalog_v1 import CatalogTable
     from dbt_bouncer.parsers import DbtBouncerModel, DbtBouncerTest
 
-from dbt_bouncer.conf_validator_base import BaseCheck
+from dbt_bouncer.check_base import BaseCheck
 
 
 class CheckColumnDescriptionPopulated(BaseCheck):

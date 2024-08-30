@@ -3,9 +3,9 @@
 # TODO Remove after this program no longer support Python 3.8.*
 from __future__ import annotations
 
-import importlib
 import json
 import logging
+import operator
 import traceback
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, List, Union
@@ -13,7 +13,11 @@ from typing import TYPE_CHECKING, Any, List, Union
 from progress.bar import Bar
 from tabulate import tabulate
 
-from dbt_bouncer.utils import create_github_comment_file, resource_in_path
+from dbt_bouncer.utils import (
+    create_github_comment_file,
+    get_check_objects,
+    resource_in_path,
+)
 
 if TYPE_CHECKING:
     from dbt_artifacts_parser.parsers.manifest.manifest_v12 import (
@@ -22,7 +26,7 @@ if TYPE_CHECKING:
         UnitTests,
     )
 
-    from dbt_bouncer.conf_validator import DbtBouncerConf
+    from dbt_bouncer.config_file_validator import DbtBouncerConf
     from dbt_bouncer.parsers import (
         DbtBouncerCatalogNode,
         DbtBouncerManifest,
@@ -37,6 +41,7 @@ def runner(
     bouncer_config: DbtBouncerConf,
     catalog_nodes: List[DbtBouncerCatalogNode],
     catalog_sources: List[DbtBouncerCatalogNode],
+    check_categories: List[str],
     create_pr_comment_file: bool,
     exposures: List[Exposures],
     macros: List[Macros],
@@ -57,17 +62,8 @@ def runner(
         RuntimeError: If more than one "iterate_over" argument is found.
 
     """
-    # Dynamically import all Check classes
-    check_files = [
-        f for f in (Path(__file__).parent / "checks").glob("*/*.py") if f.is_file()
-    ]
-    for check_file in check_files:
-        imported_check_file = importlib.import_module(
-            ".".join([x.replace(".py", "") for x in check_file.parts[-4:]]),
-        )
-        for obj in dir(imported_check_file):
-            if callable(getattr(imported_check_file, obj)) and obj.startswith("check_"):
-                locals()[obj] = getattr(imported_check_file, obj)
+    for i in get_check_objects()["functions"]:
+        locals()[i.__name__] = getattr(i, i.__name__)
 
     parsed_data = {
         "catalog_nodes": catalog_nodes,
@@ -82,54 +78,57 @@ def runner(
         "unit_tests": unit_tests,
     }
 
+    list_of_check_configs = []
+    for check_category in check_categories:
+        list_of_check_configs.extend(getattr(bouncer_config, check_category))
+
     checks_to_run = []
-    for _, v in sorted(bouncer_config.items()):
-        for check in v:
-            valid_iterate_over_values = {
-                "catalog_node",
-                "catalog_source",
-                "exposure",
-                "macro",
-                "model",
-                "run_result",
-                "source",
-                "unit_test",
-            }
-            iterate_over_value = valid_iterate_over_values.intersection(
-                set(locals()[check.name].__annotations__.keys()),
-            )
+    for check in sorted(list_of_check_configs, key=operator.attrgetter("index")):
+        valid_iterate_over_values = {
+            "catalog_node",
+            "catalog_source",
+            "exposure",
+            "macro",
+            "model",
+            "run_result",
+            "source",
+            "unit_test",
+        }
+        iterate_over_value = valid_iterate_over_values.intersection(
+            set(locals()[check.name].__annotations__.keys()),
+        )
 
-            if len(iterate_over_value) == 1:
-                iterate_value = next(iter(iterate_over_value))
+        if len(iterate_over_value) == 1:
+            iterate_value = next(iter(iterate_over_value))
 
-                for i in locals()[f"{iterate_value}s"]:
-                    if resource_in_path(check, i):
-                        check_run_id = (
-                            f"{check.name}:{check.index}:{i.unique_id.split('.')[2]}"
-                        )
-                        checks_to_run.append(
-                            {
-                                **{
-                                    "check_run_id": check_run_id,
-                                },
-                                **check.model_dump(),
-                                **{iterate_value: getattr(i, iterate_value, i)},
+            for i in locals()[f"{iterate_value}s"]:
+                if resource_in_path(check, i):
+                    check_run_id = (
+                        f"{check.name}:{check.index}:{i.unique_id.split('.')[2]}"
+                    )
+                    checks_to_run.append(
+                        {
+                            **{
+                                "check_run_id": check_run_id,
                             },
-                        )
-            elif len(iterate_over_value) > 1:
-                raise RuntimeError(
-                    f"Check {check.name} has multiple iterate_over_value values: {iterate_over_value}",
-                )
-            else:
-                check_run_id = f"{check.name}:{check.index}"
-                checks_to_run.append(
-                    {
-                        **{
-                            "check_run_id": check_run_id,
+                            **check.model_dump(),
+                            **{iterate_value: getattr(i, iterate_value, i)},
                         },
-                        **check.model_dump(),
+                    )
+        elif len(iterate_over_value) > 1:
+            raise RuntimeError(
+                f"Check {check.name} has multiple iterate_over_value values: {iterate_over_value}",
+            )
+        else:
+            check_run_id = f"{check.name}:{check.index}"
+            checks_to_run.append(
+                {
+                    **{
+                        "check_run_id": check_run_id,
                     },
-                )
+                    **check.model_dump(),
+                },
+            )
 
     logging.info(f"Assembled {len(checks_to_run)} checks, running...")
 

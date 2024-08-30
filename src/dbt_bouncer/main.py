@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import Dict, List, Union
+from typing import Union
 
 import click
 
@@ -57,107 +57,80 @@ def cli(
         )
 
     # Using local imports to speed up CLI startup
-    from dbt_bouncer.utils import get_dbt_bouncer_config
+    from dbt_bouncer.config_file_validator import (
+        get_config_file_path,
+        load_config_file_contents,
+    )
 
-    conf = get_dbt_bouncer_config(
+    config_file_path = get_config_file_path(
         config_file=config_file,
         config_file_source=click.get_current_context()
         .get_parameter_source("config_file")
         .name,  # type: ignore[union-attr]
     )
+    config_file_contents = load_config_file_contents(config_file_path)
 
     # Handle `severity` at the global level
-    if conf.get("severity"):
-        logging.info(f"Setting `severity` for all checks to `{conf['severity']}`.")
-        for c in conf["manifest_checks"]:
-            c["severity"] = conf["severity"]
+    if config_file_contents.get("severity"):
+        logging.info(
+            f"Setting `severity` for all checks to `{config_file_contents['severity']}`."
+        )
+        for c in config_file_contents["manifest_checks"]:
+            c["severity"] = config_file_contents["severity"]
 
-    logging.debug(f"{conf=}")
-    from dbt_bouncer.conf_validator import validate_conf
+    logging.debug(f"{config_file_contents=}")
+    from dbt_bouncer.config_file_validator import validate_conf
 
-    bouncer_config = validate_conf(conf=conf)
+    bouncer_config = validate_conf(config_file_contents=config_file_contents)
+    del config_file_contents
     logging.debug(f"{bouncer_config=}")
 
     check_categories = [
-        k
-        for k in dir(bouncer_config)
-        if k.endswith("_checks") and getattr(bouncer_config, k) != []
+        i
+        for i in bouncer_config.model_dump()
+        if i.endswith("_checks") and getattr(bouncer_config, i) != []
     ]
     logging.debug(f"{check_categories=}")
 
-    # Add indices to uniquely identify checks
     for category in check_categories:
-        for idx, c in enumerate(getattr(bouncer_config, category)):
-            c.index = idx
+        for idx, check in enumerate(getattr(bouncer_config, category)):
+            # Add indices to uniquely identify checks
+            check.index = idx
 
-    config: Dict[str, List[Dict[str, str]]] = {}
-    for category in check_categories:
-        for check_name in {c.name for c in getattr(bouncer_config, category)}:
-            config[check_name] = []
-            for check in getattr(bouncer_config, category):
-                if check.name == check_name:
-                    # info = {k: v for k, v in check.model_dump().items() if k != "name"}
-
-                    # Handle global `exclude` and `include` args
-                    if bouncer_config.include and not check.include:
-                        check.include = bouncer_config.include
-                    if bouncer_config.exclude and not check.exclude:
-                        check.exclude = bouncer_config.exclude
-
-                    config[check_name].append(check)
-
-    logging.debug(f"{config=}")
+            # Handle global `exclude` and `include` args
+            if bouncer_config.include and not check.include:
+                check.include = bouncer_config.include
+            if bouncer_config.exclude and not check.exclude:
+                check.exclude = bouncer_config.exclude
+    logging.debug(f"{bouncer_config=}")
 
     dbt_artifacts_dir = config_file.parent / bouncer_config.dbt_artifacts_dir
 
-    from dbt_bouncer.parsers import load_dbt_artifact, parse_manifest_artifact
+    from dbt_bouncer.parsers import parse_dbt_artifacts
 
-    # Manifest, will always be parsed
-    manifest_obj = load_dbt_artifact(
-        artifact_name="manifest.json",
-        dbt_artifacts_dir=dbt_artifacts_dir,
-    )
     (
+        manifest_obj,
         project_exposures,
         project_macros,
         project_models,
         project_sources,
         project_tests,
         project_unit_tests,
-    ) = parse_manifest_artifact(
-        manifest_obj=manifest_obj,
+        project_catalog_nodes,
+        project_catalog_sources,
+        project_run_results,
+    ) = parse_dbt_artifacts(
+        bouncer_config=bouncer_config, dbt_artifacts_dir=dbt_artifacts_dir
     )
-
-    # Catalog, must come after manifest is parsed
-    from dbt_bouncer.parsers import parse_catalog_artifact
-
-    if bouncer_config.catalog_checks != []:
-        project_catalog_nodes, project_catalog_sources = parse_catalog_artifact(
-            artifact_dir=dbt_artifacts_dir,
-            manifest_obj=manifest_obj,
-        )
-    else:
-        project_catalog_nodes = []
-        project_catalog_sources = []
-
-    # Run results, must come after manifest is parsed
-    from dbt_bouncer.parsers import parse_run_results_artifact
-
-    if bouncer_config.run_results_checks != []:
-        project_run_results = parse_run_results_artifact(
-            artifact_dir=dbt_artifacts_dir,
-            manifest_obj=manifest_obj,
-        )
-    else:
-        project_run_results = []
 
     logging.info("Running checks...")
     from dbt_bouncer.runner import runner
 
     results = runner(
-        bouncer_config=config,
+        bouncer_config=bouncer_config,
         catalog_nodes=project_catalog_nodes,
         catalog_sources=project_catalog_sources,
+        check_categories=check_categories,
         create_pr_comment_file=create_pr_comment_file,
         exposures=project_exposures,
         macros=project_macros,
