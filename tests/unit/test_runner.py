@@ -11,6 +11,7 @@ from unittest.mock import MagicMock
 
 from click.globals import push_context
 
+from dbt_bouncer.checks.common import NestedDict  # noqa: F401
 from dbt_bouncer.config_file_validator import DbtBouncerConf
 from dbt_bouncer.logger import configure_console_logging
 from dbt_bouncer.parsers import DbtBouncerModel
