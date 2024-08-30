@@ -71,6 +71,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://godatadriven.github.io/dbt-bouncer/latest/checks/manifest/check_semantic_models/</loc>
+         <lastmod>2024-08-30</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://godatadriven.github.io/dbt-bouncer/latest/checks/manifest/check_sources/</loc>
          <lastmod>2024-08-30</lastmod>
          <changefreq>daily</changefreq>
