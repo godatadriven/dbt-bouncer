@@ -32,6 +32,7 @@ if TYPE_CHECKING:
         DbtBouncerManifest,
         DbtBouncerModel,
         DbtBouncerRunResult,
+        DbtBouncerSemanticModel,
         DbtBouncerSource,
         DbtBouncerTest,
     )
@@ -49,6 +50,7 @@ def runner(
     models: List[DbtBouncerModel],
     output_file: Union[None, Path],
     run_results: List[DbtBouncerRunResult],
+    semantic_models: List[DbtBouncerSemanticModel],
     sources: List[DbtBouncerSource],
     tests: List[DbtBouncerTest],
     unit_tests: List[UnitTests],
@@ -73,6 +75,7 @@ def runner(
         "manifest_obj": manifest_obj,
         "models": [m.model for m in models],
         "run_results": [r.run_result for r in run_results],
+        "semantic_models": [s.semantic_model for s in semantic_models],
         "sources": sources,
         "tests": [t.test for t in tests],
         "unit_tests": unit_tests,
@@ -91,6 +94,7 @@ def runner(
             "macro",
             "model",
             "run_result",
+            "semantic_model",
             "source",
             "unit_test",
         }

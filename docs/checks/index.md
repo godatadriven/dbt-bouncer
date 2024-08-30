@@ -9,6 +9,7 @@
     - [Macros](./manifest/check_macros.md)
     - [Metadata](./manifest/check_metadata.md)
     - [Models](./manifest/check_models.md)
+    - [Semantic Models](./manifest/check_semantic_models.md)
     - [Sources](./manifest/check_sources.md)
     - [Unit Tests](./manifest/check_unit_tests.md)
 - Run Results checks:
