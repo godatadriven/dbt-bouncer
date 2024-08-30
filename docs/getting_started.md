@@ -10,12 +10,12 @@
 
 1. Run `dbt-bouncer` to validate that your conventions are being maintained.
 
-### Python
+### Installing with Python
 
 Install from [pypi.org](https://pypi.org/p/dbt-bouncer):
 
 ```shell
-pip install dbt-bouncer
+pip install dbt-bouncer # or via any other package manager
 ```
 
 Run:
