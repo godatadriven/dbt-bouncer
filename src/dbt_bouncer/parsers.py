@@ -205,7 +205,7 @@ def parse_catalog_artifact(
         if k.split(".")[1] == manifest_obj.manifest.metadata.project_name
     ]
     logging.info(
-        f"Parsed `catalog.json`, found {len(project_catalog_nodes)} nodes and {len(project_catalog_sources)} sources.",
+        f"Parsed `catalog.json`: {len(project_catalog_nodes)} nodes, {len(project_catalog_sources)} sources.",
     )
 
     return project_catalog_nodes, project_catalog_sources
@@ -379,7 +379,7 @@ def parse_manifest_artifact(
         if v.package_name == manifest_obj.manifest.metadata.project_name
     ]
     logging.info(
-        f"Parsed `manifest.json`, found `{manifest_obj.manifest.metadata.project_name}` project, found {len(project_exposures)} exposures, {len(project_macros)} macros, {len(project_models)} nodes, {len(project_sources)} sources, {len(project_tests)} tests and {len(project_unit_tests)} unit tests.",
+        f"Parsed `manifest.json`, found `{manifest_obj.manifest.metadata.project_name}` project: {len(project_exposures)} exposures, {len(project_macros)} macros, {len(project_models)} nodes, {len(project_sources)} sources, {len(project_tests)} tests, {len(project_unit_tests)} unit tests.",
     )
 
     return (
@@ -427,6 +427,6 @@ def parse_run_results_artifact(
         if r.unique_id.split(".")[1] == manifest_obj.manifest.metadata.project_name
     ]
     logging.info(
-        f"Parsed `run_results.json`, found {len(project_run_results)} results.",
+        f"Parsed `run_results.json`: {len(project_run_results)} results.",
     )
     return project_run_results

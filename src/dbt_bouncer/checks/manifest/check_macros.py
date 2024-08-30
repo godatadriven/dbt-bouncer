@@ -1,14 +1,16 @@
 # mypy: disable-error-code="union-attr"
 
 import re
-import warnings
-from typing import ClassVar, Literal
+from typing import TYPE_CHECKING, ClassVar, Literal
 
 from pydantic import Field
 
-with warnings.catch_warnings():
-    warnings.filterwarnings("ignore", category=UserWarning)
-    from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Macros
+if TYPE_CHECKING:
+    import warnings
+
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", category=UserWarning)
+        from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Macros
 
 
 import jinja2
@@ -25,7 +27,7 @@ class CheckMacroArgumentsDescriptionPopulated(BaseCheck):
     name: Literal["check_macro_arguments_description_populated"]
 
 
-def check_macro_arguments_description_populated(macro: Macros, **kwargs) -> None:
+def check_macro_arguments_description_populated(macro: "Macros", **kwargs) -> None:
     """Macro arguments must have a populated description.
 
     Parameters:
@@ -90,7 +92,7 @@ class CheckMacroCodeDoesNotContainRegexpPattern(BaseCheck):
 
 
 def check_macro_code_does_not_contain_regexp_pattern(
-    macro: Macros,
+    macro: "Macros",
     regexp_pattern: str,
     **kwargs,
 ) -> None:
@@ -124,7 +126,7 @@ class CheckMacroDescriptionPopulated(BaseCheck):
     name: Literal["check_macro_description_populated"]
 
 
-def check_macro_description_populated(macro: Macros, **kwargs) -> None:
+def check_macro_description_populated(macro: "Macros", **kwargs) -> None:
     """Macros must have a populated description.
 
     Parameters:
@@ -159,7 +161,7 @@ class CheckMacroMaxNumberOfLines(BaseCheck):
 
 
 def check_macro_max_number_of_lines(
-    macro: Macros,
+    macro: "Macros",
     max_number_of_lines: int = 50,
     **kwargs,
 ) -> None:
@@ -197,7 +199,7 @@ class CheckMacroNameMatchesFileName(BaseCheck):
     name: Literal["check_macro_name_matches_file_name"]
 
 
-def check_macro_name_matches_file_name(macro: Macros, **kwargs) -> None:
+def check_macro_name_matches_file_name(macro: "Macros", **kwargs) -> None:
     """Macros names must be the same as the file they are contained in.
 
     Generic tests are also macros, however to document these tests the "name" value must be preceded with "test_".
@@ -231,7 +233,7 @@ class CheckMacroPropertyFileLocation(BaseCheck):
     name: Literal["check_macro_property_file_location"]
 
 
-def check_macro_property_file_location(macro: Macros, **kwargs) -> None:
+def check_macro_property_file_location(macro: "Macros", **kwargs) -> None:
     """Macro properties files must follow the guidance provided by dbt [here](https://docs.getdbt.com/best-practices/how-we-structure/5-the-rest-of-the-project#how-we-use-the-other-folders).
 
     Parameters:
