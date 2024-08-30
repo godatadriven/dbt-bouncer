@@ -1,0 +1,19 @@
+semantic_models:
+  - name: customers
+    description: same as always
+    model: ref('customers')
+    defaults:
+      agg_time_dimension: first_order_date
+    entities:
+      - name: customer
+        type: primary
+        expr: customer_id
+    measures:
+      - name: customer_lifetime_value
+        description: The total value of the customer.
+        agg: sum
+    dimensions:
+      - name: first_order_date
+        type: time
+        type_params:
+          time_granularity: day

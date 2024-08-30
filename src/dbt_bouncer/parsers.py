@@ -25,6 +25,9 @@ with warnings.catch_warnings():
         ModelNode as ModelNode_v10,
     )
     from dbt_artifacts_parser.parsers.manifest.manifest_v10 import (
+        SemanticModel as SemanticModel_v10,
+    )
+    from dbt_artifacts_parser.parsers.manifest.manifest_v10 import (
         SourceDefinition as SourceDefinition_v10,
     )
     from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
@@ -35,6 +38,9 @@ with warnings.catch_warnings():
         ModelNode as ModelNode_v11,
     )
     from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
+        SemanticModel as SemanticModel_v11,
+    )
+    from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
         SourceDefinition as SourceDefinition_v11,
     )
     from dbt_artifacts_parser.parsers.manifest.manifest_v12 import (
@@ -43,6 +49,7 @@ with warnings.catch_warnings():
         ManifestV12,
         Nodes4,
         Nodes6,
+        SemanticModels,
         Sources,
         UnitTests,
     )
@@ -87,6 +94,14 @@ class DbtBouncerRunResult(BaseModel):
 
     original_file_path: str
     run_result: Union[RunResultOutput_v4, RunResultOutput_v5, Result]
+    unique_id: str
+
+
+class DbtBouncerSemanticModel(BaseModel):
+    """Model for all semantic model nodes in `manifest.json`."""
+
+    original_file_path: str
+    semantic_model: Union[SemanticModel_v10, SemanticModel_v11, SemanticModels]
     unique_id: str
 
 
@@ -218,6 +233,7 @@ def parse_dbt_artifacts(
     List[Exposures],
     List[Macros],
     List[DbtBouncerModel],
+    List[DbtBouncerSemanticModel],
     List[DbtBouncerSource],
     List[DbtBouncerTest],
     List[UnitTests],
@@ -236,6 +252,7 @@ def parse_dbt_artifacts(
         List[DbtBouncerExposure]: List of exposures in the project.
         List[DbtBouncerMacro]: List of macros in the project.
         List[DbtBouncerModel]: List of models in the project.
+        List[DbtBouncerSemanticModel]: List of semantic models in the project.
         List[DbtBouncerSource]: List of sources in the project.
         List[DbtBouncerTest]: List of tests in the project.
         List[DbtBouncerUnitTest]: List of unit tests in the project.
@@ -255,6 +272,7 @@ def parse_dbt_artifacts(
         project_exposures,
         project_macros,
         project_models,
+        project_semantic_models,
         project_sources,
         project_tests,
         project_unit_tests,
@@ -290,6 +308,7 @@ def parse_dbt_artifacts(
         project_exposures,
         project_macros,
         project_models,
+        project_semantic_models,
         project_sources,
         project_tests,
         project_unit_tests,
@@ -305,6 +324,7 @@ def parse_manifest_artifact(
     List[Exposures],
     List[Macros],
     List[DbtBouncerModel],
+    List[DbtBouncerSemanticModel],
     List[DbtBouncerSource],
     List[DbtBouncerTest],
     List[UnitTests],
@@ -315,6 +335,7 @@ def parse_manifest_artifact(
         List[DbtBouncerExposure]: List of exposures in the project.
         List[DbtBouncerMacro]: List of macros in the project.
         List[DbtBouncerModel]: List of models in the project.
+        List[DbtBouncerSemanticModel]: List of semantic models in the project.
         List[DbtBouncerSource]: List of sources in the project.
         List[DbtBouncerTest]: List of tests in the project.
         List[DbtBouncerUnitTest]: List of unit tests in the project.
@@ -371,6 +392,18 @@ def parse_manifest_artifact(
     else:
         project_unit_tests = []
 
+    project_semantic_models = [
+        DbtBouncerSemanticModel(
+            **{
+                "original_file_path": v.original_file_path,
+                "semantic_model": v,
+                "unique_id": k,
+            },
+        )
+        for _, v in manifest_obj.manifest.semantic_models.items()
+        if v.package_name == manifest_obj.manifest.metadata.project_name
+    ]
+
     project_sources = [
         DbtBouncerSource(
             **{"original_file_path": v.original_file_path, "source": v, "unique_id": k},
@@ -378,14 +411,15 @@ def parse_manifest_artifact(
         for _, v in manifest_obj.manifest.sources.items()
         if v.package_name == manifest_obj.manifest.metadata.project_name
     ]
-    logging.info(
-        f"Parsed `manifest.json`, found `{manifest_obj.manifest.metadata.project_name}` project: {len(project_exposures)} exposures, {len(project_macros)} macros, {len(project_models)} nodes, {len(project_sources)} sources, {len(project_tests)} tests, {len(project_unit_tests)} unit tests.",
-    )
 
+    logging.info(
+        f"Parsed `manifest.json`, found `{manifest_obj.manifest.metadata.project_name}` project: {len(project_exposures)} exposures, {len(project_macros)} macros, {len(project_models)} nodes, {len(project_semantic_models)} semantic models, {len(project_sources)} sources, {len(project_tests)} tests, {len(project_unit_tests)} unit tests.",
+    )
     return (
         project_exposures,
         project_macros,
         project_models,
+        project_semantic_models,
         project_sources,
         project_tests,
         project_unit_tests,

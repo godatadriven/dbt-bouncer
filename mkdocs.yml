@@ -44,6 +44,7 @@ nav:
       - Metadata: checks/manifest/check_metadata.md
       - Models: checks/manifest/check_models.md
       - Sources: checks/manifest/check_sources.md
+      - Semantic Models: checks/manifest/check_semantic_models.md
       - Unit Tests: checks/manifest/check_unit_tests.md
     - Run Results:
       - Run Results: checks/run_results/check_run_results.md

@@ -89,6 +89,7 @@ manifest_checks:
       - intermediate
       - marts
       - staging
+      - utilities
   - name: check_model_directories
     include: ^models/staging
     permitted_sub_directories:
@@ -103,6 +104,7 @@ manifest_checks:
       - maturity
   - name: check_model_has_no_upstream_dependencies
     include: ^((?!int_*).)*$
+    exclude: ^models/utilities/time_spines
   - name: check_model_has_tags
     include: ^models/staging/crm
     tags:
@@ -123,6 +125,9 @@ manifest_checks:
     model_name_pattern: ^stg_
   - name: check_model_test_coverage
   - name: check_model_property_file_location
+
+  # Semantic models
+  - name: check_semantic_model_based_on_non_public_models
 
   # Sources
   - name: check_source_description_populated
