@@ -8,10 +8,14 @@ import logging
 import os
 import re
 from functools import lru_cache
+from importlib.machinery import SourceFileLoader
 from pathlib import Path
-from typing import Any, List, Mapping
+from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Union
 
 import yaml
+
+if TYPE_CHECKING:
+    import function
 
 
 def create_github_comment_file(failed_checks: List[List[str]]) -> None:
@@ -87,14 +91,17 @@ def flatten(structure: Any, key: str = "", path: str = "", flattened=None):
 
 
 @lru_cache
-def get_check_objects() -> set[str]:
+def get_check_objects() -> Dict[str, Union[function, Any]]:
     """Get list of Check* classes and check_* functions.
 
     Returns:
-        set[str]: Set of all Check classes
+        Dict[str, Union[function, Any]]: Dictionary of Check* classes and check_* functions.
 
     """
-    check_objects = []
+    check_objects: Dict[str, Union[function, Any]] = {
+        "classes": [],
+        "functions": [],
+    }
     check_files = [
         f for f in (Path(__file__).parent / "checks").glob("*/*.py") if f.is_file()
     ]
@@ -103,10 +110,21 @@ def get_check_objects() -> set[str]:
             [x.replace(".py", "") for x in check_file.parts[-4:]]
         )
         imported_check_file = importlib.import_module(check_qual_name)
-        for obj in dir(imported_check_file):
-            check_objects.append(f"{check_qual_name}.{obj}")
 
-    return set(check_objects)
+        for obj in dir(imported_check_file):
+            loader = SourceFileLoader(obj, check_file.absolute().__str__())
+            spec = importlib.util.spec_from_loader(loader.name, loader)
+            locals()[obj] = importlib.util.module_from_spec(spec)  # type: ignore[arg-type]
+            loader.exec_module(locals()[obj])
+            if obj.startswith("Check"):
+                check_objects["classes"].append(locals()[obj])
+            elif obj.startswith("check_"):
+                check_objects["functions"].append(locals()[obj])
+
+    logging.debug(
+        f"Loaded {len(check_objects['classes'])} `Check*` classes and {len(check_objects['functions'])} `check)*` functions."
+    )
+    return check_objects
 
 
 def load_config_from_yaml(config_file: Path) -> Mapping[str, Any]:

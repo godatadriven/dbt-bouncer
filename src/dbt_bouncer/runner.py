@@ -3,7 +3,6 @@
 # TODO Remove after this program no longer support Python 3.8.*
 from __future__ import annotations
 
-import importlib
 import json
 import logging
 import operator
@@ -63,13 +62,8 @@ def runner(
         RuntimeError: If more than one "iterate_over" argument is found.
 
     """
-    check_funcs = [
-        x for x in get_check_objects() if x.split(".")[-1].startswith("check_")
-    ]
-    for i in check_funcs:
-        locals()[i.split(".")[-1]] = getattr(
-            importlib.import_module(".".join(i.split(".")[:-1])), i.split(".")[-1]
-        )
+    for i in get_check_objects()["functions"]:
+        locals()[i.__name__] = getattr(i, i.__name__)
 
     parsed_data = {
         "catalog_nodes": catalog_nodes,

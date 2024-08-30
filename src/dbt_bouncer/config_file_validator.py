@@ -8,19 +8,24 @@ from typing_extensions import Annotated
 
 from dbt_bouncer.utils import get_check_objects, load_config_from_yaml
 
-check_classes: List[str] = [
-    x for x in get_check_objects() if x.split(".")[-1].startswith("Check")
+check_classes: List[Dict[str, Union[Any, str]]] = [
+    {"class": getattr(x, x.__name__), "source_file": x.__file__}
+    for x in get_check_objects()["classes"]
 ]
 
 # Catalog checks
-catalog_check_classes = [x for x in check_classes if x.split(".")[-3] == "catalog"]
+catalog_check_classes = [
+    x["class"] for x in check_classes if x["source_file"].split("/")[-2] == "catalog"
+]
 CatalogCheckConfigs = Annotated[  # type: ignore[valid-type]
     Union[tuple(catalog_check_classes)],
     Field(discriminator="name"),
 ]
 
 # Manifest checks
-manifest_check_classes = [x for x in check_classes if x.split(".")[-3] == "manifest"]
+manifest_check_classes = [
+    x["class"] for x in check_classes if x["source_file"].split("/")[-2] == "manifest"
+]
 ManifestCheckConfigs = Annotated[  # type: ignore[valid-type]
     Union[tuple(manifest_check_classes)],
     Field(discriminator="name"),
@@ -28,7 +33,9 @@ ManifestCheckConfigs = Annotated[  # type: ignore[valid-type]
 
 # Run result checks
 run_results_check_classes = [
-    x for x in check_classes if x.split(".")[-3] == "run_results"
+    x["class"]
+    for x in check_classes
+    if x["source_file"].split("/")[-2] == "run_results"
 ]
 RunResultsCheckConfigs = Annotated[  # type: ignore[valid-type]
     Union[tuple(run_results_check_classes)],

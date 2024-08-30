@@ -11,11 +11,12 @@ from unittest.mock import MagicMock
 
 from click.globals import push_context
 
-from dbt_bouncer.checks.manifest.check_models import CheckModelDescriptionPopulated
 from dbt_bouncer.config_file_validator import DbtBouncerConf
 from dbt_bouncer.logger import configure_console_logging
 from dbt_bouncer.parsers import DbtBouncerModel
 from dbt_bouncer.runner import runner
+
+DbtBouncerConf.model_rebuild()
 
 
 def test_runner_coverage(caplog, tmp_path):
@@ -27,14 +28,12 @@ def test_runner_coverage(caplog, tmp_path):
         bouncer_config=DbtBouncerConf(
             **{
                 "manifest_checks": [
-                    CheckModelDescriptionPopulated(
-                        **{
-                            "exclude": None,
-                            "include": None,
-                            "index": 0,
-                            "name": "check_model_description_populated",
-                        },
-                    ),
+                    {
+                        "exclude": None,
+                        "include": None,
+                        "index": 0,
+                        "name": "check_model_description_populated",
+                    },
                 ]
             }
         ),
@@ -122,14 +121,12 @@ def test_runner_failure():
         bouncer_config=DbtBouncerConf(
             **{
                 "manifest_checks": [
-                    CheckModelDescriptionPopulated(
-                        **{
-                            "exclude": None,
-                            "include": None,
-                            "index": 0,
-                            "name": "check_model_description_populated",
-                        },
-                    ),
+                    {
+                        "exclude": None,
+                        "include": None,
+                        "index": 0,
+                        "name": "check_model_description_populated",
+                    },
                 ]
             }
         ),
@@ -206,18 +203,17 @@ def test_runner_success():
     ctx = MagicMock(obj={"verbosity": 3})
     push_context(ctx)
 
+    DbtBouncerConf.model_rebuild()
     results = runner(
         bouncer_config=DbtBouncerConf(
             **{
                 "manifest_checks": [
-                    CheckModelDescriptionPopulated(
-                        **{
-                            "exclude": None,
-                            "include": None,
-                            "index": 0,
-                            "name": "check_model_description_populated",
-                        },
-                    ),
+                    {
+                        "exclude": None,
+                        "include": None,
+                        "index": 0,
+                        "name": "check_model_description_populated",
+                    },
                 ]
             }
         ),
