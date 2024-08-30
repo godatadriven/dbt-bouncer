@@ -14,7 +14,11 @@ from typing import TYPE_CHECKING, Any, List, Union
 from progress.bar import Bar
 from tabulate import tabulate
 
-from dbt_bouncer.utils import create_github_comment_file, resource_in_path
+from dbt_bouncer.utils import (
+    create_github_comment_file,
+    get_check_objects,
+    resource_in_path,
+)
 
 if TYPE_CHECKING:
     from dbt_artifacts_parser.parsers.manifest.manifest_v12 import (
@@ -59,17 +63,13 @@ def runner(
         RuntimeError: If more than one "iterate_over" argument is found.
 
     """
-    # Dynamically import all Check classes
-    check_files = [
-        f for f in (Path(__file__).parent / "checks").glob("*/*.py") if f.is_file()
+    check_funcs = [
+        x for x in get_check_objects() if x.split(".")[-1].startswith("check_")
     ]
-    for check_file in check_files:
-        imported_check_file = importlib.import_module(
-            ".".join([x.replace(".py", "") for x in check_file.parts[-4:]]),
+    for i in check_funcs:
+        locals()[i.split(".")[-1]] = getattr(
+            importlib.import_module(".".join(i.split(".")[:-1])), i.split(".")[-1]
         )
-        for obj in dir(imported_check_file):
-            if callable(getattr(imported_check_file, obj)) and obj.startswith("check_"):
-                locals()[obj] = getattr(imported_check_file, obj)
 
     parsed_data = {
         "catalog_nodes": catalog_nodes,

@@ -1,44 +1,24 @@
-import importlib
 import logging
-from pathlib import Path
 from typing import Any, Dict, List, Literal, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field
-from pydantic._internal._model_construction import ModelMetaclass
 from typing_extensions import Annotated
 
-# Dynamically import all Check classes
-check_files = [
-    f for f in (Path(__file__).parent / "checks").glob("*/*.py") if f.is_file()
-]
-for check_file in check_files:
-    imported_check_file = importlib.import_module(
-        ".".join([x.replace(".py", "") for x in check_file.parts[-4:]]),
-    )
-    for obj in dir(imported_check_file):
-        if isinstance(getattr(imported_check_file, obj), ModelMetaclass):
-            locals()[obj] = getattr(imported_check_file, obj)
+from dbt_bouncer.utils import get_check_objects
 
-# Dynamically assemble all Check* classes
-check_classes = [
-    x
-    for x in globals()
-    if x.startswith("Check") and isinstance(globals()[x], ModelMetaclass)
+check_classes: List[str] = [
+    x for x in get_check_objects() if x.split(".")[-1].startswith("Check")
 ]
 
 # Catalog checks
-catalog_check_classes = [
-    x for x in check_classes if globals()[x].__module__.split(".")[-2] == "catalog"
-]
+catalog_check_classes = [x for x in check_classes if x.split(".")[-3] == "catalog"]
 CatalogCheckConfigs = Annotated[  # type: ignore[valid-type]
     Union[tuple(catalog_check_classes)],
     Field(discriminator="name"),
 ]
 
 # Manifest checks
-manifest_check_classes = [
-    x for x in check_classes if globals()[x].__module__.split(".")[-2] == "manifest"
-]
+manifest_check_classes = [x for x in check_classes if x.split(".")[-3] == "manifest"]
 ManifestCheckConfigs = Annotated[  # type: ignore[valid-type]
     Union[tuple(manifest_check_classes)],
     Field(discriminator="name"),
@@ -46,7 +26,7 @@ ManifestCheckConfigs = Annotated[  # type: ignore[valid-type]
 
 # Run result checks
 run_results_check_classes = [
-    x for x in check_classes if globals()[x].__module__.split(".")[-2] == "run_results"
+    x for x in check_classes if x.split(".")[-3] == "run_results"
 ]
 RunResultsCheckConfigs = Annotated[  # type: ignore[valid-type]
     Union[tuple(run_results_check_classes)],
@@ -102,4 +82,5 @@ def validate_conf(config_file_contents: Dict[str, Any]) -> DbtBouncerConf:
     """
     logging.info("Validating conf...")
 
+    DbtBouncerConf.model_rebuild()
     return DbtBouncerConf(**config_file_contents)

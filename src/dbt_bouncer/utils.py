@@ -1,8 +1,13 @@
-"""RE-usable functions for dbt-bouncer."""
+"""Re-usable functions for dbt-bouncer."""
 
+# TODO Remove after this program no longer support Python 3.8.*
+from __future__ import annotations
+
+import importlib
 import logging
 import os
 import re
+from functools import lru_cache
 from pathlib import Path
 from typing import Any, List, Mapping
 
@@ -133,6 +138,29 @@ def get_config_file_path(
             )
 
     return pyproject_toml_dir / "pyproject.toml"
+
+
+@lru_cache
+def get_check_objects() -> set[str]:
+    """Get list of Check* classes and check_* functions.
+
+    Returns:
+        set[str]: Set of all Check classes
+
+    """
+    check_objects = []
+    check_files = [
+        f for f in (Path(__file__).parent / "checks").glob("*/*.py") if f.is_file()
+    ]
+    for check_file in check_files:
+        check_qual_name = ".".join(
+            [x.replace(".py", "") for x in check_file.parts[-4:]]
+        )
+        imported_check_file = importlib.import_module(check_qual_name)
+        for obj in dir(imported_check_file):
+            check_objects.append(f"{check_qual_name}.{obj}")
+
+    return set(check_objects)
 
 
 def load_config_file_contents(config_file_path: Path) -> Mapping[str, Any]:
