@@ -163,5 +163,10 @@ def validate_conf(config_file_contents: Dict[str, Any]) -> DbtBouncerConf:
     """
     logging.info("Validating conf...")
 
+    # Rebuild the model to ensure all fields are present
+    import dbt_bouncer.checks  # noqa: F401
+    from dbt_bouncer.checks.common import NestedDict  # noqa: F401
+
     DbtBouncerConf.model_rebuild()
+
     return DbtBouncerConf(**config_file_contents)
