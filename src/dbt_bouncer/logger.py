@@ -1,25 +1,33 @@
 import logging
 import os
-from typing import ClassVar
 
 
 class CustomFormatter(logging.Formatter):
     """Base class for custom logger."""
 
-    grey = "\x1b[38;20m"
-    yellow = "\x1b[33;20m"
-    red = "\x1b[31;20m"
-    bold_red = "\x1b[31;1m"
-    reset = "\x1b[0m"
-    log_format: str = "%(asctime)s - %(levelname)s: %(message)s"
+    def __init__(self, logging_level):
+        """Initialise a custom logger."""
+        self.logging_level = logging_level
 
-    FORMATS: ClassVar = {
-        logging.DEBUG: grey + log_format + reset,
-        logging.INFO: grey + log_format + reset,
-        logging.WARNING: yellow + log_format + reset,
-        logging.ERROR: red + log_format + reset,
-        logging.CRITICAL: bold_red + log_format + reset,
-    }
+        grey = "\x1b[38;20m"
+        yellow = "\x1b[33;20m"
+        red = "\x1b[31;20m"
+        bold_red = "\x1b[31;1m"
+        reset = "\x1b[0m"
+
+        log_format = (
+            "%(asctime)s - %(levelname)s: %(message)s"
+            if logging_level == logging.DEBUG
+            else "%(message)s"
+        )
+
+        self.FORMATS = {
+            logging.DEBUG: grey + log_format + reset,
+            logging.INFO: grey + log_format + reset,
+            logging.WARNING: yellow + log_format + reset,
+            logging.ERROR: red + log_format + reset,
+            logging.CRITICAL: bold_red + log_format + reset,
+        }
 
     def format(self, record: logging.LogRecord) -> str:
         """Set the format of a log record.
@@ -47,5 +55,5 @@ def configure_console_logging(verbosity: int):
 
     console_handler = logging.StreamHandler()
     console_handler.setLevel(loglevel)
-    console_handler.setFormatter(CustomFormatter())
+    console_handler.setFormatter(CustomFormatter(logging_level=loglevel))
     logger.addHandler(console_handler)
