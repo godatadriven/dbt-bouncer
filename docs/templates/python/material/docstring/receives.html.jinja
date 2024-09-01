@@ -1,0 +1,31 @@
+{% import "language.html" as lang with context %}
+
+<p><strong>Receives at execution time:</strong></p>
+<table>
+  <thead>
+    <tr>
+      {% if name_column %}<th>{{ lang.t("Name") }}</th>{% endif %}
+      <th>{{ lang.t("Type") }}</th>
+      <th>{{ lang.t("Description") }}</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for receives in section.value %}
+      <tr>
+        {% if name_column %}<td>{% if receives.name %}<code>{{ receives.name }}</code>{% endif %}</td>{% endif %}
+        <td>
+          {% if receives.annotation %}
+            {% with expression = receives.annotation %}
+              <code>{% include "expression.html" with context %}</code>
+            {% endwith %}
+          {% endif %}
+        </td>
+        <td>
+          <div class="doc-md-description">
+            {{ receives.description|convert_markdown(heading_level, html_id) }}
+          </div>
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>

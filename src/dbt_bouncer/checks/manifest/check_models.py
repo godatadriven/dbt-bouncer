@@ -456,58 +456,61 @@ class CheckModelHasUniqueTest(BaseCheck):
             "unique",
         ],
     )
+    model: "DbtBouncerModel" = Field(default=None)
     name: Literal["check_model_has_unique_test"]
+    tests: List["DbtBouncerTest"] = Field(default=None)
 
 
-def check_model_has_unique_test(
-    model: "DbtBouncerModel",
-    tests: "DbtBouncerTest",
-    accepted_uniqueness_tests: List[str] = (
-        [  # noqa: B006
-            "expect_compound_columns_to_be_unique",
-            "dbt_utils.unique_combination_of_columns",
-            "unique",
-        ]
-    ),
-    **kwargs,
-) -> None:
-    """Models must have a test for uniqueness of a column.
+    def execute(
+        # model: "DbtBouncerModel",
+        # tests: "DbtBouncerTest",
+        # accepted_uniqueness_tests: List[str] = (
+        #     [  # noqa: B006
+        #         "expect_compound_columns_to_be_unique",
+        #         "dbt_utils.unique_combination_of_columns",
+        #         "unique",
+        #     ]
+        # ),
+        # **kwargs,
+        self
+    ) -> None:
+        """Models must have a test for uniqueness of a column.
 
-    Parameters:
-        accepted_uniqueness_tests (Optional[List[str]]): List of tests that are accepted as uniqueness tests.
-        model (DbtBouncerModel): The DbtBouncerModel object to check.
-        tests (List[DbtBouncerTest]): List of DbtBouncerTest objects parsed from `manifest.json`.
+        Parameters:
+            accepted_uniqueness_tests (Optional[List[str]]): List of tests that are accepted as uniqueness tests.
+            model (DbtBouncerModel): The DbtBouncerModel object to check.
+            tests (List[DbtBouncerTest]): List of DbtBouncerTest objects parsed from `manifest.json`.
 
-    Other Parameters:
-        exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
-        include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
-        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
+        Other Parameters:
+            exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
+            include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+            severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
-    Example(s):
-        ```yaml
-        manifest_checks:
-          - name: check_model_has_unique_test
-            include: ^models/marts
-        ```
-        ```yaml
-        manifest_checks:
-          # Example of allowing a custom uniqueness test
-          - name: check_model_has_unique_test
-            accepted_uniqueness_tests:
-                - expect_compound_columns_to_be_unique
-                - my_custom_uniqueness_test
-                - unique
-        ```
+        Example(s):
+            ```yaml
+            manifest_checks:
+            - name: check_model_has_unique_test
+                include: ^models/marts
+            ```
+            ```yaml
+            manifest_checks:
+            # Example of allowing a custom uniqueness test
+            - name: check_model_has_unique_test
+                accepted_uniqueness_tests:
+                    - expect_compound_columns_to_be_unique
+                    - my_custom_uniqueness_test
+                    - unique
+            ```
 
-    """
-    num_unique_tests = sum(
-        test.attached_node == model.unique_id
-        and test.test_metadata.name in accepted_uniqueness_tests
-        for test in tests
-    )
-    assert (
-        num_unique_tests >= 1
-    ), f"`{model.name}` does not have a test for uniqueness of a column."
+        """
+        num_unique_tests = sum(
+            test.attached_node == self.model.unique_id
+            and test.test_metadata.name in self.accepted_uniqueness_tests
+            for test in self.tests
+        )
+        assert (
+            num_unique_tests >= 1
+        ), f"`{self.model.name}` does not have a test for uniqueness of a column."
 
 
 class CheckModelHasUnitTests(BaseCheck):

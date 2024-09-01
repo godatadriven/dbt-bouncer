@@ -62,13 +62,14 @@ plugins:
             - src/dbt_bouncer/checks
           options:
             docstring_style: google
-            filters: ["check_"]
+            # filters: ["check_"]
+            filters: ["Check"]
             group_by_category: true
             heading_level: 1
             inherited_members: true
             members_order: source
             show_bases: false
-            show_docstring_classes: false
+            show_docstring_classes: true
             show_docstring_raises: false
             show_if_no_docstring: true
             show_root_toc_entry: false

@@ -18,6 +18,8 @@ class DbtBouncerConf(BaseModel):
         {"class": getattr(x, x.__name__), "source_file": x.__file__}
         for x in get_check_objects()["classes"]
     ]
+    
+    # logging.warning(f"{check_classes=}")
 
     # Catalog checks
     catalog_check_classes: ClassVar = [
@@ -25,6 +27,10 @@ class DbtBouncerConf(BaseModel):
         for x in check_classes
         if x["source_file"].split("/")[-2] == "catalog"
     ]
+    
+    # logging.warning(f"{catalog_check_classes=}")
+    
+    
     CatalogCheckConfigs: ClassVar = Annotated[
         Union[tuple(catalog_check_classes)],
         Field(discriminator="name"),
@@ -47,6 +53,11 @@ class DbtBouncerConf(BaseModel):
         for x in check_classes
         if x["source_file"].split("/")[-2] == "run_results"
     ]
+    
+    
+    # logging.warning(f"{run_results_check_classes=}")
+    
+    
     RunResultsCheckConfigs: ClassVar = Annotated[
         Union[tuple(run_results_check_classes)],
         Field(discriminator="name"),
@@ -58,6 +69,10 @@ class DbtBouncerConf(BaseModel):
             Field(discriminator="name"),
         ]
     ] = Field(default=[])
+    
+    # logging.warning(f"{catalog_checks=}")
+    
+    
     manifest_checks: List[
         Annotated[
             ManifestCheckConfigs,
@@ -70,6 +85,9 @@ class DbtBouncerConf(BaseModel):
             Field(discriminator="name"),
         ]
     ] = Field(default=[])
+    
+    
+    # logging.warning(f"{run_results_checks=}")
 
     dbt_artifacts_dir: Optional[str] = Field(default="./target")
     exclude: Optional[str] = Field(
@@ -175,10 +193,13 @@ def validate_conf(config_file_contents: Dict[str, Any]) -> "DbtBouncerConf":
     logging.info("Validating conf...")
 
     # Rebuild the model to ensure all fields are present
-    from dbt_bouncer.parsers import DbtBouncerRunResult
+    from dbt_bouncer.parsers import DbtBouncerRunResult, DbtBouncerTest, DbtBouncerModel
     import dbt_bouncer.checks  # noqa: F401
     from dbt_bouncer.checks.common import NestedDict  # noqa: F401
 
     DbtBouncerConf.model_rebuild()
+    
+    
+    # logging.warning(f"{config_file_contents=}")
 
     return DbtBouncerConf(**config_file_contents)
