@@ -3,7 +3,7 @@ dbt_artifacts_dir: dbt_project/target # [Optional] Directory where the dbt artif
 # # include: ^models/marts # Optional, here for demonstration purposes only
 # # severity: warn # Optional, useful when applying `dbt-bouncer` to an existing dbt project.
 
-# catalog_checks:
+catalog_checks:
 #   - name: check_column_description_populated
 #     include: ^models/marts
 #   - name: check_column_name_complies_to_column_type
@@ -31,8 +31,8 @@ dbt_artifacts_dir: dbt_project/target # [Optional] Directory where the dbt artif
 #   - name: check_columns_are_all_documented
 #     include: ^models/marts
 #   - name: check_columns_are_documented_in_public_models
-#   - name: check_source_columns_are_all_documented
-#     exclude: ^models/staging/crm # Not a good idea, here for demonstration purposes only
+  - name: check_source_columns_are_all_documented
+    exclude: ^models/staging/crm # Not a good idea, here for demonstration purposes only
 
 manifest_checks:
   # Exposures
