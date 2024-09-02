@@ -62,7 +62,7 @@ class CheckColumnNameCompliesToColumnType(BaseCheck):
     """Columns with specified data types must comply to the specified regexp naming pattern.
 
     Parameters:
-        column_name_pattern: (str): Regex pattern to match the model name.
+        column_name_pattern (str): Regex pattern to match the model name.
         types (List[str]): List of data types to check.
 
     Receives:

@@ -38,7 +38,7 @@ class CheckRunResultsMaxGigabytesBilled(BaseCheck):
         ```yaml
         run_results_checks:
             - name: check_run_results_max_gigabytes_billed
-              max_gigabytes_billed: 100
+            max_gigabytes_billed: 100
         ```
 
     """

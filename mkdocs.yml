@@ -62,7 +62,6 @@ plugins:
             - src/dbt_bouncer/checks
           options:
             docstring_style: google
-            # filters: ["check_"]
             filters: ["Check"]
             group_by_category: true
             heading_level: 1

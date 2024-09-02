@@ -4,7 +4,7 @@
 <table>
   <thead>
     <tr>
-      {% if name_column %}<th>{{ lang.t("Name") }}</th>{% endif %}
+      <th>{{ lang.t("Name") }}</th>
       <th>{{ lang.t("Type") }}</th>
       <th>{{ lang.t("Description") }}</th>
     </tr>
@@ -12,7 +12,7 @@
   <tbody>
     {% for receives in section.value %}
       <tr>
-        {% if name_column %}<td>{% if receives.name %}<code>{{ receives.name }}</code>{% endif %}</td>{% endif %}
+        <td>{% if receives.name %}<code>{{ receives.name }}</code>{% endif %}
         <td>
           {% if receives.annotation %}
             {% with expression = receives.annotation %}
