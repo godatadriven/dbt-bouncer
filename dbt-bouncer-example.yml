@@ -54,14 +54,14 @@ manifest_checks:
   - name: check_lineage_source_cannot_be_used
     include: ^models/intermediate|^models/marts
 
-#   # Macros
-#   - name: check_macro_arguments_description_populated
-#   - name: check_macro_code_does_not_contain_regexp_pattern
-#     regexp_pattern: .*[i][f][n][u][l][l].*
-#   - name: check_macro_description_populated
-#   - name: check_macro_max_number_of_lines
-#   - name: check_macro_name_matches_file_name
-#   - name: check_macro_property_file_location
+  # Macros
+  - name: check_macro_arguments_description_populated
+  - name: check_macro_code_does_not_contain_regexp_pattern
+    regexp_pattern: .*[i][f][n][u][l][l].*
+  - name: check_macro_description_populated
+  - name: check_macro_max_number_of_lines
+  - name: check_macro_name_matches_file_name
+  - name: check_macro_property_file_location
 
 #   # Metadata
 #   - name: check_project_name

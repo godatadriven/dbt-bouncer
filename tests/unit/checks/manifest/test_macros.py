@@ -8,13 +8,20 @@ with warnings.catch_warnings():
     from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Macros
 
 from dbt_bouncer.checks.manifest.check_macros import (
-    check_macro_arguments_description_populated,
-    check_macro_code_does_not_contain_regexp_pattern,
-    check_macro_description_populated,
-    check_macro_max_number_of_lines,
-    check_macro_name_matches_file_name,
-    check_macro_property_file_location,
+    CheckMacroArgumentsDescriptionPopulated,
+    CheckMacroCodeDoesNotContainRegexpPattern,
+    CheckMacroDescriptionPopulated,
+    CheckMacroMaxNumberOfLines,
+    CheckMacroNameMatchesFileName,
+    CheckMacroPropertyFileLocation,
 )
+
+CheckMacroArgumentsDescriptionPopulated.model_rebuild()
+CheckMacroCodeDoesNotContainRegexpPattern.model_rebuild()
+CheckMacroDescriptionPopulated.model_rebuild()
+CheckMacroMaxNumberOfLines.model_rebuild()
+CheckMacroNameMatchesFileName.model_rebuild()
+CheckMacroPropertyFileLocation.model_rebuild()
 
 
 @pytest.mark.parametrize(
@@ -156,9 +163,9 @@ from dbt_bouncer.checks.manifest.check_macros import (
 )
 def test_check_macro_arguments_description_populated(macro, expectation):
     with expectation:
-        check_macro_arguments_description_populated(
-            macro=macro,
-        )
+        CheckMacroArgumentsDescriptionPopulated(
+            macro=macro, name="check_macro_arguments_description_populated"
+        ).execute()
 
 
 @pytest.mark.parametrize(
@@ -222,10 +229,11 @@ def test_check_macro_code_does_not_contain_regexp_pattern(
     expectation,
 ):
     with expectation:
-        check_macro_code_does_not_contain_regexp_pattern(
+        CheckMacroCodeDoesNotContainRegexpPattern(
             macro=macro,
+            name="check_macro_code_does_not_contain_regexp_pattern",
             regexp_pattern=regexp_pattern,
-        )
+        ).execute()
 
 
 @pytest.mark.parametrize(
@@ -296,9 +304,10 @@ def test_check_macro_code_does_not_contain_regexp_pattern(
 )
 def test_check_macro_description_populated(macro, expectation):
     with expectation:
-        check_macro_description_populated(
+        CheckMacroDescriptionPopulated(
             macro=macro,
-        )
+            name="check_macro_description_populated",
+        ).execute()
 
 
 @pytest.mark.parametrize(
@@ -338,10 +347,11 @@ def test_check_macro_description_populated(macro, expectation):
 )
 def test_check_macro_max_number_of_lines(max_number_of_lines, macro, expectation):
     with expectation:
-        check_macro_max_number_of_lines(
+        CheckMacroMaxNumberOfLines(
             max_number_of_lines=max_number_of_lines,
             macro=macro,
-        )
+            name="check_macro_max_number_of_lines",
+        ).execute()
 
 
 @pytest.mark.parametrize(
@@ -407,9 +417,10 @@ def test_check_macro_max_number_of_lines(max_number_of_lines, macro, expectation
 )
 def test_check_macro_name_matches_file_name(macro, expectation):
     with expectation:
-        check_macro_name_matches_file_name(
+        CheckMacroNameMatchesFileName(
             macro=macro,
-        )
+            name="check_macro_name_matches_file_name",
+        ).execute()
 
 
 @pytest.mark.parametrize(
@@ -509,6 +520,7 @@ def test_check_macro_name_matches_file_name(macro, expectation):
 )
 def test_check_macro_property_file_location(macro, expectation):
     with expectation:
-        check_macro_property_file_location(
+        CheckMacroPropertyFileLocation(
             macro=macro,
-        )
+            name="check_macro_property_file_location",
+        ).execute()
