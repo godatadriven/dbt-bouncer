@@ -69,7 +69,14 @@ jobs:
             - name: Run `dbt-bouncer`
               run: python ./dbt-bouncer.pex --config-file dbt-bouncer-example.yml
 
+    pypi-pause:
+        runs-on: ubuntu-latest
+        steps:
+            # PyPi appears to be "slow" to register new packages, adding manual delay to account for this
+            - run: sleep 90
+
     pypi-tests:
+        needs: [pypi-pause]
         runs-on: ubuntu-latest
         strategy:
             fail-fast: false
@@ -81,9 +88,6 @@ jobs:
                     - '3.11'
                     - '3.12'
         steps:
-            # PyPi appears to be "slow" to register new packages, adding manual delay to account for this
-            - run: sleep 60
-
             - name: Checkout
               uses: actions/checkout@v4
 
