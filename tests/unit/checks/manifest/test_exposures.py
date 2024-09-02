@@ -8,9 +8,13 @@ with warnings.catch_warnings():
     from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Exposures, Nodes4
 
 from dbt_bouncer.checks.manifest.check_exposures import (
-    check_exposure_based_on_non_public_models,
-    check_exposure_based_on_view,
+    CheckExposureOnNonPublicModels,
+    CheckExposureOnView,
 )
+from dbt_bouncer.parsers import DbtBouncerModel, DbtBouncerModelBase  # noqa: F401
+
+CheckExposureOnNonPublicModels.model_rebuild()
+CheckExposureOnView.model_rebuild()
 
 
 @pytest.mark.parametrize(
@@ -118,10 +122,11 @@ from dbt_bouncer.checks.manifest.check_exposures import (
 )
 def test_check_exposure_based_on_non_public_models(exposure, models, expectation):
     with expectation:
-        check_exposure_based_on_non_public_models(
+        CheckExposureOnNonPublicModels(
             exposure=exposure,
             models=models,
-        )
+            name="check_exposure_based_on_non_public_models",
+        ).execute()
 
 
 @pytest.mark.parametrize(
@@ -322,8 +327,9 @@ def test_check_exposure_based_on_view(
     expectation,
 ):
     with expectation:
-        check_exposure_based_on_view(
+        CheckExposureOnView(
             exposure=exposure,
             materializations_to_include=materializations_to_include,
             models=models,
-        )
+            name="check_exposure_based_on_view",
+        ).execute()

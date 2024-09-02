@@ -35,9 +35,9 @@ dbt_artifacts_dir: dbt_project/target # [Optional] Directory where the dbt artif
 #     exclude: ^models/staging/crm # Not a good idea, here for demonstration purposes only
 
 manifest_checks:
-#   # Exposures
-#   - name: check_exposure_based_on_non_public_models
-#   - name: check_exposure_based_on_view
+  # Exposures
+  - name: check_exposure_based_on_non_public_models
+  - name: check_exposure_based_on_view
 
 #   # Lineage
 #   - name: check_lineage_permitted_upstream_models

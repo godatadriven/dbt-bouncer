@@ -81,10 +81,13 @@ class DbtBouncerManifest(BaseModel):
     manifest: Union[ManifestV10, ManifestV11, ManifestV12]
 
 
+DbtBouncerModelBase = Union[ModelNode_v10, ModelNode_v11, Nodes4]
+
+
 class DbtBouncerModel(BaseModel):
     """Model for all model nodes in `manifest.json`."""
 
-    model: Union[ModelNode_v10, ModelNode_v11, Nodes4]
+    model: DbtBouncerModelBase
     original_file_path: str
     unique_id: str
 

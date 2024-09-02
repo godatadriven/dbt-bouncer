@@ -37,6 +37,7 @@ class DbtBouncerConf(BaseModel):
         for x in check_classes
         if x["source_file"].split("/")[-2] == "manifest"
     ]
+
     ManifestCheckConfigs: ClassVar = Annotated[
         Union[tuple(manifest_check_classes)],
         Field(discriminator="name"),
@@ -178,10 +179,15 @@ def validate_conf(config_file_contents: Dict[str, Any]) -> "DbtBouncerConf":
     logging.info("Validating conf...")
 
     # Rebuild the model to ensure all fields are present
+    from dbt_artifacts_parser.parsers.manifest.manifest_v12 import (
+        Exposures,  # noqa: F401
+    )
+
     import dbt_bouncer.checks  # noqa: F401
     from dbt_bouncer.checks.common import NestedDict  # noqa: F401
     from dbt_bouncer.parsers import (  # noqa: F401
         DbtBouncerModel,
+        DbtBouncerModelBase,
         DbtBouncerRunResult,
         DbtBouncerRunResultBase,
         DbtBouncerTest,
