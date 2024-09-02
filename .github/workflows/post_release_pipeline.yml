@@ -1,0 +1,106 @@
+---
+name: Post release pipeline
+
+on:
+    release:
+        types: [published]
+
+env:
+    POETRY_VERSION: "1.8.3"
+    POETRY_VIRTUALENVS_IN_PROJECT: true
+
+jobs:
+    docker-tests:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Run Docker test
+              run: |
+                docker run --rm \
+                  --volume "$PWD":/app \
+                  ghcr.io/godatadriven/dbt-bouncer:${{ github.ref }} \
+                  --config-file /app/dbt-bouncer-example.yml
+
+    github-action-test:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              run: git clone https://github.com/godatadriven/dbt-bouncer.git --branch ${{ github.ref }} --depth 1
+
+            - run: cd dbt-bouncer
+
+            - name: Run `dbt-bouncer`
+              uses: ./
+              with:
+                config-file: ./dbt-bouncer-example.yml
+                send-pr-comment: false
+
+    pex-tests:
+        runs-on: ubuntu-latest
+        strategy:
+            fail-fast: false
+            matrix:
+                python-version:
+                    - '3.8'
+                    - '3.9'
+                    - '3.10'
+                    - '3.11'
+                    - '3.12'
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Determine python version
+              id: python-version
+              run: |
+                    export PYTHON_VERSION=$(cat .python-version)
+                    echo "PYTHON_VERSION: $PYTHON_VERSION"
+                    echo "PYTHON_VERSION=$PYTHON_VERSION" >> $GITHUB_OUTPUT
+
+            - name: Setup Python
+              uses: ./.github/actions/setup_python_env
+              with:
+                poetry-version: ${{ env.POETRY_VERSION }}
+                python-version: ${{ matrix.python-version }}
+
+            - name: Download `pex` artifact
+              run: wget https://github.com/godatadriven/dbt-bouncer/releases/download/${{ github.ref }}/dbt-bouncer.pex -O ./dbt-bouncer.pex
+
+            - name: Run `dbt-bouncer`
+              run: python ./dbt-bouncer.pex --config-file dbt-bouncer-example.yml
+
+    pip-tests:
+        runs-on: ubuntu-latest
+        strategy:
+            fail-fast: false
+            matrix:
+                python-version:
+                    - '3.8'
+                    - '3.9'
+                    - '3.10'
+                    - '3.11'
+                    - '3.12'
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Determine python version
+              id: python-version
+              run: |
+                    export PYTHON_VERSION=$(cat .python-version)
+                    echo "PYTHON_VERSION: $PYTHON_VERSION"
+                    echo "PYTHON_VERSION=$PYTHON_VERSION" >> $GITHUB_OUTPUT
+
+            - name: Setup Python
+              uses: ./.github/actions/setup_python_env
+              with:
+                poetry-version: ${{ env.POETRY_VERSION }}
+                python-version: ${{ matrix.python-version }}
+
+            - name: Install `dbt-bouncer`
+              run: pip install dbt-bouncer==${{ github.ref }}
+
+            - name: Run `dbt-bouncer`
+              run: dbt-bouncer --config-file dbt-bouncer-example.yml
