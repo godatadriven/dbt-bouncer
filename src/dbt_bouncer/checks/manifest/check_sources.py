@@ -61,13 +61,17 @@ def check_source_freshness_populated(source: "DbtBouncerSource", **kwargs) -> No
         ```
 
     """
+    error_msg = (
+        f"`{source.source_name}.{source.name}` does not have a populated freshness."
+    )
+    assert source.freshness is not None, error_msg
     assert (
         source.freshness.error_after.count is not None
         and source.freshness.error_after.period is not None
     ) or (
         source.freshness.warn_after.count is not None
         and source.freshness.warn_after.period is not None
-    ), f"`{source.source_name}.{source.name}` does not have a populated freshness."
+    ), error_msg
 
 
 class CheckSourceHasMetaKeys(BaseCheck):
