@@ -1,23 +1,21 @@
 # mypy: disable-error-code="union-attr"
 
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Literal, Optional
+
+from pydantic import Field
 
 from dbt_bouncer.check_base import BaseCheck
 
 if TYPE_CHECKING:
-    from dbt_bouncer.parsers import DbtBouncerRunResult
+    from dbt_bouncer.parsers import DbtBouncerRunResultBase
+
+import warnings
+
+with warnings.catch_warnings():
+    warnings.filterwarnings("ignore", category=UserWarning)
 
 
 class CheckRunResultsMaxGigabytesBilled(BaseCheck):
-    max_gigabytes_billed: float
-    name: Literal["check_run_results_max_gigabytes_billed"]
-
-
-def check_run_results_max_gigabytes_billed(
-    max_gigabytes_billed: float,
-    run_result: "DbtBouncerRunResult",
-    **kwargs,
-) -> None:
     """Each result can have a maximum number of gigabytes billed.
 
     !!! note
@@ -40,36 +38,38 @@ def check_run_results_max_gigabytes_billed(
         ```yaml
         run_results_checks:
             - name: check_run_results_max_gigabytes_billed
-              max_gigabytes_billed: 100
+            max_gigabytes_billed: 100
         ```
 
     """
-    try:
-        gigabytes_billed = run_result.adapter_response["bytes_billed"] / (1000**3)
-    except KeyError as e:
-        raise RuntimeError(  # noqa: DOC501
-            "`bytes_billed` not found in adapter response. Are you using the `dbt-bigquery` adapter?",
-        ) from e
 
-    assert (
-        gigabytes_billed < max_gigabytes_billed
-    ), f"`{run_result.unique_id.split('.')[-2]}` results in ({gigabytes_billed} billed bytes, this is greater than permitted ({max_gigabytes_billed})."
+    max_gigabytes_billed: float
+    name: Literal["check_run_results_max_gigabytes_billed"]
+    run_result: Optional["DbtBouncerRunResultBase"] = Field(default=None)
+
+    def execute(self) -> None:
+        """Execute the check."""
+        try:
+            gigabytes_billed = self.run_result.adapter_response["bytes_billed"] / (
+                1000**3
+            )
+        except KeyError as e:
+            raise RuntimeError(  # noqa: DOC501
+                "`bytes_billed` not found in adapter response. Are you using the `dbt-bigquery` adapter?",
+            ) from e
+
+        assert (
+            gigabytes_billed < self.max_gigabytes_billed
+        ), f"`{self.run_result.unique_id.split('.')[-2]}` results in ({gigabytes_billed} billed bytes, this is greater than permitted ({self.max_gigabytes_billed})."
 
 
 class CheckRunResultsMaxExecutionTime(BaseCheck):
-    max_execution_time_seconds: float
-    name: Literal["check_run_results_max_execution_time"]
-
-
-def check_run_results_max_execution_time(
-    max_execution_time_seconds: float,
-    run_result: "DbtBouncerRunResult",
-    **kwargs,
-) -> None:
     """Each result can take a maximum duration (seconds).
 
     Parameters:
         max_execution_time_seconds (float): The maximum execution time (seconds) allowed for a node.
+
+    Receives:
         run_result (DbtBouncerRunResult): The DbtBouncerRunResult object to check.
 
     Other Parameters:
@@ -91,6 +91,13 @@ def check_run_results_max_execution_time(
         ```
 
     """
-    assert (
-        run_result.execution_time <= max_execution_time_seconds
-    ), f"`{run_result.unique_id.split('.')[-1]}` has an execution time ({run_result.execution_time} greater than permitted ({max_execution_time_seconds}s)."
+
+    max_execution_time_seconds: float
+    name: Literal["check_run_results_max_execution_time"]
+    run_result: Optional["DbtBouncerRunResultBase"] = Field(default=None)
+
+    def execute(self) -> None:
+        """Execute the check."""
+        assert (
+            self.run_result.execution_time <= self.max_execution_time_seconds
+        ), f"`{self.run_result.unique_id.split('.')[-1]}` has an execution time ({self.run_result.execution_time} greater than permitted ({self.max_execution_time_seconds}s)."
