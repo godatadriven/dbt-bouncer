@@ -151,9 +151,9 @@ manifest_checks:
 #   - name: check_source_used_by_models_in_same_directory
 #   - name: check_source_used_by_only_one_model
 
-#   # Unit tests
-#   - name: check_unit_test_expect_format
-#   - name: check_unit_test_given_formats
+  # Unit tests
+  - name: check_unit_test_expect_format
+  - name: check_unit_test_given_formats
 
 run_results_checks:
   # Not a good idea, here for demonstration purposes only

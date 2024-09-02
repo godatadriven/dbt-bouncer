@@ -182,6 +182,7 @@ def validate_conf(config_file_contents: Dict[str, Any]) -> "DbtBouncerConf":
     from dbt_artifacts_parser.parsers.manifest.manifest_v12 import (
         Exposures,  # noqa: F401
         Macros,  # noqa: F401
+        UnitTests,  # noqa: F401
     )
 
     import dbt_bouncer.checks  # noqa: F401
