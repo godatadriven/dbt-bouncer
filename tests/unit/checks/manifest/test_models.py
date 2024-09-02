@@ -11,29 +11,59 @@ with warnings.catch_warnings():
         UnitTests,
     )
 
+    from dbt_bouncer.parsers import (  # noqa: F401
+        DbtBouncerManifest,
+        DbtBouncerModel,
+        DbtBouncerModelBase,
+        DbtBouncerTest,
+        DbtBouncerTestBase,
+    )
+
 from dbt_bouncer.checks.manifest.check_models import (
-    check_model_access,
-    check_model_code_does_not_contain_regexp_pattern,
-    check_model_contract_enforced_for_public_model,
-    check_model_depends_on_multiple_sources,
-    check_model_description_populated,
-    check_model_directories,
-    check_model_documentation_coverage,
-    check_model_documented_in_same_directory,
-    check_model_has_contracts_enforced,
-    check_model_has_meta_keys,
-    check_model_has_no_upstream_dependencies,
-    check_model_has_tags,
-    check_model_has_unique_test,
-    check_model_has_unit_tests,
-    check_model_max_chained_views,
-    check_model_max_fanout,
-    check_model_max_number_of_lines,
-    check_model_max_upstream_dependencies,
-    check_model_names,
-    check_model_property_file_location,
-    check_model_test_coverage,
+    CheckModelAccess,
+    CheckModelCodeDoesNotContainRegexpPattern,
+    CheckModelContractsEnforcedForPublicModel,
+    CheckModelDependsOnMultipleSources,
+    CheckModelDescriptionPopulated,
+    CheckModelDirectories,
+    CheckModelDocumentedInSameDirectory,
+    CheckModelHasContractsEnforced,
+    CheckModelHasMetaKeys,
+    CheckModelHasNoUpstreamDependencies,
+    CheckModelHasTags,
+    CheckModelHasUniqueTest,
+    CheckModelHasUnitTests,
+    CheckModelMaxChainedViews,
+    CheckModelMaxFanout,
+    CheckModelMaxNumberOfLines,
+    CheckModelMaxUpstreamDependencies,
+    CheckModelNames,
+    CheckModelPropertyFileLocation,
+    CheckModelsDocumentationCoverage,
+    CheckModelsTestCoverage,
 )
+
+CheckModelAccess.model_rebuild()
+CheckModelCodeDoesNotContainRegexpPattern.model_rebuild()
+CheckModelContractsEnforcedForPublicModel.model_rebuild()
+CheckModelDependsOnMultipleSources.model_rebuild()
+CheckModelDescriptionPopulated.model_rebuild()
+CheckModelDirectories.model_rebuild()
+CheckModelsDocumentationCoverage.model_rebuild()
+CheckModelDocumentedInSameDirectory.model_rebuild()
+CheckModelHasContractsEnforced.model_rebuild()
+CheckModelHasMetaKeys.model_rebuild()
+CheckModelHasNoUpstreamDependencies.model_rebuild()
+CheckModelHasTags.model_rebuild()
+CheckModelHasUniqueTest.model_rebuild()
+CheckModelHasUnitTests.model_rebuild()
+CheckModelMaxChainedViews.model_rebuild()
+CheckModelMaxFanout.model_rebuild()
+CheckModelMaxNumberOfLines.model_rebuild()
+CheckModelMaxUpstreamDependencies.model_rebuild()
+CheckModelNames.model_rebuild()
+CheckModelPropertyFileLocation.model_rebuild()
+CheckModelsTestCoverage.model_rebuild()
 
 
 @pytest.mark.parametrize(
@@ -95,10 +125,9 @@ from dbt_bouncer.checks.manifest.check_models import (
 )
 def test_check_model_access(access, model, expectation):
     with expectation:
-        check_model_access(
-            access=access,
-            model=model,
-        )
+        CheckModelAccess(
+            access=access, model=model, name="check_model_access"
+        ).execute()
 
 
 @pytest.mark.parametrize(
@@ -186,9 +215,9 @@ def test_check_model_access(access, model, expectation):
 )
 def test_check_model_contract_enforced_for_public_model(model, expectation):
     with expectation:
-        check_model_contract_enforced_for_public_model(
-            model=model,
-        )
+        CheckModelContractsEnforcedForPublicModel(
+            model=model, name="check_model_contract_enforced_for_public_model"
+        ).execute()
 
 
 @pytest.mark.parametrize(
@@ -253,9 +282,9 @@ def test_check_model_contract_enforced_for_public_model(model, expectation):
 )
 def test_check_model_depends_on_multiple_sources(model, expectation):
     with expectation:
-        check_model_depends_on_multiple_sources(
-            model=model,
-        )
+        CheckModelDependsOnMultipleSources(
+            model=model, name="check_model_depends_on_multiple_sources"
+        ).execute()
 
 
 @pytest.mark.parametrize(
@@ -375,10 +404,11 @@ def test_check_model_documentation_coverage(
     expectation,
 ):
     with expectation:
-        check_model_documentation_coverage(
+        CheckModelsDocumentationCoverage(
             min_model_documentation_coverage_pct=min_model_documentation_coverage_pct,
             models=models,
-        )
+            name="check_model_documentation_coverage",
+        ).execute()
 
 
 @pytest.mark.parametrize(
@@ -438,9 +468,9 @@ def test_check_model_documentation_coverage(
 )
 def test_check_model_documented_in_same_directory(model, expectation):
     with expectation:
-        check_model_documented_in_same_directory(
-            model=model,
-        )
+        CheckModelDocumentedInSameDirectory(
+            model=model, name="check_model_documented_in_same_directory"
+        ).execute()
 
 
 @pytest.mark.parametrize(
@@ -500,9 +530,9 @@ def test_check_model_documented_in_same_directory(model, expectation):
 )
 def test_check_model_has_contracts_enforced(model, expectation):
     with expectation:
-        check_model_has_contracts_enforced(
-            model=model,
-        )
+        CheckModelHasContractsEnforced(
+            model=model, name="check_model_has_contracts_enforced"
+        ).execute()
 
 
 @pytest.mark.parametrize(
@@ -671,10 +701,9 @@ def test_check_model_has_contracts_enforced(model, expectation):
 )
 def test_check_model_has_meta_keys(keys, model, expectation):
     with expectation:
-        check_model_has_meta_keys(
-            keys=keys,
-            model=model,
-        )
+        CheckModelHasMetaKeys(
+            keys=keys, model=model, name="check_model_has_meta_keys"
+        ).execute()
 
 
 @pytest.mark.parametrize(
@@ -759,9 +788,9 @@ def test_check_model_has_meta_keys(keys, model, expectation):
 )
 def test_check_model_has_no_upstream_dependencies(model, expectation):
     with expectation:
-        check_model_has_no_upstream_dependencies(
-            model=model,
-        )
+        CheckModelHasNoUpstreamDependencies(
+            model=model, name="check_model_has_no_upstream_dependencies"
+        ).execute()
 
 
 @pytest.mark.parametrize(
@@ -825,10 +854,11 @@ def test_check_model_has_no_upstream_dependencies(model, expectation):
 )
 def test_check_model_has_tags(model, tags, expectation):
     with expectation:
-        check_model_has_tags(
+        CheckModelHasTags(
             model=model,
+            name="check_model_has_tags",
             tags=tags,
-        )
+        ).execute()
 
 
 @pytest.mark.parametrize(
@@ -1022,11 +1052,12 @@ def test_check_model_has_unique_test(
     expectation,
 ):
     with expectation:
-        check_model_has_unique_test(
+        CheckModelHasUniqueTest(
             accepted_uniqueness_tests=accepted_uniqueness_tests,
             model=model,
+            name="check_model_has_unique_test",
             tests=tests,
-        )
+        ).execute()
 
 
 @pytest.mark.parametrize(
@@ -1149,12 +1180,13 @@ def test_check_model_has_unit_tests(
     expectation,
 ):
     with expectation:
-        check_model_has_unit_tests(
+        CheckModelHasUnitTests(
             manifest_obj=manifest_obj,
             min_number_of_unit_tests=min_number_of_unit_tests,
             model=model,
+            name="check_model_has_unit_tests",
             unit_tests=unit_tests,
-        )
+        ).execute()
 
 
 @pytest.mark.parametrize(
@@ -1220,10 +1252,11 @@ def test_check_model_code_does_not_contain_regexp_pattern(
     expectation,
 ):
     with expectation:
-        check_model_code_does_not_contain_regexp_pattern(
+        CheckModelCodeDoesNotContainRegexpPattern(
             model=model,
+            name="check_model_code_does_not_contain_regexp_pattern",
             regexp_pattern=regexp_pattern,
-        )
+        ).execute()
 
 
 @pytest.mark.parametrize(
@@ -1316,11 +1349,12 @@ def test_check_model_directories(
     expectation,
 ):
     with expectation:
-        check_model_directories(
+        CheckModelDirectories(
             include=include,
             model=model,
+            name="check_model_directories",
             permitted_sub_directories=permitted_sub_directories,
-        )
+        ).execute()
 
 
 @pytest.mark.parametrize(
@@ -1576,13 +1610,14 @@ def test_check_model_max_chained_views(
     expectation,
 ):
     with expectation:
-        check_model_max_chained_views(
+        CheckModelMaxChainedViews(
             manifest_obj=manifest_obj,
             materializations_to_include=materializations_to_include,
             max_chained_views=max_chained_views,
             model=model,
             models=models,
-        )
+            name="check_model_max_chained_views",
+        ).execute()
 
 
 @pytest.mark.parametrize(
@@ -1748,11 +1783,12 @@ def test_check_model_max_chained_views(
 )
 def test_check_mode_names(include, model_name_pattern, model, expectation):
     with expectation:
-        check_model_names(
+        CheckModelNames(
             include=include,
             model_name_pattern=model_name_pattern,
             model=model,
-        )
+            name="check_model_names",
+        ).execute()
 
 
 @pytest.mark.parametrize(
@@ -1894,11 +1930,12 @@ def test_check_mode_names(include, model_name_pattern, model, expectation):
 )
 def test_check_model_max_fanout(max_downstream_models, model, models, expectation):
     with expectation:
-        check_model_max_fanout(
+        CheckModelMaxFanout(
             max_downstream_models=max_downstream_models,
             model=model,
             models=models,
-        )
+            name="check_model_max_fanout",
+        ).execute()
 
 
 @pytest.mark.parametrize(
@@ -1962,10 +1999,11 @@ def test_check_model_max_fanout(max_downstream_models, model, models, expectatio
 )
 def test_check_model_max_number_of_lines(max_number_of_lines, model, expectation):
     with expectation:
-        check_model_max_number_of_lines(
+        CheckModelMaxNumberOfLines(
             max_number_of_lines=max_number_of_lines,
             model=model,
-        )
+            name="check_model_max_number_of_lines",
+        ).execute()
 
 
 @pytest.mark.parametrize(
@@ -2177,12 +2215,13 @@ def test_check_model_max_upstream_dependencies(
     expectation,
 ):
     with expectation:
-        check_model_max_upstream_dependencies(
+        CheckModelMaxUpstreamDependencies(
             max_upstream_macros=max_upstream_macros,
             max_upstream_models=max_upstream_models,
             max_upstream_sources=max_upstream_sources,
             model=model,
-        )
+            name="check_model_max_upstream_dependencies",
+        ).execute()
 
 
 @pytest.mark.parametrize(
@@ -2342,9 +2381,9 @@ def test_check_model_max_upstream_dependencies(
 )
 def test_check_model_property_file_location(model, expectation):
     with expectation:
-        check_model_property_file_location(
-            model=model,
-        )
+        CheckModelPropertyFileLocation(
+            model=model, name="check_model_property_file_location"
+        ).execute()
 
 
 @pytest.mark.parametrize(
@@ -2533,9 +2572,9 @@ def test_check_model_property_file_location(model, expectation):
 )
 def test_check_model_description_populated(model, expectation):
     with expectation:
-        check_model_description_populated(
-            model=model,
-        )
+        CheckModelDescriptionPopulated(
+            model=model, name="check_model_description_populated"
+        ).execute()
 
 
 @pytest.mark.parametrize(
@@ -2766,8 +2805,9 @@ def test_check_model_test_coverage(
     expectation,
 ):
     with expectation:
-        check_model_test_coverage(
+        CheckModelsTestCoverage(
             min_model_test_coverage_pct=min_model_test_coverage_pct,
             models=models,
+            name="check_model_test_coverage",
             tests=tests,
-        )
+        ).execute()
