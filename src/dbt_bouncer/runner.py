@@ -6,9 +6,9 @@ from __future__ import annotations
 import json
 import logging
 import operator
-import traceback, re
+import traceback
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, List, Union, Dict
+from typing import TYPE_CHECKING, Any, Dict, List, Union
 
 from progress.bar import Bar
 from tabulate import tabulate
@@ -64,21 +64,12 @@ def runner(
         RuntimeError: If more than one "iterate_over" argument is found.
 
     """
-    # for i in get_check_objects()["functions"]:
-    #     locals()[i.__name__] = getattr(i, i.__name__)
-
     check_classes: List[Dict[str, Union[Any, str]]] = [
         {"class": getattr(x, x.__name__), "source_file": x.__file__}
         for x in get_check_objects()["classes"]
     ]
-    # logging.warning(f"{check_classes=}")
-
-    # logging.warning(check_classes[0]["class"])
-    # logging.warning(check_classes[0]["class"].__name__)
     for c in check_classes:
-        locals()[c["class"].__name__] = c["class"]
-
-    # logging.warning(f"{sorted(locals().keys())=}")
+        locals()[c["class"].__name__] = c["class"]  # type: ignore[union-attr]
 
     parsed_data = {
         "catalog_nodes": catalog_nodes,
@@ -111,39 +102,20 @@ def runner(
             "source",
             "unit_test",
         }
-
-        # logging.warning(f"{check=}")
-        # check_name_camel_case =       ''.join(word.title() for word in check.name.split('_'))
-        # logging.warning(f"{check_name_camel_case=}")
-
-        
-        
-        # logging.warning(f"{check.__annotations__.keys()=}")
-
         iterate_over_value = valid_iterate_over_values.intersection(
             set(check.__annotations__.keys()),
         )
-        # logging.warning(f"{iterate_over_value=}")
 
         if len(iterate_over_value) == 1:
             iterate_value = next(iter(iterate_over_value))
-
-            # logging.warning(f"{iterate_value=}")
-
             for i in locals()[f"{iterate_value}s"]:
                 if resource_in_path(check, i):
-                    check_run_id = f"{check.name}:{check.index}:{i.unique_id.split('.')[2]}"
+                    check_run_id = (
+                        f"{check.name}:{check.index}:{i.unique_id.split('.')[2]}"
+                    )
                     setattr(check, iterate_value, getattr(i, iterate_value, i))
 
-
-                    # logging.warning(f"{parsed_data.keys()=}")
-                    # logging.warning(f"{check.__annotations__.keys()=}")
-                    # logging.warning(
-                    #     f"{parsed_data.keys() & check.__annotations__.keys()}"
-                    # )
-
                     for x in parsed_data.keys() & check.__annotations__.keys():
-                        # logging.warning(f"{x=}")
                         setattr(check, x, parsed_data[x])
 
                     checks_to_run.append(
@@ -153,7 +125,6 @@ def runner(
                                 "check_run_id": check_run_id,
                             },
                             **check.model_dump(),
-                            # **{iterate_value: getattr(i, iterate_value, i)},
                         },
                     )
         elif len(iterate_over_value) > 1:
@@ -178,16 +149,7 @@ def runner(
     for check in checks_to_run:
         logging.debug(f"Running {check['check_run_id']}...")
         try:
-            # logging.warning(f"{check=}")
-            # logging.warning(f"{check['check']=}")
-            # logging.warning(f"{parsed_data.keys()=}")
-            # check["check"].run_result = check["run_result"]
             check["check"].execute()
-            # **{
-            # **check,
-            # **parsed_data
-            # }
-            # )
             check["outcome"] = "success"
         except AssertionError as e:
             failure_message = list(

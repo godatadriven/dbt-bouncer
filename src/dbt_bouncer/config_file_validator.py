@@ -7,7 +7,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from typing_extensions import Annotated
 
 from dbt_bouncer.utils import get_check_objects, load_config_from_yaml
-from dbt_bouncer.parsers import DbtBouncerRunResultBase
+
 
 class DbtBouncerConf(BaseModel):
     """Base model for the config file contents."""
@@ -25,8 +25,7 @@ class DbtBouncerConf(BaseModel):
         for x in check_classes
         if x["source_file"].split("/")[-2] == "catalog"
     ]
-    
-    
+
     CatalogCheckConfigs: ClassVar = Annotated[
         Union[tuple(catalog_check_classes)],
         Field(discriminator="name"),
@@ -49,8 +48,7 @@ class DbtBouncerConf(BaseModel):
         for x in check_classes
         if x["source_file"].split("/")[-2] == "run_results"
     ]
-    
-    
+
     RunResultsCheckConfigs: ClassVar = Annotated[
         Union[tuple(run_results_check_classes)],
         Field(discriminator="name"),
@@ -62,8 +60,7 @@ class DbtBouncerConf(BaseModel):
             Field(discriminator="name"),
         ]
     ] = Field(default=[])
-    
-    
+
     manifest_checks: List[
         Annotated[
             ManifestCheckConfigs,
@@ -76,8 +73,6 @@ class DbtBouncerConf(BaseModel):
             Field(discriminator="name"),
         ]
     ] = Field(default=[])
-    
-    
 
     dbt_artifacts_dir: Optional[str] = Field(default="./target")
     exclude: Optional[str] = Field(
@@ -183,11 +178,15 @@ def validate_conf(config_file_contents: Dict[str, Any]) -> "DbtBouncerConf":
     logging.info("Validating conf...")
 
     # Rebuild the model to ensure all fields are present
-    from dbt_bouncer.parsers import DbtBouncerRunResult, DbtBouncerTest, DbtBouncerModel
     import dbt_bouncer.checks  # noqa: F401
     from dbt_bouncer.checks.common import NestedDict  # noqa: F401
+    from dbt_bouncer.parsers import (  # noqa: F401
+        DbtBouncerModel,
+        DbtBouncerRunResult,
+        DbtBouncerRunResultBase,
+        DbtBouncerTest,
+    )
 
     DbtBouncerConf.model_rebuild()
-    
 
     return DbtBouncerConf(**config_file_contents)

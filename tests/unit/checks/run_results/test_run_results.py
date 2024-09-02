@@ -5,14 +5,14 @@ import pytest
 
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
-    from dbt_artifacts_parser.parsers.run_results.run_results_v6 import Result
+
+from pydantic import TypeAdapter
 
 from dbt_bouncer.checks.run_results.check_run_results import (
     CheckRunResultsMaxExecutionTime,
     CheckRunResultsMaxGigabytesBilled,
 )
-from dbt_bouncer.parsers import DbtBouncerRunResult, DbtBouncerRunResultBase
-from pydantic import TypeAdapter
+from dbt_bouncer.parsers import DbtBouncerRunResultBase
 
 CheckRunResultsMaxGigabytesBilled.model_rebuild()
 CheckRunResultsMaxExecutionTime.model_rebuild()
