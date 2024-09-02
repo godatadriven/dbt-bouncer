@@ -121,7 +121,7 @@
             - name: Run `dbt-bouncer`
               run: python ./dist/dbt-bouncer.pex --config-file dbt-bouncer-example.yml
 
-      pip-tests:
+      pypi-tests:
         runs-on: ubuntu-latest
         strategy:
             fail-fast: false

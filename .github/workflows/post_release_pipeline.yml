@@ -27,7 +27,7 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout
-              run: git clone https://github.com/godatadriven/dbt-bouncer.git --branch ${{ github.ref }} --depth 1
+              run: git clone https://github.com/godatadriven/dbt-bouncer.git --branch $(echo "${{ github.ref }}" | cut -d "/" -f3) --depth 1
 
             - run: cd dbt-bouncer
 
@@ -66,12 +66,12 @@ jobs:
                 python-version: ${{ matrix.python-version }}
 
             - name: Download `pex` artifact
-              run: wget https://github.com/godatadriven/dbt-bouncer/releases/download/${{ github.ref }}/dbt-bouncer.pex -O ./dbt-bouncer.pex
+              run: wget https://github.com/godatadriven/dbt-bouncer/releases/download/$(echo "${{ github.ref }}" | cut -d "/" -f3)/dbt-bouncer.pex -O ./dbt-bouncer.pex
 
             - name: Run `dbt-bouncer`
               run: python ./dbt-bouncer.pex --config-file dbt-bouncer-example.yml
 
-    pip-tests:
+    pypi-tests:
         runs-on: ubuntu-latest
         strategy:
             fail-fast: false
@@ -100,7 +100,7 @@ jobs:
                 python-version: ${{ matrix.python-version }}
 
             - name: Install `dbt-bouncer`
-              run: pip install dbt-bouncer==${{ github.ref }}
+              run: pip install dbt-bouncer==$(echo "${{ github.ref }}" | cut -d "/" -f3)
 
             - name: Run `dbt-bouncer`
               run: dbt-bouncer --config-file dbt-bouncer-example.yml
