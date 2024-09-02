@@ -47,6 +47,21 @@ from dbt_bouncer.checks.manifest.check_macros import (
         (
             Macros(
                 **{
+                    "arguments": [],
+                    "macro_sql": "{% materialization udf, adapter=\"bigquery\" %}\n{%- set target = adapter.quote(this.database ~ '.' ~ this.schema ~ '.' ~ this.identifier) -%}\n\n{%- set parameter_list=config.get('parameter_list') -%}\n{%- set ret=config.get('returns') -%}\n{%- set description=config.get('description') -%}\n\n{%- set create_sql -%}\nCREATE OR REPLACE FUNCTION {{ target }}({{ parameter_list }})\nAS (\n  {{ sql }}\n);\n{%- endset -%}\n\n{% call statement('main') -%}\n  {{ create_sql }}\n{%- endcall %}\n\n{{ return({'relations': []}) }}\n\n{% endmaterialization %}",
+                    "name": "materialization_udf",
+                    "original_file_path": "macros/materialization_udf.sql",
+                    "package_name": "package_name",
+                    "path": "macros/materialization_udf.sql",
+                    "resource_type": "macro",
+                    "unique_id": "macro.package_name.materialization_udf",
+                },
+            ),
+            does_not_raise(),
+        ),
+        (
+            Macros(
+                **{
                     "arguments": [
                         {
                             "name": "arg_1",
