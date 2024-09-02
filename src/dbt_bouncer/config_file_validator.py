@@ -186,6 +186,7 @@ def validate_conf(config_file_contents: Dict[str, Any]) -> "DbtBouncerConf":
     import dbt_bouncer.checks  # noqa: F401
     from dbt_bouncer.checks.common import NestedDict  # noqa: F401
     from dbt_bouncer.parsers import (  # noqa: F401
+        DbtBouncerManifest,
         DbtBouncerModel,
         DbtBouncerModelBase,
         DbtBouncerRunResult,

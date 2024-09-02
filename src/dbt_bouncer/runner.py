@@ -105,7 +105,6 @@ def runner(
         iterate_over_value = valid_iterate_over_values.intersection(
             set(check.__annotations__.keys()),
         )
-
         if len(iterate_over_value) == 1:
             iterate_value = next(iter(iterate_over_value))
             for i in locals()[f"{iterate_value}s"]:
