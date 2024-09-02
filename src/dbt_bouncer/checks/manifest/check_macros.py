@@ -20,7 +20,7 @@ from dbt_bouncer.check_base import BaseCheck
 
 
 class TagExtension(StandaloneTag):
-    tags: ClassVar = {"endtest", "test"}
+    tags: ClassVar = {"do", "endmaterialization", "endtest", "materialization", "test"}
 
 
 class CheckMacroArgumentsDescriptionPopulated(BaseCheck):
@@ -54,20 +54,29 @@ def check_macro_arguments_description_populated(macro: "Macros", **kwargs) -> No
     environment = jinja2.Environment(autoescape=True, extensions=[TagExtension])
     ast = environment.parse(macro.macro_sql)
 
-    # Assume macro is a "true" macro, if not see if it's a generic test
-    try:
-        macro_arguments = [a.name for a in ast.body[0].args]  # type: ignore[attr-defined]
-    except AttributeError:
-        test_macro = next(
-            x
-            for x in ast.body
-            if not isinstance(x.nodes[0], jinja2.nodes.Call)  # type: ignore[attr-defined]
-        )
-        macro_arguments = [
-            x.name
-            for x in test_macro.nodes  # type: ignore[attr-defined]
-            if isinstance(x, jinja2.nodes.Name)
-        ]
+    if hasattr(ast.body[0], "args"):
+        # Assume macro is a "true" macro
+        macro_arguments = [a.name for a in ast.body[0].args]
+    else:
+        if "materialization" in [
+            x.value.value
+            for x in ast.body[0].nodes[0].kwargs  # type: ignore[attr-defined]
+            if isinstance(x.value, jinja2.nodes.Const)
+        ]:
+            # Materializations don't have arguments
+            macro_arguments = []
+        else:
+            # Macro is a test
+            test_macro = next(
+                x
+                for x in ast.body
+                if not isinstance(x.nodes[0], jinja2.nodes.Call)  # type: ignore[attr-defined]
+            )
+            macro_arguments = [
+                x.name
+                for x in test_macro.nodes  # type: ignore[attr-defined]
+                if isinstance(x, jinja2.nodes.Name)
+            ]
 
     # macro_arguments: List of args parsed from macro SQL
     # macro.arguments: List of args manually added to the properties file
@@ -252,6 +261,10 @@ def check_macro_property_file_location(macro: "Macros", **kwargs) -> None:
 
     """
     expected_substr = "_".join(macro.original_file_path[6:].split("/")[:-1])
+
+    assert (
+        macro.patch_path is not None
+    ), f"Macro `{macro.name}` is not defined in a `.yml` properties file."
     properties_yml_name = macro.patch_path.split("/")[-1]
 
     if macro.original_file_path.startswith(
