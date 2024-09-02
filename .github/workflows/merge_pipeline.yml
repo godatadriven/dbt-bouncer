@@ -55,7 +55,7 @@
               uses: ./.github/actions/setup_python_env
               with:
                 poetry-version: ${{ env.POETRY_VERSION }}
-                python-version: ${{ matrix.python-version }}
+                python-version: ${{ steps.python-version.outputs.PYTHON_VERSION }}
 
             - name: Install `pex`
               run: pip install pex
