@@ -25,6 +25,7 @@ class DbtBouncerConf(BaseModel):
         for x in check_classes
         if x["source_file"].split("/")[-2] == "catalog"
     ]
+
     CatalogCheckConfigs: ClassVar = Annotated[
         Union[tuple(catalog_check_classes)],
         Field(discriminator="name"),
@@ -36,6 +37,7 @@ class DbtBouncerConf(BaseModel):
         for x in check_classes
         if x["source_file"].split("/")[-2] == "manifest"
     ]
+
     ManifestCheckConfigs: ClassVar = Annotated[
         Union[tuple(manifest_check_classes)],
         Field(discriminator="name"),
@@ -47,6 +49,7 @@ class DbtBouncerConf(BaseModel):
         for x in check_classes
         if x["source_file"].split("/")[-2] == "run_results"
     ]
+
     RunResultsCheckConfigs: ClassVar = Annotated[
         Union[tuple(run_results_check_classes)],
         Field(discriminator="name"),
@@ -58,6 +61,7 @@ class DbtBouncerConf(BaseModel):
             Field(discriminator="name"),
         ]
     ] = Field(default=[])
+
     manifest_checks: List[
         Annotated[
             ManifestCheckConfigs,
@@ -175,8 +179,36 @@ def validate_conf(config_file_contents: Dict[str, Any]) -> "DbtBouncerConf":
     logging.info("Validating conf...")
 
     # Rebuild the model to ensure all fields are present
+    import warnings
+
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", category=UserWarning)
+        from dbt_artifacts_parser.parsers.catalog.catalog_v1 import (
+            CatalogTable,  # noqa: F401
+        )
+        from dbt_artifacts_parser.parsers.manifest.manifest_v12 import (
+            Exposures,  # noqa: F401
+            Macros,  # noqa: F401
+            UnitTests,  # noqa: F401
+        )
+
     import dbt_bouncer.checks  # noqa: F401
     from dbt_bouncer.checks.common import NestedDict  # noqa: F401
+    from dbt_bouncer.parsers import (  # noqa: F401
+        DbtBouncerCatalogNode,
+        DbtBouncerExposureBase,
+        DbtBouncerManifest,
+        DbtBouncerModel,
+        DbtBouncerModelBase,
+        DbtBouncerRunResult,
+        DbtBouncerRunResultBase,
+        DbtBouncerSemanticModel,
+        DbtBouncerSemanticModelBase,
+        DbtBouncerSource,
+        DbtBouncerSourceBase,
+        DbtBouncerTest,
+        DbtBouncerTestBase,
+    )
 
     DbtBouncerConf.model_rebuild()
 

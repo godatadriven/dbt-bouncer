@@ -8,7 +8,7 @@ import logging
 import operator
 import traceback
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, List, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Union
 
 from progress.bar import Bar
 from tabulate import tabulate
@@ -20,11 +20,15 @@ from dbt_bouncer.utils import (
 )
 
 if TYPE_CHECKING:
-    from dbt_artifacts_parser.parsers.manifest.manifest_v12 import (
-        Exposures,
-        Macros,
-        UnitTests,
-    )
+    import warnings
+
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", category=UserWarning)
+        from dbt_artifacts_parser.parsers.manifest.manifest_v12 import (
+            Exposures,
+            Macros,
+            UnitTests,
+        )
 
     from dbt_bouncer.config_file_validator import DbtBouncerConf
     from dbt_bouncer.parsers import (
@@ -64,8 +68,12 @@ def runner(
         RuntimeError: If more than one "iterate_over" argument is found.
 
     """
-    for i in get_check_objects()["functions"]:
-        locals()[i.__name__] = getattr(i, i.__name__)
+    check_classes: List[Dict[str, Union[Any, str]]] = [
+        {"class": getattr(x, x.__name__), "source_file": x.__file__}
+        for x in get_check_objects()["classes"]
+    ]
+    for c in check_classes:
+        locals()[c["class"].__name__] = c["class"]  # type: ignore[union-attr]
 
     parsed_data = {
         "catalog_nodes": catalog_nodes,
@@ -99,24 +107,27 @@ def runner(
             "unit_test",
         }
         iterate_over_value = valid_iterate_over_values.intersection(
-            set(locals()[check.name].__annotations__.keys()),
+            set(check.__annotations__.keys()),
         )
-
         if len(iterate_over_value) == 1:
             iterate_value = next(iter(iterate_over_value))
-
             for i in locals()[f"{iterate_value}s"]:
                 if resource_in_path(check, i):
                     check_run_id = (
                         f"{check.name}:{check.index}:{i.unique_id.split('.')[2]}"
                     )
+                    setattr(check, iterate_value, getattr(i, iterate_value, i))
+
+                    for x in parsed_data.keys() & check.__annotations__.keys():
+                        setattr(check, x, parsed_data[x])
+
                     checks_to_run.append(
                         {
                             **{
+                                "check": check,
                                 "check_run_id": check_run_id,
                             },
                             **check.model_dump(),
-                            **{iterate_value: getattr(i, iterate_value, i)},
                         },
                     )
         elif len(iterate_over_value) > 1:
@@ -125,9 +136,12 @@ def runner(
             )
         else:
             check_run_id = f"{check.name}:{check.index}"
+            for x in parsed_data.keys() & check.__annotations__.keys():
+                setattr(check, x, parsed_data[x])
             checks_to_run.append(
                 {
                     **{
+                        "check": check,
                         "check_run_id": check_run_id,
                     },
                     **check.model_dump(),
@@ -140,7 +154,7 @@ def runner(
     for check in checks_to_run:
         logging.debug(f"Running {check['check_run_id']}...")
         try:
-            locals()[check["name"]](**{**check, **parsed_data})
+            check["check"].execute()
             check["outcome"] = "success"
         except Exception as e:
             failure_message = list(
