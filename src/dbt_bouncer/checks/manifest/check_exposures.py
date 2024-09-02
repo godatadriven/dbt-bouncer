@@ -12,15 +12,14 @@ if TYPE_CHECKING:
 
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", category=UserWarning)
-        from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Exposures
-    from dbt_bouncer.parsers import DbtBouncerModelBase
+    from dbt_bouncer.parsers import DbtBouncerExposureBase, DbtBouncerModelBase
 
 
 class CheckExposureOnNonPublicModels(BaseCheck):
     """Exposures should be based on public models only.
 
     Receives:
-        exposure (Exposures): The Exposures object to check.
+        exposure (DbtBouncerExposureBase): The DbtBouncerExposureBase object to check.
         models (List[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
 
     Other Parameters:
@@ -36,7 +35,7 @@ class CheckExposureOnNonPublicModels(BaseCheck):
 
     """
 
-    exposure: "Exposures" = Field(default=None)
+    exposure: "DbtBouncerExposureBase" = Field(default=None)
     models: List["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_exposure_based_on_non_public_models"]
 
@@ -62,7 +61,7 @@ class CheckExposureOnView(BaseCheck):
         materializations_to_include (Optional[List[str]]): List of materializations to include in the check.
 
     Receives:
-        exposure (Exposures): The Exposures object to check.
+        exposure (DbtBouncerExposureBase): The DbtBouncerExposureBase object to check.
         models (List[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
 
     Other Parameters:
@@ -86,7 +85,7 @@ class CheckExposureOnView(BaseCheck):
 
     """
 
-    exposure: "Exposures" = Field(default=None)
+    exposure: "DbtBouncerExposureBase" = Field(default=None)
     materializations_to_include: List[str] = Field(
         default=["ephemeral", "view"],
     )

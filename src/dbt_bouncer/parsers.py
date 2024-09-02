@@ -18,6 +18,9 @@ with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
     from dbt_artifacts_parser.parsers.catalog.catalog_v1 import CatalogTable, CatalogV1
     from dbt_artifacts_parser.parsers.manifest.manifest_v10 import (
+        Exposure as Exposure_v10,
+    )
+    from dbt_artifacts_parser.parsers.manifest.manifest_v10 import (
         GenericTestNode as GenericTestNode_v10,
     )
     from dbt_artifacts_parser.parsers.manifest.manifest_v10 import ManifestV10
@@ -29,6 +32,9 @@ with warnings.catch_warnings():
     )
     from dbt_artifacts_parser.parsers.manifest.manifest_v10 import (
         SourceDefinition as SourceDefinition_v10,
+    )
+    from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
+        Exposure as Exposure_v11,
     )
     from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
         GenericTestNode as GenericTestNode_v11,
@@ -79,6 +85,17 @@ class DbtBouncerManifest(BaseModel):
     """Model for all manifest objects."""
 
     manifest: Union[ManifestV10, ManifestV11, ManifestV12]
+
+
+DbtBouncerExposureBase = Union[Exposure_v10, Exposure_v11, Exposures]
+
+
+class DbtBouncerExposure(BaseModel):
+    """Model for all exposure nodes in `manifest.json`."""
+
+    model: DbtBouncerExposureBase
+    original_file_path: str
+    unique_id: str
 
 
 DbtBouncerModelBase = Union[ModelNode_v10, ModelNode_v11, Nodes4]

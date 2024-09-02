@@ -5,7 +5,15 @@ from pathlib import Path
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
     from dbt_artifacts_parser.parser import parse_manifest
-    from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Nodes4
+    from dbt_artifacts_parser.parsers.catalog.catalog_v1 import (
+        CatalogTable,  # noqa: F401
+    )
+    from dbt_artifacts_parser.parsers.manifest.manifest_v12 import (  # noqa: F401
+        Exposures,
+        Macros,
+        Nodes4,
+        UnitTests,
+    )
 
 from unittest.mock import MagicMock
 
@@ -14,7 +22,16 @@ from click.globals import push_context
 from dbt_bouncer.checks.common import NestedDict  # noqa: F401
 from dbt_bouncer.config_file_validator import DbtBouncerConf
 from dbt_bouncer.logger import configure_console_logging
-from dbt_bouncer.parsers import DbtBouncerModel
+from dbt_bouncer.parsers import (  # noqa: F401
+    DbtBouncerExposureBase,
+    DbtBouncerManifest,
+    DbtBouncerModel,
+    DbtBouncerModelBase,
+    DbtBouncerRunResultBase,
+    DbtBouncerSemanticModelBase,
+    DbtBouncerSourceBase,
+    DbtBouncerTestBase,
+)
 from dbt_bouncer.runner import runner
 
 DbtBouncerConf.model_rebuild()

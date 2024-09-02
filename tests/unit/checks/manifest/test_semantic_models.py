@@ -5,9 +5,10 @@ import pytest
 
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
-    from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Nodes4
-
-from dbt_artifacts_parser.parsers.manifest.manifest_v12 import SemanticModels
+    from dbt_artifacts_parser.parsers.manifest.manifest_v12 import (
+        Nodes4,
+        SemanticModels,
+    )
 
 from dbt_bouncer.checks.manifest.check_semantic_models import (
     CheckSemanticModelOnNonPublicModels,

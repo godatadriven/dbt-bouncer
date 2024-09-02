@@ -181,16 +181,22 @@ def validate_conf(config_file_contents: Dict[str, Any]) -> "DbtBouncerConf":
     # Rebuild the model to ensure all fields are present
     import warnings
 
-    from dbt_artifacts_parser.parsers.manifest.manifest_v12 import (
-        Exposures,  # noqa: F401
-        Macros,  # noqa: F401
-        UnitTests,  # noqa: F401
-    )
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", category=UserWarning)
+        from dbt_artifacts_parser.parsers.catalog.catalog_v1 import (
+            CatalogTable,  # noqa: F401
+        )
+        from dbt_artifacts_parser.parsers.manifest.manifest_v12 import (
+            Exposures,  # noqa: F401
+            Macros,  # noqa: F401
+            UnitTests,  # noqa: F401
+        )
 
     import dbt_bouncer.checks  # noqa: F401
     from dbt_bouncer.checks.common import NestedDict  # noqa: F401
     from dbt_bouncer.parsers import (  # noqa: F401
         DbtBouncerCatalogNode,
+        DbtBouncerExposureBase,
         DbtBouncerManifest,
         DbtBouncerModel,
         DbtBouncerModelBase,
@@ -203,12 +209,6 @@ def validate_conf(config_file_contents: Dict[str, Any]) -> "DbtBouncerConf":
         DbtBouncerTest,
         DbtBouncerTestBase,
     )
-
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", category=UserWarning)
-        from dbt_artifacts_parser.parsers.catalog.catalog_v1 import (
-            CatalogTable,  # noqa: F401
-        )
 
     DbtBouncerConf.model_rebuild()
 

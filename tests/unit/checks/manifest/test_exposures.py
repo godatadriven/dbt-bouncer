@@ -11,7 +11,11 @@ from dbt_bouncer.checks.manifest.check_exposures import (
     CheckExposureOnNonPublicModels,
     CheckExposureOnView,
 )
-from dbt_bouncer.parsers import DbtBouncerModel, DbtBouncerModelBase  # noqa: F401
+from dbt_bouncer.parsers import (  # noqa: F401
+    DbtBouncerExposureBase,
+    DbtBouncerModel,
+    DbtBouncerModelBase,
+)
 
 CheckExposureOnNonPublicModels.model_rebuild()
 CheckExposureOnView.model_rebuild()

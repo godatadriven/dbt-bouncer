@@ -20,11 +20,15 @@ from dbt_bouncer.utils import (
 )
 
 if TYPE_CHECKING:
-    from dbt_artifacts_parser.parsers.manifest.manifest_v12 import (
-        Exposures,
-        Macros,
-        UnitTests,
-    )
+    import warnings
+
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", category=UserWarning)
+        from dbt_artifacts_parser.parsers.manifest.manifest_v12 import (
+            Exposures,
+            Macros,
+            UnitTests,
+        )
 
     from dbt_bouncer.config_file_validator import DbtBouncerConf
     from dbt_bouncer.parsers import (
