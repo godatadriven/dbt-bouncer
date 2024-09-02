@@ -142,13 +142,21 @@ def runner(
         try:
             locals()[check["name"]](**{**check, **parsed_data})
             check["outcome"] = "success"
-        except AssertionError as e:
+        except Exception as e:
             failure_message = list(
                 traceback.TracebackException.from_exception(e).format(),
             )[-1].strip()
             logging.debug(f"Check {check['check_run_id']} failed: {failure_message}")
             check["outcome"] = "failed"
             check["failure_message"] = failure_message
+
+            # If a check encountered an issue, change severity to warn
+            if not isinstance(e, AssertionError):
+                check["severity"] = "warn"
+                check["failure_message"] = (
+                    f"`dbt-bouncer` encountered an error ({failure_message}), run with `-v` to see more details or report an issue at https://github.com/godatadriven/dbt-bouncer/issues."
+                )
+
         bar.next()
     bar.finish()
 
