@@ -63,9 +63,9 @@ manifest_checks:
   - name: check_macro_name_matches_file_name
   - name: check_macro_property_file_location
 
-#   # Metadata
-#   - name: check_project_name
-#     project_name_pattern: ^dbt_bouncer_
+  # Metadata
+  - name: check_project_name
+    project_name_pattern: ^dbt_bouncer_
 
 #   # Models
 #   - name: check_model_access

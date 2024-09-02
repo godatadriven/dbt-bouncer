@@ -132,6 +132,8 @@ def runner(
             )
         else:
             check_run_id = f"{check.name}:{check.index}"
+            for x in parsed_data.keys() & check.__annotations__.keys():
+                setattr(check, x, parsed_data[x])
             checks_to_run.append(
                 {
                     **{
