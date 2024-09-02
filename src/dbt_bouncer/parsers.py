@@ -103,11 +103,16 @@ class DbtBouncerRunResult(BaseModel):
     unique_id: str
 
 
+DbtBouncerSemanticModelBase = Union[
+    SemanticModel_v10, SemanticModel_v11, SemanticModels
+]
+
+
 class DbtBouncerSemanticModel(BaseModel):
     """Model for all semantic model nodes in `manifest.json`."""
 
     original_file_path: str
-    semantic_model: Union[SemanticModel_v10, SemanticModel_v11, SemanticModels]
+    semantic_model: DbtBouncerSemanticModelBase
     unique_id: str
 
 

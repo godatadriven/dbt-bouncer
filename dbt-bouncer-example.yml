@@ -126,8 +126,8 @@ manifest_checks:
 #   - name: check_model_test_coverage
 #   - name: check_model_property_file_location
 
-#   # Semantic models
-#   - name: check_semantic_model_based_on_non_public_models
+  # Semantic models
+  - name: check_semantic_model_based_on_non_public_models
 
   # Sources
   - name: check_source_description_populated
