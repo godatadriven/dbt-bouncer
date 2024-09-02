@@ -21,18 +21,6 @@ if TYPE_CHECKING:
 
 
 class CheckUnitTestExpectFormats(BaseCheck):
-    name: Literal["check_unit_test_expect_format"]
-    permitted_formats: List[Literal["csv", "dict", "sql"]] = Field(
-        default=["csv", "dict", "sql"],
-    )
-
-
-def check_unit_test_expect_format(
-    manifest_obj: "DbtBouncerManifest",
-    unit_test: "UnitTests",
-    permitted_formats: List[Literal["csv", "dict", "sql"]] = ["csv", "dict", "sql"],  # noqa: B006
-    **kwargs,
-) -> None:
     """Unit tests can only use the specified formats.
 
     !!! warning
@@ -40,8 +28,10 @@ def check_unit_test_expect_format(
         This check is only supported for dbt 1.8.0 and above.
 
     Parameters:
-        manifest_obj (DbtBouncerManifest): The DbtBouncerManifest object parsed from `manifest.json`.
         permitted_formats (Optional[List[Literal["csv", "dict", "sql"]]]): A list of formats that are allowed to be used for `expect` input in a unit test.
+
+    Receives:
+        manifest_obj (DbtBouncerManifest): The DbtBouncerManifest object parsed from `manifest.json`.
         unit_test (UnitTests): The UnitTests object to check.
 
     Other Parameters:
@@ -58,29 +48,30 @@ def check_unit_test_expect_format(
         ```
 
     """
-    if semver.Version.parse(manifest_obj.manifest.metadata.dbt_version) >= "1.8.0":
-        assert (
-            unit_test.expect.format.value in permitted_formats
-        ), f"Unit test `{unit_test.name}` has an `expect` format that is not permitted. Permitted formats are: {permitted_formats}."
-    else:
-        logging.warning(
-            "The `check_unit_test_expect_format` check is only supported for dbt 1.8.0 and above.",
-        )
 
-
-class CheckUnitTestGivenFormats(BaseCheck):
-    name: Literal["check_unit_test_given_formats"]
+    manifest_obj: "DbtBouncerManifest" = Field(default=None)
+    name: Literal["check_unit_test_expect_format"]
     permitted_formats: List[Literal["csv", "dict", "sql"]] = Field(
         default=["csv", "dict", "sql"],
     )
+    unit_test: "UnitTests" = Field(default=None)
+
+    def execute(self) -> None:
+        """Execute the check."""
+        if (
+            semver.Version.parse(self.manifest_obj.manifest.metadata.dbt_version)
+            >= "1.8.0"
+        ):
+            assert (
+                self.unit_test.expect.format.value in self.permitted_formats
+            ), f"Unit test `{self.unit_test.name}` has an `expect` format that is not permitted. Permitted formats are: {self.permitted_formats}."
+        else:
+            logging.warning(
+                "The `check_unit_test_expect_format` check is only supported for dbt 1.8.0 and above.",
+            )
 
 
-def check_unit_test_given_formats(
-    manifest_obj: "DbtBouncerManifest",
-    unit_test: "UnitTests",
-    permitted_formats: List[Literal["csv", "dict", "sql"]] = ["csv", "dict", "sql"],  # noqa: B006
-    **kwargs,
-) -> None:
+class CheckUnitTestGivenFormats(BaseCheck):
     """Unit tests can only use the specified formats.
 
     !!! warning
@@ -88,8 +79,10 @@ def check_unit_test_given_formats(
         This check is only supported for dbt 1.8.0 and above.
 
     Parameters:
-        manifest_obj (DbtBouncerManifest): The DbtBouncerManifest object parsed from `manifest.json`.
         permitted_formats (Optional[List[Literal["csv", "dict", "sql"]]]): A list of formats that are allowed to be used for `expect` input in a unit test.
+
+    Receives:
+        manifest_obj (DbtBouncerManifest): The DbtBouncerManifest object parsed from `manifest.json`.
         unit_test (UnitTests): The UnitTests object to check.
 
     Other Parameters:
@@ -106,12 +99,25 @@ def check_unit_test_given_formats(
         ```
 
     """
-    if semver.Version.parse(manifest_obj.manifest.metadata.dbt_version) >= "1.8.0":
-        given_formats = [i.format.value for i in unit_test.given]
-        assert all(
-            e in permitted_formats for e in given_formats
-        ), f"Unit test `{unit_test.name}` has given formats which are not permitted. Permitted formats are: {permitted_formats}."
-    else:
-        logging.warning(
-            "The `check_unit_test_given_formats` check is only supported for dbt 1.8.0 and above.",
-        )
+
+    manifest_obj: "DbtBouncerManifest" = Field(default=None)
+    name: Literal["check_unit_test_given_formats"]
+    permitted_formats: List[Literal["csv", "dict", "sql"]] = Field(
+        default=["csv", "dict", "sql"],
+    )
+    unit_test: "UnitTests" = Field(default=None)
+
+    def execute(self) -> None:
+        """Execute the check."""
+        if (
+            semver.Version.parse(self.manifest_obj.manifest.metadata.dbt_version)
+            >= "1.8.0"
+        ):
+            given_formats = [i.format.value for i in self.unit_test.given]
+            assert all(
+                e in self.permitted_formats for e in given_formats
+            ), f"Unit test `{self.unit_test.name}` has given formats which are not permitted. Permitted formats are: {self.permitted_formats}."
+        else:
+            logging.warning(
+                "The `check_unit_test_given_formats` check is only supported for dbt 1.8.0 and above.",
+            )

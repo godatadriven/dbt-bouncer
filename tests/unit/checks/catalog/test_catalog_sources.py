@@ -9,8 +9,11 @@ with warnings.catch_warnings():
     from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Sources
 
 from dbt_bouncer.checks.catalog.check_catalog_sources import (
-    check_source_columns_are_all_documented,
+    CheckSourceColumnsAreAllDocumented,
 )
+from dbt_bouncer.parsers import DbtBouncerSourceBase  # noqa: F401
+
+CheckSourceColumnsAreAllDocumented.model_rebuild()
 
 
 @pytest.mark.parametrize(
@@ -121,7 +124,8 @@ from dbt_bouncer.checks.catalog.check_catalog_sources import (
 )
 def test_check_source_columns_are_all_documented(catalog_source, sources, expectation):
     with expectation:
-        check_source_columns_are_all_documented(
+        CheckSourceColumnsAreAllDocumented(
             catalog_source=catalog_source,
+            name="check_source_columns_are_all_documented",
             sources=sources,
-        )
+        ).execute()

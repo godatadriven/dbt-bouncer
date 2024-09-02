@@ -2,7 +2,10 @@ from contextlib import nullcontext as does_not_raise
 
 import pytest
 
-from dbt_bouncer.checks.manifest.check_metadata import check_project_name
+from dbt_bouncer.checks.manifest.check_metadata import CheckProjectName
+from dbt_bouncer.parsers import DbtBouncerManifest  # noqa: F401
+
+CheckProjectName.model_rebuild()
 
 
 @pytest.mark.parametrize(
@@ -23,7 +26,8 @@ from dbt_bouncer.checks.manifest.check_metadata import check_project_name
 )
 def test_check_project_name(manifest_obj, project_name_pattern, expectation):
     with expectation:
-        check_project_name(
+        CheckProjectName(
             manifest_obj=manifest_obj,
+            name="check_project_name",
             project_name_pattern=project_name_pattern,
-        )
+        ).execute()
