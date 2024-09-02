@@ -20,7 +20,7 @@ jobs:
               run: |
                 docker run --rm \
                   --volume "$PWD":/app \
-                  ghcr.io/godatadriven/dbt-bouncer:${{ github.ref }} \
+                  ghcr.io/godatadriven/dbt-bouncer:$(echo "${{ github.ref }}" | cut -d "/" -f3) \
                   --config-file /app/dbt-bouncer-example.yml
 
     github-action-test:
@@ -30,6 +30,10 @@ jobs:
               run: git clone https://github.com/godatadriven/dbt-bouncer.git --branch $(echo "${{ github.ref }}" | cut -d "/" -f3) --depth 1
 
             - run: cd dbt-bouncer
+
+            - run: |
+                pwd
+                ls -ahl
 
             - name: Run `dbt-bouncer`
               uses: ./
