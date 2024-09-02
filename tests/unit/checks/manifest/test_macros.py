@@ -475,6 +475,21 @@ def test_check_macro_name_matches_file_name(macro, expectation):
             ),
             pytest.raises(AssertionError),
         ),
+        (
+            Macros(
+                **{
+                    "macro_sql": "select 1",
+                    "name": "macro_1",
+                    "original_file_path": "macros/dir1/macro_1.sql",
+                    "package_name": "package_name",
+                    "patch_path": None,
+                    "path": "macros/dir1/macro_1.sql",
+                    "resource_type": "macro",
+                    "unique_id": "macro.package_name.macro_1",
+                },
+            ),
+            pytest.raises(AssertionError),
+        ),
     ],
 )
 def test_check_macro_property_file_location(macro, expectation):
