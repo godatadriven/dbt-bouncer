@@ -29,15 +29,10 @@ jobs:
             - name: Checkout
               run: git clone https://github.com/godatadriven/dbt-bouncer.git --branch $(echo "${{ github.ref }}" | cut -d "/" -f3) --depth 1
 
-            - run: |
-                cd dbt-bouncer
-                pwd
-                ls -ahl
-
             - name: Run `dbt-bouncer`
               uses: ./dbt-bouncer
               with:
-                config-file: ./dbt-bouncer-example.yml
+                config-file: ./dbt-bouncer/dbt-bouncer-example.yml
                 send-pr-comment: false
 
     pex-tests:
