@@ -9,18 +9,22 @@ with warnings.catch_warnings():
 
 from dbt_bouncer.checks.run_results.check_run_results import (
     CheckRunResultsMaxExecutionTime,
-    check_run_results_max_gigabytes_billed,
+    CheckRunResultsMaxGigabytesBilled,
 )
-from dbt_bouncer.parsers import DbtBouncerRunResult
+from dbt_bouncer.parsers import DbtBouncerRunResult, DbtBouncerRunResultBase
+from pydantic import TypeAdapter
+
+CheckRunResultsMaxGigabytesBilled.model_rebuild()
 CheckRunResultsMaxExecutionTime.model_rebuild()
+
 
 @pytest.mark.parametrize(
     ("max_gigabytes_billed", "run_result", "expectation"),
     [
         (
             10,
-            Result(
-                **{
+            TypeAdapter(DbtBouncerRunResultBase).validate_python(
+                {
                     "adapter_response": {"bytes_billed": 1},
                     "execution_time": 1,
                     "status": "success",
@@ -33,8 +37,8 @@ CheckRunResultsMaxExecutionTime.model_rebuild()
         ),
         (
             10,
-            Result(
-                **{
+            TypeAdapter(DbtBouncerRunResultBase).validate_python(
+                {
                     "adapter_response": {"bytes_billed": 100000000000},
                     "execution_time": 1,
                     "status": "success",
@@ -53,10 +57,11 @@ def test_check_run_results_max_gigabytes_billed(
     expectation,
 ):
     with expectation:
-        check_run_results_max_gigabytes_billed(
+        CheckRunResultsMaxGigabytesBilled(
             max_gigabytes_billed=max_gigabytes_billed,
+            name="check_run_results_max_gigabytes_billed",
             run_result=run_result,
-        )
+        ).execute()
 
 
 @pytest.mark.parametrize(
@@ -64,17 +69,13 @@ def test_check_run_results_max_gigabytes_billed(
     [
         (
             10,
-            DbtBouncerRunResult(
-                **{
-                    "original_file_path": "path/to/file.sql",
-                    "run_result": Result(**{
-                        "adapter_response": {"bytes_billed": 1},
-                        "execution_time": 1,
-                        "status": "success",
-                        "thread_id": "Thread-1",
-                        "timing": [],
-                        "unique_id": "model.package_name.model_1",
-                    }),
+            TypeAdapter(DbtBouncerRunResultBase).validate_python(
+                {
+                    "adapter_response": {"bytes_billed": 1},
+                    "execution_time": 1,
+                    "status": "success",
+                    "thread_id": "Thread-1",
+                    "timing": [],
                     "unique_id": "model.package_name.model_1",
                 }
             ),
@@ -82,17 +83,13 @@ def test_check_run_results_max_gigabytes_billed(
         ),
         (
             10,
-            DbtBouncerRunResult(
-                **{
-                    "original_file_path": "path/to/file.sql",
-                    "run_result": Result(**{
-                        "adapter_response": {"bytes_billed": 1},
-                        "execution_time": 10,
-                        "status": "success",
-                        "thread_id": "Thread-1",
-                        "timing": [],
-                        "unique_id": "model.package_name.model_1",
-                    }),
+            TypeAdapter(DbtBouncerRunResultBase).validate_python(
+                {
+                    "adapter_response": {"bytes_billed": 1},
+                    "execution_time": 10,
+                    "status": "success",
+                    "thread_id": "Thread-1",
+                    "timing": [],
                     "unique_id": "model.package_name.model_1",
                 }
             ),
@@ -100,17 +97,13 @@ def test_check_run_results_max_gigabytes_billed(
         ),
         (
             10,
-            DbtBouncerRunResult(
-                **{
-                    "original_file_path": "path/to/file.sql",
-                    "run_result": Result(**{
-                        "adapter_response": {"bytes_billed": 1},
-                        "execution_time": 100,
-                        "status": "success",
-                        "thread_id": "Thread-1",
-                        "timing": [],
-                        "unique_id": "model.package_name.model_1",
-                    }),
+            TypeAdapter(DbtBouncerRunResultBase).validate_python(
+                {
+                    "adapter_response": {"bytes_billed": 1},
+                    "execution_time": 100,
+                    "status": "success",
+                    "thread_id": "Thread-1",
+                    "timing": [],
                     "unique_id": "model.package_name.model_1",
                 }
             ),
@@ -127,5 +120,5 @@ def test_check_run_results_max_execution_time(
         CheckRunResultsMaxExecutionTime(
             max_execution_time_seconds=max_execution_time_seconds,
             name="check_run_results_max_execution_time",
-            run_result=run_result.run_result,
+            run_result=run_result,
         ).execute()

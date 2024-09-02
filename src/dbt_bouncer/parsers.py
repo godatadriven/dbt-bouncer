@@ -89,11 +89,14 @@ class DbtBouncerModel(BaseModel):
     unique_id: str
 
 
+DbtBouncerRunResultBase = Union[RunResultOutput_v4, RunResultOutput_v5, Result]
+
+
 class DbtBouncerRunResult(BaseModel):
     """Model for all results in `run_results.json`."""
 
     original_file_path: str
-    run_result: Union[RunResultOutput_v4, RunResultOutput_v5, Result]
+    run_result: DbtBouncerRunResultBase
     unique_id: str
 
 

@@ -7,7 +7,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from typing_extensions import Annotated
 
 from dbt_bouncer.utils import get_check_objects, load_config_from_yaml
-
+from dbt_bouncer.parsers import DbtBouncerRunResultBase
 
 class DbtBouncerConf(BaseModel):
     """Base model for the config file contents."""
@@ -18,8 +18,6 @@ class DbtBouncerConf(BaseModel):
         {"class": getattr(x, x.__name__), "source_file": x.__file__}
         for x in get_check_objects()["classes"]
     ]
-    
-    # logging.warning(f"{check_classes=}")
 
     # Catalog checks
     catalog_check_classes: ClassVar = [
@@ -27,8 +25,6 @@ class DbtBouncerConf(BaseModel):
         for x in check_classes
         if x["source_file"].split("/")[-2] == "catalog"
     ]
-    
-    # logging.warning(f"{catalog_check_classes=}")
     
     
     CatalogCheckConfigs: ClassVar = Annotated[
@@ -55,9 +51,6 @@ class DbtBouncerConf(BaseModel):
     ]
     
     
-    # logging.warning(f"{run_results_check_classes=}")
-    
-    
     RunResultsCheckConfigs: ClassVar = Annotated[
         Union[tuple(run_results_check_classes)],
         Field(discriminator="name"),
@@ -69,8 +62,6 @@ class DbtBouncerConf(BaseModel):
             Field(discriminator="name"),
         ]
     ] = Field(default=[])
-    
-    # logging.warning(f"{catalog_checks=}")
     
     
     manifest_checks: List[
@@ -87,7 +78,6 @@ class DbtBouncerConf(BaseModel):
     ] = Field(default=[])
     
     
-    # logging.warning(f"{run_results_checks=}")
 
     dbt_artifacts_dir: Optional[str] = Field(default="./target")
     exclude: Optional[str] = Field(
@@ -199,7 +189,5 @@ def validate_conf(config_file_contents: Dict[str, Any]) -> "DbtBouncerConf":
 
     DbtBouncerConf.model_rebuild()
     
-    
-    # logging.warning(f"{config_file_contents=}")
 
     return DbtBouncerConf(**config_file_contents)
