@@ -127,11 +127,14 @@ class DbtBouncerSource(BaseModel):
     unique_id: str
 
 
+DbtBouncerTestBase = Union[GenericTestNode_v10, GenericTestNode_v11, Nodes6]
+
+
 class DbtBouncerTest(BaseModel):
     """Model for all test nodes in `manifest.json`."""
 
     original_file_path: str
-    test: Union[GenericTestNode_v10, GenericTestNode_v11, Nodes6]
+    test: DbtBouncerTestBase
     unique_id: str
 
 

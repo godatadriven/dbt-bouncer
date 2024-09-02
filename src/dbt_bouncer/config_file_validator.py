@@ -201,6 +201,7 @@ def validate_conf(config_file_contents: Dict[str, Any]) -> "DbtBouncerConf":
         DbtBouncerSource,
         DbtBouncerSourceBase,
         DbtBouncerTest,
+        DbtBouncerTestBase,
     )
 
     with warnings.catch_warnings():

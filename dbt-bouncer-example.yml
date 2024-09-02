@@ -4,33 +4,33 @@ dbt_artifacts_dir: dbt_project/target # [Optional] Directory where the dbt artif
 # # severity: warn # Optional, useful when applying `dbt-bouncer` to an existing dbt project.
 
 catalog_checks:
-#   - name: check_column_description_populated
-#     include: ^models/marts
-#   - name: check_column_name_complies_to_column_type
-#     column_name_pattern: ^is_.*
-#     exclude: ^models/staging
-#     types:
-#       - BOOLEAN
-#   - name: check_column_name_complies_to_column_type
-#     column_name_pattern: .*_date$
-#     include: ^models/staging # Not a good idea, here for demonstration purposes only
-#     types:
-#       - DATE
-#   - name: check_column_name_complies_to_column_type
-#     column_name_pattern: ^[a-z_]*$
-#     types:
-#       - BIGINT
-#       - BOOLEAN
-#       - DATE
-#       - DOUBLE
-#       - INTEGER
-#       - VARCHAR
-#   - name: check_column_has_specified_test
-#     column_name_pattern: ^is_.*
-#     test_name: not_null
-#   - name: check_columns_are_all_documented
-#     include: ^models/marts
-#   - name: check_columns_are_documented_in_public_models
+  - name: check_column_description_populated
+    include: ^models/marts
+  - name: check_column_name_complies_to_column_type
+    column_name_pattern: ^is_.*
+    exclude: ^models/staging
+    types:
+      - BOOLEAN
+  - name: check_column_name_complies_to_column_type
+    column_name_pattern: .*_date$
+    include: ^models/staging # Not a good idea, here for demonstration purposes only
+    types:
+      - DATE
+  - name: check_column_name_complies_to_column_type
+    column_name_pattern: ^[a-z_]*$
+    types:
+      - BIGINT
+      - BOOLEAN
+      - DATE
+      - DOUBLE
+      - INTEGER
+      - VARCHAR
+  - name: check_column_has_specified_test
+    column_name_pattern: ^is_.*
+    test_name: not_null
+  - name: check_columns_are_all_documented
+    include: ^models/marts
+  - name: check_columns_are_documented_in_public_models
   - name: check_source_columns_are_all_documented
     exclude: ^models/staging/crm # Not a good idea, here for demonstration purposes only
 
