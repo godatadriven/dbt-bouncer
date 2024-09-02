@@ -261,6 +261,10 @@ def check_macro_property_file_location(macro: "Macros", **kwargs) -> None:
 
     """
     expected_substr = "_".join(macro.original_file_path[6:].split("/")[:-1])
+
+    assert (
+        macro.patch_path is not None
+    ), f"Macro `{macro.name}` is not defined in a `.yml` properties file."
     properties_yml_name = macro.patch_path.split("/")[-1]
 
     if macro.original_file_path.startswith(
