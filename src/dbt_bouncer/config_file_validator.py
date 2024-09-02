@@ -193,6 +193,8 @@ def validate_conf(config_file_contents: Dict[str, Any]) -> "DbtBouncerConf":
         DbtBouncerModelBase,
         DbtBouncerRunResult,
         DbtBouncerRunResultBase,
+        DbtBouncerSource,
+        DbtBouncerSourceBase,
         DbtBouncerTest,
     )
 

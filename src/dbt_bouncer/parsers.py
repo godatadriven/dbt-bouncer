@@ -111,11 +111,14 @@ class DbtBouncerSemanticModel(BaseModel):
     unique_id: str
 
 
+DbtBouncerSourceBase = Union[SourceDefinition_v10, SourceDefinition_v11, Sources]
+
+
 class DbtBouncerSource(BaseModel):
     """Model for all source nodes in `manifest.json`."""
 
     original_file_path: str
-    source: Union[SourceDefinition_v10, SourceDefinition_v11, Sources]
+    source: DbtBouncerSourceBase
     unique_id: str
 
 

@@ -129,27 +129,27 @@ manifest_checks:
 #   # Semantic models
 #   - name: check_semantic_model_based_on_non_public_models
 
-#   # Sources
-#   - name: check_source_description_populated
-#   - name: check_source_freshness_populated
-#   - name: check_source_loader_populated
-#   - name: check_source_has_meta_keys
-#     keys:
-#       - contact:
-#           - email
-#           - slack
-#       - owner
-#   - name: check_source_has_tags
-#     tags:
-#       - example_tag
-#   - name: check_source_names
-#     source_name_pattern: >
-#       ^[a-z0-9_]*$
-#   - name: check_source_not_orphaned
-#     include: ^models/staging/crm
-#   - name: check_source_property_file_location
-#   - name: check_source_used_by_models_in_same_directory
-#   - name: check_source_used_by_only_one_model
+  # Sources
+  - name: check_source_description_populated
+  - name: check_source_freshness_populated
+  - name: check_source_loader_populated
+  - name: check_source_has_meta_keys
+    keys:
+      - contact:
+          - email
+          - slack
+      - owner
+  - name: check_source_has_tags
+    tags:
+      - example_tag
+  - name: check_source_names
+    source_name_pattern: >
+      ^[a-z0-9_]*$
+  - name: check_source_not_orphaned
+    include: ^models/staging/crm
+  - name: check_source_property_file_location
+  - name: check_source_used_by_models_in_same_directory
+  - name: check_source_used_by_only_one_model
 
   # Unit tests
   - name: check_unit_test_expect_format
