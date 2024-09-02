@@ -29,14 +29,13 @@ jobs:
             - name: Checkout
               run: git clone https://github.com/godatadriven/dbt-bouncer.git --branch $(echo "${{ github.ref }}" | cut -d "/" -f3) --depth 1
 
-            - run: cd dbt-bouncer/dbt-bouncer
-
             - run: |
+                cd dbt-bouncer
                 pwd
                 ls -ahl
 
             - name: Run `dbt-bouncer`
-              uses: ./
+              uses: ./dbt-bouncer
               with:
                 config-file: ./dbt-bouncer-example.yml
                 send-pr-comment: false
@@ -88,7 +87,7 @@ jobs:
                     - '3.12'
         steps:
             # PyPi appears to be "slow" to register new packages, adding manual delay to account for this
-            - run: sleep 30
+            - run: sleep 60
 
             - name: Checkout
               uses: actions/checkout@v4
