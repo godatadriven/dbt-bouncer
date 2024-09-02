@@ -280,6 +280,27 @@ def test_check_source_description_populated(source, expectation):
             ),
             pytest.raises(AssertionError),
         ),
+        (
+            Sources(
+                **{
+                    "description": "Description that is more than 4 characters.",
+                    "fqn": ["package_name", "source_1", "table_1"],
+                    "freshness": None,
+                    "identifier": "table_1",
+                    "loader": "",
+                    "name": "table_1",
+                    "original_file_path": "models/staging/_sources.yml",
+                    "package_name": "package_name",
+                    "path": "models/staging/_sources.yml",
+                    "resource_type": "source",
+                    "schema": "main",
+                    "source_description": "",
+                    "source_name": "source_1",
+                    "unique_id": "source.package_name.source_1.table_1",
+                },
+            ),
+            pytest.raises(AssertionError),
+        ),
     ],
 )
 def test_check_source_freshness_populated(source, expectation):
