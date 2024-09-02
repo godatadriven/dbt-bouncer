@@ -161,7 +161,7 @@ def load_config_file_contents(config_file_path: Path) -> Mapping[str, Any]:
             )
     else:
         raise RuntimeError(
-            f"Config file must be either a `pyproject.toml`, `.yaml` or `.yaml file. Got {config_file_path.suffix}."
+            f"Config file must be either a `pyproject.toml`, `.yaml` or `.yml` file. Got {config_file_path.suffix}."
         )
 
 
