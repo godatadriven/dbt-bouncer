@@ -343,7 +343,7 @@ class CheckModelDirectories(BaseCheck):
 
         assert (
             path_after_match.split("/")[0] in self.permitted_sub_directories
-        ), f"`{self.model.name}` is located in `{self.model.original_file_path.split('/')[1]}`, this is not a valid sub-directory. {path_after_match.split('/')[0]}"
+        ), f"`{self.model.name}` is located in `{self.model.original_file_path.split('/')[1]}`, this is not a valid sub-directory."
 
 
 class CheckModelHasContractsEnforced(BaseCheck):
