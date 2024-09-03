@@ -16,7 +16,7 @@ class DbtBouncerConf(BaseModel):
 
     check_classes: List[Dict[str, Union[Any, str]]] = [
         {"class": getattr(x, x.__name__), "source_file": x.__file__}
-        for x in get_check_objects()["classes"]
+        for x in get_check_objects()
     ]
 
     # Catalog checks
