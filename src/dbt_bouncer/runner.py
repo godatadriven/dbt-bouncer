@@ -71,7 +71,7 @@ def runner(
     """
     check_classes: List[Dict[str, Union[Any, str]]] = [
         {"class": getattr(x, x.__name__), "source_file": x.__file__}
-        for x in get_check_objects()["classes"]
+        for x in get_check_objects()
     ]
     for c in check_classes:
         locals()[c["class"].__name__] = c["class"]  # type: ignore[union-attr]
