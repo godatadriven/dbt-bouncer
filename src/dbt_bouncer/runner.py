@@ -3,6 +3,7 @@
 # TODO Remove after this program no longer support Python 3.8.*
 from __future__ import annotations
 
+import copy
 import json
 import logging
 import operator
@@ -112,20 +113,21 @@ def runner(
         if len(iterate_over_value) == 1:
             iterate_value = next(iter(iterate_over_value))
             for i in locals()[f"{iterate_value}s"]:
-                if resource_in_path(check, i):
+                check_i = copy.deepcopy(check)
+                if resource_in_path(check_i, i):
                     check_run_id = (
-                        f"{check.name}:{check.index}:{i.unique_id.split('.')[2]}"
+                        f"{check_i.name}:{check_i.index}:{i.unique_id.split('.')[2]}"
                     )
-                    setattr(check, iterate_value, getattr(i, iterate_value, i))
+                    setattr(check_i, iterate_value, getattr(i, iterate_value, i))
 
-                    for x in parsed_data.keys() & check.__annotations__.keys():
-                        setattr(check, x, parsed_data[x])
+                    for x in parsed_data.keys() & check_i.__annotations__.keys():
+                        setattr(check_i, x, parsed_data[x])
 
                     checks_to_run.append(
                         {
-                            "check": check,
+                            "check": check_i,
                             "check_run_id": check_run_id,
-                            "severity": check.severity,
+                            "severity": check_i.severity,
                         },
                     )
         elif len(iterate_over_value) > 1:

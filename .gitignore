@@ -201,3 +201,4 @@ tests/fixtures/dbt_18/target/graph.gpickle
 tests/fixtures/dbt_18/target/partial_parse.msgpack
 tests/fixtures/dbt_18/target/perf_info.json
 tests/fixtures/dbt_18/target/semantic_manifest.json
+tmp/
