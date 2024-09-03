@@ -31,6 +31,9 @@ with warnings.catch_warnings():
         SemanticModel as SemanticModel_v10,
     )
     from dbt_artifacts_parser.parsers.manifest.manifest_v10 import (
+        SingularTestNode as SingularTestNode_v10,
+    )
+    from dbt_artifacts_parser.parsers.manifest.manifest_v10 import (
         SourceDefinition as SourceDefinition_v10,
     )
     from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
@@ -47,12 +50,16 @@ with warnings.catch_warnings():
         SemanticModel as SemanticModel_v11,
     )
     from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
+        SingularTestNode as SingularTestNode_v11,
+    )
+    from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
         SourceDefinition as SourceDefinition_v11,
     )
     from dbt_artifacts_parser.parsers.manifest.manifest_v12 import (
         Exposures,
         Macros,
         ManifestV12,
+        Nodes2,
         Nodes4,
         Nodes6,
         SemanticModels,
@@ -144,7 +151,14 @@ class DbtBouncerSource(BaseModel):
     unique_id: str
 
 
-DbtBouncerTestBase = Union[GenericTestNode_v10, GenericTestNode_v11, Nodes6]
+DbtBouncerTestBase = Union[
+    GenericTestNode_v10,
+    SingularTestNode_v10,
+    GenericTestNode_v11,
+    SingularTestNode_v11,
+    Nodes2,
+    Nodes6,
+]
 
 
 class DbtBouncerTest(BaseModel):

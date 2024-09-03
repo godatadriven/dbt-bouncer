@@ -246,7 +246,9 @@ class CheckColumnHasSpecifiedTest(BaseCheck):
         relevant_tests = [
             t
             for t in self.tests
-            if t.test_metadata.name == self.test_name
+            if hasattr(t, "test_metadata") is True
+            and hasattr(t, "attached_node") is True
+            and t.test_metadata.name == self.test_name
             and t.attached_node == self.catalog_node.unique_id
         ]
         non_complying_columns = [

@@ -214,10 +214,14 @@ class CheckModelDocumentedInSameDirectory(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
+        model_sql_dir = self.model.original_file_path.split("/")[:-1]
+        assert (  # noqa: PT018
+            hasattr(self.model, "patch_path") and self.model.patch_path is not None
+        ), f"`{self.model.name}` is not documented."
+
         model_doc_dir = self.model.patch_path[
             self.model.patch_path.find("models") :
         ].split("/")[:-1]
-        model_sql_dir = self.model.original_file_path.split("/")[:-1]
 
         assert (
             model_doc_dir == model_sql_dir
@@ -522,6 +526,7 @@ class CheckModelHasUniqueTest(BaseCheck):
             test.attached_node == self.model.unique_id
             and test.test_metadata.name in self.accepted_uniqueness_tests  # type: ignore[operator]
             for test in self.tests
+            if hasattr(test, "test_metadata")
         )
         assert (
             num_unique_tests >= 1
@@ -902,6 +907,10 @@ class CheckModelPropertyFileLocation(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
+        assert (  # noqa: PT018
+            hasattr(self.model, "patch_path") and self.model.patch_path is not None
+        ), f"`{self.model.name}` is not documented."
+
         expected_substr = (
             "_".join(self.model.original_file_path.split("/")[1:-1])
             .replace("staging", "stg")
