@@ -155,10 +155,13 @@ def runner(
             check["check"].execute()
             check["outcome"] = "success"
         except Exception as e:
-            failure_message = list(
+            failure_message_full = list(
                 traceback.TracebackException.from_exception(e).format(),
-            )[-1].strip()
-            logging.debug(f"Check {check['check_run_id']} failed: {failure_message}")
+            )
+            failure_message = failure_message_full[-1].strip()
+            logging.debug(
+                f"Check {check['check_run_id']} failed: {' '.join(failure_message_full)}"
+            )
             check["outcome"] = "failed"
             check["failure_message"] = failure_message
 
