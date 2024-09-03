@@ -113,8 +113,8 @@ def get_check_objects() -> List[Type[BaseCheck]]:
 
         for obj in [i for i in dir(imported_check_file) if i.startswith("Check")]:
             loader = SourceFileLoader(obj, check_file.absolute().__str__())
-            spec = importlib.util.spec_from_loader(loader.name, loader)
-            locals()[obj] = importlib.util.module_from_spec(spec)  # type: ignore[arg-type]
+            spec = importlib.util.spec_from_loader(loader.name, loader)  # type: ignore[attr-defined]
+            locals()[obj] = importlib.util.module_from_spec(spec)  # type: ignore[attr-defined]
             loader.exec_module(locals()[obj])
             check_objects.append(locals()[obj])
 
