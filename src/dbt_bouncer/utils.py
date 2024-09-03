@@ -21,10 +21,13 @@ if TYPE_CHECKING:
 def create_github_comment_file(failed_checks: List[List[str]]) -> None:
     """Create a markdown file containing a comment for GitHub."""
     md_formatted_comment = make_markdown_table(
-        [["Check name", "Failure message"], *sorted(failed_checks)],
+        [["Check name", "Failure message"], *sorted(failed_checks[:25])],
     )
 
-    md_formatted_comment = f"## **Failed `dbt-bouncer`** checks\n\n{md_formatted_comment}\n\nSent from this [GitHub Action workflow run](https://github.com/{os.environ.get('GITHUB_REPOSITORY', None)}/actions/runs/{os.environ.get('GITHUB_RUN_ID', None)})."  # Would like to be more specific and include the job ID, but it's not exposed as an environment variable: https://github.com/actions/runner/issues/324
+    # Would like to be more specific and include the job ID, but it's not exposed as an environment variable: https://github.com/actions/runner/issues/324
+    md_formatted_comment = f"## **Failed `dbt-bouncer`** checks\n\n{md_formatted_comment}\n\nSent from this [GitHub Action workflow run](https://github.com/{os.environ.get('GITHUB_REPOSITORY', None)}/actions/runs/{os.environ.get('GITHUB_RUN_ID', None)})."
+    if len(failed_checks) > 25:
+        md_formatted_comment += f"\n\n**Note:** Only the first 25 failed checks (of {len(failed_checks)}) are shown."
 
     logging.debug(f"{md_formatted_comment=}")
 

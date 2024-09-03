@@ -123,11 +123,9 @@ def runner(
 
                     checks_to_run.append(
                         {
-                            **{
-                                "check": check,
-                                "check_run_id": check_run_id,
-                            },
-                            **check.model_dump(),
+                            "check": check,
+                            "check_run_id": check_run_id,
+                            "severity": check.severity,
                         },
                     )
         elif len(iterate_over_value) > 1:
@@ -140,11 +138,9 @@ def runner(
                 setattr(check, x, parsed_data[x])
             checks_to_run.append(
                 {
-                    **{
-                        "check": check,
-                        "check_run_id": check_run_id,
-                    },
-                    **check.model_dump(),
+                    "check": check,
+                    "check_run_id": check_run_id,
+                    "severity": check.severity,
                 },
             )
 
@@ -197,7 +193,12 @@ def runner(
     if num_checks_error > 0 or num_checks_warn > 0:
         logger = logging.error if num_checks_error > 0 else logging.warning
         logger(
-            f"`dbt-bouncer` {'failed' if num_checks_error > 0 else 'has warnings'}. Please see below for more details or run `dbt-bouncer` with the `-v` flag...",
+            f"`dbt-bouncer` {'failed' if num_checks_error > 0 else 'has warnings'}. Please see below for more details or run `dbt-bouncer` with the `-v` flag."
+            + (
+                ""
+                if num_checks_error < 25
+                else " More than 25 checks failed, to see a full list of all failed checks re-run `dbt-bouncer` with the `--output-file` flag."
+            )
         )
         failed_checks = [
             {
@@ -212,7 +213,7 @@ def runner(
         logger(
             ("Failed checks:\n" if num_checks_error > 0 else "Warning checks:\n")
             + tabulate(
-                failed_checks,
+                failed_checks[:25],  # Print max of 25 failed tests to console
                 headers={
                     "check_run_id": "Check name",
                     "severity": "Severity",
@@ -223,7 +224,11 @@ def runner(
         )
 
         if create_pr_comment_file:
-            create_github_comment_file(failed_checks=failed_checks)
+            create_github_comment_file(
+                failed_checks=[
+                    [f["check_run_id"], f["failure_message"]] for f in failed_checks
+                ]
+            )
 
     if output_file is not None:
         coverage_file = Path().cwd() / output_file
