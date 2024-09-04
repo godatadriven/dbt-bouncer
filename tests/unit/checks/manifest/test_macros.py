@@ -8,13 +8,20 @@ with warnings.catch_warnings():
     from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Macros
 
 from dbt_bouncer.checks.manifest.check_macros import (
-    check_macro_arguments_description_populated,
-    check_macro_code_does_not_contain_regexp_pattern,
-    check_macro_description_populated,
-    check_macro_max_number_of_lines,
-    check_macro_name_matches_file_name,
-    check_macro_property_file_location,
+    CheckMacroArgumentsDescriptionPopulated,
+    CheckMacroCodeDoesNotContainRegexpPattern,
+    CheckMacroDescriptionPopulated,
+    CheckMacroMaxNumberOfLines,
+    CheckMacroNameMatchesFileName,
+    CheckMacroPropertyFileLocation,
 )
+
+CheckMacroArgumentsDescriptionPopulated.model_rebuild()
+CheckMacroCodeDoesNotContainRegexpPattern.model_rebuild()
+CheckMacroDescriptionPopulated.model_rebuild()
+CheckMacroMaxNumberOfLines.model_rebuild()
+CheckMacroNameMatchesFileName.model_rebuild()
+CheckMacroPropertyFileLocation.model_rebuild()
 
 
 @pytest.mark.parametrize(
@@ -40,6 +47,21 @@ from dbt_bouncer.checks.manifest.check_macros import (
                     "path": "macros/macro_1.sql",
                     "resource_type": "macro",
                     "unique_id": "macro.package_name.macro_1",
+                },
+            ),
+            does_not_raise(),
+        ),
+        (
+            Macros(
+                **{
+                    "arguments": [],
+                    "macro_sql": "{% materialization udf, adapter=\"bigquery\" %}\n{%- set target = adapter.quote(this.database ~ '.' ~ this.schema ~ '.' ~ this.identifier) -%}\n\n{%- set parameter_list=config.get('parameter_list') -%}\n{%- set ret=config.get('returns') -%}\n{%- set description=config.get('description') -%}\n\n{%- set create_sql -%}\nCREATE OR REPLACE FUNCTION {{ target }}({{ parameter_list }})\nAS (\n  {{ sql }}\n);\n{%- endset -%}\n\n{% call statement('main') -%}\n  {{ create_sql }}\n{%- endcall %}\n\n{{ return({'relations': []}) }}\n\n{% endmaterialization %}",
+                    "name": "materialization_udf",
+                    "original_file_path": "macros/materialization_udf.sql",
+                    "package_name": "package_name",
+                    "path": "macros/materialization_udf.sql",
+                    "resource_type": "macro",
+                    "unique_id": "macro.package_name.materialization_udf",
                 },
             ),
             does_not_raise(),
@@ -141,9 +163,9 @@ from dbt_bouncer.checks.manifest.check_macros import (
 )
 def test_check_macro_arguments_description_populated(macro, expectation):
     with expectation:
-        check_macro_arguments_description_populated(
-            macro=macro,
-        )
+        CheckMacroArgumentsDescriptionPopulated(
+            macro=macro, name="check_macro_arguments_description_populated"
+        ).execute()
 
 
 @pytest.mark.parametrize(
@@ -207,10 +229,11 @@ def test_check_macro_code_does_not_contain_regexp_pattern(
     expectation,
 ):
     with expectation:
-        check_macro_code_does_not_contain_regexp_pattern(
+        CheckMacroCodeDoesNotContainRegexpPattern(
             macro=macro,
+            name="check_macro_code_does_not_contain_regexp_pattern",
             regexp_pattern=regexp_pattern,
-        )
+        ).execute()
 
 
 @pytest.mark.parametrize(
@@ -281,9 +304,10 @@ def test_check_macro_code_does_not_contain_regexp_pattern(
 )
 def test_check_macro_description_populated(macro, expectation):
     with expectation:
-        check_macro_description_populated(
+        CheckMacroDescriptionPopulated(
             macro=macro,
-        )
+            name="check_macro_description_populated",
+        ).execute()
 
 
 @pytest.mark.parametrize(
@@ -323,10 +347,11 @@ def test_check_macro_description_populated(macro, expectation):
 )
 def test_check_macro_max_number_of_lines(max_number_of_lines, macro, expectation):
     with expectation:
-        check_macro_max_number_of_lines(
+        CheckMacroMaxNumberOfLines(
             max_number_of_lines=max_number_of_lines,
             macro=macro,
-        )
+            name="check_macro_max_number_of_lines",
+        ).execute()
 
 
 @pytest.mark.parametrize(
@@ -392,9 +417,10 @@ def test_check_macro_max_number_of_lines(max_number_of_lines, macro, expectation
 )
 def test_check_macro_name_matches_file_name(macro, expectation):
     with expectation:
-        check_macro_name_matches_file_name(
+        CheckMacroNameMatchesFileName(
             macro=macro,
-        )
+            name="check_macro_name_matches_file_name",
+        ).execute()
 
 
 @pytest.mark.parametrize(
@@ -475,10 +501,26 @@ def test_check_macro_name_matches_file_name(macro, expectation):
             ),
             pytest.raises(AssertionError),
         ),
+        (
+            Macros(
+                **{
+                    "macro_sql": "select 1",
+                    "name": "macro_1",
+                    "original_file_path": "macros/dir1/macro_1.sql",
+                    "package_name": "package_name",
+                    "patch_path": None,
+                    "path": "macros/dir1/macro_1.sql",
+                    "resource_type": "macro",
+                    "unique_id": "macro.package_name.macro_1",
+                },
+            ),
+            pytest.raises(AssertionError),
+        ),
     ],
 )
 def test_check_macro_property_file_location(macro, expectation):
     with expectation:
-        check_macro_property_file_location(
+        CheckMacroPropertyFileLocation(
             macro=macro,
-        )
+            name="check_macro_property_file_location",
+        ).execute()

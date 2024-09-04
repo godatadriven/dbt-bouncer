@@ -18,6 +18,9 @@ with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
     from dbt_artifacts_parser.parsers.catalog.catalog_v1 import CatalogTable, CatalogV1
     from dbt_artifacts_parser.parsers.manifest.manifest_v10 import (
+        Exposure as Exposure_v10,
+    )
+    from dbt_artifacts_parser.parsers.manifest.manifest_v10 import (
         GenericTestNode as GenericTestNode_v10,
     )
     from dbt_artifacts_parser.parsers.manifest.manifest_v10 import ManifestV10
@@ -28,7 +31,13 @@ with warnings.catch_warnings():
         SemanticModel as SemanticModel_v10,
     )
     from dbt_artifacts_parser.parsers.manifest.manifest_v10 import (
+        SingularTestNode as SingularTestNode_v10,
+    )
+    from dbt_artifacts_parser.parsers.manifest.manifest_v10 import (
         SourceDefinition as SourceDefinition_v10,
+    )
+    from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
+        Exposure as Exposure_v11,
     )
     from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
         GenericTestNode as GenericTestNode_v11,
@@ -41,12 +50,16 @@ with warnings.catch_warnings():
         SemanticModel as SemanticModel_v11,
     )
     from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
+        SingularTestNode as SingularTestNode_v11,
+    )
+    from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
         SourceDefinition as SourceDefinition_v11,
     )
     from dbt_artifacts_parser.parsers.manifest.manifest_v12 import (
         Exposures,
         Macros,
         ManifestV12,
+        Nodes2,
         Nodes4,
         Nodes6,
         SemanticModels,
@@ -81,43 +94,78 @@ class DbtBouncerManifest(BaseModel):
     manifest: Union[ManifestV10, ManifestV11, ManifestV12]
 
 
+DbtBouncerExposureBase = Union[Exposure_v10, Exposure_v11, Exposures]
+
+
+class DbtBouncerExposure(BaseModel):
+    """Model for all exposure nodes in `manifest.json`."""
+
+    model: DbtBouncerExposureBase
+    original_file_path: str
+    unique_id: str
+
+
+DbtBouncerModelBase = Union[ModelNode_v10, ModelNode_v11, Nodes4]
+
+
 class DbtBouncerModel(BaseModel):
     """Model for all model nodes in `manifest.json`."""
 
-    model: Union[ModelNode_v10, ModelNode_v11, Nodes4]
+    model: DbtBouncerModelBase
     original_file_path: str
     unique_id: str
+
+
+DbtBouncerRunResultBase = Union[RunResultOutput_v4, RunResultOutput_v5, Result]
 
 
 class DbtBouncerRunResult(BaseModel):
     """Model for all results in `run_results.json`."""
 
     original_file_path: str
-    run_result: Union[RunResultOutput_v4, RunResultOutput_v5, Result]
+    run_result: DbtBouncerRunResultBase
     unique_id: str
+
+
+DbtBouncerSemanticModelBase = Union[
+    SemanticModel_v10, SemanticModel_v11, SemanticModels
+]
 
 
 class DbtBouncerSemanticModel(BaseModel):
     """Model for all semantic model nodes in `manifest.json`."""
 
     original_file_path: str
-    semantic_model: Union[SemanticModel_v10, SemanticModel_v11, SemanticModels]
+    semantic_model: DbtBouncerSemanticModelBase
     unique_id: str
+
+
+DbtBouncerSourceBase = Union[SourceDefinition_v10, SourceDefinition_v11, Sources]
 
 
 class DbtBouncerSource(BaseModel):
     """Model for all source nodes in `manifest.json`."""
 
     original_file_path: str
-    source: Union[SourceDefinition_v10, SourceDefinition_v11, Sources]
+    source: DbtBouncerSourceBase
     unique_id: str
+
+
+DbtBouncerTestBase = Union[
+    GenericTestNode_v10,
+    SingularTestNode_v10,
+    GenericTestNode_v11,
+    SingularTestNode_v11,
+    Nodes2,
+    Nodes6,
+]
 
 
 class DbtBouncerTest(BaseModel):
     """Model for all test nodes in `manifest.json`."""
 
     original_file_path: str
-    test: Union[GenericTestNode_v10, GenericTestNode_v11, Nodes6]
+    test: DbtBouncerTestBase
     unique_id: str
 
 

@@ -8,10 +8,15 @@ with warnings.catch_warnings():
     from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Nodes4
 
 from dbt_bouncer.checks.manifest.check_lineage import (
-    check_lineage_permitted_upstream_models,
-    check_lineage_seed_cannot_be_used,
-    check_lineage_source_cannot_be_used,
+    CheckLineagePermittedUpstreamModels,
+    CheckLineageSeedCannotBeUsed,
+    CheckLineageSourceCannotBeUsed,
 )
+from dbt_bouncer.parsers import DbtBouncerManifest, DbtBouncerModelBase  # noqa: F401
+
+CheckLineagePermittedUpstreamModels.model_rebuild()
+CheckLineageSeedCannotBeUsed.model_rebuild()
+CheckLineageSourceCannotBeUsed.model_rebuild()
 
 
 @pytest.mark.parametrize(
@@ -160,12 +165,13 @@ def test_check_lineage_permitted_upstream_models(
     expectation,
 ):
     with expectation:
-        check_lineage_permitted_upstream_models(
+        CheckLineagePermittedUpstreamModels(
             manifest_obj=manifest_obj,
             model=model,
             models=models,
+            name="check_lineage_permitted_upstream_models",
             upstream_path_pattern=upstream_path_pattern,
-        )
+        ).execute()
 
 
 @pytest.mark.parametrize(
@@ -225,9 +231,10 @@ def test_check_lineage_permitted_upstream_models(
 )
 def test_check_lineage_seed_cannot_be_used(model, expectation):
     with expectation:
-        check_lineage_seed_cannot_be_used(
+        CheckLineageSeedCannotBeUsed(
             model=model,
-        )
+            name="check_lineage_seed_cannot_be_used",
+        ).execute()
 
 
 @pytest.mark.parametrize(
@@ -287,6 +294,7 @@ def test_check_lineage_seed_cannot_be_used(model, expectation):
 )
 def test_check_lineage_source_cannot_be_used(model, expectation):
     with expectation:
-        check_lineage_source_cannot_be_used(
+        CheckLineageSourceCannotBeUsed(
             model=model,
-        )
+            name="check_lineage_source_cannot_be_used",
+        ).execute()

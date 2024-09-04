@@ -5,13 +5,20 @@ import pytest
 
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
-    from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Nodes4
-
-from dbt_artifacts_parser.parsers.manifest.manifest_v12 import SemanticModels
+    from dbt_artifacts_parser.parsers.manifest.manifest_v12 import (
+        Nodes4,
+        SemanticModels,
+    )
 
 from dbt_bouncer.checks.manifest.check_semantic_models import (
-    check_semantic_model_based_on_non_public_models,
+    CheckSemanticModelOnNonPublicModels,
 )
+from dbt_bouncer.parsers import (  # noqa: F401
+    DbtBouncerModelBase,
+    DbtBouncerSemanticModelBase,
+)
+
+CheckSemanticModelOnNonPublicModels.model_rebuild()
 
 
 @pytest.mark.parametrize(
@@ -103,7 +110,8 @@ def test_check_semantic_model_based_on_non_public_models(
     models, semantic_model, expectation
 ):
     with expectation:
-        check_semantic_model_based_on_non_public_models(
+        CheckSemanticModelOnNonPublicModels(
             models=models,
+            name="check_semantic_model_based_on_non_public_models",
             semantic_model=semantic_model,
-        )
+        ).execute()

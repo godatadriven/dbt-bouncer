@@ -8,9 +8,13 @@ with warnings.catch_warnings():
     from dbt_artifacts_parser.parsers.manifest.manifest_v12 import UnitTests
 
 from dbt_bouncer.checks.manifest.check_unit_tests import (
-    check_unit_test_expect_format,
-    check_unit_test_given_formats,
+    CheckUnitTestExpectFormats,
+    CheckUnitTestGivenFormats,
 )
+from dbt_bouncer.parsers import DbtBouncerManifest  # noqa: F401
+
+CheckUnitTestExpectFormats.model_rebuild()
+CheckUnitTestGivenFormats.model_rebuild()
 
 
 @pytest.mark.parametrize(
@@ -66,11 +70,12 @@ def test_check_unit_test_expect_format(
     expectation,
 ):
     with expectation:
-        check_unit_test_expect_format(
+        CheckUnitTestExpectFormats(
             manifest_obj=manifest_obj,
+            name="check_unit_test_expect_format",
             permitted_formats=permitted_formats,
             unit_test=unit_test,
-        )
+        ).execute()
 
 
 @pytest.mark.parametrize(
@@ -132,8 +137,9 @@ def test_check_unit_test_given_formats(
     expectation,
 ):
     with expectation:
-        check_unit_test_given_formats(
+        CheckUnitTestGivenFormats(
             manifest_obj=manifest_obj,
+            name="check_unit_test_given_formats",
             permitted_formats=permitted_formats,
             unit_test=unit_test,
-        )
+        ).execute()

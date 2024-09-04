@@ -7,14 +7,25 @@ with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
     from dbt_artifacts_parser.parsers.catalog.catalog_v1 import CatalogTable
     from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Nodes4, Nodes6
-
 from dbt_bouncer.checks.catalog.check_columns import (
-    check_column_description_populated,
-    check_column_has_specified_test,
-    check_column_name_complies_to_column_type,
-    check_columns_are_all_documented,
-    check_columns_are_documented_in_public_models,
+    CheckColumnDescriptionPopulated,
+    CheckColumnHasSpecifiedTest,
+    CheckColumnNameCompliesToColumnType,
+    CheckColumnsAreAllDocumented,
+    CheckColumnsAreDocumentedInPublicModels,
 )
+from dbt_bouncer.parsers import (  # noqa: F401
+    DbtBouncerModelBase,
+    DbtBouncerTest,
+    DbtBouncerTestBase,
+)
+
+CheckColumnDescriptionPopulated.model_rebuild()
+CheckColumnNameCompliesToColumnType.model_rebuild()
+CheckColumnNameCompliesToColumnType.model_rebuild()
+CheckColumnsAreAllDocumented.model_rebuild()
+CheckColumnsAreDocumentedInPublicModels.model_rebuild()
+CheckColumnHasSpecifiedTest.model_rebuild()
 
 
 @pytest.mark.parametrize(
@@ -135,10 +146,11 @@ from dbt_bouncer.checks.catalog.check_columns import (
 )
 def test_check_column_description_populated(catalog_node, models, expectation):
     with expectation:
-        check_column_description_populated(
+        CheckColumnDescriptionPopulated(
             catalog_node=catalog_node,
             models=models,
-        )
+            name="check_column_description_populated",
+        ).execute()
 
 
 @pytest.mark.parametrize(
@@ -252,12 +264,13 @@ def test_check_column_has_specified_test(
     expectation,
 ):
     with expectation:
-        check_column_has_specified_test(
+        CheckColumnHasSpecifiedTest(
             catalog_node=catalog_node,
             column_name_pattern=column_name_pattern,
+            name="check_column_has_specified_test",
             test_name=test_name,
             tests=tests,
-        )
+        ).execute()
 
 
 @pytest.mark.parametrize(
@@ -370,10 +383,11 @@ def test_check_column_has_specified_test(
 )
 def test_check_columns_are_all_documented(catalog_node, models, expectation):
     with expectation:
-        check_columns_are_all_documented(
+        CheckColumnsAreAllDocumented(
             catalog_node=catalog_node,
             models=models,
-        )
+            name="check_columns_are_all_documented",
+        ).execute()
 
 
 @pytest.mark.parametrize(
@@ -490,10 +504,11 @@ def test_check_columns_are_documented_in_public_models(
     expectation,
 ):
     with expectation:
-        check_columns_are_documented_in_public_models(
+        CheckColumnsAreDocumentedInPublicModels(
             catalog_node=catalog_node,
             models=models,
-        )
+            name="check_columns_are_documented_in_public_models",
+        ).execute()
 
 
 @pytest.mark.parametrize(
@@ -587,8 +602,9 @@ def test_check_column_name_complies_to_column_type(
     expectation,
 ):
     with expectation:
-        check_column_name_complies_to_column_type(
+        CheckColumnNameCompliesToColumnType(
             catalog_node=catalog_node,
             column_name_pattern=column_name_pattern,
+            name="check_column_name_complies_to_column_type",
             types=types,
-        )
+        ).execute()

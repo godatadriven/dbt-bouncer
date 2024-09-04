@@ -7,18 +7,36 @@ with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
     from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Nodes4, Sources
 
+from dbt_bouncer.checks.common import NestedDict  # noqa: F401
 from dbt_bouncer.checks.manifest.check_sources import (
-    check_source_description_populated,
-    check_source_freshness_populated,
-    check_source_has_meta_keys,
-    check_source_has_tags,
-    check_source_loader_populated,
-    check_source_names,
-    check_source_not_orphaned,
-    check_source_property_file_location,
-    check_source_used_by_models_in_same_directory,
-    check_source_used_by_only_one_model,
+    CheckSourceDescriptionPopulated,
+    CheckSourceFreshnessPopulated,
+    CheckSourceHasMetaKeys,
+    CheckSourceHasTags,
+    CheckSourceLoaderPopulated,
+    CheckSourceNames,
+    CheckSourceNotOrphaned,
+    CheckSourcePropertyFileLocation,
+    CheckSourceUsedByModelsInSameDirectory,
+    CheckSourceUsedByOnlyOneModel,
 )
+from dbt_bouncer.parsers import (  # noqa: F401
+    DbtBouncerModel,
+    DbtBouncerModelBase,
+    DbtBouncerSource,
+    DbtBouncerSourceBase,
+)
+
+CheckSourceDescriptionPopulated.model_rebuild()
+CheckSourceFreshnessPopulated.model_rebuild()
+CheckSourceHasMetaKeys.model_rebuild()
+CheckSourceHasTags.model_rebuild()
+CheckSourceLoaderPopulated.model_rebuild()
+CheckSourceNames.model_rebuild()
+CheckSourceNotOrphaned.model_rebuild()
+CheckSourcePropertyFileLocation.model_rebuild()
+CheckSourceUsedByModelsInSameDirectory.model_rebuild()
+CheckSourceUsedByOnlyOneModel.model_rebuild()
 
 
 @pytest.mark.parametrize(
@@ -172,9 +190,10 @@ from dbt_bouncer.checks.manifest.check_sources import (
 )
 def test_check_source_description_populated(source, expectation):
     with expectation:
-        check_source_description_populated(
+        CheckSourceDescriptionPopulated(
+            name="check_source_description_populated",
             source=source,
-        )
+        ).execute()
 
 
 @pytest.mark.parametrize(
@@ -280,13 +299,35 @@ def test_check_source_description_populated(source, expectation):
             ),
             pytest.raises(AssertionError),
         ),
+        (
+            Sources(
+                **{
+                    "description": "Description that is more than 4 characters.",
+                    "fqn": ["package_name", "source_1", "table_1"],
+                    "freshness": None,
+                    "identifier": "table_1",
+                    "loader": "",
+                    "name": "table_1",
+                    "original_file_path": "models/staging/_sources.yml",
+                    "package_name": "package_name",
+                    "path": "models/staging/_sources.yml",
+                    "resource_type": "source",
+                    "schema": "main",
+                    "source_description": "",
+                    "source_name": "source_1",
+                    "unique_id": "source.package_name.source_1.table_1",
+                },
+            ),
+            pytest.raises(AssertionError),
+        ),
     ],
 )
 def test_check_source_freshness_populated(source, expectation):
     with expectation:
-        check_source_freshness_populated(
+        CheckSourceFreshnessPopulated(
+            name="check_source_freshness_populated",
             source=source,
-        )
+        ).execute()
 
 
 @pytest.mark.parametrize(
@@ -336,9 +377,10 @@ def test_check_source_freshness_populated(source, expectation):
 )
 def test_check_source_loader_populated(source, expectation):
     with expectation:
-        check_source_loader_populated(
+        CheckSourceLoaderPopulated(
+            name="check_source_loader_populated",
             source=source,
-        )
+        ).execute()
 
 
 @pytest.mark.parametrize(
@@ -483,10 +525,11 @@ def test_check_source_loader_populated(source, expectation):
 )
 def test_check_source_has_meta_keys(keys, source, expectation):
     with expectation:
-        check_source_has_meta_keys(
+        CheckSourceHasMetaKeys(
             keys=keys,
+            name="check_source_has_meta_keys",
             source=source,
-        )
+        ).execute()
 
 
 @pytest.mark.parametrize(
@@ -540,10 +583,11 @@ def test_check_source_has_meta_keys(keys, source, expectation):
 )
 def test_check_source_has_tags(source, tags, expectation):
     with expectation:
-        check_source_has_tags(
+        CheckSourceHasTags(
+            name="check_source_has_tags",
             source=source,
             tags=tags,
-        )
+        ).execute()
 
 
 @pytest.mark.parametrize(
@@ -597,10 +641,11 @@ def test_check_source_has_tags(source, tags, expectation):
 )
 def test_check_source_names(source_name_pattern, source, expectation):
     with expectation:
-        check_source_names(
+        CheckSourceNames(
+            name="check_source_names",
             source_name_pattern=source_name_pattern,
             source=source,
-        )
+        ).execute()
 
 
 @pytest.mark.parametrize(
@@ -773,10 +818,11 @@ def test_check_source_names(source_name_pattern, source, expectation):
 )
 def test_check_source_not_orphaned(models, source, expectation):
     with expectation:
-        check_source_not_orphaned(
+        CheckSourceNotOrphaned(
             models=models,
+            name="check_source_not_orphaned",
             source=source,
-        )
+        ).execute()
 
 
 @pytest.mark.parametrize(
@@ -891,9 +937,10 @@ def test_check_source_not_orphaned(models, source, expectation):
 )
 def test_check_source_property_file_location(source, expectation):
     with expectation:
-        check_source_property_file_location(
+        CheckSourcePropertyFileLocation(
+            name="check_source_property_file_location",
             source=source,
-        )
+        ).execute()
 
 
 @pytest.mark.parametrize(
@@ -997,10 +1044,11 @@ def test_check_source_property_file_location(source, expectation):
 )
 def test_check_source_used_by_models_in_same_directory(models, source, expectation):
     with expectation:
-        check_source_used_by_models_in_same_directory(
+        CheckSourceUsedByModelsInSameDirectory(
             models=models,
+            name="check_source_used_by_models_in_same_directory",
             source=source,
-        )
+        ).execute()
 
 
 @pytest.mark.parametrize(
@@ -1173,7 +1221,8 @@ def test_check_source_used_by_models_in_same_directory(models, source, expectati
 )
 def test_check_source_used_by_only_one_model(models, source, expectation):
     with expectation:
-        check_source_used_by_only_one_model(
+        CheckSourceUsedByOnlyOneModel(
             models=models,
+            name="check_source_used_by_only_one_model",
             source=source,
-        )
+        ).execute()

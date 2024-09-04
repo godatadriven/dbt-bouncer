@@ -3,6 +3,8 @@ from pathlib import Path
 
 import sh
 
+from dbt_bouncer.logger import configure_console_logging
+
 
 def build_pex_file(dbt_version, pex_file_name):
     """Build a pex file of `dbt-bouncer` if it does not already exist."""
@@ -100,4 +102,5 @@ def main():
 
 
 if __name__ == "__main__":
+    configure_console_logging(1)
     main()

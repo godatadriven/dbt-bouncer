@@ -10,21 +10,24 @@ import re
 from functools import lru_cache
 from importlib.machinery import SourceFileLoader
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Union
+from typing import TYPE_CHECKING, Any, List, Mapping, Type
 
 import yaml
 
 if TYPE_CHECKING:
-    import function
+    from dbt_bouncer.check_base import BaseCheck
 
 
 def create_github_comment_file(failed_checks: List[List[str]]) -> None:
     """Create a markdown file containing a comment for GitHub."""
     md_formatted_comment = make_markdown_table(
-        [["Check name", "Failure message"], *sorted(failed_checks)],
+        [["Check name", "Failure message"], *sorted(failed_checks[:25])],
     )
 
-    md_formatted_comment = f"## **Failed `dbt-bouncer`** checks\n\n{md_formatted_comment}\n\nSent from this [GitHub Action workflow run](https://github.com/{os.environ.get('GITHUB_REPOSITORY', None)}/actions/runs/{os.environ.get('GITHUB_RUN_ID', None)})."  # Would like to be more specific and include the job ID, but it's not exposed as an environment variable: https://github.com/actions/runner/issues/324
+    # Would like to be more specific and include the job ID, but it's not exposed as an environment variable: https://github.com/actions/runner/issues/324
+    md_formatted_comment = f"## **Failed `dbt-bouncer`** checks\n\n{md_formatted_comment}\n\nSent from this [GitHub Action workflow run](https://github.com/{os.environ.get('GITHUB_REPOSITORY', None)}/actions/runs/{os.environ.get('GITHUB_RUN_ID', None)})."
+    if len(failed_checks) > 25:
+        md_formatted_comment += f"\n\n**Note:** Only the first 25 failed checks (of {len(failed_checks)}) are shown."
 
     logging.debug(f"{md_formatted_comment=}")
 
@@ -91,17 +94,14 @@ def flatten(structure: Any, key: str = "", path: str = "", flattened=None):
 
 
 @lru_cache
-def get_check_objects() -> Dict[str, Union[function, Any]]:
+def get_check_objects() -> List[Type[BaseCheck]]:
     """Get list of Check* classes and check_* functions.
 
     Returns:
-        Dict[str, Union[function, Any]]: Dictionary of Check* classes and check_* functions.
+        List[Type[BaseCheck]]: List of Check* classes.
 
     """
-    check_objects: Dict[str, Union[function, Any]] = {
-        "classes": [],
-        "functions": [],
-    }
+    check_objects = []
     check_files = [
         f for f in (Path(__file__).parent / "checks").glob("*/*.py") if f.is_file()
     ]
@@ -111,19 +111,14 @@ def get_check_objects() -> Dict[str, Union[function, Any]]:
         )
         imported_check_file = importlib.import_module(check_qual_name)
 
-        for obj in dir(imported_check_file):
+        for obj in [i for i in dir(imported_check_file) if i.startswith("Check")]:
             loader = SourceFileLoader(obj, check_file.absolute().__str__())
-            spec = importlib.util.spec_from_loader(loader.name, loader)
-            locals()[obj] = importlib.util.module_from_spec(spec)  # type: ignore[arg-type]
+            spec = importlib.util.spec_from_loader(loader.name, loader)  # type: ignore[attr-defined]
+            locals()[obj] = importlib.util.module_from_spec(spec)  # type: ignore[attr-defined]
             loader.exec_module(locals()[obj])
-            if obj.startswith("Check"):
-                check_objects["classes"].append(locals()[obj])
-            elif obj.startswith("check_"):
-                check_objects["functions"].append(locals()[obj])
+            check_objects.append(locals()[obj])
 
-    logging.debug(
-        f"Loaded {len(check_objects['classes'])} `Check*` classes and {len(check_objects['functions'])} `check)*` functions."
-    )
+    logging.debug(f"Loaded {len(check_objects)} `Check*` classes.")
     return check_objects
 
 
