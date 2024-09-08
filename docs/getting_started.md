@@ -10,12 +10,12 @@
 
 1. Run `dbt-bouncer` to validate that your conventions are being maintained.
 
-### Python
+### Installing with Python
 
 Install from [pypi.org](https://pypi.org/p/dbt-bouncer):
 
 ```shell
-pip install dbt-bouncer
+pip install dbt-bouncer # or via any other package manager
 ```
 
 Run:
@@ -46,6 +46,14 @@ Loading config from dbt-bouncer-example.yml...
 Loaded config from dbt-bouncer-example.yml...
 conf={'dbt_artifacts_dir': 'dbt_project/target', 'catalog_checks': [{'name': 'check_column_name_complies_to_column_type', 'column_name_pattern': '^is_.*', 'exclude': '^staging', 'types': ['BOOLEAN']}]}
 Validating conf...
+```
+
+### Running as an executable using [uv](https://github.com/astral-sh/uv)
+
+Run `dbt-bouncer` as a standalone Python executable using `uv`:
+
+```shell
+uvx dbt-bouncer --config-file <PATH_TO_CONFIG_FILE>
 ```
 
 ### GitHub Actions
