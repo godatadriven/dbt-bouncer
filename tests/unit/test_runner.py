@@ -15,7 +15,10 @@ with warnings.catch_warnings():
     )
 
 
+from unittest.mock import MagicMock
+
 import click
+from click.globals import push_context
 
 from dbt_bouncer.checks.common import NestedDict  # noqa: F401
 from dbt_bouncer.logger import configure_console_logging
@@ -414,6 +417,22 @@ def test_runner_windows(caplog, tmp_path):
     ctx = MagicMock(obj={"verbosity": 3})
     push_context(ctx)
 
+    from dbt_bouncer.config_file_parser import DbtBouncerConf
+
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", category=UserWarning)
+        from dbt_artifacts_parser.parser import parse_manifest
+        from dbt_artifacts_parser.parsers.catalog.catalog_v1 import (
+            CatalogTable,  # noqa: F401
+        )
+        from dbt_artifacts_parser.parsers.manifest.manifest_v12 import (  # noqa: F401
+            Exposures,
+            Macros,
+            Nodes4,
+            UnitTests,
+        )
+
+    DbtBouncerConf.model_rebuild()
     results = runner(
         bouncer_config=DbtBouncerConf(
             **{
