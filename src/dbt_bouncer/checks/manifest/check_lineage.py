@@ -13,6 +13,8 @@ if TYPE_CHECKING:
 
 from pydantic import Field
 
+from dbt_bouncer.utils import clean_path_str
+
 
 class CheckLineagePermittedUpstreamModels(BaseCheck):
     """Upstream models must have a path that matches the provided `upstream_path_pattern`.
@@ -64,9 +66,11 @@ class CheckLineagePermittedUpstreamModels(BaseCheck):
             upstream_model
             for upstream_model in upstream_models
             if re.compile(self.upstream_path_pattern.strip()).match(
-                next(
-                    m for m in self.models if m.unique_id == upstream_model
-                ).original_file_path,
+                clean_path_str(
+                    next(
+                        m for m in self.models if m.unique_id == upstream_model
+                    ).original_file_path
+                ),
             )
             is None
         ]

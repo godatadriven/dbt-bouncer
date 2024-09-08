@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 from pydantic import Field
 
 from dbt_bouncer.check_base import BaseCheck
-from dbt_bouncer.utils import find_missing_meta_keys
+from dbt_bouncer.utils import clean_path_str, find_missing_meta_keys
 
 
 class CheckSourceDescriptionPopulated(BaseCheck):
@@ -280,7 +280,9 @@ class CheckSourcePropertyFileLocation(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
-        path_cleaned = self.source.original_file_path.replace("models/staging", "")
+        path_cleaned = clean_path_str(self.source.original_file_path).replace(
+            "models/staging", ""
+        )
         expected_substring = "_".join(path_cleaned.split("/")[:-1])
 
         assert path_cleaned.split(

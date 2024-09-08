@@ -5,6 +5,8 @@ from typing import TYPE_CHECKING, ClassVar, Literal
 
 from pydantic import Field
 
+from dbt_bouncer.utils import clean_path_str
+
 if TYPE_CHECKING:
     import warnings
 
@@ -239,12 +241,16 @@ class CheckMacroNameMatchesFileName(BaseCheck):
         if self.macro.name.startswith("test_"):
             assert (
                 self.macro.name[5:]
-                == self.macro.original_file_path.split("/")[-1].split(".")[0]
+                == clean_path_str(self.macro.original_file_path)
+                .split("/")[-1]
+                .split(".")[0]
             ), f"Macro `{self.macro.unique_id}` is not in a file named `{self.macro.name[5:]}.sql`."
         else:
             assert (
                 self.macro.name
-                == self.macro.original_file_path.split("/")[-1].split(".")[0]
+                == clean_path_str(self.macro.original_file_path)
+                .split("/")[-1]
+                .split(".")[0]
             ), f"Macro `{self.macro.name}` is not in a file of the same name."
 
 
@@ -272,14 +278,16 @@ class CheckMacroPropertyFileLocation(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
-        expected_substr = "_".join(self.macro.original_file_path[6:].split("/")[:-1])
+        expected_substr = "_".join(
+            clean_path_str(self.macro.original_file_path)[6:].split("/")[:-1]
+        )
 
         assert (
-            self.macro.patch_path is not None
+            clean_path_str(self.macro.patch_path) is not None
         ), f"Macro `{self.macro.name}` is not defined in a `.yml` properties file."
-        properties_yml_name = self.macro.patch_path.split("/")[-1]
+        properties_yml_name = clean_path_str(self.macro.patch_path).split("/")[-1]
 
-        if self.macro.original_file_path.startswith(
+        if clean_path_str(self.macro.original_file_path).startswith(
             "tests/",
         ):  # Do not check generic tests (which are also macros)
             pass

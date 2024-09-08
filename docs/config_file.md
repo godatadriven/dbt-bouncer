@@ -88,6 +88,22 @@ To determine if a check accepts these arguments view the [Checks page](./checks/
         model_name_pattern: ^stg_
     ```
 
+!!! note
+
+    When compiled on Windows machines, keys such as `original_file_path`, `patch_path` and `path` take the form:
+
+    ```shell
+    models\\staging\\crm\\model_1.sql
+    ```
+
+    When compiled on Linux and Mac machines, these same keys take the form:
+
+    ```shell
+    models/staging/crm/model_1.sql
+    ```
+
+    `dbt-bouncer` converts all of these paths to the Linux/Mac form, hence when you are supplying values to `exclude` and `include` you should use the Linux/Mac form.
+
 ### Severity
 
 All checks accept a `severity` argument, valid values are:
