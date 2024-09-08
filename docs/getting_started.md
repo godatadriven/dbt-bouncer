@@ -96,6 +96,79 @@ wget https://github.com/godatadriven/dbt-bouncer/releases/download/vX.X.X/dbt-bo
 python dbt-bouncer.pex --config-file $PWD/<PATH_TO_CONFIG_FILE>
 ```
 
-## How to add a check to `dbt-bouncer`
+## How to contribute a check to `dbt-bouncer`
 
 See [Adding a new check](./CONTRIBUTING.md#adding-a-new-check).
+
+## How to add a custom check to `dbt-bouncer`
+
+In addition to the checks built into `dbt-bouncer`, the ability to add custom checks is supported. This allows users to write checks that are specific to the conventions of their projects. To add a custom check:
+
+1. Create an empty directory and add a `custom_checks_dir` key to your config file. The value of this key should be the path to the directory you just created, relative to where the config file is located.
+1. In this directory create an empty `__init__.py` file.
+1. In this directory create a subdirectory named `catalog`, `manifest` or `run_results` depending on the type of artifact you want to check.
+1. In this subdirectory create a python file that defines a check. The check must meet the following criteria:
+
+    * Start with "Check".
+    * Inherit from dbt_bouncer.check_base.BaseCheck.
+    * Have a name attribute that is a string whose value is the snake case equivalent of the class name.
+    * A default value provided for optional input arguments and arguments that are received at execution time.
+    * Have a doc string that includes a description of the check, a list of possible input parameters and at least one example.
+    * A clear message in the event of a failure.
+
+1. In your config file, add the name of the check and any desired arguments.
+1. Run `dbt-bouncer`, your custom check will be executed.
+
+An example:
+
+* Directory tree:
+
+    ```shell
+    .
+    ├── dbt-bouncer.yml
+    ├── dbt_project.yml
+    ├── my_custom_checks
+    |   ├── __init__.py
+    |   └── manifest
+    |       └── check_custom_to_me.py
+    └── target
+        └── manifest.json
+    ```
+
+* Contents of `check_custom_to_me.py`:
+
+    ```python
+    from typing import TYPE_CHECKING, Literal
+
+    from pydantic import Field
+
+    from dbt_bouncer.check_base import BaseCheck
+
+    if TYPE_CHECKING:
+        import warnings
+
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", category=UserWarning)
+            from dbt_bouncer.parsers import DbtBouncerModelBase
+
+
+    class CheckModelDepcrecationDate(BaseCheck):
+
+        model: "DbtBouncerModelBase" = Field(default=None)
+        name: Literal["check_model_deprecation_date"]
+
+        def execute(self) -> None:
+            """Execute the check."""
+
+            assert self.model.deprecation_date is not None, f"`{self.model.name}` requires a `deprecation_date` to be set."
+    ```
+
+* Contents of `dbt-bouncer.yml`:
+
+    ```yaml
+    custom_checks_dir: my_custom_checks
+
+    manifest_checks:
+        - name: check_model_deprecation_date
+          include: ^models/staging/legacy_erp
+    ```
