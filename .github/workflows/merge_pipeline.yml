@@ -163,6 +163,7 @@
             - name: Regenerate dbt artifacts
               run: |
                 poetry run dbt build
+                poetry run dbt deps
                 poetry run dbt docs generate
 
             - name: Run `dbt-bouncer` on generated artifacts
