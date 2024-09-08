@@ -202,14 +202,14 @@ def load_dbt_artifact(
             from dbt_artifacts_parser.parser import (
                 parse_catalog,
             )
-        with Path.open(artifact_path, "r") as fp:
+        with Path.open(Path(artifact_path), "r") as fp:
             catalog_obj = parse_catalog(catalog=json.load(fp))
 
         return catalog_obj
 
     elif artifact_name == "manifest.json":
         # First assess dbt version is sufficient
-        with Path.open(artifact_path, "r") as fp:
+        with Path.open(Path(artifact_path), "r") as fp:
             manifest_json = json.load(fp)
 
         assert (
@@ -232,7 +232,7 @@ def load_dbt_artifact(
             from dbt_artifacts_parser.parser import (
                 parse_run_results,
             )
-        with Path.open(artifact_path, "r") as fp:
+        with Path.open(Path(artifact_path), "r") as fp:
             run_results_obj = parse_run_results(run_results=json.load(fp))
 
         return run_results_obj
