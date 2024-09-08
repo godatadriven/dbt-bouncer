@@ -7,11 +7,13 @@ import importlib
 import logging
 import os
 import re
+import sys
 from functools import lru_cache
 from importlib.machinery import SourceFileLoader
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, List, Mapping, Type
 
+import click
 import yaml
 
 if TYPE_CHECKING:
@@ -113,12 +115,36 @@ def get_check_objects() -> List[Type[BaseCheck]]:
 
         for obj in [i for i in dir(imported_check_file) if i.startswith("Check")]:
             loader = SourceFileLoader(obj, check_file.absolute().__str__())
-            spec = importlib.util.spec_from_loader(loader.name, loader)  # type: ignore[attr-defined]
-            locals()[obj] = importlib.util.module_from_spec(spec)  # type: ignore[attr-defined]
+            spec = importlib.util.spec_from_loader(loader.name, loader)
+            locals()[obj] = importlib.util.module_from_spec(spec)  # type: ignore[arg-type]
             loader.exec_module(locals()[obj])
             check_objects.append(locals()[obj])
 
+    config_file_path = click.get_current_context().obj["config_file_path"]
+    custom_checks_dir = click.get_current_context().obj["custom_checks_dir"]
+    if custom_checks_dir is not None:
+        custom_checks_dir = config_file_path.parent / custom_checks_dir
+        logging.debug(f"{custom_checks_dir=}")
+        custom_check_files = [
+            f for f in custom_checks_dir.glob("*/*.py") if f.is_file()
+        ]
+        logging.debug(f"{custom_check_files=}")
+
+        for check_file in custom_check_files:
+            spec = importlib.util.spec_from_file_location("custom_check", check_file)
+            foo = importlib.util.module_from_spec(spec)  # type: ignore[arg-type]
+            sys.modules["custom_check"] = foo
+            spec.loader.exec_module(foo)  # type: ignore[union-attr]
+            for obj in dir(foo):
+                if obj.startswith("Check"):
+                    loader = SourceFileLoader(obj, check_file.absolute().__str__())
+                    spec = importlib.util.spec_from_loader(loader.name, loader)
+                    locals()[obj] = importlib.util.module_from_spec(spec)  # type: ignore[arg-type]
+                    loader.exec_module(locals()[obj])
+                    check_objects.append(locals()[obj])
+
     logging.debug(f"Loaded {len(check_objects)} `Check*` classes.")
+
     return check_objects
 
 

@@ -79,6 +79,13 @@ def cli(
             c["severity"] = config_file_contents["severity"]
 
     logging.debug(f"{config_file_contents=}")
+
+    # Set click context object for dbt_bouncer.utils.get_check_objects()
+    ctx.obj = {
+        "config_file_path": config_file_path,
+        "custom_checks_dir": config_file_contents.get("custom_checks_dir"),
+    }
+
     from dbt_bouncer.config_file_validator import validate_conf
 
     bouncer_config = validate_conf(config_file_contents=config_file_contents)

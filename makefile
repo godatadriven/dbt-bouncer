@@ -42,4 +42,12 @@ test-unit:
 		--cov-report=term-missing:skip-covered \
 		--cov=src/dbt_bouncer/ \
 		--numprocesses 5 \
-		./tests/unit
+		./tests/unit \
+		-m 'not not_in_parallel' && \
+	poetry run pytest \
+		-c ./tests \
+		--junitxml=coverage.xml \
+		--cov-report=term-missing:skip-covered \
+		--cov=src/dbt_bouncer/ \
+		--cov-append \
+		-m not_in_parallel
