@@ -1,5 +1,5 @@
 import logging
-from pathlib import Path
+from pathlib import Path, PurePath
 from typing import Union
 
 import click
@@ -14,7 +14,7 @@ from dbt_bouncer.version import version
     default=Path("dbt-bouncer.yml"),
     help="Location of the YML config file.",
     required=False,
-    type=Path,
+    type=PurePath,
 )
 @click.option(
     "--create-pr-comment-file",
@@ -36,7 +36,7 @@ from dbt_bouncer.version import version
 @click.version_option()
 def cli(
     ctx: click.Context,
-    config_file: Path,
+    config_file: PurePath,
     create_pr_comment_file: bool,
     output_file: Union[None, Path],
     verbosity: int,

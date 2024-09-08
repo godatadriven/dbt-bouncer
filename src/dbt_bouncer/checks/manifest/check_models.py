@@ -30,6 +30,7 @@ if TYPE_CHECKING:
         DbtBouncerManifest,
         DbtBouncerModelBase,
     )
+from dbt_bouncer.utils import clean_path_str
 
 
 class CheckModelAccess(BaseCheck):
@@ -214,14 +215,17 @@ class CheckModelDocumentedInSameDirectory(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
-        model_sql_dir = self.model.original_file_path.split("/")[:-1]
+        model_sql_dir = clean_path_str(self.model.original_file_path).split("/")[:-1]
         assert (  # noqa: PT018
-            hasattr(self.model, "patch_path") and self.model.patch_path is not None
+            hasattr(self.model, "patch_path")
+            and clean_path_str(self.model.patch_path) is not None
         ), f"`{self.model.name}` is not documented."
 
-        model_doc_dir = self.model.patch_path[
-            self.model.patch_path.find("models") :
-        ].split("/")[:-1]
+        model_doc_dir = clean_path_str(
+            self.model.patch_path[
+                clean_path_str(self.model.patch_path).find("models") :
+            ]
+        ).split("/")[:-1]
 
         assert (
             model_doc_dir == model_sql_dir
@@ -337,9 +341,11 @@ class CheckModelDirectories(BaseCheck):
     def execute(self) -> None:
         """Execute the check."""
         matched_path = re.compile(self.include.strip()).match(
-            self.model.original_file_path
+            clean_path_str(self.model.original_file_path)
         )
-        path_after_match = self.model.original_file_path[matched_path.end() + 1 :]  # type: ignore[union-attr]
+        path_after_match = clean_path_str(self.model.original_file_path)[
+            matched_path.end() + 1 :
+        ]
 
         assert (
             path_after_match.split("/")[0] in self.permitted_sub_directories
@@ -908,16 +914,17 @@ class CheckModelPropertyFileLocation(BaseCheck):
     def execute(self) -> None:
         """Execute the check."""
         assert (  # noqa: PT018
-            hasattr(self.model, "patch_path") and self.model.patch_path is not None
+            hasattr(self.model, "patch_path")
+            and clean_path_str(self.model.patch_path) is not None
         ), f"`{self.model.name}` is not documented."
 
         expected_substr = (
-            "_".join(self.model.original_file_path.split("/")[1:-1])
+            "_".join(clean_path_str(self.model.original_file_path).split("/")[1:-1])
             .replace("staging", "stg")
             .replace("intermediate", "int")
             .replace("marts", "")
         )
-        properties_yml_name = self.model.patch_path.split("/")[-1]
+        properties_yml_name = clean_path_str(self.model.patch_path).split("/")[-1]
 
         assert properties_yml_name.startswith(
             "_",

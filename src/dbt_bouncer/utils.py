@@ -20,6 +20,16 @@ if TYPE_CHECKING:
     from dbt_bouncer.check_base import BaseCheck
 
 
+def clean_path_str(path: str) -> str:
+    """Clean a path string by replacing double backslashes with a forward slash.
+
+    Returns:
+        str: Cleaned path string.
+
+    """
+    return path.replace("\\", "/") if path is not None else ""
+
+
 def create_github_comment_file(failed_checks: List[List[str]]) -> None:
     """Create a markdown file containing a comment for GitHub."""
     md_formatted_comment = make_markdown_table(
@@ -126,7 +136,7 @@ def get_check_objects() -> List[Type[BaseCheck]]:
         custom_checks_dir = config_file_path.parent / custom_checks_dir
         logging.debug(f"{custom_checks_dir=}")
         custom_check_files = [
-            f for f in custom_checks_dir.glob("*/*.py") if f.is_file()
+            f for f in Path(custom_checks_dir).glob("*/*.py") if f.is_file()
         ]
         logging.debug(f"{custom_check_files=}")
 

@@ -1,5 +1,5 @@
 import logging
-from pathlib import Path
+from pathlib import Path, PurePath
 from typing import TYPE_CHECKING, Any, Dict, Mapping
 
 import toml
@@ -11,9 +11,9 @@ if TYPE_CHECKING:
 
 
 def get_config_file_path(
-    config_file: str,
+    config_file: PurePath,
     config_file_source: str,
-) -> Path:
+) -> PurePath:
     """Get the path to the config file for dbt-bouncer. This is fetched from (in order):
 
     1. The file passed via the `--config-file` CLI flag.
@@ -21,7 +21,7 @@ def get_config_file_path(
     3. A `[tool.dbt-bouncer]` section in `pyproject.toml` (in current working directory or parent directories).
 
     Returns:
-        Path: Config file for dbt-bouncer.
+        PurePath: Config file for dbt-bouncer.
 
     Raises:
         RuntimeError: If no config file is found.
@@ -32,7 +32,7 @@ def get_config_file_path(
 
     if config_file_source == "COMMANDLINE":
         logging.debug(f"Config file passed via command line: {config_file}")
-        return Path(config_file)
+        return config_file
 
     if config_file_source == "DEFAULT":
         logging.debug(f"Using default value for config file: {config_file}")
@@ -63,7 +63,7 @@ def get_config_file_path(
     return pyproject_toml_dir / "pyproject.toml"
 
 
-def load_config_file_contents(config_file_path: Path) -> Mapping[str, Any]:
+def load_config_file_contents(config_file_path: PurePath) -> Mapping[str, Any]:
     """Load the contents of the config file.
 
     Returns:

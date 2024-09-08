@@ -1,7 +1,10 @@
+from pathlib import Path
 from typing import Any, ClassVar, Dict, List, Literal, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field
 from typing_extensions import Annotated
+
+from dbt_bouncer.utils import clean_path_str
 
 
 class DbtBouncerConf(BaseModel):
@@ -11,16 +14,17 @@ class DbtBouncerConf(BaseModel):
 
     from dbt_bouncer.utils import get_check_objects
 
-    check_classes: List[Dict[str, Union[Any, str]]] = [
-        {"class": getattr(x, x.__name__), "source_file": x.__file__}
+    check_classes: List[Dict[str, Union[Any, Path]]] = [
+        {
+            "class": getattr(x, x.__name__),
+            "source_file": Path(clean_path_str(x.__file__)),
+        }
         for x in get_check_objects()
     ]
 
     # Catalog checks
     catalog_check_classes: ClassVar = [
-        x["class"]
-        for x in check_classes
-        if x["source_file"].split("/")[-2] == "catalog"
+        x["class"] for x in check_classes if x["source_file"].parts[-2] == "catalog"
     ]
 
     CatalogCheckConfigs: ClassVar = Annotated[
@@ -30,9 +34,7 @@ class DbtBouncerConf(BaseModel):
 
     # Manifest checks
     manifest_check_classes: ClassVar = [
-        x["class"]
-        for x in check_classes
-        if x["source_file"].split("/")[-2] == "manifest"
+        x["class"] for x in check_classes if x["source_file"].parts[-2] == "manifest"
     ]
 
     ManifestCheckConfigs: ClassVar = Annotated[
@@ -42,9 +44,7 @@ class DbtBouncerConf(BaseModel):
 
     # Run result checks
     run_results_check_classes: ClassVar = [
-        x["class"]
-        for x in check_classes
-        if x["source_file"].split("/")[-2] == "run_results"
+        x["class"] for x in check_classes if x["source_file"].parts[-2] == "run_results"
     ]
 
     RunResultsCheckConfigs: ClassVar = Annotated[

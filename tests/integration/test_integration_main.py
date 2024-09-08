@@ -1,6 +1,6 @@
 import json
 import re
-from pathlib import Path
+from pathlib import Path, PurePath
 
 import pytest
 import yaml
@@ -33,7 +33,7 @@ def test_cli_happy_path(caplog, dbt_artifacts_dir, request, tmp_path):
         yaml.dump(bouncer_config, f)
 
     runner = CliRunner()
-    result = runner.invoke(cli, f"--config-file {config_file.__str__()}")
+    result = runner.invoke(cli, f"--config-file {PurePath(config_file).as_posix()}")
 
     assert "Running dbt-bouncer (0.0.0)..." in caplog.text
 
@@ -128,7 +128,9 @@ def test_cli_coverage(caplog, tmp_path):
 
     assert (tmp_path / "coverage.json").exists()
     assert len(coverage) > 1
-    assert f"Saving coverage file to `{tmp_path}/coverage.json`" in caplog.text
+    assert f"Saving coverage file to `{tmp_path}/coverage.json`".replace(
+        "\\", "/"
+    ) in caplog.text.replace("\\", "/")
     assert (
         "`dbt-bouncer` failed. Please see below for more details or run `dbt-bouncer` with the `-v` flag."
         in caplog.text

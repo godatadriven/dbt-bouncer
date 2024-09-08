@@ -11,6 +11,8 @@ from typing import TYPE_CHECKING, List, Literal, Union
 import semver
 from pydantic import BaseModel
 
+from dbt_bouncer.utils import clean_path_str
+
 if TYPE_CHECKING:
     from dbt_bouncer.config_file_validator import DbtBouncerConf
 
@@ -188,10 +190,10 @@ def load_dbt_artifact(
     logging.debug(f"{dbt_artifacts_dir=}")
 
     artifact_path = dbt_artifacts_dir / Path(artifact_name)
-    logging.debug(f"Loading {artifact_name} from {artifact_path.absolute()}...")
-    if not artifact_path.exists():
+    logging.debug(f"Loading {artifact_name} from {artifact_path}...")
+    if not Path(artifact_path).exists():
         raise FileNotFoundError(
-            f"No {artifact_name} found at {artifact_path.absolute()}.",
+            f"No {artifact_name} found at {artifact_path}.",
         )
 
     if artifact_name == "catalog.json":
@@ -200,14 +202,14 @@ def load_dbt_artifact(
             from dbt_artifacts_parser.parser import (
                 parse_catalog,
             )
-        with Path.open(artifact_path, "r") as fp:
+        with Path.open(Path(artifact_path), "r") as fp:
             catalog_obj = parse_catalog(catalog=json.load(fp))
 
         return catalog_obj
 
     elif artifact_name == "manifest.json":
         # First assess dbt version is sufficient
-        with Path.open(artifact_path, "r") as fp:
+        with Path.open(Path(artifact_path), "r") as fp:
             manifest_json = json.load(fp)
 
         assert (
@@ -230,7 +232,7 @@ def load_dbt_artifact(
             from dbt_artifacts_parser.parser import (
                 parse_run_results,
             )
-        with Path.open(artifact_path, "r") as fp:
+        with Path.open(Path(artifact_path), "r") as fp:
             run_results_obj = parse_run_results(run_results=json.load(fp))
 
         return run_results_obj
@@ -255,7 +257,9 @@ def parse_catalog_artifact(
         DbtBouncerCatalogNode(
             **{
                 "catalog_node": v,
-                "original_file_path": manifest_obj.manifest.nodes[k].original_file_path,
+                "original_file_path": clean_path_str(
+                    manifest_obj.manifest.nodes[k].original_file_path
+                ),
                 "unique_id": k,
             },
         )
@@ -266,9 +270,9 @@ def parse_catalog_artifact(
         DbtBouncerCatalogNode(
             **{
                 "catalog_node": v,
-                "original_file_path": manifest_obj.manifest.sources[
-                    k
-                ].original_file_path,
+                "original_file_path": clean_path_str(
+                    manifest_obj.manifest.sources[k].original_file_path
+                ),
                 "unique_id": k,
             },
         )
@@ -420,7 +424,7 @@ def parse_manifest_artifact(
                     DbtBouncerModel(
                         **{
                             "model": v,
-                            "original_file_path": v.original_file_path,
+                            "original_file_path": clean_path_str(v.original_file_path),
                             "unique_id": k,
                         },
                     ),
@@ -432,7 +436,7 @@ def parse_manifest_artifact(
             project_tests.append(
                 DbtBouncerTest(
                     **{
-                        "original_file_path": v.original_file_path,
+                        "original_file_path": clean_path_str(v.original_file_path),
                         "test": v,
                         "unique_id": k,
                     },
@@ -451,7 +455,7 @@ def parse_manifest_artifact(
     project_semantic_models = [
         DbtBouncerSemanticModel(
             **{
-                "original_file_path": v.original_file_path,
+                "original_file_path": clean_path_str(v.original_file_path),
                 "semantic_model": v,
                 "unique_id": k,
             },
@@ -462,7 +466,11 @@ def parse_manifest_artifact(
 
     project_sources = [
         DbtBouncerSource(
-            **{"original_file_path": v.original_file_path, "source": v, "unique_id": k},
+            **{
+                "original_file_path": clean_path_str(v.original_file_path),
+                "source": v,
+                "unique_id": k,
+            },
         )
         for _, v in manifest_obj.manifest.sources.items()
         if v.package_name == manifest_obj.manifest.metadata.project_name
@@ -503,11 +511,13 @@ def parse_run_results_artifact(
         DbtBouncerRunResult(
             **{
                 "original_file_path": (
-                    manifest_obj.manifest.nodes[r.unique_id].original_file_path
+                    clean_path_str(
+                        manifest_obj.manifest.nodes[r.unique_id].original_file_path
+                    )
                     if r.unique_id in manifest_obj.manifest.nodes
-                    else manifest_obj.manifest.unit_tests[
-                        r.unique_id
-                    ].original_file_path
+                    else clean_path_str(
+                        manifest_obj.manifest.unit_tests[r.unique_id].original_file_path
+                    )
                 ),
                 "run_result": r,
                 "unique_id": r.unique_id,

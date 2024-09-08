@@ -6,6 +6,8 @@ on:
         types: [published]
 
 env:
+    DBT_PROFILES_DIR: dbt_project
+    DBT_PROJECT_DIR: dbt_project
     POETRY_VERSION: "1.8.3"
     POETRY_VIRTUALENVS_IN_PROJECT: true
 
@@ -77,10 +79,13 @@ jobs:
 
     pypi-tests:
         needs: [pypi-pause]
-        runs-on: ubuntu-latest
+        runs-on: ${{ matrix.operating-system }}
         strategy:
             fail-fast: false
             matrix:
+                operating-system:
+                  - ubuntu-latest
+                  - windows-latest
                 python-version:
                     - '3.8'
                     - '3.9'
@@ -109,3 +114,12 @@ jobs:
 
             - name: Run `dbt-bouncer`
               run: dbt-bouncer --config-file dbt-bouncer-example.yml
+
+            - name: Regenerate dbt artifacts
+              run: |
+                poetry run dbt deps
+                poetry run dbt build
+                poetry run dbt docs generate
+
+            - name: Run `dbt-bouncer` on generated artifacts
+              run: poetry run dbt-bouncer --config-file ./dbt-bouncer-example.yml
