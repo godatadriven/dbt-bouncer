@@ -136,7 +136,7 @@ def get_check_objects() -> List[Type[BaseCheck]]:
         custom_checks_dir = config_file_path.parent / custom_checks_dir
         logging.debug(f"{custom_checks_dir=}")
         custom_check_files = [
-            f for f in custom_checks_dir.glob("*/*.py") if f.is_file()
+            f for f in Path(custom_checks_dir).glob("*/*.py") if f.is_file()
         ]
         logging.debug(f"{custom_check_files=}")
 

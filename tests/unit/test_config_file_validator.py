@@ -22,7 +22,8 @@ def test_get_file_config_path_commandline(tmp_path):
         config_file=str(config_file),
         config_file_source="COMMANDLINE",
     )
-    assert config_file_path == config_file
+
+    assert config_file_path == config_file.as_posix()
 
 
 def test_get_file_config_path_default(tmp_path):

@@ -163,7 +163,9 @@ def test_runner_coverage(caplog, tmp_path):
     assert results[0] == 0
     assert (tmp_path / "coverage.json").exists()
     assert len(coverage) == 1
-    assert f"Saving coverage file to `{tmp_path}/coverage.json`" in caplog.text
+    assert f"Saving coverage file to `{tmp_path}/coverage.json`".replace(
+        "\\", "/"
+    ) in caplog.text.replace("\\", "/")
 
 
 def test_runner_failure():
@@ -521,4 +523,6 @@ def test_runner_windows(caplog, tmp_path):
     assert results[0] == 0
     assert (tmp_path / "coverage.json").exists()
     assert len(coverage) == 1
-    assert f"Saving coverage file to `{tmp_path}/coverage.json`" in caplog.text
+    assert f"Saving coverage file to `{tmp_path}/coverage.json`".replace(
+        "\\", "/"
+    ) in caplog.text.replace("\\", "/")

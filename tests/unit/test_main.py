@@ -1,5 +1,5 @@
 import json
-from pathlib import Path
+from pathlib import Path, PurePath
 
 import pytest
 import yaml
@@ -104,7 +104,8 @@ class CheckMyCustomCheck(BaseCheck):
     runner = CliRunner()
     result = runner.invoke(
         cli,
-        ["--config-file", "dbt-bouncer.yml", "-v"],
+        # ["--config-file", "dbt-bouncer.yml", "-v"],
+        ["--config-file", PurePath("dbt-bouncer.yml").as_posix(), "-v"],
     )
 
     assert len([r for r in caplog.messages if r.find("custom_checks_dir=") >= 0]) >= 1
