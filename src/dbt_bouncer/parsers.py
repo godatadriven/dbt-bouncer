@@ -208,13 +208,21 @@ def load_dbt_artifact(
         return catalog_obj
 
     elif artifact_name == "manifest.json":
+        # First assess dbt version is sufficient
+        with Path.open(artifact_path, "r") as fp:
+            manifest_json = json.load(fp)
+
+        assert (
+            semver.Version.parse(manifest_json["metadata"]["dbt_version"]) >= "1.6.0"
+        ), f"The supplied `manifest.json` was generated with dbt version {manifest_json['metadata']['dbt_version']}, this is below the minimum supported version of 1.6.0."
+
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=UserWarning)
             from dbt_artifacts_parser.parser import (
                 parse_manifest,
             )
-        with Path.open(artifact_path, "r") as fp:
-            manifest_obj = parse_manifest(manifest=json.load(fp))
+
+        manifest_obj = parse_manifest(manifest_json)
 
         return DbtBouncerManifest(**{"manifest": manifest_obj})
 

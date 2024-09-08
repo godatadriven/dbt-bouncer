@@ -1,93 +1,13 @@
 import logging
 from pathlib import Path
-from typing import Any, ClassVar, Dict, List, Literal, Mapping, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Mapping
 
 import toml
-from pydantic import BaseModel, ConfigDict, Field
-from typing_extensions import Annotated
 
-from dbt_bouncer.utils import get_check_objects, load_config_from_yaml
+from dbt_bouncer.utils import load_config_from_yaml
 
-
-class DbtBouncerConf(BaseModel):
-    """Base model for the config file contents."""
-
-    model_config = ConfigDict(extra="forbid")
-
-    check_classes: List[Dict[str, Union[Any, str]]] = [
-        {"class": getattr(x, x.__name__), "source_file": x.__file__}
-        for x in get_check_objects()
-    ]
-
-    # Catalog checks
-    catalog_check_classes: ClassVar = [
-        x["class"]
-        for x in check_classes
-        if x["source_file"].split("/")[-2] == "catalog"
-    ]
-
-    CatalogCheckConfigs: ClassVar = Annotated[
-        Union[tuple(catalog_check_classes)],
-        Field(discriminator="name"),
-    ]
-
-    # Manifest checks
-    manifest_check_classes: ClassVar = [
-        x["class"]
-        for x in check_classes
-        if x["source_file"].split("/")[-2] == "manifest"
-    ]
-
-    ManifestCheckConfigs: ClassVar = Annotated[
-        Union[tuple(manifest_check_classes)],
-        Field(discriminator="name"),
-    ]
-
-    # Run result checks
-    run_results_check_classes: ClassVar = [
-        x["class"]
-        for x in check_classes
-        if x["source_file"].split("/")[-2] == "run_results"
-    ]
-
-    RunResultsCheckConfigs: ClassVar = Annotated[
-        Union[tuple(run_results_check_classes)],
-        Field(discriminator="name"),
-    ]
-
-    catalog_checks: List[
-        Annotated[
-            CatalogCheckConfigs,
-            Field(discriminator="name"),
-        ]
-    ] = Field(default=[])
-
-    manifest_checks: List[
-        Annotated[
-            ManifestCheckConfigs,
-            Field(discriminator="name"),
-        ]
-    ] = Field(default=[])
-    run_results_checks: List[
-        Annotated[
-            RunResultsCheckConfigs,
-            Field(discriminator="name"),
-        ]
-    ] = Field(default=[])
-
-    dbt_artifacts_dir: Optional[str] = Field(default="./target")
-    exclude: Optional[str] = Field(
-        default=None,
-        description="Regexp to match which paths to exclude.",
-    )
-    include: Optional[str] = Field(
-        default=None,
-        description="Regexp to match which paths to include.",
-    )
-    severity: Union[Literal["error", "warn"], None] = Field(
-        default=None,
-        description="Severity of the check, one of 'error' or 'warn'.",
-    )
+if TYPE_CHECKING:
+    from dbt_bouncer.config_file_parser import DbtBouncerConf
 
 
 def get_config_file_path(
@@ -194,6 +114,7 @@ def validate_conf(config_file_contents: Dict[str, Any]) -> "DbtBouncerConf":
 
     import dbt_bouncer.checks  # noqa: F401
     from dbt_bouncer.checks.common import NestedDict  # noqa: F401
+    from dbt_bouncer.config_file_parser import DbtBouncerConf
     from dbt_bouncer.parsers import (  # noqa: F401
         DbtBouncerCatalogNode,
         DbtBouncerExposureBase,
