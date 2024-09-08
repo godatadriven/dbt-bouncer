@@ -766,3 +766,47 @@ def test_cli_severity_warn(tmp_path):
         == "warn"
     )
     assert result.exit_code == 0
+
+
+def test_cli_unsupported_dbt_version(tmp_path):
+    # Config file
+    bouncer_config = {
+        "dbt_artifacts_dir": ".",
+        "manifest_checks": [
+            {
+                "name": "check_model_directories",
+                "include": "models",
+                "permitted_sub_directories": ["staging"],
+            },
+        ],
+    }
+
+    with Path(tmp_path / "dbt-bouncer.yml").open("w") as f:
+        yaml.dump(bouncer_config, f)
+
+    # Manifest file
+    with Path.open(Path("./dbt_project/target/manifest.json"), "r") as f:
+        manifest = json.load(f)
+
+    manifest["metadata"]["dbt_version"] = "1.5.5"
+    with Path.open(tmp_path / "manifest.json", "w") as f:
+        json.dump(manifest, f)
+
+    # Run dbt-bouncer
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        [
+            "--config-file",
+            Path(tmp_path / "dbt-bouncer.yml").__str__(),
+        ],
+    )
+
+    assert isinstance(result.exception, AssertionError)
+    assert (
+        result.exception.args[0].find(
+            "The supplied `manifest.json` was generated with dbt version 1.5.5, this is below the minimum supported version of",
+        )
+        >= 0
+    )
+    assert result.exit_code == 1
