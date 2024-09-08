@@ -1,6 +1,7 @@
 from contextlib import nullcontext as does_not_raise
 from pathlib import Path
 
+import click
 import pytest
 import toml
 import yaml
@@ -11,6 +12,7 @@ from dbt_bouncer.config_file_validator import (
     load_config_file_contents,
     validate_conf,
 )
+from dbt_bouncer.main import cli
 
 
 def test_get_file_config_path_commandline(tmp_path):
@@ -121,7 +123,15 @@ def test_validate_conf_invalid(f, expectation):
     with Path.open(f, "r") as fp:
         conf = yaml.safe_load(fp)
 
-    with expectation:
+    ctx = click.Context(
+        cli,
+        obj={
+            "config_file_path": "",
+            "custom_checks_dir": None,
+        },
+    )
+
+    with ctx as _, expectation as _:
         validate_conf(config_file_contents=conf)
 
 
@@ -143,5 +153,13 @@ def test_validate_conf_valid(f, expectation):
     with Path.open(f, "r") as fp:
         conf = yaml.safe_load(fp)
 
-    with expectation:
+    ctx = click.Context(
+        cli,
+        obj={
+            "config_file_path": "",
+            "custom_checks_dir": None,
+        },
+    )
+
+    with ctx, expectation:
         validate_conf(config_file_contents=conf)

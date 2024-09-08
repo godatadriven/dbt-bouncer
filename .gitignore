@@ -180,6 +180,7 @@ dbt_project/target/sources.json
 dbt_project/.user.yml
 dbt_project/package-lock.yml
 dist_pypi/
+my_checks/
 tests/fixtures/dbt_16/target/compiled/
 tests/fixtures/dbt_16/target/index.html
 tests/fixtures/dbt_16/target/graph_summary.json

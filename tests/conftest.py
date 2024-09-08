@@ -5,6 +5,12 @@ from pathlib import Path
 import pytest
 
 
+def pytest_configure(config):
+    config.addinivalue_line(
+        "markers", "not_in_parallel: Unit tests that cannot be run in parallel."
+    )
+
+
 @pytest.fixture(scope="session")
 def manifest_obj():
     with warnings.catch_warnings():
