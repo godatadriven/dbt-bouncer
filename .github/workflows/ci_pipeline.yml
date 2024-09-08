@@ -14,6 +14,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
+  DBT_PROFILES_DIR: dbt_project
+  DBT_PROJECT_DIR: dbt_project
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   IMAGE_NAME: ${{ github.repository }}
   POETRY_VERSION: "1.8.3"
