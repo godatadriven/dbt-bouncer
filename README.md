@@ -54,6 +54,39 @@
 
 All documentation can be found on `dbt-bouncer` [documentation website](https://godatadriven.github.io/dbt-bouncer/).
 
+### TLDR
+
+```yaml
+manifest_checks:
+  - name: check_model_directories
+    include: ^models
+    permitted_sub_directories:
+      - intermediate
+      - marts
+      - staging
+  - name: check_model_names
+    include: ^models/staging
+    model_name_pattern: ^stg_
+catalog_checks:
+  - name: check_columns_are_documented_in_public_models
+run_results_checks:
+  - name: check_run_results_max_gigabytes_billed
+    max_gigabytes_billed: 100
+```
+
+```
+$ dbt-bouncer
+
+[...]
+Running checks... |################################| 20/20
+Done. SUCCESS=19 WARN=0 ERROR=1
+Failed checks:
+| Check name               | Severity | Failure message                                                                       |
+|--------------------------|----------|---------------------------------------------------------------------------------------|
+| check_model_directories: | error    | AssertionError: `model` is located in `utilities`, this is not a valid sub-directory. |
+```
+
+
 ## Reporting bugs and contributing code
 
 - Want to report a bug or request a feature? Let us know and open [an issue](https://github.com/godatadriven/dbt-bouncer/issues/new/choose).
