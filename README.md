@@ -56,7 +56,9 @@ All documentation can be found on `dbt-bouncer` [documentation website](https://
 
 ### TLDR
 
-```yaml
+1. Create a `dbt-bouncer.yml` config file
+
+```yml
 manifest_checks:
   - name: check_model_directories
     include: ^models
@@ -73,6 +75,8 @@ run_results_checks:
   - name: check_run_results_max_gigabytes_billed
     max_gigabytes_billed: 100
 ```
+
+2. Run `dbt-bouncer`
 
 ```
 $ dbt-bouncer
