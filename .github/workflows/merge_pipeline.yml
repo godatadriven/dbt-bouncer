@@ -123,7 +123,7 @@
             - name: Run `dbt-bouncer`
               run: python ./dist/dbt-bouncer.pex --config-file dbt-bouncer-example.yml
 
-      pypi-tests:
+      pip-tests:
         runs-on: ${{ matrix.operating-system }}
         strategy:
             fail-fast: false
@@ -144,9 +144,13 @@
             - name: Determine python version
               id: python-version
               run: |
+                  if [[ ${{ matrix.operating-system }} == "windows-latest" ]]; then
+                    echo "PYTHON_VERSION=$(cat .python-version)" >> $ENV:GITHUB_OUTPUT
+                  else
                     export PYTHON_VERSION=$(cat .python-version)
                     echo "PYTHON_VERSION: $PYTHON_VERSION"
                     echo "PYTHON_VERSION=$PYTHON_VERSION" >> $GITHUB_OUTPUT
+                  fi
 
             - name: Setup Python
               uses: ./.github/actions/setup_python_env

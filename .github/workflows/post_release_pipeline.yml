@@ -99,9 +99,13 @@ jobs:
             - name: Determine python version
               id: python-version
               run: |
+                  if [[ ${{ matrix.operating-system }} == "windows-latest" ]]; then
+                    echo "PYTHON_VERSION=$(cat .python-version)" >> $ENV:GITHUB_OUTPUT
+                  else
                     export PYTHON_VERSION=$(cat .python-version)
                     echo "PYTHON_VERSION: $PYTHON_VERSION"
                     echo "PYTHON_VERSION=$PYTHON_VERSION" >> $GITHUB_OUTPUT
+                  fi
 
             - name: Setup Python
               uses: ./.github/actions/setup_python_env
@@ -110,6 +114,11 @@ jobs:
                 python-version: ${{ matrix.python-version }}
 
             - name: Install `dbt-bouncer`
+              if: matrix.operating-system == 'windows-latest'
+              run: pip install dbt-bouncer=='("${{ github.ref }}" -Split "/")[2]'
+
+            - name: Install `dbt-bouncer`
+              if: matrix.operating-system != 'windows-latest'
               run: pip install dbt-bouncer==$(echo "${{ github.ref }}" | cut -d "/" -f3)
 
             - name: Run `dbt-bouncer`
