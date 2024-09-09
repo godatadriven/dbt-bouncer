@@ -123,7 +123,7 @@
             - name: Run `dbt-bouncer`
               run: python ./dist/dbt-bouncer.pex --config-file dbt-bouncer-example.yml
 
-      pypi-tests:
+      pip-tests:
         runs-on: ${{ matrix.operating-system }}
         strategy:
             fail-fast: false
@@ -141,13 +141,6 @@
             - name: Checkout
               uses: actions/checkout@v4
 
-            - name: Determine python version
-              id: python-version
-              run: |
-                    export PYTHON_VERSION=$(cat .python-version)
-                    echo "PYTHON_VERSION: $PYTHON_VERSION"
-                    echo "PYTHON_VERSION=$PYTHON_VERSION" >> $GITHUB_OUTPUT
-
             - name: Setup Python
               uses: ./.github/actions/setup_python_env
               with:
@@ -160,11 +153,19 @@
             - name: Run `dbt-bouncer`
               run: dbt-bouncer --config-file dbt-bouncer-example.yml
 
-            - name: Regenerate dbt artifacts
+            - name: Regenerate dbt artifacts and run `dbt-bouncer`
+              if: matrix.operating-system == 'windows-latest'
+              run: |
+                $env:Path += ';C:\Users\runneradmin\.local\bin'
+                poetry run dbt deps
+                poetry run dbt build
+                poetry run dbt docs generate
+                poetry run dbt-bouncer --config-file ./dbt-bouncer-example.yml
+
+            - name: Regenerate dbt artifacts and run `dbt-bouncer`
+              if: matrix.operating-system != 'windows-latest'
               run: |
                 poetry run dbt deps
                 poetry run dbt build
                 poetry run dbt docs generate
-
-            - name: Run `dbt-bouncer` on generated artifacts
-              run: poetry run dbt-bouncer --config-file ./dbt-bouncer-example.yml
+                poetry run dbt-bouncer --config-file ./dbt-bouncer-example.yml
