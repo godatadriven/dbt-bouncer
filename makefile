@@ -51,3 +51,8 @@ test-unit:
 		--cov=src/dbt_bouncer/ \
 		--cov-append \
 		-m not_in_parallel
+
+test-windows:
+	poetry run pytest -c ./tests --numprocesses 5 ./tests/unit -m 'not not_in_parallel' && \
+	poetry run pytest -c ./tests -m not_in_parallel && \
+	poetry run pytest -c ./tests --numprocesses 5 ./tests/integration
