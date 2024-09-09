@@ -48,8 +48,8 @@ nav:
       - Unit Tests: checks/manifest/check_unit_tests.md
     - Run Results:
       - Run Results: checks/run_results/check_run_results.md
-  - FAQ: faq.md
   - CLI: cli.md
+  - FAQ: faq.md
   - Contributing: CONTRIBUTING.md
 
 plugins:
