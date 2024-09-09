@@ -83,11 +83,16 @@ jobs:
                 poetry-version: ${{ env.POETRY_VERSION }}
                 python-version: ${{ matrix.python-version }}
 
+            - name: Run pytest (Windows)
+              if: matrix.operating-system == 'windows-latest'
+              run: make test-windows
+
             - name: Run pytest (unit tests)
+              if: matrix.operating-system != 'windows-latest'
               run: make test-unit | tee pytest-coverage.txt && exit ${PIPESTATUS[0]}
 
             - name: Pytest coverage comment
-              if: matrix.python-version == '3.11' && matrix.operating-system == 'ubuntu-latest'
+              if: matrix.python-version == '3.11' && matrix.operating-system != 'windows-latest'
               uses: MishaKav/pytest-coverage-comment@main
               with:
                   pytest-coverage-path: ./pytest-coverage.txt
@@ -96,16 +101,25 @@ jobs:
                   junitxml-path: ./coverage.xml
 
             - name: Run pytest (integration tests)
+              if: matrix.operating-system != 'windows-latest'
               run: make test-integration
 
-            - name: Regenerate dbt artifacts
+            - name: Regenerate dbt artifacts and run `dbt-bouncer`
+              if: matrix.operating-system == 'windows-latest'
+              run: |
+                $env:Path += ';C:\Users\runneradmin\.local\bin'
+                poetry run dbt deps
+                poetry run dbt build
+                poetry run dbt docs generate
+                poetry run dbt-bouncer --config-file ./dbt-bouncer-example.yml
+
+            - name: Regenerate dbt artifacts and run `dbt-bouncer`
+              if: matrix.operating-system != 'windows-latest'
               run: |
                 poetry run dbt deps
                 poetry run dbt build
                 poetry run dbt docs generate
-
-            - name: Run `dbt-bouncer` on generated artifacts
-              run: poetry run dbt-bouncer --config-file ./dbt-bouncer-example.yml
+                poetry run dbt-bouncer --config-file ./dbt-bouncer-example.yml
 
     e2e-tests:
         needs: [pre-commit]
