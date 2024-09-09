@@ -56,40 +56,45 @@ All documentation can be found on `dbt-bouncer` [documentation website](https://
 
 ### TLDR
 
-1. Create a `dbt-bouncer.yml` config file
+1. Install `dbt-bouncer`:
 
-```yml
-manifest_checks:
-  - name: check_model_directories
-    include: ^models
-    permitted_sub_directories:
-      - intermediate
-      - marts
-      - staging
-  - name: check_model_names
-    include: ^models/staging
-    model_name_pattern: ^stg_
-catalog_checks:
-  - name: check_columns_are_documented_in_public_models
-run_results_checks:
-  - name: check_run_results_max_gigabytes_billed
-    max_gigabytes_billed: 100
-```
+    ```shell
+    pip install dbt-bouncer
+    ```
 
-2. Run `dbt-bouncer`
+1. Create a `dbt-bouncer.yml` config file:
 
-```
-$ dbt-bouncer
+    ```yml
+    manifest_checks:
+      - name: check_model_directories
+        include: ^models
+        permitted_sub_directories:
+          - intermediate
+          - marts
+          - staging
+      - name: check_model_names
+        include: ^models/staging
+        model_name_pattern: ^stg_
+    catalog_checks:
+      - name: check_columns_are_documented_in_public_models
+    run_results_checks:
+      - name: check_run_results_max_execution_time
+        max_execution_time_seconds: 60
+    ```
 
-[...]
-Running checks... |################################| 20/20
-Done. SUCCESS=19 WARN=0 ERROR=1
-Failed checks:
-| Check name               | Severity | Failure message                                                                       |
-|--------------------------|----------|---------------------------------------------------------------------------------------|
-| check_model_directories: | error    | AssertionError: `model` is located in `utilities`, this is not a valid sub-directory. |
-```
+1. Run `dbt-bouncer`:
 
+    ```
+    $ dbt-bouncer
+
+    [...]
+    Running checks... |################################| 20/20
+    Done. SUCCESS=19 WARN=0 ERROR=1
+    Failed checks:
+    | Check name               | Severity | Failure message                                                                       |
+    |--------------------------|----------|---------------------------------------------------------------------------------------|
+    | check_model_directories: | error    | AssertionError: `model` is located in `utilities`, this is not a valid sub-directory. |
+    ```
 
 ## Reporting bugs and contributing code
 
