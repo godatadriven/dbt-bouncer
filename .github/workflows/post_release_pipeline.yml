@@ -104,7 +104,7 @@ jobs:
 
             - name: Install `dbt-bouncer`
               if: matrix.operating-system == 'windows-latest'
-              run: pip install dbt-bouncer=='("${{ github.ref }}" -Split "/")[2]'
+              run: pip install "dbt-bouncer=='("${{ github.ref }}" -Split "/")[2]'"
 
             - name: Install `dbt-bouncer`
               if: matrix.operating-system != 'windows-latest'
