@@ -38,7 +38,7 @@ runs:
       id: assemble-verbose-param
       shell: bash
       run: >
-        if [[ "${{ inputs.verbose }}" = "" ]]; then
+        if [[ "${{ inputs.verbose }}" = "false" ]]; then
           echo "verbose-param=" >> $GITHUB_OUTPUT
         else
           echo "verbose-param=-v" >> $GITHUB_OUTPUT
@@ -62,6 +62,8 @@ runs:
     - name: Send PR comment
       if: always() && inputs.send-pr-comment == 'true' && steps.run-dbt-bouncer.outcome != 'success'
       shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
       run: >
         gh pr comment ${{ github.event.number }} \
           --repo ${{ github.repository }} \
