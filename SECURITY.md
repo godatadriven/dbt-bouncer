@@ -3,10 +3,10 @@
 ## Supported Versions
 
 
-| dbt Core | dbt-bouncer 0.* |
-| - | - |
-| >= 1.6 | :white_check_mark: |
-| <= 1.5 | :x: |
+| dbt Core | dbt-bouncer 0.* | dbt-bouncer 1.* |
+| - | - | - |
+| >= 1.6 | :white_check_mark: | :white_check_mark: |
+| <= 1.5 | :x: | :x: |
 
 ## Reporting a Vulnerability
 
