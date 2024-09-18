@@ -5,7 +5,6 @@ import click
 import pytest
 import toml
 import yaml
-from pydantic import ValidationError
 
 from dbt_bouncer.config_file_validator import (
     get_config_file_path,
@@ -111,7 +110,7 @@ def test_load_config_file_contents_pyproject_toml_no_bouncer_section(
 invalid_confs = [
     (
         f,
-        pytest.raises(ValidationError),
+        pytest.raises(RuntimeError),
     )
     for f in Path("./tests/unit/config_files/invalid").glob("*.yml")
 ]
@@ -136,6 +135,54 @@ def test_validate_conf_invalid(f, expectation):
 
     with ctx as _, expectation as _:
         validate_conf(config_file_contents=conf)
+
+
+def test_validate_conf_incorrect_name():
+    ctx = click.Context(
+        cli,
+        obj={
+            "config_file_path": "",
+            "custom_checks_dir": None,
+        },
+    )
+
+    with ctx, pytest.raises(Exception) as excinfo:  # noqa: PT011
+        validate_conf(
+            config_file_contents={
+                "manifest_checks": [{"name": "check_model_has_unique_tst"}]
+            }
+        )
+
+    assert (
+        str(excinfo.value)
+        == "1. Check 'check_model_has_unique_tst' does not match any of the expected checks. Did you mean 'check_model_has_unique_test'?"
+    )
+
+
+def test_validate_conf_incorrect_names():
+    ctx = click.Context(
+        cli,
+        obj={
+            "config_file_path": "",
+            "custom_checks_dir": None,
+        },
+    )
+
+    with ctx, pytest.raises(Exception) as excinfo:  # noqa: PT011
+        validate_conf(
+            config_file_contents={
+                "manifest_checks": [
+                    {"name": "check_model_has_unique_tst"},
+                    {"name": "check_exposure_based_on_viw"},
+                ]
+            }
+        )
+
+    assert (
+        str(excinfo.value)
+        == """1. Check 'check_model_has_unique_tst' does not match any of the expected checks. Did you mean 'check_model_has_unique_test'?
+2. Check 'check_exposure_based_on_viw' does not match any of the expected checks. Did you mean 'check_exposure_based_on_view'?"""
+    )
 
 
 valid_confs = [
