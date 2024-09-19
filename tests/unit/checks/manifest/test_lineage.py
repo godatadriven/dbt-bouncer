@@ -1,18 +1,17 @@
-import warnings
 from contextlib import nullcontext as does_not_raise
 
 import pytest
-
-with warnings.catch_warnings():
-    warnings.filterwarnings("ignore", category=UserWarning)
-    from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Nodes4
 
 from dbt_bouncer.checks.manifest.check_lineage import (
     CheckLineagePermittedUpstreamModels,
     CheckLineageSeedCannotBeUsed,
     CheckLineageSourceCannotBeUsed,
 )
-from dbt_bouncer.parsers import DbtBouncerManifest, DbtBouncerModelBase  # noqa: F401
+from dbt_bouncer.parsers import (  # noqa: F401
+    DbtBouncerManifest,
+    DbtBouncerModelBase,
+    DbtBouncerNodes4,
+)
 
 CheckLineagePermittedUpstreamModels.model_rebuild()
 CheckLineageSeedCannotBeUsed.model_rebuild()
@@ -24,7 +23,7 @@ CheckLineageSourceCannotBeUsed.model_rebuild()
     [
         (
             "manifest_obj",
-            Nodes4(
+            DbtBouncerNodes4(
                 **{
                     "alias": "int_model",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -49,7 +48,7 @@ CheckLineageSourceCannotBeUsed.model_rebuild()
                 },
             ),
             [
-                Nodes4(
+                DbtBouncerNodes4(
                     **{
                         "alias": "stg_model_1",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -76,7 +75,7 @@ CheckLineageSourceCannotBeUsed.model_rebuild()
         ),
         (
             "manifest_obj",
-            Nodes4(
+            DbtBouncerNodes4(
                 **{
                     "alias": "int_model",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -104,7 +103,7 @@ CheckLineageSourceCannotBeUsed.model_rebuild()
         ),
         (
             "manifest_obj",
-            Nodes4(
+            DbtBouncerNodes4(
                 **{
                     "alias": "mart_model",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -129,7 +128,7 @@ CheckLineageSourceCannotBeUsed.model_rebuild()
                 },
             ),
             [
-                Nodes4(
+                DbtBouncerNodes4(
                     **{
                         "alias": "mart_other_model",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -178,7 +177,7 @@ def test_check_lineage_permitted_upstream_models(
     ("model", "expectation"),
     [
         (
-            Nodes4(
+            DbtBouncerNodes4(
                 **{
                     "alias": "int_model_2",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -203,7 +202,7 @@ def test_check_lineage_permitted_upstream_models(
             does_not_raise(),
         ),
         (
-            Nodes4(
+            DbtBouncerNodes4(
                 **{
                     "alias": "int_model_2",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -241,7 +240,7 @@ def test_check_lineage_seed_cannot_be_used(model, expectation):
     ("model", "expectation"),
     [
         (
-            Nodes4(
+            DbtBouncerNodes4(
                 **{
                     "alias": "int_model_2",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -266,7 +265,7 @@ def test_check_lineage_seed_cannot_be_used(model, expectation):
             does_not_raise(),
         ),
         (
-            Nodes4(
+            DbtBouncerNodes4(
                 **{
                     "alias": "int_model_2",
                     "checksum": {"name": "sha256", "checksum": ""},

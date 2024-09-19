@@ -6,7 +6,7 @@ import pytest
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
     from dbt_artifacts_parser.parsers.catalog.catalog_v1 import CatalogTable
-    from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Nodes4, Nodes6
+    from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Nodes6
 from dbt_bouncer.checks.catalog.check_columns import (
     CheckColumnDescriptionPopulated,
     CheckColumnHasSpecifiedTest,
@@ -16,6 +16,7 @@ from dbt_bouncer.checks.catalog.check_columns import (
 )
 from dbt_bouncer.parsers import (  # noqa: F401
     DbtBouncerModelBase,
+    DbtBouncerNodes4,
     DbtBouncerTest,
     DbtBouncerTestBase,
 )
@@ -56,7 +57,7 @@ CheckColumnHasSpecifiedTest.model_rebuild()
                 },
             ),
             [
-                Nodes4(
+                DbtBouncerNodes4(
                     **{
                         "alias": "model_1",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -112,7 +113,7 @@ CheckColumnHasSpecifiedTest.model_rebuild()
                 },
             ),
             [
-                Nodes4(
+                DbtBouncerNodes4(
                     **{
                         "alias": "model_2",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -301,7 +302,7 @@ def test_check_column_has_specified_test(
                 },
             ),
             [
-                Nodes4(
+                DbtBouncerNodes4(
                     **{
                         "alias": "model_1",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -355,7 +356,7 @@ def test_check_column_has_specified_test(
                 },
             ),
             [
-                Nodes4(
+                DbtBouncerNodes4(
                     **{
                         "alias": "model_2",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -413,7 +414,7 @@ def test_check_columns_are_all_documented(catalog_node, models, expectation):
                 },
             ),
             [
-                Nodes4(
+                DbtBouncerNodes4(
                     **{
                         "access": "public",
                         "alias": "model_1",
@@ -464,7 +465,7 @@ def test_check_columns_are_all_documented(catalog_node, models, expectation):
                 },
             ),
             [
-                Nodes4(
+                DbtBouncerNodes4(
                     **{
                         "access": "public",
                         "alias": "model_1",

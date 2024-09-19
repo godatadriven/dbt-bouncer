@@ -5,7 +5,7 @@ import pytest
 
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
-    from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Nodes4, Sources
+    from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Sources
 
 from dbt_bouncer.checks.common import NestedDict  # noqa: F401
 from dbt_bouncer.checks.manifest.check_sources import (
@@ -23,6 +23,7 @@ from dbt_bouncer.checks.manifest.check_sources import (
 from dbt_bouncer.parsers import (  # noqa: F401
     DbtBouncerModel,
     DbtBouncerModelBase,
+    DbtBouncerNodes4,
     DbtBouncerSource,
     DbtBouncerSourceBase,
 )
@@ -653,7 +654,7 @@ def test_check_source_names(source_name_pattern, source, expectation):
     [
         (
             [
-                Nodes4(
+                DbtBouncerNodes4(
                     **{
                         "alias": "model_1",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -700,7 +701,7 @@ def test_check_source_names(source_name_pattern, source, expectation):
         ),
         (
             [
-                Nodes4(
+                DbtBouncerNodes4(
                     **{
                         "alias": "model_1",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -724,7 +725,7 @@ def test_check_source_names(source_name_pattern, source, expectation):
                         "unique_id": "model.package_name.model_1",
                     },
                 ),
-                Nodes4(
+                DbtBouncerNodes4(
                     **{
                         "alias": "model_2",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -771,7 +772,7 @@ def test_check_source_names(source_name_pattern, source, expectation):
         ),
         (
             [
-                Nodes4(
+                DbtBouncerNodes4(
                     **{
                         "alias": "model_2",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -948,7 +949,7 @@ def test_check_source_property_file_location(source, expectation):
     [
         (
             [
-                Nodes4(
+                DbtBouncerNodes4(
                     **{
                         "alias": "model_2",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -995,7 +996,7 @@ def test_check_source_property_file_location(source, expectation):
         ),
         (
             [
-                Nodes4(
+                DbtBouncerNodes4(
                     **{
                         "alias": "model_2",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -1056,7 +1057,7 @@ def test_check_source_used_by_models_in_same_directory(models, source, expectati
     [
         (
             [
-                Nodes4(
+                DbtBouncerNodes4(
                     **{
                         "alias": "model_2",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -1103,7 +1104,7 @@ def test_check_source_used_by_models_in_same_directory(models, source, expectati
         ),
         (
             [
-                Nodes4(
+                DbtBouncerNodes4(
                     **{
                         "alias": "model_2",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -1148,7 +1149,7 @@ def test_check_source_used_by_models_in_same_directory(models, source, expectati
         ),
         (
             [
-                Nodes4(
+                DbtBouncerNodes4(
                     **{
                         "alias": "model_1",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -1172,7 +1173,7 @@ def test_check_source_used_by_models_in_same_directory(models, source, expectati
                         "unique_id": "model.package_name.model_1",
                     },
                 ),
-                Nodes4(
+                DbtBouncerNodes4(
                     **{
                         "alias": "model_2",
                         "checksum": {"name": "sha256", "checksum": ""},

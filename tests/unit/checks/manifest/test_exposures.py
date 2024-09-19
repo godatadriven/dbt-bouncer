@@ -5,7 +5,7 @@ import pytest
 
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
-    from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Exposures, Nodes4
+    from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Exposures
 
 from dbt_bouncer.checks.manifest.check_exposures import (
     CheckExposureOnNonPublicModels,
@@ -15,6 +15,7 @@ from dbt_bouncer.parsers import (  # noqa: F401
     DbtBouncerExposureBase,
     DbtBouncerModel,
     DbtBouncerModelBase,
+    DbtBouncerNodes4,
 )
 
 CheckExposureOnNonPublicModels.model_rebuild()
@@ -43,7 +44,7 @@ CheckExposureOnView.model_rebuild()
                 },
             ),
             [
-                Nodes4(
+                DbtBouncerNodes4(
                     **{
                         "access": "public",
                         "alias": "model_1",
@@ -92,7 +93,7 @@ CheckExposureOnView.model_rebuild()
                 },
             ),
             [
-                Nodes4(
+                DbtBouncerNodes4(
                     **{
                         "access": "protected",
                         "alias": "model_1",
@@ -156,7 +157,7 @@ def test_check_exposure_based_on_non_public_models(exposure, models, expectation
             ),
             ["ephemeral", "view"],
             [
-                Nodes4(
+                DbtBouncerNodes4(
                     **{
                         "access": "protected",
                         "alias": "model_1",
@@ -212,7 +213,7 @@ def test_check_exposure_based_on_non_public_models(exposure, models, expectation
             ),
             ["ephemeral", "view"],
             [
-                Nodes4(
+                DbtBouncerNodes4(
                     **{
                         "access": "protected",
                         "alias": "model_1",
@@ -240,7 +241,7 @@ def test_check_exposure_based_on_non_public_models(exposure, models, expectation
                         "unique_id": "model.package_name.model_1",
                     },
                 ),
-                Nodes4(
+                DbtBouncerNodes4(
                     **{
                         "access": "protected",
                         "alias": "model_2",
@@ -291,7 +292,7 @@ def test_check_exposure_based_on_non_public_models(exposure, models, expectation
             ),
             ["ephemeral", "view"],
             [
-                Nodes4(
+                DbtBouncerNodes4(
                     **{
                         "access": "protected",
                         "alias": "model_1",

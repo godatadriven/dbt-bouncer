@@ -10,7 +10,6 @@ with warnings.catch_warnings():
     from dbt_artifacts_parser.parsers.manifest.manifest_v12 import (  # noqa: F401
         Exposures,
         Macros,
-        Nodes4,
         UnitTests,
     )
 
@@ -28,6 +27,7 @@ from dbt_bouncer.parsers import (  # noqa: F401
     DbtBouncerManifest,
     DbtBouncerModel,
     DbtBouncerModelBase,
+    DbtBouncerNodes4,
     DbtBouncerRunResultBase,
     DbtBouncerSemanticModelBase,
     DbtBouncerSourceBase,
@@ -58,7 +58,6 @@ def test_runner_coverage(caplog, tmp_path):
             from dbt_artifacts_parser.parsers.manifest.manifest_v12 import (  # noqa: F401
                 Exposures,
                 Macros,
-                Nodes4,
                 UnitTests,
             )
 
@@ -68,6 +67,7 @@ def test_runner_coverage(caplog, tmp_path):
             DbtBouncerManifest,
             DbtBouncerModel,
             DbtBouncerModelBase,
+            DbtBouncerNodes4,
             DbtBouncerRunResultBase,
             DbtBouncerSemanticModelBase,
             DbtBouncerSourceBase,
@@ -121,7 +121,7 @@ def test_runner_coverage(caplog, tmp_path):
             models=[
                 DbtBouncerModel(
                     **{
-                        "model": Nodes4(
+                        "model": DbtBouncerNodes4(
                             **{
                                 "access": "public",
                                 "alias": "stg_payments",
@@ -189,7 +189,6 @@ def test_runner_failure():
             from dbt_artifacts_parser.parsers.manifest.manifest_v12 import (  # noqa: F401
                 Exposures,
                 Macros,
-                Nodes4,
                 UnitTests,
             )
 
@@ -252,7 +251,7 @@ def test_runner_failure():
             models=[
                 DbtBouncerModel(
                     **{
-                        "model": Nodes4(
+                        "model": DbtBouncerNodes4(
                             **{
                                 "access": "public",
                                 "alias": "stg_payments",
@@ -312,7 +311,6 @@ def test_runner_success():
             from dbt_artifacts_parser.parsers.manifest.manifest_v12 import (  # noqa: F401
                 Exposures,
                 Macros,
-                Nodes4,
                 UnitTests,
             )
 
@@ -322,6 +320,7 @@ def test_runner_success():
             DbtBouncerManifest,
             DbtBouncerModel,
             DbtBouncerModelBase,
+            DbtBouncerNodes4,
             DbtBouncerRunResultBase,
             DbtBouncerSemanticModelBase,
             DbtBouncerSourceBase,
@@ -375,7 +374,7 @@ def test_runner_success():
             models=[
                 DbtBouncerModel(
                     **{
-                        "model": Nodes4(
+                        "model": DbtBouncerNodes4(
                             **{
                                 "access": "public",
                                 "alias": "stg_payments",
@@ -430,7 +429,6 @@ def test_runner_windows(caplog, tmp_path):
         from dbt_artifacts_parser.parsers.manifest.manifest_v12 import (  # noqa: F401
             Exposures,
             Macros,
-            Nodes4,
             UnitTests,
         )
 
@@ -480,7 +478,7 @@ def test_runner_windows(caplog, tmp_path):
         models=[
             DbtBouncerModel(
                 **{
-                    "model": Nodes4(
+                    "model": DbtBouncerNodes4(
                         **{
                             "access": "public",
                             "alias": "stg_payments",
