@@ -27,7 +27,7 @@ from dbt_bouncer.parsers import (  # noqa: F401
     DbtBouncerManifest,
     DbtBouncerModel,
     DbtBouncerModelBase,
-    DbtBouncerNodes4,
+    DbtBouncerNodesModel,
     DbtBouncerRunResultBase,
     DbtBouncerSemanticModelBase,
     DbtBouncerSourceBase,
@@ -67,7 +67,7 @@ def test_runner_coverage(caplog, tmp_path):
             DbtBouncerManifest,
             DbtBouncerModel,
             DbtBouncerModelBase,
-            DbtBouncerNodes4,
+            DbtBouncerNodesModel,
             DbtBouncerRunResultBase,
             DbtBouncerSemanticModelBase,
             DbtBouncerSourceBase,
@@ -121,7 +121,7 @@ def test_runner_coverage(caplog, tmp_path):
             models=[
                 DbtBouncerModel(
                     **{
-                        "model": DbtBouncerNodes4(
+                        "model": DbtBouncerNodesModel(
                             **{
                                 "access": "public",
                                 "alias": "stg_payments",
@@ -251,7 +251,7 @@ def test_runner_failure():
             models=[
                 DbtBouncerModel(
                     **{
-                        "model": DbtBouncerNodes4(
+                        "model": DbtBouncerNodesModel(
                             **{
                                 "access": "public",
                                 "alias": "stg_payments",
@@ -320,7 +320,7 @@ def test_runner_success():
             DbtBouncerManifest,
             DbtBouncerModel,
             DbtBouncerModelBase,
-            DbtBouncerNodes4,
+            DbtBouncerNodesModel,
             DbtBouncerRunResultBase,
             DbtBouncerSemanticModelBase,
             DbtBouncerSourceBase,
@@ -374,7 +374,7 @@ def test_runner_success():
             models=[
                 DbtBouncerModel(
                     **{
-                        "model": DbtBouncerNodes4(
+                        "model": DbtBouncerNodesModel(
                             **{
                                 "access": "public",
                                 "alias": "stg_payments",
@@ -478,7 +478,7 @@ def test_runner_windows(caplog, tmp_path):
         models=[
             DbtBouncerModel(
                 **{
-                    "model": DbtBouncerNodes4(
+                    "model": DbtBouncerNodesModel(
                         **{
                             "access": "public",
                             "alias": "stg_payments",

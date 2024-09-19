@@ -15,7 +15,7 @@ from dbt_bouncer.parsers import (  # noqa: F401
     DbtBouncerExposureBase,
     DbtBouncerModel,
     DbtBouncerModelBase,
-    DbtBouncerNodes4,
+    DbtBouncerNodesModel,
 )
 
 CheckExposureOnNonPublicModels.model_rebuild()
@@ -44,7 +44,7 @@ CheckExposureOnView.model_rebuild()
                 },
             ),
             [
-                DbtBouncerNodes4(
+                DbtBouncerNodesModel(
                     **{
                         "access": "public",
                         "alias": "model_1",
@@ -93,7 +93,7 @@ CheckExposureOnView.model_rebuild()
                 },
             ),
             [
-                DbtBouncerNodes4(
+                DbtBouncerNodesModel(
                     **{
                         "access": "protected",
                         "alias": "model_1",
@@ -157,7 +157,7 @@ def test_check_exposure_based_on_non_public_models(exposure, models, expectation
             ),
             ["ephemeral", "view"],
             [
-                DbtBouncerNodes4(
+                DbtBouncerNodesModel(
                     **{
                         "access": "protected",
                         "alias": "model_1",
@@ -213,7 +213,7 @@ def test_check_exposure_based_on_non_public_models(exposure, models, expectation
             ),
             ["ephemeral", "view"],
             [
-                DbtBouncerNodes4(
+                DbtBouncerNodesModel(
                     **{
                         "access": "protected",
                         "alias": "model_1",
@@ -241,7 +241,7 @@ def test_check_exposure_based_on_non_public_models(exposure, models, expectation
                         "unique_id": "model.package_name.model_1",
                     },
                 ),
-                DbtBouncerNodes4(
+                DbtBouncerNodesModel(
                     **{
                         "access": "protected",
                         "alias": "model_2",
@@ -292,7 +292,7 @@ def test_check_exposure_based_on_non_public_models(exposure, models, expectation
             ),
             ["ephemeral", "view"],
             [
-                DbtBouncerNodes4(
+                DbtBouncerNodesModel(
                     **{
                         "access": "protected",
                         "alias": "model_1",

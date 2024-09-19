@@ -23,7 +23,7 @@ from dbt_bouncer.checks.manifest.check_sources import (
 from dbt_bouncer.parsers import (  # noqa: F401
     DbtBouncerModel,
     DbtBouncerModelBase,
-    DbtBouncerNodes4,
+    DbtBouncerNodesModel,
     DbtBouncerSource,
     DbtBouncerSourceBase,
 )
@@ -654,7 +654,7 @@ def test_check_source_names(source_name_pattern, source, expectation):
     [
         (
             [
-                DbtBouncerNodes4(
+                DbtBouncerNodesModel(
                     **{
                         "alias": "model_1",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -701,7 +701,7 @@ def test_check_source_names(source_name_pattern, source, expectation):
         ),
         (
             [
-                DbtBouncerNodes4(
+                DbtBouncerNodesModel(
                     **{
                         "alias": "model_1",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -725,7 +725,7 @@ def test_check_source_names(source_name_pattern, source, expectation):
                         "unique_id": "model.package_name.model_1",
                     },
                 ),
-                DbtBouncerNodes4(
+                DbtBouncerNodesModel(
                     **{
                         "alias": "model_2",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -772,7 +772,7 @@ def test_check_source_names(source_name_pattern, source, expectation):
         ),
         (
             [
-                DbtBouncerNodes4(
+                DbtBouncerNodesModel(
                     **{
                         "alias": "model_2",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -949,7 +949,7 @@ def test_check_source_property_file_location(source, expectation):
     [
         (
             [
-                DbtBouncerNodes4(
+                DbtBouncerNodesModel(
                     **{
                         "alias": "model_2",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -996,7 +996,7 @@ def test_check_source_property_file_location(source, expectation):
         ),
         (
             [
-                DbtBouncerNodes4(
+                DbtBouncerNodesModel(
                     **{
                         "alias": "model_2",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -1057,7 +1057,7 @@ def test_check_source_used_by_models_in_same_directory(models, source, expectati
     [
         (
             [
-                DbtBouncerNodes4(
+                DbtBouncerNodesModel(
                     **{
                         "alias": "model_2",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -1104,7 +1104,7 @@ def test_check_source_used_by_models_in_same_directory(models, source, expectati
         ),
         (
             [
-                DbtBouncerNodes4(
+                DbtBouncerNodesModel(
                     **{
                         "alias": "model_2",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -1149,7 +1149,7 @@ def test_check_source_used_by_models_in_same_directory(models, source, expectati
         ),
         (
             [
-                DbtBouncerNodes4(
+                DbtBouncerNodesModel(
                     **{
                         "alias": "model_1",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -1173,7 +1173,7 @@ def test_check_source_used_by_models_in_same_directory(models, source, expectati
                         "unique_id": "model.package_name.model_1",
                     },
                 ),
-                DbtBouncerNodes4(
+                DbtBouncerNodesModel(
                     **{
                         "alias": "model_2",
                         "checksum": {"name": "sha256", "checksum": ""},

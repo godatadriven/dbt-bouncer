@@ -14,7 +14,7 @@ from dbt_bouncer.checks.manifest.check_semantic_models import (
 )
 from dbt_bouncer.parsers import (  # noqa: F401
     DbtBouncerModelBase,
-    DbtBouncerNodes4,
+    DbtBouncerNodesModel,
     DbtBouncerSemanticModelBase,
 )
 
@@ -26,7 +26,7 @@ CheckSemanticModelOnNonPublicModels.model_rebuild()
     [
         (
             [
-                DbtBouncerNodes4(
+                DbtBouncerNodesModel(
                     **{
                         "access": "public",
                         "alias": "model_1",
@@ -66,7 +66,7 @@ CheckSemanticModelOnNonPublicModels.model_rebuild()
         ),
         (
             [
-                DbtBouncerNodes4(
+                DbtBouncerNodesModel(
                     **{
                         "access": "protected",
                         "alias": "model_1",

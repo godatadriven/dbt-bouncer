@@ -14,7 +14,7 @@ with warnings.catch_warnings():
         DbtBouncerManifest,
         DbtBouncerModel,
         DbtBouncerModelBase,
-        DbtBouncerNodes4,
+        DbtBouncerNodesModel,
         DbtBouncerTest,
         DbtBouncerTestBase,
     )
@@ -71,7 +71,7 @@ CheckModelsTestCoverage.model_rebuild()
     [
         (
             "public",
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "access": "public",
                     "alias": "model_2",
@@ -97,7 +97,7 @@ CheckModelsTestCoverage.model_rebuild()
         ),
         (
             "public",
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "access": "protected",
                     "alias": "model_2",
@@ -134,7 +134,7 @@ def test_check_model_access(access, model, expectation):
     ("model", "expectation"),
     [
         (
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "access": "public",
                     "alias": "model_2",
@@ -160,7 +160,7 @@ def test_check_model_access(access, model, expectation):
             does_not_raise(),
         ),
         (
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "access": "protected",
                     "alias": "model_2",
@@ -186,7 +186,7 @@ def test_check_model_access(access, model, expectation):
             does_not_raise(),
         ),
         (
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "access": "public",
                     "alias": "model_2",
@@ -224,7 +224,7 @@ def test_check_model_contract_enforced_for_public_model(model, expectation):
     ("model", "expectation"),
     [
         (
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "model_2",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -249,7 +249,7 @@ def test_check_model_contract_enforced_for_public_model(model, expectation):
             does_not_raise(),
         ),
         (
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "model_2",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -293,7 +293,7 @@ def test_check_model_depends_on_multiple_sources(model, expectation):
         (
             100,
             [
-                DbtBouncerNodes4(
+                DbtBouncerNodesModel(
                     **{
                         "alias": "model_2",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -321,7 +321,7 @@ def test_check_model_depends_on_multiple_sources(model, expectation):
         (
             50,
             [
-                DbtBouncerNodes4(
+                DbtBouncerNodesModel(
                     **{
                         "alias": "model_1",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -343,7 +343,7 @@ def test_check_model_depends_on_multiple_sources(model, expectation):
                         "unique_id": "model.package_name.model_1",
                     },
                 ),
-                DbtBouncerNodes4(
+                DbtBouncerNodesModel(
                     **{
                         "alias": "model_2",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -371,7 +371,7 @@ def test_check_model_depends_on_multiple_sources(model, expectation):
         (
             100,
             [
-                DbtBouncerNodes4(
+                DbtBouncerNodesModel(
                     **{
                         "alias": "model_2",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -415,7 +415,7 @@ def test_check_model_documentation_coverage(
     ("model", "expectation"),
     [
         (
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -440,7 +440,7 @@ def test_check_model_documentation_coverage(
             does_not_raise(),
         ),
         (
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -477,7 +477,7 @@ def test_check_model_documented_in_same_directory(model, expectation):
     ("model", "expectation"),
     [
         (
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -502,7 +502,7 @@ def test_check_model_documented_in_same_directory(model, expectation):
             does_not_raise(),
         ),
         (
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -540,7 +540,7 @@ def test_check_model_has_contracts_enforced(model, expectation):
     [
         (
             ["owner"],
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -566,7 +566,7 @@ def test_check_model_has_contracts_enforced(model, expectation):
         ),
         (
             ["owner"],
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -592,7 +592,7 @@ def test_check_model_has_contracts_enforced(model, expectation):
         ),
         (
             ["owner", {"name": ["first", "last"]}],
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -621,7 +621,7 @@ def test_check_model_has_contracts_enforced(model, expectation):
         ),
         (
             ["owner"],
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -647,7 +647,7 @@ def test_check_model_has_contracts_enforced(model, expectation):
         ),
         (
             ["owner"],
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -673,7 +673,7 @@ def test_check_model_has_contracts_enforced(model, expectation):
         ),
         (
             ["owner", {"name": ["first", "last"]}],
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -710,7 +710,7 @@ def test_check_model_has_meta_keys(keys, model, expectation):
     ("model", "expectation"),
     [
         (
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -735,7 +735,7 @@ def test_check_model_has_meta_keys(keys, model, expectation):
             does_not_raise(),
         ),
         (
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "int_model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -760,7 +760,7 @@ def test_check_model_has_meta_keys(keys, model, expectation):
             does_not_raise(),
         ),
         (
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -797,7 +797,7 @@ def test_check_model_has_no_upstream_dependencies(model, expectation):
     ("model", "tags", "expectation"),
     [
         (
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -824,7 +824,7 @@ def test_check_model_has_no_upstream_dependencies(model, expectation):
             does_not_raise(),
         ),
         (
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -866,7 +866,7 @@ def test_check_model_has_tags(model, tags, expectation):
     [
         (
             ["expect_compound_columns_to_be_unique", "unique"],
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -917,7 +917,7 @@ def test_check_model_has_tags(model, tags, expectation):
         ),
         (
             ["my_custom_test", "unique"],
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -968,7 +968,7 @@ def test_check_model_has_tags(model, tags, expectation):
         ),
         (
             ["unique"],
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -1019,7 +1019,7 @@ def test_check_model_has_tags(model, tags, expectation):
         ),
         (
             ["expect_compound_columns_to_be_unique", "unique"],
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -1066,7 +1066,7 @@ def test_check_model_has_unique_test(
         (
             "manifest_obj",
             1,
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -1119,7 +1119,7 @@ def test_check_model_has_unique_test(
         (
             "manifest_obj",
             2,
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -1193,7 +1193,7 @@ def test_check_model_has_unit_tests(
     ("model", "regexp_pattern", "expectation"),
     [
         (
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -1219,7 +1219,7 @@ def test_check_model_has_unit_tests(
             does_not_raise(),
         ),
         (
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -1264,7 +1264,7 @@ def test_check_model_code_does_not_contain_regexp_pattern(
     [
         (
             "models",
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -1290,7 +1290,7 @@ def test_check_model_code_does_not_contain_regexp_pattern(
         ),
         (
             "models/marts",
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -1316,7 +1316,7 @@ def test_check_model_code_does_not_contain_regexp_pattern(
         ),
         (
             "models/marts",
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -1371,7 +1371,7 @@ def test_check_model_directories(
             "manifest_obj",
             ["ephemeral", "view"],
             3,
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "model_0",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -1394,7 +1394,7 @@ def test_check_model_directories(
                 },
             ),
             [
-                DbtBouncerNodes4(
+                DbtBouncerNodesModel(
                     **{
                         "alias": "model_0",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -1419,7 +1419,7 @@ def test_check_model_directories(
                         "unique_id": "model.dbt_bouncer_test_project.model_0",
                     },
                 ),
-                DbtBouncerNodes4(
+                DbtBouncerNodesModel(
                     **{
                         "alias": "model_1",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -1444,7 +1444,7 @@ def test_check_model_directories(
                         "unique_id": "model.dbt_bouncer_test_project.model_1",
                     },
                 ),
-                DbtBouncerNodes4(
+                DbtBouncerNodesModel(
                     **{
                         "alias": "model_2",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -1474,7 +1474,7 @@ def test_check_model_directories(
             "manifest_obj",
             ["ephemeral", "view"],
             3,
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "model_0",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -1497,7 +1497,7 @@ def test_check_model_directories(
                 },
             ),
             [
-                DbtBouncerNodes4(
+                DbtBouncerNodesModel(
                     **{
                         "alias": "model_0",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -1522,7 +1522,7 @@ def test_check_model_directories(
                         "unique_id": "model.dbt_bouncer_test_project.model_0",
                     },
                 ),
-                DbtBouncerNodes4(
+                DbtBouncerNodesModel(
                     **{
                         "alias": "model_1",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -1547,7 +1547,7 @@ def test_check_model_directories(
                         "unique_id": "model.dbt_bouncer_test_project.model_1",
                     },
                 ),
-                DbtBouncerNodes4(
+                DbtBouncerNodesModel(
                     **{
                         "alias": "model_2",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -1572,7 +1572,7 @@ def test_check_model_directories(
                         "unique_id": "model.dbt_bouncer_test_project.model_2",
                     },
                 ),
-                DbtBouncerNodes4(
+                DbtBouncerNodesModel(
                     **{
                         "alias": "model_3",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -1626,7 +1626,7 @@ def test_check_model_max_chained_views(
         (
             "",
             "^stg_",
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "stg_model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -1652,7 +1652,7 @@ def test_check_model_max_chained_views(
         (
             "^staging",
             "^stg_",
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "stg_model_2",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -1678,7 +1678,7 @@ def test_check_model_max_chained_views(
         (
             "^intermediate",
             "^stg_",
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "stg_model_3",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -1704,7 +1704,7 @@ def test_check_model_max_chained_views(
         (
             "^intermediate",
             "^int_",
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "int_model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -1730,7 +1730,7 @@ def test_check_model_max_chained_views(
         (
             "^intermediate",
             "^int_",
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -1756,7 +1756,7 @@ def test_check_model_max_chained_views(
         (
             "^intermediate",
             "^int_",
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "model_int_2",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -1796,7 +1796,7 @@ def test_check_mode_names(include, model_name_pattern, model, expectation):
     [
         (
             1,
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "stg_model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -1818,7 +1818,7 @@ def test_check_mode_names(include, model_name_pattern, model, expectation):
                 },
             ),
             [
-                DbtBouncerNodes4(
+                DbtBouncerNodesModel(
                     **{
                         "alias": "stg_model_2",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -1849,7 +1849,7 @@ def test_check_mode_names(include, model_name_pattern, model, expectation):
         ),
         (
             1,
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "stg_model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -1871,7 +1871,7 @@ def test_check_mode_names(include, model_name_pattern, model, expectation):
                 },
             ),
             [
-                DbtBouncerNodes4(
+                DbtBouncerNodesModel(
                     **{
                         "alias": "stg_model_2",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -1897,7 +1897,7 @@ def test_check_mode_names(include, model_name_pattern, model, expectation):
                         "unique_id": "model.package_name.stg_model_2",
                     },
                 ),
-                DbtBouncerNodes4(
+                DbtBouncerNodesModel(
                     **{
                         "alias": "stg_model_3",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -1943,7 +1943,7 @@ def test_check_model_max_fanout(max_downstream_models, model, models, expectatio
     [
         (
             100,
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -1970,7 +1970,7 @@ def test_check_model_max_fanout(max_downstream_models, model, models, expectatio
         ),
         (
             10,
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -2019,7 +2019,7 @@ def test_check_model_max_number_of_lines(max_number_of_lines, model, expectation
             5,
             5,
             1,
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -2064,7 +2064,7 @@ def test_check_model_max_number_of_lines(max_number_of_lines, model, expectation
             5,
             5,
             1,
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -2096,7 +2096,7 @@ def test_check_model_max_number_of_lines(max_number_of_lines, model, expectation
             5,
             5,
             1,
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -2131,7 +2131,7 @@ def test_check_model_max_number_of_lines(max_number_of_lines, model, expectation
             5,
             5,
             1,
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -2170,7 +2170,7 @@ def test_check_model_max_number_of_lines(max_number_of_lines, model, expectation
             5,
             5,
             1,
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -2228,7 +2228,7 @@ def test_check_model_max_upstream_dependencies(
     ("model", "expectation"),
     [
         (
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -2253,7 +2253,7 @@ def test_check_model_max_upstream_dependencies(
             does_not_raise(),
         ),
         (
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -2278,7 +2278,7 @@ def test_check_model_max_upstream_dependencies(
             does_not_raise(),
         ),
         (
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -2303,7 +2303,7 @@ def test_check_model_max_upstream_dependencies(
             does_not_raise(),
         ),
         (
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -2328,7 +2328,7 @@ def test_check_model_max_upstream_dependencies(
             pytest.raises(AssertionError),
         ),
         (
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -2353,7 +2353,7 @@ def test_check_model_max_upstream_dependencies(
             pytest.raises(AssertionError),
         ),
         (
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -2390,7 +2390,7 @@ def test_check_model_property_file_location(model, expectation):
     ("model", "expectation"),
     [
         (
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -2415,7 +2415,7 @@ def test_check_model_property_file_location(model, expectation):
             does_not_raise(),
         ),
         (
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -2443,7 +2443,7 @@ def test_check_model_property_file_location(model, expectation):
             does_not_raise(),
         ),
         (
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -2468,7 +2468,7 @@ def test_check_model_property_file_location(model, expectation):
             pytest.raises(AssertionError),
         ),
         (
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -2493,7 +2493,7 @@ def test_check_model_property_file_location(model, expectation):
             pytest.raises(AssertionError),
         ),
         (
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -2519,7 +2519,7 @@ def test_check_model_property_file_location(model, expectation):
             pytest.raises(AssertionError),
         ),
         (
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -2544,7 +2544,7 @@ def test_check_model_property_file_location(model, expectation):
             pytest.raises(AssertionError),
         ),
         (
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -2583,7 +2583,7 @@ def test_check_model_description_populated(model, expectation):
         (
             100,
             [
-                DbtBouncerNodes4(
+                DbtBouncerNodesModel(
                     **{
                         "alias": "model_1",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -2641,7 +2641,7 @@ def test_check_model_description_populated(model, expectation):
         (
             50,
             [
-                DbtBouncerNodes4(
+                DbtBouncerNodesModel(
                     **{
                         "alias": "model_1",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -2662,7 +2662,7 @@ def test_check_model_description_populated(model, expectation):
                         "unique_id": "model.package_name.model_1",
                     },
                 ),
-                DbtBouncerNodes4(
+                DbtBouncerNodesModel(
                     **{
                         "alias": "model_2",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -2720,7 +2720,7 @@ def test_check_model_description_populated(model, expectation):
         (
             100,
             [
-                DbtBouncerNodes4(
+                DbtBouncerNodesModel(
                     **{
                         "alias": "model_1",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -2741,7 +2741,7 @@ def test_check_model_description_populated(model, expectation):
                         "unique_id": "model.package_name.model_1",
                     },
                 ),
-                DbtBouncerNodes4(
+                DbtBouncerNodesModel(
                     **{
                         "alias": "model_2",
                         "checksum": {"name": "sha256", "checksum": ""},

@@ -10,7 +10,7 @@ from dbt_bouncer.checks.manifest.check_lineage import (
 from dbt_bouncer.parsers import (  # noqa: F401
     DbtBouncerManifest,
     DbtBouncerModelBase,
-    DbtBouncerNodes4,
+    DbtBouncerNodesModel,
 )
 
 CheckLineagePermittedUpstreamModels.model_rebuild()
@@ -23,7 +23,7 @@ CheckLineageSourceCannotBeUsed.model_rebuild()
     [
         (
             "manifest_obj",
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "int_model",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -48,7 +48,7 @@ CheckLineageSourceCannotBeUsed.model_rebuild()
                 },
             ),
             [
-                DbtBouncerNodes4(
+                DbtBouncerNodesModel(
                     **{
                         "alias": "stg_model_1",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -75,7 +75,7 @@ CheckLineageSourceCannotBeUsed.model_rebuild()
         ),
         (
             "manifest_obj",
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "int_model",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -103,7 +103,7 @@ CheckLineageSourceCannotBeUsed.model_rebuild()
         ),
         (
             "manifest_obj",
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "mart_model",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -128,7 +128,7 @@ CheckLineageSourceCannotBeUsed.model_rebuild()
                 },
             ),
             [
-                DbtBouncerNodes4(
+                DbtBouncerNodesModel(
                     **{
                         "alias": "mart_other_model",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -177,7 +177,7 @@ def test_check_lineage_permitted_upstream_models(
     ("model", "expectation"),
     [
         (
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "int_model_2",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -202,7 +202,7 @@ def test_check_lineage_permitted_upstream_models(
             does_not_raise(),
         ),
         (
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "int_model_2",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -240,7 +240,7 @@ def test_check_lineage_seed_cannot_be_used(model, expectation):
     ("model", "expectation"),
     [
         (
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "int_model_2",
                     "checksum": {"name": "sha256", "checksum": ""},
@@ -265,7 +265,7 @@ def test_check_lineage_seed_cannot_be_used(model, expectation):
             does_not_raise(),
         ),
         (
-            DbtBouncerNodes4(
+            DbtBouncerNodesModel(
                 **{
                     "alias": "int_model_2",
                     "checksum": {"name": "sha256", "checksum": ""},

@@ -62,18 +62,13 @@ with warnings.catch_warnings():
     from dbt_artifacts_parser.parsers.manifest.manifest_v12 import (
         Access,
         Checksum,
-        Columns,
         Columns2,
         Columns4,
-        Config,
         Config3,
         Config5,
         Constraint5,
         Contract8,
-        Contract11,
-        DeferRelation,
         DeferRelation1,
-        DependsOn,
         Disabled,
         Disabled1,
         Disabled2,
@@ -133,7 +128,6 @@ with warnings.catch_warnings():
         database: Optional[str] = None
         schema: str
         name: str
-        resource_type: Literal["seed"]
         package_name: str
         path: str
         original_file_path: str
@@ -141,89 +135,10 @@ with warnings.catch_warnings():
         fqn: List[str]
         alias: str
         checksum: Checksum = Field(..., title="FileHash")
-        config: Optional[Config] = Field(None, title="SeedConfig")
+        config: Optional[Union[Config3, Config5]] = None
         tags: Optional[List[str]] = None
         description: Optional[str] = ""
-        columns: Optional[Dict[str, Columns]] = None
-        meta: Optional[Dict[str, Any]] = None
-        group: Optional[str] = None
-        docs: Optional[Docs] = Field(None, title="Docs")
-        patch_path: Optional[str] = None
-        build_path: Optional[str] = None
-        unrendered_config: Optional[Dict[str, Any]] = None
-        created_at: Optional[float] = None
-        config_call_dict: Optional[Dict[str, Any]] = None
-        relation_name: Optional[str] = None
-        raw_code: Optional[str] = ""
-        root_path: Optional[str] = None
-        depends_on: Optional[DependsOn] = Field(None, title="MacroDependsOn")
-        defer_relation: Optional[DeferRelation] = None
-
-    class DbtBouncerNodes2(BaseParserModel):  # noqa: D101
-        model_config = ConfigDict(
-            extra="allow",
-        )
-        database: Optional[str] = None
-        schema: str
-        name: str
-        resource_type: Literal["test"]
-        package_name: str
-        path: str
-        original_file_path: str
-        unique_id: str
-        fqn: List[str]
-        alias: str
-        checksum: Checksum = Field(..., title="FileHash")
-        config: Optional[Config3] = Field(None, title="TestConfig")
-        tags: Optional[List[str]] = None
-        description: Optional[str] = ""
-        columns: Optional[Dict[str, Columns2]] = None
-        meta: Optional[Dict[str, Any]] = None
-        group: Optional[str] = None
-        docs: Optional[Docs] = Field(None, title="Docs")
-        patch_path: Optional[str] = None
-        build_path: Optional[str] = None
-        unrendered_config: Optional[Dict[str, Any]] = None
-        created_at: Optional[float] = None
-        config_call_dict: Optional[Dict[str, Any]] = None
-        relation_name: Optional[str] = None
-        raw_code: Optional[str] = ""
-        language: Optional[str] = "sql"
-        refs: Optional[List[Ref]] = None
-        sources: Optional[List[List[str]]] = None
-        metrics: Optional[List[List[str]]] = None
-        depends_on: Optional[DependsOn1] = Field(None, title="DependsOn")
-        compiled_path: Optional[str] = None
-        compiled: Optional[bool] = False
-        compiled_code: Optional[str] = None
-        extra_ctes_injected: Optional[bool] = False
-        extra_ctes: Optional[List[ExtraCte]] = None
-        field_pre_injected_sql: Optional[str] = Field(None, alias="_pre_injected_sql")
-        contract: Optional[Contract11] = Field(None, title="Contract")
-        column_name: Optional[str] = None
-        file_key_name: Optional[str] = None
-        attached_node: Optional[str] = None
-        test_metadata: Optional[TestMetadata] = Field(None, title="TestMetadata")
-
-    class DbtBouncerNodes4(BaseParserModel):  # noqa: D101
-        model_config = ConfigDict(
-            extra="allow",
-        )
-        database: Optional[str] = None
-        schema: str
-        name: str
-        resource_type: Literal["model"]
-        package_name: str
-        path: str
-        original_file_path: str
-        unique_id: str
-        fqn: List[str]
-        alias: str
-        checksum: Checksum = Field(..., title="FileHash")
-        config: Optional[Config5] = Field(None, title="ModelConfig")
-        tags: Optional[List[str]] = None
-        description: Optional[str] = ""
-        columns: Optional[Dict[str, Columns4]] = None
+        columns: Optional[Dict[str, Union[Columns2, Columns4]]] = None
         meta: Optional[Dict[str, Any]] = None
         group: Optional[str] = None
         docs: Optional[Docs] = Field(None, title="Docs")
@@ -246,14 +161,35 @@ with warnings.catch_warnings():
         extra_ctes: Optional[List[ExtraCte]] = None
         field_pre_injected_sql: Optional[str] = Field(None, alias="_pre_injected_sql")
         contract: Optional[Contract8] = Field(None, title="Contract")
+
+    class DbtBouncerNodesModel(DbtBouncerNodes):  # noqa: D101
+        model_config = ConfigDict(
+            extra="allow",
+        )
         access: Optional[Access] = "protected"
         constraints: Optional[List[Constraint5]] = None
-        version: Optional[Union[str, float]] = None
-        latest_version: Optional[Union[str, float]] = None
-        deprecation_date: Optional[str] = None
         defer_relation: Optional[DeferRelation1] = None
+        deprecation_date: Optional[str] = None
+        latest_version: Optional[Union[str, float]] = None
         primary_key: Optional[List[str]] = None
+        resource_type: Literal["model"]
         time_spine: Optional[TimeSpine] = None
+        version: Optional[Union[str, float]] = None
+
+    class DbtBouncerNodesSeed(DbtBouncerNodes):  # noqa: D101
+        model_config = ConfigDict(
+            extra="allow",
+        )
+        resource_type: Literal["seed"]
+
+    class DbtBouncerNodesTest(DbtBouncerNodes):  # noqa: D101
+        model_config = ConfigDict(
+            extra="allow",
+        )
+        attached_node: Optional[str] = None
+        column_name: Optional[str] = None
+        resource_type: Literal["test"]
+        test_metadata: Optional[TestMetadata] = Field(None, title="TestMetadata")
 
 
 class DbtBouncerCatalogNode(BaseModel):
@@ -296,7 +232,7 @@ class TimeSpine(BaseParserModel):  # noqa: D101
     standard_granularity_column: str
 
 
-DbtBouncerModelBase = Union[ModelNode_v10, ModelNode_v11, DbtBouncerNodes4]
+DbtBouncerModelBase = Union[ModelNode_v10, ModelNode_v11, DbtBouncerNodesModel]
 
 
 class DbtBouncerModel(BaseModel):
@@ -347,7 +283,7 @@ DbtBouncerTestBase = Union[
     SingularTestNode_v10,
     GenericTestNode_v11,
     SingularTestNode_v11,
-    DbtBouncerNodes2,
+    DbtBouncerNodesTest,
     Nodes6,
 ]
 
@@ -572,9 +508,9 @@ class DbtBouncerManifestV12(BaseParserModel):  # noqa: D101
         str,
         Annotated[
             Union[
-                DbtBouncerNodes,
-                DbtBouncerNodes2,
-                DbtBouncerNodes4,
+                DbtBouncerNodesSeed,
+                DbtBouncerNodesTest,
+                DbtBouncerNodesModel,
             ],
             Field(discriminator="resource_type"),
         ],
@@ -718,7 +654,7 @@ def parse_manifest_artifact(
                 # https://github.com/yu-iskw/dbt-artifacts-parser/pull/112#issuecomment-2360298424
                 # To work around this we create a more flexible Pydantic object and map to that
                 if type(v) in [Nodes, Nodes2, Nodes4]:
-                    v = DbtBouncerNodes4(**v.model_dump())
+                    v = DbtBouncerNodesModel(**v.model_dump())
 
                 project_models.append(
                     DbtBouncerModel(

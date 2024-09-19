@@ -16,7 +16,7 @@ from dbt_bouncer.checks.catalog.check_columns import (
 )
 from dbt_bouncer.parsers import (  # noqa: F401
     DbtBouncerModelBase,
-    DbtBouncerNodes4,
+    DbtBouncerNodesModel,
     DbtBouncerTest,
     DbtBouncerTestBase,
 )
@@ -57,7 +57,7 @@ CheckColumnHasSpecifiedTest.model_rebuild()
                 },
             ),
             [
-                DbtBouncerNodes4(
+                DbtBouncerNodesModel(
                     **{
                         "alias": "model_1",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -113,7 +113,7 @@ CheckColumnHasSpecifiedTest.model_rebuild()
                 },
             ),
             [
-                DbtBouncerNodes4(
+                DbtBouncerNodesModel(
                     **{
                         "alias": "model_2",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -302,7 +302,7 @@ def test_check_column_has_specified_test(
                 },
             ),
             [
-                DbtBouncerNodes4(
+                DbtBouncerNodesModel(
                     **{
                         "alias": "model_1",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -356,7 +356,7 @@ def test_check_column_has_specified_test(
                 },
             ),
             [
-                DbtBouncerNodes4(
+                DbtBouncerNodesModel(
                     **{
                         "alias": "model_2",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -414,7 +414,7 @@ def test_check_columns_are_all_documented(catalog_node, models, expectation):
                 },
             ),
             [
-                DbtBouncerNodes4(
+                DbtBouncerNodesModel(
                     **{
                         "access": "public",
                         "alias": "model_1",
@@ -465,7 +465,7 @@ def test_check_columns_are_all_documented(catalog_node, models, expectation):
                 },
             ),
             [
-                DbtBouncerNodes4(
+                DbtBouncerNodesModel(
                     **{
                         "access": "public",
                         "alias": "model_1",
