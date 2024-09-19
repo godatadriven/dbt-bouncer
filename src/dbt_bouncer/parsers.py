@@ -6,10 +6,11 @@ import logging
 import warnings
 from enum import Enum
 from pathlib import Path
-from typing import TYPE_CHECKING, List, Literal, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Union
 
 import semver
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field
+from typing_extensions import Annotated
 
 from dbt_bouncer.utils import clean_path_str
 
@@ -18,6 +19,7 @@ if TYPE_CHECKING:
 
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
+    from dbt_artifacts_parser.parsers.base import BaseParserModel
     from dbt_artifacts_parser.parsers.catalog.catalog_v1 import CatalogTable, CatalogV1
     from dbt_artifacts_parser.parsers.manifest.manifest_v10 import (
         Exposure as Exposure_v10,
@@ -58,14 +60,51 @@ with warnings.catch_warnings():
         SourceDefinition as SourceDefinition_v11,
     )
     from dbt_artifacts_parser.parsers.manifest.manifest_v12 import (
+        Access,
+        Checksum,
+        Columns,
+        Columns2,
+        Columns4,
+        Config,
+        Config3,
+        Config5,
+        Constraint5,
+        Contract8,
+        Contract11,
+        DeferRelation,
+        DeferRelation1,
+        DependsOn,
+        Disabled,
+        Disabled1,
+        Disabled2,
+        Disabled3,
+        Disabled4,
+        Disabled5,
+        Disabled6,
+        Disabled7,
+        Disabled8,
+        Disabled9,
+        Disabled10,
+        Disabled11,
+        Disabled12,
+        Disabled13,
+        Docs,
+        Docs18,
         Exposures,
+        ExtraCte,
+        Groups,
         Macros,
-        ManifestV12,
+        Metadata,
+        Metrics,
+        Nodes,
         Nodes2,
         Nodes4,
         Nodes6,
+        Ref,
+        SavedQueries,
         SemanticModels,
         Sources,
+        TestMetadata,
         UnitTests,
     )
     from dbt_artifacts_parser.parsers.run_results.run_results_v4 import (
@@ -80,6 +119,141 @@ with warnings.catch_warnings():
         Result,
         RunResultsV6,
     )
+    from dbt_artifacts_parser.parsers.utils import get_dbt_schema_version
+    from dbt_artifacts_parser.parsers.version_map import ArtifactTypes
+
+
+with warnings.catch_warnings():
+    warnings.filterwarnings("ignore", category=UserWarning)
+
+    class DbtBouncerNodes(BaseParserModel):  # noqa: D101
+        model_config = ConfigDict(
+            extra="allow",
+        )
+        database: Optional[str] = None
+        schema: str
+        name: str
+        resource_type: Literal["seed"]
+        package_name: str
+        path: str
+        original_file_path: str
+        unique_id: str
+        fqn: List[str]
+        alias: str
+        checksum: Checksum = Field(..., title="FileHash")
+        config: Optional[Config] = Field(None, title="SeedConfig")
+        tags: Optional[List[str]] = None
+        description: Optional[str] = ""
+        columns: Optional[Dict[str, Columns]] = None
+        meta: Optional[Dict[str, Any]] = None
+        group: Optional[str] = None
+        docs: Optional[Docs] = Field(None, title="Docs")
+        patch_path: Optional[str] = None
+        build_path: Optional[str] = None
+        unrendered_config: Optional[Dict[str, Any]] = None
+        created_at: Optional[float] = None
+        config_call_dict: Optional[Dict[str, Any]] = None
+        relation_name: Optional[str] = None
+        raw_code: Optional[str] = ""
+        root_path: Optional[str] = None
+        depends_on: Optional[DependsOn] = Field(None, title="MacroDependsOn")
+        defer_relation: Optional[DeferRelation] = None
+
+    class DbtBouncerNodes2(BaseParserModel):  # noqa: D101
+        model_config = ConfigDict(
+            extra="allow",
+        )
+        database: Optional[str] = None
+        schema: str
+        name: str
+        resource_type: Literal["test"]
+        package_name: str
+        path: str
+        original_file_path: str
+        unique_id: str
+        fqn: List[str]
+        alias: str
+        checksum: Checksum = Field(..., title="FileHash")
+        config: Optional[Config3] = Field(None, title="TestConfig")
+        tags: Optional[List[str]] = None
+        description: Optional[str] = ""
+        columns: Optional[Dict[str, Columns2]] = None
+        meta: Optional[Dict[str, Any]] = None
+        group: Optional[str] = None
+        docs: Optional[Docs] = Field(None, title="Docs")
+        patch_path: Optional[str] = None
+        build_path: Optional[str] = None
+        unrendered_config: Optional[Dict[str, Any]] = None
+        created_at: Optional[float] = None
+        config_call_dict: Optional[Dict[str, Any]] = None
+        relation_name: Optional[str] = None
+        raw_code: Optional[str] = ""
+        language: Optional[str] = "sql"
+        refs: Optional[List[Ref]] = None
+        sources: Optional[List[List[str]]] = None
+        metrics: Optional[List[List[str]]] = None
+        depends_on: Optional[DependsOn1] = Field(None, title="DependsOn")
+        compiled_path: Optional[str] = None
+        compiled: Optional[bool] = False
+        compiled_code: Optional[str] = None
+        extra_ctes_injected: Optional[bool] = False
+        extra_ctes: Optional[List[ExtraCte]] = None
+        field_pre_injected_sql: Optional[str] = Field(None, alias="_pre_injected_sql")
+        contract: Optional[Contract11] = Field(None, title="Contract")
+        column_name: Optional[str] = None
+        file_key_name: Optional[str] = None
+        attached_node: Optional[str] = None
+        test_metadata: Optional[TestMetadata] = Field(None, title="TestMetadata")
+
+    class DbtBouncerNodes4(BaseParserModel):  # noqa: D101
+        model_config = ConfigDict(
+            extra="allow",
+        )
+        database: Optional[str] = None
+        schema: str
+        name: str
+        resource_type: Literal["model"]
+        package_name: str
+        path: str
+        original_file_path: str
+        unique_id: str
+        fqn: List[str]
+        alias: str
+        checksum: Checksum = Field(..., title="FileHash")
+        config: Optional[Config5] = Field(None, title="ModelConfig")
+        tags: Optional[List[str]] = None
+        description: Optional[str] = ""
+        columns: Optional[Dict[str, Columns4]] = None
+        meta: Optional[Dict[str, Any]] = None
+        group: Optional[str] = None
+        docs: Optional[Docs] = Field(None, title="Docs")
+        patch_path: Optional[str] = None
+        build_path: Optional[str] = None
+        unrendered_config: Optional[Dict[str, Any]] = None
+        created_at: Optional[float] = None
+        config_call_dict: Optional[Dict[str, Any]] = None
+        relation_name: Optional[str] = None
+        raw_code: Optional[str] = ""
+        language: Optional[str] = "sql"
+        refs: Optional[List[Ref]] = None
+        sources: Optional[List[List[str]]] = None
+        metrics: Optional[List[List[str]]] = None
+        depends_on: Optional[DependsOn1] = Field(None, title="DependsOn")
+        compiled_path: Optional[str] = None
+        compiled: Optional[bool] = False
+        compiled_code: Optional[str] = None
+        extra_ctes_injected: Optional[bool] = False
+        extra_ctes: Optional[List[ExtraCte]] = None
+        field_pre_injected_sql: Optional[str] = Field(None, alias="_pre_injected_sql")
+        contract: Optional[Contract8] = Field(None, title="Contract")
+        access: Optional[Access] = "protected"
+        constraints: Optional[List[Constraint5]] = None
+        version: Optional[Union[str, float]] = None
+        latest_version: Optional[Union[str, float]] = None
+        deprecation_date: Optional[str] = None
+        defer_relation: Optional[DeferRelation1] = None
+        primary_key: Optional[List[str]] = None
+        time_spine: Optional[TimeSpine] = None
 
 
 class DbtBouncerCatalogNode(BaseModel):
@@ -93,7 +267,7 @@ class DbtBouncerCatalogNode(BaseModel):
 class DbtBouncerManifest(BaseModel):
     """Model for all manifest objects."""
 
-    manifest: Union[ManifestV10, ManifestV11, ManifestV12]
+    manifest: Union[ManifestV10, ManifestV11, DbtBouncerManifestV12]
 
 
 DbtBouncerExposureBase = Union[Exposure_v10, Exposure_v11, Exposures]
@@ -107,7 +281,22 @@ class DbtBouncerExposure(BaseModel):
     unique_id: str
 
 
-DbtBouncerModelBase = Union[ModelNode_v10, ModelNode_v11, Nodes4]
+class DependsOn1(BaseParserModel):  # noqa: D101
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    macros: Optional[List[str]] = None
+    nodes: Optional[List[str]] = None
+
+
+class TimeSpine(BaseParserModel):  # noqa: D101
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    standard_granularity_column: str
+
+
+DbtBouncerModelBase = Union[ModelNode_v10, ModelNode_v11, DbtBouncerNodes4]
 
 
 class DbtBouncerModel(BaseModel):
@@ -158,7 +347,7 @@ DbtBouncerTestBase = Union[
     SingularTestNode_v10,
     GenericTestNode_v11,
     SingularTestNode_v11,
-    Nodes2,
+    DbtBouncerNodes2,
     Nodes6,
 ]
 
@@ -215,12 +404,6 @@ def load_dbt_artifact(
         assert (
             semver.Version.parse(manifest_json["metadata"]["dbt_version"]) >= "1.6.0"
         ), f"The supplied `manifest.json` was generated with dbt version {manifest_json['metadata']['dbt_version']}, this is below the minimum supported version of 1.6.0."
-
-        with warnings.catch_warnings():
-            warnings.filterwarnings("ignore", category=UserWarning)
-            from dbt_artifacts_parser.parser import (
-                parse_manifest,
-            )
 
         manifest_obj = parse_manifest(manifest_json)
 
@@ -378,6 +561,119 @@ def parse_dbt_artifacts(
     )
 
 
+class DbtBouncerManifestV12(BaseParserModel):  # noqa: D101
+    model_config = ConfigDict(
+        extra="allow",
+    )
+    metadata: Metadata = Field(
+        ..., description="Metadata about the manifest", title="ManifestMetadata"
+    )
+    nodes: Dict[
+        str,
+        Annotated[
+            Union[
+                DbtBouncerNodes,
+                DbtBouncerNodes2,
+                DbtBouncerNodes4,
+            ],
+            Field(discriminator="resource_type"),
+        ],
+    ] = Field(
+        ..., description="The nodes defined in the dbt project and its dependencies"
+    )
+    sources: Dict[str, Sources] = Field(
+        ..., description="The sources defined in the dbt project and its dependencies"
+    )
+    macros: Dict[str, Macros] = Field(
+        ..., description="The macros defined in the dbt project and its dependencies"
+    )
+    docs: Dict[str, Docs18] = Field(
+        ..., description="The docs defined in the dbt project and its dependencies"
+    )
+    exposures: Dict[str, Exposures] = Field(
+        ..., description="The exposures defined in the dbt project and its dependencies"
+    )
+    metrics: Dict[str, Metrics] = Field(
+        ..., description="The metrics defined in the dbt project and its dependencies"
+    )
+    groups: Dict[str, Groups] = Field(
+        ..., description="The groups defined in the dbt project"
+    )
+    selectors: Dict[str, Any] = Field(
+        ..., description="The selectors defined in selectors.yml"
+    )
+    disabled: Optional[
+        Dict[
+            str,
+            List[
+                Union[
+                    Disabled,
+                    Disabled1,
+                    Disabled2,
+                    Disabled3,
+                    Disabled4,
+                    Disabled5,
+                    Disabled6,
+                    Disabled7,
+                    Disabled8,
+                    Disabled9,
+                    Disabled10,
+                    Disabled11,
+                    Disabled12,
+                    Disabled13,
+                ]
+            ],
+        ]
+    ] = Field(..., description="A mapping of the disabled nodes in the target")
+    parent_map: Optional[Dict[str, List[str]]] = Field(
+        ..., description="A mapping from\xa0child nodes to their dependencies"
+    )
+    child_map: Optional[Dict[str, List[str]]] = Field(
+        ..., description="A mapping from parent nodes to their dependents"
+    )
+    group_map: Optional[Dict[str, List[str]]] = Field(
+        ..., description="A mapping from group names to their nodes"
+    )
+    saved_queries: Dict[str, SavedQueries] = Field(
+        ..., description="The saved queries defined in the dbt project"
+    )
+    semantic_models: Dict[str, SemanticModels] = Field(
+        ..., description="The semantic models defined in the dbt project"
+    )
+    unit_tests: Dict[str, UnitTests] = Field(
+        ..., description="The unit tests defined in the project"
+    )
+
+
+def parse_manifest(
+    manifest: Dict[str, Any],
+) -> Union[
+    ManifestV10,
+    ManifestV11,
+    DbtBouncerManifestV12,
+]:
+    """Parse manifest.json.
+
+    Args:
+        manifest: A dict of manifest.json
+
+    Raises:
+        ValueError: If the manifest.json is not a valid manifest.json
+
+    Returns:
+       Union[ManifestV10, ManifestV11, DbtBouncerManifestV12]
+
+    """
+    dbt_schema_version = get_dbt_schema_version(artifact_json=manifest)
+    if dbt_schema_version == ArtifactTypes.MANIFEST_V10.value.dbt_schema_version:
+        return ManifestV10(**manifest)
+    elif dbt_schema_version == ArtifactTypes.MANIFEST_V11.value.dbt_schema_version:
+        return ManifestV11(**manifest)
+    elif dbt_schema_version == ArtifactTypes.MANIFEST_V12.value.dbt_schema_version:
+        return DbtBouncerManifestV12(**manifest)
+    raise ValueError("Not a manifest.json")
+
+
 def parse_manifest_artifact(
     manifest_obj: DbtBouncerManifest,
 ) -> tuple[
@@ -417,9 +713,13 @@ def parse_manifest_artifact(
         if (
             isinstance(v.resource_type, Enum) and v.resource_type.value == "model"
         ) or v.resource_type == "model":
-            if (
-                v.package_name == manifest_obj.manifest.metadata.project_name
-            ):  # dbt 1.6  # dbt 1.7+
+            if v.package_name == manifest_obj.manifest.metadata.project_name:
+                # dbt-artifacts-parser does not support "versionless" dbt Cloud artifacts
+                # https://github.com/yu-iskw/dbt-artifacts-parser/pull/112#issuecomment-2360298424
+                # To work around this we create a more flexible Pydantic object and map to that
+                if type(v) in [Nodes, Nodes2, Nodes4]:
+                    v = DbtBouncerNodes4(**v.model_dump())
+
                 project_models.append(
                     DbtBouncerModel(
                         **{
