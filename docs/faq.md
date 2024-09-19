@@ -51,3 +51,18 @@ manifest_checks:
 ```
 
 `dbt-bouncer` can now be run from the root directory.
+
+## How to set up `dbt-bouncer` with `pre-commit`?
+
+You can use a local hook to run automatically run `dbt-bouncer` before your commits get added to the git tree.
+
+```yaml
+- repo: local
+  hooks:
+    - id: dbt-bouncer
+      name: dbt-bouncer
+      entry: dbt-bouncer # --config-file <PATH_TO_CONFIG_FILE>
+      language: system
+      pass_filenames: false
+      always_run: true
+```
