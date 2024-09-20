@@ -84,6 +84,63 @@ manifest_checks:
 
 `dbt-bouncer` can now be run from the root directory.
 
+## How to set up `dbt-bouncer` in a dbt Mesh?
+
+A [dbt Mesh](https://docs.getdbt.com/best-practices/how-we-mesh/mesh-1-intro#what-is-dbt-mesh) is a collection of dbt projects in an organisation, some of which can read models from other dbt projects. Natively supported by dbt Cloud, a dbt Mesh can also be set up with dbt Core using a plugin such as [dbt-loom](https://github.com/nicholasyager/dbt-loom).
+
+One challenge in a dbt Mesh is the large number of developers working across multiple dbt projects leading to differing conventions being implemented. With `dbt-bouncer` this can be alleviated via the use of a `dbt-bouncer.yml` configuration file shared via a [git submodule](https://github.blog/open-source/git/working-with-submodules/) (this example uses GitHub, similar setups can be achieved with other providers):
+
+1. Set up a dedicated repository to store a centralised `dbt-bouncer.yml` configuration file that will be used by all dbt projects. Let's call this repository `dbt-bouncer-config`.
+
+1. The contents of the `dbt-bouncer.yml` file in `dbt-bouncer-config` should contain the following configuration for `dbt_artifacts_dir`:
+
+    ```yaml
+    dbt_artifacts_dir: ../target
+
+    manifest_checks:
+      - name: check_model_directories
+        include: ^models
+        permitted_sub_directories:
+          - intermediate
+          - marts
+          - staging
+          - utilities
+      ...
+    ```
+
+1. In every repository add a git submodule via:
+
+    ```shell
+    git submodule add git@github.com:<YOUR_ORG>/dbt-bouncer-config.git
+    ```
+
+1. Run `dbt-bouncer`:
+
+    ```shell
+    dbt-bouncer --config-file dbt-bouncer-config/dbt-bouncer.yml
+    ```
+
+Your directory tree should look like this:
+
+```shell
+.
+├── dbt-bouncer-config
+│   └── dbt-bouncer.yml
+├── dbt_project.yml
+├── macros
+│   └── ...
+├── models
+│   └── ...
+├── profiles.yml
+├── README.md
+└── target
+    ├── catalog.json
+    ├── manifest.json
+    └── run_results.json
+```
+
+Note: if you update your central `dbt-bouncer.yml` file, you will need to run `git submodule update --remote` in every repository to update the submodule.
+
 ## How to set up `dbt-bouncer` with `pre-commit`?
 
 You can use a local hook to run automatically run `dbt-bouncer` before your commits get added to the git tree.
