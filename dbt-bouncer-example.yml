@@ -153,6 +153,8 @@ manifest_checks:
   - name: check_source_used_by_only_one_model
 
   # Unit tests
+  - name: check_unit_test_coverage
+    include: ^models/marts
   - name: check_unit_test_expect_format
   - name: check_unit_test_given_formats
 

@@ -149,7 +149,7 @@ class CheckModelsDocumentationCoverage(BaseModel):
     Example(s):
         ```yaml
         manifest_checks:
-            - name: check_model_description_populated
+            - name: check_model_documentation_coverage
               min_model_documentation_coverage_pct: 90
         ```
 
