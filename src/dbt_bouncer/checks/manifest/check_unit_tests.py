@@ -1,10 +1,10 @@
 # mypy: disable-error-code="union-attr"
 
 import logging
-from typing import TYPE_CHECKING, List, Literal
+from typing import TYPE_CHECKING, List, Literal, Optional
 
 import semver
-from pydantic import Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from dbt_bouncer.check_base import BaseCheck
 
@@ -18,6 +18,95 @@ if TYPE_CHECKING:
         from dbt_artifacts_parser.parsers.manifest.manifest_v12 import (
             UnitTests,
         )
+
+from dbt_bouncer.utils import object_in_path
+
+if TYPE_CHECKING:
+    from dbt_bouncer.parsers import (
+        DbtBouncerManifest,
+        DbtBouncerModelBase,
+    )
+
+
+class CheckUnitTestCoverage(BaseModel):
+    """Set the minimum percentage of models that have a unit test.
+
+    !!! warning
+
+        This check is only supported for dbt 1.8.0 and above.
+
+    Parameters:
+        min_unit_test_coverage_pct (float): The minimum percentage of models that must have a unit test.
+
+    Receives:
+        models (List[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
+        unit_tests (List[UnitTests]): List of UnitTests objects parsed from `manifest.json`.
+
+    Other Parameters:
+        include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_unit_test_coverage
+              min_unit_test_coverage_pct: 90
+        ```
+
+    """
+
+    model_config = ConfigDict(extra="forbid")
+    include: Optional[str] = Field(
+        default=None,
+        description="Regexp to match which paths to include.",
+    )
+    index: Optional[int] = Field(
+        default=None,
+        description="Index to uniquely identify the check, calculated at runtime.",
+    )
+    manifest_obj: "DbtBouncerManifest" = Field(default=None)
+    min_unit_test_coverage_pct: int = Field(
+        default=100,
+        ge=0,
+        le=100,
+    )
+    models: List["DbtBouncerModelBase"] = Field(default=[])
+    name: Literal["check_unit_test_coverage"]
+    severity: Optional[Literal["error", "warn"]] = Field(
+        default="error",
+        description="Severity of the check, one of 'error' or 'warn'.",
+    )
+    unit_tests: List["UnitTests"] = Field(default=[])
+
+    def execute(self) -> None:
+        """Execute the check."""
+        if (
+            semver.Version.parse(self.manifest_obj.manifest.metadata.dbt_version)
+            >= "1.8.0"
+        ):
+            relevant_models = [
+                m.unique_id
+                for m in self.models
+                if object_in_path(self.include, m.original_file_path)
+            ]
+            models_with_unit_test = []
+            for unit_test in self.unit_tests:
+                for node in unit_test.depends_on.nodes:
+                    if node in relevant_models:
+                        models_with_unit_test.append(node)
+
+            num_models_with_unit_tests = len(set(models_with_unit_test))
+            unit_test_coverage_pct = (
+                num_models_with_unit_tests / len(relevant_models)
+            ) * 100
+
+            assert (
+                unit_test_coverage_pct >= self.min_unit_test_coverage_pct
+            ), f"Only {unit_test_coverage_pct}% of models have a unit test, this is less than the permitted minimum of {self.min_unit_test_coverage_pct}%."
+        else:
+            logging.warning(
+                "The `check_unit_test_expect_format` check is only supported for dbt 1.8.0 and above.",
+            )
 
 
 class CheckUnitTestExpectFormats(BaseCheck):
