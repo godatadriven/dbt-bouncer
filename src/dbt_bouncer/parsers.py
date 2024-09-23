@@ -11,6 +11,12 @@ from typing import TYPE_CHECKING, Any, Dict, List, Literal, Union
 import semver
 from pydantic import BaseModel
 
+from dbt_bouncer.dbt_cloud.manifest_latest import ManifestLatest
+from dbt_bouncer.dbt_cloud.manifest_latest import Nodes2 as Nodes2Latest
+from dbt_bouncer.dbt_cloud.manifest_latest import Nodes4 as Nodes4Latest
+from dbt_bouncer.dbt_cloud.manifest_latest import Nodes6 as Nodes6Latest
+from dbt_bouncer.dbt_cloud.manifest_latest import SemanticModels as SemanticModelsLatest
+from dbt_bouncer.dbt_cloud.manifest_latest import Sources as SourcesLatest
 from dbt_bouncer.utils import clean_path_str
 
 if TYPE_CHECKING:
@@ -61,6 +67,7 @@ with warnings.catch_warnings():
         Exposures,
         Macros,
         ManifestV12,
+        Nodes1,
         Nodes2,
         Nodes4,
         Nodes6,
@@ -93,7 +100,7 @@ class DbtBouncerCatalogNode(BaseModel):
 class DbtBouncerManifest(BaseModel):
     """Model for all manifest objects."""
 
-    manifest: Union[ManifestV10, ManifestV11, ManifestV12]
+    manifest: Union[ManifestV10, ManifestV11, ManifestV12, ManifestLatest]
 
 
 DbtBouncerExposureBase = Union[Exposure_v10, Exposure_v11, Exposures]
@@ -107,7 +114,7 @@ class DbtBouncerExposure(BaseModel):
     unique_id: str
 
 
-DbtBouncerModelBase = Union[ModelNode_v10, ModelNode_v11, Nodes4]
+DbtBouncerModelBase = Union[ModelNode_v10, ModelNode_v11, Nodes4, Nodes4Latest]
 
 
 class DbtBouncerModel(BaseModel):
@@ -130,7 +137,7 @@ class DbtBouncerRunResult(BaseModel):
 
 
 DbtBouncerSemanticModelBase = Union[
-    SemanticModel_v10, SemanticModel_v11, SemanticModels
+    SemanticModel_v10, SemanticModel_v11, SemanticModels, SemanticModelsLatest
 ]
 
 
@@ -142,7 +149,9 @@ class DbtBouncerSemanticModel(BaseModel):
     unique_id: str
 
 
-DbtBouncerSourceBase = Union[SourceDefinition_v10, SourceDefinition_v11, Sources]
+DbtBouncerSourceBase = Union[
+    SourceDefinition_v10, SourceDefinition_v11, Sources, SourcesLatest
+]
 
 
 class DbtBouncerSource(BaseModel):
@@ -158,8 +167,11 @@ DbtBouncerTestBase = Union[
     SingularTestNode_v10,
     GenericTestNode_v11,
     SingularTestNode_v11,
+    Nodes1,
     Nodes2,
     Nodes6,
+    Nodes2Latest,
+    Nodes6Latest,
 ]
 
 
@@ -383,7 +395,10 @@ def parse_manifest(
     elif dbt_schema_version == "https://schemas.getdbt.com/dbt/manifest/v11.json":
         return ManifestV11(**manifest)
     elif dbt_schema_version == "https://schemas.getdbt.com/dbt/manifest/v12.json":
-        return ManifestV12(**manifest)
+        from dbt_bouncer.dbt_cloud.manifest_latest import ManifestLatest
+
+        return ManifestLatest(**manifest)
+
     raise ValueError("Not a manifest.json")
 
 

@@ -153,6 +153,7 @@ exclude = [
     "dist",
     "node_modules",
     "site-packages",
+    "src/dbt_bouncer/dbt_cloud",
     "venv",
 ]
 line-length = 88
