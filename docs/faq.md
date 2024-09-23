@@ -92,7 +92,23 @@ manifest_checks:
 
 A [dbt Mesh](https://docs.getdbt.com/best-practices/how-we-mesh/mesh-1-intro#what-is-dbt-mesh) is a collection of dbt projects in an organisation, some of which can read models from other dbt projects. Natively supported by dbt Cloud, a dbt Mesh can also be set up with dbt Core using a plugin such as [dbt-loom](https://github.com/nicholasyager/dbt-loom).
 
-One challenge in a dbt Mesh is the large number of developers working across multiple dbt projects leading to differing conventions being implemented. With `dbt-bouncer` this can be alleviated via the use of a `dbt-bouncer.yml` configuration file shared via a [git submodule](https://github.blog/open-source/git/working-with-submodules/) (this example uses GitHub, similar setups can be achieved with other providers):
+One challenge in a dbt Mesh is the large number of developers working across multiple dbt projects leading to differing conventions being implemented. There are multiple approaches to using `dbt-bouncer` in a dbt Mesh, two are outlined below.
+
+### Approach 1: Individual `dbt-bouncer.yml` configuration file
+
+Each dbt project can have its own `dbt-bouncer.yml` configuration file. This allows each project to adopt and implement its own conventions in addition to any conventions to be shared across all dbt projects. Should a breaking change be required to the config file then each dbt project can be updated independently at a time that makes sense.
+
+This is the recommended approach due to its simplicity and ability to update each dbt project independently.
+
+### Approach 2: Centralised `dbt-bouncer.yml` configuration file shared via git submodule
+
+!!! warning
+
+    With this approach, a change to the centralised `dbt-bouncer.yml` file may result in CI pipelines in dbt projects failing despite no changes being made to these projects. As such we recommend implementing this approach only after extensive discussion with all dbt project developers so that all dbt projects can be brought into line before `dbt-bouncer` is enforced in the CI pipeline.
+
+    Should it be necessary for a breaking change to be made to the centralised `dbt-bouncer.yml` configuration file, we recommend setting the `severity` of the relevant check to `warn` so that CI pipelines in dbt projects will not fail and maintainers have sufficient time to make the necessary changes.
+
+[Git submodules](https://github.blog/open-source/git/working-with-submodules/) allow the contents from one repository to be accessible from a different repository. Such a setup for `dbt-bouncer` can be achieved as follows (this example uses GitHub, similar setups can be achieved with other providers):
 
 1. Set up a dedicated repository to store a centralised `dbt-bouncer.yml` configuration file that will be used by all dbt projects. Let's call this repository `dbt-bouncer-config`.
 
