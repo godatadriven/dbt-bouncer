@@ -60,17 +60,31 @@ uvx dbt-bouncer --config-file <PATH_TO_CONFIG_FILE>
 
 Run `dbt-bouncer` as part of your CI pipeline:
 ```yaml
-steps:
-    ...
+name: CI pipeline
 
-    - uses: godatadriven/dbt-bouncer@vX.X
-      with:
-        config-file: ./<PATH_TO_CONFIG_FILE>
-        output-file: results.json # optional, default does not save a results file
-        send-pr-comment: true # optional, defaults to true
-        verbose: false # optional, defaults to false
+on:
+  pull_request:
+      branches:
+          - main
 
-    ...
+jobs:
+    run-dbt-bouncer:
+        permissions:
+            pull-requests: write # Required to write a comment on the PR
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Generate or fetch dbt artifacts
+              run: ...
+
+            - uses: godatadriven/dbt-bouncer@vX.X
+              with:
+                config-file: ./<PATH_TO_CONFIG_FILE>
+                output-file: results.json # optional, default does not save a results file
+                send-pr-comment: true # optional, defaults to true
+                verbose: false # optional, defaults to false
 ```
 
 We recommend pinning both a major and minor version number.

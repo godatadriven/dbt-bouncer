@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path, PurePath
-from typing import TYPE_CHECKING, Any, Dict, Mapping
+from typing import TYPE_CHECKING, Any, Dict, List, Mapping
 
 import toml
 
@@ -8,6 +8,12 @@ from dbt_bouncer.utils import load_config_from_yaml
 
 if TYPE_CHECKING:
     from dbt_bouncer.config_file_parser import DbtBouncerConf
+
+
+import re
+
+from Levenshtein import distance
+from pydantic import ValidationError
 
 
 def get_config_file_path(
@@ -92,6 +98,9 @@ def load_config_file_contents(config_file_path: PurePath) -> Mapping[str, Any]:
 def validate_conf(config_file_contents: Dict[str, Any]) -> "DbtBouncerConf":
     """Validate the configuration and return the Pydantic model.
 
+    Raises:
+        RuntimeError: If the configuration is invalid.
+
     Returns:
         DbtBouncerConf: The validated configuration.
 
@@ -133,4 +142,32 @@ def validate_conf(config_file_contents: Dict[str, Any]) -> "DbtBouncerConf":
 
     DbtBouncerConf.model_rebuild()
 
-    return DbtBouncerConf(**config_file_contents)
+    try:
+        return DbtBouncerConf(**config_file_contents)
+    except ValidationError as e:
+        error_message: List[str] = []
+        for error in e.errors():
+            if (
+                re.compile(
+                    r"Input tag \S* found using 'name' does not match any of the expected tags: [\S\s]*",
+                    flags=re.DOTALL,
+                ).match(error["msg"])
+                is not None
+            ):
+                incorrect_name = error["msg"][
+                    error["msg"].find("tag") + 5 : error["msg"].find("found using") - 2
+                ]
+                accepted_names = error["msg"][
+                    error["msg"].find("tags:") + 7 : -1
+                ].split("', '")
+                min_dist = 100
+                for name in accepted_names:
+                    dist = distance(name, incorrect_name)
+                    if dist < min_dist:
+                        min_dist = dist
+                        min_name = name
+                error_message.append(
+                    f"{len(error_message) + 1}. Check '{incorrect_name}' does not match any of the expected checks. Did you mean '{min_name}'?"
+                )
+
+        raise RuntimeError("\n".join(error_message)) from e
