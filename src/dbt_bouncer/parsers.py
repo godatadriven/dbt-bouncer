@@ -6,7 +6,7 @@ import logging
 import warnings
 from enum import Enum
 from pathlib import Path
-from typing import TYPE_CHECKING, List, Literal, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Union
 
 import semver
 from pydantic import BaseModel
@@ -197,13 +197,8 @@ def load_dbt_artifact(
         )
 
     if artifact_name == "catalog.json":
-        with warnings.catch_warnings():
-            warnings.filterwarnings("ignore", category=UserWarning)
-            from dbt_artifacts_parser.parser import (
-                parse_catalog,
-            )
         with Path.open(Path(artifact_path), "r") as fp:
-            catalog_obj = parse_catalog(catalog=json.load(fp))
+            catalog_obj = CatalogV1(**json.load(fp))
 
         return catalog_obj
 
@@ -216,22 +211,11 @@ def load_dbt_artifact(
             semver.Version.parse(manifest_json["metadata"]["dbt_version"]) >= "1.6.0"
         ), f"The supplied `manifest.json` was generated with dbt version {manifest_json['metadata']['dbt_version']}, this is below the minimum supported version of 1.6.0."
 
-        with warnings.catch_warnings():
-            warnings.filterwarnings("ignore", category=UserWarning)
-            from dbt_artifacts_parser.parser import (
-                parse_manifest,
-            )
-
         manifest_obj = parse_manifest(manifest_json)
 
         return DbtBouncerManifest(**{"manifest": manifest_obj})
 
     elif artifact_name == "run_results.json":
-        with warnings.catch_warnings():
-            warnings.filterwarnings("ignore", category=UserWarning)
-            from dbt_artifacts_parser.parser import (
-                parse_run_results,
-            )
         with Path.open(Path(artifact_path), "r") as fp:
             run_results_obj = parse_run_results(run_results=json.load(fp))
 
@@ -378,6 +362,31 @@ def parse_dbt_artifacts(
     )
 
 
+def parse_manifest(
+    manifest: Dict[str, Any],
+) -> DbtBouncerManifest:
+    """Parse manifest.json.
+
+    Args:
+        manifest: A dict of manifest.json
+
+    Raises:
+        ValueError: If the manifest.json is not a valid manifest.json
+
+    Returns:
+       DbtBouncerManifest
+
+    """
+    dbt_schema_version = manifest["metadata"]["dbt_schema_version"]
+    if dbt_schema_version == "https://schemas.getdbt.com/dbt/manifest/v10.json":
+        return ManifestV10(**manifest)
+    elif dbt_schema_version == "https://schemas.getdbt.com/dbt/manifest/v11.json":
+        return ManifestV11(**manifest)
+    elif dbt_schema_version == "https://schemas.getdbt.com/dbt/manifest/v12.json":
+        return ManifestV12(**manifest)
+    raise ValueError("Not a manifest.json")
+
+
 def parse_manifest_artifact(
     manifest_obj: DbtBouncerManifest,
 ) -> tuple[
@@ -488,6 +497,31 @@ def parse_manifest_artifact(
         project_tests,
         project_unit_tests,
     )
+
+
+def parse_run_results(
+    run_results: Dict[str, Any],
+) -> Union[RunResultsV4, RunResultsV5, RunResultsV6]:
+    """Parse run-results.json.
+
+    Args:
+        run_results: A dict of run-results.json
+
+    Raises:
+        ValueError: If the schema version is not supported.
+
+    Returns:
+        Union[RunResultsV4, RunResultsV5, RunResultsV6]:
+
+    """
+    dbt_schema_version = run_results["metadata"]["dbt_schema_version"]
+    if dbt_schema_version == "https://schemas.getdbt.com/dbt/run-results/v4.json":
+        return RunResultsV4(**run_results)
+    elif dbt_schema_version == "https://schemas.getdbt.com/dbt/run-results/v5.json":
+        return RunResultsV5(**run_results)
+    elif dbt_schema_version == "https://schemas.getdbt.com/dbt/run-results/v6.json":
+        return RunResultsV6(**run_results)
+    raise ValueError("Not a manifest.json")
 
 
 def parse_run_results_artifact(
