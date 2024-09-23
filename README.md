@@ -15,9 +15,6 @@
 	<img src="https://img.shields.io/github/release/godatadriven/dbt-bouncer.svg?logo=github">
   </a>
   <a>
-	<img src="https://github.com/godatadriven/dbt-bouncer/actions/workflows/ci_pipeline.yml/badge.svg">
-  </a>
-  <a>
 	<img src="https://img.shields.io/badge/License-MIT-yellow.svg">
   </a>
   <a>
@@ -41,6 +38,12 @@
 </div>
 
 <div align="center">
+  <a>
+	<img src="https://github.com/godatadriven/dbt-bouncer/actions/workflows/merge_pipeline.yml/badge.svg">
+  </a>
+  <a>
+	<img src="https://github.com/godatadriven/dbt-bouncer/actions/workflows/post_release_pipeline.yml/badge.svg">
+  </a>
   <a>
 	<img src="https://img.shields.io/badge/style-ruff-41B5BE?style=flat">
   </a>
