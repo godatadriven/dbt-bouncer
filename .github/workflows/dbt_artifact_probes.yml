@@ -1,0 +1,72 @@
+---
+    name: dbt Artifacts probe
+
+    on:
+      schedule:
+        - cron: '0 6 * * *'
+      workflow_dispatch:
+
+    env:
+      DBT_PROFILES_DIR: dbt_project
+      DBT_PROJECT_DIR: dbt_project
+      POETRY_VERSION: "1.8.3"
+      POETRY_VIRTUALENVS_IN_PROJECT: true
+
+    jobs:
+        dbt-cloud:
+            runs-on: ubuntu-latest
+            steps:
+                - name: Checkout
+                  uses: actions/checkout@v4
+
+                - name: Determine python version
+                  id: python-version
+                  run: |
+                      export PYTHON_VERSION=$(cat .python-version)
+                      echo "PYTHON_VERSION: $PYTHON_VERSION"
+                      echo "PYTHON_VERSION=$PYTHON_VERSION" >> $GITHUB_OUTPUT
+
+                - name: Setup Python
+                  uses: ./.github/actions/setup_python_env
+                  with:
+                    poetry-version: ${{ env.POETRY_VERSION }}
+                    python-version: ${{ steps.python-version.outputs.PYTHON_VERSION }}
+
+                - name: Trigger dbt Cloud job and download artifacts
+                  run: ./scripts/get_dbt_cloud_artifacts.sh
+                  env:
+                    DBT_ACCOUNT_ID: ${{ secrets.DBT_ACCOUNT_ID }}
+                    DBT_CLOUD_JOB_ID: ${{ secrets.DBT_CLOUD_JOB_ID }}
+                    DBT_TOKEN_VALUE: ${{ secrets.DBT_TOKEN_VALUE }}
+
+                - name: Run `dbt-bouncer`
+                  run: poetry run dbt-bouncer --config-file ./dbt-bouncer-example.yml
+
+        dbt-core:
+            runs-on: ubuntu-latest
+            steps:
+                - name: Checkout
+                  uses: actions/checkout@v4
+
+                - name: Determine python version
+                  id: python-version
+                  run: |
+                      export PYTHON_VERSION=$(cat .python-version)
+                      echo "PYTHON_VERSION: $PYTHON_VERSION"
+                      echo "PYTHON_VERSION=$PYTHON_VERSION" >> $GITHUB_OUTPUT
+
+                - name: Setup Python
+                  uses: ./.github/actions/setup_python_env
+                  with:
+                    poetry-version: ${{ env.POETRY_VERSION }}
+                    python-version: ${{ steps.python-version.outputs.PYTHON_VERSION }}
+
+                - name: Install latest dbt-core and generate dbt artifacts
+                  run: poetry run pip install dbt-core -U --pre
+
+                - name: Regenerate dbt artifacts and run `dbt-bouncer`
+                  run: |
+                    poetry run dbt deps
+                    poetry run dbt build
+                    poetry run dbt docs generate
+                    poetry run dbt-bouncer --config-file ./dbt-bouncer-example.yml
