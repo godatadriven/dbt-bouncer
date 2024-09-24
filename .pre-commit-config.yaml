@@ -42,6 +42,15 @@ repos:
             types_or: [python, pyi]
     - repo: local
       hooks:
+          - id: alphabetical-checks
+            args: []
+            entry: poetry run python ./scripts/assert_alphabetical_checks.py
+            language: system
+            name: alphabetical-checks
+            require_serial: true
+            types_or: [python, pyi]
+    - repo: local
+      hooks:
         - id: sqlfmt
           entry: poetry run sqlfmt
           language: system
