@@ -58,6 +58,63 @@ class CheckColumnDescriptionPopulated(BaseCheck):
             assert not non_complying_columns, f"`{self.catalog_node.unique_id.split('.')[-1]}` has columns that do not have a populated description: {non_complying_columns}"
 
 
+class CheckColumnHasSpecifiedTest(BaseCheck):
+    """Columns that match the specified regexp pattern must have a specified test.
+
+    Parameters:
+        column_name_pattern (str): Regex pattern to match the column name.
+        test_name (str): Name of the test to check for.
+
+    Receives:
+        catalog_node (CatalogTable): The CatalogTable object to check.
+        tests (List[DbtBouncerTestBase]): List of DbtBouncerTestBase objects parsed from `manifest.json`.
+
+    Other Parameters:
+        exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
+        include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        catalog_checks:
+            - name: check_column_has_specified_test
+              column_name_pattern: ^is_.*
+              test_name: not_null
+        ```
+
+    """
+
+    catalog_node: "CatalogTable" = Field(default=None)
+    column_name_pattern: str
+    name: Literal["check_column_has_specified_test"]
+    test_name: str
+    tests: List["DbtBouncerTestBase"] = Field(default=[])
+
+    def execute(self) -> None:
+        """Execute the check."""
+        columns_to_check = [
+            v.name
+            for _, v in self.catalog_node.columns.items()
+            if re.compile(self.column_name_pattern.strip()).match(v.name) is not None
+        ]
+        relevant_tests = [
+            t
+            for t in self.tests
+            if hasattr(t, "test_metadata") is True
+            and hasattr(t, "attached_node") is True
+            and t.test_metadata.name == self.test_name
+            and t.attached_node == self.catalog_node.unique_id
+        ]
+        non_complying_columns = [
+            c
+            for c in columns_to_check
+            if f"{self.catalog_node.unique_id}.{c}"
+            not in [f"{t.attached_node}.{t.column_name}" for t in relevant_tests]
+        ]
+
+        assert not non_complying_columns, f"`{self.catalog_node.unique_id.split('.')[-1]}` has columns that should have a `{self.test_name}` test: {non_complying_columns}"
+
+
 class CheckColumnNameCompliesToColumnType(BaseCheck):
     """Columns with specified data types must comply to the specified regexp naming pattern.
 
@@ -202,60 +259,3 @@ class CheckColumnsAreDocumentedInPublicModels(BaseCheck):
                         non_complying_columns.append(v.name)
 
             assert not non_complying_columns, f"`{self.catalog_node.unique_id.split('.')[-1]}` is a public model but has columns that don't have a populated description: {non_complying_columns}"
-
-
-class CheckColumnHasSpecifiedTest(BaseCheck):
-    """Columns that match the specified regexp pattern must have a specified test.
-
-    Parameters:
-        column_name_pattern (str): Regex pattern to match the column name.
-        test_name (str): Name of the test to check for.
-
-    Receives:
-        catalog_node (CatalogTable): The CatalogTable object to check.
-        tests (List[DbtBouncerTestBase]): List of DbtBouncerTestBase objects parsed from `manifest.json`.
-
-    Other Parameters:
-        exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
-        include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
-        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
-
-    Example(s):
-        ```yaml
-        catalog_checks:
-            - name: check_column_has_specified_test
-              column_name_pattern: ^is_.*
-              test_name: not_null
-        ```
-
-    """
-
-    catalog_node: "CatalogTable" = Field(default=None)
-    column_name_pattern: str
-    name: Literal["check_column_has_specified_test"]
-    test_name: str
-    tests: List["DbtBouncerTestBase"] = Field(default=[])
-
-    def execute(self) -> None:
-        """Execute the check."""
-        columns_to_check = [
-            v.name
-            for _, v in self.catalog_node.columns.items()
-            if re.compile(self.column_name_pattern.strip()).match(v.name) is not None
-        ]
-        relevant_tests = [
-            t
-            for t in self.tests
-            if hasattr(t, "test_metadata") is True
-            and hasattr(t, "attached_node") is True
-            and t.test_metadata.name == self.test_name
-            and t.attached_node == self.catalog_node.unique_id
-        ]
-        non_complying_columns = [
-            c
-            for c in columns_to_check
-            if f"{self.catalog_node.unique_id}.{c}"
-            not in [f"{t.attached_node}.{t.column_name}" for t in relevant_tests]
-        ]
-
-        assert not non_complying_columns, f"`{self.catalog_node.unique_id.split('.')[-1]}` has columns that should have a `{self.test_name}` test: {non_complying_columns}"

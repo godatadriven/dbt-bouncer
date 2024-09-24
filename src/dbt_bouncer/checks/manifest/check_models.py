@@ -75,163 +75,6 @@ class CheckModelAccess(BaseCheck):
         ), f"`{self.model.name}` has `{self.model.access.value}` access, it should have access `{self.access}`."
 
 
-class CheckModelContractsEnforcedForPublicModel(BaseCheck):
-    """Public models must have contracts enforced.
-
-    Receives:
-        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
-
-    Other Parameters:
-        exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
-        include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
-        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
-
-    Example(s):
-        ```yaml
-        manifest_checks:
-            - name: check_model_contract_enforced_for_public_model
-        ```
-
-    """
-
-    model: "DbtBouncerModelBase" = Field(default=None)
-    name: Literal["check_model_contract_enforced_for_public_model"]
-
-    def execute(self) -> None:
-        """Execute the check."""
-        if self.model.access.value == "public":
-            assert (
-                self.model.contract.enforced is True
-            ), f"`{self.model.name}` is a public model but does not have contracts enforced."
-
-
-class CheckModelDescriptionPopulated(BaseCheck):
-    """Models must have a populated description.
-
-    Receives:
-        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
-
-    Other Parameters:
-        exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
-        include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
-        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
-
-    Example(s):
-        ```yaml
-        manifest_checks:
-            - name: check_model_description_populated
-        ```
-
-    """
-
-    model: "DbtBouncerModelBase" = Field(default=None)
-    name: Literal["check_model_description_populated"]
-
-    def execute(self) -> None:
-        """Execute the check."""
-        assert (
-            len(self.model.description.strip()) > 4
-        ), f"`{self.model.name}` does not have a populated description."
-
-
-class CheckModelsDocumentationCoverage(BaseModel):
-    """Set the minimum percentage of models that have a populated description.
-
-    Parameters:
-        min_model_documentation_coverage_pct (float): The minimum percentage of models that must have a populated description.
-
-    Receives:
-        models (List[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
-
-    Other Parameters:
-        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
-
-    Example(s):
-        ```yaml
-        manifest_checks:
-            - name: check_model_documentation_coverage
-              min_model_documentation_coverage_pct: 90
-        ```
-
-    """
-
-    model_config = ConfigDict(extra="forbid")
-
-    index: Optional[int] = Field(
-        default=None,
-        description="Index to uniquely identify the check, calculated at runtime.",
-    )
-    min_model_documentation_coverage_pct: int = Field(
-        default=100,
-        ge=0,
-        le=100,
-    )
-    models: List["DbtBouncerModelBase"] = Field(default=[])
-    name: Literal["check_model_documentation_coverage"]
-    severity: Optional[Literal["error", "warn"]] = Field(
-        default="error",
-        description="Severity of the check, one of 'error' or 'warn'.",
-    )
-
-    def execute(self) -> None:
-        """Execute the check."""
-        num_models = len(self.models)
-        models_with_description = []
-        for model in self.models:
-            if len(model.description.strip()) > 4:
-                models_with_description.append(model.unique_id)
-
-        num_models_with_descriptions = len(models_with_description)
-        model_description_coverage_pct = (
-            num_models_with_descriptions / num_models
-        ) * 100
-
-        assert (
-            model_description_coverage_pct >= self.min_model_documentation_coverage_pct
-        ), f"Only {model_description_coverage_pct}% of models have a populated description, this is less than the permitted minimum of {self.min_model_documentation_coverage_pct}%."
-
-
-class CheckModelDocumentedInSameDirectory(BaseCheck):
-    """Models must be documented in the same directory where they are defined (i.e. `.yml` and `.sql` files are in the same directory).
-
-    Receives:
-        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
-
-    Other Parameters:
-        exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
-        include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
-        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
-
-    Example(s):
-        ```yaml
-        manifest_checks:
-            - name: check_model_documented_in_same_directory
-        ```
-
-    """
-
-    model: "DbtBouncerModelBase" = Field(default=None)
-    name: Literal["check_model_documented_in_same_directory"]
-
-    def execute(self) -> None:
-        """Execute the check."""
-        model_sql_dir = clean_path_str(self.model.original_file_path).split("/")[:-1]
-        assert (  # noqa: PT018
-            hasattr(self.model, "patch_path")
-            and clean_path_str(self.model.patch_path) is not None
-        ), f"`{self.model.name}` is not documented."
-
-        model_doc_dir = clean_path_str(
-            self.model.patch_path[
-                clean_path_str(self.model.patch_path).find("models") :
-            ]
-        ).split("/")[:-1]
-
-        assert (
-            model_doc_dir == model_sql_dir
-        ), f"`{self.model.name}` is documented in a different directory to the `.sql` file: `{'/'.join(model_doc_dir)}` vs `{'/'.join(model_sql_dir)}`."
-
-
 class CheckModelCodeDoesNotContainRegexpPattern(BaseCheck):
     """The raw code for a model must not match the specified regexp pattern.
 
@@ -270,6 +113,36 @@ class CheckModelCodeDoesNotContainRegexpPattern(BaseCheck):
         ), f"`{self.model.name}` contains a banned string: `{self.regexp_pattern.strip()}`."
 
 
+class CheckModelContractsEnforcedForPublicModel(BaseCheck):
+    """Public models must have contracts enforced.
+
+    Receives:
+        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+
+    Other Parameters:
+        exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
+        include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_model_contract_enforced_for_public_model
+        ```
+
+    """
+
+    model: "DbtBouncerModelBase" = Field(default=None)
+    name: Literal["check_model_contract_enforced_for_public_model"]
+
+    def execute(self) -> None:
+        """Execute the check."""
+        if self.model.access.value == "public":
+            assert (
+                self.model.contract.enforced is True
+            ), f"`{self.model.name}` is a public model but does not have contracts enforced."
+
+
 class CheckModelDependsOnMultipleSources(BaseCheck):
     """Models cannot reference more than one source.
 
@@ -300,6 +173,35 @@ class CheckModelDependsOnMultipleSources(BaseCheck):
         assert (
             num_reffed_sources <= 1
         ), f"`{self.model.name}` references more than one source."
+
+
+class CheckModelDescriptionPopulated(BaseCheck):
+    """Models must have a populated description.
+
+    Receives:
+        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+
+    Other Parameters:
+        exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
+        include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_model_description_populated
+        ```
+
+    """
+
+    model: "DbtBouncerModelBase" = Field(default=None)
+    name: Literal["check_model_description_populated"]
+
+    def execute(self) -> None:
+        """Execute the check."""
+        assert (
+            len(self.model.description.strip()) > 4
+        ), f"`{self.model.name}` does not have a populated description."
 
 
 class CheckModelDirectories(BaseCheck):
@@ -350,6 +252,47 @@ class CheckModelDirectories(BaseCheck):
         assert (
             path_after_match.split("/")[0] in self.permitted_sub_directories
         ), f"`{self.model.name}` is located in `{self.model.original_file_path.split('/')[1]}`, this is not a valid sub-directory."
+
+
+class CheckModelDocumentedInSameDirectory(BaseCheck):
+    """Models must be documented in the same directory where they are defined (i.e. `.yml` and `.sql` files are in the same directory).
+
+    Receives:
+        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+
+    Other Parameters:
+        exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
+        include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_model_documented_in_same_directory
+        ```
+
+    """
+
+    model: "DbtBouncerModelBase" = Field(default=None)
+    name: Literal["check_model_documented_in_same_directory"]
+
+    def execute(self) -> None:
+        """Execute the check."""
+        model_sql_dir = clean_path_str(self.model.original_file_path).split("/")[:-1]
+        assert (  # noqa: PT018
+            hasattr(self.model, "patch_path")
+            and clean_path_str(self.model.patch_path) is not None
+        ), f"`{self.model.name}` is not documented."
+
+        model_doc_dir = clean_path_str(
+            self.model.patch_path[
+                clean_path_str(self.model.patch_path).find("models") :
+            ]
+        ).split("/")[:-1]
+
+        assert (
+            model_doc_dir == model_sql_dir
+        ), f"`{self.model.name}` is documented in a different directory to the `.sql` file: `{'/'.join(model_doc_dir)}` vs `{'/'.join(model_sql_dir)}`."
 
 
 class CheckModelHasContractsEnforced(BaseCheck):
@@ -935,6 +878,63 @@ class CheckModelPropertyFileLocation(BaseCheck):
         assert properties_yml_name.endswith(
             "__models.yml",
         ), f"The properties file for `{self.model.name}` (`{properties_yml_name}`) does not end with `__models.yml`."
+
+
+class CheckModelsDocumentationCoverage(BaseModel):
+    """Set the minimum percentage of models that have a populated description.
+
+    Parameters:
+        min_model_documentation_coverage_pct (float): The minimum percentage of models that must have a populated description.
+
+    Receives:
+        models (List[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
+
+    Other Parameters:
+        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_model_documentation_coverage
+              min_model_documentation_coverage_pct: 90
+        ```
+
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    index: Optional[int] = Field(
+        default=None,
+        description="Index to uniquely identify the check, calculated at runtime.",
+    )
+    min_model_documentation_coverage_pct: int = Field(
+        default=100,
+        ge=0,
+        le=100,
+    )
+    models: List["DbtBouncerModelBase"] = Field(default=[])
+    name: Literal["check_model_documentation_coverage"]
+    severity: Optional[Literal["error", "warn"]] = Field(
+        default="error",
+        description="Severity of the check, one of 'error' or 'warn'.",
+    )
+
+    def execute(self) -> None:
+        """Execute the check."""
+        num_models = len(self.models)
+        models_with_description = []
+        for model in self.models:
+            if len(model.description.strip()) > 4:
+                models_with_description.append(model.unique_id)
+
+        num_models_with_descriptions = len(models_with_description)
+        model_description_coverage_pct = (
+            num_models_with_descriptions / num_models
+        ) * 100
+
+        assert (
+            model_description_coverage_pct >= self.min_model_documentation_coverage_pct
+        ), f"Only {model_description_coverage_pct}% of models have a populated description, this is less than the permitted minimum of {self.min_model_documentation_coverage_pct}%."
 
 
 class CheckModelsTestCoverage(BaseModel):
