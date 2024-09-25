@@ -13,11 +13,20 @@ from dbt_artifacts_parser.parsers.base import BaseParserModel
 from pydantic import ConfigDict, Field, constr
 
 
+class CustomGranularity(BaseParserModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    name: str
+    column_name: Optional[str] = None
+
+
 class TimeSpine(BaseParserModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra='forbid',
     )
     standard_granularity_column: str
+    custom_granularities: Optional[List[CustomGranularity]] = None
 
 
 class Metadata(BaseParserModel):
