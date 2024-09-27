@@ -110,6 +110,7 @@ pytest-xdist = "^3"
 ruff = "^0"
 sh = "^2"
 "shandy-sqlfmt" = {version = "^0", extras=["shandy-sqlfmt[jinjafmt]"]}
+types-tabulate = "^0"
 
 [tool.poetry.group.docs.dependencies]
 mike = "^2"

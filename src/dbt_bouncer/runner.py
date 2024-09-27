@@ -191,9 +191,6 @@ def runner(
         [c for c in results if c["outcome"] == "failed" and c["severity"] == "warn"]
     )
     num_checks_success = len([c for c in results if c["outcome"] == "success"])
-    logging.info(
-        f"Done. SUCCESS={num_checks_success} WARN={num_checks_warn} ERROR={num_checks_error}",
-    )
 
     if num_checks_error > 0 or num_checks_warn > 0:
         logger = logging.error if num_checks_error > 0 else logging.warning
@@ -234,6 +231,10 @@ def runner(
                     [f["check_run_id"], f["failure_message"]] for f in failed_checks
                 ]
             )
+
+    logging.info(
+        f"Done. SUCCESS={num_checks_success} WARN={num_checks_warn} ERROR={num_checks_error}",
+    )
 
     if output_file is not None:
         coverage_file = Path().cwd() / output_file
