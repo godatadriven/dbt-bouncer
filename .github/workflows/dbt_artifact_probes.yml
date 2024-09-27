@@ -1,5 +1,5 @@
 ---
-    name: dbt Artifacts probe
+    name: dbt artifacts probe
 
     on:
       schedule:
@@ -61,7 +61,7 @@
                     poetry-version: ${{ env.POETRY_VERSION }}
                     python-version: ${{ steps.python-version.outputs.PYTHON_VERSION }}
 
-                - name: Install latest dbt-core and generate dbt artifacts
+                - name: Install latest dbt-core
                   run: poetry run pip install dbt-core -U --pre
 
                 - name: Regenerate dbt artifacts and run `dbt-bouncer`
