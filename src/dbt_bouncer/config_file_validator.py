@@ -95,7 +95,9 @@ def load_config_file_contents(config_file_path: PurePath) -> Mapping[str, Any]:
         )
 
 
-def validate_conf(config_file_contents: Dict[str, Any]) -> "DbtBouncerConf":
+def validate_conf(
+    config_file_contents: Dict[str, Any],
+) -> "DbtBouncerConf":
     """Validate the configuration and return the Pydantic model.
 
     Raises:
@@ -110,18 +112,22 @@ def validate_conf(config_file_contents: Dict[str, Any]) -> "DbtBouncerConf":
     # Rebuild the model to ensure all fields are present
     import warnings
 
+    # catalog_checks
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", category=UserWarning)
         from dbt_artifacts_parser.parsers.catalog.catalog_v1 import (
             CatalogTable,  # noqa: F401
         )
-        from dbt_artifacts_parser.parsers.manifest.manifest_v12 import (
-            Exposures,  # noqa: F401
-            Macros,  # noqa: F401
-            UnitTests,  # noqa: F401
-        )
+    # manifest_checks
+    from dbt_artifacts_parser.parsers.manifest.manifest_v12 import (
+        Exposures,  # noqa: F401
+        Macros,  # noqa: F401
+        UnitTests,  # noqa: F401
+    )
 
-    import dbt_bouncer.checks  # noqa: F401
+    import dbt_bouncer.checks.catalog
+    import dbt_bouncer.checks.manifest
+    import dbt_bouncer.checks.run_results  # noqa: F401
     from dbt_bouncer.artifact_parsers.parsers_catalog import (  # noqa: F401
         DbtBouncerCatalogNode,
     )
@@ -137,6 +143,8 @@ def validate_conf(config_file_contents: Dict[str, Any]) -> "DbtBouncerConf":
         DbtBouncerTest,
         DbtBouncerTestBase,
     )
+
+    # run_results_checks
     from dbt_bouncer.artifact_parsers.parsers_run_results import (  # noqa: F401
         DbtBouncerRunResult,
         DbtBouncerRunResultBase,
@@ -144,7 +152,7 @@ def validate_conf(config_file_contents: Dict[str, Any]) -> "DbtBouncerConf":
     from dbt_bouncer.checks.common import NestedDict  # noqa: F401
     from dbt_bouncer.config_file_parser import DbtBouncerConf
 
-    DbtBouncerConf.model_rebuild()
+    DbtBouncerConf().model_rebuild()
 
     try:
         return DbtBouncerConf(**config_file_contents)

@@ -10,10 +10,9 @@ from typing import TYPE_CHECKING, List, Literal, Union
 import semver
 
 if TYPE_CHECKING:
-    from dbt_bouncer.artifact_parsers.parsers_manifest import DbtBouncerManifest
-if TYPE_CHECKING:
     from dbt_bouncer.artifact_parsers.parsers_catalog import DbtBouncerCatalogNode
     from dbt_bouncer.artifact_parsers.parsers_manifest import (
+        DbtBouncerManifest,
         DbtBouncerModel,
         DbtBouncerSemanticModel,
         DbtBouncerSource,

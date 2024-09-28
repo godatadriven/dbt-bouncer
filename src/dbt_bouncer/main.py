@@ -80,6 +80,13 @@ def cli(
 
     logging.debug(f"{config_file_contents=}")
 
+    check_categories = [
+        i
+        for i in config_file_contents
+        if i.endswith("_checks") and config_file_contents.get(i) != []
+    ]
+    logging.debug(f"{check_categories=}")
+
     # Set click context object for dbt_bouncer.utils.get_check_objects()
     ctx.obj = {
         "config_file_path": config_file_path,
@@ -91,13 +98,6 @@ def cli(
     bouncer_config = validate_conf(config_file_contents=config_file_contents)
     del config_file_contents
     logging.debug(f"{bouncer_config=}")
-
-    check_categories = [
-        i
-        for i in bouncer_config.model_dump()
-        if i.endswith("_checks") and getattr(bouncer_config, i) != []
-    ]
-    logging.debug(f"{check_categories=}")
 
     for category in check_categories:
         for idx, check in enumerate(getattr(bouncer_config, category)):
