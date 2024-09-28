@@ -67,24 +67,24 @@ with warnings.catch_warnings():
     from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
         SourceDefinition as SourceDefinition_v11,
     )
-    from dbt_artifacts_parser.parsers.manifest.manifest_v12 import (
-        Exposures,
-        Macros,
-        ManifestV12,
-        Nodes1,
-        Nodes2,
-        Nodes4,
-        Nodes6,
-        SemanticModels,
-        Sources,
-        UnitTests,
-    )
+
+from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
+    Exposures,
+    Macros,
+    Nodes1,
+    Nodes2,
+    Nodes4,
+    Nodes6,
+    SemanticModels,
+    Sources,
+    UnitTests,
+)
 
 
 class DbtBouncerManifest(BaseModel):
     """Model for all manifest objects."""
 
-    manifest: Union[ManifestV10, ManifestV11, ManifestV12, ManifestLatest]
+    manifest: Union[ManifestV10, ManifestV11, ManifestLatest]
 
 
 DbtBouncerExposureBase = Union[Exposure_v10, Exposure_v11, Exposures]

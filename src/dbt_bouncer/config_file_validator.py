@@ -119,15 +119,14 @@ def validate_conf(
             CatalogTable,  # noqa: F401
         )
     # manifest_checks
-    from dbt_artifacts_parser.parsers.manifest.manifest_v12 import (
+    import dbt_bouncer.checks.catalog
+    import dbt_bouncer.checks.manifest
+    import dbt_bouncer.checks.run_results  # noqa: F401
+    from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
         Exposures,  # noqa: F401
         Macros,  # noqa: F401
         UnitTests,  # noqa: F401
     )
-
-    import dbt_bouncer.checks.catalog
-    import dbt_bouncer.checks.manifest
-    import dbt_bouncer.checks.run_results  # noqa: F401
     from dbt_bouncer.artifact_parsers.parsers_catalog import (  # noqa: F401
         DbtBouncerCatalogNode,
     )

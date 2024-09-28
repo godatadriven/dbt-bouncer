@@ -9,15 +9,10 @@ from pydantic import BaseModel, ConfigDict, Field
 from dbt_bouncer.check_base import BaseCheck
 
 if TYPE_CHECKING:
-    import warnings
-
+    from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
+        UnitTests,
+    )
     from dbt_bouncer.artifact_parsers.parsers_common import DbtBouncerManifest
-
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", category=UserWarning)
-        from dbt_artifacts_parser.parsers.manifest.manifest_v12 import (
-            UnitTests,
-        )
 
 from dbt_bouncer.utils import object_in_path
 

@@ -7,19 +7,17 @@ with warnings.catch_warnings():
     from dbt_artifacts_parser.parsers.catalog.catalog_v1 import (
         CatalogTable,  # noqa: F401
     )
-    from dbt_artifacts_parser.parsers.manifest.manifest_v12 import (  # noqa: F401
-        Exposures,
-        Macros,
-        Nodes4,
-        UnitTests,
-    )
-
-
 from unittest.mock import MagicMock
 
 import click
 from click.globals import push_context
 
+from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (  # noqa: F401
+    Exposures,
+    Macros,
+    Nodes4,
+    UnitTests,
+)
 from dbt_bouncer.artifact_parsers.parsers_manifest import (  # noqa: F401
     DbtBouncerExposureBase,
     DbtBouncerManifest,
@@ -57,13 +55,12 @@ def test_runner_coverage(caplog, tmp_path):
             from dbt_artifacts_parser.parsers.catalog.catalog_v1 import (
                 CatalogTable,  # noqa: F401
             )
-            from dbt_artifacts_parser.parsers.manifest.manifest_v12 import (  # noqa: F401
-                Exposures,
-                Macros,
-                Nodes4,
-                UnitTests,
-            )
-
+        from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (  # noqa: F401
+            Exposures,
+            Macros,
+            Nodes4,
+            UnitTests,
+        )
         from dbt_bouncer.artifact_parsers.parsers_manifest import (  # noqa: F401
             DbtBouncerExposureBase,
             DbtBouncerManifest,
@@ -190,13 +187,12 @@ def test_runner_failure():
             from dbt_artifacts_parser.parsers.catalog.catalog_v1 import (
                 CatalogTable,  # noqa: F401
             )
-            from dbt_artifacts_parser.parsers.manifest.manifest_v12 import (  # noqa: F401
-                Exposures,
-                Macros,
-                Nodes4,
-                UnitTests,
-            )
-
+        from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (  # noqa: F401
+            Exposures,
+            Macros,
+            Nodes4,
+            UnitTests,
+        )
         from dbt_bouncer.artifact_parsers.parsers_manifest import (  # noqa: F401
             DbtBouncerExposureBase,
             DbtBouncerManifest,
@@ -315,13 +311,12 @@ def test_runner_success():
             from dbt_artifacts_parser.parsers.catalog.catalog_v1 import (
                 CatalogTable,  # noqa: F401
             )
-            from dbt_artifacts_parser.parsers.manifest.manifest_v12 import (  # noqa: F401
-                Exposures,
-                Macros,
-                Nodes4,
-                UnitTests,
-            )
-
+        from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (  # noqa: F401
+            Exposures,
+            Macros,
+            Nodes4,
+            UnitTests,
+        )
         from dbt_bouncer.artifact_parsers.parsers_manifest import (  # noqa: F401
             DbtBouncerExposureBase,
             DbtBouncerManifest,
@@ -434,12 +429,6 @@ def test_runner_windows(caplog, tmp_path):
         from dbt_artifacts_parser.parser import parse_manifest
         from dbt_artifacts_parser.parsers.catalog.catalog_v1 import (
             CatalogTable,  # noqa: F401
-        )
-        from dbt_artifacts_parser.parsers.manifest.manifest_v12 import (  # noqa: F401
-            Exposures,
-            Macros,
-            Nodes4,
-            UnitTests,
         )
 
     DbtBouncerConf.model_rebuild()
