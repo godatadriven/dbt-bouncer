@@ -12,7 +12,6 @@ if TYPE_CHECKING:
 
 import re
 
-from Levenshtein import distance
 from pydantic import ValidationError
 
 
@@ -152,6 +151,8 @@ def validate_conf(
     try:
         return DbtBouncerConf(**config_file_contents)
     except ValidationError as e:
+        from Levenshtein import distance
+
         error_message: List[str] = []
         for error in e.errors():
             if (
