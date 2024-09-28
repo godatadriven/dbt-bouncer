@@ -112,13 +112,11 @@ def validate_conf(
     # Rebuild the model to ensure all fields are present
     import warnings
 
-    # catalog_checks
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", category=UserWarning)
         from dbt_artifacts_parser.parsers.catalog.catalog_v1 import (
             CatalogTable,  # noqa: F401
         )
-    # manifest_checks
     import dbt_bouncer.checks.catalog
     import dbt_bouncer.checks.manifest
     import dbt_bouncer.checks.run_results  # noqa: F401
@@ -142,8 +140,6 @@ def validate_conf(
         DbtBouncerTest,
         DbtBouncerTestBase,
     )
-
-    # run_results_checks
     from dbt_bouncer.artifact_parsers.parsers_run_results import (  # noqa: F401
         DbtBouncerRunResult,
         DbtBouncerRunResultBase,

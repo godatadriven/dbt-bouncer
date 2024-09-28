@@ -42,7 +42,7 @@ def load_dbt_artifact(
     """Load a dbt artifact from a JSON file to a Pydantic object.
 
     Returns:
-        Union[CatalogV1, DbtBouncerManifest, RunResultsV4, RunResultsV5, RunResultsV6]:
+        Union[CatalogV1, DbtBouncerManifest, DbtBouncerRunResultBase]:
             The dbt artifact loaded as a Pydantic object.
 
     Raises:
