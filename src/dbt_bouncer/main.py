@@ -113,7 +113,7 @@ def cli(
 
     dbt_artifacts_dir = config_file.parent / bouncer_config.dbt_artifacts_dir
 
-    from dbt_bouncer.parsers import parse_dbt_artifacts
+    from dbt_bouncer.artifact_parsers.parsers_common import parse_dbt_artifacts
 
     (
         manifest_obj,

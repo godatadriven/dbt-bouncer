@@ -7,17 +7,17 @@ with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
     from dbt_artifacts_parser.parsers.catalog.catalog_v1 import CatalogTable
     from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Nodes4, Nodes6
+from dbt_bouncer.artifact_parsers.parsers_manifest import (  # noqa: F401
+    DbtBouncerModelBase,
+    DbtBouncerTest,
+    DbtBouncerTestBase,
+)
 from dbt_bouncer.checks.catalog.check_columns import (
     CheckColumnDescriptionPopulated,
     CheckColumnHasSpecifiedTest,
     CheckColumnNameCompliesToColumnType,
     CheckColumnsAreAllDocumented,
     CheckColumnsAreDocumentedInPublicModels,
-)
-from dbt_bouncer.parsers import (  # noqa: F401
-    DbtBouncerModelBase,
-    DbtBouncerTest,
-    DbtBouncerTestBase,
 )
 
 CheckColumnDescriptionPopulated.model_rebuild()

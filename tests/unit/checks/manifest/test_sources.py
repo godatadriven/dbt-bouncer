@@ -7,6 +7,12 @@ with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
     from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Nodes4, Sources
 
+from dbt_bouncer.artifact_parsers.parsers_manifest import (  # noqa: F401
+    DbtBouncerModel,
+    DbtBouncerModelBase,
+    DbtBouncerSource,
+    DbtBouncerSourceBase,
+)
 from dbt_bouncer.checks.common import NestedDict  # noqa: F401
 from dbt_bouncer.checks.manifest.check_sources import (
     CheckSourceDescriptionPopulated,
@@ -19,12 +25,6 @@ from dbt_bouncer.checks.manifest.check_sources import (
     CheckSourcePropertyFileLocation,
     CheckSourceUsedByModelsInSameDirectory,
     CheckSourceUsedByOnlyOneModel,
-)
-from dbt_bouncer.parsers import (  # noqa: F401
-    DbtBouncerModel,
-    DbtBouncerModelBase,
-    DbtBouncerSource,
-    DbtBouncerSourceBase,
 )
 
 CheckSourceDescriptionPopulated.model_rebuild()

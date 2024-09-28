@@ -7,7 +7,7 @@ from pydantic import Field
 from dbt_bouncer.check_base import BaseCheck
 
 if TYPE_CHECKING:
-    from dbt_bouncer.parsers import DbtBouncerRunResultBase
+    from dbt_bouncer.artifact_parsers.parsers_common import DbtBouncerRunResultBase
 
 import warnings
 

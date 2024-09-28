@@ -12,7 +12,10 @@ def pytest_configure(config):
 
 @pytest.fixture(scope="session")
 def manifest_obj():
-    from dbt_bouncer.parsers import DbtBouncerManifest, parse_manifest
+    from dbt_bouncer.artifact_parsers.parsers_manifest import (
+        DbtBouncerManifest,
+        parse_manifest,
+    )
 
     manifest_json_path = Path("dbt_project") / "target/manifest.json"
     with Path.open(manifest_json_path, "r") as fp:

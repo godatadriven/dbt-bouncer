@@ -10,12 +10,12 @@ with warnings.catch_warnings():
         SemanticModels,
     )
 
-from dbt_bouncer.checks.manifest.check_semantic_models import (
-    CheckSemanticModelOnNonPublicModels,
-)
-from dbt_bouncer.parsers import (  # noqa: F401
+from dbt_bouncer.artifact_parsers.parsers_manifest import (  # noqa: F401
     DbtBouncerModelBase,
     DbtBouncerSemanticModelBase,
+)
+from dbt_bouncer.checks.manifest.check_semantic_models import (
+    CheckSemanticModelOnNonPublicModels,
 )
 
 CheckSemanticModelOnNonPublicModels.model_rebuild()

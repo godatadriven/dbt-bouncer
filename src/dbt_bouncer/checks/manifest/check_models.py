@@ -20,13 +20,13 @@ if TYPE_CHECKING:
         from dbt_artifacts_parser.parsers.manifest.manifest_v12 import (
             UnitTests,
         )
-    from dbt_bouncer.parsers import (
+    from dbt_bouncer.artifact_parsers.parsers_common import (
         DbtBouncerManifest,
         DbtBouncerModelBase,
         DbtBouncerTestBase,
     )
 if TYPE_CHECKING:
-    from dbt_bouncer.parsers import (
+    from dbt_bouncer.artifact_parsers.parsers_common import (
         DbtBouncerManifest,
         DbtBouncerModelBase,
     )

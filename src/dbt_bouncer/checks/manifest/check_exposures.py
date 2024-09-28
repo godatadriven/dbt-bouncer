@@ -12,7 +12,10 @@ if TYPE_CHECKING:
 
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", category=UserWarning)
-    from dbt_bouncer.parsers import DbtBouncerExposureBase, DbtBouncerModelBase
+    from dbt_bouncer.artifact_parsers.parsers_common import (
+        DbtBouncerExposureBase,
+        DbtBouncerModelBase,
+    )
 
 
 class CheckExposureOnNonPublicModels(BaseCheck):

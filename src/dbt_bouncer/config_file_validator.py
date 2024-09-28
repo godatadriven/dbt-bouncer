@@ -122,16 +122,14 @@ def validate_conf(config_file_contents: Dict[str, Any]) -> "DbtBouncerConf":
         )
 
     import dbt_bouncer.checks  # noqa: F401
-    from dbt_bouncer.checks.common import NestedDict  # noqa: F401
-    from dbt_bouncer.config_file_parser import DbtBouncerConf
-    from dbt_bouncer.parsers import (  # noqa: F401
+    from dbt_bouncer.artifact_parsers.parsers_catalog import (  # noqa: F401
         DbtBouncerCatalogNode,
+    )
+    from dbt_bouncer.artifact_parsers.parsers_manifest import (  # noqa: F401
         DbtBouncerExposureBase,
         DbtBouncerManifest,
         DbtBouncerModel,
         DbtBouncerModelBase,
-        DbtBouncerRunResult,
-        DbtBouncerRunResultBase,
         DbtBouncerSemanticModel,
         DbtBouncerSemanticModelBase,
         DbtBouncerSource,
@@ -139,6 +137,12 @@ def validate_conf(config_file_contents: Dict[str, Any]) -> "DbtBouncerConf":
         DbtBouncerTest,
         DbtBouncerTestBase,
     )
+    from dbt_bouncer.artifact_parsers.parsers_run_results import (  # noqa: F401
+        DbtBouncerRunResult,
+        DbtBouncerRunResultBase,
+    )
+    from dbt_bouncer.checks.common import NestedDict  # noqa: F401
+    from dbt_bouncer.config_file_parser import DbtBouncerConf
 
     DbtBouncerConf.model_rebuild()
 

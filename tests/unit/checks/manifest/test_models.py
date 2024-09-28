@@ -11,7 +11,7 @@ with warnings.catch_warnings():
         UnitTests,
     )
 
-    from dbt_bouncer.parsers import (  # noqa: F401
+    from dbt_bouncer.artifact_parsers.parsers_manifest import (  # noqa: F401
         DbtBouncerManifest,
         DbtBouncerModel,
         DbtBouncerModelBase,

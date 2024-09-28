@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Literal, Optional
 from pydantic import BaseModel, ConfigDict, Field
 
 if TYPE_CHECKING:
-    from dbt_bouncer.parsers import DbtBouncerManifest
+    from dbt_bouncer.artifact_parsers.parsers_common import DbtBouncerManifest
 
 
 class CheckProjectName(BaseModel):

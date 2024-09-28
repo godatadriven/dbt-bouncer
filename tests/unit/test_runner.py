@@ -20,19 +20,21 @@ from unittest.mock import MagicMock
 import click
 from click.globals import push_context
 
-from dbt_bouncer.checks.common import NestedDict  # noqa: F401
-from dbt_bouncer.logger import configure_console_logging
-from dbt_bouncer.main import cli
-from dbt_bouncer.parsers import (  # noqa: F401
+from dbt_bouncer.artifact_parsers.parsers_manifest import (  # noqa: F401
     DbtBouncerExposureBase,
     DbtBouncerManifest,
     DbtBouncerModel,
     DbtBouncerModelBase,
-    DbtBouncerRunResultBase,
     DbtBouncerSemanticModelBase,
     DbtBouncerSourceBase,
     DbtBouncerTestBase,
 )
+from dbt_bouncer.artifact_parsers.parsers_run_results import (  # noqa: F401
+    DbtBouncerRunResultBase,
+)
+from dbt_bouncer.checks.common import NestedDict  # noqa: F401
+from dbt_bouncer.logger import configure_console_logging
+from dbt_bouncer.main import cli
 from dbt_bouncer.runner import runner
 
 
@@ -62,17 +64,19 @@ def test_runner_coverage(caplog, tmp_path):
                 UnitTests,
             )
 
-        from dbt_bouncer.checks.common import NestedDict  # noqa: F401
-        from dbt_bouncer.parsers import (  # noqa: F401
+        from dbt_bouncer.artifact_parsers.parsers_manifest import (  # noqa: F401
             DbtBouncerExposureBase,
             DbtBouncerManifest,
             DbtBouncerModel,
             DbtBouncerModelBase,
-            DbtBouncerRunResultBase,
             DbtBouncerSemanticModelBase,
             DbtBouncerSourceBase,
             DbtBouncerTestBase,
         )
+        from dbt_bouncer.artifact_parsers.parsers_run_results import (  # noqa: F401
+            DbtBouncerRunResultBase,
+        )
+        from dbt_bouncer.checks.common import NestedDict  # noqa: F401
 
         DbtBouncerConf.model_rebuild()
 
@@ -193,17 +197,19 @@ def test_runner_failure():
                 UnitTests,
             )
 
-        from dbt_bouncer.checks.common import NestedDict  # noqa: F401
-        from dbt_bouncer.parsers import (  # noqa: F401
+        from dbt_bouncer.artifact_parsers.parsers_manifest import (  # noqa: F401
             DbtBouncerExposureBase,
             DbtBouncerManifest,
             DbtBouncerModel,
             DbtBouncerModelBase,
-            DbtBouncerRunResultBase,
             DbtBouncerSemanticModelBase,
             DbtBouncerSourceBase,
             DbtBouncerTestBase,
         )
+        from dbt_bouncer.artifact_parsers.parsers_run_results import (  # noqa: F401
+            DbtBouncerRunResultBase,
+        )
+        from dbt_bouncer.checks.common import NestedDict  # noqa: F401
 
         DbtBouncerConf.model_rebuild()
 
@@ -316,17 +322,19 @@ def test_runner_success():
                 UnitTests,
             )
 
-        from dbt_bouncer.checks.common import NestedDict  # noqa: F401
-        from dbt_bouncer.parsers import (  # noqa: F401
+        from dbt_bouncer.artifact_parsers.parsers_manifest import (  # noqa: F401
             DbtBouncerExposureBase,
             DbtBouncerManifest,
             DbtBouncerModel,
             DbtBouncerModelBase,
-            DbtBouncerRunResultBase,
             DbtBouncerSemanticModelBase,
             DbtBouncerSourceBase,
             DbtBouncerTestBase,
         )
+        from dbt_bouncer.artifact_parsers.parsers_run_results import (  # noqa: F401
+            DbtBouncerRunResultBase,
+        )
+        from dbt_bouncer.checks.common import NestedDict  # noqa: F401
 
         DbtBouncerConf.model_rebuild()
 

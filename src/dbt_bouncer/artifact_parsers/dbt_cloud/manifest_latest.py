@@ -15,7 +15,7 @@ from pydantic import ConfigDict, Field, constr
 
 class CustomGranularity(BaseParserModel):
     model_config = ConfigDict(
-        extra='forbid',
+        extra="forbid",
     )
     name: str
     column_name: Optional[str] = None
@@ -23,7 +23,7 @@ class CustomGranularity(BaseParserModel):
 
 class TimeSpine(BaseParserModel):
     model_config = ConfigDict(
-        extra='forbid',
+        extra="forbid",
     )
     standard_granularity_column: str
     custom_granularities: Optional[List[CustomGranularity]] = None

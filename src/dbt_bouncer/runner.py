@@ -31,8 +31,7 @@ if TYPE_CHECKING:
             UnitTests,
         )
 
-    from dbt_bouncer.config_file_validator import DbtBouncerConf
-    from dbt_bouncer.parsers import (
+    from dbt_bouncer.artifact_parsers.parsers_common import (
         DbtBouncerCatalogNode,
         DbtBouncerManifest,
         DbtBouncerModel,
@@ -41,6 +40,7 @@ if TYPE_CHECKING:
         DbtBouncerSource,
         DbtBouncerTest,
     )
+    from dbt_bouncer.config_file_validator import DbtBouncerConf
 
 
 def runner(

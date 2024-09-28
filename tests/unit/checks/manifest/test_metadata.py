@@ -2,8 +2,10 @@ from contextlib import nullcontext as does_not_raise
 
 import pytest
 
+from dbt_bouncer.artifact_parsers.parsers_manifest import (
+    DbtBouncerManifest,  # noqa: F401
+)
 from dbt_bouncer.checks.manifest.check_metadata import CheckProjectName
-from dbt_bouncer.parsers import DbtBouncerManifest  # noqa: F401
 
 CheckProjectName.model_rebuild()
 
