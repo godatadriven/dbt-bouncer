@@ -40,9 +40,9 @@ def conf_cls_factory(
 
         return DbtBouncerConfManifestOnly
     elif check_categories == ["run_results_checks"]:
-        from dbt_bouncer.config_file_parser import DbtBouncerConftRunResultsOnly
+        from dbt_bouncer.config_file_parser import DbtBouncerConfRunResultsOnly
 
-        return DbtBouncerConftRunResultsOnly
+        return DbtBouncerConfRunResultsOnly
     elif check_categories == ["catalog_checks", "manifest_checks"]:
         from dbt_bouncer.config_file_parser import DbtBouncerConfCatalogManifest
 
@@ -170,6 +170,11 @@ def validate_conf(
         import dbt_bouncer.checks.catalog
         from dbt_bouncer.artifact_parsers.parsers_catalog import (  # noqa: F401
             DbtBouncerCatalogNode,
+        )
+        from dbt_bouncer.artifact_parsers.parsers_manifest import (
+            DbtBouncerModelBase,
+            DbtBouncerSourceBase,
+            DbtBouncerTestBase,
         )
 
         with warnings.catch_warnings():

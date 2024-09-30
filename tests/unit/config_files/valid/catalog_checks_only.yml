@@ -1,0 +1,5 @@
+dbt_artifacts_dir: dbt_project/target
+
+catalog_checks:
+  - name: check_column_description_populated
+    include: ^models/marts
