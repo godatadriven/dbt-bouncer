@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, List, Literal
 from dbt_bouncer.check_base import BaseCheck
 
 if TYPE_CHECKING:
-    from dbt_bouncer.parsers import (
+    from dbt_bouncer.artifact_parsers.parsers_common import (
         DbtBouncerManifest,
         DbtBouncerModelBase,
     )

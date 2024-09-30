@@ -1,19 +1,70 @@
 import logging
+import re
 from pathlib import Path, PurePath
-from typing import TYPE_CHECKING, Any, Dict, List, Mapping
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Mapping
 
 import toml
+from pydantic import ValidationError
 
 from dbt_bouncer.utils import load_config_from_yaml
 
 if TYPE_CHECKING:
-    from dbt_bouncer.config_file_parser import DbtBouncerConf
+    from dbt_bouncer.config_file_parser import (
+        DbtBouncerConfAllCategories as DbtBouncerConf,
+    )
 
 
-import re
+def conf_cls_factory(
+    check_categories: List[
+        Literal["catalog_checks", "manifest_checks", "run_results_checks"]
+    ],
+):
+    """Return the appropriate configuration class based on the check categories.
 
-from Levenshtein import distance
-from pydantic import ValidationError
+    Args:
+        check_categories: List[Literal["catalog_checks", "manifest_checks", "run_results_checks"]]
+
+    Raises:
+        ValueError: If the check categories are not valid.
+
+    Returns:
+        DbtBouncerConf: The configuration class.
+
+    """
+    if check_categories == ["catalog_checks"]:
+        from dbt_bouncer.config_file_parser import DbtBouncerConfCatalogOnly
+
+        return DbtBouncerConfCatalogOnly
+    elif check_categories == ["manifest_checks"]:
+        from dbt_bouncer.config_file_parser import DbtBouncerConfManifestOnly
+
+        return DbtBouncerConfManifestOnly
+    elif check_categories == ["run_results_checks"]:
+        from dbt_bouncer.config_file_parser import DbtBouncerConftRunResultsOnly
+
+        return DbtBouncerConftRunResultsOnly
+    elif check_categories == ["catalog_checks", "manifest_checks"]:
+        from dbt_bouncer.config_file_parser import DbtBouncerConfCatalogManifest
+
+        return DbtBouncerConfCatalogManifest
+    elif check_categories == ["catalog_checks", "run_results_checks"]:
+        from dbt_bouncer.config_file_parser import DbtBouncerConfCatalogRunResults
+
+        return DbtBouncerConfCatalogRunResults
+    elif check_categories == ["manifest_checks", "run_results_checks"]:
+        from dbt_bouncer.config_file_parser import DbtBouncerConfManifestRunResults
+
+        return DbtBouncerConfManifestRunResults
+    elif check_categories == [
+        "catalog_checks",
+        "manifest_checks",
+        "run_results_checks",
+    ]:
+        from dbt_bouncer.config_file_parser import DbtBouncerConfAllCategories
+
+        return DbtBouncerConfAllCategories
+    else:
+        raise ValueError(f"Invalid check_categories: {check_categories}")
 
 
 def get_config_file_path(
@@ -95,7 +146,10 @@ def load_config_file_contents(config_file_path: PurePath) -> Mapping[str, Any]:
         )
 
 
-def validate_conf(config_file_contents: Dict[str, Any]) -> "DbtBouncerConf":
+def validate_conf(
+    check_categories,  #: List[Literal["catalog_checks"], Literal["manifest_checks"], Literal["run_results_checks"]],
+    config_file_contents: Dict[str, Any],
+) -> "DbtBouncerConf":
     """Validate the configuration and return the Pydantic model.
 
     Raises:
@@ -108,43 +162,55 @@ def validate_conf(config_file_contents: Dict[str, Any]) -> "DbtBouncerConf":
     logging.info("Validating conf...")
 
     # Rebuild the model to ensure all fields are present
-    import warnings
+    from dbt_bouncer.checks.common import NestedDict  # noqa: F401
 
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", category=UserWarning)
-        from dbt_artifacts_parser.parsers.catalog.catalog_v1 import (
-            CatalogTable,  # noqa: F401
+    if "catalog_checks" in check_categories:
+        import warnings
+
+        import dbt_bouncer.checks.catalog
+        from dbt_bouncer.artifact_parsers.parsers_catalog import (  # noqa: F401
+            DbtBouncerCatalogNode,
         )
-        from dbt_artifacts_parser.parsers.manifest.manifest_v12 import (
+
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", category=UserWarning)
+            from dbt_artifacts_parser.parsers.catalog.catalog_v1 import (
+                CatalogTable,  # noqa: F401
+            )
+    if "manifest_checks" in check_categories:
+        import dbt_bouncer.checks.manifest
+        from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
             Exposures,  # noqa: F401
             Macros,  # noqa: F401
             UnitTests,  # noqa: F401
         )
+        from dbt_bouncer.artifact_parsers.parsers_manifest import (  # noqa: F401
+            DbtBouncerExposureBase,
+            DbtBouncerManifest,
+            DbtBouncerModel,
+            DbtBouncerModelBase,
+            DbtBouncerSemanticModel,
+            DbtBouncerSemanticModelBase,
+            DbtBouncerSource,
+            DbtBouncerSourceBase,
+            DbtBouncerTest,
+            DbtBouncerTestBase,
+        )
+    if "run_results_checks" in check_categories:
+        import dbt_bouncer.checks.run_results  # noqa: F401
+        from dbt_bouncer.artifact_parsers.parsers_run_results import (  # noqa: F401
+            DbtBouncerRunResult,
+            DbtBouncerRunResultBase,
+        )
 
-    import dbt_bouncer.checks  # noqa: F401
-    from dbt_bouncer.checks.common import NestedDict  # noqa: F401
-    from dbt_bouncer.config_file_parser import DbtBouncerConf
-    from dbt_bouncer.parsers import (  # noqa: F401
-        DbtBouncerCatalogNode,
-        DbtBouncerExposureBase,
-        DbtBouncerManifest,
-        DbtBouncerModel,
-        DbtBouncerModelBase,
-        DbtBouncerRunResult,
-        DbtBouncerRunResultBase,
-        DbtBouncerSemanticModel,
-        DbtBouncerSemanticModelBase,
-        DbtBouncerSource,
-        DbtBouncerSourceBase,
-        DbtBouncerTest,
-        DbtBouncerTestBase,
-    )
-
-    DbtBouncerConf.model_rebuild()
+    DbtBouncerConf = conf_cls_factory(check_categories=check_categories)  # noqa: N806
+    DbtBouncerConf().model_rebuild()
 
     try:
         return DbtBouncerConf(**config_file_contents)
     except ValidationError as e:
+        from Levenshtein import distance
+
         error_message: List[str] = []
         for error in e.errors():
             if (

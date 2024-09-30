@@ -80,6 +80,13 @@ def cli(
 
     logging.debug(f"{config_file_contents=}")
 
+    check_categories = [
+        i
+        for i in config_file_contents
+        if i.endswith("_checks") and config_file_contents.get(i) != []
+    ]
+    logging.debug(f"{check_categories=}")
+
     # Set click context object for dbt_bouncer.utils.get_check_objects()
     ctx.obj = {
         "config_file_path": config_file_path,
@@ -88,16 +95,11 @@ def cli(
 
     from dbt_bouncer.config_file_validator import validate_conf
 
-    bouncer_config = validate_conf(config_file_contents=config_file_contents)
+    bouncer_config = validate_conf(
+        check_categories=check_categories, config_file_contents=config_file_contents
+    )
     del config_file_contents
     logging.debug(f"{bouncer_config=}")
-
-    check_categories = [
-        i
-        for i in bouncer_config.model_dump()
-        if i.endswith("_checks") and getattr(bouncer_config, i) != []
-    ]
-    logging.debug(f"{check_categories=}")
 
     for category in check_categories:
         for idx, check in enumerate(getattr(bouncer_config, category)):
@@ -113,7 +115,7 @@ def cli(
 
     dbt_artifacts_dir = config_file.parent / bouncer_config.dbt_artifacts_dir
 
-    from dbt_bouncer.parsers import parse_dbt_artifacts
+    from dbt_bouncer.artifact_parsers.parsers_common import parse_dbt_artifacts
 
     (
         manifest_obj,

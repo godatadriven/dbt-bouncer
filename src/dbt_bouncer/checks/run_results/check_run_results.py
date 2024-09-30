@@ -7,12 +7,7 @@ from pydantic import Field
 from dbt_bouncer.check_base import BaseCheck
 
 if TYPE_CHECKING:
-    from dbt_bouncer.parsers import DbtBouncerRunResultBase
-
-import warnings
-
-with warnings.catch_warnings():
-    warnings.filterwarnings("ignore", category=UserWarning)
+    from dbt_bouncer.artifact_parsers.parsers_run_results import DbtBouncerRunResultBase
 
 
 class CheckRunResultsMaxExecutionTime(BaseCheck):

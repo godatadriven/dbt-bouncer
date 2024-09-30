@@ -21,18 +21,12 @@ from dbt_bouncer.utils import (
 )
 
 if TYPE_CHECKING:
-    import warnings
-
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", category=UserWarning)
-        from dbt_artifacts_parser.parsers.manifest.manifest_v12 import (
-            Exposures,
-            Macros,
-            UnitTests,
-        )
-
-    from dbt_bouncer.config_file_validator import DbtBouncerConf
-    from dbt_bouncer.parsers import (
+    from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
+        Exposures,
+        Macros,
+        UnitTests,
+    )
+    from dbt_bouncer.artifact_parsers.parsers_common import (
         DbtBouncerCatalogNode,
         DbtBouncerManifest,
         DbtBouncerModel,
@@ -41,10 +35,13 @@ if TYPE_CHECKING:
         DbtBouncerSource,
         DbtBouncerTest,
     )
+    from dbt_bouncer.config_file_parser import (
+        DbtBouncerConfAllCategories as DbtBouncerConf,
+    )
 
 
 def runner(
-    bouncer_config: DbtBouncerConf,
+    bouncer_config: "DbtBouncerConf",
     catalog_nodes: List[DbtBouncerCatalogNode],
     catalog_sources: List[DbtBouncerCatalogNode],
     check_categories: List[str],

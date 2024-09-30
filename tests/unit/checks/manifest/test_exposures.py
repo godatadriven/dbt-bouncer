@@ -1,20 +1,16 @@
-import warnings
 from contextlib import nullcontext as does_not_raise
 
 import pytest
 
-with warnings.catch_warnings():
-    warnings.filterwarnings("ignore", category=UserWarning)
-    from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Exposures, Nodes4
-
-from dbt_bouncer.checks.manifest.check_exposures import (
-    CheckExposureOnNonPublicModels,
-    CheckExposureOnView,
-)
-from dbt_bouncer.parsers import (  # noqa: F401
+from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import Exposures, Nodes4
+from dbt_bouncer.artifact_parsers.parsers_manifest import (  # noqa: F401
     DbtBouncerExposureBase,
     DbtBouncerModel,
     DbtBouncerModelBase,
+)
+from dbt_bouncer.checks.manifest.check_exposures import (
+    CheckExposureOnNonPublicModels,
+    CheckExposureOnView,
 )
 
 CheckExposureOnNonPublicModels.model_rebuild()

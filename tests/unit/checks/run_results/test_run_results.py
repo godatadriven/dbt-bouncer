@@ -8,11 +8,11 @@ with warnings.catch_warnings():
 
 from pydantic import TypeAdapter
 
+from dbt_bouncer.artifact_parsers.parsers_run_results import DbtBouncerRunResultBase
 from dbt_bouncer.checks.run_results.check_run_results import (
     CheckRunResultsMaxExecutionTime,
     CheckRunResultsMaxGigabytesBilled,
 )
-from dbt_bouncer.parsers import DbtBouncerRunResultBase
 
 CheckRunResultsMaxGigabytesBilled.model_rebuild()
 CheckRunResultsMaxExecutionTime.model_rebuild()

@@ -8,14 +8,10 @@ from pydantic import Field
 from dbt_bouncer.utils import clean_path_str
 
 if TYPE_CHECKING:
-    import warnings
-
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", category=UserWarning)
-        from dbt_artifacts_parser.parsers.manifest.manifest_v12 import Macros
+    from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import Macros
 
 
-import jinja2
+from jinja2 import Environment, nodes
 from jinja2_simple_tags import StandaloneTag
 
 from dbt_bouncer.check_base import BaseCheck
@@ -55,7 +51,7 @@ class CheckMacroArgumentsDescriptionPopulated(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
-        environment = jinja2.Environment(autoescape=True, extensions=[TagExtension])
+        environment = Environment(autoescape=True, extensions=[TagExtension])
         ast = environment.parse(self.macro.macro_sql)
 
         if hasattr(ast.body[0], "args"):
@@ -65,7 +61,7 @@ class CheckMacroArgumentsDescriptionPopulated(BaseCheck):
             if "materialization" in [
                 x.value.value
                 for x in ast.body[0].nodes[0].kwargs  # type: ignore[attr-defined]
-                if isinstance(x.value, jinja2.nodes.Const)
+                if isinstance(x.value, nodes.Const)
             ]:
                 # Materializations don't have arguments
                 macro_arguments = []
@@ -74,12 +70,12 @@ class CheckMacroArgumentsDescriptionPopulated(BaseCheck):
                 test_macro = next(
                     x
                     for x in ast.body
-                    if not isinstance(x.nodes[0], jinja2.nodes.Call)  # type: ignore[attr-defined]
+                    if not isinstance(x.nodes[0], nodes.Call)  # type: ignore[attr-defined]
                 )
                 macro_arguments = [
                     x.name
                     for x in test_macro.nodes  # type: ignore[attr-defined]
-                    if isinstance(x, jinja2.nodes.Name)
+                    if isinstance(x, nodes.Name)
                 ]
 
         # macro_arguments: List of args parsed from macro SQL

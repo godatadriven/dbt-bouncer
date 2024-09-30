@@ -2,7 +2,6 @@
 
 import logging
 import re
-import warnings
 from typing import TYPE_CHECKING, List, Literal, Optional
 
 import semver
@@ -13,23 +12,15 @@ from dbt_bouncer.checks.common import NestedDict
 from dbt_bouncer.utils import find_missing_meta_keys
 
 if TYPE_CHECKING:
-    import warnings
-
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", category=UserWarning)
-        from dbt_artifacts_parser.parsers.manifest.manifest_v12 import (
-            UnitTests,
-        )
-    from dbt_bouncer.parsers import (
+    from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
+        UnitTests,
+    )
+    from dbt_bouncer.artifact_parsers.parsers_common import (
         DbtBouncerManifest,
         DbtBouncerModelBase,
         DbtBouncerTestBase,
     )
-if TYPE_CHECKING:
-    from dbt_bouncer.parsers import (
-        DbtBouncerManifest,
-        DbtBouncerModelBase,
-    )
+
 from dbt_bouncer.utils import clean_path_str
 
 

@@ -8,11 +8,10 @@ from pydantic import Field
 from dbt_bouncer.check_base import BaseCheck
 
 if TYPE_CHECKING:
-    import warnings
-
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", category=UserWarning)
-    from dbt_bouncer.parsers import DbtBouncerExposureBase, DbtBouncerModelBase
+    from dbt_bouncer.artifact_parsers.parsers_common import (
+        DbtBouncerExposureBase,
+        DbtBouncerModelBase,
+    )
 
 
 class CheckExposureOnNonPublicModels(BaseCheck):

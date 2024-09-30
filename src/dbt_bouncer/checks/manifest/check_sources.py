@@ -4,11 +4,11 @@ import re
 from typing import TYPE_CHECKING, List, Literal
 
 if TYPE_CHECKING:
-    from dbt_bouncer.checks.common import NestedDict
-    from dbt_bouncer.parsers import (
+    from dbt_bouncer.artifact_parsers.parsers_common import (
         DbtBouncerModelBase,
         DbtBouncerSourceBase,
     )
+    from dbt_bouncer.checks.common import NestedDict
 
 
 from pydantic import Field
