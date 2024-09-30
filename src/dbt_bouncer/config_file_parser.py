@@ -72,7 +72,7 @@ class DbtBouncerConfBase(BaseModel):
 
 
 class DbtBouncerConfAllCategories(DbtBouncerConfBase):
-    """Base model for the config file contents."""
+    """Config file contents when all categories are used."""
 
     model_config = ConfigDict(extra="forbid")
 
@@ -87,7 +87,7 @@ class DbtBouncerConfAllCategories(DbtBouncerConfBase):
 
 
 class DbtBouncerConfCatalogManifest(DbtBouncerConfBase):
-    """Base model for the config file contents."""
+    """Config file contents when catalog and manifest are used."""
 
     model_config = ConfigDict(extra="forbid")
 
@@ -96,7 +96,7 @@ class DbtBouncerConfCatalogManifest(DbtBouncerConfBase):
 
 
 class DbtBouncerConfCatalogOnly(DbtBouncerConfBase):
-    """Base model for the config file contents."""
+    """Config file contents when catalog only is used."""
 
     model_config = ConfigDict(extra="forbid")
 
@@ -104,7 +104,7 @@ class DbtBouncerConfCatalogOnly(DbtBouncerConfBase):
 
 
 class DbtBouncerConfCatalogRunResults(DbtBouncerConfBase):
-    """Base model for the config file contents."""
+    """Config file contents when catalog and run_results are used."""
 
     model_config = ConfigDict(extra="forbid")
 
@@ -113,7 +113,7 @@ class DbtBouncerConfCatalogRunResults(DbtBouncerConfBase):
 
 
 class DbtBouncerConfManifestOnly(DbtBouncerConfBase):
-    """Base model for the config file contents."""
+    """Config file contents when manifest only is used."""
 
     model_config = ConfigDict(extra="forbid")
 
@@ -121,7 +121,7 @@ class DbtBouncerConfManifestOnly(DbtBouncerConfBase):
 
 
 class DbtBouncerConfManifestRunResults(DbtBouncerConfBase):
-    """Base model for the config file contents."""
+    """Config file contents when manifest and run_results are used."""
 
     model_config = ConfigDict(extra="forbid")
 
@@ -129,8 +129,8 @@ class DbtBouncerConfManifestRunResults(DbtBouncerConfBase):
     run_results_checks: get_check_types(check_type="run_results") = Field(default=[])  # type: ignore[valid-type]
 
 
-class DbtBouncerConftRunResultsOnly(DbtBouncerConfBase):
-    """Base model for the config file contents."""
+class DbtBouncerConfRunResultsOnly(DbtBouncerConfBase):
+    """Config file contents when run_results only is used."""
 
     model_config = ConfigDict(extra="forbid")
 
