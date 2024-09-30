@@ -113,7 +113,6 @@ sh = "^2"
 types-PyYaml = "^6"
 types-tabulate = "^0"
 types-toml = "^0"
-ipykernel = "^6.29.5"
 
 [tool.poetry.group.docs.dependencies]
 mike = "^2"
