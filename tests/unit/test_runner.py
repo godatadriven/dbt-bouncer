@@ -47,7 +47,9 @@ def test_runner_coverage(caplog, tmp_path):
     )
 
     with ctx:
-        from dbt_bouncer.config_file_parser import DbtBouncerConf
+        from dbt_bouncer.config_file_parser import (
+            DbtBouncerConfAllCategories as DbtBouncerConf,
+        )
 
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=UserWarning)
@@ -179,7 +181,9 @@ def test_runner_failure():
     )
 
     with ctx:
-        from dbt_bouncer.config_file_parser import DbtBouncerConf
+        from dbt_bouncer.config_file_parser import (
+            DbtBouncerConfAllCategories as DbtBouncerConf,
+        )
 
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=UserWarning)
@@ -303,7 +307,9 @@ def test_runner_success():
     )
 
     with ctx:
-        from dbt_bouncer.config_file_parser import DbtBouncerConf
+        from dbt_bouncer.config_file_parser import (
+            DbtBouncerConfAllCategories as DbtBouncerConf,
+        )
 
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=UserWarning)
@@ -422,7 +428,9 @@ def test_runner_windows(caplog, tmp_path):
     ctx = MagicMock(obj={"verbosity": 3})
     push_context(ctx)
 
-    from dbt_bouncer.config_file_parser import DbtBouncerConf
+    from dbt_bouncer.config_file_parser import (
+        DbtBouncerConfAllCategories as DbtBouncerConf,
+    )
 
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", category=UserWarning)

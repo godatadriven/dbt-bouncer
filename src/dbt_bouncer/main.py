@@ -95,7 +95,9 @@ def cli(
 
     from dbt_bouncer.config_file_validator import validate_conf
 
-    bouncer_config = validate_conf(config_file_contents=config_file_contents)
+    bouncer_config = validate_conf(
+        check_categories=check_categories, config_file_contents=config_file_contents
+    )
     del config_file_contents
     logging.debug(f"{bouncer_config=}")
 

@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any, ClassVar, Dict, List, Literal, Optional, Union
+from typing import Any, Dict, List, Literal, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field
 from typing_extensions import Annotated
@@ -7,11 +7,20 @@ from typing_extensions import Annotated
 from dbt_bouncer.utils import clean_path_str
 
 
-class DbtBouncerConf(BaseModel):
-    """Base model for the config file contents."""
+def get_check_types(
+    check_type: List[
+        Literal["catalog_checks", "manifest_checks", "run_results_checks"]
+    ],
+) -> List[Any]:
+    """Get the check types from the check categories.
 
-    model_config = ConfigDict(extra="forbid")
+    Args:
+        check_type: List[Literal["catalog_checks", "manifest_checks", "run_results_checks"]]
 
+    Returns:
+        List[str]: The check types.
+
+    """
     from dbt_bouncer.utils import get_check_objects
 
     check_classes: List[Dict[str, Union[Any, Path]]] = [
@@ -21,56 +30,27 @@ class DbtBouncerConf(BaseModel):
         }
         for x in get_check_objects()
     ]
-
-    # Catalog checks
-    catalog_check_classes: ClassVar = [
-        x["class"] for x in check_classes if x["source_file"].parts[-2] == "catalog"
-    ]
-
-    CatalogCheckConfigs: ClassVar = Annotated[
-        Union[tuple(catalog_check_classes)],
-        Field(discriminator="name"),
-    ]
-
-    # Manifest checks
-    manifest_check_classes: ClassVar = [
-        x["class"] for x in check_classes if x["source_file"].parts[-2] == "manifest"
-    ]
-
-    ManifestCheckConfigs: ClassVar = Annotated[
-        Union[tuple(manifest_check_classes)],
-        Field(discriminator="name"),
-    ]
-
-    # Run result checks
-    run_results_check_classes: ClassVar = [
-        x["class"] for x in check_classes if x["source_file"].parts[-2] == "run_results"
-    ]
-
-    RunResultsCheckConfigs: ClassVar = Annotated[
-        Union[tuple(run_results_check_classes)],
-        Field(discriminator="name"),
-    ]
-
-    catalog_checks: List[
+    return List[  # type: ignore[misc, return-value]
         Annotated[
-            CatalogCheckConfigs,
+            Annotated[
+                Union[
+                    tuple(
+                        x["class"]
+                        for x in check_classes
+                        if x["source_file"].parts[-2] == check_type
+                    )
+                ],
+                Field(discriminator="name"),
+            ],
             Field(discriminator="name"),
         ]
-    ] = Field(default=[])
+    ]
 
-    manifest_checks: List[
-        Annotated[
-            ManifestCheckConfigs,
-            Field(discriminator="name"),
-        ]
-    ] = Field(default=[])
-    run_results_checks: List[
-        Annotated[
-            RunResultsCheckConfigs,
-            Field(discriminator="name"),
-        ]
-    ] = Field(default=[])
+
+class DbtBouncerConfBase(BaseModel):
+    """Base model for the config file contents."""
+
+    model_config = ConfigDict(extra="forbid")
 
     custom_checks_dir: Optional[str] = Field(
         default=None,
@@ -89,3 +69,69 @@ class DbtBouncerConf(BaseModel):
         default=None,
         description="Severity of the check, one of 'error' or 'warn'.",
     )
+
+
+class DbtBouncerConfAllCategories(DbtBouncerConfBase):
+    """Base model for the config file contents."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    catalog_checks: get_check_types(check_type="catalog") = Field(default=[])  # type: ignore[valid-type]
+    manifest_checks: get_check_types(check_type="manifest") = Field(default=[])  # type: ignore[valid-type]
+    run_results_checks: get_check_types(check_type="run_results") = Field(default=[])  # type: ignore[valid-type]
+
+    custom_checks_dir: Optional[str] = Field(
+        default=None,
+        description="Path to a directory containing custom checks.",
+    )
+
+
+class DbtBouncerConfCatalogManifest(DbtBouncerConfBase):
+    """Base model for the config file contents."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    catalog_checks: get_check_types(check_type="catalog") = Field(default=[])  # type: ignore[valid-type]
+    manifest_checks: get_check_types(check_type="manifest") = Field(default=[])  # type: ignore[valid-type]
+
+
+class DbtBouncerConfCatalogOnly(DbtBouncerConfBase):
+    """Base model for the config file contents."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    catalog_checks: get_check_types(check_type="catalog") = Field(default=[])  # type: ignore[valid-type]
+
+
+class DbtBouncerConfCatalogRunResults(DbtBouncerConfBase):
+    """Base model for the config file contents."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    catalog_checks: get_check_types(check_type="catalog") = Field(default=[])  # type: ignore[valid-type]
+    run_results_checks: get_check_types(check_type="run_results") = Field(default=[])  # type: ignore[valid-type]
+
+
+class DbtBouncerConfManifestOnly(DbtBouncerConfBase):
+    """Base model for the config file contents."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    manifest_checks: get_check_types(check_type="manifest") = Field(default=[])  # type: ignore[valid-type]
+
+
+class DbtBouncerConfManifestRunResults(DbtBouncerConfBase):
+    """Base model for the config file contents."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    manifest_checks: get_check_types(check_type="manifest") = Field(default=[])  # type: ignore[valid-type]
+    run_results_checks: get_check_types(check_type="run_results") = Field(default=[])  # type: ignore[valid-type]
+
+
+class DbtBouncerConftRunResultsOnly(DbtBouncerConfBase):
+    """Base model for the config file contents."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    run_results_checks: get_check_types(check_type="run_results") = Field(default=[])  # type: ignore[valid-type]

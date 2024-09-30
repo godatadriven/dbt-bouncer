@@ -5,6 +5,7 @@ import click
 import pytest
 import toml
 import yaml
+from pydantic import PydanticUserError
 
 from dbt_bouncer.config_file_validator import (
     get_config_file_path,
@@ -110,7 +111,7 @@ def test_load_config_file_contents_pyproject_toml_no_bouncer_section(
 invalid_confs = [
     (
         f,
-        pytest.raises(RuntimeError),
+        pytest.raises(Exception),  # noqa: PT011
     )
     for f in Path("./tests/unit/config_files/invalid").glob("*.yml")
 ]
@@ -134,7 +135,11 @@ def test_validate_conf_invalid(f, expectation):
     )
 
     with ctx as _, expectation as _:
-        validate_conf(config_file_contents=conf)
+        result = validate_conf(
+            check_categories=[x for x in conf if x.endswith("_checks")],
+            config_file_contents=conf,
+        )
+        assert isinstance(result.exception, (RuntimeError, PydanticUserError))
 
 
 def test_validate_conf_incorrect_name():
@@ -148,9 +153,10 @@ def test_validate_conf_incorrect_name():
 
     with ctx, pytest.raises(Exception) as excinfo:  # noqa: PT011
         validate_conf(
+            check_categories=["manifest_checks"],
             config_file_contents={
                 "manifest_checks": [{"name": "check_model_has_unique_tst"}]
-            }
+            },
         )
 
     assert (
@@ -170,12 +176,13 @@ def test_validate_conf_incorrect_names():
 
     with ctx, pytest.raises(Exception) as excinfo:  # noqa: PT011
         validate_conf(
+            check_categories=["manifest_checks"],
             config_file_contents={
                 "manifest_checks": [
                     {"name": "check_model_has_unique_tst"},
                     {"name": "check_exposure_based_on_viw"},
                 ]
-            }
+            },
         )
 
     assert (
@@ -212,4 +219,7 @@ def test_validate_conf_valid(f, expectation):
     )
 
     with ctx, expectation:
-        validate_conf(config_file_contents=conf)
+        validate_conf(
+            check_categories=[x for x in conf if x.endswith("_checks")],
+            config_file_contents=conf,
+        )

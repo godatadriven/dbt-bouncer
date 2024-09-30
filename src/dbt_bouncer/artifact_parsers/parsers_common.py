@@ -23,7 +23,6 @@ if TYPE_CHECKING:
         DbtBouncerRunResult,
         DbtBouncerRunResultBase,
     )
-    from dbt_bouncer.config_file_validator import DbtBouncerConf
 
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", category=UserWarning)
@@ -32,6 +31,9 @@ if TYPE_CHECKING:
     from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
         Exposures,
         Macros,
+    )
+    from dbt_bouncer.config_file_parser import (
+        DbtBouncerConfAllCategories as DbtBouncerConf,
     )
 
 
@@ -151,9 +153,12 @@ def parse_dbt_artifacts(
     )
 
     # Catalog, must come after manifest is parsed
-    from dbt_bouncer.artifact_parsers.parsers_catalog import parse_catalog
+    if (
+        hasattr(bouncer_config, "catalog_checks")
+        and bouncer_config.catalog_checks != []
+    ):
+        from dbt_bouncer.artifact_parsers.parsers_catalog import parse_catalog
 
-    if bouncer_config.catalog_checks != []:
         project_catalog_nodes, project_catalog_sources = parse_catalog(
             artifact_dir=dbt_artifacts_dir,
             manifest_obj=manifest_obj,
@@ -163,11 +168,14 @@ def parse_dbt_artifacts(
         project_catalog_sources = []
 
     # Run results, must come after manifest is parsed
-    from dbt_bouncer.artifact_parsers.parsers_run_results import (
-        parse_run_results_artifact,
-    )
+    if (
+        hasattr(bouncer_config, "run_results_checks")
+        and bouncer_config.run_results_checks != []
+    ):
+        from dbt_bouncer.artifact_parsers.parsers_run_results import (
+            parse_run_results_artifact,
+        )
 
-    if bouncer_config.run_results_checks != []:
         project_run_results = parse_run_results_artifact(
             artifact_dir=dbt_artifacts_dir,
             manifest_obj=manifest_obj,

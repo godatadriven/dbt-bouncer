@@ -35,11 +35,13 @@ if TYPE_CHECKING:
         DbtBouncerSource,
         DbtBouncerTest,
     )
-    from dbt_bouncer.config_file_validator import DbtBouncerConf
+    from dbt_bouncer.config_file_parser import (
+        DbtBouncerConfAllCategories as DbtBouncerConf,
+    )
 
 
 def runner(
-    bouncer_config: DbtBouncerConf,
+    bouncer_config: "DbtBouncerConf",
     catalog_nodes: List[DbtBouncerCatalogNode],
     catalog_sources: List[DbtBouncerCatalogNode],
     check_categories: List[str],
