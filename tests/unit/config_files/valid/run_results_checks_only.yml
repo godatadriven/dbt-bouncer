@@ -1,0 +1,8 @@
+dbt_artifacts_dir: dbt_project/target
+
+run_results_checks:
+  # Not a good idea, here for demonstration purposes only
+  - name: check_run_results_max_execution_time
+    include: ^models/staging
+    exclude: ^models/staging/crm
+    max_execution_time_seconds: 10
