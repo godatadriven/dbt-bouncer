@@ -19,12 +19,13 @@ with warnings.catch_warnings():
         RunResultOutput as RunResultOutput_v5,
     )
     from dbt_artifacts_parser.parsers.run_results.run_results_v5 import RunResultsV5
-    from dbt_artifacts_parser.parsers.run_results.run_results_v6 import (
-        Result as RunResultOutput_v6,
-    )
-    from dbt_artifacts_parser.parsers.run_results.run_results_v6 import (
-        RunResultsV6,
-    )
+
+from dbt_bouncer.artifact_parsers.dbt_cloud.run_results_latest import (
+    Result as RunResultOutput_Latest,
+)
+from dbt_bouncer.artifact_parsers.dbt_cloud.run_results_latest import (
+    RunResultsLatest,
+)
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -34,7 +35,7 @@ if TYPE_CHECKING:
 from dbt_bouncer.artifact_parsers.parsers_common import load_dbt_artifact
 
 DbtBouncerRunResultBase = Union[
-    RunResultOutput_v4, RunResultOutput_v5, RunResultOutput_v6
+    RunResultOutput_v4, RunResultOutput_v5, RunResultOutput_Latest
 ]
 
 
@@ -48,7 +49,7 @@ class DbtBouncerRunResult(BaseModel):
 
 def parse_run_results(
     run_results: Dict[str, Any],
-) -> Union[RunResultsV4, RunResultsV5, RunResultsV6]:
+) -> Union[RunResultsV4, RunResultsV5, RunResultsLatest]:
     """Parse run-results.json.
 
     Args:
@@ -58,7 +59,7 @@ def parse_run_results(
         ValueError: If the schema version is not supported.
 
     Returns:
-        Union[RunResultsV4, RunResultsV5, RunResultsV6]:
+        Union[RunResultsV4, RunResultsV5, RunResultsLatest]:
 
     """
     dbt_schema_version = run_results["metadata"]["dbt_schema_version"]
@@ -67,7 +68,7 @@ def parse_run_results(
     elif dbt_schema_version == "https://schemas.getdbt.com/dbt/run-results/v5.json":
         return RunResultsV5(**run_results)
     elif dbt_schema_version == "https://schemas.getdbt.com/dbt/run-results/v6.json":
-        return RunResultsV6(**run_results)
+        return RunResultsLatest(**run_results)
     raise ValueError("Not a manifest.json")
 
 
@@ -81,7 +82,7 @@ def parse_run_results_artifact(
         List[DbtBouncerRunResult]: A list of DbtBouncerRunResult objects.
 
     """
-    run_results_obj: Union[RunResultsV4, RunResultsV5, RunResultsV6] = (
+    run_results_obj: Union[RunResultsV4, RunResultsV5, RunResultsLatest] = (
         load_dbt_artifact(
             artifact_name="run_results.json",
             dbt_artifacts_dir=artifact_dir,
