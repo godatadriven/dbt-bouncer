@@ -2544,13 +2544,13 @@ files = [
 
 [[package]]
 name = "sh"
-version = "2.0.7"
+version = "2.1.0"
 description = "Python subprocess replacement"
 optional = false
 python-versions = "<4.0,>=3.8.1"
 files = [
-    {file = "sh-2.0.7-py3-none-any.whl", hash = "sha256:2f2f79a65abd00696cf2e9ad26508cf8abb6dba5745f40255f1c0ded2876926d"},
-    {file = "sh-2.0.7.tar.gz", hash = "sha256:029d45198902bfb967391eccfd13a88d92f7cebd200411e93f99ebacc6afbb35"},
+    {file = "sh-2.1.0-py3-none-any.whl", hash = "sha256:bf5e44178dd96a542126c2774e9b7ab1d89bfe0e2ef84d92e6d0ed7358d63d01"},
+    {file = "sh-2.1.0.tar.gz", hash = "sha256:7e27301c574bec8ca5bf6f211851357526455ee97cd27a7c4c6cc5e2375399cb"},
 ]
 
 [[package]]
