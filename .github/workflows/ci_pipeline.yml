@@ -29,7 +29,7 @@ jobs:
                 fetch-depth: "0"
 
             - name: checkout-merge
-              uses: check-spelling/checkout-merge@v0.0.5
+              uses: check-spelling/checkout-merge@v0.0.6
 
             - name: Determine python version
               id: python-version
@@ -75,7 +75,7 @@ jobs:
 
             - name: checkout-merge
               if: matrix.operating-system != 'windows-latest'
-              uses: check-spelling/checkout-merge@v0.0.5
+              uses: check-spelling/checkout-merge@v0.0.6
 
             - name: Setup Python
               uses: ./.github/actions/setup_python_env
@@ -129,7 +129,7 @@ jobs:
               uses: actions/checkout@v4
 
             - name: checkout-merge
-              uses: check-spelling/checkout-merge@v0.0.5
+              uses: check-spelling/checkout-merge@v0.0.6
 
             - name: Determine python version
               id: python-version
@@ -176,7 +176,7 @@ jobs:
             uses: actions/checkout@v4
 
           - name: checkout-merge
-            uses: check-spelling/checkout-merge@v0.0.5
+            uses: check-spelling/checkout-merge@v0.0.6
 
           - name: Determine python version
             id: python-version
@@ -202,7 +202,7 @@ jobs:
             uses: actions/checkout@v4
 
           - name: checkout-merge
-            uses: check-spelling/checkout-merge@v0.0.5
+            uses: check-spelling/checkout-merge@v0.0.6
 
           - name: Determine python version
             id: python-version
