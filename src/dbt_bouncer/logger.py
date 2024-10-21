@@ -48,7 +48,7 @@ def configure_console_logging(verbosity: int):
     logger.setLevel(logging.DEBUG)  # handlers filter the level
 
     # Override via env var
-    if os.getenv("LOG_LEVEL") is not None:
+    if os.getenv("LOG_LEVEL") == "DEBUG":
         loglevel = logging.DEBUG
     else:
         loglevel = logging.INFO if verbosity == 0 else max(2 - verbosity, 0) * 10
