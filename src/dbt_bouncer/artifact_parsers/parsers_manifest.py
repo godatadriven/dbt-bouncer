@@ -1,6 +1,3 @@
-# TODO Remove after this program no longer support Python 3.8.*
-from __future__ import annotations
-
 import logging
 import warnings
 from enum import Enum

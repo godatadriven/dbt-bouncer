@@ -1,8 +1,5 @@
 """Assemble and run all checks."""
 
-# TODO Remove after this program no longer support Python 3.8.*
-from __future__ import annotations
-
 import copy
 import json
 import logging
@@ -42,20 +39,20 @@ if TYPE_CHECKING:
 
 def runner(
     bouncer_config: "DbtBouncerConf",
-    catalog_nodes: List[DbtBouncerCatalogNode],
-    catalog_sources: List[DbtBouncerCatalogNode],
+    catalog_nodes: List["DbtBouncerCatalogNode"],
+    catalog_sources: List["DbtBouncerCatalogNode"],
     check_categories: List[str],
     create_pr_comment_file: bool,
-    exposures: List[Exposures],
-    macros: List[Macros],
-    manifest_obj: DbtBouncerManifest,
-    models: List[DbtBouncerModel],
+    exposures: List["Exposures"],
+    macros: List["Macros"],
+    manifest_obj: "DbtBouncerManifest",
+    models: List["DbtBouncerModel"],
     output_file: Union[None, Path],
-    run_results: List[DbtBouncerRunResult],
-    semantic_models: List[DbtBouncerSemanticModel],
-    sources: List[DbtBouncerSource],
-    tests: List[DbtBouncerTest],
-    unit_tests: List[UnitTests],
+    run_results: List["DbtBouncerRunResult"],
+    semantic_models: List["DbtBouncerSemanticModel"],
+    sources: List["DbtBouncerSource"],
+    tests: List["DbtBouncerTest"],
+    unit_tests: List["UnitTests"],
 ) -> tuple[int, List[Any]]:
     """Run dbt-bouncer checks.
 

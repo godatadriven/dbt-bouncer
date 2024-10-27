@@ -1,6 +1,3 @@
-# TODO Remove after this program no longer support Python 3.8.*
-from __future__ import annotations
-
 import logging
 import warnings
 from typing import TYPE_CHECKING, List
@@ -12,8 +9,8 @@ from dbt_bouncer.utils import clean_path_str
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
     from dbt_artifacts_parser.parsers.catalog.catalog_v1 import (
-        CatalogTable,  # noqa: TCH002
-        CatalogV1,  # noqa: TCH002
+        CatalogTable,
+        CatalogV1,
     )
 if TYPE_CHECKING:
     from pathlib import Path
@@ -33,7 +30,7 @@ class DbtBouncerCatalogNode(BaseModel):
 
 
 def parse_catalog(
-    artifact_dir: Path,
+    artifact_dir: "Path",
     manifest_obj: "DbtBouncerManifest",
 ) -> tuple[List[DbtBouncerCatalogNode], List[DbtBouncerCatalogNode]]:
     """Parse the catalog.json artifact.

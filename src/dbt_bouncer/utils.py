@@ -1,15 +1,11 @@
 """Re-usable functions for dbt-bouncer."""
 
-# TODO Remove after this program no longer support Python 3.8.*
-from __future__ import annotations
-
 import importlib
 import logging
 import os
 import re
 import sys
 from functools import lru_cache
-from importlib.machinery import SourceFileLoader
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, List, Mapping, Type
 
@@ -106,14 +102,23 @@ def flatten(structure: Any, key: str = "", path: str = "", flattened=None):
 
 
 @lru_cache
-def get_check_objects() -> List[Type[BaseCheck]]:
+def get_check_objects() -> List[Type["BaseCheck"]]:
     """Get list of Check* classes and check_* functions.
 
     Returns:
         List[Type[BaseCheck]]: List of Check* classes.
 
     """
-    check_objects = []
+
+    def import_check(check_class_name: str, check_file_path: str) -> None:
+        """Import the Check* class to locals()."""
+        spec = importlib.util.spec_from_file_location(check_class_name, check_file_path)
+        module = importlib.util.module_from_spec(spec)  # type: ignore[arg-type]
+        spec.loader.exec_module(module)  # type: ignore[union-attr]
+        sys._getframe().f_locals[check_class_name] = module
+        check_objects.append(locals()[check_class_name])
+
+    check_objects: List[Type["BaseCheck"]] = []
     check_files = [
         f for f in (Path(__file__).parent / "checks").glob("*/*.py") if f.is_file()
     ]
@@ -124,11 +129,7 @@ def get_check_objects() -> List[Type[BaseCheck]]:
         imported_check_file = importlib.import_module(check_qual_name)
 
         for obj in [i for i in dir(imported_check_file) if i.startswith("Check")]:
-            loader = SourceFileLoader(obj, check_file.absolute().__str__())
-            spec = importlib.util.spec_from_loader(loader.name, loader)
-            locals()[obj] = importlib.util.module_from_spec(spec)  # type: ignore[arg-type]
-            loader.exec_module(locals()[obj])
-            check_objects.append(locals()[obj])
+            import_check(obj, check_file.absolute().__str__())
 
     config_file_path = click.get_current_context().obj["config_file_path"]
     custom_checks_dir = click.get_current_context().obj["custom_checks_dir"]
@@ -147,11 +148,7 @@ def get_check_objects() -> List[Type[BaseCheck]]:
             spec.loader.exec_module(foo)  # type: ignore[union-attr]
             for obj in dir(foo):
                 if obj.startswith("Check"):
-                    loader = SourceFileLoader(obj, check_file.absolute().__str__())
-                    spec = importlib.util.spec_from_loader(loader.name, loader)
-                    locals()[obj] = importlib.util.module_from_spec(spec)  # type: ignore[arg-type]
-                    loader.exec_module(locals()[obj])
-                    check_objects.append(locals()[obj])
+                    import_check(obj, check_file.absolute().__str__())
 
     logging.debug(f"Loaded {len(check_objects)} `Check*` classes.")
 
