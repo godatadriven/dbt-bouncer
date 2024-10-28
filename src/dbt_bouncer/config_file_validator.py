@@ -1,6 +1,5 @@
 import logging
 import re
-import sys
 from pathlib import Path, PurePath
 from typing import TYPE_CHECKING, Any, Dict, List, Literal, Mapping
 
@@ -215,35 +214,31 @@ def validate_conf(
     try:
         return DbtBouncerConf(**config_file_contents)
     except ValidationError as e:
-        if sys.version_info < (3, 13):
-            # Levenshtein does not work correctly at this time in Python 3.13
-            from Levenshtein import distance
+        from Levenshtein import distance
 
-            error_message: List[str] = []
-            for error in e.errors():
-                if (
-                    re.compile(
-                        r"Input tag \S* found using 'name' does not match any of the expected tags: [\S\s]*",
-                        flags=re.DOTALL,
-                    ).match(error["msg"])
-                    is not None
-                ):
-                    incorrect_name = error["msg"][
-                        error["msg"].find("tag") + 5 : error["msg"].find("found using")
-                        - 2
-                    ]
-                    accepted_names = error["msg"][
-                        error["msg"].find("tags:") + 7 : -1
-                    ].split("', '")
-                    min_dist = 100
-                    for name in accepted_names:
-                        dist = distance(name, incorrect_name)
-                        if dist < min_dist:
-                            min_dist = dist
-                            min_name = name
-                    error_message.append(
-                        f"{len(error_message) + 1}. Check '{incorrect_name}' does not match any of the expected checks. Did you mean '{min_name}'?"
-                    )
+        error_message: List[str] = []
+        for error in e.errors():
+            if (
+                re.compile(
+                    r"Input tag \S* found using 'name' does not match any of the expected tags: [\S\s]*",
+                    flags=re.DOTALL,
+                ).match(error["msg"])
+                is not None
+            ):
+                incorrect_name = error["msg"][
+                    error["msg"].find("tag") + 5 : error["msg"].find("found using") - 2
+                ]
+                accepted_names = error["msg"][
+                    error["msg"].find("tags:") + 7 : -1
+                ].split("', '")
+                min_dist = 100
+                for name in accepted_names:
+                    dist = distance(name, incorrect_name)
+                    if dist < min_dist:
+                        min_dist = dist
+                        min_name = name
+                error_message.append(
+                    f"{len(error_message) + 1}. Check '{incorrect_name}' does not match any of the expected checks. Did you mean '{min_name}'?"
+                )
 
-            raise RuntimeError("\n".join(error_message)) from e
-        raise e
+        raise RuntimeError("\n".join(error_message)) from e

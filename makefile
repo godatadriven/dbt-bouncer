@@ -12,7 +12,7 @@ build-pex:
 		--platform macosx_11_0_x86_64-cp-310-cp310 \
 		--platform macosx_11_0_x86_64-cp-311-cp311 \
 		--platform macosx_11_0_x86_64-cp-312-cp312 \
-		--platform macosx_11_0_x86_64-cp-313-cp313 \
+		--platform macosx_10_13_x86_64-cp-313-cp313 \
 		--platform manylinux2014_x86_64-cp-39-cp39 \
 		--platform manylinux2014_x86_64-cp-310-cp310 \
 		--platform manylinux2014_x86_64-cp-311-cp311 \

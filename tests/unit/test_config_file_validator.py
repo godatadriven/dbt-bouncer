@@ -1,4 +1,3 @@
-import sys
 from contextlib import nullcontext as does_not_raise
 from pathlib import Path
 
@@ -143,10 +142,6 @@ def test_validate_conf_invalid(f, expectation):
         assert isinstance(result.exception, (RuntimeError, PydanticUserError))
 
 
-@pytest.mark.skipif(
-    sys.version_info >= (3, 13),
-    reason="Levenshtein does not work as desired for python 3.13.",
-)
 def test_validate_conf_incorrect_name():
     ctx = click.Context(
         cli,
@@ -170,10 +165,6 @@ def test_validate_conf_incorrect_name():
     )
 
 
-@pytest.mark.skipif(
-    sys.version_info >= (3, 13),
-    reason="Levenshtein does not work as desired for python 3.13.",
-)
 def test_validate_conf_incorrect_names():
     ctx = click.Context(
         cli,
