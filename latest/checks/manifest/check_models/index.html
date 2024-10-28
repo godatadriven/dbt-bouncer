@@ -1042,6 +1042,196 @@
 
 
 
+
+
+
+
+<p><span class="doc-section-title">Classes:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="manifest.check_models.CheckModelAccess" href="#manifest.check_models.CheckModelAccess">CheckModelAccess</a></code></td>
+            <td>
+              <div class="doc-md-description">
+                <p>Models must have the specified access attribute. Requires dbt 1.7+.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="manifest.check_models.CheckModelCodeDoesNotContainRegexpPattern" href="#manifest.check_models.CheckModelCodeDoesNotContainRegexpPattern">CheckModelCodeDoesNotContainRegexpPattern</a></code></td>
+            <td>
+              <div class="doc-md-description">
+                <p>The raw code for a model must not match the specified regexp pattern.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="manifest.check_models.CheckModelContractsEnforcedForPublicModel" href="#manifest.check_models.CheckModelContractsEnforcedForPublicModel">CheckModelContractsEnforcedForPublicModel</a></code></td>
+            <td>
+              <div class="doc-md-description">
+                <p>Public models must have contracts enforced.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="manifest.check_models.CheckModelDependsOnMultipleSources" href="#manifest.check_models.CheckModelDependsOnMultipleSources">CheckModelDependsOnMultipleSources</a></code></td>
+            <td>
+              <div class="doc-md-description">
+                <p>Models cannot reference more than one source.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="manifest.check_models.CheckModelDescriptionPopulated" href="#manifest.check_models.CheckModelDescriptionPopulated">CheckModelDescriptionPopulated</a></code></td>
+            <td>
+              <div class="doc-md-description">
+                <p>Models must have a populated description.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="manifest.check_models.CheckModelDirectories" href="#manifest.check_models.CheckModelDirectories">CheckModelDirectories</a></code></td>
+            <td>
+              <div class="doc-md-description">
+                <p>Only specified sub-directories are permitted.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="manifest.check_models.CheckModelDocumentedInSameDirectory" href="#manifest.check_models.CheckModelDocumentedInSameDirectory">CheckModelDocumentedInSameDirectory</a></code></td>
+            <td>
+              <div class="doc-md-description">
+                <p>Models must be documented in the same directory where they are defined (i.e. <code>.yml</code> and <code>.sql</code> files are in the same directory).</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="manifest.check_models.CheckModelHasContractsEnforced" href="#manifest.check_models.CheckModelHasContractsEnforced">CheckModelHasContractsEnforced</a></code></td>
+            <td>
+              <div class="doc-md-description">
+                <p>Model must have contracts enforced.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="manifest.check_models.CheckModelHasMetaKeys" href="#manifest.check_models.CheckModelHasMetaKeys">CheckModelHasMetaKeys</a></code></td>
+            <td>
+              <div class="doc-md-description">
+                <p>The <code>meta</code> config for models must have the specified keys.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="manifest.check_models.CheckModelHasNoUpstreamDependencies" href="#manifest.check_models.CheckModelHasNoUpstreamDependencies">CheckModelHasNoUpstreamDependencies</a></code></td>
+            <td>
+              <div class="doc-md-description">
+                <p>Identify if models have no upstream dependencies as this likely indicates hard-coded tables references.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="manifest.check_models.CheckModelHasTags" href="#manifest.check_models.CheckModelHasTags">CheckModelHasTags</a></code></td>
+            <td>
+              <div class="doc-md-description">
+                <p>Models must have the specified tags.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="manifest.check_models.CheckModelHasUniqueTest" href="#manifest.check_models.CheckModelHasUniqueTest">CheckModelHasUniqueTest</a></code></td>
+            <td>
+              <div class="doc-md-description">
+                <p>Models must have a test for uniqueness of a column.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="manifest.check_models.CheckModelHasUnitTests" href="#manifest.check_models.CheckModelHasUnitTests">CheckModelHasUnitTests</a></code></td>
+            <td>
+              <div class="doc-md-description">
+                <p>Models must have more than the specified number of unit tests.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="manifest.check_models.CheckModelMaxChainedViews" href="#manifest.check_models.CheckModelMaxChainedViews">CheckModelMaxChainedViews</a></code></td>
+            <td>
+              <div class="doc-md-description">
+                <p>Models cannot have more than the specified number of upstream dependents that are not tables.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="manifest.check_models.CheckModelMaxFanout" href="#manifest.check_models.CheckModelMaxFanout">CheckModelMaxFanout</a></code></td>
+            <td>
+              <div class="doc-md-description">
+                <p>Models cannot have more than the specified number of downstream models.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="manifest.check_models.CheckModelMaxNumberOfLines" href="#manifest.check_models.CheckModelMaxNumberOfLines">CheckModelMaxNumberOfLines</a></code></td>
+            <td>
+              <div class="doc-md-description">
+                <p>Models may not have more than the specified number of lines.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="manifest.check_models.CheckModelMaxUpstreamDependencies" href="#manifest.check_models.CheckModelMaxUpstreamDependencies">CheckModelMaxUpstreamDependencies</a></code></td>
+            <td>
+              <div class="doc-md-description">
+                <p>Limit the number of upstream dependencies a model has.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="manifest.check_models.CheckModelNames" href="#manifest.check_models.CheckModelNames">CheckModelNames</a></code></td>
+            <td>
+              <div class="doc-md-description">
+                <p>Models must have a name that matches the supplied regex.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="manifest.check_models.CheckModelPropertyFileLocation" href="#manifest.check_models.CheckModelPropertyFileLocation">CheckModelPropertyFileLocation</a></code></td>
+            <td>
+              <div class="doc-md-description">
+                <p>Model properties files must follow the guidance provided by dbt <a href="https://docs.getdbt.com/best-practices/how-we-structure/1-guide-overview">here</a>.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="manifest.check_models.CheckModelsDocumentationCoverage" href="#manifest.check_models.CheckModelsDocumentationCoverage">CheckModelsDocumentationCoverage</a></code></td>
+            <td>
+              <div class="doc-md-description">
+                <p>Set the minimum percentage of models that have a populated description.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="manifest.check_models.CheckModelsTestCoverage" href="#manifest.check_models.CheckModelsTestCoverage">CheckModelsTestCoverage</a></code></td>
+            <td>
+              <div class="doc-md-description">
+                <p>Set the minimum percentage of models that have at least one test.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+
+
+
+
+
   <div class="doc doc-children">
 
 
@@ -1080,7 +1270,9 @@
       </thead>
       <tbody>
           <tr class="doc-section-item">
-            <td><code>access</code></td>
+            <td>
+                <code>access</code>
+            </td>
             <td>
                   <code><span title="typing.Literal">Literal</span>[&#39;private&#39;, &#39;protected&#39;, &#39;public&#39;]</code>
             </td>
@@ -1175,6 +1367,15 @@
 </span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">      </span><span class="nt">access</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">protected</span>
 </span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">      </span><span class="nt">include</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">^models/staging</span>
 </span></code></pre></div></p>
+
+
+
+
+
+
+
+
+
 
               <details class="quote">
                 <summary>Source code in <code>src/dbt_bouncer/checks/manifest/check_models.py</code></summary>
@@ -1309,7 +1510,9 @@
       </thead>
       <tbody>
           <tr class="doc-section-item">
-            <td><code>regexp_pattern</code></td>
+            <td>
+                <code>regexp_pattern</code>
+            </td>
             <td>
                   <code>str</code>
             </td>
@@ -1397,6 +1600,15 @@
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_model_code_does_not_contain_regexp_pattern</span>
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">      </span><span class="nt">regexp_pattern</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">.*[i][f][n][u][l][l].*</span>
 </span></code></pre></div></p>
+
+
+
+
+
+
+
+
+
 
               <details class="quote">
                 <summary>Source code in <code>src/dbt_bouncer/checks/manifest/check_models.py</code></summary>
@@ -1581,6 +1793,15 @@
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_model_contract_enforced_for_public_model</span>
 </span></code></pre></div></p>
 
+
+
+
+
+
+
+
+
+
               <details class="quote">
                 <summary>Source code in <code>src/dbt_bouncer/checks/manifest/check_models.py</code></summary>
                 <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-107">107</a></span>
@@ -1690,7 +1911,9 @@
       </thead>
       <tbody>
           <tr class="doc-section-item">
-            <td><code>model</code></td>
+            <td>
+                <code>model</code>
+            </td>
             <td>
                   <code><span title="dbt_bouncer.artifact_parsers.parsers_common.DbtBouncerModelBase">DbtBouncerModelBase</span></code>
             </td>
@@ -1754,6 +1977,15 @@
     <div class="language-yaml highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">manifest_checks</span><span class="p">:</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_model_depends_on_multiple_sources</span>
 </span></code></pre></div></p>
+
+
+
+
+
+
+
+
+
 
               <details class="quote">
                 <summary>Source code in <code>src/dbt_bouncer/checks/manifest/check_models.py</code></summary>
@@ -1926,6 +2158,15 @@
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_model_description_populated</span>
 </span></code></pre></div></p>
 
+
+
+
+
+
+
+
+
+
               <details class="quote">
                 <summary>Source code in <code>src/dbt_bouncer/checks/manifest/check_models.py</code></summary>
                 <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-169">169</a></span>
@@ -2033,7 +2274,9 @@
       </thead>
       <tbody>
           <tr class="doc-section-item">
-            <td><code>include</code></td>
+            <td>
+                <code>include</code>
+            </td>
             <td>
                   <code>str</code>
             </td>
@@ -2047,7 +2290,9 @@
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code>permitted_sub_directories</code></td>
+            <td>
+                <code>permitted_sub_directories</code>
+            </td>
             <td>
                   <code><span title="typing.List">List</span>[str]</code>
             </td>
@@ -2100,6 +2345,15 @@
 </span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">crm</span>
 </span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">payments</span>
 </span></code></pre></div></p>
+
+
+
+
+
+
+
+
+
 
               <details class="quote">
                 <summary>Source code in <code>src/dbt_bouncer/checks/manifest/check_models.py</code></summary>
@@ -2308,6 +2562,15 @@
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_model_documented_in_same_directory</span>
 </span></code></pre></div></p>
 
+
+
+
+
+
+
+
+
+
               <details class="quote">
                 <summary>Source code in <code>src/dbt_bouncer/checks/manifest/check_models.py</code></summary>
                 <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-248">248</a></span>
@@ -2498,6 +2761,15 @@
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">      </span><span class="nt">include</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">^models/marts</span>
 </span></code></pre></div></p>
 
+
+
+
+
+
+
+
+
+
               <details class="quote">
                 <summary>Source code in <code>src/dbt_bouncer/checks/manifest/check_models.py</code></summary>
                 <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-289">289</a></span>
@@ -2607,7 +2879,9 @@
       </thead>
       <tbody>
           <tr class="doc-section-item">
-            <td><code>keys</code></td>
+            <td>
+                <code>keys</code>
+            </td>
             <td>
                   <code><span title="dbt_bouncer.checks.common.NestedDict">NestedDict</span></code>
             </td>
@@ -2621,7 +2895,9 @@
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code>model</code></td>
+            <td>
+                <code>model</code>
+            </td>
             <td>
                   <code><span title="dbt_bouncer.artifact_parsers.parsers_common.DbtBouncerModelBase">DbtBouncerModelBase</span></code>
             </td>
@@ -2688,6 +2964,15 @@
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">maturity</span>
 </span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">owner</span>
 </span></code></pre></div></p>
+
+
+
+
+
+
+
+
+
 
               <details class="quote">
                 <summary>Source code in <code>src/dbt_bouncer/checks/manifest/check_models.py</code></summary>
@@ -2872,6 +3157,15 @@
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_model_has_no_upstream_dependencies</span>
 </span></code></pre></div></p>
 
+
+
+
+
+
+
+
+
+
               <details class="quote">
                 <summary>Source code in <code>src/dbt_bouncer/checks/manifest/check_models.py</code></summary>
                 <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-357">357</a></span>
@@ -2979,7 +3273,9 @@
       </thead>
       <tbody>
           <tr class="doc-section-item">
-            <td><code>model</code></td>
+            <td>
+                <code>model</code>
+            </td>
             <td>
                   <code><span title="dbt_bouncer.artifact_parsers.parsers_common.DbtBouncerModelBase">DbtBouncerModelBase</span></code>
             </td>
@@ -2993,7 +3289,9 @@
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code>tags</code></td>
+            <td>
+                <code>tags</code>
+            </td>
             <td>
                   <code><span title="typing.List">List</span>[str]</code>
             </td>
@@ -3060,6 +3358,15 @@
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tag_1</span>
 </span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tag_2</span>
 </span></code></pre></div></p>
+
+
+
+
+
+
+
+
+
 
               <details class="quote">
                 <summary>Source code in <code>src/dbt_bouncer/checks/manifest/check_models.py</code></summary>
@@ -3180,7 +3487,9 @@
       </thead>
       <tbody>
           <tr class="doc-section-item">
-            <td><code>accepted_uniqueness_tests</code></td>
+            <td>
+                <code>accepted_uniqueness_tests</code>
+            </td>
             <td>
                   <code><span title="typing.Optional">Optional</span>[<span title="typing.List">List</span>[str]]</code>
             </td>
@@ -3194,7 +3503,9 @@
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code>model</code></td>
+            <td>
+                <code>model</code>
+            </td>
             <td>
                   <code><span title="dbt_bouncer.artifact_parsers.parsers_common.DbtBouncerModelBase">DbtBouncerModelBase</span></code>
             </td>
@@ -3208,7 +3519,9 @@
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code>tests</code></td>
+            <td>
+                <code>tests</code>
+            </td>
             <td>
                   <code><span title="typing.List">List</span>[<span title="dbt_bouncer.artifact_parsers.parsers_common.DbtBouncerTestBase">DbtBouncerTestBase</span>]</code>
             </td>
@@ -3281,6 +3594,15 @@
 </span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_custom_uniqueness_test</span>
 </span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unique</span>
 </span></code></pre></div></p>
+
+
+
+
+
+
+
+
+
 
               <details class="quote">
                 <summary>Source code in <code>src/dbt_bouncer/checks/manifest/check_models.py</code></summary>
@@ -3441,7 +3763,9 @@
       </thead>
       <tbody>
           <tr class="doc-section-item">
-            <td><code>min_number_of_unit_tests</code></td>
+            <td>
+                <code>min_number_of_unit_tests</code>
+            </td>
             <td>
                   <code><span title="typing.Optional">Optional</span>[int]</code>
             </td>
@@ -3556,6 +3880,15 @@
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_model_has_unit_tests</span>
 </span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">      </span><span class="nt">min_number_of_unit_tests</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
 </span></code></pre></div></p>
+
+
+
+
+
+
+
+
+
 
               <details class="quote">
                 <summary>Source code in <code>src/dbt_bouncer/checks/manifest/check_models.py</code></summary>
@@ -3730,7 +4063,9 @@
       </thead>
       <tbody>
           <tr class="doc-section-item">
-            <td><code>materializations_to_include</code></td>
+            <td>
+                <code>materializations_to_include</code>
+            </td>
             <td>
                   <code><span title="typing.Optional">Optional</span>[<span title="typing.List">List</span>[str]]</code>
             </td>
@@ -3744,7 +4079,9 @@
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code>max_chained_views</code></td>
+            <td>
+                <code>max_chained_views</code>
+            </td>
             <td>
                   <code><span title="typing.Optional">Optional</span>[int]</code>
             </td>
@@ -3848,6 +4185,15 @@
 </span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">view</span>
 </span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">      </span><span class="nt">max_chained_views</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
 </span></code></pre></div></p>
+
+
+
+
+
+
+
+
+
 
               <details class="quote">
                 <summary>Source code in <code>src/dbt_bouncer/checks/manifest/check_models.py</code></summary>
@@ -4118,7 +4464,9 @@
       </thead>
       <tbody>
           <tr class="doc-section-item">
-            <td><code>max_downstream_models</code></td>
+            <td>
+                <code>max_downstream_models</code>
+            </td>
             <td>
                   <code><span title="typing.Optional">Optional</span>[int]</code>
             </td>
@@ -4215,6 +4563,15 @@
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_model_max_fanout</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">      </span><span class="nt">max_downstream_models</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
 </span></code></pre></div></p>
+
+
+
+
+
+
+
+
+
 
               <details class="quote">
                 <summary>Source code in <code>src/dbt_bouncer/checks/manifest/check_models.py</code></summary>
@@ -4345,7 +4702,9 @@
       </thead>
       <tbody>
           <tr class="doc-section-item">
-            <td><code>max_number_of_lines</code></td>
+            <td>
+                <code>max_number_of_lines</code>
+            </td>
             <td>
                   <code>int</code>
             </td>
@@ -4359,7 +4718,9 @@
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code>model</code></td>
+            <td>
+                <code>model</code>
+            </td>
             <td>
                   <code><span title="dbt_bouncer.artifact_parsers.parsers_common.DbtBouncerModelBase">DbtBouncerModelBase</span></code>
             </td>
@@ -4427,6 +4788,15 @@
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_model_max_number_of_lines</span>
 </span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">      </span><span class="nt">max_number_of_lines</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">150</span>
 </span></code></pre></div></p>
+
+
+
+
+
+
+
+
+
 
               <details class="quote">
                 <summary>Source code in <code>src/dbt_bouncer/checks/manifest/check_models.py</code></summary>
@@ -4555,7 +4925,9 @@
       </thead>
       <tbody>
           <tr class="doc-section-item">
-            <td><code>max_upstream_macros</code></td>
+            <td>
+                <code>max_upstream_macros</code>
+            </td>
             <td>
                   <code><span title="typing.Optional">Optional</span>[int]</code>
             </td>
@@ -4569,7 +4941,9 @@
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code>max_upstream_models</code></td>
+            <td>
+                <code>max_upstream_models</code>
+            </td>
             <td>
                   <code><span title="typing.Optional">Optional</span>[int]</code>
             </td>
@@ -4583,7 +4957,9 @@
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code>max_upstream_sources</code></td>
+            <td>
+                <code>max_upstream_sources</code>
+            </td>
             <td>
                   <code><span title="typing.Optional">Optional</span>[int]</code>
             </td>
@@ -4670,6 +5046,15 @@
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_model_max_upstream_dependencies</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">      </span><span class="nt">max_upstream_models</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
 </span></code></pre></div></p>
+
+
+
+
+
+
+
+
+
 
               <details class="quote">
                 <summary>Source code in <code>src/dbt_bouncer/checks/manifest/check_models.py</code></summary>
@@ -4836,7 +5221,9 @@
       </thead>
       <tbody>
           <tr class="doc-section-item">
-            <td><code>model_name_pattern</code></td>
+            <td>
+                <code>model_name_pattern</code>
+            </td>
             <td>
                   <code>str</code>
             </td>
@@ -4927,6 +5314,15 @@
 </span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">      </span><span class="nt">include</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">^models/staging</span>
 </span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">      </span><span class="nt">model_name_pattern</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">^stg_</span>
 </span></code></pre></div></p>
+
+
+
+
+
+
+
+
+
 
               <details class="quote">
                 <summary>Source code in <code>src/dbt_bouncer/checks/manifest/check_models.py</code></summary>
@@ -5059,7 +5455,9 @@
       </thead>
       <tbody>
           <tr class="doc-section-item">
-            <td><code>model</code></td>
+            <td>
+                <code>model</code>
+            </td>
             <td>
                   <code><span title="dbt_bouncer.artifact_parsers.parsers_common.DbtBouncerModelBase">DbtBouncerModelBase</span></code>
             </td>
@@ -5123,6 +5521,15 @@
     <div class="language-yaml highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">manifest_checks</span><span class="p">:</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_model_property_file_location</span>
 </span></code></pre></div></p>
+
+
+
+
+
+
+
+
+
 
               <details class="quote">
                 <summary>Source code in <code>src/dbt_bouncer/checks/manifest/check_models.py</code></summary>
@@ -5269,7 +5676,9 @@
       </thead>
       <tbody>
           <tr class="doc-section-item">
-            <td><code>min_model_documentation_coverage_pct</code></td>
+            <td>
+                <code>min_model_documentation_coverage_pct</code>
+            </td>
             <td>
                   <code>float</code>
             </td>
@@ -5334,6 +5743,15 @@
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_model_documentation_coverage</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">      </span><span class="nt">min_model_documentation_coverage_pct</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">90</span>
 </span></code></pre></div></p>
+
+
+
+
+
+
+
+
+
 
               <details class="quote">
                 <summary>Source code in <code>src/dbt_bouncer/checks/manifest/check_models.py</code></summary>
@@ -5498,7 +5916,9 @@
       </thead>
       <tbody>
           <tr class="doc-section-item">
-            <td><code>min_model_test_coverage_pct</code></td>
+            <td>
+                <code>min_model_test_coverage_pct</code>
+            </td>
             <td>
                   <code>float</code>
             </td>
@@ -5512,7 +5932,9 @@
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code>models</code></td>
+            <td>
+                <code>models</code>
+            </td>
             <td>
                   <code><span title="typing.List">List</span>[<span title="dbt_bouncer.artifact_parsers.parsers_common.DbtBouncerModelBase">DbtBouncerModelBase</span>]</code>
             </td>
@@ -5526,7 +5948,9 @@
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code>tests</code></td>
+            <td>
+                <code>tests</code>
+            </td>
             <td>
                   <code><span title="typing.List">List</span>[<span title="dbt_bouncer.artifact_parsers.parsers_common.DbtBouncerTestBase">DbtBouncerTestBase</span>]</code>
             </td>
@@ -5569,6 +5993,15 @@
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_model_test_coverage</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">      </span><span class="nt">min_model_test_coverage_pct</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">90</span>
 </span></code></pre></div></p>
+
+
+
+
+
+
+
+
+
 
               <details class="quote">
                 <summary>Source code in <code>src/dbt_bouncer/checks/manifest/check_models.py</code></summary>
@@ -5730,7 +6163,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">August 28, 2024</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">August 21, 2024</span>
   </span>
 
     

@@ -2,74 +2,74 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://godatadriven.github.io/dbt-bouncer/latest/</loc>
-         <lastmod>2024-10-21</lastmod>
+         <lastmod>2024-10-28</lastmod>
     </url>
     <url>
          <loc>https://godatadriven.github.io/dbt-bouncer/latest/CONTRIBUTING/</loc>
-         <lastmod>2024-10-21</lastmod>
+         <lastmod>2024-10-28</lastmod>
     </url>
     <url>
          <loc>https://godatadriven.github.io/dbt-bouncer/latest/cli/</loc>
-         <lastmod>2024-10-21</lastmod>
+         <lastmod>2024-10-28</lastmod>
     </url>
     <url>
          <loc>https://godatadriven.github.io/dbt-bouncer/latest/config_file/</loc>
-         <lastmod>2024-10-21</lastmod>
+         <lastmod>2024-10-28</lastmod>
     </url>
     <url>
          <loc>https://godatadriven.github.io/dbt-bouncer/latest/faq/</loc>
-         <lastmod>2024-10-21</lastmod>
+         <lastmod>2024-10-28</lastmod>
     </url>
     <url>
          <loc>https://godatadriven.github.io/dbt-bouncer/latest/getting_started/</loc>
-         <lastmod>2024-10-21</lastmod>
+         <lastmod>2024-10-28</lastmod>
     </url>
     <url>
          <loc>https://godatadriven.github.io/dbt-bouncer/latest/checks/</loc>
-         <lastmod>2024-10-21</lastmod>
+         <lastmod>2024-10-28</lastmod>
     </url>
     <url>
          <loc>https://godatadriven.github.io/dbt-bouncer/latest/checks/catalog/check_catalog_sources/</loc>
-         <lastmod>2024-10-21</lastmod>
+         <lastmod>2024-10-28</lastmod>
     </url>
     <url>
          <loc>https://godatadriven.github.io/dbt-bouncer/latest/checks/catalog/check_columns/</loc>
-         <lastmod>2024-10-21</lastmod>
+         <lastmod>2024-10-28</lastmod>
     </url>
     <url>
          <loc>https://godatadriven.github.io/dbt-bouncer/latest/checks/manifest/check_exposures/</loc>
-         <lastmod>2024-10-21</lastmod>
+         <lastmod>2024-10-28</lastmod>
     </url>
     <url>
          <loc>https://godatadriven.github.io/dbt-bouncer/latest/checks/manifest/check_lineage/</loc>
-         <lastmod>2024-10-21</lastmod>
+         <lastmod>2024-10-28</lastmod>
     </url>
     <url>
          <loc>https://godatadriven.github.io/dbt-bouncer/latest/checks/manifest/check_macros/</loc>
-         <lastmod>2024-10-21</lastmod>
+         <lastmod>2024-10-28</lastmod>
     </url>
     <url>
          <loc>https://godatadriven.github.io/dbt-bouncer/latest/checks/manifest/check_metadata/</loc>
-         <lastmod>2024-10-21</lastmod>
+         <lastmod>2024-10-28</lastmod>
     </url>
     <url>
          <loc>https://godatadriven.github.io/dbt-bouncer/latest/checks/manifest/check_models/</loc>
-         <lastmod>2024-10-21</lastmod>
+         <lastmod>2024-10-28</lastmod>
     </url>
     <url>
          <loc>https://godatadriven.github.io/dbt-bouncer/latest/checks/manifest/check_semantic_models/</loc>
-         <lastmod>2024-10-21</lastmod>
+         <lastmod>2024-10-28</lastmod>
     </url>
     <url>
          <loc>https://godatadriven.github.io/dbt-bouncer/latest/checks/manifest/check_sources/</loc>
-         <lastmod>2024-10-21</lastmod>
+         <lastmod>2024-10-28</lastmod>
     </url>
     <url>
          <loc>https://godatadriven.github.io/dbt-bouncer/latest/checks/manifest/check_unit_tests/</loc>
-         <lastmod>2024-10-21</lastmod>
+         <lastmod>2024-10-28</lastmod>
     </url>
     <url>
          <loc>https://godatadriven.github.io/dbt-bouncer/latest/checks/run_results/check_run_results/</loc>
-         <lastmod>2024-10-21</lastmod>
+         <lastmod>2024-10-28</lastmod>
     </url>
 </urlset>

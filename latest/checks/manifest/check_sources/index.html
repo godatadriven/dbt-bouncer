@@ -1042,6 +1042,108 @@
 
 
 
+
+
+
+
+<p><span class="doc-section-title">Classes:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="manifest.check_sources.CheckSourceDescriptionPopulated" href="#manifest.check_sources.CheckSourceDescriptionPopulated">CheckSourceDescriptionPopulated</a></code></td>
+            <td>
+              <div class="doc-md-description">
+                <p>Sources must have a populated description.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="manifest.check_sources.CheckSourceFreshnessPopulated" href="#manifest.check_sources.CheckSourceFreshnessPopulated">CheckSourceFreshnessPopulated</a></code></td>
+            <td>
+              <div class="doc-md-description">
+                <p>Sources must have a populated freshness.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="manifest.check_sources.CheckSourceHasMetaKeys" href="#manifest.check_sources.CheckSourceHasMetaKeys">CheckSourceHasMetaKeys</a></code></td>
+            <td>
+              <div class="doc-md-description">
+                <p>The <code>meta</code> config for sources must have the specified keys.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="manifest.check_sources.CheckSourceHasTags" href="#manifest.check_sources.CheckSourceHasTags">CheckSourceHasTags</a></code></td>
+            <td>
+              <div class="doc-md-description">
+                <p>Sources must have the specified tags.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="manifest.check_sources.CheckSourceLoaderPopulated" href="#manifest.check_sources.CheckSourceLoaderPopulated">CheckSourceLoaderPopulated</a></code></td>
+            <td>
+              <div class="doc-md-description">
+                <p>Sources must have a populated loader.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="manifest.check_sources.CheckSourceNames" href="#manifest.check_sources.CheckSourceNames">CheckSourceNames</a></code></td>
+            <td>
+              <div class="doc-md-description">
+                <p>Sources must have a name that matches the supplied regex.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="manifest.check_sources.CheckSourceNotOrphaned" href="#manifest.check_sources.CheckSourceNotOrphaned">CheckSourceNotOrphaned</a></code></td>
+            <td>
+              <div class="doc-md-description">
+                <p>Sources must be referenced in at least one model.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="manifest.check_sources.CheckSourcePropertyFileLocation" href="#manifest.check_sources.CheckSourcePropertyFileLocation">CheckSourcePropertyFileLocation</a></code></td>
+            <td>
+              <div class="doc-md-description">
+                <p>Source properties files must follow the guidance provided by dbt <a href="https://docs.getdbt.com/best-practices/how-we-structure/1-guide-overview">here</a>.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="manifest.check_sources.CheckSourceUsedByModelsInSameDirectory" href="#manifest.check_sources.CheckSourceUsedByModelsInSameDirectory">CheckSourceUsedByModelsInSameDirectory</a></code></td>
+            <td>
+              <div class="doc-md-description">
+                <p>Sources can only be referenced by models that are located in the same directory where the source is defined.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><a class="autorefs autorefs-internal" title="manifest.check_sources.CheckSourceUsedByOnlyOneModel" href="#manifest.check_sources.CheckSourceUsedByOnlyOneModel">CheckSourceUsedByOnlyOneModel</a></code></td>
+            <td>
+              <div class="doc-md-description">
+                <p>Each source can be referenced by a maximum of one model.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+
+
+
+
+
   <div class="doc doc-children">
 
 
@@ -1137,6 +1239,15 @@
     <div class="language-yaml highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">manifest_checks</span><span class="p">:</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_source_description_populated</span>
 </span></code></pre></div></p>
+
+
+
+
+
+
+
+
+
 
               <details class="quote">
                 <summary>Source code in <code>src/dbt_bouncer/checks/manifest/check_sources.py</code></summary>
@@ -1303,6 +1414,15 @@
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_source_freshness_populated</span>
 </span></code></pre></div></p>
 
+
+
+
+
+
+
+
+
+
               <details class="quote">
                 <summary>Source code in <code>src/dbt_bouncer/checks/manifest/check_sources.py</code></summary>
                 <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-49">49</a></span>
@@ -1422,7 +1542,9 @@
       </thead>
       <tbody>
           <tr class="doc-section-item">
-            <td><code>keys</code></td>
+            <td>
+                <code>keys</code>
+            </td>
             <td>
                   <code><span title="dbt_bouncer.checks.common.NestedDict">NestedDict</span></code>
             </td>
@@ -1513,6 +1635,15 @@
 </span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">slack</span>
 </span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">owner</span>
 </span></code></pre></div></p>
+
+
+
+
+
+
+
+
+
 
               <details class="quote">
                 <summary>Source code in <code>src/dbt_bouncer/checks/manifest/check_sources.py</code></summary>
@@ -1649,7 +1780,9 @@
       </thead>
       <tbody>
           <tr class="doc-section-item">
-            <td><code>source</code></td>
+            <td>
+                <code>source</code>
+            </td>
             <td>
                   <code>DbtBouncerSource</code>
             </td>
@@ -1663,7 +1796,9 @@
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code>tags</code></td>
+            <td>
+                <code>tags</code>
+            </td>
             <td>
                   <code><span title="typing.List">List</span>[str]</code>
             </td>
@@ -1730,6 +1865,15 @@
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tag_1</span>
 </span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tag_2</span>
 </span></code></pre></div></p>
+
+
+
+
+
+
+
+
+
 
               <details class="quote">
                 <summary>Source code in <code>src/dbt_bouncer/checks/manifest/check_sources.py</code></summary>
@@ -1846,7 +1990,9 @@
       </thead>
       <tbody>
           <tr class="doc-section-item">
-            <td><code>source</code></td>
+            <td>
+                <code>source</code>
+            </td>
             <td>
                   <code>DbtBouncerSource</code>
             </td>
@@ -1910,6 +2056,15 @@
     <div class="language-yaml highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">manifest_checks</span><span class="p">:</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_source_loader_populated</span>
 </span></code></pre></div></p>
+
+
+
+
+
+
+
+
+
 
               <details class="quote">
                 <summary>Source code in <code>src/dbt_bouncer/checks/manifest/check_sources.py</code></summary>
@@ -2018,7 +2173,9 @@
       </thead>
       <tbody>
           <tr class="doc-section-item">
-            <td><code>source_name_pattern</code></td>
+            <td>
+                <code>source_name_pattern</code>
+            </td>
             <td>
                   <code>str</code>
             </td>
@@ -2106,6 +2263,15 @@
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">      </span><span class="nt">source_name_pattern</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;</span>
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">        </span><span class="no">^[a-z0-9_]*$</span>
 </span></code></pre></div></p>
+
+
+
+
+
+
+
+
+
 
               <details class="quote">
                 <summary>Source code in <code>src/dbt_bouncer/checks/manifest/check_sources.py</code></summary>
@@ -2296,6 +2462,15 @@
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_source_not_orphaned</span>
 </span></code></pre></div></p>
 
+
+
+
+
+
+
+
+
+
               <details class="quote">
                 <summary>Source code in <code>src/dbt_bouncer/checks/manifest/check_sources.py</code></summary>
                 <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-225">225</a></span>
@@ -2471,6 +2646,15 @@
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_source_property_file_location</span>
 </span></code></pre></div></p>
 
+
+
+
+
+
+
+
+
+
               <details class="quote">
                 <summary>Source code in <code>src/dbt_bouncer/checks/manifest/check_sources.py</code></summary>
                 <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-259">259</a></span>
@@ -2616,7 +2800,9 @@
       </thead>
       <tbody>
           <tr class="doc-section-item">
-            <td><code>models</code></td>
+            <td>
+                <code>models</code>
+            </td>
             <td>
                   <code><span title="typing.List">List</span>[<span title="dbt_bouncer.artifact_parsers.parsers_common.DbtBouncerModelBase">DbtBouncerModelBase</span>]</code>
             </td>
@@ -2630,7 +2816,9 @@
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code>source</code></td>
+            <td>
+                <code>source</code>
+            </td>
             <td>
                   <code>DbtBouncerSource</code>
             </td>
@@ -2694,6 +2882,15 @@
     <div class="language-yaml highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">manifest_checks</span><span class="p">:</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_source_used_by_models_in_same_directory</span>
 </span></code></pre></div></p>
+
+
+
+
+
+
+
+
+
 
               <details class="quote">
                 <summary>Source code in <code>src/dbt_bouncer/checks/manifest/check_sources.py</code></summary>
@@ -2892,6 +3089,15 @@
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_source_used_by_only_one_model</span>
 </span></code></pre></div></p>
 
+
+
+
+
+
+
+
+
+
               <details class="quote">
                 <summary>Source code in <code>src/dbt_bouncer/checks/manifest/check_sources.py</code></summary>
                 <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-347">347</a></span>
@@ -3008,7 +3214,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">August 28, 2024</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">August 21, 2024</span>
   </span>
 
     
