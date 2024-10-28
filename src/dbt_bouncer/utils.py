@@ -112,9 +112,9 @@ def get_check_objects() -> List[Type["BaseCheck"]]:
 
     def import_check(check_class_name: str, check_file_path: str) -> None:
         """Import the Check* class to locals()."""
-        spec = importlib.util.spec_from_file_location(check_class_name, check_file_path)
-        module = importlib.util.module_from_spec(spec)  # type: ignore[arg-type]
-        spec.loader.exec_module(module)  # type: ignore[union-attr]
+        spec = importlib.util.spec_from_file_location(check_class_name, check_file_path)  # type: ignore[attr-defined]
+        module = importlib.util.module_from_spec(spec)  # type: ignore[attr-defined]
+        spec.loader.exec_module(module)
         sys._getframe().f_locals[check_class_name] = module
         check_objects.append(locals()[check_class_name])
 
@@ -142,10 +142,10 @@ def get_check_objects() -> List[Type["BaseCheck"]]:
         logging.debug(f"{custom_check_files=}")
 
         for check_file in custom_check_files:
-            spec = importlib.util.spec_from_file_location("custom_check", check_file)
-            foo = importlib.util.module_from_spec(spec)  # type: ignore[arg-type]
+            spec = importlib.util.spec_from_file_location("custom_check", check_file)  # type: ignore[attr-defined]
+            foo = importlib.util.module_from_spec(spec)  # type: ignore[attr-defined]
             sys.modules["custom_check"] = foo
-            spec.loader.exec_module(foo)  # type: ignore[union-attr]
+            spec.loader.exec_module(foo)
             for obj in dir(foo):
                 if obj.startswith("Check"):
                     import_check(obj, check_file.absolute().__str__())
