@@ -11,6 +11,8 @@ from typing import TYPE_CHECKING, Any, List, Mapping, Type
 
 import click
 import yaml
+from packaging.version import Version as PyPIVersion
+from semver import Version
 
 if TYPE_CHECKING:
     from dbt_bouncer.check_base import BaseCheck
@@ -153,6 +155,20 @@ def get_check_objects() -> List[Type["BaseCheck"]]:
     logging.debug(f"Loaded {len(check_objects)} `Check*` classes.")
 
     return check_objects
+
+
+def get_package_version_number(version_string: str) -> Version:
+    """Dbt Cloud no longer uses version numbers that comply with semantic versioning, e.g. "2024.11.06+2a3d725".
+    This function is used to convert the version number to a version object that can be used to compare versions.
+
+    Args:
+        version_string (str): The version number to convert.
+
+    Returns:
+            Version: The version object.
+
+    """
+    return Version(*PyPIVersion(version_string).release)
 
 
 def load_config_from_yaml(config_file: Path) -> Mapping[str, Any]:

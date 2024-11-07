@@ -6,6 +6,7 @@ import pytest
 from dbt_bouncer.utils import (
     create_github_comment_file,
     flatten,
+    get_package_version_number,
     make_markdown_table,
     object_in_path,
 )
@@ -45,6 +46,21 @@ def test_create_github_comment_file(monkeypatch, tmp_path):
 )
 def test_flatten(data_in, data_out):
     assert flatten(data_in) == data_out
+
+
+@pytest.mark.parametrize(
+    ("version_a", "version_b", "expectation"),
+    [
+        ("1.6.0", "1.6.0", True),
+        ("1.6.1", "1.6.0", True),
+        ("1.5.9", "1.6.0", False),
+        ("2024.11.06+2a3d725", "1.6.0", True),
+    ],
+)
+def test_get_package_version_number(version_a, version_b, expectation):
+    assert (
+        get_package_version_number(version_a) >= get_package_version_number(version_b)
+    ) == expectation
 
 
 @pytest.mark.parametrize(

@@ -4,7 +4,7 @@ import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING, List, Literal, Union
 
-import semver
+from dbt_bouncer.utils import get_package_version_number
 
 if TYPE_CHECKING:
     from dbt_bouncer.artifact_parsers.parsers_catalog import DbtBouncerCatalogNode
@@ -74,7 +74,8 @@ def load_dbt_artifact(
             manifest_json = json.load(fp)
 
         assert (
-            semver.Version.parse(manifest_json["metadata"]["dbt_version"]) >= "1.6.0"
+            get_package_version_number(manifest_json["metadata"]["dbt_version"])
+            >= get_package_version_number("1.6.0")
         ), f"The supplied `manifest.json` was generated with dbt version {manifest_json['metadata']['dbt_version']}, this is below the minimum supported version of 1.6.0."
 
         from dbt_bouncer.artifact_parsers.parsers_manifest import (
