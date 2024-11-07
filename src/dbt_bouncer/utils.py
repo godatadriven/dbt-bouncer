@@ -1,3 +1,5 @@
+# mypy: disable-error-code="arg-type,attr-defined,union-attr"
+
 """Re-usable functions for dbt-bouncer."""
 
 import importlib
@@ -11,6 +13,8 @@ from typing import TYPE_CHECKING, Any, List, Mapping, Type
 
 import click
 import yaml
+from packaging.version import Version as PyPIVersion
+from semver import Version
 
 if TYPE_CHECKING:
     from dbt_bouncer.check_base import BaseCheck
@@ -112,8 +116,8 @@ def get_check_objects() -> List[Type["BaseCheck"]]:
 
     def import_check(check_class_name: str, check_file_path: str) -> None:
         """Import the Check* class to locals()."""
-        spec = importlib.util.spec_from_file_location(check_class_name, check_file_path)  # type: ignore[attr-defined]
-        module = importlib.util.module_from_spec(spec)  # type: ignore[attr-defined]
+        spec = importlib.util.spec_from_file_location(check_class_name, check_file_path)
+        module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
         sys._getframe().f_locals[check_class_name] = module
         check_objects.append(locals()[check_class_name])
@@ -142,8 +146,8 @@ def get_check_objects() -> List[Type["BaseCheck"]]:
         logging.debug(f"{custom_check_files=}")
 
         for check_file in custom_check_files:
-            spec = importlib.util.spec_from_file_location("custom_check", check_file)  # type: ignore[attr-defined]
-            foo = importlib.util.module_from_spec(spec)  # type: ignore[attr-defined]
+            spec = importlib.util.spec_from_file_location("custom_check", check_file)
+            foo = importlib.util.module_from_spec(spec)
             sys.modules["custom_check"] = foo
             spec.loader.exec_module(foo)
             for obj in dir(foo):
@@ -153,6 +157,22 @@ def get_check_objects() -> List[Type["BaseCheck"]]:
     logging.debug(f"Loaded {len(check_objects)} `Check*` classes.")
 
     return check_objects
+
+
+def get_package_version_number(version_string: str) -> Version:
+    """Dbt Cloud no longer uses version numbers that comply with semantic versioning, e.g. "2024.11.06+2a3d725".
+    This function is used to convert the version number to a version object that can be used to compare versions.
+
+    Args:
+        version_string (str): The version number to convert.
+
+    Returns:
+            Version: The version object.
+
+    """  # noqa: D205
+    p = PyPIVersion(version_string)
+
+    return Version(*p.release)
 
 
 def load_config_from_yaml(config_file: Path) -> Mapping[str, Any]:

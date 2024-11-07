@@ -1,12 +1,11 @@
 # mypy: disable-error-code="union-attr"
-
 import logging
 from typing import TYPE_CHECKING, List, Literal, Optional
 
-import semver
 from pydantic import BaseModel, ConfigDict, Field
 
 from dbt_bouncer.check_base import BaseCheck
+from dbt_bouncer.utils import get_package_version_number
 
 if TYPE_CHECKING:
     from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
@@ -75,10 +74,9 @@ class CheckUnitTestCoverage(BaseModel):
 
     def execute(self) -> None:
         """Execute the check."""
-        if (
-            semver.Version.parse(self.manifest_obj.manifest.metadata.dbt_version)
-            >= "1.8.0"
-        ):
+        if get_package_version_number(
+            self.manifest_obj.manifest.metadata.dbt_version
+        ) >= get_package_version_number("1.8.0"):
             relevant_models = [
                 m.unique_id
                 for m in self.models
@@ -142,10 +140,9 @@ class CheckUnitTestExpectFormats(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
-        if (
-            semver.Version.parse(self.manifest_obj.manifest.metadata.dbt_version)
-            >= "1.8.0"
-        ):
+        if get_package_version_number(
+            self.manifest_obj.manifest.metadata.dbt_version
+        ) >= get_package_version_number("1.8.0"):
             assert (
                 self.unit_test.expect.format.value in self.permitted_formats
             ), f"Unit test `{self.unit_test.name}` has an `expect` format that is not permitted. Permitted formats are: {self.permitted_formats}."
@@ -193,10 +190,9 @@ class CheckUnitTestGivenFormats(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
-        if (
-            semver.Version.parse(self.manifest_obj.manifest.metadata.dbt_version)
-            >= "1.8.0"
-        ):
+        if get_package_version_number(
+            self.manifest_obj.manifest.metadata.dbt_version
+        ) >= get_package_version_number("1.8.0"):
             given_formats = [i.format.value for i in self.unit_test.given]
             assert all(
                 e in self.permitted_formats for e in given_formats

@@ -3,7 +3,6 @@ import warnings
 from enum import Enum
 from typing import Any, Dict, List, Union
 
-import semver
 from pydantic import BaseModel
 
 from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import ManifestLatest
@@ -22,7 +21,7 @@ from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
 from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
     Sources as SourcesLatest,
 )
-from dbt_bouncer.utils import clean_path_str
+from dbt_bouncer.utils import clean_path_str, get_package_version_number
 
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
@@ -248,7 +247,9 @@ def parse_manifest_artifact(
                 ),
             )
 
-    if semver.Version.parse(manifest_obj.manifest.metadata.dbt_version) >= "1.8.0":
+    if get_package_version_number(
+        manifest_obj.manifest.metadata.dbt_version
+    ) >= get_package_version_number("1.8.0"):
         project_unit_tests = [
             v
             for _, v in manifest_obj.manifest.unit_tests.items()
