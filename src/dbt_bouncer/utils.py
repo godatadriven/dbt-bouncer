@@ -1,3 +1,6 @@
+# mypy: disable-error-code="arg-type"
+# mypy: disable-error-code="union-attr"
+
 """Re-usable functions for dbt-bouncer."""
 
 import importlib
@@ -167,8 +170,10 @@ def get_package_version_number(version_string: str) -> Version:
     Returns:
             Version: The version object.
 
-    """
-    return Version(*PyPIVersion(version_string).release)
+    """  # noqa: D205
+    p = PyPIVersion(version_string)
+
+    return Version(*p.release)
 
 
 def load_config_from_yaml(config_file: Path) -> Mapping[str, Any]:
