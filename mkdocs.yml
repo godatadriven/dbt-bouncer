@@ -51,6 +51,7 @@ nav:
   - CLI: cli.md
   - FAQ: faq.md
   - Contributing: CONTRIBUTING.md
+  - Users: users.md
 
 plugins:
   - git-revision-date-localized
