@@ -8,13 +8,11 @@
       
       
       
-        <link rel="canonical" href="https://godatadriven.github.io/dbt-bouncer/latest/cli/">
+        <link rel="canonical" href="https://godatadriven.github.io/dbt-bouncer/latest/users/">
       
       
-        <link rel="prev" href="../checks/run_results/check_run_results/">
+        <link rel="prev" href="../CONTRIBUTING/">
       
-      
-        <link rel="next" href="../faq/">
       
       
       <link rel="icon" href="../assets/logo.svg">
@@ -22,7 +20,7 @@
     
     
       
-        <title>CLI - dbt-bouncer</title>
+        <title>Users - dbt-bouncer</title>
       
     
     
@@ -76,7 +74,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#cli" class="md-skip">
+        <a href="#our-users" class="md-skip">
           Skip to content
         </a>
       
@@ -127,7 +125,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              CLI
+              Users
             
           </span>
         </div>
@@ -271,11 +269,9 @@
         
   
   
-    
   
-  
-    <li class="md-tabs__item md-tabs__item--active">
-      <a href="./" class="md-tabs__link">
+    <li class="md-tabs__item">
+      <a href="../cli/" class="md-tabs__link">
         
   
     
@@ -324,9 +320,11 @@
         
   
   
+    
   
-    <li class="md-tabs__item">
-      <a href="../users/" class="md-tabs__link">
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="./" class="md-tabs__link">
         
   
     
@@ -510,19 +508,10 @@
       
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../cli/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -531,7 +520,6 @@
   
 
       </a>
-      
     </li>
   
 
@@ -580,10 +568,19 @@
       
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../users/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -592,6 +589,7 @@
   
 
       </a>
+      
     </li>
   
 
@@ -611,7 +609,7 @@
                   
 
   
-    <a href="https://github.com/godatadriven/dbt-bouncer/docs/cli.md" title="Edit this page" class="md-content__button md-icon">
+    <a href="https://github.com/godatadriven/dbt-bouncer/docs/users.md" title="Edit this page" class="md-content__button md-icon">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75z"/></svg>
     </a>
@@ -619,37 +617,19 @@
   
 
 
-<h1 id="cli">CLI<a class="headerlink" href="#cli" title="Permanent link">#</a></h1>
-<p>This page provides documentation for the <code>dbt-bouncer</code> CLI.</p>
-<h1 id="dbt-bouncer">dbt-bouncer<a class="headerlink" href="#dbt-bouncer" title="Permanent link">#</a></h1>
-<p>Entrypoint for dbt-bouncer.</p>
-<p>Raises:
-    RuntimeError: If output file has an invalid extension.</p>
-<p><strong>Usage:</strong></p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>dbt-bouncer [OPTIONS]
-</span></code></pre></div>
-<p><strong>Options:</strong></p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>  --config-file PUREPATH  Location of the YML config file.
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>  --output-file PATH      Location of the json file where check metadata will
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>                          be saved.
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>  -v, --verbosity         Verbosity.
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>  --version               Show the version and exit.
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>  --help                  Show this message and exit.
-</span></code></pre></div>
-<h3 id="exit-codes">Exit codes<a class="headerlink" href="#exit-codes" title="Permanent link">#</a></h3>
-<p><code>dbt-bouncer</code> returns the following exit codes:</p>
-<ul>
-<li>
-<p><code>0</code>: All checks have succeeded.</p>
-</li>
-<li>
-<p><code>1</code>:</p>
-<ul>
-<li>At least one check has failed. Check the logs for more information.</li>
-<li>A fatal error occurred during check setup or check execution. Check the logs for more information.</li>
-</ul>
-</li>
-</ul>
+<h1 id="our-users">Our users<a class="headerlink" href="#our-users" title="Permanent link">#</a></h1>
+<p>A list of companies using <code>dbt-bouncer</code>.</p>
+<p>To add your company:</p>
+<ol>
+<li>Fork the <a href="https://github.com/godatadriven/dbt-bouncer">dbt-bouncer</a> repository.</li>
+<li>Add your company to the <code>Users</code> section in <a href="https://github.com/godatadriven/dbt-bouncer/blob/main/docs/users.md">users.md</a>, retaining alphabetical order.</li>
+<li>Open a <a href="https://github.com/godatadriven/dbt-bouncer/compare">pull request</a>.</li>
+</ol>
+<h1 id="users">Users<a class="headerlink" href="#users" title="Permanent link">#</a></h1>
+<p>
+    <h3>Xebia Data</h3>
+    <img src="https://yt3.googleusercontent.com/RfqF5B5h5-rfyJpLb0e-GE2j1a1yRw_OKhvVDgmZy-Xpt8oYFtaQAn2PMBrJzHOznj1pQNwvp9s=s900-c-k-c0x00ffffff-no-rj" width="500"/>
+</p>
 
 
 
@@ -670,7 +650,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">August 26, 2024</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">November 19, 2024</span>
   </span>
 
     
