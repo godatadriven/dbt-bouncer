@@ -21,7 +21,7 @@ env:
 
 jobs:
     pre-commit:
-        runs-on: ubuntu-latest
+        runs-on: ubuntu-22.04
         steps:
             - name: Checkout
               uses: actions/checkout@v4
@@ -62,7 +62,7 @@ jobs:
             fail-fast: false
             matrix:
                 operating-system:
-                  - ubuntu-latest
+                  - ubuntu-22.04
                   - windows-latest
                 python-version:
                     - '3.9'
@@ -123,7 +123,7 @@ jobs:
 
     e2e-tests:
         needs: [pre-commit]
-        runs-on: ubuntu-latest
+        runs-on: ubuntu-22.04
         steps:
             - name: Checkout
               uses: actions/checkout@v4
@@ -170,7 +170,7 @@ jobs:
 
     mkdocs-build:
       needs: [pre-commit]
-      runs-on: ubuntu-latest
+      runs-on: ubuntu-22.04
       steps:
           - name: Checkout
             uses: actions/checkout@v4
@@ -196,7 +196,7 @@ jobs:
 
     pex-tests:
       needs: [pre-commit]
-      runs-on: ubuntu-latest
+      runs-on: ubuntu-22.04
       steps:
           - name: Checkout
             uses: actions/checkout@v4
