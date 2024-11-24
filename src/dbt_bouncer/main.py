@@ -68,7 +68,9 @@ def cli(
         .get_parameter_source("config_file")
         .name,  # type: ignore[union-attr]
     )
-    config_file_contents = load_config_file_contents(config_file_path)
+    config_file_contents = load_config_file_contents(
+        config_file_path, allow_default_config_file_creation=True
+    )
 
     # Handle `severity` at the global level
     if config_file_contents.get("severity"):

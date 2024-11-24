@@ -93,6 +93,30 @@ def test_get_file_config_path_pyproject_toml_recursive(monkeypatch, tmp_path):
     assert config_file_path == pyproject_file
 
 
+def test_load_config_file_contents_create_default_config_file(
+    monkeypatch,
+    tmp_path,
+):
+    monkeypatch.chdir(tmp_path)
+
+    pyproject_file = tmp_path / "pyproject.toml"
+    config = {"tool": {"dbt-bouncer-misspelled": PYPROJECT_TOML_SAMPLE_CONFIG}}
+    with Path.open(pyproject_file, "w") as f:
+        toml.dump(config, f)
+
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setenv("CREATE_DBT_BOUNCER_CONFIG_FILE", "true")
+
+        contents = load_config_file_contents(
+            config_file_path=pyproject_file, allow_default_config_file_creation=True
+        )
+        assert list(contents.keys()) == [
+            "manifest_checks",
+            "catalog_checks",
+            "run_results_checks",
+        ]
+
+
 def test_load_config_file_contents_pyproject_toml_no_bouncer_section(
     monkeypatch,
     tmp_path,
@@ -105,7 +129,10 @@ def test_load_config_file_contents_pyproject_toml_no_bouncer_section(
         toml.dump(config, f)
 
     with pytest.raises(RuntimeError):
-        config = load_config_file_contents(config_file_path=tmp_path / "pyproject.toml")
+        config = load_config_file_contents(
+            config_file_path=tmp_path / "pyproject.toml",
+            allow_default_config_file_creation=False,
+        )
 
 
 invalid_confs = [

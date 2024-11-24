@@ -1,8 +1,10 @@
 import logging
+import os
 import re
 from pathlib import Path, PurePath
-from typing import TYPE_CHECKING, Any, Dict, List, Literal, Mapping
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Mapping, Optional
 
+import click
 import toml
 from pydantic import ValidationError
 
@@ -12,6 +14,23 @@ if TYPE_CHECKING:
     from dbt_bouncer.config_file_parser import (
         DbtBouncerConfAllCategories as DbtBouncerConf,
     )
+
+DEFAULT_DBT_BOUNCER_CONFIG = """manifest_checks:
+  - name: check_model_directories
+    include: ^models
+    permitted_sub_directories:
+      - intermediate
+      - marts
+      - staging
+  - name: check_model_names
+    include: ^models/staging
+    model_name_pattern: ^stg_
+catalog_checks:
+  - name: check_columns_are_documented_in_public_models
+run_results_checks:
+  - name: check_run_results_max_execution_time
+    max_execution_time_seconds: 60
+"""
 
 
 def conf_cls_factory(
@@ -120,8 +139,15 @@ def get_config_file_path(
     return pyproject_toml_dir / "pyproject.toml"
 
 
-def load_config_file_contents(config_file_path: PurePath) -> Mapping[str, Any]:
+def load_config_file_contents(
+    config_file_path: PurePath,
+    allow_default_config_file_creation: Optional[bool] = None,
+) -> Mapping[str, Any]:
     """Load the contents of the config file.
+
+    Args:
+        config_file_path: Path to the config file.
+        allow_default_config_file_creation: Whether to allow the creation of a default config file if one does not exist. Used to allow pytesting of this function.
 
     Returns:
         Mapping[str, Any]: Config for dbt-bouncer.
@@ -137,9 +163,33 @@ def load_config_file_contents(config_file_path: PurePath) -> Mapping[str, Any]:
         if "dbt-bouncer" in toml_cfg["tool"]:
             return next(v for k, v in toml_cfg["tool"].items() if k == "dbt-bouncer")
         else:
-            raise RuntimeError(
-                "Please ensure your pyproject.toml file is correctly configured to work with `dbt-bouncer`. Alternatively, you can pass the path to your config file via the `--config-file` flag.",
+            logging.warning(
+                "Cannot find a `dbt-bouncer.yml` file or a `dbt-bouncer` section found in pyproject.toml."
             )
+            if (
+                allow_default_config_file_creation is True
+                and os.getenv("CREATE_DBT_BOUNCER_CONFIG_FILE") != "false"
+                and (
+                    os.getenv("CREATE_DBT_BOUNCER_CONFIG_FILE") == "true"
+                    or click.confirm(
+                        "Do you want `dbt-bouncer` to create a `dbt-bouncer.yml` file in the current directory?"
+                    )
+                )
+            ):
+                created_config_file = Path.cwd().joinpath("dbt-bouncer.yml")
+                created_config_file.touch()
+                logging.info(
+                    "A `dbt-bouncer.yml` file has been created in the current directory with default settings."
+                )
+                with Path.open(created_config_file, "w") as f:
+                    f.write(DEFAULT_DBT_BOUNCER_CONFIG)
+
+                return load_config_from_yaml(created_config_file)
+
+            else:
+                raise RuntimeError(
+                    "No configuration for `dbt-bouncer` could be found. You can pass the path to your config file via the `--config-file` flag. Alternatively, your pyproject.toml file can be configured to work with `dbt-bouncer`.",
+                )
     else:
         raise RuntimeError(
             f"Config file must be either a `pyproject.toml`, `.yaml` or `.yml` file. Got {config_file_path.suffix}."
