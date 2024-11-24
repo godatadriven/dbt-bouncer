@@ -13,7 +13,7 @@ env:
 
 jobs:
     docker-tests:
-        runs-on: ubuntu-latest
+        runs-on: ubuntu-22.04
         steps:
             - name: Checkout
               uses: actions/checkout@v4
@@ -26,7 +26,7 @@ jobs:
                   --config-file /app/dbt-bouncer-example.yml
 
     github-action-test:
-        runs-on: ubuntu-latest
+        runs-on: ubuntu-22.04
         steps:
             - name: Checkout
               run: git clone https://github.com/godatadriven/dbt-bouncer.git --branch $(echo "${{ github.ref }}" | cut -d "/" -f3) --depth 1
@@ -38,7 +38,7 @@ jobs:
                 send-pr-comment: false
 
     pex-tests:
-        runs-on: ubuntu-latest
+        runs-on: ubuntu-22.04
         strategy:
             fail-fast: false
             matrix:
@@ -72,7 +72,7 @@ jobs:
               run: python ./dbt-bouncer.pex --config-file dbt-bouncer-example.yml
 
     pypi-pause:
-        runs-on: ubuntu-latest
+        runs-on: ubuntu-22.04
         steps:
             # PyPi appears to be "slow" to register new packages, adding manual delay to account for this
             - run: sleep 120
@@ -84,7 +84,7 @@ jobs:
             fail-fast: false
             matrix:
                 operating-system:
-                  - ubuntu-latest
+                  - ubuntu-22.04
                   - windows-latest
                 python-version:
                     - '3.9'
