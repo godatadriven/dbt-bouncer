@@ -49,6 +49,7 @@ runs:
       shell: bash
       run: >
         docker run --rm \
+          --env CREATE_DBT_BOUNCER_CONFIG_FILE=false \
           --env GITHUB_REF='${{ github.ref }}' \
           --env GITHUB_REPOSITORY='${{ github.repository }}' \
           --env GITHUB_RUN_ID='${{ github.run_id }}' \
