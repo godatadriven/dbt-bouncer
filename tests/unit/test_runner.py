@@ -428,6 +428,10 @@ def test_runner_windows(caplog, tmp_path):
     ctx = MagicMock(obj={"verbosity": 3})
     push_context(ctx)
 
+    from dbt_bouncer.artifact_parsers.parsers_run_results import (
+        DbtBouncerRunResultBase,  # noqa: F401, F811
+    )
+    from dbt_bouncer.checks.common import NestedDict  # noqa: F401, F811
     from dbt_bouncer.config_file_parser import (
         DbtBouncerConfAllCategories as DbtBouncerConf,
     )
