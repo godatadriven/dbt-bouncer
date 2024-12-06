@@ -28,3 +28,4 @@ To add your company:
 ## Talks
 
 * "Maintaining your conventions amid the chaos of dbt" @ [Belgium dbt Meetup #8](https://www.meetup.com/analytics-engineering-belgium/events/303644594/?eventOrigin=group_featured_event), slides available [here](https://docs.google.com/presentation/d/1NZic12RV1dDrl6GcqAkLwXeTjkyhJU43Y2cFoFpHZeQ/edit#slide=id.p3).
+* "Maintaining your conventions amid the chaos of dbt" @ [Cologne dbt Meetup](https://www.meetup.com/rhein-ruhr-dbt-meetup/events/304543797/?eventOrigin=group_upcoming_events), slides available [here](https://docs.google.com/presentation/d/1xTplaTT3067O92kF8xsGR18AwkUY3PsGDLLsWFJnvW8/edit#slide=id.p3).
