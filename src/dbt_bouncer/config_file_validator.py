@@ -25,11 +25,6 @@ DEFAULT_DBT_BOUNCER_CONFIG = """manifest_checks:
   - name: check_model_names
     include: ^models/staging
     model_name_pattern: ^stg_
-catalog_checks:
-  - name: check_columns_are_documented_in_public_models
-run_results_checks:
-  - name: check_run_results_max_execution_time
-    max_execution_time_seconds: 60
 """
 
 
@@ -50,6 +45,7 @@ def conf_cls_factory(
         DbtBouncerConf: The configuration class.
 
     """
+    check_categories = sorted(check_categories)
     if check_categories == ["catalog_checks"]:
         from dbt_bouncer.config_file_parser import DbtBouncerConfCatalogOnly
 

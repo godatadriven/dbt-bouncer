@@ -112,8 +112,6 @@ def test_load_config_file_contents_create_default_config_file(
         )
         assert list(contents.keys()) == [
             "manifest_checks",
-            "catalog_checks",
-            "run_results_checks",
         ]
 
 

@@ -68,6 +68,12 @@ All documentation can be found on `dbt-bouncer` [documentation website](https://
     pip install dbt-bouncer
     ```
 
+1. `dbt-bouncer` requires a `manifest.json` file. If not already present, run:
+
+    ```shell
+    dbt parse
+    ```
+
 1. Create a `dbt-bouncer.yml` config file:
 
     ```yml
@@ -81,11 +87,6 @@ All documentation can be found on `dbt-bouncer` [documentation website](https://
       - name: check_model_names
         include: ^models/staging
         model_name_pattern: ^stg_
-    catalog_checks:
-      - name: check_columns_are_documented_in_public_models
-    run_results_checks:
-      - name: check_run_results_max_execution_time
-        max_execution_time_seconds: 60
     ```
 
 1. Run `dbt-bouncer`:
