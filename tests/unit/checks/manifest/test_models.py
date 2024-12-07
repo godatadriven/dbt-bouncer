@@ -1341,6 +1341,32 @@ def test_check_model_code_does_not_contain_regexp_pattern(
             ["finance", "marketing"],
             pytest.raises(AssertionError),
         ),
+        (
+            "models",
+            Nodes4(
+                **{
+                    "alias": "model_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                    },
+                    "fqn": ["package_name", "model_1"],
+                    "name": "model_1",
+                    "original_file_path": "models/model_1.sql",
+                    "package_name": "package_name",
+                    "path": "marts/sales/model_1.sql",
+                    "resource_type": "model",
+                    "schema": "main",
+                    "unique_id": "model.package_name.model_1",
+                },
+            ),
+            ["finance", "marketing"],
+            pytest.raises(AssertionError),
+        ),
     ],
 )
 def test_check_model_directories(

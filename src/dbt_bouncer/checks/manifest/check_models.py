@@ -203,6 +203,9 @@ class CheckModelDirectories(BaseCheck):
     Receives:
         model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
 
+    Raises:
+        AssertionError: If the model directory does not contain a permitted sub-directory.
+
     Example(s):
         ```yaml
         manifest_checks:
@@ -237,10 +240,16 @@ class CheckModelDirectories(BaseCheck):
         path_after_match = clean_path_str(self.model.original_file_path)[
             matched_path.end() + 1 :
         ]
+        directory_to_check = path_after_match.split("/")[0]
 
-        assert (
-            path_after_match.split("/")[0] in self.permitted_sub_directories
-        ), f"`{self.model.name}` is located in `{self.model.original_file_path.split('/')[1]}`, this is not a valid sub-directory."
+        if directory_to_check.replace(".sql", "") == self.model.name:
+            raise AssertionError(  # noqa: DOC501
+                f"`{self.model.name}` is not located in a valid sub-directory ({self.permitted_sub_directories})."
+            )
+        else:
+            assert (
+                directory_to_check in self.permitted_sub_directories
+            ), f"`{self.model.name}` is located in the `{directory_to_check}` sub-directory, this is not a valid sub-directory ({self.permitted_sub_directories})."
 
 
 class CheckModelDocumentedInSameDirectory(BaseCheck):
