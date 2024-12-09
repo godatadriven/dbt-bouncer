@@ -1,3 +1,10 @@
+# On GitHub the `dbt build` command often returns "leaked semaphores" errors.
+build-and-run-dbt-bouncer:
+	poetry run dbt deps
+	poetry run dbt build
+	poetry run dbt docs generate
+	poetry run dbt-bouncer --config-file ./dbt-bouncer-example.yml
+
 build-artifacts:
 	poetry run python ./scripts/generate_artifacts.py
 

@@ -157,15 +157,9 @@
               if: matrix.operating-system == 'windows-latest'
               run: |
                 $env:Path += ';C:\Users\runneradmin\.local\bin'
-                poetry run dbt deps
-                poetry run dbt build
-                poetry run dbt docs generate
-                poetry run dbt-bouncer --config-file ./dbt-bouncer-example.yml
+                make build-and-run-dbt-bouncer
 
             - name: Regenerate dbt artifacts and run `dbt-bouncer`
               if: matrix.operating-system != 'windows-latest'
               run: |
-                poetry run dbt deps
-                poetry run dbt build
-                poetry run dbt docs generate
-                poetry run dbt-bouncer --config-file ./dbt-bouncer-example.yml
+                (r=3;while ! make build-and-run-dbt-bouncer ; do ((--r))||exit;done)
