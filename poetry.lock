@@ -478,13 +478,13 @@ typing-extensions = ">=4.4"
 
 [[package]]
 name = "dbt-duckdb"
-version = "1.9.0"
+version = "1.9.1"
 description = "The duckdb adapter plugin for dbt (data build tool)"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "dbt_duckdb-1.9.0-py3-none-any.whl", hash = "sha256:f6534ad95f37f0e35bd591546cc736e85d156bc7c1509c0cb9cdcda5c50fe00c"},
-    {file = "dbt_duckdb-1.9.0.tar.gz", hash = "sha256:56c82f511f96fde696ee0c86e34b784a75dfad0997b249f87faf2fc9dee7830e"},
+    {file = "dbt_duckdb-1.9.1-py3-none-any.whl", hash = "sha256:4034e57a0f3ee5283597b447b8fddf5220aa11744e84deb28ee32c977826139b"},
+    {file = "dbt_duckdb-1.9.1.tar.gz", hash = "sha256:3d5b5e0372033684f3515b4f152757d330598b517ba7ee9c6612819a2e13e084"},
 ]
 
 [package.dependencies]
