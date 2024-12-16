@@ -83,7 +83,7 @@ version = "0.0.0"
 [tool.poetry.dependencies]
 python = ">=3.9,<3.14"
 click = "<9"
-dbt-artifacts-parser = "<0.8"
+dbt-artifacts-parser = "<0.9"
 jinja2 = "^3"
 jinja2-simple-tags = "^0"
 levenshtein = ">=0.26.1"
