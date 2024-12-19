@@ -8,7 +8,9 @@ if TYPE_CHECKING:
 
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", category=UserWarning)
-        from dbt_artifacts_parser.parsers.catalog.catalog_v1 import CatalogTable
+        from dbt_artifacts_parser.parsers.catalog.catalog_v1 import (
+            Nodes as CatalogNodes,
+        )
     from dbt_bouncer.artifact_parsers.parsers_manifest import (
         DbtBouncerModelBase,
         DbtBouncerTestBase,
@@ -23,7 +25,7 @@ class CheckColumnDescriptionPopulated(BaseCheck):
     """Columns must have a populated description.
 
     Receives:
-        catalog_node (CatalogTable): The CatalogTable object to check.
+        catalog_node (CatalogNodes): The CatalogNodes object to check.
         models (List[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
 
     Other Parameters:
@@ -40,7 +42,7 @@ class CheckColumnDescriptionPopulated(BaseCheck):
 
     """
 
-    catalog_node: "CatalogTable" = Field(default=None)
+    catalog_node: "CatalogNodes" = Field(default=None)
     models: List["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_column_description_populated"]
 
@@ -69,7 +71,7 @@ class CheckColumnHasSpecifiedTest(BaseCheck):
         test_name (str): Name of the test to check for.
 
     Receives:
-        catalog_node (CatalogTable): The CatalogTable object to check.
+        catalog_node (CatalogNodes): The CatalogNodes object to check.
         tests (List[DbtBouncerTestBase]): List of DbtBouncerTestBase objects parsed from `manifest.json`.
 
     Other Parameters:
@@ -87,7 +89,7 @@ class CheckColumnHasSpecifiedTest(BaseCheck):
 
     """
 
-    catalog_node: "CatalogTable" = Field(default=None)
+    catalog_node: "CatalogNodes" = Field(default=None)
     column_name_pattern: str
     name: Literal["check_column_has_specified_test"]
     test_name: str
@@ -126,7 +128,7 @@ class CheckColumnNameCompliesToColumnType(BaseCheck):
         types (List[str]): List of data types to check.
 
     Receives:
-        catalog_node (CatalogTable): The CatalogTable object to check.
+        catalog_node (CatalogNodes): The CatalogNodes object to check.
 
     Other Parameters:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
@@ -166,7 +168,7 @@ class CheckColumnNameCompliesToColumnType(BaseCheck):
 
     """
 
-    catalog_node: "CatalogTable" = Field(default=None)
+    catalog_node: "CatalogNodes" = Field(default=None)
     column_name_pattern: str
     name: Literal["check_column_name_complies_to_column_type"]
     types: List[str]
@@ -187,7 +189,7 @@ class CheckColumnsAreAllDocumented(BaseCheck):
     """All columns in a model should be included in the model's properties file, i.e. `.yml` file.
 
     Receives:
-        catalog_node (CatalogTable): The CatalogTable object to check.
+        catalog_node (CatalogNodes): The CatalogNodes object to check.
         models (List[DbtBouncerModel]): List of DbtBouncerModel objects parsed from `manifest.json`.
 
     Other Parameters:
@@ -203,7 +205,7 @@ class CheckColumnsAreAllDocumented(BaseCheck):
 
     """
 
-    catalog_node: "CatalogTable" = Field(default=None)
+    catalog_node: "CatalogNodes" = Field(default=None)
     models: List["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_columns_are_all_documented"]
 
@@ -225,7 +227,7 @@ class CheckColumnsAreDocumentedInPublicModels(BaseCheck):
     """Columns should have a populated description in public models.
 
     Receives:
-        catalog_node (CatalogTable): The CatalogTable object to check.
+        catalog_node (CatalogNodes): The CatalogNodes object to check.
         models (List[DbtBouncerModel]): List of DbtBouncerModel objects parsed from `manifest.json`.
 
     Other Parameters:
@@ -241,7 +243,7 @@ class CheckColumnsAreDocumentedInPublicModels(BaseCheck):
 
     """
 
-    catalog_node: "CatalogTable" = Field(default=None)
+    catalog_node: "CatalogNodes" = Field(default=None)
     models: List["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_columns_are_documented_in_public_models"]
 

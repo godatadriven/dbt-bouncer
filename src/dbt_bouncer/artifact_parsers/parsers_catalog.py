@@ -9,8 +9,10 @@ from dbt_bouncer.utils import clean_path_str
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
     from dbt_artifacts_parser.parsers.catalog.catalog_v1 import (
-        CatalogTable,
         CatalogV1,
+    )
+    from dbt_artifacts_parser.parsers.catalog.catalog_v1 import (
+        Nodes as CatalogNodes,
     )
 if TYPE_CHECKING:
     from pathlib import Path
@@ -24,7 +26,7 @@ from dbt_bouncer.artifact_parsers.parsers_common import load_dbt_artifact
 class DbtBouncerCatalogNode(BaseModel):
     """Model for all nodes in `catalog.json`."""
 
-    catalog_node: CatalogTable
+    catalog_node: CatalogNodes
     original_file_path: str
     unique_id: str
 
