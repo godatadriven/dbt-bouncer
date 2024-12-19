@@ -5,7 +5,7 @@ from pathlib import Path
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
     from dbt_artifacts_parser.parsers.catalog.catalog_v1 import (
-        CatalogTable,  # noqa: F401
+        Nodes as CatalogNodes,  # noqa: F401
     )
 from unittest.mock import MagicMock
 
@@ -55,7 +55,7 @@ def test_runner_coverage(caplog, tmp_path):
             warnings.filterwarnings("ignore", category=UserWarning)
             from dbt_artifacts_parser.parser import parse_manifest
             from dbt_artifacts_parser.parsers.catalog.catalog_v1 import (
-                CatalogTable,  # noqa: F401
+                Nodes as CatalogNodes,  # noqa: F401
             )
         from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (  # noqa: F401
             Exposures,
@@ -189,7 +189,7 @@ def test_runner_failure():
             warnings.filterwarnings("ignore", category=UserWarning)
             from dbt_artifacts_parser.parser import parse_manifest
             from dbt_artifacts_parser.parsers.catalog.catalog_v1 import (
-                CatalogTable,  # noqa: F401
+                Nodes as CatalogNodes,  # noqa: F401
             )
         from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (  # noqa: F401
             Exposures,
@@ -315,7 +315,7 @@ def test_runner_success():
             warnings.filterwarnings("ignore", category=UserWarning)
             from dbt_artifacts_parser.parser import parse_manifest
             from dbt_artifacts_parser.parsers.catalog.catalog_v1 import (
-                CatalogTable,  # noqa: F401
+                Nodes as CatalogNodes,  # noqa: F401
             )
         from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (  # noqa: F401
             Exposures,
@@ -440,7 +440,7 @@ def test_runner_windows(caplog, tmp_path):
         warnings.filterwarnings("ignore", category=UserWarning)
         from dbt_artifacts_parser.parser import parse_manifest
         from dbt_artifacts_parser.parsers.catalog.catalog_v1 import (
-            CatalogTable,  # noqa: F401
+            Nodes as CatalogNodes,  # noqa: F401
         )
 
     DbtBouncerConf.model_rebuild()

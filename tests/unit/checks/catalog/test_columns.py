@@ -5,7 +5,7 @@ import pytest
 
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
-    from dbt_artifacts_parser.parsers.catalog.catalog_v1 import CatalogTable
+    from dbt_artifacts_parser.parsers.catalog.catalog_v1 import Nodes as CatalogNodes
 
 
 from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import Nodes4, Nodes6
@@ -34,7 +34,7 @@ CheckColumnHasSpecifiedTest.model_rebuild()
     ("catalog_node", "models", "expectation"),
     [
         (
-            CatalogTable(
+            CatalogNodes(
                 **{
                     "columns": {
                         "col_1": {
@@ -90,7 +90,7 @@ CheckColumnHasSpecifiedTest.model_rebuild()
             does_not_raise(),
         ),
         (
-            CatalogTable(
+            CatalogNodes(
                 **{
                     "columns": {
                         "col_1": {
@@ -159,7 +159,7 @@ def test_check_column_description_populated(catalog_node, models, expectation):
     ("catalog_node", "column_name_pattern", "test_name", "tests", "expectation"),
     [
         (
-            CatalogTable(
+            CatalogNodes(
                 **{
                     "columns": {
                         "col_1": {
@@ -208,7 +208,7 @@ def test_check_column_description_populated(catalog_node, models, expectation):
             does_not_raise(),
         ),
         (
-            CatalogTable(
+            CatalogNodes(
                 **{
                     "columns": {
                         "col_1": {
@@ -279,7 +279,7 @@ def test_check_column_has_specified_test(
     ("catalog_node", "models", "expectation"),
     [
         (
-            CatalogTable(
+            CatalogNodes(
                 **{
                     "columns": {
                         "col_1": {
@@ -333,7 +333,7 @@ def test_check_column_has_specified_test(
             does_not_raise(),
         ),
         (
-            CatalogTable(
+            CatalogNodes(
                 **{
                     "columns": {
                         "col_1": {
@@ -396,7 +396,7 @@ def test_check_columns_are_all_documented(catalog_node, models, expectation):
     ("catalog_node", "models", "expectation"),
     [
         (
-            CatalogTable(
+            CatalogNodes(
                 **{
                     "columns": {
                         "col_1": {
@@ -442,7 +442,7 @@ def test_check_columns_are_all_documented(catalog_node, models, expectation):
             does_not_raise(),
         ),
         (
-            CatalogTable(
+            CatalogNodes(
                 **{
                     "columns": {
                         "col_1": {
@@ -517,7 +517,7 @@ def test_check_columns_are_documented_in_public_models(
     ("catalog_node", "column_name_pattern", "types", "expectation"),
     [
         (
-            CatalogTable(
+            CatalogNodes(
                 **{
                     "columns": {
                         "col_1_date": {
@@ -540,7 +540,7 @@ def test_check_columns_are_documented_in_public_models(
             does_not_raise(),
         ),
         (
-            CatalogTable(
+            CatalogNodes(
                 **{
                     "columns": {
                         "col_1_date": {
@@ -573,7 +573,7 @@ def test_check_columns_are_documented_in_public_models(
             does_not_raise(),
         ),
         (
-            CatalogTable(
+            CatalogNodes(
                 **{
                     "columns": {
                         "col_1": {

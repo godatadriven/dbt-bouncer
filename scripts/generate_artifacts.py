@@ -9,7 +9,7 @@ from dbt_bouncer.logger import configure_console_logging
 def build_pex_file(dbt_version, pex_file_name):
     """Build a pex file of `dbt-bouncer` if it does not already exist."""
     if not Path(pex_file_name).exists():
-        logging.info(f"Building pex file for dbt version {dbt_version}")  # noqa: LOG015
+        logging.info(f"Building pex file for dbt version {dbt_version}")
         sh.poetry(
             [
                 "run",
@@ -42,7 +42,7 @@ def generate_artifacts(
     pex_file_name,
 ):
     """Generate dbt artifacts for all specified versions of dbt. These artifacts are used in testing."""
-    logging.info(f"Generating dbt artifacts for dbt version {dbt_version}")  # noqa: LOG015
+    logging.info(f"Generating dbt artifacts for dbt version {dbt_version}")
     Path(artifact_path).mkdir(exist_ok=True, parents=True)
     sh.python(
         [

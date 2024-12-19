@@ -13,14 +13,16 @@ if TYPE_CHECKING:
 
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", category=UserWarning)
-        from dbt_artifacts_parser.parsers.catalog.catalog_v1 import CatalogTable
+        from dbt_artifacts_parser.parsers.catalog.catalog_v1 import (
+            Nodes as CatalogNodes,
+        )
 
 
 class CheckSourceColumnsAreAllDocumented(BaseCheck):
     """All columns in a source should be included in the source's properties file, i.e. `.yml` file.
 
     Receives:
-        catalog_source (CatalogTable): The CatalogTable object to check.
+        catalog_source (CatalogNodes): The CatalogNodes object to check.
         sources (List[DbtBouncerSourceBase]): List of DbtBouncerSourceBase objects parsed from `catalog.json`.
 
     Other Parameters:
@@ -36,7 +38,7 @@ class CheckSourceColumnsAreAllDocumented(BaseCheck):
 
     """
 
-    catalog_source: "CatalogTable" = Field(default=None)
+    catalog_source: "CatalogNodes" = Field(default=None)
     name: Literal["check_source_columns_are_all_documented"]
     sources: List["DbtBouncerSourceBase"] = Field(default=[])
 

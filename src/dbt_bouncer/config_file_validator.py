@@ -226,7 +226,7 @@ def validate_conf(
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=UserWarning)
             from dbt_artifacts_parser.parsers.catalog.catalog_v1 import (
-                CatalogTable,  # noqa: F401
+                Nodes as CatalogNodes,  # noqa: F401
             )
     if "manifest_checks" in check_categories:
         import dbt_bouncer.checks.manifest

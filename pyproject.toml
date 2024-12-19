@@ -83,7 +83,7 @@ version = "0.0.0"
 [tool.poetry.dependencies]
 python = ">=3.9,<3.14"
 click = "<9"
-dbt-artifacts-parser = "<0.8"
+dbt-artifacts-parser = ">=0.8"
 jinja2 = "^3"
 jinja2-simple-tags = "^0"
 levenshtein = ">=0.26.1"
@@ -165,7 +165,7 @@ indent-width = 4
 target-version = "py38"
 
 [tool.ruff.lint]
-ignore = ["COM812", "D100", "D203", "D213", "D406", "D407", "D409", "E501", "G004", "S101"]
+ignore = ["COM812", "D100", "D203", "D213", "D406", "D407", "D409", "E501", "G004", "LOG015", "S101"]
 preview=true
 select = ["A", "ARG", "B", "C4", "COM", "D", "DOC", "E", "EXE", "F", "I", "ICN", "LOG", "G", "N", "PT", "PTH", "Q", "RUF", "S", "SIM", "T20", "TCH", "TID", "W"]
 unfixable = ["B"]
