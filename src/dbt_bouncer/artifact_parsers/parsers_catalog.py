@@ -1,6 +1,6 @@
 import logging
 import warnings
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Union
 
 from pydantic import BaseModel
 
@@ -11,8 +11,9 @@ with warnings.catch_warnings():
     from dbt_artifacts_parser.parsers.catalog.catalog_v1 import (
         CatalogV1,
     )
+    from dbt_artifacts_parser.parsers.catalog.catalog_v1 import Nodes as CatalogNodes
     from dbt_artifacts_parser.parsers.catalog.catalog_v1 import (
-        Nodes as CatalogNodes,
+        Sources as CatalogSources,
     )
 if TYPE_CHECKING:
     from pathlib import Path
@@ -26,7 +27,7 @@ from dbt_bouncer.artifact_parsers.parsers_common import load_dbt_artifact
 class DbtBouncerCatalogNode(BaseModel):
     """Model for all nodes in `catalog.json`."""
 
-    catalog_node: CatalogNodes
+    catalog_node: Union[CatalogNodes, CatalogSources]
     original_file_path: str
     unique_id: str
 
