@@ -397,21 +397,21 @@ typing-extensions = ">=4.0,<5.0"
 
 [[package]]
 name = "dbt-artifacts-parser"
-version = "0.8.0"
+version = "0.8.1"
 description = "A dbt artifacts parser in python"
 optional = false
-python-versions = ">=3.7.0"
+python-versions = ">=3.8.0"
 files = [
-    {file = "dbt_artifacts_parser-0.8.0-py3-none-any.whl", hash = "sha256:eaebbeb0b00c1c1e221819d2cc9cc4433eb8abf2d76be2eead690dd842d156dc"},
-    {file = "dbt_artifacts_parser-0.8.0.tar.gz", hash = "sha256:072f614c8082c4423c03af538e911c0181518e82123fa53240f9afa4391edc5a"},
+    {file = "dbt_artifacts_parser-0.8.1-py3-none-any.whl", hash = "sha256:d523a23fcf0488e1664f0db498b7123f950673dd6649902698d1c808016c61bc"},
+    {file = "dbt_artifacts_parser-0.8.1.tar.gz", hash = "sha256:5c082171a061dfdfac398ceb58da6d1adce5338e03815a00a9553885df382165"},
 ]
 
 [package.dependencies]
 pydantic = ">=2.0,<3.0"
 
 [package.extras]
-dev = ["build (==1.2.2)", "datamodel-code-generator (>=0.20,<0.30)", "flit (==3.9.0)", "pdoc3 (>=0.9.2)", "pre-commit (>=2.15.0)", "pyyaml (>=5.3)", "yapf (>=0.29.0)"]
-test = ["black (==24.8.0)", "flake8 (>=3.8.3,<4.0.0)", "isort (>=5.0.6,<6.0.0)", "mypy (==1.13.0)", "pylint (>=2.12.0)", "pytest (>=6.2.4,<9.0.0)", "yapf (>=0.29.0)"]
+dev = ["black (==24.8.0)", "build (==1.2.2)", "datamodel-code-generator (>=0.20,<0.30)", "flake8 (>=3.8.3,<4.0.0)", "isort (>=5.0.6,<6.0.0)", "mypy (==1.13.0)", "pdoc3 (>=0.9.2)", "pre-commit (>=2.15.0)", "pylint (>=2.12.0)", "pyyaml (>=5.3)"]
+test = ["pytest (>=6.2.4,<9.0.0)"]
 
 [[package]]
 name = "dbt-common"
