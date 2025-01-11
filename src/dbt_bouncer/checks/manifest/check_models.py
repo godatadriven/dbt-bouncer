@@ -233,7 +233,12 @@ class CheckModelDirectories(BaseCheck):
     permitted_sub_directories: List[str]
 
     def execute(self) -> None:
-        """Execute the check."""
+        """Execute the check.
+
+        Raises:
+            AssertionError: If model located in `./models`.
+
+        """
         matched_path = re.compile(self.include.strip()).match(
             clean_path_str(self.model.original_file_path)
         )
@@ -243,7 +248,7 @@ class CheckModelDirectories(BaseCheck):
         directory_to_check = path_after_match.split("/")[0]
 
         if directory_to_check.replace(".sql", "") == self.model.name:
-            raise AssertionError(  # noqa: DOC501
+            raise AssertionError(
                 f"`{self.model.name}` is not located in a valid sub-directory ({self.permitted_sub_directories})."
             )
         else:

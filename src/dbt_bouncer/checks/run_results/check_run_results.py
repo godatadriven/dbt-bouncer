@@ -84,13 +84,18 @@ class CheckRunResultsMaxGigabytesBilled(BaseCheck):
     run_result: Optional["DbtBouncerRunResultBase"] = Field(default=None)
 
     def execute(self) -> None:
-        """Execute the check."""
+        """Execute the check.
+
+        Raises:
+            RuntimeError: If running with adapter other than `dbt-bigquery`.
+
+        """
         try:
             gigabytes_billed = self.run_result.adapter_response["bytes_billed"] / (
                 1000**3
             )
         except KeyError as e:
-            raise RuntimeError(  # noqa: DOC501
+            raise RuntimeError(
                 "`bytes_billed` not found in adapter response. Are you using the `dbt-bigquery` adapter?",
             ) from e
 
