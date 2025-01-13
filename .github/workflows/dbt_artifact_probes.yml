@@ -9,7 +9,7 @@
     env:
       DBT_PROFILES_DIR: dbt_project
       DBT_PROJECT_DIR: dbt_project
-      POETRY_VERSION: "1.8.3"
+      POETRY_VERSION: "2.0.1"
       POETRY_VIRTUALENVS_IN_PROJECT: true
 
     jobs:

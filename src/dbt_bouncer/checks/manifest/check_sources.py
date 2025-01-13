@@ -41,9 +41,9 @@ class CheckSourceDescriptionPopulated(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
-        assert (
-            len(self.source.description.strip()) > 4
-        ), f"`{self.source.source_name}.{self.source.name}` does not have a populated description."
+        assert len(self.source.description.strip()) > 4, (
+            f"`{self.source.source_name}.{self.source.name}` does not have a populated description."
+        )
 
 
 class CheckSourceFreshnessPopulated(BaseCheck):
@@ -119,9 +119,9 @@ class CheckSourceHasMetaKeys(BaseCheck):
             required_keys=self.keys.model_dump(),
         )
 
-        assert (
-            missing_keys == []
-        ), f"`{self.source.source_name}.{self.source.name}` is missing the following keys from the `meta` config: {[x.replace('>>', '') for x in missing_keys]}"
+        assert missing_keys == [], (
+            f"`{self.source.source_name}.{self.source.name}` is missing the following keys from the `meta` config: {[x.replace('>>', '') for x in missing_keys]}"
+        )
 
 
 class CheckSourceHasTags(BaseCheck):
@@ -154,7 +154,9 @@ class CheckSourceHasTags(BaseCheck):
     def execute(self) -> None:
         """Execute the check."""
         missing_tags = [tag for tag in self.tags if tag not in self.source.tags]
-        assert not missing_tags, f"`{self.source.source_name}.{self.source.name}` is missing required tags: {missing_tags}."
+        assert not missing_tags, (
+            f"`{self.source.source_name}.{self.source.name}` is missing required tags: {missing_tags}."
+        )
 
 
 class CheckSourceLoaderPopulated(BaseCheck):
@@ -181,9 +183,9 @@ class CheckSourceLoaderPopulated(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
-        assert (
-            self.source.loader != ""
-        ), f"`{self.source.source_name}.{self.source.name}` does not have a populated loader."
+        assert self.source.loader != "", (
+            f"`{self.source.source_name}.{self.source.name}` does not have a populated loader."
+        )
 
 
 class CheckSourceNames(BaseCheck):
@@ -219,7 +221,9 @@ class CheckSourceNames(BaseCheck):
         assert (
             re.compile(self.source_name_pattern.strip()).match(self.source.name)
             is not None
-        ), f"`{self.source.source_name}.{self.source.name}` does not match the supplied regex `({self.source_name_pattern.strip()})`."
+        ), (
+            f"`{self.source.source_name}.{self.source.name}` does not match the supplied regex `({self.source_name_pattern.strip()})`."
+        )
 
 
 class CheckSourceNotOrphaned(BaseCheck):
@@ -251,9 +255,9 @@ class CheckSourceNotOrphaned(BaseCheck):
         num_refs = sum(
             self.source.unique_id in model.depends_on.nodes for model in self.models
         )
-        assert (
-            num_refs >= 1
-        ), f"Source `{self.source.source_name}.{self.source.name}` is orphaned, i.e. not referenced by any model."
+        assert num_refs >= 1, (
+            f"Source `{self.source.source_name}.{self.source.name}` is orphaned, i.e. not referenced by any model."
+        )
 
 
 class CheckSourcePropertyFileLocation(BaseCheck):
@@ -287,21 +291,21 @@ class CheckSourcePropertyFileLocation(BaseCheck):
 
         assert path_cleaned.split(
             "/",
-        )[
-            -1
-        ].startswith(
+        )[-1].startswith(
             "_",
-        ), f"The properties file for `{self.source.source_name}.{self.source.name}` (`{path_cleaned}`) does not start with an underscore."
-        assert (
-            expected_substring in path_cleaned
-        ), f"The properties file for `{self.source.source_name}.{self.source.name}` (`{path_cleaned}`) does not contain the expected substring (`{expected_substring}`)."
+        ), (
+            f"The properties file for `{self.source.source_name}.{self.source.name}` (`{path_cleaned}`) does not start with an underscore."
+        )
+        assert expected_substring in path_cleaned, (
+            f"The properties file for `{self.source.source_name}.{self.source.name}` (`{path_cleaned}`) does not contain the expected substring (`{expected_substring}`)."
+        )
         assert path_cleaned.split(
             "/",
-        )[
-            -1
-        ].endswith(
+        )[-1].endswith(
             "__sources.yml",
-        ), f"The properties file for `{self.source.source_name}.{self.source.name}` (`{path_cleaned}`) does not end with `__sources.yml`."
+        ), (
+            f"The properties file for `{self.source.source_name}.{self.source.name}` (`{path_cleaned}`) does not end with `__sources.yml`."
+        )
 
 
 class CheckSourceUsedByModelsInSameDirectory(BaseCheck):
@@ -339,9 +343,9 @@ class CheckSourceUsedByModelsInSameDirectory(BaseCheck):
             ):
                 reffed_models_not_in_same_dir.append(model.unique_id.split(".")[0])
 
-        assert (
-            len(reffed_models_not_in_same_dir) == 0
-        ), f"Source `{self.source.source_name}.{self.source.name}` is referenced by models defined in a different directory: {reffed_models_not_in_same_dir}"
+        assert len(reffed_models_not_in_same_dir) == 0, (
+            f"Source `{self.source.source_name}.{self.source.name}` is referenced by models defined in a different directory: {reffed_models_not_in_same_dir}"
+        )
 
 
 class CheckSourceUsedByOnlyOneModel(BaseCheck):
@@ -373,6 +377,6 @@ class CheckSourceUsedByOnlyOneModel(BaseCheck):
         num_refs = sum(
             self.source.unique_id in model.depends_on.nodes for model in self.models
         )
-        assert (
-            num_refs <= 1
-        ), f"Source `{self.source.source_name}.{self.source.name}` is referenced by more than one model."
+        assert num_refs <= 1, (
+            f"Source `{self.source.source_name}.{self.source.name}` is referenced by more than one model."
+        )
