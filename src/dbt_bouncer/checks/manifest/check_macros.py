@@ -90,9 +90,9 @@ class CheckMacroArgumentsDescriptionPopulated(BaseCheck):
             ):
                 non_complying_args.append(arg)
 
-        assert (
-            non_complying_args == []
-        ), f"Macro `{self.macro.name}` does not have a populated description for the following argument(s): {non_complying_args}."
+        assert non_complying_args == [], (
+            f"Macro `{self.macro.name}` does not have a populated description for the following argument(s): {non_complying_args}."
+        )
 
 
 class CheckMacroCodeDoesNotContainRegexpPattern(BaseCheck):
@@ -130,7 +130,9 @@ class CheckMacroCodeDoesNotContainRegexpPattern(BaseCheck):
                 self.macro.macro_sql
             )
             is None
-        ), f"Macro `{self.macro.name}` contains a banned string: `{self.regexp_pattern.strip()}`."
+        ), (
+            f"Macro `{self.macro.name}` contains a banned string: `{self.regexp_pattern.strip()}`."
+        )
 
 
 class CheckMacroDescriptionPopulated(BaseCheck):
@@ -163,9 +165,9 @@ class CheckMacroDescriptionPopulated(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
-        assert (
-            len(self.macro.description.strip()) > 4
-        ), f"Macro `{self.macro.name}` does not have a populated description."
+        assert len(self.macro.description.strip()) > 4, (
+            f"Macro `{self.macro.name}` does not have a populated description."
+        )
 
 
 class CheckMacroMaxNumberOfLines(BaseCheck):
@@ -203,9 +205,9 @@ class CheckMacroMaxNumberOfLines(BaseCheck):
         """Execute the check."""
         actual_number_of_lines = self.macro.macro_sql.count("\n") + 1
 
-        assert (
-            actual_number_of_lines <= self.max_number_of_lines
-        ), f"Macro `{self.macro.name}` has {actual_number_of_lines} lines, this is more than the maximum permitted number of lines ({self.max_number_of_lines})."
+        assert actual_number_of_lines <= self.max_number_of_lines, (
+            f"Macro `{self.macro.name}` has {actual_number_of_lines} lines, this is more than the maximum permitted number of lines ({self.max_number_of_lines})."
+        )
 
 
 class CheckMacroNameMatchesFileName(BaseCheck):
@@ -240,7 +242,9 @@ class CheckMacroNameMatchesFileName(BaseCheck):
                 == clean_path_str(self.macro.original_file_path)
                 .split("/")[-1]
                 .split(".")[0]
-            ), f"Macro `{self.macro.unique_id}` is not in a file named `{self.macro.name[5:]}.sql`."
+            ), (
+                f"Macro `{self.macro.unique_id}` is not in a file named `{self.macro.name[5:]}.sql`."
+            )
         else:
             assert (
                 self.macro.name
@@ -278,9 +282,9 @@ class CheckMacroPropertyFileLocation(BaseCheck):
             clean_path_str(self.macro.original_file_path)[6:].split("/")[:-1]
         )
 
-        assert (
-            clean_path_str(self.macro.patch_path) is not None
-        ), f"Macro `{self.macro.name}` is not defined in a `.yml` properties file."
+        assert clean_path_str(self.macro.patch_path) is not None, (
+            f"Macro `{self.macro.name}` is not defined in a `.yml` properties file."
+        )
         properties_yml_name = clean_path_str(self.macro.patch_path).split("/")[-1]
 
         if clean_path_str(self.macro.original_file_path).startswith(
@@ -288,16 +292,20 @@ class CheckMacroPropertyFileLocation(BaseCheck):
         ):  # Do not check generic tests (which are also macros)
             pass
         elif expected_substr == "":  # i.e. macro in ./macros
-            assert (
-                properties_yml_name == "_macros.yml"
-            ), f"The properties file for `{self.macro.name}` (`{properties_yml_name}`) should be `_macros.yml`."
+            assert properties_yml_name == "_macros.yml", (
+                f"The properties file for `{self.macro.name}` (`{properties_yml_name}`) should be `_macros.yml`."
+            )
         else:
             assert properties_yml_name.startswith(
                 "_",
-            ), f"The properties file for `{self.macro.name}` (`{properties_yml_name}`) does not start with an underscore."
-            assert (
-                expected_substr in properties_yml_name
-            ), f"The properties file for `{self.macro.name}` (`{properties_yml_name}`) does not contain the expected substring (`{expected_substr}`)."
+            ), (
+                f"The properties file for `{self.macro.name}` (`{properties_yml_name}`) does not start with an underscore."
+            )
+            assert expected_substr in properties_yml_name, (
+                f"The properties file for `{self.macro.name}` (`{properties_yml_name}`) does not contain the expected substring (`{expected_substr}`)."
+            )
             assert properties_yml_name.endswith(
                 "__macros.yml",
-            ), f"The properties file for `{self.macro.name.name}` (`{properties_yml_name}`) does not end with `__macros.yml`."
+            ), (
+                f"The properties file for `{self.macro.name.name}` (`{properties_yml_name}`) does not end with `__macros.yml`."
+            )

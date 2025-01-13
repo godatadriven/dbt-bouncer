@@ -63,9 +63,9 @@ def test_cli_happy_path(caplog, dbt_artifacts_dir, request, tmp_path):
 
             semantic_models_text = re.search(r"\d* sources", record).group(0)  # type: ignore[union-attr]
             semantic_models_num = int(re.search(r"\d*", semantic_models_text).group(0))  # type: ignore[union-attr]
-            assert (
-                semantic_models_num > 0
-            ), f"Only found {semantic_models_num} semantic models."
+            assert semantic_models_num > 0, (
+                f"Only found {semantic_models_num} semantic models."
+            )
 
             sources_text = re.search(r"\d* sources", record).group(0)  # type: ignore[union-attr]
             sources_num = int(re.search(r"\d*", sources_text).group(0))  # type: ignore[union-attr]
