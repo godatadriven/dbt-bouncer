@@ -93,9 +93,9 @@ class CheckUnitTestCoverage(BaseModel):
                 num_models_with_unit_tests / len(relevant_models)
             ) * 100
 
-            assert (
-                unit_test_coverage_pct >= self.min_unit_test_coverage_pct
-            ), f"Only {unit_test_coverage_pct}% of models have a unit test, this is less than the permitted minimum of {self.min_unit_test_coverage_pct}%."
+            assert unit_test_coverage_pct >= self.min_unit_test_coverage_pct, (
+                f"Only {unit_test_coverage_pct}% of models have a unit test, this is less than the permitted minimum of {self.min_unit_test_coverage_pct}%."
+            )
         else:
             logging.warning(
                 "The `check_unit_test_expect_format` check is only supported for dbt 1.8.0 and above.",
@@ -143,9 +143,9 @@ class CheckUnitTestExpectFormats(BaseCheck):
         if get_package_version_number(
             self.manifest_obj.manifest.metadata.dbt_version
         ) >= get_package_version_number("1.8.0"):
-            assert (
-                self.unit_test.expect.format.value in self.permitted_formats
-            ), f"Unit test `{self.unit_test.name}` has an `expect` format that is not permitted. Permitted formats are: {self.permitted_formats}."
+            assert self.unit_test.expect.format.value in self.permitted_formats, (
+                f"Unit test `{self.unit_test.name}` has an `expect` format that is not permitted. Permitted formats are: {self.permitted_formats}."
+            )
         else:
             logging.warning(
                 "The `check_unit_test_expect_format` check is only supported for dbt 1.8.0 and above.",
@@ -194,9 +194,9 @@ class CheckUnitTestGivenFormats(BaseCheck):
             self.manifest_obj.manifest.metadata.dbt_version
         ) >= get_package_version_number("1.8.0"):
             given_formats = [i.format.value for i in self.unit_test.given]
-            assert all(
-                e in self.permitted_formats for e in given_formats
-            ), f"Unit test `{self.unit_test.name}` has given formats which are not permitted. Permitted formats are: {self.permitted_formats}."
+            assert all(e in self.permitted_formats for e in given_formats), (
+                f"Unit test `{self.unit_test.name}` has given formats which are not permitted. Permitted formats are: {self.permitted_formats}."
+            )
         else:
             logging.warning(
                 "The `check_unit_test_given_formats` check is only supported for dbt 1.8.0 and above.",

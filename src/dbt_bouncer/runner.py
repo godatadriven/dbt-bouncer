@@ -47,7 +47,7 @@ def runner(
     macros: List["Macros"],
     manifest_obj: "DbtBouncerManifest",
     models: List["DbtBouncerModel"],
-    output_file: Union[None, Path],
+    output_file: Union[Path, None],
     run_results: List["DbtBouncerRunResult"],
     semantic_models: List["DbtBouncerSemanticModel"],
     sources: List["DbtBouncerSource"],

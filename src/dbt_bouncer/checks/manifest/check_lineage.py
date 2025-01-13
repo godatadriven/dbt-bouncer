@@ -74,7 +74,9 @@ class CheckLineagePermittedUpstreamModels(BaseCheck):
             )
             is None
         ]
-        assert not not_permitted_upstream_models, f"`{self.model.name}` references upstream models that are not permitted: {[m.split('.')[-1] for m in not_permitted_upstream_models]}."
+        assert not not_permitted_upstream_models, (
+            f"`{self.model.name}` references upstream models that are not permitted: {[m.split('.')[-1] for m in not_permitted_upstream_models]}."
+        )
 
 
 class CheckLineageSeedCannotBeUsed(BaseCheck):

@@ -59,9 +59,9 @@ class CheckModelAccess(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
-        assert (
-            self.model.access.value == self.access
-        ), f"`{self.model.name}` has `{self.model.access.value}` access, it should have access `{self.access}`."
+        assert self.model.access.value == self.access, (
+            f"`{self.model.name}` has `{self.model.access.value}` access, it should have access `{self.access}`."
+        )
 
 
 class CheckModelCodeDoesNotContainRegexpPattern(BaseCheck):
@@ -99,7 +99,9 @@ class CheckModelCodeDoesNotContainRegexpPattern(BaseCheck):
                 self.model.raw_code
             )
             is None
-        ), f"`{self.model.name}` contains a banned string: `{self.regexp_pattern.strip()}`."
+        ), (
+            f"`{self.model.name}` contains a banned string: `{self.regexp_pattern.strip()}`."
+        )
 
 
 class CheckModelContractsEnforcedForPublicModel(BaseCheck):
@@ -127,9 +129,9 @@ class CheckModelContractsEnforcedForPublicModel(BaseCheck):
     def execute(self) -> None:
         """Execute the check."""
         if self.model.access.value == "public":
-            assert (
-                self.model.contract.enforced is True
-            ), f"`{self.model.name}` is a public model but does not have contracts enforced."
+            assert self.model.contract.enforced is True, (
+                f"`{self.model.name}` is a public model but does not have contracts enforced."
+            )
 
 
 class CheckModelDependsOnMultipleSources(BaseCheck):
@@ -159,9 +161,9 @@ class CheckModelDependsOnMultipleSources(BaseCheck):
         num_reffed_sources = sum(
             x.split(".")[0] == "source" for x in self.model.depends_on.nodes
         )
-        assert (
-            num_reffed_sources <= 1
-        ), f"`{self.model.name}` references more than one source."
+        assert num_reffed_sources <= 1, (
+            f"`{self.model.name}` references more than one source."
+        )
 
 
 class CheckModelDescriptionPopulated(BaseCheck):
@@ -188,9 +190,9 @@ class CheckModelDescriptionPopulated(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
-        assert (
-            len(self.model.description.strip()) > 4
-        ), f"`{self.model.name}` does not have a populated description."
+        assert len(self.model.description.strip()) > 4, (
+            f"`{self.model.name}` does not have a populated description."
+        )
 
 
 class CheckModelDirectories(BaseCheck):
@@ -233,7 +235,12 @@ class CheckModelDirectories(BaseCheck):
     permitted_sub_directories: List[str]
 
     def execute(self) -> None:
-        """Execute the check."""
+        """Execute the check.
+
+        Raises:
+            AssertionError: If model located in `./models`.
+
+        """
         matched_path = re.compile(self.include.strip()).match(
             clean_path_str(self.model.original_file_path)
         )
@@ -243,13 +250,13 @@ class CheckModelDirectories(BaseCheck):
         directory_to_check = path_after_match.split("/")[0]
 
         if directory_to_check.replace(".sql", "") == self.model.name:
-            raise AssertionError(  # noqa: DOC501
+            raise AssertionError(
                 f"`{self.model.name}` is not located in a valid sub-directory ({self.permitted_sub_directories})."
             )
         else:
-            assert (
-                directory_to_check in self.permitted_sub_directories
-            ), f"`{self.model.name}` is located in the `{directory_to_check}` sub-directory, this is not a valid sub-directory ({self.permitted_sub_directories})."
+            assert directory_to_check in self.permitted_sub_directories, (
+                f"`{self.model.name}` is located in the `{directory_to_check}` sub-directory, this is not a valid sub-directory ({self.permitted_sub_directories})."
+            )
 
 
 class CheckModelDocumentedInSameDirectory(BaseCheck):
@@ -288,9 +295,9 @@ class CheckModelDocumentedInSameDirectory(BaseCheck):
             ]
         ).split("/")[:-1]
 
-        assert (
-            model_doc_dir == model_sql_dir
-        ), f"`{self.model.name}` is documented in a different directory to the `.sql` file: `{'/'.join(model_doc_dir)}` vs `{'/'.join(model_sql_dir)}`."
+        assert model_doc_dir == model_sql_dir, (
+            f"`{self.model.name}` is documented in a different directory to the `.sql` file: `{'/'.join(model_doc_dir)}` vs `{'/'.join(model_sql_dir)}`."
+        )
 
 
 class CheckModelHasContractsEnforced(BaseCheck):
@@ -318,9 +325,9 @@ class CheckModelHasContractsEnforced(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
-        assert (
-            self.model.contract.enforced is True
-        ), f"`{self.model.name}` does not have contracts enforced."
+        assert self.model.contract.enforced is True, (
+            f"`{self.model.name}` does not have contracts enforced."
+        )
 
 
 class CheckModelHasMetaKeys(BaseCheck):
@@ -356,9 +363,9 @@ class CheckModelHasMetaKeys(BaseCheck):
             meta_config=self.model.meta,
             required_keys=self.keys.model_dump(),
         )
-        assert (
-            missing_keys == []
-        ), f"`{self.model.name}` is missing the following keys from the `meta` config: {[x.replace('>>', '') for x in missing_keys]}"
+        assert missing_keys == [], (
+            f"`{self.model.name}` is missing the following keys from the `meta` config: {[x.replace('>>', '') for x in missing_keys]}"
+        )
 
 
 class CheckModelHasNoUpstreamDependencies(BaseCheck):
@@ -385,9 +392,9 @@ class CheckModelHasNoUpstreamDependencies(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
-        assert (
-            len(self.model.depends_on.nodes) > 0
-        ), f"`{self.model.name}` has no upstream dependencies, this likely indicates hard-coded tables references."
+        assert len(self.model.depends_on.nodes) > 0, (
+            f"`{self.model.name}` has no upstream dependencies, this likely indicates hard-coded tables references."
+        )
 
 
 class CheckModelHasTags(BaseCheck):
@@ -420,9 +427,9 @@ class CheckModelHasTags(BaseCheck):
     def execute(self) -> None:
         """Execute the check."""
         missing_tags = [tag for tag in self.tags if tag not in self.model.tags]
-        assert (
-            not missing_tags
-        ), f"`{self.model.name}` is missing required tags: {missing_tags}."
+        assert not missing_tags, (
+            f"`{self.model.name}` is missing required tags: {missing_tags}."
+        )
 
 
 class CheckModelHasUniqueTest(BaseCheck):
@@ -475,9 +482,9 @@ class CheckModelHasUniqueTest(BaseCheck):
             for test in self.tests
             if hasattr(test, "test_metadata")
         )
-        assert (
-            num_unique_tests >= 1
-        ), f"`{self.model.name}` does not have a test for uniqueness of a column."
+        assert num_unique_tests >= 1, (
+            f"`{self.model.name}` does not have a test for uniqueness of a column."
+        )
 
 
 class CheckModelHasUnitTests(BaseCheck):
@@ -532,9 +539,9 @@ class CheckModelHasUnitTests(BaseCheck):
                     if t.depends_on.nodes[0] == self.model.unique_id
                 ],
             )
-            assert (
-                num_unit_tests >= self.min_number_of_unit_tests
-            ), f"`{self.model.name}` has {num_unit_tests} unit tests, this is less than the minimum of {self.min_number_of_unit_tests}."
+            assert num_unit_tests >= self.min_number_of_unit_tests, (
+                f"`{self.model.name}` has {num_unit_tests} unit tests, this is less than the minimum of {self.min_number_of_unit_tests}."
+            )
         else:
             logging.warning(
                 "The `check_model_has_unit_tests` check is only supported for dbt 1.8.0 and above.",
@@ -648,7 +655,9 @@ class CheckModelMaxChainedViews(BaseCheck):
                 ),
             )
             == 0
-        ), f"`{self.model.name}` has more than {self.max_chained_views} upstream dependents that are not tables."
+        ), (
+            f"`{self.model.name}` has more than {self.max_chained_views} upstream dependents that are not tables."
+        )
 
 
 class CheckModelMaxFanout(BaseCheck):
@@ -686,9 +695,9 @@ class CheckModelMaxFanout(BaseCheck):
             self.model.unique_id in m.depends_on.nodes for m in self.models
         )
 
-        assert (
-            num_downstream_models <= self.max_downstream_models
-        ), f"`{self.model.name}` has {num_downstream_models} downstream models, which is more than the permitted maximum of {self.max_downstream_models}."
+        assert num_downstream_models <= self.max_downstream_models, (
+            f"`{self.model.name}` has {num_downstream_models} downstream models, which is more than the permitted maximum of {self.max_downstream_models}."
+        )
 
 
 class CheckModelMaxNumberOfLines(BaseCheck):
@@ -725,9 +734,9 @@ class CheckModelMaxNumberOfLines(BaseCheck):
         """Execute the check."""
         actual_number_of_lines = self.model.raw_code.count("\n") + 1
 
-        assert (
-            actual_number_of_lines <= self.max_number_of_lines
-        ), f"`{self.model.name}` has {actual_number_of_lines} lines, this is more than the maximum permitted number of lines ({self.max_number_of_lines})."
+        assert actual_number_of_lines <= self.max_number_of_lines, (
+            f"`{self.model.name}` has {actual_number_of_lines} lines, this is more than the maximum permitted number of lines ({self.max_number_of_lines})."
+        )
 
 
 class CheckModelMaxUpstreamDependencies(BaseCheck):
@@ -777,15 +786,15 @@ class CheckModelMaxUpstreamDependencies(BaseCheck):
             [m for m in self.model.depends_on.nodes if m.split(".")[0] == "source"],
         )
 
-        assert (
-            num_upstream_macros <= self.max_upstream_macros
-        ), f"`{self.model.name}` has {num_upstream_macros} upstream macros, which is more than the permitted maximum of {self.max_upstream_macros}."
-        assert (
-            num_upstream_models <= self.max_upstream_models
-        ), f"`{self.model.name}` has {num_upstream_models} upstream models, which is more than the permitted maximum of {self.max_upstream_models}."
-        assert (
-            num_upstream_sources <= self.max_upstream_sources
-        ), f"`{self.model.name}` has {num_upstream_sources} upstream sources, which is more than the permitted maximum of {self.max_upstream_sources}."
+        assert num_upstream_macros <= self.max_upstream_macros, (
+            f"`{self.model.name}` has {num_upstream_macros} upstream macros, which is more than the permitted maximum of {self.max_upstream_macros}."
+        )
+        assert num_upstream_models <= self.max_upstream_models, (
+            f"`{self.model.name}` has {num_upstream_models} upstream models, which is more than the permitted maximum of {self.max_upstream_models}."
+        )
+        assert num_upstream_sources <= self.max_upstream_sources, (
+            f"`{self.model.name}` has {num_upstream_sources} upstream sources, which is more than the permitted maximum of {self.max_upstream_sources}."
+        )
 
 
 class CheckModelNames(BaseCheck):
@@ -826,7 +835,9 @@ class CheckModelNames(BaseCheck):
         assert (
             re.compile(self.model_name_pattern.strip()).match(self.model.name)
             is not None
-        ), f"`{self.model.name}` does not match the supplied regex `{self.model_name_pattern.strip()})`."
+        ), (
+            f"`{self.model.name}` does not match the supplied regex `{self.model_name_pattern.strip()})`."
+        )
 
 
 class CheckModelPropertyFileLocation(BaseCheck):
@@ -868,13 +879,17 @@ class CheckModelPropertyFileLocation(BaseCheck):
 
         assert properties_yml_name.startswith(
             "_",
-        ), f"The properties file for `{self.model.name}` (`{properties_yml_name}`) does not start with an underscore."
-        assert (
-            expected_substr in properties_yml_name
-        ), f"The properties file for `{self.model.name}` (`{properties_yml_name}`) does not contain the expected substring (`{expected_substr}`)."
+        ), (
+            f"The properties file for `{self.model.name}` (`{properties_yml_name}`) does not start with an underscore."
+        )
+        assert expected_substr in properties_yml_name, (
+            f"The properties file for `{self.model.name}` (`{properties_yml_name}`) does not contain the expected substring (`{expected_substr}`)."
+        )
         assert properties_yml_name.endswith(
             "__models.yml",
-        ), f"The properties file for `{self.model.name}` (`{properties_yml_name}`) does not end with `__models.yml`."
+        ), (
+            f"The properties file for `{self.model.name}` (`{properties_yml_name}`) does not end with `__models.yml`."
+        )
 
 
 class CheckModelsDocumentationCoverage(BaseModel):
@@ -931,7 +946,9 @@ class CheckModelsDocumentationCoverage(BaseModel):
 
         assert (
             model_description_coverage_pct >= self.min_model_documentation_coverage_pct
-        ), f"Only {model_description_coverage_pct}% of models have a populated description, this is less than the permitted minimum of {self.min_model_documentation_coverage_pct}%."
+        ), (
+            f"Only {model_description_coverage_pct}% of models have a populated description, this is less than the permitted minimum of {self.min_model_documentation_coverage_pct}%."
+        )
 
 
 class CheckModelsTestCoverage(BaseModel):
@@ -985,6 +1002,6 @@ class CheckModelsTestCoverage(BaseModel):
         num_models_with_tests = len(set(models_with_tests))
         model_test_coverage_pct = (num_models_with_tests / num_models) * 100
 
-        assert (
-            model_test_coverage_pct >= self.min_model_test_coverage_pct
-        ), f"Only {model_test_coverage_pct}% of models have at least one test, this is less than the permitted minimum of {self.min_model_test_coverage_pct}%."
+        assert model_test_coverage_pct >= self.min_model_test_coverage_pct, (
+            f"Only {model_test_coverage_pct}% of models have at least one test, this is less than the permitted minimum of {self.min_model_test_coverage_pct}%."
+        )

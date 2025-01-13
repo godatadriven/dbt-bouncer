@@ -50,4 +50,6 @@ class CheckSemanticModelOnNonPublicModels(BaseCheck):
                 if model.access.value != "public":
                     non_public_upstream_dependencies.append(model.name)
 
-        assert not non_public_upstream_dependencies, f"Semantic model `{self.semantic_model.name}` is based on a model(s) that is not public: {non_public_upstream_dependencies}."
+        assert not non_public_upstream_dependencies, (
+            f"Semantic model `{self.semantic_model.name}` is based on a model(s) that is not public: {non_public_upstream_dependencies}."
+        )
