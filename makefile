@@ -15,16 +15,16 @@ build-pex:
 		--max-install-jobs 0 \
 		--output-file ./dist/dbt-bouncer.pex \
 		--pip-version 24.1 \
-		--platform macosx_11_0_x86_64-cp-39-cp39 \
-		--platform macosx_11_0_x86_64-cp-310-cp310 \
-		--platform macosx_11_0_x86_64-cp-311-cp311 \
-		--platform macosx_11_0_x86_64-cp-312-cp312 \
-		--platform macosx_10_13_x86_64-cp-313-cp313 \
-		--platform manylinux2014_x86_64-cp-39-cp39 \
-		--platform manylinux2014_x86_64-cp-310-cp310 \
-		--platform manylinux2014_x86_64-cp-311-cp311 \
-		--platform manylinux2014_x86_64-cp-312-cp312 \
-		--platform manylinux2014_x86_64-cp-313-cp313 \
+		--platform macosx_11_0_x86_64-cp-3.9.21-cp39 \
+		--platform macosx_11_0_x86_64-cp-3.10.16-cp310 \
+		--platform macosx_11_0_x86_64-cp-3.11.11-cp311 \
+		--platform macosx_11_0_x86_64-cp-3.12.8-cp312 \
+		--platform macosx_10_13_x86_64-cp-3.13.0-cp313 \
+		--platform manylinux2014_x86_64-cp-3.9.21-cp39 \
+		--platform manylinux2014_x86_64-cp-3.10.16-cp310 \
+		--platform manylinux2014_x86_64-cp-3.11.11-cp311 \
+		--platform manylinux2014_x86_64-cp-3.12.8-cp312 \
+		--platform manylinux2014_x86_64-cp-3.13.0-cp313 \
 		--python-shebang='/usr/bin/env python' \
 		--script dbt-bouncer
 

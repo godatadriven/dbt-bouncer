@@ -15,7 +15,7 @@ env:
   DBT_PROJECT_DIR: dbt_project
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   IMAGE_NAME: ${{ github.repository }}
-  POETRY_VERSION: "1.8.3"
+  POETRY_VERSION: "2.0.1"
   POETRY_VIRTUALENVS_IN_PROJECT: true
   REGISTRY: ghcr.io
 

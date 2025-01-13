@@ -60,7 +60,9 @@ class CheckColumnDescriptionPopulated(BaseCheck):
                 ):
                     non_complying_columns.append(v.name)
 
-            assert not non_complying_columns, f"`{self.catalog_node.unique_id.split('.')[-1]}` has columns that do not have a populated description: {non_complying_columns}"
+            assert not non_complying_columns, (
+                f"`{self.catalog_node.unique_id.split('.')[-1]}` has columns that do not have a populated description: {non_complying_columns}"
+            )
 
 
 class CheckColumnHasSpecifiedTest(BaseCheck):
@@ -117,7 +119,9 @@ class CheckColumnHasSpecifiedTest(BaseCheck):
             not in [f"{t.attached_node}.{t.column_name}" for t in relevant_tests]
         ]
 
-        assert not non_complying_columns, f"`{self.catalog_node.unique_id.split('.')[-1]}` has columns that should have a `{self.test_name}` test: {non_complying_columns}"
+        assert not non_complying_columns, (
+            f"`{self.catalog_node.unique_id.split('.')[-1]}` has columns that should have a `{self.test_name}` test: {non_complying_columns}"
+        )
 
 
 class CheckColumnNameCompliesToColumnType(BaseCheck):
@@ -182,7 +186,9 @@ class CheckColumnNameCompliesToColumnType(BaseCheck):
             and re.compile(self.column_name_pattern.strip()).match(v.name) is None
         ]
 
-        assert not non_complying_columns, f"`{self.catalog_node.unique_id.split('.')[-1]}` has columns that don't comply with the specified regexp pattern (`{self.column_name_pattern}`): {non_complying_columns}"
+        assert not non_complying_columns, (
+            f"`{self.catalog_node.unique_id.split('.')[-1]}` has columns that don't comply with the specified regexp pattern (`{self.column_name_pattern}`): {non_complying_columns}"
+        )
 
 
 class CheckColumnsAreAllDocumented(BaseCheck):
@@ -220,7 +226,9 @@ class CheckColumnsAreAllDocumented(BaseCheck):
                 for _, v in self.catalog_node.columns.items()
                 if v.name not in model.columns
             ]
-            assert not undocumented_columns, f"`{self.catalog_node.unique_id.split('.')[-1]}` has columns that are not included in the models properties file: {undocumented_columns}"
+            assert not undocumented_columns, (
+                f"`{self.catalog_node.unique_id.split('.')[-1]}` has columns that are not included in the models properties file: {undocumented_columns}"
+            )
 
 
 class CheckColumnsAreDocumentedInPublicModels(BaseCheck):
@@ -263,4 +271,6 @@ class CheckColumnsAreDocumentedInPublicModels(BaseCheck):
                     ):
                         non_complying_columns.append(v.name)
 
-            assert not non_complying_columns, f"`{self.catalog_node.unique_id.split('.')[-1]}` is a public model but has columns that don't have a populated description: {non_complying_columns}"
+            assert not non_complying_columns, (
+                f"`{self.catalog_node.unique_id.split('.')[-1]}` is a public model but has columns that don't have a populated description: {non_complying_columns}"
+            )

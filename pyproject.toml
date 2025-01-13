@@ -1,3 +1,49 @@
+[project]
+authors = [{name="Padraic Slattery", email= "pgoslatara@gmail.com"}]
+classifiers = [
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+]
+dependencies =[
+  "click (<9)",
+  "dbt-artifacts-parser (>=0.8)",
+  "jinja2 (>=3,<4)",
+  "jinja2-simple-tags (<1)",
+  "levenshtein (>=0.26.1,<1)",
+  "packaging (<25)",
+  "progress",
+  "pydantic (>=2,<3)",
+  "pyyaml (<7)",
+  "requests (>=2,<3)",
+  "tabulate (<1)",
+  "toml (<1)",
+  "semver (<4)",
+  "poetry (>=2.0.1,<3.0.0)"
+]
+description = "Configure and enforce conventions for your dbt project."
+keywords = [
+  "python",
+  "cli",
+  "dbt",
+  "CI/CD",
+]
+license ="MIT"
+maintainers = [{name="Padraic Slattery",email="pgoslatara@gmail.com"}]
+name = "dbt-bouncer"
+readme = "README.md"
+repository = "https://github.com/godatadriven/dbt-bouncer"
+requires-python = ">=3.9,<3.14"
+version = "0.0.0"
+
+[project.scripts]
+dbt-bouncer = "dbt_bouncer.main:cli"
+
 [tool.black]
 line-length = 99
 include = '/project$|\.pyi?$'
@@ -52,49 +98,10 @@ ignore_missing_imports = true
 module = "dbt_artifacts_parser.*"
 
 [tool.poetry]
-authors = ["Padraic Slattery <pgoslatara@gmail.com>"]
-classifiers = [
-  "Programming Language :: Python",
-  "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3 :: Only",
-  "Programming Language :: Python :: 3.9",
-  "Programming Language :: Python :: 3.10",
-  "Programming Language :: Python :: 3.11",
-  "Programming Language :: Python :: 3.12",
-  "Programming Language :: Python :: 3.13",
-]
-description = "Configure and enforce conventions for your dbt project."
-keywords = [
-  "python",
-  "cli",
-  "dbt",
-  "CI/CD",
-]
-license ="MIT"
-maintainers = ["Padraic Slattery <pgoslatara@gmail.com>"]
-name = "dbt-bouncer"
 packages = [
     {include = "dbt_bouncer", from = "src"},
 ]
-readme = "README.md"
-repository = "https://github.com/godatadriven/dbt-bouncer"
-version = "0.0.0"
-
-[tool.poetry.dependencies]
-python = ">=3.9,<3.14"
-click = "<9"
-dbt-artifacts-parser = ">=0.8"
-jinja2 = "^3"
-jinja2-simple-tags = "^0"
-levenshtein = ">=0.26.1"
-packaging = "^24"
-progress = "^1"
-pydantic = "^2"
-pyyaml = "<7"
-requests = "^2"
-tabulate = "^0"
-toml = "^0"
-semver = "^3"
+requires-poetry = ">=2.0.0"
 
 [tool.poetry.group.dev.dependencies]
 autoflake = "^2"
@@ -123,9 +130,6 @@ mkdocs-click = "^0"
 mkdocs-git-revision-date-localized-plugin = "^1"
 mkdocs-material = "^9"
 pymdown-extensions = {extras = ["details"], version = "^10"}
-
-[tool.poetry.scripts]
-dbt-bouncer = "dbt_bouncer.main:cli"
 
 [tool.poetry_bumpversion.file."./src/dbt_bouncer/version.py"]
 [tool.poetry_bumpversion.file."action.yml"]
@@ -185,5 +189,5 @@ quote-style = "double"
 skip-magic-trailing-comma = false
 
 [build-system]
-requires = ["poetry-core>=1.9.0"]
+requires = ["poetry-core>=2.0.0"]
 build-backend = "poetry.core.masonry.api"
