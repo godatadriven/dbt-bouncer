@@ -50,7 +50,9 @@ class CheckExposureOnNonPublicModels(BaseCheck):
                 if model.access.value != "public":
                     non_public_upstream_dependencies.append(model.name)
 
-        assert not non_public_upstream_dependencies, f"`{self.exposure.name}` is based on a model(s) that is not public: {non_public_upstream_dependencies}."
+        assert not non_public_upstream_dependencies, (
+            f"`{self.exposure.name}` is based on a model(s) that is not public: {non_public_upstream_dependencies}."
+        )
 
 
 class CheckExposureOnView(BaseCheck):
@@ -103,4 +105,6 @@ class CheckExposureOnView(BaseCheck):
                 if model.config.materialized in self.materializations_to_include:
                     non_table_upstream_dependencies.append(model.name)
 
-        assert not non_table_upstream_dependencies, f"`{self.exposure.name}` is based on a model that is not a table: {non_table_upstream_dependencies}."
+        assert not non_table_upstream_dependencies, (
+            f"`{self.exposure.name}` is based on a model that is not a table: {non_table_upstream_dependencies}."
+        )

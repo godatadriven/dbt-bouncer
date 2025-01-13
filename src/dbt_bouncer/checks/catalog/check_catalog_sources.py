@@ -52,4 +52,6 @@ class CheckSourceColumnsAreAllDocumented(BaseCheck):
             for _, v in self.catalog_source.columns.items()
             if v.name not in source.columns
         ]
-        assert not undocumented_columns, f"`{self.catalog_source.unique_id}` has columns that are not included in the sources properties file: {undocumented_columns}"
+        assert not undocumented_columns, (
+            f"`{self.catalog_source.unique_id}` has columns that are not included in the sources properties file: {undocumented_columns}"
+        )
