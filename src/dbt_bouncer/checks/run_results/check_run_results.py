@@ -45,9 +45,9 @@ class CheckRunResultsMaxExecutionTime(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
-        assert (
-            self.run_result.execution_time <= self.max_execution_time_seconds
-        ), f"`{self.run_result.unique_id.split('.')[-1]}` has an execution time ({self.run_result.execution_time} greater than permitted ({self.max_execution_time_seconds}s)."
+        assert self.run_result.execution_time <= self.max_execution_time_seconds, (
+            f"`{self.run_result.unique_id.split('.')[-1]}` has an execution time ({self.run_result.execution_time} greater than permitted ({self.max_execution_time_seconds}s)."
+        )
 
 
 class CheckRunResultsMaxGigabytesBilled(BaseCheck):
@@ -99,6 +99,6 @@ class CheckRunResultsMaxGigabytesBilled(BaseCheck):
                 "`bytes_billed` not found in adapter response. Are you using the `dbt-bigquery` adapter?",
             ) from e
 
-        assert (
-            gigabytes_billed < self.max_gigabytes_billed
-        ), f"`{self.run_result.unique_id.split('.')[-2]}` results in ({gigabytes_billed} billed bytes, this is greater than permitted ({self.max_gigabytes_billed})."
+        assert gigabytes_billed < self.max_gigabytes_billed, (
+            f"`{self.run_result.unique_id.split('.')[-2]}` results in ({gigabytes_billed} billed bytes, this is greater than permitted ({self.max_gigabytes_billed})."
+        )

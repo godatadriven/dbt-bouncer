@@ -51,4 +51,6 @@ class CheckProjectName(BaseModel):
                 self.manifest_obj.manifest.metadata.project_name,
             )
             is not None
-        ), f"Project name (`{self.manifest_obj.manifest.metadata.project_name}`) does not conform to the supplied regex `({self.project_name_pattern.strip()})`."
+        ), (
+            f"Project name (`{self.manifest_obj.manifest.metadata.project_name}`) does not conform to the supplied regex `({self.project_name_pattern.strip()})`."
+        )

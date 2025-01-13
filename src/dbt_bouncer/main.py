@@ -38,7 +38,7 @@ def cli(
     ctx: click.Context,
     config_file: PurePath,
     create_pr_comment_file: bool,
-    output_file: Union[None, Path],
+    output_file: Union[Path, None],
     verbosity: int,
 ) -> None:
     """Entrypoint for dbt-bouncer.
