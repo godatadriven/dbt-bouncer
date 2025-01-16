@@ -20,11 +20,91 @@ def test_create_github_comment_file(monkeypatch, tmp_path):
             ["check_model_description_populated", "message_1"],
             ["check_model_description_populated", "message_2"],
         ]
-        create_github_comment_file(failed_checks)
+        create_github_comment_file(failed_checks, show_all_failures=False)
         assert (
             (tmp_path / "github-comment.md").read_text()
             == "## **Failed `dbt-bouncer`** checks\n\n\n| Check name | Failure message |\n| :--- | :--- |\n| check_model_description_populated | message_1 |\n| check_model_description_populated | message_2 |\n\n\nSent from this [GitHub Action workflow run](https://github.com/None/actions/runs/None)."
         )
+
+
+def test_create_github_comment_file_show_all_failures_false(monkeypatch, tmp_path):
+    monkeypatch.chdir(tmp_path)
+
+    with mock.patch.dict(os.environ, clear=True):
+        failed_checks = [
+            ["check_model_description_populated", "message_1"],
+            ["check_model_description_populated", "message_2"],
+            ["check_model_description_populated", "message_3"],
+            ["check_model_description_populated", "message_4"],
+            ["check_model_description_populated", "message_5"],
+            ["check_model_description_populated", "message_6"],
+            ["check_model_description_populated", "message_7"],
+            ["check_model_description_populated", "message_8"],
+            ["check_model_description_populated", "message_9"],
+            ["check_model_description_populated", "message_10"],
+            ["check_model_description_populated", "message_11"],
+            ["check_model_description_populated", "message_12"],
+            ["check_model_description_populated", "message_13"],
+            ["check_model_description_populated", "message_14"],
+            ["check_model_description_populated", "message_15"],
+            ["check_model_description_populated", "message_16"],
+            ["check_model_description_populated", "message_17"],
+            ["check_model_description_populated", "message_18"],
+            ["check_model_description_populated", "message_19"],
+            ["check_model_description_populated", "message_20"],
+            ["check_model_description_populated", "message_21"],
+            ["check_model_description_populated", "message_22"],
+            ["check_model_description_populated", "message_23"],
+            ["check_model_description_populated", "message_24"],
+            ["check_model_description_populated", "message_25"],
+            ["check_model_description_populated", "message_26"],
+            ["check_model_description_populated", "message_27"],
+            ["check_model_description_populated", "message_28"],
+            ["check_model_description_populated", "message_29"],
+            ["check_model_description_populated", "message_30"],
+        ]
+        create_github_comment_file(failed_checks, show_all_failures=False)
+        assert len((tmp_path / "github-comment.md").read_text().split("\n")) == 35
+
+
+def test_create_github_comment_file_show_all_failures_true(monkeypatch, tmp_path):
+    monkeypatch.chdir(tmp_path)
+
+    with mock.patch.dict(os.environ, clear=True):
+        failed_checks = [
+            ["check_model_description_populated", "message_1"],
+            ["check_model_description_populated", "message_2"],
+            ["check_model_description_populated", "message_3"],
+            ["check_model_description_populated", "message_4"],
+            ["check_model_description_populated", "message_5"],
+            ["check_model_description_populated", "message_6"],
+            ["check_model_description_populated", "message_7"],
+            ["check_model_description_populated", "message_8"],
+            ["check_model_description_populated", "message_9"],
+            ["check_model_description_populated", "message_10"],
+            ["check_model_description_populated", "message_11"],
+            ["check_model_description_populated", "message_12"],
+            ["check_model_description_populated", "message_13"],
+            ["check_model_description_populated", "message_14"],
+            ["check_model_description_populated", "message_15"],
+            ["check_model_description_populated", "message_16"],
+            ["check_model_description_populated", "message_17"],
+            ["check_model_description_populated", "message_18"],
+            ["check_model_description_populated", "message_19"],
+            ["check_model_description_populated", "message_20"],
+            ["check_model_description_populated", "message_21"],
+            ["check_model_description_populated", "message_22"],
+            ["check_model_description_populated", "message_23"],
+            ["check_model_description_populated", "message_24"],
+            ["check_model_description_populated", "message_25"],
+            ["check_model_description_populated", "message_26"],
+            ["check_model_description_populated", "message_27"],
+            ["check_model_description_populated", "message_28"],
+            ["check_model_description_populated", "message_29"],
+            ["check_model_description_populated", "message_30"],
+        ]
+        create_github_comment_file(failed_checks, show_all_failures=True)
+        assert len((tmp_path / "github-comment.md").read_text().split("\n")) == 38
 
 
 @pytest.mark.parametrize(

@@ -50,6 +50,7 @@ def runner(
     output_file: Union[Path, None],
     run_results: List["DbtBouncerRunResult"],
     semantic_models: List["DbtBouncerSemanticModel"],
+    show_all_failures: bool,
     sources: List["DbtBouncerSource"],
     tests: List["DbtBouncerTest"],
     unit_tests: List["UnitTests"],
@@ -192,8 +193,8 @@ def runner(
             f"`dbt-bouncer` {'failed' if num_checks_error > 0 else 'has warnings'}. Please see below for more details or run `dbt-bouncer` with the `-v` flag."
             + (
                 ""
-                if num_checks_error < 25
-                else " More than 25 checks failed, to see a full list of all failed checks re-run `dbt-bouncer` with the `--output-file` flag."
+                if num_checks_error < 25 or show_all_failures
+                else " More than 25 checks failed, to see a full list of all failed checks re-run `dbt-bouncer` with (one of) the `--output-file` or `--show-all-failures` flags."
             )
         )
         failed_checks = [
@@ -209,7 +210,7 @@ def runner(
         logger(
             ("Failed checks:\n" if num_checks_error > 0 else "Warning checks:\n")
             + tabulate(
-                failed_checks[:25],  # Print max of 25 failed tests to console
+                failed_checks if show_all_failures else failed_checks[:25],
                 headers={
                     "check_run_id": "Check name",
                     "severity": "Severity",
@@ -223,7 +224,8 @@ def runner(
             create_github_comment_file(
                 failed_checks=[
                     [f["check_run_id"], f["failure_message"]] for f in failed_checks
-                ]
+                ],
+                show_all_failures=show_all_failures,
             )
 
     logging.info(
