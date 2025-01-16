@@ -31,6 +31,11 @@ from dbt_bouncer.version import version
     required=False,
     type=Path,
 )
+@click.option(
+    "--show-all-failures",
+    help="If passed then all failures will be printed to the console.",
+    is_flag=True,
+)
 @click.option("-v", "--verbosity", help="Verbosity.", default=0, count=True)
 @click.pass_context
 @click.version_option()
@@ -39,6 +44,7 @@ def cli(
     config_file: PurePath,
     create_pr_comment_file: bool,
     output_file: Union[Path, None],
+    show_all_failures: bool,
     verbosity: int,
 ) -> None:
     """Entrypoint for dbt-bouncer.
@@ -151,6 +157,7 @@ def cli(
         output_file=output_file,
         run_results=project_run_results,
         semantic_models=project_semantic_models,
+        show_all_failures=show_all_failures,
         sources=project_sources,
         tests=project_tests,
         unit_tests=project_unit_tests,

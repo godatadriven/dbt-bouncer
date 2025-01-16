@@ -84,6 +84,7 @@ jobs:
                 config-file: ./<PATH_TO_CONFIG_FILE>
                 output-file: results.json # optional, default does not save a results file
                 send-pr-comment: true # optional, defaults to true
+                show-all-failures: false # optional, defaults to false
                 verbose: false # optional, defaults to false
 ```
 
