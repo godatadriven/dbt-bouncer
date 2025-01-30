@@ -1,4 +1,4 @@
-{% snapshot orders_snapshot %}
+{% snapshot snapshot_orders %}
 
     {{
         config(
@@ -8,6 +8,7 @@
             target_schema="dbt_pslattery",
             unique_key="id",
             strategy="timestamp",
+            tags=["payment"],
             updated_at="order_date",
         )
     }}

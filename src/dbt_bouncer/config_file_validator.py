@@ -219,6 +219,7 @@ def validate_conf(
         )
         from dbt_bouncer.artifact_parsers.parsers_manifest import (
             DbtBouncerModelBase,
+            DbtBouncerSnapshotBase,
             DbtBouncerSourceBase,
             DbtBouncerTestBase,
         )
@@ -242,6 +243,8 @@ def validate_conf(
             DbtBouncerModelBase,
             DbtBouncerSemanticModel,
             DbtBouncerSemanticModelBase,
+            DbtBouncerSnapshot,
+            DbtBouncerSnapshotBase,
             DbtBouncerSource,
             DbtBouncerSourceBase,
             DbtBouncerTest,
