@@ -29,6 +29,7 @@ if TYPE_CHECKING:
         DbtBouncerModel,
         DbtBouncerRunResult,
         DbtBouncerSemanticModel,
+        DbtBouncerSnapshot,
         DbtBouncerSource,
         DbtBouncerTest,
     )
@@ -51,6 +52,7 @@ def runner(
     run_results: List["DbtBouncerRunResult"],
     semantic_models: List["DbtBouncerSemanticModel"],
     show_all_failures: bool,
+    snapshots: List["DbtBouncerSnapshot"],
     sources: List["DbtBouncerSource"],
     tests: List["DbtBouncerTest"],
     unit_tests: List["UnitTests"],
@@ -80,6 +82,7 @@ def runner(
         "models": [m.model for m in models],
         "run_results": [r.run_result for r in run_results],
         "semantic_models": [s.semantic_model for s in semantic_models],
+        "snapshots": [s.snapshot for s in snapshots],
         "sources": sources,
         "tests": [t.test for t in tests],
         "unit_tests": unit_tests,
@@ -99,6 +102,7 @@ def runner(
             "model",
             "run_result",
             "semantic_model",
+            "snapshot",
             "source",
             "unit_test",
         }

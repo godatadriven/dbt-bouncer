@@ -130,6 +130,15 @@ manifest_checks:
   # Semantic models
   - name: check_semantic_model_based_on_non_public_models
 
+  # Snapshots
+  - name: check_snapshot_has_tags
+    exclude: snapshots/snapshot_orders.sql
+    tags:
+      - payment
+  - name: check_snapshot_names
+    include: snapshots/snapshot_orders.sql
+    snapshot_name_pattern: ^snapshot_
+
   # Sources
   - name: check_source_description_populated
   - name: check_source_freshness_populated

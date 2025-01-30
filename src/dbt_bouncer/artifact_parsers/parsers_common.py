@@ -12,6 +12,7 @@ if TYPE_CHECKING:
         DbtBouncerManifest,
         DbtBouncerModel,
         DbtBouncerSemanticModel,
+        DbtBouncerSnapshot,
         DbtBouncerSource,
         DbtBouncerTest,
         UnitTests,
@@ -104,6 +105,7 @@ def parse_dbt_artifacts(
     List["Macros"],
     List["DbtBouncerModel"],
     List["DbtBouncerSemanticModel"],
+    List["DbtBouncerSnapshot"],
     List["DbtBouncerSource"],
     List["DbtBouncerTest"],
     List["UnitTests"],
@@ -123,6 +125,7 @@ def parse_dbt_artifacts(
         List[DbtBouncerMacro]: List of macros in the project.
         List[DbtBouncerModel]: List of models in the project.
         List[DbtBouncerSemanticModel]: List of semantic models in the project.
+        List[DbtBouncerSnapshot]: List of snapshots in the project.
         List[DbtBouncerSource]: List of sources in the project.
         List[DbtBouncerTest]: List of tests in the project.
         List[DbtBouncerUnitTest]: List of unit tests in the project.
@@ -144,6 +147,7 @@ def parse_dbt_artifacts(
         project_macros,
         project_models,
         project_semantic_models,
+        project_snapshots,
         project_sources,
         project_tests,
         project_unit_tests,
@@ -188,6 +192,7 @@ def parse_dbt_artifacts(
         project_macros,
         project_models,
         project_semantic_models,
+        project_snapshots,
         project_sources,
         project_tests,
         project_unit_tests,

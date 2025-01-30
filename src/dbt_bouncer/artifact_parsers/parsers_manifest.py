@@ -42,6 +42,9 @@ with warnings.catch_warnings():
         SingularTestNode as SingularTestNode_v10,
     )
     from dbt_artifacts_parser.parsers.manifest.manifest_v10 import (
+        SnapshotNode as SnapshotNode_v10,
+    )
+    from dbt_artifacts_parser.parsers.manifest.manifest_v10 import (
         SourceDefinition as SourceDefinition_v10,
     )
     from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
@@ -61,6 +64,9 @@ with warnings.catch_warnings():
         SingularTestNode as SingularTestNode_v11,
     )
     from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
+        SnapshotNode as SnapshotNode_v11,
+    )
+    from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
         SourceDefinition as SourceDefinition_v11,
     )
 
@@ -71,6 +77,7 @@ from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
     Nodes2,
     Nodes4,
     Nodes6,
+    Nodes7,
     SemanticModels,
     Sources,
     UnitTests,
@@ -115,6 +122,17 @@ class DbtBouncerSemanticModel(BaseModel):
 
     original_file_path: str
     semantic_model: DbtBouncerSemanticModelBase
+    unique_id: str
+
+
+DbtBouncerSnapshotBase = Union[Nodes7, SnapshotNode_v10, SnapshotNode_v11]
+
+
+class DbtBouncerSnapshot(BaseModel):
+    """Model for all snapshot nodes in `manifest.json`."""
+
+    original_file_path: str
+    snapshot: DbtBouncerSnapshotBase
     unique_id: str
 
 
@@ -189,6 +207,7 @@ def parse_manifest_artifact(
     List[Macros],
     List[DbtBouncerModel],
     List[DbtBouncerSemanticModel],
+    List[DbtBouncerSnapshot],
     List[DbtBouncerSource],
     List[DbtBouncerTest],
     List[UnitTests],
@@ -200,6 +219,7 @@ def parse_manifest_artifact(
         List[DbtBouncerMacro]: List of macros in the project.
         List[DbtBouncerModel]: List of models in the project.
         List[DbtBouncerSemanticModel]: List of semantic models in the project.
+        List[DbtBouncerSnapshot]: List of snapshots in the project.
         List[DbtBouncerSource]: List of sources in the project.
         List[DbtBouncerTest]: List of tests in the project.
         List[DbtBouncerUnitTest]: List of unit tests in the project.
@@ -216,6 +236,7 @@ def parse_manifest_artifact(
         if v.package_name == manifest_obj.manifest.metadata.project_name
     ]
     project_models = []
+    project_snapshots = []
     project_tests = []
     for k, v in manifest_obj.manifest.nodes.items():
         if (
@@ -233,6 +254,19 @@ def parse_manifest_artifact(
                         },
                     ),
                 )
+        elif (
+            (isinstance(v.resource_type, Enum) and v.resource_type.value == "snapshot")
+            or v.resource_type == "snapshot"
+        ) and v.package_name == manifest_obj.manifest.metadata.project_name:
+            project_snapshots.append(
+                DbtBouncerSnapshot(
+                    **{
+                        "original_file_path": clean_path_str(v.original_file_path),
+                        "snapshot": v,
+                        "unique_id": k,
+                    },
+                ),
+            )
         elif (
             (isinstance(v.resource_type, Enum) and v.resource_type.value == "test")
             or v.resource_type == "test"
@@ -283,13 +317,14 @@ def parse_manifest_artifact(
     ]
 
     logging.info(
-        f"Parsed `manifest.json`, found `{manifest_obj.manifest.metadata.project_name}` project: {len(project_exposures)} exposures, {len(project_macros)} macros, {len(project_models)} nodes, {len(project_semantic_models)} semantic models, {len(project_sources)} sources, {len(project_tests)} tests, {len(project_unit_tests)} unit tests.",
+        f"Parsed `manifest.json`, found `{manifest_obj.manifest.metadata.project_name}` project: {len(project_exposures)} exposures, {len(project_macros)} macros, {len(project_models)} nodes, {len(project_semantic_models)} semantic models, {len(project_snapshots)} snapshots, {len(project_sources)} sources, {len(project_tests)} tests, {len(project_unit_tests)} unit tests.",
     )
     return (
         project_exposures,
         project_macros,
         project_models,
         project_semantic_models,
+        project_snapshots,
         project_sources,
         project_tests,
         project_unit_tests,
