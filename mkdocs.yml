@@ -43,6 +43,7 @@ nav:
       - Macros: checks/manifest/check_macros.md
       - Metadata: checks/manifest/check_metadata.md
       - Models: checks/manifest/check_models.md
+      - Snapshots: checks/manifest/check_snapshots.md
       - Sources: checks/manifest/check_sources.md
       - Semantic Models: checks/manifest/check_semantic_models.md
       - Unit Tests: checks/manifest/check_unit_tests.md
