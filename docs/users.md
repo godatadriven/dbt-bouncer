@@ -12,7 +12,7 @@ To add your company:
 
 <p>
     <h3>Xebia Data</h3>
-    <img src="https://yt3.googleusercontent.com/RfqF5B5h5-rfyJpLb0e-GE2j1a1yRw_OKhvVDgmZy-Xpt8oYFtaQAn2PMBrJzHOznj1pQNwvp9s=s900-c-k-c0x00ffffff-no-rj" width="500"/>
+    <img src="https://github.com/godatadriven/dbt-bouncer/raw/main/docs/assets/xebia_logo-large-transparent.png" width="500"/>
 </p>
 
 # `dbt-bouncer` in the wild
