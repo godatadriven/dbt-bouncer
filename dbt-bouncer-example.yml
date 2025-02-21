@@ -31,6 +31,8 @@ catalog_checks:
     test_name: not_null
   - name: check_columns_are_all_documented
     include: ^models/marts
+  - name: check_columns_are_all_in_sync
+    include: ^models/marts
   - name: check_columns_are_documented_in_public_models
   - name: check_source_columns_are_all_documented
     exclude: ^models/staging/crm # Not a good idea, here for demonstration purposes only

@@ -231,6 +231,45 @@ class CheckColumnsAreAllDocumented(BaseCheck):
             )
 
 
+class CheckColumnsAreAllInSync(BaseCheck):
+    """All columns in a model should be included in the model's properties file, i.e. `.yml` file, and vice versa.
+
+    Receives:
+        catalog_node (CatalogNodes): The CatalogNodes object to check.
+        models (List[DbtBouncerModel]): List of DbtBouncerModel objects parsed from `manifest.json`.
+
+    Other Parameters:
+        exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
+        include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        catalog_checks:
+            - name: check_columns_are_all_documented
+        ```
+
+    """
+
+    catalog_node: "CatalogNodes" = Field(default=None)
+    models: List["DbtBouncerModelBase"] = Field(default=[])
+    name: Literal["check_columns_are_all_in_sync"]
+
+    def execute(self) -> None:
+        """Execute the check."""
+        if self.catalog_node.unique_id.split(".")[0] == "model":
+            model = next(
+                m for m in self.models if m.unique_id == self.catalog_node.unique_id
+            )
+            properties_column_names = {column.name for column in model.columns.values()}
+            model_column_names = {
+                column.name for column in self.catalog_node.columns.values()
+            }
+            assert properties_column_names == model_column_names, (
+                f"`{self.catalog_node.unique_id.split('.')[-1]}` has columns that are out of sync between the SQL model and the `.yaml` properties file: {properties_column_names ^ model_column_names}"
+            )
+
+
 class CheckColumnsAreDocumentedInPublicModels(BaseCheck):
     """Columns should have a populated description in public models.
 
