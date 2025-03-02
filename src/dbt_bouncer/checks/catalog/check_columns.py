@@ -54,9 +54,10 @@ class CheckColumnDescriptionPopulated(BaseCheck):
             )
             non_complying_columns = []
             for _, v in self.catalog_node.columns.items():
-                if (
-                    model.columns.get(v.name) is None
-                    or len(model.columns[v.name].description.strip()) <= 4
+                if model.columns.get(
+                    v.name
+                ) is None or not self.is_description_populated(
+                    model.columns[v.name].description
                 ):
                     non_complying_columns.append(v.name)
 

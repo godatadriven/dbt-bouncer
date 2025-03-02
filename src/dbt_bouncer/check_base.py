@@ -40,7 +40,7 @@ class BaseCheck(BaseModel):
     # Helper methods
     def is_catalog_node_a_model(
         self, catalog_node: "CatalogNodes", models: List["DbtBouncerModelBase"]
-    ):
+    ) -> bool:
         """Check if a catalog node is a model.
 
         Args:
@@ -58,3 +58,15 @@ class BaseCheck(BaseModel):
             return catalog_node_model[0].resource_type == "model"
         else:
             return False
+
+    def is_description_populated(self, description: str) -> bool:
+        """Check if a description is populated.
+
+        Args:
+            description (str): Description.
+
+        Returns:
+            bool: Whether a description is validly populated.
+
+        """
+        return len(description.strip()) > 4
