@@ -19,6 +19,7 @@ To add your company:
 
 ## Blogs:
 
+* [Automate Sensitive Data Protection with Metadata-Driven Masking](https://xebia.com/blog/automate-sensitive-data-protection-with-metadata-driven-masking/)
 * [Maintaining conventions in dbt projects with dbt-bouncer](https://xebia.com/blog/maintaining-conventions-in-dbt-projects-with-dbt-bouncer/)
 
 ## Repos
