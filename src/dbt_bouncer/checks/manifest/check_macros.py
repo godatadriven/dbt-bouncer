@@ -165,7 +165,7 @@ class CheckMacroDescriptionPopulated(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
-        assert len(self.macro.description.strip()) > 4, (
+        assert self.is_description_populated(self.macro.description), (
             f"Macro `{self.macro.name}` does not have a populated description."
         )
 

@@ -43,8 +43,10 @@ class CheckSemanticModelOnNonPublicModels(BaseCheck):
         non_public_upstream_dependencies = []
         for model in self.semantic_model.depends_on.nodes:
             if (
-                model.split(".")[0] == "model"
-                and model.split(".")[1] == self.semantic_model.package_name
+                next(m for m in self.models if m.unique_id == model).resource_type
+                == "model"
+                and next(m for m in self.models if m.unique_id == model).package_name
+                == self.semantic_model.package_name
             ):
                 model = next(m for m in self.models if m.unique_id == model)
                 if model.access.value != "public":

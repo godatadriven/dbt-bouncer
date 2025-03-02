@@ -41,7 +41,7 @@ class CheckSourceDescriptionPopulated(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
-        assert len(self.source.description.strip()) > 4, (
+        assert self.is_description_populated(self.source.description), (
             f"`{self.source.source_name}.{self.source.name}` does not have a populated description."
         )
 
@@ -341,7 +341,7 @@ class CheckSourceUsedByModelsInSameDirectory(BaseCheck):
                 and model.original_file_path.split("/")[:-1]
                 != self.source.original_file_path.split("/")[:-1]
             ):
-                reffed_models_not_in_same_dir.append(model.unique_id.split(".")[0])
+                reffed_models_not_in_same_dir.append(model.name)
 
         assert len(reffed_models_not_in_same_dir) == 0, (
             f"Source `{self.source.source_name}.{self.source.name}` is referenced by models defined in a different directory: {reffed_models_not_in_same_dir}"

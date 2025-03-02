@@ -43,8 +43,10 @@ class CheckExposureOnNonPublicModels(BaseCheck):
         non_public_upstream_dependencies = []
         for model in self.exposure.depends_on.nodes:
             if (
-                model.split(".")[0] == "model"
-                and model.split(".")[1] == self.exposure.package_name
+                next(m for m in self.models if m.unique_id == model).resource_type
+                == "model"
+                and next(m for m in self.models if m.unique_id == model).package_name
+                == self.exposure.package_name
             ):
                 model = next(m for m in self.models if m.unique_id == model)
                 if model.access.value != "public":
@@ -98,8 +100,10 @@ class CheckExposureOnView(BaseCheck):
         non_table_upstream_dependencies = []
         for model in self.exposure.depends_on.nodes:
             if (
-                model.split(".")[0] == "model"
-                and model.split(".")[1] == self.exposure.package_name
+                next(m for m in self.models if m.unique_id == model).resource_type
+                == "model"
+                and next(m for m in self.models if m.unique_id == model).package_name
+                == self.exposure.package_name
             ):
                 model = next(m for m in self.models if m.unique_id == model)
                 if model.config.materialized in self.materializations_to_include:

@@ -190,7 +190,7 @@ class CheckModelDescriptionPopulated(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
-        assert len(self.model.description.strip()) > 4, (
+        assert self.is_description_populated(self.model.description), (
             f"`{self.model.name}` does not have a populated description."
         )
 

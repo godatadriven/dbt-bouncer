@@ -48,15 +48,16 @@ class CheckColumnDescriptionPopulated(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
-        if self.catalog_node.unique_id.split(".")[0] == "model":
+        if self.is_catalog_node_a_model(self.catalog_node, self.models):
             model = next(
                 m for m in self.models if m.unique_id == self.catalog_node.unique_id
             )
             non_complying_columns = []
             for _, v in self.catalog_node.columns.items():
-                if (
-                    model.columns.get(v.name) is None
-                    or len(model.columns[v.name].description.strip()) <= 4
+                if model.columns.get(
+                    v.name
+                ) is None or not self.is_description_populated(
+                    model.columns[v.name].description
                 ):
                     non_complying_columns.append(v.name)
 
@@ -196,7 +197,7 @@ class CheckColumnsAreAllDocumented(BaseCheck):
 
     Receives:
         catalog_node (CatalogNodes): The CatalogNodes object to check.
-        models (List[DbtBouncerModel]): List of DbtBouncerModel objects parsed from `manifest.json`.
+        models (List[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
 
     Other Parameters:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
@@ -217,7 +218,7 @@ class CheckColumnsAreAllDocumented(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
-        if self.catalog_node.unique_id.split(".")[0] == "model":
+        if self.is_catalog_node_a_model(self.catalog_node, self.models):
             model = next(
                 m for m in self.models if m.unique_id == self.catalog_node.unique_id
             )
@@ -236,7 +237,7 @@ class CheckColumnsAreDocumentedInPublicModels(BaseCheck):
 
     Receives:
         catalog_node (CatalogNodes): The CatalogNodes object to check.
-        models (List[DbtBouncerModel]): List of DbtBouncerModel objects parsed from `manifest.json`.
+        models (List[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
 
     Other Parameters:
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
@@ -257,7 +258,7 @@ class CheckColumnsAreDocumentedInPublicModels(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
-        if self.catalog_node.unique_id.split(".")[0] == "model":
+        if self.is_catalog_node_a_model(self.catalog_node, self.models):
             model = next(
                 m for m in self.models if m.unique_id == self.catalog_node.unique_id
             )
