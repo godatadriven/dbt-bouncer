@@ -4,6 +4,13 @@ from typing import TYPE_CHECKING, List, Union
 
 from pydantic import BaseModel
 
+from dbt_bouncer.artifact_parsers.dbt_cloud.catalog_latest import CatalogLatest
+from dbt_bouncer.artifact_parsers.dbt_cloud.catalog_latest import (
+    Nodes as CatalogNodesLatest,
+)
+from dbt_bouncer.artifact_parsers.dbt_cloud.catalog_latest import (
+    Sources as CatalogSourcesLatest,
+)
 from dbt_bouncer.utils import clean_path_str
 
 with warnings.catch_warnings():
@@ -24,10 +31,18 @@ if TYPE_CHECKING:
 from dbt_bouncer.artifact_parsers.parsers_common import load_dbt_artifact
 
 
+class DbtBouncerCatalog(BaseModel):
+    """Model for all catalog objects."""
+
+    catalog: Union[CatalogV1, CatalogLatest]
+
+
 class DbtBouncerCatalogNode(BaseModel):
     """Model for all nodes in `catalog.json`."""
 
-    catalog_node: Union[CatalogNodes, CatalogSources]
+    catalog_node: Union[
+        CatalogNodes, CatalogNodesLatest, CatalogSources, CatalogSourcesLatest
+    ]
     original_file_path: str
     unique_id: str
 
@@ -43,7 +58,7 @@ def parse_catalog(
         List[DbtBouncerCatalogNode]: List of catalog nodes for the project sources.
 
     """
-    catalog_obj: CatalogV1 = load_dbt_artifact(
+    catalog_obj: Union[CatalogLatest, CatalogV1] = load_dbt_artifact(
         artifact_name="catalog.json",
         dbt_artifacts_dir=artifact_dir,
     )
@@ -57,7 +72,7 @@ def parse_catalog(
                 "unique_id": k,
             },
         )
-        for k, v in catalog_obj.nodes.items()
+        for k, v in catalog_obj.catalog.nodes.items()
         if k.split(".")[-2] == manifest_obj.manifest.metadata.project_name
     ]
     project_catalog_sources = [
@@ -70,7 +85,7 @@ def parse_catalog(
                 "unique_id": k,
             },
         )
-        for k, v in catalog_obj.sources.items()
+        for k, v in catalog_obj.catalog.sources.items()
         if k.split(".")[1] == manifest_obj.manifest.metadata.project_name
     ]
     logging.info(
