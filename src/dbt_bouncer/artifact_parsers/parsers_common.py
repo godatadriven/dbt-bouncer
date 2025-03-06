@@ -1,12 +1,15 @@
 import json
 import logging
-import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING, List, Literal, Union
 
 from dbt_bouncer.utils import get_package_version_number
 
 if TYPE_CHECKING:
+    from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
+        Exposures,
+        Macros,
+    )
     from dbt_bouncer.artifact_parsers.parsers_catalog import DbtBouncerCatalogNode
     from dbt_bouncer.artifact_parsers.parsers_manifest import (
         DbtBouncerManifest,
@@ -21,15 +24,6 @@ if TYPE_CHECKING:
         DbtBouncerRunResult,
         DbtBouncerRunResultBase,
     )
-
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", category=UserWarning)
-        from dbt_artifacts_parser.parsers.catalog.catalog_v1 import CatalogV1
-
-    from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
-        Exposures,
-        Macros,
-    )
     from dbt_bouncer.config_file_parser import (
         DbtBouncerConfAllCategories as DbtBouncerConf,
     )
@@ -38,11 +32,11 @@ if TYPE_CHECKING:
 def load_dbt_artifact(
     artifact_name: Literal["catalog.json", "manifest.json", "run_results.json"],
     dbt_artifacts_dir: Path,
-) -> Union["CatalogV1", "DbtBouncerManifest", "DbtBouncerRunResultBase"]:
+) -> Union["DbtBouncerCatalogNode", "DbtBouncerManifest", "DbtBouncerRunResultBase"]:
     """Load a dbt artifact from a JSON file to a Pydantic object.
 
     Returns:
-        Union[CatalogV1, DbtBouncerManifest, DbtBouncerRunResultBase]:
+        Union[DbtBouncerCatalogNode, DbtBouncerManifest, DbtBouncerRunResultBase]:
             The dbt artifact loaded as a Pydantic object.
 
     Raises:
@@ -61,11 +55,10 @@ def load_dbt_artifact(
         )
 
     if artifact_name == "catalog.json":
-        with warnings.catch_warnings():
-            warnings.filterwarnings("ignore", category=UserWarning)
-            from dbt_artifacts_parser.parsers.catalog.catalog_v1 import CatalogV1
+        from dbt_bouncer.artifact_parsers.parsers_catalog import DbtBouncerCatalog
+
         with Path.open(Path(artifact_path), "r") as fp:
-            catalog_obj = CatalogV1(**json.load(fp))
+            catalog_obj = DbtBouncerCatalog(**{"catalog": json.load(fp)})
 
         return catalog_obj
 
