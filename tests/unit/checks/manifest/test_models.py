@@ -621,6 +621,32 @@ def test_check_model_has_contracts_enforced(model, expectation):
             does_not_raise(),
         ),
         (
+            ["key_1", "key_2"],
+            Nodes4(
+                **{
+                    "alias": "model_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                    },
+                    "fqn": ["package_name", "model_1"],
+                    "meta": {"key_1": "abc", "key_2": ["a", "b", "c"]},
+                    "name": "model_1",
+                    "original_file_path": "model_1.sql",
+                    "package_name": "package_name",
+                    "path": "staging/finance/model_1.sql",
+                    "resource_type": "model",
+                    "schema": "main",
+                    "unique_id": "model.package_name.model_1",
+                },
+            ),
+            does_not_raise(),
+        ),
+        (
             ["owner"],
             Nodes4(
                 **{

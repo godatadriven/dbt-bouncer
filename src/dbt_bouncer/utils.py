@@ -87,7 +87,14 @@ def find_missing_meta_keys(meta_config, required_keys) -> List[str]:
         for k, v in flatten(required_keys).items()
     ]
 
-    return [x for x in required_keys if x not in keys_in_meta]
+    return [
+        x
+        for x in required_keys
+        if (x not in keys_in_meta)
+        and (
+            x not in [y[:-2] for y in keys_in_meta if y[-3] != ">" and y[-2] == ">"]
+        )  # Account for a key with a value that is a list
+    ]
 
 
 def flatten(structure: Any, key: str = "", path: str = "", flattened=None):
