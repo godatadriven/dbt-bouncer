@@ -21,6 +21,8 @@ env:
 
 jobs:
     pre-commit:
+        permissions:
+          contents: read
         runs-on: ubuntu-22.04
         steps:
             - name: Checkout
@@ -117,6 +119,8 @@ jobs:
 
     e2e-tests:
         needs: [pre-commit]
+        permissions:
+          contents: read
         runs-on: ubuntu-22.04
         steps:
             - name: Checkout
@@ -164,6 +168,8 @@ jobs:
 
     mkdocs-build:
       needs: [pre-commit]
+      permissions:
+        contents: read
       runs-on: ubuntu-22.04
       steps:
           - name: Checkout
@@ -190,6 +196,8 @@ jobs:
 
     pex-tests:
       needs: [pre-commit]
+      permissions:
+        contents: read
       runs-on: ubuntu-22.04
       steps:
           - name: Checkout
