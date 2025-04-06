@@ -36,7 +36,7 @@ include = "^models/staging"
 model_name_pattern = "^stg_"
 ```
 
-For more example config files, see [here](https://github.com/godatadriven/dbt-bouncer/tree/main/tests/unit/config_files/valid).
+For more example config files, see [here](https://github.com/godatadriven/dbt-bouncer/tree/main/tests/unit/config_files/valid). For a detailed description of how to use `dbt-bouncer` in a CI pipeline see [here](./faq.md#how-to-configure-dbt-bouncer-for-use-in-a-ci-pipeline).
 
 ## Common arguments
 
@@ -103,6 +103,17 @@ To determine if a check accepts these arguments view the [Checks page](./checks/
     ```
 
     `dbt-bouncer` converts all of these paths to the Linux/Mac form, hence when you are supplying values to `exclude` and `include` you should use the Linux/Mac form.
+
+### Only
+
+`dbt-bouncer` has checks for three categories: catalog_checks, manifest_checks and run_results_checks. Running `dbt-bouncer` runs all checks for all categories. If you want to limit `dbt-bouncer` to a subset of check categories then you can use the `--only` CLI flag. It takes a command-separated list of check categories to run. Examples:
+
+```shell
+dbt-bouncer --only manifest_checks
+dbt-bouncer --only catalog_checks,manifest_checks
+```
+
+For a detailed description see [here](./faq.md#how-to-configure-dbt-bouncer-for-use-in-a-ci-pipeline).
 
 ### Severity
 
