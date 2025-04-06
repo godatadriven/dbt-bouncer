@@ -25,6 +25,13 @@ from dbt_bouncer.version import version
     type=click.BOOL,
 )
 @click.option(
+    "--only",
+    default="",
+    help="Limit the checks run to specific categories, comma-separated. Examples: 'manifest_checks', 'catalog_checks,manifest_checks'.",
+    required=False,
+    type=str,
+)
+@click.option(
     "--output-file",
     default=None,
     help="Location of the json file where check metadata will be saved.",
@@ -43,6 +50,7 @@ def cli(
     ctx: click.Context,
     config_file: PurePath,
     create_pr_comment_file: bool,
+    only: str,
     output_file: Union[Path, None],
     show_all_failures: bool,
     verbosity: int,
@@ -60,6 +68,18 @@ def cli(
     if output_file and not output_file.suffix == ".json":
         raise RuntimeError(
             f"Output file must have a `.json` extension. Got `{output_file.suffix}`.",
+        )
+
+    # Validate `only` has valid values
+    valid_check_categories = ["catalog_checks", "manifest_checks", "run_results_checks"]
+    if not only.strip():
+        only_parsed = valid_check_categories
+    else:
+        only_parsed = [x.strip() for x in set(only.strip().split(",")) if x != ""]
+
+    for x in [i for i in only_parsed if i not in valid_check_categories]:
+        raise RuntimeError(
+            f"`--only` contains an invalid value (`{x}`). Valid values are `{valid_check_categories}` or any comma-separated combination."
         )
 
     # Using local imports to speed up CLI startup
@@ -110,15 +130,20 @@ def cli(
     logging.debug(f"{bouncer_config=}")
 
     for category in check_categories:
-        for idx, check in enumerate(getattr(bouncer_config, category)):
-            # Add indices to uniquely identify checks
-            check.index = idx
+        if category in only_parsed:
+            for idx, check in enumerate(getattr(bouncer_config, category)):
+                # Add indices to uniquely identify checks
+                check.index = idx
 
-            # Handle global `exclude` and `include` args
-            if bouncer_config.include and not check.include:
-                check.include = bouncer_config.include
-            if bouncer_config.exclude and not check.exclude:
-                check.exclude = bouncer_config.exclude
+                # Handle global `exclude` and `include` args
+                if bouncer_config.include and not check.include:
+                    check.include = bouncer_config.include
+                if bouncer_config.exclude and not check.exclude:
+                    check.exclude = bouncer_config.exclude
+        else:
+            # i.e. if `only` used then remove non-specified check categories
+            setattr(bouncer_config, category, [])
+
     logging.debug(f"{bouncer_config=}")
 
     dbt_artifacts_dir = config_file.parent / bouncer_config.dbt_artifacts_dir

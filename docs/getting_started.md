@@ -2,7 +2,7 @@
 
 1. Generate dbt artifacts by running a dbt command:
 
-    - `dbt parse` to generate a `manifest.json` artifact.
+    - `dbt parse` to generate a `manifest.json` artifact (no database connection required!).
     - `dbt docs generate` to generate a `catalog.json` artifact (necessary if you are using catalog checks).
     - `dbt run` (or any other command that implies it e.g. `dbt build`) to generate a `run_results.json` artifact (necessary if you are using run results checks).
 

@@ -58,6 +58,51 @@ jobs:
 
     dbt Cloud now supports a "[versionless](https://docs.getdbt.com/docs/dbt-versions/upgrade-dbt-version-in-cloud#versionless)" option, which allows dbt projects to be run with the latest version of dbt. One effect of choosing this option is that dbt artifacts may receive non-breaking changes ([source](https://github.com/dbt-labs/dbt-core/blob/main/core/dbt/artifacts/README.md#making-changes-to-dbtartifacts)), these may or may not be compatible with `dbt-bouncer`. If you encounter a bug as a result of this, please open an [issue](https://github.com/godatadriven/dbt-bouncer/issues) and we'll investigate.
 
+## How to configure `dbt-bouncer` for use in a CI pipeline?
+
+`dbt-bouncer` is designed to be use primarily in a CI pipeline such as GitHub Actions or Azure DevOps. To do this we create a config file such as:
+
+```yaml
+catalog_checks:
+  - name: check_column_description_populated
+    include: ^models/marts
+
+manifest_checks:
+  - name: check_model_directories
+    include: ^models
+    permitted_sub_directories:
+      - intermediate
+      - marts
+      - staging
+      - utilities
+
+run_results_checks:
+  - name: check_run_results_max_execution_time
+    max_execution_time_seconds: 10
+```
+
+The goal of a CI pipeline is to test the changes in a pull request but also to provide feedback to the developer as quickly as possible without incurring unnecessary costs (time, financial, compute, etc.). To achieve this we can combine several features of dbt and `dbt-bouncer`:
+
+  1. By running `dbt parse`, dbt can generate a `manifest.json` without a database connection. We can then run our manifest checks via:
+
+      ```shell
+      dbt-bouncer --only manifest_checks
+      ```
+
+  1. dbt requires models to be materialised before it can generate a `catalog.json` file. By running `dbt run --empty` we can materialise every model without processing any data. Once these materialisations are performed we can run our catalog checks via:
+
+      ```shell
+      dbt-bouncer --only catalog_checks
+      ```
+
+  1. Typically a CI pipeline will run a `dbt build` command with flags such as `--state` and/or `--defer`. After this command has completed we can run our run results checks via:
+
+      ```shell
+      dbt-bouncer --only run_results_checks
+      ```
+
+By using this approach, and combining with your own unique constraints and desires, `dbt-bouncer` can be used efficiently as part of your CI pipeline.
+
 ## How to set up `dbt-bouncer` in a monorepo?
 
 A monorepo may consist of one directory with a dbt project and other directories with unrelated code. It may be desired for `dbt-bouncer` to be configured from the root directory. Sample directory tree:

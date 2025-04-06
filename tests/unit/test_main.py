@@ -75,7 +75,8 @@ def test_cli_custom_checks_dir(caplog, monkeypatch, tmp_path):
 
     Path(tmp_path / "my_checks_dir/manifest").mkdir(parents=True)
     Path(tmp_path / "my_checks_dir/__init__.py").write_text("")
-    Path(tmp_path / "my_checks_dir/manifest/check_models.py").write_text("""
+    Path(tmp_path / "my_checks_dir/manifest/check_models.py").write_text(
+        """
 from pydantic import Field
 from typing import Literal
 from dbt_bouncer.check_base import BaseCheck
@@ -90,7 +91,8 @@ class CheckMyCustomCheck(BaseCheck):
 
     def execute(self) -> None:
         assert 1 == 1
-""")
+"""
+    )
 
     # Manifest file
     with Path.open(Path("./dbt_project/target/manifest.json"), "r") as f:
@@ -516,6 +518,73 @@ def test_cli_include(tmp_path):
         assert i in [x["check_run_id"] for x in coverage], (
             f"`{i}` not in `coverage.json`."
         )
+
+
+@pytest.mark.parametrize(
+    ("only_value", "exit_code", "number_of_checks_run"),
+    [
+        ("", 0, 43),
+        ("catalog_checks", 0, 2),
+        ("catalog_checks,manifest_checks", 0, 5),
+        ("catalog_checks,manifest_checks,run_results_checks", 0, 43),
+        ("catalog_checks, run_results_checks", 0, 40),
+        ("manifest_checks", 0, 3),
+        ("run_results_checks", 0, 38),
+        ("manifest", 1, 1),
+        ("manifest checks", 1, 1),
+    ],
+)
+def test_cli_only(only_value, exit_code, number_of_checks_run, tmp_path):
+    # Config file
+    bouncer_config = {
+        "dbt_artifacts_dir": ".",
+        "catalog_checks": [
+            {"include": "^models/marts", "name": "check_column_description_populated"}
+        ],
+        "manifest_checks": [
+            {
+                "access": "protected",
+                "include": "^models/staging",
+                "name": "check_model_access",
+            },
+        ],
+        "run_results_checks": [
+            {
+                "max_execution_time_seconds": 10,
+                "name": "check_run_results_max_execution_time",
+            }
+        ],
+    }
+
+    with Path(tmp_path / "dbt-bouncer.yml").open("w") as f:
+        yaml.dump(bouncer_config, f)
+
+    # Artifact files
+    for file in ["catalog.json", "manifest.json", "run_results.json"]:
+        with Path.open(Path(f"./dbt_project/target/{file}"), "r") as f:
+            data = json.load(f)
+        with Path.open(tmp_path / file, "w") as f:
+            json.dump(data, f)
+
+    # Run dbt-bouncer
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        [
+            "--config-file",
+            Path(tmp_path / "dbt-bouncer.yml").__str__(),
+            "--output-file",
+            Path(tmp_path / "results.json").__str__(),
+            "--only",
+            only_value,
+        ],
+    )
+    assert result.exit_code == exit_code
+
+    if exit_code == 0:
+        with Path.open(tmp_path / "results.json", "r") as f:
+            results = json.load(f)
+        assert len(results) == number_of_checks_run
 
 
 def test_cli_severity_default(tmp_path):
