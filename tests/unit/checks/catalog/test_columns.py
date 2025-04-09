@@ -19,15 +19,16 @@ from dbt_bouncer.checks.catalog.check_columns import (
     CheckColumnHasSpecifiedTest,
     CheckColumnNameCompliesToColumnType,
     CheckColumnsAreAllDocumented,
+    CheckColumnsAreAllInSync,
     CheckColumnsAreDocumentedInPublicModels,
 )
 
 CheckColumnDescriptionPopulated.model_rebuild()
-CheckColumnNameCompliesToColumnType.model_rebuild()
+CheckColumnHasSpecifiedTest.model_rebuild()
 CheckColumnNameCompliesToColumnType.model_rebuild()
 CheckColumnsAreAllDocumented.model_rebuild()
 CheckColumnsAreDocumentedInPublicModels.model_rebuild()
-CheckColumnHasSpecifiedTest.model_rebuild()
+CheckColumnsAreAllInSync.model_rebuild()
 
 
 @pytest.mark.parametrize(
@@ -609,4 +610,170 @@ def test_check_column_name_complies_to_column_type(
             column_name_pattern=column_name_pattern,
             name="check_column_name_complies_to_column_type",
             types=types,
+        ).execute()
+
+
+@pytest.mark.parametrize(
+    ("catalog_node", "models", "expectation"),
+    [
+        (
+            CatalogNodes(
+                **{
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                        "col_2": {
+                            "index": 2,
+                            "name": "col_2",
+                            "type": "INTEGER",
+                        },
+                    },
+                    "metadata": {
+                        "name": "table_1",
+                        "schema": "main",
+                        "type": "VIEW",
+                    },
+                    "stats": {},
+                    "unique_id": "model.package_name.model_1",
+                },
+            ),
+            [
+                Nodes4(
+                    **{
+                        "alias": "model_1",
+                        "checksum": {"name": "sha256", "checksum": ""},
+                        "columns": {
+                            "col_1": {
+                                "index": 1,
+                                "name": "col_1",
+                                "type": "INTEGER",
+                            },
+                            "col_2": {
+                                "index": 2,
+                                "name": "col_2",
+                                "type": "INTEGER",
+                            },
+                        },
+                        "fqn": ["package_name", "model_1"],
+                        "name": "model_1",
+                        "original_file_path": "model_1.sql",
+                        "package_name": "package_name",
+                        "path": "model_1.sql",
+                        "resource_type": "model",
+                        "schema": "main",
+                        "unique_id": "model.package_name.model_1",
+                    },
+                ),
+            ],
+            does_not_raise(),
+        ),
+        (
+            CatalogNodes(
+                **{
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                        "col_2": {
+                            "index": 2,
+                            "name": "col_2",
+                            "type": "INTEGER",
+                        },
+                    },
+                    "metadata": {
+                        "name": "table_1",
+                        "schema": "main",
+                        "type": "VIEW",
+                    },
+                    "stats": {},
+                    "unique_id": "model.package_name.model_2",
+                },
+            ),
+            [
+                Nodes4(
+                    **{
+                        "alias": "model_2",
+                        "checksum": {"name": "sha256", "checksum": ""},
+                        "columns": {
+                            "col_1": {
+                                "index": 1,
+                                "name": "col_1",
+                                "type": "INTEGER",
+                            },
+                        },
+                        "fqn": ["package_name", "model_2"],
+                        "name": "model_2",
+                        "original_file_path": "model_2.sql",
+                        "package_name": "package_name",
+                        "path": "model_2.sql",
+                        "resource_type": "model",
+                        "schema": "main",
+                        "unique_id": "model.package_name.model_2",
+                    },
+                ),
+            ],
+            pytest.raises(AssertionError),
+        ),
+        (
+            CatalogNodes(
+                **{
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                    },
+                    "metadata": {
+                        "name": "table_1",
+                        "schema": "main",
+                        "type": "VIEW",
+                    },
+                    "stats": {},
+                    "unique_id": "model.package_name.model_2",
+                },
+            ),
+            [
+                Nodes4(
+                    **{
+                        "alias": "model_2",
+                        "checksum": {"name": "sha256", "checksum": ""},
+                        "columns": {
+                            "col_1": {
+                                "index": 1,
+                                "name": "col_1",
+                                "type": "INTEGER",
+                            },
+                            "col_2": {
+                                "index": 1,
+                                "name": "col_2",
+                                "type": "INTEGER",
+                            },
+                        },
+                        "fqn": ["package_name", "model_2"],
+                        "name": "model_2",
+                        "original_file_path": "model_2.sql",
+                        "package_name": "package_name",
+                        "path": "model_2.sql",
+                        "resource_type": "model",
+                        "schema": "main",
+                        "unique_id": "model.package_name.model_2",
+                    },
+                ),
+            ],
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_columns_are_in_sync(catalog_node, models, expectation):
+    with expectation:
+        CheckColumnsAreAllInSync(
+            catalog_node=catalog_node,
+            models=models,
+            name="check_columns_are_all_in_sync",
         ).execute()
