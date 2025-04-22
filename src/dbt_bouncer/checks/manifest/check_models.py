@@ -241,7 +241,7 @@ class CheckModelDirectories(BaseCheck):
             AssertionError: If model located in `./models`.
 
         """
-        matched_path = re.compile(self.include.strip()).match(
+        matched_path = re.compile(self.include.strip().rstrip("/")).match(
             clean_path_str(self.model.original_file_path)
         )
         path_after_match = clean_path_str(self.model.original_file_path)[

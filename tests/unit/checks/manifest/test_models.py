@@ -1342,6 +1342,32 @@ def test_check_model_code_does_not_contain_regexp_pattern(
             does_not_raise(),
         ),
         (
+            "models/marts/",
+            Nodes4(
+                **{
+                    "alias": "model_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                    },
+                    "fqn": ["package_name", "model_1"],
+                    "name": "model_1",
+                    "original_file_path": "models/marts/finance/marts_model_1.sql",
+                    "package_name": "package_name",
+                    "path": "marts/finance/marts_model_1.sql",
+                    "resource_type": "model",
+                    "schema": "main",
+                    "unique_id": "model.package_name.model_1",
+                },
+            ),
+            ["finance", "marketing"],
+            does_not_raise(),
+        ),
+        (
             "models/marts",
             Nodes4(
                 **{
