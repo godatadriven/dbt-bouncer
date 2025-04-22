@@ -456,7 +456,7 @@ class CheckModelHasUniqueTest(BaseCheck):
         # Example of allowing a custom uniqueness test
             - name: check_model_has_unique_test
               accepted_uniqueness_tests:
-                - expect_compound_columns_to_be_unique
+                - dbt_expectations.expect_compound_columns_to_be_unique # i.e. tests from packages must include package name
                 - my_custom_uniqueness_test
                 - unique
         ```
@@ -465,7 +465,7 @@ class CheckModelHasUniqueTest(BaseCheck):
 
     accepted_uniqueness_tests: Optional[List[str]] = Field(
         default=[
-            "expect_compound_columns_to_be_unique",
+            "dbt_expectations.expect_compound_columns_to_be_unique",
             "dbt_utils.unique_combination_of_columns",
             "unique",
         ],
@@ -478,7 +478,16 @@ class CheckModelHasUniqueTest(BaseCheck):
         """Execute the check."""
         num_unique_tests = sum(
             test.attached_node == self.model.unique_id
-            and test.test_metadata.name in self.accepted_uniqueness_tests  # type: ignore[operator]
+            and (
+                (
+                    f"{test.test_metadata.namespace}.{test.test_metadata.name}"  # type: ignore[operator]
+                    in self.accepted_uniqueness_tests
+                )  # tests from packages
+                or (
+                    test.test_metadata.namespace is None
+                    and test.test_metadata.name in self.accepted_uniqueness_tests  # type: ignore[operator]
+                )  # tests from within package
+            )
             for test in self.tests
             if hasattr(test, "test_metadata")
         )
