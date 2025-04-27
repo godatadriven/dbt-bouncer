@@ -10,7 +10,7 @@ The following options are available, in order of priority:
 Here is an example config file in `yaml`:
 
 ```yaml
-# [Optional] Directory where the dbt artifacts exists, generally the `target` directory inside a dbt project. Defaults to `./target`.
+# [Optional] Directory where the dbt artifacts exists, generally the `target` directory inside a dbt project. Defaults to `$DBT_PROJECT_DIR/target` if $DBT_PROJECT_DIR is set, else `./target`.
 dbt_artifacts_dir: target
 
 manifest_checks:
@@ -24,7 +24,7 @@ And the same config in `toml`:
 
 ```toml
 [tool.dbt-bouncer]
-# [Optional] Directory where the dbt artifacts exists, generally the `target` directory inside a dbt project. Defaults to `./target`.
+# [Optional] Directory where the dbt artifacts exists, generally the `target` directory inside a dbt project. Defaults to `$DBT_PROJECT_DIR/target` if $DBT_PROJECT_DIR is set, else `./target`.
 dbt_artifacts_dir = "target"
 
 [[tool.dbt-bouncer.manifest_checks]]
