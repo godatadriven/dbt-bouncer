@@ -133,6 +133,81 @@ def test_load_config_file_contents_pyproject_toml_no_bouncer_section(
         )
 
 
+def test_validate_conf_target_default_value(monkeypatch):
+    monkeypatch.delenv("DBT_PROJECT_DIR", raising=False)
+    ctx = click.Context(
+        cli,
+        obj={
+            "config_file_path": "",
+            "custom_checks_dir": None,
+        },
+    )
+
+    with ctx:
+        bouncer_config = validate_conf(
+            check_categories=["manifest_checks"],
+            config_file_contents={
+                "manifest_checks": [
+                    {"name": "check_model_has_unique_test"},
+                    {"name": "check_exposure_based_on_view"},
+                ]
+            },
+        )
+
+    assert bouncer_config.dbt_artifacts_dir == "./target"
+
+
+# No idea why but this test always fails when run with all other unit tests but succeeds when run alone
+@pytest.mark.not_in_parallel2
+def test_validate_conf_target_env_var():
+    ctx = click.Context(
+        cli,
+        obj={
+            "config_file_path": "",
+            "custom_checks_dir": None,
+        },
+    )
+
+    with ctx, pytest.MonkeyPatch.context() as mp:
+        mp.setenv("DBT_PROJECT_DIR", "my_dbt_project_dir")
+        bouncer_config = validate_conf(
+            check_categories=["manifest_checks"],
+            config_file_contents={
+                "manifest_checks": [
+                    {"name": "check_model_has_unique_test"},
+                    {"name": "check_exposure_based_on_view"},
+                ]
+            },
+        )
+
+    assert bouncer_config.dbt_artifacts_dir == "my_dbt_project_dir/target"
+
+
+def test_validate_conf_target_override(monkeypatch):
+    monkeypatch.delenv("DBT_PROJECT_DIR", raising=False)
+    ctx = click.Context(
+        cli,
+        obj={
+            "config_file_path": "",
+            "custom_checks_dir": None,
+        },
+    )
+
+    with ctx:
+        bouncer_config = validate_conf(
+            check_categories=["manifest_checks"],
+            config_file_contents={
+                "dbt_artifacts_dir": "somewhere_over_there/target",
+                "manifest_checks": [
+                    {"name": "check_model_has_unique_test"},
+                    {"name": "check_exposure_based_on_view"},
+                ],
+            },
+        )
+
+    assert bouncer_config.dbt_artifacts_dir == "somewhere_over_there/target"
+
+
 invalid_confs = [
     (
         f,

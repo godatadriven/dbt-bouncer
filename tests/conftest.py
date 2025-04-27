@@ -6,7 +6,10 @@ import pytest
 
 def pytest_configure(config):
     config.addinivalue_line(
-        "markers", "not_in_parallel: Unit tests that cannot be run in parallel."
+        "markers", "not_in_parallel: Unit test that cannot be run in parallel."
+    )
+    config.addinivalue_line(
+        "markers", "not_in_parallel2: Unit test that cannot be run in parallel."
     )
 
 

@@ -1,5 +1,5 @@
 # custom_checks_dir: my_checks # [Optional] Directory where custom checks are stored.
-dbt_artifacts_dir: dbt_project/target # [Optional] Directory where the dbt artifacts exists, generally the `target` directory inside a dbt project. Defaults to `./target`.
+dbt_artifacts_dir: dbt_project/target # [Optional] Directory where the dbt artifacts exists, generally the `target` directory inside a dbt project. Defaults to `$DBT_PROJECT_DIR/target` if $DBT_PROJECT_DIR is set, else `./target`.
 # exclude: ^models/staging # [Optional] Here for demonstration purposes only
 # include: ^models/marts # [Optional] Here for demonstration purposes only
 # severity: warn # [Optional] Useful when applying `dbt-bouncer` to an existing dbt project.

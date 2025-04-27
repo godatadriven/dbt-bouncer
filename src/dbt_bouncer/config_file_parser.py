@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from typing import Any, Dict, List, Literal, Optional, Union
 
@@ -56,7 +57,13 @@ class DbtBouncerConfBase(BaseModel):
         default=None,
         description="Path to a directory containing custom checks.",
     )
-    dbt_artifacts_dir: Optional[str] = Field(default="./target")
+    dbt_artifacts_dir: Optional[str] = Field(
+        default=(
+            f"{os.getenv('DBT_PROJECT_DIR')}/target"
+            if os.getenv("DBT_PROJECT_DIR")
+            else "./target"
+        )
+    )
     exclude: Optional[str] = Field(
         default=None,
         description="Regexp to match which paths to exclude.",
