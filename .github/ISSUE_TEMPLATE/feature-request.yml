@@ -26,3 +26,9 @@ body:
       description: Let us know if you want to write some code, and how we can help.
     validations:
       required: false
+  - type: input
+    attributes:
+      label: Add your company's website here to be added to our list of [users](https://godatadriven.github.io/dbt-bouncer/stable/users/#users).
+      description: Do you use `dbt-bouncer` in your workplace?
+    validations:
+      required: false
