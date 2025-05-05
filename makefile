@@ -67,7 +67,7 @@ test-unit:
 		-m not_in_parallel2
 
 test-windows:
-	poetry run pytest -c ./tests --numprocesses 5 ./tests/unit -m 'not not_in_parallel and not not_in_parallel' && \
+	poetry run pytest -c ./tests --numprocesses 5 ./tests/unit -m 'not not_in_parallel and not not_in_parallel2' && \
 	poetry run pytest -c ./tests -m not_in_parallel && \
 	poetry run pytest -c ./tests -m not_in_parallel2 && \
 	poetry run pytest -c ./tests --numprocesses 5 ./tests/integration
