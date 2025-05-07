@@ -105,7 +105,7 @@ requires-poetry = ">=2.0.0"
 
 [tool.poetry.group.dev.dependencies]
 autoflake = "^2"
-black = "^24"
+black = "^25"
 dbt-core = "^1"
 dbt-duckdb = "^1"
 isort = "^5"
