@@ -13,6 +13,7 @@ classifiers = [
 dependencies =[
   "click (<9)",
   "dbt-artifacts-parser (>=0.8)",
+  "h11 (>=0.16.0)", # To fix security warning
   "jinja2 (>=3,<4)",
   "jinja2-simple-tags (<1)",
   "levenshtein (>=0.26.1,<1)",
