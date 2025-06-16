@@ -725,14 +725,14 @@ test = ["hypothesis (>=6.87,<7.0)", "pytest (>=7.3,<8.0)", "pytest-cov (>=4.1,<5
 
 [[package]]
 name = "dbt-core"
-version = "1.9.2"
+version = "1.9.8"
 description = "With dbt, data analysts and engineers can build analytics the way engineers build applications."
 optional = false
 python-versions = ">=3.9"
 groups = ["dev"]
 files = [
-    {file = "dbt_core-1.9.2-py3-none-any.whl", hash = "sha256:9da00a336910c3279e4deb34febef9ebd7eed847cf8a20452df0439518eb8188"},
-    {file = "dbt_core-1.9.2.tar.gz", hash = "sha256:c1f2d9cad44c17c366141da2613d07804497d9b063d0045ae57c758743d3b32d"},
+    {file = "dbt_core-1.9.8-py3-none-any.whl", hash = "sha256:01f54766c14a05a2108d47b8a170580e0034e1076a0eaf807355e661084f50c7"},
+    {file = "dbt_core-1.9.8.tar.gz", hash = "sha256:19a2022d10d833a4b3c0298cb3a1cd6ce21079639542de5638a1465843d7523b"},
 ]
 
 [package.dependencies]
