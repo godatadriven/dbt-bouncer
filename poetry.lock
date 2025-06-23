@@ -655,19 +655,20 @@ files = [
 
 [[package]]
 name = "dbt-adapters"
-version = "1.14.1"
+version = "1.16.0"
 description = "The set of adapter protocols and base functionality that supports integration with dbt-core"
 optional = false
 python-versions = ">=3.9.0"
 groups = ["dev"]
 files = [
-    {file = "dbt_adapters-1.14.1-py3-none-any.whl", hash = "sha256:11e480f48b63466ead8ae56698ac7a5541ffc64ec2b0392cec174e8d47b09a7f"},
-    {file = "dbt_adapters-1.14.1.tar.gz", hash = "sha256:0ba2325bfdf00f084b635d373f2d89e392be257ca79c47280683a2612882c61b"},
+    {file = "dbt_adapters-1.16.0-py3-none-any.whl", hash = "sha256:54734dcef653d82e93be7b9ab0ad141a4c0d33f04a0435604c4694bb32f29173"},
+    {file = "dbt_adapters-1.16.0.tar.gz", hash = "sha256:d4d22c7c7b86730ba3bb056f67109e01846847dc052cf13100be4f11b277a7d9"},
 ]
 
 [package.dependencies]
 agate = ">=1.0,<2.0"
 dbt-common = ">=1.13,<2.0"
+dbt-protos = ">=1.0.291,<2.0"
 mashumaro = {version = ">=3.9,<3.15", extras = ["msgpack"]}
 protobuf = ">=5.0,<6.0"
 pytz = ">=2015.7"
@@ -694,19 +695,20 @@ test = ["pytest (>=6.2.4,<9.0.0)"]
 
 [[package]]
 name = "dbt-common"
-version = "1.15.0"
+version = "1.25.0"
 description = "The shared common utilities that dbt-core and adapter implementations use"
 optional = false
 python-versions = ">=3.9"
 groups = ["dev"]
 files = [
-    {file = "dbt_common-1.15.0-py3-none-any.whl", hash = "sha256:007d245eb796de5fa3b5e9f9304324ad8330db37752f0cbf307b8b93db87a4d3"},
-    {file = "dbt_common-1.15.0.tar.gz", hash = "sha256:728fa941591ddf97b5a93460ef2d8e5793a581a51d41a4a185afdb887b65bda9"},
+    {file = "dbt_common-1.25.0-py3-none-any.whl", hash = "sha256:857a206efccbe9754787f2b9baa9040ba1f1ddfd04168440224d3864e943251e"},
+    {file = "dbt_common-1.25.0.tar.gz", hash = "sha256:b65097b624e9833762a7892a6054fc6d75618bd4f7e58c6859468cefc859d40b"},
 ]
 
 [package.dependencies]
 agate = ">=1.7.0,<1.10"
 colorama = ">=0.3.9,<0.5"
+dbt-protos = ">=1.0.291,<2.0.0"
 deepdiff = ">=7.0,<8.0"
 isodate = ">=0.6,<0.7"
 jinja2 = ">=3.1.3,<4"
@@ -725,30 +727,33 @@ test = ["hypothesis (>=6.87,<7.0)", "pytest (>=7.3,<8.0)", "pytest-cov (>=4.1,<5
 
 [[package]]
 name = "dbt-core"
-version = "1.9.2"
+version = "1.10.2"
 description = "With dbt, data analysts and engineers can build analytics the way engineers build applications."
 optional = false
 python-versions = ">=3.9"
 groups = ["dev"]
 files = [
-    {file = "dbt_core-1.9.2-py3-none-any.whl", hash = "sha256:9da00a336910c3279e4deb34febef9ebd7eed847cf8a20452df0439518eb8188"},
-    {file = "dbt_core-1.9.2.tar.gz", hash = "sha256:c1f2d9cad44c17c366141da2613d07804497d9b063d0045ae57c758743d3b32d"},
+    {file = "dbt_core-1.10.2-py3-none-any.whl", hash = "sha256:c86b22941d88f9c3fad1453b6e0dd6a5d06991498bc8786ca34738358e90bef1"},
+    {file = "dbt_core-1.10.2.tar.gz", hash = "sha256:24115fb2d9aca8ed21135836d23d0e039517a4f1b86a2d0336a658b030fb878a"},
 ]
 
 [package.dependencies]
 agate = ">=1.7.0,<1.10"
 click = ">=8.0.2,<9.0"
 daff = ">=1.3.46"
-dbt-adapters = ">=1.10.1,<2.0"
-dbt-common = ">=1.13.0,<2.0"
+dbt-adapters = ">=1.15.2,<2.0"
+dbt-common = ">=1.22.0,<2.0"
 dbt-extractor = ">=0.5.0,<=0.6"
-dbt-semantic-interfaces = ">=0.7.4,<0.8"
+dbt-protos = ">=1.0.315,<2.0"
+dbt-semantic-interfaces = ">=0.8.3,<0.9"
 Jinja2 = ">=3.1.3,<4"
+jsonschema = ">=4.19.1,<5.0"
 mashumaro = {version = ">=3.9,<3.15", extras = ["msgpack"]}
 networkx = ">=2.3,<4.0"
 packaging = ">20.9"
 pathspec = ">=0.9,<0.13"
 protobuf = ">=5.0,<6.0"
+pydantic = "<3"
 pytz = ">=2015.7"
 pyyaml = ">=6.0"
 requests = "<3.0.0"
@@ -805,21 +810,36 @@ files = [
 ]
 
 [[package]]
+name = "dbt-protos"
+version = "1.0.330"
+description = "Public proto bindings for dbt"
+optional = false
+python-versions = ">=3.6"
+groups = ["dev"]
+files = [
+    {file = "dbt_protos-1.0.330-py3-none-any.whl", hash = "sha256:e1ffc9275195b2187ea9bbdedc85d2a8d0ca4d0b129de7cb5789a0bd9f4fc844"},
+    {file = "dbt_protos-1.0.330.tar.gz", hash = "sha256:a8532e3617fbc949c3b0a907e6bda39862973be9451a2bb1b46e1ad8f2ada9e9"},
+]
+
+[package.dependencies]
+protobuf = ">=3.17.1"
+
+[[package]]
 name = "dbt-semantic-interfaces"
-version = "0.7.4"
+version = "0.8.4"
 description = "The shared semantic layer definitions that dbt-core and MetricFlow use"
 optional = false
 python-versions = ">=3.8"
 groups = ["dev"]
 files = [
-    {file = "dbt_semantic_interfaces-0.7.4-py3-none-any.whl", hash = "sha256:63965478ef27056f20a8c9a0f59b1355ebbc15133c1a6f0d368d93996a31dd5d"},
-    {file = "dbt_semantic_interfaces-0.7.4.tar.gz", hash = "sha256:dcedda6702ecabb633aa4e8ab3b1eb7f9c4301dcc0026076a4a0ef64f9e59cf0"},
+    {file = "dbt_semantic_interfaces-0.8.4-py3-none-any.whl", hash = "sha256:b25d2e6bf8a2208a666fa6c94ca549cdae790c520e7cd461045508d792444770"},
+    {file = "dbt_semantic_interfaces-0.8.4.tar.gz", hash = "sha256:ccf3f8ad35d41ac92e6009e608ab733980cfc39e16b7e964fd9e2a897086433a"},
 ]
 
 [package.dependencies]
 click = ">=7.0,<9.0"
-importlib-metadata = ">=6.0,<7"
-jinja2 = ">=3.1.3,<4"
+importlib-metadata = ">=6.0,<9"
+jinja2 = ">=3.1.6,<4"
 jsonschema = ">=4.0,<5"
 more-itertools = ">=8.0,<11.0"
 pydantic = ">=1.10,<3"
