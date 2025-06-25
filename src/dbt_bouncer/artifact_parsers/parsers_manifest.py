@@ -25,28 +25,6 @@ from dbt_bouncer.utils import clean_path_str, get_package_version_number
 
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
-    from dbt_artifacts_parser.parsers.manifest.manifest_v10 import (
-        Exposure as Exposure_v10,
-    )
-    from dbt_artifacts_parser.parsers.manifest.manifest_v10 import (
-        GenericTestNode as GenericTestNode_v10,
-    )
-    from dbt_artifacts_parser.parsers.manifest.manifest_v10 import ManifestV10
-    from dbt_artifacts_parser.parsers.manifest.manifest_v10 import (
-        ModelNode as ModelNode_v10,
-    )
-    from dbt_artifacts_parser.parsers.manifest.manifest_v10 import (
-        SemanticModel as SemanticModel_v10,
-    )
-    from dbt_artifacts_parser.parsers.manifest.manifest_v10 import (
-        SingularTestNode as SingularTestNode_v10,
-    )
-    from dbt_artifacts_parser.parsers.manifest.manifest_v10 import (
-        SnapshotNode as SnapshotNode_v10,
-    )
-    from dbt_artifacts_parser.parsers.manifest.manifest_v10 import (
-        SourceDefinition as SourceDefinition_v10,
-    )
     from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
         Exposure as Exposure_v11,
     )
@@ -87,10 +65,10 @@ from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
 class DbtBouncerManifest(BaseModel):
     """Model for all manifest objects."""
 
-    manifest: Union[ManifestV10, ManifestV11, ManifestLatest]
+    manifest: Union[ManifestV11, ManifestLatest]
 
 
-DbtBouncerExposureBase = Union[Exposure_v10, Exposure_v11, Exposures]
+DbtBouncerExposureBase = Union[Exposure_v11, Exposures]
 
 
 class DbtBouncerExposure(BaseModel):
@@ -101,7 +79,7 @@ class DbtBouncerExposure(BaseModel):
     unique_id: str
 
 
-DbtBouncerModelBase = Union[ModelNode_v10, ModelNode_v11, Nodes4, Nodes4Latest]
+DbtBouncerModelBase = Union[ModelNode_v11, Nodes4, Nodes4Latest]
 
 
 class DbtBouncerModel(BaseModel):
@@ -113,7 +91,7 @@ class DbtBouncerModel(BaseModel):
 
 
 DbtBouncerSemanticModelBase = Union[
-    SemanticModel_v10, SemanticModel_v11, SemanticModels, SemanticModelsLatest
+    SemanticModel_v11, SemanticModels, SemanticModelsLatest
 ]
 
 
@@ -125,7 +103,7 @@ class DbtBouncerSemanticModel(BaseModel):
     unique_id: str
 
 
-DbtBouncerSnapshotBase = Union[Nodes7, SnapshotNode_v10, SnapshotNode_v11]
+DbtBouncerSnapshotBase = Union[Nodes7, SnapshotNode_v11]
 
 
 class DbtBouncerSnapshot(BaseModel):
@@ -136,9 +114,7 @@ class DbtBouncerSnapshot(BaseModel):
     unique_id: str
 
 
-DbtBouncerSourceBase = Union[
-    SourceDefinition_v10, SourceDefinition_v11, Sources, SourcesLatest
-]
+DbtBouncerSourceBase = Union[SourceDefinition_v11, Sources, SourcesLatest]
 
 
 class DbtBouncerSource(BaseModel):
@@ -150,8 +126,6 @@ class DbtBouncerSource(BaseModel):
 
 
 DbtBouncerTestBase = Union[
-    GenericTestNode_v10,
-    SingularTestNode_v10,
     GenericTestNode_v11,
     SingularTestNode_v11,
     Nodes1,
@@ -186,9 +160,7 @@ def parse_manifest(
 
     """
     dbt_schema_version = manifest["metadata"]["dbt_schema_version"]
-    if dbt_schema_version == "https://schemas.getdbt.com/dbt/manifest/v10.json":
-        return ManifestV10(**manifest)
-    elif dbt_schema_version == "https://schemas.getdbt.com/dbt/manifest/v11.json":
+    if dbt_schema_version == "https://schemas.getdbt.com/dbt/manifest/v11.json":
         return ManifestV11(**manifest)
     elif dbt_schema_version == "https://schemas.getdbt.com/dbt/manifest/v12.json":
         from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
@@ -242,9 +214,7 @@ def parse_manifest_artifact(
         if (
             isinstance(v.resource_type, Enum) and v.resource_type.value == "model"
         ) or v.resource_type == "model":
-            if (
-                v.package_name == manifest_obj.manifest.metadata.project_name
-            ):  # dbt 1.6  # dbt 1.7+
+            if v.package_name == manifest_obj.manifest.metadata.project_name:
                 project_models.append(
                     DbtBouncerModel(
                         **{

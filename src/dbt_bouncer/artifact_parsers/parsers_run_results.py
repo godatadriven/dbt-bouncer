@@ -8,10 +8,6 @@ from dbt_bouncer.utils import clean_path_str
 
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
-    from dbt_artifacts_parser.parsers.run_results.run_results_v4 import (
-        RunResultOutput as RunResultOutput_v4,
-    )
-    from dbt_artifacts_parser.parsers.run_results.run_results_v4 import RunResultsV4
     from dbt_artifacts_parser.parsers.run_results.run_results_v5 import (
         RunResultOutput as RunResultOutput_v5,
     )
@@ -31,9 +27,7 @@ if TYPE_CHECKING:
 
 from dbt_bouncer.artifact_parsers.parsers_common import load_dbt_artifact
 
-DbtBouncerRunResultBase = Union[
-    RunResultOutput_v4, RunResultOutput_v5, RunResultOutput_Latest
-]
+DbtBouncerRunResultBase = Union[RunResultOutput_v5, RunResultOutput_Latest]
 
 
 class DbtBouncerRunResult(BaseModel):
@@ -46,7 +40,7 @@ class DbtBouncerRunResult(BaseModel):
 
 def parse_run_results(
     run_results: Dict[str, Any],
-) -> Union[RunResultsV4, RunResultsV5, RunResultsLatest]:
+) -> Union[RunResultsV5, RunResultsLatest]:
     """Parse run-results.json.
 
     Args:
@@ -56,13 +50,11 @@ def parse_run_results(
         ValueError: If the schema version is not supported.
 
     Returns:
-        Union[RunResultsV4, RunResultsV5, RunResultsLatest]:
+        Union[ RunResultsV5, RunResultsLatest]:
 
     """
     dbt_schema_version = run_results["metadata"]["dbt_schema_version"]
-    if dbt_schema_version == "https://schemas.getdbt.com/dbt/run-results/v4.json":
-        return RunResultsV4(**run_results)
-    elif dbt_schema_version == "https://schemas.getdbt.com/dbt/run-results/v5.json":
+    if dbt_schema_version == "https://schemas.getdbt.com/dbt/run-results/v5.json":
         return RunResultsV5(**run_results)
     elif dbt_schema_version == "https://schemas.getdbt.com/dbt/run-results/v6.json":
         return RunResultsLatest(**run_results)
@@ -79,24 +71,41 @@ def parse_run_results_artifact(
         List[DbtBouncerRunResult]: A list of DbtBouncerRunResult objects.
 
     """
-    run_results_obj: Union[RunResultsV4, RunResultsV5, RunResultsLatest] = (
-        load_dbt_artifact(
-            artifact_name="run_results.json",
-            dbt_artifacts_dir=artifact_dir,
-        )
+
+    def get_clean_path_str(unique_id: str, manifest_obj: "DbtBouncerManifest") -> str:
+        """Extract the path for multiple node types.
+
+        Args:
+            unique_id (str): Id of the node in question
+            manifest_obj (DbtBouncerManifest): Manifest
+
+        Returns:
+            str: The cleaned path.
+
+        """
+        if unique_id in manifest_obj.manifest.nodes:
+            return clean_path_str(
+                manifest_obj.manifest.nodes[unique_id].original_file_path
+            )
+        elif unique_id.split(".")[0] == "exposure":
+            return clean_path_str(
+                manifest_obj.manifest.exposures[unique_id].original_file_path
+            )
+        else:
+            return clean_path_str(
+                manifest_obj.manifest.unit_tests[unique_id].original_file_path
+            )
+
+    run_results_obj: Union[RunResultsV5, RunResultsLatest] = load_dbt_artifact(
+        artifact_name="run_results.json",
+        dbt_artifacts_dir=artifact_dir,
     )
 
     project_run_results = [
         DbtBouncerRunResult(
             **{
                 "original_file_path": (
-                    clean_path_str(
-                        manifest_obj.manifest.nodes[r.unique_id].original_file_path
-                    )
-                    if r.unique_id in manifest_obj.manifest.nodes
-                    else clean_path_str(
-                        manifest_obj.manifest.unit_tests[r.unique_id].original_file_path
-                    )
+                    get_clean_path_str(unique_id=r.unique_id, manifest_obj=manifest_obj)
                 ),
                 "run_result": r,
                 "unique_id": r.unique_id,

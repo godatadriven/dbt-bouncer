@@ -27,6 +27,7 @@ class Metadata(BaseParserModel):
 class Status(Enum):
     success = 'success'
     error = 'error'
+    no_op = "no-op"
     skipped = 'skipped'
     partial_success = 'partial success'
 
