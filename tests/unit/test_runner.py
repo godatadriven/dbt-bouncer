@@ -24,6 +24,7 @@ from dbt_bouncer.artifact_parsers.parsers_manifest import (  # noqa: F401
     DbtBouncerModel,
     DbtBouncerModelBase,
     DbtBouncerSemanticModelBase,
+    DbtBouncerSnapshotBase,
     DbtBouncerSourceBase,
     DbtBouncerTestBase,
 )
