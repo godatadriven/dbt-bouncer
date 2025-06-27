@@ -69,8 +69,8 @@ def load_dbt_artifact(
 
         assert get_package_version_number(
             manifest_json["metadata"]["dbt_version"]
-        ) >= get_package_version_number("1.6.0"), (
-            f"The supplied `manifest.json` was generated with dbt version {manifest_json['metadata']['dbt_version']}, this is below the minimum supported version of 1.6.0."
+        ) >= get_package_version_number("1.7.0"), (
+            f"The supplied `manifest.json` was generated with dbt version {manifest_json['metadata']['dbt_version']}, this is below the minimum supported version of 1.7.0."
         )
 
         from dbt_bouncer.artifact_parsers.parsers_manifest import (

@@ -5,7 +5,11 @@
 
 | dbt Core | dbt-bouncer 0.* | dbt-bouncer 1.* |
 | - | - | - |
-| >= 1.6 | :white_check_mark: | :white_check_mark: |
+| 1.10 | :x: | :white_check_mark: (>=1.13) |
+| 1.9 | :x: | :white_check_mark: |
+| 1.8 | :white_check_mark: | :white_check_mark: |
+| 1.7 | :white_check_mark: | :white_check_mark: |
+| 1.6 | :white_check_mark: | :white_check_mark: (<1.13) |
 | <= 1.5 | :x: | :x: |
 
 ## Reporting a Vulnerability

@@ -29,7 +29,7 @@ def build_pex_file(dbt_version, pex_file_name):
                 "--script",
                 "dbt",
                 f"dbt-core=={dbt_version}",
-                f"dbt-duckdb=={dbt_version}",
+                "dbt-duckdb",
                 "pytz",
             ],
             _fg=True,
@@ -86,7 +86,7 @@ def generate_artifacts(
 
 def main():
     """For the specified dbt versions, build a pex file and generate dbt artifacts in the `./tests` directory."""
-    dbt_versions = ["1.6", "1.7", "1.8", "1.9"]
+    dbt_versions = ["1.7", "1.8", "1.9", "1.10"]
 
     for dbt_version in dbt_versions:
         pex_file_name = f"./dist/dbt-{dbt_version.replace('.', '')}.pex"

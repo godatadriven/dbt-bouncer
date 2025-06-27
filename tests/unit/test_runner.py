@@ -24,6 +24,7 @@ from dbt_bouncer.artifact_parsers.parsers_manifest import (  # noqa: F401
     DbtBouncerModel,
     DbtBouncerModelBase,
     DbtBouncerSemanticModelBase,
+    DbtBouncerSnapshotBase,
     DbtBouncerSourceBase,
     DbtBouncerTestBase,
 )
@@ -69,6 +70,7 @@ def test_runner_coverage(caplog, tmp_path):
             DbtBouncerModel,
             DbtBouncerModelBase,
             DbtBouncerSemanticModelBase,
+            DbtBouncerSnapshotBase,
             DbtBouncerSourceBase,
             DbtBouncerTestBase,
         )
@@ -205,6 +207,7 @@ def test_runner_failure():
             DbtBouncerModel,
             DbtBouncerModelBase,
             DbtBouncerSemanticModelBase,
+            DbtBouncerSnapshotBase,
             DbtBouncerSourceBase,
             DbtBouncerTestBase,
         )
@@ -333,6 +336,7 @@ def test_runner_success():
             DbtBouncerModel,
             DbtBouncerModelBase,
             DbtBouncerSemanticModelBase,
+            DbtBouncerSnapshotBase,
             DbtBouncerSourceBase,
             DbtBouncerTestBase,
         )
