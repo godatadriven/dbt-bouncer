@@ -28,6 +28,7 @@ class CheckLineagePermittedUpstreamModels(BaseCheck):
         models (List[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
 
     Other Parameters:
+        description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
@@ -86,6 +87,7 @@ class CheckLineageSeedCannotBeUsed(BaseCheck):
         model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
 
     Other Parameters:
+        description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
@@ -116,6 +118,7 @@ class CheckLineageSourceCannotBeUsed(BaseCheck):
         model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
 
     Other Parameters:
+        description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.

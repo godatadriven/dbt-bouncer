@@ -40,6 +40,29 @@ For more example config files, see [here](https://github.com/godatadriven/dbt-bo
 
 ## Common arguments
 
+### Description
+
+All checks support a `description` argument, this can be used to provide more context about the purpose of a check and why it is implemented. The description is included in the failure message. For example, this check:
+
+```yaml
+manifest_checks:
+  - name: check_model_names
+    description: Models in the staging layer should always start with "stg_".
+    include: ^models/staging
+    model_name_pattern: ^stg_
+```
+
+Produces this failure message:
+
+```shell
+`dbt-bouncer` failed. Please see below for more details or run `dbt-bouncer` with the `-v` flag.
+Failed checks:
+| Check name                         | Severity   | Failure message                                                                                                                           |
+|------------------------------------|------------|-------------------------------------------------------------------------------------------------------------------------------------------|
+| check_model_names:36:orders        | error      | Models in the staging layer should always start with "stg_". - AssertionError: `orders` does not match the supplied regex `^stg_)`.       |
+Done. SUCCESS=250 WARN=0 ERROR=1
+```
+
 ### Exclude and Include
 
 Most (but not all) checks accept the following optional arguments:

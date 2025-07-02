@@ -122,6 +122,7 @@ manifest_checks:
     include: ^models/intermediate
     model_name_pattern: ^int_
   - name: check_model_names
+    description: Models in the staging layer should always start with "stg_". # Descriptions are optional for all checks.
     include: ^models/staging
     model_name_pattern: ^stg_
   - name: check_model_test_coverage

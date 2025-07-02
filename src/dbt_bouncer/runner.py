@@ -160,6 +160,9 @@ def runner(
                 traceback.TracebackException.from_exception(e).format(),
             )
             failure_message = failure_message_full[-1].strip()
+            if check["check"].description:
+                failure_message = f"{check['check'].description} - {failure_message}"
+
             logging.debug(
                 f"Check {check['check_run_id']} failed: {' '.join(failure_message_full)}"
             )

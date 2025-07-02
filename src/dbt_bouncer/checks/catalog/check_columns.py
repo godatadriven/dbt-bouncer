@@ -29,6 +29,7 @@ class CheckColumnDescriptionPopulated(BaseCheck):
         models (List[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
 
     Other Parameters:
+        description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
@@ -78,6 +79,7 @@ class CheckColumnHasSpecifiedTest(BaseCheck):
         tests (List[DbtBouncerTestBase]): List of DbtBouncerTestBase objects parsed from `manifest.json`.
 
     Other Parameters:
+        description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
@@ -136,6 +138,7 @@ class CheckColumnNameCompliesToColumnType(BaseCheck):
         catalog_node (CatalogNodes): The CatalogNodes object to check.
 
     Other Parameters:
+        description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
@@ -200,6 +203,7 @@ class CheckColumnsAreAllDocumented(BaseCheck):
         models (List[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
 
     Other Parameters:
+        description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
@@ -240,6 +244,7 @@ class CheckColumnsAreDocumentedInPublicModels(BaseCheck):
         models (List[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
 
     Other Parameters:
+        description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.

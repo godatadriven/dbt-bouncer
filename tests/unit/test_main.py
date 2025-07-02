@@ -114,6 +114,73 @@ class CheckMyCustomCheck(BaseCheck):
     assert result.exit_code == 0
 
 
+def test_cli_description(tmp_path):
+    # Config file
+    bouncer_config = {
+        "dbt_artifacts_dir": ".",
+        "manifest_checks": [
+            {
+                "description": "Staging models should start with 'staging_'.",
+                "include": "^models/staging",
+                "model_name_pattern": "staging_",
+                "name": "check_model_names",
+            },
+            {
+                "include": "^models/staging",
+                "model_name_pattern": "staging_",
+                "name": "check_model_names",
+            },
+        ],
+    }
+
+    with Path(tmp_path / "dbt-bouncer.yml").open("w") as f:
+        yaml.dump(bouncer_config, f)
+
+    # Manifest file
+    with Path.open(Path("./dbt_project/target/manifest.json"), "r") as f:
+        manifest = json.load(f)
+
+    with Path.open(tmp_path / "manifest.json", "w") as f:
+        json.dump(manifest, f)
+
+    # Run dbt-bouncer
+    runner = CliRunner()
+    runner.invoke(
+        cli,
+        [
+            "--config-file",
+            Path(tmp_path / "dbt-bouncer.yml").__str__(),
+            "--output-file",
+            tmp_path / "coverage.json",
+        ],
+    )
+
+    with Path.open(tmp_path / "coverage.json", "r") as f:
+        coverage = json.load(f)
+
+    import logging
+
+    logging.warning(f"{coverage=}")
+
+    assert (
+        next(
+            x["failure_message"]
+            for x in coverage
+            if x["check_run_id"] == "check_model_names:0:stg_orders"
+        )
+        == "Staging models should start with 'staging_'. - AssertionError: `stg_orders` does not match the supplied regex `staging_)`."
+    )
+
+    assert (
+        next(
+            x["failure_message"]
+            for x in coverage
+            if x["check_run_id"] == "check_model_names:1:stg_orders"
+        )
+        == "AssertionError: `stg_orders` does not match the supplied regex `staging_)`."
+    )
+
+
 def test_cli_exclude(tmp_path):
     # Config file
     bouncer_config = {

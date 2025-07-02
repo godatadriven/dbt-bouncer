@@ -28,6 +28,7 @@ class CheckMacroArgumentsDescriptionPopulated(BaseCheck):
         macro (Macros): The Macros object to check.
 
     Other Parameters:
+        description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the macro path. Macro paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
@@ -105,6 +106,7 @@ class CheckMacroCodeDoesNotContainRegexpPattern(BaseCheck):
         macro (Macros): The Macros object to check.
 
     Other Parameters:
+        description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the macro path. Macro paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
@@ -142,6 +144,7 @@ class CheckMacroDescriptionPopulated(BaseCheck):
         macro (Macros): The Macros object to check.
 
     Other Parameters:
+        description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the macro path. Macro paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
@@ -180,6 +183,7 @@ class CheckMacroMaxNumberOfLines(BaseCheck):
         macro (Macros): The Macros object to check.
 
     Other Parameters:
+        description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the macro path. Macro paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
@@ -219,6 +223,7 @@ class CheckMacroNameMatchesFileName(BaseCheck):
         macro (Macros): The Macros object to check.
 
     Other Parameters:
+        description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the macro path. Macro paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
@@ -261,6 +266,7 @@ class CheckMacroPropertyFileLocation(BaseCheck):
         macro (Macros): The Macros object to check.
 
     Other Parameters:
+        description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the macro path. Macro paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
