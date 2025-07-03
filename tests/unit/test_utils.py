@@ -225,6 +225,7 @@ def test_make_markdown_table(data_in, data_out):
     ("include_pattern", "path", "output"),
     [
         ("^staging", "staging/model_1.sql", True),
+        ("^staging", "staging\\model_1.sql", True),  # Windows path format
         (None, "staging/model_1.sql", True),
         ("^staging", "model_1.sql", False),
         ("^staging", "intermediate/model_1.sql", False),

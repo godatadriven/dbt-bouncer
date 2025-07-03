@@ -943,6 +943,10 @@ class CheckModelsDocumentationCoverage(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
+    description: Optional[str] = Field(
+        default=None,
+        description="Description of what the check does and why it is implemented.",
+    )
     index: Optional[int] = Field(
         default=None,
         description="Index to uniquely identify the check, calculated at runtime.",
@@ -1003,6 +1007,10 @@ class CheckModelsTestCoverage(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
+    description: Optional[str] = Field(
+        default=None,
+        description="Description of what the check does and why it is implemented.",
+    )
     index: Optional[int] = Field(
         default=None,
         description="Index to uniquely identify the check, calculated at runtime.",
