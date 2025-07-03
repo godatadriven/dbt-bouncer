@@ -32,6 +32,7 @@ class CheckModelAccess(BaseCheck):
         model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
 
     Other Parameters:
+        description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
@@ -74,6 +75,7 @@ class CheckModelCodeDoesNotContainRegexpPattern(BaseCheck):
         model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
 
     Other Parameters:
+        description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
@@ -111,6 +113,7 @@ class CheckModelContractsEnforcedForPublicModel(BaseCheck):
         model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
 
     Other Parameters:
+        description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
@@ -141,6 +144,7 @@ class CheckModelDependsOnMultipleSources(BaseCheck):
         model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
 
     Other Parameters:
+        description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
@@ -173,6 +177,7 @@ class CheckModelDescriptionPopulated(BaseCheck):
         model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
 
     Other Parameters:
+        description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
@@ -266,6 +271,7 @@ class CheckModelDocumentedInSameDirectory(BaseCheck):
         model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
 
     Other Parameters:
+        description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
@@ -307,6 +313,7 @@ class CheckModelHasContractsEnforced(BaseCheck):
         model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
 
     Other Parameters:
+        description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
@@ -338,6 +345,7 @@ class CheckModelHasMetaKeys(BaseCheck):
         model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
 
     Other Parameters:
+        description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
@@ -375,6 +383,7 @@ class CheckModelHasNoUpstreamDependencies(BaseCheck):
         model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
 
     Other Parameters:
+        description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
@@ -405,6 +414,7 @@ class CheckModelHasTags(BaseCheck):
         tags (List[str]): List of tags to check for.
 
     Other Parameters:
+        description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
@@ -441,6 +451,7 @@ class CheckModelHasUniqueTest(BaseCheck):
         tests (List[DbtBouncerTestBase]): List of DbtBouncerTestBase objects parsed from `manifest.json`.
 
     Other Parameters:
+        description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
@@ -508,6 +519,7 @@ class CheckModelHasUnitTests(BaseCheck):
         unit_tests (List[UnitTests]): List of UnitTests objects parsed from `manifest.json`.
 
     Other Parameters:
+        description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
@@ -569,6 +581,7 @@ class CheckModelMaxChainedViews(BaseCheck):
         models (List[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
 
     Other Parameters:
+        description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
@@ -680,6 +693,7 @@ class CheckModelMaxFanout(BaseCheck):
         models (List[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
 
     Other Parameters:
+        description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
@@ -718,6 +732,7 @@ class CheckModelMaxNumberOfLines(BaseCheck):
         model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
 
     Other Parameters:
+        description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
@@ -760,6 +775,7 @@ class CheckModelMaxUpstreamDependencies(BaseCheck):
         model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
 
     Other Parameters:
+        description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
@@ -816,6 +832,7 @@ class CheckModelNames(BaseCheck):
         model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
 
     Other Parameters:
+        description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
@@ -856,6 +873,7 @@ class CheckModelPropertyFileLocation(BaseCheck):
         model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
 
     Other Parameters:
+        description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
@@ -911,6 +929,7 @@ class CheckModelsDocumentationCoverage(BaseModel):
         models (List[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
 
     Other Parameters:
+        description (Optional[str]): Description of what the check does and why it is implemented.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
@@ -969,6 +988,7 @@ class CheckModelsTestCoverage(BaseModel):
         tests (List[DbtBouncerTestBase]): List of DbtBouncerTestBase objects parsed from `manifest.json`.
 
     Other Parameters:
+        description (Optional[str]): Description of what the check does and why it is implemented.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
 

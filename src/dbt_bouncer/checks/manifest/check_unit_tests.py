@@ -37,6 +37,7 @@ class CheckUnitTestCoverage(BaseModel):
         unit_tests (List[UnitTests]): List of UnitTests objects parsed from `manifest.json`.
 
     Other Parameters:
+        description (Optional[str]): Description of what the check does and why it is implemented.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
@@ -117,6 +118,7 @@ class CheckUnitTestExpectFormats(BaseCheck):
         unit_test (UnitTests): The UnitTests object to check.
 
     Other Parameters:
+        description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the unit test path (i.e the .yml file where the unit test is configured). Unit test paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the unit test path (i.e the .yml file where the unit test is configured). Only unit test paths that match the pattern will be checked.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
@@ -167,6 +169,7 @@ class CheckUnitTestGivenFormats(BaseCheck):
         unit_test (UnitTests): The UnitTests object to check.
 
     Other Parameters:
+        description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the unit test path (i.e the .yml file where the unit test is configured). Unit test paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the unit test path (i.e the .yml file where the unit test is configured). Only unit test paths that match the pattern will be checked.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
