@@ -31,6 +31,7 @@ CheckUnitTestGivenFormats.model_rebuild()
 
 @pytest.mark.parametrize(
     (
+        "description",
         "include",
         "manifest_obj",
         "min_unit_test_coverage_pct",
@@ -40,6 +41,7 @@ CheckUnitTestGivenFormats.model_rebuild()
     ),
     [
         (
+            "The first check",
             "^models/staging",
             "manifest_obj",
             100,
@@ -98,6 +100,7 @@ CheckUnitTestGivenFormats.model_rebuild()
             does_not_raise(),
         ),
         (
+            None,
             "^models/staging",
             "manifest_obj",
             75,
@@ -178,6 +181,7 @@ CheckUnitTestGivenFormats.model_rebuild()
             does_not_raise(),
         ),
         (
+            "The third check",
             "^models/staging",
             "manifest_obj",
             75,
@@ -261,6 +265,7 @@ CheckUnitTestGivenFormats.model_rebuild()
     indirect=["manifest_obj"],
 )
 def test_check_unit_test_coverage(
+    description,
     include,
     manifest_obj,
     min_unit_test_coverage_pct,
@@ -270,6 +275,7 @@ def test_check_unit_test_coverage(
 ):
     with expectation:
         CheckUnitTestCoverage(
+            description=description,
             include=include,
             manifest_obj=manifest_obj,
             min_unit_test_coverage_pct=min_unit_test_coverage_pct,

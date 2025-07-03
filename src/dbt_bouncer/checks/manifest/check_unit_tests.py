@@ -51,6 +51,10 @@ class CheckUnitTestCoverage(BaseModel):
     """
 
     model_config = ConfigDict(extra="forbid")
+    description: Optional[str] = Field(
+        default=None,
+        description="Description of what the check does and why it is implemented.",
+    )
     include: Optional[str] = Field(
         default=None,
         description="Regexp to match which paths to include.",
