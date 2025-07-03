@@ -245,6 +245,8 @@ def object_in_path(include_pattern: str, path: str) -> bool:
 
     """
     if include_pattern is not None:
-        return re.compile(include_pattern.strip()).match(path) is not None
+        return (
+            re.compile(include_pattern.strip()).match(clean_path_str(path)) is not None
+        )
     else:
         return True
