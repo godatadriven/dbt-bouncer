@@ -170,6 +170,41 @@ class CheckModelDependsOnMultipleSources(BaseCheck):
         )
 
 
+class CheckModelDescriptionContainsRegexPattern(BaseCheck):
+    """Models must have a description that matches the provided pattern.
+
+    Receives:
+        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+        regexp_pattern (str): The regexp pattern that should match the model description.
+
+    Other Parameters:
+        description (Optional[str]): Description of what the check does and why it is implemented.
+        exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
+        include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_model_description_contains_regex_pattern
+            - regex_pattern: .*pattern_to_match.*
+        ```
+
+    """
+
+    model: "DbtBouncerModelBase" = Field(default=None)
+    name: Literal["check_model_description_contains_regex_pattern"]
+    regexp_pattern: str
+
+    def execute(self) -> None:
+        """Execute the check."""
+        assert re.compile(self.regexp_pattern.strip(), flags=re.DOTALL).match(
+            self.model.description
+        ), (
+            f"""`{self.model.name}`'s description "{self.model.description}" doesn't match the supplied regex: {self.regexp_pattern}."""
+        )
+
+
 class CheckModelDescriptionPopulated(BaseCheck):
     """Models must have a populated description.
 
