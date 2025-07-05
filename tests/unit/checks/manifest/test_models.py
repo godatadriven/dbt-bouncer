@@ -25,6 +25,7 @@ from dbt_bouncer.checks.manifest.check_models import (
     CheckModelCodeDoesNotContainRegexpPattern,
     CheckModelContractsEnforcedForPublicModel,
     CheckModelDependsOnMultipleSources,
+    CheckModelDescriptionContainsRegexPattern,
     CheckModelDescriptionPopulated,
     CheckModelDirectories,
     CheckModelDocumentedInSameDirectory,
@@ -49,6 +50,7 @@ CheckModelCodeDoesNotContainRegexpPattern.model_rebuild()
 CheckModelContractsEnforcedForPublicModel.model_rebuild()
 CheckModelDependsOnMultipleSources.model_rebuild()
 CheckModelDescriptionPopulated.model_rebuild()
+CheckModelDescriptionContainsRegexPattern.model_rebuild()
 CheckModelDirectories.model_rebuild()
 CheckModelsDocumentationCoverage.model_rebuild()
 CheckModelDocumentedInSameDirectory.model_rebuild()
@@ -2462,6 +2464,209 @@ def test_check_model_property_file_location(model, expectation):
     with expectation:
         CheckModelPropertyFileLocation(
             model=model, name="check_model_property_file_location"
+        ).execute()
+
+
+@pytest.mark.parametrize(
+    ("model", "pattern", "expectation"),
+    [
+        (
+            Nodes4(
+                **{
+                    "alias": "model_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                    },
+                    "description": "Description that contains the pattern to match.",
+                    "fqn": ["package_name", "model_1"],
+                    "name": "model_1",
+                    "original_file_path": "model_1.sql",
+                    "package_name": "package_name",
+                    "path": "staging/finance/model_1.sql",
+                    "resource_type": "model",
+                    "schema": "main",
+                    "unique_id": "model.package_name.model_1",
+                },
+            ),
+            ".*pattern to match.*",
+            does_not_raise(),
+        ),
+        (
+            Nodes4(
+                **{
+                    "alias": "model_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                    },
+                    "description": """A
+                        multiline
+                        description
+                        with the pattern to match.
+                        """,
+                    "fqn": ["package_name", "model_1"],
+                    "name": "model_1",
+                    "original_file_path": "model_1.sql",
+                    "package_name": "package_name",
+                    "path": "staging/finance/model_1.sql",
+                    "resource_type": "model",
+                    "schema": "main",
+                    "unique_id": "model.package_name.model_1",
+                },
+            ),
+            ".*pattern to match.*",
+            does_not_raise(),
+        ),
+        (
+            Nodes4(
+                **{
+                    "alias": "model_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                    },
+                    "description": "",
+                    "fqn": ["package_name", "model_1"],
+                    "name": "model_1",
+                    "original_file_path": "model_1.sql",
+                    "package_name": "package_name",
+                    "path": "staging/finance/model_1.sql",
+                    "resource_type": "model",
+                    "schema": "main",
+                    "unique_id": "model.package_name.model_1",
+                },
+            ),
+            ".*pattern to match.*",
+            pytest.raises(AssertionError),
+        ),
+        (
+            Nodes4(
+                **{
+                    "alias": "model_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                    },
+                    "description": " ",
+                    "fqn": ["package_name", "model_1"],
+                    "name": "model_1",
+                    "original_file_path": "model_1.sql",
+                    "package_name": "package_name",
+                    "path": "staging/finance/model_1.sql",
+                    "resource_type": "model",
+                    "schema": "main",
+                    "unique_id": "model.package_name.model_1",
+                },
+            ),
+            ".*pattern to match.*",
+            pytest.raises(AssertionError),
+        ),
+        (
+            Nodes4(
+                **{
+                    "alias": "model_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                    },
+                    "description": """
+                        """,
+                    "fqn": ["package_name", "model_1"],
+                    "name": "model_1",
+                    "original_file_path": "model_1.sql",
+                    "package_name": "package_name",
+                    "path": "staging/finance/model_1.sql",
+                    "resource_type": "model",
+                    "schema": "main",
+                    "unique_id": "model.package_name.model_1",
+                },
+            ),
+            ".*pattern to match.*",
+            pytest.raises(AssertionError),
+        ),
+        (
+            Nodes4(
+                **{
+                    "alias": "model_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                    },
+                    "description": "Description with a pattern that does not match.",
+                    "fqn": ["package_name", "model_1"],
+                    "name": "model_1",
+                    "original_file_path": "model_1.sql",
+                    "package_name": "package_name",
+                    "path": "staging/finance/model_1.sql",
+                    "resource_type": "model",
+                    "schema": "main",
+                    "unique_id": "model.package_name.model_1",
+                },
+            ),
+            ".*pattern to match.*",
+            pytest.raises(AssertionError),
+        ),
+        (
+            Nodes4(
+                **{
+                    "alias": "model_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                    },
+                    "description": """Description with
+                    the
+                    pattern to match.""",
+                    "fqn": ["package_name", "model_1"],
+                    "name": "model_1",
+                    "original_file_path": "model_1.sql",
+                    "package_name": "package_name",
+                    "path": "staging/finance/model_1.sql",
+                    "resource_type": "model",
+                    "schema": "main",
+                    "unique_id": "model.package_name.model_1",
+                },
+            ),
+            ".*pattern to match.*",
+            does_not_raise(),
+        ),
+    ],
+)
+def test_check_model_description_contains_regex_pattern(model, pattern, expectation):
+    with expectation:
+        CheckModelDescriptionContainsRegexPattern(
+            model=model,
+            name="check_model_description_contains_regex_pattern",
+            regexp_pattern=pattern,
         ).execute()
 
 
