@@ -83,6 +83,9 @@ manifest_checks:
     regexp_pattern: .*[i][f][n][u][l][l].*
   - name: check_model_contract_enforced_for_public_model
   - name: check_model_depends_on_multiple_sources
+  - name: check_model_description_contains_regex_pattern
+    include: ^models/marts/finance/customers
+    regexp_pattern: .*as well as some derived facts.*
   - name: check_model_description_populated
   - name: check_model_directories
     include: ^models
