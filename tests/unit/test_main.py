@@ -590,13 +590,13 @@ def test_cli_include(tmp_path):
 @pytest.mark.parametrize(
     ("only_value", "exit_code", "number_of_checks_run"),
     [
-        ("", 0, 43),
+        ("", 0, 46),
         ("catalog_checks", 0, 2),
         ("catalog_checks,manifest_checks", 0, 5),
-        ("catalog_checks,manifest_checks,run_results_checks", 0, 43),
-        ("catalog_checks, run_results_checks", 0, 40),
+        ("catalog_checks,manifest_checks,run_results_checks", 0, 46),
+        ("catalog_checks, run_results_checks", 0, 43),
         ("manifest_checks", 0, 3),
-        ("run_results_checks", 0, 38),
+        ("run_results_checks", 0, 41),
         ("manifest", 1, 1),
         ("manifest checks", 1, 1),
     ],
