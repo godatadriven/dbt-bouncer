@@ -101,6 +101,12 @@ manifest_checks:
       - payments
   - name: check_model_documentation_coverage
   - name: check_model_documented_in_same_directory
+  - name: check_model_grant_privilege
+    include: ^models/marts
+    privilege_pattern: ^select|^write
+  - name: check_model_grant_privilege_required
+    include: ^models/marts
+    privilege: select
   - name: check_model_has_contracts_enforced
     include: ^models/marts
   - name: check_model_has_meta_keys
@@ -119,6 +125,10 @@ manifest_checks:
     max_downstream_models: 2
   - name: check_model_max_number_of_lines
   - name: check_model_max_upstream_dependencies
+  - name: check_model_number_of_grants
+    include: ^models/marts
+    max_number_of_privileges: 2 # Optional
+    min_number_of_privileges: 1 # Optional
   - name: check_model_has_unit_tests
     include: ^models/marts
   - name: check_model_names
