@@ -372,7 +372,7 @@ class CheckModelGrantPrivilege(BaseCheck):
         """Execute the check."""
         non_complying_grants = [
             i
-            for i in self.model.config.grants.keys
+            for i in self.model.config.grants
             if re.compile(self.privilege_pattern.strip()).match(i) is None
         ]
 
@@ -410,7 +410,7 @@ class CheckModelGrantPrivilegeRequired(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
-        assert self.privilege in self.model.config.grants.keys, (
+        assert self.privilege in self.model.config.grants, (
             f"`{self.model.name}` does not have the required grant privilege (`{self.privilege}`)."
         )
 

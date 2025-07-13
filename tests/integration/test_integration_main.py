@@ -21,6 +21,13 @@ def test_cli_happy_path(caplog, dbt_artifacts_dir, tmp_path):
     )
 
     config_file = Path(tmp_path / "dbt-bouncer-example.yml")
+
+    # Due to non-backwards compatible dbt-fusion changes, this check doesn't work with dbt-core < 1.10
+    if dbt_artifacts_dir.split("/")[-1] in ["dbt_17", "dbt_18", "dbt_19"]:
+        for item in bouncer_config["manifest_checks"]:
+            if item["name"] == "check_source_freshness_populated":
+                bouncer_config["manifest_checks"].remove(item)
+
     with config_file.open("w") as f:
         yaml.dump(bouncer_config, f)
 

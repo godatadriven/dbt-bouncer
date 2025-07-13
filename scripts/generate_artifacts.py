@@ -10,28 +10,35 @@ def build_pex_file(dbt_version, pex_file_name):
     """Build a pex file of `dbt-bouncer` if it does not already exist."""
     if not Path(pex_file_name).exists():
         logging.info(f"Building pex file for dbt version {dbt_version}")
+        command = [
+            "run",
+            "pex",
+            "--interpreter-constraint",
+            ">=3.9,<3.14",
+            "--jobs",
+            "128",
+            "--max-install-jobs",
+            "0",
+            "--output-file",
+            pex_file_name,
+            "--pip-version",
+            "24.1",
+            "--python-shebang",
+            "/usr/bin/env python",
+            "--script",
+            "dbt",
+            f"dbt-core=={dbt_version}",
+            "dbt-duckdb",
+            "pytz",
+            "setuptools",
+        ]
+        if dbt_version in ["1.7", "1.8"]:
+            command.extend(["protobuf<5"])
+        else:
+            command.extend(["protobuf>=5"])
+
         sh.poetry(
-            [
-                "run",
-                "pex",
-                "--interpreter-constraint",
-                ">=3.9,<3.14",
-                "--jobs",
-                "128",
-                "--max-install-jobs",
-                "0",
-                "--output-file",
-                pex_file_name,
-                "--pip-version",
-                "24.1",
-                "--python-shebang",
-                "/usr/bin/env python",
-                "--script",
-                "dbt",
-                f"dbt-core=={dbt_version}",
-                "dbt-duckdb",
-                "pytz",
-            ],
+            command,
             _fg=True,
         )
 
