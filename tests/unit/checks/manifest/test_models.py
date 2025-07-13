@@ -29,6 +29,8 @@ from dbt_bouncer.checks.manifest.check_models import (
     CheckModelDescriptionPopulated,
     CheckModelDirectories,
     CheckModelDocumentedInSameDirectory,
+    CheckModelGrantPrivilege,
+    CheckModelGrantPrivilegeRequired,
     CheckModelHasContractsEnforced,
     CheckModelHasMetaKeys,
     CheckModelHasNoUpstreamDependencies,
@@ -40,6 +42,7 @@ from dbt_bouncer.checks.manifest.check_models import (
     CheckModelMaxNumberOfLines,
     CheckModelMaxUpstreamDependencies,
     CheckModelNames,
+    CheckModelNumberOfGrants,
     CheckModelPropertyFileLocation,
     CheckModelsDocumentationCoverage,
     CheckModelsTestCoverage,
@@ -54,6 +57,8 @@ CheckModelDescriptionContainsRegexPattern.model_rebuild()
 CheckModelDirectories.model_rebuild()
 CheckModelsDocumentationCoverage.model_rebuild()
 CheckModelDocumentedInSameDirectory.model_rebuild()
+CheckModelGrantPrivilege.model_rebuild()
+CheckModelGrantPrivilegeRequired.model_rebuild()
 CheckModelHasContractsEnforced.model_rebuild()
 CheckModelHasMetaKeys.model_rebuild()
 CheckModelHasNoUpstreamDependencies.model_rebuild()
@@ -65,6 +70,7 @@ CheckModelMaxFanout.model_rebuild()
 CheckModelMaxNumberOfLines.model_rebuild()
 CheckModelMaxUpstreamDependencies.model_rebuild()
 CheckModelNames.model_rebuild()
+CheckModelNumberOfGrants.model_rebuild()
 CheckModelPropertyFileLocation.model_rebuild()
 CheckModelsTestCoverage.model_rebuild()
 
@@ -473,6 +479,138 @@ def test_check_model_documented_in_same_directory(model, expectation):
     with expectation:
         CheckModelDocumentedInSameDirectory(
             model=model, name="check_model_documented_in_same_directory"
+        ).execute()
+
+
+@pytest.mark.parametrize(
+    ("privilege_pattern", "model", "expectation"),
+    [
+        (
+            "select",
+            Nodes4(
+                **{
+                    "alias": "model_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                    },
+                    "config": {"grants": {"select": ["user1"]}},
+                    "fqn": ["package_name", "model_1"],
+                    "name": "model_1",
+                    "original_file_path": "model_1.sql",
+                    "package_name": "package_name",
+                    "path": "staging/finance/model_1.sql",
+                    "resource_type": "model",
+                    "schema": "main",
+                    "unique_id": "model.package_name.model_1",
+                },
+            ),
+            does_not_raise(),
+        ),
+        (
+            "^select$",
+            Nodes4(
+                **{
+                    "alias": "model_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                    },
+                    "config": {"grants": {"write": ["user1"]}},
+                    "fqn": ["package_name", "model_1"],
+                    "name": "model_1",
+                    "original_file_path": "model_1.sql",
+                    "package_name": "package_name",
+                    "path": "staging/finance/model_1.sql",
+                    "resource_type": "model",
+                    "schema": "main",
+                    "unique_id": "model.package_name.model_1",
+                },
+            ),
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_model_grant_privilege(privilege_pattern, model, expectation):
+    with expectation:
+        CheckModelGrantPrivilege(
+            privilege_pattern=privilege_pattern,
+            model=model,
+            name="check_model_grant_privilege",
+        ).execute()
+
+
+@pytest.mark.parametrize(
+    ("privilege", "model", "expectation"),
+    [
+        (
+            "select",
+            Nodes4(
+                **{
+                    "alias": "model_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                    },
+                    "config": {"grants": {"select": ["user1"]}},
+                    "fqn": ["package_name", "model_1"],
+                    "name": "model_1",
+                    "original_file_path": "model_1.sql",
+                    "package_name": "package_name",
+                    "path": "staging/finance/model_1.sql",
+                    "resource_type": "model",
+                    "schema": "main",
+                    "unique_id": "model.package_name.model_1",
+                },
+            ),
+            does_not_raise(),
+        ),
+        (
+            "select",
+            Nodes4(
+                **{
+                    "alias": "model_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                    },
+                    "config": {"grants": {"write": ["user1"]}},
+                    "fqn": ["package_name", "model_1"],
+                    "name": "model_1",
+                    "original_file_path": "model_1.sql",
+                    "package_name": "package_name",
+                    "path": "staging/finance/model_1.sql",
+                    "resource_type": "model",
+                    "schema": "main",
+                    "unique_id": "model.package_name.model_1",
+                },
+            ),
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_model_grant_privilege_required(privilege, model, expectation):
+    with expectation:
+        CheckModelGrantPrivilegeRequired(
+            privilege=privilege,
+            model=model,
+            name="check_model_grant_privilege_required",
         ).execute()
 
 
@@ -1869,6 +2007,104 @@ def test_check_mode_names(include, model_name_pattern, model, expectation):
             model_name_pattern=model_name_pattern,
             model=model,
             name="check_model_names",
+        ).execute()
+
+
+@pytest.mark.parametrize(
+    ("max_number_of_privileges", "min_number_of_privileges", "model", "expectation"),
+    [
+        (
+            1,
+            1,
+            Nodes4(
+                **{
+                    "alias": "model_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                    },
+                    "config": {"grants": {"select": ["user1"]}},
+                    "fqn": ["package_name", "model_1"],
+                    "name": "model_1",
+                    "original_file_path": "model_1.sql",
+                    "package_name": "package_name",
+                    "path": "staging/finance/model_1.sql",
+                    "resource_type": "model",
+                    "schema": "main",
+                    "unique_id": "model.package_name.model_1",
+                },
+            ),
+            does_not_raise(),
+        ),
+        (
+            1,
+            1,
+            Nodes4(
+                **{
+                    "alias": "model_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                    },
+                    "config": {"grants": {"select": ["user1"], "write": ["user1"]}},
+                    "fqn": ["package_name", "model_1"],
+                    "name": "model_1",
+                    "original_file_path": "model_1.sql",
+                    "package_name": "package_name",
+                    "path": "staging/finance/model_1.sql",
+                    "resource_type": "model",
+                    "schema": "main",
+                    "unique_id": "model.package_name.model_1",
+                },
+            ),
+            pytest.raises(AssertionError),
+        ),
+        (
+            2,
+            2,
+            Nodes4(
+                **{
+                    "alias": "model_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                    },
+                    "config": {"grants": {"select": ["user1"]}},
+                    "fqn": ["package_name", "model_1"],
+                    "name": "model_1",
+                    "original_file_path": "model_1.sql",
+                    "package_name": "package_name",
+                    "path": "staging/finance/model_1.sql",
+                    "resource_type": "model",
+                    "schema": "main",
+                    "unique_id": "model.package_name.model_1",
+                },
+            ),
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_model_number_of_grants(
+    max_number_of_privileges, min_number_of_privileges, model, expectation
+):
+    with expectation:
+        CheckModelNumberOfGrants(
+            max_number_of_privileges=max_number_of_privileges,
+            min_number_of_privileges=min_number_of_privileges,
+            model=model,
+            name="check_model_number_of_grants",
         ).execute()
 
 

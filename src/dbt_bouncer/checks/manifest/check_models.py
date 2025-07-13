@@ -341,6 +341,80 @@ class CheckModelDocumentedInSameDirectory(BaseCheck):
         )
 
 
+class CheckModelGrantPrivilege(BaseCheck):
+    """Model can have grant privileges that match the specified pattern.
+
+    Receives:
+        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+        privilege_pattern (str): Regex pattern to match the privilege.
+
+    Other Parameters:
+        description (Optional[str]): Description of what the check does and why it is implemented.
+        exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
+        include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_model_grant_privilege
+              include: ^models/marts
+              privilege_pattern: ^select
+        ```
+
+    """
+
+    model: "DbtBouncerModelBase" = Field(default=None)
+    name: Literal["check_model_grant_privilege"]
+    privilege_pattern: str
+
+    def execute(self) -> None:
+        """Execute the check."""
+        non_complying_grants = [
+            i
+            for i in self.model.config.grants
+            if re.compile(self.privilege_pattern.strip()).match(i) is None
+        ]
+
+        assert not non_complying_grants, (
+            f"`{self.model.name}` has grants (`{self.privilege_pattern}`) that don't comply with the specified regexp pattern ({non_complying_grants})."
+        )
+
+
+class CheckModelGrantPrivilegeRequired(BaseCheck):
+    """Model must have the specified grant privilege.
+
+    Receives:
+        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+        privilege (str): The privilege that is required.
+
+    Other Parameters:
+        description (Optional[str]): Description of what the check does and why it is implemented.
+        exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
+        include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_model_grant_privilege_required
+              include: ^models/marts
+              privilege: select
+        ```
+
+    """
+
+    model: "DbtBouncerModelBase" = Field(default=None)
+    name: Literal["check_model_grant_privilege_required"]
+    privilege: str
+
+    def execute(self) -> None:
+        """Execute the check."""
+        assert self.privilege in self.model.config.grants, (
+            f"`{self.model.name}` does not have the required grant privilege (`{self.privilege}`)."
+        )
+
+
 class CheckModelHasContractsEnforced(BaseCheck):
     """Model must have contracts enforced.
 
@@ -898,6 +972,48 @@ class CheckModelNames(BaseCheck):
             is not None
         ), (
             f"`{self.model.name}` does not match the supplied regex `{self.model_name_pattern.strip()})`."
+        )
+
+
+class CheckModelNumberOfGrants(BaseCheck):
+    """Model can have the specified number of privileges.
+
+    Receives:
+        max_number_of_privileges (Optional(int)): Maximum number of privileges, inclusive.
+        min_number_of_privileges (Optional(int)): Minimum number of privileges, inclusive.
+        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+
+    Other Parameters:
+        description (Optional[str]): Description of what the check does and why it is implemented.
+        exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
+        include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_model_number_of_grants
+              include: ^models/marts
+              max_number_of_privileges: 1 # Optional
+              min_number_of_privileges: 0 # Optional
+        ```
+
+    """
+
+    model: "DbtBouncerModelBase" = Field(default=None)
+    name: Literal["check_model_number_of_grants"]
+    max_number_of_privileges: int = Field(default=100)
+    min_number_of_privileges: int = Field(default=0)
+
+    def execute(self) -> None:
+        """Execute the check."""
+        num_grants = len(self.model.config.grants.keys())
+
+        assert num_grants >= self.min_number_of_privileges, (
+            f"`{self.model.name}` has less grants (`{num_grants}`) than the specified minimum ({self.min_number_of_privileges})."
+        )
+        assert num_grants <= self.max_number_of_privileges, (
+            f"`{self.model.name}` has more grants (`{num_grants}`) than the specified maximum ({self.max_number_of_privileges})."
         )
 
 
