@@ -11,6 +11,16 @@ To add your company:
 # Users
 
 <p>
+    <h3>Dataroots</h3>
+    <img src="https://dataroots.io//_next/static/media/logo-white-talan.78d4bd58.svg" width="500"/>
+</p>
+
+<p>
+    <h3>Nationale Loterij</h3>
+    <img src="https://www.nationale-loterij.be/content/dam/opp/corporate/logos/national-lottery/manual-fix-8pt-nl-logo-new.svg" width="500"/>
+</p>
+
+<p>
     <h3>Xebia Data</h3>
     <img src="https://github.com/godatadriven/dbt-bouncer/raw/main/docs/assets/xebia_logo-large-transparent.png" width="500"/>
 </p>
