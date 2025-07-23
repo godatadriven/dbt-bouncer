@@ -40,7 +40,7 @@ name = "dbt-bouncer"
 readme = "README.md"
 repository = "https://github.com/godatadriven/dbt-bouncer"
 requires-python = ">=3.9.2,<3.14"
-version = "0.0.0"
+version = "1.17.0"
 
 [project.scripts]
 dbt-bouncer = "dbt_bouncer.main:cli"
