@@ -515,6 +515,37 @@ class CheckModelHasNoUpstreamDependencies(BaseCheck):
         )
 
 
+class CheckModelHasSemiColon(BaseCheck):
+    """Model may not end with a semi-colon (`;`).
+
+    Receives:
+        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+
+    Other Parameters:
+        description (Optional[str]): Description of what the check does and why it is implemented.
+        exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
+        include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_model_has_semi_colon
+              include: ^models/marts
+        ```
+
+    """
+
+    model: "DbtBouncerModelBase" = Field(default=None)
+    name: Literal["check_model_has_semi_colon"]
+
+    def execute(self) -> None:
+        """Execute the check."""
+        assert self.model.raw_code.strip()[-1] != ";", (
+            f"`{self.model.name}` ends with a semi-colon, this is not permitted."
+        )
+
+
 class CheckModelHasTags(BaseCheck):
     """Models must have the specified tags.
 
