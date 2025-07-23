@@ -115,6 +115,7 @@ manifest_checks:
   - name: check_model_has_no_upstream_dependencies
     include: ^((?!int_*).)*$
     exclude: ^models/utilities/time_spines
+  - name: check_model_has_semi_colon
   - name: check_model_has_tags
     include: ^models/staging/crm
     tags:

@@ -34,6 +34,7 @@ from dbt_bouncer.checks.manifest.check_models import (
     CheckModelHasContractsEnforced,
     CheckModelHasMetaKeys,
     CheckModelHasNoUpstreamDependencies,
+    CheckModelHasSemiColon,
     CheckModelHasTags,
     CheckModelHasUniqueTest,
     CheckModelHasUnitTests,
@@ -62,6 +63,7 @@ CheckModelGrantPrivilegeRequired.model_rebuild()
 CheckModelHasContractsEnforced.model_rebuild()
 CheckModelHasMetaKeys.model_rebuild()
 CheckModelHasNoUpstreamDependencies.model_rebuild()
+CheckModelHasSemiColon.model_rebuild()
 CheckModelHasTags.model_rebuild()
 CheckModelHasUniqueTest.model_rebuild()
 CheckModelHasUnitTests.model_rebuild()
@@ -957,6 +959,213 @@ def test_check_model_has_no_upstream_dependencies(model, expectation):
     with expectation:
         CheckModelHasNoUpstreamDependencies(
             model=model, name="check_model_has_no_upstream_dependencies"
+        ).execute()
+
+
+@pytest.mark.parametrize(
+    ("model", "expectation"),
+    [
+        (
+            Nodes4(
+                **{
+                    "alias": "model_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                    },
+                    "depends_on": {"nodes": []},
+                    "fqn": ["package_name", "model_1"],
+                    "name": "model_1",
+                    "original_file_path": "model_1.sql",
+                    "package_name": "package_name",
+                    "path": "staging/finance/model_1.sql",
+                    "raw_code": "select 1 as id",
+                    "resource_type": "model",
+                    "schema": "main",
+                    "tags": [],
+                    "unique_id": "model.package_name.model_1",
+                },
+            ),
+            does_not_raise(),
+        ),
+        (
+            Nodes4(
+                **{
+                    "alias": "model_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                    },
+                    "depends_on": {"nodes": []},
+                    "fqn": ["package_name", "model_1"],
+                    "name": "model_1",
+                    "original_file_path": "model_1.sql",
+                    "package_name": "package_name",
+                    "path": "staging/finance/model_1.sql",
+                    "raw_code": """select 1 as id
+                    """,
+                    "resource_type": "model",
+                    "schema": "main",
+                    "tags": [],
+                    "unique_id": "model.package_name.model_1",
+                },
+            ),
+            does_not_raise(),
+        ),
+        (
+            Nodes4(
+                **{
+                    "alias": "model_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                    },
+                    "depends_on": {"nodes": []},
+                    "fqn": ["package_name", "model_1"],
+                    "name": "model_1",
+                    "original_file_path": "model_1.sql",
+                    "package_name": "package_name",
+                    "path": "staging/finance/model_1.sql",
+                    "raw_code": """-- comment with ;
+                    select 1 as id""",
+                    "resource_type": "model",
+                    "schema": "main",
+                    "tags": [],
+                    "unique_id": "model.package_name.model_1",
+                },
+            ),
+            does_not_raise(),
+        ),
+        (
+            Nodes4(
+                **{
+                    "alias": "model_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                    },
+                    "depends_on": {"nodes": []},
+                    "fqn": ["package_name", "model_1"],
+                    "name": "model_1",
+                    "original_file_path": "model_1.sql",
+                    "package_name": "package_name",
+                    "path": "staging/finance/model_1.sql",
+                    "raw_code": "select 1 as id;",
+                    "resource_type": "model",
+                    "schema": "main",
+                    "tags": [],
+                    "unique_id": "model.package_name.model_1",
+                },
+            ),
+            pytest.raises(AssertionError),
+        ),
+        (
+            Nodes4(
+                **{
+                    "alias": "model_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                    },
+                    "depends_on": {"nodes": []},
+                    "fqn": ["package_name", "model_1"],
+                    "name": "model_1",
+                    "original_file_path": "model_1.sql",
+                    "package_name": "package_name",
+                    "path": "staging/finance/model_1.sql",
+                    "raw_code": "select 1 as id; ",
+                    "resource_type": "model",
+                    "schema": "main",
+                    "tags": [],
+                    "unique_id": "model.package_name.model_1",
+                },
+            ),
+            pytest.raises(AssertionError),
+        ),
+        (
+            Nodes4(
+                **{
+                    "alias": "model_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                    },
+                    "depends_on": {"nodes": []},
+                    "fqn": ["package_name", "model_1"],
+                    "name": "model_1",
+                    "original_file_path": "model_1.sql",
+                    "package_name": "package_name",
+                    "path": "staging/finance/model_1.sql",
+                    "raw_code": """select 1 as id;
+
+                    """,
+                    "resource_type": "model",
+                    "schema": "main",
+                    "tags": [],
+                    "unique_id": "model.package_name.model_1",
+                },
+            ),
+            pytest.raises(AssertionError),
+        ),
+        (
+            Nodes4(
+                **{
+                    "alias": "model_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                    },
+                    "depends_on": {"nodes": []},
+                    "fqn": ["package_name", "model_1"],
+                    "name": "model_1",
+                    "original_file_path": "model_1.sql",
+                    "package_name": "package_name",
+                    "path": "staging/finance/model_1.sql",
+                    "raw_code": """select 1 as id
+                    ; """,
+                    "resource_type": "model",
+                    "schema": "main",
+                    "tags": [],
+                    "unique_id": "model.package_name.model_1",
+                },
+            ),
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_model_has_semi_colon(model, expectation):
+    with expectation:
+        CheckModelHasSemiColon(
+            model=model,
+            name="check_model_has_semi_colon",
         ).execute()
 
 
