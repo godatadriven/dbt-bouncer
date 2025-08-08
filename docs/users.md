@@ -12,7 +12,7 @@ To add your company:
 
 <p>
     <h3>Dataroots</h3>
-    <img src="https://dataroots.io//_next/static/media/logo-white-talan.78d4bd58.svg" width="500"/>
+    <img src="./assets/dataroots_logo.svg" width="500"/>
 </p>
 
 <p>
