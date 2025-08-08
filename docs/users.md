@@ -12,7 +12,7 @@ To add your company:
 
 <p>
     <h3>Dataroots</h3>
-    <img src="./assets/dataroots_logo.svg" width="500"/>
+    <img src="https://github.com/godatadriven/dbt-bouncer/raw/main/docs/assets/dataroots_logo.svg" width="500"/>
 </p>
 
 <p>
