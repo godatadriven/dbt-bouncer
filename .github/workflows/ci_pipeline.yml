@@ -27,7 +27,7 @@ jobs:
         runs-on: ubuntu-22.04
         steps:
             - name: Checkout
-              uses: actions/checkout@v4
+              uses: actions/checkout@v5
               with:
                 fetch-depth: "0"
 
@@ -74,7 +74,7 @@ jobs:
                     - '3.12'
                     - '3.13'
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v5
 
             - name: checkout-merge
               if: matrix.operating-system != 'windows-latest'
@@ -125,7 +125,7 @@ jobs:
         runs-on: ubuntu-22.04
         steps:
             - name: Checkout
-              uses: actions/checkout@v4
+              uses: actions/checkout@v5
 
             - name: checkout-merge
               uses: check-spelling/checkout-merge@v0.0.6
@@ -174,7 +174,7 @@ jobs:
       runs-on: ubuntu-22.04
       steps:
           - name: Checkout
-            uses: actions/checkout@v4
+            uses: actions/checkout@v5
 
           - name: checkout-merge
             uses: check-spelling/checkout-merge@v0.0.6
@@ -202,7 +202,7 @@ jobs:
       runs-on: ubuntu-22.04
       steps:
           - name: Checkout
-            uses: actions/checkout@v4
+            uses: actions/checkout@v5
 
           - name: checkout-merge
             uses: check-spelling/checkout-merge@v0.0.6
