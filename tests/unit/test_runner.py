@@ -437,6 +437,12 @@ def test_runner_windows(caplog, tmp_path):
     configure_console_logging(verbosity=0)
     ctx = MagicMock(obj={"verbosity": 3})
     push_context(ctx)
+    from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (  # noqa: F401, F811
+        Exposures,
+        Macros,
+        Nodes4,
+        UnitTests,
+    )
     from dbt_bouncer.artifact_parsers.parsers_manifest import (  # noqa: F401, F811
         DbtBouncerExposureBase,
         DbtBouncerManifest,
