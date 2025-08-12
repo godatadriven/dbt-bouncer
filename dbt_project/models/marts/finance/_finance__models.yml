@@ -11,44 +11,90 @@ models:
         select: ['reporter', 'bi']
       meta:
         maturity: gold
+    latest_version: 2
 
-    columns:
-      - name: customer_id
-        data_type: bigint
-        description: This is a unique identifier for a customer
-        tests:
-          - unique
-          - not_null
+    versions:
+    - v: 2
+      columns:
+        - name: customer_id
+          data_type: bigint
+          description: This is a unique identifier for a customer
+          tests:
+            - unique
+            - not_null
 
-      - name: first_name
-        data_type: string
-        description: Customer's first name. PII.
+        - name: first_name
+          data_type: string
+          description: Customer's first name. PII.
 
-      - name: last_name
-        data_type: string
-        description: Customer's last name. PII.
+        - name: last_name
+          data_type: string
+          description: Customer's last name. PII.
 
-      - name: first_order_date
-        data_type: date
-        description: Date (UTC) of a customer's first order
+        - name: new_column
+          data_type: string
+          description: New column to simulate a new version of this model
 
-      - name: most_recent_order_date
-        data_type: date
-        description: Date (UTC) of a customer's most recent order
+        - name: first_order_date
+          data_type: date
+          description: Date (UTC) of a customer's first order
 
-      - name: number_of_orders
-        data_type: bigint
-        description: Count of the number of orders a customer has placed
+        - name: most_recent_order_date
+          data_type: date
+          description: Date (UTC) of a customer's most recent order
 
-      - name: is_recurring_customer
-        data_type: boolean
-        description: Boolean indicating whether a customer has placed more than five orders
-        tests:
-          - not_null
+        - name: number_of_orders
+          data_type: bigint
+          description: Count of the number of orders a customer has placed
 
-      - name: customer_lifetime_value
-        data_type: double
-        description: Sum of all payments a customer has made
+        - name: is_recurring_customer
+          data_type: boolean
+          description: Boolean indicating whether a customer has placed more than five orders
+          tests:
+            - not_null
+
+        - name: customer_lifetime_value
+          data_type: double
+          description: Sum of all payments a customer has made
+
+    - v: 1
+      columns:
+        - name: customer_id
+          data_type: bigint
+          description: This is a unique identifier for a customer
+          tests:
+            - unique
+            - not_null
+
+        - name: first_name
+          data_type: string
+          description: Customer's first name. PII.
+
+        - name: last_name
+          data_type: string
+          description: Customer's last name. PII.
+
+        - name: first_order_date
+          data_type: date
+          description: Date (UTC) of a customer's first order
+
+        - name: most_recent_order_date
+          data_type: date
+          description: Date (UTC) of a customer's most recent order
+
+        - name: number_of_orders
+          data_type: bigint
+          description: Count of the number of orders a customer has placed
+
+        - name: is_recurring_customer
+          data_type: boolean
+          description: Boolean indicating whether a customer has placed more than five orders
+          tests:
+            - not_null
+
+        - name: customer_lifetime_value
+          data_type: double
+          description: Sum of all payments a customer has made
 
   - name: orders
     description: This table has basic information about orders, as well as some derived facts based on payments
