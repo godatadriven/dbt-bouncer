@@ -19,7 +19,7 @@ if TYPE_CHECKING:
         DbtBouncerTestBase,
     )
 
-from dbt_bouncer.utils import clean_path_str
+from dbt_bouncer.utils import clean_path_str, get_clean_model_name
 
 
 class CheckModelAccess(BaseCheck):
@@ -61,7 +61,7 @@ class CheckModelAccess(BaseCheck):
     def execute(self) -> None:
         """Execute the check."""
         assert self.model.access.value == self.access, (
-            f"`{self.model.name}` has `{self.model.access.value}` access, it should have access `{self.access}`."
+            f"`{get_clean_model_name(self.model.unique_id)}` has `{self.model.access.value}` access, it should have access `{self.access}`."
         )
 
 
@@ -102,7 +102,7 @@ class CheckModelCodeDoesNotContainRegexpPattern(BaseCheck):
             )
             is None
         ), (
-            f"`{self.model.name}` contains a banned string: `{self.regexp_pattern.strip()}`."
+            f"`{get_clean_model_name(self.model.unique_id)}` contains a banned string: `{self.regexp_pattern.strip()}`."
         )
 
 
@@ -133,7 +133,7 @@ class CheckModelContractsEnforcedForPublicModel(BaseCheck):
         """Execute the check."""
         if self.model.access.value == "public":
             assert self.model.contract.enforced is True, (
-                f"`{self.model.name}` is a public model but does not have contracts enforced."
+                f"`{get_clean_model_name(self.model.unique_id)}` is a public model but does not have contracts enforced."
             )
 
 
@@ -166,7 +166,7 @@ class CheckModelDependsOnMultipleSources(BaseCheck):
             x.split(".")[0] == "source" for x in self.model.depends_on.nodes
         )
         assert num_reffed_sources <= 1, (
-            f"`{self.model.name}` references more than one source."
+            f"`{get_clean_model_name(self.model.unique_id)}` references more than one source."
         )
 
 
@@ -201,7 +201,7 @@ class CheckModelDescriptionContainsRegexPattern(BaseCheck):
         assert re.compile(self.regexp_pattern.strip(), flags=re.DOTALL).match(
             self.model.description
         ), (
-            f"""`{self.model.name}`'s description "{self.model.description}" doesn't match the supplied regex: {self.regexp_pattern}."""
+            f"""`{get_clean_model_name(self.model.unique_id)}`'s description "{self.model.description}" doesn't match the supplied regex: {self.regexp_pattern}."""
         )
 
 
@@ -231,7 +231,7 @@ class CheckModelDescriptionPopulated(BaseCheck):
     def execute(self) -> None:
         """Execute the check."""
         assert self.is_description_populated(self.model.description), (
-            f"`{self.model.name}` does not have a populated description."
+            f"`{get_clean_model_name(self.model.unique_id)}` does not have a populated description."
         )
 
 
@@ -291,11 +291,11 @@ class CheckModelDirectories(BaseCheck):
 
         if directory_to_check.replace(".sql", "") == self.model.name:
             raise AssertionError(
-                f"`{self.model.name}` is not located in a valid sub-directory ({self.permitted_sub_directories})."
+                f"`{get_clean_model_name(self.model.unique_id)}` is not located in a valid sub-directory ({self.permitted_sub_directories})."
             )
         else:
             assert directory_to_check in self.permitted_sub_directories, (
-                f"`{self.model.name}` is located in the `{directory_to_check}` sub-directory, this is not a valid sub-directory ({self.permitted_sub_directories})."
+                f"`{get_clean_model_name(self.model.unique_id)}` is located in the `{directory_to_check}` sub-directory, this is not a valid sub-directory ({self.permitted_sub_directories})."
             )
 
 
@@ -328,7 +328,7 @@ class CheckModelDocumentedInSameDirectory(BaseCheck):
         assert (  # noqa: PT018
             hasattr(self.model, "patch_path")
             and clean_path_str(self.model.patch_path) is not None
-        ), f"`{self.model.name}` is not documented."
+        ), f"`{get_clean_model_name(self.model.unique_id)}` is not documented."
 
         model_doc_dir = clean_path_str(
             self.model.patch_path[
@@ -337,7 +337,7 @@ class CheckModelDocumentedInSameDirectory(BaseCheck):
         ).split("/")[:-1]
 
         assert model_doc_dir == model_sql_dir, (
-            f"`{self.model.name}` is documented in a different directory to the `.sql` file: `{'/'.join(model_doc_dir)}` vs `{'/'.join(model_sql_dir)}`."
+            f"`{get_clean_model_name(self.model.unique_id)}` is documented in a different directory to the `.sql` file: `{'/'.join(model_doc_dir)}` vs `{'/'.join(model_sql_dir)}`."
         )
 
 
@@ -377,7 +377,7 @@ class CheckModelGrantPrivilege(BaseCheck):
         ]
 
         assert not non_complying_grants, (
-            f"`{self.model.name}` has grants (`{self.privilege_pattern}`) that don't comply with the specified regexp pattern ({non_complying_grants})."
+            f"`{get_clean_model_name(self.model.unique_id)}` has grants (`{self.privilege_pattern}`) that don't comply with the specified regexp pattern ({non_complying_grants})."
         )
 
 
@@ -411,7 +411,7 @@ class CheckModelGrantPrivilegeRequired(BaseCheck):
     def execute(self) -> None:
         """Execute the check."""
         assert self.privilege in self.model.config.grants, (
-            f"`{self.model.name}` does not have the required grant privilege (`{self.privilege}`)."
+            f"`{get_clean_model_name(self.model.unique_id)}` does not have the required grant privilege (`{self.privilege}`)."
         )
 
 
@@ -442,7 +442,7 @@ class CheckModelHasContractsEnforced(BaseCheck):
     def execute(self) -> None:
         """Execute the check."""
         assert self.model.contract.enforced is True, (
-            f"`{self.model.name}` does not have contracts enforced."
+            f"`{get_clean_model_name(self.model.unique_id)}` does not have contracts enforced."
         )
 
 
@@ -481,7 +481,7 @@ class CheckModelHasMetaKeys(BaseCheck):
             required_keys=self.keys.model_dump(),
         )
         assert missing_keys == [], (
-            f"`{self.model.name}` is missing the following keys from the `meta` config: {[x.replace('>>', '') for x in missing_keys]}"
+            f"`{get_clean_model_name(self.model.unique_id)}` is missing the following keys from the `meta` config: {[x.replace('>>', '') for x in missing_keys]}"
         )
 
 
@@ -511,7 +511,7 @@ class CheckModelHasNoUpstreamDependencies(BaseCheck):
     def execute(self) -> None:
         """Execute the check."""
         assert len(self.model.depends_on.nodes) > 0, (
-            f"`{self.model.name}` has no upstream dependencies, this likely indicates hard-coded tables references."
+            f"`{get_clean_model_name(self.model.unique_id)}` has no upstream dependencies, this likely indicates hard-coded tables references."
         )
 
 
@@ -542,7 +542,7 @@ class CheckModelHasSemiColon(BaseCheck):
     def execute(self) -> None:
         """Execute the check."""
         assert self.model.raw_code.strip()[-1] != ";", (
-            f"`{self.model.name}` ends with a semi-colon, this is not permitted."
+            f"`{get_clean_model_name(self.model.unique_id)}` ends with a semi-colon, this is not permitted."
         )
 
 
@@ -578,7 +578,7 @@ class CheckModelHasTags(BaseCheck):
         """Execute the check."""
         missing_tags = [tag for tag in self.tags if tag not in self.model.tags]
         assert not missing_tags, (
-            f"`{self.model.name}` is missing required tags: {missing_tags}."
+            f"`{get_clean_model_name(self.model.unique_id)}` is missing required tags: {missing_tags}."
         )
 
 
@@ -643,7 +643,7 @@ class CheckModelHasUniqueTest(BaseCheck):
             if hasattr(test, "test_metadata")
         )
         assert num_unique_tests >= 1, (
-            f"`{self.model.name}` does not have a test for uniqueness of a column."
+            f"`{get_clean_model_name(self.model.unique_id)}` does not have a test for uniqueness of a column."
         )
 
 
@@ -701,7 +701,7 @@ class CheckModelHasUnitTests(BaseCheck):
                 ],
             )
             assert num_unit_tests >= self.min_number_of_unit_tests, (
-                f"`{self.model.name}` has {num_unit_tests} unit tests, this is less than the minimum of {self.min_number_of_unit_tests}."
+                f"`{get_clean_model_name(self.model.unique_id)}` has {num_unit_tests} unit tests, this is less than the minimum of {self.min_number_of_unit_tests}."
             )
         else:
             logging.warning(
@@ -818,7 +818,7 @@ class CheckModelMaxChainedViews(BaseCheck):
             )
             == 0
         ), (
-            f"`{self.model.name}` has more than {self.max_chained_views} upstream dependents that are not tables."
+            f"`{get_clean_model_name(self.model.unique_id)}` has more than {self.max_chained_views} upstream dependents that are not tables."
         )
 
 
@@ -859,7 +859,7 @@ class CheckModelMaxFanout(BaseCheck):
         )
 
         assert num_downstream_models <= self.max_downstream_models, (
-            f"`{self.model.name}` has {num_downstream_models} downstream models, which is more than the permitted maximum of {self.max_downstream_models}."
+            f"`{get_clean_model_name(self.model.unique_id)}` has {num_downstream_models} downstream models, which is more than the permitted maximum of {self.max_downstream_models}."
         )
 
 
@@ -899,7 +899,7 @@ class CheckModelMaxNumberOfLines(BaseCheck):
         actual_number_of_lines = self.model.raw_code.count("\n") + 1
 
         assert actual_number_of_lines <= self.max_number_of_lines, (
-            f"`{self.model.name}` has {actual_number_of_lines} lines, this is more than the maximum permitted number of lines ({self.max_number_of_lines})."
+            f"`{get_clean_model_name(self.model.unique_id)}` has {actual_number_of_lines} lines, this is more than the maximum permitted number of lines ({self.max_number_of_lines})."
         )
 
 
@@ -952,13 +952,13 @@ class CheckModelMaxUpstreamDependencies(BaseCheck):
         )
 
         assert num_upstream_macros <= self.max_upstream_macros, (
-            f"`{self.model.name}` has {num_upstream_macros} upstream macros, which is more than the permitted maximum of {self.max_upstream_macros}."
+            f"`{get_clean_model_name(self.model.unique_id)}` has {num_upstream_macros} upstream macros, which is more than the permitted maximum of {self.max_upstream_macros}."
         )
         assert num_upstream_models <= self.max_upstream_models, (
-            f"`{self.model.name}` has {num_upstream_models} upstream models, which is more than the permitted maximum of {self.max_upstream_models}."
+            f"`{get_clean_model_name(self.model.unique_id)}` has {num_upstream_models} upstream models, which is more than the permitted maximum of {self.max_upstream_models}."
         )
         assert num_upstream_sources <= self.max_upstream_sources, (
-            f"`{self.model.name}` has {num_upstream_sources} upstream sources, which is more than the permitted maximum of {self.max_upstream_sources}."
+            f"`{get_clean_model_name(self.model.unique_id)}` has {num_upstream_sources} upstream sources, which is more than the permitted maximum of {self.max_upstream_sources}."
         )
 
 
@@ -1002,7 +1002,7 @@ class CheckModelNames(BaseCheck):
             re.compile(self.model_name_pattern.strip()).match(self.model.name)
             is not None
         ), (
-            f"`{self.model.name}` does not match the supplied regex `{self.model_name_pattern.strip()})`."
+            f"`{get_clean_model_name(self.model.unique_id)}` does not match the supplied regex `{self.model_name_pattern.strip()})`."
         )
 
 
@@ -1041,10 +1041,10 @@ class CheckModelNumberOfGrants(BaseCheck):
         num_grants = len(self.model.config.grants.keys())
 
         assert num_grants >= self.min_number_of_privileges, (
-            f"`{self.model.name}` has less grants (`{num_grants}`) than the specified minimum ({self.min_number_of_privileges})."
+            f"`{get_clean_model_name(self.model.unique_id)}` has less grants (`{num_grants}`) than the specified minimum ({self.min_number_of_privileges})."
         )
         assert num_grants <= self.max_number_of_privileges, (
-            f"`{self.model.name}` has more grants (`{num_grants}`) than the specified maximum ({self.max_number_of_privileges})."
+            f"`{get_clean_model_name(self.model.unique_id)}` has more grants (`{num_grants}`) than the specified maximum ({self.max_number_of_privileges})."
         )
 
 
@@ -1076,7 +1076,7 @@ class CheckModelPropertyFileLocation(BaseCheck):
         assert (  # noqa: PT018
             hasattr(self.model, "patch_path")
             and clean_path_str(self.model.patch_path) is not None
-        ), f"`{self.model.name}` is not documented."
+        ), f"`{get_clean_model_name(self.model.unique_id)}` is not documented."
 
         expected_substr = (
             "_".join(clean_path_str(self.model.original_file_path).split("/")[1:-1])
@@ -1089,15 +1089,15 @@ class CheckModelPropertyFileLocation(BaseCheck):
         assert properties_yml_name.startswith(
             "_",
         ), (
-            f"The properties file for `{self.model.name}` (`{properties_yml_name}`) does not start with an underscore."
+            f"The properties file for `{get_clean_model_name(self.model.unique_id)}` (`{properties_yml_name}`) does not start with an underscore."
         )
         assert expected_substr in properties_yml_name, (
-            f"The properties file for `{self.model.name}` (`{properties_yml_name}`) does not contain the expected substring (`{expected_substr}`)."
+            f"The properties file for `{get_clean_model_name(self.model.unique_id)}` (`{properties_yml_name}`) does not contain the expected substring (`{expected_substr}`)."
         )
         assert properties_yml_name.endswith(
             "__models.yml",
         ), (
-            f"The properties file for `{self.model.name}` (`{properties_yml_name}`) does not end with `__models.yml`."
+            f"The properties file for `{get_clean_model_name(self.model.unique_id)}` (`{properties_yml_name}`) does not end with `__models.yml`."
         )
 
 

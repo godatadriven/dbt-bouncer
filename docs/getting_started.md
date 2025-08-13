@@ -158,6 +158,7 @@ An example:
     from pydantic import Field
 
     from dbt_bouncer.check_base import BaseCheck
+    from dbt_bouncer.utils import get_clean_model_name
 
     if TYPE_CHECKING:
         import warnings
@@ -175,7 +176,7 @@ An example:
         def execute(self) -> None:
             """Execute the check."""
 
-            assert self.model.deprecation_date is not None, f"`{self.model.name}` requires a `deprecation_date` to be set."
+            assert self.model.deprecation_date is not None, f"`{get_clean_model_name(self.model.unique_id)}` requires a `deprecation_date` to be set."
     ```
 
 * Contents of `dbt-bouncer.yml`:

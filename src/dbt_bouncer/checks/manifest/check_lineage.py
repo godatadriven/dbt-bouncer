@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 from pydantic import Field
 
-from dbt_bouncer.utils import clean_path_str
+from dbt_bouncer.utils import clean_path_str, get_clean_model_name
 
 
 class CheckLineagePermittedUpstreamModels(BaseCheck):
@@ -76,7 +76,7 @@ class CheckLineagePermittedUpstreamModels(BaseCheck):
             is None
         ]
         assert not not_permitted_upstream_models, (
-            f"`{self.model.name}` references upstream models that are not permitted: {[m.split('.')[-1] for m in not_permitted_upstream_models]}."
+            f"`{get_clean_model_name(self.model.unique_id)}` references upstream models that are not permitted: {[m.split('.')[-1] for m in not_permitted_upstream_models]}."
         )
 
 
@@ -108,7 +108,9 @@ class CheckLineageSeedCannotBeUsed(BaseCheck):
         """Execute the check."""
         assert not [
             x for x in self.model.depends_on.nodes if x.split(".")[0] == "seed"
-        ], f"`{self.model.name}` references a seed even though this is not permitted."
+        ], (
+            f"`{get_clean_model_name(self.model.unique_id)}` references a seed even though this is not permitted."
+        )
 
 
 class CheckLineageSourceCannotBeUsed(BaseCheck):
@@ -139,4 +141,6 @@ class CheckLineageSourceCannotBeUsed(BaseCheck):
         """Execute the check."""
         assert not [
             x for x in self.model.depends_on.nodes if x.split(".")[0] == "source"
-        ], f"`{self.model.name}` references a source even though this is not permitted."
+        ], (
+            f"`{get_clean_model_name(self.model.unique_id)}` references a source even though this is not permitted."
+        )

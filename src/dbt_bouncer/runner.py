@@ -117,7 +117,7 @@ def runner(
                     check_run_id = (
                         f"{check_i.name}:{check_i.index}:{i.unique_id.split('.')[-1]}"
                         if iterate_value in ["exposure", "macro", "unit_test"]
-                        else f"{check_i.name}:{check_i.index}:{getattr(i, iterate_value).unique_id.split('.')[-1]}"
+                        else f"{check_i.name}:{check_i.index}:{'_'.join(getattr(i, iterate_value).unique_id.split('.')[2:])}"
                     )
                     setattr(check_i, iterate_value, getattr(i, iterate_value, i))
 

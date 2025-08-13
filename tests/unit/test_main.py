@@ -587,9 +587,9 @@ def test_cli_include(tmp_path):
         )
 
 
-NUM_CATALOG_CHECKS = 2
+NUM_CATALOG_CHECKS = 1
 NUM_MANIFEST_CHECKS = 3
-NUM_RUN_RESULTS_CHECKS = 39
+NUM_RUN_RESULTS_CHECKS = 43
 
 
 @pytest.mark.parametrize(

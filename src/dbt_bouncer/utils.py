@@ -171,6 +171,19 @@ def get_check_objects() -> List[Type["BaseCheck"]]:
     return check_objects
 
 
+def get_clean_model_name(unique_id: str) -> str:
+    """`name` for versioned models does not include the version. This function returns the model name concatenated to the version.
+
+    Args:
+        unique_id (str): From dbt's artifacts.
+
+    Returns:
+        str: The model name including the version number (if present).
+
+    """
+    return "_".join(unique_id.split(".")[2:])
+
+
 def get_package_version_number(version_string: str) -> Version:
     """Dbt Cloud no longer uses version numbers that comply with semantic versioning, e.g. "2024.11.06+2a3d725".
     This function is used to convert the version number to a version object that can be used to compare versions.

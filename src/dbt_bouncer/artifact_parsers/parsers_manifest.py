@@ -218,6 +218,7 @@ def parse_manifest_artifact(
                 project_models.append(
                     DbtBouncerModel(
                         **{
+                            "clean_model_name": "_".join(k.split(".")[2:]),
                             "model": v,
                             "original_file_path": clean_path_str(v.original_file_path),
                             "unique_id": k,
