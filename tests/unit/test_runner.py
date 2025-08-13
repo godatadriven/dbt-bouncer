@@ -562,3 +562,178 @@ def test_runner_windows(caplog, tmp_path):
     assert f"Saving coverage file to `{tmp_path}/coverage.json`".replace(
         "\\", "/"
     ) in caplog.text.replace("\\", "/")
+
+
+def test_runner_check_id(tmp_path):
+    configure_console_logging(verbosity=0)
+    ctx = click.Context(
+        cli,
+        obj={
+            "config_file_path": "",
+            "custom_checks_dir": None,
+        },
+    )
+
+    with ctx:
+        from dbt_bouncer.config_file_parser import (
+            DbtBouncerConfAllCategories as DbtBouncerConf,
+        )
+
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", category=UserWarning)
+            from dbt_artifacts_parser.parser import parse_manifest
+            from dbt_artifacts_parser.parsers.catalog.catalog_v1 import (
+                Nodes as CatalogNodes,  # noqa: F401
+            )
+        from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (  # noqa: F401
+            Exposures,
+            Macros,
+            Nodes4,
+            UnitTests,
+        )
+        from dbt_bouncer.artifact_parsers.parsers_manifest import (  # noqa: F401
+            DbtBouncerExposureBase,
+            DbtBouncerManifest,
+            DbtBouncerModel,
+            DbtBouncerModelBase,
+            DbtBouncerSemanticModelBase,
+            DbtBouncerSnapshotBase,
+            DbtBouncerSourceBase,
+            DbtBouncerTestBase,
+        )
+        from dbt_bouncer.artifact_parsers.parsers_run_results import (  # noqa: F401
+            DbtBouncerRunResultBase,
+        )
+        from dbt_bouncer.checks.common import NestedDict  # noqa: F401
+
+        DbtBouncerConf.model_rebuild()
+
+        results = runner(
+            bouncer_config=DbtBouncerConf(
+                **{
+                    "manifest_checks": [
+                        {
+                            "exclude": None,
+                            "include": None,
+                            "index": 0,
+                            "name": "check_model_description_populated",
+                        },
+                    ]
+                }
+            ),
+            catalog_nodes=[],
+            catalog_sources=[],
+            check_categories=["manifest_checks"],
+            create_pr_comment_file=False,
+            exposures=[],
+            macros=[],
+            manifest_obj=parse_manifest(
+                {
+                    "child_map": {},
+                    "disabled": {},
+                    "docs": {},
+                    "exposures": {},
+                    "group_map": {},
+                    "groups": {},
+                    "macros": {},
+                    "metadata": {
+                        "dbt_schema_version": "https://schemas.getdbt.com/dbt/manifest/v12.json",
+                        "project_name": "dbt_bouncer_test_project",
+                    },
+                    "metrics": {},
+                    "nodes": {},
+                    "parent_map": {},
+                    "saved_queries": {},
+                    "selectors": {},
+                    "semantic_models": {},
+                    "sources": {},
+                    "unit_tests": {},
+                },
+            ),
+            models=[
+                DbtBouncerModel(
+                    **{
+                        "model": Nodes4(
+                            **{
+                                "access": "public",
+                                "alias": "stg_payments_v1",
+                                "checksum": {"name": "sha256", "checksum": ""},
+                                "columns": {
+                                    "col_1": {
+                                        "index": 1,
+                                        "name": "col_1",
+                                        "type": "INTEGER",
+                                    },
+                                },
+                                "description": "This is a description",
+                                "fqn": [
+                                    "dbt_bouncer_test_project",
+                                    "stg_payments",
+                                    "v1",
+                                ],
+                                "name": "stg_payments",
+                                "original_file_path": "models/staging/stg_payments_v1.sql",
+                                "package_name": "dbt_bouncer_test_project",
+                                "path": "staging/stg_payments_v1.sql",
+                                "resource_type": "model",
+                                "schema": "main",
+                                "unique_id": "model.dbt_bouncer_test_project.stg_payments.v1",
+                            },
+                        ),
+                        "original_file_path": "models/staging/stg_payments_v1.sql",
+                        "unique_id": "model.dbt_bouncer_test_project.stg_payments.v1",
+                    },
+                ),
+                DbtBouncerModel(
+                    **{
+                        "model": Nodes4(
+                            **{
+                                "access": "public",
+                                "alias": "stg_payments_v2",
+                                "checksum": {"name": "sha256", "checksum": ""},
+                                "columns": {
+                                    "col_1": {
+                                        "index": 1,
+                                        "name": "col_1",
+                                        "type": "INTEGER",
+                                    },
+                                },
+                                "description": "This is a description",
+                                "fqn": [
+                                    "dbt_bouncer_test_project",
+                                    "stg_payments",
+                                    "v2",
+                                ],
+                                "name": "stg_payments",
+                                "original_file_path": "models/staging/stg_payments_v2.sql",
+                                "package_name": "dbt_bouncer_test_project",
+                                "path": "staging/stg_payments_v2.sql",
+                                "resource_type": "model",
+                                "schema": "main",
+                                "unique_id": "model.dbt_bouncer_test_project.stg_payments.v2",
+                            },
+                        ),
+                        "original_file_path": "models/staging/stg_payments_v2.sql",
+                        "unique_id": "model.dbt_bouncer_test_project.stg_payments.v2",
+                    },
+                ),
+            ],
+            output_file=tmp_path / "output.json",
+            run_results=[],
+            semantic_models=[],
+            snapshots=[],
+            show_all_failures=False,
+            sources=[],
+            tests=[],
+            unit_tests=[],
+        )
+
+    with Path.open(tmp_path / "output.json", "r") as f:
+        output = json.load(f)
+
+    check_run_ids = [x["check_run_id"] for x in output]
+    assert "check_model_description_populated:0:stg_payments_v1" in check_run_ids
+    assert "check_model_description_populated:0:stg_payments_v2" in check_run_ids
+
+    assert results[0] == 0
+    assert (tmp_path / "output.json").exists()
