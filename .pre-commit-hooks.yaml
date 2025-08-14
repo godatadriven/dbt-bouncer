@@ -1,0 +1,10 @@
+-   id: dbt-bouncer
+    additional_dependencies: []
+    args: []
+    description: "Configure and enforce conventions for your dbt project."
+    entry: dbt-bouncer
+    language: python
+    minimum_pre_commit_version: "2.9.2"
+    name: dbt-bouncer
+    pass_filenames: false
+    require_serial: true

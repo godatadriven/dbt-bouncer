@@ -208,7 +208,18 @@ Note: if you update your central `dbt-bouncer.yml` file, you will need to run `g
 
 ## How to set up `dbt-bouncer` with `pre-commit`?
 
-You can use a local hook to run automatically run `dbt-bouncer` before your commits get added to the git tree.
+You can use the official pre-commit hook, in your `.pre-commit-config.yaml` file:
+
+```yaml
+repos:
+  - repo: https://github.com/godatadriven/dbt-bouncer
+    rev: v1.19.0 # Check https://github.com/godatadriven/dbt-bouncer/releases for latest version
+    hooks:
+      - id: dbt-bouncer
+        args: ["--config-file", "<PATH_TO_CONFIG_FILE>"] # Optional
+```
+
+Alternatively, you can use a local hook to run automatically run `dbt-bouncer` before your commits get added to the git tree.
 
 ```yaml
 - repo: local
