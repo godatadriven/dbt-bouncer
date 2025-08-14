@@ -6,6 +6,7 @@ import pytest
 from dbt_bouncer.utils import (
     create_github_comment_file,
     flatten,
+    get_clean_model_name,
     get_package_version_number,
     make_markdown_table,
     object_in_path,
@@ -105,6 +106,17 @@ def test_create_github_comment_file_show_all_failures_true(monkeypatch, tmp_path
         ]
         create_github_comment_file(failed_checks, show_all_failures=True)
         assert len((tmp_path / "github-comment.md").read_text().split("\n")) == 38
+
+
+@pytest.mark.parametrize(
+    ("unique_id", "expected_model_name"),
+    [
+        ("model.my_project.my_model", "my_model"),
+        ("model.my_project.my_model.v1", "my_model_v1"),
+    ],
+)
+def test_get_clean_model_name(unique_id, expected_model_name):
+    assert get_clean_model_name(unique_id) == expected_model_name
 
 
 @pytest.mark.parametrize(
