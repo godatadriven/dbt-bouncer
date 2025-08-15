@@ -1101,6 +1101,56 @@ class CheckModelPropertyFileLocation(BaseCheck):
         )
 
 
+class CheckModelSchemaName(BaseCheck):
+    """Models must have a schema name that matches the supplied regex.
+
+    Note that most setups will use schema names in development that are prefixed, for example:
+        * dbt_jdoe_stg_payments
+        * mary_stg_payments
+
+    Please account for this if you wish to run `dbt-bouncer` against locally generated manifests.
+
+    Parameters:
+        schema_name_pattern (str): Regexp the schema name must match.
+
+    Receives:
+        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+
+    Other Parameters:
+        description (Optional[str]): Description of what the check does and why it is implemented.
+        exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
+        include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_model_schema_name
+              include: ^models/intermediate
+              schema_name_pattern: .*intermediate # Accounting for schemas like `dbt_jdoe_intermediate`.
+            - name: check_model_schema_name
+              include: ^models/staging
+              schema_name_pattern: .*stg_.*
+        ```
+
+    """
+
+    model_config = ConfigDict(extra="forbid", protected_namespaces=())
+
+    model: "DbtBouncerModelBase" = Field(default=None)
+    name: Literal["check_model_schema_name"]
+    schema_name_pattern: str
+
+    def execute(self) -> None:
+        """Execute the check."""
+        assert (
+            re.compile(self.schema_name_pattern.strip()).match(self.model.schema_)
+            is not None
+        ), (
+            f"`{self.model.schema_}` does not match the supplied regex `{self.schema_name_pattern.strip()})`."
+        )
+
+
 class CheckModelsDocumentationCoverage(BaseModel):
     """Set the minimum percentage of models that have a populated description.
 

@@ -141,6 +141,12 @@ manifest_checks:
     model_name_pattern: ^stg_
   - name: check_model_test_coverage
   - name: check_model_property_file_location
+  - name: check_model_schema_name
+    include: ^models/intermediate
+    schema_name_pattern: .*intermediate
+  - name: check_model_schema_name
+    include: ^models/staging
+    schema_name_pattern: .*stg_.*
 
   # Semantic models
   - name: check_semantic_model_based_on_non_public_models

@@ -21,10 +21,15 @@ models:
   dbt_bouncer_test_project:
     intermediate:
       access: protected
+      schema: intermediate
     marts:
       access: public
+      schema: marts
     staging:
       access: protected
       crm:
+        schema: stg_crm
         tags:
-          - crm
+            - crm
+      payments:
+        schema: stg_payments
