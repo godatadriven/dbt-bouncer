@@ -45,6 +45,7 @@ from dbt_bouncer.checks.manifest.check_models import (
     CheckModelNames,
     CheckModelNumberOfGrants,
     CheckModelPropertyFileLocation,
+    CheckModelSchemaName,
     CheckModelsDocumentationCoverage,
     CheckModelsTestCoverage,
 )
@@ -74,6 +75,7 @@ CheckModelMaxUpstreamDependencies.model_rebuild()
 CheckModelNames.model_rebuild()
 CheckModelNumberOfGrants.model_rebuild()
 CheckModelPropertyFileLocation.model_rebuild()
+CheckModelSchemaName.model_rebuild()
 CheckModelsTestCoverage.model_rebuild()
 
 
@@ -2909,6 +2911,125 @@ def test_check_model_property_file_location(model, expectation):
     with expectation:
         CheckModelPropertyFileLocation(
             model=model, name="check_model_property_file_location"
+        ).execute()
+
+
+@pytest.mark.parametrize(
+    ("include", "schema_name_pattern", "model", "expectation"),
+    [
+        (
+            "",
+            ".*stg_.*",
+            Nodes4(
+                **{
+                    "alias": "stg_model_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                    },
+                    "fqn": ["package_name", "stg_model_1"],
+                    "name": "stg_model_1",
+                    "original_file_path": "models/staging/stg_model_1.sql",
+                    "package_name": "package_name",
+                    "path": "staging/stg_model_1.sql",
+                    "resource_type": "model",
+                    "schema": "dbt_jdoe_stg_domain",
+                    "unique_id": "model.package_name.stg_model_1",
+                },
+            ),
+            does_not_raise(),
+        ),
+        (
+            "^staging",
+            "stg_",
+            Nodes4(
+                **{
+                    "alias": "stg_model_2",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                    },
+                    "fqn": ["package_name", "stg_model_2"],
+                    "name": "stg_model_2",
+                    "original_file_path": "models/staging/stg_model_2.sql",
+                    "package_name": "package_name",
+                    "path": "staging/stg_model_2.sql",
+                    "resource_type": "model",
+                    "schema": "stg_domain",
+                    "unique_id": "model.package_name.stg_model_2",
+                },
+            ),
+            does_not_raise(),
+        ),
+        (
+            "^intermediate",
+            ".*_intermediate",
+            Nodes4(
+                **{
+                    "alias": "stg_model_3",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                    },
+                    "fqn": ["package_name", "stg_model_3"],
+                    "name": "stg_model_3",
+                    "original_file_path": "models/staging/stg_model_3.sql",
+                    "package_name": "package_name",
+                    "path": "staging/stg_model_3.sql",
+                    "resource_type": "model",
+                    "schema": "dbt_jdoe_intermediate",
+                    "unique_id": "model.package_name.stg_model_3",
+                },
+            ),
+            does_not_raise(),
+        ),
+        (
+            "^intermediate",
+            ".*intermediate",
+            Nodes4(
+                **{
+                    "alias": "model_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                    },
+                    "fqn": ["package_name", "model_1"],
+                    "name": "model_1",
+                    "original_file_path": "models/intermediate/model_1.sql",
+                    "package_name": "package_name",
+                    "path": "intermediate/model_1.sql",
+                    "resource_type": "model",
+                    "schema": "dbt_jdoe_int_domain",
+                    "unique_id": "model.package_name.model_1",
+                },
+            ),
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_model_schema_name(include, schema_name_pattern, model, expectation):
+    with expectation:
+        CheckModelSchemaName(
+            include=include,
+            schema_name_pattern=schema_name_pattern,
+            model=model,
+            name="check_model_schema_name",
         ).execute()
 
 
