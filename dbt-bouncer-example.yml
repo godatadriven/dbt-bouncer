@@ -188,6 +188,17 @@ manifest_checks:
   - name: check_unit_test_expect_format
   - name: check_unit_test_given_formats
 
+  # Versions
+  - name: check_model_latest_version_specified
+    exclude: ^models/marts/finance/orders.sql
+    include: ^models/marts
+  - name: check_model_version_allowed
+    include: ^models/marts
+    version_pattern: >- # Versions must be numeric
+      [0-9]\d*
+  - name: check_model_version_pinned_in_ref
+
+
 run_results_checks:
   # Not a good idea, here for demonstration purposes only
   - name: check_run_results_max_execution_time
