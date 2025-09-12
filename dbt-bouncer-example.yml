@@ -197,6 +197,7 @@ manifest_checks:
     version_pattern: >- # Versions must be numeric
       [0-9]\d*
   - name: check_model_version_pinned_in_ref
+    include: ^models/marts
 
 
 run_results_checks:
