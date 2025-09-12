@@ -1270,8 +1270,9 @@ class CheckModelVersionPinnedInRef(BaseCheck):
             downstream_models_with_unversioned_refs.extend(
                 m
                 for ref in self.manifest_obj.manifest.nodes[m].refs
-                if ref.name == self.model.unique_id.split(".")[-2] and not ref.version
+                if ref.name == self.model.unique_id.split(".")[-1] and not ref.version
             )
+
         assert not downstream_models_with_unversioned_refs, (
             f"`{self.model.name}` is referenced without a pinned version in downstream models: {downstream_models_with_unversioned_refs}."
         )
