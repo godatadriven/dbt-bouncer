@@ -117,13 +117,13 @@ def get_config_file_path(
     if (Path().cwd() / "pyproject.toml").exists():
         pyproject_toml_dir = Path().cwd()
     else:
-        pyproject_toml_dir = next(
+        pyproject_toml_dir = next(  # type: ignore[assignment]
             (
                 parent
                 for parent in Path().cwd().parents
                 if (parent / "pyproject.toml").exists()
             ),
-            None,  # type: ignore[arg-type]
+            None,
         )  # i.e. look in parent directories for a pyproject.toml file
 
         if pyproject_toml_dir is None:

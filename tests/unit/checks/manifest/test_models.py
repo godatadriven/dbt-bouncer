@@ -38,6 +38,7 @@ from dbt_bouncer.checks.manifest.check_models import (
     CheckModelHasTags,
     CheckModelHasUniqueTest,
     CheckModelHasUnitTests,
+    CheckModelLatestVersionSpecified,
     CheckModelMaxChainedViews,
     CheckModelMaxFanout,
     CheckModelMaxNumberOfLines,
@@ -48,6 +49,8 @@ from dbt_bouncer.checks.manifest.check_models import (
     CheckModelSchemaName,
     CheckModelsDocumentationCoverage,
     CheckModelsTestCoverage,
+    CheckModelVersionAllowed,
+    CheckModelVersionPinnedInRef,
 )
 
 CheckModelAccess.model_rebuild()
@@ -68,6 +71,7 @@ CheckModelHasSemiColon.model_rebuild()
 CheckModelHasTags.model_rebuild()
 CheckModelHasUniqueTest.model_rebuild()
 CheckModelHasUnitTests.model_rebuild()
+CheckModelLatestVersionSpecified.model_rebuild()
 CheckModelMaxChainedViews.model_rebuild()
 CheckModelMaxFanout.model_rebuild()
 CheckModelMaxNumberOfLines.model_rebuild()
@@ -76,6 +80,8 @@ CheckModelNames.model_rebuild()
 CheckModelNumberOfGrants.model_rebuild()
 CheckModelPropertyFileLocation.model_rebuild()
 CheckModelSchemaName.model_rebuild()
+CheckModelVersionAllowed.model_rebuild()
+CheckModelVersionPinnedInRef.model_rebuild()
 CheckModelsTestCoverage.model_rebuild()
 
 
@@ -1568,6 +1574,97 @@ def test_check_model_has_unit_tests(
 
 
 @pytest.mark.parametrize(
+    ("model", "expectation"),
+    [
+        (
+            Nodes4(
+                **{
+                    "alias": "model_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                    },
+                    "fqn": ["package_name", "model_1"],
+                    "latest_version": 2,
+                    "name": "model_1",
+                    "original_file_path": "model_1.sql",
+                    "package_name": "package_name",
+                    "path": "staging/finance/model_1.sql",
+                    "resource_type": "model",
+                    "schema": "main",
+                    "unique_id": "model.package_name.model_1",
+                },
+            ),
+            does_not_raise(),
+        ),
+        (
+            Nodes4(
+                **{
+                    "alias": "model_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                    },
+                    "fqn": ["package_name", "model_1"],
+                    "latest_version": "stable",
+                    "name": "model_1",
+                    "original_file_path": "model_1.sql",
+                    "package_name": "package_name",
+                    "path": "staging/finance/model_1.sql",
+                    "resource_type": "model",
+                    "schema": "main",
+                    "unique_id": "model.package_name.model_1",
+                },
+            ),
+            does_not_raise(),
+        ),
+        (
+            Nodes4(
+                **{
+                    "alias": "model_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                    },
+                    "fqn": ["package_name", "model_1"],
+                    "latest_version": None,
+                    "name": "model_1",
+                    "original_file_path": "model_1.sql",
+                    "package_name": "package_name",
+                    "path": "staging/finance/model_1.sql",
+                    "resource_type": "model",
+                    "schema": "main",
+                    "unique_id": "model.package_name.model_1",
+                },
+            ),
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_model_latest_version_specified(
+    model,
+    expectation,
+):
+    with expectation:
+        CheckModelLatestVersionSpecified(
+            model=model,
+            name="check_model_latest_version_specified",
+        ).execute()
+
+
+@pytest.mark.parametrize(
     ("model", "regexp_pattern", "expectation"),
     [
         (
@@ -3030,6 +3127,330 @@ def test_check_model_schema_name(include, schema_name_pattern, model, expectatio
             schema_name_pattern=schema_name_pattern,
             model=model,
             name="check_model_schema_name",
+        ).execute()
+
+
+@pytest.mark.parametrize(
+    ("model", "version_pattern", "expectation"),
+    [
+        (
+            Nodes4(
+                **{
+                    "alias": "stg_model_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                    },
+                    "fqn": ["package_name", "stg_model_1"],
+                    "name": "stg_model_1",
+                    "original_file_path": "models/staging/stg_model_1.sql",
+                    "package_name": "package_name",
+                    "path": "staging/stg_model_1.sql",
+                    "resource_type": "model",
+                    "schema": "dbt_jdoe_stg_domain",
+                    "unique_id": "model.package_name.stg_model_1",
+                    "version": 1,
+                },
+            ),
+            r"[0-9]\d*",
+            does_not_raise(),
+        ),
+        (
+            Nodes4(
+                **{
+                    "alias": "stg_model_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                    },
+                    "fqn": ["package_name", "stg_model_1"],
+                    "name": "stg_model_1",
+                    "original_file_path": "models/staging/stg_model_1.sql",
+                    "package_name": "package_name",
+                    "path": "staging/stg_model_1.sql",
+                    "resource_type": "model",
+                    "schema": "dbt_jdoe_stg_domain",
+                    "unique_id": "model.package_name.stg_model_1",
+                    "version": 10,
+                },
+            ),
+            r"[0-9]\d*",
+            does_not_raise(),
+        ),
+        (
+            Nodes4(
+                **{
+                    "alias": "stg_model_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                    },
+                    "fqn": ["package_name", "stg_model_1"],
+                    "name": "stg_model_1",
+                    "original_file_path": "models/staging/stg_model_1.sql",
+                    "package_name": "package_name",
+                    "path": "staging/stg_model_1.sql",
+                    "resource_type": "model",
+                    "schema": "dbt_jdoe_stg_domain",
+                    "unique_id": "model.package_name.stg_model_1",
+                    "version": 100,
+                },
+            ),
+            r"[0-9]\d*",
+            does_not_raise(),
+        ),
+        (
+            Nodes4(
+                **{
+                    "alias": "stg_model_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                    },
+                    "fqn": ["package_name", "stg_model_1"],
+                    "name": "stg_model_1",
+                    "original_file_path": "models/staging/stg_model_1.sql",
+                    "package_name": "package_name",
+                    "path": "staging/stg_model_1.sql",
+                    "resource_type": "model",
+                    "schema": "dbt_jdoe_stg_domain",
+                    "unique_id": "model.package_name.stg_model_1",
+                    "version": "golden",
+                },
+            ),
+            r"[0-9]\d*",
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_model_version_allowed(model, version_pattern, expectation):
+    with expectation:
+        CheckModelVersionAllowed(
+            model=model,
+            name="check_model_version_allowed",
+            version_pattern=version_pattern,
+        ).execute()
+
+
+@pytest.mark.parametrize(
+    ("manifest_obj", "model", "expectation"),
+    [
+        (
+            DbtBouncerManifest(
+                **{
+                    "manifest": {
+                        "child_map": {
+                            "model.package_name.stg_model_1": [
+                                "model.package_name.stg_model_2"
+                            ]
+                        },
+                        "disabled": {},
+                        "docs": {},
+                        "exposures": {},
+                        "group_map": {},
+                        "groups": {},
+                        "macros": {},
+                        "metadata": {
+                            "dbt_schema_version": "https://schemas.getdbt.com/dbt/manifest/v12.json",
+                            "project_name": "dbt_bouncer_test_project",
+                        },
+                        "metrics": {},
+                        "nodes": {
+                            "model.package_name.stg_model_1": {
+                                "alias": "stg_model_1",
+                                "checksum": {"name": "sha256", "checksum": ""},
+                                "columns": {
+                                    "col_1": {
+                                        "index": 1,
+                                        "name": "col_1",
+                                        "type": "INTEGER",
+                                    },
+                                },
+                                "fqn": ["package_name", "stg_model_1"],
+                                "name": "stg_model_1",
+                                "original_file_path": "models/staging/stg_model_1.sql",
+                                "package_name": "package_name",
+                                "path": "staging/stg_model_1.sql",
+                                "resource_type": "model",
+                                "schema": "dbt_jdoe_stg_domain",
+                                "unique_id": "model.package_name.stg_model_1",
+                                "version": 1,
+                            },
+                            "model.package_name.stg_model_2": {
+                                "alias": "stg_model_2",
+                                "checksum": {"name": "sha256", "checksum": ""},
+                                "columns": {
+                                    "col_1": {
+                                        "index": 1,
+                                        "name": "col_1",
+                                        "type": "INTEGER",
+                                    },
+                                },
+                                "fqn": ["package_name", "stg_model_2"],
+                                "name": "stg_model_2",
+                                "original_file_path": "models/staging/stg_model_2.sql",
+                                "package_name": "package_name",
+                                "path": "staging/stg_model_2.sql",
+                                "refs": [{"name": "stg_model_1", "version": 1}],
+                                "resource_type": "model",
+                                "schema": "dbt_jdoe_stg_domain",
+                                "unique_id": "model.package_name.stg_model_2",
+                                "version": 1,
+                            },
+                        },
+                        "parent_map": {},
+                        "saved_queries": {},
+                        "selectors": {},
+                        "semantic_models": {},
+                        "sources": {},
+                        "unit_tests": {},
+                    }
+                }
+            ),
+            Nodes4(
+                **{
+                    "alias": "stg_model_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                    },
+                    "fqn": ["package_name", "stg_model_1"],
+                    "name": "stg_model_1",
+                    "original_file_path": "models/staging/stg_model_1.sql",
+                    "package_name": "package_name",
+                    "path": "staging/stg_model_1.sql",
+                    "resource_type": "model",
+                    "schema": "dbt_jdoe_stg_domain",
+                    "unique_id": "model.package_name.stg_model_1",
+                    "version": 1,
+                },
+            ),
+            does_not_raise(),
+        ),
+        (
+            DbtBouncerManifest(
+                **{
+                    "manifest": {
+                        "child_map": {
+                            "model.package_name.stg_model_1": [
+                                "model.package_name.stg_model_2"
+                            ]
+                        },
+                        "disabled": {},
+                        "docs": {},
+                        "exposures": {},
+                        "group_map": {},
+                        "groups": {},
+                        "macros": {},
+                        "metadata": {
+                            "dbt_schema_version": "https://schemas.getdbt.com/dbt/manifest/v12.json",
+                            "project_name": "dbt_bouncer_test_project",
+                        },
+                        "metrics": {},
+                        "nodes": {
+                            "model.package_name.stg_model_1": {
+                                "alias": "stg_model_1",
+                                "checksum": {"name": "sha256", "checksum": ""},
+                                "columns": {
+                                    "col_1": {
+                                        "index": 1,
+                                        "name": "col_1",
+                                        "type": "INTEGER",
+                                    },
+                                },
+                                "fqn": ["package_name", "stg_model_1"],
+                                "name": "stg_model_1",
+                                "original_file_path": "models/staging/stg_model_1.sql",
+                                "package_name": "package_name",
+                                "path": "staging/stg_model_1.sql",
+                                "resource_type": "model",
+                                "schema": "dbt_jdoe_stg_domain",
+                                "unique_id": "model.package_name.stg_model_1",
+                                "version": 1,
+                            },
+                            "model.package_name.stg_model_2": {
+                                "alias": "stg_model_2",
+                                "checksum": {"name": "sha256", "checksum": ""},
+                                "columns": {
+                                    "col_1": {
+                                        "index": 1,
+                                        "name": "col_1",
+                                        "type": "INTEGER",
+                                    },
+                                },
+                                "fqn": ["package_name", "stg_model_2"],
+                                "name": "stg_model_2",
+                                "original_file_path": "models/staging/stg_model_2.sql",
+                                "package_name": "package_name",
+                                "path": "staging/stg_model_2.sql",
+                                "refs": [{"name": "stg_model_1", "version": None}],
+                                "resource_type": "model",
+                                "schema": "dbt_jdoe_stg_domain",
+                                "unique_id": "model.package_name.stg_model_2",
+                                "version": 1,
+                            },
+                        },
+                        "parent_map": {},
+                        "saved_queries": {},
+                        "selectors": {},
+                        "semantic_models": {},
+                        "sources": {},
+                        "unit_tests": {},
+                    }
+                }
+            ),
+            Nodes4(
+                **{
+                    "alias": "stg_model_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                    },
+                    "fqn": ["package_name", "stg_model_1"],
+                    "name": "stg_model_1",
+                    "original_file_path": "models/staging/stg_model_1.sql",
+                    "package_name": "package_name",
+                    "path": "staging/stg_model_1.sql",
+                    "resource_type": "model",
+                    "schema": "dbt_jdoe_stg_domain",
+                    "unique_id": "model.package_name.stg_model_1",
+                    "version": 1,
+                },
+            ),
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_model_version_pinned_in_ref(manifest_obj, model, expectation):
+    with expectation:
+        CheckModelVersionPinnedInRef(
+            manifest_obj=manifest_obj,
+            model=model,
+            name="check_model_version_pinned_in_ref",
         ).execute()
 
 
