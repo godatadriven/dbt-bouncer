@@ -8,8 +8,8 @@ build-and-run-dbt-bouncer:
 build-artifacts:
 	poetry run python ./scripts/generate_artifacts.py
 
-build-pex:
-	poetry run pex . \
+build-pex: # Remove rapidfuzz constraint once Python3.9 support is removed
+	poetry run pex . 'rapidfuzz<3.14.0' \
 		--interpreter-constraint ">=3.9,<3.14" \
 		--jobs 128 \
 		--max-install-jobs 0 \
