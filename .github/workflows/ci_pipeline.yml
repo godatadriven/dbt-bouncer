@@ -2,7 +2,7 @@
 name: CI pipeline
 
 on:
-  pull_request_target:
+  pull_request:
       branches:
           - main
   workflow_dispatch:
@@ -14,7 +14,6 @@ concurrency:
 env:
   DBT_PROFILES_DIR: dbt_project
   DBT_PROJECT_DIR: dbt_project
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   IMAGE_NAME: ${{ github.repository }}
   POETRY_VERSION: "2.0.1"
   POETRY_VIRTUALENVS_IN_PROJECT: true
@@ -96,6 +95,8 @@ jobs:
 
             - name: Pytest coverage comment
               if: matrix.python-version == '3.11' && matrix.operating-system != 'windows-latest'
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               uses: MishaKav/pytest-coverage-comment@main
               with:
                   pytest-coverage-path: ./pytest-coverage.txt
