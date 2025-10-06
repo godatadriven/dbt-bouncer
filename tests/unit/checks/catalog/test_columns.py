@@ -8,6 +8,8 @@ with warnings.catch_warnings():
     from dbt_artifacts_parser.parsers.catalog.catalog_v1 import Nodes as CatalogNodes
 
 
+from pydantic import ValidationError
+
 from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import Nodes4, Nodes6
 from dbt_bouncer.artifact_parsers.parsers_manifest import (  # noqa: F401
     DbtBouncerModelBase,
@@ -23,7 +25,6 @@ from dbt_bouncer.checks.catalog.check_columns import (
 )
 
 CheckColumnDescriptionPopulated.model_rebuild()
-CheckColumnNameCompliesToColumnType.model_rebuild()
 CheckColumnNameCompliesToColumnType.model_rebuild()
 CheckColumnsAreAllDocumented.model_rebuild()
 CheckColumnsAreDocumentedInPublicModels.model_rebuild()
@@ -514,7 +515,7 @@ def test_check_columns_are_documented_in_public_models(
 
 
 @pytest.mark.parametrize(
-    ("catalog_node", "column_name_pattern", "types", "expectation"),
+    ("catalog_node", "column_name_pattern", "type_pattern", "types", "expectation"),
     [
         (
             CatalogNodes(
@@ -536,6 +537,7 @@ def test_check_columns_are_documented_in_public_models(
                 },
             ),
             ".*_date$",
+            None,
             ["DATE"],
             does_not_raise(),
         ),
@@ -569,8 +571,43 @@ def test_check_columns_are_documented_in_public_models(
                 },
             ),
             ".*_date$",
+            None,
             ["DATE"],
             does_not_raise(),
+        ),
+        (
+            CatalogNodes(
+                **{
+                    "columns": {
+                        "col_1_date": {
+                            "index": 1,
+                            "name": "col_1_date",
+                            "type": "DATE",
+                        },
+                        "col_2_date": {
+                            "index": 2,
+                            "name": "col_2_date",
+                            "type": "STRUCT",
+                        },
+                        "col_3": {
+                            "index": 3,
+                            "name": "col_3",
+                            "type": "VARCHAR",
+                        },
+                    },
+                    "metadata": {
+                        "name": "table_1",
+                        "schema": "main",
+                        "type": "VIEW",
+                    },
+                    "stats": {},
+                    "unique_id": "model.package_name.model_1",
+                },
+            ),
+            ".*_date$",
+            "^(?!STRUCT)",
+            None,
+            pytest.raises(AssertionError),
         ),
         (
             CatalogNodes(
@@ -592,14 +629,84 @@ def test_check_columns_are_documented_in_public_models(
                 },
             ),
             ".*_date$",
+            None,
             ["DATE"],
             pytest.raises(AssertionError),
+        ),
+        (
+            CatalogNodes(
+                **{
+                    "columns": {
+                        "col_1_date": {
+                            "index": 1,
+                            "name": "col_1_date",
+                            "type": "DATE",
+                        },
+                        "col_2_date": {
+                            "index": 2,
+                            "name": "col_2_date",
+                            "type": "DATE",
+                        },
+                        "col_3": {
+                            "index": 3,
+                            "name": "col_3",
+                            "type": "VARCHAR",
+                        },
+                    },
+                    "metadata": {
+                        "name": "table_1",
+                        "schema": "main",
+                        "type": "VIEW",
+                    },
+                    "stats": {},
+                    "unique_id": "model.package_name.model_1",
+                },
+            ),
+            ".*_date$",
+            None,
+            None,
+            pytest.raises(ValidationError),
+        ),
+        (
+            CatalogNodes(
+                **{
+                    "columns": {
+                        "col_1_date": {
+                            "index": 1,
+                            "name": "col_1_date",
+                            "type": "DATE",
+                        },
+                        "col_2_date": {
+                            "index": 2,
+                            "name": "col_2_date",
+                            "type": "DATE",
+                        },
+                        "col_3": {
+                            "index": 3,
+                            "name": "col_3",
+                            "type": "VARCHAR",
+                        },
+                    },
+                    "metadata": {
+                        "name": "table_1",
+                        "schema": "main",
+                        "type": "VIEW",
+                    },
+                    "stats": {},
+                    "unique_id": "model.package_name.model_1",
+                },
+            ),
+            ".*_date$",
+            "^(?!STRUCT)",
+            ["DATE"],
+            pytest.raises(ValidationError),
         ),
     ],
 )
 def test_check_column_name_complies_to_column_type(
     catalog_node,
     column_name_pattern,
+    type_pattern,
     types,
     expectation,
 ):
@@ -608,5 +715,6 @@ def test_check_column_name_complies_to_column_type(
             catalog_node=catalog_node,
             column_name_pattern=column_name_pattern,
             name="check_column_name_complies_to_column_type",
+            type_pattern=type_pattern,
             types=types,
         ).execute()
