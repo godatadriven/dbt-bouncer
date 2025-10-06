@@ -1,7 +1,7 @@
 # mypy: disable-error-code="union-attr"
 
 import re
-from typing import TYPE_CHECKING, List, Literal
+from typing import TYPE_CHECKING, List, Literal, Optional
 
 if TYPE_CHECKING:
     import warnings
@@ -16,7 +16,7 @@ if TYPE_CHECKING:
         DbtBouncerTestBase,
     )
 
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from dbt_bouncer.check_base import BaseCheck
 
@@ -128,11 +128,14 @@ class CheckColumnHasSpecifiedTest(BaseCheck):
 
 
 class CheckColumnNameCompliesToColumnType(BaseCheck):
-    """Columns with specified data types must comply to the specified regexp naming pattern.
+    """Columns with the specified regexp naming pattern must have data types that comply to the specified regexp pattern or list of data types.
+
+    Note: Oe of `type_pattern` or `types` must be specified.
 
     Parameters:
         column_name_pattern (str): Regex pattern to match the model name.
-        types (List[str]): List of data types to check.
+        type_pattern (Optional[str]): Regex pattern to match the data types.
+        types (Optional[List[str]]): List of data types to check.
 
     Receives:
         catalog_node (CatalogNodes): The CatalogNodes object to check.
@@ -173,26 +176,56 @@ class CheckColumnNameCompliesToColumnType(BaseCheck):
                 - INTEGER
                 - VARCHAR
         ```
+        ```yaml
+        catalog_checks:
+            # No STRUCT data types permitted.
+            - name: check_column_name_complies_to_column_type
+              column_name_pattern: ^[a-z_]*$
+              type_pattern: ^(?!STRUCT)
+        ```
 
     """
 
     catalog_node: "CatalogNodes" = Field(default=None)
     column_name_pattern: str
     name: Literal["check_column_name_complies_to_column_type"]
-    types: List[str]
+    type_pattern: Optional[str] = None
+    types: Optional[List[str]] = None
 
     def execute(self) -> None:
         """Execute the check."""
-        non_complying_columns = [
-            v.name
-            for _, v in self.catalog_node.columns.items()
-            if v.type in self.types
-            and re.compile(self.column_name_pattern.strip()).match(v.name) is None
-        ]
+        if self.type_pattern:
+            non_complying_columns = [
+                v.name
+                for _, v in self.catalog_node.columns.items()
+                if re.compile(self.type_pattern.strip()).match(v.type) is None
+                and re.compile(self.column_name_pattern.strip()).match(v.name)
+                is not None
+            ]
 
-        assert not non_complying_columns, (
-            f"`{self.catalog_node.unique_id.split('.')[-1]}` has columns that don't comply with the specified regexp pattern (`{self.column_name_pattern}`): {non_complying_columns}"
-        )
+            assert not non_complying_columns, (
+                f"`{self.catalog_node.unique_id.split('.')[-1]}` has columns that don't comply with the specified data type regexp pattern (`{self.column_name_pattern}`): {non_complying_columns}"
+            )
+
+        elif self.types:
+            non_complying_columns = [
+                v.name
+                for _, v in self.catalog_node.columns.items()
+                if v.type in self.types
+                and re.compile(self.column_name_pattern.strip()).match(v.name) is None
+            ]
+
+            assert not non_complying_columns, (
+                f"`{self.catalog_node.unique_id.split('.')[-1]}` has columns that don't comply with the specified regexp pattern (`{self.column_name_pattern}`): {non_complying_columns}"
+            )
+
+    @model_validator(mode="after")
+    def _check_type_pattern_or_types(self) -> "CheckColumnNameCompliesToColumnType":
+        if not (self.type_pattern or self.types):
+            raise ValueError("Either 'type_pattern' or 'types' must be supplied.")
+        if self.type_pattern is not None and self.types is not None:
+            raise ValueError("Only one of 'type_pattern' or 'types' can be supplied.")
+        return self
 
 
 class CheckColumnsAreAllDocumented(BaseCheck):
