@@ -133,6 +133,7 @@ class CheckSourceHasTags(BaseCheck):
     Parameters:
         source (DbtBouncerSource): The DbtBouncerSourceBase object to check.
         tags (List[str]): List of tags to check for.
+        criteria: (Optional[Literal["any", "all", "one"]]): Whether the source must have any, all, or exactly one of the specified tags. Default: `all`.
 
     Other Parameters:
         description (Optional[str]): Description of what the check does and why it is implemented.
@@ -154,13 +155,23 @@ class CheckSourceHasTags(BaseCheck):
     name: Literal["check_source_has_tags"]
     source: "DbtBouncerSourceBase" = Field(default=None)
     tags: List[str]
+    criteria: Literal["any", "all", "one"] = Field(default="all")
 
     def execute(self) -> None:
         """Execute the check."""
-        missing_tags = [tag for tag in self.tags if tag not in self.source.tags]
-        assert not missing_tags, (
-            f"`{self.source.source_name}.{self.source.name}` is missing required tags: {missing_tags}."
-        )
+        if self.criteria == "any":
+            assert any(tag in self.source.tags for tag in self.tags), (
+                f"`{self.source.source_name}.{self.source.name}` does not have any of the required tags: {self.tags}."
+            )
+        elif self.criteria == "all":
+            missing_tags = [tag for tag in self.tags if tag not in self.source.tags]
+            assert not missing_tags, (
+                f"`{self.source.source_name}.{self.source.name}` is missing required tags: {missing_tags}."
+            )
+        elif self.criteria == "one":
+            assert sum(tag in self.source.tags for tag in self.tags) == 1, (
+                f"`{self.source.source_name}.{self.source.name}` must have exactly one of the required tags: {self.tags}."
+            )
 
 
 class CheckSourceLoaderPopulated(BaseCheck):

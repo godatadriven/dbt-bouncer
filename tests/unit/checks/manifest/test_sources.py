@@ -577,12 +577,335 @@ def test_check_source_has_meta_keys(keys, source, expectation):
         ),
     ],
 )
-def test_check_source_has_tags(source, tags, expectation):
+def test_check_source_has_tags_default(source, tags, expectation):
+    """Default criteria is 'all'."""
     with expectation:
         CheckSourceHasTags(
             name="check_source_has_tags",
             source=source,
             tags=tags,
+        ).execute()
+
+
+@pytest.mark.parametrize(
+    ("source", "tags", "expectation"),
+    [
+        (
+            Sources(
+                **{
+                    "description": "",
+                    "fqn": ["package_name", "source_1", "table_1"],
+                    "identifier": "table_1",
+                    "loader": "",
+                    "name": "table_1",
+                    "original_file_path": "models/staging/_sources.yml",
+                    "package_name": "package_name",
+                    "path": "models/staging/_sources.yml",
+                    "resource_type": "source",
+                    "schema": "main",
+                    "source_description": "",
+                    "source_name": "source_1",
+                    "tags": ["tag_1"],
+                    "unique_id": "source.package_name.source_1.table_1",
+                },
+            ),
+            ["tag_1"],
+            does_not_raise(),
+        ),
+        (
+            Sources(
+                **{
+                    "description": "",
+                    "fqn": ["package_name", "source_1", "table_1"],
+                    "identifier": "table_1",
+                    "loader": "",
+                    "name": "table_1",
+                    "original_file_path": "models/staging/_sources.yml",
+                    "package_name": "package_name",
+                    "path": "models/staging/_sources.yml",
+                    "resource_type": "source",
+                    "schema": "main",
+                    "source_description": "",
+                    "source_name": "source_1",
+                    "tags": [],
+                    "unique_id": "source.package_name.source_1.table_1",
+                },
+            ),
+            ["tag_1"],
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_source_has_tags_all(source, tags, expectation):
+    """Criteria is 'all'."""
+    with expectation:
+        CheckSourceHasTags(
+            name="check_source_has_tags",
+            source=source,
+            tags=tags,
+            criteria="all",
+        ).execute()
+
+
+@pytest.mark.parametrize(
+    ("source", "tags", "expectation"),
+    [
+        # Source has one of the required tags - should pass
+        (
+            Sources(
+                **{
+                    "description": "",
+                    "fqn": ["package_name", "source_1", "table_1"],
+                    "identifier": "table_1",
+                    "loader": "",
+                    "name": "table_1",
+                    "original_file_path": "models/staging/_sources.yml",
+                    "package_name": "package_name",
+                    "path": "models/staging/_sources.yml",
+                    "resource_type": "source",
+                    "schema": "main",
+                    "source_description": "",
+                    "source_name": "source_1",
+                    "tags": ["tag_1"],
+                    "unique_id": "source.package_name.source_1.table_1",
+                },
+            ),
+            ["tag_1", "tag_2"],
+            does_not_raise(),
+        ),
+        # Source has multiple tags including one of the required - should pass
+        (
+            Sources(
+                **{
+                    "description": "",
+                    "fqn": ["package_name", "source_1", "table_1"],
+                    "identifier": "table_1",
+                    "loader": "",
+                    "name": "table_1",
+                    "original_file_path": "models/staging/_sources.yml",
+                    "package_name": "package_name",
+                    "path": "models/staging/_sources.yml",
+                    "resource_type": "source",
+                    "schema": "main",
+                    "source_description": "",
+                    "source_name": "source_1",
+                    "tags": ["tag_1", "tag_3"],
+                    "unique_id": "source.package_name.source_1.table_1",
+                },
+            ),
+            ["tag_1", "tag_2"],
+            does_not_raise(),
+        ),
+        # Source has no tags - should fail
+        (
+            Sources(
+                **{
+                    "description": "",
+                    "fqn": ["package_name", "source_1", "table_1"],
+                    "identifier": "table_1",
+                    "loader": "",
+                    "name": "table_1",
+                    "original_file_path": "models/staging/_sources.yml",
+                    "package_name": "package_name",
+                    "path": "models/staging/_sources.yml",
+                    "resource_type": "source",
+                    "schema": "main",
+                    "source_description": "",
+                    "source_name": "source_1",
+                    "tags": [],
+                    "unique_id": "source.package_name.source_1.table_1",
+                },
+            ),
+            ["tag_1", "tag_2"],
+            pytest.raises(AssertionError),
+        ),
+        # Source has tags but none of the required ones - should fail
+        (
+            Sources(
+                **{
+                    "description": "",
+                    "fqn": ["package_name", "source_1", "table_1"],
+                    "identifier": "table_1",
+                    "loader": "",
+                    "name": "table_1",
+                    "original_file_path": "models/staging/_sources.yml",
+                    "package_name": "package_name",
+                    "path": "models/staging/_sources.yml",
+                    "resource_type": "source",
+                    "schema": "main",
+                    "source_description": "",
+                    "source_name": "source_1",
+                    "tags": ["tag_3", "tag_4"],
+                    "unique_id": "source.package_name.source_1.table_1",
+                },
+            ),
+            ["tag_1", "tag_2"],
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_source_has_tags_any(source, tags, expectation):
+    """Criteria is 'any'."""
+    with expectation:
+        CheckSourceHasTags(
+            name="check_source_has_tags",
+            source=source,
+            tags=tags,
+            criteria="any",
+        ).execute()
+
+
+@pytest.mark.parametrize(
+    ("source", "tags", "expectation"),
+    [
+        # Source has exactly one of the required tags - should pass
+        (
+            Sources(
+                **{
+                    "description": "",
+                    "fqn": ["package_name", "source_1", "table_1"],
+                    "identifier": "table_1",
+                    "loader": "",
+                    "name": "table_1",
+                    "original_file_path": "models/staging/_sources.yml",
+                    "package_name": "package_name",
+                    "path": "models/staging/_sources.yml",
+                    "resource_type": "source",
+                    "schema": "main",
+                    "source_description": "",
+                    "source_name": "source_1",
+                    "tags": ["tag_1", "tag_3"],
+                    "unique_id": "source.package_name.source_1.table_1",
+                },
+            ),
+            ["tag_1", "tag_2"],
+            does_not_raise(),
+        ),
+        # Source has multiple required tags - should fail
+        (
+            Sources(
+                **{
+                    "description": "",
+                    "fqn": ["package_name", "source_1", "table_1"],
+                    "identifier": "table_1",
+                    "loader": "",
+                    "name": "table_1",
+                    "original_file_path": "models/staging/_sources.yml",
+                    "package_name": "package_name",
+                    "path": "models/staging/_sources.yml",
+                    "resource_type": "source",
+                    "schema": "main",
+                    "source_description": "",
+                    "source_name": "source_1",
+                    "tags": ["tag_1", "tag_2"],
+                    "unique_id": "source.package_name.source_1.table_1",
+                },
+            ),
+            ["tag_1", "tag_2"],
+            pytest.raises(AssertionError),
+        ),
+        # Source has no required tags - should fail
+        (
+            Sources(
+                **{
+                    "description": "",
+                    "fqn": ["package_name", "source_1", "table_1"],
+                    "identifier": "table_1",
+                    "loader": "",
+                    "name": "table_1",
+                    "original_file_path": "models/staging/_sources.yml",
+                    "package_name": "package_name",
+                    "path": "models/staging/_sources.yml",
+                    "resource_type": "source",
+                    "schema": "main",
+                    "source_description": "",
+                    "source_name": "source_1",
+                    "tags": [],
+                    "unique_id": "source.package_name.source_1.table_1",
+                },
+            ),
+            ["tag_1", "tag_2"],
+            pytest.raises(AssertionError),
+        ),
+        # Source has no tags but only one required - should fail
+        (
+            Sources(
+                **{
+                    "description": "",
+                    "fqn": ["package_name", "source_1", "table_1"],
+                    "identifier": "table_1",
+                    "loader": "",
+                    "name": "table_1",
+                    "original_file_path": "models/staging/_sources.yml",
+                    "package_name": "package_name",
+                    "path": "models/staging/_sources.yml",
+                    "resource_type": "source",
+                    "schema": "main",
+                    "source_description": "",
+                    "source_name": "source_1",
+                    "tags": [],
+                    "unique_id": "source.package_name.source_1.table_1",
+                },
+            ),
+            ["tag_1"],
+            pytest.raises(AssertionError),
+        ),
+        # Source has exactly one required tag from single tag list - should pass
+        (
+            Sources(
+                **{
+                    "description": "",
+                    "fqn": ["package_name", "source_1", "table_1"],
+                    "identifier": "table_1",
+                    "loader": "",
+                    "name": "table_1",
+                    "original_file_path": "models/staging/_sources.yml",
+                    "package_name": "package_name",
+                    "path": "models/staging/_sources.yml",
+                    "resource_type": "source",
+                    "schema": "main",
+                    "source_description": "",
+                    "source_name": "source_1",
+                    "tags": ["tag_1"],
+                    "unique_id": "source.package_name.source_1.table_1",
+                },
+            ),
+            ["tag_1"],
+            does_not_raise(),
+        ),
+        # Source has tags but none of the required ones - should fail
+        (
+            Sources(
+                **{
+                    "description": "",
+                    "fqn": ["package_name", "source_1", "table_1"],
+                    "identifier": "table_1",
+                    "loader": "",
+                    "name": "table_1",
+                    "original_file_path": "models/staging/_sources.yml",
+                    "package_name": "package_name",
+                    "path": "models/staging/_sources.yml",
+                    "resource_type": "source",
+                    "schema": "main",
+                    "source_description": "",
+                    "source_name": "source_1",
+                    "tags": ["tag_3", "tag_4"],
+                    "unique_id": "source.package_name.source_1.table_1",
+                },
+            ),
+            ["tag_1", "tag_2"],
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_source_has_tags_one(source, tags, expectation):
+    """Criteria is 'one'."""
+    with expectation:
+        CheckSourceHasTags(
+            name="check_source_has_tags",
+            source=source,
+            tags=tags,
+            criteria="one",
         ).execute()
 
 

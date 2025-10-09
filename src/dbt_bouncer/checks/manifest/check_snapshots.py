@@ -18,6 +18,7 @@ class CheckSnapshotHasTags(BaseCheck):
     Parameters:
         snapshot (DbtBouncerSnapshotBase): The DbtBouncerSnapshotBase object to check.
         tags (List[str]): List of tags to check for.
+        criteria: (Optional[Literal["any", "all", "one"]]): Whether the snapshot must have any, all, or exactly one of the specified tags. Default: `all`.
 
     Other Parameters:
         description (Optional[str]): Description of what the check does and why it is implemented.
@@ -39,13 +40,23 @@ class CheckSnapshotHasTags(BaseCheck):
     name: Literal["check_snapshot_has_tags"]
     snapshot: "DbtBouncerSnapshotBase" = Field(default=None)
     tags: List[str]
+    criteria: Literal["any", "all", "one"] = Field(default="all")
 
     def execute(self) -> None:
         """Execute the check."""
-        missing_tags = [tag for tag in self.tags if tag not in self.snapshot.tags]
-        assert not missing_tags, (
-            f"`{self.snapshot.name}` is missing required tags: {missing_tags}."
-        )
+        if self.criteria == "any":
+            assert any(tag in self.snapshot.tags for tag in self.tags), (
+                f"`{self.snapshot.name}` does not have any of the required tags: {self.tags}."
+            )
+        elif self.criteria == "all":
+            missing_tags = [tag for tag in self.tags if tag not in self.snapshot.tags]
+            assert not missing_tags, (
+                f"`{self.snapshot.name}` is missing required tags: {missing_tags}."
+            )
+        elif self.criteria == "one":
+            assert sum(tag in self.snapshot.tags for tag in self.tags) == 1, (
+                f"`{self.snapshot.name}` must have exactly one of the required tags: {self.tags}."
+            )
 
 
 class CheckSnapshotNames(BaseCheck):
