@@ -552,6 +552,7 @@ class CheckModelHasTags(BaseCheck):
     Parameters:
         model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
         tags (List[str]): List of tags to check for.
+        criteria: (Optional[Literal["any", "all", "one"]]): Whether the model must have any, all, or exactlyone of the specified tags. Default: `any`.
 
     Other Parameters:
         description (Optional[str]): Description of what the check does and why it is implemented.
@@ -573,13 +574,23 @@ class CheckModelHasTags(BaseCheck):
     model: "DbtBouncerModelBase" = Field(default=None)
     name: Literal["check_model_has_tags"]
     tags: List[str]
+    criteria: Literal["any", "all", "one"] = Field(default="all")
 
     def execute(self) -> None:
         """Execute the check."""
-        missing_tags = [tag for tag in self.tags if tag not in self.model.tags]
-        assert not missing_tags, (
-            f"`{get_clean_model_name(self.model.unique_id)}` is missing required tags: {missing_tags}."
-        )
+        if self.criteria == "any":
+            assert any(tag in self.model.tags for tag in self.tags), (
+                f"`{get_clean_model_name(self.model.unique_id)}` does not have any of the required tags: {self.tags}."
+            )
+        elif self.criteria == "all":
+            missing_tags = [tag for tag in self.tags if tag not in self.model.tags]
+            assert not missing_tags, (
+                f"`{get_clean_model_name(self.model.unique_id)}` is missing required tags: {missing_tags}."
+            )
+        elif self.criteria == "one":
+            assert sum(tag in self.model.tags for tag in self.tags) == 1, (
+                f"`{get_clean_model_name(self.model.unique_id)}` must have exactly one of the required tags: {self.tags}."
+            )
 
 
 class CheckModelHasUniqueTest(BaseCheck):

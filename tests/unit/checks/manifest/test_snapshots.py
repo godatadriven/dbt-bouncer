@@ -88,12 +88,311 @@ CheckSnapshotNames.model_rebuild()
         ),
     ],
 )
-def test_check_snapshot_has_tags(snapshot, tags, expectation):
+def test_check_snapshot_has_tags_default(snapshot, tags, expectation):
+    """Default criteria is 'all'."""
     with expectation:
         CheckSnapshotHasTags(
             snapshot=snapshot,
             name="check_snapshot_has_tags",
             tags=tags,
+        ).execute()
+
+
+@pytest.mark.parametrize(
+    ("snapshot", "tags", "expectation"),
+    [
+        (
+            Nodes7(
+                **{
+                    "alias": "snapshot_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "config": {},
+                    "fqn": ["package_name", "snapshot_1", "snapshot_1"],
+                    "name": "snapshot_1",
+                    "original_file_path": "snapshots/snapshot_1.sql",
+                    "package_name": "package_name",
+                    "path": "snapshot_1.sql",
+                    "resource_type": "snapshot",
+                    "schema": "main",
+                    "tags": ["tag_1"],
+                    "unique_id": "snapshot.package_name.snapshot_1",
+                },
+            ),
+            ["tag_1"],
+            does_not_raise(),
+        ),
+        (
+            Nodes7(
+                **{
+                    "alias": "snapshot_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "config": {},
+                    "fqn": ["package_name", "snapshot_1", "snapshot_1"],
+                    "name": "snapshot_1",
+                    "original_file_path": "snapshots/snapshot_1.sql",
+                    "package_name": "package_name",
+                    "path": "snapshot_1.sql",
+                    "resource_type": "snapshot",
+                    "schema": "main",
+                    "tags": [],
+                    "unique_id": "snapshot.package_name.snapshot_1",
+                },
+            ),
+            ["tag_1"],
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_snapshot_has_tags_all(snapshot, tags, expectation):
+    """Criteria is 'all'."""
+    with expectation:
+        CheckSnapshotHasTags(
+            snapshot=snapshot,
+            name="check_snapshot_has_tags",
+            tags=tags,
+            criteria="all",
+        ).execute()
+
+
+@pytest.mark.parametrize(
+    ("snapshot", "tags", "expectation"),
+    [
+        # Snapshot has one of the required tags - should pass
+        (
+            Nodes7(
+                **{
+                    "alias": "snapshot_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "config": {},
+                    "fqn": ["package_name", "snapshot_1", "snapshot_1"],
+                    "name": "snapshot_1",
+                    "original_file_path": "snapshots/snapshot_1.sql",
+                    "package_name": "package_name",
+                    "path": "snapshot_1.sql",
+                    "resource_type": "snapshot",
+                    "schema": "main",
+                    "tags": ["tag_1"],
+                    "unique_id": "snapshot.package_name.snapshot_1",
+                },
+            ),
+            ["tag_1", "tag_2"],
+            does_not_raise(),
+        ),
+        # Snapshot has multiple tags including one of the required - should pass
+        (
+            Nodes7(
+                **{
+                    "alias": "snapshot_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "config": {},
+                    "fqn": ["package_name", "snapshot_1", "snapshot_1"],
+                    "name": "snapshot_1",
+                    "original_file_path": "snapshots/snapshot_1.sql",
+                    "package_name": "package_name",
+                    "path": "snapshot_1.sql",
+                    "resource_type": "snapshot",
+                    "schema": "main",
+                    "tags": ["tag_1", "tag_3"],
+                    "unique_id": "snapshot.package_name.snapshot_1",
+                },
+            ),
+            ["tag_1", "tag_2"],
+            does_not_raise(),
+        ),
+        # Snapshot has no tags - should fail
+        (
+            Nodes7(
+                **{
+                    "alias": "snapshot_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "config": {},
+                    "fqn": ["package_name", "snapshot_1", "snapshot_1"],
+                    "name": "snapshot_1",
+                    "original_file_path": "snapshots/snapshot_1.sql",
+                    "package_name": "package_name",
+                    "path": "snapshot_1.sql",
+                    "resource_type": "snapshot",
+                    "schema": "main",
+                    "tags": [],
+                    "unique_id": "snapshot.package_name.snapshot_1",
+                },
+            ),
+            ["tag_1", "tag_2"],
+            pytest.raises(AssertionError),
+        ),
+        # Snapshot has tags but none of the required ones - should fail
+        (
+            Nodes7(
+                **{
+                    "alias": "snapshot_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "config": {},
+                    "fqn": ["package_name", "snapshot_1", "snapshot_1"],
+                    "name": "snapshot_1",
+                    "original_file_path": "snapshots/snapshot_1.sql",
+                    "package_name": "package_name",
+                    "path": "snapshot_1.sql",
+                    "resource_type": "snapshot",
+                    "schema": "main",
+                    "tags": ["tag_3", "tag_4"],
+                    "unique_id": "snapshot.package_name.snapshot_1",
+                },
+            ),
+            ["tag_1", "tag_2"],
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_snapshot_has_tags_any(snapshot, tags, expectation):
+    """Criteria is 'any'."""
+    with expectation:
+        CheckSnapshotHasTags(
+            snapshot=snapshot,
+            name="check_snapshot_has_tags",
+            tags=tags,
+            criteria="any",
+        ).execute()
+
+
+@pytest.mark.parametrize(
+    ("snapshot", "tags", "expectation"),
+    [
+        # Snapshot has exactly one of the required tags - should pass
+        (
+            Nodes7(
+                **{
+                    "alias": "snapshot_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "config": {},
+                    "fqn": ["package_name", "snapshot_1", "snapshot_1"],
+                    "name": "snapshot_1",
+                    "original_file_path": "snapshots/snapshot_1.sql",
+                    "package_name": "package_name",
+                    "path": "snapshot_1.sql",
+                    "resource_type": "snapshot",
+                    "schema": "main",
+                    "tags": ["tag_1", "tag_3"],
+                    "unique_id": "snapshot.package_name.snapshot_1",
+                },
+            ),
+            ["tag_1", "tag_2"],
+            does_not_raise(),
+        ),
+        # Snapshot has multiple required tags - should fail
+        (
+            Nodes7(
+                **{
+                    "alias": "snapshot_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "config": {},
+                    "fqn": ["package_name", "snapshot_1", "snapshot_1"],
+                    "name": "snapshot_1",
+                    "original_file_path": "snapshots/snapshot_1.sql",
+                    "package_name": "package_name",
+                    "path": "snapshot_1.sql",
+                    "resource_type": "snapshot",
+                    "schema": "main",
+                    "tags": ["tag_1", "tag_2"],
+                    "unique_id": "snapshot.package_name.snapshot_1",
+                },
+            ),
+            ["tag_1", "tag_2"],
+            pytest.raises(AssertionError),
+        ),
+        # Snapshot has no required tags - should fail
+        (
+            Nodes7(
+                **{
+                    "alias": "snapshot_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "config": {},
+                    "fqn": ["package_name", "snapshot_1", "snapshot_1"],
+                    "name": "snapshot_1",
+                    "original_file_path": "snapshots/snapshot_1.sql",
+                    "package_name": "package_name",
+                    "path": "snapshot_1.sql",
+                    "resource_type": "snapshot",
+                    "schema": "main",
+                    "tags": [],
+                    "unique_id": "snapshot.package_name.snapshot_1",
+                },
+            ),
+            ["tag_1", "tag_2"],
+            pytest.raises(AssertionError),
+        ),
+        # Snapshot has no tags but only one required - should fail
+        (
+            Nodes7(
+                **{
+                    "alias": "snapshot_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "config": {},
+                    "fqn": ["package_name", "snapshot_1", "snapshot_1"],
+                    "name": "snapshot_1",
+                    "original_file_path": "snapshots/snapshot_1.sql",
+                    "package_name": "package_name",
+                    "path": "snapshot_1.sql",
+                    "resource_type": "snapshot",
+                    "schema": "main",
+                    "tags": [],
+                    "unique_id": "snapshot.package_name.snapshot_1",
+                },
+            ),
+            ["tag_1"],
+            pytest.raises(AssertionError),
+        ),
+        # Snapshot has exactly one required tag from single tag list - should pass
+        (
+            Nodes7(
+                **{
+                    "alias": "snapshot_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "config": {},
+                    "fqn": ["package_name", "snapshot_1", "snapshot_1"],
+                    "name": "snapshot_1",
+                    "original_file_path": "snapshots/snapshot_1.sql",
+                    "package_name": "package_name",
+                    "path": "snapshot_1.sql",
+                    "resource_type": "snapshot",
+                    "schema": "main",
+                    "tags": ["tag_1"],
+                    "unique_id": "snapshot.package_name.snapshot_1",
+                },
+            ),
+            ["tag_1"],
+            does_not_raise(),
+        ),
+        # Snapshot has tags but none of the required ones - should fail
+        (
+            Nodes7(
+                **{
+                    "alias": "snapshot_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "config": {},
+                    "fqn": ["package_name", "snapshot_1", "snapshot_1"],
+                    "name": "snapshot_1",
+                    "original_file_path": "snapshots/snapshot_1.sql",
+                    "package_name": "package_name",
+                    "path": "snapshot_1.sql",
+                    "resource_type": "snapshot",
+                    "schema": "main",
+                    "tags": ["tag_3", "tag_4"],
+                    "unique_id": "snapshot.package_name.snapshot_1",
+                },
+            ),
+            ["tag_1", "tag_2"],
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_snapshot_has_tags_one(snapshot, tags, expectation):
+    """Criteria is 'one'."""
+    with expectation:
+        CheckSnapshotHasTags(
+            snapshot=snapshot,
+            name="check_snapshot_has_tags",
+            tags=tags,
+            criteria="one",
         ).execute()
 
 
