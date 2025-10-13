@@ -24,7 +24,7 @@ CheckSnapshotNames.model_rebuild()
 
 
 @pytest.mark.parametrize(
-    ("snapshot", "tags", "expectation"),
+    ("snapshot", "tags", "criteria", "expectation"),
     [
         (
             Nodes7(
@@ -44,6 +44,7 @@ CheckSnapshotNames.model_rebuild()
                 },
             ),
             ["tag_1"],
+            "all",
             does_not_raise(),
         ),
         (
@@ -63,7 +64,8 @@ CheckSnapshotNames.model_rebuild()
                     "unique_id": "snapshot.package_name.snapshot_1",
                 },
             ),
-            ["tag_2"],
+            ["tag_1"],
+            "all",
             pytest.raises(AssertionError),
         ),
         (
@@ -79,21 +81,86 @@ CheckSnapshotNames.model_rebuild()
                     "path": "snapshot_1.sql",
                     "resource_type": "snapshot",
                     "schema": "main",
-                    "tags": [],
+                    "tags": ["tag_1"],
                     "unique_id": "snapshot.package_name.snapshot_1",
                 },
             ),
-            ["tag_1"],
+            ["tag_1", "tag_2"],
+            "any",
+            does_not_raise(),
+        ),
+        (
+            Nodes7(
+                **{
+                    "alias": "snapshot_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "config": {},
+                    "fqn": ["package_name", "snapshot_1", "snapshot_1"],
+                    "name": "snapshot_1",
+                    "original_file_path": "snapshots/snapshot_1.sql",
+                    "package_name": "package_name",
+                    "path": "snapshot_1.sql",
+                    "resource_type": "snapshot",
+                    "schema": "main",
+                    "tags": ["tag_3", "tag_4"],
+                    "unique_id": "snapshot.package_name.snapshot_1",
+                },
+            ),
+            ["tag_1", "tag_2"],
+            "any",
+            pytest.raises(AssertionError),
+        ),
+        (
+            Nodes7(
+                **{
+                    "alias": "snapshot_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "config": {},
+                    "fqn": ["package_name", "snapshot_1", "snapshot_1"],
+                    "name": "snapshot_1",
+                    "original_file_path": "snapshots/snapshot_1.sql",
+                    "package_name": "package_name",
+                    "path": "snapshot_1.sql",
+                    "resource_type": "snapshot",
+                    "schema": "main",
+                    "tags": ["tag_1", "tag_3"],
+                    "unique_id": "snapshot.package_name.snapshot_1",
+                },
+            ),
+            ["tag_1", "tag_2"],
+            "one",
+            does_not_raise(),
+        ),
+        (
+            Nodes7(
+                **{
+                    "alias": "snapshot_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "config": {},
+                    "fqn": ["package_name", "snapshot_1", "snapshot_1"],
+                    "name": "snapshot_1",
+                    "original_file_path": "snapshots/snapshot_1.sql",
+                    "package_name": "package_name",
+                    "path": "snapshot_1.sql",
+                    "resource_type": "snapshot",
+                    "schema": "main",
+                    "tags": ["tag_1", "tag_2"],
+                    "unique_id": "snapshot.package_name.snapshot_1",
+                },
+            ),
+            ["tag_1", "tag_2"],
+            "one",
             pytest.raises(AssertionError),
         ),
     ],
 )
-def test_check_snapshot_has_tags(snapshot, tags, expectation):
+def test_check_snapshot_has_tags(snapshot, tags, criteria, expectation):
     with expectation:
         CheckSnapshotHasTags(
             snapshot=snapshot,
             name="check_snapshot_has_tags",
             tags=tags,
+            criteria=criteria,
         ).execute()
 
 
