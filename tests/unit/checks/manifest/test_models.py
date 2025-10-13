@@ -1178,19 +1178,17 @@ def test_check_model_has_semi_colon(model, expectation):
 
 
 @pytest.mark.parametrize(
-    ("model", "tags", "expectation"),
+    ("model", "tags", "criteria", "expectation"),
     [
+        # ---- DEFAULT / ALL CRITERIA ----
+        # default behaves like "all"
         (
             Nodes4(
                 **{
                     "alias": "model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
                     "columns": {
-                        "col_1": {
-                            "index": 1,
-                            "name": "col_1",
-                            "type": "INTEGER",
-                        },
+                        "col_1": {"index": 1, "name": "col_1", "type": "INTEGER"}
                     },
                     "depends_on": {"nodes": []},
                     "fqn": ["package_name", "model_1"],
@@ -1205,6 +1203,7 @@ def test_check_model_has_semi_colon(model, expectation):
                 },
             ),
             ["tag_1"],
+            None,
             does_not_raise(),
         ),
         (
@@ -1213,11 +1212,7 @@ def test_check_model_has_semi_colon(model, expectation):
                     "alias": "model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
                     "columns": {
-                        "col_1": {
-                            "index": 1,
-                            "name": "col_1",
-                            "type": "INTEGER",
-                        },
+                        "col_1": {"index": 1, "name": "col_1", "type": "INTEGER"}
                     },
                     "depends_on": {"nodes": []},
                     "fqn": ["package_name", "model_1"],
@@ -1232,30 +1227,17 @@ def test_check_model_has_semi_colon(model, expectation):
                 },
             ),
             ["tag_1"],
+            None,
             pytest.raises(AssertionError),
         ),
-    ],
-)
-def test_check_model_has_tags_default(model, tags, expectation):
-    """Default criteria is 'all'."""
-    with expectation:
-        CheckModelHasTags(model=model, name="check_model_has_tags", tags=tags).execute()
-
-
-@pytest.mark.parametrize(
-    ("model", "tags", "expectation"),
-    [
+        # ---- CRITERIA = "all" ----
         (
             Nodes4(
                 **{
                     "alias": "model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
                     "columns": {
-                        "col_1": {
-                            "index": 1,
-                            "name": "col_1",
-                            "type": "INTEGER",
-                        },
+                        "col_1": {"index": 1, "name": "col_1", "type": "INTEGER"}
                     },
                     "depends_on": {"nodes": []},
                     "fqn": ["package_name", "model_1"],
@@ -1270,6 +1252,7 @@ def test_check_model_has_tags_default(model, tags, expectation):
                 },
             ),
             ["tag_1"],
+            "all",
             does_not_raise(),
         ),
         (
@@ -1278,11 +1261,7 @@ def test_check_model_has_tags_default(model, tags, expectation):
                     "alias": "model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
                     "columns": {
-                        "col_1": {
-                            "index": 1,
-                            "name": "col_1",
-                            "type": "INTEGER",
-                        },
+                        "col_1": {"index": 1, "name": "col_1", "type": "INTEGER"}
                     },
                     "depends_on": {"nodes": []},
                     "fqn": ["package_name", "model_1"],
@@ -1297,36 +1276,17 @@ def test_check_model_has_tags_default(model, tags, expectation):
                 },
             ),
             ["tag_1"],
+            "all",
             pytest.raises(AssertionError),
         ),
-    ],
-)
-def test_check_model_has_tags_all(model, tags, expectation):
-    """Criteria is 'all'."""
-    with expectation:
-        CheckModelHasTags(
-            model=model,
-            name="check_model_has_tags",
-            tags=tags,
-            criteria="all",
-        ).execute()
-
-
-@pytest.mark.parametrize(
-    ("model", "tags", "expectation"),
-    [
-        # Model has one of the required tags - should pass
+        # ---- CRITERIA = "any" ----
         (
             Nodes4(
                 **{
                     "alias": "model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
                     "columns": {
-                        "col_1": {
-                            "index": 1,
-                            "name": "col_1",
-                            "type": "INTEGER",
-                        },
+                        "col_1": {"index": 1, "name": "col_1", "type": "INTEGER"}
                     },
                     "depends_on": {"nodes": []},
                     "fqn": ["package_name", "model_1"],
@@ -1341,76 +1301,16 @@ def test_check_model_has_tags_all(model, tags, expectation):
                 },
             ),
             ["tag_1", "tag_2"],
+            "any",
             does_not_raise(),
         ),
-        # Model has multiple tags including one of the required - should pass
         (
             Nodes4(
                 **{
                     "alias": "model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
                     "columns": {
-                        "col_1": {
-                            "index": 1,
-                            "name": "col_1",
-                            "type": "INTEGER",
-                        },
-                    },
-                    "depends_on": {"nodes": []},
-                    "fqn": ["package_name", "model_1"],
-                    "name": "model_1",
-                    "original_file_path": "model_1.sql",
-                    "package_name": "package_name",
-                    "path": "staging/finance/model_1.sql",
-                    "resource_type": "model",
-                    "schema": "main",
-                    "tags": ["tag_1", "tag_3"],
-                    "unique_id": "model.package_name.model_1",
-                },
-            ),
-            ["tag_1", "tag_2"],
-            does_not_raise(),
-        ),
-        # Model has no tags - should fail
-        (
-            Nodes4(
-                **{
-                    "alias": "model_1",
-                    "checksum": {"name": "sha256", "checksum": ""},
-                    "columns": {
-                        "col_1": {
-                            "index": 1,
-                            "name": "col_1",
-                            "type": "INTEGER",
-                        },
-                    },
-                    "depends_on": {"nodes": []},
-                    "fqn": ["package_name", "model_1"],
-                    "name": "model_1",
-                    "original_file_path": "model_1.sql",
-                    "package_name": "package_name",
-                    "path": "staging/finance/model_1.sql",
-                    "resource_type": "model",
-                    "schema": "main",
-                    "tags": [],
-                    "unique_id": "model.package_name.model_1",
-                },
-            ),
-            ["tag_1", "tag_2"],
-            pytest.raises(AssertionError),
-        ),
-        # Model has tags but none of the required ones - should fail
-        (
-            Nodes4(
-                **{
-                    "alias": "model_1",
-                    "checksum": {"name": "sha256", "checksum": ""},
-                    "columns": {
-                        "col_1": {
-                            "index": 1,
-                            "name": "col_1",
-                            "type": "INTEGER",
-                        },
+                        "col_1": {"index": 1, "name": "col_1", "type": "INTEGER"}
                     },
                     "depends_on": {"nodes": []},
                     "fqn": ["package_name", "model_1"],
@@ -1425,36 +1325,17 @@ def test_check_model_has_tags_all(model, tags, expectation):
                 },
             ),
             ["tag_1", "tag_2"],
+            "any",
             pytest.raises(AssertionError),
         ),
-    ],
-)
-def test_check_model_has_tags_any(model, tags, expectation):
-    """Criteria is 'any'."""
-    with expectation:
-        CheckModelHasTags(
-            model=model,
-            name="check_model_has_tags",
-            tags=tags,
-            criteria="any",
-        ).execute()
-
-
-@pytest.mark.parametrize(
-    ("model", "tags", "expectation"),
-    [
-        # Model has exactly one of the required tags - should pass
+        # ---- CRITERIA = "one" ----
         (
             Nodes4(
                 **{
                     "alias": "model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
                     "columns": {
-                        "col_1": {
-                            "index": 1,
-                            "name": "col_1",
-                            "type": "INTEGER",
-                        },
+                        "col_1": {"index": 1, "name": "col_1", "type": "INTEGER"}
                     },
                     "depends_on": {"nodes": []},
                     "fqn": ["package_name", "model_1"],
@@ -1469,20 +1350,16 @@ def test_check_model_has_tags_any(model, tags, expectation):
                 },
             ),
             ["tag_1", "tag_2"],
+            "one",
             does_not_raise(),
         ),
-        # Model has multiple required tags - should fail
         (
             Nodes4(
                 **{
                     "alias": "model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
                     "columns": {
-                        "col_1": {
-                            "index": 1,
-                            "name": "col_1",
-                            "type": "INTEGER",
-                        },
+                        "col_1": {"index": 1, "name": "col_1", "type": "INTEGER"}
                     },
                     "depends_on": {"nodes": []},
                     "fqn": ["package_name", "model_1"],
@@ -1497,131 +1374,27 @@ def test_check_model_has_tags_any(model, tags, expectation):
                 },
             ),
             ["tag_1", "tag_2"],
-            pytest.raises(AssertionError),
-        ),
-        # Model has no required tags - should fail
-        (
-            Nodes4(
-                **{
-                    "alias": "model_1",
-                    "checksum": {"name": "sha256", "checksum": ""},
-                    "columns": {
-                        "col_1": {
-                            "index": 1,
-                            "name": "col_1",
-                            "type": "INTEGER",
-                        },
-                    },
-                    "depends_on": {"nodes": []},
-                    "fqn": ["package_name", "model_1"],
-                    "name": "model_1",
-                    "original_file_path": "model_1.sql",
-                    "package_name": "package_name",
-                    "path": "staging/finance/model_1.sql",
-                    "resource_type": "model",
-                    "schema": "main",
-                    "tags": [],
-                    "unique_id": "model.package_name.model_1",
-                },
-            ),
-            ["tag_1", "tag_2"],
-            pytest.raises(AssertionError),
-        ),
-        # Model has no tags but only one required - should fail
-        (
-            Nodes4(
-                **{
-                    "alias": "model_1",
-                    "checksum": {"name": "sha256", "checksum": ""},
-                    "columns": {
-                        "col_1": {
-                            "index": 1,
-                            "name": "col_1",
-                            "type": "INTEGER",
-                        },
-                    },
-                    "depends_on": {"nodes": []},
-                    "fqn": ["package_name", "model_1"],
-                    "name": "model_1",
-                    "original_file_path": "model_1.sql",
-                    "package_name": "package_name",
-                    "path": "staging/finance/model_1.sql",
-                    "resource_type": "model",
-                    "schema": "main",
-                    "tags": [],
-                    "unique_id": "model.package_name.model_1",
-                },
-            ),
-            ["tag_1"],
-            pytest.raises(AssertionError),
-        ),
-        # Model has exactly one required tag from single tag list - should pass
-        (
-            Nodes4(
-                **{
-                    "alias": "model_1",
-                    "checksum": {"name": "sha256", "checksum": ""},
-                    "columns": {
-                        "col_1": {
-                            "index": 1,
-                            "name": "col_1",
-                            "type": "INTEGER",
-                        },
-                    },
-                    "depends_on": {"nodes": []},
-                    "fqn": ["package_name", "model_1"],
-                    "name": "model_1",
-                    "original_file_path": "model_1.sql",
-                    "package_name": "package_name",
-                    "path": "staging/finance/model_1.sql",
-                    "resource_type": "model",
-                    "schema": "main",
-                    "tags": ["tag_1"],
-                    "unique_id": "model.package_name.model_1",
-                },
-            ),
-            ["tag_1"],
-            does_not_raise(),
-        ),
-        # Model has tags but none of the required ones - should fail
-        (
-            Nodes4(
-                **{
-                    "alias": "model_1",
-                    "checksum": {"name": "sha256", "checksum": ""},
-                    "columns": {
-                        "col_1": {
-                            "index": 1,
-                            "name": "col_1",
-                            "type": "INTEGER",
-                        },
-                    },
-                    "depends_on": {"nodes": []},
-                    "fqn": ["package_name", "model_1"],
-                    "name": "model_1",
-                    "original_file_path": "model_1.sql",
-                    "package_name": "package_name",
-                    "path": "staging/finance/model_1.sql",
-                    "resource_type": "model",
-                    "schema": "main",
-                    "tags": ["tag_3", "tag_4"],
-                    "unique_id": "model.package_name.model_1",
-                },
-            ),
-            ["tag_1", "tag_2"],
+            "one",
             pytest.raises(AssertionError),
         ),
     ],
 )
-def test_check_model_has_tags_one(model, tags, expectation):
-    """Criteria is 'one'."""
+def test_check_model_has_tags(model, tags, criteria, expectation):
+    """Test CheckModelHasTags for all criteria: default, all, any, and one."""
     with expectation:
-        CheckModelHasTags(
-            model=model,
-            name="check_model_has_tags",
-            tags=tags,
-            criteria="one",
-        ).execute()
+        if criteria:
+            CheckModelHasTags(
+                model=model,
+                name="check_model_has_tags",
+                tags=tags,
+                criteria=criteria,
+            ).execute()
+        else:
+            CheckModelHasTags(
+                model=model,
+                name="check_model_has_tags",
+                tags=tags,
+            ).execute()
 
 
 @pytest.mark.parametrize(

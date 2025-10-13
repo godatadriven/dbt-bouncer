@@ -7,7 +7,7 @@ from typing_extensions import Annotated
 
 from dbt_bouncer.utils import clean_path_str
 
- 
+
 def get_check_types(
     check_type: List[
         Literal["catalog_checks", "manifest_checks", "run_results_checks"]
