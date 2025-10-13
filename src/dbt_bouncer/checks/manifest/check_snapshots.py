@@ -16,9 +16,9 @@ class CheckSnapshotHasTags(BaseCheck):
     """Snapshots must have the specified tags.
 
     Parameters:
+        criteria: (Optional[Literal["any", "all", "one"]]): Whether the snapshot must have any, all, or exactly one of the specified tags. Default: `all`.
         snapshot (DbtBouncerSnapshotBase): The DbtBouncerSnapshotBase object to check.
         tags (List[str]): List of tags to check for.
-        criteria: (Optional[Literal["any", "all", "one"]]): Whether the snapshot must have any, all, or exactly one of the specified tags. Default: `all`.
 
     Other Parameters:
         description (Optional[str]): Description of what the check does and why it is implemented.
@@ -37,10 +37,10 @@ class CheckSnapshotHasTags(BaseCheck):
 
     """
 
+    criteria: Literal["any", "all", "one"] = Field(default="all")
     name: Literal["check_snapshot_has_tags"]
     snapshot: "DbtBouncerSnapshotBase" = Field(default=None)
     tags: List[str]
-    criteria: Literal["any", "all", "one"] = Field(default="all")
 
     def execute(self) -> None:
         """Execute the check."""

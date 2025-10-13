@@ -131,9 +131,9 @@ class CheckSourceHasTags(BaseCheck):
     """Sources must have the specified tags.
 
     Parameters:
+        criteria: (Optional[Literal["any", "all", "one"]]): Whether the source must have any, all, or exactly one of the specified tags. Default: `all`.
         source (DbtBouncerSource): The DbtBouncerSourceBase object to check.
         tags (List[str]): List of tags to check for.
-        criteria: (Optional[Literal["any", "all", "one"]]): Whether the source must have any, all, or exactly one of the specified tags. Default: `all`.
 
     Other Parameters:
         description (Optional[str]): Description of what the check does and why it is implemented.
@@ -152,10 +152,10 @@ class CheckSourceHasTags(BaseCheck):
 
     """
 
+    criteria: Literal["any", "all", "one"] = Field(default="all")
     name: Literal["check_source_has_tags"]
     source: "DbtBouncerSourceBase" = Field(default=None)
     tags: List[str]
-    criteria: Literal["any", "all", "one"] = Field(default="all")
 
     def execute(self) -> None:
         """Execute the check."""

@@ -550,9 +550,9 @@ class CheckModelHasTags(BaseCheck):
     """Models must have the specified tags.
 
     Parameters:
+        criteria: (Optional[Literal["any", "all", "one"]]): Whether the model must have any, all, or exactly one of the specified tags. Default: `any`.
         model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
         tags (List[str]): List of tags to check for.
-        criteria: (Optional[Literal["any", "all", "one"]]): Whether the model must have any, all, or exactly one of the specified tags. Default: `any`.
 
     Other Parameters:
         description (Optional[str]): Description of what the check does and why it is implemented.
@@ -571,10 +571,10 @@ class CheckModelHasTags(BaseCheck):
 
     """
 
+    criteria: Literal["any", "all", "one"] = Field(default="all")
     model: "DbtBouncerModelBase" = Field(default=None)
     name: Literal["check_model_has_tags"]
     tags: List[str]
-    criteria: Literal["any", "all", "one"] = Field(default="all")
 
     def execute(self) -> None:
         """Execute the check."""
