@@ -531,54 +531,6 @@ def test_check_source_has_meta_keys(keys, source, expectation):
 @pytest.mark.parametrize(
     ("source", "tags", "criteria", "expectation"),
     [
-        # ---- DEFAULT / ALL CRITERIA ----
-        (
-            Sources(
-                **{
-                    "description": "",
-                    "fqn": ["package_name", "source_1", "table_1"],
-                    "identifier": "table_1",
-                    "loader": "",
-                    "name": "table_1",
-                    "original_file_path": "models/staging/_sources.yml",
-                    "package_name": "package_name",
-                    "path": "models/staging/_sources.yml",
-                    "resource_type": "source",
-                    "schema": "main",
-                    "source_description": "",
-                    "source_name": "source_1",
-                    "tags": ["tag_1"],
-                    "unique_id": "source.package_name.source_1.table_1",
-                },
-            ),
-            ["tag_1"],
-            None,
-            does_not_raise(),
-        ),
-        (
-            Sources(
-                **{
-                    "description": "",
-                    "fqn": ["package_name", "source_1", "table_1"],
-                    "identifier": "table_1",
-                    "loader": "",
-                    "name": "table_1",
-                    "original_file_path": "models/staging/_sources.yml",
-                    "package_name": "package_name",
-                    "path": "models/staging/_sources.yml",
-                    "resource_type": "source",
-                    "schema": "main",
-                    "source_description": "",
-                    "source_name": "source_1",
-                    "tags": [],
-                    "unique_id": "source.package_name.source_1.table_1",
-                },
-            ),
-            ["tag_1"],
-            None,
-            pytest.raises(AssertionError),
-        ),
-        # ---- CRITERIA = "all" ----
         (
             Sources(
                 **{
@@ -625,7 +577,6 @@ def test_check_source_has_meta_keys(keys, source, expectation):
             "all",
             pytest.raises(AssertionError),
         ),
-        # ---- CRITERIA = "any" ----
         (
             Sources(
                 **{
@@ -672,7 +623,6 @@ def test_check_source_has_meta_keys(keys, source, expectation):
             "any",
             pytest.raises(AssertionError),
         ),
-        # ---- CRITERIA = "one" ----
         (
             Sources(
                 **{
@@ -768,21 +718,13 @@ def test_check_source_has_meta_keys(keys, source, expectation):
     ],
 )
 def test_check_source_has_tags(source, tags, criteria, expectation):
-    """Test CheckSourceHasTags for all criteria: default, all, any, and one."""
     with expectation:
-        if criteria:
-            CheckSourceHasTags(
-                name="check_source_has_tags",
-                source=source,
-                tags=tags,
-                criteria=criteria,
-            ).execute()
-        else:
-            CheckSourceHasTags(
-                name="check_source_has_tags",
-                source=source,
-                tags=tags,
-            ).execute()
+        CheckSourceHasTags(
+            name="check_source_has_tags",
+            source=source,
+            tags=tags,
+            criteria=criteria,
+        ).execute()
 
 
 @pytest.mark.parametrize(

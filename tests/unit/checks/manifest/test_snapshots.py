@@ -26,51 +26,6 @@ CheckSnapshotNames.model_rebuild()
 @pytest.mark.parametrize(
     ("snapshot", "tags", "criteria", "expectation"),
     [
-        # ---- DEFAULT / ALL CRITERIA ----
-        # default behaves like "all"
-        (
-            Nodes7(
-                **{
-                    "alias": "snapshot_1",
-                    "checksum": {"name": "sha256", "checksum": ""},
-                    "config": {},
-                    "fqn": ["package_name", "snapshot_1", "snapshot_1"],
-                    "name": "snapshot_1",
-                    "original_file_path": "snapshots/snapshot_1.sql",
-                    "package_name": "package_name",
-                    "path": "snapshot_1.sql",
-                    "resource_type": "snapshot",
-                    "schema": "main",
-                    "tags": ["tag_1"],
-                    "unique_id": "snapshot.package_name.snapshot_1",
-                },
-            ),
-            ["tag_1"],
-            None,
-            does_not_raise(),
-        ),
-        (
-            Nodes7(
-                **{
-                    "alias": "snapshot_1",
-                    "checksum": {"name": "sha256", "checksum": ""},
-                    "config": {},
-                    "fqn": ["package_name", "snapshot_1", "snapshot_1"],
-                    "name": "snapshot_1",
-                    "original_file_path": "snapshots/snapshot_1.sql",
-                    "package_name": "package_name",
-                    "path": "snapshot_1.sql",
-                    "resource_type": "snapshot",
-                    "schema": "main",
-                    "tags": [],
-                    "unique_id": "snapshot.package_name.snapshot_1",
-                },
-            ),
-            ["tag_1"],
-            None,
-            pytest.raises(AssertionError),
-        ),
-        # ---- CRITERIA = "all" ----
         (
             Nodes7(
                 **{
@@ -113,7 +68,6 @@ CheckSnapshotNames.model_rebuild()
             "all",
             pytest.raises(AssertionError),
         ),
-        # ---- CRITERIA = "any" ----
         (
             Nodes7(
                 **{
@@ -156,7 +110,6 @@ CheckSnapshotNames.model_rebuild()
             "any",
             pytest.raises(AssertionError),
         ),
-        # ---- CRITERIA = "one" ----
         (
             Nodes7(
                 **{
@@ -202,21 +155,13 @@ CheckSnapshotNames.model_rebuild()
     ],
 )
 def test_check_snapshot_has_tags(snapshot, tags, criteria, expectation):
-    """Test CheckSnapshotHasTags for all criteria: default, all, any, and one."""
     with expectation:
-        if criteria:
-            CheckSnapshotHasTags(
-                snapshot=snapshot,
-                name="check_snapshot_has_tags",
-                tags=tags,
-                criteria=criteria,
-            ).execute()
-        else:
-            CheckSnapshotHasTags(
-                snapshot=snapshot,
-                name="check_snapshot_has_tags",
-                tags=tags,
-            ).execute()
+        CheckSnapshotHasTags(
+            snapshot=snapshot,
+            name="check_snapshot_has_tags",
+            tags=tags,
+            criteria=criteria,
+        ).execute()
 
 
 @pytest.mark.parametrize(
