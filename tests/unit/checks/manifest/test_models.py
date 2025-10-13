@@ -1178,7 +1178,7 @@ def test_check_model_has_semi_colon(model, expectation):
 
 
 @pytest.mark.parametrize(
-    ("model", "tags", "expectation"),
+    ("model", "tags", "criteria", "expectation"),
     [
         (
             Nodes4(
@@ -1186,11 +1186,7 @@ def test_check_model_has_semi_colon(model, expectation):
                     "alias": "model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
                     "columns": {
-                        "col_1": {
-                            "index": 1,
-                            "name": "col_1",
-                            "type": "INTEGER",
-                        },
+                        "col_1": {"index": 1, "name": "col_1", "type": "INTEGER"}
                     },
                     "depends_on": {"nodes": []},
                     "fqn": ["package_name", "model_1"],
@@ -1205,6 +1201,7 @@ def test_check_model_has_semi_colon(model, expectation):
                 },
             ),
             ["tag_1"],
+            "all",
             does_not_raise(),
         ),
         (
@@ -1213,11 +1210,7 @@ def test_check_model_has_semi_colon(model, expectation):
                     "alias": "model_1",
                     "checksum": {"name": "sha256", "checksum": ""},
                     "columns": {
-                        "col_1": {
-                            "index": 1,
-                            "name": "col_1",
-                            "type": "INTEGER",
-                        },
+                        "col_1": {"index": 1, "name": "col_1", "type": "INTEGER"}
                     },
                     "depends_on": {"nodes": []},
                     "fqn": ["package_name", "model_1"],
@@ -1232,16 +1225,162 @@ def test_check_model_has_semi_colon(model, expectation):
                 },
             ),
             ["tag_1"],
+            "all",
+            pytest.raises(AssertionError),
+        ),
+        (
+            Nodes4(
+                **{
+                    "alias": "model_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "columns": {
+                        "col_1": {"index": 1, "name": "col_1", "type": "INTEGER"}
+                    },
+                    "depends_on": {"nodes": []},
+                    "fqn": ["package_name", "model_1"],
+                    "name": "model_1",
+                    "original_file_path": "model_1.sql",
+                    "package_name": "package_name",
+                    "path": "staging/finance/model_1.sql",
+                    "resource_type": "model",
+                    "schema": "main",
+                    "tags": ["tag_1", "tag_2"],
+                    "unique_id": "model.package_name.model_1",
+                },
+            ),
+            ["tag_1", "tag_2"],
+            "all",
+            does_not_raise(),
+        ),
+        (
+            Nodes4(
+                **{
+                    "alias": "model_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "columns": {
+                        "col_1": {"index": 1, "name": "col_1", "type": "INTEGER"}
+                    },
+                    "depends_on": {"nodes": []},
+                    "fqn": ["package_name", "model_1"],
+                    "name": "model_1",
+                    "original_file_path": "model_1.sql",
+                    "package_name": "package_name",
+                    "path": "staging/finance/model_1.sql",
+                    "resource_type": "model",
+                    "schema": "main",
+                    "tags": ["tag_1"],
+                    "unique_id": "model.package_name.model_1",
+                },
+            ),
+            ["tag_1", "tag_2"],
+            "all",
+            pytest.raises(AssertionError),
+        ),
+        (
+            Nodes4(
+                **{
+                    "alias": "model_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "columns": {
+                        "col_1": {"index": 1, "name": "col_1", "type": "INTEGER"}
+                    },
+                    "depends_on": {"nodes": []},
+                    "fqn": ["package_name", "model_1"],
+                    "name": "model_1",
+                    "original_file_path": "model_1.sql",
+                    "package_name": "package_name",
+                    "path": "staging/finance/model_1.sql",
+                    "resource_type": "model",
+                    "schema": "main",
+                    "tags": ["tag_1"],
+                    "unique_id": "model.package_name.model_1",
+                },
+            ),
+            ["tag_1", "tag_2"],
+            "any",
+            does_not_raise(),
+        ),
+        (
+            Nodes4(
+                **{
+                    "alias": "model_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "columns": {
+                        "col_1": {"index": 1, "name": "col_1", "type": "INTEGER"}
+                    },
+                    "depends_on": {"nodes": []},
+                    "fqn": ["package_name", "model_1"],
+                    "name": "model_1",
+                    "original_file_path": "model_1.sql",
+                    "package_name": "package_name",
+                    "path": "staging/finance/model_1.sql",
+                    "resource_type": "model",
+                    "schema": "main",
+                    "tags": ["tag_3", "tag_4"],
+                    "unique_id": "model.package_name.model_1",
+                },
+            ),
+            ["tag_1", "tag_2"],
+            "any",
+            pytest.raises(AssertionError),
+        ),
+        (
+            Nodes4(
+                **{
+                    "alias": "model_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "columns": {
+                        "col_1": {"index": 1, "name": "col_1", "type": "INTEGER"}
+                    },
+                    "depends_on": {"nodes": []},
+                    "fqn": ["package_name", "model_1"],
+                    "name": "model_1",
+                    "original_file_path": "model_1.sql",
+                    "package_name": "package_name",
+                    "path": "staging/finance/model_1.sql",
+                    "resource_type": "model",
+                    "schema": "main",
+                    "tags": ["tag_1", "tag_3"],
+                    "unique_id": "model.package_name.model_1",
+                },
+            ),
+            ["tag_1", "tag_2"],
+            "one",
+            does_not_raise(),
+        ),
+        (
+            Nodes4(
+                **{
+                    "alias": "model_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "columns": {
+                        "col_1": {"index": 1, "name": "col_1", "type": "INTEGER"}
+                    },
+                    "depends_on": {"nodes": []},
+                    "fqn": ["package_name", "model_1"],
+                    "name": "model_1",
+                    "original_file_path": "model_1.sql",
+                    "package_name": "package_name",
+                    "path": "staging/finance/model_1.sql",
+                    "resource_type": "model",
+                    "schema": "main",
+                    "tags": ["tag_1", "tag_2"],
+                    "unique_id": "model.package_name.model_1",
+                },
+            ),
+            ["tag_1", "tag_2"],
+            "one",
             pytest.raises(AssertionError),
         ),
     ],
 )
-def test_check_model_has_tags(model, tags, expectation):
+def test_check_model_has_tags(model, tags, criteria, expectation):
     with expectation:
         CheckModelHasTags(
             model=model,
             name="check_model_has_tags",
             tags=tags,
+            criteria=criteria,
         ).execute()
 
 
