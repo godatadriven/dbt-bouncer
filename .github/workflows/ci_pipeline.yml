@@ -55,12 +55,12 @@ jobs:
     unit-tests:
         needs: [pre-commit]
         runs-on: ${{ matrix.operating-system }}
-        permissions:
-            checks: write
-            contents: write
-            id-token: write
-            issues: write
-            pull-requests: write
+        # permissions:
+        #     checks: write
+        #     contents: write
+        #     id-token: write
+        #     issues: write
+        #     pull-requests: write
         strategy:
             fail-fast: false
             matrix:
@@ -94,15 +94,16 @@ jobs:
               if: matrix.operating-system != 'windows-latest'
               run: make test-unit | tee pytest-coverage.txt && exit ${PIPESTATUS[0]}
 
-            - name: Pytest coverage comment
-              if: matrix.python-version == '3.11' && matrix.operating-system != 'windows-latest'
-              uses: MishaKav/pytest-coverage-comment@main
-              with:
-                  github-token: ${{ github.token }}
-                  pytest-coverage-path: ./pytest-coverage.txt
-                  title: Coverage Report
-                  badge-title: Coverage
-                  junitxml-path: ./coverage.xml
+            # TODO: Fix permissions issue
+            # - name: Pytest coverage comment
+            #   if: matrix.python-version == '3.11' && matrix.operating-system != 'windows-latest'
+            #   uses: MishaKav/pytest-coverage-comment@main
+            #   with:
+            #       github-token: ${{ github.token }}
+            #       pytest-coverage-path: ./pytest-coverage.txt
+            #       title: Coverage Report
+            #       badge-title: Coverage
+            #       junitxml-path: ./coverage.xml
 
             - name: Run pytest (integration tests)
               if: matrix.operating-system != 'windows-latest'
