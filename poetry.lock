@@ -2264,14 +2264,14 @@ install = ["zstandard (>=0.21.0)"]
 
 [[package]]
 name = "pex"
-version = "2.59.1"
+version = "2.60.0"
 description = "The PEX packaging toolchain."
 optional = false
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,<3.15,>=2.7"
 groups = ["dev"]
 files = [
-    {file = "pex-2.59.1-py2.py3-none-any.whl", hash = "sha256:ce32c6e088889386d85f3c429c5483cdc9da60da87273e0d88c14c93b010d2d1"},
-    {file = "pex-2.59.1.tar.gz", hash = "sha256:b3708a32508b780da4d38527f3fed53ddc8ea1448d87a667a6d50bf235662328"},
+    {file = "pex-2.60.0-py2.py3-none-any.whl", hash = "sha256:d8cb245f005d7c7e76d84628ea47ccf221f90dc288f939169e3ff10bf4f9deea"},
+    {file = "pex-2.60.0.tar.gz", hash = "sha256:0acdb5a600477c71f686687805ced14aebee8d71a24878d19de3967590ac914c"},
 ]
 
 [package.extras]
