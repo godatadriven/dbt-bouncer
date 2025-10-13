@@ -552,7 +552,7 @@ class CheckModelHasTags(BaseCheck):
     Parameters:
         model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
         tags (List[str]): List of tags to check for.
-        criteria: (Optional[Literal["any", "all", "one"]]): Whether the model must have any, all, or exactlyone of the specified tags. Default: `any`.
+        criteria: (Optional[Literal["any", "all", "one"]]): Whether the model must have any, all, or exactly one of the specified tags. Default: `any`.
 
     Other Parameters:
         description (Optional[str]): Description of what the check does and why it is implemented.
