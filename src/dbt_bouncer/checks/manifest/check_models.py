@@ -35,6 +35,7 @@ class CheckModelAccess(BaseCheck):
         description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        materialization (Optional[Literal["ephemeral", "incremental", "table", "view"]]): Limit check to models with the specified materialization.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
@@ -78,6 +79,7 @@ class CheckModelCodeDoesNotContainRegexpPattern(BaseCheck):
         description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        materialization (Optional[Literal["ephemeral", "incremental", "table", "view"]]): Limit check to models with the specified materialization.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
@@ -116,6 +118,7 @@ class CheckModelContractsEnforcedForPublicModel(BaseCheck):
         description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        materialization (Optional[Literal["ephemeral", "incremental", "table", "view"]]): Limit check to models with the specified materialization.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
@@ -147,6 +150,7 @@ class CheckModelDependsOnMultipleSources(BaseCheck):
         description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        materialization (Optional[Literal["ephemeral", "incremental", "table", "view"]]): Limit check to models with the specified materialization.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
@@ -181,6 +185,7 @@ class CheckModelDescriptionContainsRegexPattern(BaseCheck):
         description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        materialization (Optional[Literal["ephemeral", "incremental", "table", "view"]]): Limit check to models with the specified materialization.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
@@ -215,6 +220,7 @@ class CheckModelDescriptionPopulated(BaseCheck):
         description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        materialization (Optional[Literal["ephemeral", "incremental", "table", "view"]]): Limit check to models with the specified materialization.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
@@ -245,8 +251,12 @@ class CheckModelDirectories(BaseCheck):
     Receives:
         model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
 
-    Raises:
-        AssertionError: If the model directory does not contain a permitted sub-directory.
+    Other Parameters:
+        description (Optional[str]): Description of what the check does and why it is implemented.
+        exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
+        include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        materialization (Optional[Literal["ephemeral", "incremental", "table", "view"]]): Limit check to models with the specified materialization.
+        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml
@@ -309,6 +319,7 @@ class CheckModelDocumentedInSameDirectory(BaseCheck):
         description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        materialization (Optional[Literal["ephemeral", "incremental", "table", "view"]]): Limit check to models with the specified materialization.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
@@ -352,6 +363,7 @@ class CheckModelGrantPrivilege(BaseCheck):
         description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        materialization (Optional[Literal["ephemeral", "incremental", "table", "view"]]): Limit check to models with the specified materialization.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
@@ -392,6 +404,7 @@ class CheckModelGrantPrivilegeRequired(BaseCheck):
         description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        materialization (Optional[Literal["ephemeral", "incremental", "table", "view"]]): Limit check to models with the specified materialization.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
@@ -425,6 +438,7 @@ class CheckModelHasContractsEnforced(BaseCheck):
         description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        materialization (Optional[Literal["ephemeral", "incremental", "table", "view"]]): Limit check to models with the specified materialization.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
@@ -457,6 +471,7 @@ class CheckModelHasMetaKeys(BaseCheck):
         description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        materialization (Optional[Literal["ephemeral", "incremental", "table", "view"]]): Limit check to models with the specified materialization.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
@@ -495,6 +510,7 @@ class CheckModelHasNoUpstreamDependencies(BaseCheck):
         description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        materialization (Optional[Literal["ephemeral", "incremental", "table", "view"]]): Limit check to models with the specified materialization.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
@@ -525,6 +541,7 @@ class CheckModelHasSemiColon(BaseCheck):
         description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        materialization (Optional[Literal["ephemeral", "incremental", "table", "view"]]): Limit check to models with the specified materialization.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
@@ -558,6 +575,7 @@ class CheckModelHasTags(BaseCheck):
         description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        materialization (Optional[Literal["ephemeral", "incremental", "table", "view"]]): Limit check to models with the specified materialization.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
@@ -605,6 +623,7 @@ class CheckModelHasUniqueTest(BaseCheck):
         description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        materialization (Optional[Literal["ephemeral", "incremental", "table", "view"]]): Limit check to models with the specified materialization.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
@@ -673,6 +692,7 @@ class CheckModelHasUnitTests(BaseCheck):
         description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        materialization (Optional[Literal["ephemeral", "incremental", "table", "view"]]): Limit check to models with the specified materialization.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     !!! warning
@@ -730,6 +750,7 @@ class CheckModelLatestVersionSpecified(BaseCheck):
         description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        materialization (Optional[Literal["ephemeral", "incremental", "table", "view"]]): Limit check to models with the specified materialization.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
@@ -768,6 +789,7 @@ class CheckModelMaxChainedViews(BaseCheck):
         description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        materialization (Optional[Literal["ephemeral", "incremental", "table", "view"]]): Limit check to models with the specified materialization.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
@@ -880,6 +902,7 @@ class CheckModelMaxFanout(BaseCheck):
         description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        materialization (Optional[Literal["ephemeral", "incremental", "table", "view"]]): Limit check to models with the specified materialization.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
@@ -919,6 +942,7 @@ class CheckModelMaxNumberOfLines(BaseCheck):
         description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        materialization (Optional[Literal["ephemeral", "incremental", "table", "view"]]): Limit check to models with the specified materialization.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
@@ -962,6 +986,7 @@ class CheckModelMaxUpstreamDependencies(BaseCheck):
         description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        materialization (Optional[Literal["ephemeral", "incremental", "table", "view"]]): Limit check to models with the specified materialization.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
@@ -1019,6 +1044,7 @@ class CheckModelNames(BaseCheck):
         description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        materialization (Optional[Literal["ephemeral", "incremental", "table", "view"]]): Limit check to models with the specified materialization.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
@@ -1062,6 +1088,7 @@ class CheckModelNumberOfGrants(BaseCheck):
         description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        materialization (Optional[Literal["ephemeral", "incremental", "table", "view"]]): Limit check to models with the specified materialization.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
@@ -1102,6 +1129,7 @@ class CheckModelPropertyFileLocation(BaseCheck):
         description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        materialization (Optional[Literal["ephemeral", "incremental", "table", "view"]]): Limit check to models with the specified materialization.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
@@ -1164,6 +1192,7 @@ class CheckModelSchemaName(BaseCheck):
         description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        materialization (Optional[Literal["ephemeral", "incremental", "table", "view"]]): Limit check to models with the specified materialization.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
@@ -1208,6 +1237,7 @@ class CheckModelVersionAllowed(BaseCheck):
         description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        materialization (Optional[Literal["ephemeral", "incremental", "table", "view"]]): Limit check to models with the specified materialization.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
@@ -1252,6 +1282,7 @@ class CheckModelVersionPinnedInRef(BaseCheck):
         description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        materialization (Optional[Literal["ephemeral", "incremental", "table", "view"]]): Limit check to models with the specified materialization.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):

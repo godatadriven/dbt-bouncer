@@ -150,6 +150,11 @@ manifest_checks:
   - name: check_model_schema_name
     include: ^models/staging
     schema_name_pattern: .*stg_.*
+  - name: check_model_names
+    description: Most model checks include the ability to filter by materilization, this is an example of how this is done.
+    include: ^models/intermediate
+    materialization: ephemeral
+    model_name_pattern: ^int_
 
   # Semantic models
   - name: check_semantic_model_based_on_non_public_models
