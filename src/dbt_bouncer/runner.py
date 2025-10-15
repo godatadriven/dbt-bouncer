@@ -113,10 +113,14 @@ def runner(
             iterate_value = next(iter(iterate_over_value))
             for i in locals()[f"{iterate_value}s"]:
                 check_i = copy.deepcopy(check)
-                if resource_in_path(check_i, i) or (
-                    iterate_over_value == {"model"}
-                    and check_i.materialization
-                    and check_i.materialization == i.model.config.materialized
+                if resource_in_path(check_i, i) and (
+                    iterate_over_value != {"model"}
+                    or (
+                        iterate_over_value == {"model"}
+                        and check_i.materialization == i.model.config.materialized
+                        if check_i.materialization is not None
+                        else True
+                    )
                 ):
                     check_run_id = (
                         f"{check_i.name}:{check_i.index}:{i.unique_id.split('.')[-1]}"
