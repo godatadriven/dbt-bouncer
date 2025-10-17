@@ -36,6 +36,12 @@ class BaseCheck(BaseModel):
         default=None,
         description="Index to uniquely identify the check, calculated at runtime.",
     )
+    materialization: Optional[Literal["ephemeral", "incremental", "table", "view"]] = (
+        Field(
+            default=None,
+            description="Limit check to models with the specified materialization.",
+        )
+    )
     severity: Optional[Literal["error", "warn"]] = Field(
         default="error",
         description="Severity of the check, one of 'error' or 'warn'.",

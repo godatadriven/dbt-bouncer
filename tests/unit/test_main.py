@@ -587,9 +587,92 @@ def test_cli_include(tmp_path):
         )
 
 
+@pytest.mark.parametrize(
+    ("manifest_check", "num_checks"),
+    [
+        (
+            {
+                "access": "protected",
+                "name": "check_model_access",
+            },
+            10,
+        ),
+        (
+            {
+                "access": "protected",
+                "materialization": "view",
+                "name": "check_model_access",
+            },
+            4,
+        ),
+        (
+            {
+                "access": "protected",
+                "materialization": "ephemeral",
+                "name": "check_model_access",
+            },
+            2,
+        ),
+        (
+            {
+                "access": "protected",
+                "include": "^models/intermediate",
+                "materialization": "ephemeral",
+                "name": "check_model_access",
+            },
+            2,
+        ),
+        (
+            {
+                "access": "protected",
+                "include": "^models/intermediate",
+                "materialization": "table",
+                "name": "check_model_access",
+            },
+            0,
+        ),
+    ],
+)
+def test_cli_materialization(manifest_check, num_checks, tmp_path):
+    # Config file
+    bouncer_config = {
+        "dbt_artifacts_dir": ".",
+        "manifest_checks": [
+            manifest_check,
+        ],
+    }
+
+    with Path(tmp_path / "dbt-bouncer.yml").open("w") as f:
+        yaml.dump(bouncer_config, f)
+
+    # Manifest file
+    with Path.open(Path("./dbt_project/target/manifest.json"), "r") as f:
+        manifest = json.load(f)
+
+    with Path.open(tmp_path / "manifest.json", "w") as f:
+        json.dump(manifest, f)
+
+    # Run dbt-bouncer
+    runner = CliRunner()
+    runner.invoke(
+        cli,
+        [
+            "--config-file",
+            Path(tmp_path / "dbt-bouncer.yml").__str__(),
+            "--output-file",
+            tmp_path / "coverage.json",
+        ],
+    )
+
+    with Path.open(tmp_path / "coverage.json", "r") as f:
+        coverage = json.load(f)
+
+    assert len(coverage) == num_checks
+
+
 NUM_CATALOG_CHECKS = 1
 NUM_MANIFEST_CHECKS = 3
-NUM_RUN_RESULTS_CHECKS = 43
+NUM_RUN_RESULTS_CHECKS = 50
 
 
 @pytest.mark.parametrize(
