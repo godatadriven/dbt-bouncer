@@ -1,0 +1,13 @@
+version: 2
+
+models:
+  - name: int_incremental
+    config:
+      meta:
+        maturity: lead
+    description: Incremental model so we can test incremental settings.
+    columns:
+      - name: id
+        tests:
+          - not_null
+          - unique
