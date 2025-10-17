@@ -85,6 +85,11 @@ manifest_checks:
   - name: check_model_code_does_not_contain_regexp_pattern
     regexp_pattern: .*[i][f][n][u][l][l].*
   - name: check_model_contract_enforced_for_public_model
+  - name: check_model_depends_on_macros
+    description: Incremental models must use the `is_incremental` macro.
+    required_macros:
+      - dbt.is_incremental
+    materialization: incremental
   - name: check_model_depends_on_multiple_sources
   - name: check_model_description_contains_regex_pattern
     include: ^models/marts/finance/customers

@@ -20,10 +20,12 @@ with warnings.catch_warnings():
         DbtBouncerTestBase,
     )
 
+
 from dbt_bouncer.checks.manifest.check_models import (
     CheckModelAccess,
     CheckModelCodeDoesNotContainRegexpPattern,
     CheckModelContractsEnforcedForPublicModel,
+    CheckModelDependsOnMacros,
     CheckModelDependsOnMultipleSources,
     CheckModelDescriptionContainsRegexPattern,
     CheckModelDescriptionPopulated,
@@ -56,6 +58,7 @@ from dbt_bouncer.checks.manifest.check_models import (
 CheckModelAccess.model_rebuild()
 CheckModelCodeDoesNotContainRegexpPattern.model_rebuild()
 CheckModelContractsEnforcedForPublicModel.model_rebuild()
+CheckModelDependsOnMacros.model_rebuild()
 CheckModelDependsOnMultipleSources.model_rebuild()
 CheckModelDescriptionPopulated.model_rebuild()
 CheckModelDescriptionContainsRegexPattern.model_rebuild()
@@ -236,6 +239,151 @@ def test_check_model_contract_enforced_for_public_model(model, expectation):
     with expectation:
         CheckModelContractsEnforcedForPublicModel(
             model=model, name="check_model_contract_enforced_for_public_model"
+        ).execute()
+
+
+@pytest.mark.parametrize(
+    ("model", "required_macros", "criteria", "expectation"),
+    [
+        (
+            Nodes4(
+                **{
+                    "unique_id": "model.package.model_1",
+                    "depends_on": {"macros": ["macro.dbt.is_incremental"]},
+                    "resource_type": "model",
+                    "path": "model_1.sql",
+                    "original_file_path": "model_1.sql",
+                    "package_name": "package",
+                    "name": "model_1",
+                    "schema": "schema",
+                    "alias": "model_1",
+                    "fqn": ["package", "model_1"],
+                    "checksum": {"name": "sha256", "checksum": "checksum"},
+                }
+            ),
+            ["dbt.is_incremental"],
+            "all",
+            does_not_raise(),
+        ),
+        (
+            Nodes4(
+                **{
+                    "unique_id": "model.package.model_1",
+                    "depends_on": {"macros": ["macro.dbt.is_incremental"]},
+                    "resource_type": "model",
+                    "path": "model_1.sql",
+                    "original_file_path": "model_1.sql",
+                    "package_name": "package",
+                    "name": "model_1",
+                    "schema": "schema",
+                    "alias": "model_1",
+                    "fqn": ["package", "model_1"],
+                    "checksum": {"name": "sha256", "checksum": "checksum"},
+                }
+            ),
+            ["dbt.is_incremental", "dbt.other_macro"],
+            "all",
+            pytest.raises(AssertionError),
+        ),
+        (
+            Nodes4(
+                **{
+                    "unique_id": "model.package.model_1",
+                    "depends_on": {
+                        "macros": [
+                            "macro.dbt.is_incremental",
+                            "macro.dbt.other_macro",
+                        ]
+                    },
+                    "resource_type": "model",
+                    "path": "model_1.sql",
+                    "original_file_path": "model_1.sql",
+                    "package_name": "package",
+                    "name": "model_1",
+                    "schema": "schema",
+                    "alias": "model_1",
+                    "fqn": ["package", "model_1"],
+                    "checksum": {"name": "sha256", "checksum": "checksum"},
+                }
+            ),
+            ["dbt.is_incremental"],
+            "any",
+            does_not_raise(),
+        ),
+        (
+            Nodes4(
+                **{
+                    "unique_id": "model.package.model_1",
+                    "depends_on": {"macros": ["macro.dbt.is_incremental"]},
+                    "resource_type": "model",
+                    "path": "model_1.sql",
+                    "original_file_path": "model_1.sql",
+                    "package_name": "package",
+                    "name": "model_1",
+                    "schema": "schema",
+                    "alias": "model_1",
+                    "fqn": ["package", "model_1"],
+                    "checksum": {"name": "sha256", "checksum": "checksum"},
+                }
+            ),
+            ["dbt.other_macro"],
+            "any",
+            pytest.raises(AssertionError),
+        ),
+        (
+            Nodes4(
+                **{
+                    "unique_id": "model.package.model_1",
+                    "depends_on": {"macros": ["macro.dbt.is_incremental"]},
+                    "resource_type": "model",
+                    "path": "model_1.sql",
+                    "original_file_path": "model_1.sql",
+                    "package_name": "package",
+                    "name": "model_1",
+                    "schema": "schema",
+                    "alias": "model_1",
+                    "fqn": ["package", "model_1"],
+                    "checksum": {"name": "sha256", "checksum": "checksum"},
+                }
+            ),
+            ["dbt.is_incremental", "dbt.other_macro"],
+            "one",
+            does_not_raise(),
+        ),
+        (
+            Nodes4(
+                **{
+                    "unique_id": "model.package.model_1",
+                    "depends_on": {
+                        "macros": [
+                            "macro.dbt.is_incremental",
+                            "macro.dbt.other_macro",
+                        ]
+                    },
+                    "resource_type": "model",
+                    "path": "model_1.sql",
+                    "original_file_path": "model_1.sql",
+                    "package_name": "package",
+                    "name": "model_1",
+                    "schema": "schema",
+                    "alias": "model_1",
+                    "fqn": ["package", "model_1"],
+                    "checksum": {"name": "sha256", "checksum": "checksum"},
+                }
+            ),
+            ["dbt.is_incremental", "dbt.other_macro"],
+            "one",
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_model_depends_on_macros(model, required_macros, criteria, expectation):
+    with expectation:
+        CheckModelDependsOnMacros(
+            model=model,
+            required_macros=required_macros,
+            criteria=criteria,
+            name="check_model_depends_on_macros",
         ).execute()
 
 
