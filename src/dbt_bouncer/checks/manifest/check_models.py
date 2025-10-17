@@ -140,6 +140,67 @@ class CheckModelContractsEnforcedForPublicModel(BaseCheck):
             )
 
 
+class CheckModelDependsOnMacros(BaseCheck):
+    """Models must depend on the specified macros.
+
+    Parameters:
+        criteria: (Optional[Literal["any", "all", "one"]]): Whether the model must depend on any, all, or exactly one of the specified macros. Default: `any`.
+        required_macros: (List[str]): List of macros the model must depend on. All macros must specify a namespace, e.g. `dbt.is_incremental`.
+
+    Receives:
+        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+
+    Other Parameters:
+        description (Optional[str]): Description of what the check does and why it is implemented.
+        exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
+        include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        materialization (Optional[Literal["ephemeral", "incremental", "table", "view"]]): Limit check to models with the specified materialization.
+        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_model_depends_on_macros
+              required_macros:
+                - dbt.is_incremental
+            - name: check_model_depends_on_macros
+              criteria: one
+              required_macros:
+                - my_package.sampler
+                - my_package.sampling
+        ```
+
+    """
+
+    criteria: Literal["any", "all", "one"] = Field(default="all")
+    model: "DbtBouncerModelBase" = Field(default=None)
+    name: Literal["check_model_depends_on_macros"]
+    required_macros: List[str]
+
+    def execute(self) -> None:
+        """Execute the check."""
+        upstream_macros = [
+            (".").join(m.split(".")[1:]) for m in self.model.depends_on.macros
+        ]
+        if self.criteria == "any":
+            assert any(macro in upstream_macros for macro in self.required_macros), (
+                f"`{get_clean_model_name(self.model.unique_id)}` does not depend on any of the required macros: {self.required_macros}."
+            )
+        elif self.criteria == "all":
+            missing_macros = [
+                macro for macro in self.required_macros if macro not in upstream_macros
+            ]
+            assert not missing_macros, (
+                f"`{get_clean_model_name(self.model.unique_id)}` is missing required macros: {missing_macros}."
+            )
+        elif self.criteria == "one":
+            assert (
+                sum(macro in upstream_macros for macro in self.required_macros) == 1
+            ), (
+                f"`{get_clean_model_name(self.model.unique_id)}` must depend on exactly one of the required macros: {self.required_macros}."
+            )
+
+
 class CheckModelDependsOnMultipleSources(BaseCheck):
     """Models cannot reference more than one source.
 
