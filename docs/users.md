@@ -11,6 +11,12 @@ To add your company:
 # Users
 
 <p>
+    <h3>Aurai</h3>
+    <img src="https://github.com/godatadriven/dbt-bouncer/raw/main/docs/assets/aurai_logo.png" width="500"/>
+</p>
+
+
+<p>
     <h3>Dataroots</h3>
     <img src="https://github.com/godatadriven/dbt-bouncer/raw/main/docs/assets/dataroots_logo.svg" width="500"/>
 </p>
