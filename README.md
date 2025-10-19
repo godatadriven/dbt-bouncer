@@ -103,6 +103,24 @@ All documentation can be found on `dbt-bouncer` [documentation website](https://
     | check_model_directories: | error    | AssertionError: `model` is located in `utilities`, this is not a valid sub-directory. |
     ```
 
+## Programmatic Usage
+
+`dbt-bouncer` can also be used programmatically.
+
+```python
+from pathlib import Path
+from dbt_bouncer import dbt_bouncer
+
+result = dbt_bouncer(
+    config_file=Path("dbt-bouncer.yml"),
+    create_pr_comment_file=False,
+    only="",
+    output_file=None,
+    show_all_failures=False,
+    verbosity=0,
+)
+```
+
 ## Reporting bugs and contributing code
 
 - Want to report a bug or request a feature? Let us know and open [an issue](https://github.com/godatadriven/dbt-bouncer/issues/new/choose).

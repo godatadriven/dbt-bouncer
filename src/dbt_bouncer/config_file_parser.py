@@ -9,14 +9,14 @@ from dbt_bouncer.utils import clean_path_str
 
 
 def get_check_types(
-    check_type: List[
-        Literal["catalog_checks", "manifest_checks", "run_results_checks"]
-    ],
+    check_type: Literal["catalog_checks", "manifest_checks", "run_results_checks"],
+    config_file_path: Path,
+    custom_checks_dir: str,
 ) -> List[Any]:
     """Get the check types from the check categories.
 
     Args:
-        check_type: List[Literal["catalog_checks", "manifest_checks", "run_results_checks"]]
+        check_type: Literal["catalog_checks", "manifest_checks", "run_results_checks"]
 
     Returns:
         List[str]: The check types.
@@ -29,7 +29,9 @@ def get_check_types(
             "class": getattr(x, x.__name__),
             "source_file": Path(clean_path_str(x.__file__)),
         }
-        for x in get_check_objects()
+        for x in get_check_objects(
+            config_file_path=config_file_path, custom_checks_dir=custom_checks_dir
+        )
     ]
     return List[  # type: ignore[misc, return-value]
         Annotated[
@@ -53,6 +55,9 @@ class DbtBouncerConfBase(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
+    config_file_path: Optional[Path] = Field(
+        default=None,
+    )
     custom_checks_dir: Optional[str] = Field(
         default=None,
         description="Path to a directory containing custom checks.",
@@ -83,9 +88,21 @@ class DbtBouncerConfAllCategories(DbtBouncerConfBase):
 
     model_config = ConfigDict(extra="forbid")
 
-    catalog_checks: get_check_types(check_type="catalog") = Field(default=[])  # type: ignore[valid-type]
-    manifest_checks: get_check_types(check_type="manifest") = Field(default=[])  # type: ignore[valid-type]
-    run_results_checks: get_check_types(check_type="run_results") = Field(default=[])  # type: ignore[valid-type]
+    catalog_checks: get_check_types(
+        check_type="catalog",
+        config_file_path=Path(),
+        custom_checks_dir="",
+    ) = Field(default=[])  # type: ignore[valid-type]
+    manifest_checks: get_check_types(
+        check_type="manifest",
+        config_file_path=Path(),
+        custom_checks_dir="",
+    ) = Field(default=[])  # type: ignore[valid-type]
+    run_results_checks: get_check_types(
+        check_type="run_results",
+        config_file_path=Path(),
+        custom_checks_dir="",
+    ) = Field(default=[])  # type: ignore[valid-type]
 
     custom_checks_dir: Optional[str] = Field(
         default=None,
@@ -98,8 +115,16 @@ class DbtBouncerConfCatalogManifest(DbtBouncerConfBase):
 
     model_config = ConfigDict(extra="forbid")
 
-    catalog_checks: get_check_types(check_type="catalog") = Field(default=[])  # type: ignore[valid-type]
-    manifest_checks: get_check_types(check_type="manifest") = Field(default=[])  # type: ignore[valid-type]
+    catalog_checks: get_check_types(
+        check_type="catalog",
+        config_file_path=Path(),
+        custom_checks_dir="",
+    ) = Field(default=[])  # type: ignore[valid-type]
+    manifest_checks: get_check_types(
+        check_type="manifest",
+        config_file_path=Path(),
+        custom_checks_dir="",
+    ) = Field(default=[])  # type: ignore[valid-type]
 
 
 class DbtBouncerConfCatalogOnly(DbtBouncerConfBase):
@@ -107,7 +132,11 @@ class DbtBouncerConfCatalogOnly(DbtBouncerConfBase):
 
     model_config = ConfigDict(extra="forbid")
 
-    catalog_checks: get_check_types(check_type="catalog") = Field(default=[])  # type: ignore[valid-type]
+    catalog_checks: get_check_types(
+        check_type="catalog",
+        config_file_path=Path(),
+        custom_checks_dir="",
+    ) = Field(default=[])  # type: ignore[valid-type]
 
 
 class DbtBouncerConfCatalogRunResults(DbtBouncerConfBase):
@@ -115,8 +144,16 @@ class DbtBouncerConfCatalogRunResults(DbtBouncerConfBase):
 
     model_config = ConfigDict(extra="forbid")
 
-    catalog_checks: get_check_types(check_type="catalog") = Field(default=[])  # type: ignore[valid-type]
-    run_results_checks: get_check_types(check_type="run_results") = Field(default=[])  # type: ignore[valid-type]
+    catalog_checks: get_check_types(
+        check_type="catalog",
+        config_file_path=Path(),
+        custom_checks_dir="",
+    ) = Field(default=[])  # type: ignore[valid-type]
+    run_results_checks: get_check_types(
+        check_type="run_results",
+        config_file_path=Path(),
+        custom_checks_dir="",
+    ) = Field(default=[])  # type: ignore[valid-type]
 
 
 class DbtBouncerConfManifestOnly(DbtBouncerConfBase):
@@ -124,7 +161,11 @@ class DbtBouncerConfManifestOnly(DbtBouncerConfBase):
 
     model_config = ConfigDict(extra="forbid")
 
-    manifest_checks: get_check_types(check_type="manifest") = Field(default=[])  # type: ignore[valid-type]
+    manifest_checks: get_check_types(
+        check_type="manifest",
+        config_file_path=Path(),
+        custom_checks_dir="",
+    ) = Field(default=[])  # type: ignore[valid-type]
 
 
 class DbtBouncerConfManifestRunResults(DbtBouncerConfBase):
@@ -132,8 +173,16 @@ class DbtBouncerConfManifestRunResults(DbtBouncerConfBase):
 
     model_config = ConfigDict(extra="forbid")
 
-    manifest_checks: get_check_types(check_type="manifest") = Field(default=[])  # type: ignore[valid-type]
-    run_results_checks: get_check_types(check_type="run_results") = Field(default=[])  # type: ignore[valid-type]
+    manifest_checks: get_check_types(
+        check_type="manifest",
+        config_file_path=Path(),
+        custom_checks_dir="",
+    ) = Field(default=[])  # type: ignore[valid-type]
+    run_results_checks: get_check_types(
+        check_type="run_results",
+        config_file_path=Path(),
+        custom_checks_dir="",
+    ) = Field(default=[])  # type: ignore[valid-type]
 
 
 class DbtBouncerConfRunResultsOnly(DbtBouncerConfBase):
@@ -141,4 +190,8 @@ class DbtBouncerConfRunResultsOnly(DbtBouncerConfBase):
 
     model_config = ConfigDict(extra="forbid")
 
-    run_results_checks: get_check_types(check_type="run_results") = Field(default=[])  # type: ignore[valid-type]
+    run_results_checks: get_check_types(
+        check_type="run_results",
+        config_file_path=Path(),
+        custom_checks_dir="",
+    ) = Field(default=[])  # type: ignore[valid-type]

@@ -67,8 +67,11 @@ def runner(
 
     """
     check_classes: List[Dict[str, Union[Any, str]]] = [
-        {"class": getattr(x, x.__name__), "source_file": x.__file__}
-        for x in get_check_objects()
+        {"class": getattr(x, x.__name__)}
+        for x in get_check_objects(
+            config_file_path=bouncer_config.config_file_path,
+            custom_checks_dir=bouncer_config.custom_checks_dir,
+        )
     ]
     for c in check_classes:
         locals()[c["class"].__name__] = c["class"]  # type: ignore[union-attr]
