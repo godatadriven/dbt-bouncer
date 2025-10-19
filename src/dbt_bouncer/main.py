@@ -8,7 +8,8 @@ from dbt_bouncer.logger import configure_console_logging
 from dbt_bouncer.version import version
 
 
-def dbt_bouncer(
+def main(
+    ctx: click.Context,
     config_file: PurePath,
     create_pr_comment_file: bool,
     only: str,
@@ -76,10 +77,14 @@ def dbt_bouncer(
 
     from dbt_bouncer.config_file_validator import validate_conf
 
+    ctx.obj = {
+        "config_file_path": config_file_path,
+        "custom_checks_dir": config_file_contents.get("custom_checks_dir"),
+    }
+
     bouncer_config = validate_conf(
         check_categories=check_categories,
-        config_file_contents=config_file_contents,
-        config_file_path=Path(config_file_path),
+        config_file_contents=dict(config_file_contents),
     )
     del config_file_contents
     logging.debug(f"{bouncer_config=}")
@@ -195,7 +200,8 @@ def cli(
     verbosity: int,
 ) -> None:
     """CLI entrypoint for dbt-bouncer."""
-    result = dbt_bouncer(
+    result = main(
+        ctx=ctx,
         config_file=config_file,
         create_pr_comment_file=create_pr_comment_file,
         only=only,

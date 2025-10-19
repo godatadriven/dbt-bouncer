@@ -109,9 +109,12 @@ All documentation can be found on `dbt-bouncer` [documentation website](https://
 
 ```python
 from pathlib import Path
-from dbt_bouncer import dbt_bouncer
+import click
+from dbt_bouncer.main import main
 
-result = dbt_bouncer(
+ctx = click.Context(click.Command("dbt-bouncer"))
+result = main(
+    ctx=ctx,
     config_file=Path("dbt-bouncer.yml"),
     create_pr_comment_file=False,
     only="",

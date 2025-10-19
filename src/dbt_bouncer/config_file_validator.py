@@ -195,7 +195,6 @@ def load_config_file_contents(
 def validate_conf(
     check_categories,  #: List[Literal["catalog_checks"], Literal["manifest_checks"], Literal["run_results_checks"]],
     config_file_contents: Dict[str, Any],
-    config_file_path: Path,
 ) -> "DbtBouncerConf":
     """Validate the configuration and return the Pydantic model.
 
@@ -206,29 +205,58 @@ def validate_conf(
         DbtBouncerConf: The validated configuration.
 
     """
-    if TYPE_CHECKING:
-        from dbt_bouncer.config_file_parser import (
-            DbtBouncerConfAllCategories as DbtBouncerConf,
-        )
     logging.info("Validating conf...")
 
     # Rebuild the model to ensure all fields are present
+    from dbt_bouncer.checks.common import NestedDict  # noqa: F401
 
     if "catalog_checks" in check_categories:
         import warnings
 
+        from dbt_bouncer.artifact_parsers.parsers_catalog import (  # noqa: F401
+            DbtBouncerCatalogNode,
+        )
+        from dbt_bouncer.artifact_parsers.parsers_manifest import (
+            DbtBouncerModelBase,
+            DbtBouncerSnapshotBase,
+            DbtBouncerSourceBase,
+            DbtBouncerTestBase,
+        )
+
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=UserWarning)
+            from dbt_artifacts_parser.parsers.catalog.catalog_v1 import (
+                Nodes as CatalogNodes,  # noqa: F401
+            )
     if "manifest_checks" in check_categories:
-        pass
+        from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
+            Exposures,  # noqa: F401
+            Macros,  # noqa: F401
+            UnitTests,  # noqa: F401
+        )
+        from dbt_bouncer.artifact_parsers.parsers_manifest import (  # noqa: F401
+            DbtBouncerExposureBase,
+            DbtBouncerManifest,
+            DbtBouncerModel,
+            DbtBouncerModelBase,
+            DbtBouncerSemanticModel,
+            DbtBouncerSemanticModelBase,
+            DbtBouncerSnapshot,
+            DbtBouncerSnapshotBase,
+            DbtBouncerSource,
+            DbtBouncerSourceBase,
+            DbtBouncerTest,
+            DbtBouncerTestBase,
+        )
     if "run_results_checks" in check_categories:
-        pass
+        import dbt_bouncer.checks.run_results  # noqa: F401
+        from dbt_bouncer.artifact_parsers.parsers_run_results import (  # noqa: F401
+            DbtBouncerRunResult,
+            DbtBouncerRunResultBase,
+        )
 
-    DbtBouncerConf = conf_cls_factory(check_categories=check_categories)
-    DbtBouncerConf(
-        config_file_path=config_file_path,
-        custom_checks_dir=config_file_contents.get("custom_checks_dir"),
-    ).model_rebuild()
+    DbtBouncerConf = conf_cls_factory(check_categories=check_categories)  # noqa: N806
+    DbtBouncerConf().model_rebuild()
 
     try:
         return DbtBouncerConf(**config_file_contents)
@@ -251,7 +279,6 @@ def validate_conf(
                     error["msg"].find("tags:") + 7 : -1
                 ].split("', '")
                 min_dist = 100
-                min_name = ""
                 for name in accepted_names:
                     dist = distance(name, incorrect_name)
                     if dist < min_dist:
