@@ -23,7 +23,12 @@ To add your company:
 
 <p>
     <h3>Nationale Loterij</h3>
-    <img src="https://www.nationale-loterij.be/content/dam/opp/corporate/logos/national-lottery/manual-fix-8pt-nl-logo-new.svg" width="500"/>
+    <img src="https://github.com/godatadriven/dbt-bouncer/raw/main/docs/assets/nationale_loterij_logo.svg" width="500"/>
+</p>
+
+<p>
+    <h3>Tiqets</h3>
+    <img src="https://github.com/godatadriven/dbt-bouncer/raw/main/docs/assets/tiqets_logo.png" width="500"/>
 </p>
 
 <p>
