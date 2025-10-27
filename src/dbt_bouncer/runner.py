@@ -51,6 +51,7 @@ def runner(
     output_file: Union[Path, None],
     run_results: List["DbtBouncerRunResult"],
     semantic_models: List["DbtBouncerSemanticModel"],
+    output_only_failures: bool,
     show_all_failures: bool,
     snapshots: List["DbtBouncerSnapshot"],
     sources: List["DbtBouncerSource"],
@@ -252,9 +253,15 @@ def runner(
     if output_file is not None:
         coverage_file = Path().cwd() / output_file
         logging.info(f"Saving coverage file to `{coverage_file}`.")
+
+        if output_only_failures:
+            results_to_save = [r for r in results if r["outcome"] == "failed"]
+        else:
+            results_to_save = results
+
         with Path.open(coverage_file, "w") as f:
             json.dump(
-                results,
+                results_to_save,
                 f,
             )
 
