@@ -39,6 +39,11 @@ from dbt_bouncer.version import version
     type=Path,
 )
 @click.option(
+    "--output-only-failures",
+    help="If passed then only failures will be included in the output file.",
+    is_flag=True,
+)
+@click.option(
     "--show-all-failures",
     help="If passed then all failures will be printed to the console.",
     is_flag=True,
@@ -52,6 +57,7 @@ def cli(
     create_pr_comment_file: bool,
     only: str,
     output_file: Union[Path, None],
+    output_only_failures: bool,
     show_all_failures: bool,
     verbosity: int,
 ) -> None:
@@ -181,6 +187,7 @@ def cli(
         manifest_obj=manifest_obj,
         models=project_models,
         output_file=output_file,
+        output_only_failures=output_only_failures,
         run_results=project_run_results,
         semantic_models=project_semantic_models,
         show_all_failures=show_all_failures,
