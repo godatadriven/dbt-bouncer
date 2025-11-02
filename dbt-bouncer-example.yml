@@ -40,6 +40,7 @@ catalog_checks:
 
 manifest_checks:
   # Exposures
+  - name: check_exposure_based_on_model
   - name: check_exposure_based_on_non_public_models
   - name: check_exposure_based_on_view
 
