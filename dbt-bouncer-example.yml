@@ -29,6 +29,9 @@ catalog_checks:
   - name: check_column_name_complies_to_column_type
     column_name_pattern: ^[a-z_]*$
     type_pattern: ^(?!STRUCT) # No STRUCT data types allowed
+  - name: check_column_names
+    column_name_pattern: >
+      [a-z_]*
   - name: check_column_has_specified_test
     column_name_pattern: ^is_.*
     test_name: not_null

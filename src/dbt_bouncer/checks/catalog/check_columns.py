@@ -3,6 +3,8 @@
 import re
 from typing import TYPE_CHECKING, List, Literal, Optional
 
+from pydantic import ConfigDict, Field
+
 if TYPE_CHECKING:
     import warnings
 
@@ -16,7 +18,7 @@ if TYPE_CHECKING:
         DbtBouncerTestBase,
     )
 
-from pydantic import Field, model_validator
+from pydantic import model_validator
 
 from dbt_bouncer.check_base import BaseCheck
 
@@ -130,7 +132,7 @@ class CheckColumnHasSpecifiedTest(BaseCheck):
 class CheckColumnNameCompliesToColumnType(BaseCheck):
     """Columns with the specified regexp naming pattern must have data types that comply to the specified regexp pattern or list of data types.
 
-    Note: Oe of `type_pattern` or `types` must be specified.
+    Note: One of `type_pattern` or `types` must be specified.
 
     Parameters:
         column_name_pattern (str): Regex pattern to match the model name.
@@ -226,6 +228,58 @@ class CheckColumnNameCompliesToColumnType(BaseCheck):
         if self.type_pattern is not None and self.types is not None:
             raise ValueError("Only one of 'type_pattern' or 'types' can be supplied.")
         return self
+
+
+class CheckColumnNames(BaseCheck):
+    """Columns must have a name that matches the supplied regex.
+
+    Parameters:
+        columns_name_pattern (str): Regexp the column name must match.
+
+    Receives:
+        catalog_node (CatalogNodes): The CatalogNodes object to check.
+        models (List[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
+
+    Other Parameters:
+        description (Optional[str]): Description of what the check does and why it is implemented.
+        exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
+        include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        materialization (Optional[Literal["ephemeral", "incremental", "table", "view"]]): Limit check to models with the specified materialization.
+        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        catalog_checks:
+            - name: check_column_names
+              column_name_pattern: [a-z_] # Lowercase only, underscores allowed
+        ```
+
+    """
+
+    model_config = ConfigDict(extra="forbid", protected_namespaces=())
+
+    catalog_node: "CatalogNodes" = Field(default=None)
+    column_name_pattern: str
+    models: List["DbtBouncerModelBase"] = Field(default=[])
+    name: Literal["check_column_names"]
+
+    def execute(self) -> None:
+        """Execute the check."""
+        if self.is_catalog_node_a_model(self.catalog_node, self.models):
+            non_complying_columns: List[str] = []
+            non_complying_columns.extend(
+                v.name
+                for _, v in self.catalog_node.columns.items()
+                if re.fullmatch(self.column_name_pattern.strip(), v.name) is None
+            )
+
+            import logging
+
+            logging.error(f"{non_complying_columns}")
+
+            assert not non_complying_columns, (
+                f"`{self.catalog_node.unique_id.split('.')[-1]}` has columns ({non_complying_columns}) that do not match the supplied regex: `{self.column_name_pattern.strip()}`."
+            )
 
 
 class CheckColumnsAreAllDocumented(BaseCheck):
