@@ -8,3 +8,12 @@ exposures:
     owner:
       name: Anna Anderson
       email: anna.anderson@example.com
+
+  - name: Pulse queries
+    type: notebook
+    depends_on:
+      - ref('customers')
+      - ref('orders')
+    owner:
+      name: Jacky Jackson
+      email: jacky.jackson@example.com

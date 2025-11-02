@@ -4,6 +4,7 @@ from contextlib import nullcontext as does_not_raise
 import pytest
 
 from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
+    Exposures,
     Nodes4,
     Nodes6,
     UnitTests,
@@ -13,6 +14,8 @@ with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
 
     from dbt_bouncer.artifact_parsers.parsers_manifest import (  # noqa: F401
+        DbtBouncerExposure,
+        DbtBouncerExposureBase,
         DbtBouncerManifest,
         DbtBouncerModel,
         DbtBouncerModelBase,
@@ -34,6 +37,7 @@ from dbt_bouncer.checks.manifest.check_models import (
     CheckModelGrantPrivilege,
     CheckModelGrantPrivilegeRequired,
     CheckModelHasContractsEnforced,
+    CheckModelHasExposure,
     CheckModelHasMetaKeys,
     CheckModelHasNoUpstreamDependencies,
     CheckModelHasSemiColon,
@@ -68,6 +72,7 @@ CheckModelDocumentedInSameDirectory.model_rebuild()
 CheckModelGrantPrivilege.model_rebuild()
 CheckModelGrantPrivilegeRequired.model_rebuild()
 CheckModelHasContractsEnforced.model_rebuild()
+CheckModelHasExposure.model_rebuild()
 CheckModelHasMetaKeys.model_rebuild()
 CheckModelHasNoUpstreamDependencies.model_rebuild()
 CheckModelHasSemiColon.model_rebuild()
@@ -831,6 +836,106 @@ def test_check_model_has_contracts_enforced(model, expectation):
     with expectation:
         CheckModelHasContractsEnforced(
             model=model, name="check_model_has_contracts_enforced"
+        ).execute()
+
+
+@pytest.mark.parametrize(
+    ("exposures", "model", "expectation"),
+    [
+        (
+            [
+                Exposures(
+                    **{
+                        "depends_on": {"nodes": ["model.package_name.model_1"]},
+                        "fqn": ["package_name", "marts", "finance", "exposure_1"],
+                        "name": "exposure_1",
+                        "original_file_path": "models/marts/finance/_exposures.yml",
+                        "owner": {
+                            "email": "anna.anderson@example.com",
+                            "name": "Anna Anderson",
+                        },
+                        "package_name": "package_name",
+                        "path": "marts/finance/_exposures.yml",
+                        "resource_type": "exposure",
+                        "type": "dashboard",
+                        "unique_id": "exposure.package_name.exposure_1",
+                    },
+                ),
+            ],
+            Nodes4(
+                **{
+                    "alias": "model_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                    },
+                    "depends_on": {"nodes": ["source.package_name.source_1"]},
+                    "fqn": ["package_name", "model_1"],
+                    "name": "model_1",
+                    "original_file_path": "model_1.sql",
+                    "package_name": "package_name",
+                    "path": "staging/finance/model_1.sql",
+                    "resource_type": "model",
+                    "schema": "main",
+                    "unique_id": "model.package_name.model_1",
+                },
+            ),
+            does_not_raise(),
+        ),
+        (
+            [
+                Exposures(
+                    **{
+                        "depends_on": {"nodes": ["model.package_name.model_2"]},
+                        "fqn": ["package_name", "marts", "finance", "exposure_1"],
+                        "name": "exposure_1",
+                        "original_file_path": "models/marts/finance/_exposures.yml",
+                        "owner": {
+                            "email": "anna.anderson@example.com",
+                            "name": "Anna Anderson",
+                        },
+                        "package_name": "package_name",
+                        "path": "marts/finance/_exposures.yml",
+                        "resource_type": "exposure",
+                        "type": "dashboard",
+                        "unique_id": "exposure.package_name.exposure_1",
+                    },
+                ),
+            ],
+            Nodes4(
+                **{
+                    "alias": "model_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                    },
+                    "depends_on": {"nodes": ["source.package_name.source_1"]},
+                    "fqn": ["package_name", "model_1"],
+                    "name": "model_1",
+                    "original_file_path": "model_1.sql",
+                    "package_name": "package_name",
+                    "path": "staging/finance/model_1.sql",
+                    "resource_type": "model",
+                    "schema": "main",
+                    "unique_id": "model.package_name.model_1",
+                },
+            ),
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_model_has_exposures(exposures, model, expectation):
+    with expectation:
+        CheckModelHasExposure(
+            exposures=exposures, model=model, name="check_model_has_exposure"
         ).execute()
 
 

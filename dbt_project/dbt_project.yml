@@ -24,6 +24,7 @@ models:
       schema: intermediate
     marts:
       access: public
+      materialized: table
       schema: marts
     staging:
       access: protected

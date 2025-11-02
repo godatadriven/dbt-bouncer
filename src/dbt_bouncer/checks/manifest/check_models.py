@@ -14,6 +14,7 @@ if TYPE_CHECKING:
         UnitTests,
     )
     from dbt_bouncer.artifact_parsers.parsers_common import (
+        DbtBouncerExposureBase,
         DbtBouncerManifest,
         DbtBouncerModelBase,
         DbtBouncerTestBase,
@@ -518,6 +519,49 @@ class CheckModelHasContractsEnforced(BaseCheck):
         """Execute the check."""
         assert self.model.contract.enforced is True, (
             f"`{get_clean_model_name(self.model.unique_id)}` does not have contracts enforced."
+        )
+
+
+class CheckModelHasExposure(BaseCheck):
+    """Models must have an exposure.
+
+    Receives:
+        exposures (List[DbtBouncerExposureBase]):  List of DbtBouncerExposureBase objects parsed from `manifest.json`.
+        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+
+    Other Parameters:
+        description (Optional[str]): Description of what the check does and why it is implemented.
+        exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
+        include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        materialization (Optional[Literal["ephemeral", "incremental", "table", "view"]]): Limit check to models with the specified materialization.
+        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_model_has_exposure
+              description: Ensure all marts are part of an exposure.
+              include: ^models/marts
+        ```
+
+    """
+
+    model_config = ConfigDict(extra="forbid", protected_namespaces=())
+
+    exposures: List["DbtBouncerExposureBase"] = Field(default=[])
+    model: "DbtBouncerModelBase" = Field(default=None)
+    name: Literal["check_model_has_exposure"]
+
+    def execute(self) -> None:
+        """Execute the check."""
+        has_exposure = False
+        for e in self.exposures:
+            for m in e.depends_on.nodes:
+                if m == self.model.unique_id:
+                    has_exposure = True
+
+        assert has_exposure, (
+            f"`{get_clean_model_name(self.model.unique_id)}` does not have an associated exposure."
         )
 
 
