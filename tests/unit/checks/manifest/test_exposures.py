@@ -9,12 +9,102 @@ from dbt_bouncer.artifact_parsers.parsers_manifest import (  # noqa: F401
     DbtBouncerModelBase,
 )
 from dbt_bouncer.checks.manifest.check_exposures import (
+    CheckExposureOnModel,
     CheckExposureOnNonPublicModels,
     CheckExposureOnView,
 )
 
+CheckExposureOnModel.model_rebuild()
 CheckExposureOnNonPublicModels.model_rebuild()
 CheckExposureOnView.model_rebuild()
+
+
+@pytest.mark.parametrize(
+    ("exposure", "maximum_number_of_models", "minimum_number_of_models", "expectation"),
+    [
+        (
+            Exposures(
+                **{
+                    "depends_on": {"nodes": ["model.package_name.model_1"]},
+                    "fqn": ["package_name", "marts", "finance", "exposure_1"],
+                    "name": "exposure_1",
+                    "original_file_path": "models/marts/finance/_exposures.yml",
+                    "owner": {
+                        "email": "anna.anderson@example.com",
+                        "name": "Anna Anderson",
+                    },
+                    "package_name": "package_name",
+                    "path": "marts/finance/_exposures.yml",
+                    "resource_type": "exposure",
+                    "type": "dashboard",
+                    "unique_id": "exposure.package_name.exposure_1",
+                },
+            ),
+            100,
+            1,
+            does_not_raise(),
+        ),
+        (
+            Exposures(
+                **{
+                    "depends_on": {
+                        "nodes": [
+                            "model.package_name.model_1",
+                            "model.package_name.model_2",
+                        ]
+                    },
+                    "fqn": ["package_name", "marts", "finance", "exposure_1"],
+                    "name": "exposure_1",
+                    "original_file_path": "models/marts/finance/_exposures.yml",
+                    "owner": {
+                        "email": "anna.anderson@example.com",
+                        "name": "Anna Anderson",
+                    },
+                    "package_name": "package_name",
+                    "path": "marts/finance/_exposures.yml",
+                    "resource_type": "exposure",
+                    "type": "dashboard",
+                    "unique_id": "exposure.package_name.exposure_1",
+                },
+            ),
+            1,
+            1,
+            pytest.raises(AssertionError),
+        ),
+        (
+            Exposures(
+                **{
+                    "depends_on": {"nodes": ["model.package_name.model_1"]},
+                    "fqn": ["package_name", "marts", "finance", "exposure_1"],
+                    "name": "exposure_1",
+                    "original_file_path": "models/marts/finance/_exposures.yml",
+                    "owner": {
+                        "email": "anna.anderson@example.com",
+                        "name": "Anna Anderson",
+                    },
+                    "package_name": "package_name",
+                    "path": "marts/finance/_exposures.yml",
+                    "resource_type": "exposure",
+                    "type": "dashboard",
+                    "unique_id": "exposure.package_name.exposure_1",
+                },
+            ),
+            100,
+            2,
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_exposure_based_on_model(
+    exposure, maximum_number_of_models, minimum_number_of_models, expectation
+):
+    with expectation:
+        CheckExposureOnModel(
+            exposure=exposure,
+            maximum_number_of_models=maximum_number_of_models,
+            minimum_number_of_models=minimum_number_of_models,
+            name="check_exposure_based_on_model",
+        ).execute()
 
 
 @pytest.mark.parametrize(

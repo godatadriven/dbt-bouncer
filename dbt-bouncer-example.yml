@@ -43,6 +43,7 @@ catalog_checks:
 
 manifest_checks:
   # Exposures
+  - name: check_exposure_based_on_model
   - name: check_exposure_based_on_non_public_models
   - name: check_exposure_based_on_view
 
@@ -120,6 +121,9 @@ manifest_checks:
     privilege: select
   - name: check_model_has_contracts_enforced
     include: ^models/marts
+  - name: check_model_has_exposure
+    include: ^models/marts/finance
+    exclude: ^models/marts/finance/customers_v1.sql
   - name: check_model_has_meta_keys
     keys:
       - maturity

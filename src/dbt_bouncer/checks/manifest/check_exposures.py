@@ -14,6 +14,53 @@ if TYPE_CHECKING:
     )
 
 
+class CheckExposureOnModel(BaseCheck):
+    """Exposures should depend on a model.
+
+    Parameters:
+        max_number_of_models (Optional[int]): The maximum number of models an exposure can depend on, defaults to 100.
+        min_number_of_models (Optional[int]): The minimum number of models an exposure can depend on, defaults to 1.
+
+    Receives:
+        exposure (DbtBouncerExposureBase): The DbtBouncerExposureBase object to check.
+
+    Other Parameters:
+        description (Optional[str]): Description of what the check does and why it is implemented.
+        exclude (Optional[str]): Regex pattern to match the exposure path (i.e the .yml file where the exposure is configured). Exposure paths that match the pattern will not be checked.
+        include (Optional[str]): Regex pattern to match the exposure path (i.e the .yml file where the exposure is configured). Only exposure paths that match the pattern will be checked.
+        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_exposure_based_on_model
+        ```
+        ```yaml
+        manifest_checks:
+            - name: check_exposure_based_on_model
+              maximum_number_of_models: 3
+              minimum_number_of_models: 1
+        ```
+
+    """
+
+    exposure: "DbtBouncerExposureBase" = Field(default=None)
+    maximum_number_of_models: int = Field(default=100)
+    minimum_number_of_models: int = Field(default=1)
+    name: Literal["check_exposure_based_on_model"]
+
+    def execute(self) -> None:
+        """Execute the check."""
+        number_of_upstream_models = len(self.exposure.depends_on.nodes)
+
+        assert self.minimum_number_of_models <= number_of_upstream_models, (
+            f"`{self.exposure.name}` is based on less models ({number_of_upstream_models}) than the minimum permitted ({self.minimum_number_of_models})."
+        )
+        assert number_of_upstream_models <= self.maximum_number_of_models, (
+            f"`{self.exposure.name}` is based on more models ({number_of_upstream_models}) than the maximum permitted ({self.maximum_number_of_models})."
+        )
+
+
 class CheckExposureOnNonPublicModels(BaseCheck):
     """Exposures should be based on public models only.
 
