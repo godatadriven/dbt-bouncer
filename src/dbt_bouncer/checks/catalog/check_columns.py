@@ -273,10 +273,6 @@ class CheckColumnNames(BaseCheck):
                 if re.fullmatch(self.column_name_pattern.strip(), v.name) is None
             )
 
-            import logging
-
-            logging.error(f"{non_complying_columns}")
-
             assert not non_complying_columns, (
                 f"`{self.catalog_node.unique_id.split('.')[-1]}` has columns ({non_complying_columns}) that do not match the supplied regex: `{self.column_name_pattern.strip()}`."
             )
