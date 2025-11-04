@@ -45,7 +45,7 @@ body:
       description: |
         examples:
           - **OS**: Ubuntu 20.04
-          - **Python**: 3.9.12 (`python3 --version`)
+          - **Python**: 3.10.5 (`python3 --version`)
           - **dbt-bouncer**: X.X.X (`dbt-bouncer --version`)
       value: |
         - OS:
