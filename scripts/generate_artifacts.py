@@ -14,7 +14,7 @@ def build_pex_file(dbt_version, pex_file_name):
             "run",
             "pex",
             "--interpreter-constraint",
-            ">=3.10,<3.14",
+            ">=3.11,<3.14",
             "--jobs",
             "128",
             "--max-install-jobs",

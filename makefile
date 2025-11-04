@@ -8,18 +8,16 @@ build-and-run-dbt-bouncer:
 build-artifacts:
 	poetry run python ./scripts/generate_artifacts.py
 
-build-pex:
-	poetry run pex . \
-		--interpreter-constraint ">=3.10,<3.14" \
+build-pex:# rapidfuzz constraint helps with dependency resolving
+	poetry run pex . 'rapidfuzz<3.14.0' \
+		--interpreter-constraint ">=3.11,<3.14" \
 		--jobs 128 \
 		--max-install-jobs 0 \
 		--output-file ./dist/dbt-bouncer.pex \
 		--pip-version 24.1 \
-		--platform macosx_11_0_x86_64-cp-3.10.16-cp310 \
 		--platform macosx_11_0_x86_64-cp-3.11.11-cp311 \
 		--platform macosx_11_0_x86_64-cp-3.12.8-cp312 \
 		--platform macosx_10_13_x86_64-cp-3.13.0-cp313 \
-		--platform manylinux2014_x86_64-cp-3.10.16-cp310 \
 		--platform manylinux2014_x86_64-cp-3.11.11-cp311 \
 		--platform manylinux2014_x86_64-cp-3.12.8-cp312 \
 		--platform manylinux2014_x86_64-cp-3.13.0-cp313 \
