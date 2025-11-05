@@ -112,6 +112,7 @@ manifest_checks:
       - crm
       - payments
   - name: check_model_documentation_coverage
+    min_model_documentation_coverage_pct: 90
   - name: check_model_documented_in_same_directory
   - name: check_model_grant_privilege
     include: ^models/marts

@@ -34,3 +34,13 @@ sources:
           owner: Annabelle
         tags:
           - example_tag
+      - name: Non_Comforming_Name
+        config:
+          meta:
+            dbt-bouncer:
+              skip_checks:
+                - check_source_description_populated
+                - check_source_has_meta_keys
+                - check_source_has_tags
+                - check_source_names
+              reason: This is a source that specifically tests for this feature.

@@ -9,7 +9,7 @@ import re
 import sys
 from functools import lru_cache
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, List, Mapping, Type
+from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Type
 
 import click
 import yaml
@@ -56,6 +56,39 @@ def create_github_comment_file(
     logging.info(f"Writing comment for GitHub to {comment_file}...")
     with Path.open(Path(comment_file), "w") as f:
         f.write(md_formatted_comment)
+
+
+def get_nested_value(
+    d: Dict[str, Any], keys: List[str], default: Optional[Any] = None
+) -> Any:
+    """Retrieve a value from a nested dictionary using a list of keys.
+
+    This function safely traverses a dictionary structure, allowing access to
+    deeply nested values. If any key in the `keys` list does not exist at
+    its respective level, the function returns the specified default value.
+
+    Args:
+        d: The dictionary to traverse.
+        keys: A list of strings representing the sequence of keys to follow
+              to reach the desired nested value.
+        default: The value to return if any key in the `keys` list is not
+                 found at its corresponding level, or if an intermediate
+                 value is not a dictionary. Defaults to None.
+
+    Returns:
+        The value found at the specified nested path, or the `default` value
+        if any part of the path is invalid or not found.
+
+    """
+    current_level = d
+    for key in keys:
+        if isinstance(current_level, dict):
+            current_level = current_level.get(key, default)  # type: ignore[assignment]
+            if current_level is default and key != keys[-1]:
+                return default
+        else:
+            return default
+    return current_level
 
 
 def resource_in_path(check, resource) -> bool:

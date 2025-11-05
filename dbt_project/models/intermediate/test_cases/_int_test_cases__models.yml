@@ -1,6 +1,19 @@
 version: 2
 
 models:
+  - name: int_exclude_via_meta_config
+    config:
+      meta:
+        dbt-bouncer:
+          skip_checks:
+            - check_model_description_populated
+            - check_model_has_meta_keys
+          reason: This is a model that specifically tests for this feature.
+    columns:
+      - name: id
+        tests:
+          - unique
+
   - name: int_incremental
     config:
       meta:

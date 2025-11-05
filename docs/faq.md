@@ -231,3 +231,41 @@ Alternatively, you can use a local hook to run automatically run `dbt-bouncer` b
       pass_filenames: false
       always_run: true
 ```
+
+## Can I skip specific checks for an exposure/model/source/etc.?
+
+Yes! Many dbt objects permit adding a `meta` config field ([docs](https://docs.getdbt.com/reference/resource-configs/meta)), this can be used to skip checks for the object. For example, for a model:
+
+```yaml
+models:
+  - name: my_model
+    config:
+      meta:
+        dbt-bouncer:
+          skip_checks:
+            - check_model_description_populated
+            - check_model_has_meta_keys
+          reason: We recommend documenting why these checks are being skipped.
+```
+
+And for a source:
+
+```yaml
+version: 2
+
+sources:
+  - name: source_system
+    tables:
+      - name: source_1
+        config:
+          meta:
+            dbt-bouncer:
+              skip_checks:
+                - check_source_description_populated
+                - check_source_has_meta_keys
+                - check_source_has_tags
+                - check_source_names
+              reason: We recommend documenting why these checks are being skipped.
+```
+
+Similar can be done for other objects that support the `meta` value.

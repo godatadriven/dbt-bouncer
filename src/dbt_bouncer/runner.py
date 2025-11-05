@@ -14,6 +14,7 @@ from tabulate import tabulate
 from dbt_bouncer.utils import (
     create_github_comment_file,
     get_check_objects,
+    get_nested_value,
     resource_in_path,
 )
 
@@ -114,14 +115,36 @@ def runner(
             iterate_value = next(iter(iterate_over_value))
             for i in locals()[f"{iterate_value}s"]:
                 check_i = copy.deepcopy(check)
+                if iterate_value in ["model", "semantic_model", "snapshot", "source"]:
+                    try:
+                        d = getattr(i, iterate_value).config.meta
+                    except Exception:
+                        d = getattr(i, iterate_value).meta
+                elif iterate_value in ["catalog_node", "run_result"]:
+                    d = {}
+                elif iterate_value in ["macro"]:
+                    d = i.meta
+                else:
+                    try:
+                        d = i.config.meta
+                    except Exception:
+                        d = i.meta
+                meta_config = get_nested_value(
+                    d,
+                    ["dbt-bouncer", "skip_checks"],
+                    [],
+                )
                 if resource_in_path(check_i, i) and (
-                    iterate_over_value != {"model"}
-                    or (
-                        iterate_over_value == {"model"}
-                        and check_i.materialization == i.model.config.materialized
-                        if check_i.materialization is not None
-                        else True
+                    (
+                        iterate_over_value != {"model"}
+                        or (
+                            iterate_over_value == {"model"}
+                            and check_i.materialization == i.model.config.materialized
+                            if check_i.materialization is not None
+                            else True
+                        )
                     )
+                    and (check_i.name not in meta_config if meta_config != [] else True)
                 ):
                     check_run_id = (
                         f"{check_i.name}:{check_i.index}:{i.unique_id.split('.')[-1]}"
