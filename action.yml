@@ -5,9 +5,18 @@ inputs:
     default: 'dbt-bouncer.yml'
     description: 'Location of the YML config file.'
     required: false
+  only:
+    default: ''
+    description: >-
+      Limit the checks run to specific categories, comma-separated. Examples: 'manifest_checks', 'catalog_checks,manifest_checks'.
+    required: false
   output-file:
     default: ''
     description: 'Name of the json file where check metadata will be saved.'
+    required: false
+  output-only-failures:
+    default: 'false'
+    description: If passed then only failures will be included in the output file.
     required: false
   send-pr-comment:
     default: 'true'
@@ -28,6 +37,16 @@ runs:
   using: composite
 
   steps:
+    - name: Assemble `only` parameter
+      id: assemble-only-param
+      shell: bash
+      run: >
+        if [[ "${{ inputs.only }}" = "" ]]; then
+          echo "only-param=" >> $GITHUB_OUTPUT
+        else
+          echo "only-param=--only ${{ inputs.only }}" >> $GITHUB_OUTPUT
+        fi
+
     - name: Assemble `output-file` parameter
       id: assemble-output-file-param
       shell: bash
@@ -36,6 +55,16 @@ runs:
           echo "output-file-param=" >> $GITHUB_OUTPUT
         else
           echo "output-file-param=--output-file /app/${{ inputs.output-file }}" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Assemble `output-only-failures` parameter
+      id: assemble-output-only-failures-param
+      shell: bash
+      run: >
+        if [[ "${{ inputs.output-only-failures }}" = "false" ]]; then
+          echo "output-only-failures-param=" >> $GITHUB_OUTPUT
+        else
+          echo "output-only-failures-param=-v" >> $GITHUB_OUTPUT
         fi
 
     - name: Assemble `show-all-failures` parameter
@@ -72,7 +101,7 @@ runs:
           ghcr.io/godatadriven/dbt-bouncer:v0.0.0 \
           --config-file /app/${{ inputs.config-file }} \
           --create-pr-comment-file ${{ inputs.send-pr-comment }} \
-          ${{ steps.assemble-output-file-param.outputs.output-file-param }} ${{ steps.assemble-show-all-failures-param.outputs.show-all-failures-param }} ${{ steps.assemble-verbose-param.outputs.verbose-param }}
+          ${{ steps.assemble-only-param.outputs.only-param }} ${{ steps.assemble-output-file-param.outputs.output-file-param }} ${{ steps.assemble-show-all-failures-param.outputs.show-all-failures-param }} $${{ steps.assemble-output-only-failures-param.outputs.output-only-failures-param }} {{ steps.assemble-verbose-param.outputs.verbose-param }}
 
     - name: Send PR comment
       if: always() && inputs.send-pr-comment == 'true' && steps.run-dbt-bouncer.outcome != 'success'
