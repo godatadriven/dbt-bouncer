@@ -30,6 +30,8 @@ jobs:
           - name: Setup Python
             uses: ./.github/actions/setup_python_env
 
+          - run: mv dbt-bouncer-example.yml dbt-bouncer.yml
+
           - name: Run dbt-bouncer
             uses: godatadriven/dbt-bouncer@v1.27.1a2
 
