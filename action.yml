@@ -64,7 +64,7 @@ runs:
         if [[ "${{ inputs.output-only-failures }}" = "false" ]]; then
           echo "output-only-failures-param=" >> $GITHUB_OUTPUT
         else
-          echo "output-only-failures-param=-v" >> $GITHUB_OUTPUT
+          echo "output-only-failures-param=--output-only-failures" >> $GITHUB_OUTPUT
         fi
 
     - name: Assemble `show-all-failures` parameter
@@ -74,7 +74,7 @@ runs:
         if [[ "${{ inputs.show-all-failures }}" = "false" ]]; then
           echo "show-all-failures-param=" >> $GITHUB_OUTPUT
         else
-          echo "show-all-failures-param=-v" >> $GITHUB_OUTPUT
+          echo "show-all-failures-param=--show-all-failures" >> $GITHUB_OUTPUT
         fi
 
     - name: Assemble `verbose` parameter
