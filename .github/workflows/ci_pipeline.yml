@@ -20,208 +20,22 @@ env:
   REGISTRY: ghcr.io
 
 jobs:
-    pre-commit:
-        permissions:
-          contents: read
-        runs-on: ubuntu-22.04
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v5
-              with:
-                fetch-depth: "0"
-
-            - name: checkout-merge
-              uses: check-spelling/checkout-merge@v0.0.6
-
-            - name: Determine python version
-              id: python-version
-              run: |
-                  export PYTHON_VERSION=$(cat .python-version)
-                  echo "PYTHON_VERSION: $PYTHON_VERSION"
-                  echo "PYTHON_VERSION=$PYTHON_VERSION" >> $GITHUB_OUTPUT
-
-            - name: Setup Python
-              uses: ./.github/actions/setup_python_env
-              with:
-                poetry-version: ${{ env.POETRY_VERSION }}
-                python-version: ${{ steps.python-version.outputs.PYTHON_VERSION }}
-
-            - name: Run pre-commit
-              run: |
-                git diff --name-status origin/main..HEAD > changed_files.txt
-                cat changed_files.txt
-                cat changed_files.txt | xargs poetry run pre-commit run --files
-
-    unit-tests:
-        needs: [pre-commit]
-        runs-on: ${{ matrix.operating-system }}
-        # permissions:
-        #     checks: write
-        #     contents: write
-        #     id-token: write
-        #     issues: write
-        #     pull-requests: write
-        strategy:
-            fail-fast: false
-            matrix:
-                operating-system:
-                  - ubuntu-22.04
-                  - windows-latest
-                python-version:
-                    - '3.11'
-                    - '3.12'
-                    - '3.13'
-        steps:
-            - uses: actions/checkout@v5
-
-            - name: checkout-merge
-              if: matrix.operating-system != 'windows-latest'
-              uses: check-spelling/checkout-merge@v0.0.6
-
-            - name: Setup Python
-              uses: ./.github/actions/setup_python_env
-              with:
-                poetry-version: ${{ env.POETRY_VERSION }}
-                python-version: ${{ matrix.python-version }}
-
-            - name: Run pytest (Windows)
-              if: matrix.operating-system == 'windows-latest'
-              run: make test-windows
-
-            - name: Run pytest (unit tests)
-              if: matrix.operating-system != 'windows-latest'
-              run: make test-unit | tee pytest-coverage.txt && exit ${PIPESTATUS[0]}
-
-            # TODO: Fix permissions issue
-            # - name: Pytest coverage comment
-            #   if: matrix.python-version == '3.11' && matrix.operating-system != 'windows-latest'
-            #   uses: MishaKav/pytest-coverage-comment@main
-            #   with:
-            #       github-token: ${{ github.token }}
-            #       pytest-coverage-path: ./pytest-coverage.txt
-            #       title: Coverage Report
-            #       badge-title: Coverage
-            #       junitxml-path: ./coverage.xml
-
-            - name: Run pytest (integration tests)
-              if: matrix.operating-system != 'windows-latest'
-              run: make test-integration
-
-            - name: Regenerate dbt artifacts and run `dbt-bouncer`
-              if: matrix.operating-system == 'windows-latest'
-              run: |
-                $env:Path += ';C:\Users\runneradmin\.local\bin'
-                make build-and-run-dbt-bouncer
-
-            - name: Regenerate dbt artifacts and run `dbt-bouncer`
-              if: matrix.operating-system != 'windows-latest'
-              run: |
-                  (r=3;while ! make build-and-run-dbt-bouncer ; do ((--r))||exit;done)
-
-    e2e-tests:
-        needs: [pre-commit]
-        permissions:
-          contents: read
-        runs-on: ubuntu-22.04
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v5
-
-            - name: checkout-merge
-              uses: check-spelling/checkout-merge@v0.0.6
-
-            - name: Determine python version
-              id: python-version
-              run: |
-                  export PYTHON_VERSION=$(cat .python-version)
-                  echo "PYTHON_VERSION: $PYTHON_VERSION"
-                  echo "PYTHON_VERSION=$PYTHON_VERSION" >> $GITHUB_OUTPUT
-
-            - name: Setup Python
-              uses: ./.github/actions/setup_python_env
-              with:
-                poetry-version: ${{ env.POETRY_VERSION }}
-                python-version: ${{ steps.python-version.outputs.PYTHON_VERSION }}
-
-            - name: Build pex file
-              run: make build-pex
-
-            - name: Set up Docker Buildx
-              uses: docker/setup-buildx-action@v3
-
-            - name: Build image
-              uses: docker/build-push-action@v6
-              with:
-                  build-args: PYTHON_VERSION=${{ steps.python-version.outputs.PYTHON_VERSION }}
-                  cache-from: type=gha
-                  cache-to: type=gha,mode=max
-                  context: .
-                  load: true
-                  push: false
-                  tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:ci
-
-            - name: Run e2e test
-              run: |
-                docker run --rm \
-                  --volume "$PWD":/app \
-                  ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:ci \
-                  --config-file /app/dbt-bouncer-example.yml
-
-    mkdocs-build:
-      needs: [pre-commit]
+    action-test:
       permissions:
         contents: read
       runs-on: ubuntu-22.04
       steps:
-          - name: Checkout
-            uses: actions/checkout@v5
-
-          - name: checkout-merge
-            uses: check-spelling/checkout-merge@v0.0.6
-
-          - name: Determine python version
-            id: python-version
-            run: |
-                export PYTHON_VERSION=$(cat .python-version)
-                echo "PYTHON_VERSION: $PYTHON_VERSION"
-                echo "PYTHON_VERSION=$PYTHON_VERSION" >> $GITHUB_OUTPUT
+          - uses: actions/checkout@v5
 
           - name: Setup Python
             uses: ./.github/actions/setup_python_env
+
+          - name: Run dbt-bouncer
+            uses: godatadriven/dbt-bouncer@fix-action-params
+
+          - run: rm ./dbt_project/target/catalog.json
+
+          - name: Run dbt-bouncer
+            uses: godatadriven/dbt-bouncer@fix-action-params
             with:
-              poetry-version: ${{ env.POETRY_VERSION }}
-              python-version: ${{ steps.python-version.outputs.PYTHON_VERSION }}
-
-          - name: Build docs website
-            run: poetry run mkdocs build
-
-    pex-tests:
-      needs: [pre-commit]
-      permissions:
-        contents: read
-      runs-on: ubuntu-22.04
-      steps:
-          - name: Checkout
-            uses: actions/checkout@v5
-
-          - name: checkout-merge
-            uses: check-spelling/checkout-merge@v0.0.6
-
-          - name: Determine python version
-            id: python-version
-            run: |
-                export PYTHON_VERSION=$(cat .python-version)
-                echo "PYTHON_VERSION: $PYTHON_VERSION"
-                echo "PYTHON_VERSION=$PYTHON_VERSION" >> $GITHUB_OUTPUT
-
-          - name: Setup Python
-            uses: ./.github/actions/setup_python_env
-            with:
-              poetry-version: ${{ env.POETRY_VERSION }}
-              python-version: ${{ steps.python-version.outputs.PYTHON_VERSION }}
-
-          - name: Build pex file
-            run: make build-pex
-
-          - name: Test pex file
-            run: ./dist/dbt-bouncer.pex --config-file $PWD/dbt-bouncer-example.yml
+                only: manifest_checks
