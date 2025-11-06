@@ -31,11 +31,11 @@ jobs:
             uses: ./.github/actions/setup_python_env
 
           - name: Run dbt-bouncer
-            uses: godatadriven/dbt-bouncer@v1.27.1a0
+            uses: godatadriven/dbt-bouncer@v1.27.1a1
 
           - run: rm ./dbt_project/target/catalog.json
 
           - name: Run dbt-bouncer
-            uses: godatadriven/dbt-bouncer@v1.27.1a0
+            uses: godatadriven/dbt-bouncer@v1.27.1a1
             with:
                 only: manifest_checks
