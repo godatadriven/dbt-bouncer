@@ -95,12 +95,13 @@ def parse_dbt_artifacts(
 ) -> tuple[
     "DbtBouncerManifest",
     List["Exposures"],
+    List["DbtBouncerTest"],
     List["Macros"],
     List["DbtBouncerModel"],
     List["DbtBouncerSemanticModel"],
+    List["DbtBouncerTest"],
     List["DbtBouncerSnapshot"],
     List["DbtBouncerSource"],
-    List["DbtBouncerTest"],
     List["UnitTests"],
     List["DbtBouncerCatalogNode"],
     List["DbtBouncerCatalogNode"],
@@ -115,12 +116,13 @@ def parse_dbt_artifacts(
     Returns:
         DbtBouncerManifest: The manifest object.
         List[DbtBouncerExposure]: List of exposures in the project.
+        List[DbtBouncerTest]: List of generic tests in the project.
         List[DbtBouncerMacro]: List of macros in the project.
         List[DbtBouncerModel]: List of models in the project.
         List[DbtBouncerSemanticModel]: List of semantic models in the project.
+        List[DbtBouncerTest]: List of singular tests in the project.
         List[DbtBouncerSnapshot]: List of snapshots in the project.
         List[DbtBouncerSource]: List of sources in the project.
-        List[DbtBouncerTest]: List of tests in the project.
         List[DbtBouncerUnitTest]: List of unit tests in the project.
         List[DbtBouncerCatalogNode]: List of catalog nodes for the project.
         List[DbtBouncerCatalogNode]: List of catalog nodes for the project sources.
@@ -137,12 +139,13 @@ def parse_dbt_artifacts(
     )
     (
         project_exposures,
+        project_generic_tests,
         project_macros,
         project_models,
         project_semantic_models,
+        project_singular_tests,
         project_snapshots,
         project_sources,
-        project_tests,
         project_unit_tests,
     ) = parse_manifest_artifact(
         manifest_obj=manifest_obj,
@@ -182,12 +185,13 @@ def parse_dbt_artifacts(
     return (
         manifest_obj,
         project_exposures,
+        project_generic_tests,
         project_macros,
         project_models,
         project_semantic_models,
+        project_singular_tests,
         project_snapshots,
         project_sources,
-        project_tests,
         project_unit_tests,
         project_catalog_nodes,
         project_catalog_sources,
