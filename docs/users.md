@@ -15,6 +15,10 @@ To add your company:
     <img src="https://github.com/godatadriven/dbt-bouncer/raw/main/docs/assets/aurai_logo.png" width="500"/>
 </p>
 
+<p>
+    <h3>Canon</h3>
+    <img src="https://github.com/godatadriven/dbt-bouncer/raw/main/docs/assets/canon_logo.png" width="500"/>
+</p>
 
 <p>
     <h3>Dataroots</h3>
