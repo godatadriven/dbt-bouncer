@@ -8,9 +8,7 @@ from dbt_bouncer.checks.common import NestedDict
 from dbt_bouncer.utils import find_missing_meta_keys
 
 if TYPE_CHECKING:
-    from dbt_bouncer.artifact_parsers.parsers_common import (
-        DbtBouncerTestBase,
-    )
+    from dbt_bouncer.artifact_parsers.parsers_common import DbtBouncerTest
 
 
 class CheckSingularTestHasMetaKeys(BaseCheck):
@@ -18,13 +16,12 @@ class CheckSingularTestHasMetaKeys(BaseCheck):
 
     Parameters:
         keys (NestedDict): A list (that may contain sub-lists) of required keys.
-        singular_test (DbtBouncerTestBase): The DbtBouncerTestBase object to check.
+        singular_test (DbtBouncerTest): The DbtBouncerTest object to check.
 
     Other Parameters:
         description (Optional[str]): Description of what the check does and why it is implemented.
         exclude (Optional[str]): Regex pattern to match the test path. Test paths that match the pattern will not be checked.
         include (Optional[str]): Regex pattern to match the test path. Only test paths that match the pattern will be checked.
-        materialization (Optional[Literal["ephemeral", "incremental", "table", "view"]]): Limit check to tests with the specified materialization.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
     Example(s):
@@ -40,7 +37,7 @@ class CheckSingularTestHasMetaKeys(BaseCheck):
 
     keys: NestedDict
     name: Literal["check_singular_test_has_meta_keys"]
-    singular_test: "DbtBouncerTestBase" = Field(default=None)
+    singular_test: "DbtBouncerTest" = Field(default=None)
 
     def execute(self) -> None:
         """Execute the check."""
