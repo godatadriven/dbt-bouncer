@@ -176,24 +176,26 @@ def parse_manifest_artifact(
     manifest_obj: DbtBouncerManifest,
 ) -> tuple[
     List[Exposures],
+    List[DbtBouncerTest],
     List[Macros],
     List[DbtBouncerModel],
     List[DbtBouncerSemanticModel],
+    List[DbtBouncerTest],
     List[DbtBouncerSnapshot],
     List[DbtBouncerSource],
-    List[DbtBouncerTest],
     List[UnitTests],
 ]:
     """Parse the manifest.json artifact.
 
     Returns:
         List[DbtBouncerExposure]: List of exposures in the project.
+        List[DbtBouncerTest]: List of generic tests in the project.
         List[DbtBouncerMacro]: List of macros in the project.
         List[DbtBouncerModel]: List of models in the project.
         List[DbtBouncerSemanticModel]: List of semantic models in the project.
+        List[DbtBouncerTest]: List of singular tests in the project.
         List[DbtBouncerSnapshot]: List of snapshots in the project.
         List[DbtBouncerSource]: List of sources in the project.
-        List[DbtBouncerTest]: List of tests in the project.
         List[DbtBouncerUnitTest]: List of unit tests in the project.
 
     """
@@ -209,7 +211,8 @@ def parse_manifest_artifact(
     ]
     project_models = []
     project_snapshots = []
-    project_tests = []
+    project_generic_tests = []
+    project_singular_tests = []
     for k, v in manifest_obj.manifest.nodes.items():
         if (
             isinstance(v.resource_type, Enum) and v.resource_type.value == "model"
@@ -242,15 +245,17 @@ def parse_manifest_artifact(
             (isinstance(v.resource_type, Enum) and v.resource_type.value == "test")
             or v.resource_type == "test"
         ) and v.package_name == manifest_obj.manifest.metadata.project_name:
-            project_tests.append(
-                DbtBouncerTest(
-                    **{
-                        "original_file_path": clean_path_str(v.original_file_path),
-                        "test": v,
-                        "unique_id": k,
-                    },
-                ),
+            test = DbtBouncerTest(
+                **{
+                    "original_file_path": clean_path_str(v.original_file_path),
+                    "test": v,
+                    "unique_id": k,
+                },
             )
+            if getattr(v, "attached_node", None):
+                project_generic_tests.append(test)
+            else:
+                project_singular_tests.append(test)
 
     if get_package_version_number(
         manifest_obj.manifest.metadata.dbt_version
@@ -288,15 +293,16 @@ def parse_manifest_artifact(
     ]
 
     logging.info(
-        f"Parsed `manifest.json`, found `{manifest_obj.manifest.metadata.project_name}` project: {len(project_exposures)} exposures, {len(project_macros)} macros, {len(project_models)} nodes, {len(project_semantic_models)} semantic models, {len(project_snapshots)} snapshots, {len(project_sources)} sources, {len(project_tests)} tests, {len(project_unit_tests)} unit tests.",
+        f"Parsed `manifest.json`, found `{manifest_obj.manifest.metadata.project_name}` project: {len(project_exposures)} exposures, {len(project_macros)} macros, {len(project_models)} nodes, {len(project_semantic_models)} semantic models, {len(project_snapshots)} snapshots, {len(project_sources)} sources, {len(project_generic_tests)} generic tests, {len(project_singular_tests)} singular tests, {len(project_unit_tests)} unit tests.",
     )
     return (
         project_exposures,
+        project_generic_tests,
         project_macros,
         project_models,
         project_semantic_models,
+        project_singular_tests,
         project_snapshots,
         project_sources,
-        project_tests,
         project_unit_tests,
     )

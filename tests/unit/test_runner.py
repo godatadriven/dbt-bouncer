@@ -101,6 +101,7 @@ def test_runner_coverage(caplog, tmp_path):
             check_categories=["manifest_checks"],
             create_pr_comment_file=False,
             exposures=[],
+            generic_tests=[],
             macros=[],
             manifest_obj=parse_manifest(
                 {
@@ -161,10 +162,10 @@ def test_runner_coverage(caplog, tmp_path):
             output_only_failures=False,
             run_results=[],
             semantic_models=[],
+            singular_tests=[],
             snapshots=[],
             show_all_failures=False,
             sources=[],
-            tests=[],
             unit_tests=[],
         )
 
@@ -240,6 +241,7 @@ def test_runner_failure():
             check_categories=["manifest_checks"],
             create_pr_comment_file=False,
             exposures=[],
+            generic_tests=[],
             macros=[],
             manifest_obj=parse_manifest(
                 {
@@ -300,10 +302,10 @@ def test_runner_failure():
             output_only_failures=False,
             run_results=[],
             semantic_models=[],
+            singular_tests=[],
             snapshots=[],
             show_all_failures=False,
             sources=[],
-            tests=[],
             unit_tests=[],
         )
 
@@ -372,6 +374,7 @@ def test_runner_skip(tmp_path):
             check_categories=["manifest_checks"],
             create_pr_comment_file=False,
             exposures=[],
+            generic_tests=[],
             macros=[],
             manifest_obj=parse_manifest(
                 {
@@ -470,10 +473,10 @@ def test_runner_skip(tmp_path):
             output_only_failures=False,
             run_results=[],
             semantic_models=[],
+            singular_tests=[],
             snapshots=[],
             show_all_failures=False,
             sources=[],
-            tests=[],
             unit_tests=[],
         )
 
@@ -545,6 +548,7 @@ def test_runner_success():
             check_categories=["manifest_checks"],
             create_pr_comment_file=False,
             exposures=[],
+            generic_tests=[],
             macros=[],
             manifest_obj=parse_manifest(
                 {
@@ -605,10 +609,10 @@ def test_runner_success():
             output_only_failures=False,
             run_results=[],
             semantic_models=[],
+            singular_tests=[],
             snapshots=[],
             show_all_failures=False,
             sources=[],
-            tests=[],
             unit_tests=[],
         )
 
@@ -669,6 +673,7 @@ def test_runner_windows(caplog, tmp_path):
         check_categories=["manifest_checks"],
         create_pr_comment_file=False,
         exposures=[],
+        generic_tests=[],
         macros=[],
         manifest_obj=parse_manifest(
             {
@@ -730,10 +735,10 @@ def test_runner_windows(caplog, tmp_path):
         output_only_failures=False,
         run_results=[],
         semantic_models=[],
+        singular_tests=[],
         snapshots=[],
         show_all_failures=False,
         sources=[],
-        tests=[],
         unit_tests=[],
     )
 
@@ -810,6 +815,7 @@ def test_runner_check_id(tmp_path):
             check_categories=["manifest_checks"],
             create_pr_comment_file=False,
             exposures=[],
+            generic_tests=[],
             macros=[],
             manifest_obj=parse_manifest(
                 {
@@ -908,10 +914,10 @@ def test_runner_check_id(tmp_path):
             output_only_failures=False,
             run_results=[],
             semantic_models=[],
+            singular_tests=[],
             snapshots=[],
             show_all_failures=False,
             sources=[],
-            tests=[],
             unit_tests=[],
         )
 
@@ -994,6 +1000,7 @@ def test_runner_output_only_failures(output_only_failures, num_checks, tmp_path)
             check_categories=["manifest_checks"],
             create_pr_comment_file=False,
             exposures=[],
+            generic_tests=[],
             macros=[],
             manifest_obj=parse_manifest(
                 {
@@ -1084,10 +1091,10 @@ def test_runner_output_only_failures(output_only_failures, num_checks, tmp_path)
             output_only_failures=output_only_failures,
             run_results=[],
             semantic_models=[],
+            singular_tests=[],
             snapshots=[],
             show_all_failures=False,
             sources=[],
-            tests=[],
             unit_tests=[],
         )
 

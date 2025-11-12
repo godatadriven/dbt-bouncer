@@ -33,6 +33,15 @@ def test_cli_happy_path(caplog, dbt_artifacts_dir, tmp_path):
             if item["name"] == "check_source_freshness_populated":
                 bouncer_config["manifest_checks"].remove(item)
 
+    # Due to non-backwards compatible features, this check doesn't work with dbt-core < 1.9
+    if clean_path_str(dbt_artifacts_dir).split("/")[-1] in [
+        "dbt_17",
+        "dbt_18",
+    ]:
+        for item in bouncer_config["manifest_checks"]:
+            if item["name"] == "check_singular_test_has_meta_keys":
+                bouncer_config["manifest_checks"].remove(item)
+
     with config_file.open("w") as f:
         yaml.dump(bouncer_config, f)
 
@@ -79,9 +88,13 @@ def test_cli_happy_path(caplog, dbt_artifacts_dir, tmp_path):
             sources_num = int(re.search(r"\d*", sources_text).group(0))  # type: ignore[union-attr]
             assert sources_num > 0, f"Only found {sources_num} sources."
 
-            tests_text = re.search(r"\d* tests", record).group(0)  # type: ignore[union-attr]
-            tests_num = int(re.search(r"\d*", tests_text).group(0))  # type: ignore[union-attr]
-            assert tests_num > 0, f"Only found {tests_num} tests."
+            generic_tests_text = re.search(r"\d* generic tests", record).group(0)  # type: ignore[union-attr]
+            generic_tests_num = int(re.search(r"\d*", generic_tests_text).group(0))  # type: ignore[union-attr]
+            assert generic_tests_num > 0, f"Only found {generic_tests_num} tests."
+
+            singular_tests_text = re.search(r"\d* singular tests", record).group(0)  # type: ignore[union-attr]
+            singular_tests_num = int(re.search(r"\d*", singular_tests_text).group(0))  # type: ignore[union-attr]
+            assert singular_tests_num > 0, f"Only found {singular_tests_num} tests."
 
     summary_count_run_results = 0
     for record in caplog.messages:
