@@ -24,6 +24,10 @@ class CheckSingularTestHasMetaKeys(BaseCheck):
         include (Optional[str]): Regex pattern to match the test path. Only test paths that match the pattern will be checked.
         severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
 
+    !!! warning
+
+        This check is only supported for dbt 1.9.0 and above.
+
     Example(s):
         ```yaml
         manifest_checks:

@@ -17,7 +17,7 @@ if TYPE_CHECKING:
         DbtBouncerExposureBase,
         DbtBouncerManifest,
         DbtBouncerModelBase,
-        DbtBouncerTestBase,
+        DbtBouncerTest,
     )
 
 from dbt_bouncer.utils import clean_path_str, get_clean_model_name
@@ -721,7 +721,7 @@ class CheckModelHasUniqueTest(BaseCheck):
 
     Parameters:
         accepted_uniqueness_tests (Optional[List[str]]): List of tests that are accepted as uniqueness tests.
-        generic_tests (List[DbtBouncerTestBase]): List of DbtBouncerTestBase objects parsed from `manifest.json`.
+        generic_tests (List[DbtBouncerTest]): List of DbtBouncerTest objects parsed from `manifest.json`.
         model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
 
     Other Parameters:
@@ -756,7 +756,7 @@ class CheckModelHasUniqueTest(BaseCheck):
             "unique",
         ],
     )
-    generic_tests: List["DbtBouncerTestBase"] = Field(default=[])
+    generic_tests: List["DbtBouncerTest"] = Field(default=[])
     model: "DbtBouncerModelBase" = Field(default=None)
     name: Literal["check_model_has_unique_test"]
 
@@ -1493,10 +1493,10 @@ class CheckModelsTestCoverage(BaseModel):
     """Set the minimum percentage of models that have at least one test.
 
     Parameters:
-        generic_tests (List[DbtBouncerTestBase]): List of DbtBouncerTestBase objects parsed from `manifest.json`.
+        generic_tests (List[DbtBouncerTest]): List of DbtBouncerTest objects parsed from `manifest.json`.
         min_model_test_coverage_pct (float): The minimum percentage of models that must have at least one test.
         models (List[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
-        singular_tests (List[DbtBouncerTestBase]): List of DbtBouncerTestBase objects parsed from `manifest.json`.
+        singular_tests (List[DbtBouncerTest]): List of DbtBouncerTest objects parsed from `manifest.json`.
 
     Other Parameters:
         description (Optional[str]): Description of what the check does and why it is implemented.
@@ -1518,7 +1518,7 @@ class CheckModelsTestCoverage(BaseModel):
         default=None,
         description="Description of what the check does and why it is implemented.",
     )
-    generic_tests: List["DbtBouncerTestBase"] = Field(default=[])
+    generic_tests: List["DbtBouncerTest"] = Field(default=[])
     index: Optional[int] = Field(
         default=None,
         description="Index to uniquely identify the check, calculated at runtime.",
@@ -1534,7 +1534,7 @@ class CheckModelsTestCoverage(BaseModel):
         default="error",
         description="Severity of the check, one of 'error' or 'warn'.",
     )
-    singular_tests: List["DbtBouncerTestBase"] = Field(default=[])
+    singular_tests: List["DbtBouncerTest"] = Field(default=[])
 
     def execute(self) -> None:
         """Execute the check."""
