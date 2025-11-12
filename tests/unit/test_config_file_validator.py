@@ -1,5 +1,7 @@
+import os
 from contextlib import nullcontext as does_not_raise
 from pathlib import Path
+from unittest import mock
 
 import click
 import pytest
@@ -36,6 +38,22 @@ def test_get_file_config_path_default(tmp_path):
         config_file_source="DEFAULT",
     )
     assert config_file_path == config_file
+
+
+def test_get_file_config_path_env_var(tmp_path):
+    config_file = tmp_path / "dbt_bouncer.yml"
+    config_file.write_text("test: 1")
+
+    with mock.patch.dict(os.environ, clear=True) and pytest.MonkeyPatch.context() as mp:
+        custom_config_file_path = "/dir/my_custom_config_file.yml"
+        mp.setenv("DBT_BOUNCER_CONFIG_FILE", custom_config_file_path)
+
+        config_file_path = get_config_file_path(
+            config_file=str(config_file),
+            config_file_source="DEFAULT",
+        )
+
+    assert config_file_path == Path(custom_config_file_path)
 
 
 PYPROJECT_TOML_SAMPLE_CONFIG = {
