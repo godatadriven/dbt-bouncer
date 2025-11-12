@@ -89,8 +89,9 @@ def get_config_file_path(
     """Get the path to the config file for dbt-bouncer. This is fetched from (in order):
 
     1. The file passed via the `--config-file` CLI flag.
-    2. A file named `dbt-bouncer.yml` in the current working directory.
-    3. A `[tool.dbt-bouncer]` section in `pyproject.toml` (in current working directory or parent directories).
+    2. The file passed via the `DBT_BOUNCER_CONFIG_FILE` environment variable.
+    3. A file named `dbt-bouncer.yml` in the current working directory.
+    4. A `[tool.dbt-bouncer]` section in `pyproject.toml` (in current working directory or parent directories).
 
     Returns:
         PurePath: Config file for dbt-bouncer.
@@ -105,6 +106,12 @@ def get_config_file_path(
     if config_file_source == "COMMANDLINE":
         logging.debug(f"Config file passed via command line: {config_file}")
         return config_file
+
+    if config_file_path_via_env_var := os.getenv("DBT_BOUNCER_CONFIG_FILE"):
+        logging.debug(
+            f"Config file passed via environment variable: {config_file_path_via_env_var}"
+        )
+        return Path(config_file_path_via_env_var)
 
     if config_file_source == "DEFAULT":
         logging.debug(f"Using default value for config file: {config_file}")
