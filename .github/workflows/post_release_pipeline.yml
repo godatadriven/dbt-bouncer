@@ -18,7 +18,7 @@ jobs:
         runs-on: ubuntu-22.04
         steps:
             - name: Checkout
-              uses: actions/checkout@v5
+              uses: actions/checkout@v6
 
             - name: Run Docker test
               run: |
@@ -54,7 +54,7 @@ jobs:
                     - '3.13'
         steps:
             - name: Checkout
-              uses: actions/checkout@v5
+              uses: actions/checkout@v6
 
             - name: Determine python version
               id: python-version
@@ -98,7 +98,7 @@ jobs:
                     - '3.13'
         steps:
             - name: Checkout
-              uses: actions/checkout@v5
+              uses: actions/checkout@v6
 
             - name: Setup Python
               uses: ./.github/actions/setup_python_env

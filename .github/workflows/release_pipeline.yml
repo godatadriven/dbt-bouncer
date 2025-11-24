@@ -34,7 +34,7 @@
               id-token: write
               packages: write
           steps:
-              - uses: actions/checkout@v5
+              - uses: actions/checkout@v6
 
               - name: Fetch tags
                 run: git fetch --prune --unshallow --tags
