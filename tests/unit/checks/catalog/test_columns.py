@@ -488,30 +488,6 @@ def test_check_columns_are_all_documented(
                     "unique_id": "model.package_name.model_1",
                 },
             ),
-            # parse_manifest(
-            #     {
-            #         "child_map": {},
-            #         "disabled": {},
-            #         "docs": {},
-            #         "exposures": {},
-            #         "group_map": {},
-            #         "groups": {},
-            #         "macros": {},
-            #         "metadata": {
-            #             "adapter_type": "snowflake",
-            #             "dbt_schema_version": "https://schemas.getdbt.com/dbt/manifest/v12.json",
-            #             "project_name": "dbt_bouncer_test_project",
-            #         },
-            #         "metrics": {},
-            #         "nodes": {},
-            #         "parent_map": {},
-            #         "saved_queries": {},
-            #         "selectors": {},
-            #         "semantic_models": {},
-            #         "sources": {},
-            #         "unit_tests": {},
-            #     },
-            # ),
             DbtBouncerManifest(
                 **{
                     "manifest": ManifestLatest(
