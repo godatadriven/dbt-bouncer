@@ -2,13 +2,17 @@
 version: 2
 updates:
     - package-ecosystem: github-actions
+      cooldown:
+        default-days: 14
       directory: /
       schedule:
-          interval: weekly
+          interval: monthly
     - package-ecosystem: pip
+      cooldown:
+        default-days: 14
       directory: /
       ignore:
         - dependency-name: "*"
           update-types: ["version-update:semver-patch"]
       schedule:
-          interval: weekly
+          interval: monthly
