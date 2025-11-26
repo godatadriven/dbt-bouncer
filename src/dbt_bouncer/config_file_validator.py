@@ -225,6 +225,7 @@ def validate_conf(
             DbtBouncerCatalogNode,
         )
         from dbt_bouncer.artifact_parsers.parsers_manifest import (
+            DbtBouncerManifest,
             DbtBouncerModelBase,
             DbtBouncerSnapshotBase,
             DbtBouncerSourceBase,

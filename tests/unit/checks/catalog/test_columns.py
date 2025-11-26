@@ -7,11 +7,16 @@ with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
     from dbt_artifacts_parser.parsers.catalog.catalog_v1 import Nodes as CatalogNodes
 
+    from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
+        ManifestLatest,
+        Metadata,
+    )
 
 from pydantic import ValidationError
 
 from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import Nodes4, Nodes6
-from dbt_bouncer.artifact_parsers.parsers_manifest import (  # noqa: F401
+from dbt_bouncer.artifact_parsers.parsers_manifest import (  # noqa: F401  # noqa: F401
+    DbtBouncerManifest,
     DbtBouncerModelBase,
     DbtBouncerTest,
     DbtBouncerTestBase,
@@ -279,7 +284,7 @@ def test_check_column_has_specified_test(
 
 
 @pytest.mark.parametrize(
-    ("catalog_node", "models", "expectation"),
+    ("catalog_node", "manifest_obj", "models", "expectation"),
     [
         (
             CatalogNodes(
@@ -305,6 +310,7 @@ def test_check_column_has_specified_test(
                     "unique_id": "model.package_name.model_1",
                 },
             ),
+            "manifest_obj",
             [
                 Nodes4(
                     **{
@@ -356,9 +362,65 @@ def test_check_column_has_specified_test(
                         "type": "VIEW",
                     },
                     "stats": {},
+                    "unique_id": "model.package_name.model_1",
+                },
+            ),
+            "manifest_obj",
+            [
+                Nodes4(
+                    **{
+                        "alias": "model_1",
+                        "checksum": {"name": "sha256", "checksum": ""},
+                        "columns": {
+                            "COL_1": {
+                                "index": 1,
+                                "name": "COL_1",
+                                "type": "INTEGER",
+                            },
+                            "COL_2": {
+                                "index": 2,
+                                "name": "COL_2",
+                                "type": "INTEGER",
+                            },
+                        },
+                        "fqn": ["package_name", "model_1"],
+                        "name": "model_1",
+                        "original_file_path": "model_1.sql",
+                        "package_name": "package_name",
+                        "path": "model_1.sql",
+                        "resource_type": "model",
+                        "schema": "main",
+                        "unique_id": "model.package_name.model_1",
+                    },
+                ),
+            ],
+            pytest.raises(AssertionError),
+        ),
+        (
+            CatalogNodes(
+                **{
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                        "col_2": {
+                            "index": 2,
+                            "name": "col_2",
+                            "type": "INTEGER",
+                        },
+                    },
+                    "metadata": {
+                        "name": "table_1",
+                        "schema": "main",
+                        "type": "VIEW",
+                    },
+                    "stats": {},
                     "unique_id": "model.package_name.model_2",
                 },
             ),
+            "manifest_obj",
             [
                 Nodes4(
                     **{
@@ -385,11 +447,147 @@ def test_check_column_has_specified_test(
             pytest.raises(AssertionError),
         ),
     ],
+    indirect=["manifest_obj"],
 )
-def test_check_columns_are_all_documented(catalog_node, models, expectation):
+def test_check_columns_are_all_documented(
+    catalog_node, manifest_obj, models, expectation
+):
     with expectation:
         CheckColumnsAreAllDocumented(
             catalog_node=catalog_node,
+            manifest_obj=manifest_obj,
+            models=models,
+            name="check_columns_are_all_documented",
+        ).execute()
+
+
+@pytest.mark.parametrize(
+    ("catalog_node", "manifest_obj", "models", "expectation"),
+    [
+        (
+            CatalogNodes(
+                **{
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                        "col_2": {
+                            "index": 2,
+                            "name": "col_2",
+                            "type": "INTEGER",
+                        },
+                    },
+                    "metadata": {
+                        "name": "table_1",
+                        "schema": "main",
+                        "type": "VIEW",
+                    },
+                    "stats": {},
+                    "unique_id": "model.package_name.model_1",
+                },
+            ),
+            # parse_manifest(
+            #     {
+            #         "child_map": {},
+            #         "disabled": {},
+            #         "docs": {},
+            #         "exposures": {},
+            #         "group_map": {},
+            #         "groups": {},
+            #         "macros": {},
+            #         "metadata": {
+            #             "adapter_type": "snowflake",
+            #             "dbt_schema_version": "https://schemas.getdbt.com/dbt/manifest/v12.json",
+            #             "project_name": "dbt_bouncer_test_project",
+            #         },
+            #         "metrics": {},
+            #         "nodes": {},
+            #         "parent_map": {},
+            #         "saved_queries": {},
+            #         "selectors": {},
+            #         "semantic_models": {},
+            #         "sources": {},
+            #         "unit_tests": {},
+            #     },
+            # ),
+            DbtBouncerManifest(
+                **{
+                    "manifest": ManifestLatest(
+                        metadata=Metadata(
+                            dbt_schema_version="https://schemas.getdbt.com/dbt/manifest/v12.json",
+                            dbt_version="1.11.0a1",
+                            generated_at=None,
+                            invocation_id=None,
+                            invocation_started_at=None,
+                            env=None,
+                            project_name="dbt_bouncer_test_project",
+                            project_id=None,
+                            user_id=None,
+                            send_anonymous_usage_stats=None,
+                            adapter_type="snowflake",
+                            quoting=None,
+                            run_started_at=None,
+                        ),
+                        nodes={},
+                        sources={},
+                        macros={},
+                        docs={},
+                        exposures={},
+                        metrics={},
+                        groups={},
+                        selectors={},
+                        disabled={},
+                        parent_map={},
+                        child_map={},
+                        group_map={},
+                        saved_queries={},
+                        semantic_models={},
+                        unit_tests={},
+                        functions=None,
+                    )
+                }
+            ),
+            [
+                Nodes4(
+                    **{
+                        "alias": "model_1",
+                        "checksum": {"name": "sha256", "checksum": ""},
+                        "columns": {
+                            "COL_1": {
+                                "index": 1,
+                                "name": "COL_1",
+                                "type": "INTEGER",
+                            },
+                            "COL_2": {
+                                "index": 2,
+                                "name": "COL_2",
+                                "type": "INTEGER",
+                            },
+                        },
+                        "fqn": ["package_name", "model_1"],
+                        "name": "model_1",
+                        "original_file_path": "model_1.sql",
+                        "package_name": "package_name",
+                        "path": "model_1.sql",
+                        "resource_type": "model",
+                        "schema": "main",
+                        "unique_id": "model.package_name.model_1",
+                    },
+                ),
+            ],
+            does_not_raise(),
+        )
+    ],
+)
+def test_check_columns_are_all_documented_snowflake(
+    catalog_node, manifest_obj, models, expectation
+):
+    with expectation:
+        CheckColumnsAreAllDocumented(
+            catalog_node=catalog_node,
+            manifest_obj=manifest_obj,
             models=models,
             name="check_columns_are_all_documented",
         ).execute()
