@@ -13,11 +13,11 @@ if TYPE_CHECKING:
         from dbt_artifacts_parser.parsers.catalog.catalog_v1 import (
             Nodes as CatalogNodes,
         )
+    from dbt_bouncer.artifact_parsers.parsers_common import DbtBouncerManifest
     from dbt_bouncer.artifact_parsers.parsers_manifest import (
         DbtBouncerModelBase,
         DbtBouncerTestBase,
     )
-
 from pydantic import model_validator
 
 from dbt_bouncer.check_base import BaseCheck
@@ -282,7 +282,9 @@ class CheckColumnsAreAllDocumented(BaseCheck):
     """All columns in a model should be included in the model's properties file, i.e. `.yml` file.
 
     Receives:
+        case_sensitive (Optional[bool]): Whether the column names are case sensitive or not. Necessary for adapters like `dbt-snowflake` where the column in `catalog.json` is uppercase but the column in `manifest.json` can be lowercase. Defaults to `false` for `dbt-snowflake`, otherwise `true`.
         catalog_node (CatalogNodes): The CatalogNodes object to check.
+        manifest_obj (DbtBouncerManifest): The DbtBouncerManifest object parsed from `manifest.json`.
         models (List[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
 
     Other Parameters:
@@ -299,7 +301,9 @@ class CheckColumnsAreAllDocumented(BaseCheck):
 
     """
 
+    case_sensitive: Optional[bool] = Field(default=True)
     catalog_node: "CatalogNodes" = Field(default=None)
+    manifest_obj: "DbtBouncerManifest" = Field(default=None)
     models: List["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_columns_are_all_documented"]
 
@@ -309,11 +313,23 @@ class CheckColumnsAreAllDocumented(BaseCheck):
             model = next(
                 m for m in self.models if m.unique_id == self.catalog_node.unique_id
             )
-            undocumented_columns = [
-                v.name
-                for _, v in self.catalog_node.columns.items()
-                if v.name not in model.columns
-            ]
+
+            if self.manifest_obj.manifest.metadata.adapter_type in ["snowflake"]:
+                self.case_sensitive = False
+
+            if self.case_sensitive:
+                undocumented_columns = [
+                    v.name
+                    for _, v in self.catalog_node.columns.items()
+                    if v.name not in model.columns
+                ]
+            else:
+                undocumented_columns = [
+                    v.name
+                    for _, v in self.catalog_node.columns.items()
+                    if v.name.lower() not in [c.lower() for c in model.columns]
+                ]
+
             assert not undocumented_columns, (
                 f"`{self.catalog_node.unique_id.split('.')[-1]}` has columns that are not included in the models properties file: {undocumented_columns}"
             )
