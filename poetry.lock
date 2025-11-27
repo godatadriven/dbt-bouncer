@@ -491,14 +491,14 @@ rapidfuzz = ">=3.0.0,<4.0.0"
 
 [[package]]
 name = "click"
-version = "8.1.8"
+version = "8.3.1"
 description = "Composable command line interface toolkit"
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.10"
 groups = ["main", "dev", "docs"]
 files = [
-    {file = "click-8.1.8-py3-none-any.whl", hash = "sha256:63c132bbbed01578a06712a2d1f497bb62d9c1c0d329b7903a866228027263b2"},
-    {file = "click-8.1.8.tar.gz", hash = "sha256:ed53c9d8990d83c2a27deae68e4ee337473f6330c040a31d4225c9574d16096a"},
+    {file = "click-8.3.1-py3-none-any.whl", hash = "sha256:981153a64e25f12d547d3426c367a4857371575ee7ad18df2a6183ab0545b2a6"},
+    {file = "click-8.3.1.tar.gz", hash = "sha256:12ff4785d337a1bb490bb7e9c2b1ee5da3112e94a8622f26a6c77f5d2fc6842a"},
 ]
 
 [package.dependencies]
@@ -3311,24 +3311,25 @@ files = [
 
 [[package]]
 name = "shandy-sqlfmt"
-version = "0.28.2"
+version = "0.27.0"
 description = "sqlfmt formats your dbt SQL files so you don't have to."
 optional = false
-python-versions = "<3.15,>=3.8"
+python-versions = "<4.0,>=3.8"
 groups = ["dev"]
 files = [
-    {file = "shandy_sqlfmt-0.28.2-py3-none-any.whl", hash = "sha256:5c0bda7e66cf8782d960f22c97c22d98541d6e75febd6b21b94c10ca6eb2514f"},
-    {file = "shandy_sqlfmt-0.28.2.tar.gz", hash = "sha256:0a78a2eee23f8b84b19a2895ca4608237d6da19037ce71346417fe01e97bad8b"},
+    {file = "shandy_sqlfmt-0.27.0-py3-none-any.whl", hash = "sha256:84359f5e4b8754852019e0b7dde6ba438594adbdfdc0131bc17cb5b51f88b72e"},
+    {file = "shandy_sqlfmt-0.27.0.tar.gz", hash = "sha256:1c9ac6beb5f17f66e7b87b4c70be586e87db538cd7d72f42dedb85132e8b3a96"},
 ]
 
 [package.dependencies]
-click = ">=8.1,<8.2"
-jinja2 = ">=3.0,<4"
+click = ">=8.0,<9.0"
+jinja2 = ">=3.0,<4.0"
 platformdirs = ">=2.4,<5.0"
-tqdm = ">=4.67,<5"
+tqdm = ">=4.0,<5.0"
 
 [package.extras]
-jinjafmt = ["black (>=24)"]
+jinjafmt = ["black"]
+sqlfmt-primer = ["gitpython (>=3.1.24,<4.0.0)"]
 
 [[package]]
 name = "shellingham"
