@@ -19,7 +19,7 @@
             runs-on: ubuntu-22.04
             steps:
                 - name: Checkout
-                  uses: actions/checkout@v5
+                  uses: actions/checkout@v6
 
                 - name: Determine python version
                   id: python-version
@@ -50,7 +50,7 @@
             runs-on: ubuntu-22.04
             steps:
                 - name: Checkout
-                  uses: actions/checkout@v5
+                  uses: actions/checkout@v6
 
                 - name: Determine python version
                   id: python-version
