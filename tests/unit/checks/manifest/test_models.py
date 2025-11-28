@@ -1638,31 +1638,10 @@ def test_check_model_has_tags(model, tags, criteria, expectation):
 
 
 @pytest.mark.parametrize(
-    ("accepted_uniqueness_tests", "model", "tests", "expectation"),
+    ("accepted_uniqueness_tests", "generic_tests", "model", "expectation"),
     [
         (
             ["expect_compound_columns_to_be_unique", "unique"],
-            Nodes4(
-                **{
-                    "alias": "model_1",
-                    "checksum": {"name": "sha256", "checksum": ""},
-                    "columns": {
-                        "col_1": {
-                            "index": 1,
-                            "name": "col_1",
-                            "type": "INTEGER",
-                        },
-                    },
-                    "fqn": ["package_name", "model_1"],
-                    "name": "model_1",
-                    "original_file_path": "model_1.sql",
-                    "package_name": "package_name",
-                    "path": "staging/finance/model_1.sql",
-                    "resource_type": "model",
-                    "schema": "main",
-                    "unique_id": "model.package_name.model_1",
-                },
-            ),
             [
                 Nodes6(
                     **{
@@ -1687,12 +1666,8 @@ def test_check_model_has_tags(model, tags, criteria, expectation):
                         },
                         "unique_id": "test.package_name.not_null_model_1_unique.cf6c17daed",
                     },
-                ),
+                )
             ],
-            does_not_raise(),
-        ),
-        (
-            ["my_custom_test", "unique"],
             Nodes4(
                 **{
                     "alias": "model_1",
@@ -1714,6 +1689,10 @@ def test_check_model_has_tags(model, tags, criteria, expectation):
                     "unique_id": "model.package_name.model_1",
                 },
             ),
+            does_not_raise(),
+        ),
+        (
+            ["my_custom_test", "unique"],
             [
                 Nodes6(
                     **{
@@ -1738,12 +1717,8 @@ def test_check_model_has_tags(model, tags, criteria, expectation):
                         },
                         "unique_id": "test.package_name.not_null_model_1_unique.cf6c17daed",
                     },
-                ),
+                )
             ],
-            does_not_raise(),
-        ),
-        (
-            ["unique"],
             Nodes4(
                 **{
                     "alias": "model_1",
@@ -1765,6 +1740,10 @@ def test_check_model_has_tags(model, tags, criteria, expectation):
                     "unique_id": "model.package_name.model_1",
                 },
             ),
+            does_not_raise(),
+        ),
+        (
+            ["unique"],
             [
                 Nodes6(
                     **{
@@ -1789,12 +1768,8 @@ def test_check_model_has_tags(model, tags, criteria, expectation):
                         },
                         "unique_id": "test.package_name.not_null_model_1_unique.cf6c17daed",
                     },
-                ),
+                )
             ],
-            pytest.raises(AssertionError),
-        ),
-        (
-            ["expect_compound_columns_to_be_unique", "unique"],
             Nodes4(
                 **{
                     "alias": "model_1",
@@ -1816,23 +1791,48 @@ def test_check_model_has_tags(model, tags, criteria, expectation):
                     "unique_id": "model.package_name.model_1",
                 },
             ),
+            pytest.raises(AssertionError),
+        ),
+        (
+            ["expect_compound_columns_to_be_unique", "unique"],
             [],
+            Nodes4(
+                **{
+                    "alias": "model_1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                    },
+                    "fqn": ["package_name", "model_1"],
+                    "name": "model_1",
+                    "original_file_path": "model_1.sql",
+                    "package_name": "package_name",
+                    "path": "staging/finance/model_1.sql",
+                    "resource_type": "model",
+                    "schema": "main",
+                    "unique_id": "model.package_name.model_1",
+                },
+            ),
             pytest.raises(AssertionError),
         ),
     ],
 )
 def test_check_model_has_unique_test(
     accepted_uniqueness_tests,
+    generic_tests,
     model,
-    tests,
     expectation,
 ):
     with expectation:
         CheckModelHasUniqueTest(
             accepted_uniqueness_tests=accepted_uniqueness_tests,
+            generic_tests=generic_tests,
             model=model,
             name="check_model_has_unique_test",
-            tests=tests,
         ).execute()
 
 
@@ -4241,33 +4241,15 @@ def test_check_model_description_populated(model, expectation):
 
 
 @pytest.mark.parametrize(
-    ("min_model_test_coverage_pct", "models", "tests", "expectation"),
+    (
+        "generic_tests",
+        "min_model_test_coverage_pct",
+        "models",
+        "singular_tests",
+        "expectation",
+    ),
     [
         (
-            100,
-            [
-                Nodes4(
-                    **{
-                        "alias": "model_1",
-                        "checksum": {"name": "sha256", "checksum": ""},
-                        "columns": {
-                            "col_1": {
-                                "index": 1,
-                                "name": "col_1",
-                                "type": "INTEGER",
-                            },
-                        },
-                        "fqn": ["package_name", "model_1"],
-                        "name": "model_1",
-                        "original_file_path": "model_1.sql",
-                        "package_name": "package_name",
-                        "path": "staging/finance/model_1.sql",
-                        "resource_type": "model",
-                        "schema": "main",
-                        "unique_id": "model.package_name.model_1",
-                    },
-                ),
-            ],
             [
                 Nodes6(
                     **{
@@ -4299,9 +4281,65 @@ def test_check_model_description_populated(model, expectation):
                     },
                 ),
             ],
+            100,
+            [
+                Nodes4(
+                    **{
+                        "alias": "model_1",
+                        "checksum": {"name": "sha256", "checksum": ""},
+                        "columns": {
+                            "col_1": {
+                                "index": 1,
+                                "name": "col_1",
+                                "type": "INTEGER",
+                            },
+                        },
+                        "fqn": ["package_name", "model_1"],
+                        "name": "model_1",
+                        "original_file_path": "model_1.sql",
+                        "package_name": "package_name",
+                        "path": "staging/finance/model_1.sql",
+                        "resource_type": "model",
+                        "schema": "main",
+                        "unique_id": "model.package_name.model_1",
+                    },
+                ),
+            ],
+            [],
             does_not_raise(),
         ),
         (
+            [
+                Nodes6(
+                    **{
+                        "alias": "not_null_model_1_unique",
+                        "attached_node": "model.package_name.model_1",
+                        "checksum": {"name": "none", "checksum": ""},
+                        "column_name": "col_1",
+                        "depends_on": {
+                            "nodes": [
+                                "model.package_name.model_1",
+                            ],
+                        },
+                        "fqn": [
+                            "package_name",
+                            "marts",
+                            "finance",
+                            "not_null_model_1_unique",
+                        ],
+                        "name": "not_null_model_1_unique",
+                        "original_file_path": "models/marts/finance/_finance__models.yml",
+                        "package_name": "package_name",
+                        "path": "not_null_model_1_unique.sql",
+                        "resource_type": "test",
+                        "schema": "main",
+                        "test_metadata": {
+                            "name": "expect_compound_columns_to_be_unique",
+                        },
+                        "unique_id": "test.package_name.not_null_model_1_unique.cf6c17daed",
+                    },
+                )
+            ],
             50,
             [
                 Nodes4(
@@ -4347,6 +4385,10 @@ def test_check_model_description_populated(model, expectation):
                     },
                 ),
             ],
+            [],
+            does_not_raise(),
+        ),
+        (
             [
                 Nodes6(
                     **{
@@ -4356,7 +4398,7 @@ def test_check_model_description_populated(model, expectation):
                         "column_name": "col_1",
                         "depends_on": {
                             "nodes": [
-                                "model.package_name.model_1",
+                                "model.package_name.model_2",
                             ],
                         },
                         "fqn": [
@@ -4376,11 +4418,8 @@ def test_check_model_description_populated(model, expectation):
                         },
                         "unique_id": "test.package_name.not_null_model_1_unique.cf6c17daed",
                     },
-                ),
+                )
             ],
-            does_not_raise(),
-        ),
-        (
             100,
             [
                 Nodes4(
@@ -4426,51 +4465,23 @@ def test_check_model_description_populated(model, expectation):
                     },
                 ),
             ],
-            [
-                Nodes6(
-                    **{
-                        "alias": "not_null_model_1_unique",
-                        "attached_node": "model.package_name.model_1",
-                        "checksum": {"name": "none", "checksum": ""},
-                        "column_name": "col_1",
-                        "depends_on": {
-                            "nodes": [
-                                "model.package_name.model_2",
-                            ],
-                        },
-                        "fqn": [
-                            "package_name",
-                            "marts",
-                            "finance",
-                            "not_null_model_1_unique",
-                        ],
-                        "name": "not_null_model_1_unique",
-                        "original_file_path": "models/marts/finance/_finance__models.yml",
-                        "package_name": "package_name",
-                        "path": "not_null_model_1_unique.sql",
-                        "resource_type": "test",
-                        "schema": "main",
-                        "test_metadata": {
-                            "name": "expect_compound_columns_to_be_unique",
-                        },
-                        "unique_id": "test.package_name.not_null_model_1_unique.cf6c17daed",
-                    },
-                ),
-            ],
+            [],
             pytest.raises(AssertionError),
         ),
     ],
 )
 def test_check_model_test_coverage(
+    generic_tests,
     min_model_test_coverage_pct,
     models,
-    tests,
+    singular_tests,
     expectation,
 ):
     with expectation:
         CheckModelsTestCoverage(
+            generic_tests=generic_tests,
             min_model_test_coverage_pct=min_model_test_coverage_pct,
             models=models,
             name="check_model_test_coverage",
-            tests=tests,
+            singular_tests=singular_tests,
         ).execute()

@@ -1,0 +1,11 @@
+data_tests:
+  - name: test_assert_something
+    config:
+      meta:
+        owner: monty.montgomery@example.com
+  - name: test_skip_checks_feature
+    config:
+      meta:
+        dbt-bouncer:
+          skip_checks:
+            - check_singular_test_has_meta_keys

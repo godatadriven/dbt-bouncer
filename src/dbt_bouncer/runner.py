@@ -46,6 +46,7 @@ def runner(
     check_categories: List[str],
     create_pr_comment_file: bool,
     exposures: List["Exposures"],
+    generic_tests: List["DbtBouncerTest"],
     macros: List["Macros"],
     manifest_obj: "DbtBouncerManifest",
     models: List["DbtBouncerModel"],
@@ -54,9 +55,9 @@ def runner(
     semantic_models: List["DbtBouncerSemanticModel"],
     output_only_failures: bool,
     show_all_failures: bool,
+    singular_tests: List["DbtBouncerTest"],
     snapshots: List["DbtBouncerSnapshot"],
     sources: List["DbtBouncerSource"],
-    tests: List["DbtBouncerTest"],
     unit_tests: List["UnitTests"],
 ) -> tuple[int, List[Any]]:
     """Run dbt-bouncer checks.
@@ -79,14 +80,15 @@ def runner(
         "catalog_nodes": catalog_nodes,
         "catalog_sources": catalog_sources,
         "exposures": exposures,
+        "generic_tests": [t.test for t in generic_tests],
         "macros": macros,
         "manifest_obj": manifest_obj,
         "models": [m.model for m in models],
         "run_results": [r.run_result for r in run_results],
         "semantic_models": [s.semantic_model for s in semantic_models],
+        "singular_tests": [t.test for t in singular_tests],
         "snapshots": [s.snapshot for s in snapshots],
         "sources": sources,
-        "tests": [t.test for t in tests],
         "unit_tests": unit_tests,
     }
 
@@ -100,10 +102,12 @@ def runner(
             "catalog_node",
             "catalog_source",
             "exposure",
+            "generic_test",
             "macro",
             "model",
             "run_result",
             "semantic_model",
+            "singular_test",
             "snapshot",
             "source",
             "unit_test",
@@ -115,7 +119,9 @@ def runner(
             iterate_value = next(iter(iterate_over_value))
             for i in locals()[f"{iterate_value}s"]:
                 check_i = copy.deepcopy(check)
-                if iterate_value in ["model", "semantic_model", "snapshot", "source"]:
+                if iterate_value in ["generic_test", "singular_test"]:
+                    d = i.test.config.meta
+                elif iterate_value in ["model", "semantic_model", "snapshot", "source"]:
                     try:
                         d = getattr(i, iterate_value).config.meta
                     except Exception:
@@ -148,7 +154,14 @@ def runner(
                 ):
                     check_run_id = (
                         f"{check_i.name}:{check_i.index}:{i.unique_id.split('.')[-1]}"
-                        if iterate_value in ["exposure", "macro", "unit_test"]
+                        if iterate_value
+                        in [
+                            "exposure",
+                            "generic_test",
+                            "macro",
+                            "singular_test",
+                            "unit_test",
+                        ]
                         else f"{check_i.name}:{check_i.index}:{'_'.join(getattr(i, iterate_value).unique_id.split('.')[2:])}"
                     )
                     setattr(check_i, iterate_value, getattr(i, iterate_value, i))
