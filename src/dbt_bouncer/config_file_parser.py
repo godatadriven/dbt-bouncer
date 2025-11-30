@@ -72,6 +72,9 @@ class DbtBouncerConfBase(BaseModel):
         default=None,
         description="Regexp to match which paths to include.",
     )
+    package_name: Optional[str] = Field(
+        default=None, description="If you want to run `dbt-bouncer` against a package."
+    )
     severity: Union[Literal["error", "warn"], None] = Field(
         default=None,
         description="Severity of the check, one of 'error' or 'warn'.",

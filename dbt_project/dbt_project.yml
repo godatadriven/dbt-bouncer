@@ -34,3 +34,4 @@ models:
             - crm
       payments:
         schema: stg_payments
+  internal_package:

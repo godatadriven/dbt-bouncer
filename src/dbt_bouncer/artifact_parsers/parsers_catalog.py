@@ -1,6 +1,6 @@
 import logging
 import warnings
-from typing import TYPE_CHECKING, List, Union
+from typing import TYPE_CHECKING, List, Optional, Union
 
 from pydantic import BaseModel
 
@@ -50,6 +50,7 @@ class DbtBouncerCatalogNode(BaseModel):
 def parse_catalog(
     artifact_dir: "Path",
     manifest_obj: "DbtBouncerManifest",
+    package_name: Optional[str] = None,
 ) -> tuple[List[DbtBouncerCatalogNode], List[DbtBouncerCatalogNode]]:
     """Parse the catalog.json artifact.
 
@@ -73,7 +74,8 @@ def parse_catalog(
             },
         )
         for k, v in catalog_obj.catalog.nodes.items()
-        if k.split(".")[-2] == manifest_obj.manifest.metadata.project_name
+        if k.split(".")[-2]
+        == (package_name or manifest_obj.manifest.metadata.project_name)
     ]
     project_catalog_sources = [
         DbtBouncerCatalogNode(
@@ -86,7 +88,8 @@ def parse_catalog(
             },
         )
         for k, v in catalog_obj.catalog.sources.items()
-        if k.split(".")[1] == manifest_obj.manifest.metadata.project_name
+        if k.split(".")[1]
+        == (package_name or manifest_obj.manifest.metadata.project_name)
     ]
     logging.info(
         f"Parsed `catalog.json`: {len(project_catalog_nodes)} nodes, {len(project_catalog_sources)} sources.",

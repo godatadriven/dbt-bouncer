@@ -1,6 +1,6 @@
 import logging
 import warnings
-from typing import TYPE_CHECKING, Any, Dict, List, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from pydantic import BaseModel
 
@@ -64,6 +64,7 @@ def parse_run_results(
 def parse_run_results_artifact(
     artifact_dir: "Path",
     manifest_obj: "DbtBouncerManifest",
+    package_name: Optional[str] = None,
 ) -> List[DbtBouncerRunResult]:
     """Parse the run_results.json artifact.
 
@@ -112,7 +113,8 @@ def parse_run_results_artifact(
             },
         )
         for r in run_results_obj.results
-        if r.unique_id.split(".")[1] == manifest_obj.manifest.metadata.project_name
+        if r.unique_id.split(".")[1]
+        == (package_name or manifest_obj.manifest.metadata.project_name)
     ]
     logging.info(
         f"Parsed `run_results.json`: {len(project_run_results)} results.",

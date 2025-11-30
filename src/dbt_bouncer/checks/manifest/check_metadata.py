@@ -43,6 +43,7 @@ class CheckProjectName(BaseModel):
     )
     manifest_obj: "DbtBouncerManifest" = Field(default=None)
     name: Literal["check_project_name"]
+    package_name: Optional[str] = Field(default=None)
     project_name_pattern: str
     severity: Optional[Literal["error", "warn"]] = Field(
         default="error",
@@ -51,11 +52,14 @@ class CheckProjectName(BaseModel):
 
     def execute(self) -> None:
         """Execute the check."""
+        package_name = (
+            self.package_name or self.manifest_obj.manifest.metadata.project_name
+        )
         assert (
             re.compile(self.project_name_pattern.strip()).match(
-                self.manifest_obj.manifest.metadata.project_name,
+                package_name,
             )
             is not None
         ), (
-            f"Project name (`{self.manifest_obj.manifest.metadata.project_name}`) does not conform to the supplied regex `({self.project_name_pattern.strip()})`."
+            f"Project name (`{package_name}`) does not conform to the supplied regex `({self.project_name_pattern.strip()})`."
         )

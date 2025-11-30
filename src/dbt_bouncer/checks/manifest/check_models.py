@@ -924,6 +924,7 @@ class CheckModelMaxChainedViews(BaseCheck):
     model: "DbtBouncerModelBase" = Field(default=None)
     models: List["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_model_max_chained_views"]
+    package_name: Optional[str] = Field(default=None)
 
     def execute(self) -> None:
         """Execute the check."""
@@ -984,7 +985,10 @@ class CheckModelMaxChainedViews(BaseCheck):
                     max_chained_views=self.max_chained_views,
                     models=self.models,
                     model_unique_ids_to_check=[self.model.unique_id],
-                    package_name=self.manifest_obj.manifest.metadata.project_name,
+                    package_name=(
+                        self.package_name
+                        or self.manifest_obj.manifest.metadata.project_name
+                    ),
                 ),
             )
             == 0

@@ -145,7 +145,7 @@ def parse_dbt_artifacts(
         project_tests,
         project_unit_tests,
     ) = parse_manifest_artifact(
-        manifest_obj=manifest_obj,
+        manifest_obj=manifest_obj, package_name=bouncer_config.package_name
     )
 
     # Catalog, must come after manifest is parsed
@@ -158,6 +158,7 @@ def parse_dbt_artifacts(
         project_catalog_nodes, project_catalog_sources = parse_catalog(
             artifact_dir=dbt_artifacts_dir,
             manifest_obj=manifest_obj,
+            package_name=bouncer_config.package_name,
         )
     else:
         project_catalog_nodes = []
@@ -175,6 +176,7 @@ def parse_dbt_artifacts(
         project_run_results = parse_run_results_artifact(
             artifact_dir=dbt_artifacts_dir,
             manifest_obj=manifest_obj,
+            package_name=bouncer_config.package_name,
         )
     else:
         project_run_results = []

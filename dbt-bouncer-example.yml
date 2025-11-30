@@ -2,6 +2,7 @@
 dbt_artifacts_dir: dbt_project/target # [Optional] Directory where the dbt artifacts exists, generally the `target` directory inside a dbt project. Defaults to `$DBT_PROJECT_DIR/target` if $DBT_PROJECT_DIR is set, else `./target`.
 # exclude: ^models/staging # [Optional] Here for demonstration purposes only
 # include: ^models/marts # [Optional] Here for demonstration purposes only
+# package_name: internal_package # [Optional] If you want to run `dbt-bouncer` against a package.
 # severity: warn # [Optional] Useful when applying `dbt-bouncer` to an existing dbt project.
 
 catalog_checks:
