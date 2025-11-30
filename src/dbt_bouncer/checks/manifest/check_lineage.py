@@ -1,7 +1,7 @@
 # mypy: disable-error-code="union-attr"
 
 import re
-from typing import TYPE_CHECKING, List, Literal
+from typing import TYPE_CHECKING, List, Literal, Optional
 
 from dbt_bouncer.check_base import BaseCheck
 
@@ -53,6 +53,7 @@ class CheckLineagePermittedUpstreamModels(BaseCheck):
     model: "DbtBouncerModelBase" = Field(default=None)
     models: List["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_lineage_permitted_upstream_models"]
+    package_name: Optional[str] = Field(default=None)
     upstream_path_pattern: str
 
     def execute(self) -> None:
@@ -61,7 +62,8 @@ class CheckLineagePermittedUpstreamModels(BaseCheck):
             x
             for x in self.model.depends_on.nodes
             if x.split(".")[0] == "model"
-            and x.split(".")[1] == self.manifest_obj.manifest.metadata.project_name
+            and x.split(".")[1]
+            == (self.package_name or self.manifest_obj.manifest.metadata.project_name)
         ]
         not_permitted_upstream_models = [
             upstream_model

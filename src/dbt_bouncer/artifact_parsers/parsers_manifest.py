@@ -1,7 +1,7 @@
 import logging
 import warnings
 from enum import Enum
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Optional, Union
 
 from pydantic import BaseModel
 
@@ -173,7 +173,7 @@ def parse_manifest(
 
 
 def parse_manifest_artifact(
-    manifest_obj: DbtBouncerManifest,
+    manifest_obj: DbtBouncerManifest, package_name: Optional[str] = None
 ) -> tuple[
     List[Exposures],
     List[Macros],
@@ -200,12 +200,14 @@ def parse_manifest_artifact(
     project_exposures = [
         v
         for _, v in manifest_obj.manifest.exposures.items()
-        if v.package_name == manifest_obj.manifest.metadata.project_name
+        if v.package_name
+        == (package_name or manifest_obj.manifest.metadata.project_name)
     ]
     project_macros = [
         v
         for _, v in manifest_obj.manifest.macros.items()
-        if v.package_name == manifest_obj.manifest.metadata.project_name
+        if v.package_name
+        == (package_name or manifest_obj.manifest.metadata.project_name)
     ]
     project_models = []
     project_snapshots = []
@@ -214,7 +216,9 @@ def parse_manifest_artifact(
         if (
             isinstance(v.resource_type, Enum) and v.resource_type.value == "model"
         ) or v.resource_type == "model":
-            if v.package_name == manifest_obj.manifest.metadata.project_name:
+            if v.package_name == (
+                package_name or manifest_obj.manifest.metadata.project_name
+            ):
                 project_models.append(
                     DbtBouncerModel(
                         **{
@@ -228,7 +232,9 @@ def parse_manifest_artifact(
         elif (
             (isinstance(v.resource_type, Enum) and v.resource_type.value == "snapshot")
             or v.resource_type == "snapshot"
-        ) and v.package_name == manifest_obj.manifest.metadata.project_name:
+        ) and v.package_name == (
+            package_name or manifest_obj.manifest.metadata.project_name
+        ):
             project_snapshots.append(
                 DbtBouncerSnapshot(
                     **{
@@ -241,7 +247,9 @@ def parse_manifest_artifact(
         elif (
             (isinstance(v.resource_type, Enum) and v.resource_type.value == "test")
             or v.resource_type == "test"
-        ) and v.package_name == manifest_obj.manifest.metadata.project_name:
+        ) and v.package_name == (
+            package_name or manifest_obj.manifest.metadata.project_name
+        ):
             project_tests.append(
                 DbtBouncerTest(
                     **{
@@ -258,7 +266,8 @@ def parse_manifest_artifact(
         project_unit_tests = [
             v
             for _, v in manifest_obj.manifest.unit_tests.items()
-            if v.package_name == manifest_obj.manifest.metadata.project_name
+            if v.package_name
+            == (package_name or manifest_obj.manifest.metadata.project_name)
         ]
     else:
         project_unit_tests = []
@@ -272,7 +281,8 @@ def parse_manifest_artifact(
             },
         )
         for _, v in manifest_obj.manifest.semantic_models.items()
-        if v.package_name == manifest_obj.manifest.metadata.project_name
+        if v.package_name
+        == (package_name or manifest_obj.manifest.metadata.project_name)
     ]
 
     project_sources = [
@@ -284,11 +294,12 @@ def parse_manifest_artifact(
             },
         )
         for _, v in manifest_obj.manifest.sources.items()
-        if v.package_name == manifest_obj.manifest.metadata.project_name
+        if v.package_name
+        == (package_name or manifest_obj.manifest.metadata.project_name)
     ]
 
     logging.info(
-        f"Parsed `manifest.json`, found `{manifest_obj.manifest.metadata.project_name}` project: {len(project_exposures)} exposures, {len(project_macros)} macros, {len(project_models)} nodes, {len(project_semantic_models)} semantic models, {len(project_snapshots)} snapshots, {len(project_sources)} sources, {len(project_tests)} tests, {len(project_unit_tests)} unit tests.",
+        f"Parsed `manifest.json`, found `{(package_name or manifest_obj.manifest.metadata.project_name)}` project: {len(project_exposures)} exposures, {len(project_macros)} macros, {len(project_models)} nodes, {len(project_semantic_models)} semantic models, {len(project_snapshots)} snapshots, {len(project_sources)} sources, {len(project_tests)} tests, {len(project_unit_tests)} unit tests.",
     )
     return (
         project_exposures,

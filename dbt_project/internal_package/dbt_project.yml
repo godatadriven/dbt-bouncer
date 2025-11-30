@@ -1,0 +1,21 @@
+name: 'internal_package'
+version: '1.0.0'
+config-version: 2
+
+profile: 'dev'
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+
+models:
+  internal_package:
