@@ -271,7 +271,7 @@ def validate_conf(
     try:
         return DbtBouncerConf(**config_file_contents)
     except ValidationError as e:
-        from Levenshtein import distance
+        import jellyfish
 
         error_message: List[str] = []
         for error in e.errors():
@@ -290,7 +290,7 @@ def validate_conf(
                 ].split("', '")
                 min_dist = 100
                 for name in accepted_names:
-                    dist = distance(name, incorrect_name)
+                    dist = jellyfish.levenshtein_distance(name, incorrect_name)
                     if dist < min_dist:
                         min_dist = dist
                         min_name = name

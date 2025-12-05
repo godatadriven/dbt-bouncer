@@ -8,8 +8,8 @@ build-and-run-dbt-bouncer:
 build-artifacts:
 	poetry run python ./scripts/generate_artifacts.py
 
-build-pex:# rapidfuzz constraint helps with dependency resolving
-	poetry run pex . 'rapidfuzz<3.14.0' \
+build-pex:
+	poetry run pex . \
 		--interpreter-constraint ">=3.11,<3.14" \
 		--jobs 128 \
 		--max-install-jobs 0 \
