@@ -9,8 +9,6 @@
   env:
     DBT_PROFILES_DIR: dbt_project
     DBT_PROJECT_DIR: dbt_project
-    POETRY_VERSION: "2.0.1"
-    POETRY_VIRTUALENVS_IN_PROJECT: true
 
   jobs:
       deploy-docs:
@@ -33,14 +31,13 @@
               - name: Setup Python
                 uses: ./.github/actions/setup_python_env
                 with:
-                  poetry-version: ${{ env.POETRY_VERSION }}
                   python-version: ${{ steps.python-version.outputs.PYTHON_VERSION }}
 
               - name: Deploy docs website
                 run: |
                   git config --global user.email "bot@github.com"
                   git config --global user.name "github-actions[bot]"
-                  poetry run mike deploy --push --update-aliases latest
+                  uv run mike deploy --push --update-aliases latest
 
       docker-tests:
         permissions:
@@ -60,7 +57,6 @@
             - name: Setup Python
               uses: ./.github/actions/setup_python_env
               with:
-                poetry-version: ${{ env.POETRY_VERSION }}
                 python-version: ${{ steps.python-version.outputs.PYTHON_VERSION }}
 
             - name: Install `pex`
@@ -115,7 +111,6 @@
             - name: Setup Python
               uses: ./.github/actions/setup_python_env
               with:
-                poetry-version: ${{ env.POETRY_VERSION }}
                 python-version: ${{ matrix.python-version }}
 
             - name: Install `pex`
@@ -148,7 +143,6 @@
             - name: Setup Python
               uses: ./.github/actions/setup_python_env
               with:
-                poetry-version: ${{ env.POETRY_VERSION }}
                 python-version: ${{ matrix.python-version }}
 
             - name: Install `dbt-bouncer`

@@ -19,8 +19,6 @@
 
   env:
     IMAGE_NAME: ${{ github.repository }}
-    POETRY_VERSION: "2.0.1"
-    POETRY_VIRTUALENVS_IN_PROJECT: true
     REGISTRY: ghcr.io
 
   jobs:
@@ -50,7 +48,6 @@
                 uses: ./.github/actions/setup_python_env
                 with:
                   install-python-deps: 'false'
-                  poetry-version: ${{ env.POETRY_VERSION }}
                   python-version: ${{ steps.python-version.outputs.PYTHON_VERSION }}
 
               - name: Install version bump Poetry plugin
@@ -63,7 +60,7 @@
 
               # Need to re-install dbt-bouncer so version bump is visible when `dbt-bouncer --version` is called
               - name: Re-install dbt-bouncer
-                run: poetry install
+                run: make install
 
               - name: Build pex file
                 run: make build-pex
@@ -145,7 +142,7 @@
                     tags: ${{ steps.meta.outputs.tags }}
 
               - name: Build whl
-                run: poetry build --output dist_pypi
+                run: uv build --output dist_pypi
 
               - name: Publish package distributions to PyPI
                 uses: pypa/gh-action-pypi-publish@release/v1
@@ -177,5 +174,5 @@
 
               - name: Deploy docs website
                 run: |
-                  poetry run mike deploy --push --update-aliases v${{ steps.version.outputs.version }} stable
-                  poetry run mike set-default --push stable
+                  uv run mike deploy --push --update-aliases v${{ steps.version.outputs.version }} stable
+                  uv run mike set-default --push stable

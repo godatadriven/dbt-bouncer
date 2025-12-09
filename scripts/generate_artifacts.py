@@ -10,6 +10,10 @@ def build_pex_file(dbt_version, pex_file_name):
     """Build a pex file of `dbt-bouncer` if it does not already exist."""
     if not Path(pex_file_name).exists():
         logging.info(f"Building pex file for dbt version {dbt_version}")
+
+        # print(f"{pex_file_name=}")
+
+        # shutil.rmtree(Path(pex_file_name).parent)
         command = [
             "run",
             "pex",
@@ -37,7 +41,7 @@ def build_pex_file(dbt_version, pex_file_name):
         else:
             command.extend(["protobuf>=5"])
 
-        sh.poetry(
+        sh.uv(
             command,
             _fg=True,
         )

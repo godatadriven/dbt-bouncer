@@ -8,8 +8,6 @@ on:
 env:
     DBT_PROFILES_DIR: dbt_project
     DBT_PROJECT_DIR: dbt_project
-    POETRY_VERSION: "2.0.1"
-    POETRY_VIRTUALENVS_IN_PROJECT: true
 
 jobs:
     docker-tests:
@@ -66,7 +64,6 @@ jobs:
             - name: Setup Python
               uses: ./.github/actions/setup_python_env
               with:
-                poetry-version: ${{ env.POETRY_VERSION }}
                 python-version: ${{ matrix.python-version }}
 
             - name: Download `pex` artifact
@@ -103,7 +100,6 @@ jobs:
             - name: Setup Python
               uses: ./.github/actions/setup_python_env
               with:
-                poetry-version: ${{ env.POETRY_VERSION }}
                 python-version: ${{ matrix.python-version }}
 
             - name: Install `dbt-bouncer`

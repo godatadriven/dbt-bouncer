@@ -6,7 +6,7 @@
 
 There are many ways to contribute to the ongoing development of `dbt-bouncer`, such as by participating in discussions and issues.
 
-The rest of this document serves as a more granular guide for contributing code changes to `dbt-bouncer` (this repository). It is not intended as a guide for using `dbt-bouncer`, and some pieces assume a level of familiarity with Python development (virtualenvs, `Poetry`, etc). Specific code snippets in this guide assume you are using macOS or Linux and are comfortable with the command line.
+The rest of this document serves as a more granular guide for contributing code changes to `dbt-bouncer` (this repository). It is not intended as a guide for using `dbt-bouncer`, and some pieces assume a level of familiarity with Python development (virtualenvs, `uv`, etc). Specific code snippets in this guide assume you are using macOS or Linux and are comfortable with the command line.
 
 If you get stuck, we're happy to help! Just open an issue or draft PR and we'll do our best to help out.
 
@@ -42,11 +42,11 @@ These are the tools used in `dbt-bouncer` development and testing:
 - [GitHub Actions](https://github.com/features/actions) for automating tests and checks, once a PR is pushed to the `dbt-bouncer` repository.
 - [`make`](https://users.cs.duke.edu/~ola/courses/programming/Makefiles/Makefiles.html) to run multiple setup or test steps in combination.
 - [`mypy`](https://mypy.readthedocs.io/en/stable/) for static type checking.
-- [`Poetry`](https://python-poetry.org/) to manage our python virtual environment.
 - [`pre-commit`](https://pre-commit.com) to easily run those checks.
 - [`Pydantic`](https://docs.pydantic.dev/latest/) to validate our configuration file.
 - [`pytest`](https://docs.pytest.org/en/latest/) to define, discover, and run tests.
 - [`Ruff`](https://github.com/astral-sh/ruff) to lint and format python code.
+- [`uv`](https://docs.astral.sh/uv/) to manage our python virtual environment.
 
 A deep understanding of these tools in not required to effectively contribute to `dbt-bouncer`, but we recommend checking out the attached documentation if you're interested in learning more about each one.
 
@@ -55,7 +55,7 @@ A deep understanding of these tools in not required to effectively contribute to
 We strongly recommend using virtual environments when developing code in `dbt-bouncer`. We recommend creating this virtualenv in the root of the `dbt-bouncer` repository. To create a new virtualenv, run:
 
 ```shell
-poetry shell
+uv venv
 ```
 
 This will create a new Python virtual environment.
@@ -71,8 +71,8 @@ Set required environment variables by copying `.env.example` to `.env` and updat
 First make sure that you set up your `virtualenv` as described in [Setting up an environment](#setting-up-an-environment). Next, install `dbt-bouncer`, its dependencies and `pre-commit`:
 
 ```shell
-poetry install
-poetry run pre-commit install
+make install
+uv run pre-commit install
 ```
 
 When installed in this way, any changes you make to your local copy of the source code will be reflected immediately in your next `dbt-bouncer` run.
@@ -82,7 +82,7 @@ When installed in this way, any changes you make to your local copy of the sourc
 With your virtualenv activated, the `dbt-bouncer` script should point back to the source code you've cloned on your machine. You can verify this by running `which dbt-bouncer`. This command should show you a path to an executable in your virtualenv. You can run `dbt-bouncer` using the provided example configuration file via:
 
 ```shell
-poetry run dbt-bouncer --config-file dbt-bouncer-example.yml
+uv run dbt-bouncer --config-file dbt-bouncer-example.yml
 ```
 
 ## Testing
@@ -120,7 +120,7 @@ make test
 ```
 
 #### `pre-commit`
-[`pre-commit`](https://pre-commit.com) takes care of running all code-checks for formatting and linting. Run `poetry run pre-commit install` to install `pre-commit` in your local environment. Once this is done you can use the git pre-commit hooks to ensure proper formatting and linting.
+[`pre-commit`](https://pre-commit.com) takes care of running all code-checks for formatting and linting. Run `uv run pre-commit install` to install `pre-commit` in your local environment. Once this is done you can use the git pre-commit hooks to ensure proper formatting and linting.
 
 #### `pytest`
 
@@ -128,10 +128,10 @@ Finally, you can also run a specific test or group of tests using [`pytest`](htt
 
 ```shell
 # run all unit tests in a file
-poetry run pytest ./tests/unit/checks/catalog/test_columns.py
+uv run pytest ./tests/unit/checks/catalog/test_columns.py
 
 # run a specific unit test
-poetry run pytest ./tests/unit/checks/catalog/test_columns.py::test_check_columns_are_documented_in_public_models
+uv run pytest ./tests/unit/checks/catalog/test_columns.py::test_check_columns_are_documented_in_public_models
 ```
 
 > See [pytest usage docs](https://docs.pytest.org/en/8.1.x/how-to/usage.html) for an overview of useful command-line options.

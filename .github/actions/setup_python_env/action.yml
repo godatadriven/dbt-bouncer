@@ -6,11 +6,8 @@ inputs:
     default: 'true'
     description: 'Install python dependencies'
     required: false
-  poetry-version:
-    description: 'Poetry version'
-    required: true
   python-version:
-    description: 'Poetry version'
+    description: 'Python version'
     required: false
 
 runs:
@@ -22,31 +19,18 @@ runs:
       with:
         python-version: ${{ inputs.python-version }}
 
-    - name: Load cached Poetry installation
-      id: cached-poetry
-      uses: actions/cache@v4
-      with:
-            path: /home/runner/.local
-            key: poetry-cache-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ inputs.poetry-version }}
-
-    - name: Install Poetry
-      if: steps.cached-poetry.outputs.cache-hit != 'true'
-      uses: snok/install-poetry@v1
-      with:
-            installer-parallel: true
-            version: ${{ env.POETRY_VERSION }}
-            virtualenvs-create: true
-            virtualenvs-in-project: true
+    - name: Install uv
+      uses: astral-sh/setup-uv@v7
 
     - name: Load cached venv
-      id: cached-poetry-dependencies
+      id: cached-python-dependencies
       if: inputs.install-python-deps == 'true'
       uses: actions/cache@v4
       with:
             path: .venv
-            key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+            key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/uv.lock') }}
 
     - name: Install dependencies
-      if: inputs.install-python-deps == 'true' && steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+      if: inputs.install-python-deps == 'true' && steps.cached-python-dependencies.outputs.cache-hit != 'true'
       shell: bash
-      run: poetry install --no-interaction --no-ansi
+      run: make install
