@@ -334,7 +334,6 @@ dev = [
     { name = "dbt-duckdb" },
     { name = "isort" },
     { name = "mypy" },
-    { name = "pex" },
     { name = "pre-commit" },
     { name = "pytest" },
     { name = "pytest-cov" },
@@ -377,7 +376,6 @@ requires-dist = [
     { name = "mkdocstrings", extras = ["python"], marker = "extra == 'docs'", specifier = "~=0.0" },
     { name = "mypy", marker = "extra == 'dev'", specifier = "~=1.0" },
     { name = "packaging", specifier = "<25" },
-    { name = "pex", marker = "extra == 'dev'", specifier = "~=2.0" },
     { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=3,<5" },
     { name = "progress" },
     { name = "pydantic", specifier = ">=2,<3" },
@@ -1264,15 +1262,6 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/ca/bc/f35b8446f4531a7cb215605d100cd88b7ac6f44ab3fc94870c120ab3adbf/pathspec-0.12.1.tar.gz", hash = "sha256:a482d51503a1ab33b1c67a6c3813a26953dbdc71c31dacaef9a838c4e29f5712", size = 51043, upload-time = "2023-12-10T22:30:45Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/cc/20/ff623b09d963f88bfde16306a54e12ee5ea43e9b597108672ff3a408aad6/pathspec-0.12.1-py3-none-any.whl", hash = "sha256:a0d503e138a4c123b27490a4f7beda6a01c6f288df0e4a8b79c7eb0dc7b4cc08", size = 31191, upload-time = "2023-12-10T22:30:43.14Z" },
-]
-
-[[package]]
-name = "pex"
-version = "2.74.1"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/6f/85/7c46595c8f299cf6e12f0498e835ae54762726b626029f1f730f870a37f7/pex-2.74.1.tar.gz", hash = "sha256:6b864ecaf8f4a7e432c128c2dc1a087375be0f36444b9aeac2c16a8d0d8f4a66", size = 5223548, upload-time = "2025-12-05T23:49:48.657Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/c0/e0/27dc5d4f23cb28b8890fbf1117a0f547501154a32eebf401416a18cc62a4/pex-2.74.1-py2.py3-none-any.whl", hash = "sha256:45a1b76469b26f381e288b3ca2db6b16bef9630f01fb6b39d8b76241f53a5a68", size = 3938458, upload-time = "2025-12-05T23:49:46.134Z" },
 ]
 
 [[package]]

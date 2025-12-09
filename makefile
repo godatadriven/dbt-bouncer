@@ -8,22 +8,6 @@ build-and-run-dbt-bouncer:
 build-artifacts:
 	uv run python ./scripts/generate_artifacts.py
 
-build-pex:
-	PEX_ROOT=/tmp/pex_root uv run pex . \
-		--interpreter-constraint ">=3.11,<3.14" \
-		--jobs 128 \
-		--max-install-jobs 0 \
-		--output-file ./dist/dbt-bouncer.pex \
-		--pip-version 24.1 \
-		--platform macosx_11_0_x86_64-cp-3.11.11-cp311 \
-		--platform macosx_11_0_x86_64-cp-3.12.8-cp312 \
-		--platform macosx_10_13_x86_64-cp-3.13.0-cp313 \
-		--platform manylinux2014_x86_64-cp-3.11.11-cp311 \
-		--platform manylinux2014_x86_64-cp-3.12.8-cp312 \
-		--platform manylinux2014_x86_64-cp-3.13.0-cp313 \
-		--python-shebang='/usr/bin/env python' \
-		--script dbt-bouncer
-
 install:
 	uv sync --extra=dev --extra=docs
 

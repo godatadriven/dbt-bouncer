@@ -39,7 +39,7 @@ def test_cli_happy_path(caplog, dbt_artifacts_dir, tmp_path):
     runner = CliRunner()
     result = runner.invoke(cli, f"--config-file {PurePath(config_file).as_posix()}")
 
-    assert "Running dbt-bouncer (__version__)..." in caplog.text
+    assert "Running dbt-bouncer (0.0.0)..." in caplog.text
 
     summary_count_catalog = 0
     for record in caplog.messages:

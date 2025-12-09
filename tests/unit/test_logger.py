@@ -10,7 +10,7 @@ def test_logging_debug_cli(caplog) -> None:
         cli,
         ["--config-file", "dbt-bouncer-example.yml", "-v"],
     )
-    assert "Running dbt-bouncer (__version__)..." in caplog.text
+    assert "Running dbt-bouncer (0.0.0)..." in caplog.text
     assert len([r for r in caplog.messages if r.find("Loading config from") >= 0]) >= 2
 
 
@@ -23,7 +23,7 @@ def test_logging_debug_env_var(caplog) -> None:
             cli,
             ["--config-file", "dbt-bouncer-example.yml"],
         )
-        assert "Running dbt-bouncer (__version__)..." in caplog.text
+        assert "Running dbt-bouncer (0.0.0)..." in caplog.text
         assert (
             len([r for r in caplog.messages if r.find("Loading config from") >= 0]) >= 2
         )
@@ -35,4 +35,4 @@ def test_logging_info(caplog) -> None:
         cli,
         ["--config-file", "dbt-bouncer-example.yml"],
     )
-    assert "Running dbt-bouncer (__version__)..." in caplog.text
+    assert "Running dbt-bouncer (0.0.0)..." in caplog.text

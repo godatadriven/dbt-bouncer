@@ -86,42 +86,6 @@
                   dbt-bouncer:test \
                   --config-file /app/dbt-bouncer-example.yml
 
-      pex-tests:
-        permissions:
-          contents: read
-        runs-on: ubuntu-22.04
-        strategy:
-            fail-fast: false
-            matrix:
-                python-version:
-                    - '3.11'
-                    - '3.12'
-                    - '3.13'
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v6
-
-            - name: Determine python version
-              id: python-version
-              run: |
-                    export PYTHON_VERSION=$(cat .python-version)
-                    echo "PYTHON_VERSION: $PYTHON_VERSION"
-                    echo "PYTHON_VERSION=$PYTHON_VERSION" >> $GITHUB_OUTPUT
-
-            - name: Setup Python
-              uses: ./.github/actions/setup_python_env
-              with:
-                python-version: ${{ matrix.python-version }}
-
-            - name: Install `pex`
-              run: pip install pex
-
-            - name: Build .pex file
-              run: make build-pex
-
-            - name: Run `dbt-bouncer`
-              run: python ./dist/dbt-bouncer.pex --config-file dbt-bouncer-example.yml
-
       pip-tests:
         permissions:
           contents: read
