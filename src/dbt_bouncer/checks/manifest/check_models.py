@@ -1181,7 +1181,7 @@ class CheckModelNames(BaseCheck):
             re.compile(self.model_name_pattern.strip()).match(self.model.name)
             is not None
         ), (
-            f"`{get_clean_model_name(self.model.unique_id)}` does not match the supplied regex `{self.model_name_pattern.strip()})`."
+            f"`{get_clean_model_name(self.model.unique_id)}` does not match the supplied regex `{self.model_name_pattern.strip()}`."
         )
 
 
