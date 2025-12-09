@@ -50,13 +50,11 @@
                   install-python-deps: 'false'
                   python-version: ${{ steps.python-version.outputs.PYTHON_VERSION }}
 
-              - name: Install version bump Poetry plugin
-                run: poetry self add poetry-bumpversion
-
               - name: Bump version
                 run: |
-                  poetry version $(git tag --sort version:refname | tail -n 1)
-                  poetry version ${{ inputs.version_bump_type }}
+                  uv version $(git tag --sort version:refname | tail -n 1)
+                  uv version --bump ${{ inputs.version_bump_type }}
+                  uv run ./scripts/version_update.py --new-version $(uv version --short)
 
               # Need to re-install dbt-bouncer so version bump is visible when `dbt-bouncer --version` is called
               - name: Re-install dbt-bouncer
@@ -68,10 +66,10 @@
               - name: Save version to env var
                 id: version
                 run: |
-                  echo "version=$(poetry version --short)" >> $GITHUB_OUTPUT
-                  echo "major=$(echo $(poetry version --short | cut -d '.' -f 1))" >> $GITHUB_OUTPUT
-                  echo "minor=$(echo $(poetry version --short | cut -d '.' -f 2))" >> $GITHUB_OUTPUT
-                  echo "patch=$(echo $(poetry version --short | cut -d '.' -f 3))" >> $GITHUB_OUTPUT
+                  echo "version=$(uv version --short)" >> $GITHUB_OUTPUT
+                  echo "major=$(echo $(uv version --short | cut -d '.' -f 1))" >> $GITHUB_OUTPUT
+                  echo "minor=$(echo $(uv version --short | cut -d '.' -f 2))" >> $GITHUB_OUTPUT
+                  echo "patch=$(echo $(uv version --short | cut -d '.' -f 3))" >> $GITHUB_OUTPUT
 
               - name: Determine if prerelease flag is necessary
                 run: |

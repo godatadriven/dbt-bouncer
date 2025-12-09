@@ -124,9 +124,6 @@ plugins = [
 ignore_missing_imports = true
 module = "dbt_artifacts_parser.*"
 
-# [tool.poetry_bumpversion.file."./src/dbt_bouncer/version.py"]
-# [tool.poetry_bumpversion.file."action.yml"]
-
 [tool.ruff]
 exclude = [
     ".bzr",
