@@ -115,6 +115,9 @@ manifest_checks:
   - name: check_model_documentation_coverage
     min_model_documentation_coverage_pct: 90
   - name: check_model_documented_in_same_directory
+  - name: check_model_file_name
+    include: ^models/marts
+    file_name_pattern: .*(s|v[0-9])\.sql$
   - name: check_model_grant_privilege
     include: ^models/marts
     privilege_pattern: ^select|^write
