@@ -91,7 +91,7 @@
 
               - name: Determine if prerelease flag is necessary
                 run: |
-                    [ "${{ inputs.version_bump_type }}" = "rc-major" ] || [ "${{ inputs.version_bump_type }}" = "rc-minor" ] || [ "${{ inputs.version_bump_type }}" = "rc-patch" ] ] && export PRERELEASE="--prerelease" || export PRERELEASE="--latest"
+                    [ "${{ inputs.version_bump_type }}" = "rc" ] || [ "${{ inputs.version_bump_type }}" = "rc-major" ] || [ "${{ inputs.version_bump_type }}" = "rc-minor" ] || [ "${{ inputs.version_bump_type }}" = "rc-patch" ] && export PRERELEASE="--prerelease" || export PRERELEASE="--latest"
                     echo "PRERELEASE: $PRERELEASE"
                     echo PRERELEASE=$PRERELEASE >> "$GITHUB_ENV"
 
