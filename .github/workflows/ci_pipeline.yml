@@ -16,6 +16,7 @@ env:
   DBT_PROJECT_DIR: dbt_project
   IMAGE_NAME: ${{ github.repository }}
   REGISTRY: ghcr.io
+  UV_SYSTEM_PYTHON: 1
 
 jobs:
     pre-commit:
