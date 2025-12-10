@@ -62,23 +62,17 @@
                 if: ${{ inputs.version_bump_type != 'rc-major' && inputs.version_bump_type != 'rc-minor' && inputs.version_bump_type != 'rc-patch' }}
                 run: uv version --bump ${{ inputs.version_bump_type }}
 
-              - name: Bump version (prerelease - major)
+              - name: Bump version (release candidate - major)
                 if: ${{ inputs.version_bump_type == 'rc-major' }}
-                run: |
-                  uv version --bump major
-                  uv version --bump rc
+                run: uv version --bump major --bump rc
 
-              - name: Bump version (prerelease - minor)
+              - name: Bump version (release candidate - minor)
                 if: ${{ inputs.version_bump_type == 'rc-minor' }}
-                run: |
-                  uv version --bump minor
-                  uv version --bump rc
+                run: uv version --bump minor --bump rc
 
-              - name: Bump version (prerelease - patch)
+              - name: Bump version (release candidate - patch)
                 if: ${{ inputs.version_bump_type == 'rc-patch' }}
-                run: |
-                  uv version --bump patch
-                  uv version --bump rc
+                run: uv version --bump patch --bump rc
 
               - name: Update version in codebase
                 run: uv run ./scripts/version_update.py --new-version $(uv version --short)
