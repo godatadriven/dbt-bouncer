@@ -168,7 +168,7 @@ def test_cli_description(tmp_path):
             for x in coverage
             if x["check_run_id"] == "check_model_names:0:stg_orders"
         )
-        == "Staging models should start with 'staging_'. - AssertionError: `stg_orders` does not match the supplied regex `staging_)`."
+        == "Staging models should start with 'staging_'. - AssertionError: `stg_orders` does not match the supplied regex `staging_`."
     )
 
     assert (
@@ -177,7 +177,7 @@ def test_cli_description(tmp_path):
             for x in coverage
             if x["check_run_id"] == "check_model_names:1:stg_orders"
         )
-        == "AssertionError: `stg_orders` does not match the supplied regex `staging_)`."
+        == "AssertionError: `stg_orders` does not match the supplied regex `staging_`."
     )
 
 
