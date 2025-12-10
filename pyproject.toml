@@ -70,6 +70,9 @@ docs = [
 [project.scripts]
 dbt-bouncer = "dbt_bouncer.main:cli"
 
+[project.urls]
+repository = "https://github.com/godatadriven/dbt-bouncer"
+
 [tool.black]
 line-length = 99
 include = '/project$|\.pyi?$'
