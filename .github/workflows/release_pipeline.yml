@@ -16,6 +16,9 @@
                       - alpha
                       - beta
                       - rc
+                      - rc-major
+                      - rc-minor
+                      - rc-patch
                       - post
                       - dev
 
@@ -52,11 +55,33 @@
                   install-python-deps: 'false'
                   python-version: ${{ steps.python-version.outputs.PYTHON_VERSION }}
 
+              - name: Set latest version
+                run: uv version $(git tag --sort version:refname | tail -n 1)
+
               - name: Bump version
+                if: ${{ inputs.version_bump_type != 'rc-major' && inputs.version_bump_type != 'rc-minor' && inputs.version_bump_type != 'rc-patch' }}
+                run: uv version --bump ${{ inputs.version_bump_type }}
+
+              - name: Bump version (prerelease - major)
+                if: ${{ inputs.version_bump_type == 'rc-major' }}
                 run: |
-                  uv version $(git tag --sort version:refname | tail -n 1)
-                  uv version --bump ${{ inputs.version_bump_type }}
-                  uv run ./scripts/version_update.py --new-version $(uv version --short)
+                  uv version --bump major
+                  uv version --bump rc
+
+              - name: Bump version (prerelease - minor)
+                if: ${{ inputs.version_bump_type == 'rc-minor' }}
+                run: |
+                  uv version --bump minor
+                  uv version --bump rc
+
+              - name: Bump version (prerelease - patch)
+                if: ${{ inputs.version_bump_type == 'rc-patch' }}
+                run: |
+                  uv version --bump patch
+                  uv version --bump rc
+
+              - name: Update version in codebase
+                run: uv run ./scripts/version_update.py --new-version $(uv version --short)
 
               # Need to re-install dbt-bouncer so version bump is visible when `dbt-bouncer --version` is called
               - name: Re-install dbt-bouncer
@@ -72,7 +97,7 @@
 
               - name: Determine if prerelease flag is necessary
                 run: |
-                    [ "${{ inputs.version_bump_type }}" = "premajor" ] || [ "${{ inputs.version_bump_type }}" = "preminor" ] || [ "${{ inputs.version_bump_type }}" = "prepatch" ] || [ "${{ inputs.version_bump_type }}" = "prerelease" ] && export PRERELEASE="--prerelease" || export PRERELEASE="--latest"
+                    [ "${{ inputs.version_bump_type }}" = "rc-major" ] || [ "${{ inputs.version_bump_type }}" = "rc-minor" ] || [ "${{ inputs.version_bump_type }}" = "rc-patch" ] ] && export PRERELEASE="--prerelease" || export PRERELEASE="--latest"
                     echo "PRERELEASE: $PRERELEASE"
                     echo PRERELEASE=$PRERELEASE >> "$GITHUB_ENV"
 
