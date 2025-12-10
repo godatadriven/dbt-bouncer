@@ -59,12 +59,6 @@
               with:
                 python-version: ${{ steps.python-version.outputs.PYTHON_VERSION }}
 
-            - name: Install `pex`
-              run: pip install pex
-
-            - name: Build .pex file
-              run: make build-pex
-
             - name: Set up Docker Buildx
               uses: docker/setup-buildx-action@v3
 
