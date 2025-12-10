@@ -23,7 +23,7 @@ build-artifacts: # 1.7 and 1.8 are no longer compatible with the latest dbt feat
 	uv run dbt docs generate --profiles-dir ./dbt_project --project-dir ./dbt_project
 
 install:
-	uv sync --extra=dev --extra=docs
+	uv sync --extra=dev --extra=docs $(INSTALL_ARGS)
 
 test:
 	$(MAKE) test-unit
