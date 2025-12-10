@@ -414,6 +414,47 @@ class CheckModelDocumentedInSameDirectory(BaseCheck):
         )
 
 
+class CheckModelFileName(BaseCheck):
+    r"""Models must have a file name that matches the supplied regex.
+
+    Parameters:
+        file_name_pattern (str): Regexp the file name must match. Please account for the `.sql` extension.
+
+    Receives:
+        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+
+    Other Parameters:
+        description (Optional[str]): Description of what the check does and why it is implemented.
+        exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
+        include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        materialization (Optional[Literal["ephemeral", "incremental", "table", "view"]]): Limit check to models with the specified materialization.
+        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_model_file_name
+              description: Marts must include the model version in their file name.
+              include: ^models/marts
+              file_name_pattern: .*(v[0-9])\.sql$
+        ```
+
+    """
+
+    file_name_pattern: str
+    model: "DbtBouncerModelBase" = Field(default=None)
+    name: Literal["check_model_file_name"]
+
+    def execute(self) -> None:
+        """Execute the check."""
+        file_name = self.model.original_file_path.split("/")[-1]
+        assert (
+            re.compile(self.file_name_pattern.strip()).match(file_name) is not None
+        ), (
+            f"`{get_clean_model_name(self.model.unique_id)}` is in a file that does not match the supplied regex `{self.file_name_pattern.strip()}`."
+        )
+
+
 class CheckModelGrantPrivilege(BaseCheck):
     """Model can have grant privileges that match the specified pattern.
 

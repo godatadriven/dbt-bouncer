@@ -34,6 +34,7 @@ from dbt_bouncer.checks.manifest.check_models import (
     CheckModelDescriptionPopulated,
     CheckModelDirectories,
     CheckModelDocumentedInSameDirectory,
+    CheckModelFileName,
     CheckModelGrantPrivilege,
     CheckModelGrantPrivilegeRequired,
     CheckModelHasContractsEnforced,
@@ -69,6 +70,7 @@ CheckModelDescriptionContainsRegexPattern.model_rebuild()
 CheckModelDirectories.model_rebuild()
 CheckModelsDocumentationCoverage.model_rebuild()
 CheckModelDocumentedInSameDirectory.model_rebuild()
+CheckModelFileName.model_rebuild()
 CheckModelGrantPrivilege.model_rebuild()
 CheckModelGrantPrivilegeRequired.model_rebuild()
 CheckModelHasContractsEnforced.model_rebuild()
@@ -642,6 +644,72 @@ def test_check_model_documented_in_same_directory(model, expectation):
     with expectation:
         CheckModelDocumentedInSameDirectory(
             model=model, name="check_model_documented_in_same_directory"
+        ).execute()
+
+
+@pytest.mark.parametrize(
+    ("file_name_pattern", "model", "expectation"),
+    [
+        (
+            r".*(v[0-9])\.sql$",
+            Nodes4(
+                **{
+                    "alias": "model_v1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                    },
+                    "config": {"grants": {"select": ["user1"]}},
+                    "fqn": ["package_name", "model_v1"],
+                    "name": "model_v1",
+                    "original_file_path": "model_v1.sql",
+                    "package_name": "package_name",
+                    "path": "staging/finance/model_v1.sql",
+                    "resource_type": "model",
+                    "schema": "main",
+                    "unique_id": "model.package_name.model_v1",
+                },
+            ),
+            does_not_raise(),
+        ),
+        (
+            ".*(v[0-9])$",
+            Nodes4(
+                **{
+                    "alias": "model_v1",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                    },
+                    "config": {"grants": {"select": ["user1"]}},
+                    "fqn": ["package_name", "model_v1"],
+                    "name": "model_v1",
+                    "original_file_path": "model_v1.sql",
+                    "package_name": "package_name",
+                    "path": "staging/finance/model_v1.sql",
+                    "resource_type": "model",
+                    "schema": "main",
+                    "unique_id": "model.package_name.model_v1",
+                },
+            ),
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_model_file_names(file_name_pattern, model, expectation):
+    with expectation:
+        CheckModelFileName(
+            file_name_pattern=file_name_pattern,
+            model=model,
+            name="check_model_file_name",
         ).execute()
 
 
