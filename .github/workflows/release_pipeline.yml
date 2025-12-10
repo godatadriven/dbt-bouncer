@@ -12,10 +12,12 @@
                       - major
                       - minor
                       - patch
-                      - premajor
-                      - preminor
-                      - prepatch
-                      - prerelease
+                      - stable
+                      - alpha
+                      - beta
+                      - rc
+                      - post
+                      - dev
 
   env:
     IMAGE_NAME: ${{ github.repository }}
