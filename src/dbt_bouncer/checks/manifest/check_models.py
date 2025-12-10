@@ -1174,7 +1174,9 @@ class CheckModelNames(BaseCheck):
     def execute(self) -> None:
         """Execute the check."""
         assert (
-            re.compile(self.model_name_pattern.strip()).match(self.model.name)
+            re.compile(self.model_name_pattern.strip()).match(
+                get_clean_model_name(self.model.unique_id)
+            )
             is not None
         ), (
             f"`{get_clean_model_name(self.model.unique_id)}` does not match the supplied regex `{self.model_name_pattern.strip()})`."
