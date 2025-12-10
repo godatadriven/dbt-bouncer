@@ -86,7 +86,7 @@ jobs:
 
             - name: Run pytest (unit tests)
               if: matrix.operating-system != 'windows-latest'
-              run: make test-unit | tee pytest-coverage.txt && exit ${PIPESTATUS[0]}
+              run: make test-unit | tee uv pytest-coverage.txt && exit ${PIPESTATUS[0]}
 
             # TODO: Fix permissions issue
             # - name: Pytest coverage comment
