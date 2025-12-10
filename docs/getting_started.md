@@ -103,16 +103,6 @@ docker run --rm \
     --config-file /app/<PATH_TO_CONFIG_FILE>
 ```
 
-### Pex
-
-You can also run the `.pex` ([Python EXecutable](https://docs.pex-tool.org/whatispex.html#whatispex)) artifact directly once you have a python executable (3.11 -> 3.13) installed:
-
-```bash
-wget https://github.com/godatadriven/dbt-bouncer/releases/download/vX.X.X/dbt-bouncer.pex -O dbt-bouncer.pex
-
-python dbt-bouncer.pex --config-file $PWD/<PATH_TO_CONFIG_FILE>
-```
-
 ## How to contribute a check to `dbt-bouncer`
 
 See [Adding a new check](./CONTRIBUTING.md#adding-a-new-check).

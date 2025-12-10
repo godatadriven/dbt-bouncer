@@ -19,7 +19,7 @@ repos:
       hooks:
         - id: ruff
           name: ruff
-          entry: poetry run ruff check --force-exclude --config pyproject.toml --fix
+          entry: uv run ruff check --force-exclude --config pyproject.toml --fix
           language: python
           types_or: [python, pyi, jupyter]
           require_serial: true
@@ -27,7 +27,7 @@ repos:
       hooks:
         - id: ruff-format
           name: ruff-format
-          entry: poetry run ruff format --force-exclude --config pyproject.toml
+          entry: uv run ruff format --force-exclude --config pyproject.toml
           language: python
           types_or: [python, pyi, jupyter]
           require_serial: true
@@ -35,7 +35,7 @@ repos:
       hooks:
           - id: mypy
             args: ["--install-types", "--explicit-package-bases", "--ignore-missing-imports", "--scripts-are-modules", "--non-interactive"]
-            entry: poetry run mypy
+            entry: uv run mypy
             language: system
             name: mypy
             require_serial: true
@@ -44,7 +44,7 @@ repos:
       hooks:
           - id: alphabetical-checks
             args: []
-            entry: poetry run python ./scripts/assert_alphabetical_checks.py
+            entry: uv run python ./scripts/assert_alphabetical_checks.py
             language: system
             name: alphabetical-checks
             require_serial: true
@@ -52,7 +52,7 @@ repos:
     - repo: local
       hooks:
         - id: sqlfmt
-          entry: poetry run sqlfmt
+          entry: uv run sqlfmt
           language: system
           name: sqlfmt
           require_serial: true

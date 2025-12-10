@@ -1,8 +1,7 @@
 # Keep in sync with .python-version
 FROM python:3.11.5-slim
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+ENV UV_HTTP_TIMEOUT=100 \
+    UV_NO_CACHE=1
 
-WORKDIR /dbt-bouncer
-
-COPY dist/dbt-bouncer.pex ./dbt-bouncer.pex
-
-ENTRYPOINT [ "/dbt-bouncer/dbt-bouncer.pex" ]
+ENTRYPOINT ["uvx", "dbt-bouncer"]

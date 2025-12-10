@@ -9,8 +9,6 @@
   env:
     DBT_PROFILES_DIR: dbt_project
     DBT_PROJECT_DIR: dbt_project
-    POETRY_VERSION: "2.0.1"
-    POETRY_VIRTUALENVS_IN_PROJECT: true
 
   jobs:
       deploy-docs:
@@ -33,14 +31,13 @@
               - name: Setup Python
                 uses: ./.github/actions/setup_python_env
                 with:
-                  poetry-version: ${{ env.POETRY_VERSION }}
                   python-version: ${{ steps.python-version.outputs.PYTHON_VERSION }}
 
               - name: Deploy docs website
                 run: |
                   git config --global user.email "bot@github.com"
                   git config --global user.name "github-actions[bot]"
-                  poetry run mike deploy --push --update-aliases latest
+                  uv run mike deploy --push --update-aliases latest
 
       docker-tests:
         permissions:
@@ -60,14 +57,7 @@
             - name: Setup Python
               uses: ./.github/actions/setup_python_env
               with:
-                poetry-version: ${{ env.POETRY_VERSION }}
                 python-version: ${{ steps.python-version.outputs.PYTHON_VERSION }}
-
-            - name: Install `pex`
-              run: pip install pex
-
-            - name: Build .pex file
-              run: make build-pex
 
             - name: Set up Docker Buildx
               uses: docker/setup-buildx-action@v3
@@ -90,43 +80,6 @@
                   dbt-bouncer:test \
                   --config-file /app/dbt-bouncer-example.yml
 
-      pex-tests:
-        permissions:
-          contents: read
-        runs-on: ubuntu-22.04
-        strategy:
-            fail-fast: false
-            matrix:
-                python-version:
-                    - '3.11'
-                    - '3.12'
-                    - '3.13'
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v6
-
-            - name: Determine python version
-              id: python-version
-              run: |
-                    export PYTHON_VERSION=$(cat .python-version)
-                    echo "PYTHON_VERSION: $PYTHON_VERSION"
-                    echo "PYTHON_VERSION=$PYTHON_VERSION" >> $GITHUB_OUTPUT
-
-            - name: Setup Python
-              uses: ./.github/actions/setup_python_env
-              with:
-                poetry-version: ${{ env.POETRY_VERSION }}
-                python-version: ${{ matrix.python-version }}
-
-            - name: Install `pex`
-              run: pip install pex
-
-            - name: Build .pex file
-              run: make build-pex
-
-            - name: Run `dbt-bouncer`
-              run: python ./dist/dbt-bouncer.pex --config-file dbt-bouncer-example.yml
-
       pip-tests:
         permissions:
           contents: read
@@ -148,7 +101,6 @@
             - name: Setup Python
               uses: ./.github/actions/setup_python_env
               with:
-                poetry-version: ${{ env.POETRY_VERSION }}
                 python-version: ${{ matrix.python-version }}
 
             - name: Install `dbt-bouncer`

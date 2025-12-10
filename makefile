@@ -1,35 +1,36 @@
+PYTHON_VERSION_FILE := .python-version
+PYTHON_INTERPRETER_CONSTRAINT := $(shell cat $(PYTHON_VERSION_FILE))
+
 # On GitHub the `dbt build` command often returns "leaked semaphores" errors.
 build-and-run-dbt-bouncer:
-	poetry run dbt deps
-	poetry run dbt build
-	poetry run dbt docs generate
-	poetry run dbt-bouncer --config-file ./dbt-bouncer-example.yml
+	uv run dbt deps
+	uv run dbt build
+	uv run dbt docs generate
+	uv run dbt-bouncer --config-file ./dbt-bouncer-example.yml
 
-build-artifacts:
-	poetry run python ./scripts/generate_artifacts.py
+build-artifacts: # 1.7 and 1.8 are no longer compatible with the latest dbt features so those fixtures are considered frozen
+	uvx --python "==$(PYTHON_INTERPRETER_CONSTRAINT)" --with 'dbt-duckdb~=1.9.0' --from 'dbt-core~=1.9.0' dbt parse --profiles-dir ./dbt_project --project-dir ./dbt_project
+	uvx --python "==$(PYTHON_INTERPRETER_CONSTRAINT)" --with 'dbt-duckdb~=1.9.0' --from 'dbt-core~=1.9.0' dbt docs generate --profiles-dir ./dbt_project --project-dir ./dbt_project
+	rm -r ./tests/fixtures/dbt_19/target || true
+	mkdir -p ./tests/fixtures/dbt_19/target
+	mv ./dbt_project/target/*.json ./tests/fixtures/dbt_19/target
+	uvx --python "==$(PYTHON_INTERPRETER_CONSTRAINT)" --with 'dbt-duckdb~=1.10.0' --from 'dbt-core~=1.10.0' dbt parse --profiles-dir ./dbt_project --project-dir ./dbt_project
+	uvx --python "==$(PYTHON_INTERPRETER_CONSTRAINT)" --with 'dbt-duckdb~=1.10.0' --from 'dbt-core~=1.10.0' dbt docs generate --profiles-dir ./dbt_project --project-dir ./dbt_project
+	rm -r ./tests/fixtures/dbt_110/target || true
+	mkdir -p ./tests/fixtures/dbt_110/target
+	mv ./dbt_project/target ./tests/fixtures/dbt_110
+	uv run dbt parse --profiles-dir ./dbt_project --project-dir ./dbt_project
+	uv run dbt docs generate --profiles-dir ./dbt_project --project-dir ./dbt_project
 
-build-pex:
-	poetry run pex . \
-		--interpreter-constraint ">=3.11,<3.14" \
-		--jobs 128 \
-		--max-install-jobs 0 \
-		--output-file ./dist/dbt-bouncer.pex \
-		--pip-version 24.1 \
-		--platform macosx_11_0_x86_64-cp-3.11.11-cp311 \
-		--platform macosx_11_0_x86_64-cp-3.12.8-cp312 \
-		--platform macosx_10_13_x86_64-cp-3.13.0-cp313 \
-		--platform manylinux2014_x86_64-cp-3.11.11-cp311 \
-		--platform manylinux2014_x86_64-cp-3.12.8-cp312 \
-		--platform manylinux2014_x86_64-cp-3.13.0-cp313 \
-		--python-shebang='/usr/bin/env python' \
-		--script dbt-bouncer
+install:
+	uv sync --extra=dev --extra=docs
 
 test:
 	$(MAKE) test-unit
 	$(MAKE) test-integration
 
 test-integration:
-	poetry run pytest \
+	uv run pytest \
 		-c ./tests \
 		--junitxml=coverage.xml \
 		--cov-report=term-missing:skip-covered \
@@ -39,7 +40,7 @@ test-integration:
 		$(MAKE_ARGS)
 
 test-unit:
-	poetry run pytest \
+	uv run pytest \
 		-c ./tests \
 		--junitxml=coverage.xml \
 		--cov-report=term-missing:skip-covered \
@@ -47,14 +48,14 @@ test-unit:
 		--numprocesses 5 \
 		./tests/unit \
 		-m 'not not_in_parallel and not not_in_parallel2' && \
-	poetry run pytest \
+	uv run pytest \
 		-c ./tests \
 		--junitxml=coverage.xml \
 		--cov-report=term-missing:skip-covered \
 		--cov=src/dbt_bouncer/ \
 		--cov-append \
 		-m not_in_parallel && \
-	poetry run pytest \
+	uv run pytest \
 		-c ./tests \
 		--junitxml=coverage.xml \
 		--cov-report=term-missing:skip-covered \
@@ -63,7 +64,7 @@ test-unit:
 		-m not_in_parallel2
 
 test-windows:
-	poetry run pytest -c ./tests --numprocesses 5 ./tests/unit -m 'not not_in_parallel and not not_in_parallel2' && \
-	poetry run pytest -c ./tests -m not_in_parallel && \
-	poetry run pytest -c ./tests -m not_in_parallel2 && \
-	poetry run pytest -c ./tests --numprocesses 5 ./tests/integration
+	uv run pytest -c ./tests --numprocesses 5 ./tests/unit -m 'not not_in_parallel and not not_in_parallel2' && \
+	uv run pytest -c ./tests -m not_in_parallel && \
+	uv run pytest -c ./tests -m not_in_parallel2 && \
+	uv run pytest -c ./tests --numprocesses 5 ./tests/integration

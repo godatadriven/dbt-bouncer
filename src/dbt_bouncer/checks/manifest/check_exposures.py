@@ -18,8 +18,8 @@ class CheckExposureOnModel(BaseCheck):
     """Exposures should depend on a model.
 
     Parameters:
-        max_number_of_models (Optional[int]): The maximum number of models an exposure can depend on, defaults to 100.
-        min_number_of_models (Optional[int]): The minimum number of models an exposure can depend on, defaults to 1.
+        maximum_number_of_models (Optional[int]): The maximum number of models an exposure can depend on, defaults to 100.
+        minimum_number_of_models (Optional[int]): The minimum number of models an exposure can depend on, defaults to 1.
 
     Receives:
         exposure (DbtBouncerExposureBase): The DbtBouncerExposureBase object to check.

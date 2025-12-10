@@ -19,8 +19,6 @@
 
   env:
     IMAGE_NAME: ${{ github.repository }}
-    POETRY_VERSION: "2.0.1"
-    POETRY_VIRTUALENVS_IN_PROJECT: true
     REGISTRY: ghcr.io
 
   jobs:
@@ -50,31 +48,25 @@
                 uses: ./.github/actions/setup_python_env
                 with:
                   install-python-deps: 'false'
-                  poetry-version: ${{ env.POETRY_VERSION }}
                   python-version: ${{ steps.python-version.outputs.PYTHON_VERSION }}
-
-              - name: Install version bump Poetry plugin
-                run: poetry self add poetry-bumpversion
 
               - name: Bump version
                 run: |
-                  poetry version $(git tag --sort version:refname | tail -n 1)
-                  poetry version ${{ inputs.version_bump_type }}
+                  uv version $(git tag --sort version:refname | tail -n 1)
+                  uv version --bump ${{ inputs.version_bump_type }}
+                  uv run ./scripts/version_update.py --new-version $(uv version --short)
 
               # Need to re-install dbt-bouncer so version bump is visible when `dbt-bouncer --version` is called
               - name: Re-install dbt-bouncer
-                run: poetry install
-
-              - name: Build pex file
-                run: make build-pex
+                run: make install
 
               - name: Save version to env var
                 id: version
                 run: |
-                  echo "version=$(poetry version --short)" >> $GITHUB_OUTPUT
-                  echo "major=$(echo $(poetry version --short | cut -d '.' -f 1))" >> $GITHUB_OUTPUT
-                  echo "minor=$(echo $(poetry version --short | cut -d '.' -f 2))" >> $GITHUB_OUTPUT
-                  echo "patch=$(echo $(poetry version --short | cut -d '.' -f 3))" >> $GITHUB_OUTPUT
+                  echo "version=$(uv version --short)" >> $GITHUB_OUTPUT
+                  echo "major=$(echo $(uv version --short | cut -d '.' -f 1))" >> $GITHUB_OUTPUT
+                  echo "minor=$(echo $(uv version --short | cut -d '.' -f 2))" >> $GITHUB_OUTPUT
+                  echo "patch=$(echo $(uv version --short | cut -d '.' -f 3))" >> $GITHUB_OUTPUT
 
               - name: Determine if prerelease flag is necessary
                 run: |
@@ -145,7 +137,7 @@
                     tags: ${{ steps.meta.outputs.tags }}
 
               - name: Build whl
-                run: poetry build --output dist_pypi
+                run: uv build --output dist_pypi
 
               - name: Publish package distributions to PyPI
                 uses: pypa/gh-action-pypi-publish@release/v1
@@ -167,15 +159,10 @@
                         $PRERELEASE \
                         --verify-tag
 
-              - name: Upload .pex to release
-                env:
-                    GH_TOKEN: ${{ github.token }}
-                run: gh release upload v${{ steps.version.outputs.version }} ./dist/dbt-bouncer.pex
-
               - name: Checkout `gh-pages`
                 run: git fetch origin gh-pages --depth=1
 
               - name: Deploy docs website
                 run: |
-                  poetry run mike deploy --push --update-aliases v${{ steps.version.outputs.version }} stable
-                  poetry run mike set-default --push stable
+                  uv run mike deploy --push --update-aliases v${{ steps.version.outputs.version }} stable
+                  uv run mike set-default --push stable

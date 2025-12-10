@@ -15,8 +15,6 @@ env:
   DBT_PROFILES_DIR: dbt_project
   DBT_PROJECT_DIR: dbt_project
   IMAGE_NAME: ${{ github.repository }}
-  POETRY_VERSION: "2.0.1"
-  POETRY_VIRTUALENVS_IN_PROJECT: true
   REGISTRY: ghcr.io
 
 jobs:
@@ -43,14 +41,13 @@ jobs:
             - name: Setup Python
               uses: ./.github/actions/setup_python_env
               with:
-                poetry-version: ${{ env.POETRY_VERSION }}
                 python-version: ${{ steps.python-version.outputs.PYTHON_VERSION }}
 
             - name: Run pre-commit
               run: |
                 git diff --name-status origin/main..HEAD > changed_files.txt
                 cat changed_files.txt
-                cat changed_files.txt | xargs poetry run pre-commit run --files
+                cat changed_files.txt | xargs uv run pre-commit run --files
 
     unit-tests:
         needs: [pre-commit]
@@ -81,7 +78,6 @@ jobs:
             - name: Setup Python
               uses: ./.github/actions/setup_python_env
               with:
-                poetry-version: ${{ env.POETRY_VERSION }}
                 python-version: ${{ matrix.python-version }}
 
             - name: Run pytest (Windows)
@@ -140,11 +136,7 @@ jobs:
             - name: Setup Python
               uses: ./.github/actions/setup_python_env
               with:
-                poetry-version: ${{ env.POETRY_VERSION }}
                 python-version: ${{ steps.python-version.outputs.PYTHON_VERSION }}
-
-            - name: Build pex file
-              run: make build-pex
 
             - name: Set up Docker Buildx
               uses: docker/setup-buildx-action@v3
@@ -189,39 +181,7 @@ jobs:
           - name: Setup Python
             uses: ./.github/actions/setup_python_env
             with:
-              poetry-version: ${{ env.POETRY_VERSION }}
               python-version: ${{ steps.python-version.outputs.PYTHON_VERSION }}
 
           - name: Build docs website
-            run: poetry run mkdocs build
-
-    pex-tests:
-      needs: [pre-commit]
-      permissions:
-        contents: read
-      runs-on: ubuntu-22.04
-      steps:
-          - name: Checkout
-            uses: actions/checkout@v6
-
-          - name: checkout-merge
-            uses: check-spelling/checkout-merge@v0.0.6
-
-          - name: Determine python version
-            id: python-version
-            run: |
-                export PYTHON_VERSION=$(cat .python-version)
-                echo "PYTHON_VERSION: $PYTHON_VERSION"
-                echo "PYTHON_VERSION=$PYTHON_VERSION" >> $GITHUB_OUTPUT
-
-          - name: Setup Python
-            uses: ./.github/actions/setup_python_env
-            with:
-              poetry-version: ${{ env.POETRY_VERSION }}
-              python-version: ${{ steps.python-version.outputs.PYTHON_VERSION }}
-
-          - name: Build pex file
-            run: make build-pex
-
-          - name: Test pex file
-            run: ./dist/dbt-bouncer.pex --config-file $PWD/dbt-bouncer-example.yml
+            run: uv run mkdocs build

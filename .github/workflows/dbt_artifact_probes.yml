@@ -9,8 +9,6 @@
     env:
       DBT_PROFILES_DIR: dbt_project
       DBT_PROJECT_DIR: dbt_project
-      POETRY_VERSION: "2.0.1"
-      POETRY_VIRTUALENVS_IN_PROJECT: true
 
     jobs:
         dbt-cloud:
@@ -31,7 +29,6 @@
                 - name: Setup Python
                   uses: ./.github/actions/setup_python_env
                   with:
-                    poetry-version: ${{ env.POETRY_VERSION }}
                     python-version: ${{ steps.python-version.outputs.PYTHON_VERSION }}
 
                 - name: Trigger dbt Cloud job and download artifacts
@@ -42,7 +39,7 @@
                     DBT_TOKEN_VALUE: ${{ secrets.DBT_TOKEN_VALUE }}
 
                 - name: Run `dbt-bouncer`
-                  run: poetry run dbt-bouncer --config-file ./dbt-bouncer-example.yml
+                  run: uv run dbt-bouncer --config-file ./dbt-bouncer-example.yml
 
         dbt-core:
             permissions:
@@ -62,11 +59,10 @@
                 - name: Setup Python
                   uses: ./.github/actions/setup_python_env
                   with:
-                    poetry-version: ${{ env.POETRY_VERSION }}
                     python-version: ${{ steps.python-version.outputs.PYTHON_VERSION }}
 
                 - name: Install latest released dbt-core
-                  run: poetry run pip install dbt-core -U
+                  run: uv run pip install dbt-core -U
 
                 - name: Regenerate dbt artifacts and run `dbt-bouncer`
                   run: |
