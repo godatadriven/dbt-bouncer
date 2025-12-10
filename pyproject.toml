@@ -51,7 +51,6 @@ dev = [
   "pytest-cov>=5,<8",
   "pytest-xdist~=3.0",
   "ruff~=0.0",
-  "sh~=2.0",
   "shandy-sqlfmt[jinjafmt]~=0.0",
   "types-PyYaml~=6.0",
   "types-tabulate~=0.0",
