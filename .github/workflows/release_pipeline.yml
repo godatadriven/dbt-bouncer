@@ -158,7 +158,7 @@
                     tags: ${{ steps.meta.outputs.tags }}
 
               - name: Build whl
-                run: uv build --output dist_pypi
+                run: uv build --out-dir dist_pypi
 
               - name: Publish package distributions to PyPI
                 uses: pypa/gh-action-pypi-publish@release/v1
