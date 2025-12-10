@@ -22,7 +22,7 @@ dependencies =[
   "requests (>=2,<3)",
   "tabulate (<1)",
   "toml (<1)",
-  "semver (<4)",
+  "semver (<4)"
 ]
 description = "Configure and enforce conventions for your dbt project."
 keywords = [
@@ -59,11 +59,11 @@ dev = [
 docs = [
   "mike~=2.0",
   "mkdocs~=1.0",
-  "mkdocstrings[python]~=0.0",
+  "mkdocstrings-python<2",
   "mkdocs-click~=0.0",
   "mkdocs-git-revision-date-localized-plugin~=1.0",
   "mkdocs-material~=9.0",
-  "pymdown-extensions[details]~=10.0"
+  "pymdown-extensions~=10.0"
 ]
 
 [project.scripts]
