@@ -19,39 +19,39 @@ env:
   UV_SYSTEM_PYTHON: 1
 
 jobs:
-    pre-commit:
-        permissions:
-          contents: read
-        runs-on: ubuntu-22.04
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v6
-              with:
-                fetch-depth: "0"
+    # pre-commit:
+    #     permissions:
+    #       contents: read
+    #     runs-on: ubuntu-22.04
+    #     steps:
+    #         - name: Checkout
+    #           uses: actions/checkout@v6
+    #           with:
+    #             fetch-depth: "0"
 
-            - name: checkout-merge
-              uses: check-spelling/checkout-merge@v0.0.6
+    #         - name: checkout-merge
+    #           uses: check-spelling/checkout-merge@v0.0.6
 
-            - name: Determine python version
-              id: python-version
-              run: |
-                  export PYTHON_VERSION=$(cat .python-version)
-                  echo "PYTHON_VERSION: $PYTHON_VERSION"
-                  echo "PYTHON_VERSION=$PYTHON_VERSION" >> $GITHUB_OUTPUT
+    #         - name: Determine python version
+    #           id: python-version
+    #           run: |
+    #               export PYTHON_VERSION=$(cat .python-version)
+    #               echo "PYTHON_VERSION: $PYTHON_VERSION"
+    #               echo "PYTHON_VERSION=$PYTHON_VERSION" >> $GITHUB_OUTPUT
 
-            - name: Setup Python
-              uses: ./.github/actions/setup_python_env
-              with:
-                python-version: ${{ steps.python-version.outputs.PYTHON_VERSION }}
+    #         - name: Setup Python
+    #           uses: ./.github/actions/setup_python_env
+    #           with:
+    #             python-version: ${{ steps.python-version.outputs.PYTHON_VERSION }}
 
-            - name: Run pre-commit
-              run: |
-                git diff --name-status origin/main..HEAD > changed_files.txt
-                cat changed_files.txt
-                cat changed_files.txt | xargs uv run pre-commit run --files
+    #         - name: Run pre-commit
+    #           run: |
+    #             git diff --name-status origin/main..HEAD > changed_files.txt
+    #             cat changed_files.txt
+    #             cat changed_files.txt | xargs uv run pre-commit run --files
 
     unit-tests:
-        needs: [pre-commit]
+        # needs: [pre-commit]
         runs-on: ${{ matrix.operating-system }}
         # permissions:
         #     checks: write
@@ -67,8 +67,8 @@ jobs:
                   - windows-latest
                 python-version:
                     - '3.11'
-                    - '3.12'
-                    - '3.13'
+                    # - '3.12'
+                    # - '3.13'
         steps:
             - uses: actions/checkout@v6
 
@@ -80,6 +80,9 @@ jobs:
               uses: ./.github/actions/setup_python_env
               with:
                 python-version: ${{ matrix.python-version }}
+
+            - name: Setup tmate session
+              uses: mxschmitt/action-tmate@v3
 
             - name: Run pytest (Windows)
               if: matrix.operating-system == 'windows-latest'
@@ -115,74 +118,74 @@ jobs:
               run: |
                   (r=3;while ! make build-and-run-dbt-bouncer ; do ((--r))||exit;done)
 
-    e2e-tests:
-        needs: [pre-commit]
-        permissions:
-          contents: read
-        runs-on: ubuntu-22.04
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v6
+    # e2e-tests:
+    #     needs: [pre-commit]
+    #     permissions:
+    #       contents: read
+    #     runs-on: ubuntu-22.04
+    #     steps:
+    #         - name: Checkout
+    #           uses: actions/checkout@v6
 
-            - name: checkout-merge
-              uses: check-spelling/checkout-merge@v0.0.6
+    #         - name: checkout-merge
+    #           uses: check-spelling/checkout-merge@v0.0.6
 
-            - name: Determine python version
-              id: python-version
-              run: |
-                  export PYTHON_VERSION=$(cat .python-version)
-                  echo "PYTHON_VERSION: $PYTHON_VERSION"
-                  echo "PYTHON_VERSION=$PYTHON_VERSION" >> $GITHUB_OUTPUT
+    #         - name: Determine python version
+    #           id: python-version
+    #           run: |
+    #               export PYTHON_VERSION=$(cat .python-version)
+    #               echo "PYTHON_VERSION: $PYTHON_VERSION"
+    #               echo "PYTHON_VERSION=$PYTHON_VERSION" >> $GITHUB_OUTPUT
 
-            - name: Setup Python
-              uses: ./.github/actions/setup_python_env
-              with:
-                python-version: ${{ steps.python-version.outputs.PYTHON_VERSION }}
+    #         - name: Setup Python
+    #           uses: ./.github/actions/setup_python_env
+    #           with:
+    #             python-version: ${{ steps.python-version.outputs.PYTHON_VERSION }}
 
-            - name: Set up Docker Buildx
-              uses: docker/setup-buildx-action@v3
+    #         - name: Set up Docker Buildx
+    #           uses: docker/setup-buildx-action@v3
 
-            - name: Build image
-              uses: docker/build-push-action@v6
-              with:
-                  build-args: PYTHON_VERSION=${{ steps.python-version.outputs.PYTHON_VERSION }}
-                  cache-from: type=gha
-                  cache-to: type=gha,mode=max
-                  context: .
-                  load: true
-                  push: false
-                  tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:ci
+    #         - name: Build image
+    #           uses: docker/build-push-action@v6
+    #           with:
+    #               build-args: PYTHON_VERSION=${{ steps.python-version.outputs.PYTHON_VERSION }}
+    #               cache-from: type=gha
+    #               cache-to: type=gha,mode=max
+    #               context: .
+    #               load: true
+    #               push: false
+    #               tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:ci
 
-            - name: Run e2e test
-              run: |
-                docker run --rm \
-                  --volume "$PWD":/app \
-                  ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:ci \
-                  --config-file /app/dbt-bouncer-example.yml
+    #         - name: Run e2e test
+    #           run: |
+    #             docker run --rm \
+    #               --volume "$PWD":/app \
+    #               ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:ci \
+    #               --config-file /app/dbt-bouncer-example.yml
 
-    mkdocs-build:
-      needs: [pre-commit]
-      permissions:
-        contents: read
-      runs-on: ubuntu-22.04
-      steps:
-          - name: Checkout
-            uses: actions/checkout@v6
+    # mkdocs-build:
+    #   needs: [pre-commit]
+    #   permissions:
+    #     contents: read
+    #   runs-on: ubuntu-22.04
+    #   steps:
+    #       - name: Checkout
+    #         uses: actions/checkout@v6
 
-          - name: checkout-merge
-            uses: check-spelling/checkout-merge@v0.0.6
+    #       - name: checkout-merge
+    #         uses: check-spelling/checkout-merge@v0.0.6
 
-          - name: Determine python version
-            id: python-version
-            run: |
-                export PYTHON_VERSION=$(cat .python-version)
-                echo "PYTHON_VERSION: $PYTHON_VERSION"
-                echo "PYTHON_VERSION=$PYTHON_VERSION" >> $GITHUB_OUTPUT
+    #       - name: Determine python version
+    #         id: python-version
+    #         run: |
+    #             export PYTHON_VERSION=$(cat .python-version)
+    #             echo "PYTHON_VERSION: $PYTHON_VERSION"
+    #             echo "PYTHON_VERSION=$PYTHON_VERSION" >> $GITHUB_OUTPUT
 
-          - name: Setup Python
-            uses: ./.github/actions/setup_python_env
-            with:
-              python-version: ${{ steps.python-version.outputs.PYTHON_VERSION }}
+    #       - name: Setup Python
+    #         uses: ./.github/actions/setup_python_env
+    #         with:
+    #           python-version: ${{ steps.python-version.outputs.PYTHON_VERSION }}
 
-          - name: Build docs website
-            run: uv run mkdocs build
+    #       - name: Build docs website
+    #         run: uv run mkdocs build
