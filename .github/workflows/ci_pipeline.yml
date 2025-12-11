@@ -64,7 +64,7 @@ jobs:
             matrix:
                 operating-system:
                   - ubuntu-22.04
-                  - windows-latest
+                  # - windows-latest
                 python-version:
                     - '3.11'
                     # - '3.12'

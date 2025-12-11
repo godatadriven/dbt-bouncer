@@ -22,15 +22,15 @@ runs:
     - name: Install uv
       uses: astral-sh/setup-uv@v7
 
-    - name: Load cached venv
-      id: cached-python-dependencies
-      if: inputs.install-python-deps == 'true'
-      uses: actions/cache@v4
-      with:
-            path: .venv
-            key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/uv.lock') }}
+    # - name: Load cached venv
+    #   id: cached-python-dependencies
+    #   if: inputs.install-python-deps == 'true'
+    #   uses: actions/cache@v4
+    #   with:
+    #         path: .venv
+    #         key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/uv.lock') }}
 
     - name: Install dependencies
-      if: inputs.install-python-deps == 'true' && steps.cached-python-dependencies.outputs.cache-hit != 'true'
+      # if: inputs.install-python-deps == 'true' && steps.cached-python-dependencies.outputs.cache-hit != 'true'
       shell: bash
       run: make install INSTALL_ARGS="--system"
