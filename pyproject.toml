@@ -132,7 +132,7 @@ exclude = [
 ]
 line-length = 99
 indent-width = 4
-target-version = "py38"
+target-version = "py311"
 
 [tool.ruff.lint]
 ignore = ["COM812", "D100", "D203", "D213", "D406", "D407", "D409", "E501", "G004", "LOG015", "S101"]
