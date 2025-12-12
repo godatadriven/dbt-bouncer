@@ -60,38 +60,46 @@ class CheckMacroArgumentsDescriptionPopulated(BaseCheck):
     min_description_length: int = Field(default=4)
     name: Literal["check_macro_arguments_description_populated"]
 
-    def execute(self) -> None:
-        """Execute the check."""
-        environment = Environment(autoescape=True, extensions=[TagExtension])
-        ast = environment.parse(self.macro.macro_sql)
-
+    def _is_materialization(self, ast) -> bool:
+        """Check if the parsed AST represents a materialization macro."""
         if hasattr(ast.body[0], "args"):
-            # Assume macro is a "true" macro
-            macro_arguments = [a.name for a in ast.body[0].args]
+            return False
+        return "materialization" in [
+            x.value.value
+            for x in ast.body[0].nodes[0].kwargs  # type: ignore[attr-defined]
+            if isinstance(x.value, nodes.Const)
+        ]
+
+    def _extract_true_macro_arguments(self, ast) -> list[str]:
+        """Extract arguments from a regular macro."""
+        return [a.name for a in ast.body[0].args]
+
+    def _extract_test_macro_arguments(self, ast) -> list[str]:
+        """Extract arguments from a test macro."""
+        test_macro = next(
+            x
+            for x in ast.body
+            if not isinstance(x.nodes[0], nodes.Call)  # type: ignore[attr-defined]
+        )
+        return [
+            x.name
+            for x in test_macro.nodes  # type: ignore[attr-defined]
+            if isinstance(x, nodes.Name)
+        ]
+
+    def _parse_macro_arguments(self, ast) -> list[str]:
+        """Parse and extract macro arguments based on macro type."""
+        if hasattr(ast.body[0], "args"):
+            return self._extract_true_macro_arguments(ast)
+        elif self._is_materialization(ast):
+            # Materializations don't have arguments
+            return []
         else:
-            if "materialization" in [
-                x.value.value
-                for x in ast.body[0].nodes[0].kwargs  # type: ignore[attr-defined]
-                if isinstance(x.value, nodes.Const)
-            ]:
-                # Materializations don't have arguments
-                macro_arguments = []
-            else:
-                # Macro is a test
-                test_macro = next(
-                    x
-                    for x in ast.body
-                    if not isinstance(x.nodes[0], nodes.Call)  # type: ignore[attr-defined]
-                )
-                macro_arguments = [
-                    x.name
-                    for x in test_macro.nodes  # type: ignore[attr-defined]
-                    if isinstance(x, nodes.Name)
-                ]
+            # Macro is a test
+            return self._extract_test_macro_arguments(ast)
 
-        # macro_arguments: List of args parsed from macro SQL
-        # macro.arguments: List of args manually added to the properties file
-
+    def _get_non_complying_arguments(self, macro_arguments: list[str]) -> list[str]:
+        """Identify arguments that lack proper documentation."""
         non_complying_args = []
         for arg in macro_arguments:
             macro_doc_raw = [x for x in self.macro.arguments if x.name == arg]
@@ -100,6 +108,18 @@ class CheckMacroArgumentsDescriptionPopulated(BaseCheck):
                 or len(macro_doc_raw[0].description.strip()) < self.min_description_length
             ):
                 non_complying_args.append(arg)
+        return non_complying_args
+
+    def execute(self) -> None:
+        """Execute the check."""
+        environment = Environment(autoescape=True, extensions=[TagExtension])
+        ast = environment.parse(self.macro.macro_sql)
+
+        # Parse macro arguments based on macro type
+        macro_arguments = self._parse_macro_arguments(ast)
+
+        # Check for arguments with insufficient documentation
+        non_complying_args = self._get_non_complying_arguments(macro_arguments)
 
         assert non_complying_args == [], (
             f"Macro `{self.macro.name}` does not have a populated description for the following argument(s): {non_complying_args}."
