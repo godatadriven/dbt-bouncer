@@ -313,5 +313,5 @@ class CheckMacroPropertyFileLocation(BaseCheck):
             assert properties_yml_name.endswith(
                 "__macros.yml",
             ), (
-                f"The properties file for `{self.macro.name.name}` (`{properties_yml_name}`) does not end with `__macros.yml`."
+                f"The properties file for `{self.macro.name}` (`{properties_yml_name}`) does not end with `__macros.yml`."
             )
