@@ -307,7 +307,7 @@ wheels = [
 
 [[package]]
 name = "dbt-bouncer"
-version = "0.0.0"
+version = "1.31.2rc3"
 source = { editable = "." }
 dependencies = [
     { name = "click" },
