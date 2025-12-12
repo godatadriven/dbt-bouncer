@@ -165,6 +165,106 @@ def test_check_macro_arguments_description_populated(macro, expectation):
 
 
 @pytest.mark.parametrize(
+    ("macro", "min_description_length", "expectation"),
+    [
+        (
+            Macros(
+                **{
+                    "arguments": [
+                        {
+                            "name": "arg_1",
+                            "description": "ABC",
+                        },
+                    ],
+                    "macro_sql": "{% macro no_makes_sense(arg_1) %} select {{ arg_1 }} from table {% endmacro %}",
+                    "name": "macro_1",
+                    "original_file_path": "macros/macro_1.sql",
+                    "package_name": "package_name",
+                    "path": "macros/macro_1.sql",
+                    "resource_type": "macro",
+                    "unique_id": "macro.package_name.macro_1",
+                },
+            ),
+            4,
+            pytest.raises(AssertionError),
+        ),
+        (
+            Macros(
+                **{
+                    "arguments": [
+                        {
+                            "name": "arg_1",
+                            "description": "Short",
+                        },
+                    ],
+                    "macro_sql": "{% macro no_makes_sense(arg_1) %} select {{ arg_1 }} from table {% endmacro %}",
+                    "name": "macro_1",
+                    "original_file_path": "macros/macro_1.sql",
+                    "package_name": "package_name",
+                    "path": "macros/macro_1.sql",
+                    "resource_type": "macro",
+                    "unique_id": "macro.package_name.macro_1",
+                },
+            ),
+            5,
+            does_not_raise(),
+        ),
+        (
+            Macros(
+                **{
+                    "arguments": [
+                        {
+                            "name": "arg_1",
+                            "description": "This is a longer description",
+                        },
+                    ],
+                    "macro_sql": "{% macro no_makes_sense(arg_1) %} select {{ arg_1 }} from table {% endmacro %}",
+                    "name": "macro_1",
+                    "original_file_path": "macros/macro_1.sql",
+                    "package_name": "package_name",
+                    "path": "macros/macro_1.sql",
+                    "resource_type": "macro",
+                    "unique_id": "macro.package_name.macro_1",
+                },
+            ),
+            10,
+            does_not_raise(),
+        ),
+        (
+            Macros(
+                **{
+                    "arguments": [
+                        {
+                            "name": "arg_1",
+                            "description": "Short",
+                        },
+                    ],
+                    "macro_sql": "{% macro no_makes_sense(arg_1) %} select {{ arg_1 }} from table {% endmacro %}",
+                    "name": "macro_1",
+                    "original_file_path": "macros/macro_1.sql",
+                    "package_name": "package_name",
+                    "path": "macros/macro_1.sql",
+                    "resource_type": "macro",
+                    "unique_id": "macro.package_name.macro_1",
+                },
+            ),
+            10,
+            pytest.raises(AssertionError),
+        ),
+    ],
+)
+def test_check_macro_arguments_description_populated_with_min_length(
+    macro, min_description_length, expectation
+):
+    with expectation:
+        CheckMacroArgumentsDescriptionPopulated(
+            macro=macro,
+            min_description_length=min_description_length,
+            name="check_macro_arguments_description_populated",
+        ).execute()
+
+
+@pytest.mark.parametrize(
     ("macro", "regexp_pattern", "expectation"),
     [
         (

@@ -24,6 +24,9 @@ class TagExtension(StandaloneTag):
 class CheckMacroArgumentsDescriptionPopulated(BaseCheck):
     """Macro arguments must have a populated description.
 
+    Parameters:
+        min_description_length (int): The minimum number of characters required for a valid description. Default: `4`.
+
     Receives:
         macro (Macros): The Macros object to check.
 
@@ -44,10 +47,17 @@ class CheckMacroArgumentsDescriptionPopulated(BaseCheck):
             - name: check_macro_arguments_description_populated
               include: ^macros/common
         ```
+        ```yaml
+        # Require longer descriptions
+        manifest_checks:
+            - name: check_macro_arguments_description_populated
+              min_description_length: 10
+        ```
 
     """
 
     macro: "Macros" = Field(default=None)
+    min_description_length: int = Field(default=4)
     name: Literal["check_macro_arguments_description_populated"]
 
     def execute(self) -> None:
@@ -85,7 +95,10 @@ class CheckMacroArgumentsDescriptionPopulated(BaseCheck):
         non_complying_args = []
         for arg in macro_arguments:
             macro_doc_raw = [x for x in self.macro.arguments if x.name == arg]
-            if macro_doc_raw == [] or len(macro_doc_raw[0].description.strip()) <= 4:
+            if (
+                macro_doc_raw == []
+                or len(macro_doc_raw[0].description.strip()) < self.min_description_length
+            ):
                 non_complying_args.append(arg)
 
         assert non_complying_args == [], (
