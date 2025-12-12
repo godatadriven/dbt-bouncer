@@ -61,7 +61,12 @@ class CheckMacroArgumentsDescriptionPopulated(BaseCheck):
     name: Literal["check_macro_arguments_description_populated"]
 
     def _is_materialization(self, ast) -> bool:
-        """Check if the parsed AST represents a materialization macro."""
+        """Check if the parsed AST represents a materialization macro.
+
+        Returns:
+            bool: True if the AST represents a materialization macro, False otherwise.
+
+        """
         if hasattr(ast.body[0], "args"):
             return False
         return "materialization" in [
@@ -71,11 +76,21 @@ class CheckMacroArgumentsDescriptionPopulated(BaseCheck):
         ]
 
     def _extract_true_macro_arguments(self, ast) -> list[str]:
-        """Extract arguments from a regular macro."""
+        """Extract arguments from a regular macro.
+
+        Returns:
+            list[str]: List of argument names from the macro.
+
+        """
         return [a.name for a in ast.body[0].args]
 
     def _extract_test_macro_arguments(self, ast) -> list[str]:
-        """Extract arguments from a test macro."""
+        """Extract arguments from a test macro.
+
+        Returns:
+            list[str]: List of argument names from the test macro.
+
+        """
         test_macro = next(
             x
             for x in ast.body
@@ -88,7 +103,12 @@ class CheckMacroArgumentsDescriptionPopulated(BaseCheck):
         ]
 
     def _parse_macro_arguments(self, ast) -> list[str]:
-        """Parse and extract macro arguments based on macro type."""
+        """Parse and extract macro arguments based on macro type.
+
+        Returns:
+            list[str]: List of argument names from the macro.
+
+        """
         if hasattr(ast.body[0], "args"):
             return self._extract_true_macro_arguments(ast)
         elif self._is_materialization(ast):
@@ -99,7 +119,12 @@ class CheckMacroArgumentsDescriptionPopulated(BaseCheck):
             return self._extract_test_macro_arguments(ast)
 
     def _get_non_complying_arguments(self, macro_arguments: list[str]) -> list[str]:
-        """Identify arguments that lack proper documentation."""
+        """Identify arguments that lack proper documentation.
+
+        Returns:
+            list[str]: List of argument names that lack proper documentation.
+
+        """
         non_complying_args = []
         for arg in macro_arguments:
             macro_doc_raw = [x for x in self.macro.arguments if x.name == arg]
