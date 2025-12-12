@@ -85,10 +85,7 @@ class CheckMacroArgumentsDescriptionPopulated(BaseCheck):
         non_complying_args = []
         for arg in macro_arguments:
             macro_doc_raw = [x for x in self.macro.arguments if x.name == arg]
-            if macro_doc_raw == [] or (
-                arg not in [x.name for x in self.macro.arguments]
-                or len(macro_doc_raw[0].description.strip()) <= 4
-            ):
+            if macro_doc_raw == [] or len(macro_doc_raw[0].description.strip()) <= 4:
                 non_complying_args.append(arg)
 
         assert non_complying_args == [], (
