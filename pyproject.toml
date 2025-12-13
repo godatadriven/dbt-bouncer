@@ -40,11 +40,8 @@ version = "0.0.0"
 
 [project.optional-dependencies]
 dev = [
-  "autoflake~=2.0",
-  "black~=25.0",
   "dbt-core>=1.10.0,<2",
   "dbt-duckdb~=1.0",
-  "isort~=7.0",
   "mypy~=1.0",
   "pre-commit>=3,<5",
   "pytest<=10",
@@ -72,25 +69,6 @@ dbt-bouncer = "dbt_bouncer.main:cli"
 [project.urls]
 repository = "https://github.com/godatadriven/dbt-bouncer"
 
-[tool.black]
-line-length = 99
-include = '/project$|\.pyi?$'
-exclude = '''
-/(
-    \.git
-  | \.hg
-  | \.eggs
-  | \.mypy_cache
-  | \.tox
-  | \.venv
-  | \.vscode
-  | _build
-  | buck-out
-  | build
-  | dist
-)/
-'''
-
 [tool.coverage.report]
 exclude_lines = [
     "if TYPE_CHECKING:",
@@ -106,9 +84,6 @@ name = "check_model_has_unique_test"
 name = "check_model_names"
 include = "^staging"
 model_name_pattern = "^stg_"
-
-[tool.isort]
-profile = "black"
 
 [tool.mypy]
 follow_imports = "silent"
@@ -157,7 +132,7 @@ exclude = [
 ]
 line-length = 88
 indent-width = 4
-target-version = "py38"
+target-version = "py311"
 
 [tool.ruff.lint]
 ignore = ["COM812", "D100", "D203", "D213", "D406", "D407", "D409", "E501", "G004", "LOG015", "S101"]
