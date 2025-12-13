@@ -1,6 +1,7 @@
 # mypy: disable-error-code="union-attr"
 
 import re
+from pathlib import Path
 from typing import TYPE_CHECKING, ClassVar, Literal
 
 from pydantic import Field
@@ -114,7 +115,7 @@ class CheckMacroCodeDoesNotContainRegexpPattern(BaseCheck):
     Example(s):
         ```yaml
         manifest_checks:
-            # Prefer `coalesce` over `ifnull`: https://docs.sqlfluff.com/en/stable/rules.html#sqlfluff.rules.sphinx.Rule_CV02
+            # Prefer `coalesce` over `ifnull`: [https://docs.sqlfluff.com/en/stable/rules.html#sqlfluff.rules.sphinx.Rule_CV02](https://docs.sqlfluff.com/en/stable/rules.html#sqlfluff.rules.sphinx.Rule_CV02)
             - name: check_macro_code_does_not_contain_regexp_pattern
               regexp_pattern: .*[i][f][n][u][l][l].*
         ```
@@ -241,22 +242,17 @@ class CheckMacroNameMatchesFileName(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
+        file_path = Path(clean_path_str(self.macro.original_file_path))
+        file_stem = file_path.stem
+
         if self.macro.name.startswith("test_"):
-            assert (
-                self.macro.name[5:]
-                == clean_path_str(self.macro.original_file_path)
-                .split("/")[-1]
-                .split(".")[0]
-            ), (
+            assert self.macro.name[5:] == file_stem, (
                 f"Macro `{self.macro.unique_id}` is not in a file named `{self.macro.name[5:]}.sql`."
             )
         else:
-            assert (
-                self.macro.name
-                == clean_path_str(self.macro.original_file_path)
-                .split("/")[-1]
-                .split(".")[0]
-            ), f"Macro `{self.macro.name}` is not in a file of the same name."
+            assert self.macro.name == file_stem, (
+                f"Macro `{self.macro.name}` is not in a file of the same name."
+            )
 
 
 class CheckMacroPropertyFileLocation(BaseCheck):
@@ -284,18 +280,23 @@ class CheckMacroPropertyFileLocation(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
-        expected_substr = "_".join(
-            clean_path_str(self.macro.original_file_path)[6:].split("/")[:-1]
-        )
+        original_path = Path(clean_path_str(self.macro.original_file_path))
+
+        # Logic matches previous manual splitting:
+        # If path is `macros/utils/file.sql`, we want `_utils`.
+        # We assume the first part of the path is the root (e.g. 'macros' or 'tests').
+        subdir_parts = original_path.parent.parts[1:]
+        expected_substr = "_" + "_".join(subdir_parts) if subdir_parts else ""
 
         assert clean_path_str(self.macro.patch_path) is not None, (
             f"Macro `{self.macro.name}` is not defined in a `.yml` properties file."
         )
-        properties_yml_name = clean_path_str(self.macro.patch_path).split("/")[-1]
 
-        if clean_path_str(self.macro.original_file_path).startswith(
-            "tests/",
-        ):  # Do not check generic tests (which are also macros)
+        patch_path = Path(clean_path_str(self.macro.patch_path))
+        properties_yml_name = patch_path.name
+
+        if original_path.parts[0] == "tests":
+            # Do not check generic tests (which are also macros)
             pass
         elif expected_substr == "":  # i.e. macro in ./macros
             assert properties_yml_name == "_macros.yml", (
