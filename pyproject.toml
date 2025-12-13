@@ -130,7 +130,7 @@ exclude = [
     "src/dbt_bouncer/artifact_parsers/dbt_cloud",
     "venv",
 ]
-line-length = 99
+line-length = 88
 indent-width = 4
 target-version = "py311"
 
