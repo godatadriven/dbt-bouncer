@@ -1,0 +1,13 @@
+__pycache__/
+.mypy_cache
+.pytest_cache
+.venv
+build
+my_checks
+site
+tmp
+.coverage
+.env
+coverage.xml
+dbt.duckdb
+pytest-coverage.txt
