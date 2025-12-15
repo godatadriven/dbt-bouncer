@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from typing import Any, Dict, List, Literal, Optional, Union
+from typing import Any, Dict, List, Literal, Union
 
 from pydantic import BaseModel, ConfigDict, Field
 from typing_extensions import Annotated
@@ -53,26 +53,26 @@ class DbtBouncerConfBase(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    custom_checks_dir: Optional[str] = Field(
+    custom_checks_dir: str | None = Field(
         default=None,
         description="Path to a directory containing custom checks.",
     )
-    dbt_artifacts_dir: Optional[str] = Field(
+    dbt_artifacts_dir: str | None = Field(
         default=(
             f"{os.getenv('DBT_PROJECT_DIR')}/target"
             if os.getenv("DBT_PROJECT_DIR")
             else "./target"
         )
     )
-    exclude: Optional[str] = Field(
+    exclude: str | None = Field(
         default=None,
         description="Regexp to match which paths to exclude.",
     )
-    include: Optional[str] = Field(
+    include: str | None = Field(
         default=None,
         description="Regexp to match which paths to include.",
     )
-    package_name: Optional[str] = Field(
+    package_name: str | None = Field(
         default=None, description="If you want to run `dbt-bouncer` against a package."
     )
     severity: Union[Literal["error", "warn"], None] = Field(
@@ -90,7 +90,7 @@ class DbtBouncerConfAllCategories(DbtBouncerConfBase):
     manifest_checks: get_check_types(check_type="manifest") = Field(default=[])  # type: ignore[valid-type]
     run_results_checks: get_check_types(check_type="run_results") = Field(default=[])  # type: ignore[valid-type]
 
-    custom_checks_dir: Optional[str] = Field(
+    custom_checks_dir: str | None = Field(
         default=None,
         description="Path to a directory containing custom checks.",
     )

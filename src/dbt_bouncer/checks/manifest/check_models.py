@@ -2,7 +2,7 @@
 import logging
 import re
 from pathlib import Path
-from typing import TYPE_CHECKING, List, Literal, Optional
+from typing import TYPE_CHECKING, List, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -792,7 +792,7 @@ class CheckModelHasUniqueTest(BaseCheck):
 
     """
 
-    accepted_uniqueness_tests: Optional[List[str]] = Field(
+    accepted_uniqueness_tests: List[str] | None = Field(
         default=[
             "dbt_expectations.expect_compound_columns_to_be_unique",
             "dbt_utils.unique_combination_of_columns",
@@ -967,7 +967,7 @@ class CheckModelMaxChainedViews(BaseCheck):
     model: "DbtBouncerModelBase" = Field(default=None)
     models: List["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_model_max_chained_views"]
-    package_name: Optional[str] = Field(default=None)
+    package_name: str | None = Field(default=None)
 
     def execute(self) -> None:
         """Execute the check."""
@@ -1505,11 +1505,11 @@ class CheckModelsDocumentationCoverage(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    description: Optional[str] = Field(
+    description: str | None = Field(
         default=None,
         description="Description of what the check does and why it is implemented.",
     )
-    index: Optional[int] = Field(
+    index: int | None = Field(
         default=None,
         description="Index to uniquely identify the check, calculated at runtime.",
     )
@@ -1520,7 +1520,7 @@ class CheckModelsDocumentationCoverage(BaseModel):
     )
     models: List["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_model_documentation_coverage"]
-    severity: Optional[Literal["error", "warn"]] = Field(
+    severity: Literal["error", "warn"] | None = Field(
         default="error",
         description="Severity of the check, one of 'error' or 'warn'.",
     )
@@ -1569,11 +1569,11 @@ class CheckModelsTestCoverage(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    description: Optional[str] = Field(
+    description: str | None = Field(
         default=None,
         description="Description of what the check does and why it is implemented.",
     )
-    index: Optional[int] = Field(
+    index: int | None = Field(
         default=None,
         description="Index to uniquely identify the check, calculated at runtime.",
     )
@@ -1584,7 +1584,7 @@ class CheckModelsTestCoverage(BaseModel):
         le=100,
     )
     models: List["DbtBouncerModelBase"] = Field(default=[])
-    severity: Optional[Literal["error", "warn"]] = Field(
+    severity: Literal["error", "warn"] | None = Field(
         default="error",
         description="Severity of the check, one of 'error' or 'warn'.",
     )
