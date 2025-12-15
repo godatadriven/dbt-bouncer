@@ -1,7 +1,8 @@
 # mypy: disable-error-code="union-attr"
 import logging
 import re
-from typing import TYPE_CHECKING, List, Literal, Optional
+from pathlib import Path
+from typing import TYPE_CHECKING, List, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -353,13 +354,10 @@ class CheckModelDirectories(BaseCheck):
             AssertionError: If model located in `./models`.
 
         """
-        matched_path = re.compile(self.include.strip().rstrip("/")).match(
-            clean_path_str(self.model.original_file_path)
-        )
-        path_after_match = clean_path_str(self.model.original_file_path)[
-            matched_path.end() + 1 :
-        ]
-        directory_to_check = path_after_match.split("/")[0]
+        clean_path = clean_path_str(self.model.original_file_path)
+        matched_path = re.compile(self.include.strip().rstrip("/")).match(clean_path)
+        path_after_match = clean_path[matched_path.end() + 1 :]
+        directory_to_check = Path(path_after_match).parts[0]
 
         if directory_to_check.replace(".sql", "") == self.model.name:
             raise AssertionError(
@@ -397,17 +395,21 @@ class CheckModelDocumentedInSameDirectory(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
-        model_sql_dir = clean_path_str(self.model.original_file_path).split("/")[:-1]
+        model_sql_path = Path(clean_path_str(self.model.original_file_path))
+        model_sql_dir = model_sql_path.parent.parts
+
         assert (  # noqa: PT018
             hasattr(self.model, "patch_path")
             and clean_path_str(self.model.patch_path) is not None
         ), f"`{get_clean_model_name(self.model.unique_id)}` is not documented."
 
-        model_doc_dir = clean_path_str(
-            self.model.patch_path[
-                clean_path_str(self.model.patch_path).find("models") :
-            ]
-        ).split("/")[:-1]
+        patch_path_str = clean_path_str(self.model.patch_path)
+        start_idx = patch_path_str.find("models")
+        if start_idx != -1:
+            patch_path_str = patch_path_str[start_idx:]
+
+        model_doc_path = Path(patch_path_str)
+        model_doc_dir = model_doc_path.parent.parts
 
         assert model_doc_dir == model_sql_dir, (
             f"`{get_clean_model_name(self.model.unique_id)}` is documented in a different directory to the `.sql` file: `{'/'.join(model_doc_dir)}` vs `{'/'.join(model_sql_dir)}`."
@@ -447,7 +449,7 @@ class CheckModelFileName(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
-        file_name = self.model.original_file_path.split("/")[-1]
+        file_name = Path(clean_path_str(self.model.original_file_path)).name
         assert (
             re.compile(self.file_name_pattern.strip()).match(file_name) is not None
         ), (
@@ -790,7 +792,7 @@ class CheckModelHasUniqueTest(BaseCheck):
 
     """
 
-    accepted_uniqueness_tests: Optional[List[str]] = Field(
+    accepted_uniqueness_tests: List[str] | None = Field(
         default=[
             "dbt_expectations.expect_compound_columns_to_be_unique",
             "dbt_utils.unique_combination_of_columns",
@@ -965,7 +967,7 @@ class CheckModelMaxChainedViews(BaseCheck):
     model: "DbtBouncerModelBase" = Field(default=None)
     models: List["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_model_max_chained_views"]
-    package_name: Optional[str] = Field(default=None)
+    package_name: str | None = Field(default=None)
 
     def execute(self) -> None:
         """Execute the check."""
@@ -1300,13 +1302,22 @@ class CheckModelPropertyFileLocation(BaseCheck):
             and clean_path_str(self.model.patch_path) is not None
         ), f"`{get_clean_model_name(self.model.unique_id)}` is not documented."
 
-        expected_substr = (
-            "_".join(clean_path_str(self.model.original_file_path).split("/")[1:-1])
-            .replace("staging", "stg")
-            .replace("intermediate", "int")
-            .replace("marts", "")
-        )
-        properties_yml_name = clean_path_str(self.model.patch_path).split("/")[-1]
+        original_path = Path(clean_path_str(self.model.original_file_path))
+        relevant_parts = original_path.parts[1:-1]
+
+        mapped_parts = []
+        for part in relevant_parts:
+            if part == "staging":
+                mapped_parts.append("stg")
+            elif part == "intermediate":
+                mapped_parts.append("int")
+            elif part == "marts":
+                continue
+            else:
+                mapped_parts.append(part)
+
+        expected_substr = "_".join(mapped_parts)
+        properties_yml_name = Path(clean_path_str(self.model.patch_path)).name
 
         assert properties_yml_name.startswith(
             "_",
@@ -1494,11 +1505,11 @@ class CheckModelsDocumentationCoverage(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    description: Optional[str] = Field(
+    description: str | None = Field(
         default=None,
         description="Description of what the check does and why it is implemented.",
     )
-    index: Optional[int] = Field(
+    index: int | None = Field(
         default=None,
         description="Index to uniquely identify the check, calculated at runtime.",
     )
@@ -1509,7 +1520,7 @@ class CheckModelsDocumentationCoverage(BaseModel):
     )
     models: List["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_model_documentation_coverage"]
-    severity: Optional[Literal["error", "warn"]] = Field(
+    severity: Literal["error", "warn"] | None = Field(
         default="error",
         description="Severity of the check, one of 'error' or 'warn'.",
     )
@@ -1558,11 +1569,11 @@ class CheckModelsTestCoverage(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    description: Optional[str] = Field(
+    description: str | None = Field(
         default=None,
         description="Description of what the check does and why it is implemented.",
     )
-    index: Optional[int] = Field(
+    index: int | None = Field(
         default=None,
         description="Index to uniquely identify the check, calculated at runtime.",
     )
@@ -1573,7 +1584,7 @@ class CheckModelsTestCoverage(BaseModel):
         le=100,
     )
     models: List["DbtBouncerModelBase"] = Field(default=[])
-    severity: Optional[Literal["error", "warn"]] = Field(
+    severity: Literal["error", "warn"] | None = Field(
         default="error",
         description="Severity of the check, one of 'error' or 'warn'.",
     )

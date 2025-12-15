@@ -9,7 +9,7 @@ import re
 import sys
 from functools import lru_cache
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Type
+from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Type
 
 import click
 import yaml
@@ -59,7 +59,7 @@ def create_github_comment_file(
 
 
 def get_nested_value(
-    d: Dict[str, Any], keys: List[str], default: Optional[Any] = None
+    d: Dict[str, Any], keys: List[str], default: Any | None = None
 ) -> Any:
     """Retrieve a value from a nested dictionary using a list of keys.
 

@@ -1,7 +1,7 @@
 # mypy: disable-error-code="union-attr"
 
 import re
-from typing import TYPE_CHECKING, Literal, Optional
+from typing import TYPE_CHECKING, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -33,19 +33,19 @@ class CheckProjectName(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    description: Optional[str] = Field(
+    description: str | None = Field(
         default=None,
         description="Description of what the check does and why it is implemented.",
     )
-    index: Optional[int] = Field(
+    index: int | None = Field(
         default=None,
         description="Index to uniquely identify the check, calculated at runtime.",
     )
     manifest_obj: "DbtBouncerManifest" = Field(default=None)
     name: Literal["check_project_name"]
-    package_name: Optional[str] = Field(default=None)
+    package_name: str | None = Field(default=None)
     project_name_pattern: str
-    severity: Optional[Literal["error", "warn"]] = Field(
+    severity: Literal["error", "warn"] | None = Field(
         default="error",
         description="Severity of the check, one of 'error' or 'warn'.",
     )

@@ -1,7 +1,7 @@
 # mypy: disable-error-code="union-attr"
 
 import re
-from typing import TYPE_CHECKING, List, Literal, Optional
+from typing import TYPE_CHECKING, List, Literal
 
 from pydantic import ConfigDict, Field
 
@@ -191,8 +191,8 @@ class CheckColumnNameCompliesToColumnType(BaseCheck):
     catalog_node: "CatalogNodes" = Field(default=None)
     column_name_pattern: str
     name: Literal["check_column_name_complies_to_column_type"]
-    type_pattern: Optional[str] = None
-    types: Optional[List[str]] = None
+    type_pattern: str | None = None
+    types: List[str] | None = None
 
     def execute(self) -> None:
         """Execute the check."""
@@ -301,7 +301,7 @@ class CheckColumnsAreAllDocumented(BaseCheck):
 
     """
 
-    case_sensitive: Optional[bool] = Field(default=True)
+    case_sensitive: bool | None = Field(default=True)
     catalog_node: "CatalogNodes" = Field(default=None)
     manifest_obj: "DbtBouncerManifest" = Field(default=None)
     models: List["DbtBouncerModelBase"] = Field(default=[])
