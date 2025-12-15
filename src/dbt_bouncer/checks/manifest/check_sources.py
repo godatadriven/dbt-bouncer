@@ -1,6 +1,7 @@
 # mypy: disable-error-code="union-attr"
 
 import re
+from pathlib import Path
 from typing import TYPE_CHECKING, List, Literal
 
 if TYPE_CHECKING:
@@ -303,27 +304,32 @@ class CheckSourcePropertyFileLocation(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
-        path_cleaned = clean_path_str(self.source.original_file_path).replace(
-            "models/staging", ""
-        )
-        expected_substring = "_".join(path_cleaned.split("/")[:-1])
+        original_path = Path(clean_path_str(self.source.original_file_path))
 
-        assert path_cleaned.split(
-            "/",
-        )[-1].startswith(
+        if (
+            len(original_path.parts) > 2
+            and original_path.parts[0] == "models"
+            and original_path.parts[1] == "staging"
+        ):
+            subdir_parts = original_path.parent.parts[2:]
+        else:
+            subdir_parts = original_path.parent.parts
+
+        expected_substring = "_" + "_".join(subdir_parts) if subdir_parts else ""
+        properties_yml_name = original_path.name
+
+        assert properties_yml_name.startswith(
             "_",
         ), (
-            f"The properties file for `{self.source.source_name}.{self.source.name}` (`{path_cleaned}`) does not start with an underscore."
+            f"The properties file for `{self.source.source_name}.{self.source.name}` (`{properties_yml_name}`) does not start with an underscore."
         )
-        assert expected_substring in path_cleaned, (
-            f"The properties file for `{self.source.source_name}.{self.source.name}` (`{path_cleaned}`) does not contain the expected substring (`{expected_substring}`)."
+        assert expected_substring in properties_yml_name, (
+            f"The properties file for `{self.source.source_name}.{self.source.name}` (`{properties_yml_name}`) does not contain the expected substring (`{expected_substring}`)."
         )
-        assert path_cleaned.split(
-            "/",
-        )[-1].endswith(
+        assert properties_yml_name.endswith(
             "__sources.yml",
         ), (
-            f"The properties file for `{self.source.source_name}.{self.source.name}` (`{path_cleaned}`) does not end with `__sources.yml`."
+            f"The properties file for `{self.source.source_name}.{self.source.name}` (`{properties_yml_name}`) does not end with `__sources.yml`."
         )
 
 
