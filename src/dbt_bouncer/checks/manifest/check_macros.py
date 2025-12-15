@@ -88,8 +88,7 @@ class CheckMacroArgumentsDescriptionPopulated(BaseCheck):
             macro_doc_raw = [x for x in self.macro.arguments if x.name == arg]
             if macro_doc_raw == [] or (
                 arg not in [x.name for x in self.macro.arguments]
-                or len(macro_doc_raw[0].description.strip())
-                < self._min_description_length
+                or not self._is_description_populated(macro_doc_raw[0].description)
             ):
                 non_complying_args.append(arg)
 
@@ -170,7 +169,7 @@ class CheckMacroDescriptionPopulated(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
-        assert self.is_description_populated(self.macro.description), (
+        assert self._is_description_populated(self.macro.description), (
             f"Macro `{self.macro.name}` does not have a populated description."
         )
 

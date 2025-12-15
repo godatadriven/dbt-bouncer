@@ -2,6 +2,8 @@ from typing import TYPE_CHECKING, ClassVar, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from dbt_bouncer.utils import is_description_populated
+
 if TYPE_CHECKING:
     import warnings
 
@@ -71,7 +73,7 @@ class BaseCheck(BaseModel):
         else:
             return False
 
-    def is_description_populated(self, description: str) -> bool:
+    def _is_description_populated(self, description: str) -> bool:
         """Check if a description is populated.
 
         Args:
@@ -81,7 +83,6 @@ class BaseCheck(BaseModel):
             bool: Whether a description is validly populated.
 
         """
-        return (
-            len(description.strip()) >= self._min_description_length
-            and description.strip() != "null"
+        return is_description_populated(
+            description=description, min_description_length=self._min_description_length
         )

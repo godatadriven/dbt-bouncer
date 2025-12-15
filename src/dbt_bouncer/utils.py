@@ -233,6 +233,26 @@ def get_package_version_number(version_string: str) -> Version:
     return Version(*p.release)
 
 
+def is_description_populated(description: str, min_description_length: int) -> bool:
+    """Check if a description is populated.
+
+    Args:
+        description (str): Description.
+        min_description_length (int): Minimum length of the description.
+
+    Returns:
+        bool: Whether a description is validly populated.
+
+    """
+    return len(
+        description.strip()
+    ) >= min_description_length and description.strip().lower() not in (
+        "none",
+        "null",
+        "n/a",
+    )
+
+
 def load_config_from_yaml(config_file: Path) -> Mapping[str, Any]:
     """Safely load a YAML file to a dict object.
 

@@ -43,7 +43,7 @@ class CheckSourceDescriptionPopulated(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
-        assert self.is_description_populated(self.source.description), (
+        assert self._is_description_populated(self.source.description), (
             f"`{self.source.source_name}.{self.source.name}` does not have a populated description."
         )
 

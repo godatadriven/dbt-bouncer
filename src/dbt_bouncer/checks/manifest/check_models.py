@@ -8,7 +8,11 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import NestedDict
-from dbt_bouncer.utils import find_missing_meta_keys, get_package_version_number
+from dbt_bouncer.utils import (
+    find_missing_meta_keys,
+    get_package_version_number,
+    is_description_populated,
+)
 
 if TYPE_CHECKING:
     from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
@@ -299,7 +303,7 @@ class CheckModelDescriptionPopulated(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
-        assert self.is_description_populated(self.model.description), (
+        assert self._is_description_populated(self.model.description), (
             f"`{get_clean_model_name(self.model.unique_id)}` does not have a populated description."
         )
 
@@ -1530,7 +1534,9 @@ class CheckModelsDocumentationCoverage(BaseModel):
         num_models = len(self.models)
         models_with_description = []
         for model in self.models:
-            if len(model.description.strip()) > 4:
+            if is_description_populated(
+                description=model.description, min_description_length=4
+            ):
                 models_with_description.append(model.unique_id)
 
         num_models_with_descriptions = len(models_with_description)

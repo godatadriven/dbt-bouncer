@@ -59,7 +59,7 @@ class CheckColumnDescriptionPopulated(BaseCheck):
             for _, v in self.catalog_node.columns.items():
                 if model.columns.get(
                     v.name
-                ) is None or not self.is_description_populated(
+                ) is None or not self._is_description_populated(
                     model.columns[v.name].description
                 ):
                     non_complying_columns.append(v.name)
@@ -370,9 +370,8 @@ class CheckColumnsAreDocumentedInPublicModels(BaseCheck):
             for _, v in self.catalog_node.columns.items():
                 if model.access.value == "public":
                     column_config = model.columns.get(v.name)
-                    if (
-                        column_config is None
-                        or len(column_config.description.strip()) < 4
+                    if column_config is None or not self._is_description_populated(
+                        column_config.description
                     ):
                         non_complying_columns.append(v.name)
 
