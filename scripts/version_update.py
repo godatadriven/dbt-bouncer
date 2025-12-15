@@ -18,6 +18,6 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    for file in ["src/dbt_bouncer/version.py", "./action.yml"]:
+    for file in ["src/dbt_bouncer/version.py", "./action.yml", "Dockerfile"]:
         file_path = Path(file)
         update_version(args.new_version, file_path)
