@@ -47,7 +47,7 @@ class BaseCheck(BaseModel):
         description="Severity of the check, one of 'error' or 'warn'.",
     )
 
-    _min_description_length: ClassVar[int] = 5
+    _min_description_length: ClassVar[int] = 4
 
     # Helper methods
     def is_catalog_node_a_model(
