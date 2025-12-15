@@ -36,7 +36,7 @@ def macro(request):
 
 
 _TEST_DATA_FOR_CHECK_MACRO_ARGUMENTS_DESCRIPTION_POPULATED = [
-    (
+    pytest.param(
         {
             "arguments": [
                 {
@@ -51,8 +51,9 @@ _TEST_DATA_FOR_CHECK_MACRO_ARGUMENTS_DESCRIPTION_POPULATED = [
             "macro_sql": "{% macro no_makes_sense(arg_1, arg_2) %} select coalesce({{ arg_1 }}, {{ arg_2 }}) from table {% endmacro %}",
         },
         does_not_raise(),
+        id="valid_arguments",
     ),
-    (
+    pytest.param(
         {
             "arguments": [],
             "macro_sql": "{% materialization udf, adapter=\"bigquery\" %}\n{%- set target = adapter.quote(this.database ~ '.' ~ this.schema ~ '.' ~ this.identifier) -%}\n\n{%- set parameter_list=config.get('parameter_list') -%}\n{%- set ret=config.get('returns') -%}\n{%- set description=config.get('description') -%}\n\n{%- set create_sql -%}\nCREATE OR REPLACE FUNCTION {{ target }}({{ parameter_list }})\nAS (\n  {{ sql }}\n);\n{%- endset -%}\n\n{% call statement('main') -%}\n  {{ create_sql }}\n{%- endcall %}\n\n{{ return({'relations': []}) }}\n\n{% endmaterialization %}",
@@ -61,8 +62,9 @@ _TEST_DATA_FOR_CHECK_MACRO_ARGUMENTS_DESCRIPTION_POPULATED = [
             "unique_id": "macro.package_name.materialization_udf",
         },
         does_not_raise(),
+        id="valid_materialization_no_args",
     ),
-    (
+    pytest.param(
         {
             "arguments": [
                 {
@@ -77,8 +79,9 @@ _TEST_DATA_FOR_CHECK_MACRO_ARGUMENTS_DESCRIPTION_POPULATED = [
             "macro_sql": "{% macro no_makes_sense(arg_1, arg_2) %} select coalesce({{ arg_1 }}, {{ arg_2 }}) from table {% endmacro %}",
         },
         pytest.raises(AssertionError),
+        id="empty_description",
     ),
-    (
+    pytest.param(
         {
             "arguments": [
                 {
@@ -93,8 +96,9 @@ _TEST_DATA_FOR_CHECK_MACRO_ARGUMENTS_DESCRIPTION_POPULATED = [
             "macro_sql": "{% macro no_makes_sense(arg_1, arg_2) %} select coalesce({{ arg_1 }}, {{ arg_2 }}) from table {% endmacro %}",
         },
         pytest.raises(AssertionError),
+        id="whitespace_description",
     ),
-    (
+    pytest.param(
         {
             "arguments": [
                 {
@@ -110,8 +114,9 @@ _TEST_DATA_FOR_CHECK_MACRO_ARGUMENTS_DESCRIPTION_POPULATED = [
             "macro_sql": "{% macro no_makes_sense(arg_1, arg_2) %} select coalesce({{ arg_1 }}, {{ arg_2 }}) from table {% endmacro %}",
         },
         pytest.raises(AssertionError),
+        id="multiline_whitespace_description",
     ),
-    (
+    pytest.param(
         {
             "arguments": [
                 {
@@ -122,6 +127,7 @@ _TEST_DATA_FOR_CHECK_MACRO_ARGUMENTS_DESCRIPTION_POPULATED = [
             "macro_sql": "{% macro no_makes_sense(arg_1, arg_2) %} select coalesce({{ arg_1 }}, {{ arg_2 }}) from table {% endmacro %}",
         },
         pytest.raises(AssertionError),
+        id="missing_argument_in_config",
     ),
 ]
 
@@ -139,7 +145,7 @@ def test_check_macro_arguments_description_populated(macro, expectation):
 
 
 _TEST_DATA_FOR_CHECK_MACRO_CODE_DOES_NOT_CONTAIN_REGEXP_PATTERN = [
-    (
+    pytest.param(
         {
             "arguments": [
                 {
@@ -155,8 +161,9 @@ _TEST_DATA_FOR_CHECK_MACRO_CODE_DOES_NOT_CONTAIN_REGEXP_PATTERN = [
         },
         ".*[i][f][n][u][l][l].*",
         does_not_raise(),
+        id="does_not_contain_pattern",
     ),
-    (
+    pytest.param(
         {
             "arguments": [
                 {
@@ -172,6 +179,7 @@ _TEST_DATA_FOR_CHECK_MACRO_CODE_DOES_NOT_CONTAIN_REGEXP_PATTERN = [
         },
         ".*[i][f][n][u][l][l].*",
         pytest.raises(AssertionError),
+        id="contains_pattern",
     ),
 ]
 
@@ -195,34 +203,38 @@ def test_check_macro_code_does_not_contain_regexp_pattern(
 
 
 _TEST_DATA_FOR_CHECK_MACRO_DESCRIPTION_POPULATED = [
-    (
+    pytest.param(
         {
             "description": "This is macro_1.",
             "macro_sql": "select 1",
         },
         does_not_raise(),
+        id="valid_description",
     ),
-    (
+    pytest.param(
         {
             "description": "",
             "macro_sql": "select 1",
         },
         pytest.raises(AssertionError),
+        id="empty_description",
     ),
-    (
+    pytest.param(
         {
             "description": "                ",
             "macro_sql": "select 1",
         },
         pytest.raises(AssertionError),
+        id="whitespace_description",
     ),
-    (
+    pytest.param(
         {
             "description": """
                         """,
             "macro_sql": "select 1",
         },
         pytest.raises(AssertionError),
+        id="multiline_whitespace_description",
     ),
 ]
 
@@ -241,14 +253,15 @@ def test_check_macro_description_populated(macro, expectation):
 
 
 _TEST_DATA_FOR_CHECK_MACRO_MAX_NUMBER_OF_LINES = [
-    (
+    pytest.param(
         {
             "macro_sql": '{% macro generate_schema_name(custom_schema_name, node) -%}\n    {#\n        Enter this block when run on stg or prd (except for CICD runs).\n        We want the same dataset and table names to be used across all environments.\n        For example, `marts.dim_customer` should exist in stg and prd, i.e. there should be no references to the project in the dataset name.\n        This will allow other tooling (BI, CICD scripts, etc.) to work across all environments without the need for differing logic per environment.\n    #}\n    {% if env_var("DBT_CICD_RUN", "false") == "true" %} {{ env_var("DBT_DATASET") }}\n\n    {% elif target.name in ["stg", "prd"] and env_var(\n        "DBT_CICD_RUN", "false"\n    ) == "false" %}\n\n        {{ node.config.schema }}\n\n    {% else %} {{ default__generate_schema_name(custom_schema_name, node) }}\n\n    {%- endif -%}\n\n{%- endmacro %}',
         },
         50,
         does_not_raise(),
+        id="within_limit",
     ),
-    (
+    pytest.param(
         {
             "macro_sql": '{% macro generate_schema_name(custom_schema_name, node) -%}\n    {#\n        Enter this block when run on stg or prd (except for CICD runs).\n        We want the same dataset and table names to be used across all environments.\n        For example, `marts.dim_customer` should exist in stg and prd, i.e. there should be no references to the project in the dataset name.\n        This will allow other tooling (BI, CICD scripts, etc.) to work across all environments without the need for differing logic per environment.\n    #}\n    {% if env_var("DBT_CICD_RUN", "false") == "true" %} {{ env_var("DBT_DATASET") }}\n\n    {% elif target.name in ["stg", "prd"] and env_var(\n        "DBT_CICD_RUN", "false"\n    ) == "false" %}\n\n        {{ node.config.schema }}\n\n    {% else %} {{ default__generate_schema_name(custom_schema_name, node) }}\n\n    {%- endif -%}\n\n{%- endmacro %}',
             "name": "test_logic_2",
@@ -258,6 +271,7 @@ _TEST_DATA_FOR_CHECK_MACRO_MAX_NUMBER_OF_LINES = [
         },
         10,
         pytest.raises(AssertionError),
+        id="exceeds_limit",
     ),
 ]
 
@@ -277,11 +291,12 @@ def test_check_macro_max_number_of_lines(max_number_of_lines, macro, expectation
 
 
 _TEST_DATA_FOR_CHECK_MACRO_NAME_MATCHES_FILE_NAME = [
-    (
+    pytest.param(
         {},
         does_not_raise(),
+        id="matches_default",
     ),
-    (
+    pytest.param(
         {
             "name": "test_logic_1",
             "original_file_path": "tests/logic_1.sql",
@@ -289,8 +304,9 @@ _TEST_DATA_FOR_CHECK_MACRO_NAME_MATCHES_FILE_NAME = [
             "unique_id": "macro.package_name.test_logic_1",
         },
         does_not_raise(),
+        id="matches_custom_path",
     ),
-    (
+    pytest.param(
         {
             "name": "my_macro_2",
             "original_file_path": "macros/macro_2.sql",
@@ -298,8 +314,9 @@ _TEST_DATA_FOR_CHECK_MACRO_NAME_MATCHES_FILE_NAME = [
             "unique_id": "macro.package_name.macro_2",
         },
         pytest.raises(AssertionError),
+        id="name_mismatch",
     ),
-    (
+    pytest.param(
         {
             "name": "test_logic_2",
             "original_file_path": "macros/test_logic_2.sql",
@@ -307,6 +324,7 @@ _TEST_DATA_FOR_CHECK_MACRO_NAME_MATCHES_FILE_NAME = [
             "unique_id": "macro.package_name.test_logic_2",
         },
         pytest.raises(AssertionError),
+        id="path_mismatch_in_object",
     ),
 ]
 
@@ -325,21 +343,23 @@ def test_check_macro_name_matches_file_name(macro, expectation):
 
 
 _TEST_DATA_FOR_CHECK_MACRO_PROPERTY_FILE_LOCATION = [
-    (
+    pytest.param(
         {
             "patch_path": "package_name://macros/_macros.yml",
         },
         does_not_raise(),
+        id="valid_underscore_prefix",
     ),
-    (
+    pytest.param(
         {
             "original_file_path": "macros/dir1/macro_1.sql",
             "patch_path": "package_name://macros/dir1/_dir1__macros.yml",
             "path": "macros/dir1/macro_1.sql",
         },
         does_not_raise(),
+        id="valid_nested_underscore_prefix",
     ),
-    (
+    pytest.param(
         {
             "name": "test_macro",
             "original_file_path": "tests/generic/test_macro.sql",
@@ -348,28 +368,32 @@ _TEST_DATA_FOR_CHECK_MACRO_PROPERTY_FILE_LOCATION = [
             "unique_id": "macro.package_name.test_macro",
         },
         does_not_raise(),
+        id="valid_test_macro",
     ),
-    (
+    pytest.param(
         {
             "patch_path": "package_name://macros/macros.yml",
         },
         pytest.raises(AssertionError),
+        id="invalid_no_underscore",
     ),
-    (
+    pytest.param(
         {
             "original_file_path": "macros/dir1/macro_1.sql",
             "patch_path": "package_name://macros/dir1/__macros.yml",
             "path": "macros/dir1/macro_1.sql",
         },
         pytest.raises(AssertionError),
+        id="invalid_double_underscore",
     ),
-    (
+    pytest.param(
         {
             "original_file_path": "macros/dir1/macro_1.sql",
             "patch_path": None,
             "path": "macros/dir1/macro_1.sql",
         },
         pytest.raises(AssertionError),
+        id="missing_patch_path",
     ),
 ]
 
