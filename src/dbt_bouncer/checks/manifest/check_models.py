@@ -8,7 +8,11 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import NestedDict
-from dbt_bouncer.utils import find_missing_meta_keys, get_package_version_number
+from dbt_bouncer.utils import (
+    find_missing_meta_keys,
+    get_package_version_number,
+    is_description_populated,
+)
 
 if TYPE_CHECKING:
     from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
@@ -276,6 +280,9 @@ class CheckModelDescriptionContainsRegexPattern(BaseCheck):
 class CheckModelDescriptionPopulated(BaseCheck):
     """Models must have a populated description.
 
+    Parameters:
+        min_description_length (Optional[int]): Minimum length required for the description to be considered populated.
+
     Receives:
         model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
 
@@ -291,15 +298,23 @@ class CheckModelDescriptionPopulated(BaseCheck):
         manifest_checks:
             - name: check_model_description_populated
         ```
+        ```yaml
+        manifest_checks:
+            - name: check_model_description_populated
+              min_description_length: 25 # Setting a stricter requirement for description length
+        ```
 
     """
 
+    min_description_length: int | None = Field(default=None)
     model: "DbtBouncerModelBase" = Field(default=None)
     name: Literal["check_model_description_populated"]
 
     def execute(self) -> None:
         """Execute the check."""
-        assert self.is_description_populated(self.model.description), (
+        assert self._is_description_populated(
+            self.model.description, self.min_description_length
+        ), (
             f"`{get_clean_model_name(self.model.unique_id)}` does not have a populated description."
         )
 
@@ -1485,6 +1500,7 @@ class CheckModelsDocumentationCoverage(BaseModel):
     """Set the minimum percentage of models that have a populated description.
 
     Parameters:
+        min_description_length (Optional[int]): Minimum length required for the description to be considered populated.
         min_model_documentation_coverage_pct (float): The minimum percentage of models that must have a populated description.
 
     Receives:
@@ -1499,6 +1515,11 @@ class CheckModelsDocumentationCoverage(BaseModel):
         manifest_checks:
             - name: check_model_documentation_coverage
               min_model_documentation_coverage_pct: 90
+        ```
+        ```yaml
+        manifest_checks:
+            - name: check_model_documentation_coverage
+              min_description_length: 25 # Setting a stricter requirement for description length
         ```
 
     """
@@ -1530,7 +1551,9 @@ class CheckModelsDocumentationCoverage(BaseModel):
         num_models = len(self.models)
         models_with_description = []
         for model in self.models:
-            if len(model.description.strip()) > 4:
+            if is_description_populated(
+                description=model.description, min_description_length=4
+            ):
                 models_with_description.append(model.unique_id)
 
         num_models_with_descriptions = len(models_with_description)

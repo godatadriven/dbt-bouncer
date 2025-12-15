@@ -187,6 +187,7 @@ manifest_checks:
 
   # Sources
   - name: check_source_description_populated
+    min_description_length: 25
   - name: check_source_freshness_populated
   - name: check_source_loader_populated
   - name: check_source_has_meta_keys
