@@ -81,4 +81,7 @@ class BaseCheck(BaseModel):
             bool: Whether a description is validly populated.
 
         """
-        return len(description.strip()) >= self._min_description_length
+        return (
+            len(description.strip()) >= self._min_description_length
+            and description.strip() != "null"
+        )
