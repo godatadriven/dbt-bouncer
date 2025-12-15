@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, ClassVar, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -47,6 +47,8 @@ class BaseCheck(BaseModel):
         description="Severity of the check, one of 'error' or 'warn'.",
     )
 
+    _min_description_length: ClassVar[int] = 5
+
     # Helper methods
     def is_catalog_node_a_model(
         self, catalog_node: "CatalogNodes", models: list["DbtBouncerModelBase"]
@@ -79,4 +81,4 @@ class BaseCheck(BaseModel):
             bool: Whether a description is validly populated.
 
         """
-        return len(description.strip()) > 4
+        return len(description.strip()) >= self._min_description_length
