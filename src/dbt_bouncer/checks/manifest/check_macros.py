@@ -88,7 +88,8 @@ class CheckMacroArgumentsDescriptionPopulated(BaseCheck):
             macro_doc_raw = [x for x in self.macro.arguments if x.name == arg]
             if macro_doc_raw == [] or (
                 arg not in [x.name for x in self.macro.arguments]
-                or len(macro_doc_raw[0].description.strip()) <= 4
+                or len(macro_doc_raw[0].description.strip())
+                < self._min_description_length
             ):
                 non_complying_args.append(arg)
 
