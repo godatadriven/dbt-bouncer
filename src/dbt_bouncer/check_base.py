@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, List, Literal, Optional
+from typing import TYPE_CHECKING, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -20,42 +20,42 @@ class BaseCheck(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    description: Optional[str] = Field(
+    description: str | None = Field(
         default=None,
         description="Description of what the check does and why it is implemented.",
     )
-    exclude: Optional[str] = Field(
+    exclude: str | None = Field(
         default=None,
         description="Regexp to match which paths to exclude.",
     )
-    include: Optional[str] = Field(
+    include: str | None = Field(
         default=None,
         description="Regexp to match which paths to include.",
     )
-    index: Optional[int] = Field(
+    index: int | None = Field(
         default=None,
         description="Index to uniquely identify the check, calculated at runtime.",
     )
-    materialization: Optional[Literal["ephemeral", "incremental", "table", "view"]] = (
+    materialization: Literal["ephemeral", "incremental", "table", "view"] | None = (
         Field(
             default=None,
             description="Limit check to models with the specified materialization.",
         )
     )
-    severity: Optional[Literal["error", "warn"]] = Field(
+    severity: Literal["error", "warn"] | None = Field(
         default="error",
         description="Severity of the check, one of 'error' or 'warn'.",
     )
 
     # Helper methods
     def is_catalog_node_a_model(
-        self, catalog_node: "CatalogNodes", models: List["DbtBouncerModelBase"]
+        self, catalog_node: "CatalogNodes", models: list["DbtBouncerModelBase"]
     ) -> bool:
         """Check if a catalog node is a model.
 
         Args:
             catalog_node (CatalogNodes): The CatalogNodes object to check.
-            models (List[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
+            models (list[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
 
         Returns:
             bool: Whether a catalog node is a model.
