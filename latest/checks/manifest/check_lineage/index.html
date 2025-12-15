@@ -1467,7 +1467,7 @@
         <tr class="doc-section-item">
         <td><code>description</code></td>
         <td>
-                <code><span title="typing.Optional">Optional</span>[<span title="str">str</span>]</code>
+                <code><span title="Optional">Optional</span>[<span title="str">str</span>]</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -1478,7 +1478,7 @@
         <tr class="doc-section-item">
         <td><code>exclude</code></td>
         <td>
-                <code><span title="typing.Optional">Optional</span>[<span title="str">str</span>]</code>
+                <code><span title="Optional">Optional</span>[<span title="str">str</span>]</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -1489,7 +1489,7 @@
         <tr class="doc-section-item">
         <td><code>include</code></td>
         <td>
-                <code><span title="typing.Optional">Optional</span>[<span title="str">str</span>]</code>
+                <code><span title="Optional">Optional</span>[<span title="str">str</span>]</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -1500,7 +1500,7 @@
         <tr class="doc-section-item">
         <td><code>severity</code></td>
         <td>
-                <code><span title="typing.Optional">Optional</span>[<span title="typing.Literal">Literal</span>[&#39;error&#39;, &#39;warn&#39;]]</code>
+                <code><span title="Optional">Optional</span>[<span title="typing.Literal">Literal</span>[&#39;error&#39;, &#39;warn&#39;]]</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -1636,7 +1636,7 @@
 </span><span id="__span-0-53"><a id="__codelineno-0-53" name="__codelineno-0-53"></a>    <span class="n">model</span><span class="p">:</span> <span class="s2">&quot;DbtBouncerModelBase&quot;</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 </span><span id="__span-0-54"><a id="__codelineno-0-54" name="__codelineno-0-54"></a>    <span class="n">models</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="s2">&quot;DbtBouncerModelBase&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">[])</span>
 </span><span id="__span-0-55"><a id="__codelineno-0-55" name="__codelineno-0-55"></a>    <span class="n">name</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;check_lineage_permitted_upstream_models&quot;</span><span class="p">]</span>
-</span><span id="__span-0-56"><a id="__codelineno-0-56" name="__codelineno-0-56"></a>    <span class="n">package_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</span><span id="__span-0-56"><a id="__codelineno-0-56" name="__codelineno-0-56"></a>    <span class="n">package_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 </span><span id="__span-0-57"><a id="__codelineno-0-57" name="__codelineno-0-57"></a>    <span class="n">upstream_path_pattern</span><span class="p">:</span> <span class="nb">str</span>
 </span><span id="__span-0-58"><a id="__codelineno-0-58" name="__codelineno-0-58"></a>
 </span><span id="__span-0-59"><a id="__codelineno-0-59" name="__codelineno-0-59"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -1739,7 +1739,7 @@
         <tr class="doc-section-item">
         <td><code>description</code></td>
         <td>
-                <code><span title="typing.Optional">Optional</span>[<span title="str">str</span>]</code>
+                <code><span title="Optional">Optional</span>[<span title="str">str</span>]</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -1750,7 +1750,7 @@
         <tr class="doc-section-item">
         <td><code>exclude</code></td>
         <td>
-                <code><span title="typing.Optional">Optional</span>[<span title="str">str</span>]</code>
+                <code><span title="Optional">Optional</span>[<span title="str">str</span>]</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -1761,7 +1761,7 @@
         <tr class="doc-section-item">
         <td><code>include</code></td>
         <td>
-                <code><span title="typing.Optional">Optional</span>[<span title="str">str</span>]</code>
+                <code><span title="Optional">Optional</span>[<span title="str">str</span>]</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -1772,7 +1772,7 @@
         <tr class="doc-section-item">
         <td><code>severity</code></td>
         <td>
-                <code><span title="typing.Optional">Optional</span>[<span title="typing.Literal">Literal</span>[&#39;error&#39;, &#39;warn&#39;]]</code>
+                <code><span title="Optional">Optional</span>[<span title="typing.Literal">Literal</span>[&#39;error&#39;, &#39;warn&#39;]]</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -1938,7 +1938,7 @@
         <tr class="doc-section-item">
         <td><code>description</code></td>
         <td>
-                <code><span title="typing.Optional">Optional</span>[<span title="str">str</span>]</code>
+                <code><span title="Optional">Optional</span>[<span title="str">str</span>]</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -1949,7 +1949,7 @@
         <tr class="doc-section-item">
         <td><code>exclude</code></td>
         <td>
-                <code><span title="typing.Optional">Optional</span>[<span title="str">str</span>]</code>
+                <code><span title="Optional">Optional</span>[<span title="str">str</span>]</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -1960,7 +1960,7 @@
         <tr class="doc-section-item">
         <td><code>include</code></td>
         <td>
-                <code><span title="typing.Optional">Optional</span>[<span title="str">str</span>]</code>
+                <code><span title="Optional">Optional</span>[<span title="str">str</span>]</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -1971,7 +1971,7 @@
         <tr class="doc-section-item">
         <td><code>severity</code></td>
         <td>
-                <code><span title="typing.Optional">Optional</span>[<span title="typing.Literal">Literal</span>[&#39;error&#39;, &#39;warn&#39;]]</code>
+                <code><span title="Optional">Optional</span>[<span title="typing.Literal">Literal</span>[&#39;error&#39;, &#39;warn&#39;]]</code>
         </td>
         <td>
             <div class="doc-md-description">
