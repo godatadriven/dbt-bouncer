@@ -280,6 +280,9 @@ class CheckModelDescriptionContainsRegexPattern(BaseCheck):
 class CheckModelDescriptionPopulated(BaseCheck):
     """Models must have a populated description.
 
+    Parameters:
+        min_description_length (Optional[int]): Minimum length required for the description to be considered populated.
+
     Receives:
         model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
 
@@ -295,15 +298,23 @@ class CheckModelDescriptionPopulated(BaseCheck):
         manifest_checks:
             - name: check_model_description_populated
         ```
+        ```yaml
+        manifest_checks:
+            - name: check_model_description_populated
+              min_description_length: 25 # Setting a stricter requirement for description length
+        ```
 
     """
 
+    min_description_length: int | None = Field(default=None)
     model: "DbtBouncerModelBase" = Field(default=None)
     name: Literal["check_model_description_populated"]
 
     def execute(self) -> None:
         """Execute the check."""
-        assert self._is_description_populated(self.model.description), (
+        assert self._is_description_populated(
+            self.model.description, self.min_description_length
+        ), (
             f"`{get_clean_model_name(self.model.unique_id)}` does not have a populated description."
         )
 
@@ -1489,6 +1500,7 @@ class CheckModelsDocumentationCoverage(BaseModel):
     """Set the minimum percentage of models that have a populated description.
 
     Parameters:
+        min_description_length (Optional[int]): Minimum length required for the description to be considered populated.
         min_model_documentation_coverage_pct (float): The minimum percentage of models that must have a populated description.
 
     Receives:
@@ -1503,6 +1515,11 @@ class CheckModelsDocumentationCoverage(BaseModel):
         manifest_checks:
             - name: check_model_documentation_coverage
               min_model_documentation_coverage_pct: 90
+        ```
+        ```yaml
+        manifest_checks:
+            - name: check_model_documentation_coverage
+              min_description_length: 25 # Setting a stricter requirement for description length
         ```
 
     """

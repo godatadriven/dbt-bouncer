@@ -73,16 +73,21 @@ class BaseCheck(BaseModel):
         else:
             return False
 
-    def _is_description_populated(self, description: str) -> bool:
+    def _is_description_populated(
+        self, description: str, min_description_length: int | None
+    ) -> bool:
         """Check if a description is populated.
 
         Args:
             description (str): Description.
+            min_description_length (int): Minimum length of the description.
 
         Returns:
             bool: Whether a description is validly populated.
 
         """
         return is_description_populated(
-            description=description, min_description_length=self._min_description_length
+            description=description,
+            min_description_length=min_description_length
+            or self._min_description_length,
         )

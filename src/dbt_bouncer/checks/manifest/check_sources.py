@@ -21,6 +21,9 @@ from dbt_bouncer.utils import clean_path_str, find_missing_meta_keys
 class CheckSourceDescriptionPopulated(BaseCheck):
     """Sources must have a populated description.
 
+    Parameters:
+        min_description_length (Optional[int]): Minimum length required for the description to be considered populated.
+
     Receives:
         source (DbtBouncerSourceBase): The DbtBouncerSourceBase object to check.
 
@@ -35,15 +38,23 @@ class CheckSourceDescriptionPopulated(BaseCheck):
         manifest_checks:
             - name: check_source_description_populated
         ```
+        ```yaml
+        manifest_checks:
+            - name: check_source_description_populated
+              min_description_length: 25 # Setting a stricter requirement for description length
+        ```
 
     """
 
+    min_description_length: int | None = Field(default=None)
     name: Literal["check_source_description_populated"]
     source: "DbtBouncerSourceBase" = Field(default=None)
 
     def execute(self) -> None:
         """Execute the check."""
-        assert self._is_description_populated(self.source.description), (
+        assert self._is_description_populated(
+            self.source.description, self.min_description_length
+        ), (
             f"`{self.source.source_name}.{self.source.name}` does not have a populated description."
         )
 

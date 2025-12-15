@@ -26,6 +26,9 @@ from dbt_bouncer.check_base import BaseCheck
 class CheckColumnDescriptionPopulated(BaseCheck):
     """Columns must have a populated description.
 
+    Parameters:
+        min_description_length (Optional[int]): Minimum length required for the description to be considered populated.
+
     Receives:
         catalog_node (CatalogNodes): The CatalogNodes object to check.
         models (List[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
@@ -42,10 +45,16 @@ class CheckColumnDescriptionPopulated(BaseCheck):
             - name: check_column_description_populated
               include: ^models/marts
         ```
+        ```yaml
+        manifest_checks:
+            - name: check_column_description_populated
+              min_description_length: 25 # Setting a stricter requirement for description length
+        ```
 
     """
 
     catalog_node: "CatalogNodes" = Field(default=None)
+    min_description_length: int | None = Field(default=None)
     models: List["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_column_description_populated"]
 
@@ -60,7 +69,7 @@ class CheckColumnDescriptionPopulated(BaseCheck):
                 if model.columns.get(
                     v.name
                 ) is None or not self._is_description_populated(
-                    model.columns[v.name].description
+                    model.columns[v.name].description, self.min_description_length
                 ):
                     non_complying_columns.append(v.name)
 
@@ -340,6 +349,7 @@ class CheckColumnsAreDocumentedInPublicModels(BaseCheck):
 
     Receives:
         catalog_node (CatalogNodes): The CatalogNodes object to check.
+        min_description_length (Optional[int]): Minimum length required for the description to be considered populated.
         models (List[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
 
     Other Parameters:
@@ -357,6 +367,7 @@ class CheckColumnsAreDocumentedInPublicModels(BaseCheck):
     """
 
     catalog_node: "CatalogNodes" = Field(default=None)
+    min_description_length: int | None = Field(default=None)
     models: List["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_columns_are_documented_in_public_models"]
 
@@ -371,7 +382,7 @@ class CheckColumnsAreDocumentedInPublicModels(BaseCheck):
                 if model.access.value == "public":
                     column_config = model.columns.get(v.name)
                     if column_config is None or not self._is_description_populated(
-                        column_config.description
+                        column_config.description, self.min_description_length
                     ):
                         non_complying_columns.append(v.name)
 

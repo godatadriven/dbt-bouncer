@@ -25,6 +25,9 @@ class TagExtension(StandaloneTag):
 class CheckMacroArgumentsDescriptionPopulated(BaseCheck):
     """Macro arguments must have a populated description.
 
+    Parameters:
+        min_description_length (Optional[int]): Minimum length required for the description to be considered populated.
+
     Receives:
         macro (Macros): The Macros object to check.
 
@@ -45,9 +48,15 @@ class CheckMacroArgumentsDescriptionPopulated(BaseCheck):
             - name: check_macro_arguments_description_populated
               include: ^macros/common
         ```
+        ```yaml
+        manifest_checks:
+            - name: check_macro_arguments_description_populated
+              min_description_length: 25 # Setting a stricter requirement for description length
+        ```
 
     """
 
+    min_description_length: int | None = Field(default=None)
     macro: "Macros" = Field(default=None)
     name: Literal["check_macro_arguments_description_populated"]
 
@@ -88,7 +97,9 @@ class CheckMacroArgumentsDescriptionPopulated(BaseCheck):
             macro_doc_raw = [x for x in self.macro.arguments if x.name == arg]
             if macro_doc_raw == [] or (
                 arg not in [x.name for x in self.macro.arguments]
-                or not self._is_description_populated(macro_doc_raw[0].description)
+                or not self._is_description_populated(
+                    macro_doc_raw[0].description, self.min_description_length
+                )
             ):
                 non_complying_args.append(arg)
 
@@ -141,6 +152,9 @@ class CheckMacroCodeDoesNotContainRegexpPattern(BaseCheck):
 class CheckMacroDescriptionPopulated(BaseCheck):
     """Macros must have a populated description.
 
+    Parameters:
+        min_description_length (Optional[int]): Minimum length required for the description to be considered populated.
+
     Receives:
         macro (Macros): The Macros object to check.
 
@@ -165,13 +179,14 @@ class CheckMacroDescriptionPopulated(BaseCheck):
     """
 
     macro: "Macros" = Field(default=None)
+    min_description_length: int | None = Field(default=None)
     name: Literal["check_macro_description_populated"]
 
     def execute(self) -> None:
         """Execute the check."""
-        assert self._is_description_populated(self.macro.description), (
-            f"Macro `{self.macro.name}` does not have a populated description."
-        )
+        assert self._is_description_populated(
+            self.macro.description, self.min_description_length
+        ), f"Macro `{self.macro.name}` does not have a populated description."
 
 
 class CheckMacroMaxNumberOfLines(BaseCheck):
