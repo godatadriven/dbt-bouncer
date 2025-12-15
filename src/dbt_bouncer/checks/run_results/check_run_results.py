@@ -1,6 +1,6 @@
 # mypy: disable-error-code="union-attr"
 
-from typing import TYPE_CHECKING, Literal, Optional
+from typing import TYPE_CHECKING, Literal
 
 from pydantic import Field
 
@@ -42,7 +42,7 @@ class CheckRunResultsMaxExecutionTime(BaseCheck):
 
     max_execution_time_seconds: float
     name: Literal["check_run_results_max_execution_time"]
-    run_result: Optional["DbtBouncerRunResultBase"] = Field(default=None)
+    run_result: "DbtBouncerRunResultBase" = Field(default=None)
 
     def execute(self) -> None:
         """Execute the check."""
@@ -83,7 +83,7 @@ class CheckRunResultsMaxGigabytesBilled(BaseCheck):
 
     max_gigabytes_billed: float
     name: Literal["check_run_results_max_gigabytes_billed"]
-    run_result: Optional["DbtBouncerRunResultBase"] = Field(default=None)
+    run_result: "DbtBouncerRunResultBase" = Field(default=None)
 
     def execute(self) -> None:
         """Execute the check.

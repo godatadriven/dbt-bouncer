@@ -1,7 +1,7 @@
 import logging
 import warnings
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Union
 
 from pydantic import BaseModel
 
@@ -173,7 +173,7 @@ def parse_manifest(
 
 
 def parse_manifest_artifact(
-    manifest_obj: DbtBouncerManifest, package_name: Optional[str] = None
+    manifest_obj: DbtBouncerManifest, package_name: str | None = None
 ) -> tuple[
     List[Exposures],
     List[Macros],

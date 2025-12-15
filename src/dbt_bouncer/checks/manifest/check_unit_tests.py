@@ -1,6 +1,6 @@
 # mypy: disable-error-code="union-attr"
 import logging
-from typing import TYPE_CHECKING, List, Literal, Optional
+from typing import TYPE_CHECKING, List, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -51,15 +51,15 @@ class CheckUnitTestCoverage(BaseModel):
     """
 
     model_config = ConfigDict(extra="forbid")
-    description: Optional[str] = Field(
+    description: str | None = Field(
         default=None,
         description="Description of what the check does and why it is implemented.",
     )
-    include: Optional[str] = Field(
+    include: str | None = Field(
         default=None,
         description="Regexp to match which paths to include.",
     )
-    index: Optional[int] = Field(
+    index: int | None = Field(
         default=None,
         description="Index to uniquely identify the check, calculated at runtime.",
     )
@@ -71,7 +71,7 @@ class CheckUnitTestCoverage(BaseModel):
     )
     models: List["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_unit_test_coverage"]
-    severity: Optional[Literal["error", "warn"]] = Field(
+    severity: Literal["error", "warn"] | None = Field(
         default="error",
         description="Severity of the check, one of 'error' or 'warn'.",
     )

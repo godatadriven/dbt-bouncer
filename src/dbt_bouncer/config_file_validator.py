@@ -2,7 +2,7 @@ import logging
 import os
 import re
 from pathlib import Path, PurePath
-from typing import TYPE_CHECKING, Any, Dict, List, Literal, Mapping, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Mapping
 
 import click
 import toml
@@ -144,7 +144,7 @@ def get_config_file_path(
 
 def load_config_file_contents(
     config_file_path: PurePath,
-    allow_default_config_file_creation: Optional[bool] = None,
+    allow_default_config_file_creation: bool | None = None,
 ) -> Mapping[str, Any]:
     """Load the contents of the config file.
 
