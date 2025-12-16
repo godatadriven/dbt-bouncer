@@ -3,6 +3,7 @@
 """Re-usable functions for dbt-bouncer."""
 
 import importlib
+import importlib.util
 import logging
 import os
 import re
@@ -11,7 +12,6 @@ from functools import lru_cache
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Type
 
-import click
 import yaml
 from packaging.version import Version as PyPIVersion
 from semver import Version
@@ -151,8 +151,13 @@ def flatten(structure: Any, key: str = "", path: str = "", flattened=None):
 
 
 @lru_cache
-def get_check_objects() -> List[Type["BaseCheck"]]:
+def get_check_objects(
+    custom_checks_dir: Path | None = None,
+) -> List[Type["BaseCheck"]]:
     """Get list of Check* classes and check_* functions.
+
+    Args:
+        custom_checks_dir: Path to a directory containing custom checks.
 
     Returns:
         List[Type[BaseCheck]]: List of Check* classes.
@@ -162,9 +167,10 @@ def get_check_objects() -> List[Type["BaseCheck"]]:
     def import_check(check_class_name: str, check_file_path: str) -> None:
         """Import the Check* class to locals()."""
         spec = importlib.util.spec_from_file_location(check_class_name, check_file_path)
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
-        sys._getframe().f_locals[check_class_name] = module
+        if spec and spec.loader:
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            sys._getframe().f_locals[check_class_name] = module
         check_objects.append(locals()[check_class_name])
 
     check_objects: List[Type["BaseCheck"]] = []
@@ -180,24 +186,31 @@ def get_check_objects() -> List[Type["BaseCheck"]]:
         for obj in [i for i in dir(imported_check_file) if i.startswith("Check")]:
             import_check(obj, check_file.absolute().__str__())
 
-    config_file_path = click.get_current_context().obj["config_file_path"]
-    custom_checks_dir = click.get_current_context().obj["custom_checks_dir"]
     if custom_checks_dir is not None:
-        custom_checks_dir = config_file_path.parent / custom_checks_dir
+        custom_checks_dir = Path(custom_checks_dir)
         logging.debug(f"{custom_checks_dir=}")
-        custom_check_files = [
-            f for f in Path(custom_checks_dir).glob("*/*.py") if f.is_file()
-        ]
-        logging.debug(f"{custom_check_files=}")
+        if custom_checks_dir.exists():
+            custom_check_files = [
+                f for f in custom_checks_dir.glob("*/*.py") if f.is_file()
+            ]
+            logging.debug(f"{custom_check_files=}")
 
-        for check_file in custom_check_files:
-            spec = importlib.util.spec_from_file_location("custom_check", check_file)
-            foo = importlib.util.module_from_spec(spec)
-            sys.modules["custom_check"] = foo
-            spec.loader.exec_module(foo)
-            for obj in dir(foo):
-                if obj.startswith("Check"):
-                    import_check(obj, check_file.absolute().__str__())
+            for check_file in custom_check_files:
+                unique_module_name = f"custom_check_{abs(hash(str(check_file)))}"
+                spec = importlib.util.spec_from_file_location(
+                    unique_module_name, check_file
+                )
+                if spec and spec.loader:
+                    foo = importlib.util.module_from_spec(spec)
+                    sys.modules[unique_module_name] = foo
+                    spec.loader.exec_module(foo)
+                    for obj in dir(foo):
+                        if obj.startswith("Check"):
+                            import_check(obj, check_file.absolute().__str__())
+        else:
+            logging.warning(
+                f"Custom checks directory `{custom_checks_dir}` does not exist."
+            )
 
     logging.debug(f"Loaded {len(check_objects)} `Check*` classes.")
 

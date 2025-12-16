@@ -8,6 +8,7 @@ import traceback
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Union
 
+import click
 from progress.bar import Bar
 from tabulate import tabulate
 
@@ -68,9 +69,18 @@ def runner(
         RuntimeError: If more than one "iterate_over" argument is found.
 
     """
+    try:
+        ctx = click.get_current_context()
+        config_file_path = ctx.obj.get("config_file_path")
+        custom_checks_dir = ctx.obj.get("custom_checks_dir")
+        if custom_checks_dir:
+            custom_checks_dir = config_file_path.parent / custom_checks_dir
+    except (RuntimeError, AttributeError, KeyError):
+        custom_checks_dir = None
+
     check_classes: List[Dict[str, Union[Any, str]]] = [
         {"class": getattr(x, x.__name__), "source_file": x.__file__}
-        for x in get_check_objects()
+        for x in get_check_objects(custom_checks_dir)
     ]
     for c in check_classes:
         locals()[c["class"].__name__] = c["class"]  # type: ignore[union-attr]

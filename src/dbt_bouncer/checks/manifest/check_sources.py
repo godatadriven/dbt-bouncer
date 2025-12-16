@@ -176,7 +176,7 @@ class CheckSourceHasTags(BaseCheck):
                 f"`{self.source.source_name}.{self.source.name}` does not have any of the required tags: {self.tags}."
             )
         elif self.criteria == "all":
-            missing_tags = [tag for tag in self.tags if tag not in self.source.tags]
+            missing_tags = set(self.tags) - set(self.source.tags)
             assert not missing_tags, (
                 f"`{self.source.source_name}.{self.source.name}` is missing required tags: {missing_tags}."
             )
