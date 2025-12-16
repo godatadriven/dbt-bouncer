@@ -54,8 +54,6 @@ def test_cli_coverage_non_json(tmp_path):
     assert result.exit_code == 1
 
 
-# No idea why but this test always fails when run with all other unit tests but succeeds when run alone or when just this file is tested
-@pytest.mark.not_in_parallel
 def test_cli_custom_checks_dir(caplog, monkeypatch, tmp_path):
     get_check_objects.cache_clear()
 
