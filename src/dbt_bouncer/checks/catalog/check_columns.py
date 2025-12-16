@@ -1,7 +1,7 @@
 # mypy: disable-error-code="union-attr"
 
 import re
-from typing import TYPE_CHECKING, List, Literal
+from typing import TYPE_CHECKING, Literal
 
 from pydantic import ConfigDict, Field
 
@@ -55,7 +55,7 @@ class CheckColumnDescriptionPopulated(BaseCheck):
 
     catalog_node: "CatalogNodes" = Field(default=None)
     min_description_length: int | None = Field(default=None)
-    models: List["DbtBouncerModelBase"] = Field(default=[])
+    models: list["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_column_description_populated"]
 
     def execute(self) -> None:
@@ -109,7 +109,7 @@ class CheckColumnHasSpecifiedTest(BaseCheck):
     column_name_pattern: str
     name: Literal["check_column_has_specified_test"]
     test_name: str
-    tests: List["DbtBouncerTestBase"] = Field(default=[])
+    tests: list["DbtBouncerTestBase"] = Field(default=[])
 
     def execute(self) -> None:
         """Execute the check."""
@@ -201,7 +201,7 @@ class CheckColumnNameCompliesToColumnType(BaseCheck):
     column_name_pattern: str
     name: Literal["check_column_name_complies_to_column_type"]
     type_pattern: str | None = None
-    types: List[str] | None = None
+    types: list[str] | None = None
 
     def execute(self) -> None:
         """Execute the check."""
@@ -250,11 +250,11 @@ class CheckColumnNames(BaseCheck):
         models (list[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
 
     Other Parameters:
-        description (Optional[str]): Description of what the check does and why it is implemented.
-        exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
-        include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
         materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
-        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml
@@ -269,13 +269,13 @@ class CheckColumnNames(BaseCheck):
 
     catalog_node: "CatalogNodes" = Field(default=None)
     column_name_pattern: str
-    models: List["DbtBouncerModelBase"] = Field(default=[])
+    models: list["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_column_names"]
 
     def execute(self) -> None:
         """Execute the check."""
         if self.is_catalog_node_a_model(self.catalog_node, self.models):
-            non_complying_columns: List[str] = []
+            non_complying_columns: list[str] = []
             non_complying_columns.extend(
                 v.name
                 for _, v in self.catalog_node.columns.items()
@@ -313,7 +313,7 @@ class CheckColumnsAreAllDocumented(BaseCheck):
     case_sensitive: bool | None = Field(default=True)
     catalog_node: "CatalogNodes" = Field(default=None)
     manifest_obj: "DbtBouncerManifest" = Field(default=None)
-    models: List["DbtBouncerModelBase"] = Field(default=[])
+    models: list["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_columns_are_all_documented"]
 
     def execute(self) -> None:
@@ -368,7 +368,7 @@ class CheckColumnsAreDocumentedInPublicModels(BaseCheck):
 
     catalog_node: "CatalogNodes" = Field(default=None)
     min_description_length: int | None = Field(default=None)
-    models: List["DbtBouncerModelBase"] = Field(default=[])
+    models: list["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_columns_are_documented_in_public_models"]
 
     def execute(self) -> None:

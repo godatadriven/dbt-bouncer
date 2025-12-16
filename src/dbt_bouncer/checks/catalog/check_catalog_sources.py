@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, List, Literal
+from typing import TYPE_CHECKING, Literal
 
 from pydantic import Field
 
@@ -41,7 +41,7 @@ class CheckSourceColumnsAreAllDocumented(BaseCheck):
 
     catalog_source: "CatalogNodes" = Field(default=None)
     name: Literal["check_source_columns_are_all_documented"]
-    sources: List["DbtBouncerSourceBase"] = Field(default=[])
+    sources: list["DbtBouncerSourceBase"] = Field(default=[])
 
     def execute(self) -> None:
         """Execute the check."""
