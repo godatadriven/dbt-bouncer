@@ -1,4 +1,6 @@
+import importlib
 import logging
+import sys
 from pathlib import Path, PurePath
 from typing import Union
 
@@ -126,6 +128,10 @@ def cli(
         "config_file_path": config_file_path,
         "custom_checks_dir": config_file_contents.get("custom_checks_dir"),
     }
+
+    # If config_file_parser is already loaded, reload it so that check types are updated (necessary for parallel tests)
+    if "dbt_bouncer.config_file_parser" in sys.modules:
+        importlib.reload(sys.modules["dbt_bouncer.config_file_parser"])
 
     from dbt_bouncer.config_file_validator import validate_conf
 

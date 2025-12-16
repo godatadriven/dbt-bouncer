@@ -46,25 +46,8 @@ test-unit:
 		--cov-report=term-missing:skip-covered \
 		--cov=src/dbt_bouncer/ \
 		--numprocesses 5 \
-		./tests/unit \
-		-m 'not not_in_parallel and not not_in_parallel2' && \
-	uv run pytest \
-		-c ./tests \
-		--junitxml=coverage.xml \
-		--cov-report=term-missing:skip-covered \
-		--cov=src/dbt_bouncer/ \
-		--cov-append \
-		-m not_in_parallel && \
-	uv run pytest \
-		-c ./tests \
-		--junitxml=coverage.xml \
-		--cov-report=term-missing:skip-covered \
-		--cov=src/dbt_bouncer/ \
-		--cov-append \
-		-m not_in_parallel2
+		./tests/unit
 
 test-windows:
-	uv run pytest -c ./tests --numprocesses 5 ./tests/unit -m 'not not_in_parallel and not not_in_parallel2' && \
-	uv run pytest -c ./tests -m not_in_parallel && \
-	uv run pytest -c ./tests -m not_in_parallel2 && \
+	uv run pytest -c ./tests --numprocesses 5 ./tests/unit && \
 	uv run pytest -c ./tests --numprocesses 5 ./tests/integration

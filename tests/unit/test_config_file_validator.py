@@ -175,8 +175,6 @@ def test_validate_conf_target_default_value(monkeypatch):
     assert bouncer_config.dbt_artifacts_dir == "./target"
 
 
-# No idea why but this test always fails when run with all other unit tests but succeeds when run alone
-@pytest.mark.not_in_parallel2
 def test_validate_conf_target_env_var():
     ctx = click.Context(
         cli,

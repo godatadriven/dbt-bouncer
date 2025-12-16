@@ -2,10 +2,11 @@ import os
 from pathlib import Path
 from typing import Any, Dict, List, Literal, Union
 
+import click
 from pydantic import BaseModel, ConfigDict, Field
 from typing_extensions import Annotated
 
-from dbt_bouncer.utils import clean_path_str
+from dbt_bouncer.utils import clean_path_str, get_check_objects
 
 
 def get_check_types(
@@ -22,14 +23,21 @@ def get_check_types(
         List[str]: The check types.
 
     """
-    from dbt_bouncer.utils import get_check_objects
+    try:
+        ctx = click.get_current_context()
+        config_file_path = ctx.obj.get("config_file_path")
+        custom_checks_dir = ctx.obj.get("custom_checks_dir")
+        if custom_checks_dir:
+            custom_checks_dir = config_file_path.parent / custom_checks_dir
+    except (RuntimeError, AttributeError, KeyError):
+        custom_checks_dir = None
 
     check_classes: List[Dict[str, Union[Any, Path]]] = [
         {
             "class": getattr(x, x.__name__),
             "source_file": Path(clean_path_str(x.__file__)),
         }
-        for x in get_check_objects()
+        for x in get_check_objects(custom_checks_dir)
     ]
     return List[  # type: ignore[misc, return-value]
         Annotated[
@@ -58,7 +66,7 @@ class DbtBouncerConfBase(BaseModel):
         description="Path to a directory containing custom checks.",
     )
     dbt_artifacts_dir: str | None = Field(
-        default=(
+        default_factory=lambda: (
             f"{os.getenv('DBT_PROJECT_DIR')}/target"
             if os.getenv("DBT_PROJECT_DIR")
             else "./target"
