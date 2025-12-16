@@ -16,15 +16,15 @@ class CheckSnapshotHasTags(BaseCheck):
     """Snapshots must have the specified tags.
 
     Parameters:
-        criteria: (Optional[Literal["any", "all", "one"]]): Whether the snapshot must have any, all, or exactly one of the specified tags. Default: `all`.
+        criteria: (Literal["any", "all", "one"] | None): Whether the snapshot must have any, all, or exactly one of the specified tags. Default: `all`.
         snapshot (DbtBouncerSnapshotBase): The DbtBouncerSnapshotBase object to check.
-        tags (List[str]): List of tags to check for.
+        tags (list[str]): List of tags to check for.
 
     Other Parameters:
-        description (Optional[str]): Description of what the check does and why it is implemented.
-        exclude (Optional[str]): Regex pattern to match the snapshot path. Snapshot paths that match the pattern will not be checked.
-        include (Optional[str]): Regex pattern to match the snapshot path. Only snapshot paths that match the pattern will be checked.
-        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the snapshot path. Snapshot paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the snapshot path. Only snapshot paths that match the pattern will be checked.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml
@@ -69,10 +69,10 @@ class CheckSnapshotNames(BaseCheck):
         snapshot (DbtBouncerSnapshotBase): The DbtBouncerSnapshotBase object to check.
 
     Other Parameters:
-        description (Optional[str]): Description of what the check does and why it is implemented.
-        exclude (Optional[str]): Regex pattern to match the snapshot path. Snapshot paths that match the pattern will not be checked.
-        include (Optional[str]): Regex pattern to match the snapshot path. Only snapshot paths that match the pattern will be checked.
-        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the snapshot path. Snapshot paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the snapshot path. Only snapshot paths that match the pattern will be checked.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml
