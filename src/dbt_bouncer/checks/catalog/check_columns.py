@@ -1,7 +1,7 @@
 # mypy: disable-error-code="union-attr"
 
 import re
-from typing import TYPE_CHECKING, List, Literal
+from typing import TYPE_CHECKING, Literal
 
 from pydantic import ConfigDict, Field
 
@@ -27,17 +27,17 @@ class CheckColumnDescriptionPopulated(BaseCheck):
     """Columns must have a populated description.
 
     Parameters:
-        min_description_length (Optional[int]): Minimum length required for the description to be considered populated.
+        min_description_length (int | None): Minimum length required for the description to be considered populated.
 
     Receives:
         catalog_node (CatalogNodes): The CatalogNodes object to check.
-        models (List[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
+        models (list[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
 
     Other Parameters:
-        description (Optional[str]): Description of what the check does and why it is implemented.
-        exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
-        include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
-        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml
@@ -55,7 +55,7 @@ class CheckColumnDescriptionPopulated(BaseCheck):
 
     catalog_node: "CatalogNodes" = Field(default=None)
     min_description_length: int | None = Field(default=None)
-    models: List["DbtBouncerModelBase"] = Field(default=[])
+    models: list["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_column_description_populated"]
 
     def execute(self) -> None:
@@ -87,13 +87,13 @@ class CheckColumnHasSpecifiedTest(BaseCheck):
 
     Receives:
         catalog_node (CatalogNodes): The CatalogNodes object to check.
-        tests (List[DbtBouncerTestBase]): List of DbtBouncerTestBase objects parsed from `manifest.json`.
+        tests (list[DbtBouncerTestBase]): List of DbtBouncerTestBase objects parsed from `manifest.json`.
 
     Other Parameters:
-        description (Optional[str]): Description of what the check does and why it is implemented.
-        exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
-        include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
-        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml
@@ -109,7 +109,7 @@ class CheckColumnHasSpecifiedTest(BaseCheck):
     column_name_pattern: str
     name: Literal["check_column_has_specified_test"]
     test_name: str
-    tests: List["DbtBouncerTestBase"] = Field(default=[])
+    tests: list["DbtBouncerTestBase"] = Field(default=[])
 
     def execute(self) -> None:
         """Execute the check."""
@@ -145,17 +145,17 @@ class CheckColumnNameCompliesToColumnType(BaseCheck):
 
     Parameters:
         column_name_pattern (str): Regex pattern to match the model name.
-        type_pattern (Optional[str]): Regex pattern to match the data types.
-        types (Optional[List[str]]): List of data types to check.
+        type_pattern (str | None): Regex pattern to match the data types.
+        types (list[str] | None): List of data types to check.
 
     Receives:
         catalog_node (CatalogNodes): The CatalogNodes object to check.
 
     Other Parameters:
-        description (Optional[str]): Description of what the check does and why it is implemented.
-        exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
-        include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
-        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml
@@ -201,7 +201,7 @@ class CheckColumnNameCompliesToColumnType(BaseCheck):
     column_name_pattern: str
     name: Literal["check_column_name_complies_to_column_type"]
     type_pattern: str | None = None
-    types: List[str] | None = None
+    types: list[str] | None = None
 
     def execute(self) -> None:
         """Execute the check."""
@@ -247,14 +247,14 @@ class CheckColumnNames(BaseCheck):
 
     Receives:
         catalog_node (CatalogNodes): The CatalogNodes object to check.
-        models (List[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
+        models (list[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
 
     Other Parameters:
-        description (Optional[str]): Description of what the check does and why it is implemented.
-        exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
-        include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
-        materialization (Optional[Literal["ephemeral", "incremental", "table", "view"]]): Limit check to models with the specified materialization.
-        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml
@@ -269,13 +269,13 @@ class CheckColumnNames(BaseCheck):
 
     catalog_node: "CatalogNodes" = Field(default=None)
     column_name_pattern: str
-    models: List["DbtBouncerModelBase"] = Field(default=[])
+    models: list["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_column_names"]
 
     def execute(self) -> None:
         """Execute the check."""
         if self.is_catalog_node_a_model(self.catalog_node, self.models):
-            non_complying_columns: List[str] = []
+            non_complying_columns: list[str] = []
             non_complying_columns.extend(
                 v.name
                 for _, v in self.catalog_node.columns.items()
@@ -291,16 +291,16 @@ class CheckColumnsAreAllDocumented(BaseCheck):
     """All columns in a model should be included in the model's properties file, i.e. `.yml` file.
 
     Receives:
-        case_sensitive (Optional[bool]): Whether the column names are case sensitive or not. Necessary for adapters like `dbt-snowflake` where the column in `catalog.json` is uppercase but the column in `manifest.json` can be lowercase. Defaults to `false` for `dbt-snowflake`, otherwise `true`.
+        case_sensitive (bool | None): Whether the column names are case sensitive or not. Necessary for adapters like `dbt-snowflake` where the column in `catalog.json` is uppercase but the column in `manifest.json` can be lowercase. Defaults to `false` for `dbt-snowflake`, otherwise `true`.
         catalog_node (CatalogNodes): The CatalogNodes object to check.
         manifest_obj (DbtBouncerManifest): The DbtBouncerManifest object parsed from `manifest.json`.
-        models (List[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
+        models (list[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
 
     Other Parameters:
-        description (Optional[str]): Description of what the check does and why it is implemented.
-        exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
-        include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
-        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml
@@ -313,7 +313,7 @@ class CheckColumnsAreAllDocumented(BaseCheck):
     case_sensitive: bool | None = Field(default=True)
     catalog_node: "CatalogNodes" = Field(default=None)
     manifest_obj: "DbtBouncerManifest" = Field(default=None)
-    models: List["DbtBouncerModelBase"] = Field(default=[])
+    models: list["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_columns_are_all_documented"]
 
     def execute(self) -> None:
@@ -349,14 +349,14 @@ class CheckColumnsAreDocumentedInPublicModels(BaseCheck):
 
     Receives:
         catalog_node (CatalogNodes): The CatalogNodes object to check.
-        min_description_length (Optional[int]): Minimum length required for the description to be considered populated.
-        models (List[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
+        min_description_length (int | None): Minimum length required for the description to be considered populated.
+        models (list[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
 
     Other Parameters:
-        description (Optional[str]): Description of what the check does and why it is implemented.
-        exclude (Optional[str]): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
-        include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
-        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml
@@ -368,7 +368,7 @@ class CheckColumnsAreDocumentedInPublicModels(BaseCheck):
 
     catalog_node: "CatalogNodes" = Field(default=None)
     min_description_length: int | None = Field(default=None)
-    models: List["DbtBouncerModelBase"] = Field(default=[])
+    models: list["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_columns_are_documented_in_public_models"]
 
     def execute(self) -> None:

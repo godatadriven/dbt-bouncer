@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, List, Literal
+from typing import TYPE_CHECKING, Literal
 
 from pydantic import Field
 
@@ -23,13 +23,13 @@ class CheckSourceColumnsAreAllDocumented(BaseCheck):
 
     Receives:
         catalog_source (CatalogNodes): The CatalogNodes object to check.
-        sources (List[DbtBouncerSourceBase]): List of DbtBouncerSourceBase objects parsed from `catalog.json`.
+        sources (list[DbtBouncerSourceBase]): List of DbtBouncerSourceBase objects parsed from `catalog.json`.
 
     Other Parameters:
-        description (Optional[str]): Description of what the check does and why it is implemented.
-        exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
-        include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
-        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml
@@ -41,7 +41,7 @@ class CheckSourceColumnsAreAllDocumented(BaseCheck):
 
     catalog_source: "CatalogNodes" = Field(default=None)
     name: Literal["check_source_columns_are_all_documented"]
-    sources: List["DbtBouncerSourceBase"] = Field(default=[])
+    sources: list["DbtBouncerSourceBase"] = Field(default=[])
 
     def execute(self) -> None:
         """Execute the check."""
