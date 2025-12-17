@@ -1454,7 +1454,7 @@
                 <code>min_description_length</code>
             </td>
             <td>
-                  <code><span title="Optional">Optional</span>[<span title="int">int</span>]</code>
+                  <code><span title="int">int</span> | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -1503,7 +1503,7 @@
         <tr class="doc-section-item">
         <td><code>description</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="str">str</span>]</code>
+                <code><span title="str">str</span> | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -1514,7 +1514,7 @@
         <tr class="doc-section-item">
         <td><code>exclude</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="str">str</span>]</code>
+                <code><span title="str">str</span> | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -1525,7 +1525,7 @@
         <tr class="doc-section-item">
         <td><code>include</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="str">str</span>]</code>
+                <code><span title="str">str</span> | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -1536,7 +1536,7 @@
         <tr class="doc-section-item">
         <td><code>severity</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="typing.Literal">Literal</span>[&#39;error&#39;, &#39;warn&#39;]]</code>
+                <code><span title="typing.Literal">Literal</span>[&#39;error&#39;, &#39;warn&#39;] | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -1610,16 +1610,16 @@
 </span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Sources must have a populated description.</span>
 </span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23"></a>
 </span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24"></a><span class="sd">    Parameters:</span>
-</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25"></a><span class="sd">        min_description_length (Optional[int]): Minimum length required for the description to be considered populated.</span>
+</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25"></a><span class="sd">        min_description_length (int | None): Minimum length required for the description to be considered populated.</span>
 </span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26"></a>
 </span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27"></a><span class="sd">    Receives:</span>
 </span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28"></a><span class="sd">        source (DbtBouncerSourceBase): The DbtBouncerSourceBase object to check.</span>
 </span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29"></a>
 </span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30"></a><span class="sd">    Other Parameters:</span>
-</span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31"></a><span class="sd">        description (Optional[str]): Description of what the check does and why it is implemented.</span>
-</span><span id="__span-0-32"><a id="__codelineno-0-32" name="__codelineno-0-32"></a><span class="sd">        exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.</span>
-</span><span id="__span-0-33"><a id="__codelineno-0-33" name="__codelineno-0-33"></a><span class="sd">        include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.</span>
-</span><span id="__span-0-34"><a id="__codelineno-0-34" name="__codelineno-0-34"></a><span class="sd">        severity (Optional[Literal[&quot;error&quot;, &quot;warn&quot;]]): Severity level of the check. Default: `error`.</span>
+</span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31"></a><span class="sd">        description (str | None): Description of what the check does and why it is implemented.</span>
+</span><span id="__span-0-32"><a id="__codelineno-0-32" name="__codelineno-0-32"></a><span class="sd">        exclude (str | None): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.</span>
+</span><span id="__span-0-33"><a id="__codelineno-0-33" name="__codelineno-0-33"></a><span class="sd">        include (str | None): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.</span>
+</span><span id="__span-0-34"><a id="__codelineno-0-34" name="__codelineno-0-34"></a><span class="sd">        severity (Literal[&quot;error&quot;, &quot;warn&quot;] | None): Severity level of the check. Default: `error`.</span>
 </span><span id="__span-0-35"><a id="__codelineno-0-35" name="__codelineno-0-35"></a>
 </span><span id="__span-0-36"><a id="__codelineno-0-36" name="__codelineno-0-36"></a><span class="sd">    Example(s):</span>
 </span><span id="__span-0-37"><a id="__codelineno-0-37" name="__codelineno-0-37"></a><span class="sd">        ```yaml</span>
@@ -1721,7 +1721,7 @@
         <tr class="doc-section-item">
         <td><code>description</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="str">str</span>]</code>
+                <code><span title="str">str</span> | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -1732,7 +1732,7 @@
         <tr class="doc-section-item">
         <td><code>exclude</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="str">str</span>]</code>
+                <code><span title="str">str</span> | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -1743,7 +1743,7 @@
         <tr class="doc-section-item">
         <td><code>include</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="str">str</span>]</code>
+                <code><span title="str">str</span> | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -1754,7 +1754,7 @@
         <tr class="doc-section-item">
         <td><code>severity</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="typing.Literal">Literal</span>[&#39;error&#39;, &#39;warn&#39;]]</code>
+                <code><span title="typing.Literal">Literal</span>[&#39;error&#39;, &#39;warn&#39;] | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -1822,10 +1822,10 @@
 </span><span id="__span-0-66"><a id="__codelineno-0-66" name="__codelineno-0-66"></a><span class="sd">        source (DbtBouncerSource): The DbtBouncerSourceBase object to check.</span>
 </span><span id="__span-0-67"><a id="__codelineno-0-67" name="__codelineno-0-67"></a>
 </span><span id="__span-0-68"><a id="__codelineno-0-68" name="__codelineno-0-68"></a><span class="sd">    Other Parameters:</span>
-</span><span id="__span-0-69"><a id="__codelineno-0-69" name="__codelineno-0-69"></a><span class="sd">        description (Optional[str]): Description of what the check does and why it is implemented.</span>
-</span><span id="__span-0-70"><a id="__codelineno-0-70" name="__codelineno-0-70"></a><span class="sd">        exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.</span>
-</span><span id="__span-0-71"><a id="__codelineno-0-71" name="__codelineno-0-71"></a><span class="sd">        include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.</span>
-</span><span id="__span-0-72"><a id="__codelineno-0-72" name="__codelineno-0-72"></a><span class="sd">        severity (Optional[Literal[&quot;error&quot;, &quot;warn&quot;]]): Severity level of the check. Default: `error`.</span>
+</span><span id="__span-0-69"><a id="__codelineno-0-69" name="__codelineno-0-69"></a><span class="sd">        description (str | None): Description of what the check does and why it is implemented.</span>
+</span><span id="__span-0-70"><a id="__codelineno-0-70" name="__codelineno-0-70"></a><span class="sd">        exclude (str | None): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.</span>
+</span><span id="__span-0-71"><a id="__codelineno-0-71" name="__codelineno-0-71"></a><span class="sd">        include (str | None): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.</span>
+</span><span id="__span-0-72"><a id="__codelineno-0-72" name="__codelineno-0-72"></a><span class="sd">        severity (Literal[&quot;error&quot;, &quot;warn&quot;] | None): Severity level of the check. Default: `error`.</span>
 </span><span id="__span-0-73"><a id="__codelineno-0-73" name="__codelineno-0-73"></a>
 </span><span id="__span-0-74"><a id="__codelineno-0-74" name="__codelineno-0-74"></a><span class="sd">    Example(s):</span>
 </span><span id="__span-0-75"><a id="__codelineno-0-75" name="__codelineno-0-75"></a><span class="sd">        ```yaml</span>
@@ -1956,7 +1956,7 @@
         <tr class="doc-section-item">
         <td><code>description</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="str">str</span>]</code>
+                <code><span title="str">str</span> | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -1967,7 +1967,7 @@
         <tr class="doc-section-item">
         <td><code>exclude</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="str">str</span>]</code>
+                <code><span title="str">str</span> | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -1978,7 +1978,7 @@
         <tr class="doc-section-item">
         <td><code>include</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="str">str</span>]</code>
+                <code><span title="str">str</span> | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -1989,7 +1989,7 @@
         <tr class="doc-section-item">
         <td><code>severity</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="typing.Literal">Literal</span>[&#39;error&#39;, &#39;warn&#39;]]</code>
+                <code><span title="typing.Literal">Literal</span>[&#39;error&#39;, &#39;warn&#39;] | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -2073,10 +2073,10 @@
 </span><span id="__span-0-105"><a id="__codelineno-0-105" name="__codelineno-0-105"></a><span class="sd">        source (DbtBouncerSource): The DbtBouncerSourceBase object to check.</span>
 </span><span id="__span-0-106"><a id="__codelineno-0-106" name="__codelineno-0-106"></a>
 </span><span id="__span-0-107"><a id="__codelineno-0-107" name="__codelineno-0-107"></a><span class="sd">    Other Parameters:</span>
-</span><span id="__span-0-108"><a id="__codelineno-0-108" name="__codelineno-0-108"></a><span class="sd">        description (Optional[str]): Description of what the check does and why it is implemented.</span>
-</span><span id="__span-0-109"><a id="__codelineno-0-109" name="__codelineno-0-109"></a><span class="sd">        exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.</span>
-</span><span id="__span-0-110"><a id="__codelineno-0-110" name="__codelineno-0-110"></a><span class="sd">        include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.</span>
-</span><span id="__span-0-111"><a id="__codelineno-0-111" name="__codelineno-0-111"></a><span class="sd">        severity (Optional[Literal[&quot;error&quot;, &quot;warn&quot;]]): Severity level of the check. Default: `error`.</span>
+</span><span id="__span-0-108"><a id="__codelineno-0-108" name="__codelineno-0-108"></a><span class="sd">        description (str | None): Description of what the check does and why it is implemented.</span>
+</span><span id="__span-0-109"><a id="__codelineno-0-109" name="__codelineno-0-109"></a><span class="sd">        exclude (str | None): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.</span>
+</span><span id="__span-0-110"><a id="__codelineno-0-110" name="__codelineno-0-110"></a><span class="sd">        include (str | None): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.</span>
+</span><span id="__span-0-111"><a id="__codelineno-0-111" name="__codelineno-0-111"></a><span class="sd">        severity (Literal[&quot;error&quot;, &quot;warn&quot;] | None): Severity level of the check. Default: `error`.</span>
 </span><span id="__span-0-112"><a id="__codelineno-0-112" name="__codelineno-0-112"></a>
 </span><span id="__span-0-113"><a id="__codelineno-0-113" name="__codelineno-0-113"></a><span class="sd">    Example(s):</span>
 </span><span id="__span-0-114"><a id="__codelineno-0-114" name="__codelineno-0-114"></a><span class="sd">        ```yaml</span>
@@ -2166,7 +2166,7 @@
             </td>
             <td>
               <div class="doc-md-description">
-                <p>(Optional[Literal["any", "all", "one"]]): Whether the source must have any, all, or exactly one of the specified tags. Default: <code>all</code>.</p>
+                <p>(Literal["any", "all", "one"] | None): Whether the source must have any, all, or exactly one of the specified tags. Default: <code>all</code>.</p>
               </div>
             </td>
             <td>
@@ -2194,7 +2194,7 @@
                 <code>tags</code>
             </td>
             <td>
-                  <code><span title="typing.List">List</span>[<span title="str">str</span>]</code>
+                  <code><span title="list">list</span>[<span title="str">str</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -2221,7 +2221,7 @@
         <tr class="doc-section-item">
         <td><code>description</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="str">str</span>]</code>
+                <code><span title="str">str</span> | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -2232,7 +2232,7 @@
         <tr class="doc-section-item">
         <td><code>exclude</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="str">str</span>]</code>
+                <code><span title="str">str</span> | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -2243,7 +2243,7 @@
         <tr class="doc-section-item">
         <td><code>include</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="str">str</span>]</code>
+                <code><span title="str">str</span> | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -2254,7 +2254,7 @@
         <tr class="doc-section-item">
         <td><code>severity</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="typing.Literal">Literal</span>[&#39;error&#39;, &#39;warn&#39;]]</code>
+                <code><span title="typing.Literal">Literal</span>[&#39;error&#39;, &#39;warn&#39;] | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -2333,15 +2333,15 @@
 </span><span id="__span-0-143"><a id="__codelineno-0-143" name="__codelineno-0-143"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Sources must have the specified tags.</span>
 </span><span id="__span-0-144"><a id="__codelineno-0-144" name="__codelineno-0-144"></a>
 </span><span id="__span-0-145"><a id="__codelineno-0-145" name="__codelineno-0-145"></a><span class="sd">    Parameters:</span>
-</span><span id="__span-0-146"><a id="__codelineno-0-146" name="__codelineno-0-146"></a><span class="sd">        criteria: (Optional[Literal[&quot;any&quot;, &quot;all&quot;, &quot;one&quot;]]): Whether the source must have any, all, or exactly one of the specified tags. Default: `all`.</span>
+</span><span id="__span-0-146"><a id="__codelineno-0-146" name="__codelineno-0-146"></a><span class="sd">        criteria: (Literal[&quot;any&quot;, &quot;all&quot;, &quot;one&quot;] | None): Whether the source must have any, all, or exactly one of the specified tags. Default: `all`.</span>
 </span><span id="__span-0-147"><a id="__codelineno-0-147" name="__codelineno-0-147"></a><span class="sd">        source (DbtBouncerSource): The DbtBouncerSourceBase object to check.</span>
-</span><span id="__span-0-148"><a id="__codelineno-0-148" name="__codelineno-0-148"></a><span class="sd">        tags (List[str]): List of tags to check for.</span>
+</span><span id="__span-0-148"><a id="__codelineno-0-148" name="__codelineno-0-148"></a><span class="sd">        tags (list[str]): List of tags to check for.</span>
 </span><span id="__span-0-149"><a id="__codelineno-0-149" name="__codelineno-0-149"></a>
 </span><span id="__span-0-150"><a id="__codelineno-0-150" name="__codelineno-0-150"></a><span class="sd">    Other Parameters:</span>
-</span><span id="__span-0-151"><a id="__codelineno-0-151" name="__codelineno-0-151"></a><span class="sd">        description (Optional[str]): Description of what the check does and why it is implemented.</span>
-</span><span id="__span-0-152"><a id="__codelineno-0-152" name="__codelineno-0-152"></a><span class="sd">        exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.</span>
-</span><span id="__span-0-153"><a id="__codelineno-0-153" name="__codelineno-0-153"></a><span class="sd">        include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.</span>
-</span><span id="__span-0-154"><a id="__codelineno-0-154" name="__codelineno-0-154"></a><span class="sd">        severity (Optional[Literal[&quot;error&quot;, &quot;warn&quot;]]): Severity level of the check. Default: `error`.</span>
+</span><span id="__span-0-151"><a id="__codelineno-0-151" name="__codelineno-0-151"></a><span class="sd">        description (str | None): Description of what the check does and why it is implemented.</span>
+</span><span id="__span-0-152"><a id="__codelineno-0-152" name="__codelineno-0-152"></a><span class="sd">        exclude (str | None): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.</span>
+</span><span id="__span-0-153"><a id="__codelineno-0-153" name="__codelineno-0-153"></a><span class="sd">        include (str | None): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.</span>
+</span><span id="__span-0-154"><a id="__codelineno-0-154" name="__codelineno-0-154"></a><span class="sd">        severity (Literal[&quot;error&quot;, &quot;warn&quot;] | None): Severity level of the check. Default: `error`.</span>
 </span><span id="__span-0-155"><a id="__codelineno-0-155" name="__codelineno-0-155"></a>
 </span><span id="__span-0-156"><a id="__codelineno-0-156" name="__codelineno-0-156"></a><span class="sd">    Example(s):</span>
 </span><span id="__span-0-157"><a id="__codelineno-0-157" name="__codelineno-0-157"></a><span class="sd">        ```yaml</span>
@@ -2459,7 +2459,7 @@
         <tr class="doc-section-item">
         <td><code>description</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="str">str</span>]</code>
+                <code><span title="str">str</span> | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -2470,7 +2470,7 @@
         <tr class="doc-section-item">
         <td><code>exclude</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="str">str</span>]</code>
+                <code><span title="str">str</span> | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -2481,7 +2481,7 @@
         <tr class="doc-section-item">
         <td><code>include</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="str">str</span>]</code>
+                <code><span title="str">str</span> | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -2492,7 +2492,7 @@
         <tr class="doc-section-item">
         <td><code>severity</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="typing.Literal">Literal</span>[&#39;error&#39;, &#39;warn&#39;]]</code>
+                <code><span title="typing.Literal">Literal</span>[&#39;error&#39;, &#39;warn&#39;] | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -2554,10 +2554,10 @@
 </span><span id="__span-0-193"><a id="__codelineno-0-193" name="__codelineno-0-193"></a><span class="sd">        source (DbtBouncerSource): The DbtBouncerSourceBase object to check.</span>
 </span><span id="__span-0-194"><a id="__codelineno-0-194" name="__codelineno-0-194"></a>
 </span><span id="__span-0-195"><a id="__codelineno-0-195" name="__codelineno-0-195"></a><span class="sd">    Other Parameters:</span>
-</span><span id="__span-0-196"><a id="__codelineno-0-196" name="__codelineno-0-196"></a><span class="sd">        description (Optional[str]): Description of what the check does and why it is implemented.</span>
-</span><span id="__span-0-197"><a id="__codelineno-0-197" name="__codelineno-0-197"></a><span class="sd">        exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.</span>
-</span><span id="__span-0-198"><a id="__codelineno-0-198" name="__codelineno-0-198"></a><span class="sd">        include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.</span>
-</span><span id="__span-0-199"><a id="__codelineno-0-199" name="__codelineno-0-199"></a><span class="sd">        severity (Optional[Literal[&quot;error&quot;, &quot;warn&quot;]]): Severity level of the check. Default: `error`.</span>
+</span><span id="__span-0-196"><a id="__codelineno-0-196" name="__codelineno-0-196"></a><span class="sd">        description (str | None): Description of what the check does and why it is implemented.</span>
+</span><span id="__span-0-197"><a id="__codelineno-0-197" name="__codelineno-0-197"></a><span class="sd">        exclude (str | None): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.</span>
+</span><span id="__span-0-198"><a id="__codelineno-0-198" name="__codelineno-0-198"></a><span class="sd">        include (str | None): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.</span>
+</span><span id="__span-0-199"><a id="__codelineno-0-199" name="__codelineno-0-199"></a><span class="sd">        severity (Literal[&quot;error&quot;, &quot;warn&quot;] | None): Severity level of the check. Default: `error`.</span>
 </span><span id="__span-0-200"><a id="__codelineno-0-200" name="__codelineno-0-200"></a>
 </span><span id="__span-0-201"><a id="__codelineno-0-201" name="__codelineno-0-201"></a><span class="sd">    Example(s):</span>
 </span><span id="__span-0-202"><a id="__codelineno-0-202" name="__codelineno-0-202"></a><span class="sd">        ```yaml</span>
@@ -2682,7 +2682,7 @@
         <tr class="doc-section-item">
         <td><code>description</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="str">str</span>]</code>
+                <code><span title="str">str</span> | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -2693,7 +2693,7 @@
         <tr class="doc-section-item">
         <td><code>exclude</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="str">str</span>]</code>
+                <code><span title="str">str</span> | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -2704,7 +2704,7 @@
         <tr class="doc-section-item">
         <td><code>include</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="str">str</span>]</code>
+                <code><span title="str">str</span> | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -2715,7 +2715,7 @@
         <tr class="doc-section-item">
         <td><code>severity</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="typing.Literal">Literal</span>[&#39;error&#39;, &#39;warn&#39;]]</code>
+                <code><span title="typing.Literal">Literal</span>[&#39;error&#39;, &#39;warn&#39;] | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -2791,10 +2791,10 @@
 </span><span id="__span-0-226"><a id="__codelineno-0-226" name="__codelineno-0-226"></a><span class="sd">        source (DbtBouncerSource): The DbtBouncerSourceBase object to check.</span>
 </span><span id="__span-0-227"><a id="__codelineno-0-227" name="__codelineno-0-227"></a>
 </span><span id="__span-0-228"><a id="__codelineno-0-228" name="__codelineno-0-228"></a><span class="sd">    Other Parameters:</span>
-</span><span id="__span-0-229"><a id="__codelineno-0-229" name="__codelineno-0-229"></a><span class="sd">        description (Optional[str]): Description of what the check does and why it is implemented.</span>
-</span><span id="__span-0-230"><a id="__codelineno-0-230" name="__codelineno-0-230"></a><span class="sd">        exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.</span>
-</span><span id="__span-0-231"><a id="__codelineno-0-231" name="__codelineno-0-231"></a><span class="sd">        include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.</span>
-</span><span id="__span-0-232"><a id="__codelineno-0-232" name="__codelineno-0-232"></a><span class="sd">        severity (Optional[Literal[&quot;error&quot;, &quot;warn&quot;]]): Severity level of the check. Default: `error`.</span>
+</span><span id="__span-0-229"><a id="__codelineno-0-229" name="__codelineno-0-229"></a><span class="sd">        description (str | None): Description of what the check does and why it is implemented.</span>
+</span><span id="__span-0-230"><a id="__codelineno-0-230" name="__codelineno-0-230"></a><span class="sd">        exclude (str | None): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.</span>
+</span><span id="__span-0-231"><a id="__codelineno-0-231" name="__codelineno-0-231"></a><span class="sd">        include (str | None): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.</span>
+</span><span id="__span-0-232"><a id="__codelineno-0-232" name="__codelineno-0-232"></a><span class="sd">        severity (Literal[&quot;error&quot;, &quot;warn&quot;] | None): Severity level of the check. Default: `error`.</span>
 </span><span id="__span-0-233"><a id="__codelineno-0-233" name="__codelineno-0-233"></a>
 </span><span id="__span-0-234"><a id="__codelineno-0-234" name="__codelineno-0-234"></a><span class="sd">    Example(s):</span>
 </span><span id="__span-0-235"><a id="__codelineno-0-235" name="__codelineno-0-235"></a><span class="sd">        ```yaml</span>
@@ -2871,7 +2871,7 @@
   <tbody>
       <tr>
         <td><code>models</code>        <td>
-              <code><span title="typing.List">List</span>[<span title="dbt_bouncer.artifact_parsers.parsers_common.DbtBouncerModelBase">DbtBouncerModelBase</span>]</code>
+              <code><span title="list">list</span>[<span title="dbt_bouncer.artifact_parsers.parsers_common.DbtBouncerModelBase">DbtBouncerModelBase</span>]</code>
         </td>
         <td>
           <div class="doc-md-description">
@@ -2904,7 +2904,7 @@
         <tr class="doc-section-item">
         <td><code>description</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="str">str</span>]</code>
+                <code><span title="str">str</span> | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -2915,7 +2915,7 @@
         <tr class="doc-section-item">
         <td><code>exclude</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="str">str</span>]</code>
+                <code><span title="str">str</span> | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -2926,7 +2926,7 @@
         <tr class="doc-section-item">
         <td><code>include</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="str">str</span>]</code>
+                <code><span title="str">str</span> | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -2937,7 +2937,7 @@
         <tr class="doc-section-item">
         <td><code>severity</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="typing.Literal">Literal</span>[&#39;error&#39;, &#39;warn&#39;]]</code>
+                <code><span title="typing.Literal">Literal</span>[&#39;error&#39;, &#39;warn&#39;] | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -3001,14 +3001,14 @@
 </span><span id="__span-0-259"><a id="__codelineno-0-259" name="__codelineno-0-259"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Sources must be referenced in at least one model.</span>
 </span><span id="__span-0-260"><a id="__codelineno-0-260" name="__codelineno-0-260"></a>
 </span><span id="__span-0-261"><a id="__codelineno-0-261" name="__codelineno-0-261"></a><span class="sd">    Receives:</span>
-</span><span id="__span-0-262"><a id="__codelineno-0-262" name="__codelineno-0-262"></a><span class="sd">        models (List[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.</span>
+</span><span id="__span-0-262"><a id="__codelineno-0-262" name="__codelineno-0-262"></a><span class="sd">        models (list[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.</span>
 </span><span id="__span-0-263"><a id="__codelineno-0-263" name="__codelineno-0-263"></a><span class="sd">        source (DbtBouncerSource): The DbtBouncerSourceBase object to check.</span>
 </span><span id="__span-0-264"><a id="__codelineno-0-264" name="__codelineno-0-264"></a>
 </span><span id="__span-0-265"><a id="__codelineno-0-265" name="__codelineno-0-265"></a><span class="sd">    Other Parameters:</span>
-</span><span id="__span-0-266"><a id="__codelineno-0-266" name="__codelineno-0-266"></a><span class="sd">        description (Optional[str]): Description of what the check does and why it is implemented.</span>
-</span><span id="__span-0-267"><a id="__codelineno-0-267" name="__codelineno-0-267"></a><span class="sd">        exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.</span>
-</span><span id="__span-0-268"><a id="__codelineno-0-268" name="__codelineno-0-268"></a><span class="sd">        include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.</span>
-</span><span id="__span-0-269"><a id="__codelineno-0-269" name="__codelineno-0-269"></a><span class="sd">        severity (Optional[Literal[&quot;error&quot;, &quot;warn&quot;]]): Severity level of the check. Default: `error`.</span>
+</span><span id="__span-0-266"><a id="__codelineno-0-266" name="__codelineno-0-266"></a><span class="sd">        description (str | None): Description of what the check does and why it is implemented.</span>
+</span><span id="__span-0-267"><a id="__codelineno-0-267" name="__codelineno-0-267"></a><span class="sd">        exclude (str | None): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.</span>
+</span><span id="__span-0-268"><a id="__codelineno-0-268" name="__codelineno-0-268"></a><span class="sd">        include (str | None): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.</span>
+</span><span id="__span-0-269"><a id="__codelineno-0-269" name="__codelineno-0-269"></a><span class="sd">        severity (Literal[&quot;error&quot;, &quot;warn&quot;] | None): Severity level of the check. Default: `error`.</span>
 </span><span id="__span-0-270"><a id="__codelineno-0-270" name="__codelineno-0-270"></a>
 </span><span id="__span-0-271"><a id="__codelineno-0-271" name="__codelineno-0-271"></a><span class="sd">    Example(s):</span>
 </span><span id="__span-0-272"><a id="__codelineno-0-272" name="__codelineno-0-272"></a><span class="sd">        ```yaml</span>
@@ -3106,7 +3106,7 @@
         <tr class="doc-section-item">
         <td><code>description</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="str">str</span>]</code>
+                <code><span title="str">str</span> | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -3117,7 +3117,7 @@
         <tr class="doc-section-item">
         <td><code>exclude</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="str">str</span>]</code>
+                <code><span title="str">str</span> | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -3128,7 +3128,7 @@
         <tr class="doc-section-item">
         <td><code>include</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="str">str</span>]</code>
+                <code><span title="str">str</span> | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -3139,7 +3139,7 @@
         <tr class="doc-section-item">
         <td><code>severity</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="typing.Literal">Literal</span>[&#39;error&#39;, &#39;warn&#39;]]</code>
+                <code><span title="typing.Literal">Literal</span>[&#39;error&#39;, &#39;warn&#39;] | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -3225,10 +3225,10 @@
 </span><span id="__span-0-297"><a id="__codelineno-0-297" name="__codelineno-0-297"></a><span class="sd">        source (DbtBouncerSource): The DbtBouncerSourceBase object to check.</span>
 </span><span id="__span-0-298"><a id="__codelineno-0-298" name="__codelineno-0-298"></a>
 </span><span id="__span-0-299"><a id="__codelineno-0-299" name="__codelineno-0-299"></a><span class="sd">    Other Parameters:</span>
-</span><span id="__span-0-300"><a id="__codelineno-0-300" name="__codelineno-0-300"></a><span class="sd">        description (Optional[str]): Description of what the check does and why it is implemented.</span>
-</span><span id="__span-0-301"><a id="__codelineno-0-301" name="__codelineno-0-301"></a><span class="sd">        exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.</span>
-</span><span id="__span-0-302"><a id="__codelineno-0-302" name="__codelineno-0-302"></a><span class="sd">        include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.</span>
-</span><span id="__span-0-303"><a id="__codelineno-0-303" name="__codelineno-0-303"></a><span class="sd">        severity (Optional[Literal[&quot;error&quot;, &quot;warn&quot;]]): Severity level of the check. Default: `error`.</span>
+</span><span id="__span-0-300"><a id="__codelineno-0-300" name="__codelineno-0-300"></a><span class="sd">        description (str | None): Description of what the check does and why it is implemented.</span>
+</span><span id="__span-0-301"><a id="__codelineno-0-301" name="__codelineno-0-301"></a><span class="sd">        exclude (str | None): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.</span>
+</span><span id="__span-0-302"><a id="__codelineno-0-302" name="__codelineno-0-302"></a><span class="sd">        include (str | None): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.</span>
+</span><span id="__span-0-303"><a id="__codelineno-0-303" name="__codelineno-0-303"></a><span class="sd">        severity (Literal[&quot;error&quot;, &quot;warn&quot;] | None): Severity level of the check. Default: `error`.</span>
 </span><span id="__span-0-304"><a id="__codelineno-0-304" name="__codelineno-0-304"></a>
 </span><span id="__span-0-305"><a id="__codelineno-0-305" name="__codelineno-0-305"></a><span class="sd">    Example(s):</span>
 </span><span id="__span-0-306"><a id="__codelineno-0-306" name="__codelineno-0-306"></a><span class="sd">        ```yaml</span>
@@ -3328,7 +3328,7 @@
                 <code>models</code>
             </td>
             <td>
-                  <code><span title="typing.List">List</span>[<span title="dbt_bouncer.artifact_parsers.parsers_common.DbtBouncerModelBase">DbtBouncerModelBase</span>]</code>
+                  <code><span title="list">list</span>[<span title="dbt_bouncer.artifact_parsers.parsers_common.DbtBouncerModelBase">DbtBouncerModelBase</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3371,7 +3371,7 @@
         <tr class="doc-section-item">
         <td><code>description</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="str">str</span>]</code>
+                <code><span title="str">str</span> | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -3382,7 +3382,7 @@
         <tr class="doc-section-item">
         <td><code>exclude</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="str">str</span>]</code>
+                <code><span title="str">str</span> | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -3393,7 +3393,7 @@
         <tr class="doc-section-item">
         <td><code>include</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="str">str</span>]</code>
+                <code><span title="str">str</span> | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -3404,7 +3404,7 @@
         <tr class="doc-section-item">
         <td><code>severity</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="typing.Literal">Literal</span>[&#39;error&#39;, &#39;warn&#39;]]</code>
+                <code><span title="typing.Literal">Literal</span>[&#39;error&#39;, &#39;warn&#39;] | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -3474,14 +3474,14 @@
 </span><span id="__span-0-348"><a id="__codelineno-0-348" name="__codelineno-0-348"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Sources can only be referenced by models that are located in the same directory where the source is defined.</span>
 </span><span id="__span-0-349"><a id="__codelineno-0-349" name="__codelineno-0-349"></a>
 </span><span id="__span-0-350"><a id="__codelineno-0-350" name="__codelineno-0-350"></a><span class="sd">    Parameters:</span>
-</span><span id="__span-0-351"><a id="__codelineno-0-351" name="__codelineno-0-351"></a><span class="sd">        models (List[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.</span>
+</span><span id="__span-0-351"><a id="__codelineno-0-351" name="__codelineno-0-351"></a><span class="sd">        models (list[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.</span>
 </span><span id="__span-0-352"><a id="__codelineno-0-352" name="__codelineno-0-352"></a><span class="sd">        source (DbtBouncerSource): The DbtBouncerSourceBase object to check.</span>
 </span><span id="__span-0-353"><a id="__codelineno-0-353" name="__codelineno-0-353"></a>
 </span><span id="__span-0-354"><a id="__codelineno-0-354" name="__codelineno-0-354"></a><span class="sd">    Other Parameters:</span>
-</span><span id="__span-0-355"><a id="__codelineno-0-355" name="__codelineno-0-355"></a><span class="sd">        description (Optional[str]): Description of what the check does and why it is implemented.</span>
-</span><span id="__span-0-356"><a id="__codelineno-0-356" name="__codelineno-0-356"></a><span class="sd">        exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.</span>
-</span><span id="__span-0-357"><a id="__codelineno-0-357" name="__codelineno-0-357"></a><span class="sd">        include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.</span>
-</span><span id="__span-0-358"><a id="__codelineno-0-358" name="__codelineno-0-358"></a><span class="sd">        severity (Optional[Literal[&quot;error&quot;, &quot;warn&quot;]]): Severity level of the check. Default: `error`.</span>
+</span><span id="__span-0-355"><a id="__codelineno-0-355" name="__codelineno-0-355"></a><span class="sd">        description (str | None): Description of what the check does and why it is implemented.</span>
+</span><span id="__span-0-356"><a id="__codelineno-0-356" name="__codelineno-0-356"></a><span class="sd">        exclude (str | None): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.</span>
+</span><span id="__span-0-357"><a id="__codelineno-0-357" name="__codelineno-0-357"></a><span class="sd">        include (str | None): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.</span>
+</span><span id="__span-0-358"><a id="__codelineno-0-358" name="__codelineno-0-358"></a><span class="sd">        severity (Literal[&quot;error&quot;, &quot;warn&quot;] | None): Severity level of the check. Default: `error`.</span>
 </span><span id="__span-0-359"><a id="__codelineno-0-359" name="__codelineno-0-359"></a>
 </span><span id="__span-0-360"><a id="__codelineno-0-360" name="__codelineno-0-360"></a><span class="sd">    Example(s):</span>
 </span><span id="__span-0-361"><a id="__codelineno-0-361" name="__codelineno-0-361"></a><span class="sd">        ```yaml</span>
@@ -3562,7 +3562,7 @@
   <tbody>
       <tr>
         <td><code>models</code>        <td>
-              <code><span title="typing.List">List</span>[<span title="dbt_bouncer.artifact_parsers.parsers_common.DbtBouncerModelBase">DbtBouncerModelBase</span>]</code>
+              <code><span title="list">list</span>[<span title="dbt_bouncer.artifact_parsers.parsers_common.DbtBouncerModelBase">DbtBouncerModelBase</span>]</code>
         </td>
         <td>
           <div class="doc-md-description">
@@ -3595,7 +3595,7 @@
         <tr class="doc-section-item">
         <td><code>description</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="str">str</span>]</code>
+                <code><span title="str">str</span> | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -3606,7 +3606,7 @@
         <tr class="doc-section-item">
         <td><code>exclude</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="str">str</span>]</code>
+                <code><span title="str">str</span> | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -3617,7 +3617,7 @@
         <tr class="doc-section-item">
         <td><code>include</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="str">str</span>]</code>
+                <code><span title="str">str</span> | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -3628,7 +3628,7 @@
         <tr class="doc-section-item">
         <td><code>severity</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="typing.Literal">Literal</span>[&#39;error&#39;, &#39;warn&#39;]]</code>
+                <code><span title="typing.Literal">Literal</span>[&#39;error&#39;, &#39;warn&#39;] | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -3692,14 +3692,14 @@
 </span><span id="__span-0-389"><a id="__codelineno-0-389" name="__codelineno-0-389"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Each source can be referenced by a maximum of one model.</span>
 </span><span id="__span-0-390"><a id="__codelineno-0-390" name="__codelineno-0-390"></a>
 </span><span id="__span-0-391"><a id="__codelineno-0-391" name="__codelineno-0-391"></a><span class="sd">    Receives:</span>
-</span><span id="__span-0-392"><a id="__codelineno-0-392" name="__codelineno-0-392"></a><span class="sd">        models (List[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.</span>
+</span><span id="__span-0-392"><a id="__codelineno-0-392" name="__codelineno-0-392"></a><span class="sd">        models (list[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.</span>
 </span><span id="__span-0-393"><a id="__codelineno-0-393" name="__codelineno-0-393"></a><span class="sd">        source (DbtBouncerSource): The DbtBouncerSourceBase object to check.</span>
 </span><span id="__span-0-394"><a id="__codelineno-0-394" name="__codelineno-0-394"></a>
 </span><span id="__span-0-395"><a id="__codelineno-0-395" name="__codelineno-0-395"></a><span class="sd">    Other Parameters:</span>
-</span><span id="__span-0-396"><a id="__codelineno-0-396" name="__codelineno-0-396"></a><span class="sd">        description (Optional[str]): Description of what the check does and why it is implemented.</span>
-</span><span id="__span-0-397"><a id="__codelineno-0-397" name="__codelineno-0-397"></a><span class="sd">        exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.</span>
-</span><span id="__span-0-398"><a id="__codelineno-0-398" name="__codelineno-0-398"></a><span class="sd">        include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.</span>
-</span><span id="__span-0-399"><a id="__codelineno-0-399" name="__codelineno-0-399"></a><span class="sd">        severity (Optional[Literal[&quot;error&quot;, &quot;warn&quot;]]): Severity level of the check. Default: `error`.</span>
+</span><span id="__span-0-396"><a id="__codelineno-0-396" name="__codelineno-0-396"></a><span class="sd">        description (str | None): Description of what the check does and why it is implemented.</span>
+</span><span id="__span-0-397"><a id="__codelineno-0-397" name="__codelineno-0-397"></a><span class="sd">        exclude (str | None): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.</span>
+</span><span id="__span-0-398"><a id="__codelineno-0-398" name="__codelineno-0-398"></a><span class="sd">        include (str | None): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.</span>
+</span><span id="__span-0-399"><a id="__codelineno-0-399" name="__codelineno-0-399"></a><span class="sd">        severity (Literal[&quot;error&quot;, &quot;warn&quot;] | None): Severity level of the check. Default: `error`.</span>
 </span><span id="__span-0-400"><a id="__codelineno-0-400" name="__codelineno-0-400"></a>
 </span><span id="__span-0-401"><a id="__codelineno-0-401" name="__codelineno-0-401"></a><span class="sd">    Example(s):</span>
 </span><span id="__span-0-402"><a id="__codelineno-0-402" name="__codelineno-0-402"></a><span class="sd">        ```yaml</span>

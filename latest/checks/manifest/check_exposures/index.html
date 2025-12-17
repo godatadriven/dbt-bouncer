@@ -1398,7 +1398,7 @@
                 <code>maximum_number_of_models</code>
             </td>
             <td>
-                  <code><span title="Optional">Optional</span>[<span title="int">int</span>]</code>
+                  <code><span title="int">int</span> | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -1414,7 +1414,7 @@
                 <code>minimum_number_of_models</code>
             </td>
             <td>
-                  <code><span title="Optional">Optional</span>[<span title="int">int</span>]</code>
+                  <code><span title="int">int</span> | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -1463,7 +1463,7 @@
         <tr class="doc-section-item">
         <td><code>description</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="str">str</span>]</code>
+                <code><span title="str">str</span> | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -1474,7 +1474,7 @@
         <tr class="doc-section-item">
         <td><code>exclude</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="str">str</span>]</code>
+                <code><span title="str">str</span> | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -1485,7 +1485,7 @@
         <tr class="doc-section-item">
         <td><code>include</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="str">str</span>]</code>
+                <code><span title="str">str</span> | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -1496,7 +1496,7 @@
         <tr class="doc-section-item">
         <td><code>severity</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="typing.Literal">Literal</span>[&#39;error&#39;, &#39;warn&#39;]]</code>
+                <code><span title="typing.Literal">Literal</span>[&#39;error&#39;, &#39;warn&#39;] | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -1577,17 +1577,17 @@
 </span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Exposures should depend on a model.</span>
 </span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19"></a>
 </span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20"></a><span class="sd">    Parameters:</span>
-</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21"></a><span class="sd">        maximum_number_of_models (Optional[int]): The maximum number of models an exposure can depend on, defaults to 100.</span>
-</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22"></a><span class="sd">        minimum_number_of_models (Optional[int]): The minimum number of models an exposure can depend on, defaults to 1.</span>
+</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21"></a><span class="sd">        maximum_number_of_models (int | None): The maximum number of models an exposure can depend on, defaults to 100.</span>
+</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22"></a><span class="sd">        minimum_number_of_models (int | None): The minimum number of models an exposure can depend on, defaults to 1.</span>
 </span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23"></a>
 </span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24"></a><span class="sd">    Receives:</span>
 </span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25"></a><span class="sd">        exposure (DbtBouncerExposureBase): The DbtBouncerExposureBase object to check.</span>
 </span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26"></a>
 </span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27"></a><span class="sd">    Other Parameters:</span>
-</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28"></a><span class="sd">        description (Optional[str]): Description of what the check does and why it is implemented.</span>
-</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29"></a><span class="sd">        exclude (Optional[str]): Regex pattern to match the exposure path (i.e the .yml file where the exposure is configured). Exposure paths that match the pattern will not be checked.</span>
-</span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30"></a><span class="sd">        include (Optional[str]): Regex pattern to match the exposure path (i.e the .yml file where the exposure is configured). Only exposure paths that match the pattern will be checked.</span>
-</span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31"></a><span class="sd">        severity (Optional[Literal[&quot;error&quot;, &quot;warn&quot;]]): Severity level of the check. Default: `error`.</span>
+</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28"></a><span class="sd">        description (str | None): Description of what the check does and why it is implemented.</span>
+</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29"></a><span class="sd">        exclude (str | None): Regex pattern to match the exposure path (i.e the .yml file where the exposure is configured). Exposure paths that match the pattern will not be checked.</span>
+</span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30"></a><span class="sd">        include (str | None): Regex pattern to match the exposure path (i.e the .yml file where the exposure is configured). Only exposure paths that match the pattern will be checked.</span>
+</span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31"></a><span class="sd">        severity (Literal[&quot;error&quot;, &quot;warn&quot;] | None): Severity level of the check. Default: `error`.</span>
 </span><span id="__span-0-32"><a id="__codelineno-0-32" name="__codelineno-0-32"></a>
 </span><span id="__span-0-33"><a id="__codelineno-0-33" name="__codelineno-0-33"></a><span class="sd">    Example(s):</span>
 </span><span id="__span-0-34"><a id="__codelineno-0-34" name="__codelineno-0-34"></a><span class="sd">        ```yaml</span>
@@ -1681,7 +1681,7 @@
       </tr>
       <tr>
         <td><code>models</code>        <td>
-              <code><span title="typing.List">List</span>[<span title="dbt_bouncer.artifact_parsers.parsers_common.DbtBouncerModelBase">DbtBouncerModelBase</span>]</code>
+              <code><span title="list">list</span>[<span title="dbt_bouncer.artifact_parsers.parsers_common.DbtBouncerModelBase">DbtBouncerModelBase</span>]</code>
         </td>
         <td>
           <div class="doc-md-description">
@@ -1704,7 +1704,7 @@
         <tr class="doc-section-item">
         <td><code>description</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="str">str</span>]</code>
+                <code><span title="str">str</span> | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -1715,7 +1715,7 @@
         <tr class="doc-section-item">
         <td><code>exclude</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="str">str</span>]</code>
+                <code><span title="str">str</span> | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -1726,7 +1726,7 @@
         <tr class="doc-section-item">
         <td><code>include</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="str">str</span>]</code>
+                <code><span title="str">str</span> | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -1737,7 +1737,7 @@
         <tr class="doc-section-item">
         <td><code>severity</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="typing.Literal">Literal</span>[&#39;error&#39;, &#39;warn&#39;]]</code>
+                <code><span title="typing.Literal">Literal</span>[&#39;error&#39;, &#39;warn&#39;] | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -1811,13 +1811,13 @@
 </span><span id="__span-0-66"><a id="__codelineno-0-66" name="__codelineno-0-66"></a>
 </span><span id="__span-0-67"><a id="__codelineno-0-67" name="__codelineno-0-67"></a><span class="sd">    Receives:</span>
 </span><span id="__span-0-68"><a id="__codelineno-0-68" name="__codelineno-0-68"></a><span class="sd">        exposure (DbtBouncerExposureBase): The DbtBouncerExposureBase object to check.</span>
-</span><span id="__span-0-69"><a id="__codelineno-0-69" name="__codelineno-0-69"></a><span class="sd">        models (List[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.</span>
+</span><span id="__span-0-69"><a id="__codelineno-0-69" name="__codelineno-0-69"></a><span class="sd">        models (list[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.</span>
 </span><span id="__span-0-70"><a id="__codelineno-0-70" name="__codelineno-0-70"></a>
 </span><span id="__span-0-71"><a id="__codelineno-0-71" name="__codelineno-0-71"></a><span class="sd">    Other Parameters:</span>
-</span><span id="__span-0-72"><a id="__codelineno-0-72" name="__codelineno-0-72"></a><span class="sd">        description (Optional[str]): Description of what the check does and why it is implemented.</span>
-</span><span id="__span-0-73"><a id="__codelineno-0-73" name="__codelineno-0-73"></a><span class="sd">        exclude (Optional[str]): Regex pattern to match the exposure path (i.e the .yml file where the exposure is configured). Exposure paths that match the pattern will not be checked.</span>
-</span><span id="__span-0-74"><a id="__codelineno-0-74" name="__codelineno-0-74"></a><span class="sd">        include (Optional[str]): Regex pattern to match the exposure path (i.e the .yml file where the exposure is configured). Only exposure paths that match the pattern will be checked.</span>
-</span><span id="__span-0-75"><a id="__codelineno-0-75" name="__codelineno-0-75"></a><span class="sd">        severity (Optional[Literal[&quot;error&quot;, &quot;warn&quot;]]): Severity level of the check. Default: `error`.</span>
+</span><span id="__span-0-72"><a id="__codelineno-0-72" name="__codelineno-0-72"></a><span class="sd">        description (str | None): Description of what the check does and why it is implemented.</span>
+</span><span id="__span-0-73"><a id="__codelineno-0-73" name="__codelineno-0-73"></a><span class="sd">        exclude (str | None): Regex pattern to match the exposure path (i.e the .yml file where the exposure is configured). Exposure paths that match the pattern will not be checked.</span>
+</span><span id="__span-0-74"><a id="__codelineno-0-74" name="__codelineno-0-74"></a><span class="sd">        include (str | None): Regex pattern to match the exposure path (i.e the .yml file where the exposure is configured). Only exposure paths that match the pattern will be checked.</span>
+</span><span id="__span-0-75"><a id="__codelineno-0-75" name="__codelineno-0-75"></a><span class="sd">        severity (Literal[&quot;error&quot;, &quot;warn&quot;] | None): Severity level of the check. Default: `error`.</span>
 </span><span id="__span-0-76"><a id="__codelineno-0-76" name="__codelineno-0-76"></a>
 </span><span id="__span-0-77"><a id="__codelineno-0-77" name="__codelineno-0-77"></a><span class="sd">    Example(s):</span>
 </span><span id="__span-0-78"><a id="__codelineno-0-78" name="__codelineno-0-78"></a><span class="sd">        ```yaml</span>
@@ -1906,7 +1906,7 @@
                 <code>materializations_to_include</code>
             </td>
             <td>
-                  <code><span title="Optional">Optional</span>[<span title="typing.List">List</span>[<span title="str">str</span>]]</code>
+                  <code><span title="list">list</span>[<span title="str">str</span>] | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -1942,7 +1942,7 @@
       </tr>
       <tr>
         <td><code>models</code>        <td>
-              <code><span title="typing.List">List</span>[<span title="dbt_bouncer.artifact_parsers.parsers_common.DbtBouncerModelBase">DbtBouncerModelBase</span>]</code>
+              <code><span title="list">list</span>[<span title="dbt_bouncer.artifact_parsers.parsers_common.DbtBouncerModelBase">DbtBouncerModelBase</span>]</code>
         </td>
         <td>
           <div class="doc-md-description">
@@ -1965,7 +1965,7 @@
         <tr class="doc-section-item">
         <td><code>description</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="str">str</span>]</code>
+                <code><span title="str">str</span> | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -1976,7 +1976,7 @@
         <tr class="doc-section-item">
         <td><code>exclude</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="str">str</span>]</code>
+                <code><span title="str">str</span> | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -1987,7 +1987,7 @@
         <tr class="doc-section-item">
         <td><code>include</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="str">str</span>]</code>
+                <code><span title="str">str</span> | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -1998,7 +1998,7 @@
         <tr class="doc-section-item">
         <td><code>severity</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="typing.Literal">Literal</span>[&#39;error&#39;, &#39;warn&#39;]]</code>
+                <code><span title="typing.Literal">Literal</span>[&#39;error&#39;, &#39;warn&#39;] | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -2092,17 +2092,17 @@
 </span><span id="__span-0-109"><a id="__codelineno-0-109" name="__codelineno-0-109"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Exposures should not be based on views.</span>
 </span><span id="__span-0-110"><a id="__codelineno-0-110" name="__codelineno-0-110"></a>
 </span><span id="__span-0-111"><a id="__codelineno-0-111" name="__codelineno-0-111"></a><span class="sd">    Parameters:</span>
-</span><span id="__span-0-112"><a id="__codelineno-0-112" name="__codelineno-0-112"></a><span class="sd">        materializations_to_include (Optional[List[str]]): List of materializations to include in the check.</span>
+</span><span id="__span-0-112"><a id="__codelineno-0-112" name="__codelineno-0-112"></a><span class="sd">        materializations_to_include (list[str] | None): List of materializations to include in the check.</span>
 </span><span id="__span-0-113"><a id="__codelineno-0-113" name="__codelineno-0-113"></a>
 </span><span id="__span-0-114"><a id="__codelineno-0-114" name="__codelineno-0-114"></a><span class="sd">    Receives:</span>
 </span><span id="__span-0-115"><a id="__codelineno-0-115" name="__codelineno-0-115"></a><span class="sd">        exposure (DbtBouncerExposureBase): The DbtBouncerExposureBase object to check.</span>
-</span><span id="__span-0-116"><a id="__codelineno-0-116" name="__codelineno-0-116"></a><span class="sd">        models (List[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.</span>
+</span><span id="__span-0-116"><a id="__codelineno-0-116" name="__codelineno-0-116"></a><span class="sd">        models (list[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.</span>
 </span><span id="__span-0-117"><a id="__codelineno-0-117" name="__codelineno-0-117"></a>
 </span><span id="__span-0-118"><a id="__codelineno-0-118" name="__codelineno-0-118"></a><span class="sd">    Other Parameters:</span>
-</span><span id="__span-0-119"><a id="__codelineno-0-119" name="__codelineno-0-119"></a><span class="sd">        description (Optional[str]): Description of what the check does and why it is implemented.</span>
-</span><span id="__span-0-120"><a id="__codelineno-0-120" name="__codelineno-0-120"></a><span class="sd">        exclude (Optional[str]): Regex pattern to match the exposure path (i.e the .yml file where the exposure is configured). Exposure paths that match the pattern will not be checked.</span>
-</span><span id="__span-0-121"><a id="__codelineno-0-121" name="__codelineno-0-121"></a><span class="sd">        include (Optional[str]): Regex pattern to match the exposure path (i.e the .yml file where the exposure is configured). Only exposure paths that match the pattern will be checked.</span>
-</span><span id="__span-0-122"><a id="__codelineno-0-122" name="__codelineno-0-122"></a><span class="sd">        severity (Optional[Literal[&quot;error&quot;, &quot;warn&quot;]]): Severity level of the check. Default: `error`.</span>
+</span><span id="__span-0-119"><a id="__codelineno-0-119" name="__codelineno-0-119"></a><span class="sd">        description (str | None): Description of what the check does and why it is implemented.</span>
+</span><span id="__span-0-120"><a id="__codelineno-0-120" name="__codelineno-0-120"></a><span class="sd">        exclude (str | None): Regex pattern to match the exposure path (i.e the .yml file where the exposure is configured). Exposure paths that match the pattern will not be checked.</span>
+</span><span id="__span-0-121"><a id="__codelineno-0-121" name="__codelineno-0-121"></a><span class="sd">        include (str | None): Regex pattern to match the exposure path (i.e the .yml file where the exposure is configured). Only exposure paths that match the pattern will be checked.</span>
+</span><span id="__span-0-122"><a id="__codelineno-0-122" name="__codelineno-0-122"></a><span class="sd">        severity (Literal[&quot;error&quot;, &quot;warn&quot;] | None): Severity level of the check. Default: `error`.</span>
 </span><span id="__span-0-123"><a id="__codelineno-0-123" name="__codelineno-0-123"></a>
 </span><span id="__span-0-124"><a id="__codelineno-0-124" name="__codelineno-0-124"></a><span class="sd">    Example(s):</span>
 </span><span id="__span-0-125"><a id="__codelineno-0-125" name="__codelineno-0-125"></a><span class="sd">        ```yaml</span>
