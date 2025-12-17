@@ -33,13 +33,13 @@ class CheckUnitTestCoverage(BaseModel):
         min_unit_test_coverage_pct (float): The minimum percentage of models that must have a unit test.
 
     Receives:
-        models (List[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
-        unit_tests (List[UnitTests]): List of UnitTests objects parsed from `manifest.json`.
+        models (list[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
+        unit_tests (list[UnitTests]): List of UnitTests objects parsed from `manifest.json`.
 
     Other Parameters:
-        description (Optional[str]): Description of what the check does and why it is implemented.
-        include (Optional[str]): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
-        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
+        description (str | None): Description of what the check does and why it is implemented.
+        include (str | None): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml
@@ -115,17 +115,17 @@ class CheckUnitTestExpectFormats(BaseCheck):
         This check is only supported for dbt 1.8.0 and above.
 
     Parameters:
-        permitted_formats (Optional[List[Literal["csv", "dict", "sql"]]]): A list of formats that are allowed to be used for `expect` input in a unit test.
+        permitted_formats (list[Literal["csv", "dict", "sql"]] | None): A list of formats that are allowed to be used for `expect` input in a unit test.
 
     Receives:
         manifest_obj (DbtBouncerManifest): The DbtBouncerManifest object parsed from `manifest.json`.
         unit_test (UnitTests): The UnitTests object to check.
 
     Other Parameters:
-        description (Optional[str]): Description of what the check does and why it is implemented.
-        exclude (Optional[str]): Regex pattern to match the unit test path (i.e the .yml file where the unit test is configured). Unit test paths that match the pattern will not be checked.
-        include (Optional[str]): Regex pattern to match the unit test path (i.e the .yml file where the unit test is configured). Only unit test paths that match the pattern will be checked.
-        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the unit test path (i.e the .yml file where the unit test is configured). Unit test paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the unit test path (i.e the .yml file where the unit test is configured). Only unit test paths that match the pattern will be checked.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml
@@ -166,17 +166,17 @@ class CheckUnitTestGivenFormats(BaseCheck):
         This check is only supported for dbt 1.8.0 and above.
 
     Parameters:
-        permitted_formats (Optional[List[Literal["csv", "dict", "sql"]]]): A list of formats that are allowed to be used for `expect` input in a unit test.
+        permitted_formats (list[Literal["csv", "dict", "sql"]] | None): A list of formats that are allowed to be used for `expect` input in a unit test.
 
     Receives:
         manifest_obj (DbtBouncerManifest): The DbtBouncerManifest object parsed from `manifest.json`.
         unit_test (UnitTests): The UnitTests object to check.
 
     Other Parameters:
-        description (Optional[str]): Description of what the check does and why it is implemented.
-        exclude (Optional[str]): Regex pattern to match the unit test path (i.e the .yml file where the unit test is configured). Unit test paths that match the pattern will not be checked.
-        include (Optional[str]): Regex pattern to match the unit test path (i.e the .yml file where the unit test is configured). Only unit test paths that match the pattern will be checked.
-        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the unit test path (i.e the .yml file where the unit test is configured). Unit test paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the unit test path (i.e the .yml file where the unit test is configured). Only unit test paths that match the pattern will be checked.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml

@@ -22,16 +22,16 @@ class CheckSourceDescriptionPopulated(BaseCheck):
     """Sources must have a populated description.
 
     Parameters:
-        min_description_length (Optional[int]): Minimum length required for the description to be considered populated.
+        min_description_length (int | None): Minimum length required for the description to be considered populated.
 
     Receives:
         source (DbtBouncerSourceBase): The DbtBouncerSourceBase object to check.
 
     Other Parameters:
-        description (Optional[str]): Description of what the check does and why it is implemented.
-        exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
-        include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
-        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml
@@ -66,10 +66,10 @@ class CheckSourceFreshnessPopulated(BaseCheck):
         source (DbtBouncerSource): The DbtBouncerSourceBase object to check.
 
     Other Parameters:
-        description (Optional[str]): Description of what the check does and why it is implemented.
-        exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
-        include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
-        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml
@@ -105,10 +105,10 @@ class CheckSourceHasMetaKeys(BaseCheck):
         source (DbtBouncerSource): The DbtBouncerSourceBase object to check.
 
     Other Parameters:
-        description (Optional[str]): Description of what the check does and why it is implemented.
-        exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
-        include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
-        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml
@@ -143,15 +143,15 @@ class CheckSourceHasTags(BaseCheck):
     """Sources must have the specified tags.
 
     Parameters:
-        criteria: (Optional[Literal["any", "all", "one"]]): Whether the source must have any, all, or exactly one of the specified tags. Default: `all`.
+        criteria: (Literal["any", "all", "one"] | None): Whether the source must have any, all, or exactly one of the specified tags. Default: `all`.
         source (DbtBouncerSource): The DbtBouncerSourceBase object to check.
-        tags (List[str]): List of tags to check for.
+        tags (list[str]): List of tags to check for.
 
     Other Parameters:
-        description (Optional[str]): Description of what the check does and why it is implemented.
-        exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
-        include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
-        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml
@@ -193,10 +193,10 @@ class CheckSourceLoaderPopulated(BaseCheck):
         source (DbtBouncerSource): The DbtBouncerSourceBase object to check.
 
     Other Parameters:
-        description (Optional[str]): Description of what the check does and why it is implemented.
-        exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
-        include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
-        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml
@@ -226,10 +226,10 @@ class CheckSourceNames(BaseCheck):
         source (DbtBouncerSource): The DbtBouncerSourceBase object to check.
 
     Other Parameters:
-        description (Optional[str]): Description of what the check does and why it is implemented.
-        exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
-        include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
-        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml
@@ -259,14 +259,14 @@ class CheckSourceNotOrphaned(BaseCheck):
     """Sources must be referenced in at least one model.
 
     Receives:
-        models (List[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
+        models (list[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
         source (DbtBouncerSource): The DbtBouncerSourceBase object to check.
 
     Other Parameters:
-        description (Optional[str]): Description of what the check does and why it is implemented.
-        exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
-        include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
-        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml
@@ -297,10 +297,10 @@ class CheckSourcePropertyFileLocation(BaseCheck):
         source (DbtBouncerSource): The DbtBouncerSourceBase object to check.
 
     Other Parameters:
-        description (Optional[str]): Description of what the check does and why it is implemented.
-        exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
-        include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
-        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml
@@ -348,14 +348,14 @@ class CheckSourceUsedByModelsInSameDirectory(BaseCheck):
     """Sources can only be referenced by models that are located in the same directory where the source is defined.
 
     Parameters:
-        models (List[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
+        models (list[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
         source (DbtBouncerSource): The DbtBouncerSourceBase object to check.
 
     Other Parameters:
-        description (Optional[str]): Description of what the check does and why it is implemented.
-        exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
-        include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
-        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml
@@ -389,14 +389,14 @@ class CheckSourceUsedByOnlyOneModel(BaseCheck):
     """Each source can be referenced by a maximum of one model.
 
     Receives:
-        models (List[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
+        models (list[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
         source (DbtBouncerSource): The DbtBouncerSourceBase object to check.
 
     Other Parameters:
-        description (Optional[str]): Description of what the check does and why it is implemented.
-        exclude (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
-        include (Optional[str]): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
-        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml

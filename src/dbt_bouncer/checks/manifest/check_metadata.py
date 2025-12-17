@@ -19,8 +19,8 @@ class CheckProjectName(BaseModel):
         manifest_obj (DbtBouncerManifest): The manifest object.
 
     Other Parameters:
-        description (Optional[str]): Description of what the check does and why it is implemented.
-        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
+        description (str | None): Description of what the check does and why it is implemented.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml
