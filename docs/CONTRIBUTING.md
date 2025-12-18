@@ -42,7 +42,7 @@ These are the tools used in `dbt-bouncer` development and testing:
 - [GitHub Actions](https://github.com/features/actions) for automating tests and checks, once a PR is pushed to the `dbt-bouncer` repository.
 - [`make`](https://users.cs.duke.edu/~ola/courses/programming/Makefiles/Makefiles.html) to run multiple setup or test steps in combination.
 - [`mypy`](https://mypy.readthedocs.io/en/stable/) for static type checking.
-- [`pre-commit`](https://pre-commit.com) to easily run those checks.
+- [`prek`](https://github.com/j178/prek) to easily run those checks.
 - [`Pydantic`](https://docs.pydantic.dev/latest/) to validate our configuration file.
 - [`pytest`](https://docs.pytest.org/en/latest/) to define, discover, and run tests.
 - [`Ruff`](https://github.com/astral-sh/ruff) to lint and format python code.
@@ -68,11 +68,11 @@ Set required environment variables by copying `.env.example` to `.env` and updat
 
 ### Installation
 
-First make sure that you set up your `virtualenv` as described in [Setting up an environment](#setting-up-an-environment). Next, install `dbt-bouncer`, its dependencies and `pre-commit`:
+First make sure that you set up your `virtualenv` as described in [Setting up an environment](#setting-up-an-environment). Next, install `dbt-bouncer`, its dependencies and `prek`:
 
 ```shell
 make install
-uv run pre-commit install
+uv run prek install
 ```
 
 When installed in this way, any changes you make to your local copy of the source code will be reflected immediately in your next `dbt-bouncer` run.
@@ -88,6 +88,7 @@ uv run dbt-bouncer --config-file dbt-bouncer-example.yml
 ## Testing
 
 Once you're able to manually test that your code change is working as expected, it's important to run existing automated tests, as well as adding some new ones. These tests will ensure that:
+
 - Your code changes do not unexpectedly break other established functionality
 - Your code changes can handle all known edge cases
 - The functionality you're adding will _keep_ working in the future
@@ -119,8 +120,9 @@ make test-integration
 make test
 ```
 
-#### `pre-commit`
-[`pre-commit`](https://pre-commit.com) takes care of running all code-checks for formatting and linting. Run `uv run pre-commit install` to install `pre-commit` in your local environment. Once this is done you can use the git pre-commit hooks to ensure proper formatting and linting.
+#### `prek`
+
+[`prek`](https://github.com/j178/prek) takes care of running all code-checks for formatting and linting. Run `uv run prek install` to install `prek` in your local environment. Once this is done you can use the git pre-commit hooks to ensure proper formatting and linting.
 
 #### `pytest`
 
@@ -138,7 +140,7 @@ uv run pytest ./tests/unit/checks/catalog/test_columns.py::test_check_columns_ar
 
 ### Assorted development tips
 
-* Append `# type: ignore` to the end of a line if you need to disable `mypy` on that line, preferably with the specific rule to ignore such as `# type: ignore[union-attr]`.
+- Append `# type: ignore` to the end of a line if you need to disable `mypy` on that line, preferably with the specific rule to ignore such as `# type: ignore[union-attr]`.
 
 ## Adding a new check
 

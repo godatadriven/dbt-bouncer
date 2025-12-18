@@ -4,7 +4,7 @@
 
 There are several other tools that perform similar tasks as `dbt-bouncer`.
 
-- [dbt-checkpoint](https://github.com/dbt-checkpoint/dbt-checkpoint): A collection of `pre-commit` hooks for dbt projects. Tests are written in python. Configuration is performed via `.pre-commit-config.yaml`. Provided the dbt artifacts have already been generated, `dbt-checkpoint` does not need access to the underlying database. The hooks execute when a new commit is made, as such `dbt-checkpoint` is designed to be run only as part of `pre-commit`.
+- [dbt-checkpoint](https://github.com/dbt-checkpoint/dbt-checkpoint): A collection of `pre-commit` hooks for dbt projects. Tests are written in python. Configuration is performed via `.pre-commit-config.yaml`. Provided the dbt artifacts have already been generated, `dbt-checkpoint` does not need access to the underlying database. The hooks execute when a new commit is made, as such `dbt-checkpoint` is designed to be run only as part of `pre-commit` (or `prek`).
 - [dbt-project-evaluator](https://github.com/dbt-labs/dbt-project-evaluator): This is a dbt package from dbt Labs. Tests are written in `.sql` files using a combination of Jinja and SQL. Configuration is performed via `dbt_project.yml` and seed files (i.e. csv files). Requires a connection to underlying database. Designed to be run both in a CI pipeline and also during active development.
 - [dbt-score](https://github.com/PicnicSupermarket/dbt-score): This is a python package installable via `pip`. A collection of tests that apply only to dbt models. Tests can be executed from the command line. Tests are written in python. Configuration is performed via a `pyproject.toml` file. Provided the dbt artifacts have already been generated, `dbt-score` does not need access to the underlying database. Designed to be run during development.
 
@@ -207,7 +207,7 @@ Your directory tree should look like this:
 
 Note: if you update your central `dbt-bouncer.yml` file, you will need to run `git submodule update --remote` in every repository to update the submodule.
 
-## How to set up `dbt-bouncer` with `pre-commit`?
+## How to set up `dbt-bouncer` with `prek`/`pre-commit`?
 
 You can use the official pre-commit hook, in your `.pre-commit-config.yaml` file:
 
