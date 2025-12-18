@@ -1,6 +1,7 @@
 """Assemble and run all checks."""
 
 import copy
+import inspect
 import json
 import logging
 import operator
@@ -79,7 +80,7 @@ def runner(
         custom_checks_dir = None
 
     check_classes: List[Dict[str, Union[Any, str]]] = [
-        {"class": getattr(x, x.__name__), "source_file": x.__file__}
+        {"class": x, "source_file": inspect.getfile(x)}
         for x in get_check_objects(custom_checks_dir)
     ]
     for c in check_classes:

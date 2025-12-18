@@ -1,4 +1,5 @@
 import os
+import inspect
 from pathlib import Path
 from typing import Any, Dict, List, Literal, Union
 
@@ -34,8 +35,8 @@ def get_check_types(
 
     check_classes: List[Dict[str, Union[Any, Path]]] = [
         {
-            "class": getattr(x, x.__name__),
-            "source_file": Path(clean_path_str(x.__file__)),
+            "class": x,
+            "source_file": Path(clean_path_str(inspect.getfile(x))),
         }
         for x in get_check_objects(custom_checks_dir)
     ]
