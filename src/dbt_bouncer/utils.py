@@ -232,9 +232,9 @@ def get_check_objects(
                             ):
                                 check_objects.append(obj)
                 except Exception as e:
-                    logging.warning(
+                    raise RuntimeError(
                         f"Failed to load custom check file {check_file}: {e}"
-                    )
+                    ) from e
         else:
             logging.warning(
                 f"Custom checks directory `{custom_checks_dir}` does not exist."
