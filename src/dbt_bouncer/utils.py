@@ -154,6 +154,20 @@ def flatten(structure: Any, key: str = "", path: str = "", flattened=None):
 def _extract_checks_from_module(
     module: Any, module_name: str, check_objects: List[Type["BaseCheck"]]
 ) -> None:
+    """Extract Check* classes from a loaded module.
+
+    Inspects the given module and appends any class whose name starts with
+    "Check" and is defined within the specified module (not imported from
+    elsewhere) to the provided check_objects list.
+
+    Args:
+        module: The loaded module object to inspect.
+        module_name: The fully qualified name of the module (used to filter
+            out imported classes).
+        check_objects: A list to which discovered check classes will be
+            appended.
+
+    """
     for name, obj in inspect.getmembers(module):
         if (
             inspect.isclass(obj)
@@ -166,6 +180,24 @@ def _extract_checks_from_module(
 def _load_custom_checks(
     custom_checks_dir: Path, check_objects: List[Type["BaseCheck"]]
 ) -> None:
+    """Load custom check classes from a directory.
+
+    Scans the specified directory for Python files in subdirectories
+    (e.g., `custom_checks_dir/category/check_file.py`) and loads any
+    Check* classes defined in them.
+
+    Each file is loaded as a uniquely named module to avoid conflicts with
+    internal checks or other custom checks.
+
+    Args:
+        custom_checks_dir: Path to the directory containing custom checks.
+        check_objects: A list to which discovered check classes will be
+            appended.
+
+    Raises:
+        RuntimeError: If a custom check file fails to load.
+
+    """
     logging.debug(f"{custom_checks_dir=}")
     if custom_checks_dir.exists():
         custom_check_files = [
