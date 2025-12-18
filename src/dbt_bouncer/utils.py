@@ -157,6 +157,18 @@ def get_check_objects(
 ) -> List[Type["BaseCheck"]]:
     """Get list of Check* classes.
 
+    This function dynamically discovers and loads check classes from two sources:
+    1. Internal checks located in the `checks` directory of the package.
+    2. Custom checks located in the specified `custom_checks_dir` (if provided).
+
+    It filters for classes that:
+    - Start with "Check".
+    - Are defined within the loaded module (not imported).
+
+    The result is cached using `@lru_cache` to avoid redundant file scanning
+    and module loading on subsequent calls. Import errors in individual files
+    are logged as warnings and do not stop execution.
+
     Args:
         custom_checks_dir: Path to a directory containing custom checks.
 
