@@ -93,7 +93,7 @@ Once you're able to manually test that your code change is working as expected, 
 - Your code changes can handle all known edge cases
 - The functionality you're adding will _keep_ working in the future
 
-### Note
+### Notice
 
 - **Generating dbt artifacts:** If you change the configuration of the dbt project located in `dbt_project` then you will need to re-generate the dbt artifacts used in testing. To do so, run:
 
