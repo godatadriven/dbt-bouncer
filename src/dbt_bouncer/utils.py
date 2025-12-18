@@ -151,6 +151,56 @@ def flatten(structure: Any, key: str = "", path: str = "", flattened=None):
     return flattened
 
 
+def _extract_checks_from_module(
+    module: Any, module_name: str, check_objects: List[Type["BaseCheck"]]
+) -> None:
+    for name, obj in inspect.getmembers(module):
+        if (
+            inspect.isclass(obj)
+            and name.startswith("Check")
+            and obj.__module__ == module_name
+        ):
+            check_objects.append(obj)
+
+
+def _load_custom_checks(
+    custom_checks_dir: Path, check_objects: List[Type["BaseCheck"]]
+) -> None:
+    logging.debug(f"{custom_checks_dir=}")
+    if custom_checks_dir.exists():
+        custom_check_files = [
+            f for f in custom_checks_dir.glob("*/*.py") if f.is_file()
+        ]
+        logging.debug(f"{custom_check_files=}")
+
+        for check_file in custom_check_files:
+            # Use a unique module name to avoid conflicts
+            unique_module_name = (
+                f"custom_check_{check_file.stem}_{abs(hash(str(check_file)))}"
+            )
+
+            try:
+                spec = importlib.util.spec_from_file_location(
+                    unique_module_name, check_file
+                )
+                if spec and spec.loader:
+                    module = importlib.util.module_from_spec(spec)
+                    sys.modules[unique_module_name] = module
+                    spec.loader.exec_module(module)
+
+                    _extract_checks_from_module(
+                        module, unique_module_name, check_objects
+                    )
+            except Exception as e:
+                raise RuntimeError(
+                    f"Failed to load custom check file {check_file}: {e}"
+                ) from e
+    else:
+        logging.warning(
+            f"Custom checks directory `{custom_checks_dir}` does not exist."
+        )
+
+
 @lru_cache
 def get_check_objects(
     custom_checks_dir: Path | None = None,
@@ -189,56 +239,13 @@ def get_check_objects(
         )
         try:
             module = importlib.import_module(module_name)
-            for name, obj in inspect.getmembers(module):
-                if (
-                    inspect.isclass(obj)
-                    and name.startswith("Check")
-                    and obj.__module__ == module_name
-                ):
-                    check_objects.append(obj)
+            _extract_checks_from_module(module, module_name, check_objects)
         except ImportError:
             logging.warning(f"Failed to import internal check module: {module_name}")
 
     # 2. Load custom checks (if any)
     if custom_checks_dir is not None:
-        custom_checks_dir = Path(custom_checks_dir)
-        logging.debug(f"{custom_checks_dir=}")
-        if custom_checks_dir.exists():
-            custom_check_files = [
-                f for f in custom_checks_dir.glob("*/*.py") if f.is_file()
-            ]
-            logging.debug(f"{custom_check_files=}")
-
-            for check_file in custom_check_files:
-                # Use a unique module name to avoid conflicts
-                unique_module_name = (
-                    f"custom_check_{check_file.stem}_{abs(hash(str(check_file)))}"
-                )
-
-                try:
-                    spec = importlib.util.spec_from_file_location(
-                        unique_module_name, check_file
-                    )
-                    if spec and spec.loader:
-                        module = importlib.util.module_from_spec(spec)
-                        sys.modules[unique_module_name] = module
-                        spec.loader.exec_module(module)
-
-                        for name, obj in inspect.getmembers(module):
-                            if (
-                                inspect.isclass(obj)
-                                and name.startswith("Check")
-                                and obj.__module__ == unique_module_name
-                            ):
-                                check_objects.append(obj)
-                except Exception as e:
-                    raise RuntimeError(
-                        f"Failed to load custom check file {check_file}: {e}"
-                    ) from e
-        else:
-            logging.warning(
-                f"Custom checks directory `{custom_checks_dir}` does not exist."
-            )
+        _load_custom_checks(Path(custom_checks_dir), check_objects)
 
     logging.debug(f"Loaded {len(check_objects)} `Check*` classes.")
 
