@@ -19,7 +19,7 @@ env:
   UV_SYSTEM_PYTHON: 1
 
 jobs:
-    pre-commit:
+    prek:
         permissions:
           contents: read
         runs-on: ubuntu-22.04
@@ -44,14 +44,14 @@ jobs:
               with:
                 python-version: ${{ steps.python-version.outputs.PYTHON_VERSION }}
 
-            - name: Run pre-commit
+            - name: Run prek
               run: |
                 git diff --name-status origin/main..HEAD > changed_files.txt
                 cat changed_files.txt
-                cat changed_files.txt | xargs uv run pre-commit run --files
+                cat changed_files.txt | xargs uv run prek run --files
 
     unit-tests:
-        needs: [pre-commit]
+        needs: [prek]
         runs-on: ${{ matrix.operating-system }}
         # permissions:
         #     checks: write
@@ -117,7 +117,7 @@ jobs:
                   (r=3;while ! make build-and-run-dbt-bouncer ; do ((--r))||exit;done)
 
     e2e-tests:
-        needs: [pre-commit]
+        needs: [prek]
         permissions:
           contents: read
         runs-on: ubuntu-22.04
@@ -168,7 +168,7 @@ jobs:
                   --config-file /app/dbt-bouncer-example.yml
 
     mkdocs-build:
-      needs: [pre-commit]
+      needs: [prek]
       permissions:
         contents: read
       runs-on: ubuntu-22.04
