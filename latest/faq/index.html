@@ -734,10 +734,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#how-to-set-up-dbt-bouncer-with-pre-commit" class="md-nav__link">
+  <a href="#how-to-set-up-dbt-bouncer-with-prekpre-commit" class="md-nav__link">
     <span class="md-ellipsis">
       
-        How to set up dbt-bouncer with pre-commit?
+        How to set up dbt-bouncer with prek/pre-commit?
       
     </span>
   </a>
@@ -846,7 +846,7 @@
 <h2 id="can-other-tools-perform-the-same-checks-as-dbt-bouncer">Can other tools perform the same checks as <code>dbt-bouncer</code>?<a class="headerlink" href="#can-other-tools-perform-the-same-checks-as-dbt-bouncer" title="Permanent link">#</a></h2>
 <p>There are several other tools that perform similar tasks as <code>dbt-bouncer</code>.</p>
 <ul>
-<li><a href="https://github.com/dbt-checkpoint/dbt-checkpoint">dbt-checkpoint</a>: A collection of <code>pre-commit</code> hooks for dbt projects. Tests are written in python. Configuration is performed via <code>.pre-commit-config.yaml</code>. Provided the dbt artifacts have already been generated, <code>dbt-checkpoint</code> does not need access to the underlying database. The hooks execute when a new commit is made, as such <code>dbt-checkpoint</code> is designed to be run only as part of <code>pre-commit</code>.</li>
+<li><a href="https://github.com/dbt-checkpoint/dbt-checkpoint">dbt-checkpoint</a>: A collection of <code>pre-commit</code> hooks for dbt projects. Tests are written in python. Configuration is performed via <code>.pre-commit-config.yaml</code>. Provided the dbt artifacts have already been generated, <code>dbt-checkpoint</code> does not need access to the underlying database. The hooks execute when a new commit is made, as such <code>dbt-checkpoint</code> is designed to be run only as part of <code>pre-commit</code> (or <code>prek</code>).</li>
 <li><a href="https://github.com/dbt-labs/dbt-project-evaluator">dbt-project-evaluator</a>: This is a dbt package from dbt Labs. Tests are written in <code>.sql</code> files using a combination of Jinja and SQL. Configuration is performed via <code>dbt_project.yml</code> and seed files (i.e. csv files). Requires a connection to underlying database. Designed to be run both in a CI pipeline and also during active development.</li>
 <li><a href="https://github.com/PicnicSupermarket/dbt-score">dbt-score</a>: This is a python package installable via <code>pip</code>. A collection of tests that apply only to dbt models. Tests can be executed from the command line. Tests are written in python. Configuration is performed via a <code>pyproject.toml</code> file. Provided the dbt artifacts have already been generated, <code>dbt-score</code> does not need access to the underlying database. Designed to be run during development.</li>
 </ul>
@@ -1015,7 +1015,7 @@
 </span><span id="__span-10-14"><a id="__codelineno-10-14" name="__codelineno-10-14" href="#__codelineno-10-14"></a><span class="w">    </span>└──<span class="w"> </span>run_results.json
 </span></code></pre></div>
 <p>Note: if you update your central <code>dbt-bouncer.yml</code> file, you will need to run <code>git submodule update --remote</code> in every repository to update the submodule.</p>
-<h2 id="how-to-set-up-dbt-bouncer-with-pre-commit">How to set up <code>dbt-bouncer</code> with <code>pre-commit</code>?<a class="headerlink" href="#how-to-set-up-dbt-bouncer-with-pre-commit" title="Permanent link">#</a></h2>
+<h2 id="how-to-set-up-dbt-bouncer-with-prekpre-commit">How to set up <code>dbt-bouncer</code> with <code>prek</code>/<code>pre-commit</code>?<a class="headerlink" href="#how-to-set-up-dbt-bouncer-with-prekpre-commit" title="Permanent link">#</a></h2>
 <p>You can use the official pre-commit hook, in your <code>.pre-commit-config.yaml</code> file:</p>
 <div class="language-yaml highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="nt">repos</span><span class="p">:</span>
 </span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">repo</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://github.com/godatadriven/dbt-bouncer</span>
@@ -1084,7 +1084,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="December 17, 2025 21:28:23 UTC">December 17, 2025</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="December 18, 2025 21:11:12 UTC">December 18, 2025</span>
   </span>
 
     

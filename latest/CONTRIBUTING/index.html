@@ -852,10 +852,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#note_1" class="md-nav__link">
+  <a href="#notice" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Note
+        Notice
       
     </span>
   </a>
@@ -886,10 +886,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#pre-commit" class="md-nav__link">
+  <a href="#prek" class="md-nav__link">
     <span class="md-ellipsis">
       
-        pre-commit
+        prek
       
     </span>
   </a>
@@ -1041,7 +1041,7 @@
 <li><a href="https://github.com/features/actions">GitHub Actions</a> for automating tests and checks, once a PR is pushed to the <code>dbt-bouncer</code> repository.</li>
 <li><a href="https://users.cs.duke.edu/~ola/courses/programming/Makefiles/Makefiles.html"><code>make</code></a> to run multiple setup or test steps in combination.</li>
 <li><a href="https://mypy.readthedocs.io/en/stable/"><code>mypy</code></a> for static type checking.</li>
-<li><a href="https://pre-commit.com"><code>pre-commit</code></a> to easily run those checks.</li>
+<li><a href="https://github.com/j178/prek"><code>prek</code></a> to easily run those checks.</li>
 <li><a href="https://docs.pydantic.dev/latest/"><code>Pydantic</code></a> to validate our configuration file.</li>
 <li><a href="https://docs.pytest.org/en/latest/"><code>pytest</code></a> to define, discover, and run tests.</li>
 <li><a href="https://github.com/astral-sh/ruff"><code>Ruff</code></a> to lint and format python code.</li>
@@ -1057,9 +1057,9 @@
 <p>Set required environment variables by copying <code>.env.example</code> to <code>.env</code> and updating the values.</p>
 <h2 id="running-dbt-bouncer-in-development">Running <code>dbt-bouncer</code> in development<a class="headerlink" href="#running-dbt-bouncer-in-development" title="Permanent link">#</a></h2>
 <h3 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">#</a></h3>
-<p>First make sure that you set up your <code>virtualenv</code> as described in <a href="#setting-up-an-environment">Setting up an environment</a>. Next, install <code>dbt-bouncer</code>, its dependencies and <code>pre-commit</code>:</p>
+<p>First make sure that you set up your <code>virtualenv</code> as described in <a href="#setting-up-an-environment">Setting up an environment</a>. Next, install <code>dbt-bouncer</code>, its dependencies and <code>prek</code>:</p>
 <div class="language-shell highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>make<span class="w"> </span>install
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>uv<span class="w"> </span>run<span class="w"> </span>pre-commit<span class="w"> </span>install
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>uv<span class="w"> </span>run<span class="w"> </span>prek<span class="w"> </span>install
 </span></code></pre></div>
 <p>When installed in this way, any changes you make to your local copy of the source code will be reflected immediately in your next <code>dbt-bouncer</code> run.</p>
 <h3 id="running-dbt-bouncer">Running <code>dbt-bouncer</code><a class="headerlink" href="#running-dbt-bouncer" title="Permanent link">#</a></h3>
@@ -1067,11 +1067,13 @@
 <div class="language-shell highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>uv<span class="w"> </span>run<span class="w"> </span>dbt-bouncer<span class="w"> </span>--config-file<span class="w"> </span>dbt-bouncer-example.yml
 </span></code></pre></div>
 <h2 id="testing">Testing<a class="headerlink" href="#testing" title="Permanent link">#</a></h2>
-<p>Once you're able to manually test that your code change is working as expected, it's important to run existing automated tests, as well as adding some new ones. These tests will ensure that:
-- Your code changes do not unexpectedly break other established functionality
-- Your code changes can handle all known edge cases
-- The functionality you're adding will <em>keep</em> working in the future</p>
-<h3 id="note_1">Note<a class="headerlink" href="#note_1" title="Permanent link">#</a></h3>
+<p>Once you're able to manually test that your code change is working as expected, it's important to run existing automated tests, as well as adding some new ones. These tests will ensure that:</p>
+<ul>
+<li>Your code changes do not unexpectedly break other established functionality</li>
+<li>Your code changes can handle all known edge cases</li>
+<li>The functionality you're adding will <em>keep</em> working in the future</li>
+</ul>
+<h3 id="notice">Notice<a class="headerlink" href="#notice" title="Permanent link">#</a></h3>
 <ul>
 <li><strong>Generating dbt artifacts:</strong> If you change the configuration of the dbt project located in <code>dbt_project</code> then you will need to re-generate the dbt artifacts used in testing. To do so, run:</li>
 </ul>
@@ -1090,8 +1092,8 @@
 </span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="c1"># Runs all tests</span>
 </span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>make<span class="w"> </span><span class="nb">test</span>
 </span></code></pre></div>
-<h4 id="pre-commit"><code>pre-commit</code><a class="headerlink" href="#pre-commit" title="Permanent link">#</a></h4>
-<p><a href="https://pre-commit.com"><code>pre-commit</code></a> takes care of running all code-checks for formatting and linting. Run <code>uv run pre-commit install</code> to install <code>pre-commit</code> in your local environment. Once this is done you can use the git pre-commit hooks to ensure proper formatting and linting.</p>
+<h4 id="prek"><code>prek</code><a class="headerlink" href="#prek" title="Permanent link">#</a></h4>
+<p><a href="https://github.com/j178/prek"><code>prek</code></a> takes care of running all code-checks for formatting and linting. Run <code>uv run prek install</code> to install <code>prek</code> in your local environment. Once this is done you can use the git pre-commit hooks to ensure proper formatting and linting.</p>
 <h4 id="pytest"><code>pytest</code><a class="headerlink" href="#pytest" title="Permanent link">#</a></h4>
 <p>Finally, you can also run a specific test or group of tests using <a href="https://docs.pytest.org/en/latest/"><code>pytest</code></a> directly. With a virtualenv active and dev dependencies installed you can do things like:</p>
 <div class="language-shell highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># run all unit tests in a file</span>
@@ -1155,7 +1157,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="December 9, 2025 14:26:55 UTC">December 9, 2025</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="December 18, 2025 21:12:52 UTC">December 18, 2025</span>
   </span>
 
     
