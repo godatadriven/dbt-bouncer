@@ -4,11 +4,11 @@
 
 import importlib
 import importlib.util
+import inspect
 import logging
 import os
 import re
 import sys
-import inspect
 from functools import lru_cache
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Type

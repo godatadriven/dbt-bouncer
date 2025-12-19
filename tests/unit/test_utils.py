@@ -1,4 +1,5 @@
 import os
+from typing import Any
 from unittest import mock
 
 import pytest
@@ -254,8 +255,10 @@ class TestExtractChecksFromModule:
     """Tests for the _extract_checks_from_module helper function."""
 
     def test_extracts_check_classes(self):
-        from dbt_bouncer.utils import _extract_checks_from_module
+        """Test that Check* classes are extracted from a module."""
         import types
+
+        from dbt_bouncer.utils import _extract_checks_from_module
 
         # Create a mock module with a Check class
         mock_module = types.ModuleType("test_module")
@@ -265,17 +268,19 @@ class TestExtractChecksFromModule:
             pass
 
         CheckExample.__module__ = "test_module"
-        mock_module.CheckExample = CheckExample
+        mock_module.CheckExample = CheckExample  # type: ignore[attr-defined]
 
-        check_objects = []
+        check_objects: list[Any] = []
         _extract_checks_from_module(mock_module, "test_module", check_objects)
 
         assert len(check_objects) == 1
         assert check_objects[0] is CheckExample
 
     def test_ignores_non_check_classes(self):
-        from dbt_bouncer.utils import _extract_checks_from_module
+        """Test that non-Check* classes are ignored."""
         import types
+
+        from dbt_bouncer.utils import _extract_checks_from_module
 
         mock_module = types.ModuleType("test_module")
 
@@ -283,16 +288,18 @@ class TestExtractChecksFromModule:
             pass
 
         SomeHelper.__module__ = "test_module"
-        mock_module.SomeHelper = SomeHelper
+        mock_module.SomeHelper = SomeHelper  # type: ignore[attr-defined]
 
-        check_objects = []
+        check_objects: list[Any] = []
         _extract_checks_from_module(mock_module, "test_module", check_objects)
 
         assert len(check_objects) == 0
 
     def test_ignores_imported_check_classes(self):
-        from dbt_bouncer.utils import _extract_checks_from_module
+        """Test that Check* classes imported from other modules are ignored."""
         import types
+
+        from dbt_bouncer.utils import _extract_checks_from_module
 
         mock_module = types.ModuleType("test_module")
 
@@ -301,9 +308,9 @@ class TestExtractChecksFromModule:
 
         # Simulate an imported class by setting a different __module__
         CheckImported.__module__ = "other_module"
-        mock_module.CheckImported = CheckImported
+        mock_module.CheckImported = CheckImported  # type: ignore[attr-defined]
 
-        check_objects = []
+        check_objects: list[Any] = []
         _extract_checks_from_module(mock_module, "test_module", check_objects)
 
         assert len(check_objects) == 0
@@ -316,8 +323,8 @@ class TestLoadCustomChecks:
     """Tests for the _load_custom_checks helper function."""
 
     def test_loads_custom_check_from_directory(self, tmp_path):
+        """Test loading a custom check from a directory."""
         from dbt_bouncer.utils import _load_custom_checks
-        from pathlib import Path
 
         # Create directory structure: custom_checks/manifest/check_custom.py
         custom_dir = tmp_path / "custom_checks"
@@ -332,13 +339,14 @@ class CheckCustomExample:
 """
         )
 
-        check_objects = []
+        check_objects: list[Any] = []
         _load_custom_checks(custom_dir, check_objects)
 
         assert len(check_objects) == 1
         assert check_objects[0].__name__ == "CheckCustomExample"
 
     def test_raises_on_invalid_check_file(self, tmp_path):
+        """Test that an error is raised when a custom check file is invalid."""
         from dbt_bouncer.utils import _load_custom_checks
 
         custom_dir = tmp_path / "custom_checks"
@@ -348,17 +356,19 @@ class CheckCustomExample:
         check_file = manifest_dir / "check_broken.py"
         check_file.write_text("this is not valid python syntax !!!")
 
-        check_objects = []
+        check_objects: list[Any] = []
         with pytest.raises(RuntimeError, match="Failed to load custom check file"):
             _load_custom_checks(custom_dir, check_objects)
 
     def test_warns_on_nonexistent_directory(self, tmp_path, caplog):
-        from dbt_bouncer.utils import _load_custom_checks
+        """Test that a warning is logged when the custom check directory does not exist."""
         import logging
+
+        from dbt_bouncer.utils import _load_custom_checks
 
         nonexistent_dir = tmp_path / "does_not_exist"
 
-        check_objects = []
+        check_objects: list[Any] = []
         with caplog.at_level(logging.WARNING):
             _load_custom_checks(nonexistent_dir, check_objects)
 
