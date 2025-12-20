@@ -116,6 +116,53 @@ jobs:
               run: |
                   (r=3;while ! make build-and-run-dbt-bouncer ; do ((--r))||exit;done)
 
+    benchmark-pr-branch:
+        permissions:
+          contents: read
+        runs-on: ubuntu-22.04
+        steps:
+          - uses: actions/checkout@v6
+
+          - name: Setup Python
+            uses: ./.github/actions/setup_python_env
+
+          - name: Install `dbt-bouncer`
+            run: make install
+
+          - name: Install bencher
+            uses: bencherdev/bencher@v0.5.9
+
+          - name: Install Hyperfine
+            uses: taiki-e/install-action@v2
+            with:
+              tool: hyperfine@1.20
+
+          - name: Upload Benchmark Results
+            uses: actions/upload-artifact@v4
+            with:
+              name: benchmark_results.json
+              path: ./benchmark_results.json
+
+          - name: Track base branch benchmarks with Bencher
+            run: |
+              bencher run \
+                --adapter shell_hyperfine \
+                --file results.json \
+                --format json \
+                "hyperfine --export-json results.json --runs 10 'dbt-bouncer --config-file dbt-bouncer-example.yml'" > benchmark_results.json
+
+          - name: Upload Benchmark Results
+            uses: actions/upload-artifact@v4
+            with:
+              name: benchmark_results.json
+              path: ./benchmark_results.json
+
+          - name: Upload GitHub Pull Request Event
+            uses: actions/upload-artifact@v4
+            with:
+              name: event.json
+              path: ${{ github.event_path }}
+
     e2e-tests:
         needs: [prek]
         permissions:

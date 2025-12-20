@@ -160,6 +160,7 @@ cython_debug/
 #.idea/
 
 *.ipynb
+benchmark_results.json
 changed_files.txt
 coverage.json
 dbt.duckdb
