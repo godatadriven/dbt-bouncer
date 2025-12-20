@@ -145,7 +145,7 @@ jobs:
                 --ci-on-the-fly \
                 --file results.json \
                 --format json \
-                "hyperfine --export-json results.json --runs 10 'dbt-bouncer --config-file dbt-bouncer-example.yml'" > benchmark_results.json
+                "hyperfine --export-json results.json --runs 10 'uv run dbt-bouncer --config-file dbt-bouncer-example.yml'" > benchmark_results.json
 
           - name: Upload Benchmark Results
             uses: actions/upload-artifact@v4
