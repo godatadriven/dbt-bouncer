@@ -216,4 +216,11 @@ tests/fixtures/dbt_110/target/graph.gpickle
 tests/fixtures/dbt_110/target/partial_parse.msgpack
 tests/fixtures/dbt_110/target/perf_info.json
 tests/fixtures/dbt_110/target/semantic_manifest.json
+tests/fixtures/dbt_111/target/compiled/
+tests/fixtures/dbt_111/target/index.html
+tests/fixtures/dbt_111/target/graph_summary.json
+tests/fixtures/dbt_111/target/graph.gpickle
+tests/fixtures/dbt_111/target/partial_parse.msgpack
+tests/fixtures/dbt_111/target/perf_info.json
+tests/fixtures/dbt_111/target/semantic_manifest.json
 tmp/

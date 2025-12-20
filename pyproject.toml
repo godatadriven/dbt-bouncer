@@ -10,7 +10,7 @@ classifiers = [
   "Programming Language :: Python :: 3.14",
 ]
 dependencies =[
-  "click (<9)",
+  "click (<8.3)", # Due to this issue: https://github.com/pallets/click/issues/3110
   "dbt-artifacts-parser (>=0.8)",
   "h11 (>=0.16.0)", # To fix security warning
   "jellyfish (>=1,<2)",
@@ -41,7 +41,7 @@ version = "0.0.0"
 
 [project.optional-dependencies]
 dev = [
-  "dbt-core>=1.10.0,<2",
+  "dbt-core>=1.11.2,<2",
   "dbt-duckdb~=1.0",
   "mypy~=1.0",
   "prek>=0.1,<1",
