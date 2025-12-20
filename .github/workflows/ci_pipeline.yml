@@ -117,7 +117,7 @@ jobs:
                   (r=3;while ! make build-and-run-dbt-bouncer ; do ((--r))||exit;done)
 
     benchmark-pr-branch:
-        # needs: [prek]
+        needs: [prek]
         permissions:
           contents: read
         runs-on: ubuntu-22.04
