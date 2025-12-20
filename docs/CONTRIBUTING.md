@@ -120,6 +120,14 @@ make test-integration
 make test
 ```
 
+#### Performance tests
+
+To test the performance on the `dbt-bouncer` CLI, we use [bencher](https://github.com/bencherdev/bencher) and [hyperfine](https://github.com/sharkdp/hyperfine). Provided both are installed, you can run performance tests via:
+
+```shell
+make test-perf
+```
+
 #### `prek`
 
 [`prek`](https://github.com/j178/prek) takes care of running all code-checks for formatting and linting. Run `uv run prek install` to install `prek` in your local environment. Once this is done you can use the git pre-commit hooks to ensure proper formatting and linting.
