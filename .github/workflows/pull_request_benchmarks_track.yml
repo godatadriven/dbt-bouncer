@@ -53,4 +53,14 @@ jobs:
             --github-actions '${{ secrets.GITHUB_TOKEN }}' \
             --hash "$PR_HEAD_SHA" \
             --project dbt-bouncer \
+            --start-point "$GITHUB_BASE_REF" \
+            --start-point-hash 'ade4e6321b2d9865f461e9baebcdfb8b1153acda' \
+            --start-point-clone-thresholds \
+            --start-point-reset \
+            --testbed ubuntu-2204 \
+            --threshold-max-sample-size 16 \
+            --threshold-measure latency \
+            --threshold-test percentage \
+            --threshold-upper-boundary 0.1 \
+            --thresholds-reset \
             --token '${{ secrets.BENCHER_API_TOKEN }}'
