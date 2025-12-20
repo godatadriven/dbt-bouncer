@@ -117,6 +117,7 @@ jobs:
                   (r=3;while ! make build-and-run-dbt-bouncer ; do ((--r))||exit;done)
 
     benchmark-pr-branch:
+        # needs: [prek]
         permissions:
           contents: read
         runs-on: ubuntu-22.04
@@ -137,16 +138,11 @@ jobs:
             with:
               tool: hyperfine@1.20
 
-          - name: Upload Benchmark Results
-            uses: actions/upload-artifact@v4
-            with:
-              name: benchmark_results.json
-              path: ./benchmark_results.json
-
           - name: Track base branch benchmarks with Bencher
             run: |
               bencher run \
                 --adapter shell_hyperfine \
+                --ci-on-the-fly \
                 --file results.json \
                 --format json \
                 "hyperfine --export-json results.json --runs 10 'dbt-bouncer --config-file dbt-bouncer-example.yml'" > benchmark_results.json
