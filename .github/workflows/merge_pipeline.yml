@@ -12,7 +12,7 @@
     DBT_PROJECT_DIR: dbt_project
 
   jobs:
-      benchmark_main_branch:
+      benchmark-main-branch:
         permissions:
           contents: read
         runs-on: ubuntu-22.04
@@ -21,8 +21,6 @@
 
           - name: Setup Python
             uses: ./.github/actions/setup_python_env
-            with:
-              python-version: ${{ matrix.python-version }}
 
           - name: Install `dbt-bouncer`
             run: pip install git+https://github.com/godatadriven/dbt-bouncer.git@${{ github.sha }}
