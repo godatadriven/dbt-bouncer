@@ -165,6 +165,7 @@ coverage.json
 dbt.duckdb
 github-comment.md
 pytest-coverage.txt
+results.json
 
 dbt_project/dbt_packages
 dbt_project/logs
