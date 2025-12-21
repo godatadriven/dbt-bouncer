@@ -1439,7 +1439,7 @@
         <tr class="doc-section-item">
         <td><code>description</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="str">str</span>]</code>
+                <code><span title="str">str</span> | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -1450,7 +1450,7 @@
         <tr class="doc-section-item">
         <td><code>exclude</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="str">str</span>]</code>
+                <code><span title="str">str</span> | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -1461,7 +1461,7 @@
         <tr class="doc-section-item">
         <td><code>include</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="str">str</span>]</code>
+                <code><span title="str">str</span> | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -1472,7 +1472,7 @@
         <tr class="doc-section-item">
         <td><code>severity</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="typing.Literal">Literal</span>[&#39;error&#39;, &#39;warn&#39;]]</code>
+                <code><span title="typing.Literal">Literal</span>[&#39;error&#39;, &#39;warn&#39;] | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -1554,10 +1554,10 @@
 </span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20"></a><span class="sd">        run_result (DbtBouncerRunResult): The DbtBouncerRunResult object to check.</span>
 </span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21"></a>
 </span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22"></a><span class="sd">    Other Parameters:</span>
-</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23"></a><span class="sd">        description (Optional[str]): Description of what the check does and why it is implemented.</span>
-</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24"></a><span class="sd">        exclude (Optional[str]): Regex pattern to match the resource path. Resource paths that match the pattern will not be checked.</span>
-</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25"></a><span class="sd">        include (Optional[str]): Regex pattern to match the resource path. Only resource paths that match the pattern will be checked.</span>
-</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26"></a><span class="sd">        severity (Optional[Literal[&quot;error&quot;, &quot;warn&quot;]]): Severity level of the check. Default: `error`.</span>
+</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23"></a><span class="sd">        description (str | None): Description of what the check does and why it is implemented.</span>
+</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24"></a><span class="sd">        exclude (str | None): Regex pattern to match the resource path. Resource paths that match the pattern will not be checked.</span>
+</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25"></a><span class="sd">        include (str | None): Regex pattern to match the resource path. Only resource paths that match the pattern will be checked.</span>
+</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26"></a><span class="sd">        severity (Literal[&quot;error&quot;, &quot;warn&quot;] | None): Severity level of the check. Default: `error`.</span>
 </span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27"></a>
 </span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28"></a><span class="sd">    Example(s):</span>
 </span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29"></a><span class="sd">        ```yaml</span>
@@ -1688,7 +1688,7 @@
         <tr class="doc-section-item">
         <td><code>description</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="str">str</span>]</code>
+                <code><span title="str">str</span> | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -1699,7 +1699,7 @@
         <tr class="doc-section-item">
         <td><code>exclude</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="str">str</span>]</code>
+                <code><span title="str">str</span> | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -1710,7 +1710,7 @@
         <tr class="doc-section-item">
         <td><code>include</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="str">str</span>]</code>
+                <code><span title="str">str</span> | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -1721,7 +1721,7 @@
         <tr class="doc-section-item">
         <td><code>severity</code></td>
         <td>
-                <code><span title="Optional">Optional</span>[<span title="typing.Literal">Literal</span>[&#39;error&#39;, &#39;warn&#39;]]</code>
+                <code><span title="typing.Literal">Literal</span>[&#39;error&#39;, &#39;warn&#39;] | None</code>
         </td>
         <td>
             <div class="doc-md-description">
@@ -1815,10 +1815,10 @@
 </span><span id="__span-0-63"><a id="__codelineno-0-63" name="__codelineno-0-63"></a><span class="sd">        run_result (DbtBouncerRunResult): The DbtBouncerRunResult object to check.</span>
 </span><span id="__span-0-64"><a id="__codelineno-0-64" name="__codelineno-0-64"></a>
 </span><span id="__span-0-65"><a id="__codelineno-0-65" name="__codelineno-0-65"></a><span class="sd">    Other Parameters:</span>
-</span><span id="__span-0-66"><a id="__codelineno-0-66" name="__codelineno-0-66"></a><span class="sd">        description (Optional[str]): Description of what the check does and why it is implemented.</span>
-</span><span id="__span-0-67"><a id="__codelineno-0-67" name="__codelineno-0-67"></a><span class="sd">        exclude (Optional[str]): Regex pattern to match the resource path. Resource paths that match the pattern will not be checked.</span>
-</span><span id="__span-0-68"><a id="__codelineno-0-68" name="__codelineno-0-68"></a><span class="sd">        include (Optional[str]): Regex pattern to match the resource path. Only resource paths that match the pattern will be checked.</span>
-</span><span id="__span-0-69"><a id="__codelineno-0-69" name="__codelineno-0-69"></a><span class="sd">        severity (Optional[Literal[&quot;error&quot;, &quot;warn&quot;]]): Severity level of the check. Default: `error`.</span>
+</span><span id="__span-0-66"><a id="__codelineno-0-66" name="__codelineno-0-66"></a><span class="sd">        description (str | None): Description of what the check does and why it is implemented.</span>
+</span><span id="__span-0-67"><a id="__codelineno-0-67" name="__codelineno-0-67"></a><span class="sd">        exclude (str | None): Regex pattern to match the resource path. Resource paths that match the pattern will not be checked.</span>
+</span><span id="__span-0-68"><a id="__codelineno-0-68" name="__codelineno-0-68"></a><span class="sd">        include (str | None): Regex pattern to match the resource path. Only resource paths that match the pattern will be checked.</span>
+</span><span id="__span-0-69"><a id="__codelineno-0-69" name="__codelineno-0-69"></a><span class="sd">        severity (Literal[&quot;error&quot;, &quot;warn&quot;] | None): Severity level of the check. Default: `error`.</span>
 </span><span id="__span-0-70"><a id="__codelineno-0-70" name="__codelineno-0-70"></a>
 </span><span id="__span-0-71"><a id="__codelineno-0-71" name="__codelineno-0-71"></a><span class="sd">    Raises: # noqa:DOC502</span>
 </span><span id="__span-0-72"><a id="__codelineno-0-72" name="__codelineno-0-72"></a><span class="sd">        KeyError: If the `dbt-bigquery` adapter is not used.</span>
