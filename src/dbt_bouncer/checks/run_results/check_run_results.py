@@ -20,10 +20,10 @@ class CheckRunResultsMaxExecutionTime(BaseCheck):
         run_result (DbtBouncerRunResult): The DbtBouncerRunResult object to check.
 
     Other Parameters:
-        description (Optional[str]): Description of what the check does and why it is implemented.
-        exclude (Optional[str]): Regex pattern to match the resource path. Resource paths that match the pattern will not be checked.
-        include (Optional[str]): Regex pattern to match the resource path. Only resource paths that match the pattern will be checked.
-        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the resource path. Resource paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the resource path. Only resource paths that match the pattern will be checked.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml
@@ -63,10 +63,10 @@ class CheckRunResultsMaxGigabytesBilled(BaseCheck):
         run_result (DbtBouncerRunResult): The DbtBouncerRunResult object to check.
 
     Other Parameters:
-        description (Optional[str]): Description of what the check does and why it is implemented.
-        exclude (Optional[str]): Regex pattern to match the resource path. Resource paths that match the pattern will not be checked.
-        include (Optional[str]): Regex pattern to match the resource path. Only resource paths that match the pattern will be checked.
-        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the resource path. Resource paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the resource path. Only resource paths that match the pattern will be checked.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Raises: # noqa:DOC502
         KeyError: If the `dbt-bigquery` adapter is not used.
