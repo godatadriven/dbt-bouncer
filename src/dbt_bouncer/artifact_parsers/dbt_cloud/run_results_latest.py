@@ -18,10 +18,10 @@ class Metadata(BaseParserModel):
         extra='allow',
     )
     dbt_schema_version: str
-    dbt_version: Optional[str] = '1.9.0a1'
-    generated_at: Optional[str] = None
-    invocation_id: Optional[str] = None
-    env: Optional[Dict[str, str]] = None
+    dbt_version: str | None = '1.9.0a1'
+    generated_at: str | None = None
+    invocation_id: str | None = None
+    env: dict[str, str] | None = None
 
 
 class Status(Enum):
@@ -52,34 +52,34 @@ class TimingItem(BaseParserModel):
         extra='allow',
     )
     name: str
-    started_at: Optional[str] = None
-    completed_at: Optional[str] = None
+    started_at: str | None = None
+    completed_at: str | None = None
 
 
 class BatchResults(BaseParserModel):
     model_config = ConfigDict(
         extra='allow',
     )
-    successful: Optional[List[List]] = None
-    failed: Optional[List[List]] = None
+    successful: list[list] | None = None
+    failed: list[list] | None = None
 
 
 class Result(BaseParserModel):
     model_config = ConfigDict(
         extra='allow',
     )
-    status: Union[Status, Status1, Status2]
-    timing: List[TimingItem]
+    status: Status | Status1 | Status2
+    timing: list[TimingItem]
     thread_id: str
     execution_time: float
-    adapter_response: Dict[str, Any]
-    message: Optional[str] = None
-    failures: Optional[int] = None
+    adapter_response: dict[str, Any]
+    message: str | None = None
+    failures: int | None = None
     unique_id: str
-    compiled: Optional[bool] = None
-    compiled_code: Optional[str] = None
-    relation_name: Optional[str] = None
-    batch_results: Optional[BatchResults] = None
+    compiled: bool | None = None
+    compiled_code: str | None = None
+    relation_name: str | None = None
+    batch_results: BatchResults | None = None
 
 
 class RunResultsLatest(BaseParserModel):
@@ -87,6 +87,6 @@ class RunResultsLatest(BaseParserModel):
         extra='allow',
     )
     metadata: Metadata = Field(..., title='BaseArtifactMetadata')
-    results: List[Result]
+    results: list[Result]
     elapsed_time: float
-    args: Optional[Dict[str, Any]] = None
+    args: dict[str, Any] | None = None
