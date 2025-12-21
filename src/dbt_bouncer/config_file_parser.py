@@ -7,6 +7,7 @@ import click
 from pydantic import BaseModel, ConfigDict, Field
 from typing_extensions import Annotated
 
+from dbt_bouncer.global_context import get_context
 from dbt_bouncer.utils import clean_path_str, get_check_objects
 
 
@@ -25,9 +26,15 @@ def get_check_types(
 
     """
     try:
-        ctx = click.get_current_context()
-        config_file_path = ctx.obj.get("config_file_path")
-        custom_checks_dir = ctx.obj.get("custom_checks_dir")
+        ctx = get_context()
+        if ctx:
+            config_file_path = ctx.config_file_path
+            custom_checks_dir = ctx.custom_checks_dir
+        else:
+            click_ctx = click.get_current_context()
+            config_file_path = click_ctx.obj.get("config_file_path")
+            custom_checks_dir = click_ctx.obj.get("custom_checks_dir")
+
         if custom_checks_dir:
             custom_checks_dir = config_file_path.parent / custom_checks_dir
     except (RuntimeError, AttributeError, KeyError):

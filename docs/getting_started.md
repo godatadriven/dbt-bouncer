@@ -103,6 +103,19 @@ docker run --rm \
     --config-file /app/<PATH_TO_CONFIG_FILE>
 ```
 
+### Programmatic invocation
+
+`dbt-bouncer` can be invoked programmatically. `run_bouncer` returns the exit code of the process.
+
+```python
+from pathlib import Path
+from dbt_bouncer.main import run_bouncer
+
+exit_code = run_bouncer(
+    config_file=Path("path/to/dbt-bouncer.yml")
+)
+```
+
 ## How to contribute a check to `dbt-bouncer`
 
 See [Adding a new check](./CONTRIBUTING.md#adding-a-new-check).
