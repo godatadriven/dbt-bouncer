@@ -1,7 +1,7 @@
 import json
 import logging
 from pathlib import Path
-from typing import TYPE_CHECKING, List, Literal, Union
+from typing import TYPE_CHECKING, Literal
 
 from dbt_bouncer.utils import get_package_version_number
 
@@ -32,11 +32,11 @@ if TYPE_CHECKING:
 def load_dbt_artifact(
     artifact_name: Literal["catalog.json", "manifest.json", "run_results.json"],
     dbt_artifacts_dir: Path,
-) -> Union["DbtBouncerCatalogNode", "DbtBouncerManifest", "DbtBouncerRunResultBase"]:
+) -> "DbtBouncerCatalogNode | DbtBouncerManifest | DbtBouncerRunResultBase":
     """Load a dbt artifact from a JSON file to a Pydantic object.
 
     Returns:
-        Union[DbtBouncerCatalogNode, DbtBouncerManifest, DbtBouncerRunResultBase]:
+        DbtBouncerCatalogNode | DbtBouncerManifest | DbtBouncerRunResultBase:
             The dbt artifact loaded as a Pydantic object.
 
     Raises:
@@ -94,17 +94,17 @@ def parse_dbt_artifacts(
     bouncer_config: "DbtBouncerConf", dbt_artifacts_dir: Path
 ) -> tuple[
     "DbtBouncerManifest",
-    List["Exposures"],
-    List["Macros"],
-    List["DbtBouncerModel"],
-    List["DbtBouncerSemanticModel"],
-    List["DbtBouncerSnapshot"],
-    List["DbtBouncerSource"],
-    List["DbtBouncerTest"],
-    List["UnitTests"],
-    List["DbtBouncerCatalogNode"],
-    List["DbtBouncerCatalogNode"],
-    List["DbtBouncerRunResult"],
+    list["Exposures"],
+    list["Macros"],
+    list["DbtBouncerModel"],
+    list["DbtBouncerSemanticModel"],
+    list["DbtBouncerSnapshot"],
+    list["DbtBouncerSource"],
+    list["DbtBouncerTest"],
+    list["UnitTests"],
+    list["DbtBouncerCatalogNode"],
+    list["DbtBouncerCatalogNode"],
+    list["DbtBouncerRunResult"],
 ]:
     """Parse all required dbt artifacts.
 
@@ -114,17 +114,17 @@ def parse_dbt_artifacts(
 
     Returns:
         DbtBouncerManifest: The manifest object.
-        List[DbtBouncerExposure]: List of exposures in the project.
-        List[DbtBouncerMacro]: List of macros in the project.
-        List[DbtBouncerModel]: List of models in the project.
-        List[DbtBouncerSemanticModel]: List of semantic models in the project.
-        List[DbtBouncerSnapshot]: List of snapshots in the project.
-        List[DbtBouncerSource]: List of sources in the project.
-        List[DbtBouncerTest]: List of tests in the project.
-        List[DbtBouncerUnitTest]: List of unit tests in the project.
-        List[DbtBouncerCatalogNode]: List of catalog nodes for the project.
-        List[DbtBouncerCatalogNode]: List of catalog nodes for the project sources.
-        List[DbtBouncerRunResult]: A list of DbtBouncerRunResult objects.
+        list[DbtBouncerExposure]: List of exposures in the project.
+        list[DbtBouncerMacro]: List of macros in the project.
+        list[DbtBouncerModel]: List of models in the project.
+        list[DbtBouncerSemanticModel]: List of semantic models in the project.
+        list[DbtBouncerSnapshot]: List of snapshots in the project.
+        list[DbtBouncerSource]: List of sources in the project.
+        list[DbtBouncerTest]: List of tests in the project.
+        list[DbtBouncerUnitTest]: List of unit tests in the project.
+        list[DbtBouncerCatalogNode]: List of catalog nodes for the project.
+        list[DbtBouncerCatalogNode]: List of catalog nodes for the project sources.
+        list[DbtBouncerRunResult]: A list of DbtBouncerRunResult objects.
 
     """
     from dbt_bouncer.artifact_parsers.parsers_common import load_dbt_artifact
