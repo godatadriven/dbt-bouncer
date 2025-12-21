@@ -2,12 +2,189 @@ import importlib
 import logging
 import sys
 from pathlib import Path, PurePath
-from typing import Union
+from typing import Optional, Union
 
 import click
 
+from dbt_bouncer.global_context import BouncerContext, set_context
 from dbt_bouncer.logger import configure_console_logging
 from dbt_bouncer.version import version
+
+
+def run_bouncer(
+    config_file: Optional[PurePath] = None,
+    create_pr_comment_file: bool = False,
+    only: str = "",
+    output_file: Union[Path, None] = None,
+    output_only_failures: bool = False,
+    show_all_failures: bool = False,
+    verbosity: int = 0,
+    config_file_source: Optional[str] = None,
+) -> int:
+    """Programmatic entrypoint for dbt-bouncer.
+
+    Args:
+        config_file: Location of the YML config file.
+        create_pr_comment_file: Create a `github-comment.md` file.
+        only: Limit the checks run to specific categories.
+        output_file: Location of the json file where check metadata will be saved.
+        output_only_failures: Only failures will be included in the output file.
+        show_all_failures: All failures will be printed to the console.
+        verbosity: Verbosity level.
+        config_file_source: Source of the config file ("COMMANDLINE", "DEFAULT", etc.).
+
+    Returns:
+        int: Exit code (0 for success, 1 for failure).
+
+    Raises:
+        RuntimeError: If output file has an invalid extension or other runtime errors.
+
+    """
+    configure_console_logging(verbosity)
+    logging.info(f"Running dbt-bouncer ({version()})...")
+
+    # Validate output file has `.json` extension
+    if output_file and not output_file.suffix == ".json":
+        raise RuntimeError(
+            f"Output file must have a `.json` extension. Got `{output_file.suffix}`.",
+        )
+
+    # Validate `only` has valid values
+    valid_check_categories = ["catalog_checks", "manifest_checks", "run_results_checks"]
+    if not only.strip():
+        only_parsed = valid_check_categories
+    else:
+        only_parsed = [x.strip() for x in set(only.strip().split(",")) if x != ""]
+
+    for x in [i for i in only_parsed if i not in valid_check_categories]:
+        raise RuntimeError(
+            f"`--only` contains an invalid value (`{x}`). Valid values are `{valid_check_categories}` or any comma-separated combination."
+        )
+
+    # Using local imports to speed up CLI startup
+    from dbt_bouncer.config_file_validator import (
+        get_config_file_path,
+        load_config_file_contents,
+    )
+
+    if config_file is None:
+        config_file = Path("dbt-bouncer.yml")
+        if config_file_source is None:
+            config_file_source = "DEFAULT"
+    else:
+        if config_file_source is None:
+            config_file_source = "COMMANDLINE"
+
+    config_file_path = get_config_file_path(
+        config_file=config_file,
+        config_file_source=config_file_source,
+    )
+    config_file_contents = load_config_file_contents(
+        config_file_path, allow_default_config_file_creation=True
+    )
+
+    # Handle `severity` at the global level
+    if config_file_contents.get("severity"):
+        logging.info(
+            f"Setting `severity` for all checks to `{config_file_contents['severity']}`."
+        )
+        for c in config_file_contents["manifest_checks"]:
+            c["severity"] = config_file_contents["severity"]
+
+    logging.debug(f"{config_file_contents=}")
+
+    check_categories = [
+        i
+        for i in config_file_contents
+        if i.endswith("_checks") and config_file_contents.get(i) != []
+    ]
+    logging.debug(f"{check_categories=}")
+
+    # Set global context for dbt_bouncer.utils.get_check_objects() and config_file_parser
+    set_context(
+        BouncerContext(
+            config_file_path=config_file_path,
+            custom_checks_dir=config_file_contents.get("custom_checks_dir"),
+        )
+    )
+
+    # If config_file_parser is already loaded, reload it so that check types are updated (necessary for parallel tests)
+    if "dbt_bouncer.config_file_parser" in sys.modules:
+        importlib.reload(sys.modules["dbt_bouncer.config_file_parser"])
+
+    from dbt_bouncer.config_file_validator import validate_conf
+
+    bouncer_config = validate_conf(
+        check_categories=check_categories,
+        config_file_contents=dict(config_file_contents),
+    )
+    del config_file_contents
+    logging.debug(f"{bouncer_config=}")
+
+    for category in check_categories:
+        if category in only_parsed:
+            for idx, check in enumerate(getattr(bouncer_config, category)):
+                # Add indices to uniquely identify checks
+                check.index = idx
+
+                # Handle global `exclude` and `include` args
+                if bouncer_config.include and not check.include:
+                    check.include = bouncer_config.include
+                if bouncer_config.exclude and not check.exclude:
+                    check.exclude = bouncer_config.exclude
+        else:
+            # i.e. if `only` used then remove non-specified check categories
+            setattr(bouncer_config, category, [])
+
+    logging.debug(f"{bouncer_config=}")
+
+    dbt_artifacts_dir = Path(
+        config_file_path.parent / (bouncer_config.dbt_artifacts_dir or "target")
+    )
+
+    from dbt_bouncer.artifact_parsers.parsers_common import parse_dbt_artifacts
+
+    (
+        manifest_obj,
+        project_exposures,
+        project_macros,
+        project_models,
+        project_semantic_models,
+        project_snapshots,
+        project_sources,
+        project_tests,
+        project_unit_tests,
+        project_catalog_nodes,
+        project_catalog_sources,
+        project_run_results,
+    ) = parse_dbt_artifacts(
+        bouncer_config=bouncer_config, dbt_artifacts_dir=dbt_artifacts_dir
+    )
+
+    logging.info("Running checks...")
+    from dbt_bouncer.runner import runner
+
+    results = runner(
+        bouncer_config=bouncer_config,
+        catalog_nodes=project_catalog_nodes,
+        catalog_sources=project_catalog_sources,
+        check_categories=check_categories,
+        create_pr_comment_file=create_pr_comment_file,
+        exposures=project_exposures,
+        macros=project_macros,
+        manifest_obj=manifest_obj,
+        models=project_models,
+        output_file=output_file,
+        output_only_failures=output_only_failures,
+        run_results=project_run_results,
+        semantic_models=project_semantic_models,
+        show_all_failures=show_all_failures,
+        snapshots=project_snapshots,
+        sources=project_sources,
+        tests=project_tests,
+        unit_tests=project_unit_tests,
+    )
+    return results[0]
 
 
 @click.command()
@@ -63,143 +240,16 @@ def cli(
     show_all_failures: bool,
     verbosity: int,
 ) -> None:
-    """Entrypoint for dbt-bouncer.
-
-    Raises:
-        RuntimeError: If output file has an invalid extension.
-
-    """
-    configure_console_logging(verbosity)
-    logging.info(f"Running dbt-bouncer ({version()})...")
-
-    # Validate output file has `.json` extension
-    if output_file and not output_file.suffix == ".json":
-        raise RuntimeError(
-            f"Output file must have a `.json` extension. Got `{output_file.suffix}`.",
-        )
-
-    # Validate `only` has valid values
-    valid_check_categories = ["catalog_checks", "manifest_checks", "run_results_checks"]
-    if not only.strip():
-        only_parsed = valid_check_categories
-    else:
-        only_parsed = [x.strip() for x in set(only.strip().split(",")) if x != ""]
-
-    for x in [i for i in only_parsed if i not in valid_check_categories]:
-        raise RuntimeError(
-            f"`--only` contains an invalid value (`{x}`). Valid values are `{valid_check_categories}` or any comma-separated combination."
-        )
-
-    # Using local imports to speed up CLI startup
-    from dbt_bouncer.config_file_validator import (
-        get_config_file_path,
-        load_config_file_contents,
-    )
-
-    config_file_path = get_config_file_path(
+    """Entrypoint for dbt-bouncer."""
+    config_file_source = ctx.get_parameter_source("config_file").name  # type: ignore[union-attr]
+    exit_code = run_bouncer(
         config_file=config_file,
-        config_file_source=click.get_current_context()
-        .get_parameter_source("config_file")
-        .name,  # type: ignore[union-attr]
-    )
-    config_file_contents = load_config_file_contents(
-        config_file_path, allow_default_config_file_creation=True
-    )
-
-    # Handle `severity` at the global level
-    if config_file_contents.get("severity"):
-        logging.info(
-            f"Setting `severity` for all checks to `{config_file_contents['severity']}`."
-        )
-        for c in config_file_contents["manifest_checks"]:
-            c["severity"] = config_file_contents["severity"]
-
-    logging.debug(f"{config_file_contents=}")
-
-    check_categories = [
-        i
-        for i in config_file_contents
-        if i.endswith("_checks") and config_file_contents.get(i) != []
-    ]
-    logging.debug(f"{check_categories=}")
-
-    # Set click context object for dbt_bouncer.utils.get_check_objects()
-    ctx.obj = {
-        "config_file_path": config_file_path,
-        "custom_checks_dir": config_file_contents.get("custom_checks_dir"),
-    }
-
-    # If config_file_parser is already loaded, reload it so that check types are updated (necessary for parallel tests)
-    if "dbt_bouncer.config_file_parser" in sys.modules:
-        importlib.reload(sys.modules["dbt_bouncer.config_file_parser"])
-
-    from dbt_bouncer.config_file_validator import validate_conf
-
-    bouncer_config = validate_conf(
-        check_categories=check_categories, config_file_contents=config_file_contents
-    )
-    del config_file_contents
-    logging.debug(f"{bouncer_config=}")
-
-    for category in check_categories:
-        if category in only_parsed:
-            for idx, check in enumerate(getattr(bouncer_config, category)):
-                # Add indices to uniquely identify checks
-                check.index = idx
-
-                # Handle global `exclude` and `include` args
-                if bouncer_config.include and not check.include:
-                    check.include = bouncer_config.include
-                if bouncer_config.exclude and not check.exclude:
-                    check.exclude = bouncer_config.exclude
-        else:
-            # i.e. if `only` used then remove non-specified check categories
-            setattr(bouncer_config, category, [])
-
-    logging.debug(f"{bouncer_config=}")
-
-    dbt_artifacts_dir = config_file.parent / bouncer_config.dbt_artifacts_dir
-
-    from dbt_bouncer.artifact_parsers.parsers_common import parse_dbt_artifacts
-
-    (
-        manifest_obj,
-        project_exposures,
-        project_macros,
-        project_models,
-        project_semantic_models,
-        project_snapshots,
-        project_sources,
-        project_tests,
-        project_unit_tests,
-        project_catalog_nodes,
-        project_catalog_sources,
-        project_run_results,
-    ) = parse_dbt_artifacts(
-        bouncer_config=bouncer_config, dbt_artifacts_dir=dbt_artifacts_dir
-    )
-
-    logging.info("Running checks...")
-    from dbt_bouncer.runner import runner
-
-    results = runner(
-        bouncer_config=bouncer_config,
-        catalog_nodes=project_catalog_nodes,
-        catalog_sources=project_catalog_sources,
-        check_categories=check_categories,
         create_pr_comment_file=create_pr_comment_file,
-        exposures=project_exposures,
-        macros=project_macros,
-        manifest_obj=manifest_obj,
-        models=project_models,
+        only=only,
         output_file=output_file,
         output_only_failures=output_only_failures,
-        run_results=project_run_results,
-        semantic_models=project_semantic_models,
         show_all_failures=show_all_failures,
-        snapshots=project_snapshots,
-        sources=project_sources,
-        tests=project_tests,
-        unit_tests=project_unit_tests,
+        verbosity=verbosity,
+        config_file_source=config_file_source,
     )
-    ctx.exit(results[0])
+    ctx.exit(exit_code)
