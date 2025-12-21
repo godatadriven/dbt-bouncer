@@ -2,7 +2,7 @@ import importlib
 import logging
 import sys
 from pathlib import Path, PurePath
-from typing import Optional, Union
+from typing import Union
 
 import click
 
@@ -12,14 +12,14 @@ from dbt_bouncer.version import version
 
 
 def run_bouncer(
-    config_file: Optional[PurePath] = None,
+    config_file: PurePath | None = None,
     create_pr_comment_file: bool = False,
     only: str = "",
     output_file: Union[Path, None] = None,
     output_only_failures: bool = False,
     show_all_failures: bool = False,
     verbosity: int = 0,
-    config_file_source: Optional[str] = None,
+    config_file_source: str | None = None,
 ) -> int:
     """Programmatic entrypoint for dbt-bouncer.
 
