@@ -1,7 +1,7 @@
 # mypy: disable-error-code="union-attr"
 
 
-from typing import TYPE_CHECKING, List, Literal
+from typing import TYPE_CHECKING, Literal
 
 from pydantic import Field
 
@@ -83,7 +83,7 @@ class CheckExposureOnNonPublicModels(BaseCheck):
     """
 
     exposure: "DbtBouncerExposureBase" = Field(default=None)
-    models: List["DbtBouncerModelBase"] = Field(default=[])
+    models: list["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_exposure_based_on_non_public_models"]
 
     def execute(self) -> None:
@@ -138,10 +138,10 @@ class CheckExposureOnView(BaseCheck):
     """
 
     exposure: "DbtBouncerExposureBase" = Field(default=None)
-    materializations_to_include: List[str] = Field(
+    materializations_to_include: list[str] = Field(
         default=["ephemeral", "view"],
     )
-    models: List["DbtBouncerModelBase"] = Field(default=[])
+    models: list["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_exposure_based_on_view"]
 
     def execute(self) -> None:

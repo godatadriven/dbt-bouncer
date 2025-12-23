@@ -7,7 +7,7 @@ import logging
 import operator
 import traceback
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Union
+from typing import TYPE_CHECKING, Any
 
 import click
 from progress.bar import Bar
@@ -43,28 +43,28 @@ if TYPE_CHECKING:
 
 def runner(
     bouncer_config: "DbtBouncerConf",
-    catalog_nodes: List["DbtBouncerCatalogNode"],
-    catalog_sources: List["DbtBouncerCatalogNode"],
-    check_categories: List[str],
+    catalog_nodes: list["DbtBouncerCatalogNode"],
+    catalog_sources: list["DbtBouncerCatalogNode"],
+    check_categories: list[str],
     create_pr_comment_file: bool,
-    exposures: List["Exposures"],
-    macros: List["Macros"],
+    exposures: list["Exposures"],
+    macros: list["Macros"],
     manifest_obj: "DbtBouncerManifest",
-    models: List["DbtBouncerModel"],
-    output_file: Union[Path, None],
-    run_results: List["DbtBouncerRunResult"],
-    semantic_models: List["DbtBouncerSemanticModel"],
+    models: list["DbtBouncerModel"],
+    output_file: Path | None,
+    run_results: list["DbtBouncerRunResult"],
+    semantic_models: list["DbtBouncerSemanticModel"],
     output_only_failures: bool,
     show_all_failures: bool,
-    snapshots: List["DbtBouncerSnapshot"],
-    sources: List["DbtBouncerSource"],
-    tests: List["DbtBouncerTest"],
-    unit_tests: List["UnitTests"],
-) -> tuple[int, List[Any]]:
+    snapshots: list["DbtBouncerSnapshot"],
+    sources: list["DbtBouncerSource"],
+    tests: list["DbtBouncerTest"],
+    unit_tests: list["UnitTests"],
+) -> tuple[int, list[Any]]:
     """Run dbt-bouncer checks.
 
     Returns:
-        tuple[int, List[Any]]: A tuple containing the exit code and a list of failed checks.
+        tuple[int, list[Any]]: A tuple containing the exit code and a list of failed checks.
 
     Raises:
         RuntimeError: If more than one "iterate_over" argument is found.
@@ -79,7 +79,7 @@ def runner(
     except (RuntimeError, AttributeError, KeyError):
         custom_checks_dir = None
 
-    check_classes: List[Dict[str, Union[Any, str]]] = [
+    check_classes: list[dict[str, Any | str]] = [
         {"class": x, "source_file": inspect.getfile(x)}
         for x in get_check_objects(custom_checks_dir)
     ]

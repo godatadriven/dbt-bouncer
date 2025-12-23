@@ -2,7 +2,7 @@
 import logging
 import re
 from pathlib import Path
-from typing import TYPE_CHECKING, List, Literal
+from typing import TYPE_CHECKING, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -181,7 +181,7 @@ class CheckModelDependsOnMacros(BaseCheck):
     criteria: Literal["any", "all", "one"] = Field(default="all")
     model: "DbtBouncerModelBase" = Field(default=None)
     name: Literal["check_model_depends_on_macros"]
-    required_macros: List[str]
+    required_macros: list[str]
 
     def execute(self) -> None:
         """Execute the check."""
@@ -360,7 +360,7 @@ class CheckModelDirectories(BaseCheck):
     include: str
     model: "DbtBouncerModelBase" = Field(default=None)
     name: Literal["check_model_directories"]
-    permitted_sub_directories: List[str]
+    permitted_sub_directories: list[str]
 
     def execute(self) -> None:
         """Execute the check.
@@ -606,7 +606,7 @@ class CheckModelHasExposure(BaseCheck):
 
     model_config = ConfigDict(extra="forbid", protected_namespaces=())
 
-    exposures: List["DbtBouncerExposureBase"] = Field(default=[])
+    exposures: list["DbtBouncerExposureBase"] = Field(default=[])
     model: "DbtBouncerModelBase" = Field(default=None)
     name: Literal["check_model_has_exposure"]
 
@@ -755,7 +755,7 @@ class CheckModelHasTags(BaseCheck):
     criteria: Literal["any", "all", "one"] = Field(default="all")
     model: "DbtBouncerModelBase" = Field(default=None)
     name: Literal["check_model_has_tags"]
-    tags: List[str]
+    tags: list[str]
 
     def execute(self) -> None:
         """Execute the check."""
@@ -807,7 +807,7 @@ class CheckModelHasUniqueTest(BaseCheck):
 
     """
 
-    accepted_uniqueness_tests: List[str] | None = Field(
+    accepted_uniqueness_tests: list[str] | None = Field(
         default=[
             "dbt_expectations.expect_compound_columns_to_be_unique",
             "dbt_utils.unique_combination_of_columns",
@@ -816,7 +816,7 @@ class CheckModelHasUniqueTest(BaseCheck):
     )
     model: "DbtBouncerModelBase" = Field(default=None)
     name: Literal["check_model_has_unique_test"]
-    tests: List["DbtBouncerTestBase"] = Field(default=[])
+    tests: list["DbtBouncerTestBase"] = Field(default=[])
 
     def execute(self) -> None:
         """Execute the check."""
@@ -880,7 +880,7 @@ class CheckModelHasUnitTests(BaseCheck):
     min_number_of_unit_tests: int = Field(default=1)
     model: "DbtBouncerModelBase" = Field(default=None)
     name: Literal["check_model_has_unit_tests"]
-    unit_tests: List["UnitTests"] = Field(default=[])
+    unit_tests: list["UnitTests"] = Field(default=[])
 
     def execute(self) -> None:
         """Execute the check."""
@@ -973,14 +973,14 @@ class CheckModelMaxChainedViews(BaseCheck):
     """
 
     manifest_obj: "DbtBouncerManifest" = Field(default=None)
-    materializations_to_include: List[str] = Field(
+    materializations_to_include: list[str] = Field(
         default=["ephemeral", "view"],
     )
     max_chained_views: int = Field(
         default=3,
     )
     model: "DbtBouncerModelBase" = Field(default=None)
-    models: List["DbtBouncerModelBase"] = Field(default=[])
+    models: list["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_model_max_chained_views"]
     package_name: str | None = Field(default=None)
 
@@ -1083,7 +1083,7 @@ class CheckModelMaxFanout(BaseCheck):
 
     max_downstream_models: int = Field(default=3)
     model: "DbtBouncerModelBase" = Field(default=None)
-    models: List["DbtBouncerModelBase"] = Field(default=[])
+    models: list["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_model_max_fanout"]
 
     def execute(self) -> None:
@@ -1483,7 +1483,7 @@ class CheckModelVersionPinnedInRef(BaseCheck):
             for x in self.manifest_obj.manifest.child_map[self.model.unique_id]
             if x.startswith("model.")
         ]
-        downstream_models_with_unversioned_refs: List[str] = []
+        downstream_models_with_unversioned_refs: list[str] = []
         for m in downstream_models:
             downstream_models_with_unversioned_refs.extend(
                 m
@@ -1539,7 +1539,7 @@ class CheckModelsDocumentationCoverage(BaseModel):
         ge=0,
         le=100,
     )
-    models: List["DbtBouncerModelBase"] = Field(default=[])
+    models: list["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_model_documentation_coverage"]
     severity: Literal["error", "warn"] | None = Field(
         default="error",
@@ -1606,12 +1606,12 @@ class CheckModelsTestCoverage(BaseModel):
         ge=0,
         le=100,
     )
-    models: List["DbtBouncerModelBase"] = Field(default=[])
+    models: list["DbtBouncerModelBase"] = Field(default=[])
     severity: Literal["error", "warn"] | None = Field(
         default="error",
         description="Severity of the check, one of 'error' or 'warn'.",
     )
-    tests: List["DbtBouncerTestBase"] = Field(default=[])
+    tests: list["DbtBouncerTestBase"] = Field(default=[])
 
     def execute(self) -> None:
         """Execute the check."""

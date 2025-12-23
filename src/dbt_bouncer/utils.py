@@ -9,9 +9,10 @@ import logging
 import os
 import re
 import sys
+from collections.abc import Mapping
 from functools import lru_cache
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Mapping, Type
+from typing import TYPE_CHECKING, Any
 
 import yaml
 from packaging.version import Version as PyPIVersion
@@ -152,7 +153,7 @@ def flatten(structure: Any, key: str = "", path: str = "", flattened=None):
 
 
 def _extract_checks_from_module(
-    module: Any, module_name: str, check_objects: list[Type["BaseCheck"]]
+    module: Any, module_name: str, check_objects: list[type["BaseCheck"]]
 ) -> None:
     """Extract Check* classes from a loaded module.
 
@@ -178,7 +179,7 @@ def _extract_checks_from_module(
 
 
 def _load_custom_checks(
-    custom_checks_dir: Path, check_objects: list[Type["BaseCheck"]]
+    custom_checks_dir: Path, check_objects: list[type["BaseCheck"]]
 ) -> None:
     """Load custom check classes from a directory.
 
@@ -236,7 +237,7 @@ def _load_custom_checks(
 @lru_cache
 def get_check_objects(
     custom_checks_dir: Path | None = None,
-) -> list[Type["BaseCheck"]]:
+) -> list[type["BaseCheck"]]:
     """Get list of Check* classes.
 
     This function dynamically discovers and loads check classes from two sources:
@@ -255,10 +256,10 @@ def get_check_objects(
         custom_checks_dir: Path to a directory containing custom checks.
 
     Returns:
-        list[Type[BaseCheck]]: List of Check* classes.
+        list[type[BaseCheck]]: List of Check* classes.
 
     """
-    check_objects: list[Type["BaseCheck"]] = []
+    check_objects: list[type["BaseCheck"]] = []
 
     # 1. Load internal checks
     check_files = [

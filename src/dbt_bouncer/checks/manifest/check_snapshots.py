@@ -1,6 +1,6 @@
 # mypy: disable-error-code="union-attr"
 import re
-from typing import TYPE_CHECKING, List, Literal
+from typing import TYPE_CHECKING, Literal
 
 from pydantic import Field
 
@@ -40,7 +40,7 @@ class CheckSnapshotHasTags(BaseCheck):
     criteria: Literal["any", "all", "one"] = Field(default="all")
     name: Literal["check_snapshot_has_tags"]
     snapshot: "DbtBouncerSnapshotBase" = Field(default=None)
-    tags: List[str]
+    tags: list[str]
 
     def execute(self) -> None:
         """Execute the check."""
