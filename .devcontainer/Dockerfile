@@ -7,8 +7,7 @@ ENV BENCHER_VERSION=0.5.9 \
     PATH="/root/.local/bin/:/app/.venv/bin:$PATH" \
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    UV_LINK_MODE=copy \
-    UV_PYTHON_DOWNLOADS=never
+    UV_LINK_MODE=copy
 
 # Install OS dependencies
 RUN apt-get update && \

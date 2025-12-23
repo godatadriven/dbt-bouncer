@@ -160,6 +160,7 @@ jobs:
               path: ${{ github.event_path }}
 
     dev-container:
+      needs: [prek]
       runs-on: ubuntu-22.04
       steps:
         - uses: actions/checkout@v6
