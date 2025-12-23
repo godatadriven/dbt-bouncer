@@ -165,11 +165,12 @@ jobs:
       steps:
         - uses: actions/checkout@v6
 
-        - name: Build container and run dbt command
+        - name: Build container and run tests
           uses: devcontainers/ci@v0.3
           with:
             runCmd: |
-              dbt-bouncer --config-file dbt-bouncer-example.yml
+              set -eou
+              uv run dbt-bouncer --config-file dbt-bouncer-example.yml
               make test
               make test-perf
 

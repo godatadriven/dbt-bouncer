@@ -41,5 +41,6 @@ COPY . .
 
 # Install Python dependencies
 RUN uv sync --extra=dev --extra=docs && \
+    echo 'source /workspace/dbt-bouncer/.venv/bin/activate' >> ~/.zshrc && \
     uv run prek install && \
     uv run prek install --install-hooks
