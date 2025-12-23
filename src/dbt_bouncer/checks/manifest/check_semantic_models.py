@@ -1,7 +1,7 @@
 # mypy: disable-error-code="union-attr"
 
 
-from typing import TYPE_CHECKING, List, Literal
+from typing import TYPE_CHECKING, Literal
 
 from dbt_bouncer.check_base import BaseCheck
 
@@ -35,7 +35,7 @@ class CheckSemanticModelOnNonPublicModels(BaseCheck):
 
     """
 
-    models: List["DbtBouncerModelBase"] = Field(default=[])
+    models: list["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_semantic_model_based_on_non_public_models"]
     semantic_model: "DbtBouncerSemanticModelBase" = Field(default=None)
 

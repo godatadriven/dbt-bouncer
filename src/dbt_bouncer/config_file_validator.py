@@ -1,8 +1,9 @@
 import logging
 import os
 import re
+from collections.abc import Mapping
 from pathlib import Path, PurePath
-from typing import TYPE_CHECKING, Any, Dict, List, Literal, Mapping
+from typing import TYPE_CHECKING, Any, Literal
 
 import click
 import toml
@@ -29,14 +30,14 @@ DEFAULT_DBT_BOUNCER_CONFIG = """manifest_checks:
 
 
 def conf_cls_factory(
-    check_categories: List[
+    check_categories: list[
         Literal["catalog_checks", "manifest_checks", "run_results_checks"]
     ],
 ):
     """Return the appropriate configuration class based on the check categories.
 
     Args:
-        check_categories: List[Literal["catalog_checks", "manifest_checks", "run_results_checks"]]
+        check_categories: list[Literal["catalog_checks", "manifest_checks", "run_results_checks"]]
 
     Raises:
         ValueError: If the check categories are not valid.
@@ -200,8 +201,8 @@ def load_config_file_contents(
 
 
 def validate_conf(
-    check_categories,  #: List[Literal["catalog_checks"], Literal["manifest_checks"], Literal["run_results_checks"]],
-    config_file_contents: Dict[str, Any],
+    check_categories,  #: list[Literal["catalog_checks"], Literal["manifest_checks"], Literal["run_results_checks"]],
+    config_file_contents: dict[str, Any],
 ) -> "DbtBouncerConf":
     """Validate the configuration and return the Pydantic model.
 
@@ -273,7 +274,7 @@ def validate_conf(
     except ValidationError as e:
         import jellyfish
 
-        error_message: List[str] = []
+        error_message: list[str] = []
         for error in e.errors():
             if (
                 re.compile(

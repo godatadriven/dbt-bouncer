@@ -1,6 +1,6 @@
 import logging
 import warnings
-from typing import TYPE_CHECKING, Any, Dict, List, Union
+from typing import TYPE_CHECKING, Any
 
 from pydantic import BaseModel
 
@@ -27,7 +27,9 @@ if TYPE_CHECKING:
 
 from dbt_bouncer.artifact_parsers.parsers_common import load_dbt_artifact
 
-DbtBouncerRunResultBase = Union[RunResultOutput_v5, RunResultOutput_Latest]
+DbtBouncerRunResultBase: ... = (  # type: ignore[misc]
+    RunResultOutput_v5 | RunResultOutput_Latest
+)
 
 
 class DbtBouncerRunResult(BaseModel):
@@ -39,8 +41,8 @@ class DbtBouncerRunResult(BaseModel):
 
 
 def parse_run_results(
-    run_results: Dict[str, Any],
-) -> Union[RunResultsV5, RunResultsLatest]:
+    run_results: dict[str, Any],
+) -> RunResultsV5 | RunResultsLatest:
     """Parse run-results.json.
 
     Args:
@@ -50,7 +52,7 @@ def parse_run_results(
         ValueError: If the schema version is not supported.
 
     Returns:
-        Union[ RunResultsV5, RunResultsLatest]:
+        RunResultsV5 | RunResultsLatest:
 
     """
     dbt_schema_version = run_results["metadata"]["dbt_schema_version"]
@@ -65,11 +67,11 @@ def parse_run_results_artifact(
     artifact_dir: "Path",
     manifest_obj: "DbtBouncerManifest",
     package_name: str | None = None,
-) -> List[DbtBouncerRunResult]:
+) -> list[DbtBouncerRunResult]:
     """Parse the run_results.json artifact.
 
     Returns:
-        List[DbtBouncerRunResult]: A list of DbtBouncerRunResult objects.
+        list[DbtBouncerRunResult]: A list of DbtBouncerRunResult objects.
 
     """
 
@@ -97,7 +99,7 @@ def parse_run_results_artifact(
                 manifest_obj.manifest.unit_tests[unique_id].original_file_path
             )
 
-    run_results_obj: Union[RunResultsV5, RunResultsLatest] = load_dbt_artifact(
+    run_results_obj: RunResultsV5 | RunResultsLatest = load_dbt_artifact(
         artifact_name="run_results.json",
         dbt_artifacts_dir=artifact_dir,
     )

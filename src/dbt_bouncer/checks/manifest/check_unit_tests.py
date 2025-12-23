@@ -1,6 +1,6 @@
 # mypy: disable-error-code="union-attr"
 import logging
-from typing import TYPE_CHECKING, List, Literal
+from typing import TYPE_CHECKING, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -69,13 +69,13 @@ class CheckUnitTestCoverage(BaseModel):
         ge=0,
         le=100,
     )
-    models: List["DbtBouncerModelBase"] = Field(default=[])
+    models: list["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_unit_test_coverage"]
     severity: Literal["error", "warn"] | None = Field(
         default="error",
         description="Severity of the check, one of 'error' or 'warn'.",
     )
-    unit_tests: List["UnitTests"] = Field(default=[])
+    unit_tests: list["UnitTests"] = Field(default=[])
 
     def execute(self) -> None:
         """Execute the check."""
@@ -139,7 +139,7 @@ class CheckUnitTestExpectFormats(BaseCheck):
 
     manifest_obj: "DbtBouncerManifest" = Field(default=None)
     name: Literal["check_unit_test_expect_format"]
-    permitted_formats: List[Literal["csv", "dict", "sql"]] = Field(
+    permitted_formats: list[Literal["csv", "dict", "sql"]] = Field(
         default=["csv", "dict", "sql"],
     )
     unit_test: "UnitTests" = Field(default=None)
@@ -190,7 +190,7 @@ class CheckUnitTestGivenFormats(BaseCheck):
 
     manifest_obj: "DbtBouncerManifest" = Field(default=None)
     name: Literal["check_unit_test_given_formats"]
-    permitted_formats: List[Literal["csv", "dict", "sql"]] = Field(
+    permitted_formats: list[Literal["csv", "dict", "sql"]] = Field(
         default=["csv", "dict", "sql"],
     )
     unit_test: "UnitTests" = Field(default=None)

@@ -2,7 +2,7 @@
 
 import re
 from pathlib import Path
-from typing import TYPE_CHECKING, List, Literal
+from typing import TYPE_CHECKING, Literal
 
 if TYPE_CHECKING:
     from dbt_bouncer.artifact_parsers.parsers_common import (
@@ -167,7 +167,7 @@ class CheckSourceHasTags(BaseCheck):
     criteria: Literal["any", "all", "one"] = Field(default="all")
     name: Literal["check_source_has_tags"]
     source: "DbtBouncerSourceBase" = Field(default=None)
-    tags: List[str]
+    tags: list[str]
 
     def execute(self) -> None:
         """Execute the check."""
@@ -276,7 +276,7 @@ class CheckSourceNotOrphaned(BaseCheck):
 
     """
 
-    models: List["DbtBouncerModelBase"] = Field(default=[])
+    models: list["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_source_not_orphaned"]
     source: "DbtBouncerSourceBase" = Field(default=None)
 
@@ -365,7 +365,7 @@ class CheckSourceUsedByModelsInSameDirectory(BaseCheck):
 
     """
 
-    models: List["DbtBouncerModelBase"] = Field(default=[])
+    models: list["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_source_used_by_models_in_same_directory"]
     source: "DbtBouncerSourceBase" = Field(default=None)
 
@@ -406,7 +406,7 @@ class CheckSourceUsedByOnlyOneModel(BaseCheck):
 
     """
 
-    models: List["DbtBouncerModelBase"] = Field(default=[])
+    models: list["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_source_used_by_only_one_model"]
     source: "DbtBouncerSourceBase" = Field(default=None)
 
