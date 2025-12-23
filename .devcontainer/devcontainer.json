@@ -12,6 +12,7 @@
 			"extensions": [
 				"bierner.markdown-preview-github-styles",
 				"mechatroner.rainbow-csv",
+				"ms-azuretools.vscode-containers",
 				"ms-python.python",
 				"ms-python.vscode-pylance",
 				"ms-vscode.makefile-tools",
@@ -21,9 +22,7 @@
 				"shardulm94.trailing-spaces",
 				"tamasfe.even-better-toml"
 			]
-		},
-		"workspaceMount": "source=dbt-bouncer,target=/workspace/dbt-bouncer,type=volume",
-		"workspaceFolder": "/workspace/dbt-bouncer"
+		}
 	},
 	"name": "dbt-bouncer",
 	"postCreateCommand": "echo 'Dev container setup complete!'",

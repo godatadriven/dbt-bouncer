@@ -15,6 +15,9 @@ RUN apt-get update && \
     apt-get install build-essential ca-certificates curl git make wget -y && \
     rm -rf /var/lib/apt/lists/*
 
+# Configure git
+RUN git config --global --add safe.directory /workspaces/dbt-bouncer
+
 # Install Bencher
 RUN curl --proto '=https' --tlsv1.2 -sSfL https://bencher.dev/download/install-cli.sh | sh
 
@@ -40,7 +43,8 @@ RUN curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh | sh && \
 COPY . .
 
 # Install Python dependencies
-RUN uv sync --extra=dev --extra=docs && \
+RUN uv venv && \
+    uv sync --extra=dev --extra=docs && \
     echo 'source /workspace/dbt-bouncer/.venv/bin/activate' >> ~/.zshrc && \
     uv run prek install && \
     uv run prek install --install-hooks

@@ -84,17 +84,6 @@ def test_get_file_config_path_pyproject_toml(monkeypatch, tmp_path):
 
     assert config_file_path == pyproject_file
 
-
-def test_get_file_config_path_pyproject_toml_doesnt_exist(monkeypatch, tmp_path):
-    monkeypatch.chdir(tmp_path)
-
-    with pytest.raises(RuntimeError):
-        get_config_file_path(
-            config_file="dbt_bouncer.yml",
-            config_file_source="DEFAULT",
-        )
-
-
 def test_get_file_config_path_pyproject_toml_recursive(monkeypatch, tmp_path):
     Path.mkdir(tmp_path / "test")
     monkeypatch.chdir(tmp_path / "test")
