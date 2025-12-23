@@ -381,7 +381,7 @@ def make_markdown_table(array: List[List[str]]) -> str:
     return markdown
 
 
-def object_in_path(include_pattern: str, path: str) -> bool:
+def object_in_path(include_pattern: str | None, path: str) -> bool:
     """Determine if an object is included in the specified path pattern.
 
     If no pattern is specified then all objects are included.
@@ -390,9 +390,8 @@ def object_in_path(include_pattern: str, path: str) -> bool:
         bool: True if the object is included in the path pattern, False otherwise.
 
     """
-    if include_pattern is not None:
-        return (
-            re.compile(include_pattern.strip()).match(clean_path_str(path)) is not None
-        )
-    else:
+    if include_pattern is None:
         return True
+    return (
+        re.compile(include_pattern.strip()).match(clean_path_str(path)) is not None
+    )
