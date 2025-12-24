@@ -57,17 +57,18 @@ class CheckMacroArgumentsDescriptionPopulated(BaseCheck):
     """
 
     min_description_length: int | None = Field(default=None)
-    macro: "Macros" = Field(default=None)
+    macro: "Macros | None" = Field(default=None)
     name: Literal["check_macro_arguments_description_populated"]
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.macro is not None
         environment = Environment(autoescape=True, extensions=[TagExtension])
         ast = environment.parse(self.macro.macro_sql)
 
         if hasattr(ast.body[0], "args"):
             # Assume macro is a "true" macro
-            macro_arguments = [a.name for a in ast.body[0].args]
+            macro_arguments = [a.name for a in getattr(ast.body[0], "args", [])]
         else:
             if "materialization" in [
                 x.value.value
@@ -93,15 +94,17 @@ class CheckMacroArgumentsDescriptionPopulated(BaseCheck):
         # macro.arguments: List of args manually added to the properties file
 
         non_complying_args = []
-        for arg in macro_arguments:
-            macro_doc_raw = [x for x in self.macro.arguments if x.name == arg]
-            if macro_doc_raw == [] or (
-                arg not in [x.name for x in self.macro.arguments]
-                or not self._is_description_populated(
-                    macro_doc_raw[0].description, self.min_description_length
-                )
-            ):
-                non_complying_args.append(arg)
+        if self.macro.arguments:
+            for arg in macro_arguments:
+                macro_doc_raw = [x for x in self.macro.arguments if x.name == arg]
+                if macro_doc_raw == [] or (
+                    arg not in [x.name for x in self.macro.arguments]
+                    or not self._is_description_populated(
+                        str(macro_doc_raw[0].description or ""),
+                        self.min_description_length,
+                    )
+                ):
+                    non_complying_args.append(arg)
 
         assert non_complying_args == [], (
             f"Macro `{self.macro.name}` does not have a populated description for the following argument(s): {non_complying_args}."
@@ -133,12 +136,13 @@ class CheckMacroCodeDoesNotContainRegexpPattern(BaseCheck):
 
     """
 
-    macro: "Macros" = Field(default=None)
+    macro: "Macros | None" = Field(default=None)
     name: Literal["check_macro_code_does_not_contain_regexp_pattern"]
     regexp_pattern: str
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.macro is not None
         assert (
             re.compile(self.regexp_pattern.strip(), flags=re.DOTALL).match(
                 self.macro.macro_sql
@@ -178,14 +182,15 @@ class CheckMacroDescriptionPopulated(BaseCheck):
 
     """
 
-    macro: "Macros" = Field(default=None)
+    macro: "Macros | None" = Field(default=None)
     min_description_length: int | None = Field(default=None)
     name: Literal["check_macro_description_populated"]
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.macro is not None
         assert self._is_description_populated(
-            self.macro.description, self.min_description_length
+            str(self.macro.description or ""), self.min_description_length
         ), f"Macro `{self.macro.name}` does not have a populated description."
 
 
@@ -217,12 +222,13 @@ class CheckMacroMaxNumberOfLines(BaseCheck):
 
     """
 
-    macro: "Macros" = Field(default=None)
+    macro: "Macros | None" = Field(default=None)
     name: Literal["check_macro_max_number_of_lines"]
     max_number_of_lines: int = Field(default=50)
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.macro is not None
         actual_number_of_lines = self.macro.macro_sql.count("\n") + 1
 
         assert actual_number_of_lines <= self.max_number_of_lines, (
@@ -252,11 +258,12 @@ class CheckMacroNameMatchesFileName(BaseCheck):
 
     """
 
-    macro: "Macros" = Field(default=None)
+    macro: "Macros | None" = Field(default=None)
     name: Literal["check_macro_name_matches_file_name"]
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.macro is not None
         file_path = Path(clean_path_str(self.macro.original_file_path))
         file_stem = file_path.stem
 
@@ -290,11 +297,12 @@ class CheckMacroPropertyFileLocation(BaseCheck):
 
     """
 
-    macro: "Macros" = Field(default=None)
+    macro: "Macros | None" = Field(default=None)
     name: Literal["check_macro_property_file_location"]
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.macro is not None
         original_path = Path(clean_path_str(self.macro.original_file_path))
 
         # Logic matches previous manual splitting:
@@ -303,11 +311,15 @@ class CheckMacroPropertyFileLocation(BaseCheck):
         subdir_parts = original_path.parent.parts[1:]
         expected_substr = "_" + "_".join(subdir_parts) if subdir_parts else ""
 
-        assert clean_path_str(self.macro.patch_path) is not None, (
+        assert self.macro.patch_path is not None, (
             f"Macro `{self.macro.name}` is not defined in a `.yml` properties file."
         )
+        clean_patch_path = clean_path_str(self.macro.patch_path)
+        assert clean_patch_path is not None, (
+            f"Macro `{self.macro.name}` has an invalid patch path."
+        )
 
-        patch_path = Path(clean_path_str(self.macro.patch_path))
+        patch_path = Path(clean_patch_path)
         properties_yml_name = patch_path.name
 
         if original_path.parts[0] == "tests":

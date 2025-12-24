@@ -13,8 +13,8 @@ if TYPE_CHECKING:
         from dbt_artifacts_parser.parsers.catalog.catalog_v1 import (
             Nodes as CatalogNodes,
         )
-    from dbt_bouncer.artifact_parsers.parsers_common import DbtBouncerManifest
     from dbt_bouncer.artifact_parsers.parsers_manifest import (
+        DbtBouncerManifest,
         DbtBouncerModelBase,
         DbtBouncerTestBase,
     )
@@ -53,13 +53,14 @@ class CheckColumnDescriptionPopulated(BaseCheck):
 
     """
 
-    catalog_node: "CatalogNodes" = Field(default=None)
+    catalog_node: "CatalogNodes | None" = Field(default=None)
     min_description_length: int | None = Field(default=None)
     models: list["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_column_description_populated"]
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.catalog_node is not None
         if self.is_catalog_node_a_model(self.catalog_node, self.models):
             model = next(
                 m for m in self.models if m.unique_id == self.catalog_node.unique_id
@@ -74,7 +75,7 @@ class CheckColumnDescriptionPopulated(BaseCheck):
                     non_complying_columns.append(v.name)
 
             assert not non_complying_columns, (
-                f"`{self.catalog_node.unique_id.split('.')[-1]}` has columns that do not have a populated description: {non_complying_columns}"
+                f"`{str(self.catalog_node.unique_id).split('.')[-1]}` has columns that do not have a populated description: {non_complying_columns}"
             )
 
 
@@ -105,7 +106,7 @@ class CheckColumnHasSpecifiedTest(BaseCheck):
 
     """
 
-    catalog_node: "CatalogNodes" = Field(default=None)
+    catalog_node: "CatalogNodes | None" = Field(default=None)
     column_name_pattern: str
     name: Literal["check_column_has_specified_test"]
     test_name: str
@@ -113,10 +114,12 @@ class CheckColumnHasSpecifiedTest(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.catalog_node is not None
         columns_to_check = [
             v.name
             for _, v in self.catalog_node.columns.items()
-            if re.compile(self.column_name_pattern.strip()).match(v.name) is not None
+            if re.compile(self.column_name_pattern.strip()).match(str(v.name))
+            is not None
         ]
         relevant_tests = [
             t
@@ -134,7 +137,7 @@ class CheckColumnHasSpecifiedTest(BaseCheck):
         ]
 
         assert not non_complying_columns, (
-            f"`{self.catalog_node.unique_id.split('.')[-1]}` has columns that should have a `{self.test_name}` test: {non_complying_columns}"
+            f"`{str(self.catalog_node.unique_id).split('.')[-1]}` has columns that should have a `{self.test_name}` test: {non_complying_columns}"
         )
 
 
@@ -197,7 +200,7 @@ class CheckColumnNameCompliesToColumnType(BaseCheck):
 
     """
 
-    catalog_node: "CatalogNodes" = Field(default=None)
+    catalog_node: "CatalogNodes | None" = Field(default=None)
     column_name_pattern: str
     name: Literal["check_column_name_complies_to_column_type"]
     type_pattern: str | None = None
@@ -205,17 +208,18 @@ class CheckColumnNameCompliesToColumnType(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.catalog_node is not None
         if self.type_pattern:
             non_complying_columns = [
                 v.name
                 for _, v in self.catalog_node.columns.items()
-                if re.compile(self.type_pattern.strip()).match(v.type) is None
-                and re.compile(self.column_name_pattern.strip()).match(v.name)
+                if re.compile(self.type_pattern.strip()).match(str(v.type)) is None
+                and re.compile(self.column_name_pattern.strip()).match(str(v.name))
                 is not None
             ]
 
             assert not non_complying_columns, (
-                f"`{self.catalog_node.unique_id.split('.')[-1]}` has columns that don't comply with the specified data type regexp pattern (`{self.column_name_pattern}`): {non_complying_columns}"
+                f"`{str(self.catalog_node.unique_id).split('.')[-1]}` has columns that don't comply with the specified data type regexp pattern (`{self.column_name_pattern}`): {non_complying_columns}"
             )
 
         elif self.types:
@@ -223,11 +227,12 @@ class CheckColumnNameCompliesToColumnType(BaseCheck):
                 v.name
                 for _, v in self.catalog_node.columns.items()
                 if v.type in self.types
-                and re.compile(self.column_name_pattern.strip()).match(v.name) is None
+                and re.compile(self.column_name_pattern.strip()).match(str(v.name))
+                is None
             ]
 
             assert not non_complying_columns, (
-                f"`{self.catalog_node.unique_id.split('.')[-1]}` has columns that don't comply with the specified regexp pattern (`{self.column_name_pattern}`): {non_complying_columns}"
+                f"`{str(self.catalog_node.unique_id).split('.')[-1]}` has columns that don't comply with the specified regexp pattern (`{self.column_name_pattern}`): {non_complying_columns}"
             )
 
     @model_validator(mode="after")
@@ -267,23 +272,24 @@ class CheckColumnNames(BaseCheck):
 
     model_config = ConfigDict(extra="forbid", protected_namespaces=())
 
-    catalog_node: "CatalogNodes" = Field(default=None)
+    catalog_node: "CatalogNodes | None" = Field(default=None)
     column_name_pattern: str
     models: list["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_column_names"]
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.catalog_node is not None
         if self.is_catalog_node_a_model(self.catalog_node, self.models):
             non_complying_columns: list[str] = []
             non_complying_columns.extend(
                 v.name
                 for _, v in self.catalog_node.columns.items()
-                if re.fullmatch(self.column_name_pattern.strip(), v.name) is None
+                if re.fullmatch(self.column_name_pattern.strip(), str(v.name)) is None
             )
 
             assert not non_complying_columns, (
-                f"`{self.catalog_node.unique_id.split('.')[-1]}` has columns ({non_complying_columns}) that do not match the supplied regex: `{self.column_name_pattern.strip()}`."
+                f"`{str(self.catalog_node.unique_id).split('.')[-1]}` has columns ({non_complying_columns}) that do not match the supplied regex: `{self.column_name_pattern.strip()}`."
             )
 
 
@@ -311,13 +317,15 @@ class CheckColumnsAreAllDocumented(BaseCheck):
     """
 
     case_sensitive: bool | None = Field(default=True)
-    catalog_node: "CatalogNodes" = Field(default=None)
-    manifest_obj: "DbtBouncerManifest" = Field(default=None)
+    catalog_node: "CatalogNodes | None" = Field(default=None)
+    manifest_obj: "DbtBouncerManifest | None" = Field(default=None)
     models: list["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_columns_are_all_documented"]
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.catalog_node is not None
+        assert self.manifest_obj is not None
         if self.is_catalog_node_a_model(self.catalog_node, self.models):
             model = next(
                 m for m in self.models if m.unique_id == self.catalog_node.unique_id
@@ -340,7 +348,7 @@ class CheckColumnsAreAllDocumented(BaseCheck):
                 ]
 
             assert not undocumented_columns, (
-                f"`{self.catalog_node.unique_id.split('.')[-1]}` has columns that are not included in the models properties file: {undocumented_columns}"
+                f"`{str(self.catalog_node.unique_id).split('.')[-1]}` has columns that are not included in the models properties file: {undocumented_columns}"
             )
 
 
@@ -366,13 +374,14 @@ class CheckColumnsAreDocumentedInPublicModels(BaseCheck):
 
     """
 
-    catalog_node: "CatalogNodes" = Field(default=None)
+    catalog_node: "CatalogNodes | None" = Field(default=None)
     min_description_length: int | None = Field(default=None)
     models: list["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_columns_are_documented_in_public_models"]
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.catalog_node is not None
         if self.is_catalog_node_a_model(self.catalog_node, self.models):
             model = next(
                 m for m in self.models if m.unique_id == self.catalog_node.unique_id
@@ -387,5 +396,5 @@ class CheckColumnsAreDocumentedInPublicModels(BaseCheck):
                         non_complying_columns.append(v.name)
 
             assert not non_complying_columns, (
-                f"`{self.catalog_node.unique_id.split('.')[-1]}` is a public model but has columns that don't have a populated description: {non_complying_columns}"
+                f"`{str(self.catalog_node.unique_id).split('.')[-1]}` is a public model but has columns that don't have a populated description: {non_complying_columns}"
             )

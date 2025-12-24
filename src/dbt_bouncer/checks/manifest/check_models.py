@@ -18,7 +18,7 @@ if TYPE_CHECKING:
     from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
         UnitTests,
     )
-    from dbt_bouncer.artifact_parsers.parsers_common import (
+    from dbt_bouncer.artifact_parsers.parsers_manifest import (
         DbtBouncerExposureBase,
         DbtBouncerManifest,
         DbtBouncerModelBase,
@@ -62,11 +62,12 @@ class CheckModelAccess(BaseCheck):
     """
 
     access: Literal["private", "protected", "public"]
-    model: "DbtBouncerModelBase" = Field(default=None)
+    model: "DbtBouncerModelBase | None" = Field(default=None)
     name: Literal["check_model_access"]
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.model is not None
         assert self.model.access.value == self.access, (
             f"`{get_clean_model_name(self.model.unique_id)}` has `{self.model.access.value}` access, it should have access `{self.access}`."
         )
@@ -104,9 +105,10 @@ class CheckModelCodeDoesNotContainRegexpPattern(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.model is not None
         assert (
             re.compile(self.regexp_pattern.strip(), flags=re.DOTALL).match(
-                self.model.raw_code
+                str(self.model.raw_code)
             )
             is None
         ), (
@@ -140,6 +142,7 @@ class CheckModelContractsEnforcedForPublicModel(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.model is not None
         if self.model.access.value == "public":
             assert self.model.contract.enforced is True, (
                 f"`{get_clean_model_name(self.model.unique_id)}` is a public model but does not have contracts enforced."
@@ -185,6 +188,7 @@ class CheckModelDependsOnMacros(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.model is not None
         upstream_macros = [
             (".").join(m.split(".")[1:]) for m in self.model.depends_on.macros
         ]
@@ -233,6 +237,7 @@ class CheckModelDependsOnMultipleSources(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.model is not None
         num_reffed_sources = sum(
             x.split(".")[0] == "source" for x in self.model.depends_on.nodes
         )
@@ -270,8 +275,9 @@ class CheckModelDescriptionContainsRegexPattern(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.model is not None
         assert re.compile(self.regexp_pattern.strip(), flags=re.DOTALL).match(
-            self.model.description
+            str(self.model.description)
         ), (
             f"""`{get_clean_model_name(self.model.unique_id)}`'s description "{self.model.description}" doesn't match the supplied regex: {self.regexp_pattern}."""
         )
@@ -312,6 +318,7 @@ class CheckModelDescriptionPopulated(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.model is not None
         assert self._is_description_populated(
             self.model.description, self.min_description_length
         ), (
@@ -369,8 +376,10 @@ class CheckModelDirectories(BaseCheck):
             AssertionError: If model located in `./models`.
 
         """
+        assert self.model is not None
         clean_path = clean_path_str(self.model.original_file_path)
         matched_path = re.compile(self.include.strip().rstrip("/")).match(clean_path)
+        assert matched_path is not None
         path_after_match = clean_path[matched_path.end() + 1 :]
         directory_to_check = Path(path_after_match).parts[0]
 
@@ -410,6 +419,7 @@ class CheckModelDocumentedInSameDirectory(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.model is not None
         model_sql_path = Path(clean_path_str(self.model.original_file_path))
         model_sql_dir = model_sql_path.parent.parts
 
@@ -464,6 +474,7 @@ class CheckModelFileName(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.model is not None
         file_name = Path(clean_path_str(self.model.original_file_path)).name
         assert (
             re.compile(self.file_name_pattern.strip()).match(file_name) is not None
@@ -502,10 +513,11 @@ class CheckModelGrantPrivilege(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.model is not None
         non_complying_grants = [
             i
             for i in self.model.config.grants
-            if re.compile(self.privilege_pattern.strip()).match(i) is None
+            if re.compile(self.privilege_pattern.strip()).match(str(i)) is None
         ]
 
         assert not non_complying_grants, (
@@ -543,6 +555,7 @@ class CheckModelGrantPrivilegeRequired(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.model is not None
         assert self.privilege in self.model.config.grants, (
             f"`{get_clean_model_name(self.model.unique_id)}` does not have the required grant privilege (`{self.privilege}`)."
         )
@@ -575,6 +588,7 @@ class CheckModelHasContractsEnforced(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.model is not None
         assert self.model.contract.enforced is True, (
             f"`{get_clean_model_name(self.model.unique_id)}` does not have contracts enforced."
         )
@@ -612,6 +626,7 @@ class CheckModelHasExposure(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.model is not None
         has_exposure = False
         for e in self.exposures:
             for m in e.depends_on.nodes:
@@ -654,6 +669,7 @@ class CheckModelHasMetaKeys(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.model is not None
         missing_keys = find_missing_meta_keys(
             meta_config=self.model.meta,
             required_keys=self.keys.model_dump(),
@@ -689,6 +705,7 @@ class CheckModelHasNoUpstreamDependencies(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.model is not None
         assert len(self.model.depends_on.nodes) > 0, (
             f"`{get_clean_model_name(self.model.unique_id)}` has no upstream dependencies, this likely indicates hard-coded tables references."
         )
@@ -721,6 +738,7 @@ class CheckModelHasSemiColon(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.model is not None
         assert self.model.raw_code.strip()[-1] != ";", (
             f"`{get_clean_model_name(self.model.unique_id)}` ends with a semi-colon, this is not permitted."
         )
@@ -759,6 +777,7 @@ class CheckModelHasTags(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.model is not None
         if self.criteria == "any":
             assert any(tag in self.model.tags for tag in self.tags), (
                 f"`{get_clean_model_name(self.model.unique_id)}` does not have any of the required tags: {self.tags}."
@@ -820,6 +839,7 @@ class CheckModelHasUniqueTest(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.model is not None
         num_unique_tests = sum(
             test.attached_node == self.model.unique_id
             and (
@@ -876,7 +896,7 @@ class CheckModelHasUnitTests(BaseCheck):
 
     """
 
-    manifest_obj: "DbtBouncerManifest" = Field(default=None)
+    manifest_obj: "DbtBouncerManifest | None" = Field(default=None)
     min_number_of_unit_tests: int = Field(default=1)
     model: "DbtBouncerModelBase" = Field(default=None)
     name: Literal["check_model_has_unit_tests"]
@@ -884,14 +904,18 @@ class CheckModelHasUnitTests(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.manifest_obj is not None
+        assert self.model is not None
         if get_package_version_number(
-            self.manifest_obj.manifest.metadata.dbt_version
+            self.manifest_obj.manifest.metadata.dbt_version or "0.0.0"
         ) >= get_package_version_number("1.8.0"):
             num_unit_tests = len(
                 [
                     t.unique_id
                     for t in self.unit_tests
-                    if t.depends_on.nodes[0] == self.model.unique_id
+                    if t.depends_on
+                    and t.depends_on.nodes
+                    and t.depends_on.nodes[0] == self.model.unique_id
                 ],
             )
             assert num_unit_tests >= self.min_number_of_unit_tests, (
@@ -932,6 +956,7 @@ class CheckModelLatestVersionSpecified(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.model is not None
         assert self.model.latest_version is not None, (
             f"`{self.model.name}` does not have a specified `latest_version`."
         )
@@ -972,20 +997,22 @@ class CheckModelMaxChainedViews(BaseCheck):
 
     """
 
-    manifest_obj: "DbtBouncerManifest" = Field(default=None)
+    manifest_obj: "DbtBouncerManifest | None" = Field(default=None)
     materializations_to_include: list[str] = Field(
         default=["ephemeral", "view"],
     )
     max_chained_views: int = Field(
         default=3,
     )
-    model: "DbtBouncerModelBase" = Field(default=None)
+    model: "DbtBouncerModelBase | None" = Field(default=None)
     models: list["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_model_max_chained_views"]
     package_name: str | None = Field(default=None)
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.model is not None
+        assert self.manifest_obj is not None
 
         def return_upstream_view_models(
             materializations,
@@ -1088,6 +1115,7 @@ class CheckModelMaxFanout(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.model is not None
         num_downstream_models = sum(
             self.model.unique_id in m.depends_on.nodes for m in self.models
         )
@@ -1131,6 +1159,7 @@ class CheckModelMaxNumberOfLines(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.model is not None
         actual_number_of_lines = self.model.raw_code.count("\n") + 1
 
         assert actual_number_of_lines <= self.max_number_of_lines, (
@@ -1179,6 +1208,7 @@ class CheckModelMaxUpstreamDependencies(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.model is not None
         num_upstream_macros = len(list(self.model.depends_on.macros))
         num_upstream_models = len(
             [m for m in self.model.depends_on.nodes if m.split(".")[0] == "model"],
@@ -1235,8 +1265,9 @@ class CheckModelNames(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.model is not None
         assert (
-            re.compile(self.model_name_pattern.strip()).match(self.model.name)
+            re.compile(self.model_name_pattern.strip()).match(str(self.model.name))
             is not None
         ), (
             f"`{get_clean_model_name(self.model.unique_id)}` does not match the supplied regex `{self.model_name_pattern.strip()}`."
@@ -1276,6 +1307,7 @@ class CheckModelNumberOfGrants(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.model is not None
         num_grants = len(self.model.config.grants.keys())
 
         assert num_grants >= self.min_number_of_privileges, (
@@ -1312,6 +1344,7 @@ class CheckModelPropertyFileLocation(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.model is not None
         assert (  # noqa: PT018
             hasattr(self.model, "patch_path")
             and clean_path_str(self.model.patch_path) is not None
@@ -1392,8 +1425,9 @@ class CheckModelSchemaName(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.model is not None
         assert (
-            re.compile(self.schema_name_pattern.strip()).match(self.model.schema_)
+            re.compile(self.schema_name_pattern.strip()).match(str(self.model.schema_))
             is not None
         ), (
             f"`{self.model.schema_}` does not match the supplied regex `{self.schema_name_pattern.strip()})`."
@@ -1438,6 +1472,7 @@ class CheckModelVersionAllowed(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.model is not None
         if self.model.version:
             assert (
                 re.compile(self.version_pattern.strip()).match(str(self.model.version))
@@ -1472,24 +1507,32 @@ class CheckModelVersionPinnedInRef(BaseCheck):
 
     model_config = ConfigDict(extra="forbid", protected_namespaces=())
 
-    manifest_obj: "DbtBouncerManifest" = Field(default=None)
-    model: "DbtBouncerModelBase" = Field(default=None)
+    manifest_obj: "DbtBouncerManifest | None" = Field(default=None)
+    model: "DbtBouncerModelBase | None" = Field(default=None)
     name: Literal["check_model_version_pinned_in_ref"]
 
     def execute(self) -> None:
         """Execute the check."""
-        downstream_models = [
-            x
-            for x in self.manifest_obj.manifest.child_map[self.model.unique_id]
-            if x.startswith("model.")
-        ]
+        assert self.model is not None
+        assert self.manifest_obj is not None
+        child_map = self.manifest_obj.manifest.child_map
+        if child_map and self.model.unique_id in child_map:
+            downstream_models = [
+                x for x in child_map[self.model.unique_id] if x.startswith("model.")
+            ]
+        else:
+            downstream_models = []
+
         downstream_models_with_unversioned_refs: list[str] = []
         for m in downstream_models:
-            downstream_models_with_unversioned_refs.extend(
-                m
-                for ref in self.manifest_obj.manifest.nodes[m].refs
-                if ref.name == self.model.unique_id.split(".")[-1] and not ref.version
-            )
+            node = self.manifest_obj.manifest.nodes.get(m)
+            if node and hasattr(node, "refs") and isinstance(node.refs, list):
+                downstream_models_with_unversioned_refs.extend(
+                    m
+                    for ref in node.refs
+                    if getattr(ref, "name", None) == self.model.unique_id.split(".")[-1]
+                    and not getattr(ref, "version", None)
+                )
 
         assert not downstream_models_with_unversioned_refs, (
             f"`{self.model.name}` is referenced without a pinned version in downstream models: {downstream_models_with_unversioned_refs}."

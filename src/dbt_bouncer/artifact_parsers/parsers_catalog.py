@@ -59,7 +59,8 @@ def parse_catalog(
         list[DbtBouncerCatalogNode]: List of catalog nodes for the project sources.
 
     """
-    catalog_obj: CatalogLatest | CatalogV1 = load_dbt_artifact(
+    # mypy: ignore
+    catalog_obj: DbtBouncerCatalog = load_dbt_artifact(
         artifact_name="catalog.json",
         dbt_artifacts_dir=artifact_dir,
     )
