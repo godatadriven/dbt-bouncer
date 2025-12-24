@@ -120,7 +120,7 @@ def runner(
             "unit_test",
         }
         iterate_over_value = valid_iterate_over_values.intersection(
-            set(check.__annotations__.keys()),
+            set(check.__class__.__annotations__.keys()),
         )
         if len(iterate_over_value) == 1:
             iterate_value = next(iter(iterate_over_value))
@@ -164,7 +164,9 @@ def runner(
                     )
                     setattr(check_i, iterate_value, getattr(i, iterate_value, i))
 
-                    for x in parsed_data.keys() & check_i.__annotations__.keys():
+                    for x in (
+                        parsed_data.keys() & check_i.__class__.__annotations__.keys()
+                    ):
                         setattr(check_i, x, parsed_data[x])
 
                     checks_to_run.append(
@@ -180,7 +182,7 @@ def runner(
             )
         else:
             check_run_id = f"{check.name}:{check.index}"
-            for x in parsed_data.keys() & check.__annotations__.keys():
+            for x in parsed_data.keys() & check.__class__.__annotations__.keys():
                 setattr(check, x, parsed_data[x])
             checks_to_run.append(
                 {
