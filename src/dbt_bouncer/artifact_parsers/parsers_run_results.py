@@ -95,10 +95,12 @@ def parse_run_results_artifact(
                 manifest_obj.manifest.exposures[unique_id].original_file_path
             )
         else:
-            return clean_path_str(
-                manifest_obj.manifest.unit_tests[unique_id].original_file_path
-            )
+            unit_tests = getattr(manifest_obj.manifest, "unit_tests", {})
+            if unique_id in unit_tests:
+                return clean_path_str(unit_tests[unique_id].original_file_path)
+            return ""
 
+    # mypy: ignore
     run_results_obj: RunResultsV5 | RunResultsLatest = load_dbt_artifact(
         artifact_name="run_results.json",
         dbt_artifacts_dir=artifact_dir,
@@ -106,13 +108,11 @@ def parse_run_results_artifact(
 
     project_run_results = [
         DbtBouncerRunResult(
-            **{
-                "original_file_path": (
-                    get_clean_path_str(unique_id=r.unique_id, manifest_obj=manifest_obj)
-                ),
-                "run_result": r,
-                "unique_id": r.unique_id,
-            },
+            original_file_path=get_clean_path_str(
+                unique_id=r.unique_id, manifest_obj=manifest_obj
+            ),
+            run_result=r,
+            unique_id=r.unique_id,
         )
         for r in run_results_obj.results
         if r.unique_id.split(".")[1]

@@ -154,7 +154,7 @@ class DbtBouncerTest(BaseModel):
 
 def parse_manifest(
     manifest: dict[str, Any],
-) -> DbtBouncerManifest:
+) -> ManifestV11 | ManifestLatest:
     """Parse manifest.json.
 
     Args:
@@ -164,7 +164,7 @@ def parse_manifest(
         ValueError: If the manifest.json is not a valid manifest.json
 
     Returns:
-       DbtBouncerManifest
+       ManifestV11 | ManifestLatest
 
     """
     dbt_schema_version = manifest["metadata"]["dbt_schema_version"]

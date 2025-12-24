@@ -7,7 +7,7 @@ from pydantic import Field
 from dbt_bouncer.check_base import BaseCheck
 
 if TYPE_CHECKING:
-    from dbt_bouncer.artifact_parsers.parsers_common import (
+    from dbt_bouncer.artifact_parsers.parsers_manifest import (
         DbtBouncerSnapshotBase,
     )
 
@@ -39,11 +39,12 @@ class CheckSnapshotHasTags(BaseCheck):
 
     criteria: Literal["any", "all", "one"] = Field(default="all")
     name: Literal["check_snapshot_has_tags"]
-    snapshot: "DbtBouncerSnapshotBase" = Field(default=None)
+    snapshot: "DbtBouncerSnapshotBase | None" = Field(default=None)
     tags: list[str]
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.snapshot is not None
         if self.criteria == "any":
             assert any(tag in self.snapshot.tags for tag in self.tags), (
                 f"`{self.snapshot.name}` does not have any of the required tags: {self.tags}."
@@ -85,13 +86,16 @@ class CheckSnapshotNames(BaseCheck):
     """
 
     name: Literal["check_snapshot_names"]
-    snapshot: "DbtBouncerSnapshotBase" = Field(default=None)
+    snapshot: "DbtBouncerSnapshotBase | None" = Field(default=None)
     snapshot_name_pattern: str
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.snapshot is not None
         assert (
-            re.compile(self.snapshot_name_pattern.strip()).match(self.snapshot.name)
+            re.compile(self.snapshot_name_pattern.strip()).match(
+                str(self.snapshot.name)
+            )
             is not None
         ), (
             f"`{self.snapshot.name}` does not match the supplied regex `{self.snapshot_name_pattern.strip()})`."

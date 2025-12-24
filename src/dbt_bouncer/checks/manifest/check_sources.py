@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 
 if TYPE_CHECKING:
-    from dbt_bouncer.artifact_parsers.parsers_common import (
+    from dbt_bouncer.artifact_parsers.parsers_manifest import (
         DbtBouncerModelBase,
         DbtBouncerSourceBase,
     )
@@ -48,10 +48,11 @@ class CheckSourceDescriptionPopulated(BaseCheck):
 
     min_description_length: int | None = Field(default=None)
     name: Literal["check_source_description_populated"]
-    source: "DbtBouncerSourceBase" = Field(default=None)
+    source: "DbtBouncerSourceBase | None" = Field(default=None)
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.source is not None
         assert self._is_description_populated(
             self.source.description, self.min_description_length
         ), (
@@ -80,10 +81,11 @@ class CheckSourceFreshnessPopulated(BaseCheck):
     """
 
     name: Literal["check_source_freshness_populated"]
-    source: "DbtBouncerSourceBase" = Field(default=None)
+    source: "DbtBouncerSourceBase | None" = Field(default=None)
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.source is not None
         error_msg = f"`{self.source.source_name}.{self.source.name}` does not have a populated freshness."
         assert self.source.freshness is not None, error_msg
         assert (
@@ -125,10 +127,11 @@ class CheckSourceHasMetaKeys(BaseCheck):
 
     keys: "NestedDict"
     name: Literal["check_source_has_meta_keys"]
-    source: "DbtBouncerSourceBase" = Field(default=None)
+    source: "DbtBouncerSourceBase | None" = Field(default=None)
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.source is not None
         missing_keys = find_missing_meta_keys(
             meta_config=self.source.meta,
             required_keys=self.keys.model_dump(),
@@ -166,11 +169,12 @@ class CheckSourceHasTags(BaseCheck):
 
     criteria: Literal["any", "all", "one"] = Field(default="all")
     name: Literal["check_source_has_tags"]
-    source: "DbtBouncerSourceBase" = Field(default=None)
+    source: "DbtBouncerSourceBase | None" = Field(default=None)
     tags: list[str]
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.source is not None
         if self.criteria == "any":
             assert any(tag in self.source.tags for tag in self.tags), (
                 f"`{self.source.source_name}.{self.source.name}` does not have any of the required tags: {self.tags}."
@@ -207,10 +211,11 @@ class CheckSourceLoaderPopulated(BaseCheck):
     """
 
     name: Literal["check_source_loader_populated"]
-    source: "DbtBouncerSourceBase" = Field(default=None)
+    source: "DbtBouncerSourceBase | None" = Field(default=None)
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.source is not None
         assert self.source.loader != "", (
             f"`{self.source.source_name}.{self.source.name}` does not have a populated loader."
         )
@@ -243,12 +248,13 @@ class CheckSourceNames(BaseCheck):
 
     name: Literal["check_source_names"]
     source_name_pattern: str
-    source: "DbtBouncerSourceBase" = Field(default=None)
+    source: "DbtBouncerSourceBase | None" = Field(default=None)
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.source is not None
         assert (
-            re.compile(self.source_name_pattern.strip()).match(self.source.name)
+            re.compile(self.source_name_pattern.strip()).match(str(self.source.name))
             is not None
         ), (
             f"`{self.source.source_name}.{self.source.name}` does not match the supplied regex `({self.source_name_pattern.strip()})`."
@@ -278,10 +284,11 @@ class CheckSourceNotOrphaned(BaseCheck):
 
     models: list["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_source_not_orphaned"]
-    source: "DbtBouncerSourceBase" = Field(default=None)
+    source: "DbtBouncerSourceBase | None" = Field(default=None)
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.source is not None
         num_refs = sum(
             self.source.unique_id in model.depends_on.nodes for model in self.models
         )
@@ -311,10 +318,11 @@ class CheckSourcePropertyFileLocation(BaseCheck):
     """
 
     name: Literal["check_source_property_file_location"]
-    source: "DbtBouncerSourceBase" = Field(default=None)
+    source: "DbtBouncerSourceBase | None" = Field(default=None)
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.source is not None
         original_path = Path(clean_path_str(self.source.original_file_path))
 
         if (
@@ -367,10 +375,11 @@ class CheckSourceUsedByModelsInSameDirectory(BaseCheck):
 
     models: list["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_source_used_by_models_in_same_directory"]
-    source: "DbtBouncerSourceBase" = Field(default=None)
+    source: "DbtBouncerSourceBase | None" = Field(default=None)
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.source is not None
         reffed_models_not_in_same_dir = []
         for model in self.models:
             if (
@@ -408,10 +417,11 @@ class CheckSourceUsedByOnlyOneModel(BaseCheck):
 
     models: list["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_source_used_by_only_one_model"]
-    source: "DbtBouncerSourceBase" = Field(default=None)
+    source: "DbtBouncerSourceBase | None" = Field(default=None)
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.source is not None
         num_refs = sum(
             self.source.unique_id in model.depends_on.nodes for model in self.models
         )

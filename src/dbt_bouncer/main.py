@@ -2,7 +2,6 @@ import importlib
 import logging
 import sys
 from pathlib import Path, PurePath
-from typing import Union
 
 import click
 
@@ -15,7 +14,7 @@ def run_bouncer(
     config_file: PurePath | None = None,
     create_pr_comment_file: bool = False,
     only: str = "",
-    output_file: Union[Path, None] = None,
+    output_file: Path | None = None,
     output_only_failures: bool = False,
     show_all_failures: bool = False,
     verbosity: int = 0,
@@ -74,6 +73,8 @@ def run_bouncer(
     else:
         if config_file_source is None:
             config_file_source = "COMMANDLINE"
+
+    assert config_file_source is not None
 
     config_file_path = get_config_file_path(
         config_file=config_file,
@@ -235,7 +236,7 @@ def cli(
     config_file: PurePath,
     create_pr_comment_file: bool,
     only: str,
-    output_file: Union[Path, None],
+    output_file: Path | None,
     output_only_failures: bool,
     show_all_failures: bool,
     verbosity: int,

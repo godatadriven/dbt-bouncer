@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 if TYPE_CHECKING:
-    from dbt_bouncer.artifact_parsers.parsers_common import DbtBouncerManifest
+    from dbt_bouncer.artifact_parsers.parsers_manifest import DbtBouncerManifest
 
 
 class CheckProjectName(BaseModel):
@@ -41,7 +41,7 @@ class CheckProjectName(BaseModel):
         default=None,
         description="Index to uniquely identify the check, calculated at runtime.",
     )
-    manifest_obj: "DbtBouncerManifest" = Field(default=None)
+    manifest_obj: "DbtBouncerManifest | None" = Field(default=None)
     name: Literal["check_project_name"]
     package_name: str | None = Field(default=None)
     project_name_pattern: str
@@ -52,12 +52,13 @@ class CheckProjectName(BaseModel):
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.manifest_obj is not None
         package_name = (
             self.package_name or self.manifest_obj.manifest.metadata.project_name
         )
         assert (
             re.compile(self.project_name_pattern.strip()).match(
-                package_name,
+                str(package_name),
             )
             is not None
         ), (

@@ -127,7 +127,6 @@ def parse_dbt_artifacts(
         list[DbtBouncerRunResult]: A list of DbtBouncerRunResult objects.
 
     """
-    from dbt_bouncer.artifact_parsers.parsers_common import load_dbt_artifact
     from dbt_bouncer.artifact_parsers.parsers_manifest import parse_manifest_artifact
 
     # Manifest, will always be parsed

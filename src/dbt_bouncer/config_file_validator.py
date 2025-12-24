@@ -161,7 +161,7 @@ def load_config_file_contents(
 
     """
     if config_file_path.suffix in [".yml", ".yaml"]:
-        return load_config_from_yaml(config_file_path)
+        return load_config_from_yaml(Path(config_file_path))
     elif config_file_path.suffix in [".toml"]:
         toml_cfg = toml.load(config_file_path)
         if "dbt-bouncer" in toml_cfg["tool"]:

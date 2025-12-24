@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Literal
 from dbt_bouncer.check_base import BaseCheck
 
 if TYPE_CHECKING:
-    from dbt_bouncer.artifact_parsers.parsers_common import (
+    from dbt_bouncer.artifact_parsers.parsers_manifest import (
         DbtBouncerManifest,
         DbtBouncerModelBase,
     )
@@ -49,8 +49,8 @@ class CheckLineagePermittedUpstreamModels(BaseCheck):
 
     """
 
-    manifest_obj: "DbtBouncerManifest" = Field(default=None)
-    model: "DbtBouncerModelBase" = Field(default=None)
+    manifest_obj: "DbtBouncerManifest | None" = Field(default=None)
+    model: "DbtBouncerModelBase | None" = Field(default=None)
     models: list["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_lineage_permitted_upstream_models"]
     package_name: str | None = Field(default=None)
@@ -58,6 +58,8 @@ class CheckLineagePermittedUpstreamModels(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.model is not None
+        assert self.manifest_obj is not None
         upstream_models = [
             x
             for x in self.model.depends_on.nodes
@@ -103,11 +105,12 @@ class CheckLineageSeedCannotBeUsed(BaseCheck):
 
     """
 
-    model: "DbtBouncerModelBase" = Field(default=None)
+    model: "DbtBouncerModelBase | None" = Field(default=None)
     name: Literal["check_lineage_seed_cannot_be_used"]
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.model is not None
         assert not [
             x for x in self.model.depends_on.nodes if x.split(".")[0] == "seed"
         ], (
@@ -136,11 +139,12 @@ class CheckLineageSourceCannotBeUsed(BaseCheck):
 
     """
 
-    model: "DbtBouncerModelBase" = Field(default=None)
+    model: "DbtBouncerModelBase | None" = Field(default=None)
     name: Literal["check_lineage_source_cannot_be_used"]
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.model is not None
         assert not [
             x for x in self.model.depends_on.nodes if x.split(".")[0] == "source"
         ], (

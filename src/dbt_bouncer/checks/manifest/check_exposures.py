@@ -8,7 +8,7 @@ from pydantic import Field
 from dbt_bouncer.check_base import BaseCheck
 
 if TYPE_CHECKING:
-    from dbt_bouncer.artifact_parsers.parsers_common import (
+    from dbt_bouncer.artifact_parsers.parsers_manifest import (
         DbtBouncerExposureBase,
         DbtBouncerModelBase,
     )
@@ -44,13 +44,14 @@ class CheckExposureOnModel(BaseCheck):
 
     """
 
-    exposure: "DbtBouncerExposureBase" = Field(default=None)
+    exposure: "DbtBouncerExposureBase | None" = Field(default=None)
     maximum_number_of_models: int = Field(default=100)
     minimum_number_of_models: int = Field(default=1)
     name: Literal["check_exposure_based_on_model"]
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.exposure is not None
         number_of_upstream_models = len(self.exposure.depends_on.nodes)
 
         assert self.minimum_number_of_models <= number_of_upstream_models, (
@@ -82,12 +83,13 @@ class CheckExposureOnNonPublicModels(BaseCheck):
 
     """
 
-    exposure: "DbtBouncerExposureBase" = Field(default=None)
+    exposure: "DbtBouncerExposureBase | None" = Field(default=None)
     models: list["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_exposure_based_on_non_public_models"]
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.exposure is not None
         non_public_upstream_dependencies = []
         for model in self.exposure.depends_on.nodes:
             if (
@@ -137,7 +139,7 @@ class CheckExposureOnView(BaseCheck):
 
     """
 
-    exposure: "DbtBouncerExposureBase" = Field(default=None)
+    exposure: "DbtBouncerExposureBase | None" = Field(default=None)
     materializations_to_include: list[str] = Field(
         default=["ephemeral", "view"],
     )
@@ -146,6 +148,7 @@ class CheckExposureOnView(BaseCheck):
 
     def execute(self) -> None:
         """Execute the check."""
+        assert self.exposure is not None
         non_table_upstream_dependencies = []
         for model in self.exposure.depends_on.nodes:
             if (
