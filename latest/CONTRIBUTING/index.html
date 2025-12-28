@@ -1052,11 +1052,11 @@
 <li><a href="https://click.palletsprojects.com/en/8.1.x/"><code>click</code></a> to create our CLI interface.</li>
 <li><a href="https://github.com/features/actions">GitHub Actions</a> for automating tests and checks, once a PR is pushed to the <code>dbt-bouncer</code> repository.</li>
 <li><a href="https://users.cs.duke.edu/~ola/courses/programming/Makefiles/Makefiles.html"><code>make</code></a> to run multiple setup or test steps in combination.</li>
-<li><a href="https://mypy.readthedocs.io/en/stable/"><code>mypy</code></a> for static type checking.</li>
 <li><a href="https://github.com/j178/prek"><code>prek</code></a> to easily run those checks.</li>
 <li><a href="https://docs.pydantic.dev/latest/"><code>Pydantic</code></a> to validate our configuration file.</li>
 <li><a href="https://docs.pytest.org/en/latest/"><code>pytest</code></a> to define, discover, and run tests.</li>
 <li><a href="https://github.com/astral-sh/ruff"><code>Ruff</code></a> to lint and format python code.</li>
+<li><a href="https://github.com/astral-sh/ty"><code>ty</code></a> for type checking.</li>
 <li><a href="https://docs.astral.sh/uv/"><code>uv</code></a> to manage our python virtual environment.</li>
 </ul>
 <p>A deep understanding of these tools in not required to effectively contribute to <code>dbt-bouncer</code>, but we recommend checking out the attached documentation if you're interested in learning more about each one.</p>
@@ -1123,7 +1123,7 @@
 </blockquote>
 <h3 id="assorted-development-tips">Assorted development tips<a class="headerlink" href="#assorted-development-tips" title="Permanent link">#</a></h3>
 <ul>
-<li>Append <code># type: ignore</code> to the end of a line if you need to disable <code>mypy</code> on that line, preferably with the specific rule to ignore such as <code># type: ignore[union-attr]</code>.</li>
+<li>Append <code># ty: ignore</code> to the end of a line if you need to disable <code>ty</code> on that line, preferably with the specific rule to ignore such as <code># ty: ignore[invalid-argument-type]</code>.</li>
 </ul>
 <h2 id="adding-a-new-check">Adding a new check<a class="headerlink" href="#adding-a-new-check" title="Permanent link">#</a></h2>
 <p>To add a new check follow the below steps:</p>
@@ -1173,7 +1173,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="December 28, 2025 11:36:37 UTC">December 28, 2025</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="December 28, 2025 13:44:12 UTC">December 28, 2025</span>
   </span>
 
     
