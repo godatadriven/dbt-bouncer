@@ -1,5 +1,3 @@
-# mypy: disable-error-code="union-attr"
-
 import re
 from typing import TYPE_CHECKING, Literal
 

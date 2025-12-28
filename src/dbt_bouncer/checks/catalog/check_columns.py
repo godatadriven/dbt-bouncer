@@ -1,5 +1,3 @@
-# mypy: disable-error-code="union-attr"
-
 import re
 from typing import TYPE_CHECKING, Literal
 
@@ -75,10 +73,9 @@ class CheckColumnDescriptionPopulated(BaseCheck):
             )
             non_complying_columns = []
             for _, v in self.catalog_node.columns.items():
-                if model.columns.get(
-                    v.name
-                ) is None or not self._is_description_populated(
-                    model.columns[v.name].description, self.min_description_length
+                columns = model.columns or {}
+                if columns.get(v.name) is None or not self._is_description_populated(
+                    columns[v.name].description or "", self.min_description_length
                 ):
                     non_complying_columns.append(v.name)
 
@@ -136,19 +133,25 @@ class CheckColumnHasSpecifiedTest(BaseCheck):
             if re.compile(self.column_name_pattern.strip()).match(str(v.name))
             is not None
         ]
-        relevant_tests = [
-            t
-            for t in self.tests
-            if hasattr(t, "test_metadata") is True
-            and hasattr(t, "attached_node") is True
-            and t.test_metadata.name == self.test_name
-            and t.attached_node == self.catalog_node.unique_id
-        ]
+        relevant_tests = []
+        for t in self.tests:
+            test_metadata = getattr(t, "test_metadata", None)
+            attached_node = getattr(t, "attached_node", None)
+            if (
+                test_metadata
+                and attached_node
+                and getattr(test_metadata, "name", None) == self.test_name
+                and attached_node == self.catalog_node.unique_id
+            ):
+                relevant_tests.append(t)
         non_complying_columns = [
             c
             for c in columns_to_check
             if f"{self.catalog_node.unique_id}.{c}"
-            not in [f"{t.attached_node}.{t.column_name}" for t in relevant_tests]
+            not in [
+                f"{getattr(t, 'attached_node', '')}.{getattr(t, 'column_name', '')}"
+                for t in relevant_tests
+            ]
         ]
 
         if non_complying_columns:
@@ -372,17 +375,18 @@ class CheckColumnsAreAllDocumented(BaseCheck):
             if self.manifest_obj.manifest.metadata.adapter_type in ["snowflake"]:
                 self.case_sensitive = False
 
+            model_columns = model.columns or {}
             if self.case_sensitive:
                 undocumented_columns = [
                     v.name
                     for _, v in self.catalog_node.columns.items()
-                    if v.name not in model.columns
+                    if v.name not in model_columns
                 ]
             else:
                 undocumented_columns = [
                     v.name
                     for _, v in self.catalog_node.columns.items()
-                    if v.name.lower() not in [c.lower() for c in model.columns]
+                    if v.name.lower() not in [c.lower() for c in model_columns]
                 ]
 
             if undocumented_columns:
@@ -433,10 +437,11 @@ class CheckColumnsAreDocumentedInPublicModels(BaseCheck):
             )
             non_complying_columns = []
             for _, v in self.catalog_node.columns.items():
-                if model.access.value == "public":
-                    column_config = model.columns.get(v.name)
+                if model.access and model.access.value == "public":
+                    model_columns = model.columns or {}
+                    column_config = model_columns.get(v.name)
                     if column_config is None or not self._is_description_populated(
-                        column_config.description, self.min_description_length
+                        column_config.description or "", self.min_description_length
                     ):
                         non_complying_columns.append(v.name)
 

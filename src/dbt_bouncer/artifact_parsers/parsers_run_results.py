@@ -1,6 +1,6 @@
 import logging
 import warnings
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, TypeAlias
 
 from pydantic import BaseModel
 
@@ -27,9 +27,7 @@ if TYPE_CHECKING:
 
 from dbt_bouncer.artifact_parsers.parsers_common import load_dbt_artifact
 
-DbtBouncerRunResultBase: ... = (  # type: ignore[misc]
-    RunResultOutput_v5 | RunResultOutput_Latest
-)
+DbtBouncerRunResultBase: TypeAlias = RunResultOutput_v5 | RunResultOutput_Latest
 
 
 class DbtBouncerRunResult(BaseModel):
@@ -70,8 +68,17 @@ def parse_run_results_artifact(
 ) -> list[DbtBouncerRunResult]:
     """Parse the run_results.json artifact.
 
+    Args:
+        artifact_dir (Path): Path to the dbt artifacts directory.
+        manifest_obj (DbtBouncerManifest): The manifest object.
+        package_name (str | None): The package name to filter results by. If None,
+            uses the project name from the manifest.
+
     Returns:
         list[DbtBouncerRunResult]: A list of DbtBouncerRunResult objects.
+
+    Raises:
+        TypeError: If the loaded artifact is not of the expected type.
 
     """
 
@@ -100,11 +107,15 @@ def parse_run_results_artifact(
                 return clean_path_str(unit_tests[unique_id].original_file_path)
             return ""
 
-    # mypy: ignore
-    run_results_obj: RunResultsV5 | RunResultsLatest = load_dbt_artifact(
+    run_results_obj = load_dbt_artifact(
         artifact_name="run_results.json",
         dbt_artifacts_dir=artifact_dir,
     )
+
+    if not isinstance(run_results_obj, (RunResultsV5, RunResultsLatest)):
+        raise TypeError(
+            f"Expected RunResultsV5 or RunResultsLatest, got {type(run_results_obj)}"
+        )
 
     project_run_results = [
         DbtBouncerRunResult(

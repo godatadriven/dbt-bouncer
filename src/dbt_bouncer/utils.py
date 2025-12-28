@@ -1,5 +1,3 @@
-# mypy: disable-error-code="arg-type,attr-defined,union-attr"
-
 """Re-usable functions for dbt-bouncer."""
 
 import importlib

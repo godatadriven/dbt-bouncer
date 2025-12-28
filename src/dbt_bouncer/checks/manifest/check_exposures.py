@@ -1,6 +1,3 @@
-# mypy: disable-error-code="union-attr"
-
-
 from typing import TYPE_CHECKING, Literal
 
 from pydantic import Field
@@ -60,7 +57,10 @@ class CheckExposureOnModel(BaseCheck):
         """
         if self.exposure is None:
             raise DbtBouncerFailedCheckError("self.exposure is None")
-        number_of_upstream_models = len(self.exposure.depends_on.nodes)
+        depends_on = self.exposure.depends_on
+        number_of_upstream_models = (
+            len(getattr(depends_on, "nodes", []) or []) if depends_on else 0
+        )
 
         if number_of_upstream_models < self.minimum_number_of_models:
             raise DbtBouncerFailedCheckError(
@@ -107,16 +107,16 @@ class CheckExposureOnNonPublicModels(BaseCheck):
         if self.exposure is None:
             raise DbtBouncerFailedCheckError("self.exposure is None")
         non_public_upstream_dependencies = []
-        for model in self.exposure.depends_on.nodes:
+        for model in getattr(self.exposure.depends_on, "nodes", []) or []:
             if (
                 next(m for m in self.models if m.unique_id == model).resource_type
                 == "model"
                 and next(m for m in self.models if m.unique_id == model).package_name
                 == self.exposure.package_name
             ):
-                model = next(m for m in self.models if m.unique_id == model)
-                if model.access.value != "public":
-                    non_public_upstream_dependencies.append(model.name)
+                model_obj = next(m for m in self.models if m.unique_id == model)
+                if model_obj.access and model_obj.access.value != "public":
+                    non_public_upstream_dependencies.append(model_obj.name)
 
         if non_public_upstream_dependencies:
             raise DbtBouncerFailedCheckError(
@@ -173,16 +173,16 @@ class CheckExposureOnView(BaseCheck):
         if self.exposure is None:
             raise DbtBouncerFailedCheckError("self.exposure is None")
         non_table_upstream_dependencies = []
-        for model in self.exposure.depends_on.nodes:
+        for model in getattr(self.exposure.depends_on, "nodes", []) or []:
             if (
                 next(m for m in self.models if m.unique_id == model).resource_type
                 == "model"
                 and next(m for m in self.models if m.unique_id == model).package_name
                 == self.exposure.package_name
             ):
-                model = next(m for m in self.models if m.unique_id == model)
-                if model.config.materialized in self.materializations_to_include:
-                    non_table_upstream_dependencies.append(model.name)
+                model_obj = next(m for m in self.models if m.unique_id == model)
+                if model_obj.config.materialized in self.materializations_to_include:
+                    non_table_upstream_dependencies.append(model_obj.name)
 
         if non_table_upstream_dependencies:
             raise DbtBouncerFailedCheckError(
