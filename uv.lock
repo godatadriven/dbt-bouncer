@@ -197,14 +197,14 @@ wheels = [
 
 [[package]]
 name = "click"
-version = "8.1.8"
+version = "8.2.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "colorama", marker = "sys_platform == 'win32'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/b9/2e/0090cbf739cee7d23781ad4b89a9894a41538e4fcf4c31dcdd705b78eb8b/click-8.1.8.tar.gz", hash = "sha256:ed53c9d8990d83c2a27deae68e4ee337473f6330c040a31d4225c9574d16096a", size = 226593, upload-time = "2024-12-21T18:38:44.339Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/60/6c/8ca2efa64cf75a977a0d7fac081354553ebe483345c734fb6b6515d96bbc/click-8.2.1.tar.gz", hash = "sha256:27c491cc05d968d271d5a1db13e3b5a184636d9d930f148c50b038f0d0646202", size = 286342, upload-time = "2025-05-20T23:19:49.832Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/7e/d4/7ebdbd03970677812aac39c869717059dbb71a4cfc033ca6e5221787892c/click-8.1.8-py3-none-any.whl", hash = "sha256:63c132bbbed01578a06712a2d1f497bb62d9c1c0d329b7903a866228027263b2", size = 98188, upload-time = "2024-12-21T18:38:41.666Z" },
+    { url = "https://files.pythonhosted.org/packages/85/32/10bb5764d90a8eee674e9dc6f4db6a0ab47c8c4d0d83c27f7c39ac415a4d/click-8.2.1-py3-none-any.whl", hash = "sha256:61a3265b914e850b85317d0b3109c7f8cd35a670f963866005d6ef1d5175a12b", size = 102215, upload-time = "2025-05-20T23:19:47.796Z" },
 ]
 
 [[package]]
@@ -398,9 +398,9 @@ docs = [
 [package.metadata]
 requires-dist = [
     { name = "bandit", marker = "extra == 'dev'", specifier = "~=1.0" },
-    { name = "click", specifier = "<9" },
+    { name = "click", specifier = "!=8.3.0,!=8.3.1,<9" },
     { name = "dbt-artifacts-parser", specifier = ">=0.8" },
-    { name = "dbt-core", marker = "extra == 'dev'", specifier = ">=1.10.0,<2" },
+    { name = "dbt-core", marker = "extra == 'dev'", specifier = ">=1.11.2,<2" },
     { name = "dbt-duckdb", marker = "extra == 'dev'", specifier = "~=1.0" },
     { name = "h11", specifier = ">=0.16.0" },
     { name = "jellyfish", specifier = ">=1,<2" },
@@ -461,7 +461,7 @@ wheels = [
 
 [[package]]
 name = "dbt-core"
-version = "1.10.17"
+version = "1.11.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "agate" },
@@ -487,9 +487,9 @@ dependencies = [
     { name = "sqlparse" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/f0/2c/a614f4c41af9b63cafb88e182c3a30aa36faf7eb4cad9b99b927709a7f0d/dbt_core-1.10.17.tar.gz", hash = "sha256:b3b7a9d9ff839405840659034e6f92d07fb27c4714476dc8cfdc5359a7b864c2", size = 900268, upload-time = "2025-12-20T01:32:13.059Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/89/82/662621bd430fc6d8ee8e0e917bc551efba1b08b82372b3c0f37fd3ef4746/dbt_core-1.11.2.tar.gz", hash = "sha256:3306fee149b9f4e648071f2c9a46c0551100e1c829f13ad7ce026eb7226ad454", size = 914480, upload-time = "2025-12-22T19:14:04.488Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/47/f1/d68b24831e8855d0b4ecc54f8341cf8d3e0a60046af08a65817954f3f4ab/dbt_core-1.10.17-py3-none-any.whl", hash = "sha256:a4a807dc37ecd88899616689c68a6446b46231c11d7e3776f4f1a06e7becce76", size = 986991, upload-time = "2025-12-20T01:32:11.079Z" },
+    { url = "https://files.pythonhosted.org/packages/02/57/dad11af27a21840252234b05d682d73ca8eb721fc79d1b4aa9502bb1b6f5/dbt_core-1.11.2-py3-none-any.whl", hash = "sha256:ac332fd61a4494494f48e1bbdc0696e309e79036b94eb0a929233bb71f4b3898", size = 1004018, upload-time = "2025-12-22T19:14:03.213Z" },
 ]
 
 [[package]]
@@ -1929,7 +1929,7 @@ wheels = [
 
 [[package]]
 name = "shandy-sqlfmt"
-version = "0.28.2"
+version = "0.27.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "click" },
@@ -1937,9 +1937,9 @@ dependencies = [
     { name = "platformdirs" },
     { name = "tqdm" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/83/96/9e4ecbe43d4bb91d651f5f091c5f72204461b1568dc5a5eaa246a64b562f/shandy_sqlfmt-0.28.2.tar.gz", hash = "sha256:0a78a2eee23f8b84b19a2895ca4608237d6da19037ce71346417fe01e97bad8b", size = 70725, upload-time = "2025-10-25T04:26:51.28Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/b3/88/db0e588e7de42eb56f4052f6392011d09748396669ae2eab815487035f52/shandy_sqlfmt-0.27.0.tar.gz", hash = "sha256:1c9ac6beb5f17f66e7b87b4c70be586e87db538cd7d72f42dedb85132e8b3a96", size = 62380, upload-time = "2025-07-28T18:11:42.774Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/30/2b/71998158977befe818fb214d7aa06eace64023ef1608eb87d6591ab73957/shandy_sqlfmt-0.28.2-py3-none-any.whl", hash = "sha256:5c0bda7e66cf8782d960f22c97c22d98541d6e75febd6b21b94c10ca6eb2514f", size = 71857, upload-time = "2025-10-25T04:26:49.797Z" },
+    { url = "https://files.pythonhosted.org/packages/e6/b7/c63d537a502dab52ba24a81f29608641950ab0efe2a3b552729b0c30ee1a/shandy_sqlfmt-0.27.0-py3-none-any.whl", hash = "sha256:84359f5e4b8754852019e0b7dde6ba438594adbdfdc0131bc17cb5b51f88b72e", size = 71115, upload-time = "2025-07-28T18:11:41.535Z" },
 ]
 
 [package.optional-dependencies]
