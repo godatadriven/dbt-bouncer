@@ -33,7 +33,7 @@ class Status(Enum):
 
 
 class Status1(Enum):
-    pass_ = 'pass'
+    pass_ = 'pass' # nosec
     error = 'error'
     fail = 'fail'
     warn = 'warn'
@@ -41,7 +41,7 @@ class Status1(Enum):
 
 
 class Status2(Enum):
-    pass_ = 'pass'
+    pass_ = 'pass' # nosec
     warn = 'warn'
     error = 'error'
     runtime_error = 'runtime error'

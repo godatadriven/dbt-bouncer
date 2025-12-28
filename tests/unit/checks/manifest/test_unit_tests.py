@@ -18,6 +18,7 @@ from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import Nodes4
 from dbt_bouncer.artifact_parsers.parsers_manifest import (
     DbtBouncerManifest,  # noqa: F401
 )
+from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.checks.manifest.check_unit_tests import (
     CheckUnitTestCoverage,
     CheckUnitTestExpectFormats,
@@ -259,7 +260,7 @@ CheckUnitTestGivenFormats.model_rebuild()
                     },
                 )
             ],
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
     indirect=["manifest_obj"],
@@ -326,7 +327,7 @@ def test_check_unit_test_coverage(
                     "unique_id": "unit_test.package_name.model_1.unit_test_1",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
     indirect=["manifest_obj"],
@@ -393,7 +394,7 @@ def test_check_unit_test_expect_format(
                     "unique_id": "unit_test.package_name.model_1.unit_test_1",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
     indirect=["manifest_obj"],

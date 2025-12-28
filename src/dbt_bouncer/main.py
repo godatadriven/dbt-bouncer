@@ -36,6 +36,7 @@ def run_bouncer(
         int: Exit code (0 for success, 1 for failure).
 
     Raises:
+        AssertionError: If config_file_source is None.
         RuntimeError: If output file has an invalid extension or other runtime errors.
 
     """
@@ -74,7 +75,8 @@ def run_bouncer(
         if config_file_source is None:
             config_file_source = "COMMANDLINE"
 
-    assert config_file_source is not None
+    if config_file_source is None:
+        raise AssertionError("config_file_source cannot be None")
 
     config_file_path = get_config_file_path(
         config_file=config_file,

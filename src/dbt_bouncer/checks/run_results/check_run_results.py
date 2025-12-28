@@ -9,6 +9,8 @@ from dbt_bouncer.check_base import BaseCheck
 if TYPE_CHECKING:
     from dbt_bouncer.artifact_parsers.parsers_run_results import DbtBouncerRunResultBase
 
+from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
+
 
 class CheckRunResultsMaxExecutionTime(BaseCheck):
     """Each result can take a maximum duration (seconds).
@@ -45,10 +47,16 @@ class CheckRunResultsMaxExecutionTime(BaseCheck):
     run_result: "DbtBouncerRunResultBase" = Field(default=None)
 
     def execute(self) -> None:
-        """Execute the check."""
-        assert self.run_result.execution_time <= self.max_execution_time_seconds, (
-            f"`{self.run_result.unique_id.split('.')[-1]}` has an execution time ({self.run_result.execution_time} greater than permitted ({self.max_execution_time_seconds}s)."
-        )
+        """Execute the check.
+
+        Raises:
+            DbtBouncerFailedCheckError: If execution time is greater than permitted.
+
+        """
+        if self.run_result.execution_time > self.max_execution_time_seconds:
+            raise DbtBouncerFailedCheckError(
+                f"`{self.run_result.unique_id.split('.')[-1]}` has an execution time ({self.run_result.execution_time} greater than permitted ({self.max_execution_time_seconds}s)."
+            )
 
 
 class CheckRunResultsMaxGigabytesBilled(BaseCheck):
@@ -89,6 +97,7 @@ class CheckRunResultsMaxGigabytesBilled(BaseCheck):
         """Execute the check.
 
         Raises:
+            DbtBouncerFailedCheckError: If gigabytes billed is greater than permitted.
             RuntimeError: If running with adapter other than `dbt-bigquery`.
 
         """
@@ -101,6 +110,7 @@ class CheckRunResultsMaxGigabytesBilled(BaseCheck):
                 "`bytes_billed` not found in adapter response. Are you using the `dbt-bigquery` adapter?",
             ) from e
 
-        assert gigabytes_billed < self.max_gigabytes_billed, (
-            f"`{self.run_result.unique_id.split('.')[-2]}` results in ({gigabytes_billed} billed bytes, this is greater than permitted ({self.max_gigabytes_billed})."
-        )
+        if gigabytes_billed > self.max_gigabytes_billed:
+            raise DbtBouncerFailedCheckError(
+                f"`{self.run_result.unique_id.split('.')[-2]}` results in ({gigabytes_billed} billed bytes, this is greater than permitted ({self.max_gigabytes_billed})."
+            )

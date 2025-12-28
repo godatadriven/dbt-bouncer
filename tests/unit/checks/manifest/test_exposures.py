@@ -8,6 +8,7 @@ from dbt_bouncer.artifact_parsers.parsers_manifest import (  # noqa: F401
     DbtBouncerModel,
     DbtBouncerModelBase,
 )
+from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.checks.manifest.check_exposures import (
     CheckExposureOnModel,
     CheckExposureOnNonPublicModels,
@@ -69,7 +70,7 @@ CheckExposureOnView.model_rebuild()
             ),
             1,
             1,
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
         (
             Exposures(
@@ -91,7 +92,7 @@ CheckExposureOnView.model_rebuild()
             ),
             100,
             2,
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
 )
@@ -206,7 +207,7 @@ def test_check_exposure_based_on_model(
                     },
                 ),
             ],
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
 )
@@ -355,7 +356,7 @@ def test_check_exposure_based_on_non_public_models(exposure, models, expectation
                     },
                 ),
             ],
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
         (
             Exposures(
@@ -406,7 +407,7 @@ def test_check_exposure_based_on_non_public_models(exposure, models, expectation
                     },
                 ),
             ],
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
 )

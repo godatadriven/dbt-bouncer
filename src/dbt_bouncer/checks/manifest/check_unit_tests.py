@@ -17,6 +17,7 @@ if TYPE_CHECKING:
         DbtBouncerModelBase,
     )
 
+from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import object_in_path
 
 
@@ -76,8 +77,14 @@ class CheckUnitTestCoverage(BaseModel):
     unit_tests: list["UnitTests"] = Field(default=[])
 
     def execute(self) -> None:
-        """Execute the check."""
-        assert self.manifest_obj is not None
+        """Execute the check.
+
+        Raises:
+            DbtBouncerFailedCheckError: If unit test coverage is less than permitted minimum.
+
+        """
+        if self.manifest_obj is None:
+            raise DbtBouncerFailedCheckError("self.manifest_obj is None")
         if get_package_version_number(
             self.manifest_obj.manifest.metadata.dbt_version or "0.0.0"
         ) >= get_package_version_number("1.8.0"):
@@ -98,9 +105,10 @@ class CheckUnitTestCoverage(BaseModel):
                 num_models_with_unit_tests / len(relevant_models)
             ) * 100
 
-            assert unit_test_coverage_pct >= self.min_unit_test_coverage_pct, (
-                f"Only {unit_test_coverage_pct}% of models have a unit test, this is less than the permitted minimum of {self.min_unit_test_coverage_pct}%."
-            )
+            if unit_test_coverage_pct < self.min_unit_test_coverage_pct:
+                raise DbtBouncerFailedCheckError(
+                    f"Only {unit_test_coverage_pct}% of models have a unit test, this is less than the permitted minimum of {self.min_unit_test_coverage_pct}%."
+                )
         else:
             logging.warning(
                 "The `check_unit_test_expect_format` check is only supported for dbt 1.8.0 and above.",
@@ -145,9 +153,16 @@ class CheckUnitTestExpectFormats(BaseCheck):
     unit_test: "UnitTests | None" = Field(default=None)
 
     def execute(self) -> None:
-        """Execute the check."""
-        assert self.manifest_obj is not None
-        assert self.unit_test is not None
+        """Execute the check.
+
+        Raises:
+            DbtBouncerFailedCheckError: If unit test expect format is not permitted.
+
+        """
+        if self.manifest_obj is None:
+            raise DbtBouncerFailedCheckError("self.manifest_obj is None")
+        if self.unit_test is None:
+            raise DbtBouncerFailedCheckError("self.unit_test is None")
         if get_package_version_number(
             self.manifest_obj.manifest.metadata.dbt_version or "0.0.0"
         ) >= get_package_version_number("1.8.0"):
@@ -163,11 +178,12 @@ class CheckUnitTestExpectFormats(BaseCheck):
                 else None
             )
 
-            assert format_value in self.permitted_formats, (
-                f"Unit test `{self.unit_test.name}` has an `expect` format that is not permitted. "
-                f"Permitted formats are: {self.permitted_formats}. "
-                f"Found: {format_value}"
-            )
+            if format_value not in self.permitted_formats:
+                raise DbtBouncerFailedCheckError(
+                    f"Unit test `{self.unit_test.name}` has an `expect` format that is not permitted. "
+                    f"Permitted formats are: {self.permitted_formats}. "
+                    f"Found: {format_value}"
+                )
         else:
             logging.warning(
                 "The `check_unit_test_expect_format` check is only supported for dbt 1.8.0 and above.",
@@ -212,18 +228,26 @@ class CheckUnitTestGivenFormats(BaseCheck):
     unit_test: "UnitTests | None" = Field(default=None)
 
     def execute(self) -> None:
-        """Execute the check."""
-        assert self.manifest_obj is not None
-        assert self.unit_test is not None
+        """Execute the check.
+
+        Raises:
+            DbtBouncerFailedCheckError: If unit test given formats are not permitted.
+
+        """
+        if self.manifest_obj is None:
+            raise DbtBouncerFailedCheckError("self.manifest_obj is None")
+        if self.unit_test is None:
+            raise DbtBouncerFailedCheckError("self.unit_test is None")
         if get_package_version_number(
             self.manifest_obj.manifest.metadata.dbt_version or "0.0.0"
         ) >= get_package_version_number("1.8.0"):
             given_formats = [
                 i.format.value for i in self.unit_test.given if i.format is not None
             ]
-            assert all(e in self.permitted_formats for e in given_formats), (
-                f"Unit test `{self.unit_test.name}` has given formats which are not permitted. Permitted formats are: {self.permitted_formats}."
-            )
+            if not all(e in self.permitted_formats for e in given_formats):
+                raise DbtBouncerFailedCheckError(
+                    f"Unit test `{self.unit_test.name}` has given formats which are not permitted. Permitted formats are: {self.permitted_formats}."
+                )
         else:
             logging.warning(
                 "The `check_unit_test_given_formats` check is only supported for dbt 1.8.0 and above.",

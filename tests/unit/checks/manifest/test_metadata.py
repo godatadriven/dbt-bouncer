@@ -5,6 +5,7 @@ import pytest
 from dbt_bouncer.artifact_parsers.parsers_manifest import (
     DbtBouncerManifest,  # noqa: F401
 )
+from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.checks.manifest.check_metadata import CheckProjectName
 
 CheckProjectName.model_rebuild()
@@ -21,7 +22,7 @@ CheckProjectName.model_rebuild()
         (
             "manifest_obj",
             "^company_",
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
     indirect=["manifest_obj"],
