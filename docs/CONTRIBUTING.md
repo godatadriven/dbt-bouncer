@@ -38,6 +38,7 @@ There are some tools that will be helpful to you in developing locally. While th
 
 These are the tools used in `dbt-bouncer` development and testing:
 
+- [`bandit`](https://github.com/PyCQA/bandit) to check for security issues.
 - [`click`](https://click.palletsprojects.com/en/8.1.x/) to create our CLI interface.
 - [GitHub Actions](https://github.com/features/actions) for automating tests and checks, once a PR is pushed to the `dbt-bouncer` repository.
 - [`make`](https://users.cs.duke.edu/~ola/courses/programming/Makefiles/Makefiles.html) to run multiple setup or test steps in combination.

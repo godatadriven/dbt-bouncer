@@ -11,6 +11,8 @@ if TYPE_CHECKING:
         DbtBouncerSnapshotBase,
     )
 
+from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
+
 
 class CheckSnapshotHasTags(BaseCheck):
     """Snapshots must have the specified tags.
@@ -43,19 +45,30 @@ class CheckSnapshotHasTags(BaseCheck):
     tags: list[str]
 
     def execute(self) -> None:
-        """Execute the check."""
-        assert self.snapshot is not None
+        """Execute the check.
+
+        Raises:
+            DbtBouncerFailedCheckError: If snapshot does not have required tags.
+
+        """
+        if self.snapshot is None:
+            raise DbtBouncerFailedCheckError("self.snapshot is None")
         if self.criteria == "any":
-            assert any(tag in self.snapshot.tags for tag in self.tags), (
-                f"`{self.snapshot.name}` does not have any of the required tags: {self.tags}."
-            )
+            if not any(tag in self.snapshot.tags for tag in self.tags):
+                raise DbtBouncerFailedCheckError(
+                    f"`{self.snapshot.name}` does not have any of the required tags: {self.tags}."
+                )
         elif self.criteria == "all":
             missing_tags = [tag for tag in self.tags if tag not in self.snapshot.tags]
-            assert not missing_tags, (
-                f"`{self.snapshot.name}` is missing required tags: {missing_tags}."
-            )
-        elif self.criteria == "one":
-            assert sum(tag in self.snapshot.tags for tag in self.tags) == 1, (
+            if missing_tags:
+                raise DbtBouncerFailedCheckError(
+                    f"`{self.snapshot.name}` is missing required tags: {missing_tags}."
+                )
+        elif (
+            self.criteria == "one"
+            and sum(tag in self.snapshot.tags for tag in self.tags) != 1
+        ):
+            raise DbtBouncerFailedCheckError(
                 f"`{self.snapshot.name}` must have exactly one of the required tags: {self.tags}."
             )
 
@@ -90,13 +103,20 @@ class CheckSnapshotNames(BaseCheck):
     snapshot_name_pattern: str
 
     def execute(self) -> None:
-        """Execute the check."""
-        assert self.snapshot is not None
-        assert (
+        """Execute the check.
+
+        Raises:
+            DbtBouncerFailedCheckError: If snapshot name does not match regex.
+
+        """
+        if self.snapshot is None:
+            raise DbtBouncerFailedCheckError("self.snapshot is None")
+        if (
             re.compile(self.snapshot_name_pattern.strip()).match(
                 str(self.snapshot.name)
             )
-            is not None
-        ), (
-            f"`{self.snapshot.name}` does not match the supplied regex `{self.snapshot_name_pattern.strip()})`."
-        )
+            is None
+        ):
+            raise DbtBouncerFailedCheckError(
+                f"`{self.snapshot.name}` does not match the supplied regex `{self.snapshot_name_pattern.strip()})`."
+            )

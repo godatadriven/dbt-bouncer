@@ -9,6 +9,9 @@ if TYPE_CHECKING:
     from dbt_bouncer.artifact_parsers.parsers_manifest import DbtBouncerManifest
 
 
+from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
+
+
 class CheckProjectName(BaseModel):
     """Enforce that the name of the dbt project matches a supplied regex. Generally used to enforce that project names conform to something like  `company_<DOMAIN>`.
 
@@ -51,16 +54,24 @@ class CheckProjectName(BaseModel):
     )
 
     def execute(self) -> None:
-        """Execute the check."""
-        assert self.manifest_obj is not None
+        """Execute the check.
+
+        Raises:
+            DbtBouncerFailedCheckError: If project name does not match regex.
+
+        """
+        if self.manifest_obj is None:
+            raise DbtBouncerFailedCheckError("self.manifest_obj is None")
+
         package_name = (
             self.package_name or self.manifest_obj.manifest.metadata.project_name
         )
-        assert (
+        if (
             re.compile(self.project_name_pattern.strip()).match(
                 str(package_name),
             )
-            is not None
-        ), (
-            f"Project name (`{package_name}`) does not conform to the supplied regex `({self.project_name_pattern.strip()})`."
-        )
+            is None
+        ):
+            raise DbtBouncerFailedCheckError(
+                f"Project name (`{package_name}`) does not conform to the supplied regex `({self.project_name_pattern.strip()})`."
+            )

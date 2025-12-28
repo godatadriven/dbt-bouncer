@@ -14,6 +14,7 @@ with warnings.catch_warnings():
         DbtBouncerSnapshotBase,
     )
 
+from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.checks.manifest.check_snapshots import (
     CheckSnapshotHasTags,
     CheckSnapshotNames,
@@ -66,7 +67,7 @@ CheckSnapshotNames.model_rebuild()
             ),
             ["tag_1"],
             "all",
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
         (
             Nodes7(
@@ -108,7 +109,7 @@ CheckSnapshotNames.model_rebuild()
             ),
             ["tag_1", "tag_2"],
             "any",
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
         (
             Nodes7(
@@ -150,7 +151,7 @@ CheckSnapshotNames.model_rebuild()
             ),
             ["tag_1", "tag_2"],
             "one",
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
 )
@@ -207,7 +208,7 @@ def test_check_snapshot_has_tags(snapshot, tags, criteria, expectation):
                     "unique_id": "snapshot.package_name.snapshot_1",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
 )

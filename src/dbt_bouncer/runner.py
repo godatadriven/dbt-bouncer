@@ -13,6 +13,7 @@ import click
 from progress.bar import Bar
 from tabulate import tabulate
 
+from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import (
     create_github_comment_file,
     get_check_objects,
@@ -201,21 +202,25 @@ def runner(
             check["check"].execute()
             check["outcome"] = "success"
         except Exception as e:
-            failure_message_full = list(
-                traceback.TracebackException.from_exception(e).format(),
-            )
-            failure_message = failure_message_full[-1].strip()
+            if isinstance(e, DbtBouncerFailedCheckError):
+                failure_message = e.message
+            else:
+                failure_message_full = list(
+                    traceback.TracebackException.from_exception(e).format(),
+                )
+                failure_message = failure_message_full[-1].strip()
+
             if check["check"].description:
                 failure_message = f"{check['check'].description} - {failure_message}"
 
             logging.debug(
-                f"Check {check['check_run_id']} failed: {' '.join(failure_message_full)}"
+                f"Check {check['check_run_id']} failed: {' '.join(failure_message)}"
             )
             check["outcome"] = "failed"
             check["failure_message"] = failure_message
 
             # If a check encountered an issue, change severity to warn
-            if not isinstance(e, AssertionError):
+            if not isinstance(e, DbtBouncerFailedCheckError):
                 check["severity"] = "warn"
                 check["failure_message"] = (
                     f"`dbt-bouncer` encountered an error ({failure_message}), run with `-v` to see more details or report an issue at https://github.com/godatadriven/dbt-bouncer/issues."

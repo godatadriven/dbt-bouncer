@@ -13,6 +13,8 @@ if TYPE_CHECKING:
 
 from pydantic import Field
 
+from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
+
 
 class CheckSemanticModelOnNonPublicModels(BaseCheck):
     """Semantic models should be based on public models only.
@@ -40,7 +42,12 @@ class CheckSemanticModelOnNonPublicModels(BaseCheck):
     semantic_model: "DbtBouncerSemanticModelBase" = Field(default=None)
 
     def execute(self) -> None:
-        """Execute the check."""
+        """Execute the check.
+
+        Raises:
+            DbtBouncerFailedCheckError: If semantic model is based on non-public models.
+
+        """
         non_public_upstream_dependencies = []
         for model in self.semantic_model.depends_on.nodes:
             if (
@@ -53,6 +60,7 @@ class CheckSemanticModelOnNonPublicModels(BaseCheck):
                 if model.access.value != "public":
                     non_public_upstream_dependencies.append(model.name)
 
-        assert not non_public_upstream_dependencies, (
-            f"Semantic model `{self.semantic_model.name}` is based on a model(s) that is not public: {non_public_upstream_dependencies}."
-        )
+        if non_public_upstream_dependencies:
+            raise DbtBouncerFailedCheckError(
+                f"Semantic model `{self.semantic_model.name}` is based on a model(s) that is not public: {non_public_upstream_dependencies}."
+            )

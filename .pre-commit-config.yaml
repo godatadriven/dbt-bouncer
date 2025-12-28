@@ -66,3 +66,11 @@ repos:
           pass_filenames: true
           require_serial: true
           types_or: [python, pyi]
+    - repo: local
+      hooks:
+        - id: bandit
+          entry: uv run bandit -r ./src
+          language: system
+          name: bandit
+          pass_filenames: false
+          require_serial: true

@@ -25,6 +25,7 @@ if TYPE_CHECKING:
         DbtBouncerTestBase,
     )
 
+from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import clean_path_str, get_clean_model_name
 
 
@@ -66,11 +67,18 @@ class CheckModelAccess(BaseCheck):
     name: Literal["check_model_access"]
 
     def execute(self) -> None:
-        """Execute the check."""
-        assert self.model is not None
-        assert self.model.access.value == self.access, (
-            f"`{get_clean_model_name(self.model.unique_id)}` has `{self.model.access.value}` access, it should have access `{self.access}`."
-        )
+        """Execute the check.
+
+        Raises:
+            DbtBouncerFailedCheckError: If access is incorrect.
+
+        """
+        if self.model is None:
+            raise DbtBouncerFailedCheckError("self.model is None")
+        if self.model.access.value != self.access:
+            raise DbtBouncerFailedCheckError(
+                f"`{get_clean_model_name(self.model.unique_id)}` has `{self.model.access.value}` access, it should have access `{self.access}`."
+            )
 
 
 class CheckModelCodeDoesNotContainRegexpPattern(BaseCheck):
@@ -104,16 +112,23 @@ class CheckModelCodeDoesNotContainRegexpPattern(BaseCheck):
     regexp_pattern: str
 
     def execute(self) -> None:
-        """Execute the check."""
-        assert self.model is not None
-        assert (
+        """Execute the check.
+
+        Raises:
+            DbtBouncerFailedCheckError: If code contains banned string.
+
+        """
+        if self.model is None:
+            raise DbtBouncerFailedCheckError("self.model is None")
+        if (
             re.compile(self.regexp_pattern.strip(), flags=re.DOTALL).match(
                 str(self.model.raw_code)
             )
-            is None
-        ), (
-            f"`{get_clean_model_name(self.model.unique_id)}` contains a banned string: `{self.regexp_pattern.strip()}`."
-        )
+            is not None
+        ):
+            raise DbtBouncerFailedCheckError(
+                f"`{get_clean_model_name(self.model.unique_id)}` contains a banned string: `{self.regexp_pattern.strip()}`."
+            )
 
 
 class CheckModelContractsEnforcedForPublicModel(BaseCheck):
@@ -141,10 +156,19 @@ class CheckModelContractsEnforcedForPublicModel(BaseCheck):
     name: Literal["check_model_contract_enforced_for_public_model"]
 
     def execute(self) -> None:
-        """Execute the check."""
-        assert self.model is not None
-        if self.model.access.value == "public":
-            assert self.model.contract.enforced is True, (
+        """Execute the check.
+
+        Raises:
+            DbtBouncerFailedCheckError: If contracts are not enforced for public model.
+
+        """
+        if self.model is None:
+            raise DbtBouncerFailedCheckError("self.model is None")
+        if (
+            self.model.access.value == "public"
+            and self.model.contract.enforced is not True
+        ):
+            raise DbtBouncerFailedCheckError(
                 f"`{get_clean_model_name(self.model.unique_id)}` is a public model but does not have contracts enforced."
             )
 
@@ -187,26 +211,35 @@ class CheckModelDependsOnMacros(BaseCheck):
     required_macros: list[str]
 
     def execute(self) -> None:
-        """Execute the check."""
-        assert self.model is not None
+        """Execute the check.
+
+        Raises:
+            DbtBouncerFailedCheckError: If model does not depend on required macros.
+
+        """
+        if self.model is None:
+            raise DbtBouncerFailedCheckError("self.model is None")
         upstream_macros = [
             (".").join(m.split(".")[1:]) for m in self.model.depends_on.macros
         ]
         if self.criteria == "any":
-            assert any(macro in upstream_macros for macro in self.required_macros), (
-                f"`{get_clean_model_name(self.model.unique_id)}` does not depend on any of the required macros: {self.required_macros}."
-            )
+            if not any(macro in upstream_macros for macro in self.required_macros):
+                raise DbtBouncerFailedCheckError(
+                    f"`{get_clean_model_name(self.model.unique_id)}` does not depend on any of the required macros: {self.required_macros}."
+                )
         elif self.criteria == "all":
             missing_macros = [
                 macro for macro in self.required_macros if macro not in upstream_macros
             ]
-            assert not missing_macros, (
-                f"`{get_clean_model_name(self.model.unique_id)}` is missing required macros: {missing_macros}."
-            )
-        elif self.criteria == "one":
-            assert (
-                sum(macro in upstream_macros for macro in self.required_macros) == 1
-            ), (
+            if missing_macros:
+                raise DbtBouncerFailedCheckError(
+                    f"`{get_clean_model_name(self.model.unique_id)}` is missing required macros: {missing_macros}."
+                )
+        elif (
+            self.criteria == "one"
+            and sum(macro in upstream_macros for macro in self.required_macros) != 1
+        ):
+            raise DbtBouncerFailedCheckError(
                 f"`{get_clean_model_name(self.model.unique_id)}` must depend on exactly one of the required macros: {self.required_macros}."
             )
 
@@ -236,14 +269,21 @@ class CheckModelDependsOnMultipleSources(BaseCheck):
     name: Literal["check_model_depends_on_multiple_sources"]
 
     def execute(self) -> None:
-        """Execute the check."""
-        assert self.model is not None
+        """Execute the check.
+
+        Raises:
+            DbtBouncerFailedCheckError: If model references more than one source.
+
+        """
+        if self.model is None:
+            raise DbtBouncerFailedCheckError("self.model is None")
         num_reffed_sources = sum(
             x.split(".")[0] == "source" for x in self.model.depends_on.nodes
         )
-        assert num_reffed_sources <= 1, (
-            f"`{get_clean_model_name(self.model.unique_id)}` references more than one source."
-        )
+        if num_reffed_sources > 1:
+            raise DbtBouncerFailedCheckError(
+                f"`{get_clean_model_name(self.model.unique_id)}` references more than one source."
+            )
 
 
 class CheckModelDescriptionContainsRegexPattern(BaseCheck):
@@ -274,13 +314,20 @@ class CheckModelDescriptionContainsRegexPattern(BaseCheck):
     regexp_pattern: str
 
     def execute(self) -> None:
-        """Execute the check."""
-        assert self.model is not None
-        assert re.compile(self.regexp_pattern.strip(), flags=re.DOTALL).match(
+        """Execute the check.
+
+        Raises:
+            DbtBouncerFailedCheckError: If description does not match regex.
+
+        """
+        if self.model is None:
+            raise DbtBouncerFailedCheckError("self.model is None")
+        if not re.compile(self.regexp_pattern.strip(), flags=re.DOTALL).match(
             str(self.model.description)
-        ), (
-            f"""`{get_clean_model_name(self.model.unique_id)}`'s description "{self.model.description}" doesn't match the supplied regex: {self.regexp_pattern}."""
-        )
+        ):
+            raise DbtBouncerFailedCheckError(
+                f"""`{get_clean_model_name(self.model.unique_id)}`'s description "{self.model.description}" doesn't match the supplied regex: {self.regexp_pattern}."""
+            )
 
 
 class CheckModelDescriptionPopulated(BaseCheck):
@@ -317,13 +364,20 @@ class CheckModelDescriptionPopulated(BaseCheck):
     name: Literal["check_model_description_populated"]
 
     def execute(self) -> None:
-        """Execute the check."""
-        assert self.model is not None
-        assert self._is_description_populated(
+        """Execute the check.
+
+        Raises:
+            DbtBouncerFailedCheckError: If description is not populated.
+
+        """
+        if self.model is None:
+            raise DbtBouncerFailedCheckError("self.model is None")
+        if not self._is_description_populated(
             self.model.description, self.min_description_length
-        ), (
-            f"`{get_clean_model_name(self.model.unique_id)}` does not have a populated description."
-        )
+        ):
+            raise DbtBouncerFailedCheckError(
+                f"`{get_clean_model_name(self.model.unique_id)}` does not have a populated description."
+            )
 
 
 class CheckModelDirectories(BaseCheck):
@@ -373,24 +427,27 @@ class CheckModelDirectories(BaseCheck):
         """Execute the check.
 
         Raises:
-            AssertionError: If model located in `./models`.
+            DbtBouncerFailedCheckError: If model located in `./models` or invalid subdirectory.
 
         """
-        assert self.model is not None
+        if self.model is None:
+            raise DbtBouncerFailedCheckError("self.model is None")
         clean_path = clean_path_str(self.model.original_file_path)
         matched_path = re.compile(self.include.strip().rstrip("/")).match(clean_path)
-        assert matched_path is not None
+        if matched_path is None:
+            raise DbtBouncerFailedCheckError("matched_path is None")
         path_after_match = clean_path[matched_path.end() + 1 :]
         directory_to_check = Path(path_after_match).parts[0]
 
         if directory_to_check.replace(".sql", "") == self.model.name:
-            raise AssertionError(
+            raise DbtBouncerFailedCheckError(
                 f"`{get_clean_model_name(self.model.unique_id)}` is not located in a valid sub-directory ({self.permitted_sub_directories})."
             )
         else:
-            assert directory_to_check in self.permitted_sub_directories, (
-                f"`{get_clean_model_name(self.model.unique_id)}` is located in the `{directory_to_check}` sub-directory, this is not a valid sub-directory ({self.permitted_sub_directories})."
-            )
+            if directory_to_check not in self.permitted_sub_directories:
+                raise DbtBouncerFailedCheckError(
+                    f"`{get_clean_model_name(self.model.unique_id)}` is located in the `{directory_to_check}` sub-directory, this is not a valid sub-directory ({self.permitted_sub_directories})."
+                )
 
 
 class CheckModelDocumentedInSameDirectory(BaseCheck):
@@ -418,15 +475,24 @@ class CheckModelDocumentedInSameDirectory(BaseCheck):
     name: Literal["check_model_documented_in_same_directory"]
 
     def execute(self) -> None:
-        """Execute the check."""
-        assert self.model is not None
+        """Execute the check.
+
+        Raises:
+            DbtBouncerFailedCheckError: If model is not documented in same directory.
+
+        """
+        if self.model is None:
+            raise DbtBouncerFailedCheckError("self.model is None")
         model_sql_path = Path(clean_path_str(self.model.original_file_path))
         model_sql_dir = model_sql_path.parent.parts
 
-        assert (  # noqa: PT018
+        if not (
             hasattr(self.model, "patch_path")
             and clean_path_str(self.model.patch_path) is not None
-        ), f"`{get_clean_model_name(self.model.unique_id)}` is not documented."
+        ):
+            raise DbtBouncerFailedCheckError(
+                f"`{get_clean_model_name(self.model.unique_id)}` is not documented."
+            )
 
         patch_path_str = clean_path_str(self.model.patch_path)
         start_idx = patch_path_str.find("models")
@@ -436,9 +502,10 @@ class CheckModelDocumentedInSameDirectory(BaseCheck):
         model_doc_path = Path(patch_path_str)
         model_doc_dir = model_doc_path.parent.parts
 
-        assert model_doc_dir == model_sql_dir, (
-            f"`{get_clean_model_name(self.model.unique_id)}` is documented in a different directory to the `.sql` file: `{'/'.join(model_doc_dir)}` vs `{'/'.join(model_sql_dir)}`."
-        )
+        if model_doc_dir != model_sql_dir:
+            raise DbtBouncerFailedCheckError(
+                f"`{get_clean_model_name(self.model.unique_id)}` is documented in a different directory to the `.sql` file: `{'/'.join(model_doc_dir)}` vs `{'/'.join(model_sql_dir)}`."
+            )
 
 
 class CheckModelFileName(BaseCheck):
@@ -473,14 +540,19 @@ class CheckModelFileName(BaseCheck):
     name: Literal["check_model_file_name"]
 
     def execute(self) -> None:
-        """Execute the check."""
-        assert self.model is not None
+        """Execute the check.
+
+        Raises:
+            DbtBouncerFailedCheckError: If file name does not match regex.
+
+        """
+        if self.model is None:
+            raise DbtBouncerFailedCheckError("self.model is None")
         file_name = Path(clean_path_str(self.model.original_file_path)).name
-        assert (
-            re.compile(self.file_name_pattern.strip()).match(file_name) is not None
-        ), (
-            f"`{get_clean_model_name(self.model.unique_id)}` is in a file that does not match the supplied regex `{self.file_name_pattern.strip()}`."
-        )
+        if re.compile(self.file_name_pattern.strip()).match(file_name) is None:
+            raise DbtBouncerFailedCheckError(
+                f"`{get_clean_model_name(self.model.unique_id)}` is in a file that does not match the supplied regex `{self.file_name_pattern.strip()}`."
+            )
 
 
 class CheckModelGrantPrivilege(BaseCheck):
@@ -512,17 +584,24 @@ class CheckModelGrantPrivilege(BaseCheck):
     privilege_pattern: str
 
     def execute(self) -> None:
-        """Execute the check."""
-        assert self.model is not None
+        """Execute the check.
+
+        Raises:
+            DbtBouncerFailedCheckError: If grant privileges do not match regex.
+
+        """
+        if self.model is None:
+            raise DbtBouncerFailedCheckError("self.model is None")
         non_complying_grants = [
             i
             for i in self.model.config.grants
             if re.compile(self.privilege_pattern.strip()).match(str(i)) is None
         ]
 
-        assert not non_complying_grants, (
-            f"`{get_clean_model_name(self.model.unique_id)}` has grants (`{self.privilege_pattern}`) that don't comply with the specified regexp pattern ({non_complying_grants})."
-        )
+        if non_complying_grants:
+            raise DbtBouncerFailedCheckError(
+                f"`{get_clean_model_name(self.model.unique_id)}` has grants (`{self.privilege_pattern}`) that don't comply with the specified regexp pattern ({non_complying_grants})."
+            )
 
 
 class CheckModelGrantPrivilegeRequired(BaseCheck):
@@ -554,11 +633,18 @@ class CheckModelGrantPrivilegeRequired(BaseCheck):
     privilege: str
 
     def execute(self) -> None:
-        """Execute the check."""
-        assert self.model is not None
-        assert self.privilege in self.model.config.grants, (
-            f"`{get_clean_model_name(self.model.unique_id)}` does not have the required grant privilege (`{self.privilege}`)."
-        )
+        """Execute the check.
+
+        Raises:
+            DbtBouncerFailedCheckError: If required grant privilege is missing.
+
+        """
+        if self.model is None:
+            raise DbtBouncerFailedCheckError("self.model is None")
+        if self.privilege not in self.model.config.grants:
+            raise DbtBouncerFailedCheckError(
+                f"`{get_clean_model_name(self.model.unique_id)}` does not have the required grant privilege (`{self.privilege}`)."
+            )
 
 
 class CheckModelHasContractsEnforced(BaseCheck):
@@ -587,11 +673,18 @@ class CheckModelHasContractsEnforced(BaseCheck):
     name: Literal["check_model_has_contracts_enforced"]
 
     def execute(self) -> None:
-        """Execute the check."""
-        assert self.model is not None
-        assert self.model.contract.enforced is True, (
-            f"`{get_clean_model_name(self.model.unique_id)}` does not have contracts enforced."
-        )
+        """Execute the check.
+
+        Raises:
+            DbtBouncerFailedCheckError: If contracts are not enforced.
+
+        """
+        if self.model is None:
+            raise DbtBouncerFailedCheckError("self.model is None")
+        if self.model.contract.enforced is not True:
+            raise DbtBouncerFailedCheckError(
+                f"`{get_clean_model_name(self.model.unique_id)}` does not have contracts enforced."
+            )
 
 
 class CheckModelHasExposure(BaseCheck):
@@ -625,17 +718,24 @@ class CheckModelHasExposure(BaseCheck):
     name: Literal["check_model_has_exposure"]
 
     def execute(self) -> None:
-        """Execute the check."""
-        assert self.model is not None
+        """Execute the check.
+
+        Raises:
+            DbtBouncerFailedCheckError: If model does not have an exposure.
+
+        """
+        if self.model is None:
+            raise DbtBouncerFailedCheckError("self.model is None")
         has_exposure = False
         for e in self.exposures:
             for m in e.depends_on.nodes:
                 if m == self.model.unique_id:
                     has_exposure = True
 
-        assert has_exposure, (
-            f"`{get_clean_model_name(self.model.unique_id)}` does not have an associated exposure."
-        )
+        if not has_exposure:
+            raise DbtBouncerFailedCheckError(
+                f"`{get_clean_model_name(self.model.unique_id)}` does not have an associated exposure."
+            )
 
 
 class CheckModelHasMetaKeys(BaseCheck):
@@ -668,15 +768,22 @@ class CheckModelHasMetaKeys(BaseCheck):
     name: Literal["check_model_has_meta_keys"]
 
     def execute(self) -> None:
-        """Execute the check."""
-        assert self.model is not None
+        """Execute the check.
+
+        Raises:
+            DbtBouncerFailedCheckError: If required meta keys are missing.
+
+        """
+        if self.model is None:
+            raise DbtBouncerFailedCheckError("self.model is None")
         missing_keys = find_missing_meta_keys(
             meta_config=self.model.meta,
             required_keys=self.keys.model_dump(),
         )
-        assert missing_keys == [], (
-            f"`{get_clean_model_name(self.model.unique_id)}` is missing the following keys from the `meta` config: {[x.replace('>>', '') for x in missing_keys]}"
-        )
+        if missing_keys != []:
+            raise DbtBouncerFailedCheckError(
+                f"`{get_clean_model_name(self.model.unique_id)}` is missing the following keys from the `meta` config: {[x.replace('>>', '') for x in missing_keys]}"
+            )
 
 
 class CheckModelHasNoUpstreamDependencies(BaseCheck):
@@ -704,11 +811,18 @@ class CheckModelHasNoUpstreamDependencies(BaseCheck):
     name: Literal["check_model_has_no_upstream_dependencies"]
 
     def execute(self) -> None:
-        """Execute the check."""
-        assert self.model is not None
-        assert len(self.model.depends_on.nodes) > 0, (
-            f"`{get_clean_model_name(self.model.unique_id)}` has no upstream dependencies, this likely indicates hard-coded tables references."
-        )
+        """Execute the check.
+
+        Raises:
+            DbtBouncerFailedCheckError: If model has no upstream dependencies.
+
+        """
+        if self.model is None:
+            raise DbtBouncerFailedCheckError("self.model is None")
+        if len(self.model.depends_on.nodes) <= 0:
+            raise DbtBouncerFailedCheckError(
+                f"`{get_clean_model_name(self.model.unique_id)}` has no upstream dependencies, this likely indicates hard-coded tables references."
+            )
 
 
 class CheckModelHasSemiColon(BaseCheck):
@@ -737,11 +851,18 @@ class CheckModelHasSemiColon(BaseCheck):
     name: Literal["check_model_has_semi_colon"]
 
     def execute(self) -> None:
-        """Execute the check."""
-        assert self.model is not None
-        assert self.model.raw_code.strip()[-1] != ";", (
-            f"`{get_clean_model_name(self.model.unique_id)}` ends with a semi-colon, this is not permitted."
-        )
+        """Execute the check.
+
+        Raises:
+            DbtBouncerFailedCheckError: If model ends with a semi-colon.
+
+        """
+        if self.model is None:
+            raise DbtBouncerFailedCheckError("self.model is None")
+        if self.model.raw_code.strip()[-1] == ";":
+            raise DbtBouncerFailedCheckError(
+                f"`{get_clean_model_name(self.model.unique_id)}` ends with a semi-colon, this is not permitted."
+            )
 
 
 class CheckModelHasTags(BaseCheck):
@@ -776,19 +897,30 @@ class CheckModelHasTags(BaseCheck):
     tags: list[str]
 
     def execute(self) -> None:
-        """Execute the check."""
-        assert self.model is not None
+        """Execute the check.
+
+        Raises:
+            DbtBouncerFailedCheckError: If model does not have required tags.
+
+        """
+        if self.model is None:
+            raise DbtBouncerFailedCheckError("self.model is None")
         if self.criteria == "any":
-            assert any(tag in self.model.tags for tag in self.tags), (
-                f"`{get_clean_model_name(self.model.unique_id)}` does not have any of the required tags: {self.tags}."
-            )
+            if not any(tag in self.model.tags for tag in self.tags):
+                raise DbtBouncerFailedCheckError(
+                    f"`{get_clean_model_name(self.model.unique_id)}` does not have any of the required tags: {self.tags}."
+                )
         elif self.criteria == "all":
             missing_tags = [tag for tag in self.tags if tag not in self.model.tags]
-            assert not missing_tags, (
-                f"`{get_clean_model_name(self.model.unique_id)}` is missing required tags: {missing_tags}."
-            )
-        elif self.criteria == "one":
-            assert sum(tag in self.model.tags for tag in self.tags) == 1, (
+            if missing_tags:
+                raise DbtBouncerFailedCheckError(
+                    f"`{get_clean_model_name(self.model.unique_id)}` is missing required tags: {missing_tags}."
+                )
+        elif (
+            self.criteria == "one"
+            and sum(tag in self.model.tags for tag in self.tags) != 1
+        ):
+            raise DbtBouncerFailedCheckError(
                 f"`{get_clean_model_name(self.model.unique_id)}` must have exactly one of the required tags: {self.tags}."
             )
 
@@ -838,8 +970,14 @@ class CheckModelHasUniqueTest(BaseCheck):
     tests: list["DbtBouncerTestBase"] = Field(default=[])
 
     def execute(self) -> None:
-        """Execute the check."""
-        assert self.model is not None
+        """Execute the check.
+
+        Raises:
+            DbtBouncerFailedCheckError: If model does not have a unique test.
+
+        """
+        if self.model is None:
+            raise DbtBouncerFailedCheckError("self.model is None")
         num_unique_tests = sum(
             test.attached_node == self.model.unique_id
             and (
@@ -855,9 +993,10 @@ class CheckModelHasUniqueTest(BaseCheck):
             for test in self.tests
             if hasattr(test, "test_metadata")
         )
-        assert num_unique_tests >= 1, (
-            f"`{get_clean_model_name(self.model.unique_id)}` does not have a test for uniqueness of a column."
-        )
+        if num_unique_tests < 1:
+            raise DbtBouncerFailedCheckError(
+                f"`{get_clean_model_name(self.model.unique_id)}` does not have a test for uniqueness of a column."
+            )
 
 
 class CheckModelHasUnitTests(BaseCheck):
@@ -903,9 +1042,16 @@ class CheckModelHasUnitTests(BaseCheck):
     unit_tests: list["UnitTests"] = Field(default=[])
 
     def execute(self) -> None:
-        """Execute the check."""
-        assert self.manifest_obj is not None
-        assert self.model is not None
+        """Execute the check.
+
+        Raises:
+            DbtBouncerFailedCheckError: If model does not have enough unit tests.
+
+        """
+        if self.manifest_obj is None:
+            raise DbtBouncerFailedCheckError("self.manifest_obj is None")
+        if self.model is None:
+            raise DbtBouncerFailedCheckError("self.model is None")
         if get_package_version_number(
             self.manifest_obj.manifest.metadata.dbt_version or "0.0.0"
         ) >= get_package_version_number("1.8.0"):
@@ -918,9 +1064,10 @@ class CheckModelHasUnitTests(BaseCheck):
                     and t.depends_on.nodes[0] == self.model.unique_id
                 ],
             )
-            assert num_unit_tests >= self.min_number_of_unit_tests, (
-                f"`{get_clean_model_name(self.model.unique_id)}` has {num_unit_tests} unit tests, this is less than the minimum of {self.min_number_of_unit_tests}."
-            )
+            if num_unit_tests < self.min_number_of_unit_tests:
+                raise DbtBouncerFailedCheckError(
+                    f"`{get_clean_model_name(self.model.unique_id)}` has {num_unit_tests} unit tests, this is less than the minimum of {self.min_number_of_unit_tests}."
+                )
         else:
             logging.warning(
                 "The `check_model_has_unit_tests` check is only supported for dbt 1.8.0 and above.",
@@ -955,11 +1102,18 @@ class CheckModelLatestVersionSpecified(BaseCheck):
     name: Literal["check_model_latest_version_specified"]
 
     def execute(self) -> None:
-        """Execute the check."""
-        assert self.model is not None
-        assert self.model.latest_version is not None, (
-            f"`{self.model.name}` does not have a specified `latest_version`."
-        )
+        """Execute the check.
+
+        Raises:
+            DbtBouncerFailedCheckError: If latest version is not specified.
+
+        """
+        if self.model is None:
+            raise DbtBouncerFailedCheckError("self.model is None")
+        if self.model.latest_version is None:
+            raise DbtBouncerFailedCheckError(
+                f"`{self.model.name}` does not have a specified `latest_version`."
+            )
 
 
 class CheckModelMaxChainedViews(BaseCheck):
@@ -1010,9 +1164,16 @@ class CheckModelMaxChainedViews(BaseCheck):
     package_name: str | None = Field(default=None)
 
     def execute(self) -> None:
-        """Execute the check."""
-        assert self.model is not None
-        assert self.manifest_obj is not None
+        """Execute the check.
+
+        Raises:
+            DbtBouncerFailedCheckError: If max chained views exceeded.
+
+        """
+        if self.model is None:
+            raise DbtBouncerFailedCheckError("self.model is None")
+        if self.manifest_obj is None:
+            raise DbtBouncerFailedCheckError("self.manifest_obj is None")
 
         def return_upstream_view_models(
             materializations,
@@ -1063,7 +1224,7 @@ class CheckModelMaxChainedViews(BaseCheck):
                 depth=depth,
             )
 
-        assert (
+        if (
             len(
                 return_upstream_view_models(
                     materializations=self.materializations_to_include,
@@ -1076,10 +1237,11 @@ class CheckModelMaxChainedViews(BaseCheck):
                     ),
                 ),
             )
-            == 0
-        ), (
-            f"`{get_clean_model_name(self.model.unique_id)}` has more than {self.max_chained_views} upstream dependents that are not tables."
-        )
+            != 0
+        ):
+            raise DbtBouncerFailedCheckError(
+                f"`{get_clean_model_name(self.model.unique_id)}` has more than {self.max_chained_views} upstream dependents that are not tables."
+            )
 
 
 class CheckModelMaxFanout(BaseCheck):
@@ -1114,15 +1276,22 @@ class CheckModelMaxFanout(BaseCheck):
     name: Literal["check_model_max_fanout"]
 
     def execute(self) -> None:
-        """Execute the check."""
-        assert self.model is not None
+        """Execute the check.
+
+        Raises:
+            DbtBouncerFailedCheckError: If max fanout exceeded.
+
+        """
+        if self.model is None:
+            raise DbtBouncerFailedCheckError("self.model is None")
         num_downstream_models = sum(
             self.model.unique_id in m.depends_on.nodes for m in self.models
         )
 
-        assert num_downstream_models <= self.max_downstream_models, (
-            f"`{get_clean_model_name(self.model.unique_id)}` has {num_downstream_models} downstream models, which is more than the permitted maximum of {self.max_downstream_models}."
-        )
+        if num_downstream_models > self.max_downstream_models:
+            raise DbtBouncerFailedCheckError(
+                f"`{get_clean_model_name(self.model.unique_id)}` has {num_downstream_models} downstream models, which is more than the permitted maximum of {self.max_downstream_models}."
+            )
 
 
 class CheckModelMaxNumberOfLines(BaseCheck):
@@ -1158,13 +1327,20 @@ class CheckModelMaxNumberOfLines(BaseCheck):
     max_number_of_lines: int = Field(default=100)
 
     def execute(self) -> None:
-        """Execute the check."""
-        assert self.model is not None
+        """Execute the check.
+
+        Raises:
+            DbtBouncerFailedCheckError: If max lines exceeded.
+
+        """
+        if self.model is None:
+            raise DbtBouncerFailedCheckError("self.model is None")
         actual_number_of_lines = self.model.raw_code.count("\n") + 1
 
-        assert actual_number_of_lines <= self.max_number_of_lines, (
-            f"`{get_clean_model_name(self.model.unique_id)}` has {actual_number_of_lines} lines, this is more than the maximum permitted number of lines ({self.max_number_of_lines})."
-        )
+        if actual_number_of_lines > self.max_number_of_lines:
+            raise DbtBouncerFailedCheckError(
+                f"`{get_clean_model_name(self.model.unique_id)}` has {actual_number_of_lines} lines, this is more than the maximum permitted number of lines ({self.max_number_of_lines})."
+            )
 
 
 class CheckModelMaxUpstreamDependencies(BaseCheck):
@@ -1207,8 +1383,14 @@ class CheckModelMaxUpstreamDependencies(BaseCheck):
     name: Literal["check_model_max_upstream_dependencies"]
 
     def execute(self) -> None:
-        """Execute the check."""
-        assert self.model is not None
+        """Execute the check.
+
+        Raises:
+            DbtBouncerFailedCheckError: If max upstream dependencies exceeded.
+
+        """
+        if self.model is None:
+            raise DbtBouncerFailedCheckError("self.model is None")
         num_upstream_macros = len(list(self.model.depends_on.macros))
         num_upstream_models = len(
             [m for m in self.model.depends_on.nodes if m.split(".")[0] == "model"],
@@ -1217,15 +1399,18 @@ class CheckModelMaxUpstreamDependencies(BaseCheck):
             [m for m in self.model.depends_on.nodes if m.split(".")[0] == "source"],
         )
 
-        assert num_upstream_macros <= self.max_upstream_macros, (
-            f"`{get_clean_model_name(self.model.unique_id)}` has {num_upstream_macros} upstream macros, which is more than the permitted maximum of {self.max_upstream_macros}."
-        )
-        assert num_upstream_models <= self.max_upstream_models, (
-            f"`{get_clean_model_name(self.model.unique_id)}` has {num_upstream_models} upstream models, which is more than the permitted maximum of {self.max_upstream_models}."
-        )
-        assert num_upstream_sources <= self.max_upstream_sources, (
-            f"`{get_clean_model_name(self.model.unique_id)}` has {num_upstream_sources} upstream sources, which is more than the permitted maximum of {self.max_upstream_sources}."
-        )
+        if num_upstream_macros > self.max_upstream_macros:
+            raise DbtBouncerFailedCheckError(
+                f"`{get_clean_model_name(self.model.unique_id)}` has {num_upstream_macros} upstream macros, which is more than the permitted maximum of {self.max_upstream_macros}."
+            )
+        if num_upstream_models > self.max_upstream_models:
+            raise DbtBouncerFailedCheckError(
+                f"`{get_clean_model_name(self.model.unique_id)}` has {num_upstream_models} upstream models, which is more than the permitted maximum of {self.max_upstream_models}."
+            )
+        if num_upstream_sources > self.max_upstream_sources:
+            raise DbtBouncerFailedCheckError(
+                f"`{get_clean_model_name(self.model.unique_id)}` has {num_upstream_sources} upstream sources, which is more than the permitted maximum of {self.max_upstream_sources}."
+            )
 
 
 class CheckModelNames(BaseCheck):
@@ -1264,14 +1449,21 @@ class CheckModelNames(BaseCheck):
     model_name_pattern: str
 
     def execute(self) -> None:
-        """Execute the check."""
-        assert self.model is not None
-        assert (
+        """Execute the check.
+
+        Raises:
+            DbtBouncerFailedCheckError: If model name does not match regex.
+
+        """
+        if self.model is None:
+            raise DbtBouncerFailedCheckError("self.model is None")
+        if (
             re.compile(self.model_name_pattern.strip()).match(str(self.model.name))
-            is not None
-        ), (
-            f"`{get_clean_model_name(self.model.unique_id)}` does not match the supplied regex `{self.model_name_pattern.strip()}`."
-        )
+            is None
+        ):
+            raise DbtBouncerFailedCheckError(
+                f"`{get_clean_model_name(self.model.unique_id)}` does not match the supplied regex `{self.model_name_pattern.strip()}`."
+            )
 
 
 class CheckModelNumberOfGrants(BaseCheck):
@@ -1306,16 +1498,24 @@ class CheckModelNumberOfGrants(BaseCheck):
     min_number_of_privileges: int = Field(default=0)
 
     def execute(self) -> None:
-        """Execute the check."""
-        assert self.model is not None
+        """Execute the check.
+
+        Raises:
+            DbtBouncerFailedCheckError: If number of grants is not within limits.
+
+        """
+        if self.model is None:
+            raise DbtBouncerFailedCheckError("self.model is None")
         num_grants = len(self.model.config.grants.keys())
 
-        assert num_grants >= self.min_number_of_privileges, (
-            f"`{get_clean_model_name(self.model.unique_id)}` has less grants (`{num_grants}`) than the specified minimum ({self.min_number_of_privileges})."
-        )
-        assert num_grants <= self.max_number_of_privileges, (
-            f"`{get_clean_model_name(self.model.unique_id)}` has more grants (`{num_grants}`) than the specified maximum ({self.max_number_of_privileges})."
-        )
+        if num_grants < self.min_number_of_privileges:
+            raise DbtBouncerFailedCheckError(
+                f"`{get_clean_model_name(self.model.unique_id)}` has less grants (`{num_grants}`) than the specified minimum ({self.min_number_of_privileges})."
+            )
+        if num_grants > self.max_number_of_privileges:
+            raise DbtBouncerFailedCheckError(
+                f"`{get_clean_model_name(self.model.unique_id)}` has more grants (`{num_grants}`) than the specified maximum ({self.max_number_of_privileges})."
+            )
 
 
 class CheckModelPropertyFileLocation(BaseCheck):
@@ -1343,12 +1543,21 @@ class CheckModelPropertyFileLocation(BaseCheck):
     name: Literal["check_model_property_file_location"]
 
     def execute(self) -> None:
-        """Execute the check."""
-        assert self.model is not None
-        assert (  # noqa: PT018
+        """Execute the check.
+
+        Raises:
+            DbtBouncerFailedCheckError: If property file location is incorrect.
+
+        """
+        if self.model is None:
+            raise DbtBouncerFailedCheckError("self.model is None")
+        if not (
             hasattr(self.model, "patch_path")
             and clean_path_str(self.model.patch_path) is not None
-        ), f"`{get_clean_model_name(self.model.unique_id)}` is not documented."
+        ):
+            raise DbtBouncerFailedCheckError(
+                f"`{get_clean_model_name(self.model.unique_id)}` is not documented."
+            )
 
         original_path = Path(clean_path_str(self.model.original_file_path))
         relevant_parts = original_path.parts[1:-1]
@@ -1367,19 +1576,18 @@ class CheckModelPropertyFileLocation(BaseCheck):
         expected_substr = "_".join(mapped_parts)
         properties_yml_name = Path(clean_path_str(self.model.patch_path)).name
 
-        assert properties_yml_name.startswith(
-            "_",
-        ), (
-            f"The properties file for `{get_clean_model_name(self.model.unique_id)}` (`{properties_yml_name}`) does not start with an underscore."
-        )
-        assert expected_substr in properties_yml_name, (
-            f"The properties file for `{get_clean_model_name(self.model.unique_id)}` (`{properties_yml_name}`) does not contain the expected substring (`{expected_substr}`)."
-        )
-        assert properties_yml_name.endswith(
-            "__models.yml",
-        ), (
-            f"The properties file for `{get_clean_model_name(self.model.unique_id)}` (`{properties_yml_name}`) does not end with `__models.yml`."
-        )
+        if not properties_yml_name.startswith("_"):
+            raise DbtBouncerFailedCheckError(
+                f"The properties file for `{get_clean_model_name(self.model.unique_id)}` (`{properties_yml_name}`) does not start with an underscore."
+            )
+        if expected_substr not in properties_yml_name:
+            raise DbtBouncerFailedCheckError(
+                f"The properties file for `{get_clean_model_name(self.model.unique_id)}` (`{properties_yml_name}`) does not contain the expected substring (`{expected_substr}`)."
+            )
+        if not properties_yml_name.endswith("__models.yml"):
+            raise DbtBouncerFailedCheckError(
+                f"The properties file for `{get_clean_model_name(self.model.unique_id)}` (`{properties_yml_name}`) does not end with `__models.yml`."
+            )
 
 
 class CheckModelSchemaName(BaseCheck):
@@ -1424,14 +1632,21 @@ class CheckModelSchemaName(BaseCheck):
     schema_name_pattern: str
 
     def execute(self) -> None:
-        """Execute the check."""
-        assert self.model is not None
-        assert (
+        """Execute the check.
+
+        Raises:
+            DbtBouncerFailedCheckError: If schema name does not match regex.
+
+        """
+        if self.model is None:
+            raise DbtBouncerFailedCheckError("self.model is None")
+        if (
             re.compile(self.schema_name_pattern.strip()).match(str(self.model.schema_))
-            is not None
-        ), (
-            f"`{self.model.schema_}` does not match the supplied regex `{self.schema_name_pattern.strip()})`."
-        )
+            is None
+        ):
+            raise DbtBouncerFailedCheckError(
+                f"`{self.model.schema_}` does not match the supplied regex `{self.schema_name_pattern.strip()})`."
+            )
 
 
 class CheckModelVersionAllowed(BaseCheck):
@@ -1471,13 +1686,19 @@ class CheckModelVersionAllowed(BaseCheck):
     version_pattern: str
 
     def execute(self) -> None:
-        """Execute the check."""
-        assert self.model is not None
-        if self.model.version:
-            assert (
-                re.compile(self.version_pattern.strip()).match(str(self.model.version))
-                is not None
-            ), (
+        """Execute the check.
+
+        Raises:
+            DbtBouncerFailedCheckError: If version is not allowed.
+
+        """
+        if self.model is None:
+            raise DbtBouncerFailedCheckError("self.model is None")
+        if self.model.version and (
+            re.compile(self.version_pattern.strip()).match(str(self.model.version))
+            is None
+        ):
+            raise DbtBouncerFailedCheckError(
                 f"Version `{self.model.version}` in `{self.model.name}` does not match the supplied regex `{self.version_pattern.strip()})`."
             )
 
@@ -1512,9 +1733,16 @@ class CheckModelVersionPinnedInRef(BaseCheck):
     name: Literal["check_model_version_pinned_in_ref"]
 
     def execute(self) -> None:
-        """Execute the check."""
-        assert self.model is not None
-        assert self.manifest_obj is not None
+        """Execute the check.
+
+        Raises:
+            DbtBouncerFailedCheckError: If version is not pinned in ref.
+
+        """
+        if self.model is None:
+            raise DbtBouncerFailedCheckError("self.model is None")
+        if self.manifest_obj is None:
+            raise DbtBouncerFailedCheckError("self.manifest_obj is None")
         child_map = self.manifest_obj.manifest.child_map
         if child_map and self.model.unique_id in child_map:
             downstream_models = [
@@ -1534,9 +1762,10 @@ class CheckModelVersionPinnedInRef(BaseCheck):
                     and not getattr(ref, "version", None)
                 )
 
-        assert not downstream_models_with_unversioned_refs, (
-            f"`{self.model.name}` is referenced without a pinned version in downstream models: {downstream_models_with_unversioned_refs}."
-        )
+        if downstream_models_with_unversioned_refs:
+            raise DbtBouncerFailedCheckError(
+                f"`{self.model.name}` is referenced without a pinned version in downstream models: {downstream_models_with_unversioned_refs}."
+            )
 
 
 class CheckModelsDocumentationCoverage(BaseModel):
@@ -1590,7 +1819,12 @@ class CheckModelsDocumentationCoverage(BaseModel):
     )
 
     def execute(self) -> None:
-        """Execute the check."""
+        """Execute the check.
+
+        Raises:
+            DbtBouncerFailedCheckError: If documentation coverage is less than minimum.
+
+        """
         num_models = len(self.models)
         models_with_description = []
         for model in self.models:
@@ -1604,11 +1838,10 @@ class CheckModelsDocumentationCoverage(BaseModel):
             num_models_with_descriptions / num_models
         ) * 100
 
-        assert (
-            model_description_coverage_pct >= self.min_model_documentation_coverage_pct
-        ), (
-            f"Only {model_description_coverage_pct}% of models have a populated description, this is less than the permitted minimum of {self.min_model_documentation_coverage_pct}%."
-        )
+        if model_description_coverage_pct < self.min_model_documentation_coverage_pct:
+            raise DbtBouncerFailedCheckError(
+                f"Only {model_description_coverage_pct}% of models have a populated description, this is less than the permitted minimum of {self.min_model_documentation_coverage_pct}%."
+            )
 
 
 class CheckModelsTestCoverage(BaseModel):
@@ -1657,7 +1890,12 @@ class CheckModelsTestCoverage(BaseModel):
     tests: list["DbtBouncerTestBase"] = Field(default=[])
 
     def execute(self) -> None:
-        """Execute the check."""
+        """Execute the check.
+
+        Raises:
+            DbtBouncerFailedCheckError: If test coverage is less than minimum.
+
+        """
         num_models = len(self.models)
         models_with_tests = []
         for model in self.models:
@@ -1667,6 +1905,7 @@ class CheckModelsTestCoverage(BaseModel):
         num_models_with_tests = len(set(models_with_tests))
         model_test_coverage_pct = (num_models_with_tests / num_models) * 100
 
-        assert model_test_coverage_pct >= self.min_model_test_coverage_pct, (
-            f"Only {model_test_coverage_pct}% of models have at least one test, this is less than the permitted minimum of {self.min_model_test_coverage_pct}%."
-        )
+        if model_test_coverage_pct < self.min_model_test_coverage_pct:
+            raise DbtBouncerFailedCheckError(
+                f"Only {model_test_coverage_pct}% of models have at least one test, this is less than the permitted minimum of {self.min_model_test_coverage_pct}%."
+            )

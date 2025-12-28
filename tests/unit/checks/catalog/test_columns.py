@@ -29,6 +29,7 @@ from dbt_bouncer.checks.catalog.check_columns import (
     CheckColumnsAreAllDocumented,
     CheckColumnsAreDocumentedInPublicModels,
 )
+from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 
 CheckColumnDescriptionPopulated.model_rebuild()
 CheckColumnNameCompliesToColumnType.model_rebuild()
@@ -150,7 +151,7 @@ CheckColumnHasSpecifiedTest.model_rebuild()
                     },
                 ),
             ],
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
 )
@@ -262,7 +263,7 @@ def test_check_column_description_populated(catalog_node, models, expectation):
                     },
                 ),
             ],
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
 )
@@ -394,7 +395,7 @@ def test_check_column_has_specified_test(
                     },
                 ),
             ],
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
         (
             CatalogNodes(
@@ -444,7 +445,7 @@ def test_check_column_has_specified_test(
                     },
                 ),
             ],
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
     indirect=["manifest_obj"],
@@ -673,7 +674,7 @@ def test_check_columns_are_all_documented_snowflake(
                     },
                 ),
             ],
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
 )
@@ -783,7 +784,7 @@ def test_check_columns_are_documented_in_public_models(
             ".*_date$",
             "^(?!STRUCT)",
             None,
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
         (
             CatalogNodes(
@@ -807,7 +808,7 @@ def test_check_columns_are_documented_in_public_models(
             ".*_date$",
             None,
             ["DATE"],
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
         (
             CatalogNodes(
@@ -989,7 +990,7 @@ def test_check_column_name_complies_to_column_type(
                     },
                 ),
             ],
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
 )

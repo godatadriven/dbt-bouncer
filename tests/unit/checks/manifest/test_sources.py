@@ -9,7 +9,10 @@ from dbt_bouncer.artifact_parsers.parsers_manifest import (  # noqa: F401
     DbtBouncerSource,
     DbtBouncerSourceBase,
 )
-from dbt_bouncer.checks.common import NestedDict  # noqa: F401
+from dbt_bouncer.checks.common import (
+    DbtBouncerFailedCheckError,
+    NestedDict,  # noqa: F401
+)
 from dbt_bouncer.checks.manifest.check_sources import (
     CheckSourceDescriptionPopulated,
     CheckSourceFreshnessPopulated,
@@ -99,7 +102,7 @@ CheckSourceUsedByOnlyOneModel.model_rebuild()
                     "unique_id": "source.package_name.source_1.table_1",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
         (
             Sources(
@@ -119,7 +122,7 @@ CheckSourceUsedByOnlyOneModel.model_rebuild()
                     "unique_id": "source.package_name.source_1.table_1",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
         (
             Sources(
@@ -140,7 +143,7 @@ CheckSourceUsedByOnlyOneModel.model_rebuild()
                     "unique_id": "source.package_name.source_1.table_1",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
         (
             Sources(
@@ -160,7 +163,7 @@ CheckSourceUsedByOnlyOneModel.model_rebuild()
                     "unique_id": "source.package_name.source_1.table_1",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
         (
             Sources(
@@ -180,7 +183,7 @@ CheckSourceUsedByOnlyOneModel.model_rebuild()
                     "unique_id": "source.package_name.source_1.table_1",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
 )
@@ -293,7 +296,7 @@ def test_check_source_description_populated(source, expectation):
                     "unique_id": "source.package_name.source_1.table_1",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
         (
             Sources(
@@ -314,7 +317,7 @@ def test_check_source_description_populated(source, expectation):
                     "unique_id": "source.package_name.source_1.table_1",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
 )
@@ -367,7 +370,7 @@ def test_check_source_freshness_populated(source, expectation):
                     "unique_id": "source.package_name.source_1.table_1",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
 )
@@ -471,7 +474,7 @@ def test_check_source_loader_populated(source, expectation):
                     "unique_id": "source.package_name.source_1.table_1",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
         (
             ["owner"],
@@ -493,7 +496,7 @@ def test_check_source_loader_populated(source, expectation):
                     "unique_id": "source.package_name.source_1.table_1",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
         (
             ["owner", {"name": ["first", "last"]}],
@@ -515,7 +518,7 @@ def test_check_source_loader_populated(source, expectation):
                     "unique_id": "source.package_name.source_1.table_1",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
 )
@@ -575,7 +578,7 @@ def test_check_source_has_meta_keys(keys, source, expectation):
             ),
             ["tag_1"],
             "all",
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
         (
             Sources(
@@ -621,7 +624,7 @@ def test_check_source_has_meta_keys(keys, source, expectation):
             ),
             ["tag_1", "tag_2"],
             "any",
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
         (
             Sources(
@@ -667,7 +670,7 @@ def test_check_source_has_meta_keys(keys, source, expectation):
             ),
             ["tag_1", "tag_2"],
             "one",
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
         (
             Sources(
@@ -690,7 +693,7 @@ def test_check_source_has_meta_keys(keys, source, expectation):
             ),
             ["tag_1"],
             "one",
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
         (
             Sources(
@@ -772,7 +775,7 @@ def test_check_source_has_tags(source, tags, criteria, expectation):
                     "unique_id": "source.package_name.source_1.model_1",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
 )
@@ -949,7 +952,7 @@ def test_check_source_names(source_name_pattern, source, expectation):
                     "unique_id": "source.package_name.source_1.table_1",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
 )
@@ -1005,7 +1008,7 @@ def test_check_source_not_orphaned(models, source, expectation):
                     "unique_id": "source.package_name.source_1.table_1",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
         (
             Sources(
@@ -1026,7 +1029,7 @@ def test_check_source_not_orphaned(models, source, expectation):
                     "unique_id": "source.package_name.source_1.table_1",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
         (
             Sources(
@@ -1047,7 +1050,7 @@ def test_check_source_not_orphaned(models, source, expectation):
                     "unique_id": "source.package_name.source_1.table_1",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
         (
             Sources(
@@ -1068,7 +1071,7 @@ def test_check_source_not_orphaned(models, source, expectation):
                     "unique_id": "source.package_name.source_1.table_1",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
 )
@@ -1175,7 +1178,7 @@ def test_check_source_property_file_location(source, expectation):
                     "unique_id": "source.package_name.source_1.table_1",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
 )
@@ -1352,7 +1355,7 @@ def test_check_source_used_by_models_in_same_directory(models, source, expectati
                     "unique_id": "source.package_name.source_1.table_1",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
 )
