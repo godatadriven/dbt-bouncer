@@ -1,5 +1,3 @@
-# mypy: disable-error-code="union-attr"
-
 import re
 from typing import TYPE_CHECKING, Literal
 
@@ -70,7 +68,7 @@ class CheckLineagePermittedUpstreamModels(BaseCheck):
             raise DbtBouncerFailedCheckError("self.manifest_obj is None")
         upstream_models = [
             x
-            for x in self.model.depends_on.nodes
+            for x in getattr(self.model.depends_on, "nodes", []) or []
             if x.split(".")[0] == "model"
             and x.split(".")[1]
             == (self.package_name or self.manifest_obj.manifest.metadata.project_name)
@@ -126,7 +124,11 @@ class CheckLineageSeedCannotBeUsed(BaseCheck):
         """
         if self.model is None:
             raise DbtBouncerFailedCheckError("self.model is None")
-        if [x for x in self.model.depends_on.nodes if x.split(".")[0] == "seed"]:
+        if [
+            x
+            for x in getattr(self.model.depends_on, "nodes", []) or []
+            if x.split(".")[0] == "seed"
+        ]:
             raise DbtBouncerFailedCheckError(
                 f"`{get_clean_model_name(self.model.unique_id)}` references a seed even though this is not permitted."
             )
@@ -165,7 +167,11 @@ class CheckLineageSourceCannotBeUsed(BaseCheck):
         """
         if self.model is None:
             raise DbtBouncerFailedCheckError("self.model is None")
-        if [x for x in self.model.depends_on.nodes if x.split(".")[0] == "source"]:
+        if [
+            x
+            for x in getattr(self.model.depends_on, "nodes", []) or []
+            if x.split(".")[0] == "source"
+        ]:
             raise DbtBouncerFailedCheckError(
                 f"`{get_clean_model_name(self.model.unique_id)}` references a source even though this is not permitted."
             )

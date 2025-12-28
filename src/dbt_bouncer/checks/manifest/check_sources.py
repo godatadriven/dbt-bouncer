@@ -1,5 +1,3 @@
-# mypy: disable-error-code="union-attr"
-
 import re
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal
@@ -61,7 +59,7 @@ class CheckSourceDescriptionPopulated(BaseCheck):
         if self.source is None:
             raise DbtBouncerFailedCheckError("self.source is None")
         if not self._is_description_populated(
-            self.source.description, self.min_description_length
+            self.source.description or "", self.min_description_length
         ):
             raise DbtBouncerFailedCheckError(
                 f"`{self.source.source_name}.{self.source.name}` does not have a populated description."
@@ -103,16 +101,18 @@ class CheckSourceFreshnessPopulated(BaseCheck):
         error_msg = f"`{self.source.source_name}.{self.source.name}` does not have a populated freshness."
         if self.source.freshness is None:
             raise DbtBouncerFailedCheckError(error_msg)
-        if not (
-            (
-                self.source.freshness.error_after.count is not None
-                and self.source.freshness.error_after.period is not None
-            )
-            or (
-                self.source.freshness.warn_after.count is not None
-                and self.source.freshness.warn_after.period is not None
-            )
-        ):
+        has_error_after = (
+            self.source.freshness.error_after
+            and self.source.freshness.error_after.count is not None
+            and self.source.freshness.error_after.period is not None
+        )
+        has_warn_after = (
+            self.source.freshness.warn_after
+            and self.source.freshness.warn_after.count is not None
+            and self.source.freshness.warn_after.period is not None
+        )
+
+        if not (has_error_after or has_warn_after):
             raise DbtBouncerFailedCheckError(error_msg)
 
 
@@ -207,20 +207,20 @@ class CheckSourceHasTags(BaseCheck):
         """
         if self.source is None:
             raise DbtBouncerFailedCheckError("self.source is None")
+        source_tags = self.source.tags or []
         if self.criteria == "any":
-            if not any(tag in self.source.tags for tag in self.tags):
+            if not any(tag in source_tags for tag in self.tags):
                 raise DbtBouncerFailedCheckError(
                     f"`{self.source.source_name}.{self.source.name}` does not have any of the required tags: {self.tags}."
                 )
         elif self.criteria == "all":
-            missing_tags = set(self.tags) - set(self.source.tags)
+            missing_tags = set(self.tags) - set(source_tags)
             if missing_tags:
                 raise DbtBouncerFailedCheckError(
                     f"`{self.source.source_name}.{self.source.name}` is missing required tags: {missing_tags}."
                 )
         elif (
-            self.criteria == "one"
-            and sum(tag in self.source.tags for tag in self.tags) != 1
+            self.criteria == "one" and sum(tag in source_tags for tag in self.tags) != 1
         ):
             raise DbtBouncerFailedCheckError(
                 f"`{self.source.source_name}.{self.source.name}` must have exactly one of the required tags: {self.tags}."
@@ -347,7 +347,9 @@ class CheckSourceNotOrphaned(BaseCheck):
         if self.source is None:
             raise DbtBouncerFailedCheckError("self.source is None")
         num_refs = sum(
-            self.source.unique_id in model.depends_on.nodes for model in self.models
+            self.source.unique_id in getattr(model.depends_on, "nodes", [])
+            for model in self.models
+            if model.depends_on
         )
         if num_refs < 1:
             raise DbtBouncerFailedCheckError(
@@ -452,7 +454,8 @@ class CheckSourceUsedByModelsInSameDirectory(BaseCheck):
         reffed_models_not_in_same_dir = []
         for model in self.models:
             if (
-                self.source.unique_id in model.depends_on.nodes
+                model.depends_on
+                and self.source.unique_id in getattr(model.depends_on, "nodes", [])
                 and model.original_file_path.split("/")[:-1]
                 != self.source.original_file_path.split("/")[:-1]
             ):
@@ -499,7 +502,9 @@ class CheckSourceUsedByOnlyOneModel(BaseCheck):
         if self.source is None:
             raise DbtBouncerFailedCheckError("self.source is None")
         num_refs = sum(
-            self.source.unique_id in model.depends_on.nodes for model in self.models
+            self.source.unique_id in getattr(model.depends_on, "nodes", [])
+            for model in self.models
+            if model.depends_on
         )
         if num_refs > 1:
             raise DbtBouncerFailedCheckError(

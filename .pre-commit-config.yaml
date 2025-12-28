@@ -33,11 +33,12 @@ repos:
           require_serial: true
     - repo: local
       hooks:
-          - id: mypy
-            args: ["--install-types", "--explicit-package-bases", "--ignore-missing-imports", "--scripts-are-modules", "--non-interactive"]
-            entry: uv run mypy
+          - id: ty
+            args: ["check", "./src"]
+            entry: uv run ty
             language: system
-            name: mypy
+            name: ty
+            pass_filenames: false
             require_serial: true
             types_or: [python, pyi]
     - repo: local

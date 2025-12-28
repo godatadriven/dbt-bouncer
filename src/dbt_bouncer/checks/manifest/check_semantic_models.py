@@ -1,6 +1,3 @@
-# mypy: disable-error-code="union-attr"
-
-
 from typing import TYPE_CHECKING, Literal
 
 from dbt_bouncer.check_base import BaseCheck
@@ -39,7 +36,7 @@ class CheckSemanticModelOnNonPublicModels(BaseCheck):
 
     models: list["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_semantic_model_based_on_non_public_models"]
-    semantic_model: "DbtBouncerSemanticModelBase" = Field(default=None)
+    semantic_model: "DbtBouncerSemanticModelBase | None" = Field(default=None)
 
     def execute(self) -> None:
         """Execute the check.
@@ -48,17 +45,20 @@ class CheckSemanticModelOnNonPublicModels(BaseCheck):
             DbtBouncerFailedCheckError: If semantic model is based on non-public models.
 
         """
+        if self.semantic_model is None:
+            raise DbtBouncerFailedCheckError("self.semantic_model is None")
+
         non_public_upstream_dependencies = []
-        for model in self.semantic_model.depends_on.nodes:
+        for model in getattr(self.semantic_model.depends_on, "nodes", []) or []:
             if (
                 next(m for m in self.models if m.unique_id == model).resource_type
                 == "model"
                 and next(m for m in self.models if m.unique_id == model).package_name
                 == self.semantic_model.package_name
             ):
-                model = next(m for m in self.models if m.unique_id == model)
-                if model.access.value != "public":
-                    non_public_upstream_dependencies.append(model.name)
+                model_obj = next(m for m in self.models if m.unique_id == model)
+                if model_obj.access and model_obj.access.value != "public":
+                    non_public_upstream_dependencies.append(model_obj.name)
 
         if non_public_upstream_dependencies:
             raise DbtBouncerFailedCheckError(

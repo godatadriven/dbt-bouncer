@@ -1,4 +1,3 @@
-# mypy: disable-error-code="union-attr"
 import logging
 from typing import TYPE_CHECKING, Literal
 

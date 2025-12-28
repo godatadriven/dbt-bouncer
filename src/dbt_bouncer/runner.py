@@ -23,8 +23,6 @@ from dbt_bouncer.utils import (
 
 if TYPE_CHECKING:
     from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
-        Exposures,
-        Macros,
         UnitTests,
     )
     from dbt_bouncer.artifact_parsers.parsers_common import (
@@ -37,6 +35,10 @@ if TYPE_CHECKING:
         DbtBouncerSource,
         DbtBouncerTest,
     )
+    from dbt_bouncer.artifact_parsers.parsers_manifest import (
+        DbtBouncerExposureBase,
+        DbtBouncerMacroBase,
+    )
     from dbt_bouncer.config_file_parser import (
         DbtBouncerConfAllCategories as DbtBouncerConf,
     )
@@ -48,8 +50,8 @@ def runner(
     catalog_sources: list["DbtBouncerCatalogNode"],
     check_categories: list[str],
     create_pr_comment_file: bool,
-    exposures: list["Exposures"],
-    macros: list["Macros"],
+    exposures: list["DbtBouncerExposureBase"],
+    macros: list["DbtBouncerMacroBase"],
     manifest_obj: "DbtBouncerManifest",
     models: list["DbtBouncerModel"],
     output_file: Path | None,

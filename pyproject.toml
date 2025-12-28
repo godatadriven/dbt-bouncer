@@ -45,16 +45,13 @@ dev = [
   "bandit~=1.0",
   "dbt-core>=1.11.2,<2",
   "dbt-duckdb~=1.0",
-  "mypy~=1.0",
   "prek>=0.1,<1",
   "pytest-cov>=5,<8",
   "pytest-xdist~=3.0",
   "pyupgrade~=3.0",
   "ruff~=0.0",
   "shandy-sqlfmt[jinjafmt]~=0.0",
-  "types-PyYaml~=6.0",
-  "types-tabulate~=0.0",
-  "types-toml~=0.0"
+  "ty>=0.0.7"
 ]
 docs = [
   "mike~=2.0",
@@ -87,21 +84,6 @@ name = "check_model_has_unique_test"
 name = "check_model_names"
 include = "^staging"
 model_name_pattern = "^stg_"
-
-[tool.mypy]
-follow_imports = "silent"
-warn_redundant_casts = true
-warn_unused_ignores = true
-disallow_any_generics = true
-check_untyped_defs = true
-no_implicit_reexport = true
-plugins = [
-  "pydantic.mypy"
-]
-
-[[tool.mypy.overrides]]
-ignore_missing_imports = true
-module = "dbt_artifacts_parser.*"
 
 [tool.ruff]
 exclude = [

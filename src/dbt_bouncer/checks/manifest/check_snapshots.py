@@ -1,4 +1,3 @@
-# mypy: disable-error-code="union-attr"
 import re
 from typing import TYPE_CHECKING, Literal
 
@@ -53,20 +52,21 @@ class CheckSnapshotHasTags(BaseCheck):
         """
         if self.snapshot is None:
             raise DbtBouncerFailedCheckError("self.snapshot is None")
+        snapshot_tags = self.snapshot.tags or []
         if self.criteria == "any":
-            if not any(tag in self.snapshot.tags for tag in self.tags):
+            if not any(tag in snapshot_tags for tag in self.tags):
                 raise DbtBouncerFailedCheckError(
                     f"`{self.snapshot.name}` does not have any of the required tags: {self.tags}."
                 )
         elif self.criteria == "all":
-            missing_tags = [tag for tag in self.tags if tag not in self.snapshot.tags]
+            missing_tags = [tag for tag in self.tags if tag not in snapshot_tags]
             if missing_tags:
                 raise DbtBouncerFailedCheckError(
                     f"`{self.snapshot.name}` is missing required tags: {missing_tags}."
                 )
         elif (
             self.criteria == "one"
-            and sum(tag in self.snapshot.tags for tag in self.tags) != 1
+            and sum(tag in snapshot_tags for tag in self.tags) != 1
         ):
             raise DbtBouncerFailedCheckError(
                 f"`{self.snapshot.name}` must have exactly one of the required tags: {self.tags}."

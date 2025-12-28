@@ -1,5 +1,3 @@
-# mypy: disable-error-code="union-attr"
-
 from typing import TYPE_CHECKING, Literal
 
 from pydantic import Field
@@ -44,7 +42,7 @@ class CheckRunResultsMaxExecutionTime(BaseCheck):
 
     max_execution_time_seconds: float
     name: Literal["check_run_results_max_execution_time"]
-    run_result: "DbtBouncerRunResultBase" = Field(default=None)
+    run_result: "DbtBouncerRunResultBase | None" = Field(default=None)
 
     def execute(self) -> None:
         """Execute the check.
@@ -53,6 +51,9 @@ class CheckRunResultsMaxExecutionTime(BaseCheck):
             DbtBouncerFailedCheckError: If execution time is greater than permitted.
 
         """
+        if self.run_result is None:
+            raise DbtBouncerFailedCheckError("self.run_result is None")
+
         if self.run_result.execution_time > self.max_execution_time_seconds:
             raise DbtBouncerFailedCheckError(
                 f"`{self.run_result.unique_id.split('.')[-1]}` has an execution time ({self.run_result.execution_time} greater than permitted ({self.max_execution_time_seconds}s)."
@@ -91,7 +92,7 @@ class CheckRunResultsMaxGigabytesBilled(BaseCheck):
 
     max_gigabytes_billed: float
     name: Literal["check_run_results_max_gigabytes_billed"]
-    run_result: "DbtBouncerRunResultBase" = Field(default=None)
+    run_result: "DbtBouncerRunResultBase | None" = Field(default=None)
 
     def execute(self) -> None:
         """Execute the check.
@@ -101,6 +102,9 @@ class CheckRunResultsMaxGigabytesBilled(BaseCheck):
             RuntimeError: If running with adapter other than `dbt-bigquery`.
 
         """
+        if self.run_result is None:
+            raise DbtBouncerFailedCheckError("self.run_result is None")
+
         try:
             gigabytes_billed = self.run_result.adapter_response["bytes_billed"] / (
                 1000**3
