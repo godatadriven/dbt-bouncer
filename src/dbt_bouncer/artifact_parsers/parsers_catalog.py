@@ -1,6 +1,6 @@
 import logging
 import warnings
-from typing import TYPE_CHECKING, List, Union
+from typing import TYPE_CHECKING
 
 from pydantic import BaseModel
 
@@ -34,15 +34,15 @@ from dbt_bouncer.artifact_parsers.parsers_common import load_dbt_artifact
 class DbtBouncerCatalog(BaseModel):
     """Model for all catalog objects."""
 
-    catalog: Union[CatalogV1, CatalogLatest]
+    catalog: CatalogV1 | CatalogLatest
 
 
 class DbtBouncerCatalogNode(BaseModel):
     """Model for all nodes in `catalog.json`."""
 
-    catalog_node: Union[
-        CatalogNodes, CatalogNodesLatest, CatalogSources, CatalogSourcesLatest
-    ]
+    catalog_node: (
+        CatalogNodes | CatalogNodesLatest | CatalogSources | CatalogSourcesLatest
+    )
     original_file_path: str
     unique_id: str
 
@@ -51,15 +51,16 @@ def parse_catalog(
     artifact_dir: "Path",
     manifest_obj: "DbtBouncerManifest",
     package_name: str | None = None,
-) -> tuple[List[DbtBouncerCatalogNode], List[DbtBouncerCatalogNode]]:
+) -> tuple[list[DbtBouncerCatalogNode], list[DbtBouncerCatalogNode]]:
     """Parse the catalog.json artifact.
 
     Returns:
-        List[DbtBouncerCatalogNode]: List of catalog nodes for the project.
-        List[DbtBouncerCatalogNode]: List of catalog nodes for the project sources.
+        list[DbtBouncerCatalogNode]: List of catalog nodes for the project.
+        list[DbtBouncerCatalogNode]: List of catalog nodes for the project sources.
 
     """
-    catalog_obj: Union[CatalogLatest, CatalogV1] = load_dbt_artifact(
+    # mypy: ignore
+    catalog_obj: DbtBouncerCatalog = load_dbt_artifact(
         artifact_name="catalog.json",
         dbt_artifacts_dir=artifact_dir,
     )

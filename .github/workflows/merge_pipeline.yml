@@ -5,12 +5,45 @@
     push:
       branches:
         - main
+    workflow_dispatch:
 
   env:
     DBT_PROFILES_DIR: dbt_project
     DBT_PROJECT_DIR: dbt_project
 
   jobs:
+      benchmark-main-branch:
+        permissions:
+          contents: read
+        runs-on: ubuntu-22.04
+        steps:
+          - uses: actions/checkout@v6
+
+          - name: Setup Python
+            uses: ./.github/actions/setup_python_env
+
+          - name: Install `dbt-bouncer`
+            run: pip install git+https://github.com/godatadriven/dbt-bouncer.git@${{ github.sha }}
+
+          - name: Install bencher
+            uses: bencherdev/bencher@v0.5.9
+
+          - name: Install Hyperfine
+            uses: taiki-e/install-action@v2
+            with:
+              tool: hyperfine@1.20
+
+          - name: Track base branch benchmarks with Bencher
+            run: |
+              bencher run \
+                --adapter shell_hyperfine \
+                --file results.json \
+                --project dbt-bouncer \
+                --token '${{ secrets.BENCHER_API_TOKEN }}' \
+                --branch main \
+                --err \
+                "hyperfine --export-json results.json --runs 10 'dbt-bouncer --config-file dbt-bouncer-example.yml'"
+
       deploy-docs:
           permissions:
             contents: write

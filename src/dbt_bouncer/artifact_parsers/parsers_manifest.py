@@ -1,7 +1,7 @@
 import logging
 import warnings
 from enum import Enum
-from typing import Any, Dict, List, Union
+from typing import Any
 
 from pydantic import BaseModel
 
@@ -65,10 +65,12 @@ from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
 class DbtBouncerManifest(BaseModel):
     """Model for all manifest objects."""
 
-    manifest: Union[ManifestV11, ManifestLatest]
+    manifest: ManifestV11 | ManifestLatest
 
 
-DbtBouncerExposureBase = Union[Exposure_v11, Exposures]
+DbtBouncerExposureBase: ... = (  # type: ignore[misc]
+    Exposure_v11 | Exposures
+)
 
 
 class DbtBouncerExposure(BaseModel):
@@ -79,7 +81,9 @@ class DbtBouncerExposure(BaseModel):
     unique_id: str
 
 
-DbtBouncerModelBase = Union[ModelNode_v11, Nodes4, Nodes4Latest]
+DbtBouncerModelBase: ... = (  # type: ignore[misc]
+    ModelNode_v11 | Nodes4 | Nodes4Latest
+)
 
 
 class DbtBouncerModel(BaseModel):
@@ -90,9 +94,9 @@ class DbtBouncerModel(BaseModel):
     unique_id: str
 
 
-DbtBouncerSemanticModelBase = Union[
-    SemanticModel_v11, SemanticModels, SemanticModelsLatest
-]
+DbtBouncerSemanticModelBase: ... = (  # type: ignore[misc]
+    SemanticModel_v11 | SemanticModels | SemanticModelsLatest
+)
 
 
 class DbtBouncerSemanticModel(BaseModel):
@@ -103,7 +107,9 @@ class DbtBouncerSemanticModel(BaseModel):
     unique_id: str
 
 
-DbtBouncerSnapshotBase = Union[Nodes7, SnapshotNode_v11]
+DbtBouncerSnapshotBase: ... = (  # type: ignore[misc]
+    Nodes7 | SnapshotNode_v11
+)
 
 
 class DbtBouncerSnapshot(BaseModel):
@@ -114,7 +120,9 @@ class DbtBouncerSnapshot(BaseModel):
     unique_id: str
 
 
-DbtBouncerSourceBase = Union[SourceDefinition_v11, Sources, SourcesLatest]
+DbtBouncerSourceBase: ... = (  # type: ignore[misc]
+    SourceDefinition_v11 | Sources | SourcesLatest
+)
 
 
 class DbtBouncerSource(BaseModel):
@@ -125,15 +133,15 @@ class DbtBouncerSource(BaseModel):
     unique_id: str
 
 
-DbtBouncerTestBase = Union[
-    GenericTestNode_v11,
-    SingularTestNode_v11,
-    Nodes1,
-    Nodes2,
-    Nodes6,
-    Nodes2Latest,
-    Nodes6Latest,
-]
+DbtBouncerTestBase: ... = (  # type: ignore[misc]
+    GenericTestNode_v11
+    | SingularTestNode_v11
+    | Nodes1
+    | Nodes2
+    | Nodes6
+    | Nodes2Latest
+    | Nodes6Latest
+)
 
 
 class DbtBouncerTest(BaseModel):
@@ -145,8 +153,8 @@ class DbtBouncerTest(BaseModel):
 
 
 def parse_manifest(
-    manifest: Dict[str, Any],
-) -> DbtBouncerManifest:
+    manifest: dict[str, Any],
+) -> ManifestV11 | ManifestLatest:
     """Parse manifest.json.
 
     Args:
@@ -156,7 +164,7 @@ def parse_manifest(
         ValueError: If the manifest.json is not a valid manifest.json
 
     Returns:
-       DbtBouncerManifest
+       ManifestV11 | ManifestLatest
 
     """
     dbt_schema_version = manifest["metadata"]["dbt_schema_version"]
@@ -175,26 +183,26 @@ def parse_manifest(
 def parse_manifest_artifact(
     manifest_obj: DbtBouncerManifest, package_name: str | None = None
 ) -> tuple[
-    List[Exposures],
-    List[Macros],
-    List[DbtBouncerModel],
-    List[DbtBouncerSemanticModel],
-    List[DbtBouncerSnapshot],
-    List[DbtBouncerSource],
-    List[DbtBouncerTest],
-    List[UnitTests],
+    list[Exposures],
+    list[Macros],
+    list[DbtBouncerModel],
+    list[DbtBouncerSemanticModel],
+    list[DbtBouncerSnapshot],
+    list[DbtBouncerSource],
+    list[DbtBouncerTest],
+    list[UnitTests],
 ]:
     """Parse the manifest.json artifact.
 
     Returns:
-        List[DbtBouncerExposure]: List of exposures in the project.
-        List[DbtBouncerMacro]: List of macros in the project.
-        List[DbtBouncerModel]: List of models in the project.
-        List[DbtBouncerSemanticModel]: List of semantic models in the project.
-        List[DbtBouncerSnapshot]: List of snapshots in the project.
-        List[DbtBouncerSource]: List of sources in the project.
-        List[DbtBouncerTest]: List of tests in the project.
-        List[DbtBouncerUnitTest]: List of unit tests in the project.
+        list[DbtBouncerExposure]: List of exposures in the project.
+        list[DbtBouncerMacro]: List of macros in the project.
+        list[DbtBouncerModel]: List of models in the project.
+        list[DbtBouncerSemanticModel]: List of semantic models in the project.
+        list[DbtBouncerSnapshot]: List of snapshots in the project.
+        list[DbtBouncerSource]: List of sources in the project.
+        list[DbtBouncerTest]: List of tests in the project.
+        list[DbtBouncerUnitTest]: List of unit tests in the project.
 
     """
     project_exposures = [

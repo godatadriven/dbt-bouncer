@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 from pydantic import ConfigDict, Field
 
@@ -14,11 +14,11 @@ class Metadata(BaseParserModel):
     model_config = ConfigDict(
         extra='allow',
     )
-    dbt_schema_version: Optional[str] = None
-    dbt_version: Optional[str] = '1.9.0b2'
-    generated_at: Optional[str] = None
-    invocation_id: Optional[str] = None
-    env: Optional[Dict[str, str]] = None
+    dbt_schema_version: str | None = None
+    dbt_version: str | None = '1.9.0b2'
+    generated_at: str | None = None
+    invocation_id: str | None = None
+    env: dict[str, str] | None = None
 
 
 class Metadata1(BaseParserModel):
@@ -28,9 +28,9 @@ class Metadata1(BaseParserModel):
     type: str
     schema_: str = Field(..., alias='schema')
     name: str
-    database: Optional[str] = None
-    comment: Optional[str] = None
-    owner: Optional[str] = None
+    database: str | None = None
+    comment: str | None = None
+    owner: str | None = None
 
 
 class Columns(BaseParserModel):
@@ -40,7 +40,7 @@ class Columns(BaseParserModel):
     type: str
     index: int
     name: str
-    comment: Optional[str] = None
+    comment: str | None = None
 
 
 class Stats(BaseParserModel):
@@ -49,9 +49,9 @@ class Stats(BaseParserModel):
     )
     id: str
     label: str
-    value: Optional[Union[bool, str, float]] = None
+    value: bool | str | float | None = None
     include: bool
-    description: Optional[str] = None
+    description: str | None = None
 
 
 class Nodes(BaseParserModel):
@@ -59,9 +59,9 @@ class Nodes(BaseParserModel):
         extra='allow',
     )
     metadata: Metadata1 = Field(..., title='TableMetadata')
-    columns: Dict[str, Columns]
-    stats: Dict[str, Stats]
-    unique_id: Optional[str] = None
+    columns: dict[str, Columns]
+    stats: dict[str, Stats]
+    unique_id: str | None = None
 
 
 class Sources(BaseParserModel):
@@ -69,9 +69,9 @@ class Sources(BaseParserModel):
         extra='allow',
     )
     metadata: Metadata1 = Field(..., title='TableMetadata')
-    columns: Dict[str, Columns]
-    stats: Dict[str, Stats]
-    unique_id: Optional[str] = None
+    columns: dict[str, Columns]
+    stats: dict[str, Stats]
+    unique_id: str | None = None
 
 
 class CatalogLatest(BaseParserModel):
@@ -79,7 +79,7 @@ class CatalogLatest(BaseParserModel):
         extra='allow',
     )
     metadata: Metadata = Field(..., title='CatalogMetadata')
-    nodes: Dict[str, Nodes]
-    sources: Dict[str, Sources]
-    errors: Optional[List[str]] = None
+    nodes: dict[str, Nodes]
+    sources: dict[str, Sources]
+    errors: list[str] | None = None
     field_compile_results: Any = Field(None, alias='_compile_results')

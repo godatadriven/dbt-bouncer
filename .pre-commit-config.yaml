@@ -57,3 +57,20 @@ repos:
           name: sqlfmt
           require_serial: true
           types_or: [sql, jinja]
+    - repo: local
+      hooks:
+        - id: pyupgrade
+          entry: uv run pyupgrade
+          language: system
+          name: pyupgrade
+          pass_filenames: true
+          require_serial: true
+          types_or: [python, pyi]
+    - repo: local
+      hooks:
+        - id: bandit
+          entry: uv run bandit -r ./src
+          language: system
+          name: bandit
+          pass_filenames: false
+          require_serial: true

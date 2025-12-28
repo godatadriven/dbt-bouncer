@@ -1,17 +1,19 @@
 # mypy: disable-error-code="union-attr"
 
 
-from typing import TYPE_CHECKING, List, Literal
+from typing import TYPE_CHECKING, Literal
 
 from pydantic import Field
 
 from dbt_bouncer.check_base import BaseCheck
 
 if TYPE_CHECKING:
-    from dbt_bouncer.artifact_parsers.parsers_common import (
+    from dbt_bouncer.artifact_parsers.parsers_manifest import (
         DbtBouncerExposureBase,
         DbtBouncerModelBase,
     )
+
+from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 
 
 class CheckExposureOnModel(BaseCheck):
@@ -44,21 +46,30 @@ class CheckExposureOnModel(BaseCheck):
 
     """
 
-    exposure: "DbtBouncerExposureBase" = Field(default=None)
+    exposure: "DbtBouncerExposureBase | None" = Field(default=None)
     maximum_number_of_models: int = Field(default=100)
     minimum_number_of_models: int = Field(default=1)
     name: Literal["check_exposure_based_on_model"]
 
     def execute(self) -> None:
-        """Execute the check."""
+        """Execute the check.
+
+        Raises:
+            DbtBouncerFailedCheckError: If upstream models number is not within limits.
+
+        """
+        if self.exposure is None:
+            raise DbtBouncerFailedCheckError("self.exposure is None")
         number_of_upstream_models = len(self.exposure.depends_on.nodes)
 
-        assert self.minimum_number_of_models <= number_of_upstream_models, (
-            f"`{self.exposure.name}` is based on less models ({number_of_upstream_models}) than the minimum permitted ({self.minimum_number_of_models})."
-        )
-        assert number_of_upstream_models <= self.maximum_number_of_models, (
-            f"`{self.exposure.name}` is based on more models ({number_of_upstream_models}) than the maximum permitted ({self.maximum_number_of_models})."
-        )
+        if number_of_upstream_models < self.minimum_number_of_models:
+            raise DbtBouncerFailedCheckError(
+                f"`{self.exposure.name}` is based on less models ({number_of_upstream_models}) than the minimum permitted ({self.minimum_number_of_models})."
+            )
+        if number_of_upstream_models > self.maximum_number_of_models:
+            raise DbtBouncerFailedCheckError(
+                f"`{self.exposure.name}` is based on more models ({number_of_upstream_models}) than the maximum permitted ({self.maximum_number_of_models})."
+            )
 
 
 class CheckExposureOnNonPublicModels(BaseCheck):
@@ -82,12 +93,19 @@ class CheckExposureOnNonPublicModels(BaseCheck):
 
     """
 
-    exposure: "DbtBouncerExposureBase" = Field(default=None)
-    models: List["DbtBouncerModelBase"] = Field(default=[])
+    exposure: "DbtBouncerExposureBase | None" = Field(default=None)
+    models: list["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_exposure_based_on_non_public_models"]
 
     def execute(self) -> None:
-        """Execute the check."""
+        """Execute the check.
+
+        Raises:
+            DbtBouncerFailedCheckError: If exposure is based on non-public models.
+
+        """
+        if self.exposure is None:
+            raise DbtBouncerFailedCheckError("self.exposure is None")
         non_public_upstream_dependencies = []
         for model in self.exposure.depends_on.nodes:
             if (
@@ -100,9 +118,10 @@ class CheckExposureOnNonPublicModels(BaseCheck):
                 if model.access.value != "public":
                     non_public_upstream_dependencies.append(model.name)
 
-        assert not non_public_upstream_dependencies, (
-            f"`{self.exposure.name}` is based on a model(s) that is not public: {non_public_upstream_dependencies}."
-        )
+        if non_public_upstream_dependencies:
+            raise DbtBouncerFailedCheckError(
+                f"`{self.exposure.name}` is based on a model(s) that is not public: {non_public_upstream_dependencies}."
+            )
 
 
 class CheckExposureOnView(BaseCheck):
@@ -137,15 +156,22 @@ class CheckExposureOnView(BaseCheck):
 
     """
 
-    exposure: "DbtBouncerExposureBase" = Field(default=None)
-    materializations_to_include: List[str] = Field(
+    exposure: "DbtBouncerExposureBase | None" = Field(default=None)
+    materializations_to_include: list[str] = Field(
         default=["ephemeral", "view"],
     )
-    models: List["DbtBouncerModelBase"] = Field(default=[])
+    models: list["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_exposure_based_on_view"]
 
     def execute(self) -> None:
-        """Execute the check."""
+        """Execute the check.
+
+        Raises:
+            DbtBouncerFailedCheckError: If exposure is based on a model that is not a table.
+
+        """
+        if self.exposure is None:
+            raise DbtBouncerFailedCheckError("self.exposure is None")
         non_table_upstream_dependencies = []
         for model in self.exposure.depends_on.nodes:
             if (
@@ -158,6 +184,7 @@ class CheckExposureOnView(BaseCheck):
                 if model.config.materialized in self.materializations_to_include:
                     non_table_upstream_dependencies.append(model.name)
 
-        assert not non_table_upstream_dependencies, (
-            f"`{self.exposure.name}` is based on a model that is not a table: {non_table_upstream_dependencies}."
-        )
+        if non_table_upstream_dependencies:
+            raise DbtBouncerFailedCheckError(
+                f"`{self.exposure.name}` is based on a model that is not a table: {non_table_upstream_dependencies}."
+            )

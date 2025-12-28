@@ -9,6 +9,7 @@ from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
     Nodes6,
     UnitTests,
 )
+from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
@@ -148,7 +149,7 @@ CheckModelsTestCoverage.model_rebuild()
                     "unique_id": "model.package_name.model_2",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
 )
@@ -238,7 +239,7 @@ def test_check_model_access(access, model, expectation):
                     "unique_id": "model.package_name.model_2",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
 )
@@ -290,7 +291,7 @@ def test_check_model_contract_enforced_for_public_model(model, expectation):
             ),
             ["dbt.is_incremental", "dbt.other_macro"],
             "all",
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
         (
             Nodes4(
@@ -335,7 +336,7 @@ def test_check_model_contract_enforced_for_public_model(model, expectation):
             ),
             ["dbt.other_macro"],
             "any",
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
         (
             Nodes4(
@@ -380,7 +381,7 @@ def test_check_model_contract_enforced_for_public_model(model, expectation):
             ),
             ["dbt.is_incremental", "dbt.other_macro"],
             "one",
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
 )
@@ -450,7 +451,7 @@ def test_check_model_depends_on_macros(model, required_macros, criteria, expecta
                     "unique_id": "model.package_name.model_2",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
 )
@@ -568,7 +569,7 @@ def test_check_model_depends_on_multiple_sources(model, expectation):
                     },
                 ),
             ],
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
 )
@@ -636,7 +637,7 @@ def test_check_model_documentation_coverage(
                     "unique_id": "model.package_name.model_1",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
 )
@@ -700,7 +701,7 @@ def test_check_model_documented_in_same_directory(model, expectation):
                     "unique_id": "model.package_name.model_v1",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
 )
@@ -766,7 +767,7 @@ def test_check_model_file_names(file_name_pattern, model, expectation):
                     "unique_id": "model.package_name.model_1",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
 )
@@ -832,7 +833,7 @@ def test_check_model_grant_privilege(privilege_pattern, model, expectation):
                     "unique_id": "model.package_name.model_1",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
 )
@@ -896,7 +897,7 @@ def test_check_model_grant_privilege_required(privilege, model, expectation):
                     "unique_id": "model.package_name.model_1",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
 )
@@ -996,7 +997,7 @@ def test_check_model_has_contracts_enforced(model, expectation):
                     "unique_id": "model.package_name.model_1",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
 )
@@ -1141,7 +1142,7 @@ def test_check_model_has_exposures(exposures, model, expectation):
                     "unique_id": "model.package_name.model_1",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
         (
             ["owner"],
@@ -1167,7 +1168,7 @@ def test_check_model_has_exposures(exposures, model, expectation):
                     "unique_id": "model.package_name.model_1",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
         (
             ["owner", {"name": ["first", "last"]}],
@@ -1193,7 +1194,7 @@ def test_check_model_has_exposures(exposures, model, expectation):
                     "unique_id": "model.package_name.model_1",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
 )
@@ -1280,7 +1281,7 @@ def test_check_model_has_meta_keys(keys, model, expectation):
                     "unique_id": "model.package_name.model_1",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
 )
@@ -1402,7 +1403,7 @@ def test_check_model_has_no_upstream_dependencies(model, expectation):
                     "unique_id": "model.package_name.model_1",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
         (
             Nodes4(
@@ -1429,7 +1430,7 @@ def test_check_model_has_no_upstream_dependencies(model, expectation):
                     "unique_id": "model.package_name.model_1",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
         (
             Nodes4(
@@ -1458,7 +1459,7 @@ def test_check_model_has_no_upstream_dependencies(model, expectation):
                     "unique_id": "model.package_name.model_1",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
         (
             Nodes4(
@@ -1486,7 +1487,7 @@ def test_check_model_has_no_upstream_dependencies(model, expectation):
                     "unique_id": "model.package_name.model_1",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
 )
@@ -1547,7 +1548,7 @@ def test_check_model_has_semi_colon(model, expectation):
             ),
             ["tag_1"],
             "all",
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
         (
             Nodes4(
@@ -1595,7 +1596,7 @@ def test_check_model_has_semi_colon(model, expectation):
             ),
             ["tag_1", "tag_2"],
             "all",
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
         (
             Nodes4(
@@ -1643,7 +1644,7 @@ def test_check_model_has_semi_colon(model, expectation):
             ),
             ["tag_1", "tag_2"],
             "any",
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
         (
             Nodes4(
@@ -1691,7 +1692,7 @@ def test_check_model_has_semi_colon(model, expectation):
             ),
             ["tag_1", "tag_2"],
             "one",
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
 )
@@ -1859,7 +1860,7 @@ def test_check_model_has_tags(model, tags, criteria, expectation):
                     },
                 ),
             ],
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
         (
             ["expect_compound_columns_to_be_unique", "unique"],
@@ -1885,7 +1886,7 @@ def test_check_model_has_tags(model, tags, criteria, expectation):
                 },
             ),
             [],
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
 )
@@ -2011,7 +2012,7 @@ def test_check_model_has_unique_test(
                     },
                 ),
             ],
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
     indirect=["manifest_obj"],
@@ -2109,7 +2110,7 @@ def test_check_model_has_unit_tests(
                     "unique_id": "model.package_name.model_1",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
 )
@@ -2177,7 +2178,7 @@ def test_check_model_latest_version_specified(
                 },
             ),
             ".*[i][f][n][u][l][l].*",
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
 )
@@ -2299,7 +2300,7 @@ def test_check_model_code_does_not_contain_regexp_pattern(
                 },
             ),
             ["finance", "marketing"],
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
         (
             "models",
@@ -2325,7 +2326,7 @@ def test_check_model_code_does_not_contain_regexp_pattern(
                 },
             ),
             ["finance", "marketing"],
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
 )
@@ -2583,7 +2584,7 @@ def test_check_model_directories(
                     },
                 ),
             ],
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
     indirect=["manifest_obj"],
@@ -2738,7 +2739,7 @@ def test_check_model_max_chained_views(
                     "unique_id": "model.package_name.model_1",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
         (
             "^intermediate",
@@ -2764,7 +2765,7 @@ def test_check_model_max_chained_views(
                     "unique_id": "model.package_name.model_int_2",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
 )
@@ -2833,7 +2834,7 @@ def test_check_mode_names(include, model_name_pattern, model, expectation):
                     "unique_id": "model.package_name.model_1",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
         (
             2,
@@ -2860,7 +2861,7 @@ def test_check_mode_names(include, model_name_pattern, model, expectation):
                     "unique_id": "model.package_name.model_1",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
 )
@@ -3009,7 +3010,7 @@ def test_check_model_number_of_grants(
                     },
                 ),
             ],
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
 )
@@ -3078,7 +3079,7 @@ def test_check_model_max_fanout(max_downstream_models, model, models, expectatio
                     "unique_id": "model.package_name.model_1",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
 )
@@ -3210,7 +3211,7 @@ def test_check_model_max_number_of_lines(max_number_of_lines, model, expectation
                     "unique_id": "model.package_name.stg_model_1",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
         (
             5,
@@ -3249,7 +3250,7 @@ def test_check_model_max_number_of_lines(max_number_of_lines, model, expectation
                     "unique_id": "model.package_name.stg_model_1",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
         (
             5,
@@ -3288,7 +3289,7 @@ def test_check_model_max_number_of_lines(max_number_of_lines, model, expectation
                     "unique_id": "model.package_name.stg_model_1",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
 )
@@ -3410,7 +3411,7 @@ def test_check_model_max_upstream_dependencies(
                     "unique_id": "model.package_name.model_1",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
         (
             Nodes4(
@@ -3435,7 +3436,7 @@ def test_check_model_max_upstream_dependencies(
                     "unique_id": "model.package_name.model_1",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
         (
             Nodes4(
@@ -3460,7 +3461,7 @@ def test_check_model_max_upstream_dependencies(
                     "unique_id": "model.package_name.model_1",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
 )
@@ -3576,7 +3577,7 @@ def test_check_model_property_file_location(model, expectation):
                     "unique_id": "model.package_name.model_1",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
 )
@@ -3695,7 +3696,7 @@ def test_check_model_schema_name(include, schema_name_pattern, model, expectatio
                 },
             ),
             r"[0-9]\d*",
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
 )
@@ -3901,7 +3902,7 @@ def test_check_model_version_allowed(model, version_pattern, expectation):
                     "version": 1,
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
 )
@@ -3997,7 +3998,7 @@ def test_check_model_version_pinned_in_ref(manifest_obj, model, expectation):
                 },
             ),
             ".*pattern to match.*",
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
         (
             Nodes4(
@@ -4023,7 +4024,7 @@ def test_check_model_version_pinned_in_ref(manifest_obj, model, expectation):
                 },
             ),
             ".*pattern to match.*",
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
         (
             Nodes4(
@@ -4050,7 +4051,7 @@ def test_check_model_version_pinned_in_ref(manifest_obj, model, expectation):
                 },
             ),
             ".*pattern to match.*",
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
         (
             Nodes4(
@@ -4076,7 +4077,7 @@ def test_check_model_version_pinned_in_ref(manifest_obj, model, expectation):
                 },
             ),
             ".*pattern to match.*",
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
         (
             Nodes4(
@@ -4196,7 +4197,7 @@ def test_check_model_description_contains_regex_pattern(model, pattern, expectat
                     "unique_id": "model.package_name.model_1",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
         (
             Nodes4(
@@ -4221,7 +4222,7 @@ def test_check_model_description_contains_regex_pattern(model, pattern, expectat
                     "unique_id": "model.package_name.model_1",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
         (
             Nodes4(
@@ -4247,7 +4248,7 @@ def test_check_model_description_contains_regex_pattern(model, pattern, expectat
                     "unique_id": "model.package_name.model_1",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
         (
             Nodes4(
@@ -4272,7 +4273,7 @@ def test_check_model_description_contains_regex_pattern(model, pattern, expectat
                     "unique_id": "model.package_name.model_1",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
         (
             Nodes4(
@@ -4297,7 +4298,7 @@ def test_check_model_description_contains_regex_pattern(model, pattern, expectat
                     "unique_id": "model.package_name.model_1",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
 )
@@ -4525,7 +4526,7 @@ def test_check_model_description_populated(model, expectation):
                     },
                 ),
             ],
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
 )

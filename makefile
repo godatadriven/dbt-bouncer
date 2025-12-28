@@ -46,6 +46,14 @@ test-integration:
 		./tests/integration \
 		$(MAKE_ARGS)
 
+test-perf:
+	bencher run \
+		--adapter shell_hyperfine \
+		--dry-run \
+		--file results.json \
+		--format json \
+		"hyperfine --export-json results.json --runs 10 'dbt-bouncer --config-file dbt-bouncer-example.yml'"
+
 test-unit:
 	uv run pytest \
 		-c ./tests \

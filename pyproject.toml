@@ -10,7 +10,7 @@ classifiers = [
   "Programming Language :: Python :: 3.14",
 ]
 dependencies =[
-  "click (<8.3)", # Due to this issue: https://github.com/pallets/click/issues/3110
+  "click (!=8.3.0,!=8.3.1,<9)", # Due to this issue: https://github.com/pallets/click/issues/3110
   "dbt-artifacts-parser (>=0.8)",
   "h11 (>=0.16.0)", # To fix security warning
   "jellyfish (>=1,<2)",
@@ -19,6 +19,7 @@ dependencies =[
   "packaging (<25)",
   "progress",
   "pydantic (>=2,<3)",
+  "pytest<=10",
   "pyyaml (<7)",
   "requests (>=2,<3)",
   "tabulate (<1)",
@@ -41,13 +42,14 @@ version = "0.0.0"
 
 [project.optional-dependencies]
 dev = [
+  "bandit~=1.0",
   "dbt-core>=1.11.2,<2",
   "dbt-duckdb~=1.0",
   "mypy~=1.0",
   "prek>=0.1,<1",
-  "pytest<=10",
   "pytest-cov>=5,<8",
   "pytest-xdist~=3.0",
+  "pyupgrade~=3.0",
   "ruff~=0.0",
   "shandy-sqlfmt[jinjafmt]~=0.0",
   "types-PyYaml~=6.0",

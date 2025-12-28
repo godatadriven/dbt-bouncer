@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING, Literal
 from pydantic import Field
 
 from dbt_bouncer.check_base import BaseCheck
+from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 
 if TYPE_CHECKING:
     import warnings
@@ -39,12 +40,20 @@ class CheckSourceColumnsAreAllDocumented(BaseCheck):
 
     """
 
-    catalog_source: "CatalogNodes" = Field(default=None)
+    catalog_source: "CatalogNodes | None" = Field(default=None)
     name: Literal["check_source_columns_are_all_documented"]
     sources: list["DbtBouncerSourceBase"] = Field(default=[])
 
     def execute(self) -> None:
-        """Execute the check."""
+        """Execute the check.
+
+        Raises:
+            DbtBouncerFailedCheckError: If columns are undocumented.
+
+        """
+        if self.catalog_source is None:
+            raise DbtBouncerFailedCheckError("self.catalog_source is None")
+
         source = next(
             s for s in self.sources if s.unique_id == self.catalog_source.unique_id
         )
@@ -53,6 +62,7 @@ class CheckSourceColumnsAreAllDocumented(BaseCheck):
             for _, v in self.catalog_source.columns.items()
             if v.name not in source.columns
         ]
-        assert not undocumented_columns, (
-            f"`{self.catalog_source.unique_id}` has columns that are not included in the sources properties file: {undocumented_columns}"
-        )
+        if undocumented_columns:
+            raise DbtBouncerFailedCheckError(
+                f"`{self.catalog_source.unique_id}` has columns that are not included in the sources properties file: {undocumented_columns}"
+            )

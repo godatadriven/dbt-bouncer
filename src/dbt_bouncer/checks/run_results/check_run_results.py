@@ -9,6 +9,8 @@ from dbt_bouncer.check_base import BaseCheck
 if TYPE_CHECKING:
     from dbt_bouncer.artifact_parsers.parsers_run_results import DbtBouncerRunResultBase
 
+from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
+
 
 class CheckRunResultsMaxExecutionTime(BaseCheck):
     """Each result can take a maximum duration (seconds).
@@ -20,10 +22,10 @@ class CheckRunResultsMaxExecutionTime(BaseCheck):
         run_result (DbtBouncerRunResult): The DbtBouncerRunResult object to check.
 
     Other Parameters:
-        description (Optional[str]): Description of what the check does and why it is implemented.
-        exclude (Optional[str]): Regex pattern to match the resource path. Resource paths that match the pattern will not be checked.
-        include (Optional[str]): Regex pattern to match the resource path. Only resource paths that match the pattern will be checked.
-        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the resource path. Resource paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the resource path. Only resource paths that match the pattern will be checked.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Example(s):
         ```yaml
@@ -45,10 +47,16 @@ class CheckRunResultsMaxExecutionTime(BaseCheck):
     run_result: "DbtBouncerRunResultBase" = Field(default=None)
 
     def execute(self) -> None:
-        """Execute the check."""
-        assert self.run_result.execution_time <= self.max_execution_time_seconds, (
-            f"`{self.run_result.unique_id.split('.')[-1]}` has an execution time ({self.run_result.execution_time} greater than permitted ({self.max_execution_time_seconds}s)."
-        )
+        """Execute the check.
+
+        Raises:
+            DbtBouncerFailedCheckError: If execution time is greater than permitted.
+
+        """
+        if self.run_result.execution_time > self.max_execution_time_seconds:
+            raise DbtBouncerFailedCheckError(
+                f"`{self.run_result.unique_id.split('.')[-1]}` has an execution time ({self.run_result.execution_time} greater than permitted ({self.max_execution_time_seconds}s)."
+            )
 
 
 class CheckRunResultsMaxGigabytesBilled(BaseCheck):
@@ -63,10 +71,10 @@ class CheckRunResultsMaxGigabytesBilled(BaseCheck):
         run_result (DbtBouncerRunResult): The DbtBouncerRunResult object to check.
 
     Other Parameters:
-        description (Optional[str]): Description of what the check does and why it is implemented.
-        exclude (Optional[str]): Regex pattern to match the resource path. Resource paths that match the pattern will not be checked.
-        include (Optional[str]): Regex pattern to match the resource path. Only resource paths that match the pattern will be checked.
-        severity (Optional[Literal["error", "warn"]]): Severity level of the check. Default: `error`.
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the resource path. Resource paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the resource path. Only resource paths that match the pattern will be checked.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Raises: # noqa:DOC502
         KeyError: If the `dbt-bigquery` adapter is not used.
@@ -89,6 +97,7 @@ class CheckRunResultsMaxGigabytesBilled(BaseCheck):
         """Execute the check.
 
         Raises:
+            DbtBouncerFailedCheckError: If gigabytes billed is greater than permitted.
             RuntimeError: If running with adapter other than `dbt-bigquery`.
 
         """
@@ -101,6 +110,7 @@ class CheckRunResultsMaxGigabytesBilled(BaseCheck):
                 "`bytes_billed` not found in adapter response. Are you using the `dbt-bigquery` adapter?",
             ) from e
 
-        assert gigabytes_billed < self.max_gigabytes_billed, (
-            f"`{self.run_result.unique_id.split('.')[-2]}` results in ({gigabytes_billed} billed bytes, this is greater than permitted ({self.max_gigabytes_billed})."
-        )
+        if gigabytes_billed > self.max_gigabytes_billed:
+            raise DbtBouncerFailedCheckError(
+                f"`{self.run_result.unique_id.split('.')[-2]}` results in ({gigabytes_billed} billed bytes, this is greater than permitted ({self.max_gigabytes_billed})."
+            )

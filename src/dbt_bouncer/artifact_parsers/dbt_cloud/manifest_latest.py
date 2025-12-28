@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Any, Dict, List, Literal, Optional, Union
+from typing import Any, Literal
 from uuid import UUID
 
 from dbt_artifacts_parser.parsers.base import BaseParserModel
@@ -18,7 +18,7 @@ class CustomGranularity(BaseParserModel):
         extra="allow",
     )
     name: str
-    column_name: Optional[str] = None
+    column_name: str | None = None
 
 
 class TimeSpine(BaseParserModel):
@@ -26,30 +26,30 @@ class TimeSpine(BaseParserModel):
         extra="allow",
     )
     standard_granularity_column: str
-    custom_granularities: Optional[List[CustomGranularity]] = None
+    custom_granularities: list[CustomGranularity] | None = None
 
 
 class Metadata(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    dbt_schema_version: Optional[str] = None
-    dbt_version: Optional[str] = "1.8.0b3"
-    generated_at: Optional[str] = None
-    invocation_id: Optional[str] = None
-    env: Optional[Dict[str, str]] = None
-    project_name: Optional[str] = Field(None, description="Name of the root project")
-    project_id: Optional[str] = Field(
+    dbt_schema_version: str | None = None
+    dbt_version: str | None = "1.8.0b3"
+    generated_at: str | None = None
+    invocation_id: str | None = None
+    env: dict[str, str] | None = None
+    project_name: str | None = Field(None, description="Name of the root project")
+    project_id: str | None = Field(
         None,
         description="A unique identifier for the project, hashed from the project name",
     )
-    user_id: Optional[UUID] = Field(
+    user_id: UUID | None = Field(
         None, description="A unique identifier for the user"
     )
-    send_anonymous_usage_stats: Optional[bool] = Field(
+    send_anonymous_usage_stats: bool | None = Field(
         None, description="Whether dbt is configured to send anonymous usage statistics"
     )
-    adapter_type: Optional[str] = Field(
+    adapter_type: str | None = Field(
         None, description="The type name of the adapter"
     )
 
@@ -67,8 +67,8 @@ class PostHookItem(BaseParserModel):
         extra="allow",
     )
     sql: str
-    transaction: Optional[bool] = True
-    index: Optional[int] = None
+    transaction: bool | None = True
+    index: int | None = None
 
 
 class PreHookItem(BaseParserModel):
@@ -76,8 +76,8 @@ class PreHookItem(BaseParserModel):
         extra="allow",
     )
     sql: str
-    transaction: Optional[bool] = True
-    index: Optional[int] = None
+    transaction: bool | None = True
+    index: int | None = None
 
 
 class OnConfigurationChange(Enum):
@@ -90,47 +90,47 @@ class Docs(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    show: Optional[bool] = True
-    node_color: Optional[str] = None
+    show: bool | None = True
+    node_color: str | None = None
 
 
 class Contract(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    enforced: Optional[bool] = False
-    alias_types: Optional[bool] = True
+    enforced: bool | None = False
+    alias_types: bool | None = True
 
 
 class Config(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    field_extra: Optional[Dict[str, Any]] = Field(None, alias="_extra")
-    enabled: Optional[bool] = True
-    alias: Optional[str] = None
-    schema_: Optional[str] = Field(None, alias="schema")
-    database: Optional[str] = None
-    tags: Optional[Union[List[str], str]] = None
-    meta: Optional[Dict[str, Any]] = None
-    group: Optional[str] = None
-    materialized: Optional[str] = "seed"
-    incremental_strategy: Optional[str] = None
-    persist_docs: Optional[Dict[str, Any]] = None
-    post_hook: Optional[List[PostHookItem]] = Field(None, alias="post-hook")
-    pre_hook: Optional[List[PreHookItem]] = Field(None, alias="pre-hook")
-    quoting: Optional[Dict[str, Any]] = None
-    column_types: Optional[Dict[str, Any]] = None
-    full_refresh: Optional[bool] = None
-    unique_key: Optional[Union[str, List[str]]] = None
-    on_schema_change: Optional[str] = "ignore"
-    on_configuration_change: Optional[OnConfigurationChange] = None
-    grants: Optional[Dict[str, Any]] = None
-    packages: Optional[List[str]] = None
-    docs: Optional[Docs] = Field(None, title="Docs")
-    contract: Optional[Contract] = Field(None, title="ContractConfig")
-    delimiter: Optional[str] = ","
-    quote_columns: Optional[bool] = None
+    field_extra: dict[str, Any] | None = Field(None, alias="_extra")
+    enabled: bool | None = True
+    alias: str | None = None
+    schema_: str | None = Field(None, alias="schema")
+    database: str | None = None
+    tags: list[str] | str | None = None
+    meta: dict[str, Any] | None = None
+    group: str | None = None
+    materialized: str | None = "seed"
+    incremental_strategy: str | None = None
+    persist_docs: dict[str, Any] | None = None
+    post_hook: list[PostHookItem] | None = Field(None, alias="post-hook")
+    pre_hook: list[PreHookItem] | None = Field(None, alias="pre-hook")
+    quoting: dict[str, Any] | None = None
+    column_types: dict[str, Any] | None = None
+    full_refresh: bool | None = None
+    unique_key: str | list[str] | None = None
+    on_schema_change: str | None = "ignore"
+    on_configuration_change: OnConfigurationChange | None = None
+    grants: dict[str, Any] | None = None
+    packages: list[str] | None = None
+    docs: Docs | None = Field(None, title="Docs")
+    contract: Contract | None = Field(None, title="ContractConfig")
+    delimiter: str | None = ","
+    quote_columns: bool | None = None
 
 
 class Type(Enum):
@@ -147,10 +147,10 @@ class Constraint(BaseParserModel):
         extra="allow",
     )
     type: Type
-    name: Optional[str] = None
-    expression: Optional[str] = None
-    warn_unenforced: Optional[bool] = True
-    warn_unsupported: Optional[bool] = True
+    name: str | None = None
+    expression: str | None = None
+    warn_unenforced: bool | None = True
+    warn_unsupported: bool | None = True
 
 
 class Columns(BaseParserModel):
@@ -158,20 +158,20 @@ class Columns(BaseParserModel):
         extra="allow",
     )
     name: str
-    description: Optional[str] = ""
-    meta: Optional[Dict[str, Any]] = None
-    data_type: Optional[str] = None
-    constraints: Optional[List[Constraint]] = None
-    quote: Optional[bool] = None
-    tags: Optional[List[str]] = None
-    field_extra: Optional[Dict[str, Any]] = Field(None, alias="_extra")
+    description: str | None = ""
+    meta: dict[str, Any] | None = None
+    data_type: str | None = None
+    constraints: list[Constraint] | None = None
+    quote: bool | None = None
+    tags: list[str] | None = None
+    field_extra: dict[str, Any] | None = Field(None, alias="_extra")
 
 
 class DependsOn(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    macros: Optional[List[str]] = None
+    macros: list[str] | None = None
 
 
 class ResourceType(Enum):
@@ -199,53 +199,53 @@ class Config1(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    field_extra: Optional[Dict[str, Any]] = Field(None, alias="_extra")
-    enabled: Optional[bool] = True
-    alias: Optional[str] = None
-    schema_: Optional[str] = Field(None, alias="schema")
-    database: Optional[str] = None
-    tags: Optional[Union[List[str], str]] = None
-    meta: Optional[Dict[str, Any]] = None
-    group: Optional[str] = None
-    materialized: Optional[str] = "view"
-    incremental_strategy: Optional[str] = None
-    persist_docs: Optional[Dict[str, Any]] = None
-    post_hook: Optional[List[PostHookItem]] = Field(None, alias="post-hook")
-    pre_hook: Optional[List[PreHookItem]] = Field(None, alias="pre-hook")
-    quoting: Optional[Dict[str, Any]] = None
-    column_types: Optional[Dict[str, Any]] = None
-    full_refresh: Optional[bool] = None
-    unique_key: Optional[Union[str, List[str]]] = None
-    on_schema_change: Optional[str] = "ignore"
-    on_configuration_change: Optional[OnConfigurationChange] = None
-    grants: Optional[Dict[str, Any]] = None
-    packages: Optional[List[str]] = None
-    docs: Optional[Docs] = Field(None, title="Docs")
-    contract: Optional[Contract] = Field(None, title="ContractConfig")
+    field_extra: dict[str, Any] | None = Field(None, alias="_extra")
+    enabled: bool | None = True
+    alias: str | None = None
+    schema_: str | None = Field(None, alias="schema")
+    database: str | None = None
+    tags: list[str] | str | None = None
+    meta: dict[str, Any] | None = None
+    group: str | None = None
+    materialized: str | None = "view"
+    incremental_strategy: str | None = None
+    persist_docs: dict[str, Any] | None = None
+    post_hook: list[PostHookItem] | None = Field(None, alias="post-hook")
+    pre_hook: list[PreHookItem] | None = Field(None, alias="pre-hook")
+    quoting: dict[str, Any] | None = None
+    column_types: dict[str, Any] | None = None
+    full_refresh: bool | None = None
+    unique_key: str | list[str] | None = None
+    on_schema_change: str | None = "ignore"
+    on_configuration_change: OnConfigurationChange | None = None
+    grants: dict[str, Any] | None = None
+    packages: list[str] | None = None
+    docs: Docs | None = Field(None, title="Docs")
+    contract: Contract | None = Field(None, title="ContractConfig")
 
 
 class DeferRelation(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    database: Optional[str] = None
+    database: str | None = None
     schema_: str = Field(..., alias="schema")
     alias: str
-    relation_name: Optional[str] = None
+    relation_name: str | None = None
     resource_type: ResourceType
     name: str
     description: str
-    compiled_code: Optional[str] = None
-    meta: Dict[str, Any]
-    tags: List[str]
-    config: Optional[Config1] = None
+    compiled_code: str | None = None
+    meta: dict[str, Any]
+    tags: list[str]
+    config: Config1 | None = None
 
 
 class Nodes(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    database: Optional[str] = None
+    database: str | None = None
     schema_: str = Field(..., alias="schema")
     name: str
     resource_type: Literal["seed"]
@@ -253,55 +253,55 @@ class Nodes(BaseParserModel):
     path: str
     original_file_path: str
     unique_id: str
-    fqn: List[str]
+    fqn: list[str]
     alias: str
     checksum: Checksum = Field(..., title="FileHash")
-    config: Optional[Config] = Field(None, title="SeedConfig")
-    tags: Optional[List[str]] = None
-    description: Optional[str] = ""
-    columns: Optional[Dict[str, Columns]] = None
-    meta: Optional[Dict[str, Any]] = None
-    group: Optional[str] = None
-    docs: Optional[Docs] = Field(None, title="Docs")
-    patch_path: Optional[str] = None
-    build_path: Optional[str] = None
-    unrendered_config: Optional[Dict[str, Any]] = None
-    created_at: Optional[float] = None
-    config_call_dict: Optional[Dict[str, Any]] = None
-    relation_name: Optional[str] = None
-    raw_code: Optional[str] = ""
-    root_path: Optional[str] = None
-    depends_on: Optional[DependsOn] = Field(None, title="MacroDependsOn")
-    defer_relation: Optional[DeferRelation] = None
+    config: Config | None = Field(None, title="SeedConfig")
+    tags: list[str] | None = None
+    description: str | None = ""
+    columns: dict[str, Columns] | None = None
+    meta: dict[str, Any] | None = None
+    group: str | None = None
+    docs: Docs | None = Field(None, title="Docs")
+    patch_path: str | None = None
+    build_path: str | None = None
+    unrendered_config: dict[str, Any] | None = None
+    created_at: float | None = None
+    config_call_dict: dict[str, Any] | None = None
+    relation_name: str | None = None
+    raw_code: str | None = ""
+    root_path: str | None = None
+    depends_on: DependsOn | None = Field(None, title="MacroDependsOn")
+    defer_relation: DeferRelation | None = None
 
 
 class Config2(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    field_extra: Optional[Dict[str, Any]] = Field(None, alias="_extra")
-    enabled: Optional[bool] = True
-    alias: Optional[str] = None
-    schema_: Optional[str] = Field(None, alias="schema")
-    database: Optional[str] = None
-    tags: Optional[Union[List[str], str]] = None
-    meta: Optional[Dict[str, Any]] = None
-    group: Optional[str] = None
-    materialized: Optional[str] = "view"
-    incremental_strategy: Optional[str] = None
-    persist_docs: Optional[Dict[str, Any]] = None
-    post_hook: Optional[List[PostHookItem]] = Field(None, alias="post-hook")
-    pre_hook: Optional[List[PreHookItem]] = Field(None, alias="pre-hook")
-    quoting: Optional[Dict[str, Any]] = None
-    column_types: Optional[Dict[str, Any]] = None
-    full_refresh: Optional[bool] = None
-    unique_key: Optional[Union[str, List[str]]] = None
-    on_schema_change: Optional[str] = "ignore"
-    on_configuration_change: Optional[OnConfigurationChange] = None
-    grants: Optional[Dict[str, Any]] = None
-    packages: Optional[List[str]] = None
-    docs: Optional[Docs] = Field(None, title="Docs")
-    contract: Optional[Contract] = Field(None, title="ContractConfig")
+    field_extra: dict[str, Any] | None = Field(None, alias="_extra")
+    enabled: bool | None = True
+    alias: str | None = None
+    schema_: str | None = Field(None, alias="schema")
+    database: str | None = None
+    tags: list[str] | str | None = None
+    meta: dict[str, Any] | None = None
+    group: str | None = None
+    materialized: str | None = "view"
+    incremental_strategy: str | None = None
+    persist_docs: dict[str, Any] | None = None
+    post_hook: list[PostHookItem] | None = Field(None, alias="post-hook")
+    pre_hook: list[PreHookItem] | None = Field(None, alias="pre-hook")
+    quoting: dict[str, Any] | None = None
+    column_types: dict[str, Any] | None = None
+    full_refresh: bool | None = None
+    unique_key: str | list[str] | None = None
+    on_schema_change: str | None = "ignore"
+    on_configuration_change: OnConfigurationChange | None = None
+    grants: dict[str, Any] | None = None
+    packages: list[str] | None = None
+    docs: Docs | None = Field(None, title="Docs")
+    contract: Contract | None = Field(None, title="ContractConfig")
 
 
 class Constraint1(BaseParserModel):
@@ -309,10 +309,10 @@ class Constraint1(BaseParserModel):
         extra="allow",
     )
     type: Type
-    name: Optional[str] = None
-    expression: Optional[str] = None
-    warn_unenforced: Optional[bool] = True
-    warn_unsupported: Optional[bool] = True
+    name: str | None = None
+    expression: str | None = None
+    warn_unenforced: bool | None = True
+    warn_unsupported: bool | None = True
 
 
 class Columns1(BaseParserModel):
@@ -320,13 +320,13 @@ class Columns1(BaseParserModel):
         extra="allow",
     )
     name: str
-    description: Optional[str] = ""
-    meta: Optional[Dict[str, Any]] = None
-    data_type: Optional[str] = None
-    constraints: Optional[List[Constraint1]] = None
-    quote: Optional[bool] = None
-    tags: Optional[List[str]] = None
-    field_extra: Optional[Dict[str, Any]] = Field(None, alias="_extra")
+    description: str | None = ""
+    meta: dict[str, Any] | None = None
+    data_type: str | None = None
+    constraints: list[Constraint1] | None = None
+    quote: bool | None = None
+    tags: list[str] | None = None
+    field_extra: dict[str, Any] | None = Field(None, alias="_extra")
 
 
 class Ref(BaseParserModel):
@@ -334,16 +334,16 @@ class Ref(BaseParserModel):
         extra="allow",
     )
     name: str
-    package: Optional[str] = None
-    version: Optional[Union[str, float]] = None
+    package: str | None = None
+    version: str | float | None = None
 
 
 class DependsOn1(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    macros: Optional[List[str]] = None
-    nodes: Optional[List[str]] = None
+    macros: list[str] | None = None
+    nodes: list[str] | None = None
 
 
 class ExtraCte(BaseParserModel):
@@ -358,16 +358,16 @@ class Contract3(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    enforced: Optional[bool] = False
-    alias_types: Optional[bool] = True
-    checksum: Optional[str] = None
+    enforced: bool | None = False
+    alias_types: bool | None = True
+    checksum: str | None = None
 
 
 class Nodes1(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    database: Optional[str] = None
+    database: str | None = None
     schema_: str = Field(..., alias="schema")
     name: str
     resource_type: Literal["analysis"]
@@ -375,60 +375,60 @@ class Nodes1(BaseParserModel):
     path: str
     original_file_path: str
     unique_id: str
-    fqn: List[str]
+    fqn: list[str]
     alias: str
     checksum: Checksum = Field(..., title="FileHash")
-    config: Optional[Config2] = Field(None, title="NodeConfig")
-    tags: Optional[List[str]] = None
-    description: Optional[str] = ""
-    columns: Optional[Dict[str, Columns1]] = None
-    meta: Optional[Dict[str, Any]] = None
-    group: Optional[str] = None
-    docs: Optional[Docs] = Field(None, title="Docs")
-    patch_path: Optional[str] = None
-    build_path: Optional[str] = None
-    unrendered_config: Optional[Dict[str, Any]] = None
-    created_at: Optional[float] = None
-    config_call_dict: Optional[Dict[str, Any]] = None
-    relation_name: Optional[str] = None
-    raw_code: Optional[str] = ""
-    language: Optional[str] = "sql"
-    refs: Optional[List[Ref]] = None
-    sources: Optional[List[List[str]]] = None
-    metrics: Optional[List[List[str]]] = None
-    depends_on: Optional[DependsOn1] = Field(None, title="DependsOn")
-    compiled_path: Optional[str] = None
-    compiled: Optional[bool] = False
-    compiled_code: Optional[str] = None
-    extra_ctes_injected: Optional[bool] = False
-    extra_ctes: Optional[List[ExtraCte]] = None
-    field_pre_injected_sql: Optional[str] = Field(None, alias="_pre_injected_sql")
-    contract: Optional[Contract3] = Field(None, title="Contract")
+    config: Config2 | None = Field(None, title="NodeConfig")
+    tags: list[str] | None = None
+    description: str | None = ""
+    columns: dict[str, Columns1] | None = None
+    meta: dict[str, Any] | None = None
+    group: str | None = None
+    docs: Docs | None = Field(None, title="Docs")
+    patch_path: str | None = None
+    build_path: str | None = None
+    unrendered_config: dict[str, Any] | None = None
+    created_at: float | None = None
+    config_call_dict: dict[str, Any] | None = None
+    relation_name: str | None = None
+    raw_code: str | None = ""
+    language: str | None = "sql"
+    refs: list[Ref] | None = None
+    sources: list[list[str]] | None = None
+    metrics: list[list[str]] | None = None
+    depends_on: DependsOn1 | None = Field(None, title="DependsOn")
+    compiled_path: str | None = None
+    compiled: bool | None = False
+    compiled_code: str | None = None
+    extra_ctes_injected: bool | None = False
+    extra_ctes: list[ExtraCte] | None = None
+    field_pre_injected_sql: str | None = Field(None, alias="_pre_injected_sql")
+    contract: Contract3 | None = Field(None, title="Contract")
 
 
 class Config3(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    field_extra: Optional[Dict[str, Any]] = Field(None, alias="_extra")
-    enabled: Optional[bool] = True
-    alias: Optional[str] = None
-    schema_: Optional[str] = Field("dbt_test__audit", alias="schema")
-    database: Optional[str] = None
-    tags: Optional[Union[List[str], str]] = None
-    meta: Optional[Dict[str, Any]] = None
-    group: Optional[str] = None
-    materialized: Optional[str] = "test"
-    severity: Optional[constr(pattern=r"^([Ww][Aa][Rr][Nn]|[Ee][Rr][Rr][Oo][Rr])$")] = (
+    field_extra: dict[str, Any] | None = Field(None, alias="_extra")
+    enabled: bool | None = True
+    alias: str | None = None
+    schema_: str | None = Field("dbt_test__audit", alias="schema")
+    database: str | None = None
+    tags: list[str] | str | None = None
+    meta: dict[str, Any] | None = None
+    group: str | None = None
+    materialized: str | None = "test"
+    severity: constr(pattern=r"^([Ww][Aa][Rr][Nn]|[Ee][Rr][Rr][Oo][Rr])$") | None = (
         "ERROR"
     )
-    store_failures: Optional[bool] = None
-    store_failures_as: Optional[str] = None
-    where: Optional[str] = None
-    limit: Optional[int] = None
-    fail_calc: Optional[str] = "count(*)"
-    warn_if: Optional[str] = "!= 0"
-    error_if: Optional[str] = "!= 0"
+    store_failures: bool | None = None
+    store_failures_as: str | None = None
+    where: str | None = None
+    limit: int | None = None
+    fail_calc: str | None = "count(*)"
+    warn_if: str | None = "!= 0"
+    error_if: str | None = "!= 0"
 
 
 class Constraint2(BaseParserModel):
@@ -436,10 +436,10 @@ class Constraint2(BaseParserModel):
         extra="allow",
     )
     type: Type
-    name: Optional[str] = None
-    expression: Optional[str] = None
-    warn_unenforced: Optional[bool] = True
-    warn_unsupported: Optional[bool] = True
+    name: str | None = None
+    expression: str | None = None
+    warn_unenforced: bool | None = True
+    warn_unsupported: bool | None = True
 
 
 class Columns2(BaseParserModel):
@@ -447,20 +447,20 @@ class Columns2(BaseParserModel):
         extra="allow",
     )
     name: str
-    description: Optional[str] = ""
-    meta: Optional[Dict[str, Any]] = None
-    data_type: Optional[str] = None
-    constraints: Optional[List[Constraint2]] = None
-    quote: Optional[bool] = None
-    tags: Optional[List[str]] = None
-    field_extra: Optional[Dict[str, Any]] = Field(None, alias="_extra")
+    description: str | None = ""
+    meta: dict[str, Any] | None = None
+    data_type: str | None = None
+    constraints: list[Constraint2] | None = None
+    quote: bool | None = None
+    tags: list[str] | None = None
+    field_extra: dict[str, Any] | None = Field(None, alias="_extra")
 
 
 class Nodes2(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    database: Optional[str] = None
+    database: str | None = None
     schema_: str = Field(..., alias="schema")
     name: str
     resource_type: Literal["test"]
@@ -468,72 +468,72 @@ class Nodes2(BaseParserModel):
     path: str
     original_file_path: str
     unique_id: str
-    fqn: List[str]
+    fqn: list[str]
     alias: str
     checksum: Checksum = Field(..., title="FileHash")
-    config: Optional[Config3] = Field(None, title="TestConfig")
-    tags: Optional[List[str]] = None
-    description: Optional[str] = ""
-    columns: Optional[Dict[str, Columns2]] = None
-    meta: Optional[Dict[str, Any]] = None
-    group: Optional[str] = None
-    docs: Optional[Docs] = Field(None, title="Docs")
-    patch_path: Optional[str] = None
-    build_path: Optional[str] = None
-    unrendered_config: Optional[Dict[str, Any]] = None
-    created_at: Optional[float] = None
-    config_call_dict: Optional[Dict[str, Any]] = None
-    relation_name: Optional[str] = None
-    raw_code: Optional[str] = ""
-    language: Optional[str] = "sql"
-    refs: Optional[List[Ref]] = None
-    sources: Optional[List[List[str]]] = None
-    metrics: Optional[List[List[str]]] = None
-    depends_on: Optional[DependsOn1] = Field(None, title="DependsOn")
-    compiled_path: Optional[str] = None
-    compiled: Optional[bool] = False
-    compiled_code: Optional[str] = None
-    extra_ctes_injected: Optional[bool] = False
-    extra_ctes: Optional[List[ExtraCte]] = None
-    field_pre_injected_sql: Optional[str] = Field(None, alias="_pre_injected_sql")
-    contract: Optional[Contract3] = Field(None, title="Contract")
+    config: Config3 | None = Field(None, title="TestConfig")
+    tags: list[str] | None = None
+    description: str | None = ""
+    columns: dict[str, Columns2] | None = None
+    meta: dict[str, Any] | None = None
+    group: str | None = None
+    docs: Docs | None = Field(None, title="Docs")
+    patch_path: str | None = None
+    build_path: str | None = None
+    unrendered_config: dict[str, Any] | None = None
+    created_at: float | None = None
+    config_call_dict: dict[str, Any] | None = None
+    relation_name: str | None = None
+    raw_code: str | None = ""
+    language: str | None = "sql"
+    refs: list[Ref] | None = None
+    sources: list[list[str]] | None = None
+    metrics: list[list[str]] | None = None
+    depends_on: DependsOn1 | None = Field(None, title="DependsOn")
+    compiled_path: str | None = None
+    compiled: bool | None = False
+    compiled_code: str | None = None
+    extra_ctes_injected: bool | None = False
+    extra_ctes: list[ExtraCte] | None = None
+    field_pre_injected_sql: str | None = Field(None, alias="_pre_injected_sql")
+    contract: Contract3 | None = Field(None, title="Contract")
 
 
 class Contract5(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    enforced: Optional[bool] = False
-    alias_types: Optional[bool] = True
+    enforced: bool | None = False
+    alias_types: bool | None = True
 
 
 class Config4(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    field_extra: Optional[Dict[str, Any]] = Field(None, alias="_extra")
-    enabled: Optional[bool] = True
-    alias: Optional[str] = None
-    schema_: Optional[str] = Field(None, alias="schema")
-    database: Optional[str] = None
-    tags: Optional[Union[List[str], str]] = None
-    meta: Optional[Dict[str, Any]] = None
-    group: Optional[str] = None
-    materialized: Optional[str] = "view"
-    incremental_strategy: Optional[str] = None
-    persist_docs: Optional[Dict[str, Any]] = None
-    post_hook: Optional[List[PostHookItem]] = Field(None, alias="post-hook")
-    pre_hook: Optional[List[PreHookItem]] = Field(None, alias="pre-hook")
-    quoting: Optional[Dict[str, Any]] = None
-    column_types: Optional[Dict[str, Any]] = None
-    full_refresh: Optional[bool] = None
-    unique_key: Optional[Union[str, List[str]]] = None
-    on_schema_change: Optional[str] = "ignore"
-    on_configuration_change: Optional[OnConfigurationChange] = None
-    grants: Optional[Dict[str, Any]] = None
-    packages: Optional[List[str]] = None
-    docs: Optional[Docs] = Field(None, title="Docs")
-    contract: Optional[Contract5] = Field(None, title="ContractConfig")
+    field_extra: dict[str, Any] | None = Field(None, alias="_extra")
+    enabled: bool | None = True
+    alias: str | None = None
+    schema_: str | None = Field(None, alias="schema")
+    database: str | None = None
+    tags: list[str] | str | None = None
+    meta: dict[str, Any] | None = None
+    group: str | None = None
+    materialized: str | None = "view"
+    incremental_strategy: str | None = None
+    persist_docs: dict[str, Any] | None = None
+    post_hook: list[PostHookItem] | None = Field(None, alias="post-hook")
+    pre_hook: list[PreHookItem] | None = Field(None, alias="pre-hook")
+    quoting: dict[str, Any] | None = None
+    column_types: dict[str, Any] | None = None
+    full_refresh: bool | None = None
+    unique_key: str | list[str] | None = None
+    on_schema_change: str | None = "ignore"
+    on_configuration_change: OnConfigurationChange | None = None
+    grants: dict[str, Any] | None = None
+    packages: list[str] | None = None
+    docs: Docs | None = Field(None, title="Docs")
+    contract: Contract5 | None = Field(None, title="ContractConfig")
 
 
 class Constraint3(BaseParserModel):
@@ -541,10 +541,10 @@ class Constraint3(BaseParserModel):
         extra="allow",
     )
     type: Type
-    name: Optional[str] = None
-    expression: Optional[str] = None
-    warn_unenforced: Optional[bool] = True
-    warn_unsupported: Optional[bool] = True
+    name: str | None = None
+    expression: str | None = None
+    warn_unenforced: bool | None = True
+    warn_unsupported: bool | None = True
 
 
 class Columns3(BaseParserModel):
@@ -552,29 +552,29 @@ class Columns3(BaseParserModel):
         extra="allow",
     )
     name: str
-    description: Optional[str] = ""
-    meta: Optional[Dict[str, Any]] = None
-    data_type: Optional[str] = None
-    constraints: Optional[List[Constraint3]] = None
-    quote: Optional[bool] = None
-    tags: Optional[List[str]] = None
-    field_extra: Optional[Dict[str, Any]] = Field(None, alias="_extra")
+    description: str | None = ""
+    meta: dict[str, Any] | None = None
+    data_type: str | None = None
+    constraints: list[Constraint3] | None = None
+    quote: bool | None = None
+    tags: list[str] | None = None
+    field_extra: dict[str, Any] | None = Field(None, alias="_extra")
 
 
 class Contract6(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    enforced: Optional[bool] = False
-    alias_types: Optional[bool] = True
-    checksum: Optional[str] = None
+    enforced: bool | None = False
+    alias_types: bool | None = True
+    checksum: str | None = None
 
 
 class Nodes3(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    database: Optional[str] = None
+    database: str | None = None
     schema_: str = Field(..., alias="schema")
     name: str
     resource_type: Literal["operation"]
@@ -582,44 +582,44 @@ class Nodes3(BaseParserModel):
     path: str
     original_file_path: str
     unique_id: str
-    fqn: List[str]
+    fqn: list[str]
     alias: str
     checksum: Checksum = Field(..., title="FileHash")
-    config: Optional[Config4] = Field(None, title="NodeConfig")
-    tags: Optional[List[str]] = None
-    description: Optional[str] = ""
-    columns: Optional[Dict[str, Columns3]] = None
-    meta: Optional[Dict[str, Any]] = None
-    group: Optional[str] = None
-    docs: Optional[Docs] = Field(None, title="Docs")
-    patch_path: Optional[str] = None
-    build_path: Optional[str] = None
-    unrendered_config: Optional[Dict[str, Any]] = None
-    created_at: Optional[float] = None
-    config_call_dict: Optional[Dict[str, Any]] = None
-    relation_name: Optional[str] = None
-    raw_code: Optional[str] = ""
-    language: Optional[str] = "sql"
-    refs: Optional[List[Ref]] = None
-    sources: Optional[List[List[str]]] = None
-    metrics: Optional[List[List[str]]] = None
-    depends_on: Optional[DependsOn1] = Field(None, title="DependsOn")
-    compiled_path: Optional[str] = None
-    compiled: Optional[bool] = False
-    compiled_code: Optional[str] = None
-    extra_ctes_injected: Optional[bool] = False
-    extra_ctes: Optional[List[ExtraCte]] = None
-    field_pre_injected_sql: Optional[str] = Field(None, alias="_pre_injected_sql")
-    contract: Optional[Contract6] = Field(None, title="Contract")
-    index: Optional[int] = None
+    config: Config4 | None = Field(None, title="NodeConfig")
+    tags: list[str] | None = None
+    description: str | None = ""
+    columns: dict[str, Columns3] | None = None
+    meta: dict[str, Any] | None = None
+    group: str | None = None
+    docs: Docs | None = Field(None, title="Docs")
+    patch_path: str | None = None
+    build_path: str | None = None
+    unrendered_config: dict[str, Any] | None = None
+    created_at: float | None = None
+    config_call_dict: dict[str, Any] | None = None
+    relation_name: str | None = None
+    raw_code: str | None = ""
+    language: str | None = "sql"
+    refs: list[Ref] | None = None
+    sources: list[list[str]] | None = None
+    metrics: list[list[str]] | None = None
+    depends_on: DependsOn1 | None = Field(None, title="DependsOn")
+    compiled_path: str | None = None
+    compiled: bool | None = False
+    compiled_code: str | None = None
+    extra_ctes_injected: bool | None = False
+    extra_ctes: list[ExtraCte] | None = None
+    field_pre_injected_sql: str | None = Field(None, alias="_pre_injected_sql")
+    contract: Contract6 | None = Field(None, title="Contract")
+    index: int | None = None
 
 
 class Contract7(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    enforced: Optional[bool] = False
-    alias_types: Optional[bool] = True
+    enforced: bool | None = False
+    alias_types: bool | None = True
 
 
 class Access(Enum):
@@ -632,30 +632,30 @@ class Config5(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    field_extra: Optional[Dict[str, Any]] = Field(None, alias="_extra")
-    enabled: Optional[bool] = True
-    alias: Optional[str] = None
-    schema_: Optional[str] = Field(None, alias="schema")
-    database: Optional[str] = None
-    tags: Optional[Union[List[str], str]] = None
-    meta: Optional[Dict[str, Any]] = None
-    group: Optional[str] = None
-    materialized: Optional[str] = "view"
-    incremental_strategy: Optional[str] = None
-    persist_docs: Optional[Dict[str, Any]] = None
-    post_hook: Optional[List[PostHookItem]] = Field(None, alias="post-hook")
-    pre_hook: Optional[List[PreHookItem]] = Field(None, alias="pre-hook")
-    quoting: Optional[Dict[str, Any]] = None
-    column_types: Optional[Dict[str, Any]] = None
-    full_refresh: Optional[bool] = None
-    unique_key: Optional[Union[str, List[str]]] = None
-    on_schema_change: Optional[str] = "ignore"
-    on_configuration_change: Optional[OnConfigurationChange] = None
-    grants: Optional[Dict[str, Any]] = None
-    packages: Optional[List[str]] = None
-    docs: Optional[Docs] = Field(None, title="Docs")
-    contract: Optional[Contract7] = Field(None, title="ContractConfig")
-    access: Optional[Access] = "protected"
+    field_extra: dict[str, Any] | None = Field(None, alias="_extra")
+    enabled: bool | None = True
+    alias: str | None = None
+    schema_: str | None = Field(None, alias="schema")
+    database: str | None = None
+    tags: list[str] | str | None = None
+    meta: dict[str, Any] | None = None
+    group: str | None = None
+    materialized: str | None = "view"
+    incremental_strategy: str | None = None
+    persist_docs: dict[str, Any] | None = None
+    post_hook: list[PostHookItem] | None = Field(None, alias="post-hook")
+    pre_hook: list[PreHookItem] | None = Field(None, alias="pre-hook")
+    quoting: dict[str, Any] | None = None
+    column_types: dict[str, Any] | None = None
+    full_refresh: bool | None = None
+    unique_key: str | list[str] | None = None
+    on_schema_change: str | None = "ignore"
+    on_configuration_change: OnConfigurationChange | None = None
+    grants: dict[str, Any] | None = None
+    packages: list[str] | None = None
+    docs: Docs | None = Field(None, title="Docs")
+    contract: Contract7 | None = Field(None, title="ContractConfig")
+    access: Access | None = "protected"
 
 
 class Constraint4(BaseParserModel):
@@ -663,10 +663,10 @@ class Constraint4(BaseParserModel):
         extra="allow",
     )
     type: Type
-    name: Optional[str] = None
-    expression: Optional[str] = None
-    warn_unenforced: Optional[bool] = True
-    warn_unsupported: Optional[bool] = True
+    name: str | None = None
+    expression: str | None = None
+    warn_unenforced: bool | None = True
+    warn_unsupported: bool | None = True
 
 
 class Columns4(BaseParserModel):
@@ -674,22 +674,22 @@ class Columns4(BaseParserModel):
         extra="allow",
     )
     name: str
-    description: Optional[str] = ""
-    meta: Optional[Dict[str, Any]] = None
-    data_type: Optional[str] = None
-    constraints: Optional[List[Constraint4]] = None
-    quote: Optional[bool] = None
-    tags: Optional[List[str]] = None
-    field_extra: Optional[Dict[str, Any]] = Field(None, alias="_extra")
+    description: str | None = ""
+    meta: dict[str, Any] | None = None
+    data_type: str | None = None
+    constraints: list[Constraint4] | None = None
+    quote: bool | None = None
+    tags: list[str] | None = None
+    field_extra: dict[str, Any] | None = Field(None, alias="_extra")
 
 
 class Contract8(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    enforced: Optional[bool] = False
-    alias_types: Optional[bool] = True
-    checksum: Optional[str] = None
+    enforced: bool | None = False
+    alias_types: bool | None = True
+    checksum: str | None = None
 
 
 class Constraint5(BaseParserModel):
@@ -697,72 +697,72 @@ class Constraint5(BaseParserModel):
         extra="allow",
     )
     type: Type
-    name: Optional[str] = None
-    expression: Optional[str] = None
-    warn_unenforced: Optional[bool] = True
-    warn_unsupported: Optional[bool] = True
-    columns: Optional[List[str]] = None
+    name: str | None = None
+    expression: str | None = None
+    warn_unenforced: bool | None = True
+    warn_unsupported: bool | None = True
+    columns: list[str] | None = None
 
 
 class Contract9(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    enforced: Optional[bool] = False
-    alias_types: Optional[bool] = True
+    enforced: bool | None = False
+    alias_types: bool | None = True
 
 
 class Config6(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    field_extra: Optional[Dict[str, Any]] = Field(None, alias="_extra")
-    enabled: Optional[bool] = True
-    alias: Optional[str] = None
-    schema_: Optional[str] = Field(None, alias="schema")
-    database: Optional[str] = None
-    tags: Optional[Union[List[str], str]] = None
-    meta: Optional[Dict[str, Any]] = None
-    group: Optional[str] = None
-    materialized: Optional[str] = "view"
-    incremental_strategy: Optional[str] = None
-    persist_docs: Optional[Dict[str, Any]] = None
-    post_hook: Optional[List[PostHookItem]] = Field(None, alias="post-hook")
-    pre_hook: Optional[List[PreHookItem]] = Field(None, alias="pre-hook")
-    quoting: Optional[Dict[str, Any]] = None
-    column_types: Optional[Dict[str, Any]] = None
-    full_refresh: Optional[bool] = None
-    unique_key: Optional[Union[str, List[str]]] = None
-    on_schema_change: Optional[str] = "ignore"
-    on_configuration_change: Optional[OnConfigurationChange] = None
-    grants: Optional[Dict[str, Any]] = None
-    packages: Optional[List[str]] = None
-    docs: Optional[Docs] = Field(None, title="Docs")
-    contract: Optional[Contract9] = Field(None, title="ContractConfig")
+    field_extra: dict[str, Any] | None = Field(None, alias="_extra")
+    enabled: bool | None = True
+    alias: str | None = None
+    schema_: str | None = Field(None, alias="schema")
+    database: str | None = None
+    tags: list[str] | str | None = None
+    meta: dict[str, Any] | None = None
+    group: str | None = None
+    materialized: str | None = "view"
+    incremental_strategy: str | None = None
+    persist_docs: dict[str, Any] | None = None
+    post_hook: list[PostHookItem] | None = Field(None, alias="post-hook")
+    pre_hook: list[PreHookItem] | None = Field(None, alias="pre-hook")
+    quoting: dict[str, Any] | None = None
+    column_types: dict[str, Any] | None = None
+    full_refresh: bool | None = None
+    unique_key: str | list[str] | None = None
+    on_schema_change: str | None = "ignore"
+    on_configuration_change: OnConfigurationChange | None = None
+    grants: dict[str, Any] | None = None
+    packages: list[str] | None = None
+    docs: Docs | None = Field(None, title="Docs")
+    contract: Contract9 | None = Field(None, title="ContractConfig")
 
 
 class DeferRelation1(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    database: Optional[str] = None
+    database: str | None = None
     schema_: str = Field(..., alias="schema")
     alias: str
-    relation_name: Optional[str] = None
+    relation_name: str | None = None
     resource_type: ResourceType
     name: str
     description: str
-    compiled_code: Optional[str] = None
-    meta: Dict[str, Any]
-    tags: List[str]
-    config: Optional[Config6] = None
+    compiled_code: str | None = None
+    meta: dict[str, Any]
+    tags: list[str]
+    config: Config6 | None = None
 
 
 class Nodes4(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    database: Optional[str] = None
+    database: str | None = None
     schema_: str = Field(..., alias="schema")
     name: str
     resource_type: Literal["model"]
@@ -770,72 +770,72 @@ class Nodes4(BaseParserModel):
     path: str
     original_file_path: str
     unique_id: str
-    fqn: List[str]
+    fqn: list[str]
     alias: str
     checksum: Checksum = Field(..., title="FileHash")
-    config: Optional[Config5] = Field(None, title="ModelConfig")
-    tags: Optional[List[str]] = None
-    description: Optional[str] = ""
-    columns: Optional[Dict[str, Columns4]] = None
-    meta: Optional[Dict[str, Any]] = None
-    group: Optional[str] = None
-    docs: Optional[Docs] = Field(None, title="Docs")
-    patch_path: Optional[str] = None
-    build_path: Optional[str] = None
-    unrendered_config: Optional[Dict[str, Any]] = None
-    created_at: Optional[float] = None
-    config_call_dict: Optional[Dict[str, Any]] = None
-    relation_name: Optional[str] = None
-    raw_code: Optional[str] = ""
-    language: Optional[str] = "sql"
-    refs: Optional[List[Ref]] = None
-    sources: Optional[List[List[str]]] = None
-    metrics: Optional[List[List[str]]] = None
-    depends_on: Optional[DependsOn1] = Field(None, title="DependsOn")
-    compiled_path: Optional[str] = None
-    compiled: Optional[bool] = False
-    compiled_code: Optional[str] = None
-    extra_ctes_injected: Optional[bool] = False
-    extra_ctes: Optional[List[ExtraCte]] = None
-    field_pre_injected_sql: Optional[str] = Field(None, alias="_pre_injected_sql")
-    contract: Optional[Contract8] = Field(None, title="Contract")
-    access: Optional[Access] = "protected"
-    constraints: Optional[List[Constraint5]] = None
-    version: Optional[Union[str, float]] = None
-    latest_version: Optional[Union[str, float]] = None
-    deprecation_date: Optional[str] = None
-    defer_relation: Optional[DeferRelation1] = None
-    primary_key: Optional[List[str]] = None
-    time_spine: Optional[TimeSpine] = None
+    config: Config5 | None = Field(None, title="ModelConfig")
+    tags: list[str] | None = None
+    description: str | None = ""
+    columns: dict[str, Columns4] | None = None
+    meta: dict[str, Any] | None = None
+    group: str | None = None
+    docs: Docs | None = Field(None, title="Docs")
+    patch_path: str | None = None
+    build_path: str | None = None
+    unrendered_config: dict[str, Any] | None = None
+    created_at: float | None = None
+    config_call_dict: dict[str, Any] | None = None
+    relation_name: str | None = None
+    raw_code: str | None = ""
+    language: str | None = "sql"
+    refs: list[Ref] | None = None
+    sources: list[list[str]] | None = None
+    metrics: list[list[str]] | None = None
+    depends_on: DependsOn1 | None = Field(None, title="DependsOn")
+    compiled_path: str | None = None
+    compiled: bool | None = False
+    compiled_code: str | None = None
+    extra_ctes_injected: bool | None = False
+    extra_ctes: list[ExtraCte] | None = None
+    field_pre_injected_sql: str | None = Field(None, alias="_pre_injected_sql")
+    contract: Contract8 | None = Field(None, title="Contract")
+    access: Access | None = "protected"
+    constraints: list[Constraint5] | None = None
+    version: str | float | None = None
+    latest_version: str | float | None = None
+    deprecation_date: str | None = None
+    defer_relation: DeferRelation1 | None = None
+    primary_key: list[str] | None = None
+    time_spine: TimeSpine | None = None
 
 
 class Config7(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    field_extra: Optional[Dict[str, Any]] = Field(None, alias="_extra")
-    enabled: Optional[bool] = True
-    alias: Optional[str] = None
-    schema_: Optional[str] = Field(None, alias="schema")
-    database: Optional[str] = None
-    tags: Optional[Union[List[str], str]] = None
-    meta: Optional[Dict[str, Any]] = None
-    group: Optional[str] = None
-    materialized: Optional[str] = "view"
-    incremental_strategy: Optional[str] = None
-    persist_docs: Optional[Dict[str, Any]] = None
-    post_hook: Optional[List[PostHookItem]] = Field(None, alias="post-hook")
-    pre_hook: Optional[List[PreHookItem]] = Field(None, alias="pre-hook")
-    quoting: Optional[Dict[str, Any]] = None
-    column_types: Optional[Dict[str, Any]] = None
-    full_refresh: Optional[bool] = None
-    unique_key: Optional[Union[str, List[str]]] = None
-    on_schema_change: Optional[str] = "ignore"
-    on_configuration_change: Optional[OnConfigurationChange] = None
-    grants: Optional[Dict[str, Any]] = None
-    packages: Optional[List[str]] = None
-    docs: Optional[Docs] = Field(None, title="Docs")
-    contract: Optional[Contract9] = Field(None, title="ContractConfig")
+    field_extra: dict[str, Any] | None = Field(None, alias="_extra")
+    enabled: bool | None = True
+    alias: str | None = None
+    schema_: str | None = Field(None, alias="schema")
+    database: str | None = None
+    tags: list[str] | str | None = None
+    meta: dict[str, Any] | None = None
+    group: str | None = None
+    materialized: str | None = "view"
+    incremental_strategy: str | None = None
+    persist_docs: dict[str, Any] | None = None
+    post_hook: list[PostHookItem] | None = Field(None, alias="post-hook")
+    pre_hook: list[PreHookItem] | None = Field(None, alias="pre-hook")
+    quoting: dict[str, Any] | None = None
+    column_types: dict[str, Any] | None = None
+    full_refresh: bool | None = None
+    unique_key: str | list[str] | None = None
+    on_schema_change: str | None = "ignore"
+    on_configuration_change: OnConfigurationChange | None = None
+    grants: dict[str, Any] | None = None
+    packages: list[str] | None = None
+    docs: Docs | None = Field(None, title="Docs")
+    contract: Contract9 | None = Field(None, title="ContractConfig")
 
 
 class Constraint6(BaseParserModel):
@@ -843,10 +843,10 @@ class Constraint6(BaseParserModel):
         extra="allow",
     )
     type: Type
-    name: Optional[str] = None
-    expression: Optional[str] = None
-    warn_unenforced: Optional[bool] = True
-    warn_unsupported: Optional[bool] = True
+    name: str | None = None
+    expression: str | None = None
+    warn_unenforced: bool | None = True
+    warn_unsupported: bool | None = True
 
 
 class Columns5(BaseParserModel):
@@ -854,29 +854,29 @@ class Columns5(BaseParserModel):
         extra="allow",
     )
     name: str
-    description: Optional[str] = ""
-    meta: Optional[Dict[str, Any]] = None
-    data_type: Optional[str] = None
-    constraints: Optional[List[Constraint6]] = None
-    quote: Optional[bool] = None
-    tags: Optional[List[str]] = None
-    field_extra: Optional[Dict[str, Any]] = Field(None, alias="_extra")
+    description: str | None = ""
+    meta: dict[str, Any] | None = None
+    data_type: str | None = None
+    constraints: list[Constraint6] | None = None
+    quote: bool | None = None
+    tags: list[str] | None = None
+    field_extra: dict[str, Any] | None = Field(None, alias="_extra")
 
 
 class Contract11(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    enforced: Optional[bool] = False
-    alias_types: Optional[bool] = True
-    checksum: Optional[str] = None
+    enforced: bool | None = False
+    alias_types: bool | None = True
+    checksum: str | None = None
 
 
 class Nodes5(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    database: Optional[str] = None
+    database: str | None = None
     schema_: str = Field(..., alias="schema")
     name: str
     resource_type: Literal["sql_operation"]
@@ -884,60 +884,60 @@ class Nodes5(BaseParserModel):
     path: str
     original_file_path: str
     unique_id: str
-    fqn: List[str]
+    fqn: list[str]
     alias: str
     checksum: Checksum = Field(..., title="FileHash")
-    config: Optional[Config7] = Field(None, title="NodeConfig")
-    tags: Optional[List[str]] = None
-    description: Optional[str] = ""
-    columns: Optional[Dict[str, Columns5]] = None
-    meta: Optional[Dict[str, Any]] = None
-    group: Optional[str] = None
-    docs: Optional[Docs] = Field(None, title="Docs")
-    patch_path: Optional[str] = None
-    build_path: Optional[str] = None
-    unrendered_config: Optional[Dict[str, Any]] = None
-    created_at: Optional[float] = None
-    config_call_dict: Optional[Dict[str, Any]] = None
-    relation_name: Optional[str] = None
-    raw_code: Optional[str] = ""
-    language: Optional[str] = "sql"
-    refs: Optional[List[Ref]] = None
-    sources: Optional[List[List[str]]] = None
-    metrics: Optional[List[List[str]]] = None
-    depends_on: Optional[DependsOn1] = Field(None, title="DependsOn")
-    compiled_path: Optional[str] = None
-    compiled: Optional[bool] = False
-    compiled_code: Optional[str] = None
-    extra_ctes_injected: Optional[bool] = False
-    extra_ctes: Optional[List[ExtraCte]] = None
-    field_pre_injected_sql: Optional[str] = Field(None, alias="_pre_injected_sql")
-    contract: Optional[Contract11] = Field(None, title="Contract")
+    config: Config7 | None = Field(None, title="NodeConfig")
+    tags: list[str] | None = None
+    description: str | None = ""
+    columns: dict[str, Columns5] | None = None
+    meta: dict[str, Any] | None = None
+    group: str | None = None
+    docs: Docs | None = Field(None, title="Docs")
+    patch_path: str | None = None
+    build_path: str | None = None
+    unrendered_config: dict[str, Any] | None = None
+    created_at: float | None = None
+    config_call_dict: dict[str, Any] | None = None
+    relation_name: str | None = None
+    raw_code: str | None = ""
+    language: str | None = "sql"
+    refs: list[Ref] | None = None
+    sources: list[list[str]] | None = None
+    metrics: list[list[str]] | None = None
+    depends_on: DependsOn1 | None = Field(None, title="DependsOn")
+    compiled_path: str | None = None
+    compiled: bool | None = False
+    compiled_code: str | None = None
+    extra_ctes_injected: bool | None = False
+    extra_ctes: list[ExtraCte] | None = None
+    field_pre_injected_sql: str | None = Field(None, alias="_pre_injected_sql")
+    contract: Contract11 | None = Field(None, title="Contract")
 
 
 class Config8(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    field_extra: Optional[Dict[str, Any]] = Field(None, alias="_extra")
-    enabled: Optional[bool] = True
-    alias: Optional[str] = None
-    schema_: Optional[str] = Field("dbt_test__audit", alias="schema")
-    database: Optional[str] = None
-    tags: Optional[Union[List[str], str]] = None
-    meta: Optional[Dict[str, Any]] = None
-    group: Optional[str] = None
-    materialized: Optional[str] = "test"
-    severity: Optional[constr(pattern=r"^([Ww][Aa][Rr][Nn]|[Ee][Rr][Rr][Oo][Rr])$")] = (
+    field_extra: dict[str, Any] | None = Field(None, alias="_extra")
+    enabled: bool | None = True
+    alias: str | None = None
+    schema_: str | None = Field("dbt_test__audit", alias="schema")
+    database: str | None = None
+    tags: list[str] | str | None = None
+    meta: dict[str, Any] | None = None
+    group: str | None = None
+    materialized: str | None = "test"
+    severity: constr(pattern=r"^([Ww][Aa][Rr][Nn]|[Ee][Rr][Rr][Oo][Rr])$") | None = (
         "ERROR"
     )
-    store_failures: Optional[bool] = None
-    store_failures_as: Optional[str] = None
-    where: Optional[str] = None
-    limit: Optional[int] = None
-    fail_calc: Optional[str] = "count(*)"
-    warn_if: Optional[str] = "!= 0"
-    error_if: Optional[str] = "!= 0"
+    store_failures: bool | None = None
+    store_failures_as: str | None = None
+    where: str | None = None
+    limit: int | None = None
+    fail_calc: str | None = "count(*)"
+    warn_if: str | None = "!= 0"
+    error_if: str | None = "!= 0"
 
 
 class Constraint7(BaseParserModel):
@@ -945,10 +945,10 @@ class Constraint7(BaseParserModel):
         extra="allow",
     )
     type: Type
-    name: Optional[str] = None
-    expression: Optional[str] = None
-    warn_unenforced: Optional[bool] = True
-    warn_unsupported: Optional[bool] = True
+    name: str | None = None
+    expression: str | None = None
+    warn_unenforced: bool | None = True
+    warn_unsupported: bool | None = True
 
 
 class Columns6(BaseParserModel):
@@ -956,29 +956,29 @@ class Columns6(BaseParserModel):
         extra="allow",
     )
     name: str
-    description: Optional[str] = ""
-    meta: Optional[Dict[str, Any]] = None
-    data_type: Optional[str] = None
-    constraints: Optional[List[Constraint7]] = None
-    quote: Optional[bool] = None
-    tags: Optional[List[str]] = None
-    field_extra: Optional[Dict[str, Any]] = Field(None, alias="_extra")
+    description: str | None = ""
+    meta: dict[str, Any] | None = None
+    data_type: str | None = None
+    constraints: list[Constraint7] | None = None
+    quote: bool | None = None
+    tags: list[str] | None = None
+    field_extra: dict[str, Any] | None = Field(None, alias="_extra")
 
 
 class TestMetadata(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    name: Optional[str] = "test"
-    kwargs: Optional[Dict[str, Any]] = None
-    namespace: Optional[str] = None
+    name: str | None = "test"
+    kwargs: dict[str, Any] | None = None
+    namespace: str | None = None
 
 
 class Nodes6(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    database: Optional[str] = None
+    database: str | None = None
     schema_: str = Field(..., alias="schema")
     name: str
     resource_type: Literal["test"]
@@ -986,81 +986,81 @@ class Nodes6(BaseParserModel):
     path: str
     original_file_path: str
     unique_id: str
-    fqn: List[str]
+    fqn: list[str]
     alias: str
     checksum: Checksum = Field(..., title="FileHash")
-    config: Optional[Config8] = Field(None, title="TestConfig")
-    tags: Optional[List[str]] = None
-    description: Optional[str] = ""
-    columns: Optional[Dict[str, Columns6]] = None
-    meta: Optional[Dict[str, Any]] = None
-    group: Optional[str] = None
-    docs: Optional[Docs] = Field(None, title="Docs")
-    patch_path: Optional[str] = None
-    build_path: Optional[str] = None
-    unrendered_config: Optional[Dict[str, Any]] = None
-    created_at: Optional[float] = None
-    config_call_dict: Optional[Dict[str, Any]] = None
-    relation_name: Optional[str] = None
-    raw_code: Optional[str] = ""
-    language: Optional[str] = "sql"
-    refs: Optional[List[Ref]] = None
-    sources: Optional[List[List[str]]] = None
-    metrics: Optional[List[List[str]]] = None
-    depends_on: Optional[DependsOn1] = Field(None, title="DependsOn")
-    compiled_path: Optional[str] = None
-    compiled: Optional[bool] = False
-    compiled_code: Optional[str] = None
-    extra_ctes_injected: Optional[bool] = False
-    extra_ctes: Optional[List[ExtraCte]] = None
-    field_pre_injected_sql: Optional[str] = Field(None, alias="_pre_injected_sql")
-    contract: Optional[Contract11] = Field(None, title="Contract")
-    column_name: Optional[str] = None
-    file_key_name: Optional[str] = None
-    attached_node: Optional[str] = None
-    test_metadata: Optional[TestMetadata] = Field(None, title="TestMetadata")
+    config: Config8 | None = Field(None, title="TestConfig")
+    tags: list[str] | None = None
+    description: str | None = ""
+    columns: dict[str, Columns6] | None = None
+    meta: dict[str, Any] | None = None
+    group: str | None = None
+    docs: Docs | None = Field(None, title="Docs")
+    patch_path: str | None = None
+    build_path: str | None = None
+    unrendered_config: dict[str, Any] | None = None
+    created_at: float | None = None
+    config_call_dict: dict[str, Any] | None = None
+    relation_name: str | None = None
+    raw_code: str | None = ""
+    language: str | None = "sql"
+    refs: list[Ref] | None = None
+    sources: list[list[str]] | None = None
+    metrics: list[list[str]] | None = None
+    depends_on: DependsOn1 | None = Field(None, title="DependsOn")
+    compiled_path: str | None = None
+    compiled: bool | None = False
+    compiled_code: str | None = None
+    extra_ctes_injected: bool | None = False
+    extra_ctes: list[ExtraCte] | None = None
+    field_pre_injected_sql: str | None = Field(None, alias="_pre_injected_sql")
+    contract: Contract11 | None = Field(None, title="Contract")
+    column_name: str | None = None
+    file_key_name: str | None = None
+    attached_node: str | None = None
+    test_metadata: TestMetadata | None = Field(None, title="TestMetadata")
 
 
 class Contract13(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    enforced: Optional[bool] = False
-    alias_types: Optional[bool] = True
+    enforced: bool | None = False
+    alias_types: bool | None = True
 
 
 class Config9(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    field_extra: Optional[Dict[str, Any]] = Field(None, alias="_extra")
-    enabled: Optional[bool] = True
-    alias: Optional[str] = None
-    schema_: Optional[str] = Field(None, alias="schema")
-    database: Optional[str] = None
-    tags: Optional[Union[List[str], str]] = None
-    meta: Optional[Dict[str, Any]] = None
-    group: Optional[str] = None
-    materialized: Optional[str] = "snapshot"
-    incremental_strategy: Optional[str] = None
-    persist_docs: Optional[Dict[str, Any]] = None
-    post_hook: Optional[List[PostHookItem]] = Field(None, alias="post-hook")
-    pre_hook: Optional[List[PreHookItem]] = Field(None, alias="pre-hook")
-    quoting: Optional[Dict[str, Any]] = None
-    column_types: Optional[Dict[str, Any]] = None
-    full_refresh: Optional[bool] = None
-    unique_key: Optional[Union[List[str], str]] = None
-    on_schema_change: Optional[str] = "ignore"
-    on_configuration_change: Optional[OnConfigurationChange] = None
-    grants: Optional[Dict[str, Any]] = None
-    packages: Optional[List[str]] = None
-    docs: Optional[Docs] = Field(None, title="Docs")
-    contract: Optional[Contract13] = Field(None, title="ContractConfig")
-    strategy: Optional[str] = None
-    target_schema: Optional[str] = None
-    target_database: Optional[str] = None
-    updated_at: Optional[str] = None
-    check_cols: Optional[Union[str, List[str]]] = None
+    field_extra: dict[str, Any] | None = Field(None, alias="_extra")
+    enabled: bool | None = True
+    alias: str | None = None
+    schema_: str | None = Field(None, alias="schema")
+    database: str | None = None
+    tags: list[str] | str | None = None
+    meta: dict[str, Any] | None = None
+    group: str | None = None
+    materialized: str | None = "snapshot"
+    incremental_strategy: str | None = None
+    persist_docs: dict[str, Any] | None = None
+    post_hook: list[PostHookItem] | None = Field(None, alias="post-hook")
+    pre_hook: list[PreHookItem] | None = Field(None, alias="pre-hook")
+    quoting: dict[str, Any] | None = None
+    column_types: dict[str, Any] | None = None
+    full_refresh: bool | None = None
+    unique_key: list[str] | str | None = None
+    on_schema_change: str | None = "ignore"
+    on_configuration_change: OnConfigurationChange | None = None
+    grants: dict[str, Any] | None = None
+    packages: list[str] | None = None
+    docs: Docs | None = Field(None, title="Docs")
+    contract: Contract13 | None = Field(None, title="ContractConfig")
+    strategy: str | None = None
+    target_schema: str | None = None
+    target_database: str | None = None
+    updated_at: str | None = None
+    check_cols: str | list[str] | None = None
 
 
 class Constraint8(BaseParserModel):
@@ -1068,10 +1068,10 @@ class Constraint8(BaseParserModel):
         extra="allow",
     )
     type: Type
-    name: Optional[str] = None
-    expression: Optional[str] = None
-    warn_unenforced: Optional[bool] = True
-    warn_unsupported: Optional[bool] = True
+    name: str | None = None
+    expression: str | None = None
+    warn_unenforced: bool | None = True
+    warn_unsupported: bool | None = True
 
 
 class Columns7(BaseParserModel):
@@ -1079,83 +1079,83 @@ class Columns7(BaseParserModel):
         extra="allow",
     )
     name: str
-    description: Optional[str] = ""
-    meta: Optional[Dict[str, Any]] = None
-    data_type: Optional[str] = None
-    constraints: Optional[List[Constraint8]] = None
-    quote: Optional[bool] = None
-    tags: Optional[List[str]] = None
-    field_extra: Optional[Dict[str, Any]] = Field(None, alias="_extra")
+    description: str | None = ""
+    meta: dict[str, Any] | None = None
+    data_type: str | None = None
+    constraints: list[Constraint8] | None = None
+    quote: bool | None = None
+    tags: list[str] | None = None
+    field_extra: dict[str, Any] | None = Field(None, alias="_extra")
 
 
 class Contract14(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    enforced: Optional[bool] = False
-    alias_types: Optional[bool] = True
-    checksum: Optional[str] = None
+    enforced: bool | None = False
+    alias_types: bool | None = True
+    checksum: str | None = None
 
 
 class Contract15(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    enforced: Optional[bool] = False
-    alias_types: Optional[bool] = True
+    enforced: bool | None = False
+    alias_types: bool | None = True
 
 
 class Config10(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    field_extra: Optional[Dict[str, Any]] = Field(None, alias="_extra")
-    enabled: Optional[bool] = True
-    alias: Optional[str] = None
-    schema_: Optional[str] = Field(None, alias="schema")
-    database: Optional[str] = None
-    tags: Optional[Union[List[str], str]] = None
-    meta: Optional[Dict[str, Any]] = None
-    group: Optional[str] = None
-    materialized: Optional[str] = "view"
-    incremental_strategy: Optional[str] = None
-    persist_docs: Optional[Dict[str, Any]] = None
-    post_hook: Optional[List[PostHookItem]] = Field(None, alias="post-hook")
-    pre_hook: Optional[List[PreHookItem]] = Field(None, alias="pre-hook")
-    quoting: Optional[Dict[str, Any]] = None
-    column_types: Optional[Dict[str, Any]] = None
-    full_refresh: Optional[bool] = None
-    unique_key: Optional[Union[str, List[str]]] = None
-    on_schema_change: Optional[str] = "ignore"
-    on_configuration_change: Optional[OnConfigurationChange] = None
-    grants: Optional[Dict[str, Any]] = None
-    packages: Optional[List[str]] = None
-    docs: Optional[Docs] = Field(None, title="Docs")
-    contract: Optional[Contract15] = Field(None, title="ContractConfig")
+    field_extra: dict[str, Any] | None = Field(None, alias="_extra")
+    enabled: bool | None = True
+    alias: str | None = None
+    schema_: str | None = Field(None, alias="schema")
+    database: str | None = None
+    tags: list[str] | str | None = None
+    meta: dict[str, Any] | None = None
+    group: str | None = None
+    materialized: str | None = "view"
+    incremental_strategy: str | None = None
+    persist_docs: dict[str, Any] | None = None
+    post_hook: list[PostHookItem] | None = Field(None, alias="post-hook")
+    pre_hook: list[PreHookItem] | None = Field(None, alias="pre-hook")
+    quoting: dict[str, Any] | None = None
+    column_types: dict[str, Any] | None = None
+    full_refresh: bool | None = None
+    unique_key: str | list[str] | None = None
+    on_schema_change: str | None = "ignore"
+    on_configuration_change: OnConfigurationChange | None = None
+    grants: dict[str, Any] | None = None
+    packages: list[str] | None = None
+    docs: Docs | None = Field(None, title="Docs")
+    contract: Contract15 | None = Field(None, title="ContractConfig")
 
 
 class DeferRelation2(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    database: Optional[str] = None
+    database: str | None = None
     schema_: str = Field(..., alias="schema")
     alias: str
-    relation_name: Optional[str] = None
+    relation_name: str | None = None
     resource_type: ResourceType
     name: str
     description: str
-    compiled_code: Optional[str] = None
-    meta: Dict[str, Any]
-    tags: List[str]
-    config: Optional[Config10] = None
+    compiled_code: str | None = None
+    meta: dict[str, Any]
+    tags: list[str]
+    config: Config10 | None = None
 
 
 class Nodes7(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    database: Optional[str] = None
+    database: str | None = None
     schema_: str = Field(..., alias="schema")
     name: str
     resource_type: Literal["snapshot"]
@@ -1163,47 +1163,47 @@ class Nodes7(BaseParserModel):
     path: str
     original_file_path: str
     unique_id: str
-    fqn: List[str]
+    fqn: list[str]
     alias: str
     checksum: Checksum = Field(..., title="FileHash")
     config: Config9 = Field(..., title="SnapshotConfig")
-    tags: Optional[List[str]] = None
-    description: Optional[str] = ""
-    columns: Optional[Dict[str, Columns7]] = None
-    meta: Optional[Dict[str, Any]] = None
-    group: Optional[str] = None
-    docs: Optional[Docs] = Field(None, title="Docs")
-    patch_path: Optional[str] = None
-    build_path: Optional[str] = None
-    unrendered_config: Optional[Dict[str, Any]] = None
-    created_at: Optional[float] = None
-    config_call_dict: Optional[Dict[str, Any]] = None
-    relation_name: Optional[str] = None
-    raw_code: Optional[str] = ""
-    language: Optional[str] = "sql"
-    refs: Optional[List[Ref]] = None
-    sources: Optional[List[List[str]]] = None
-    metrics: Optional[List[List[str]]] = None
-    depends_on: Optional[DependsOn1] = Field(None, title="DependsOn")
-    compiled_path: Optional[str] = None
-    compiled: Optional[bool] = False
-    compiled_code: Optional[str] = None
-    extra_ctes_injected: Optional[bool] = False
-    extra_ctes: Optional[List[ExtraCte]] = None
-    field_pre_injected_sql: Optional[str] = Field(None, alias="_pre_injected_sql")
-    contract: Optional[Contract14] = Field(None, title="Contract")
-    defer_relation: Optional[DeferRelation2] = None
-    time_spine: Optional[TimeSpine] = None
+    tags: list[str] | None = None
+    description: str | None = ""
+    columns: dict[str, Columns7] | None = None
+    meta: dict[str, Any] | None = None
+    group: str | None = None
+    docs: Docs | None = Field(None, title="Docs")
+    patch_path: str | None = None
+    build_path: str | None = None
+    unrendered_config: dict[str, Any] | None = None
+    created_at: float | None = None
+    config_call_dict: dict[str, Any] | None = None
+    relation_name: str | None = None
+    raw_code: str | None = ""
+    language: str | None = "sql"
+    refs: list[Ref] | None = None
+    sources: list[list[str]] | None = None
+    metrics: list[list[str]] | None = None
+    depends_on: DependsOn1 | None = Field(None, title="DependsOn")
+    compiled_path: str | None = None
+    compiled: bool | None = False
+    compiled_code: str | None = None
+    extra_ctes_injected: bool | None = False
+    extra_ctes: list[ExtraCte] | None = None
+    field_pre_injected_sql: str | None = Field(None, alias="_pre_injected_sql")
+    contract: Contract14 | None = Field(None, title="Contract")
+    defer_relation: DeferRelation2 | None = None
+    time_spine: TimeSpine | None = None
 
 
 class Quoting(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    database: Optional[bool] = None
-    schema_: Optional[bool] = Field(None, alias="schema")
-    identifier: Optional[bool] = None
-    column: Optional[bool] = None
+    database: bool | None = None
+    schema_: bool | None = Field(None, alias="schema")
+    identifier: bool | None = None
+    column: bool | None = None
 
 
 class Period(Enum):
@@ -1216,48 +1216,48 @@ class WarnAfter(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    count: Optional[int] = None
-    period: Optional[Period] = None
+    count: int | None = None
+    period: Period | None = None
 
 
 class ErrorAfter(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    count: Optional[int] = None
-    period: Optional[Period] = None
+    count: int | None = None
+    period: Period | None = None
 
 
 class Freshness(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    warn_after: Optional[WarnAfter] = None
-    error_after: Optional[ErrorAfter] = None
-    filter: Optional[str] = None
+    warn_after: WarnAfter | None = None
+    error_after: ErrorAfter | None = None
+    filter: str | None = None
 
 
 class Partition(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    field_extra: Optional[Dict[str, Any]] = Field(None, alias="_extra")
-    name: Optional[str] = ""
-    description: Optional[str] = ""
-    data_type: Optional[str] = ""
-    meta: Optional[Dict[str, Any]] = None
+    field_extra: dict[str, Any] | None = Field(None, alias="_extra")
+    name: str | None = ""
+    description: str | None = ""
+    data_type: str | None = ""
+    meta: dict[str, Any] | None = None
 
 
 class External(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    field_extra: Optional[Dict[str, Any]] = Field(None, alias="_extra")
-    location: Optional[str] = None
-    file_format: Optional[str] = None
-    row_format: Optional[str] = None
-    tbl_properties: Optional[str] = None
-    partitions: Optional[Union[List[str], List[Partition]]] = None
+    field_extra: dict[str, Any] | None = Field(None, alias="_extra")
+    location: str | None = None
+    file_format: str | None = None
+    row_format: str | None = None
+    tbl_properties: str | None = None
+    partitions: list[str] | list[Partition] | None = None
 
 
 class Constraint9(BaseParserModel):
@@ -1265,10 +1265,10 @@ class Constraint9(BaseParserModel):
         extra="allow",
     )
     type: Type
-    name: Optional[str] = None
-    expression: Optional[str] = None
-    warn_unenforced: Optional[bool] = True
-    warn_unsupported: Optional[bool] = True
+    name: str | None = None
+    expression: str | None = None
+    warn_unenforced: bool | None = True
+    warn_unsupported: bool | None = True
 
 
 class Columns8(BaseParserModel):
@@ -1276,28 +1276,28 @@ class Columns8(BaseParserModel):
         extra="allow",
     )
     name: str
-    description: Optional[str] = ""
-    meta: Optional[Dict[str, Any]] = None
-    data_type: Optional[str] = None
-    constraints: Optional[List[Constraint9]] = None
-    quote: Optional[bool] = None
-    tags: Optional[List[str]] = None
-    field_extra: Optional[Dict[str, Any]] = Field(None, alias="_extra")
+    description: str | None = ""
+    meta: dict[str, Any] | None = None
+    data_type: str | None = None
+    constraints: list[Constraint9] | None = None
+    quote: bool | None = None
+    tags: list[str] | None = None
+    field_extra: dict[str, Any] | None = Field(None, alias="_extra")
 
 
 class Config11(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    field_extra: Optional[Dict[str, Any]] = Field(None, alias="_extra")
-    enabled: Optional[bool] = True
+    field_extra: dict[str, Any] | None = Field(None, alias="_extra")
+    enabled: bool | None = True
 
 
 class Sources(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    database: Optional[str] = None
+    database: str | None = None
     schema_: str = Field(..., alias="schema")
     name: str
     resource_type: Literal["source"]
@@ -1305,32 +1305,32 @@ class Sources(BaseParserModel):
     path: str
     original_file_path: str
     unique_id: str
-    fqn: List[str]
+    fqn: list[str]
     source_name: str
     source_description: str
     loader: str
     identifier: str
-    quoting: Optional[Quoting] = Field(None, title="Quoting")
-    loaded_at_field: Optional[str] = None
-    freshness: Optional[Freshness] = None
-    external: Optional[External] = None
-    description: Optional[str] = ""
-    columns: Optional[Dict[str, Columns8]] = None
-    meta: Optional[Dict[str, Any]] = None
-    source_meta: Optional[Dict[str, Any]] = None
-    tags: Optional[List[str]] = None
-    config: Optional[Config11] = Field(None, title="SourceConfig")
-    patch_path: Optional[str] = None
-    unrendered_config: Optional[Dict[str, Any]] = None
-    relation_name: Optional[str] = None
-    created_at: Optional[float] = None
+    quoting: Quoting | None = Field(None, title="Quoting")
+    loaded_at_field: str | None = None
+    freshness: Freshness | None = None
+    external: External | None = None
+    description: str | None = ""
+    columns: dict[str, Columns8] | None = None
+    meta: dict[str, Any] | None = None
+    source_meta: dict[str, Any] | None = None
+    tags: list[str] | None = None
+    config: Config11 | None = Field(None, title="SourceConfig")
+    patch_path: str | None = None
+    unrendered_config: dict[str, Any] | None = None
+    relation_name: str | None = None
+    created_at: float | None = None
 
 
 class DependsOn8(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    macros: Optional[List[str]] = None
+    macros: list[str] | None = None
 
 
 class Argument(BaseParserModel):
@@ -1338,8 +1338,8 @@ class Argument(BaseParserModel):
         extra="allow",
     )
     name: str
-    type: Optional[str] = None
-    description: Optional[str] = ""
+    type: str | None = None
+    description: str | None = ""
 
 
 class SupportedLanguage(Enum):
@@ -1358,14 +1358,14 @@ class Macros(BaseParserModel):
     original_file_path: str
     unique_id: str
     macro_sql: str
-    depends_on: Optional[DependsOn8] = Field(None, title="MacroDependsOn")
-    description: Optional[str] = ""
-    meta: Optional[Dict[str, Any]] = None
-    docs: Optional[Docs] = Field(None, title="Docs")
-    patch_path: Optional[str] = None
-    arguments: Optional[List[Argument]] = None
-    created_at: Optional[float] = None
-    supported_languages: Optional[List[SupportedLanguage]] = None
+    depends_on: DependsOn8 | None = Field(None, title="MacroDependsOn")
+    description: str | None = ""
+    meta: dict[str, Any] | None = None
+    docs: Docs | None = Field(None, title="Docs")
+    patch_path: str | None = None
+    arguments: list[Argument] | None = None
+    created_at: float | None = None
+    supported_languages: list[SupportedLanguage] | None = None
 
 
 class Docs18(BaseParserModel):
@@ -1393,9 +1393,9 @@ class Owner(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    field_extra: Optional[Dict[str, Any]] = Field(None, alias="_extra")
-    email: Optional[str] = None
-    name: Optional[str] = None
+    field_extra: dict[str, Any] | None = Field(None, alias="_extra")
+    email: str | None = None
+    name: str | None = None
 
 
 class Maturity(Enum):
@@ -1408,8 +1408,8 @@ class DependsOn9(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    macros: Optional[List[str]] = None
-    nodes: Optional[List[str]] = None
+    macros: list[str] | None = None
+    nodes: list[str] | None = None
 
 
 class Exposures(BaseParserModel):
@@ -1422,22 +1422,22 @@ class Exposures(BaseParserModel):
     path: str
     original_file_path: str
     unique_id: str
-    fqn: List[str]
+    fqn: list[str]
     type: Type10
     owner: Owner = Field(..., title="Owner")
-    description: Optional[str] = ""
-    label: Optional[str] = None
-    maturity: Optional[Maturity] = None
-    meta: Optional[Dict[str, Any]] = None
-    tags: Optional[List[str]] = None
-    config: Optional[Config11] = Field(None, title="ExposureConfig")
-    unrendered_config: Optional[Dict[str, Any]] = None
-    url: Optional[str] = None
-    depends_on: Optional[DependsOn9] = Field(None, title="DependsOn")
-    refs: Optional[List[Ref]] = None
-    sources: Optional[List[List[str]]] = None
-    metrics: Optional[List[List[str]]] = None
-    created_at: Optional[float] = None
+    description: str | None = ""
+    label: str | None = None
+    maturity: Maturity | None = None
+    meta: dict[str, Any] | None = None
+    tags: list[str] | None = None
+    config: Config11 | None = Field(None, title="ExposureConfig")
+    unrendered_config: dict[str, Any] | None = None
+    url: str | None = None
+    depends_on: DependsOn9 | None = Field(None, title="DependsOn")
+    refs: list[Ref] | None = None
+    sources: list[list[str]] | None = None
+    metrics: list[list[str]] | None = None
+    created_at: float | None = None
 
 
 class Type11(Enum):
@@ -1459,7 +1459,7 @@ class Filter(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    where_filters: List[WhereFilter]
+    where_filters: list[WhereFilter]
 
 
 class Measure(BaseParserModel):
@@ -1467,17 +1467,17 @@ class Measure(BaseParserModel):
         extra="allow",
     )
     name: str
-    filter: Optional[Filter] = None
-    alias: Optional[str] = None
-    join_to_timespine: Optional[bool] = False
-    fill_nulls_with: Optional[int] = None
+    filter: Filter | None = None
+    alias: str | None = None
+    join_to_timespine: bool | None = False
+    fill_nulls_with: int | None = None
 
 
 class Filter1(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    where_filters: List[WhereFilter]
+    where_filters: list[WhereFilter]
 
 
 class InputMeasure(BaseParserModel):
@@ -1485,17 +1485,17 @@ class InputMeasure(BaseParserModel):
         extra="allow",
     )
     name: str
-    filter: Optional[Filter1] = None
-    alias: Optional[str] = None
-    join_to_timespine: Optional[bool] = False
-    fill_nulls_with: Optional[int] = None
+    filter: Filter1 | None = None
+    alias: str | None = None
+    join_to_timespine: bool | None = False
+    fill_nulls_with: int | None = None
 
 
 class Filter2(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    where_filters: List[WhereFilter]
+    where_filters: list[WhereFilter]
 
 
 class Granularity(Enum):
@@ -1527,17 +1527,17 @@ class Numerator(BaseParserModel):
         extra="allow",
     )
     name: str
-    filter: Optional[Filter2] = None
-    alias: Optional[str] = None
-    offset_window: Optional[OffsetWindow] = None
-    offset_to_grain: Optional[OffsetToGrain] = None
+    filter: Filter2 | None = None
+    alias: str | None = None
+    offset_window: OffsetWindow | None = None
+    offset_to_grain: OffsetToGrain | None = None
 
 
 class Filter3(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    where_filters: List[WhereFilter]
+    where_filters: list[WhereFilter]
 
 
 class OffsetWindow1(BaseParserModel):
@@ -1553,10 +1553,10 @@ class Denominator(BaseParserModel):
         extra="allow",
     )
     name: str
-    filter: Optional[Filter3] = None
-    alias: Optional[str] = None
-    offset_window: Optional[OffsetWindow1] = None
-    offset_to_grain: Optional[OffsetToGrain] = None
+    filter: Filter3 | None = None
+    alias: str | None = None
+    offset_window: OffsetWindow1 | None = None
+    offset_to_grain: OffsetToGrain | None = None
 
 
 class Window(BaseParserModel):
@@ -1579,7 +1579,7 @@ class Filter4(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    where_filters: List[WhereFilter]
+    where_filters: list[WhereFilter]
 
 
 class OffsetWindow2(BaseParserModel):
@@ -1595,17 +1595,17 @@ class Metric(BaseParserModel):
         extra="allow",
     )
     name: str
-    filter: Optional[Filter4] = None
-    alias: Optional[str] = None
-    offset_window: Optional[OffsetWindow2] = None
-    offset_to_grain: Optional[OffsetToGrain] = None
+    filter: Filter4 | None = None
+    alias: str | None = None
+    offset_window: OffsetWindow2 | None = None
+    offset_to_grain: OffsetToGrain | None = None
 
 
 class Filter5(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    where_filters: List[WhereFilter]
+    where_filters: list[WhereFilter]
 
 
 class BaseMeasure(BaseParserModel):
@@ -1613,17 +1613,17 @@ class BaseMeasure(BaseParserModel):
         extra="allow",
     )
     name: str
-    filter: Optional[Filter5] = None
-    alias: Optional[str] = None
-    join_to_timespine: Optional[bool] = False
-    fill_nulls_with: Optional[int] = None
+    filter: Filter5 | None = None
+    alias: str | None = None
+    join_to_timespine: bool | None = False
+    fill_nulls_with: int | None = None
 
 
 class Filter6(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    where_filters: List[WhereFilter]
+    where_filters: list[WhereFilter]
 
 
 class ConversionMeasure(BaseParserModel):
@@ -1631,10 +1631,10 @@ class ConversionMeasure(BaseParserModel):
         extra="allow",
     )
     name: str
-    filter: Optional[Filter6] = None
-    alias: Optional[str] = None
-    join_to_timespine: Optional[bool] = False
-    fill_nulls_with: Optional[int] = None
+    filter: Filter6 | None = None
+    alias: str | None = None
+    join_to_timespine: bool | None = False
+    fill_nulls_with: int | None = None
 
 
 class Calculation(Enum):
@@ -1665,31 +1665,31 @@ class ConversionTypeParams(BaseParserModel):
     base_measure: BaseMeasure = Field(..., title="MetricInputMeasure")
     conversion_measure: ConversionMeasure = Field(..., title="MetricInputMeasure")
     entity: str
-    calculation: Optional[Calculation] = "conversion_rate"
-    window: Optional[Window1] = None
-    constant_properties: Optional[List[ConstantProperty]] = None
+    calculation: Calculation | None = "conversion_rate"
+    window: Window1 | None = None
+    constant_properties: list[ConstantProperty] | None = None
 
 
 class TypeParams(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    measure: Optional[Measure] = None
-    input_measures: Optional[List[InputMeasure]] = None
-    numerator: Optional[Numerator] = None
-    denominator: Optional[Denominator] = None
-    expr: Optional[str] = None
-    window: Optional[Window] = None
-    grain_to_date: Optional[GrainToDate] = None
-    metrics: Optional[List[Metric]] = None
-    conversion_type_params: Optional[ConversionTypeParams] = None
+    measure: Measure | None = None
+    input_measures: list[InputMeasure] | None = None
+    numerator: Numerator | None = None
+    denominator: Denominator | None = None
+    expr: str | None = None
+    window: Window | None = None
+    grain_to_date: GrainToDate | None = None
+    metrics: list[Metric] | None = None
+    conversion_type_params: ConversionTypeParams | None = None
 
 
 class Filter7(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    where_filters: List[WhereFilter]
+    where_filters: list[WhereFilter]
 
 
 class FileSlice(BaseParserModel):
@@ -1714,10 +1714,10 @@ class Config13(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    field_extra: Optional[Dict[str, Any]] = Field(None, alias="_extra")
-    enabled: Optional[bool] = True
-    group: Optional[str] = None
-    meta: Optional[Dict[str, Any]] = None
+    field_extra: dict[str, Any] | None = Field(None, alias="_extra")
+    enabled: bool | None = True
+    group: str | None = None
+    meta: dict[str, Any] | None = None
 
 
 class Metrics(BaseParserModel):
@@ -1730,23 +1730,23 @@ class Metrics(BaseParserModel):
     path: str
     original_file_path: str
     unique_id: str
-    fqn: List[str]
+    fqn: list[str]
     description: str
     label: str
     type: Type11
     type_params: TypeParams = Field(..., title="MetricTypeParams")
-    filter: Optional[Filter7] = None
-    metadata: Optional[Metadata1] = None
-    meta: Optional[Dict[str, Any]] = None
-    tags: Optional[List[str]] = None
-    config: Optional[Config13] = Field(None, title="MetricConfig")
-    unrendered_config: Optional[Dict[str, Any]] = None
-    sources: Optional[List[List[str]]] = None
-    depends_on: Optional[DependsOn9] = Field(None, title="DependsOn")
-    refs: Optional[List[Ref]] = None
-    metrics: Optional[List[List[str]]] = None
-    created_at: Optional[float] = None
-    group: Optional[str] = None
+    filter: Filter7 | None = None
+    metadata: Metadata1 | None = None
+    meta: dict[str, Any] | None = None
+    tags: list[str] | None = None
+    config: Config13 | None = Field(None, title="MetricConfig")
+    unrendered_config: dict[str, Any] | None = None
+    sources: list[list[str]] | None = None
+    depends_on: DependsOn9 | None = Field(None, title="DependsOn")
+    refs: list[Ref] | None = None
+    metrics: list[list[str]] | None = None
+    created_at: float | None = None
+    group: str | None = None
 
 
 class Groups(BaseParserModel):
@@ -1766,39 +1766,39 @@ class Docs19(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    show: Optional[bool] = True
-    node_color: Optional[str] = None
+    show: bool | None = True
+    node_color: str | None = None
 
 
 class Config14(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    field_extra: Optional[Dict[str, Any]] = Field(None, alias="_extra")
-    enabled: Optional[bool] = True
-    alias: Optional[str] = None
-    schema_: Optional[str] = Field(None, alias="schema")
-    database: Optional[str] = None
-    tags: Optional[Union[List[str], str]] = None
-    meta: Optional[Dict[str, Any]] = None
-    group: Optional[str] = None
-    materialized: Optional[str] = "seed"
-    incremental_strategy: Optional[str] = None
-    persist_docs: Optional[Dict[str, Any]] = None
-    post_hook: Optional[List[PostHookItem]] = Field(None, alias="post-hook")
-    pre_hook: Optional[List[PreHookItem]] = Field(None, alias="pre-hook")
-    quoting: Optional[Dict[str, Any]] = None
-    column_types: Optional[Dict[str, Any]] = None
-    full_refresh: Optional[bool] = None
-    unique_key: Optional[Union[str, List[str]]] = None
-    on_schema_change: Optional[str] = "ignore"
-    on_configuration_change: Optional[OnConfigurationChange] = None
-    grants: Optional[Dict[str, Any]] = None
-    packages: Optional[List[str]] = None
-    docs: Optional[Docs19] = Field(None, title="Docs")
-    contract: Optional[Contract15] = Field(None, title="ContractConfig")
-    delimiter: Optional[str] = ","
-    quote_columns: Optional[bool] = None
+    field_extra: dict[str, Any] | None = Field(None, alias="_extra")
+    enabled: bool | None = True
+    alias: str | None = None
+    schema_: str | None = Field(None, alias="schema")
+    database: str | None = None
+    tags: list[str] | str | None = None
+    meta: dict[str, Any] | None = None
+    group: str | None = None
+    materialized: str | None = "seed"
+    incremental_strategy: str | None = None
+    persist_docs: dict[str, Any] | None = None
+    post_hook: list[PostHookItem] | None = Field(None, alias="post-hook")
+    pre_hook: list[PreHookItem] | None = Field(None, alias="pre-hook")
+    quoting: dict[str, Any] | None = None
+    column_types: dict[str, Any] | None = None
+    full_refresh: bool | None = None
+    unique_key: str | list[str] | None = None
+    on_schema_change: str | None = "ignore"
+    on_configuration_change: OnConfigurationChange | None = None
+    grants: dict[str, Any] | None = None
+    packages: list[str] | None = None
+    docs: Docs19 | None = Field(None, title="Docs")
+    contract: Contract15 | None = Field(None, title="ContractConfig")
+    delimiter: str | None = ","
+    quote_columns: bool | None = None
 
 
 class Type12(Enum):
@@ -1815,10 +1815,10 @@ class Constraint10(BaseParserModel):
         extra="allow",
     )
     type: Type12
-    name: Optional[str] = None
-    expression: Optional[str] = None
-    warn_unenforced: Optional[bool] = True
-    warn_unsupported: Optional[bool] = True
+    name: str | None = None
+    expression: str | None = None
+    warn_unenforced: bool | None = True
+    warn_unsupported: bool | None = True
 
 
 class Columns9(BaseParserModel):
@@ -1826,73 +1826,73 @@ class Columns9(BaseParserModel):
         extra="allow",
     )
     name: str
-    description: Optional[str] = ""
-    meta: Optional[Dict[str, Any]] = None
-    data_type: Optional[str] = None
-    constraints: Optional[List[Constraint10]] = None
-    quote: Optional[bool] = None
-    tags: Optional[List[str]] = None
-    field_extra: Optional[Dict[str, Any]] = Field(None, alias="_extra")
+    description: str | None = ""
+    meta: dict[str, Any] | None = None
+    data_type: str | None = None
+    constraints: list[Constraint10] | None = None
+    quote: bool | None = None
+    tags: list[str] | None = None
+    field_extra: dict[str, Any] | None = Field(None, alias="_extra")
 
 
 class DependsOn11(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    macros: Optional[List[str]] = None
+    macros: list[str] | None = None
 
 
 class Config15(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    field_extra: Optional[Dict[str, Any]] = Field(None, alias="_extra")
-    enabled: Optional[bool] = True
-    alias: Optional[str] = None
-    schema_: Optional[str] = Field(None, alias="schema")
-    database: Optional[str] = None
-    tags: Optional[Union[List[str], str]] = None
-    meta: Optional[Dict[str, Any]] = None
-    group: Optional[str] = None
-    materialized: Optional[str] = "view"
-    incremental_strategy: Optional[str] = None
-    persist_docs: Optional[Dict[str, Any]] = None
-    post_hook: Optional[List[PostHookItem]] = Field(None, alias="post-hook")
-    pre_hook: Optional[List[PreHookItem]] = Field(None, alias="pre-hook")
-    quoting: Optional[Dict[str, Any]] = None
-    column_types: Optional[Dict[str, Any]] = None
-    full_refresh: Optional[bool] = None
-    unique_key: Optional[Union[str, List[str]]] = None
-    on_schema_change: Optional[str] = "ignore"
-    on_configuration_change: Optional[OnConfigurationChange] = None
-    grants: Optional[Dict[str, Any]] = None
-    packages: Optional[List[str]] = None
-    docs: Optional[Docs19] = Field(None, title="Docs")
-    contract: Optional[Contract15] = Field(None, title="ContractConfig")
+    field_extra: dict[str, Any] | None = Field(None, alias="_extra")
+    enabled: bool | None = True
+    alias: str | None = None
+    schema_: str | None = Field(None, alias="schema")
+    database: str | None = None
+    tags: list[str] | str | None = None
+    meta: dict[str, Any] | None = None
+    group: str | None = None
+    materialized: str | None = "view"
+    incremental_strategy: str | None = None
+    persist_docs: dict[str, Any] | None = None
+    post_hook: list[PostHookItem] | None = Field(None, alias="post-hook")
+    pre_hook: list[PreHookItem] | None = Field(None, alias="pre-hook")
+    quoting: dict[str, Any] | None = None
+    column_types: dict[str, Any] | None = None
+    full_refresh: bool | None = None
+    unique_key: str | list[str] | None = None
+    on_schema_change: str | None = "ignore"
+    on_configuration_change: OnConfigurationChange | None = None
+    grants: dict[str, Any] | None = None
+    packages: list[str] | None = None
+    docs: Docs19 | None = Field(None, title="Docs")
+    contract: Contract15 | None = Field(None, title="ContractConfig")
 
 
 class DeferRelation3(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    database: Optional[str] = None
+    database: str | None = None
     schema_: str = Field(..., alias="schema")
     alias: str
-    relation_name: Optional[str] = None
+    relation_name: str | None = None
     resource_type: ResourceType
     name: str
     description: str
-    compiled_code: Optional[str] = None
-    meta: Dict[str, Any]
-    tags: List[str]
-    config: Optional[Config15] = None
+    compiled_code: str | None = None
+    meta: dict[str, Any]
+    tags: list[str]
+    config: Config15 | None = None
 
 
 class Disabled(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    database: Optional[str] = None
+    database: str | None = None
     schema_: str = Field(..., alias="schema")
     name: str
     resource_type: Literal["seed"]
@@ -1900,55 +1900,55 @@ class Disabled(BaseParserModel):
     path: str
     original_file_path: str
     unique_id: str
-    fqn: List[str]
+    fqn: list[str]
     alias: str
     checksum: Checksum = Field(..., title="FileHash")
-    config: Optional[Config14] = Field(None, title="SeedConfig")
-    tags: Optional[List[str]] = None
-    description: Optional[str] = ""
-    columns: Optional[Dict[str, Columns9]] = None
-    meta: Optional[Dict[str, Any]] = None
-    group: Optional[str] = None
-    docs: Optional[Docs19] = Field(None, title="Docs")
-    patch_path: Optional[str] = None
-    build_path: Optional[str] = None
-    unrendered_config: Optional[Dict[str, Any]] = None
-    created_at: Optional[float] = None
-    config_call_dict: Optional[Dict[str, Any]] = None
-    relation_name: Optional[str] = None
-    raw_code: Optional[str] = ""
-    root_path: Optional[str] = None
-    depends_on: Optional[DependsOn11] = Field(None, title="MacroDependsOn")
-    defer_relation: Optional[DeferRelation3] = None
+    config: Config14 | None = Field(None, title="SeedConfig")
+    tags: list[str] | None = None
+    description: str | None = ""
+    columns: dict[str, Columns9] | None = None
+    meta: dict[str, Any] | None = None
+    group: str | None = None
+    docs: Docs19 | None = Field(None, title="Docs")
+    patch_path: str | None = None
+    build_path: str | None = None
+    unrendered_config: dict[str, Any] | None = None
+    created_at: float | None = None
+    config_call_dict: dict[str, Any] | None = None
+    relation_name: str | None = None
+    raw_code: str | None = ""
+    root_path: str | None = None
+    depends_on: DependsOn11 | None = Field(None, title="MacroDependsOn")
+    defer_relation: DeferRelation3 | None = None
 
 
 class Config16(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    field_extra: Optional[Dict[str, Any]] = Field(None, alias="_extra")
-    enabled: Optional[bool] = True
-    alias: Optional[str] = None
-    schema_: Optional[str] = Field(None, alias="schema")
-    database: Optional[str] = None
-    tags: Optional[Union[List[str], str]] = None
-    meta: Optional[Dict[str, Any]] = None
-    group: Optional[str] = None
-    materialized: Optional[str] = "view"
-    incremental_strategy: Optional[str] = None
-    persist_docs: Optional[Dict[str, Any]] = None
-    post_hook: Optional[List[PostHookItem]] = Field(None, alias="post-hook")
-    pre_hook: Optional[List[PreHookItem]] = Field(None, alias="pre-hook")
-    quoting: Optional[Dict[str, Any]] = None
-    column_types: Optional[Dict[str, Any]] = None
-    full_refresh: Optional[bool] = None
-    unique_key: Optional[Union[str, List[str]]] = None
-    on_schema_change: Optional[str] = "ignore"
-    on_configuration_change: Optional[OnConfigurationChange] = None
-    grants: Optional[Dict[str, Any]] = None
-    packages: Optional[List[str]] = None
-    docs: Optional[Docs19] = Field(None, title="Docs")
-    contract: Optional[Contract15] = Field(None, title="ContractConfig")
+    field_extra: dict[str, Any] | None = Field(None, alias="_extra")
+    enabled: bool | None = True
+    alias: str | None = None
+    schema_: str | None = Field(None, alias="schema")
+    database: str | None = None
+    tags: list[str] | str | None = None
+    meta: dict[str, Any] | None = None
+    group: str | None = None
+    materialized: str | None = "view"
+    incremental_strategy: str | None = None
+    persist_docs: dict[str, Any] | None = None
+    post_hook: list[PostHookItem] | None = Field(None, alias="post-hook")
+    pre_hook: list[PreHookItem] | None = Field(None, alias="pre-hook")
+    quoting: dict[str, Any] | None = None
+    column_types: dict[str, Any] | None = None
+    full_refresh: bool | None = None
+    unique_key: str | list[str] | None = None
+    on_schema_change: str | None = "ignore"
+    on_configuration_change: OnConfigurationChange | None = None
+    grants: dict[str, Any] | None = None
+    packages: list[str] | None = None
+    docs: Docs19 | None = Field(None, title="Docs")
+    contract: Contract15 | None = Field(None, title="ContractConfig")
 
 
 class Constraint11(BaseParserModel):
@@ -1956,10 +1956,10 @@ class Constraint11(BaseParserModel):
         extra="allow",
     )
     type: Type12
-    name: Optional[str] = None
-    expression: Optional[str] = None
-    warn_unenforced: Optional[bool] = True
-    warn_unsupported: Optional[bool] = True
+    name: str | None = None
+    expression: str | None = None
+    warn_unenforced: bool | None = True
+    warn_unsupported: bool | None = True
 
 
 class Columns10(BaseParserModel):
@@ -1967,37 +1967,37 @@ class Columns10(BaseParserModel):
         extra="allow",
     )
     name: str
-    description: Optional[str] = ""
-    meta: Optional[Dict[str, Any]] = None
-    data_type: Optional[str] = None
-    constraints: Optional[List[Constraint11]] = None
-    quote: Optional[bool] = None
-    tags: Optional[List[str]] = None
-    field_extra: Optional[Dict[str, Any]] = Field(None, alias="_extra")
+    description: str | None = ""
+    meta: dict[str, Any] | None = None
+    data_type: str | None = None
+    constraints: list[Constraint11] | None = None
+    quote: bool | None = None
+    tags: list[str] | None = None
+    field_extra: dict[str, Any] | None = Field(None, alias="_extra")
 
 
 class DependsOn12(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    macros: Optional[List[str]] = None
-    nodes: Optional[List[str]] = None
+    macros: list[str] | None = None
+    nodes: list[str] | None = None
 
 
 class Contract19(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    enforced: Optional[bool] = False
-    alias_types: Optional[bool] = True
-    checksum: Optional[str] = None
+    enforced: bool | None = False
+    alias_types: bool | None = True
+    checksum: str | None = None
 
 
 class Disabled1(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    database: Optional[str] = None
+    database: str | None = None
     schema_: str = Field(..., alias="schema")
     name: str
     resource_type: Literal["analysis"]
@@ -2005,60 +2005,60 @@ class Disabled1(BaseParserModel):
     path: str
     original_file_path: str
     unique_id: str
-    fqn: List[str]
+    fqn: list[str]
     alias: str
     checksum: Checksum = Field(..., title="FileHash")
-    config: Optional[Config16] = Field(None, title="NodeConfig")
-    tags: Optional[List[str]] = None
-    description: Optional[str] = ""
-    columns: Optional[Dict[str, Columns10]] = None
-    meta: Optional[Dict[str, Any]] = None
-    group: Optional[str] = None
-    docs: Optional[Docs19] = Field(None, title="Docs")
-    patch_path: Optional[str] = None
-    build_path: Optional[str] = None
-    unrendered_config: Optional[Dict[str, Any]] = None
-    created_at: Optional[float] = None
-    config_call_dict: Optional[Dict[str, Any]] = None
-    relation_name: Optional[str] = None
-    raw_code: Optional[str] = ""
-    language: Optional[str] = "sql"
-    refs: Optional[List[Ref]] = None
-    sources: Optional[List[List[str]]] = None
-    metrics: Optional[List[List[str]]] = None
-    depends_on: Optional[DependsOn12] = Field(None, title="DependsOn")
-    compiled_path: Optional[str] = None
-    compiled: Optional[bool] = False
-    compiled_code: Optional[str] = None
-    extra_ctes_injected: Optional[bool] = False
-    extra_ctes: Optional[List[ExtraCte]] = None
-    field_pre_injected_sql: Optional[str] = Field(None, alias="_pre_injected_sql")
-    contract: Optional[Contract19] = Field(None, title="Contract")
+    config: Config16 | None = Field(None, title="NodeConfig")
+    tags: list[str] | None = None
+    description: str | None = ""
+    columns: dict[str, Columns10] | None = None
+    meta: dict[str, Any] | None = None
+    group: str | None = None
+    docs: Docs19 | None = Field(None, title="Docs")
+    patch_path: str | None = None
+    build_path: str | None = None
+    unrendered_config: dict[str, Any] | None = None
+    created_at: float | None = None
+    config_call_dict: dict[str, Any] | None = None
+    relation_name: str | None = None
+    raw_code: str | None = ""
+    language: str | None = "sql"
+    refs: list[Ref] | None = None
+    sources: list[list[str]] | None = None
+    metrics: list[list[str]] | None = None
+    depends_on: DependsOn12 | None = Field(None, title="DependsOn")
+    compiled_path: str | None = None
+    compiled: bool | None = False
+    compiled_code: str | None = None
+    extra_ctes_injected: bool | None = False
+    extra_ctes: list[ExtraCte] | None = None
+    field_pre_injected_sql: str | None = Field(None, alias="_pre_injected_sql")
+    contract: Contract19 | None = Field(None, title="Contract")
 
 
 class Config17(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    field_extra: Optional[Dict[str, Any]] = Field(None, alias="_extra")
-    enabled: Optional[bool] = True
-    alias: Optional[str] = None
-    schema_: Optional[str] = Field("dbt_test__audit", alias="schema")
-    database: Optional[str] = None
-    tags: Optional[Union[List[str], str]] = None
-    meta: Optional[Dict[str, Any]] = None
-    group: Optional[str] = None
-    materialized: Optional[str] = "test"
-    severity: Optional[constr(pattern=r"^([Ww][Aa][Rr][Nn]|[Ee][Rr][Rr][Oo][Rr])$")] = (
+    field_extra: dict[str, Any] | None = Field(None, alias="_extra")
+    enabled: bool | None = True
+    alias: str | None = None
+    schema_: str | None = Field("dbt_test__audit", alias="schema")
+    database: str | None = None
+    tags: list[str] | str | None = None
+    meta: dict[str, Any] | None = None
+    group: str | None = None
+    materialized: str | None = "test"
+    severity: constr(pattern=r"^([Ww][Aa][Rr][Nn]|[Ee][Rr][Rr][Oo][Rr])$") | None = (
         "ERROR"
     )
-    store_failures: Optional[bool] = None
-    store_failures_as: Optional[str] = None
-    where: Optional[str] = None
-    limit: Optional[int] = None
-    fail_calc: Optional[str] = "count(*)"
-    warn_if: Optional[str] = "!= 0"
-    error_if: Optional[str] = "!= 0"
+    store_failures: bool | None = None
+    store_failures_as: str | None = None
+    where: str | None = None
+    limit: int | None = None
+    fail_calc: str | None = "count(*)"
+    warn_if: str | None = "!= 0"
+    error_if: str | None = "!= 0"
 
 
 class Constraint12(BaseParserModel):
@@ -2066,10 +2066,10 @@ class Constraint12(BaseParserModel):
         extra="allow",
     )
     type: Type12
-    name: Optional[str] = None
-    expression: Optional[str] = None
-    warn_unenforced: Optional[bool] = True
-    warn_unsupported: Optional[bool] = True
+    name: str | None = None
+    expression: str | None = None
+    warn_unenforced: bool | None = True
+    warn_unsupported: bool | None = True
 
 
 class Columns11(BaseParserModel):
@@ -2077,20 +2077,20 @@ class Columns11(BaseParserModel):
         extra="allow",
     )
     name: str
-    description: Optional[str] = ""
-    meta: Optional[Dict[str, Any]] = None
-    data_type: Optional[str] = None
-    constraints: Optional[List[Constraint12]] = None
-    quote: Optional[bool] = None
-    tags: Optional[List[str]] = None
-    field_extra: Optional[Dict[str, Any]] = Field(None, alias="_extra")
+    description: str | None = ""
+    meta: dict[str, Any] | None = None
+    data_type: str | None = None
+    constraints: list[Constraint12] | None = None
+    quote: bool | None = None
+    tags: list[str] | None = None
+    field_extra: dict[str, Any] | None = Field(None, alias="_extra")
 
 
 class Disabled2(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    database: Optional[str] = None
+    database: str | None = None
     schema_: str = Field(..., alias="schema")
     name: str
     resource_type: Literal["test"]
@@ -2098,72 +2098,72 @@ class Disabled2(BaseParserModel):
     path: str
     original_file_path: str
     unique_id: str
-    fqn: List[str]
+    fqn: list[str]
     alias: str
     checksum: Checksum = Field(..., title="FileHash")
-    config: Optional[Config17] = Field(None, title="TestConfig")
-    tags: Optional[List[str]] = None
-    description: Optional[str] = ""
-    columns: Optional[Dict[str, Columns11]] = None
-    meta: Optional[Dict[str, Any]] = None
-    group: Optional[str] = None
-    docs: Optional[Docs19] = Field(None, title="Docs")
-    patch_path: Optional[str] = None
-    build_path: Optional[str] = None
-    unrendered_config: Optional[Dict[str, Any]] = None
-    created_at: Optional[float] = None
-    config_call_dict: Optional[Dict[str, Any]] = None
-    relation_name: Optional[str] = None
-    raw_code: Optional[str] = ""
-    language: Optional[str] = "sql"
-    refs: Optional[List[Ref]] = None
-    sources: Optional[List[List[str]]] = None
-    metrics: Optional[List[List[str]]] = None
-    depends_on: Optional[DependsOn12] = Field(None, title="DependsOn")
-    compiled_path: Optional[str] = None
-    compiled: Optional[bool] = False
-    compiled_code: Optional[str] = None
-    extra_ctes_injected: Optional[bool] = False
-    extra_ctes: Optional[List[ExtraCte]] = None
-    field_pre_injected_sql: Optional[str] = Field(None, alias="_pre_injected_sql")
-    contract: Optional[Contract19] = Field(None, title="Contract")
+    config: Config17 | None = Field(None, title="TestConfig")
+    tags: list[str] | None = None
+    description: str | None = ""
+    columns: dict[str, Columns11] | None = None
+    meta: dict[str, Any] | None = None
+    group: str | None = None
+    docs: Docs19 | None = Field(None, title="Docs")
+    patch_path: str | None = None
+    build_path: str | None = None
+    unrendered_config: dict[str, Any] | None = None
+    created_at: float | None = None
+    config_call_dict: dict[str, Any] | None = None
+    relation_name: str | None = None
+    raw_code: str | None = ""
+    language: str | None = "sql"
+    refs: list[Ref] | None = None
+    sources: list[list[str]] | None = None
+    metrics: list[list[str]] | None = None
+    depends_on: DependsOn12 | None = Field(None, title="DependsOn")
+    compiled_path: str | None = None
+    compiled: bool | None = False
+    compiled_code: str | None = None
+    extra_ctes_injected: bool | None = False
+    extra_ctes: list[ExtraCte] | None = None
+    field_pre_injected_sql: str | None = Field(None, alias="_pre_injected_sql")
+    contract: Contract19 | None = Field(None, title="Contract")
 
 
 class Contract21(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    enforced: Optional[bool] = False
-    alias_types: Optional[bool] = True
+    enforced: bool | None = False
+    alias_types: bool | None = True
 
 
 class Config18(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    field_extra: Optional[Dict[str, Any]] = Field(None, alias="_extra")
-    enabled: Optional[bool] = True
-    alias: Optional[str] = None
-    schema_: Optional[str] = Field(None, alias="schema")
-    database: Optional[str] = None
-    tags: Optional[Union[List[str], str]] = None
-    meta: Optional[Dict[str, Any]] = None
-    group: Optional[str] = None
-    materialized: Optional[str] = "view"
-    incremental_strategy: Optional[str] = None
-    persist_docs: Optional[Dict[str, Any]] = None
-    post_hook: Optional[List[PostHookItem]] = Field(None, alias="post-hook")
-    pre_hook: Optional[List[PreHookItem]] = Field(None, alias="pre-hook")
-    quoting: Optional[Dict[str, Any]] = None
-    column_types: Optional[Dict[str, Any]] = None
-    full_refresh: Optional[bool] = None
-    unique_key: Optional[Union[str, List[str]]] = None
-    on_schema_change: Optional[str] = "ignore"
-    on_configuration_change: Optional[OnConfigurationChange] = None
-    grants: Optional[Dict[str, Any]] = None
-    packages: Optional[List[str]] = None
-    docs: Optional[Docs19] = Field(None, title="Docs")
-    contract: Optional[Contract21] = Field(None, title="ContractConfig")
+    field_extra: dict[str, Any] | None = Field(None, alias="_extra")
+    enabled: bool | None = True
+    alias: str | None = None
+    schema_: str | None = Field(None, alias="schema")
+    database: str | None = None
+    tags: list[str] | str | None = None
+    meta: dict[str, Any] | None = None
+    group: str | None = None
+    materialized: str | None = "view"
+    incremental_strategy: str | None = None
+    persist_docs: dict[str, Any] | None = None
+    post_hook: list[PostHookItem] | None = Field(None, alias="post-hook")
+    pre_hook: list[PreHookItem] | None = Field(None, alias="pre-hook")
+    quoting: dict[str, Any] | None = None
+    column_types: dict[str, Any] | None = None
+    full_refresh: bool | None = None
+    unique_key: str | list[str] | None = None
+    on_schema_change: str | None = "ignore"
+    on_configuration_change: OnConfigurationChange | None = None
+    grants: dict[str, Any] | None = None
+    packages: list[str] | None = None
+    docs: Docs19 | None = Field(None, title="Docs")
+    contract: Contract21 | None = Field(None, title="ContractConfig")
 
 
 class Constraint13(BaseParserModel):
@@ -2171,10 +2171,10 @@ class Constraint13(BaseParserModel):
         extra="allow",
     )
     type: Type12
-    name: Optional[str] = None
-    expression: Optional[str] = None
-    warn_unenforced: Optional[bool] = True
-    warn_unsupported: Optional[bool] = True
+    name: str | None = None
+    expression: str | None = None
+    warn_unenforced: bool | None = True
+    warn_unsupported: bool | None = True
 
 
 class Columns12(BaseParserModel):
@@ -2182,29 +2182,29 @@ class Columns12(BaseParserModel):
         extra="allow",
     )
     name: str
-    description: Optional[str] = ""
-    meta: Optional[Dict[str, Any]] = None
-    data_type: Optional[str] = None
-    constraints: Optional[List[Constraint13]] = None
-    quote: Optional[bool] = None
-    tags: Optional[List[str]] = None
-    field_extra: Optional[Dict[str, Any]] = Field(None, alias="_extra")
+    description: str | None = ""
+    meta: dict[str, Any] | None = None
+    data_type: str | None = None
+    constraints: list[Constraint13] | None = None
+    quote: bool | None = None
+    tags: list[str] | None = None
+    field_extra: dict[str, Any] | None = Field(None, alias="_extra")
 
 
 class Contract22(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    enforced: Optional[bool] = False
-    alias_types: Optional[bool] = True
-    checksum: Optional[str] = None
+    enforced: bool | None = False
+    alias_types: bool | None = True
+    checksum: str | None = None
 
 
 class Disabled3(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    database: Optional[str] = None
+    database: str | None = None
     schema_: str = Field(..., alias="schema")
     name: str
     resource_type: Literal["operation"]
@@ -2212,75 +2212,75 @@ class Disabled3(BaseParserModel):
     path: str
     original_file_path: str
     unique_id: str
-    fqn: List[str]
+    fqn: list[str]
     alias: str
     checksum: Checksum = Field(..., title="FileHash")
-    config: Optional[Config18] = Field(None, title="NodeConfig")
-    tags: Optional[List[str]] = None
-    description: Optional[str] = ""
-    columns: Optional[Dict[str, Columns12]] = None
-    meta: Optional[Dict[str, Any]] = None
-    group: Optional[str] = None
-    docs: Optional[Docs19] = Field(None, title="Docs")
-    patch_path: Optional[str] = None
-    build_path: Optional[str] = None
-    unrendered_config: Optional[Dict[str, Any]] = None
-    created_at: Optional[float] = None
-    config_call_dict: Optional[Dict[str, Any]] = None
-    relation_name: Optional[str] = None
-    raw_code: Optional[str] = ""
-    language: Optional[str] = "sql"
-    refs: Optional[List[Ref]] = None
-    sources: Optional[List[List[str]]] = None
-    metrics: Optional[List[List[str]]] = None
-    depends_on: Optional[DependsOn12] = Field(None, title="DependsOn")
-    compiled_path: Optional[str] = None
-    compiled: Optional[bool] = False
-    compiled_code: Optional[str] = None
-    extra_ctes_injected: Optional[bool] = False
-    extra_ctes: Optional[List[ExtraCte]] = None
-    field_pre_injected_sql: Optional[str] = Field(None, alias="_pre_injected_sql")
-    contract: Optional[Contract22] = Field(None, title="Contract")
-    index: Optional[int] = None
-    time_spine: Optional[TimeSpine] = None
+    config: Config18 | None = Field(None, title="NodeConfig")
+    tags: list[str] | None = None
+    description: str | None = ""
+    columns: dict[str, Columns12] | None = None
+    meta: dict[str, Any] | None = None
+    group: str | None = None
+    docs: Docs19 | None = Field(None, title="Docs")
+    patch_path: str | None = None
+    build_path: str | None = None
+    unrendered_config: dict[str, Any] | None = None
+    created_at: float | None = None
+    config_call_dict: dict[str, Any] | None = None
+    relation_name: str | None = None
+    raw_code: str | None = ""
+    language: str | None = "sql"
+    refs: list[Ref] | None = None
+    sources: list[list[str]] | None = None
+    metrics: list[list[str]] | None = None
+    depends_on: DependsOn12 | None = Field(None, title="DependsOn")
+    compiled_path: str | None = None
+    compiled: bool | None = False
+    compiled_code: str | None = None
+    extra_ctes_injected: bool | None = False
+    extra_ctes: list[ExtraCte] | None = None
+    field_pre_injected_sql: str | None = Field(None, alias="_pre_injected_sql")
+    contract: Contract22 | None = Field(None, title="Contract")
+    index: int | None = None
+    time_spine: TimeSpine | None = None
 
 
 class Contract23(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    enforced: Optional[bool] = False
-    alias_types: Optional[bool] = True
+    enforced: bool | None = False
+    alias_types: bool | None = True
 
 
 class Config19(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    field_extra: Optional[Dict[str, Any]] = Field(None, alias="_extra")
-    enabled: Optional[bool] = True
-    alias: Optional[str] = None
-    schema_: Optional[str] = Field(None, alias="schema")
-    database: Optional[str] = None
-    tags: Optional[Union[List[str], str]] = None
-    meta: Optional[Dict[str, Any]] = None
-    group: Optional[str] = None
-    materialized: Optional[str] = "view"
-    incremental_strategy: Optional[str] = None
-    persist_docs: Optional[Dict[str, Any]] = None
-    post_hook: Optional[List[PostHookItem]] = Field(None, alias="post-hook")
-    pre_hook: Optional[List[PreHookItem]] = Field(None, alias="pre-hook")
-    quoting: Optional[Dict[str, Any]] = None
-    column_types: Optional[Dict[str, Any]] = None
-    full_refresh: Optional[bool] = None
-    unique_key: Optional[Union[str, List[str]]] = None
-    on_schema_change: Optional[str] = "ignore"
-    on_configuration_change: Optional[OnConfigurationChange] = None
-    grants: Optional[Dict[str, Any]] = None
-    packages: Optional[List[str]] = None
-    docs: Optional[Docs19] = Field(None, title="Docs")
-    contract: Optional[Contract23] = Field(None, title="ContractConfig")
-    access: Optional[Access] = "protected"
+    field_extra: dict[str, Any] | None = Field(None, alias="_extra")
+    enabled: bool | None = True
+    alias: str | None = None
+    schema_: str | None = Field(None, alias="schema")
+    database: str | None = None
+    tags: list[str] | str | None = None
+    meta: dict[str, Any] | None = None
+    group: str | None = None
+    materialized: str | None = "view"
+    incremental_strategy: str | None = None
+    persist_docs: dict[str, Any] | None = None
+    post_hook: list[PostHookItem] | None = Field(None, alias="post-hook")
+    pre_hook: list[PreHookItem] | None = Field(None, alias="pre-hook")
+    quoting: dict[str, Any] | None = None
+    column_types: dict[str, Any] | None = None
+    full_refresh: bool | None = None
+    unique_key: str | list[str] | None = None
+    on_schema_change: str | None = "ignore"
+    on_configuration_change: OnConfigurationChange | None = None
+    grants: dict[str, Any] | None = None
+    packages: list[str] | None = None
+    docs: Docs19 | None = Field(None, title="Docs")
+    contract: Contract23 | None = Field(None, title="ContractConfig")
+    access: Access | None = "protected"
 
 
 class Constraint14(BaseParserModel):
@@ -2288,10 +2288,10 @@ class Constraint14(BaseParserModel):
         extra="allow",
     )
     type: Type12
-    name: Optional[str] = None
-    expression: Optional[str] = None
-    warn_unenforced: Optional[bool] = True
-    warn_unsupported: Optional[bool] = True
+    name: str | None = None
+    expression: str | None = None
+    warn_unenforced: bool | None = True
+    warn_unsupported: bool | None = True
 
 
 class Columns13(BaseParserModel):
@@ -2299,22 +2299,22 @@ class Columns13(BaseParserModel):
         extra="allow",
     )
     name: str
-    description: Optional[str] = ""
-    meta: Optional[Dict[str, Any]] = None
-    data_type: Optional[str] = None
-    constraints: Optional[List[Constraint14]] = None
-    quote: Optional[bool] = None
-    tags: Optional[List[str]] = None
-    field_extra: Optional[Dict[str, Any]] = Field(None, alias="_extra")
+    description: str | None = ""
+    meta: dict[str, Any] | None = None
+    data_type: str | None = None
+    constraints: list[Constraint14] | None = None
+    quote: bool | None = None
+    tags: list[str] | None = None
+    field_extra: dict[str, Any] | None = Field(None, alias="_extra")
 
 
 class Contract24(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    enforced: Optional[bool] = False
-    alias_types: Optional[bool] = True
-    checksum: Optional[str] = None
+    enforced: bool | None = False
+    alias_types: bool | None = True
+    checksum: str | None = None
 
 
 class Constraint15(BaseParserModel):
@@ -2322,72 +2322,72 @@ class Constraint15(BaseParserModel):
         extra="allow",
     )
     type: Type12
-    name: Optional[str] = None
-    expression: Optional[str] = None
-    warn_unenforced: Optional[bool] = True
-    warn_unsupported: Optional[bool] = True
-    columns: Optional[List[str]] = None
+    name: str | None = None
+    expression: str | None = None
+    warn_unenforced: bool | None = True
+    warn_unsupported: bool | None = True
+    columns: list[str] | None = None
 
 
 class Contract25(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    enforced: Optional[bool] = False
-    alias_types: Optional[bool] = True
+    enforced: bool | None = False
+    alias_types: bool | None = True
 
 
 class Config20(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    field_extra: Optional[Dict[str, Any]] = Field(None, alias="_extra")
-    enabled: Optional[bool] = True
-    alias: Optional[str] = None
-    schema_: Optional[str] = Field(None, alias="schema")
-    database: Optional[str] = None
-    tags: Optional[Union[List[str], str]] = None
-    meta: Optional[Dict[str, Any]] = None
-    group: Optional[str] = None
-    materialized: Optional[str] = "view"
-    incremental_strategy: Optional[str] = None
-    persist_docs: Optional[Dict[str, Any]] = None
-    post_hook: Optional[List[PostHookItem]] = Field(None, alias="post-hook")
-    pre_hook: Optional[List[PreHookItem]] = Field(None, alias="pre-hook")
-    quoting: Optional[Dict[str, Any]] = None
-    column_types: Optional[Dict[str, Any]] = None
-    full_refresh: Optional[bool] = None
-    unique_key: Optional[Union[str, List[str]]] = None
-    on_schema_change: Optional[str] = "ignore"
-    on_configuration_change: Optional[OnConfigurationChange] = None
-    grants: Optional[Dict[str, Any]] = None
-    packages: Optional[List[str]] = None
-    docs: Optional[Docs19] = Field(None, title="Docs")
-    contract: Optional[Contract25] = Field(None, title="ContractConfig")
+    field_extra: dict[str, Any] | None = Field(None, alias="_extra")
+    enabled: bool | None = True
+    alias: str | None = None
+    schema_: str | None = Field(None, alias="schema")
+    database: str | None = None
+    tags: list[str] | str | None = None
+    meta: dict[str, Any] | None = None
+    group: str | None = None
+    materialized: str | None = "view"
+    incremental_strategy: str | None = None
+    persist_docs: dict[str, Any] | None = None
+    post_hook: list[PostHookItem] | None = Field(None, alias="post-hook")
+    pre_hook: list[PreHookItem] | None = Field(None, alias="pre-hook")
+    quoting: dict[str, Any] | None = None
+    column_types: dict[str, Any] | None = None
+    full_refresh: bool | None = None
+    unique_key: str | list[str] | None = None
+    on_schema_change: str | None = "ignore"
+    on_configuration_change: OnConfigurationChange | None = None
+    grants: dict[str, Any] | None = None
+    packages: list[str] | None = None
+    docs: Docs19 | None = Field(None, title="Docs")
+    contract: Contract25 | None = Field(None, title="ContractConfig")
 
 
 class DeferRelation4(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    database: Optional[str] = None
+    database: str | None = None
     schema_: str = Field(..., alias="schema")
     alias: str
-    relation_name: Optional[str] = None
+    relation_name: str | None = None
     resource_type: ResourceType
     name: str
     description: str
-    compiled_code: Optional[str] = None
-    meta: Dict[str, Any]
-    tags: List[str]
-    config: Optional[Config20] = None
+    compiled_code: str | None = None
+    meta: dict[str, Any]
+    tags: list[str]
+    config: Config20 | None = None
 
 
 class Disabled4(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    database: Optional[str] = None
+    database: str | None = None
     schema_: str = Field(..., alias="schema")
     name: str
     resource_type: Literal["model"]
@@ -2395,71 +2395,71 @@ class Disabled4(BaseParserModel):
     path: str
     original_file_path: str
     unique_id: str
-    fqn: List[str]
+    fqn: list[str]
     alias: str
     checksum: Checksum = Field(..., title="FileHash")
-    config: Optional[Config19] = Field(None, title="ModelConfig")
-    tags: Optional[List[str]] = None
-    description: Optional[str] = ""
-    columns: Optional[Dict[str, Columns13]] = None
-    meta: Optional[Dict[str, Any]] = None
-    group: Optional[str] = None
-    docs: Optional[Docs19] = Field(None, title="Docs")
-    patch_path: Optional[str] = None
-    build_path: Optional[str] = None
-    unrendered_config: Optional[Dict[str, Any]] = None
-    created_at: Optional[float] = None
-    config_call_dict: Optional[Dict[str, Any]] = None
-    relation_name: Optional[str] = None
-    raw_code: Optional[str] = ""
-    language: Optional[str] = "sql"
-    refs: Optional[List[Ref]] = None
-    sources: Optional[List[List[str]]] = None
-    metrics: Optional[List[List[str]]] = None
-    depends_on: Optional[DependsOn12] = Field(None, title="DependsOn")
-    compiled_path: Optional[str] = None
-    compiled: Optional[bool] = False
-    compiled_code: Optional[str] = None
-    extra_ctes_injected: Optional[bool] = False
-    extra_ctes: Optional[List[ExtraCte]] = None
-    field_pre_injected_sql: Optional[str] = Field(None, alias="_pre_injected_sql")
-    contract: Optional[Contract24] = Field(None, title="Contract")
-    access: Optional[Access] = "protected"
-    constraints: Optional[List[Constraint15]] = None
-    version: Optional[Union[str, float]] = None
-    latest_version: Optional[Union[str, float]] = None
-    deprecation_date: Optional[str] = None
-    defer_relation: Optional[DeferRelation4] = None
-    primary_key: Optional[List[str]] = None
+    config: Config19 | None = Field(None, title="ModelConfig")
+    tags: list[str] | None = None
+    description: str | None = ""
+    columns: dict[str, Columns13] | None = None
+    meta: dict[str, Any] | None = None
+    group: str | None = None
+    docs: Docs19 | None = Field(None, title="Docs")
+    patch_path: str | None = None
+    build_path: str | None = None
+    unrendered_config: dict[str, Any] | None = None
+    created_at: float | None = None
+    config_call_dict: dict[str, Any] | None = None
+    relation_name: str | None = None
+    raw_code: str | None = ""
+    language: str | None = "sql"
+    refs: list[Ref] | None = None
+    sources: list[list[str]] | None = None
+    metrics: list[list[str]] | None = None
+    depends_on: DependsOn12 | None = Field(None, title="DependsOn")
+    compiled_path: str | None = None
+    compiled: bool | None = False
+    compiled_code: str | None = None
+    extra_ctes_injected: bool | None = False
+    extra_ctes: list[ExtraCte] | None = None
+    field_pre_injected_sql: str | None = Field(None, alias="_pre_injected_sql")
+    contract: Contract24 | None = Field(None, title="Contract")
+    access: Access | None = "protected"
+    constraints: list[Constraint15] | None = None
+    version: str | float | None = None
+    latest_version: str | float | None = None
+    deprecation_date: str | None = None
+    defer_relation: DeferRelation4 | None = None
+    primary_key: list[str] | None = None
 
 
 class Config21(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    field_extra: Optional[Dict[str, Any]] = Field(None, alias="_extra")
-    enabled: Optional[bool] = True
-    alias: Optional[str] = None
-    schema_: Optional[str] = Field(None, alias="schema")
-    database: Optional[str] = None
-    tags: Optional[Union[List[str], str]] = None
-    meta: Optional[Dict[str, Any]] = None
-    group: Optional[str] = None
-    materialized: Optional[str] = "view"
-    incremental_strategy: Optional[str] = None
-    persist_docs: Optional[Dict[str, Any]] = None
-    post_hook: Optional[List[PostHookItem]] = Field(None, alias="post-hook")
-    pre_hook: Optional[List[PreHookItem]] = Field(None, alias="pre-hook")
-    quoting: Optional[Dict[str, Any]] = None
-    column_types: Optional[Dict[str, Any]] = None
-    full_refresh: Optional[bool] = None
-    unique_key: Optional[Union[str, List[str]]] = None
-    on_schema_change: Optional[str] = "ignore"
-    on_configuration_change: Optional[OnConfigurationChange] = None
-    grants: Optional[Dict[str, Any]] = None
-    packages: Optional[List[str]] = None
-    docs: Optional[Docs19] = Field(None, title="Docs")
-    contract: Optional[Contract25] = Field(None, title="ContractConfig")
+    field_extra: dict[str, Any] | None = Field(None, alias="_extra")
+    enabled: bool | None = True
+    alias: str | None = None
+    schema_: str | None = Field(None, alias="schema")
+    database: str | None = None
+    tags: list[str] | str | None = None
+    meta: dict[str, Any] | None = None
+    group: str | None = None
+    materialized: str | None = "view"
+    incremental_strategy: str | None = None
+    persist_docs: dict[str, Any] | None = None
+    post_hook: list[PostHookItem] | None = Field(None, alias="post-hook")
+    pre_hook: list[PreHookItem] | None = Field(None, alias="pre-hook")
+    quoting: dict[str, Any] | None = None
+    column_types: dict[str, Any] | None = None
+    full_refresh: bool | None = None
+    unique_key: str | list[str] | None = None
+    on_schema_change: str | None = "ignore"
+    on_configuration_change: OnConfigurationChange | None = None
+    grants: dict[str, Any] | None = None
+    packages: list[str] | None = None
+    docs: Docs19 | None = Field(None, title="Docs")
+    contract: Contract25 | None = Field(None, title="ContractConfig")
 
 
 class Constraint16(BaseParserModel):
@@ -2467,10 +2467,10 @@ class Constraint16(BaseParserModel):
         extra="allow",
     )
     type: Type12
-    name: Optional[str] = None
-    expression: Optional[str] = None
-    warn_unenforced: Optional[bool] = True
-    warn_unsupported: Optional[bool] = True
+    name: str | None = None
+    expression: str | None = None
+    warn_unenforced: bool | None = True
+    warn_unsupported: bool | None = True
 
 
 class Columns14(BaseParserModel):
@@ -2478,29 +2478,29 @@ class Columns14(BaseParserModel):
         extra="allow",
     )
     name: str
-    description: Optional[str] = ""
-    meta: Optional[Dict[str, Any]] = None
-    data_type: Optional[str] = None
-    constraints: Optional[List[Constraint16]] = None
-    quote: Optional[bool] = None
-    tags: Optional[List[str]] = None
-    field_extra: Optional[Dict[str, Any]] = Field(None, alias="_extra")
+    description: str | None = ""
+    meta: dict[str, Any] | None = None
+    data_type: str | None = None
+    constraints: list[Constraint16] | None = None
+    quote: bool | None = None
+    tags: list[str] | None = None
+    field_extra: dict[str, Any] | None = Field(None, alias="_extra")
 
 
 class Contract27(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    enforced: Optional[bool] = False
-    alias_types: Optional[bool] = True
-    checksum: Optional[str] = None
+    enforced: bool | None = False
+    alias_types: bool | None = True
+    checksum: str | None = None
 
 
 class Disabled5(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    database: Optional[str] = None
+    database: str | None = None
     schema_: str = Field(..., alias="schema")
     name: str
     resource_type: Literal["sql_operation"]
@@ -2508,60 +2508,60 @@ class Disabled5(BaseParserModel):
     path: str
     original_file_path: str
     unique_id: str
-    fqn: List[str]
+    fqn: list[str]
     alias: str
     checksum: Checksum = Field(..., title="FileHash")
-    config: Optional[Config21] = Field(None, title="NodeConfig")
-    tags: Optional[List[str]] = None
-    description: Optional[str] = ""
-    columns: Optional[Dict[str, Columns14]] = None
-    meta: Optional[Dict[str, Any]] = None
-    group: Optional[str] = None
-    docs: Optional[Docs19] = Field(None, title="Docs")
-    patch_path: Optional[str] = None
-    build_path: Optional[str] = None
-    unrendered_config: Optional[Dict[str, Any]] = None
-    created_at: Optional[float] = None
-    config_call_dict: Optional[Dict[str, Any]] = None
-    relation_name: Optional[str] = None
-    raw_code: Optional[str] = ""
-    language: Optional[str] = "sql"
-    refs: Optional[List[Ref]] = None
-    sources: Optional[List[List[str]]] = None
-    metrics: Optional[List[List[str]]] = None
-    depends_on: Optional[DependsOn12] = Field(None, title="DependsOn")
-    compiled_path: Optional[str] = None
-    compiled: Optional[bool] = False
-    compiled_code: Optional[str] = None
-    extra_ctes_injected: Optional[bool] = False
-    extra_ctes: Optional[List[ExtraCte]] = None
-    field_pre_injected_sql: Optional[str] = Field(None, alias="_pre_injected_sql")
-    contract: Optional[Contract27] = Field(None, title="Contract")
+    config: Config21 | None = Field(None, title="NodeConfig")
+    tags: list[str] | None = None
+    description: str | None = ""
+    columns: dict[str, Columns14] | None = None
+    meta: dict[str, Any] | None = None
+    group: str | None = None
+    docs: Docs19 | None = Field(None, title="Docs")
+    patch_path: str | None = None
+    build_path: str | None = None
+    unrendered_config: dict[str, Any] | None = None
+    created_at: float | None = None
+    config_call_dict: dict[str, Any] | None = None
+    relation_name: str | None = None
+    raw_code: str | None = ""
+    language: str | None = "sql"
+    refs: list[Ref] | None = None
+    sources: list[list[str]] | None = None
+    metrics: list[list[str]] | None = None
+    depends_on: DependsOn12 | None = Field(None, title="DependsOn")
+    compiled_path: str | None = None
+    compiled: bool | None = False
+    compiled_code: str | None = None
+    extra_ctes_injected: bool | None = False
+    extra_ctes: list[ExtraCte] | None = None
+    field_pre_injected_sql: str | None = Field(None, alias="_pre_injected_sql")
+    contract: Contract27 | None = Field(None, title="Contract")
 
 
 class Config22(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    field_extra: Optional[Dict[str, Any]] = Field(None, alias="_extra")
-    enabled: Optional[bool] = True
-    alias: Optional[str] = None
-    schema_: Optional[str] = Field("dbt_test__audit", alias="schema")
-    database: Optional[str] = None
-    tags: Optional[Union[List[str], str]] = None
-    meta: Optional[Dict[str, Any]] = None
-    group: Optional[str] = None
-    materialized: Optional[str] = "test"
-    severity: Optional[constr(pattern=r"^([Ww][Aa][Rr][Nn]|[Ee][Rr][Rr][Oo][Rr])$")] = (
+    field_extra: dict[str, Any] | None = Field(None, alias="_extra")
+    enabled: bool | None = True
+    alias: str | None = None
+    schema_: str | None = Field("dbt_test__audit", alias="schema")
+    database: str | None = None
+    tags: list[str] | str | None = None
+    meta: dict[str, Any] | None = None
+    group: str | None = None
+    materialized: str | None = "test"
+    severity: constr(pattern=r"^([Ww][Aa][Rr][Nn]|[Ee][Rr][Rr][Oo][Rr])$") | None = (
         "ERROR"
     )
-    store_failures: Optional[bool] = None
-    store_failures_as: Optional[str] = None
-    where: Optional[str] = None
-    limit: Optional[int] = None
-    fail_calc: Optional[str] = "count(*)"
-    warn_if: Optional[str] = "!= 0"
-    error_if: Optional[str] = "!= 0"
+    store_failures: bool | None = None
+    store_failures_as: str | None = None
+    where: str | None = None
+    limit: int | None = None
+    fail_calc: str | None = "count(*)"
+    warn_if: str | None = "!= 0"
+    error_if: str | None = "!= 0"
 
 
 class Constraint17(BaseParserModel):
@@ -2569,10 +2569,10 @@ class Constraint17(BaseParserModel):
         extra="allow",
     )
     type: Type12
-    name: Optional[str] = None
-    expression: Optional[str] = None
-    warn_unenforced: Optional[bool] = True
-    warn_unsupported: Optional[bool] = True
+    name: str | None = None
+    expression: str | None = None
+    warn_unenforced: bool | None = True
+    warn_unsupported: bool | None = True
 
 
 class Columns15(BaseParserModel):
@@ -2580,20 +2580,20 @@ class Columns15(BaseParserModel):
         extra="allow",
     )
     name: str
-    description: Optional[str] = ""
-    meta: Optional[Dict[str, Any]] = None
-    data_type: Optional[str] = None
-    constraints: Optional[List[Constraint17]] = None
-    quote: Optional[bool] = None
-    tags: Optional[List[str]] = None
-    field_extra: Optional[Dict[str, Any]] = Field(None, alias="_extra")
+    description: str | None = ""
+    meta: dict[str, Any] | None = None
+    data_type: str | None = None
+    constraints: list[Constraint17] | None = None
+    quote: bool | None = None
+    tags: list[str] | None = None
+    field_extra: dict[str, Any] | None = Field(None, alias="_extra")
 
 
 class Disabled6(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    database: Optional[str] = None
+    database: str | None = None
     schema_: str = Field(..., alias="schema")
     name: str
     resource_type: Literal["test"]
@@ -2601,81 +2601,81 @@ class Disabled6(BaseParserModel):
     path: str
     original_file_path: str
     unique_id: str
-    fqn: List[str]
+    fqn: list[str]
     alias: str
     checksum: Checksum = Field(..., title="FileHash")
-    config: Optional[Config22] = Field(None, title="TestConfig")
-    tags: Optional[List[str]] = None
-    description: Optional[str] = ""
-    columns: Optional[Dict[str, Columns15]] = None
-    meta: Optional[Dict[str, Any]] = None
-    group: Optional[str] = None
-    docs: Optional[Docs19] = Field(None, title="Docs")
-    patch_path: Optional[str] = None
-    build_path: Optional[str] = None
-    unrendered_config: Optional[Dict[str, Any]] = None
-    created_at: Optional[float] = None
-    config_call_dict: Optional[Dict[str, Any]] = None
-    relation_name: Optional[str] = None
-    raw_code: Optional[str] = ""
-    language: Optional[str] = "sql"
-    refs: Optional[List[Ref]] = None
-    sources: Optional[List[List[str]]] = None
-    metrics: Optional[List[List[str]]] = None
-    depends_on: Optional[DependsOn12] = Field(None, title="DependsOn")
-    compiled_path: Optional[str] = None
-    compiled: Optional[bool] = False
-    compiled_code: Optional[str] = None
-    extra_ctes_injected: Optional[bool] = False
-    extra_ctes: Optional[List[ExtraCte]] = None
-    field_pre_injected_sql: Optional[str] = Field(None, alias="_pre_injected_sql")
-    contract: Optional[Contract27] = Field(None, title="Contract")
-    column_name: Optional[str] = None
-    file_key_name: Optional[str] = None
-    attached_node: Optional[str] = None
-    test_metadata: Optional[TestMetadata] = Field(None, title="TestMetadata")
+    config: Config22 | None = Field(None, title="TestConfig")
+    tags: list[str] | None = None
+    description: str | None = ""
+    columns: dict[str, Columns15] | None = None
+    meta: dict[str, Any] | None = None
+    group: str | None = None
+    docs: Docs19 | None = Field(None, title="Docs")
+    patch_path: str | None = None
+    build_path: str | None = None
+    unrendered_config: dict[str, Any] | None = None
+    created_at: float | None = None
+    config_call_dict: dict[str, Any] | None = None
+    relation_name: str | None = None
+    raw_code: str | None = ""
+    language: str | None = "sql"
+    refs: list[Ref] | None = None
+    sources: list[list[str]] | None = None
+    metrics: list[list[str]] | None = None
+    depends_on: DependsOn12 | None = Field(None, title="DependsOn")
+    compiled_path: str | None = None
+    compiled: bool | None = False
+    compiled_code: str | None = None
+    extra_ctes_injected: bool | None = False
+    extra_ctes: list[ExtraCte] | None = None
+    field_pre_injected_sql: str | None = Field(None, alias="_pre_injected_sql")
+    contract: Contract27 | None = Field(None, title="Contract")
+    column_name: str | None = None
+    file_key_name: str | None = None
+    attached_node: str | None = None
+    test_metadata: TestMetadata | None = Field(None, title="TestMetadata")
 
 
 class Contract29(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    enforced: Optional[bool] = False
-    alias_types: Optional[bool] = True
+    enforced: bool | None = False
+    alias_types: bool | None = True
 
 
 class Config23(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    field_extra: Optional[Dict[str, Any]] = Field(None, alias="_extra")
-    enabled: Optional[bool] = True
-    alias: Optional[str] = None
-    schema_: Optional[str] = Field(None, alias="schema")
-    database: Optional[str] = None
-    tags: Optional[Union[List[str], str]] = None
-    meta: Optional[Dict[str, Any]] = None
-    group: Optional[str] = None
-    materialized: Optional[str] = "snapshot"
-    incremental_strategy: Optional[str] = None
-    persist_docs: Optional[Dict[str, Any]] = None
-    post_hook: Optional[List[PostHookItem]] = Field(None, alias="post-hook")
-    pre_hook: Optional[List[PreHookItem]] = Field(None, alias="pre-hook")
-    quoting: Optional[Dict[str, Any]] = None
-    column_types: Optional[Dict[str, Any]] = None
-    full_refresh: Optional[bool] = None
-    unique_key: Optional[str] = None
-    on_schema_change: Optional[str] = "ignore"
-    on_configuration_change: Optional[OnConfigurationChange] = None
-    grants: Optional[Dict[str, Any]] = None
-    packages: Optional[List[str]] = None
-    docs: Optional[Docs19] = Field(None, title="Docs")
-    contract: Optional[Contract29] = Field(None, title="ContractConfig")
-    strategy: Optional[str] = None
-    target_schema: Optional[str] = None
-    target_database: Optional[str] = None
-    updated_at: Optional[str] = None
-    check_cols: Optional[Union[str, List[str]]] = None
+    field_extra: dict[str, Any] | None = Field(None, alias="_extra")
+    enabled: bool | None = True
+    alias: str | None = None
+    schema_: str | None = Field(None, alias="schema")
+    database: str | None = None
+    tags: list[str] | str | None = None
+    meta: dict[str, Any] | None = None
+    group: str | None = None
+    materialized: str | None = "snapshot"
+    incremental_strategy: str | None = None
+    persist_docs: dict[str, Any] | None = None
+    post_hook: list[PostHookItem] | None = Field(None, alias="post-hook")
+    pre_hook: list[PreHookItem] | None = Field(None, alias="pre-hook")
+    quoting: dict[str, Any] | None = None
+    column_types: dict[str, Any] | None = None
+    full_refresh: bool | None = None
+    unique_key: str | None = None
+    on_schema_change: str | None = "ignore"
+    on_configuration_change: OnConfigurationChange | None = None
+    grants: dict[str, Any] | None = None
+    packages: list[str] | None = None
+    docs: Docs19 | None = Field(None, title="Docs")
+    contract: Contract29 | None = Field(None, title="ContractConfig")
+    strategy: str | None = None
+    target_schema: str | None = None
+    target_database: str | None = None
+    updated_at: str | None = None
+    check_cols: str | list[str] | None = None
 
 
 class Constraint18(BaseParserModel):
@@ -2683,10 +2683,10 @@ class Constraint18(BaseParserModel):
         extra="allow",
     )
     type: Type12
-    name: Optional[str] = None
-    expression: Optional[str] = None
-    warn_unenforced: Optional[bool] = True
-    warn_unsupported: Optional[bool] = True
+    name: str | None = None
+    expression: str | None = None
+    warn_unenforced: bool | None = True
+    warn_unsupported: bool | None = True
 
 
 class Columns16(BaseParserModel):
@@ -2694,83 +2694,83 @@ class Columns16(BaseParserModel):
         extra="allow",
     )
     name: str
-    description: Optional[str] = ""
-    meta: Optional[Dict[str, Any]] = None
-    data_type: Optional[str] = None
-    constraints: Optional[List[Constraint18]] = None
-    quote: Optional[bool] = None
-    tags: Optional[List[str]] = None
-    field_extra: Optional[Dict[str, Any]] = Field(None, alias="_extra")
+    description: str | None = ""
+    meta: dict[str, Any] | None = None
+    data_type: str | None = None
+    constraints: list[Constraint18] | None = None
+    quote: bool | None = None
+    tags: list[str] | None = None
+    field_extra: dict[str, Any] | None = Field(None, alias="_extra")
 
 
 class Contract30(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    enforced: Optional[bool] = False
-    alias_types: Optional[bool] = True
-    checksum: Optional[str] = None
+    enforced: bool | None = False
+    alias_types: bool | None = True
+    checksum: str | None = None
 
 
 class Contract31(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    enforced: Optional[bool] = False
-    alias_types: Optional[bool] = True
+    enforced: bool | None = False
+    alias_types: bool | None = True
 
 
 class Config24(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    field_extra: Optional[Dict[str, Any]] = Field(None, alias="_extra")
-    enabled: Optional[bool] = True
-    alias: Optional[str] = None
-    schema_: Optional[str] = Field(None, alias="schema")
-    database: Optional[str] = None
-    tags: Optional[Union[List[str], str]] = None
-    meta: Optional[Dict[str, Any]] = None
-    group: Optional[str] = None
-    materialized: Optional[str] = "view"
-    incremental_strategy: Optional[str] = None
-    persist_docs: Optional[Dict[str, Any]] = None
-    post_hook: Optional[List[PostHookItem]] = Field(None, alias="post-hook")
-    pre_hook: Optional[List[PreHookItem]] = Field(None, alias="pre-hook")
-    quoting: Optional[Dict[str, Any]] = None
-    column_types: Optional[Dict[str, Any]] = None
-    full_refresh: Optional[bool] = None
-    unique_key: Optional[Union[str, List[str]]] = None
-    on_schema_change: Optional[str] = "ignore"
-    on_configuration_change: Optional[OnConfigurationChange] = None
-    grants: Optional[Dict[str, Any]] = None
-    packages: Optional[List[str]] = None
-    docs: Optional[Docs19] = Field(None, title="Docs")
-    contract: Optional[Contract31] = Field(None, title="ContractConfig")
+    field_extra: dict[str, Any] | None = Field(None, alias="_extra")
+    enabled: bool | None = True
+    alias: str | None = None
+    schema_: str | None = Field(None, alias="schema")
+    database: str | None = None
+    tags: list[str] | str | None = None
+    meta: dict[str, Any] | None = None
+    group: str | None = None
+    materialized: str | None = "view"
+    incremental_strategy: str | None = None
+    persist_docs: dict[str, Any] | None = None
+    post_hook: list[PostHookItem] | None = Field(None, alias="post-hook")
+    pre_hook: list[PreHookItem] | None = Field(None, alias="pre-hook")
+    quoting: dict[str, Any] | None = None
+    column_types: dict[str, Any] | None = None
+    full_refresh: bool | None = None
+    unique_key: str | list[str] | None = None
+    on_schema_change: str | None = "ignore"
+    on_configuration_change: OnConfigurationChange | None = None
+    grants: dict[str, Any] | None = None
+    packages: list[str] | None = None
+    docs: Docs19 | None = Field(None, title="Docs")
+    contract: Contract31 | None = Field(None, title="ContractConfig")
 
 
 class DeferRelation5(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    database: Optional[str] = None
+    database: str | None = None
     schema_: str = Field(..., alias="schema")
     alias: str
-    relation_name: Optional[str] = None
+    relation_name: str | None = None
     resource_type: ResourceType
     name: str
     description: str
-    compiled_code: Optional[str] = None
-    meta: Dict[str, Any]
-    tags: List[str]
-    config: Optional[Config24] = None
+    compiled_code: str | None = None
+    meta: dict[str, Any]
+    tags: list[str]
+    config: Config24 | None = None
 
 
 class Disabled7(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    database: Optional[str] = None
+    database: str | None = None
     schema_: str = Field(..., alias="schema")
     name: str
     resource_type: Literal["snapshot"]
@@ -2778,73 +2778,73 @@ class Disabled7(BaseParserModel):
     path: str
     original_file_path: str
     unique_id: str
-    fqn: List[str]
+    fqn: list[str]
     alias: str
     checksum: Checksum = Field(..., title="FileHash")
     config: Config23 = Field(..., title="SnapshotConfig")
-    tags: Optional[List[str]] = None
-    description: Optional[str] = ""
-    columns: Optional[Dict[str, Columns16]] = None
-    meta: Optional[Dict[str, Any]] = None
-    group: Optional[str] = None
-    docs: Optional[Docs19] = Field(None, title="Docs")
-    patch_path: Optional[str] = None
-    build_path: Optional[str] = None
-    unrendered_config: Optional[Dict[str, Any]] = None
-    created_at: Optional[float] = None
-    config_call_dict: Optional[Dict[str, Any]] = None
-    relation_name: Optional[str] = None
-    raw_code: Optional[str] = ""
-    language: Optional[str] = "sql"
-    refs: Optional[List[Ref]] = None
-    sources: Optional[List[List[str]]] = None
-    metrics: Optional[List[List[str]]] = None
-    depends_on: Optional[DependsOn12] = Field(None, title="DependsOn")
-    compiled_path: Optional[str] = None
-    compiled: Optional[bool] = False
-    compiled_code: Optional[str] = None
-    extra_ctes_injected: Optional[bool] = False
-    extra_ctes: Optional[List[ExtraCte]] = None
-    field_pre_injected_sql: Optional[str] = Field(None, alias="_pre_injected_sql")
-    contract: Optional[Contract30] = Field(None, title="Contract")
-    defer_relation: Optional[DeferRelation5] = None
+    tags: list[str] | None = None
+    description: str | None = ""
+    columns: dict[str, Columns16] | None = None
+    meta: dict[str, Any] | None = None
+    group: str | None = None
+    docs: Docs19 | None = Field(None, title="Docs")
+    patch_path: str | None = None
+    build_path: str | None = None
+    unrendered_config: dict[str, Any] | None = None
+    created_at: float | None = None
+    config_call_dict: dict[str, Any] | None = None
+    relation_name: str | None = None
+    raw_code: str | None = ""
+    language: str | None = "sql"
+    refs: list[Ref] | None = None
+    sources: list[list[str]] | None = None
+    metrics: list[list[str]] | None = None
+    depends_on: DependsOn12 | None = Field(None, title="DependsOn")
+    compiled_path: str | None = None
+    compiled: bool | None = False
+    compiled_code: str | None = None
+    extra_ctes_injected: bool | None = False
+    extra_ctes: list[ExtraCte] | None = None
+    field_pre_injected_sql: str | None = Field(None, alias="_pre_injected_sql")
+    contract: Contract30 | None = Field(None, title="Contract")
+    defer_relation: DeferRelation5 | None = None
 
 
 class WarnAfter1(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    count: Optional[int] = None
-    period: Optional[Period] = None
+    count: int | None = None
+    period: Period | None = None
 
 
 class ErrorAfter1(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    count: Optional[int] = None
-    period: Optional[Period] = None
+    count: int | None = None
+    period: Period | None = None
 
 
 class Freshness1(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    warn_after: Optional[WarnAfter1] = None
-    error_after: Optional[ErrorAfter1] = None
-    filter: Optional[str] = None
+    warn_after: WarnAfter1 | None = None
+    error_after: ErrorAfter1 | None = None
+    filter: str | None = None
 
 
 class External1(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    field_extra: Optional[Dict[str, Any]] = Field(None, alias="_extra")
-    location: Optional[str] = None
-    file_format: Optional[str] = None
-    row_format: Optional[str] = None
-    tbl_properties: Optional[str] = None
-    partitions: Optional[Union[List[str], List[Partition]]] = None
+    field_extra: dict[str, Any] | None = Field(None, alias="_extra")
+    location: str | None = None
+    file_format: str | None = None
+    row_format: str | None = None
+    tbl_properties: str | None = None
+    partitions: list[str] | list[Partition] | None = None
 
 
 class Constraint19(BaseParserModel):
@@ -2852,10 +2852,10 @@ class Constraint19(BaseParserModel):
         extra="allow",
     )
     type: Type12
-    name: Optional[str] = None
-    expression: Optional[str] = None
-    warn_unenforced: Optional[bool] = True
-    warn_unsupported: Optional[bool] = True
+    name: str | None = None
+    expression: str | None = None
+    warn_unenforced: bool | None = True
+    warn_unsupported: bool | None = True
 
 
 class Columns17(BaseParserModel):
@@ -2863,28 +2863,28 @@ class Columns17(BaseParserModel):
         extra="allow",
     )
     name: str
-    description: Optional[str] = ""
-    meta: Optional[Dict[str, Any]] = None
-    data_type: Optional[str] = None
-    constraints: Optional[List[Constraint19]] = None
-    quote: Optional[bool] = None
-    tags: Optional[List[str]] = None
-    field_extra: Optional[Dict[str, Any]] = Field(None, alias="_extra")
+    description: str | None = ""
+    meta: dict[str, Any] | None = None
+    data_type: str | None = None
+    constraints: list[Constraint19] | None = None
+    quote: bool | None = None
+    tags: list[str] | None = None
+    field_extra: dict[str, Any] | None = Field(None, alias="_extra")
 
 
 class Config25(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    field_extra: Optional[Dict[str, Any]] = Field(None, alias="_extra")
-    enabled: Optional[bool] = True
+    field_extra: dict[str, Any] | None = Field(None, alias="_extra")
+    enabled: bool | None = True
 
 
 class Disabled8(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    database: Optional[str] = None
+    database: str | None = None
     schema_: str = Field(..., alias="schema")
     name: str
     resource_type: Literal["source"]
@@ -2892,25 +2892,25 @@ class Disabled8(BaseParserModel):
     path: str
     original_file_path: str
     unique_id: str
-    fqn: List[str]
+    fqn: list[str]
     source_name: str
     source_description: str
     loader: str
     identifier: str
-    quoting: Optional[Quoting] = Field(None, title="Quoting")
-    loaded_at_field: Optional[str] = None
-    freshness: Optional[Freshness1] = None
-    external: Optional[External1] = None
-    description: Optional[str] = ""
-    columns: Optional[Dict[str, Columns17]] = None
-    meta: Optional[Dict[str, Any]] = None
-    source_meta: Optional[Dict[str, Any]] = None
-    tags: Optional[List[str]] = None
-    config: Optional[Config25] = Field(None, title="SourceConfig")
-    patch_path: Optional[str] = None
-    unrendered_config: Optional[Dict[str, Any]] = None
-    relation_name: Optional[str] = None
-    created_at: Optional[float] = None
+    quoting: Quoting | None = Field(None, title="Quoting")
+    loaded_at_field: str | None = None
+    freshness: Freshness1 | None = None
+    external: External1 | None = None
+    description: str | None = ""
+    columns: dict[str, Columns17] | None = None
+    meta: dict[str, Any] | None = None
+    source_meta: dict[str, Any] | None = None
+    tags: list[str] | None = None
+    config: Config25 | None = Field(None, title="SourceConfig")
+    patch_path: str | None = None
+    unrendered_config: dict[str, Any] | None = None
+    relation_name: str | None = None
+    created_at: float | None = None
 
 
 class Type22(Enum):
@@ -2931,22 +2931,22 @@ class Disabled9(BaseParserModel):
     path: str
     original_file_path: str
     unique_id: str
-    fqn: List[str]
+    fqn: list[str]
     type: Type22
     owner: Owner = Field(..., title="Owner")
-    description: Optional[str] = ""
-    label: Optional[str] = None
-    maturity: Optional[Maturity] = None
-    meta: Optional[Dict[str, Any]] = None
-    tags: Optional[List[str]] = None
-    config: Optional[Config25] = Field(None, title="ExposureConfig")
-    unrendered_config: Optional[Dict[str, Any]] = None
-    url: Optional[str] = None
-    depends_on: Optional[DependsOn12] = Field(None, title="DependsOn")
-    refs: Optional[List[Ref]] = None
-    sources: Optional[List[List[str]]] = None
-    metrics: Optional[List[List[str]]] = None
-    created_at: Optional[float] = None
+    description: str | None = ""
+    label: str | None = None
+    maturity: Maturity | None = None
+    meta: dict[str, Any] | None = None
+    tags: list[str] | None = None
+    config: Config25 | None = Field(None, title="ExposureConfig")
+    unrendered_config: dict[str, Any] | None = None
+    url: str | None = None
+    depends_on: DependsOn12 | None = Field(None, title="DependsOn")
+    refs: list[Ref] | None = None
+    sources: list[list[str]] | None = None
+    metrics: list[list[str]] | None = None
+    created_at: float | None = None
 
 
 class Type23(Enum):
@@ -2961,7 +2961,7 @@ class Filter8(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    where_filters: List[WhereFilter]
+    where_filters: list[WhereFilter]
 
 
 class Measure1(BaseParserModel):
@@ -2969,17 +2969,17 @@ class Measure1(BaseParserModel):
         extra="allow",
     )
     name: str
-    filter: Optional[Filter8] = None
-    alias: Optional[str] = None
-    join_to_timespine: Optional[bool] = False
-    fill_nulls_with: Optional[int] = None
+    filter: Filter8 | None = None
+    alias: str | None = None
+    join_to_timespine: bool | None = False
+    fill_nulls_with: int | None = None
 
 
 class Filter9(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    where_filters: List[WhereFilter]
+    where_filters: list[WhereFilter]
 
 
 class InputMeasure1(BaseParserModel):
@@ -2987,17 +2987,17 @@ class InputMeasure1(BaseParserModel):
         extra="allow",
     )
     name: str
-    filter: Optional[Filter9] = None
-    alias: Optional[str] = None
-    join_to_timespine: Optional[bool] = False
-    fill_nulls_with: Optional[int] = None
+    filter: Filter9 | None = None
+    alias: str | None = None
+    join_to_timespine: bool | None = False
+    fill_nulls_with: int | None = None
 
 
 class Filter10(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    where_filters: List[WhereFilter]
+    where_filters: list[WhereFilter]
 
 
 class OffsetWindow3(BaseParserModel):
@@ -3013,17 +3013,17 @@ class Numerator1(BaseParserModel):
         extra="allow",
     )
     name: str
-    filter: Optional[Filter10] = None
-    alias: Optional[str] = None
-    offset_window: Optional[OffsetWindow3] = None
-    offset_to_grain: Optional[OffsetToGrain] = None
+    filter: Filter10 | None = None
+    alias: str | None = None
+    offset_window: OffsetWindow3 | None = None
+    offset_to_grain: OffsetToGrain | None = None
 
 
 class Filter11(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    where_filters: List[WhereFilter]
+    where_filters: list[WhereFilter]
 
 
 class OffsetWindow4(BaseParserModel):
@@ -3039,10 +3039,10 @@ class Denominator1(BaseParserModel):
         extra="allow",
     )
     name: str
-    filter: Optional[Filter11] = None
-    alias: Optional[str] = None
-    offset_window: Optional[OffsetWindow4] = None
-    offset_to_grain: Optional[OffsetToGrain] = None
+    filter: Filter11 | None = None
+    alias: str | None = None
+    offset_window: OffsetWindow4 | None = None
+    offset_to_grain: OffsetToGrain | None = None
 
 
 class Window2(BaseParserModel):
@@ -3057,7 +3057,7 @@ class Filter12(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    where_filters: List[WhereFilter]
+    where_filters: list[WhereFilter]
 
 
 class OffsetWindow5(BaseParserModel):
@@ -3073,17 +3073,17 @@ class Metric1(BaseParserModel):
         extra="allow",
     )
     name: str
-    filter: Optional[Filter12] = None
-    alias: Optional[str] = None
-    offset_window: Optional[OffsetWindow5] = None
-    offset_to_grain: Optional[OffsetToGrain] = None
+    filter: Filter12 | None = None
+    alias: str | None = None
+    offset_window: OffsetWindow5 | None = None
+    offset_to_grain: OffsetToGrain | None = None
 
 
 class Filter13(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    where_filters: List[WhereFilter]
+    where_filters: list[WhereFilter]
 
 
 class BaseMeasure1(BaseParserModel):
@@ -3091,17 +3091,17 @@ class BaseMeasure1(BaseParserModel):
         extra="allow",
     )
     name: str
-    filter: Optional[Filter13] = None
-    alias: Optional[str] = None
-    join_to_timespine: Optional[bool] = False
-    fill_nulls_with: Optional[int] = None
+    filter: Filter13 | None = None
+    alias: str | None = None
+    join_to_timespine: bool | None = False
+    fill_nulls_with: int | None = None
 
 
 class Filter14(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    where_filters: List[WhereFilter]
+    where_filters: list[WhereFilter]
 
 
 class ConversionMeasure1(BaseParserModel):
@@ -3109,10 +3109,10 @@ class ConversionMeasure1(BaseParserModel):
         extra="allow",
     )
     name: str
-    filter: Optional[Filter14] = None
-    alias: Optional[str] = None
-    join_to_timespine: Optional[bool] = False
-    fill_nulls_with: Optional[int] = None
+    filter: Filter14 | None = None
+    alias: str | None = None
+    join_to_timespine: bool | None = False
+    fill_nulls_with: int | None = None
 
 
 class Window3(BaseParserModel):
@@ -3130,31 +3130,31 @@ class ConversionTypeParams1(BaseParserModel):
     base_measure: BaseMeasure1 = Field(..., title="MetricInputMeasure")
     conversion_measure: ConversionMeasure1 = Field(..., title="MetricInputMeasure")
     entity: str
-    calculation: Optional[Calculation] = "conversion_rate"
-    window: Optional[Window3] = None
-    constant_properties: Optional[List[ConstantProperty]] = None
+    calculation: Calculation | None = "conversion_rate"
+    window: Window3 | None = None
+    constant_properties: list[ConstantProperty] | None = None
 
 
 class TypeParams1(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    measure: Optional[Measure1] = None
-    input_measures: Optional[List[InputMeasure1]] = None
-    numerator: Optional[Numerator1] = None
-    denominator: Optional[Denominator1] = None
-    expr: Optional[str] = None
-    window: Optional[Window2] = None
-    grain_to_date: Optional[GrainToDate] = None
-    metrics: Optional[List[Metric1]] = None
-    conversion_type_params: Optional[ConversionTypeParams1] = None
+    measure: Measure1 | None = None
+    input_measures: list[InputMeasure1] | None = None
+    numerator: Numerator1 | None = None
+    denominator: Denominator1 | None = None
+    expr: str | None = None
+    window: Window2 | None = None
+    grain_to_date: GrainToDate | None = None
+    metrics: list[Metric1] | None = None
+    conversion_type_params: ConversionTypeParams1 | None = None
 
 
 class Filter15(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    where_filters: List[WhereFilter]
+    where_filters: list[WhereFilter]
 
 
 class Metadata2(BaseParserModel):
@@ -3169,10 +3169,10 @@ class Config27(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    field_extra: Optional[Dict[str, Any]] = Field(None, alias="_extra")
-    enabled: Optional[bool] = True
-    group: Optional[str] = None
-    meta: Optional[Dict[str, Any]] = None
+    field_extra: dict[str, Any] | None = Field(None, alias="_extra")
+    enabled: bool | None = True
+    group: str | None = None
+    meta: dict[str, Any] | None = None
 
 
 class Disabled10(BaseParserModel):
@@ -3185,39 +3185,39 @@ class Disabled10(BaseParserModel):
     path: str
     original_file_path: str
     unique_id: str
-    fqn: List[str]
+    fqn: list[str]
     description: str
     label: str
     type: Type23
     type_params: TypeParams1 = Field(..., title="MetricTypeParams")
-    filter: Optional[Filter15] = None
-    metadata: Optional[Metadata2] = None
-    meta: Optional[Dict[str, Any]] = None
-    tags: Optional[List[str]] = None
-    config: Optional[Config27] = Field(None, title="MetricConfig")
-    unrendered_config: Optional[Dict[str, Any]] = None
-    sources: Optional[List[List[str]]] = None
-    depends_on: Optional[DependsOn12] = Field(None, title="DependsOn")
-    refs: Optional[List[Ref]] = None
-    metrics: Optional[List[List[str]]] = None
-    created_at: Optional[float] = None
-    group: Optional[str] = None
+    filter: Filter15 | None = None
+    metadata: Metadata2 | None = None
+    meta: dict[str, Any] | None = None
+    tags: list[str] | None = None
+    config: Config27 | None = Field(None, title="MetricConfig")
+    unrendered_config: dict[str, Any] | None = None
+    sources: list[list[str]] | None = None
+    depends_on: DependsOn12 | None = Field(None, title="DependsOn")
+    refs: list[Ref] | None = None
+    metrics: list[list[str]] | None = None
+    created_at: float | None = None
+    group: str | None = None
 
 
 class Where(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    where_filters: List[WhereFilter]
+    where_filters: list[WhereFilter]
 
 
 class QueryParams(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    metrics: List[str]
-    group_by: List[str]
-    where: Optional[Where] = None
+    metrics: list[str]
+    group_by: list[str]
+    where: Where | None = None
 
 
 class ExportAs(Enum):
@@ -3230,9 +3230,9 @@ class Config28(BaseParserModel):
         extra="allow",
     )
     export_as: ExportAs
-    schema_name: Optional[str] = None
-    alias: Optional[str] = None
-    database: Optional[str] = None
+    schema_name: str | None = None
+    alias: str | None = None
+    database: str | None = None
 
 
 class Export(BaseParserModel):
@@ -3255,20 +3255,20 @@ class Cache(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    enabled: Optional[bool] = False
+    enabled: bool | None = False
 
 
 class Config29(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    field_extra: Optional[Dict[str, Any]] = Field(None, alias="_extra")
-    enabled: Optional[bool] = True
-    group: Optional[str] = None
-    meta: Optional[Dict[str, Any]] = None
-    export_as: Optional[ExportAs] = None
-    schema_: Optional[str] = Field(None, alias="schema")
-    cache: Optional[Cache] = Field(None, title="SavedQueryCache")
+    field_extra: dict[str, Any] | None = Field(None, alias="_extra")
+    enabled: bool | None = True
+    group: str | None = None
+    meta: dict[str, Any] | None = None
+    export_as: ExportAs | None = None
+    schema_: str | None = Field(None, alias="schema")
+    cache: Cache | None = Field(None, title="SavedQueryCache")
 
 
 class Disabled11(BaseParserModel):
@@ -3281,18 +3281,18 @@ class Disabled11(BaseParserModel):
     path: str
     original_file_path: str
     unique_id: str
-    fqn: List[str]
+    fqn: list[str]
     query_params: QueryParams = Field(..., title="QueryParams")
-    exports: List[Export]
-    description: Optional[str] = None
-    label: Optional[str] = None
-    metadata: Optional[Metadata3] = None
-    config: Optional[Config29] = Field(None, title="SavedQueryConfig")
-    unrendered_config: Optional[Dict[str, Any]] = None
-    group: Optional[str] = None
-    depends_on: Optional[DependsOn12] = Field(None, title="DependsOn")
-    created_at: Optional[float] = None
-    refs: Optional[List[Ref]] = None
+    exports: list[Export]
+    description: str | None = None
+    label: str | None = None
+    metadata: Metadata3 | None = None
+    config: Config29 | None = Field(None, title="SavedQueryConfig")
+    unrendered_config: dict[str, Any] | None = None
+    group: str | None = None
+    depends_on: DependsOn12 | None = Field(None, title="DependsOn")
+    created_at: float | None = None
+    refs: list[Ref] | None = None
 
 
 class NodeRelation(BaseParserModel):
@@ -3301,15 +3301,15 @@ class NodeRelation(BaseParserModel):
     )
     alias: str
     schema_name: str
-    database: Optional[str] = None
-    relation_name: Optional[str] = ""
+    database: str | None = None
+    relation_name: str | None = ""
 
 
 class Defaults(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    agg_time_dimension: Optional[str] = None
+    agg_time_dimension: str | None = None
 
 
 class Type24(Enum):
@@ -3325,10 +3325,10 @@ class Entity(BaseParserModel):
     )
     name: str
     type: Type24
-    description: Optional[str] = None
-    label: Optional[str] = None
-    role: Optional[str] = None
-    expr: Optional[str] = None
+    description: str | None = None
+    label: str | None = None
+    role: str | None = None
+    expr: str | None = None
 
 
 class Agg(Enum):
@@ -3347,9 +3347,9 @@ class AggParams(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    percentile: Optional[float] = None
-    use_discrete_percentile: Optional[bool] = False
-    use_approximate_percentile: Optional[bool] = False
+    percentile: float | None = None
+    use_discrete_percentile: bool | None = False
+    use_approximate_percentile: bool | None = False
 
 
 class WindowChoice(Enum):
@@ -3370,7 +3370,7 @@ class NonAdditiveDimension(BaseParserModel):
     )
     name: str
     window_choice: WindowChoice
-    window_groupings: List[str]
+    window_groupings: list[str]
 
 
 class Measure2(BaseParserModel):
@@ -3379,13 +3379,13 @@ class Measure2(BaseParserModel):
     )
     name: str
     agg: Agg
-    description: Optional[str] = None
-    label: Optional[str] = None
-    create_metric: Optional[bool] = False
-    expr: Optional[str] = None
-    agg_params: Optional[AggParams] = None
-    non_additive_dimension: Optional[NonAdditiveDimension] = None
-    agg_time_dimension: Optional[str] = None
+    description: str | None = None
+    label: str | None = None
+    create_metric: bool | None = False
+    expr: str | None = None
+    agg_params: AggParams | None = None
+    non_additive_dimension: NonAdditiveDimension | None = None
+    agg_time_dimension: str | None = None
 
 
 class Type25(Enum):
@@ -3405,8 +3405,8 @@ class ValidityParams(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    is_start: Optional[bool] = False
-    is_end: Optional[bool] = False
+    is_start: bool | None = False
+    is_end: bool | None = False
 
 
 class TypeParams2(BaseParserModel):
@@ -3414,7 +3414,7 @@ class TypeParams2(BaseParserModel):
         extra="allow",
     )
     time_granularity: TimeGranularity
-    validity_params: Optional[ValidityParams] = None
+    validity_params: ValidityParams | None = None
 
 
 class Metadata4(BaseParserModel):
@@ -3431,12 +3431,12 @@ class Dimension(BaseParserModel):
     )
     name: str
     type: Type25
-    description: Optional[str] = None
-    label: Optional[str] = None
-    is_partition: Optional[bool] = False
-    type_params: Optional[TypeParams2] = None
-    expr: Optional[str] = None
-    metadata: Optional[Metadata4] = None
+    description: str | None = None
+    label: str | None = None
+    is_partition: bool | None = False
+    type_params: TypeParams2 | None = None
+    expr: str | None = None
+    metadata: Metadata4 | None = None
 
 
 class Metadata5(BaseParserModel):
@@ -3451,10 +3451,10 @@ class Config30(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    field_extra: Optional[Dict[str, Any]] = Field(None, alias="_extra")
-    enabled: Optional[bool] = True
-    group: Optional[str] = None
-    meta: Optional[Dict[str, Any]] = None
+    field_extra: dict[str, Any] | None = Field(None, alias="_extra")
+    enabled: bool | None = True
+    group: str | None = None
+    meta: dict[str, Any] | None = None
 
 
 class Disabled12(BaseParserModel):
@@ -3467,23 +3467,23 @@ class Disabled12(BaseParserModel):
     path: str
     original_file_path: str
     unique_id: str
-    fqn: List[str]
+    fqn: list[str]
     model: str
-    node_relation: Optional[NodeRelation] = None
-    description: Optional[str] = None
-    label: Optional[str] = None
-    defaults: Optional[Defaults] = None
-    entities: Optional[List[Entity]] = None
-    measures: Optional[List[Measure2]] = None
-    dimensions: Optional[List[Dimension]] = None
-    metadata: Optional[Metadata5] = None
-    depends_on: Optional[DependsOn12] = Field(None, title="DependsOn")
-    refs: Optional[List[Ref]] = None
-    created_at: Optional[float] = None
-    config: Optional[Config30] = Field(None, title="SemanticModelConfig")
-    unrendered_config: Optional[Dict[str, Any]] = None
-    primary_entity: Optional[str] = None
-    group: Optional[str] = None
+    node_relation: NodeRelation | None = None
+    description: str | None = None
+    label: str | None = None
+    defaults: Defaults | None = None
+    entities: list[Entity] | None = None
+    measures: list[Measure2] | None = None
+    dimensions: list[Dimension] | None = None
+    metadata: Metadata5 | None = None
+    depends_on: DependsOn12 | None = Field(None, title="DependsOn")
+    refs: list[Ref] | None = None
+    created_at: float | None = None
+    config: Config30 | None = Field(None, title="SemanticModelConfig")
+    unrendered_config: dict[str, Any] | None = None
+    primary_entity: str | None = None
+    group: str | None = None
 
 
 class Format(Enum):
@@ -3497,44 +3497,44 @@ class GivenItem(BaseParserModel):
         extra="allow",
     )
     input: str
-    rows: Optional[Union[str, List[Dict[str, Any]]]] = None
-    format: Optional[Format] = "dict"
-    fixture: Optional[str] = None
+    rows: str | list[dict[str, Any]] | None = None
+    format: Format | None = "dict"
+    fixture: str | None = None
 
 
 class Expect(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    rows: Optional[Union[str, List[Dict[str, Any]]]] = None
-    format: Optional[Format] = "dict"
-    fixture: Optional[str] = None
+    rows: str | list[dict[str, Any]] | None = None
+    format: Format | None = "dict"
+    fixture: str | None = None
 
 
 class Overrides(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    macros: Optional[Dict[str, Any]] = None
-    vars: Optional[Dict[str, Any]] = None
-    env_vars: Optional[Dict[str, Any]] = None
+    macros: dict[str, Any] | None = None
+    vars: dict[str, Any] | None = None
+    env_vars: dict[str, Any] | None = None
 
 
 class Config31(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    field_extra: Optional[Dict[str, Any]] = Field(None, alias="_extra")
-    tags: Optional[Union[str, List[str]]] = None
-    meta: Optional[Dict[str, Any]] = None
+    field_extra: dict[str, Any] | None = Field(None, alias="_extra")
+    tags: str | list[str] | None = None
+    meta: dict[str, Any] | None = None
 
 
 class Versions(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    include: Optional[List[Union[str, float]]] = None
-    exclude: Optional[List[Union[str, float]]] = None
+    include: list[str | float] | None = None
+    exclude: list[str | float] | None = None
 
 
 class Disabled13(BaseParserModel):
@@ -3542,7 +3542,7 @@ class Disabled13(BaseParserModel):
         extra="allow",
     )
     model: str
-    given: List[GivenItem]
+    given: list[GivenItem]
     expect: Expect = Field(..., title="UnitTestOutputFixture")
     name: str
     resource_type: ResourceType
@@ -3550,32 +3550,32 @@ class Disabled13(BaseParserModel):
     path: str
     original_file_path: str
     unique_id: str
-    fqn: List[str]
-    description: Optional[str] = ""
-    overrides: Optional[Overrides] = None
-    depends_on: Optional[DependsOn12] = Field(None, title="DependsOn")
-    config: Optional[Config31] = Field(None, title="UnitTestConfig")
-    checksum: Optional[str] = None
-    schema_: Optional[str] = Field(None, alias="schema")
-    created_at: Optional[float] = None
-    versions: Optional[Versions] = None
-    version: Optional[Union[str, float]] = None
+    fqn: list[str]
+    description: str | None = ""
+    overrides: Overrides | None = None
+    depends_on: DependsOn12 | None = Field(None, title="DependsOn")
+    config: Config31 | None = Field(None, title="UnitTestConfig")
+    checksum: str | None = None
+    schema_: str | None = Field(None, alias="schema")
+    created_at: float | None = None
+    versions: Versions | None = None
+    version: str | float | None = None
 
 
 class Where1(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    where_filters: List[WhereFilter]
+    where_filters: list[WhereFilter]
 
 
 class QueryParams1(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    metrics: List[str]
-    group_by: List[str]
-    where: Optional[Where1] = None
+    metrics: list[str]
+    group_by: list[str]
+    where: Where1 | None = None
 
 
 class Config32(BaseParserModel):
@@ -3583,9 +3583,9 @@ class Config32(BaseParserModel):
         extra="allow",
     )
     export_as: ExportAs
-    schema_name: Optional[str] = None
-    alias: Optional[str] = None
-    database: Optional[str] = None
+    schema_name: str | None = None
+    alias: str | None = None
+    database: str | None = None
 
 
 class Export1(BaseParserModel):
@@ -3608,13 +3608,13 @@ class Config33(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    field_extra: Optional[Dict[str, Any]] = Field(None, alias="_extra")
-    enabled: Optional[bool] = True
-    group: Optional[str] = None
-    meta: Optional[Dict[str, Any]] = None
-    export_as: Optional[ExportAs] = None
-    schema_: Optional[str] = Field(None, alias="schema")
-    cache: Optional[Cache] = Field(None, title="SavedQueryCache")
+    field_extra: dict[str, Any] | None = Field(None, alias="_extra")
+    enabled: bool | None = True
+    group: str | None = None
+    meta: dict[str, Any] | None = None
+    export_as: ExportAs | None = None
+    schema_: str | None = Field(None, alias="schema")
+    cache: Cache | None = Field(None, title="SavedQueryCache")
 
 
 class SavedQueries(BaseParserModel):
@@ -3627,18 +3627,18 @@ class SavedQueries(BaseParserModel):
     path: str
     original_file_path: str
     unique_id: str
-    fqn: List[str]
+    fqn: list[str]
     query_params: QueryParams1 = Field(..., title="QueryParams")
-    exports: List[Export1]
-    description: Optional[str] = None
-    label: Optional[str] = None
-    metadata: Optional[Metadata6] = None
-    config: Optional[Config33] = Field(None, title="SavedQueryConfig")
-    unrendered_config: Optional[Dict[str, Any]] = None
-    group: Optional[str] = None
-    depends_on: Optional[DependsOn12] = Field(None, title="DependsOn")
-    created_at: Optional[float] = None
-    refs: Optional[List[Ref]] = None
+    exports: list[Export1]
+    description: str | None = None
+    label: str | None = None
+    metadata: Metadata6 | None = None
+    config: Config33 | None = Field(None, title="SavedQueryConfig")
+    unrendered_config: dict[str, Any] | None = None
+    group: str | None = None
+    depends_on: DependsOn12 | None = Field(None, title="DependsOn")
+    created_at: float | None = None
+    refs: list[Ref] | None = None
 
 
 class Type26(Enum):
@@ -3654,10 +3654,10 @@ class Entity1(BaseParserModel):
     )
     name: str
     type: Type26
-    description: Optional[str] = None
-    label: Optional[str] = None
-    role: Optional[str] = None
-    expr: Optional[str] = None
+    description: str | None = None
+    label: str | None = None
+    role: str | None = None
+    expr: str | None = None
 
 
 class NonAdditiveDimension1(BaseParserModel):
@@ -3666,7 +3666,7 @@ class NonAdditiveDimension1(BaseParserModel):
     )
     name: str
     window_choice: WindowChoice
-    window_groupings: List[str]
+    window_groupings: list[str]
 
 
 class Measure3(BaseParserModel):
@@ -3675,13 +3675,13 @@ class Measure3(BaseParserModel):
     )
     name: str
     agg: Agg
-    description: Optional[str] = None
-    label: Optional[str] = None
-    create_metric: Optional[bool] = False
-    expr: Optional[str] = None
-    agg_params: Optional[AggParams] = None
-    non_additive_dimension: Optional[NonAdditiveDimension1] = None
-    agg_time_dimension: Optional[str] = None
+    description: str | None = None
+    label: str | None = None
+    create_metric: bool | None = False
+    expr: str | None = None
+    agg_params: AggParams | None = None
+    non_additive_dimension: NonAdditiveDimension1 | None = None
+    agg_time_dimension: str | None = None
 
 
 class Type27(Enum):
@@ -3694,7 +3694,7 @@ class TypeParams3(BaseParserModel):
         extra="allow",
     )
     time_granularity: TimeGranularity
-    validity_params: Optional[ValidityParams] = None
+    validity_params: ValidityParams | None = None
 
 
 class Metadata7(BaseParserModel):
@@ -3711,12 +3711,12 @@ class Dimension1(BaseParserModel):
     )
     name: str
     type: Type27
-    description: Optional[str] = None
-    label: Optional[str] = None
-    is_partition: Optional[bool] = False
-    type_params: Optional[TypeParams3] = None
-    expr: Optional[str] = None
-    metadata: Optional[Metadata7] = None
+    description: str | None = None
+    label: str | None = None
+    is_partition: bool | None = False
+    type_params: TypeParams3 | None = None
+    expr: str | None = None
+    metadata: Metadata7 | None = None
 
 
 class Metadata8(BaseParserModel):
@@ -3731,10 +3731,10 @@ class Config34(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    field_extra: Optional[Dict[str, Any]] = Field(None, alias="_extra")
-    enabled: Optional[bool] = True
-    group: Optional[str] = None
-    meta: Optional[Dict[str, Any]] = None
+    field_extra: dict[str, Any] | None = Field(None, alias="_extra")
+    enabled: bool | None = True
+    group: str | None = None
+    meta: dict[str, Any] | None = None
 
 
 class SemanticModels(BaseParserModel):
@@ -3747,23 +3747,23 @@ class SemanticModels(BaseParserModel):
     path: str
     original_file_path: str
     unique_id: str
-    fqn: List[str]
+    fqn: list[str]
     model: str
-    node_relation: Optional[NodeRelation] = None
-    description: Optional[str] = None
-    label: Optional[str] = None
-    defaults: Optional[Defaults] = None
-    entities: Optional[List[Entity1]] = None
-    measures: Optional[List[Measure3]] = None
-    dimensions: Optional[List[Dimension1]] = None
-    metadata: Optional[Metadata8] = None
-    depends_on: Optional[DependsOn12] = Field(None, title="DependsOn")
-    refs: Optional[List[Ref]] = None
-    created_at: Optional[float] = None
-    config: Optional[Config34] = Field(None, title="SemanticModelConfig")
-    unrendered_config: Optional[Dict[str, Any]] = None
-    primary_entity: Optional[str] = None
-    group: Optional[str] = None
+    node_relation: NodeRelation | None = None
+    description: str | None = None
+    label: str | None = None
+    defaults: Defaults | None = None
+    entities: list[Entity1] | None = None
+    measures: list[Measure3] | None = None
+    dimensions: list[Dimension1] | None = None
+    metadata: Metadata8 | None = None
+    depends_on: DependsOn12 | None = Field(None, title="DependsOn")
+    refs: list[Ref] | None = None
+    created_at: float | None = None
+    config: Config34 | None = Field(None, title="SemanticModelConfig")
+    unrendered_config: dict[str, Any] | None = None
+    primary_entity: str | None = None
+    group: str | None = None
 
 
 class GivenItem1(BaseParserModel):
@@ -3771,27 +3771,27 @@ class GivenItem1(BaseParserModel):
         extra="allow",
     )
     input: str
-    rows: Optional[Union[str, List[Dict[str, Any]]]] = None
-    format: Optional[Format] = "dict"
-    fixture: Optional[str] = None
+    rows: str | list[dict[str, Any]] | None = None
+    format: Format | None = "dict"
+    fixture: str | None = None
 
 
 class Expect1(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    rows: Optional[Union[str, List[Dict[str, Any]]]] = None
-    format: Optional[Format] = "dict"
-    fixture: Optional[str] = None
+    rows: str | list[dict[str, Any]] | None = None
+    format: Format | None = "dict"
+    fixture: str | None = None
 
 
 class Config35(BaseParserModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    field_extra: Optional[Dict[str, Any]] = Field(None, alias="_extra")
-    tags: Optional[Union[str, List[str]]] = None
-    meta: Optional[Dict[str, Any]] = None
+    field_extra: dict[str, Any] | None = Field(None, alias="_extra")
+    tags: str | list[str] | None = None
+    meta: dict[str, Any] | None = None
 
 
 class UnitTests(BaseParserModel):
@@ -3799,7 +3799,7 @@ class UnitTests(BaseParserModel):
         extra="allow",
     )
     model: str
-    given: List[GivenItem1]
+    given: list[GivenItem1]
     expect: Expect1 = Field(..., title="UnitTestOutputFixture")
     name: str
     resource_type: ResourceType
@@ -3807,16 +3807,16 @@ class UnitTests(BaseParserModel):
     path: str
     original_file_path: str
     unique_id: str
-    fqn: List[str]
-    description: Optional[str] = ""
-    overrides: Optional[Overrides] = None
-    depends_on: Optional[DependsOn12] = Field(None, title="DependsOn")
-    config: Optional[Config35] = Field(None, title="UnitTestConfig")
-    checksum: Optional[str] = None
-    schema_: Optional[str] = Field(None, alias="schema")
-    created_at: Optional[float] = None
-    versions: Optional[Versions] = None
-    version: Optional[Union[str, float]] = None
+    fqn: list[str]
+    description: str | None = ""
+    overrides: Overrides | None = None
+    depends_on: DependsOn12 | None = Field(None, title="DependsOn")
+    config: Config35 | None = Field(None, title="UnitTestConfig")
+    checksum: str | None = None
+    schema_: str | None = Field(None, alias="schema")
+    created_at: float | None = None
+    versions: Versions | None = None
+    version: str | float | None = None
 
 
 class ManifestLatest(BaseParserModel):
@@ -3826,70 +3826,70 @@ class ManifestLatest(BaseParserModel):
     metadata: Metadata = Field(
         ..., description="Metadata about the manifest", title="ManifestMetadata"
     )
-    nodes: Dict[
-        str, Union[Nodes, Nodes1, Nodes2, Nodes3, Nodes4, Nodes5, Nodes6, Nodes7]
+    nodes: dict[
+        str, Nodes | Nodes1 | Nodes2 | Nodes3 | Nodes4 | Nodes5 | Nodes6 | Nodes7
     ] = Field(
         ..., description="The nodes defined in the dbt project and its dependencies"
     )
-    sources: Dict[str, Sources] = Field(
+    sources: dict[str, Sources] = Field(
         ..., description="The sources defined in the dbt project and its dependencies"
     )
-    macros: Dict[str, Macros] = Field(
+    macros: dict[str, Macros] = Field(
         ..., description="The macros defined in the dbt project and its dependencies"
     )
-    docs: Dict[str, Docs18] = Field(
+    docs: dict[str, Docs18] = Field(
         ..., description="The docs defined in the dbt project and its dependencies"
     )
-    exposures: Dict[str, Exposures] = Field(
+    exposures: dict[str, Exposures] = Field(
         ..., description="The exposures defined in the dbt project and its dependencies"
     )
-    metrics: Dict[str, Metrics] = Field(
+    metrics: dict[str, Metrics] = Field(
         ..., description="The metrics defined in the dbt project and its dependencies"
     )
-    groups: Dict[str, Groups] = Field(
+    groups: dict[str, Groups] = Field(
         ..., description="The groups defined in the dbt project"
     )
-    selectors: Dict[str, Any] = Field(
+    selectors: dict[str, Any] = Field(
         ..., description="The selectors defined in selectors.yml"
     )
-    disabled: Optional[
-        Dict[
+    disabled: None | (
+        dict[
             str,
-            List[
-                Union[
-                    Disabled,
-                    Disabled1,
-                    Disabled2,
-                    Disabled3,
-                    Disabled4,
-                    Disabled5,
-                    Disabled6,
-                    Disabled7,
-                    Disabled8,
-                    Disabled9,
-                    Disabled10,
-                    Disabled11,
-                    Disabled12,
-                    Disabled13,
-                ]
+            list[
+                (
+                    Disabled |
+                    Disabled1 |
+                    Disabled2 |
+                    Disabled3 |
+                    Disabled4 |
+                    Disabled5 |
+                    Disabled6 |
+                    Disabled7 |
+                    Disabled8 |
+                    Disabled9 |
+                    Disabled10 |
+                    Disabled11 |
+                    Disabled12 |
+                    Disabled13
+                )
             ],
         ]
-    ] = Field(..., description="A mapping of the disabled nodes in the target")
-    parent_map: Optional[Dict[str, List[str]]] = Field(
+    ) = Field(..., description="A mapping of the disabled nodes in the target")
+    parent_map: dict[str, list[str]] | None = Field(
         ..., description="A mapping from\xa0child nodes to their dependencies"
     )
-    child_map: Optional[Dict[str, List[str]]] = Field(
+    child_map: dict[str, list[str]] | None = Field(
         ..., description="A mapping from parent nodes to their dependents"
     )
-    group_map: Optional[Dict[str, List[str]]] = Field(
+    group_map: dict[str, list[str]] | None = Field(
         ..., description="A mapping from group names to their nodes"
     )
-    saved_queries: Dict[str, SavedQueries] = Field(
+    saved_queries: dict[str, SavedQueries] = Field(
         ..., description="The saved queries defined in the dbt project"
     )
-    semantic_models: Dict[str, SemanticModels] = Field(
+    semantic_models: dict[str, SemanticModels] = Field(
         ..., description="The semantic models defined in the dbt project"
     )
-    unit_tests: Dict[str, UnitTests] = Field(
+    unit_tests: dict[str, UnitTests] = Field(
         ..., description="The unit tests defined in the project"
     )

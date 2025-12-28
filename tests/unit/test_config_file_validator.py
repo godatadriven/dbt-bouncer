@@ -78,7 +78,7 @@ def test_get_file_config_path_pyproject_toml(monkeypatch, tmp_path):
         toml.dump(config, f)
 
     config_file_path = get_config_file_path(
-        config_file=str("dbt_bouncer.yml"),
+        config_file="dbt_bouncer.yml",
         config_file_source="DEFAULT",
     )
 
@@ -90,7 +90,7 @@ def test_get_file_config_path_pyproject_toml_doesnt_exist(monkeypatch, tmp_path)
 
     with pytest.raises(RuntimeError):
         get_config_file_path(
-            config_file=str("dbt_bouncer.yml"),
+            config_file="dbt_bouncer.yml",
             config_file_source="DEFAULT",
         )
 
@@ -105,7 +105,7 @@ def test_get_file_config_path_pyproject_toml_recursive(monkeypatch, tmp_path):
         toml.dump(config, f)
 
     config_file_path = get_config_file_path(
-        config_file=str("dbt_bouncer.yml"),
+        config_file="dbt_bouncer.yml",
         config_file_source="DEFAULT",
     )
     assert config_file_path == pyproject_file

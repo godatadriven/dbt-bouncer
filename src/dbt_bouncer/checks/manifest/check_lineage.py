@@ -1,18 +1,19 @@
 # mypy: disable-error-code="union-attr"
 
 import re
-from typing import TYPE_CHECKING, List, Literal
+from typing import TYPE_CHECKING, Literal
 
 from dbt_bouncer.check_base import BaseCheck
 
 if TYPE_CHECKING:
-    from dbt_bouncer.artifact_parsers.parsers_common import (
+    from dbt_bouncer.artifact_parsers.parsers_manifest import (
         DbtBouncerManifest,
         DbtBouncerModelBase,
     )
 
 from pydantic import Field
 
+from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import clean_path_str, get_clean_model_name
 
 
@@ -49,15 +50,24 @@ class CheckLineagePermittedUpstreamModels(BaseCheck):
 
     """
 
-    manifest_obj: "DbtBouncerManifest" = Field(default=None)
-    model: "DbtBouncerModelBase" = Field(default=None)
-    models: List["DbtBouncerModelBase"] = Field(default=[])
+    manifest_obj: "DbtBouncerManifest | None" = Field(default=None)
+    model: "DbtBouncerModelBase | None" = Field(default=None)
+    models: list["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_lineage_permitted_upstream_models"]
     package_name: str | None = Field(default=None)
     upstream_path_pattern: str
 
     def execute(self) -> None:
-        """Execute the check."""
+        """Execute the check.
+
+        Raises:
+            DbtBouncerFailedCheckError: If upstream models are not permitted.
+
+        """
+        if self.model is None:
+            raise DbtBouncerFailedCheckError("self.model is None")
+        if self.manifest_obj is None:
+            raise DbtBouncerFailedCheckError("self.manifest_obj is None")
         upstream_models = [
             x
             for x in self.model.depends_on.nodes
@@ -77,9 +87,10 @@ class CheckLineagePermittedUpstreamModels(BaseCheck):
             )
             is None
         ]
-        assert not not_permitted_upstream_models, (
-            f"`{get_clean_model_name(self.model.unique_id)}` references upstream models that are not permitted: {[m.split('.')[-1] for m in not_permitted_upstream_models]}."
-        )
+        if not_permitted_upstream_models:
+            raise DbtBouncerFailedCheckError(
+                f"`{get_clean_model_name(self.model.unique_id)}` references upstream models that are not permitted: {[m.split('.')[-1] for m in not_permitted_upstream_models]}."
+            )
 
 
 class CheckLineageSeedCannotBeUsed(BaseCheck):
@@ -103,16 +114,22 @@ class CheckLineageSeedCannotBeUsed(BaseCheck):
 
     """
 
-    model: "DbtBouncerModelBase" = Field(default=None)
+    model: "DbtBouncerModelBase | None" = Field(default=None)
     name: Literal["check_lineage_seed_cannot_be_used"]
 
     def execute(self) -> None:
-        """Execute the check."""
-        assert not [
-            x for x in self.model.depends_on.nodes if x.split(".")[0] == "seed"
-        ], (
-            f"`{get_clean_model_name(self.model.unique_id)}` references a seed even though this is not permitted."
-        )
+        """Execute the check.
+
+        Raises:
+            DbtBouncerFailedCheckError: If seed is referenced.
+
+        """
+        if self.model is None:
+            raise DbtBouncerFailedCheckError("self.model is None")
+        if [x for x in self.model.depends_on.nodes if x.split(".")[0] == "seed"]:
+            raise DbtBouncerFailedCheckError(
+                f"`{get_clean_model_name(self.model.unique_id)}` references a seed even though this is not permitted."
+            )
 
 
 class CheckLineageSourceCannotBeUsed(BaseCheck):
@@ -136,13 +153,19 @@ class CheckLineageSourceCannotBeUsed(BaseCheck):
 
     """
 
-    model: "DbtBouncerModelBase" = Field(default=None)
+    model: "DbtBouncerModelBase | None" = Field(default=None)
     name: Literal["check_lineage_source_cannot_be_used"]
 
     def execute(self) -> None:
-        """Execute the check."""
-        assert not [
-            x for x in self.model.depends_on.nodes if x.split(".")[0] == "source"
-        ], (
-            f"`{get_clean_model_name(self.model.unique_id)}` references a source even though this is not permitted."
-        )
+        """Execute the check.
+
+        Raises:
+            DbtBouncerFailedCheckError: If source is referenced.
+
+        """
+        if self.model is None:
+            raise DbtBouncerFailedCheckError("self.model is None")
+        if [x for x in self.model.depends_on.nodes if x.split(".")[0] == "source"]:
+            raise DbtBouncerFailedCheckError(
+                f"`{get_clean_model_name(self.model.unique_id)}` references a source even though this is not permitted."
+            )

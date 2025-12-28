@@ -10,6 +10,7 @@ from dbt_bouncer.artifact_parsers.parsers_manifest import (  # noqa: F401
     DbtBouncerModelBase,
     DbtBouncerSemanticModelBase,
 )
+from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.checks.manifest.check_semantic_models import (
     CheckSemanticModelOnNonPublicModels,
 )
@@ -98,7 +99,7 @@ CheckSemanticModelOnNonPublicModels.model_rebuild()
                     "unique_id": "exposure.package_name.marts.finance.exposure_1",
                 }
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
 )

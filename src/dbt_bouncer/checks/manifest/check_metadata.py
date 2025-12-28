@@ -6,7 +6,10 @@ from typing import TYPE_CHECKING, Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 if TYPE_CHECKING:
-    from dbt_bouncer.artifact_parsers.parsers_common import DbtBouncerManifest
+    from dbt_bouncer.artifact_parsers.parsers_manifest import DbtBouncerManifest
+
+
+from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 
 
 class CheckProjectName(BaseModel):
@@ -41,7 +44,7 @@ class CheckProjectName(BaseModel):
         default=None,
         description="Index to uniquely identify the check, calculated at runtime.",
     )
-    manifest_obj: "DbtBouncerManifest" = Field(default=None)
+    manifest_obj: "DbtBouncerManifest | None" = Field(default=None)
     name: Literal["check_project_name"]
     package_name: str | None = Field(default=None)
     project_name_pattern: str
@@ -51,15 +54,24 @@ class CheckProjectName(BaseModel):
     )
 
     def execute(self) -> None:
-        """Execute the check."""
+        """Execute the check.
+
+        Raises:
+            DbtBouncerFailedCheckError: If project name does not match regex.
+
+        """
+        if self.manifest_obj is None:
+            raise DbtBouncerFailedCheckError("self.manifest_obj is None")
+
         package_name = (
             self.package_name or self.manifest_obj.manifest.metadata.project_name
         )
-        assert (
+        if (
             re.compile(self.project_name_pattern.strip()).match(
-                package_name,
+                str(package_name),
             )
-            is not None
-        ), (
-            f"Project name (`{package_name}`) does not conform to the supplied regex `({self.project_name_pattern.strip()})`."
-        )
+            is None
+        ):
+            raise DbtBouncerFailedCheckError(
+                f"Project name (`{package_name}`) does not conform to the supplied regex `({self.project_name_pattern.strip()})`."
+            )
