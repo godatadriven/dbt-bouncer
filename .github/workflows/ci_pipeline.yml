@@ -159,6 +159,21 @@ jobs:
               name: event.json
               path: ${{ github.event_path }}
 
+    dev-container:
+      needs: [prek]
+      runs-on: ubuntu-22.04
+      steps:
+        - uses: actions/checkout@v6
+
+        - name: Build container and run tests
+          uses: devcontainers/ci@v0.3
+          with:
+            runCmd: |
+              set -eou
+              uv run dbt-bouncer --config-file dbt-bouncer-example.yml
+              make test-dev-container
+              make test-perf
+
     e2e-tests:
         needs: [prek]
         permissions:

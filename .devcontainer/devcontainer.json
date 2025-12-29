@@ -1,0 +1,30 @@
+{
+	"build": {
+		"context": "..",
+		"dockerfile": "./Dockerfile"
+	},
+	"customizations": {
+		"settings": {
+			"python.defaultInterpreterPath": "/usr/local/bin/python",
+			"terminal.integrated.shell.linux": "/usr/bin/zsh"
+		},
+		"vscode": {
+			"extensions": [
+				"bierner.markdown-preview-github-styles",
+				"mechatroner.rainbow-csv",
+				"ms-azuretools.vscode-containers",
+				"ms-python.python",
+				"ms-python.vscode-pylance",
+				"ms-vscode.makefile-tools",
+				"oderwat.indent-rainbow",
+				"redhat.vscode-yaml",
+				"samuelcolvin.jinjahtml",
+				"shardulm94.trailing-spaces",
+				"tamasfe.even-better-toml"
+			]
+		}
+	},
+	"name": "dbt-bouncer",
+	"postCreateCommand": "echo 'Dev container setup complete!'",
+	"remoteUser": "root"
+}

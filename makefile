@@ -36,6 +36,15 @@ test:
 	$(MAKE) test-unit
 	$(MAKE) test-integration
 
+# Necessary due to https://github.com/coveragepy/coveragepy/issues/1514
+test-dev-container:
+	uv run --extra dev pytest \
+		--numprocesses 5 \
+		./tests/unit && \
+	uv run --extra dev pytest \
+		--numprocesses 5 \
+		./tests/integration
+
 test-integration:
 	uv run pytest \
 		-c ./tests \

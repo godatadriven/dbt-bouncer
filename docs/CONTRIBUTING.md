@@ -32,6 +32,29 @@ You can contribute to `dbt-bouncer` by forking the `dbt-bouncer` repository. For
 
 ## Setting up an environment
 
+The easiest way to contribute is to open this repo as a [Dev Container](https://containers.dev) in [VSCode](https://code.visualstudio.com/download) by simply clicking one of the buttons below. Everything you need will already be there!
+
+<br />
+<p align="center">
+  <a href="https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/godatadriven/dbt-bouncer">
+    <img
+      src="https://img.shields.io/static/v1?label=Local%20Dev%20Container&message=Open&color=orange&logo=visualstudiocode&style=for-the-badge"
+      alt="dbt-bouncer VSCode Dev Container"
+    />
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://github.dev/godatadriven/dbt-bouncer">
+    <img
+      src="https://img.shields.io/static/v1?label=GitHub%20Codespaces&message=Open&color=orange&logo=github&style=for-the-badge"
+      alt="dbt-bouncer GitHub Codespaces"
+    />
+  </a>
+</p>
+
+Alternatively, you can follow the steps below to set up your local development environment.
+
 There are some tools that will be helpful to you in developing locally. While this is the list relevant for `dbt-bouncer` development, many of these tools are used commonly across open-source python projects.
 
 ### Tools
@@ -119,6 +142,9 @@ make test-integration
 
 # Runs all tests
 make test
+
+# Alternative for dev containers only
+make test-dev-container
 ```
 
 #### Performance tests
