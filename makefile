@@ -38,10 +38,10 @@ test:
 
 # Necessary due to https://github.com/coveragepy/coveragepy/issues/1514
 test-dev-container:
-	uv run pytest \
+	uv run --extra dev pytest \
 		--numprocesses 5 \
 		./tests/unit && \
-	uv run pytest \
+	uv run --extra dev pytest \
 		--numprocesses 5 \
 		./tests/integration
 

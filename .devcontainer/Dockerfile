@@ -49,7 +49,7 @@ ENV BENCHER_VERSION=0.5.9 \
     PYTHONDONTWRITEBYTECODE=1 \
     UV_VENV_CLEAR=1 \
     UV_LINK_MODE=copy \
-    VIRTUAL_ENV="/workspace/dbt-bouncer/.venv" \
+    VIRTUAL_ENV="/workspaces/dbt-bouncer/.venv" \
     PATH="${HOME}/.cargo/bin:${HOME}/.local/bin:/app/.venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \
     ZSH_DISABLE_COMPFIX="true"
 
