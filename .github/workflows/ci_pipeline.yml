@@ -171,7 +171,7 @@ jobs:
             runCmd: |
               set -eou
               uv run dbt-bouncer --config-file dbt-bouncer-example.yml
-              make test
+              make test-dev-container
               make test-perf
 
     e2e-tests:

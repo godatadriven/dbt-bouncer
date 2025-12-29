@@ -1,5 +1,22 @@
-FROM debian:bookworm-slim
+FROM python:3.11.14-slim
+
+ARG USER_ID=1001
+ARG GROUP_ID=1001
+ENV HOME=/home/appuser
+
+# Install OS dependencies
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install adduser build-essential ca-certificates curl git make wget -y && \
+    rm -rf /var/lib/apt/lists/*
+
 COPY --from=ghcr.io/astral-sh/uv:0.9.18 /uv /uvx /bin/
+
+RUN groupadd -g $GROUP_ID appgroup && \
+    useradd -u $USER_ID -g appgroup -s /bin/bash -m -d $HOME appuser
+
+WORKDIR /app
+# RUN chown -R appuser:appgroup /app
 
 ENV BENCHER_VERSION=0.5.9 \
     DBT_PROFILES_DIR="./dbt_project" \
@@ -7,13 +24,10 @@ ENV BENCHER_VERSION=0.5.9 \
     PATH="/root/.local/bin/:/app/.venv/bin:$PATH" \
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
+    UV_VENV_CLEAR=1 \
     UV_LINK_MODE=copy
 
-# Install OS dependencies
-RUN apt-get update && \
-    apt-get upgrade -y && \
-    apt-get install build-essential ca-certificates curl git make wget -y && \
-    rm -rf /var/lib/apt/lists/*
+USER appuser
 
 # Configure git
 RUN git config --global --add safe.directory /workspaces/dbt-bouncer
@@ -40,7 +54,7 @@ RUN sh -c "$(wget -O- https://github.com/deluan/zsh-in-docker/releases/download/
 RUN curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh | sh && \
     echo 'eval "$(atuin init zsh)"' >> ~/.zshrc
 
-COPY . .
+COPY .pre-commit-config.yaml .python-version pyproject.toml README.md uv.lock ./
 
 # Install Python dependencies
 RUN uv venv && \
@@ -48,3 +62,5 @@ RUN uv venv && \
     echo 'source /workspace/dbt-bouncer/.venv/bin/activate' >> ~/.zshrc && \
     uv run prek install && \
     uv run prek install --install-hooks
+
+COPY . .

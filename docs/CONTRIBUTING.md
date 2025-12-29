@@ -141,6 +141,9 @@ make test-integration
 
 # Runs all tests
 make test
+
+# Alternative for dev containers only
+make test-dev-container
 ```
 
 #### Performance tests
