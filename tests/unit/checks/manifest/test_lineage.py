@@ -7,6 +7,7 @@ from dbt_bouncer.artifact_parsers.parsers_manifest import (  # noqa: F401
     DbtBouncerManifest,
     DbtBouncerModelBase,
 )
+from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.checks.manifest.check_lineage import (
     CheckLineagePermittedUpstreamModels,
     CheckLineageSeedCannotBeUsed,
@@ -151,7 +152,7 @@ CheckLineageSourceCannotBeUsed.model_rebuild()
                 ),
             ],
             "^intermediate",
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
     indirect=["manifest_obj"],
@@ -224,7 +225,7 @@ def test_check_lineage_permitted_upstream_models(
                     "unique_id": "model.package_name.int_model_2",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
 )
@@ -287,7 +288,7 @@ def test_check_lineage_seed_cannot_be_used(model, expectation):
                     "unique_id": "model.package_name.int_model_2",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
 )

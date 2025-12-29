@@ -6,12 +6,18 @@ from typing import TYPE_CHECKING, Literal
 from dbt_bouncer.utils import get_package_version_number
 
 if TYPE_CHECKING:
-    from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
-        Exposures,
-        Macros,
+    from dbt_artifacts_parser.parsers.run_results.run_results_v5 import RunResultsV5
+
+    from dbt_bouncer.artifact_parsers.dbt_cloud.run_results_latest import (
+        RunResultsLatest,
     )
-    from dbt_bouncer.artifact_parsers.parsers_catalog import DbtBouncerCatalogNode
+    from dbt_bouncer.artifact_parsers.parsers_catalog import (
+        DbtBouncerCatalog,
+        DbtBouncerCatalogNode,
+    )
     from dbt_bouncer.artifact_parsers.parsers_manifest import (
+        DbtBouncerExposureBase,
+        DbtBouncerMacroBase,
         DbtBouncerManifest,
         DbtBouncerModel,
         DbtBouncerSemanticModel,
@@ -22,7 +28,6 @@ if TYPE_CHECKING:
     )
     from dbt_bouncer.artifact_parsers.parsers_run_results import (
         DbtBouncerRunResult,
-        DbtBouncerRunResultBase,
     )
     from dbt_bouncer.config_file_parser import (
         DbtBouncerConfAllCategories as DbtBouncerConf,
@@ -32,14 +37,16 @@ if TYPE_CHECKING:
 def load_dbt_artifact(
     artifact_name: Literal["catalog.json", "manifest.json", "run_results.json"],
     dbt_artifacts_dir: Path,
-) -> "DbtBouncerCatalogNode | DbtBouncerManifest | DbtBouncerRunResultBase":
+) -> "DbtBouncerCatalog | DbtBouncerManifest | RunResultsV5 | RunResultsLatest":
     """Load a dbt artifact from a JSON file to a Pydantic object.
 
     Returns:
-        DbtBouncerCatalogNode | DbtBouncerManifest | DbtBouncerRunResultBase:
+        DbtBouncerCatalog | DbtBouncerManifest | RunResultsV5 | RunResultsLatest:
             The dbt artifact loaded as a Pydantic object.
 
     Raises:
+        AssertionError:
+            If the dbt version is below the minimum supported version of 1.7.0.
         FileNotFoundError:
             If the artifact file does not exist.
 
@@ -67,11 +74,12 @@ def load_dbt_artifact(
         with Path.open(Path(artifact_path), "r") as fp:
             manifest_json = json.load(fp)
 
-        assert get_package_version_number(
+        if not get_package_version_number(
             manifest_json["metadata"]["dbt_version"]
-        ) >= get_package_version_number("1.7.0"), (
-            f"The supplied `manifest.json` was generated with dbt version {manifest_json['metadata']['dbt_version']}, this is below the minimum supported version of 1.7.0."
-        )
+        ) >= get_package_version_number("1.7.0"):
+            raise AssertionError(
+                f"The supplied `manifest.json` was generated with dbt version {manifest_json['metadata']['dbt_version']}, this is below the minimum supported version of 1.7.0."
+            )
 
         from dbt_bouncer.artifact_parsers.parsers_manifest import (
             DbtBouncerManifest,
@@ -94,8 +102,8 @@ def parse_dbt_artifacts(
     bouncer_config: "DbtBouncerConf", dbt_artifacts_dir: Path
 ) -> tuple[
     "DbtBouncerManifest",
-    list["Exposures"],
-    list["Macros"],
+    list["DbtBouncerExposureBase"],
+    list["DbtBouncerMacroBase"],
     list["DbtBouncerModel"],
     list["DbtBouncerSemanticModel"],
     list["DbtBouncerSnapshot"],
@@ -126,15 +134,23 @@ def parse_dbt_artifacts(
         list[DbtBouncerCatalogNode]: List of catalog nodes for the project sources.
         list[DbtBouncerRunResult]: A list of DbtBouncerRunResult objects.
 
+    Raises:
+        TypeError: If any of the loaded artifacts are not of the expected type.
+
     """
-    from dbt_bouncer.artifact_parsers.parsers_common import load_dbt_artifact
-    from dbt_bouncer.artifact_parsers.parsers_manifest import parse_manifest_artifact
+    from dbt_bouncer.artifact_parsers.parsers_manifest import (
+        DbtBouncerManifest,
+        parse_manifest_artifact,
+    )
 
     # Manifest, will always be parsed
     manifest_obj = load_dbt_artifact(
         artifact_name="manifest.json",
         dbt_artifacts_dir=dbt_artifacts_dir,
     )
+    if not isinstance(manifest_obj, DbtBouncerManifest):
+        raise TypeError(f"Expected DbtBouncerManifest, got {type(manifest_obj)}")
+
     (
         project_exposures,
         project_macros,

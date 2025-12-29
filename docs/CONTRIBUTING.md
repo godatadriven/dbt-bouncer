@@ -61,14 +61,15 @@ There are some tools that will be helpful to you in developing locally. While th
 
 These are the tools used in `dbt-bouncer` development and testing:
 
+- [`bandit`](https://github.com/PyCQA/bandit) to check for security issues.
 - [`click`](https://click.palletsprojects.com/en/8.1.x/) to create our CLI interface.
 - [GitHub Actions](https://github.com/features/actions) for automating tests and checks, once a PR is pushed to the `dbt-bouncer` repository.
 - [`make`](https://users.cs.duke.edu/~ola/courses/programming/Makefiles/Makefiles.html) to run multiple setup or test steps in combination.
-- [`mypy`](https://mypy.readthedocs.io/en/stable/) for static type checking.
 - [`prek`](https://github.com/j178/prek) to easily run those checks.
 - [`Pydantic`](https://docs.pydantic.dev/latest/) to validate our configuration file.
 - [`pytest`](https://docs.pytest.org/en/latest/) to define, discover, and run tests.
 - [`Ruff`](https://github.com/astral-sh/ruff) to lint and format python code.
+- [`ty`](https://github.com/astral-sh/ty) for type checking.
 - [`uv`](https://docs.astral.sh/uv/) to manage our python virtual environment.
 
 A deep understanding of these tools in not required to effectively contribute to `dbt-bouncer`, but we recommend checking out the attached documentation if you're interested in learning more about each one.
@@ -174,7 +175,7 @@ uv run pytest ./tests/unit/checks/catalog/test_columns.py::test_check_columns_ar
 
 ### Assorted development tips
 
-- Append `# type: ignore` to the end of a line if you need to disable `mypy` on that line, preferably with the specific rule to ignore such as `# type: ignore[union-attr]`.
+- Append `# ty: ignore` to the end of a line if you need to disable `ty` on that line, preferably with the specific rule to ignore such as `# ty: ignore[invalid-argument-type]`.
 
 ## Adding a new check
 

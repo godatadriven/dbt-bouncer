@@ -1,5 +1,3 @@
-# mypy: disable-error-code="arg-type,attr-defined,union-attr"
-
 """Re-usable functions for dbt-bouncer."""
 
 import importlib
@@ -9,9 +7,10 @@ import logging
 import os
 import re
 import sys
+from collections.abc import Mapping
 from functools import lru_cache
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Type
+from typing import TYPE_CHECKING, Any
 
 import yaml
 from packaging.version import Version as PyPIVersion
@@ -32,7 +31,7 @@ def clean_path_str(path: str) -> str:
 
 
 def create_github_comment_file(
-    failed_checks: List[List[str]], show_all_failures: bool
+    failed_checks: list[list[str]], show_all_failures: bool
 ) -> None:
     """Create a markdown file containing a comment for GitHub."""
     md_formatted_comment = make_markdown_table(
@@ -60,7 +59,7 @@ def create_github_comment_file(
 
 
 def get_nested_value(
-    d: Dict[str, Any], keys: List[str], default: Any | None = None
+    d: dict[str, Any], keys: list[str], default: Any | None = None
 ) -> Any:
     """Retrieve a value from a nested dictionary using a list of keys.
 
@@ -105,11 +104,11 @@ def resource_in_path(check, resource) -> bool:
     )
 
 
-def find_missing_meta_keys(meta_config, required_keys) -> List[str]:
+def find_missing_meta_keys(meta_config, required_keys) -> list[str]:
     """Find missing keys in a meta config.
 
     Returns:
-        List[str]: List of missing keys.
+        list[str]: List of missing keys.
 
     """
     # Get all keys in meta config
@@ -152,7 +151,7 @@ def flatten(structure: Any, key: str = "", path: str = "", flattened=None):
 
 
 def _extract_checks_from_module(
-    module: Any, module_name: str, check_objects: List[Type["BaseCheck"]]
+    module: Any, module_name: str, check_objects: list[type["BaseCheck"]]
 ) -> None:
     """Extract Check* classes from a loaded module.
 
@@ -178,7 +177,7 @@ def _extract_checks_from_module(
 
 
 def _load_custom_checks(
-    custom_checks_dir: Path, check_objects: List[Type["BaseCheck"]]
+    custom_checks_dir: Path, check_objects: list[type["BaseCheck"]]
 ) -> None:
     """Load custom check classes from a directory.
 
@@ -236,7 +235,7 @@ def _load_custom_checks(
 @lru_cache
 def get_check_objects(
     custom_checks_dir: Path | None = None,
-) -> List[Type["BaseCheck"]]:
+) -> list[type["BaseCheck"]]:
     """Get list of Check* classes.
 
     This function dynamically discovers and loads check classes from two sources:
@@ -255,10 +254,10 @@ def get_check_objects(
         custom_checks_dir: Path to a directory containing custom checks.
 
     Returns:
-        List[Type[BaseCheck]]: List of Check* classes.
+        list[type[BaseCheck]]: List of Check* classes.
 
     """
-    check_objects: List[Type["BaseCheck"]] = []
+    check_objects: list[type["BaseCheck"]] = []
 
     # 1. Load internal checks
     check_files = [
@@ -359,7 +358,7 @@ def load_config_from_yaml(config_file: Path) -> Mapping[str, Any]:
     return conf
 
 
-def make_markdown_table(array: List[List[str]]) -> str:
+def make_markdown_table(array: list[list[str]]) -> str:
     """Transform a list of lists into a markdown table. The first element is the header row.
 
     Returns:
@@ -381,7 +380,7 @@ def make_markdown_table(array: List[List[str]]) -> str:
     return markdown
 
 
-def object_in_path(include_pattern: str, path: str) -> bool:
+def object_in_path(include_pattern: str | None, path: str) -> bool:
     """Determine if an object is included in the specified path pattern.
 
     If no pattern is specified then all objects are included.
@@ -390,9 +389,6 @@ def object_in_path(include_pattern: str, path: str) -> bool:
         bool: True if the object is included in the path pattern, False otherwise.
 
     """
-    if include_pattern is not None:
-        return (
-            re.compile(include_pattern.strip()).match(clean_path_str(path)) is not None
-        )
-    else:
+    if include_pattern is None:
         return True
+    return re.compile(include_pattern.strip()).match(clean_path_str(path)) is not None

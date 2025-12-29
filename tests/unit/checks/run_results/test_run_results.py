@@ -9,6 +9,7 @@ with warnings.catch_warnings():
 from pydantic import TypeAdapter
 
 from dbt_bouncer.artifact_parsers.parsers_run_results import DbtBouncerRunResultBase
+from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.checks.run_results.check_run_results import (
     CheckRunResultsMaxExecutionTime,
     CheckRunResultsMaxGigabytesBilled,
@@ -47,7 +48,7 @@ CheckRunResultsMaxExecutionTime.model_rebuild()
                     "unique_id": "model.package_name.model_1",
                 },
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
 )
@@ -107,7 +108,7 @@ def test_check_run_results_max_gigabytes_billed(
                     "unique_id": "model.package_name.model_1",
                 }
             ),
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
 )

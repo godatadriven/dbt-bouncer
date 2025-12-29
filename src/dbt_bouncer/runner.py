@@ -7,12 +7,13 @@ import logging
 import operator
 import traceback
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Union
+from typing import TYPE_CHECKING, Any
 
 import click
 from progress.bar import Bar
 from tabulate import tabulate
 
+from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import (
     create_github_comment_file,
     get_check_objects,
@@ -22,8 +23,6 @@ from dbt_bouncer.utils import (
 
 if TYPE_CHECKING:
     from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
-        Exposures,
-        Macros,
         UnitTests,
     )
     from dbt_bouncer.artifact_parsers.parsers_common import (
@@ -36,6 +35,10 @@ if TYPE_CHECKING:
         DbtBouncerSource,
         DbtBouncerTest,
     )
+    from dbt_bouncer.artifact_parsers.parsers_manifest import (
+        DbtBouncerExposureBase,
+        DbtBouncerMacroBase,
+    )
     from dbt_bouncer.config_file_parser import (
         DbtBouncerConfAllCategories as DbtBouncerConf,
     )
@@ -43,28 +46,28 @@ if TYPE_CHECKING:
 
 def runner(
     bouncer_config: "DbtBouncerConf",
-    catalog_nodes: List["DbtBouncerCatalogNode"],
-    catalog_sources: List["DbtBouncerCatalogNode"],
-    check_categories: List[str],
+    catalog_nodes: list["DbtBouncerCatalogNode"],
+    catalog_sources: list["DbtBouncerCatalogNode"],
+    check_categories: list[str],
     create_pr_comment_file: bool,
-    exposures: List["Exposures"],
-    macros: List["Macros"],
+    exposures: list["DbtBouncerExposureBase"],
+    macros: list["DbtBouncerMacroBase"],
     manifest_obj: "DbtBouncerManifest",
-    models: List["DbtBouncerModel"],
-    output_file: Union[Path, None],
-    run_results: List["DbtBouncerRunResult"],
-    semantic_models: List["DbtBouncerSemanticModel"],
+    models: list["DbtBouncerModel"],
+    output_file: Path | None,
+    run_results: list["DbtBouncerRunResult"],
+    semantic_models: list["DbtBouncerSemanticModel"],
     output_only_failures: bool,
     show_all_failures: bool,
-    snapshots: List["DbtBouncerSnapshot"],
-    sources: List["DbtBouncerSource"],
-    tests: List["DbtBouncerTest"],
-    unit_tests: List["UnitTests"],
-) -> tuple[int, List[Any]]:
+    snapshots: list["DbtBouncerSnapshot"],
+    sources: list["DbtBouncerSource"],
+    tests: list["DbtBouncerTest"],
+    unit_tests: list["UnitTests"],
+) -> tuple[int, list[Any]]:
     """Run dbt-bouncer checks.
 
     Returns:
-        tuple[int, List[Any]]: A tuple containing the exit code and a list of failed checks.
+        tuple[int, list[Any]]: A tuple containing the exit code and a list of failed checks.
 
     Raises:
         RuntimeError: If more than one "iterate_over" argument is found.
@@ -79,7 +82,7 @@ def runner(
     except (RuntimeError, AttributeError, KeyError):
         custom_checks_dir = None
 
-    check_classes: List[Dict[str, Union[Any, str]]] = [
+    check_classes: list[dict[str, Any | str]] = [
         {"class": x, "source_file": inspect.getfile(x)}
         for x in get_check_objects(custom_checks_dir)
     ]
@@ -120,7 +123,7 @@ def runner(
             "unit_test",
         }
         iterate_over_value = valid_iterate_over_values.intersection(
-            set(check.__annotations__.keys()),
+            set(check.__class__.__annotations__.keys()),
         )
         if len(iterate_over_value) == 1:
             iterate_value = next(iter(iterate_over_value))
@@ -164,7 +167,9 @@ def runner(
                     )
                     setattr(check_i, iterate_value, getattr(i, iterate_value, i))
 
-                    for x in parsed_data.keys() & check_i.__annotations__.keys():
+                    for x in (
+                        parsed_data.keys() & check_i.__class__.__annotations__.keys()
+                    ):
                         setattr(check_i, x, parsed_data[x])
 
                     checks_to_run.append(
@@ -180,7 +185,7 @@ def runner(
             )
         else:
             check_run_id = f"{check.name}:{check.index}"
-            for x in parsed_data.keys() & check.__annotations__.keys():
+            for x in parsed_data.keys() & check.__class__.__annotations__.keys():
                 setattr(check, x, parsed_data[x])
             checks_to_run.append(
                 {
@@ -199,21 +204,25 @@ def runner(
             check["check"].execute()
             check["outcome"] = "success"
         except Exception as e:
-            failure_message_full = list(
-                traceback.TracebackException.from_exception(e).format(),
-            )
-            failure_message = failure_message_full[-1].strip()
+            if isinstance(e, DbtBouncerFailedCheckError):
+                failure_message = e.message
+            else:
+                failure_message_full = list(
+                    traceback.TracebackException.from_exception(e).format(),
+                )
+                failure_message = failure_message_full[-1].strip()
+
             if check["check"].description:
                 failure_message = f"{check['check'].description} - {failure_message}"
 
             logging.debug(
-                f"Check {check['check_run_id']} failed: {' '.join(failure_message_full)}"
+                f"Check {check['check_run_id']} failed: {' '.join(failure_message)}"
             )
             check["outcome"] = "failed"
             check["failure_message"] = failure_message
 
             # If a check encountered an issue, change severity to warn
-            if not isinstance(e, AssertionError):
+            if not isinstance(e, DbtBouncerFailedCheckError):
                 check["severity"] = "warn"
                 check["failure_message"] = (
                     f"`dbt-bouncer` encountered an error ({failure_message}), run with `-v` to see more details or report an issue at https://github.com/godatadriven/dbt-bouncer/issues."

@@ -1,7 +1,7 @@
 import logging
 import warnings
 from enum import Enum
-from typing import Any, Dict, List, Union
+from typing import Any, TypeAlias, cast
 
 from pydantic import BaseModel
 
@@ -30,6 +30,9 @@ with warnings.catch_warnings():
     )
     from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
         GenericTestNode as GenericTestNode_v11,
+    )
+    from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
+        Macro as Macro_v11,
     )
     from dbt_artifacts_parser.parsers.manifest.manifest_v11 import ManifestV11
     from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
@@ -65,10 +68,10 @@ from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
 class DbtBouncerManifest(BaseModel):
     """Model for all manifest objects."""
 
-    manifest: Union[ManifestV11, ManifestLatest]
+    manifest: ManifestV11 | ManifestLatest
 
 
-DbtBouncerExposureBase = Union[Exposure_v11, Exposures]
+DbtBouncerExposureBase: TypeAlias = Exposure_v11 | Exposures
 
 
 class DbtBouncerExposure(BaseModel):
@@ -79,7 +82,10 @@ class DbtBouncerExposure(BaseModel):
     unique_id: str
 
 
-DbtBouncerModelBase = Union[ModelNode_v11, Nodes4, Nodes4Latest]
+DbtBouncerMacroBase: TypeAlias = Macro_v11 | Macros
+
+
+DbtBouncerModelBase: TypeAlias = ModelNode_v11 | Nodes4 | Nodes4Latest
 
 
 class DbtBouncerModel(BaseModel):
@@ -90,9 +96,9 @@ class DbtBouncerModel(BaseModel):
     unique_id: str
 
 
-DbtBouncerSemanticModelBase = Union[
-    SemanticModel_v11, SemanticModels, SemanticModelsLatest
-]
+DbtBouncerSemanticModelBase: TypeAlias = (
+    SemanticModel_v11 | SemanticModels | SemanticModelsLatest
+)
 
 
 class DbtBouncerSemanticModel(BaseModel):
@@ -103,7 +109,7 @@ class DbtBouncerSemanticModel(BaseModel):
     unique_id: str
 
 
-DbtBouncerSnapshotBase = Union[Nodes7, SnapshotNode_v11]
+DbtBouncerSnapshotBase: TypeAlias = Nodes7 | SnapshotNode_v11
 
 
 class DbtBouncerSnapshot(BaseModel):
@@ -114,7 +120,7 @@ class DbtBouncerSnapshot(BaseModel):
     unique_id: str
 
 
-DbtBouncerSourceBase = Union[SourceDefinition_v11, Sources, SourcesLatest]
+DbtBouncerSourceBase: TypeAlias = SourceDefinition_v11 | Sources | SourcesLatest
 
 
 class DbtBouncerSource(BaseModel):
@@ -125,15 +131,15 @@ class DbtBouncerSource(BaseModel):
     unique_id: str
 
 
-DbtBouncerTestBase = Union[
-    GenericTestNode_v11,
-    SingularTestNode_v11,
-    Nodes1,
-    Nodes2,
-    Nodes6,
-    Nodes2Latest,
-    Nodes6Latest,
-]
+DbtBouncerTestBase: TypeAlias = (
+    GenericTestNode_v11
+    | SingularTestNode_v11
+    | Nodes1
+    | Nodes2
+    | Nodes6
+    | Nodes2Latest
+    | Nodes6Latest
+)
 
 
 class DbtBouncerTest(BaseModel):
@@ -145,8 +151,8 @@ class DbtBouncerTest(BaseModel):
 
 
 def parse_manifest(
-    manifest: Dict[str, Any],
-) -> DbtBouncerManifest:
+    manifest: dict[str, Any],
+) -> ManifestV11 | ManifestLatest:
     """Parse manifest.json.
 
     Args:
@@ -156,7 +162,7 @@ def parse_manifest(
         ValueError: If the manifest.json is not a valid manifest.json
 
     Returns:
-       DbtBouncerManifest
+       ManifestV11 | ManifestLatest
 
     """
     dbt_schema_version = manifest["metadata"]["dbt_schema_version"]
@@ -175,26 +181,26 @@ def parse_manifest(
 def parse_manifest_artifact(
     manifest_obj: DbtBouncerManifest, package_name: str | None = None
 ) -> tuple[
-    List[Exposures],
-    List[Macros],
-    List[DbtBouncerModel],
-    List[DbtBouncerSemanticModel],
-    List[DbtBouncerSnapshot],
-    List[DbtBouncerSource],
-    List[DbtBouncerTest],
-    List[UnitTests],
+    list[DbtBouncerExposureBase],
+    list[DbtBouncerMacroBase],
+    list[DbtBouncerModel],
+    list[DbtBouncerSemanticModel],
+    list[DbtBouncerSnapshot],
+    list[DbtBouncerSource],
+    list[DbtBouncerTest],
+    list[UnitTests],
 ]:
     """Parse the manifest.json artifact.
 
     Returns:
-        List[DbtBouncerExposure]: List of exposures in the project.
-        List[DbtBouncerMacro]: List of macros in the project.
-        List[DbtBouncerModel]: List of models in the project.
-        List[DbtBouncerSemanticModel]: List of semantic models in the project.
-        List[DbtBouncerSnapshot]: List of snapshots in the project.
-        List[DbtBouncerSource]: List of sources in the project.
-        List[DbtBouncerTest]: List of tests in the project.
-        List[DbtBouncerUnitTest]: List of unit tests in the project.
+        list[DbtBouncerExposure]: List of exposures in the project.
+        list[DbtBouncerMacro]: List of macros in the project.
+        list[DbtBouncerModel]: List of models in the project.
+        list[DbtBouncerSemanticModel]: List of semantic models in the project.
+        list[DbtBouncerSnapshot]: List of snapshots in the project.
+        list[DbtBouncerSource]: List of sources in the project.
+        list[DbtBouncerTest]: List of tests in the project.
+        list[DbtBouncerUnitTest]: List of unit tests in the project.
 
     """
     project_exposures = [
@@ -221,12 +227,9 @@ def parse_manifest_artifact(
             ):
                 project_models.append(
                     DbtBouncerModel(
-                        **{
-                            "clean_model_name": "_".join(k.split(".")[2:]),
-                            "model": v,
-                            "original_file_path": clean_path_str(v.original_file_path),
-                            "unique_id": k,
-                        },
+                        model=cast("Any", v),
+                        original_file_path=str(clean_path_str(v.original_file_path)),
+                        unique_id=k,
                     ),
                 )
         elif (
@@ -237,11 +240,9 @@ def parse_manifest_artifact(
         ):
             project_snapshots.append(
                 DbtBouncerSnapshot(
-                    **{
-                        "original_file_path": clean_path_str(v.original_file_path),
-                        "snapshot": v,
-                        "unique_id": k,
-                    },
+                    original_file_path=str(clean_path_str(v.original_file_path)),
+                    snapshot=cast("Any", v),
+                    unique_id=k,
                 ),
             )
         elif (
@@ -252,20 +253,18 @@ def parse_manifest_artifact(
         ):
             project_tests.append(
                 DbtBouncerTest(
-                    **{
-                        "original_file_path": clean_path_str(v.original_file_path),
-                        "test": v,
-                        "unique_id": k,
-                    },
+                    original_file_path=str(clean_path_str(v.original_file_path)),
+                    test=cast("Any", v),
+                    unique_id=k,
                 ),
             )
 
     if get_package_version_number(
-        manifest_obj.manifest.metadata.dbt_version
+        manifest_obj.manifest.metadata.dbt_version or "0.0.0"
     ) >= get_package_version_number("1.8.0"):
         project_unit_tests = [
             v
-            for _, v in manifest_obj.manifest.unit_tests.items()
+            for _, v in getattr(manifest_obj.manifest, "unit_tests", {}).items()
             if v.package_name
             == (package_name or manifest_obj.manifest.metadata.project_name)
         ]
@@ -274,26 +273,22 @@ def parse_manifest_artifact(
 
     project_semantic_models = [
         DbtBouncerSemanticModel(
-            **{
-                "original_file_path": clean_path_str(v.original_file_path),
-                "semantic_model": v,
-                "unique_id": k,
-            },
+            original_file_path=str(clean_path_str(v.original_file_path)),
+            semantic_model=cast("Any", v),
+            unique_id=k,
         )
-        for _, v in manifest_obj.manifest.semantic_models.items()
+        for k, v in manifest_obj.manifest.semantic_models.items()
         if v.package_name
         == (package_name or manifest_obj.manifest.metadata.project_name)
     ]
 
     project_sources = [
         DbtBouncerSource(
-            **{
-                "original_file_path": clean_path_str(v.original_file_path),
-                "source": v,
-                "unique_id": k,
-            },
+            original_file_path=str(clean_path_str(v.original_file_path)),
+            source=cast("Any", v),
+            unique_id=k,
         )
-        for _, v in manifest_obj.manifest.sources.items()
+        for k, v in manifest_obj.manifest.sources.items()
         if v.package_name
         == (package_name or manifest_obj.manifest.metadata.project_name)
     ]

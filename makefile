@@ -19,6 +19,13 @@ build-artifacts: # 1.7 and 1.8 are no longer compatible with the latest dbt feat
 	rm -r ./tests/fixtures/dbt_110/target || true
 	mkdir -p ./tests/fixtures/dbt_110/target
 	mv ./dbt_project/target ./tests/fixtures/dbt_110
+	# No dbt-duckdb==1.11 yet so sticking with dbt-duckdb==1.10
+	uvx --python "==$(PYTHON_INTERPRETER_CONSTRAINT)" --with 'dbt-duckdb~=1.10.0' --from 'dbt-core~=1.11.0' dbt parse --profiles-dir ./dbt_project --project-dir ./dbt_project
+	uvx --python "==$(PYTHON_INTERPRETER_CONSTRAINT)" --with 'dbt-duckdb~=1.10.0' --from 'dbt-core~=1.11.0' dbt docs generate --profiles-dir ./dbt_project --project-dir ./dbt_project
+	rm -r ./tests/fixtures/dbt_111/target || true
+	mkdir -p ./tests/fixtures/dbt_111/target
+	mv ./dbt_project/target ./tests/fixtures/dbt_111
+	make install
 	uv run dbt parse --profiles-dir ./dbt_project --project-dir ./dbt_project
 	uv run dbt docs generate --profiles-dir ./dbt_project --project-dir ./dbt_project
 

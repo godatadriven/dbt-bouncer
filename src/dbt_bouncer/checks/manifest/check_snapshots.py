@@ -1,15 +1,16 @@
-# mypy: disable-error-code="union-attr"
 import re
-from typing import TYPE_CHECKING, List, Literal
+from typing import TYPE_CHECKING, Literal
 
 from pydantic import Field
 
 from dbt_bouncer.check_base import BaseCheck
 
 if TYPE_CHECKING:
-    from dbt_bouncer.artifact_parsers.parsers_common import (
+    from dbt_bouncer.artifact_parsers.parsers_manifest import (
         DbtBouncerSnapshotBase,
     )
+
+from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 
 
 class CheckSnapshotHasTags(BaseCheck):
@@ -39,22 +40,35 @@ class CheckSnapshotHasTags(BaseCheck):
 
     criteria: Literal["any", "all", "one"] = Field(default="all")
     name: Literal["check_snapshot_has_tags"]
-    snapshot: "DbtBouncerSnapshotBase" = Field(default=None)
-    tags: List[str]
+    snapshot: "DbtBouncerSnapshotBase | None" = Field(default=None)
+    tags: list[str]
 
     def execute(self) -> None:
-        """Execute the check."""
+        """Execute the check.
+
+        Raises:
+            DbtBouncerFailedCheckError: If snapshot does not have required tags.
+
+        """
+        if self.snapshot is None:
+            raise DbtBouncerFailedCheckError("self.snapshot is None")
+        snapshot_tags = self.snapshot.tags or []
         if self.criteria == "any":
-            assert any(tag in self.snapshot.tags for tag in self.tags), (
-                f"`{self.snapshot.name}` does not have any of the required tags: {self.tags}."
-            )
+            if not any(tag in snapshot_tags for tag in self.tags):
+                raise DbtBouncerFailedCheckError(
+                    f"`{self.snapshot.name}` does not have any of the required tags: {self.tags}."
+                )
         elif self.criteria == "all":
-            missing_tags = [tag for tag in self.tags if tag not in self.snapshot.tags]
-            assert not missing_tags, (
-                f"`{self.snapshot.name}` is missing required tags: {missing_tags}."
-            )
-        elif self.criteria == "one":
-            assert sum(tag in self.snapshot.tags for tag in self.tags) == 1, (
+            missing_tags = [tag for tag in self.tags if tag not in snapshot_tags]
+            if missing_tags:
+                raise DbtBouncerFailedCheckError(
+                    f"`{self.snapshot.name}` is missing required tags: {missing_tags}."
+                )
+        elif (
+            self.criteria == "one"
+            and sum(tag in snapshot_tags for tag in self.tags) != 1
+        ):
+            raise DbtBouncerFailedCheckError(
                 f"`{self.snapshot.name}` must have exactly one of the required tags: {self.tags}."
             )
 
@@ -85,14 +99,24 @@ class CheckSnapshotNames(BaseCheck):
     """
 
     name: Literal["check_snapshot_names"]
-    snapshot: "DbtBouncerSnapshotBase" = Field(default=None)
+    snapshot: "DbtBouncerSnapshotBase | None" = Field(default=None)
     snapshot_name_pattern: str
 
     def execute(self) -> None:
-        """Execute the check."""
-        assert (
-            re.compile(self.snapshot_name_pattern.strip()).match(self.snapshot.name)
-            is not None
-        ), (
-            f"`{self.snapshot.name}` does not match the supplied regex `{self.snapshot_name_pattern.strip()})`."
-        )
+        """Execute the check.
+
+        Raises:
+            DbtBouncerFailedCheckError: If snapshot name does not match regex.
+
+        """
+        if self.snapshot is None:
+            raise DbtBouncerFailedCheckError("self.snapshot is None")
+        if (
+            re.compile(self.snapshot_name_pattern.strip()).match(
+                str(self.snapshot.name)
+            )
+            is None
+        ):
+            raise DbtBouncerFailedCheckError(
+                f"`{self.snapshot.name}` does not match the supplied regex `{self.snapshot_name_pattern.strip()})`."
+            )

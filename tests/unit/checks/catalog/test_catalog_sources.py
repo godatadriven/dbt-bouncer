@@ -14,6 +14,7 @@ from dbt_bouncer.artifact_parsers.parsers_manifest import (
 from dbt_bouncer.checks.catalog.check_catalog_sources import (
     CheckSourceColumnsAreAllDocumented,
 )
+from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 
 CheckSourceColumnsAreAllDocumented.model_rebuild()
 
@@ -120,7 +121,7 @@ CheckSourceColumnsAreAllDocumented.model_rebuild()
                     },
                 ),
             ],
-            pytest.raises(AssertionError),
+            pytest.raises(DbtBouncerFailedCheckError),
         ),
     ],
 )

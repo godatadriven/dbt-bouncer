@@ -3,6 +3,7 @@ from contextlib import nullcontext as does_not_raise
 import pytest
 
 from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import Macros
+from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.checks.manifest.check_macros import (
     CheckMacroArgumentsDescriptionPopulated,
     CheckMacroCodeDoesNotContainRegexpPattern,
@@ -78,7 +79,7 @@ _TEST_DATA_FOR_CHECK_MACRO_ARGUMENTS_DESCRIPTION_POPULATED = [
             ],
             "macro_sql": "{% macro no_makes_sense(arg_1, arg_2) %} select coalesce({{ arg_1 }}, {{ arg_2 }}) from table {% endmacro %}",
         },
-        pytest.raises(AssertionError),
+        pytest.raises(DbtBouncerFailedCheckError),
         id="empty_description",
     ),
     pytest.param(
@@ -95,7 +96,7 @@ _TEST_DATA_FOR_CHECK_MACRO_ARGUMENTS_DESCRIPTION_POPULATED = [
             ],
             "macro_sql": "{% macro no_makes_sense(arg_1, arg_2) %} select coalesce({{ arg_1 }}, {{ arg_2 }}) from table {% endmacro %}",
         },
-        pytest.raises(AssertionError),
+        pytest.raises(DbtBouncerFailedCheckError),
         id="whitespace_description",
     ),
     pytest.param(
@@ -113,7 +114,7 @@ _TEST_DATA_FOR_CHECK_MACRO_ARGUMENTS_DESCRIPTION_POPULATED = [
             ],
             "macro_sql": "{% macro no_makes_sense(arg_1, arg_2) %} select coalesce({{ arg_1 }}, {{ arg_2 }}) from table {% endmacro %}",
         },
-        pytest.raises(AssertionError),
+        pytest.raises(DbtBouncerFailedCheckError),
         id="multiline_whitespace_description",
     ),
     pytest.param(
@@ -126,7 +127,7 @@ _TEST_DATA_FOR_CHECK_MACRO_ARGUMENTS_DESCRIPTION_POPULATED = [
             ],
             "macro_sql": "{% macro no_makes_sense(arg_1, arg_2) %} select coalesce({{ arg_1 }}, {{ arg_2 }}) from table {% endmacro %}",
         },
-        pytest.raises(AssertionError),
+        pytest.raises(DbtBouncerFailedCheckError),
         id="missing_argument_in_config",
     ),
 ]
@@ -178,7 +179,7 @@ _TEST_DATA_FOR_CHECK_MACRO_CODE_DOES_NOT_CONTAIN_REGEXP_PATTERN = [
             "macro_sql": "{% macro no_makes_sense(a, b) %} select ifnull({{ a }}, {{ b  }}) from table {% endmacro %}",
         },
         ".*[i][f][n][u][l][l].*",
-        pytest.raises(AssertionError),
+        pytest.raises(DbtBouncerFailedCheckError),
         id="contains_pattern",
     ),
 ]
@@ -216,7 +217,7 @@ _TEST_DATA_FOR_CHECK_MACRO_DESCRIPTION_POPULATED = [
             "description": "",
             "macro_sql": "select 1",
         },
-        pytest.raises(AssertionError),
+        pytest.raises(DbtBouncerFailedCheckError),
         id="empty_description",
     ),
     pytest.param(
@@ -224,7 +225,7 @@ _TEST_DATA_FOR_CHECK_MACRO_DESCRIPTION_POPULATED = [
             "description": "                ",
             "macro_sql": "select 1",
         },
-        pytest.raises(AssertionError),
+        pytest.raises(DbtBouncerFailedCheckError),
         id="whitespace_description",
     ),
     pytest.param(
@@ -233,7 +234,7 @@ _TEST_DATA_FOR_CHECK_MACRO_DESCRIPTION_POPULATED = [
                         """,
             "macro_sql": "select 1",
         },
-        pytest.raises(AssertionError),
+        pytest.raises(DbtBouncerFailedCheckError),
         id="multiline_whitespace_description",
     ),
 ]
@@ -270,7 +271,7 @@ _TEST_DATA_FOR_CHECK_MACRO_MAX_NUMBER_OF_LINES = [
             "unique_id": "macro.package_name.test_logic_2",
         },
         10,
-        pytest.raises(AssertionError),
+        pytest.raises(DbtBouncerFailedCheckError),
         id="exceeds_limit",
     ),
 ]
@@ -313,7 +314,7 @@ _TEST_DATA_FOR_CHECK_MACRO_NAME_MATCHES_FILE_NAME = [
             "path": "macros/macro_2.sql",
             "unique_id": "macro.package_name.macro_2",
         },
-        pytest.raises(AssertionError),
+        pytest.raises(DbtBouncerFailedCheckError),
         id="name_mismatch",
     ),
     pytest.param(
@@ -323,7 +324,7 @@ _TEST_DATA_FOR_CHECK_MACRO_NAME_MATCHES_FILE_NAME = [
             "path": "tests/test_logic_2.sql",
             "unique_id": "macro.package_name.test_logic_2",
         },
-        pytest.raises(AssertionError),
+        pytest.raises(DbtBouncerFailedCheckError),
         id="path_mismatch_in_object",
     ),
 ]
@@ -374,7 +375,7 @@ _TEST_DATA_FOR_CHECK_MACRO_PROPERTY_FILE_LOCATION = [
         {
             "patch_path": "package_name://macros/macros.yml",
         },
-        pytest.raises(AssertionError),
+        pytest.raises(DbtBouncerFailedCheckError),
         id="invalid_no_underscore",
     ),
     pytest.param(
@@ -383,7 +384,7 @@ _TEST_DATA_FOR_CHECK_MACRO_PROPERTY_FILE_LOCATION = [
             "patch_path": "package_name://macros/dir1/__macros.yml",
             "path": "macros/dir1/macro_1.sql",
         },
-        pytest.raises(AssertionError),
+        pytest.raises(DbtBouncerFailedCheckError),
         id="invalid_double_underscore",
     ),
     pytest.param(
@@ -392,7 +393,7 @@ _TEST_DATA_FOR_CHECK_MACRO_PROPERTY_FILE_LOCATION = [
             "patch_path": None,
             "path": "macros/dir1/macro_1.sql",
         },
-        pytest.raises(AssertionError),
+        pytest.raises(DbtBouncerFailedCheckError),
         id="missing_patch_path",
     ),
 ]

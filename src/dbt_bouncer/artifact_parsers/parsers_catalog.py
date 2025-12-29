@@ -58,20 +58,24 @@ def parse_catalog(
         list[DbtBouncerCatalogNode]: List of catalog nodes for the project.
         list[DbtBouncerCatalogNode]: List of catalog nodes for the project sources.
 
+    Raises:
+        TypeError: If the loaded artifact is not of the expected type.
+
     """
-    catalog_obj: CatalogLatest | CatalogV1 = load_dbt_artifact(
+    catalog_obj = load_dbt_artifact(
         artifact_name="catalog.json",
         dbt_artifacts_dir=artifact_dir,
     )
+    if not isinstance(catalog_obj, DbtBouncerCatalog):
+        raise TypeError(f"Expected DbtBouncerCatalog, got {type(catalog_obj)}")
+
     project_catalog_nodes = [
         DbtBouncerCatalogNode(
-            **{
-                "catalog_node": v,
-                "original_file_path": clean_path_str(
-                    manifest_obj.manifest.nodes[k].original_file_path
-                ),
-                "unique_id": k,
-            },
+            catalog_node=v,
+            original_file_path=str(
+                clean_path_str(manifest_obj.manifest.nodes[k].original_file_path)
+            ),
+            unique_id=k,
         )
         for k, v in catalog_obj.catalog.nodes.items()
         if k.split(".")[-2]
@@ -79,13 +83,11 @@ def parse_catalog(
     ]
     project_catalog_sources = [
         DbtBouncerCatalogNode(
-            **{
-                "catalog_node": v,
-                "original_file_path": clean_path_str(
-                    manifest_obj.manifest.sources[k].original_file_path
-                ),
-                "unique_id": k,
-            },
+            catalog_node=v,
+            original_file_path=str(
+                clean_path_str(manifest_obj.manifest.sources[k].original_file_path)
+            ),
+            unique_id=k,
         )
         for k, v in catalog_obj.catalog.sources.items()
         if k.split(".")[1]
