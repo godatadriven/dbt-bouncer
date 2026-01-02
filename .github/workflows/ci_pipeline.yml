@@ -148,13 +148,13 @@ jobs:
                 "hyperfine --export-json benchmark_results.json --runs 10 'uv run dbt-bouncer --config-file dbt-bouncer-example.yml'"
 
           - name: Upload Benchmark Results
-            uses: actions/upload-artifact@v4
+            uses: actions/upload-artifact@v6
             with:
               name: benchmark_results.json
               path: ./benchmark_results.json
 
           - name: Upload GitHub Pull Request Event
-            uses: actions/upload-artifact@v4
+            uses: actions/upload-artifact@v6
             with:
               name: event.json
               path: ${{ github.event_path }}
