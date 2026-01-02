@@ -56,7 +56,7 @@ dev = [
 docs = [
   "mike~=2.0",
   "mkdocs~=1.0",
-  "mkdocstrings-python<2",
+  "mkdocstrings-python<3",
   "mkdocs-click~=0.0",
   "mkdocs-git-revision-date-localized-plugin~=1.0",
   "mkdocs-material~=9.0",
