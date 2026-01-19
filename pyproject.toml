@@ -38,7 +38,7 @@ maintainers = [{name="Padraic Slattery",email="pgoslatara@gmail.com"}]
 name = "dbt-bouncer"
 readme = "README.md"
 requires-python = ">=3.11,<3.15"
-version = "0.0.0"
+version = "2.0.0rc2"
 
 [project.optional-dependencies]
 dev = [
