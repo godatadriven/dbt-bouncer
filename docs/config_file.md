@@ -77,6 +77,7 @@ Example per resource type:
 - `Macros`: The original file path to the macro file, e.g. `^macros/system` will match files like `./macros/system/generate_schema_name.sql`.
 - `Models`: The original file path to the model file, e.g. `^marts` will match files like `./models/marts/customers.sql`.
 - `Run results`: The original file path to the file associated with the resource, e.g. `^seeds/finance` will match seeds in `./seeds/finance`, `^models/staging` will match models and tests in `./models/staging`.
+- `Seeds`: The original file path to the properties file where the seed is defined, e.g. `^seeds` will match seeds defined in `./seeds/_seeds.yml`.
 - `Semantic models`: The original file path to the properties file where the semantic model is defined, e.g. `^models/marts/finance` will match semantic models defined in `./models/marts/finance/_finance__semantic_models.yml`.
 - `Sources`: The original file path to the properties file where the source is defined, e.g. `^models/staging/crm` will match sources defined in `./models/staging/crm/_crm__sources.yml`.
 - `Unit tests`: The original file path to the properties file where the unit test is defined, e.g. `^models/staging/crm` will match unit tests defined in `^staging/crm/_stg_crm__unit_tests.yml`.

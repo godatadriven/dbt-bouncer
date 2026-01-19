@@ -173,6 +173,11 @@ manifest_checks:
     materialization: ephemeral
     model_name_pattern: ^int_
 
+  # Seeds
+  - name: check_seed_names
+    include: ^seeds
+    seed_name_pattern: ^raw_
+
   # Semantic models
   - name: check_semantic_model_based_on_non_public_models
 

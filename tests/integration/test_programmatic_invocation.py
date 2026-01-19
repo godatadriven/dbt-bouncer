@@ -28,7 +28,7 @@ def test_programmatic_happy_path(tmp_path):
 
 
 def test_programmatic_failure_path(tmp_path):
-    artifacts_dir = Path("tests/fixtures/dbt_17/target").absolute()
+    artifacts_dir = Path("tests/fixtures/dbt_110/target").absolute()
 
     config_data = {
         "dbt_artifacts_dir": str(artifacts_dir),

@@ -20,6 +20,7 @@ if TYPE_CHECKING:
         DbtBouncerMacroBase,
         DbtBouncerManifest,
         DbtBouncerModel,
+        DbtBouncerSeed,
         DbtBouncerSemanticModel,
         DbtBouncerSnapshot,
         DbtBouncerSource,
@@ -105,6 +106,7 @@ def parse_dbt_artifacts(
     list["DbtBouncerExposureBase"],
     list["DbtBouncerMacroBase"],
     list["DbtBouncerModel"],
+    list["DbtBouncerSeed"],
     list["DbtBouncerSemanticModel"],
     list["DbtBouncerSnapshot"],
     list["DbtBouncerSource"],
@@ -125,6 +127,7 @@ def parse_dbt_artifacts(
         list[DbtBouncerExposure]: List of exposures in the project.
         list[DbtBouncerMacro]: List of macros in the project.
         list[DbtBouncerModel]: List of models in the project.
+        list[DbtBouncerSeed]: List of seeds in the project.
         list[DbtBouncerSemanticModel]: List of semantic models in the project.
         list[DbtBouncerSnapshot]: List of snapshots in the project.
         list[DbtBouncerSource]: List of sources in the project.
@@ -155,6 +158,7 @@ def parse_dbt_artifacts(
         project_exposures,
         project_macros,
         project_models,
+        project_seeds,
         project_semantic_models,
         project_snapshots,
         project_sources,
@@ -202,6 +206,7 @@ def parse_dbt_artifacts(
         project_exposures,
         project_macros,
         project_models,
+        project_seeds,
         project_semantic_models,
         project_snapshots,
         project_sources,
