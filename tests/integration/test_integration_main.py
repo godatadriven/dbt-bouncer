@@ -23,14 +23,6 @@ def test_cli_happy_path(caplog, dbt_artifacts_dir, tmp_path):
 
     config_file = Path(tmp_path / "dbt-bouncer-example.yml")
 
-    # Due to non-backwards compatible dbt-fusion changes, this check doesn't work with dbt-core < 1.8
-    if clean_path_str(dbt_artifacts_dir).split("/")[-1] in [
-        "dbt_17",
-    ]:
-        for item in bouncer_config["manifest_checks"]:
-            if item["name"] == "check_seed_names":
-                bouncer_config["manifest_checks"].remove(item)
-
     # Due to non-backwards compatible dbt-fusion changes, this check doesn't work with dbt-core < 1.10
     if clean_path_str(dbt_artifacts_dir).split("/")[-1] in [
         "dbt_17",
@@ -72,6 +64,10 @@ def test_cli_happy_path(caplog, dbt_artifacts_dir, tmp_path):
             nodes_text = re.search(r"\d* nodes", record).group(0)  # type: ignore[union-attr]
             nodes_num = int(re.search(r"\d*", nodes_text).group(0))  # type: ignore[union-attr]
             assert nodes_num > 0, f"Only found {nodes_num} nodes."
+
+            seeds_text = re.search(r"\d* seeds", record).group(0)  # type: ignore[union-attr]
+            seeds_num = int(re.search(r"\d*", seeds_text).group(0))  # type: ignore[union-attr]
+            assert seeds_num > 0, f"Only found {seeds_num} semantic models."
 
             semantic_models_text = re.search(r"\d* sources", record).group(0)  # type: ignore[union-attr]
             semantic_models_num = int(re.search(r"\d*", semantic_models_text).group(0))  # type: ignore[union-attr]
