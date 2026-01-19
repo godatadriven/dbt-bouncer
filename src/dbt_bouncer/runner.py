@@ -30,6 +30,7 @@ if TYPE_CHECKING:
         DbtBouncerManifest,
         DbtBouncerModel,
         DbtBouncerRunResult,
+        DbtBouncerSeed,
         DbtBouncerSemanticModel,
         DbtBouncerSnapshot,
         DbtBouncerSource,
@@ -56,6 +57,7 @@ def runner(
     models: list["DbtBouncerModel"],
     output_file: Path | None,
     run_results: list["DbtBouncerRunResult"],
+    seeds: list["DbtBouncerSeed"],
     semantic_models: list["DbtBouncerSemanticModel"],
     output_only_failures: bool,
     show_all_failures: bool,
@@ -97,6 +99,7 @@ def runner(
         "manifest_obj": manifest_obj,
         "models": [m.model for m in models],
         "run_results": [r.run_result for r in run_results],
+        "seeds": [s.seed for s in seeds],
         "semantic_models": [s.semantic_model for s in semantic_models],
         "snapshots": [s.snapshot for s in snapshots],
         "sources": sources,
@@ -117,6 +120,7 @@ def runner(
             "macro",
             "model",
             "run_result",
+            "seed",
             "semantic_model",
             "snapshot",
             "source",
@@ -129,7 +133,13 @@ def runner(
             iterate_value = next(iter(iterate_over_value))
             for i in locals()[f"{iterate_value}s"]:
                 check_i = copy.deepcopy(check)
-                if iterate_value in ["model", "semantic_model", "snapshot", "source"]:
+                if iterate_value in [
+                    "model",
+                    "seed",
+                    "semantic_model",
+                    "snapshot",
+                    "source",
+                ]:
                     try:
                         d = getattr(i, iterate_value).config.meta
                     except Exception:

@@ -250,6 +250,8 @@ def validate_conf(
             DbtBouncerManifest,
             DbtBouncerModel,
             DbtBouncerModelBase,
+            DbtBouncerSeed,
+            DbtBouncerSeedBase,
             DbtBouncerSemanticModel,
             DbtBouncerSemanticModelBase,
             DbtBouncerSnapshot,

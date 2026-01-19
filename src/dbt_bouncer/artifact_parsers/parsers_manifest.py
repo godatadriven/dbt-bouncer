@@ -7,6 +7,9 @@ from pydantic import BaseModel
 
 from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import ManifestLatest
 from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
+    Nodes as SeedsLatest,
+)
+from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
     Nodes2 as Nodes2Latest,
 )
 from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
@@ -37,6 +40,9 @@ with warnings.catch_warnings():
     from dbt_artifacts_parser.parsers.manifest.manifest_v11 import ManifestV11
     from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
         ModelNode as ModelNode_v11,
+    )
+    from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
+        SeedNode as SeedNode_v11,
     )
     from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
         SemanticModel as SemanticModel_v11,
@@ -93,6 +99,17 @@ class DbtBouncerModel(BaseModel):
 
     model: DbtBouncerModelBase
     original_file_path: str
+    unique_id: str
+
+
+DbtBouncerSeedBase: TypeAlias = SeedNode_v11 | SeedsLatest
+
+
+class DbtBouncerSeed(BaseModel):
+    """Model for all seed nodes in `manifest.json`."""
+
+    original_file_path: str
+    seed: DbtBouncerSeedBase
     unique_id: str
 
 
@@ -184,6 +201,7 @@ def parse_manifest_artifact(
     list[DbtBouncerExposureBase],
     list[DbtBouncerMacroBase],
     list[DbtBouncerModel],
+    list[DbtBouncerSeed],
     list[DbtBouncerSemanticModel],
     list[DbtBouncerSnapshot],
     list[DbtBouncerSource],
@@ -196,6 +214,7 @@ def parse_manifest_artifact(
         list[DbtBouncerExposure]: List of exposures in the project.
         list[DbtBouncerMacro]: List of macros in the project.
         list[DbtBouncerModel]: List of models in the project.
+        list[DbtBouncerSeed]: List of seeds in the project.
         list[DbtBouncerSemanticModel]: List of semantic models in the project.
         list[DbtBouncerSnapshot]: List of snapshots in the project.
         list[DbtBouncerSource]: List of sources in the project.
@@ -216,6 +235,7 @@ def parse_manifest_artifact(
         == (package_name or manifest_obj.manifest.metadata.project_name)
     ]
     project_models = []
+    project_seeds = []
     project_snapshots = []
     project_tests = []
     for k, v in manifest_obj.manifest.nodes.items():
@@ -232,6 +252,19 @@ def parse_manifest_artifact(
                         unique_id=k,
                     ),
                 )
+        elif (
+            (isinstance(v.resource_type, Enum) and v.resource_type.value == "seed")
+            or v.resource_type == "seed"
+        ) and v.package_name == (
+            package_name or manifest_obj.manifest.metadata.project_name
+        ):
+            project_seeds.append(
+                DbtBouncerSeed(
+                    original_file_path=str(clean_path_str(v.original_file_path)),
+                    seed=cast("Any", v),
+                    unique_id=k,
+                ),
+            )
         elif (
             (isinstance(v.resource_type, Enum) and v.resource_type.value == "snapshot")
             or v.resource_type == "snapshot"
@@ -294,12 +327,13 @@ def parse_manifest_artifact(
     ]
 
     logging.info(
-        f"Parsed `manifest.json`, found `{(package_name or manifest_obj.manifest.metadata.project_name)}` project: {len(project_exposures)} exposures, {len(project_macros)} macros, {len(project_models)} nodes, {len(project_semantic_models)} semantic models, {len(project_snapshots)} snapshots, {len(project_sources)} sources, {len(project_tests)} tests, {len(project_unit_tests)} unit tests.",
+        f"Parsed `manifest.json`, found `{(package_name or manifest_obj.manifest.metadata.project_name)}` project: {len(project_exposures)} exposures, {len(project_macros)} macros, {len(project_models)} nodes, {len(project_seeds)} seeds, {len(project_semantic_models)} semantic models, {len(project_snapshots)} snapshots, {len(project_sources)} sources, {len(project_tests)} tests, {len(project_unit_tests)} unit tests.",
     )
     return (
         project_exposures,
         project_macros,
         project_models,
+        project_seeds,
         project_semantic_models,
         project_snapshots,
         project_sources,
