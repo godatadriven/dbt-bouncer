@@ -192,7 +192,7 @@ def run_bouncer(
     return results[0]
 
 
-@click.command()
+@click.group(invoke_without_command=True)
 @click.option(
     "--config-file",
     default=Path("dbt-bouncer.yml"),
@@ -246,15 +246,59 @@ def cli(
     verbosity: int,
 ) -> None:
     """Entrypoint for dbt-bouncer."""
-    config_file_source = ctx.get_parameter_source("config_file").name  # type: ignore[union-attr]
-    exit_code = run_bouncer(
-        config_file=config_file,
-        create_pr_comment_file=create_pr_comment_file,
-        only=only,
-        output_file=output_file,
-        output_only_failures=output_only_failures,
-        show_all_failures=show_all_failures,
-        verbosity=verbosity,
-        config_file_source=config_file_source,
-    )
-    ctx.exit(exit_code)
+    if ctx.invoked_subcommand is None:
+        config_file_source = ctx.get_parameter_source("config_file").name  # type: ignore[union-attr]
+        exit_code = run_bouncer(
+            config_file=config_file,
+            create_pr_comment_file=create_pr_comment_file,
+            only=only,
+            output_file=output_file,
+            output_only_failures=output_only_failures,
+            show_all_failures=show_all_failures,
+            verbosity=verbosity,
+            config_file_source=config_file_source,
+        )
+        ctx.exit(exit_code)
+
+
+@cli.command()
+def init() -> None:
+    """Create a basic dbt-bouncer.yml file.
+
+    Raises:
+        RuntimeError: If the config file already exists.
+
+    """
+    config_content = """# dbt-bouncer configuration file
+# This file is used to configure dbt-bouncer checks.
+
+dbt_artifacts_dir: target # Directory where dbt artifacts (manifest.json, etc.) are located.
+
+manifest_checks:
+  - name: check_model_description_populated
+    description: All models must have a description.
+
+  - name: check_model_names
+    description: Models in the staging layer should always start with "stg_".
+    include: ^models/staging
+    model_name_pattern: ^stg_
+
+  - name: check_model_has_unique_test
+    description: All models must have a unique test defined.
+
+# Example: check that relies on `catalog.json` being present
+# catalog_checks:
+#   - name: check_column_description_populated
+#     description: All columns in the marts layer must have a description.
+#     include: ^models/marts
+"""
+    configure_console_logging(verbosity=0)
+
+    config_path = Path("dbt-bouncer.yml")
+    if config_path.exists():
+        raise RuntimeError(f"{config_path} already exists.")
+
+    with Path(config_path).open("w") as f:
+        f.write(config_content)
+
+    logging.info(f"Created `{config_path}`.")

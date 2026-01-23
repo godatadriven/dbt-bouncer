@@ -79,17 +79,8 @@ All documentation can be found on `dbt-bouncer` [documentation website](https://
 
 1. Create a `dbt-bouncer.yml` config file:
 
-    ```yml
-    manifest_checks:
-      - name: check_model_directories
-        include: ^models
-        permitted_sub_directories:
-          - intermediate
-          - marts
-          - staging
-      - name: check_model_names
-        include: ^models/staging
-        model_name_pattern: ^stg_
+    ```shell
+    dbt-bouncer init
     ```
 
 1. Run `dbt-bouncer`:
