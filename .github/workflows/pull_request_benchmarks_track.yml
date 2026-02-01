@@ -40,7 +40,7 @@ jobs:
             core.exportVariable("PR_BASE_SHA", prEvent.pull_request.base.sha);
             core.exportVariable("PR_NUMBER", prEvent.number);
 
-      - uses: bencherdev/bencher@v0.5.9
+      - uses: bencherdev/bencher@v0.5.10
 
       - name: Track Benchmarks with Bencher
         run: |
