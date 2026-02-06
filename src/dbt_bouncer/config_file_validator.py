@@ -12,7 +12,7 @@ from pydantic import ValidationError
 from dbt_bouncer.utils import load_config_from_yaml
 
 if TYPE_CHECKING:
-    from dbt_bouncer.config_file_parser import DbtBouncerConf
+    from dbt_bouncer.config_file_parser import DbtBouncerConfBase
 
 DEFAULT_DBT_BOUNCER_CONFIG = """manifest_checks:
   - name: check_model_directories
@@ -147,7 +147,8 @@ def load_config_file_contents(
 def validate_conf(
     check_categories,  #: list[Literal["catalog_checks"], Literal["manifest_checks"], Literal["run_results_checks"]],
     config_file_contents: dict[str, Any],
-) -> "DbtBouncerConf":
+    custom_checks_dir: Path | None = None,
+) -> "DbtBouncerConfBase":
     """Validate the configuration and return the Pydantic model.
 
     Raises:
@@ -209,8 +210,9 @@ def validate_conf(
             Nodes as CatalogNodes,  # noqa: F401
         )
 
-    from dbt_bouncer.config_file_parser import DbtBouncerConf
+    from dbt_bouncer.config_file_parser import create_bouncer_conf_class
 
+    DbtBouncerConf = create_bouncer_conf_class(custom_checks_dir=custom_checks_dir)  # noqa: N806
     DbtBouncerConf.model_rebuild()
 
     try:

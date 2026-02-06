@@ -5,43 +5,26 @@ from functools import reduce
 from pathlib import Path
 from typing import Any, Literal
 
-import click
 from pydantic import BaseModel, ConfigDict, Field
 from typing_extensions import Annotated
 
-from dbt_bouncer.global_context import get_context
 from dbt_bouncer.utils import clean_path_str, get_check_objects
 
 
 def get_check_types(
-    check_type: list[
-        Literal["catalog_checks", "manifest_checks", "run_results_checks"]
-    ],
+    check_type: str,
+    custom_checks_dir: Path | None = None,
 ) -> list[Any]:
     """Get the check types from the check categories.
 
     Args:
-        check_type: list[Literal["catalog_checks", "manifest_checks", "run_results_checks"]]
+        check_type: The check category subdirectory name (e.g. "catalog", "manifest", "run_results").
+        custom_checks_dir: Path to a directory containing custom checks.
 
     Returns:
         list[str]: The check types.
 
     """
-    try:
-        ctx = get_context()
-        if ctx:
-            config_file_path = ctx.config_file_path
-            custom_checks_dir = ctx.custom_checks_dir
-        else:
-            click_ctx = click.get_current_context()
-            config_file_path = click_ctx.obj.get("config_file_path")
-            custom_checks_dir = click_ctx.obj.get("custom_checks_dir")
-
-        if custom_checks_dir:
-            custom_checks_dir = config_file_path.parent / custom_checks_dir
-    except (RuntimeError, AttributeError, KeyError):
-        custom_checks_dir = None
-
     check_classes: list[dict[str, Any | Path]] = [
         {
             "class": x,
@@ -100,17 +83,41 @@ class DbtBouncerConfBase(BaseModel):
     )
 
 
-class DbtBouncerConf(DbtBouncerConfBase):
-    """Config file contents for dbt-bouncer.
+def create_bouncer_conf_class(
+    custom_checks_dir: Path | None = None,
+) -> type[DbtBouncerConfBase]:
+    """Create a DbtBouncerConf Pydantic model class with check types resolved at call time.
 
-    All check category fields are optional and default to empty lists,
-    so this single class handles any combination of check categories.
+    This factory avoids module-level class definitions that depend on
+    global mutable state and removes the need for importlib.reload() hacks.
+
+    Args:
+        custom_checks_dir: Path to a directory containing custom checks.
+
+    Returns:
+        type[DbtBouncerConfBase]: A Pydantic model class with the appropriate check type fields.
+
     """
+    catalog_type = get_check_types(
+        check_type="catalog", custom_checks_dir=custom_checks_dir
+    )
+    manifest_type = get_check_types(
+        check_type="manifest", custom_checks_dir=custom_checks_dir
+    )
+    run_results_type = get_check_types(
+        check_type="run_results", custom_checks_dir=custom_checks_dir
+    )
 
-    catalog_checks: get_check_types(check_type="catalog") = Field(default=[])  # type: ignore[valid-type]
-    manifest_checks: get_check_types(check_type="manifest") = Field(default=[])  # type: ignore[valid-type]
-    run_results_checks: get_check_types(check_type="run_results") = Field(default=[])  # type: ignore[valid-type]
+    class DbtBouncerConf(DbtBouncerConfBase):
+        """Config file contents for dbt-bouncer."""
+
+        catalog_checks: catalog_type = Field(default=[])  # type: ignore[valid-type]
+        manifest_checks: manifest_type = Field(default=[])  # type: ignore[valid-type]
+        run_results_checks: run_results_type = Field(default=[])  # type: ignore[valid-type]
+
+    return DbtBouncerConf
 
 
-# Backwards compatibility alias
-DbtBouncerConfAllCategories = DbtBouncerConf
+# Module-level class for TYPE_CHECKING imports and backwards compatibility
+DbtBouncerConfAllCategories = create_bouncer_conf_class()
+DbtBouncerConf = DbtBouncerConfAllCategories

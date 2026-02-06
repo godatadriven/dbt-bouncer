@@ -1,11 +1,8 @@
-import importlib
 import logging
-import sys
 from pathlib import Path, PurePath
 
 import click
 
-from dbt_bouncer.global_context import BouncerContext, set_context
 from dbt_bouncer.logger import configure_console_logging
 from dbt_bouncer.version import version
 
@@ -103,23 +100,19 @@ def run_bouncer(
     ]
     logging.debug(f"{check_categories=}")
 
-    # Set global context for dbt_bouncer.utils.get_check_objects() and config_file_parser
-    set_context(
-        BouncerContext(
-            config_file_path=config_file_path,
-            custom_checks_dir=config_file_contents.get("custom_checks_dir"),
+    # Resolve custom_checks_dir relative to config file
+    custom_checks_dir = None
+    if config_file_contents.get("custom_checks_dir"):
+        custom_checks_dir = (
+            config_file_path.parent / config_file_contents["custom_checks_dir"]
         )
-    )
-
-    # If config_file_parser is already loaded, reload it so that check types are updated (necessary for parallel tests)
-    if "dbt_bouncer.config_file_parser" in sys.modules:
-        importlib.reload(sys.modules["dbt_bouncer.config_file_parser"])
 
     from dbt_bouncer.config_file_validator import validate_conf
 
     bouncer_config = validate_conf(
         check_categories=check_categories,
         config_file_contents=dict(config_file_contents),
+        custom_checks_dir=Path(custom_checks_dir) if custom_checks_dir else None,
     )
     del config_file_contents
     logging.debug(f"{bouncer_config=}")

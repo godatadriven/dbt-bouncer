@@ -37,7 +37,7 @@ if TYPE_CHECKING:
         DbtBouncerExposureBase,
         DbtBouncerMacroBase,
     )
-    from dbt_bouncer.config_file_parser import DbtBouncerConf
+    from dbt_bouncer.config_file_parser import DbtBouncerConfBase
 
 
 def _should_run_check(
@@ -71,7 +71,7 @@ def _should_run_check(
 
 
 def runner(
-    bouncer_config: "DbtBouncerConf",
+    bouncer_config: "DbtBouncerConfBase",
     catalog_nodes: list["DbtBouncerCatalogNode"],
     catalog_sources: list["DbtBouncerCatalogNode"],
     check_categories: list[str],
