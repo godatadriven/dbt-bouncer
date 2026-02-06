@@ -12,7 +12,6 @@ classifiers = [
 dependencies =[
   "click (!=8.3.0,!=8.3.1,<9)", # Due to this issue: https://github.com/pallets/click/issues/3110
   "dbt-artifacts-parser (>=0.8)",
-  "h11 (>=0.16.0)", # To fix security warning
   "jellyfish (>=1,<2)",
   "jinja2 (>=3,<4)",
   "jinja2-simple-tags (<1)",
