@@ -142,7 +142,7 @@ def runner(
                 ]:
                     try:
                         d = getattr(i, iterate_value).config.meta
-                    except Exception:
+                    except AttributeError:
                         d = getattr(i, iterate_value).meta
                 elif iterate_value in ["catalog_node", "run_result"]:
                     d = {}
@@ -151,7 +151,7 @@ def runner(
                 else:
                     try:
                         d = i.config.meta
-                    except Exception:
+                    except AttributeError:
                         d = i.meta
                 meta_config = get_nested_value(
                     d,
