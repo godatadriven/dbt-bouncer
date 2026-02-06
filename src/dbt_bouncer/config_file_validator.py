@@ -3,7 +3,7 @@ import os
 import re
 from collections.abc import Mapping
 from pathlib import Path, PurePath
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any
 
 import click
 import toml
@@ -12,9 +12,7 @@ from pydantic import ValidationError
 from dbt_bouncer.utils import load_config_from_yaml
 
 if TYPE_CHECKING:
-    from dbt_bouncer.config_file_parser import (
-        DbtBouncerConfAllCategories as DbtBouncerConf,
-    )
+    from dbt_bouncer.config_file_parser import DbtBouncerConf
 
 DEFAULT_DBT_BOUNCER_CONFIG = """manifest_checks:
   - name: check_model_directories
@@ -27,60 +25,6 @@ DEFAULT_DBT_BOUNCER_CONFIG = """manifest_checks:
     include: ^models/staging
     model_name_pattern: ^stg_
 """
-
-
-def conf_cls_factory(
-    check_categories: list[
-        Literal["catalog_checks", "manifest_checks", "run_results_checks"]
-    ],
-):
-    """Return the appropriate configuration class based on the check categories.
-
-    Args:
-        check_categories: list[Literal["catalog_checks", "manifest_checks", "run_results_checks"]]
-
-    Raises:
-        ValueError: If the check categories are not valid.
-
-    Returns:
-        DbtBouncerConf: The configuration class.
-
-    """
-    check_categories = sorted(check_categories)
-    if check_categories == ["catalog_checks"]:
-        from dbt_bouncer.config_file_parser import DbtBouncerConfCatalogOnly
-
-        return DbtBouncerConfCatalogOnly
-    elif check_categories == ["manifest_checks"]:
-        from dbt_bouncer.config_file_parser import DbtBouncerConfManifestOnly
-
-        return DbtBouncerConfManifestOnly
-    elif check_categories == ["run_results_checks"]:
-        from dbt_bouncer.config_file_parser import DbtBouncerConfRunResultsOnly
-
-        return DbtBouncerConfRunResultsOnly
-    elif check_categories == ["catalog_checks", "manifest_checks"]:
-        from dbt_bouncer.config_file_parser import DbtBouncerConfCatalogManifest
-
-        return DbtBouncerConfCatalogManifest
-    elif check_categories == ["catalog_checks", "run_results_checks"]:
-        from dbt_bouncer.config_file_parser import DbtBouncerConfCatalogRunResults
-
-        return DbtBouncerConfCatalogRunResults
-    elif check_categories == ["manifest_checks", "run_results_checks"]:
-        from dbt_bouncer.config_file_parser import DbtBouncerConfManifestRunResults
-
-        return DbtBouncerConfManifestRunResults
-    elif check_categories == [
-        "catalog_checks",
-        "manifest_checks",
-        "run_results_checks",
-    ]:
-        from dbt_bouncer.config_file_parser import DbtBouncerConfAllCategories
-
-        return DbtBouncerConfAllCategories
-    else:
-        raise ValueError(f"Invalid check_categories: {check_categories}")
 
 
 def get_config_file_path(
@@ -268,8 +212,9 @@ def validate_conf(
             DbtBouncerRunResultBase,
         )
 
-    DbtBouncerConf = conf_cls_factory(check_categories=check_categories)  # noqa: N806
-    DbtBouncerConf().model_rebuild()
+    from dbt_bouncer.config_file_parser import DbtBouncerConf
+
+    DbtBouncerConf.model_rebuild()
 
     try:
         return DbtBouncerConf(**config_file_contents)

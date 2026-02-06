@@ -100,67 +100,17 @@ class DbtBouncerConfBase(BaseModel):
     )
 
 
-class DbtBouncerConfAllCategories(DbtBouncerConfBase):
-    """Config file contents when all categories are used."""
+class DbtBouncerConf(DbtBouncerConfBase):
+    """Config file contents for dbt-bouncer.
 
-    model_config = ConfigDict(extra="forbid")
+    All check category fields are optional and default to empty lists,
+    so this single class handles any combination of check categories.
+    """
 
     catalog_checks: get_check_types(check_type="catalog") = Field(default=[])  # type: ignore[valid-type]
     manifest_checks: get_check_types(check_type="manifest") = Field(default=[])  # type: ignore[valid-type]
     run_results_checks: get_check_types(check_type="run_results") = Field(default=[])  # type: ignore[valid-type]
 
-    custom_checks_dir: str | None = Field(
-        default=None,
-        description="Path to a directory containing custom checks.",
-    )
 
-
-class DbtBouncerConfCatalogManifest(DbtBouncerConfBase):
-    """Config file contents when catalog and manifest are used."""
-
-    model_config = ConfigDict(extra="forbid")
-
-    catalog_checks: get_check_types(check_type="catalog") = Field(default=[])  # type: ignore[valid-type]
-    manifest_checks: get_check_types(check_type="manifest") = Field(default=[])  # type: ignore[valid-type]
-
-
-class DbtBouncerConfCatalogOnly(DbtBouncerConfBase):
-    """Config file contents when catalog only is used."""
-
-    model_config = ConfigDict(extra="forbid")
-
-    catalog_checks: get_check_types(check_type="catalog") = Field(default=[])  # type: ignore[valid-type]
-
-
-class DbtBouncerConfCatalogRunResults(DbtBouncerConfBase):
-    """Config file contents when catalog and run_results are used."""
-
-    model_config = ConfigDict(extra="forbid")
-
-    catalog_checks: get_check_types(check_type="catalog") = Field(default=[])  # type: ignore[valid-type]
-    run_results_checks: get_check_types(check_type="run_results") = Field(default=[])  # type: ignore[valid-type]
-
-
-class DbtBouncerConfManifestOnly(DbtBouncerConfBase):
-    """Config file contents when manifest only is used."""
-
-    model_config = ConfigDict(extra="forbid")
-
-    manifest_checks: get_check_types(check_type="manifest") = Field(default=[])  # type: ignore[valid-type]
-
-
-class DbtBouncerConfManifestRunResults(DbtBouncerConfBase):
-    """Config file contents when manifest and run_results are used."""
-
-    model_config = ConfigDict(extra="forbid")
-
-    manifest_checks: get_check_types(check_type="manifest") = Field(default=[])  # type: ignore[valid-type]
-    run_results_checks: get_check_types(check_type="run_results") = Field(default=[])  # type: ignore[valid-type]
-
-
-class DbtBouncerConfRunResultsOnly(DbtBouncerConfBase):
-    """Config file contents when run_results only is used."""
-
-    model_config = ConfigDict(extra="forbid")
-
-    run_results_checks: get_check_types(check_type="run_results") = Field(default=[])  # type: ignore[valid-type]
+# Backwards compatibility alias
+DbtBouncerConfAllCategories = DbtBouncerConf
