@@ -45,6 +45,36 @@ if TYPE_CHECKING:
     )
 
 
+def _should_run_check(
+    check: Any,
+    resource: Any,
+    iterate_over_value: set[str],
+    meta_config: list[str],
+) -> bool:
+    """Determine if a check should run against a given resource.
+
+    Evaluates three conditions:
+    1. The resource path matches the check's include/exclude patterns.
+    2. For model checks, the materialization matches (if specified).
+    3. The check is not listed in the resource's skip_checks meta config.
+
+    Returns:
+        bool: Whether the check should run.
+
+    """
+    if not resource_in_path(check, resource):
+        return False
+
+    if (
+        iterate_over_value == {"model"}
+        and check.materialization is not None
+        and check.materialization != resource.model.config.materialized
+    ):
+        return False
+
+    return not (meta_config and check.name in meta_config)
+
+
 def runner(
     bouncer_config: "DbtBouncerConf",
     catalog_nodes: list["DbtBouncerCatalogNode"],
@@ -158,18 +188,7 @@ def runner(
                     ["dbt-bouncer", "skip_checks"],
                     [],
                 )
-                if resource_in_path(check_i, i) and (
-                    (
-                        iterate_over_value != {"model"}
-                        or (
-                            iterate_over_value == {"model"}
-                            and check_i.materialization == i.model.config.materialized
-                            if check_i.materialization is not None
-                            else True
-                        )
-                    )
-                    and (check_i.name not in meta_config if meta_config != [] else True)
-                ):
+                if _should_run_check(check_i, i, iterate_over_value, meta_config):
                     check_run_id = (
                         f"{check_i.name}:{check_i.index}:{i.unique_id.split('.')[-1]}"
                         if iterate_value in ["exposure", "macro", "unit_test"]
