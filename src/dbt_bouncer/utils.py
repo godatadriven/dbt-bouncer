@@ -130,23 +130,28 @@ def find_missing_meta_keys(meta_config, required_keys) -> list[str]:
     ]
 
 
-def flatten(structure: Any, key: str = "", path: str = "", flattened=None):
+def flatten(
+    structure: Any,
+    key: str = "",
+    path: str = "",
+    flattened: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     """Take a dict of arbitrary depth that may contain lists and return a non-nested dict of all pathways.
 
     Returns:
-        dict: Flattened dict.
+        dict[str, Any]: Flattened dict.
 
     """
     if flattened is None:
         flattened = {}
-    if type(structure) not in (dict, list):
+    if not isinstance(structure, (dict, list)):
         flattened[((path + ">") if path else "") + key] = structure
     elif isinstance(structure, list):
         for i, item in enumerate(structure):
-            flatten(item, "%d" % i, path + ">" + key, flattened)
+            flatten(item, f"{i}", f"{path}>{key}", flattened)
     else:
         for new_key, value in structure.items():
-            flatten(value, new_key, path + ">" + key, flattened)
+            flatten(value, new_key, f"{path}>{key}", flattened)
     return flattened
 
 
