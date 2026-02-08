@@ -12,14 +12,12 @@ classifiers = [
 dependencies =[
   "click (!=8.3.0,!=8.3.1,<9)", # Due to this issue: https://github.com/pallets/click/issues/3110
   "dbt-artifacts-parser (>=0.8)",
-  "h11 (>=0.16.0)", # To fix security warning
   "jellyfish (>=1,<2)",
   "jinja2 (>=3,<4)",
   "jinja2-simple-tags (<1)",
   "packaging (<26)",
   "progress",
   "pydantic (>=2,<3)",
-  "pytest<=10",
   "pyyaml (<7)",
   "requests (>=2,<3)",
   "tabulate (<1)",
@@ -46,6 +44,7 @@ dev = [
   "dbt-core>=1.11.2,<2",
   "dbt-duckdb~=1.0",
   "prek>=0.1,<1",
+  "pytest<=10",
   "pytest-cov>=5,<8",
   "pytest-xdist~=3.0",
   "pyupgrade~=3.0",

@@ -354,14 +354,12 @@ source = { editable = "." }
 dependencies = [
     { name = "click" },
     { name = "dbt-artifacts-parser" },
-    { name = "h11" },
     { name = "jellyfish" },
     { name = "jinja2" },
     { name = "jinja2-simple-tags" },
     { name = "packaging" },
     { name = "progress" },
     { name = "pydantic" },
-    { name = "pytest" },
     { name = "pyyaml" },
     { name = "requests" },
     { name = "semver" },
@@ -375,6 +373,7 @@ dev = [
     { name = "dbt-core" },
     { name = "dbt-duckdb" },
     { name = "prek" },
+    { name = "pytest" },
     { name = "pytest-cov" },
     { name = "pytest-xdist" },
     { name = "pyupgrade" },
@@ -399,7 +398,6 @@ requires-dist = [
     { name = "dbt-artifacts-parser", specifier = ">=0.8" },
     { name = "dbt-core", marker = "extra == 'dev'", specifier = ">=1.11.2,<2" },
     { name = "dbt-duckdb", marker = "extra == 'dev'", specifier = "~=1.0" },
-    { name = "h11", specifier = ">=0.16.0" },
     { name = "jellyfish", specifier = ">=1,<2" },
     { name = "jinja2", specifier = ">=3,<4" },
     { name = "jinja2-simple-tags", specifier = "<1" },
@@ -414,7 +412,7 @@ requires-dist = [
     { name = "progress" },
     { name = "pydantic", specifier = ">=2,<3" },
     { name = "pymdown-extensions", marker = "extra == 'docs'", specifier = "~=10.0" },
-    { name = "pytest", specifier = "<=10" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = "<=10" },
     { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=5,<8" },
     { name = "pytest-xdist", marker = "extra == 'dev'", specifier = "~=3.0" },
     { name = "pyupgrade", marker = "extra == 'dev'", specifier = "~=3.0" },
@@ -659,15 +657,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/0d/0c/3a471b6e31951dce2360477420d0a8d1e00dea6cf33b70f3e8c3ab6e28e1/griffe-1.15.0.tar.gz", hash = "sha256:7726e3afd6f298fbc3696e67958803e7ac843c1cfe59734b6251a40cdbfb5eea", size = 424112, upload-time = "2025-11-10T15:03:15.52Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/9c/83/3b1d03d36f224edded98e9affd0467630fc09d766c0e56fb1498cbb04a9b/griffe-1.15.0-py3-none-any.whl", hash = "sha256:6f6762661949411031f5fcda9593f586e6ce8340f0ba88921a0f2ef7a81eb9a3", size = 150705, upload-time = "2025-11-10T15:03:13.549Z" },
-]
-
-[[package]]
-name = "h11"
-version = "0.16.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/01/ee/02a2c011bdab74c6fb3c75474d40b3052059d95df7e73351460c8588d963/h11-0.16.0.tar.gz", hash = "sha256:4e35b956cf45792e4caa5885e69fba00bdbc6ffafbfa020300e549b208ee5ff1", size = 101250, upload-time = "2025-04-24T03:35:25.427Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/04/4b/29cac41a4d98d144bf5f6d33995617b185d14b22401f75ca86f384e87ff1/h11-0.16.0-py3-none-any.whl", hash = "sha256:63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86", size = 37515, upload-time = "2025-04-24T03:35:24.344Z" },
 ]
 
 [[package]]

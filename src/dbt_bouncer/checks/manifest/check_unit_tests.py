@@ -1,7 +1,6 @@
 import logging
 from typing import TYPE_CHECKING, Literal
 
-import pytest
 from pydantic import BaseModel, ConfigDict, Field
 
 from dbt_bouncer.check_base import BaseCheck
@@ -166,7 +165,7 @@ class CheckUnitTestExpectFormats(BaseCheck):
             self.manifest_obj.manifest.metadata.dbt_version or "0.0.0"
         ) >= get_package_version_number("1.8.0"):
             if self.unit_test.expect.format is None:
-                pytest.fail(
+                raise DbtBouncerFailedCheckError(
                     f"Unit test `{self.unit_test.name}` does not have an `expect` format defined. "
                     f"Permitted formats are: {self.permitted_formats}."
                 )
