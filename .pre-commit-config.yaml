@@ -1,18 +1,22 @@
 ---
 exclude: '^dist'
 repos:
+    - repo: builtin
+      hooks:
+        - id: trailing-whitespace
+        - id: check-json
+        - id: check-merge-conflict
+        - id: check-toml
+        - id: check-added-large-files
+        - id: detect-private-key
+
     - repo: https://github.com/pre-commit/pre-commit-hooks
       rev: v5.0.0
       hooks:
-          - id: trailing-whitespace
-          - id: check-json
           - id: check-ast
-          - id: check-merge-conflict
-          - id: check-toml
           - id: check-yaml
             args: [--unsafe]
           - id: debug-statements
-          - id: detect-private-key
           - id: end-of-file-fixer
             exclude: dbt_project/target/manifest.json,tests/fixtures/dbt_16/target/manifest.json,tests/fixtures/dbt_17/target/manifest.json,tests/fixtures/dbt_18/target/manifest.json
     - repo: local
