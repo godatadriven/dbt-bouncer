@@ -183,16 +183,17 @@ def parse_manifest(
 
     """
     dbt_schema_version = manifest["metadata"]["dbt_schema_version"]
-    if dbt_schema_version == "https://schemas.getdbt.com/dbt/manifest/v11.json":
-        return ManifestV11(**manifest)
-    elif dbt_schema_version == "https://schemas.getdbt.com/dbt/manifest/v12.json":
-        from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
-            ManifestLatest,
-        )
+    match dbt_schema_version:
+        case "https://schemas.getdbt.com/dbt/manifest/v11.json":
+            return ManifestV11(**manifest)
+        case "https://schemas.getdbt.com/dbt/manifest/v12.json":
+            from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
+                ManifestLatest,
+            )
 
-        return ManifestLatest(**manifest)
-
-    raise ValueError("Not a manifest.json")
+            return ManifestLatest(**manifest)
+        case _:
+            raise ValueError("Not a manifest.json")
 
 
 def parse_manifest_artifact(
@@ -238,13 +239,15 @@ def parse_manifest_artifact(
     project_seeds = []
     project_snapshots = []
     project_tests = []
+    target_package = package_name or manifest_obj.manifest.metadata.project_name
     for k, v in manifest_obj.manifest.nodes.items():
-        if (
-            isinstance(v.resource_type, Enum) and v.resource_type.value == "model"
-        ) or v.resource_type == "model":
-            if v.package_name == (
-                package_name or manifest_obj.manifest.metadata.project_name
-            ):
+        resource_type_value = (
+            v.resource_type.value
+            if isinstance(v.resource_type, Enum)
+            else v.resource_type
+        )
+        match resource_type_value:
+            case "model" if v.package_name == target_package:
                 project_models.append(
                     DbtBouncerModel(
                         model=cast("Any", v),
@@ -252,45 +255,30 @@ def parse_manifest_artifact(
                         unique_id=k,
                     ),
                 )
-        elif (
-            (isinstance(v.resource_type, Enum) and v.resource_type.value == "seed")
-            or v.resource_type == "seed"
-        ) and v.package_name == (
-            package_name or manifest_obj.manifest.metadata.project_name
-        ):
-            project_seeds.append(
-                DbtBouncerSeed(
-                    original_file_path=str(clean_path_str(v.original_file_path)),
-                    seed=cast("Any", v),
-                    unique_id=k,
-                ),
-            )
-        elif (
-            (isinstance(v.resource_type, Enum) and v.resource_type.value == "snapshot")
-            or v.resource_type == "snapshot"
-        ) and v.package_name == (
-            package_name or manifest_obj.manifest.metadata.project_name
-        ):
-            project_snapshots.append(
-                DbtBouncerSnapshot(
-                    original_file_path=str(clean_path_str(v.original_file_path)),
-                    snapshot=cast("Any", v),
-                    unique_id=k,
-                ),
-            )
-        elif (
-            (isinstance(v.resource_type, Enum) and v.resource_type.value == "test")
-            or v.resource_type == "test"
-        ) and v.package_name == (
-            package_name or manifest_obj.manifest.metadata.project_name
-        ):
-            project_tests.append(
-                DbtBouncerTest(
-                    original_file_path=str(clean_path_str(v.original_file_path)),
-                    test=cast("Any", v),
-                    unique_id=k,
-                ),
-            )
+            case "seed" if v.package_name == target_package:
+                project_seeds.append(
+                    DbtBouncerSeed(
+                        original_file_path=str(clean_path_str(v.original_file_path)),
+                        seed=cast("Any", v),
+                        unique_id=k,
+                    ),
+                )
+            case "snapshot" if v.package_name == target_package:
+                project_snapshots.append(
+                    DbtBouncerSnapshot(
+                        original_file_path=str(clean_path_str(v.original_file_path)),
+                        snapshot=cast("Any", v),
+                        unique_id=k,
+                    ),
+                )
+            case "test" if v.package_name == target_package:
+                project_tests.append(
+                    DbtBouncerTest(
+                        original_file_path=str(clean_path_str(v.original_file_path)),
+                        test=cast("Any", v),
+                        unique_id=k,
+                    ),
+                )
 
     if get_package_version_number(
         manifest_obj.manifest.metadata.dbt_version or "0.0.0"
