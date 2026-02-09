@@ -30,7 +30,7 @@ if TYPE_CHECKING:
     from dbt_bouncer.artifact_parsers.parsers_run_results import (
         DbtBouncerRunResult,
     )
-    from dbt_bouncer.config_file_parser import DbtBouncerConf
+    from dbt_bouncer.config_file_parser import DbtBouncerConfBase
 
 
 def load_dbt_artifact(
@@ -98,7 +98,7 @@ def load_dbt_artifact(
 
 
 def parse_dbt_artifacts(
-    bouncer_config: "DbtBouncerConf", dbt_artifacts_dir: Path
+    bouncer_config: "DbtBouncerConfBase", dbt_artifacts_dir: Path
 ) -> tuple[
     "DbtBouncerManifest",
     list["DbtBouncerExposureBase"],
@@ -117,7 +117,7 @@ def parse_dbt_artifacts(
     """Parse all required dbt artifacts.
 
     Args:
-        bouncer_config (DbtBouncerConf): All checks to be run.
+        bouncer_config (DbtBouncerConfBase): All checks to be run.
         dbt_artifacts_dir (Path): Path to directory where artifacts are located.
 
     Returns:
