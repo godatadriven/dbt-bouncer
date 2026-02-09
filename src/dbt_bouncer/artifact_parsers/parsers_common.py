@@ -30,9 +30,7 @@ if TYPE_CHECKING:
     from dbt_bouncer.artifact_parsers.parsers_run_results import (
         DbtBouncerRunResult,
     )
-    from dbt_bouncer.config_file_parser import (
-        DbtBouncerConfAllCategories as DbtBouncerConf,
-    )
+    from dbt_bouncer.config_file_parser import DbtBouncerConf
 
 
 def load_dbt_artifact(
