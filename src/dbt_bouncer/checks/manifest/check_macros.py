@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, ClassVar, Literal
 
 from pydantic import Field
 
-from dbt_bouncer.utils import clean_path_str
+from dbt_bouncer.utils import clean_path_str, compile_pattern
 
 if TYPE_CHECKING:
     from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import Macros
@@ -156,7 +156,7 @@ class CheckMacroCodeDoesNotContainRegexpPattern(BaseCheck):
         if self.macro is None:
             raise DbtBouncerFailedCheckError("self.macro is None")
         if (
-            re.compile(self.regexp_pattern.strip(), flags=re.DOTALL).match(
+            compile_pattern(self.regexp_pattern.strip(), flags=re.DOTALL).match(
                 self.macro.macro_sql
             )
             is not None

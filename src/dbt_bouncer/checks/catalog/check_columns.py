@@ -21,6 +21,7 @@ if TYPE_CHECKING:
 from pydantic import model_validator
 
 from dbt_bouncer.check_base import BaseCheck
+from dbt_bouncer.utils import compile_pattern
 
 
 class CheckColumnDescriptionPopulated(BaseCheck):
@@ -130,7 +131,7 @@ class CheckColumnHasSpecifiedTest(BaseCheck):
         columns_to_check = [
             v.name
             for _, v in self.catalog_node.columns.items()
-            if re.compile(self.column_name_pattern.strip()).match(str(v.name))
+            if compile_pattern(self.column_name_pattern.strip()).match(str(v.name))
             is not None
         ]
         relevant_tests = []
@@ -238,8 +239,8 @@ class CheckColumnNameCompliesToColumnType(BaseCheck):
             non_complying_columns = [
                 v.name
                 for _, v in self.catalog_node.columns.items()
-                if re.compile(self.type_pattern.strip()).match(str(v.type)) is None
-                and re.compile(self.column_name_pattern.strip()).match(str(v.name))
+                if compile_pattern(self.type_pattern.strip()).match(str(v.type)) is None
+                and compile_pattern(self.column_name_pattern.strip()).match(str(v.name))
                 is not None
             ]
 
@@ -253,7 +254,7 @@ class CheckColumnNameCompliesToColumnType(BaseCheck):
                 v.name
                 for _, v in self.catalog_node.columns.items()
                 if v.type in self.types
-                and re.compile(self.column_name_pattern.strip()).match(str(v.name))
+                and compile_pattern(self.column_name_pattern.strip()).match(str(v.name))
                 is None
             ]
 

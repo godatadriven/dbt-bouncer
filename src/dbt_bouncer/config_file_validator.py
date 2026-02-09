@@ -9,7 +9,7 @@ import click
 import toml
 from pydantic import ValidationError
 
-from dbt_bouncer.utils import load_config_from_yaml
+from dbt_bouncer.utils import compile_pattern, load_config_from_yaml
 
 if TYPE_CHECKING:
     from dbt_bouncer.config_file_parser import DbtBouncerConfBase
@@ -222,7 +222,7 @@ def validate_conf(
         error_message: list[str] = []
         for error in e.errors():
             if (
-                re.compile(
+                compile_pattern(
                     r"Input tag \S* found using 'name' does not match any of the expected tags: [\S\s]*",
                     flags=re.DOTALL,
                 ).match(error["msg"])
