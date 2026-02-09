@@ -161,9 +161,8 @@ def validate_conf(
     logging.info("Validating conf...")
 
     # Import all types needed by DbtBouncerConf before model_rebuild().
-    # Since the consolidated class has fields for all check categories,
-    # all referenced types must be importable regardless of which
-    # categories are in the config.
+    # Since the class has fields for all check categories, all referenced
+    # types must be importable regardless of which categories are in the config.
     import warnings
 
     from dbt_bouncer.checks.common import NestedDict  # noqa: F401
