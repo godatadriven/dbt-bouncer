@@ -22,7 +22,6 @@ dependencies =[
   "pyyaml (<7)",
   "requests (>=2,<3)",
   "tabulate (<1)",
-  "toml (<1)",
   "semver (<4)"
 ]
 description = "Configure and enforce conventions for your dbt project."

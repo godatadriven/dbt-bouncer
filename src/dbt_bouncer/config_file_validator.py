@@ -1,12 +1,12 @@
 import logging
 import os
 import re
+import tomllib
 from collections.abc import Mapping
 from pathlib import Path, PurePath
 from typing import TYPE_CHECKING, Any
 
 import click
-import toml
 from pydantic import ValidationError
 
 from dbt_bouncer.utils import compile_pattern, load_config_from_yaml
@@ -108,7 +108,8 @@ def load_config_file_contents(
         case ".yml" | ".yaml":
             return load_config_from_yaml(Path(config_file_path))
         case ".toml":
-            toml_cfg = toml.load(config_file_path)
+            with Path(config_file_path).open("rb") as f:
+                toml_cfg = tomllib.load(f)
             if "dbt-bouncer" in toml_cfg["tool"]:
                 return next(
                     v for k, v in toml_cfg["tool"].items() if k == "dbt-bouncer"
