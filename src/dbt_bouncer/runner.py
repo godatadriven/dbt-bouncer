@@ -1,6 +1,5 @@
 """Assemble and run all checks."""
 
-import copy
 import json
 import logging
 import operator
@@ -155,7 +154,7 @@ def runner(
         if len(iterate_over_value) == 1:
             iterate_value = next(iter(iterate_over_value))
             for i in resource_map[f"{iterate_value}s"]:
-                check_i = copy.deepcopy(check)
+                check_i = check.model_copy(deep=True)
                 if iterate_value in [
                     "model",
                     "seed",
