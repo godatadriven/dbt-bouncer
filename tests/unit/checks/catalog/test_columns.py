@@ -170,6 +170,7 @@ _TEST_DATA_FOR_CHECK_COLUMN_DESCRIPTION_POPULATED = [
     pytest.param(
         {},
         {},
+        {},
         does_not_raise(),
         id="all_documented",
     ),
@@ -198,6 +199,7 @@ _TEST_DATA_FOR_CHECK_COLUMN_DESCRIPTION_POPULATED = [
             "path": "model_2.sql",
             "unique_id": "model.package_name.model_2",
         },
+        {},
         pytest.raises(DbtBouncerFailedCheckError),
         id="missing_documentation",
     ),
@@ -205,15 +207,82 @@ _TEST_DATA_FOR_CHECK_COLUMN_DESCRIPTION_POPULATED = [
 
 
 @pytest.mark.parametrize(
-    ("catalog_node", "models", "expectation"),
+    ("catalog_node", "models", "manifest_obj", "expectation"),
     _TEST_DATA_FOR_CHECK_COLUMN_DESCRIPTION_POPULATED,
-    indirect=["catalog_node", "models"],
+    indirect=["catalog_node", "models", "manifest_obj"],
 )
-def test_check_column_description_populated(catalog_node, models, expectation):
+def test_check_column_description_populated(
+    catalog_node, models, manifest_obj, expectation
+):
     with expectation:
         CheckColumnDescriptionPopulated(
             catalog_node=catalog_node,
             models=models,
+            manifest_obj=manifest_obj,
+            name="check_column_description_populated",
+        ).execute()
+
+
+_TEST_DATA_FOR_CHECK_COLUMN_DESCRIPTION_POPULATED_SNOWFLAKE = [
+    pytest.param(
+        {
+            "columns": {
+                "col_1": {
+                    "index": 1,
+                    "name": "col_1",
+                    "type": "INTEGER",
+                    "comment": "This is a description",
+                },
+                "col_2": {
+                    "index": 2,
+                    "name": "col_2",
+                    "type": "INTEGER",
+                    "comment": "This is a description",
+                },
+            },
+        },
+        {},
+        {"adapter_type": "snowflake"},
+        does_not_raise(),
+        id="all_documented_snowflake",
+    ),
+    pytest.param(
+        {
+            "columns": {
+                "col_1": {
+                    "index": 1,
+                    "name": "col_1",
+                    "type": "INTEGER",
+                    "comment": "This is a description",
+                },
+                "col_2": {
+                    "index": 2,
+                    "name": "col_2",
+                    "type": "INTEGER",
+                },
+            },
+        },
+        {},
+        {"adapter_type": "snowflake"},
+        pytest.raises(DbtBouncerFailedCheckError),
+        id="missing_documentation_snowflake",
+    ),
+]
+
+
+@pytest.mark.parametrize(
+    ("catalog_node", "models", "manifest_obj", "expectation"),
+    _TEST_DATA_FOR_CHECK_COLUMN_DESCRIPTION_POPULATED_SNOWFLAKE,
+    indirect=["catalog_node", "models", "manifest_obj"],
+)
+def test_check_column_description_populated_snowflake(
+    catalog_node, models, manifest_obj, expectation
+):
+    with expectation:
+        CheckColumnDescriptionPopulated(
+            catalog_node=catalog_node,
+            models=models,
+            manifest_obj=manifest_obj,
             name="check_column_description_populated",
         ).execute()
 
