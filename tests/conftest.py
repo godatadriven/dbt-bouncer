@@ -1,6 +1,6 @@
-import json
 from pathlib import Path
 
+import orjson
 import pytest
 
 
@@ -21,6 +21,7 @@ def manifest_obj():
     )
 
     manifest_json_path = Path("dbt_project") / "target/manifest.json"
-    with Path.open(manifest_json_path, "r") as fp:
-        manifest_obj = parse_manifest(manifest=json.load(fp))
+    manifest_obj = parse_manifest(
+        manifest=orjson.loads(manifest_json_path.read_bytes())
+    )
     return DbtBouncerManifest(**{"manifest": manifest_obj})

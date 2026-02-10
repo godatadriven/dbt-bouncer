@@ -1,7 +1,8 @@
-import json
 import logging
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal
+
+import orjson
 
 from dbt_bouncer.utils import get_package_version_number
 
@@ -60,18 +61,16 @@ def load_dbt_artifact(
             f"No {artifact_name} found at {artifact_path}.",
         )
 
+    artifact_bytes = Path(artifact_path).read_bytes()
+
     if artifact_name == "catalog.json":
         from dbt_bouncer.artifact_parsers.parsers_catalog import DbtBouncerCatalog
 
-        with Path.open(Path(artifact_path), "r") as fp:
-            catalog_obj = DbtBouncerCatalog(**{"catalog": json.load(fp)})
-
+        catalog_obj = DbtBouncerCatalog(**{"catalog": orjson.loads(artifact_bytes)})
         return catalog_obj
 
     elif artifact_name == "manifest.json":
-        # First assess dbt version is sufficient
-        with Path.open(Path(artifact_path), "r") as fp:
-            manifest_json = json.load(fp)
+        manifest_json = orjson.loads(artifact_bytes)
 
         if not get_package_version_number(
             manifest_json["metadata"]["dbt_version"]
@@ -91,9 +90,7 @@ def load_dbt_artifact(
     elif artifact_name == "run_results.json":
         from dbt_bouncer.artifact_parsers.parsers_run_results import parse_run_results
 
-        with Path.open(Path(artifact_path), "r") as fp:
-            run_results_obj = parse_run_results(run_results=json.load(fp))
-
+        run_results_obj = parse_run_results(run_results=orjson.loads(artifact_bytes))
         return run_results_obj
 
 
