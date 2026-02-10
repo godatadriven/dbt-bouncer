@@ -167,7 +167,21 @@ def runner(
                         d = getattr(i, iterate_value).config.meta
                     except AttributeError:
                         d = getattr(i, iterate_value).meta
-                elif iterate_value in ["catalog_node", "run_result"]:
+                elif iterate_value == "catalog_node":
+                    # Lookup corresponding manifest node to read meta config
+                    d = {}
+                    if hasattr(i, "unique_id"):
+                        for model_resource in resource_map.get("models", []):
+                            if (
+                                hasattr(model_resource, "model")
+                                and model_resource.model.unique_id == i.unique_id
+                            ):
+                                try:
+                                    d = model_resource.model.config.meta
+                                except AttributeError:
+                                    d = getattr(model_resource.model, "meta", {})
+                                break
+                elif iterate_value == "run_result":
                     d = {}
                 elif iterate_value in ["macro"]:
                     d = i.meta
