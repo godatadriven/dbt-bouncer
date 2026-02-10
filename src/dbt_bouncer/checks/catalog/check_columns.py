@@ -32,6 +32,7 @@ class CheckColumnDescriptionPopulated(BaseCheck):
 
     Receives:
         catalog_node (CatalogNodes): The CatalogNodes object to check.
+        manifest_obj (DbtBouncerManifest): The DbtBouncerManifest object parsed from `manifest.json`.
         models (list[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
 
     Other Parameters:
@@ -55,6 +56,7 @@ class CheckColumnDescriptionPopulated(BaseCheck):
     """
 
     catalog_node: "CatalogNodes | None" = Field(default=None)
+    manifest_obj: "DbtBouncerManifest | None" = Field(default=None)
     min_description_length: int | None = Field(default=None)
     models: list["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_column_description_populated"]
@@ -68,15 +70,28 @@ class CheckColumnDescriptionPopulated(BaseCheck):
         """
         if self.catalog_node is None:
             raise DbtBouncerFailedCheckError("self.catalog_node is None")
+
+        if self.manifest_obj is None:
+            raise DbtBouncerFailedCheckError("self.manifest_obj is None")
+
         if self.is_catalog_node_a_model(self.catalog_node, self.models):
             model = next(
                 m for m in self.models if m.unique_id == self.catalog_node.unique_id
             )
             non_complying_columns = []
             for _, v in self.catalog_node.columns.items():
-                columns = model.columns or {}
-                if columns.get(v.name) is None or not self._is_description_populated(
-                    columns[v.name].description or "", self.min_description_length
+                # Snowflake saves column descriptions in the 'comment' field in catalog.json
+                if self.manifest_obj.manifest.metadata.adapter_type in ["snowflake"]:
+                    description = getattr(v, "comment", "") or ""
+                else:
+                    columns = model.columns or {}
+                    column_from_manifest = columns.get(v.name)
+                    description = ""
+                    if column_from_manifest:
+                        description = column_from_manifest.description or ""
+
+                if not self._is_description_populated(
+                    description, self.min_description_length
                 ):
                     non_complying_columns.append(v.name)
 
