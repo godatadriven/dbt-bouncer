@@ -1,4 +1,3 @@
-import warnings
 from contextlib import nullcontext as does_not_raise
 
 import pytest
@@ -11,22 +10,8 @@ from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
     Nodes6,
     UnitTests,
 )
+from dbt_bouncer.artifact_parsers.parsers_manifest import DbtBouncerManifest
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
-
-with warnings.catch_warnings():
-    warnings.filterwarnings("ignore", category=UserWarning)
-
-    from dbt_bouncer.artifact_parsers.parsers_manifest import (  # noqa: F401
-        DbtBouncerExposure,
-        DbtBouncerExposureBase,
-        DbtBouncerManifest,
-        DbtBouncerModel,
-        DbtBouncerModelBase,
-        DbtBouncerTest,
-        DbtBouncerTestBase,
-    )
-
-
 from dbt_bouncer.checks.manifest.check_models import (
     CheckModelAccess,
     CheckModelCodeDoesNotContainRegexpPattern,
@@ -62,40 +47,6 @@ from dbt_bouncer.checks.manifest.check_models import (
     CheckModelVersionAllowed,
     CheckModelVersionPinnedInRef,
 )
-
-CheckModelAccess.model_rebuild()
-CheckModelCodeDoesNotContainRegexpPattern.model_rebuild()
-CheckModelContractsEnforcedForPublicModel.model_rebuild()
-CheckModelDependsOnMacros.model_rebuild()
-CheckModelDependsOnMultipleSources.model_rebuild()
-CheckModelDescriptionPopulated.model_rebuild()
-CheckModelDescriptionContainsRegexPattern.model_rebuild()
-CheckModelDirectories.model_rebuild()
-CheckModelsDocumentationCoverage.model_rebuild()
-CheckModelDocumentedInSameDirectory.model_rebuild()
-CheckModelFileName.model_rebuild()
-CheckModelGrantPrivilege.model_rebuild()
-CheckModelGrantPrivilegeRequired.model_rebuild()
-CheckModelHasContractsEnforced.model_rebuild()
-CheckModelHasExposure.model_rebuild()
-CheckModelHasMetaKeys.model_rebuild()
-CheckModelHasNoUpstreamDependencies.model_rebuild()
-CheckModelHasSemiColon.model_rebuild()
-CheckModelHasTags.model_rebuild()
-CheckModelHasUniqueTest.model_rebuild()
-CheckModelHasUnitTests.model_rebuild()
-CheckModelLatestVersionSpecified.model_rebuild()
-CheckModelMaxChainedViews.model_rebuild()
-CheckModelMaxFanout.model_rebuild()
-CheckModelMaxNumberOfLines.model_rebuild()
-CheckModelMaxUpstreamDependencies.model_rebuild()
-CheckModelNames.model_rebuild()
-CheckModelNumberOfGrants.model_rebuild()
-CheckModelPropertyFileLocation.model_rebuild()
-CheckModelSchemaName.model_rebuild()
-CheckModelVersionAllowed.model_rebuild()
-CheckModelVersionPinnedInRef.model_rebuild()
-CheckModelsTestCoverage.model_rebuild()
 
 
 @pytest.fixture
