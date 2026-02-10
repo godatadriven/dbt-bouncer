@@ -4,6 +4,7 @@ import json
 import logging
 import operator
 import traceback
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -218,8 +219,13 @@ def runner(
 
     logging.info(f"Assembled {len(checks_to_run)} checks, running...")
 
-    bar = Bar("Running checks...", max=len(checks_to_run))
-    for check in checks_to_run:
+    def _execute_check(check: dict[str, Any]) -> dict[str, Any]:
+        """Execute a single check and return the result.
+
+        Returns:
+            dict[str, Any]: The check dict with outcome and optional failure_message set.
+
+        """
         logging.debug(f"Running {check['check_run_id']}...")
         try:
             check["check"].execute()
@@ -248,8 +254,16 @@ def runner(
                 check["failure_message"] = (
                     f"`dbt-bouncer` encountered an error ({failure_message}), run with `-v` to see more details or report an issue at https://github.com/godatadriven/dbt-bouncer/issues."
                 )
+        return check
 
-        bar.next()
+    bar = Bar("Running checks...", max=len(checks_to_run))
+    with ThreadPoolExecutor() as executor:
+        futures = {
+            executor.submit(_execute_check, check): check for check in checks_to_run
+        }
+        for future in as_completed(futures):
+            future.result()
+            bar.next()
     bar.finish()
 
     results = [
