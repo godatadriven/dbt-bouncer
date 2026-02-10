@@ -1,6 +1,5 @@
 """Assemble and run all checks."""
 
-import json
 import logging
 import operator
 import traceback
@@ -8,6 +7,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+import orjson
 from progress.bar import Bar
 from tabulate import tabulate
 
@@ -337,10 +337,6 @@ def runner(
         else:
             results_to_save = results
 
-        with Path.open(coverage_file, "w") as f:
-            json.dump(
-                results_to_save,
-                f,
-            )
+        coverage_file.write_bytes(orjson.dumps(results_to_save))
 
     return 1 if num_checks_error != 0 else 0, results
