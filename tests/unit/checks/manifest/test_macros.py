@@ -13,13 +13,6 @@ from dbt_bouncer.checks.manifest.check_macros import (
     CheckMacroPropertyFileLocation,
 )
 
-CheckMacroArgumentsDescriptionPopulated.model_rebuild()
-CheckMacroCodeDoesNotContainRegexpPattern.model_rebuild()
-CheckMacroDescriptionPopulated.model_rebuild()
-CheckMacroMaxNumberOfLines.model_rebuild()
-CheckMacroNameMatchesFileName.model_rebuild()
-CheckMacroPropertyFileLocation.model_rebuild()
-
 
 @pytest.fixture
 def macro(request):

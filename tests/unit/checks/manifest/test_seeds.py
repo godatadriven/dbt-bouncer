@@ -1,4 +1,3 @@
-import warnings
 from contextlib import nullcontext as does_not_raise
 
 import pytest
@@ -7,20 +6,7 @@ from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
     Nodes as SeedsLatest,
 )
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
-
-with warnings.catch_warnings():
-    warnings.filterwarnings("ignore", category=UserWarning)
-
-    from dbt_bouncer.artifact_parsers.parsers_manifest import (  # noqa: F401
-        DbtBouncerManifest,
-        DbtBouncerSeed,
-        DbtBouncerSeedBase,
-    )
-
-
 from dbt_bouncer.checks.manifest.check_seeds import CheckSeedNames
-
-CheckSeedNames.model_rebuild()
 
 
 @pytest.mark.parametrize(

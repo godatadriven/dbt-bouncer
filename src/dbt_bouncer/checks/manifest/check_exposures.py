@@ -106,17 +106,18 @@ class CheckExposureOnNonPublicModels(BaseCheck):
         """
         if self.exposure is None:
             raise DbtBouncerFailedCheckError("self.exposure is None")
+        models_by_id = {m.unique_id: m for m in self.models}
         non_public_upstream_dependencies = []
-        for model in getattr(self.exposure.depends_on, "nodes", []) or []:
+        for node_id in getattr(self.exposure.depends_on, "nodes", []) or []:
+            model_obj = models_by_id.get(node_id)
             if (
-                next(m for m in self.models if m.unique_id == model).resource_type
-                == "model"
-                and next(m for m in self.models if m.unique_id == model).package_name
-                == self.exposure.package_name
+                model_obj
+                and model_obj.resource_type == "model"
+                and model_obj.package_name == self.exposure.package_name
+                and model_obj.access
+                and model_obj.access.value != "public"
             ):
-                model_obj = next(m for m in self.models if m.unique_id == model)
-                if model_obj.access and model_obj.access.value != "public":
-                    non_public_upstream_dependencies.append(model_obj.name)
+                non_public_upstream_dependencies.append(model_obj.name)
 
         if non_public_upstream_dependencies:
             raise DbtBouncerFailedCheckError(
@@ -172,17 +173,18 @@ class CheckExposureOnView(BaseCheck):
         """
         if self.exposure is None:
             raise DbtBouncerFailedCheckError("self.exposure is None")
+        models_by_id = {m.unique_id: m for m in self.models}
         non_table_upstream_dependencies = []
-        for model in getattr(self.exposure.depends_on, "nodes", []) or []:
+        for node_id in getattr(self.exposure.depends_on, "nodes", []) or []:
+            model_obj = models_by_id.get(node_id)
             if (
-                next(m for m in self.models if m.unique_id == model).resource_type
-                == "model"
-                and next(m for m in self.models if m.unique_id == model).package_name
-                == self.exposure.package_name
+                model_obj
+                and model_obj.resource_type == "model"
+                and model_obj.package_name == self.exposure.package_name
+                and model_obj.config
+                and model_obj.config.materialized in self.materializations_to_include
             ):
-                model_obj = next(m for m in self.models if m.unique_id == model)
-                if model_obj.config.materialized in self.materializations_to_include:
-                    non_table_upstream_dependencies.append(model_obj.name)
+                non_table_upstream_dependencies.append(model_obj.name)
 
         if non_table_upstream_dependencies:
             raise DbtBouncerFailedCheckError(

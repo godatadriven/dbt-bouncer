@@ -1,4 +1,3 @@
-import re
 from typing import TYPE_CHECKING, Literal
 
 from dbt_bouncer.check_base import BaseCheck
@@ -12,7 +11,7 @@ if TYPE_CHECKING:
 from pydantic import Field
 
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
-from dbt_bouncer.utils import clean_path_str, get_clean_model_name
+from dbt_bouncer.utils import clean_path_str, compile_pattern, get_clean_model_name
 
 
 class CheckLineagePermittedUpstreamModels(BaseCheck):
@@ -73,15 +72,13 @@ class CheckLineagePermittedUpstreamModels(BaseCheck):
             and x.split(".")[1]
             == (self.package_name or self.manifest_obj.manifest.metadata.project_name)
         ]
+        models_by_id = {m.unique_id: m for m in self.models}
         not_permitted_upstream_models = [
             upstream_model
             for upstream_model in upstream_models
-            if re.compile(self.upstream_path_pattern.strip()).match(
-                clean_path_str(
-                    next(
-                        m for m in self.models if m.unique_id == upstream_model
-                    ).original_file_path
-                ),
+            if upstream_model in models_by_id
+            and compile_pattern(self.upstream_path_pattern.strip()).match(
+                clean_path_str(models_by_id[upstream_model].original_file_path),
             )
             is None
         ]

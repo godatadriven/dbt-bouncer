@@ -21,6 +21,7 @@ if TYPE_CHECKING:
 from pydantic import model_validator
 
 from dbt_bouncer.check_base import BaseCheck
+from dbt_bouncer.utils import compile_pattern
 
 
 class CheckColumnDescriptionPopulated(BaseCheck):
@@ -130,10 +131,10 @@ class CheckColumnHasSpecifiedTest(BaseCheck):
         columns_to_check = [
             v.name
             for _, v in self.catalog_node.columns.items()
-            if re.compile(self.column_name_pattern.strip()).match(str(v.name))
+            if compile_pattern(self.column_name_pattern.strip()).match(str(v.name))
             is not None
         ]
-        relevant_tests = []
+        tested_columns = set()
         for t in self.tests:
             test_metadata = getattr(t, "test_metadata", None)
             attached_node = getattr(t, "attached_node", None)
@@ -143,16 +144,8 @@ class CheckColumnHasSpecifiedTest(BaseCheck):
                 and getattr(test_metadata, "name", None) == self.test_name
                 and attached_node == self.catalog_node.unique_id
             ):
-                relevant_tests.append(t)
-        non_complying_columns = [
-            c
-            for c in columns_to_check
-            if f"{self.catalog_node.unique_id}.{c}"
-            not in [
-                f"{getattr(t, 'attached_node', '')}.{getattr(t, 'column_name', '')}"
-                for t in relevant_tests
-            ]
-        ]
+                tested_columns.add(getattr(t, "column_name", ""))
+        non_complying_columns = [c for c in columns_to_check if c not in tested_columns]
 
         if non_complying_columns:
             raise DbtBouncerFailedCheckError(
@@ -238,8 +231,8 @@ class CheckColumnNameCompliesToColumnType(BaseCheck):
             non_complying_columns = [
                 v.name
                 for _, v in self.catalog_node.columns.items()
-                if re.compile(self.type_pattern.strip()).match(str(v.type)) is None
-                and re.compile(self.column_name_pattern.strip()).match(str(v.name))
+                if compile_pattern(self.type_pattern.strip()).match(str(v.type)) is None
+                and compile_pattern(self.column_name_pattern.strip()).match(str(v.name))
                 is not None
             ]
 
@@ -253,7 +246,7 @@ class CheckColumnNameCompliesToColumnType(BaseCheck):
                 v.name
                 for _, v in self.catalog_node.columns.items()
                 if v.type in self.types
-                and re.compile(self.column_name_pattern.strip()).match(str(v.name))
+                and compile_pattern(self.column_name_pattern.strip()).match(str(v.name))
                 is None
             ]
 
@@ -383,10 +376,11 @@ class CheckColumnsAreAllDocumented(BaseCheck):
                     if v.name not in model_columns
                 ]
             else:
+                model_columns_lower = {c.lower() for c in model_columns}
                 undocumented_columns = [
                     v.name
                     for _, v in self.catalog_node.columns.items()
-                    if v.name.lower() not in [c.lower() for c in model_columns]
+                    if v.name.lower() not in model_columns_lower
                 ]
 
             if undocumented_columns:

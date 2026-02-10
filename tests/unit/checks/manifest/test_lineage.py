@@ -3,20 +3,12 @@ from contextlib import nullcontext as does_not_raise
 import pytest
 
 from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import Nodes4
-from dbt_bouncer.artifact_parsers.parsers_manifest import (  # noqa: F401
-    DbtBouncerManifest,
-    DbtBouncerModelBase,
-)
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.checks.manifest.check_lineage import (
     CheckLineagePermittedUpstreamModels,
     CheckLineageSeedCannotBeUsed,
     CheckLineageSourceCannotBeUsed,
 )
-
-CheckLineagePermittedUpstreamModels.model_rebuild()
-CheckLineageSeedCannotBeUsed.model_rebuild()
-CheckLineageSourceCannotBeUsed.model_rebuild()
 
 
 @pytest.mark.parametrize(

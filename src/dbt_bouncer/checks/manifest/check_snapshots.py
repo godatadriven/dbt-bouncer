@@ -1,4 +1,3 @@
-import re
 from typing import TYPE_CHECKING, Literal
 
 from pydantic import Field
@@ -11,6 +10,7 @@ if TYPE_CHECKING:
     )
 
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
+from dbt_bouncer.utils import compile_pattern
 
 
 class CheckSnapshotHasTags(BaseCheck):
@@ -112,7 +112,7 @@ class CheckSnapshotNames(BaseCheck):
         if self.snapshot is None:
             raise DbtBouncerFailedCheckError("self.snapshot is None")
         if (
-            re.compile(self.snapshot_name_pattern.strip()).match(
+            compile_pattern(self.snapshot_name_pattern.strip()).match(
                 str(self.snapshot.name)
             )
             is None

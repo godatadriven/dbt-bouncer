@@ -1,27 +1,13 @@
-import warnings
 from contextlib import nullcontext as does_not_raise
 
 import pytest
 
 from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import Nodes7
-
-with warnings.catch_warnings():
-    warnings.filterwarnings("ignore", category=UserWarning)
-
-    from dbt_bouncer.artifact_parsers.parsers_manifest import (  # noqa: F401
-        DbtBouncerManifest,
-        DbtBouncerSnapshot,
-        DbtBouncerSnapshotBase,
-    )
-
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.checks.manifest.check_snapshots import (
     CheckSnapshotHasTags,
     CheckSnapshotNames,
 )
-
-CheckSnapshotHasTags.model_rebuild()
-CheckSnapshotNames.model_rebuild()
 
 
 @pytest.mark.parametrize(

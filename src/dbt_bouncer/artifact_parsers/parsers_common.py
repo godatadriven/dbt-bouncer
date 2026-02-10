@@ -88,7 +88,9 @@ def load_dbt_artifact(
         return DbtBouncerManifest(**{"manifest": manifest_obj})
 
     elif artifact_name == "run_results.json":
-        from dbt_bouncer.artifact_parsers.parsers_run_results import parse_run_results
+        from dbt_bouncer.artifact_parsers.parsers_run_results import (
+            parse_run_results,
+        )
 
         run_results_obj = parse_run_results(run_results=orjson.loads(artifact_bytes))
         return run_results_obj

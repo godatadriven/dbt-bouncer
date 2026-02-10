@@ -1,4 +1,3 @@
-import re
 from typing import TYPE_CHECKING, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -8,6 +7,7 @@ if TYPE_CHECKING:
 
 
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
+from dbt_bouncer.utils import compile_pattern
 
 
 class CheckProjectName(BaseModel):
@@ -65,7 +65,7 @@ class CheckProjectName(BaseModel):
             self.package_name or self.manifest_obj.manifest.metadata.project_name
         )
         if (
-            re.compile(self.project_name_pattern.strip()).match(
+            compile_pattern(self.project_name_pattern.strip()).match(
                 str(package_name),
             )
             is None
