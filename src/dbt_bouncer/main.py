@@ -295,3 +295,16 @@ manifest_checks:
         f.write(config_content)
 
     logging.info(f"Created `{config_path}`.")
+
+
+@cli.command(name="list")
+def list_checks() -> None:
+    """List all available dbt-bouncer checks."""
+    from dbt_bouncer.utils import get_check_objects
+
+    checks = sorted(get_check_objects(), key=lambda c: c.__name__)
+    for check_class in checks:
+        name = check_class.__name__
+        docstring = (check_class.__doc__ or "").strip()
+        description = docstring.splitlines()[0] if docstring else ""
+        click.echo(f"{name}:\n    {description}\n")

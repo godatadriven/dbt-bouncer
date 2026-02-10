@@ -1462,3 +1462,18 @@ def test_cli_unsupported_dbt_version(tmp_path):
         >= 0
     )
     assert result.exit_code == 1
+
+
+def test_cli_list():
+    """Test that `dbt-bouncer list` outputs all built-in checks."""
+    runner = CliRunner()
+    result = runner.invoke(cli, ["list"])
+
+    assert result.exit_code == 0
+    # Spot-check a few checks from different categories
+    assert "CheckColumnDescriptionPopulated:" in result.output
+    assert "CheckModelDescriptionPopulated:" in result.output
+    assert "CheckSourceDescriptionPopulated:" in result.output
+    assert "CheckRunResultsMaxExecutionTime:" in result.output
+    # Each entry should have a description line
+    assert "Columns must have a populated description." in result.output
