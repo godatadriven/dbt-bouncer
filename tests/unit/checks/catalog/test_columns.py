@@ -15,12 +15,7 @@ with warnings.catch_warnings():
 from pydantic import ValidationError
 
 from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import Nodes4, Nodes6
-from dbt_bouncer.artifact_parsers.parsers_manifest import (  # noqa: F401  # noqa: F401
-    DbtBouncerManifest,
-    DbtBouncerModelBase,
-    DbtBouncerTest,
-    DbtBouncerTestBase,
-)
+from dbt_bouncer.artifact_parsers.parsers_manifest import DbtBouncerManifest
 from dbt_bouncer.checks.catalog.check_columns import (
     CheckColumnDescriptionPopulated,
     CheckColumnHasSpecifiedTest,
@@ -30,13 +25,6 @@ from dbt_bouncer.checks.catalog.check_columns import (
     CheckColumnsAreDocumentedInPublicModels,
 )
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
-
-CheckColumnDescriptionPopulated.model_rebuild()
-CheckColumnNameCompliesToColumnType.model_rebuild()
-CheckColumnNames.model_rebuild()
-CheckColumnsAreAllDocumented.model_rebuild()
-CheckColumnsAreDocumentedInPublicModels.model_rebuild()
-CheckColumnHasSpecifiedTest.model_rebuild()
 
 
 @pytest.fixture

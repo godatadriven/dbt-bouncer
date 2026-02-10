@@ -3,21 +3,12 @@ from contextlib import nullcontext as does_not_raise
 import pytest
 
 from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import Exposures, Nodes4
-from dbt_bouncer.artifact_parsers.parsers_manifest import (  # noqa: F401
-    DbtBouncerExposureBase,
-    DbtBouncerModel,
-    DbtBouncerModelBase,
-)
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.checks.manifest.check_exposures import (
     CheckExposureOnModel,
     CheckExposureOnNonPublicModels,
     CheckExposureOnView,
 )
-
-CheckExposureOnModel.model_rebuild()
-CheckExposureOnNonPublicModels.model_rebuild()
-CheckExposureOnView.model_rebuild()
 
 
 @pytest.mark.parametrize(

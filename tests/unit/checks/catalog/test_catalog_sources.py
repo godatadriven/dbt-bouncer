@@ -8,15 +8,10 @@ with warnings.catch_warnings():
     from dbt_artifacts_parser.parsers.catalog.catalog_v1 import Nodes as CatalogNodes
 
 from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import Sources
-from dbt_bouncer.artifact_parsers.parsers_manifest import (
-    DbtBouncerSourceBase,  # noqa: F401
-)
 from dbt_bouncer.checks.catalog.check_catalog_sources import (
     CheckSourceColumnsAreAllDocumented,
 )
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
-
-CheckSourceColumnsAreAllDocumented.model_rebuild()
 
 
 @pytest.fixture

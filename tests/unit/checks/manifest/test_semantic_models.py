@@ -6,16 +6,10 @@ from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
     Nodes4,
     SemanticModels,
 )
-from dbt_bouncer.artifact_parsers.parsers_manifest import (  # noqa: F401
-    DbtBouncerModelBase,
-    DbtBouncerSemanticModelBase,
-)
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.checks.manifest.check_semantic_models import (
     CheckSemanticModelOnNonPublicModels,
 )
-
-CheckSemanticModelOnNonPublicModels.model_rebuild()
 
 
 @pytest.mark.parametrize(
