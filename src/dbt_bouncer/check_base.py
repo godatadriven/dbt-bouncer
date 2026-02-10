@@ -44,7 +44,7 @@ class BaseCheck(BaseModel):
             description="Limit check to models with the specified materialization.",
         )
     )
-    severity: Literal["error", "warn"] | None = Field(
+    severity: str | None = Field(
         default="error",
         description="Severity of the check, one of 'error' or 'warn'.",
     )
