@@ -732,13 +732,13 @@ class CheckModelHasExposure(BaseCheck):
         """
         if self.model is None:
             raise DbtBouncerFailedCheckError("self.model is None")
-        has_exposure = False
-        for e in self.exposures:
-            for m in getattr(e.depends_on, "nodes", []) or []:
-                if m == self.model.unique_id:
-                    has_exposure = True
+        models_in_exposures = {
+            node
+            for e in self.exposures
+            for node in (getattr(e.depends_on, "nodes", []) or [])
+        }
 
-        if not has_exposure:
+        if self.model.unique_id not in models_in_exposures:
             raise DbtBouncerFailedCheckError(
                 f"`{get_clean_model_name(self.model.unique_id)}` does not have an associated exposure."
             )
@@ -1190,10 +1190,11 @@ class CheckModelMaxChainedViews(BaseCheck):
         if self.manifest_obj is None:
             raise DbtBouncerFailedCheckError("self.manifest_obj is None")
 
+        models_by_id = {m.unique_id: m for m in self.models}
+
         def return_upstream_view_models(
             materializations,
             max_chained_views,
-            models,
             model_unique_ids_to_check,
             package_name,
             depth=0,
@@ -1209,9 +1210,14 @@ class CheckModelMaxChainedViews(BaseCheck):
                 return model_unique_ids_to_check
 
             relevant_upstream_models = []
-            for model in model_unique_ids_to_check:
-                upstream_nodes = list(
-                    next(m2 for m2 in models if m2.unique_id == model).depends_on.nodes,
+            for model_id in model_unique_ids_to_check:
+                model_obj = models_by_id.get(model_id)
+                if model_obj is None:
+                    continue
+                upstream_nodes = (
+                    list(getattr(model_obj.depends_on, "nodes", []) or [])
+                    if model_obj.depends_on
+                    else []
                 )
                 if upstream_nodes != []:
                     upstream_models = [
@@ -1221,11 +1227,11 @@ class CheckModelMaxChainedViews(BaseCheck):
                         and m.split(".")[1] == package_name
                     ]
                     for i in upstream_models:
+                        upstream_obj = models_by_id.get(i)
                         if (
-                            next(
-                                m for m in models if m.unique_id == i
-                            ).config.materialized
-                            in materializations
+                            upstream_obj
+                            and upstream_obj.config
+                            and upstream_obj.config.materialized in materializations
                         ):
                             relevant_upstream_models.append(i)
 
@@ -1233,7 +1239,6 @@ class CheckModelMaxChainedViews(BaseCheck):
             return return_upstream_view_models(
                 materializations=materializations,
                 max_chained_views=max_chained_views,
-                models=models,
                 model_unique_ids_to_check=relevant_upstream_models,
                 package_name=package_name,
                 depth=depth,
@@ -1244,7 +1249,6 @@ class CheckModelMaxChainedViews(BaseCheck):
                 return_upstream_view_models(
                     materializations=self.materializations_to_include,
                     max_chained_views=self.max_chained_views,
-                    models=self.models,
                     model_unique_ids_to_check=[self.model.unique_id],
                     package_name=(
                         self.package_name
@@ -1925,14 +1929,15 @@ class CheckModelsTestCoverage(BaseModel):
 
         """
         num_models = len(self.models)
-        models_with_tests = []
-        for model in self.models:
-            for test in self.tests:
-                if test.depends_on and model.unique_id in getattr(
-                    test.depends_on, "nodes", []
-                ):
-                    models_with_tests.append(model.unique_id)
-        num_models_with_tests = len(set(models_with_tests))
+        # Build set of model IDs that have at least one test
+        tested_model_ids = {
+            node
+            for test in self.tests
+            if test.depends_on
+            for node in (getattr(test.depends_on, "nodes", []) or [])
+        }
+        model_ids = {m.unique_id for m in self.models}
+        num_models_with_tests = len(model_ids & tested_model_ids)
         model_test_coverage_pct = (num_models_with_tests / num_models) * 100
 
         if model_test_coverage_pct < self.min_model_test_coverage_pct:
