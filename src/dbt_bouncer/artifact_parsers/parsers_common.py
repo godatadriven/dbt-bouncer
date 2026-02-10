@@ -1,4 +1,5 @@
 import logging
+import os
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 
@@ -34,6 +35,10 @@ if TYPE_CHECKING:
     from dbt_bouncer.config_file_parser import DbtBouncerConfBase
 
 
+# Create a cache object
+_CACHE = {}
+
+
 def load_dbt_artifact(
     artifact_name: Literal["catalog.json", "manifest.json", "run_results.json"],
     dbt_artifacts_dir: Path,
@@ -55,6 +60,14 @@ def load_dbt_artifact(
     logging.debug(f"{dbt_artifacts_dir=}")
 
     artifact_path = dbt_artifacts_dir / Path(artifact_name)
+    last_modified_time = Path(artifact_path).stat().st_mtime
+
+    if (
+        artifact_path in _CACHE
+        and _CACHE[artifact_path][0] == last_modified_time
+    ):
+        return _CACHE[artifact_path][1]
+
     logging.debug(f"Loading {artifact_name} from {artifact_path}...")
     if not Path(artifact_path).exists():
         raise FileNotFoundError(
@@ -67,6 +80,7 @@ def load_dbt_artifact(
         from dbt_bouncer.artifact_parsers.parsers_catalog import DbtBouncerCatalog
 
         catalog_obj = DbtBouncerCatalog(**{"catalog": orjson.loads(artifact_bytes)})
+        _CACHE[artifact_path] = (last_modified_time, catalog_obj)
         return catalog_obj
 
     elif artifact_name == "manifest.json":
@@ -85,7 +99,9 @@ def load_dbt_artifact(
         )
 
         manifest_obj = parse_manifest(manifest_json)
-        return DbtBouncerManifest(**{"manifest": manifest_obj})
+        manifest_obj = DbtBouncerManifest(**{"manifest": manifest_obj})
+        _CACHE[artifact_path] = (last_modified_time, manifest_obj)
+        return manifest_obj
 
     elif artifact_name == "run_results.json":
         from dbt_bouncer.artifact_parsers.parsers_run_results import (
@@ -93,6 +109,7 @@ def load_dbt_artifact(
         )
 
         run_results_obj = parse_run_results(run_results=orjson.loads(artifact_bytes))
+        _CACHE[artifact_path] = (last_modified_time, run_results_obj)
         return run_results_obj
 
 
