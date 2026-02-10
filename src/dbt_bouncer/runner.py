@@ -393,7 +393,9 @@ def _format_junit(results: list[dict[str, Any]]) -> bytes:
         bytes: JUnit XML document.
 
     """
-    from junit_xml import TestCase, TestSuite, to_xml_report_string
+    import io
+
+    from junitparser import Failure, JUnitXml, TestCase, TestSuite
 
     test_cases = []
     for result in results:
@@ -402,11 +404,20 @@ def _format_junit(results: list[dict[str, Any]]) -> bytes:
             classname="dbt-bouncer",
         )
         if result["outcome"] == "failed":
-            tc.add_failure_info(
-                message=result.get("failure_message") or "",
-                failure_type=result.get("severity", "error"),
-            )
+            tc.result = [
+                Failure(
+                    message=result.get("failure_message") or "",
+                    type_=result.get("severity", "error"),
+                )
+            ]
         test_cases.append(tc)
 
-    suite = TestSuite("dbt-bouncer", test_cases)
-    return to_xml_report_string([suite]).encode()
+    suite = TestSuite("dbt-bouncer")
+    for tc in test_cases:
+        suite.add_testcase(tc)
+
+    xml = JUnitXml()
+    xml.add_testsuite(suite)
+    buf = io.BytesIO()
+    xml.write(buf, pretty=True)
+    return buf.getvalue()
