@@ -1,7 +1,6 @@
-import json
-import warnings
 from pathlib import Path
 
+import orjson
 import pytest
 
 
@@ -21,11 +20,9 @@ def _rebuild_all_check_models():
     This replaces the per-file model_rebuild() calls that were previously
     scattered across every test module.
     """
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", category=UserWarning)
-        from dbt_artifacts_parser.parsers.catalog.catalog_v1 import (
-            Nodes as CatalogNodes,
-        )
+    from dbt_artifacts_parser.parsers.catalog.catalog_v1 import (
+        Nodes as CatalogNodes,
+    )
 
     from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
         Macros,
@@ -80,6 +77,7 @@ def manifest_obj():
     )
 
     manifest_json_path = Path("dbt_project") / "target/manifest.json"
-    with Path.open(manifest_json_path, "r") as fp:
-        manifest_obj = parse_manifest(manifest=json.load(fp))
+    manifest_obj = parse_manifest(
+        manifest=orjson.loads(manifest_json_path.read_bytes())
+    )
     return DbtBouncerManifest(**{"manifest": manifest_obj})

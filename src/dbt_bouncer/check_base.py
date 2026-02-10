@@ -65,13 +65,8 @@ class BaseCheck(BaseModel):
             bool: Whether a catalog node is a model.
 
         """
-        catalog_node_model = [
-            m for m in models if m.unique_id == catalog_node.unique_id
-        ]
-        if catalog_node_model:
-            return catalog_node_model[0].resource_type == "model"
-        else:
-            return False
+        model = next((m for m in models if m.unique_id == catalog_node.unique_id), None)
+        return model is not None and model.resource_type == "model"
 
     def _is_description_populated(
         self, description: str, min_description_length: int | None
