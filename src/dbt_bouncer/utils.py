@@ -385,6 +385,21 @@ def make_markdown_table(array: list[list[str]]) -> str:
     return markdown
 
 
+@lru_cache(maxsize=256)
+def compile_pattern(pattern: str, flags: int = 0) -> re.Pattern[str]:
+    """Compile and cache a regex pattern.
+
+    Args:
+        pattern: The regex pattern string to compile.
+        flags: Optional regex flags (e.g. re.DOTALL).
+
+    Returns:
+        re.Pattern[str]: The compiled pattern.
+
+    """
+    return re.compile(pattern, flags)
+
+
 def object_in_path(include_pattern: str | None, path: str) -> bool:
     """Determine if an object is included in the specified path pattern.
 
@@ -396,4 +411,6 @@ def object_in_path(include_pattern: str | None, path: str) -> bool:
     """
     if include_pattern is None:
         return True
-    return re.compile(include_pattern.strip()).match(clean_path_str(path)) is not None
+    return (
+        compile_pattern(include_pattern.strip()).match(clean_path_str(path)) is not None
+    )

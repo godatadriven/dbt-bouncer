@@ -1,4 +1,3 @@
-import re
 from typing import TYPE_CHECKING, Literal
 
 from pydantic import ConfigDict, Field
@@ -11,7 +10,7 @@ if TYPE_CHECKING:
     )
 
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
-from dbt_bouncer.utils import get_clean_model_name
+from dbt_bouncer.utils import compile_pattern, get_clean_model_name
 
 
 class CheckSeedNames(BaseCheck):
@@ -55,7 +54,7 @@ class CheckSeedNames(BaseCheck):
         if self.seed is None:
             raise DbtBouncerFailedCheckError("self.seed is None")
         if (
-            re.compile(self.seed_name_pattern.strip()).match(str(self.seed.name))
+            compile_pattern(self.seed_name_pattern.strip()).match(str(self.seed.name))
             is None
         ):
             raise DbtBouncerFailedCheckError(

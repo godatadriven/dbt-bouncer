@@ -1,4 +1,3 @@
-import re
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 
@@ -14,7 +13,7 @@ from pydantic import Field
 
 from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
-from dbt_bouncer.utils import clean_path_str, find_missing_meta_keys
+from dbt_bouncer.utils import clean_path_str, compile_pattern, find_missing_meta_keys
 
 
 class CheckSourceDescriptionPopulated(BaseCheck):
@@ -304,7 +303,9 @@ class CheckSourceNames(BaseCheck):
         if self.source is None:
             raise DbtBouncerFailedCheckError("self.source is None")
         if (
-            re.compile(self.source_name_pattern.strip()).match(str(self.source.name))
+            compile_pattern(self.source_name_pattern.strip()).match(
+                str(self.source.name)
+            )
             is None
         ):
             raise DbtBouncerFailedCheckError(
