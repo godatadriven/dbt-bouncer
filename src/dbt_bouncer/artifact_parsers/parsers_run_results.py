@@ -54,11 +54,13 @@ def parse_run_results(
 
     """
     dbt_schema_version = run_results["metadata"]["dbt_schema_version"]
-    if dbt_schema_version == "https://schemas.getdbt.com/dbt/run-results/v5.json":
-        return RunResultsV5(**run_results)
-    elif dbt_schema_version == "https://schemas.getdbt.com/dbt/run-results/v6.json":
-        return RunResultsLatest(**run_results)
-    raise ValueError("Not a manifest.json")
+    match dbt_schema_version:
+        case "https://schemas.getdbt.com/dbt/run-results/v5.json":
+            return RunResultsV5(**run_results)
+        case "https://schemas.getdbt.com/dbt/run-results/v6.json":
+            return RunResultsLatest(**run_results)
+        case _:
+            raise ValueError("Not a run_results.json")
 
 
 def parse_run_results_artifact(
