@@ -13,6 +13,7 @@ def run_bouncer(
     create_pr_comment_file: bool = False,
     only: str = "",
     output_file: Path | None = None,
+    output_format: str = "text",
     output_only_failures: bool = False,
     show_all_failures: bool = False,
     verbosity: int = 0,
@@ -25,7 +26,8 @@ def run_bouncer(
         check: Limit the checks run to specific check names, comma-separated.
         create_pr_comment_file: Create a `github-comment.md` file.
         only: Limit the checks run to specific categories.
-        output_file: Location of the json file where check metadata will be saved.
+        output_file: Location of the file where check metadata will be saved.
+        output_format: Format for the output file or stdout (text, json, junit).
         output_only_failures: Only failures will be included in the output file.
         show_all_failures: All failures will be printed to the console.
         verbosity: Verbosity level.
@@ -36,17 +38,11 @@ def run_bouncer(
 
     Raises:
         AssertionError: If config_file_source is None.
-        RuntimeError: If output file has an invalid extension or other runtime errors.
+        RuntimeError: If other runtime errors occur.
 
     """
     configure_console_logging(verbosity)
     logging.info(f"Running dbt-bouncer ({version()})...")
-
-    # Validate output file has `.json` extension
-    if output_file and not output_file.suffix == ".json":
-        raise RuntimeError(
-            f"Output file must have a `.json` extension. Got `{output_file.suffix}`.",
-        )
 
     # Validate `only` has valid values
     valid_check_categories = ["catalog_checks", "manifest_checks", "run_results_checks"]
@@ -197,6 +193,7 @@ def run_bouncer(
         manifest_obj=manifest_obj,
         models=project_models,
         output_file=output_file,
+        output_format=output_format,
         output_only_failures=output_only_failures,
         run_results=project_run_results,
         seeds=project_seeds,
@@ -243,9 +240,16 @@ def run_bouncer(
 @click.option(
     "--output-file",
     default=None,
-    help="Location of the json file where check metadata will be saved.",
+    help="Location of the file where check metadata will be saved.",
     required=False,
     type=Path,
+)
+@click.option(
+    "--output-format",
+    default="text",
+    help="Format for the output file or stdout when no output file is specified. Choices: text, json, junit. Defaults to text.",
+    required=False,
+    type=click.Choice(["json", "junit", "text"], case_sensitive=False),
 )
 @click.option(
     "--output-only-failures",
@@ -267,6 +271,7 @@ def cli(
     create_pr_comment_file: bool,
     only: str,
     output_file: Path | None,
+    output_format: str,
     output_only_failures: bool,
     show_all_failures: bool,
     verbosity: int,
@@ -280,6 +285,7 @@ def cli(
             create_pr_comment_file=create_pr_comment_file,
             only=only,
             output_file=output_file,
+            output_format=output_format,
             output_only_failures=output_only_failures,
             show_all_failures=show_all_failures,
             verbosity=verbosity,

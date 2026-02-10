@@ -9,7 +9,16 @@ from dbt_bouncer.main import cli
 from dbt_bouncer.utils import get_check_objects
 
 
-def test_cli_coverage_non_json(tmp_path):
+@pytest.mark.parametrize(
+    ("output_format", "output_file_suffix", "is_json"),
+    [
+        ("json", "coverage.json", True),
+        ("junit", "coverage.xml", False),
+        ("text", "coverage.txt", False),
+    ],
+)
+def test_cli_output_formats(output_format, output_file_suffix, is_json, tmp_path):
+    """Test that --output-format writes the correct format to --output-file."""
     # Config file
     bouncer_config = {
         "dbt_artifacts_dir": ".",
@@ -32,6 +41,8 @@ def test_cli_coverage_non_json(tmp_path):
     with Path.open(tmp_path / "manifest.json", "w") as f:
         json.dump(manifest, f)
 
+    output_file = tmp_path / output_file_suffix
+
     # Run dbt-bouncer
     runner = CliRunner()
     result = runner.invoke(
@@ -40,18 +51,20 @@ def test_cli_coverage_non_json(tmp_path):
             "--config-file",
             Path(tmp_path / "dbt-bouncer.yml").__str__(),
             "--output-file",
-            tmp_path / "coverage.js",
+            output_file,
+            "--output-format",
+            output_format,
         ],
     )
 
-    assert isinstance(result.exception, RuntimeError)
-    assert (
-        result.exception.args[0].find(
-            "Output file must have a `.json` extension. Got `.js`.",
-        )
-        == 0
-    )
-    assert result.exit_code == 1
+    assert output_file.exists()
+    if is_json:
+        assert json.loads(output_file.read_bytes())
+    elif output_format == "junit":
+        content = output_file.read_text()
+        assert "<?xml" in content
+        assert "testsuite" in content
+    assert result.exit_code == 1  # checks fail due to invalid directories
 
 
 def test_cli_custom_checks_dir(caplog, monkeypatch, tmp_path):

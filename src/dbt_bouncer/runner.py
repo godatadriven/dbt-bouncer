@@ -2,6 +2,7 @@
 
 import logging
 import operator
+import sys
 import traceback
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
@@ -81,6 +82,7 @@ def runner(
     manifest_obj: "DbtBouncerManifest",
     models: list["DbtBouncerModel"],
     output_file: Path | None,
+    output_format: str,
     run_results: list["DbtBouncerRunResult"],
     seeds: list["DbtBouncerSeed"],
     semantic_models: list["DbtBouncerSemanticModel"],
@@ -328,15 +330,83 @@ def runner(
         f"Done. SUCCESS={num_checks_success} WARN={num_checks_warn} ERROR={num_checks_error}",
     )
 
+    results_to_save = (
+        [r for r in results if r["outcome"] == "failed"]
+        if output_only_failures
+        else results
+    )
+
     if output_file is not None:
         coverage_file = Path().cwd() / output_file
+        # When writing to a file, default to json for backward compatibility
+        file_format = output_format if output_format != "text" else "json"
         logging.info(f"Saving coverage file to `{coverage_file}`.")
-
-        if output_only_failures:
-            results_to_save = [r for r in results if r["outcome"] == "failed"]
-        else:
-            results_to_save = results
-
-        coverage_file.write_bytes(orjson.dumps(results_to_save))
+        coverage_file.write_bytes(_format_results(results_to_save, file_format))
+    elif output_format != "text":
+        # No file specified: write formatted output to stdout
+        sys.stdout.buffer.write(_format_results(results_to_save, output_format))
+        sys.stdout.buffer.write(b"\n")
 
     return 1 if num_checks_error != 0 else 0, results
+
+
+def _format_results(results: list[dict[str, Any]], output_format: str) -> bytes:
+    """Serialise check results to the requested format.
+
+    Args:
+        results: List of check result dicts.
+        output_format: One of "text", "json", or "junit".
+
+    Returns:
+        bytes: Serialised results.
+
+    """
+    match output_format:
+        case "json":
+            return orjson.dumps(results)
+        case "junit":
+            return _format_junit(results)
+        case _:
+            # "text": tabulated representation
+            return tabulate(
+                results,
+                headers={
+                    "check_run_id": "Check name",
+                    "failure_message": "Failure message",
+                    "outcome": "Outcome",
+                    "severity": "Severity",
+                },
+                tablefmt="github",
+            ).encode()
+
+
+def _format_junit(results: list[dict[str, Any]]) -> bytes:
+    """Serialise check results to JUnit XML format.
+
+    Each check result becomes a TestCase. Failed checks are marked with a
+    <failure> element; warn-severity failures use type="warn".
+
+    Args:
+        results: List of check result dicts.
+
+    Returns:
+        bytes: JUnit XML document.
+
+    """
+    from junit_xml import TestCase, TestSuite, to_xml_report_string
+
+    test_cases = []
+    for result in results:
+        tc = TestCase(
+            name=result["check_run_id"],
+            classname="dbt-bouncer",
+        )
+        if result["outcome"] == "failed":
+            tc.add_failure_info(
+                message=result.get("failure_message") or "",
+                failure_type=result.get("severity", "error"),
+            )
+        test_cases.append(tc)
+
+    suite = TestSuite("dbt-bouncer", test_cases)
+    return to_xml_report_string([suite]).encode()
