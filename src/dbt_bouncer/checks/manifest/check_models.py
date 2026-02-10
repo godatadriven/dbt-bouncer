@@ -25,7 +25,7 @@ if TYPE_CHECKING:
     )
 
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
-from dbt_bouncer.utils import clean_path_str, get_clean_model_name
+from dbt_bouncer.utils import clean_path_str, compile_pattern, get_clean_model_name
 
 
 class CheckModelAccess(BaseCheck):
@@ -120,7 +120,7 @@ class CheckModelCodeDoesNotContainRegexpPattern(BaseCheck):
         if self.model is None:
             raise DbtBouncerFailedCheckError("self.model is None")
         if (
-            re.compile(self.regexp_pattern.strip(), flags=re.DOTALL).match(
+            compile_pattern(self.regexp_pattern.strip(), flags=re.DOTALL).match(
                 str(self.model.raw_code)
             )
             is not None
@@ -324,7 +324,7 @@ class CheckModelDescriptionContainsRegexPattern(BaseCheck):
         """
         if self.model is None:
             raise DbtBouncerFailedCheckError("self.model is None")
-        if not re.compile(self.regexp_pattern.strip(), flags=re.DOTALL).match(
+        if not compile_pattern(self.regexp_pattern.strip(), flags=re.DOTALL).match(
             str(self.model.description)
         ):
             raise DbtBouncerFailedCheckError(
@@ -435,7 +435,9 @@ class CheckModelDirectories(BaseCheck):
         if self.model is None:
             raise DbtBouncerFailedCheckError("self.model is None")
         clean_path = clean_path_str(self.model.original_file_path)
-        matched_path = re.compile(self.include.strip().rstrip("/")).match(clean_path)
+        matched_path = compile_pattern(self.include.strip().rstrip("/")).match(
+            clean_path
+        )
         if matched_path is None:
             raise DbtBouncerFailedCheckError("matched_path is None")
         path_after_match = clean_path[matched_path.end() + 1 :]
@@ -551,7 +553,7 @@ class CheckModelFileName(BaseCheck):
         if self.model is None:
             raise DbtBouncerFailedCheckError("self.model is None")
         file_name = Path(clean_path_str(self.model.original_file_path)).name
-        if re.compile(self.file_name_pattern.strip()).match(file_name) is None:
+        if compile_pattern(self.file_name_pattern.strip()).match(file_name) is None:
             raise DbtBouncerFailedCheckError(
                 f"`{get_clean_model_name(self.model.unique_id)}` is in a file that does not match the supplied regex `{self.file_name_pattern.strip()}`."
             )
@@ -599,7 +601,7 @@ class CheckModelGrantPrivilege(BaseCheck):
         non_complying_grants = [
             i
             for i in (grants or {})
-            if re.compile(self.privilege_pattern.strip()).match(str(i)) is None
+            if compile_pattern(self.privilege_pattern.strip()).match(str(i)) is None
         ]
 
         if non_complying_grants:
@@ -1486,7 +1488,7 @@ class CheckModelNames(BaseCheck):
         if self.model is None:
             raise DbtBouncerFailedCheckError("self.model is None")
         if (
-            re.compile(self.model_name_pattern.strip()).match(str(self.model.name))
+            compile_pattern(self.model_name_pattern.strip()).match(str(self.model.name))
             is None
         ):
             raise DbtBouncerFailedCheckError(
@@ -1672,7 +1674,9 @@ class CheckModelSchemaName(BaseCheck):
         if self.model is None:
             raise DbtBouncerFailedCheckError("self.model is None")
         if (
-            re.compile(self.schema_name_pattern.strip()).match(str(self.model.schema_))
+            compile_pattern(self.schema_name_pattern.strip()).match(
+                str(self.model.schema_)
+            )
             is None
         ):
             raise DbtBouncerFailedCheckError(
@@ -1726,7 +1730,7 @@ class CheckModelVersionAllowed(BaseCheck):
         if self.model is None:
             raise DbtBouncerFailedCheckError("self.model is None")
         if self.model.version and (
-            re.compile(self.version_pattern.strip()).match(str(self.model.version))
+            compile_pattern(self.version_pattern.strip()).match(str(self.model.version))
             is None
         ):
             raise DbtBouncerFailedCheckError(

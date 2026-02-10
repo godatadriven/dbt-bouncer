@@ -60,41 +60,44 @@ def load_dbt_artifact(
             f"No {artifact_name} found at {artifact_path}.",
         )
 
-    if artifact_name == "catalog.json":
-        from dbt_bouncer.artifact_parsers.parsers_catalog import DbtBouncerCatalog
+    match artifact_name:
+        case "catalog.json":
+            from dbt_bouncer.artifact_parsers.parsers_catalog import DbtBouncerCatalog
 
-        with Path.open(Path(artifact_path), "r") as fp:
-            catalog_obj = DbtBouncerCatalog(**{"catalog": json.load(fp)})
+            with Path.open(Path(artifact_path), "r") as fp:
+                catalog_obj = DbtBouncerCatalog(**{"catalog": json.load(fp)})
 
-        return catalog_obj
+            return catalog_obj
 
-    elif artifact_name == "manifest.json":
-        # First assess dbt version is sufficient
-        with Path.open(Path(artifact_path), "r") as fp:
-            manifest_json = json.load(fp)
+        case "manifest.json":
+            # First assess dbt version is sufficient
+            with Path.open(Path(artifact_path), "r") as fp:
+                manifest_json = json.load(fp)
 
-        if not get_package_version_number(
-            manifest_json["metadata"]["dbt_version"]
-        ) >= get_package_version_number("1.7.0"):
-            raise AssertionError(
-                f"The supplied `manifest.json` was generated with dbt version {manifest_json['metadata']['dbt_version']}, this is below the minimum supported version of 1.7.0."
+            if not get_package_version_number(
+                manifest_json["metadata"]["dbt_version"]
+            ) >= get_package_version_number("1.7.0"):
+                raise AssertionError(
+                    f"The supplied `manifest.json` was generated with dbt version {manifest_json['metadata']['dbt_version']}, this is below the minimum supported version of 1.7.0."
+                )
+
+            from dbt_bouncer.artifact_parsers.parsers_manifest import (
+                DbtBouncerManifest,
+                parse_manifest,
             )
 
-        from dbt_bouncer.artifact_parsers.parsers_manifest import (
-            DbtBouncerManifest,
-            parse_manifest,
-        )
+            manifest_obj = parse_manifest(manifest_json)
+            return DbtBouncerManifest(**{"manifest": manifest_obj})
 
-        manifest_obj = parse_manifest(manifest_json)
-        return DbtBouncerManifest(**{"manifest": manifest_obj})
+        case "run_results.json":
+            from dbt_bouncer.artifact_parsers.parsers_run_results import (
+                parse_run_results,
+            )
 
-    elif artifact_name == "run_results.json":
-        from dbt_bouncer.artifact_parsers.parsers_run_results import parse_run_results
+            with Path.open(Path(artifact_path), "r") as fp:
+                run_results_obj = parse_run_results(run_results=json.load(fp))
 
-        with Path.open(Path(artifact_path), "r") as fp:
-            run_results_obj = parse_run_results(run_results=json.load(fp))
-
-        return run_results_obj
+            return run_results_obj
 
 
 def parse_dbt_artifacts(

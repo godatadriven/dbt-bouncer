@@ -3,16 +3,7 @@ from contextlib import nullcontext as does_not_raise
 import pytest
 
 from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import Nodes4, Sources
-from dbt_bouncer.artifact_parsers.parsers_manifest import (  # noqa: F401
-    DbtBouncerModel,
-    DbtBouncerModelBase,
-    DbtBouncerSource,
-    DbtBouncerSourceBase,
-)
-from dbt_bouncer.checks.common import (
-    DbtBouncerFailedCheckError,
-    NestedDict,  # noqa: F401
-)
+from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.checks.manifest.check_sources import (
     CheckSourceDescriptionPopulated,
     CheckSourceFreshnessPopulated,
@@ -25,17 +16,6 @@ from dbt_bouncer.checks.manifest.check_sources import (
     CheckSourceUsedByModelsInSameDirectory,
     CheckSourceUsedByOnlyOneModel,
 )
-
-CheckSourceDescriptionPopulated.model_rebuild()
-CheckSourceFreshnessPopulated.model_rebuild()
-CheckSourceHasMetaKeys.model_rebuild()
-CheckSourceHasTags.model_rebuild()
-CheckSourceLoaderPopulated.model_rebuild()
-CheckSourceNames.model_rebuild()
-CheckSourceNotOrphaned.model_rebuild()
-CheckSourcePropertyFileLocation.model_rebuild()
-CheckSourceUsedByModelsInSameDirectory.model_rebuild()
-CheckSourceUsedByOnlyOneModel.model_rebuild()
 
 
 @pytest.mark.parametrize(
