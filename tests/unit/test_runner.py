@@ -942,7 +942,6 @@ def test_runner_skip_catalog_check(tmp_path):
             from dbt_artifacts_parser.parsers.catalog.catalog_v1 import (
                 Nodes as CatalogNodes,
             )
-            from dbt_artifacts_parser.parser import parse_manifest
 
             from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
                 ManifestLatest,
