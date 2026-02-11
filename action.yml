@@ -127,7 +127,7 @@ runs:
           --env GITHUB_RUN_ID='${{ github.run_id }}' \
           --env GITHUB_TOKEN='${{ github.token }}' \
           --volume "$GITHUB_WORKSPACE":/app \
-          ghcr.io/godatadriven/dbt-bouncer:v0.0.0 \
+          ghcr.io/godatadriven/dbt-bouncer:v2.3.0 \
           --config-file /app/${{ inputs.config-file }} \
           --create-pr-comment-file ${{ inputs.send-pr-comment }} \
           ${{ steps.assemble-check-param.outputs.check-param }} ${{ steps.assemble-only-param.outputs.only-param }} ${{ steps.assemble-output-file-param.outputs.output-file-param }} ${{ steps.assemble-output-format-param.outputs.output-format-param }} ${{ steps.assemble-output-only-failures-param.outputs.output-only-failures-param }} ${{ steps.assemble-show-all-failures-param.outputs.show-all-failures-param }} ${{ steps.assemble-verbose-param.outputs.verbose-param }}
