@@ -1,6 +1,11 @@
 name: 'dbt-bouncer'
 description: 'Configure and enforce conventions for your dbt project.'
 inputs:
+  check:
+    default: ''
+    description: >-
+      Limit the checks run to specific check names, comma-separated. Examples: 'check_model_has_unique_test', 'check_model_names,check_source_freshness_populated'.
+    required: false
   config-file:
     default: 'dbt-bouncer.yml'
     description: 'Location of the YML config file.'
@@ -37,6 +42,16 @@ runs:
   using: composite
 
   steps:
+    - name: Assemble `check` parameter
+      id: assemble-check-param
+      shell: bash
+      run: >
+        if [[ "${{ inputs.check }}" = "" ]]; then
+          echo "check-param=" >> $GITHUB_OUTPUT
+        else
+          echo "check-param=--check ${{ inputs.check }}" >> $GITHUB_OUTPUT
+        fi
+
     - name: Assemble `only` parameter
       id: assemble-only-param
       shell: bash
@@ -101,7 +116,7 @@ runs:
           ghcr.io/godatadriven/dbt-bouncer:v0.0.0 \
           --config-file /app/${{ inputs.config-file }} \
           --create-pr-comment-file ${{ inputs.send-pr-comment }} \
-          ${{ steps.assemble-only-param.outputs.only-param }} ${{ steps.assemble-output-file-param.outputs.output-file-param }} ${{ steps.assemble-show-all-failures-param.outputs.show-all-failures-param }} ${{ steps.assemble-output-only-failures-param.outputs.output-only-failures-param }} ${{ steps.assemble-verbose-param.outputs.verbose-param }}
+          ${{ steps.assemble-check-param.outputs.check-param }} ${{ steps.assemble-only-param.outputs.only-param }} ${{ steps.assemble-output-file-param.outputs.output-file-param }} ${{ steps.assemble-show-all-failures-param.outputs.show-all-failures-param }} ${{ steps.assemble-output-only-failures-param.outputs.output-only-failures-param }} ${{ steps.assemble-verbose-param.outputs.verbose-param }}
 
     - name: Send PR comment
       if: always() && inputs.send-pr-comment == 'true' && steps.run-dbt-bouncer.outcome != 'success'
