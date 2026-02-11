@@ -1128,6 +1128,7 @@ def test_runner_skip_catalog_check(tmp_path):
                 ),
             ],
             output_file=tmp_path / "coverage.json",
+            output_format="json",
             output_only_failures=False,
             run_results=[],
             seeds=[],
