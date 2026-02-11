@@ -357,6 +357,7 @@ dependencies = [
     { name = "jellyfish" },
     { name = "jinja2" },
     { name = "jinja2-simple-tags" },
+    { name = "junitparser" },
     { name = "orjson" },
     { name = "packaging" },
     { name = "progress" },
@@ -401,6 +402,7 @@ requires-dist = [
     { name = "jellyfish", specifier = ">=1,<2" },
     { name = "jinja2", specifier = ">=3,<4" },
     { name = "jinja2-simple-tags", specifier = "<1" },
+    { name = "junitparser", specifier = ">=2,<5" },
     { name = "mike", marker = "extra == 'docs'", specifier = "~=2.0" },
     { name = "mkdocs", marker = "extra == 'docs'", specifier = "~=1.0" },
     { name = "mkdocs-click", marker = "extra == 'docs'", specifier = "~=0.0" },
@@ -812,6 +814,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/19/74/a633ee74eb36c44aa6d1095e7cc5569bebf04342ee146178e2d36600708b/jsonschema_specifications-2025.9.1.tar.gz", hash = "sha256:b540987f239e745613c7a9176f3edb72b832a4ac465cf02712288397832b5e8d", size = 32855, upload-time = "2025-09-08T01:34:59.186Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/41/45/1a4ed80516f02155c51f51e8cedb3c1902296743db0bbc66608a0db2814f/jsonschema_specifications-2025.9.1-py3-none-any.whl", hash = "sha256:98802fee3a11ee76ecaca44429fda8a41bff98b00a0f2838151b113f210cc6fe", size = 18437, upload-time = "2025-09-08T01:34:57.871Z" },
+]
+
+[[package]]
+name = "junitparser"
+version = "4.0.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/aa/97/954ee1ef04e50d8494e9f5d82d4051ed71a7618aa2c1514c1b3f24691174/junitparser-4.0.2.tar.gz", hash = "sha256:d5d07cece6d4a600ff3b7b96c8db5ffa45a91eed695cb86c45c3db113c1ca0f8", size = 25646, upload-time = "2025-06-24T04:37:32.664Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/44/87/b444f934f62ee2a1be45bb52563cf17a66b0d790eba43af4df9929e7107f/junitparser-4.0.2-py3-none-any.whl", hash = "sha256:94c3570e41fcaedc64cc3c634ca99457fe41a84dd1aa8ff74e9e12e66223a155", size = 14592, upload-time = "2025-06-24T04:37:31.322Z" },
 ]
 
 [[package]]
@@ -1878,7 +1889,7 @@ wheels = [
 
 [[package]]
 name = "shandy-sqlfmt"
-version = "0.27.0"
+version = "0.29.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "click" },
@@ -1886,9 +1897,9 @@ dependencies = [
     { name = "platformdirs" },
     { name = "tqdm" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/b3/88/db0e588e7de42eb56f4052f6392011d09748396669ae2eab815487035f52/shandy_sqlfmt-0.27.0.tar.gz", hash = "sha256:1c9ac6beb5f17f66e7b87b4c70be586e87db538cd7d72f42dedb85132e8b3a96", size = 62380, upload-time = "2025-07-28T18:11:42.774Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/b8/df/7302d0919664eb3bbb157c2c0cc1cb4ac63cf15ee832a7cb14488b08be2a/shandy_sqlfmt-0.29.0.tar.gz", hash = "sha256:0aad53fa4e77926645dbd19c2e0b3b8ca650b29d0ea16f7e7a5d4c0e410c5560", size = 70789, upload-time = "2026-01-12T17:36:25.527Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/e6/b7/c63d537a502dab52ba24a81f29608641950ab0efe2a3b552729b0c30ee1a/shandy_sqlfmt-0.27.0-py3-none-any.whl", hash = "sha256:84359f5e4b8754852019e0b7dde6ba438594adbdfdc0131bc17cb5b51f88b72e", size = 71115, upload-time = "2025-07-28T18:11:41.535Z" },
+    { url = "https://files.pythonhosted.org/packages/d3/86/c1772c879c5d8ff5a1b2754e5c891b3f2ada402f2bb7a8c181dfb0f290b9/shandy_sqlfmt-0.29.0-py3-none-any.whl", hash = "sha256:8c02cd47eb08a14fca6d1963ae71b8c5fa1f80edafc451a46ca98707542ed031", size = 71825, upload-time = "2026-01-12T17:36:23.83Z" },
 ]
 
 [package.optional-dependencies]
