@@ -21,7 +21,7 @@ inputs:
     required: false
   output-format:
     default: 'json'
-    description: 'Format for the output file or stdout. One of: json, junit. Defaults to json.'
+    description: 'Format for the output file or stdout. One of: csv, json, junit, sarif, tap. Defaults to json.'
     required: false
   output-only-failures:
     default: 'false'

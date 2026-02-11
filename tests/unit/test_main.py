@@ -12,8 +12,11 @@ from dbt_bouncer.utils import get_check_objects
 @pytest.mark.parametrize(
     ("output_format", "output_file_suffix", "is_json"),
     [
+        ("csv", "coverage.csv", False),
         ("json", "coverage.json", True),
         ("junit", "coverage.xml", False),
+        ("sarif", "coverage.sarif", True),
+        ("tap", "coverage.tap", False),
     ],
 )
 def test_cli_output_formats(output_format, output_file_suffix, is_json, tmp_path):
@@ -57,12 +60,16 @@ def test_cli_output_formats(output_format, output_file_suffix, is_json, tmp_path
     )
 
     assert output_file.exists()
+    content = output_file.read_text()
     if is_json:
         assert json.loads(output_file.read_bytes())
+    elif output_format == "csv":
+        assert "check_run_id" in content
     elif output_format == "junit":
-        content = output_file.read_text()
         assert "<?xml" in content
         assert "testsuite" in content
+    elif output_format == "tap":
+        assert content.startswith("TAP version 13")
     assert result.exit_code == 1  # checks fail due to invalid directories
 
 
