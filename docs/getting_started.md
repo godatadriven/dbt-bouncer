@@ -81,6 +81,7 @@ jobs:
 
             - uses: godatadriven/dbt-bouncer@vX.X
               with:
+                check: '' # optional, comma-separated check names to run
                 config-file: ./<PATH_TO_CONFIG_FILE>
                 only: manifest_checks # optional, defaults to running all checks
                 output-file: results.json # optional, default does not save a results file
