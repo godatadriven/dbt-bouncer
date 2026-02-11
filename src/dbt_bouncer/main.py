@@ -139,6 +139,17 @@ def run_bouncer(
 
     # Filter to specific check names when `--check` is provided
     if check_names:
+        all_configured_names: set[str] = {
+            c.name
+            for category in check_categories
+            for c in getattr(bouncer_config, category)
+        }
+        unknown_names = check_names - all_configured_names
+        if unknown_names:
+            logging.warning(
+                f"`--check` contains values not found in the (possibly filtered) config: {sorted(unknown_names)}. No checks will run for these names."
+            )
+
         for category in check_categories:
             setattr(
                 bouncer_config,

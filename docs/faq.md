@@ -114,7 +114,7 @@ Additionally, you can use the `--check` flag to run only specific checks by name
     dbt-bouncer --check check_model_has_unique_test,check_model_description_populated
     ```
 
-    The `--check` and `--only` flags can be combined to filter by both category and check name.
+    The `--check` and `--only` flags can be combined: `--only` restricts to the specified categories, then `--check` further narrows to only the named checks within those categories.
 
 By using this approach, and combining with your own unique constraints and desires, `dbt-bouncer` can be used efficiently as part of your CI pipeline.
 

@@ -815,6 +815,69 @@ def test_cli_check(check_value, exit_code, number_of_checks_run, tmp_path):
 
 
 @pytest.mark.parametrize(
+    ("check_value", "only_value", "exit_code", "number_of_checks_run"),
+    [
+        # --check filters within the --only category
+        ("check_model_access", "manifest_checks", 0, NUM_MANIFEST_CHECKS),
+        # --check name not in the --only category: zero checks run
+        ("check_run_results_max_execution_time", "manifest_checks", 0, 0),
+        # Unknown check name: zero checks run (with warning)
+        ("nonexistent_check", "", 0, 0),
+    ],
+)
+def test_cli_check_combined_with_only(
+    check_value, only_value, exit_code, number_of_checks_run, tmp_path
+):
+    bouncer_config = {
+        "dbt_artifacts_dir": ".",
+        "catalog_checks": [
+            {"include": "^models/marts", "name": "check_column_description_populated"}
+        ],
+        "manifest_checks": [
+            {
+                "access": "protected",
+                "include": "^models/staging",
+                "name": "check_model_access",
+            },
+        ],
+        "run_results_checks": [
+            {
+                "max_execution_time_seconds": 10,
+                "name": "check_run_results_max_execution_time",
+            }
+        ],
+    }
+
+    with Path(tmp_path / "dbt-bouncer.yml").open("w") as f:
+        yaml.dump(bouncer_config, f)
+
+    for file in ["catalog.json", "manifest.json", "run_results.json"]:
+        with Path.open(Path(f"./dbt_project/target/{file}"), "r") as f:
+            data = json.load(f)
+        with Path.open(tmp_path / file, "w") as f:
+            json.dump(data, f)
+
+    args = [
+        "--config-file",
+        Path(tmp_path / "dbt-bouncer.yml").__str__(),
+        "--output-file",
+        Path(tmp_path / "results.json").__str__(),
+        "--check",
+        check_value,
+    ]
+    if only_value:
+        args.extend(["--only", only_value])
+
+    runner = CliRunner()
+    result = runner.invoke(cli, args)
+    assert result.exit_code == exit_code
+
+    with Path.open(tmp_path / "results.json", "r") as f:
+        results = json.load(f)
+    assert len(results) == number_of_checks_run
+
+
+@pytest.mark.parametrize(
     ("package_name", "number_of_checks_run"),
     [
         ("dbt_bouncer_test_project", 2),
