@@ -13,7 +13,7 @@ def run_bouncer(
     create_pr_comment_file: bool = False,
     only: str = "",
     output_file: Path | None = None,
-    output_format: str = "text",
+    output_format: str = "json",
     output_only_failures: bool = False,
     show_all_failures: bool = False,
     verbosity: int = 0,
@@ -27,7 +27,7 @@ def run_bouncer(
         create_pr_comment_file: Create a `github-comment.md` file.
         only: Limit the checks run to specific categories.
         output_file: Location of the file where check metadata will be saved.
-        output_format: Format for the output file or stdout (text, json, junit).
+        output_format: Format for the output file or stdout (json, junit).
         output_only_failures: Only failures will be included in the output file.
         show_all_failures: All failures will be printed to the console.
         verbosity: Verbosity level.
@@ -246,10 +246,10 @@ def run_bouncer(
 )
 @click.option(
     "--output-format",
-    default="text",
-    help="Format for the output file or stdout when no output file is specified. Choices: text, json, junit. Defaults to text.",
+    default="json",
+    help="Format for the output file or stdout when no output file is specified. Choices: json, junit. Defaults to json.",
     required=False,
-    type=click.Choice(["json", "junit", "text"], case_sensitive=False),
+    type=click.Choice(["json", "junit"], case_sensitive=False),
 )
 @click.option(
     "--output-only-failures",

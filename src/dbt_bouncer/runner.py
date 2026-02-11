@@ -2,7 +2,6 @@
 
 import logging
 import operator
-import sys
 import traceback
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
@@ -338,14 +337,8 @@ def runner(
 
     if output_file is not None:
         coverage_file = Path().cwd() / output_file
-        # When writing to a file, default to json for backward compatibility
-        file_format = output_format if output_format != "text" else "json"
         logging.info(f"Saving coverage file to `{coverage_file}`.")
-        coverage_file.write_bytes(_format_results(results_to_save, file_format))
-    elif output_format != "text":
-        # No file specified: write formatted output to stdout
-        sys.stdout.buffer.write(_format_results(results_to_save, output_format))
-        sys.stdout.buffer.write(b"\n")
+        coverage_file.write_bytes(_format_results(results_to_save, output_format))
 
     return 1 if num_checks_error != 0 else 0, results
 
@@ -355,10 +348,13 @@ def _format_results(results: list[dict[str, Any]], output_format: str) -> bytes:
 
     Args:
         results: List of check result dicts.
-        output_format: One of "text", "json", or "junit".
+        output_format: One of "json" or "junit".
 
     Returns:
         bytes: Serialised results.
+
+    Raises:
+        ValueError: If output_format is not recognised.
 
     """
     match output_format:
@@ -367,17 +363,8 @@ def _format_results(results: list[dict[str, Any]], output_format: str) -> bytes:
         case "junit":
             return _format_junit(results)
         case _:
-            # "text": tabulated representation
-            return tabulate(
-                results,
-                headers={
-                    "check_run_id": "Check name",
-                    "failure_message": "Failure message",
-                    "outcome": "Outcome",
-                    "severity": "Severity",
-                },
-                tablefmt="github",
-            ).encode()
+            msg = f"Unknown output format: {output_format}"
+            raise ValueError(msg)
 
 
 def _format_junit(results: list[dict[str, Any]]) -> bytes:

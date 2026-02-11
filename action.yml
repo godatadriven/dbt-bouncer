@@ -20,8 +20,8 @@ inputs:
     description: 'Name of the file where check metadata will be saved.'
     required: false
   output-format:
-    default: 'text'
-    description: 'Format for the output file or stdout. One of: json, junit, text. Defaults to text.'
+    default: 'json'
+    description: 'Format for the output file or stdout. One of: json, junit. Defaults to json.'
     required: false
   output-only-failures:
     default: 'false'
@@ -80,7 +80,7 @@ runs:
       id: assemble-output-format-param
       shell: bash
       run: >
-        if [[ "${{ inputs.output-format }}" = "text" ]]; then
+        if [[ "${{ inputs.output-format }}" = "json" ]]; then
           echo "output-format-param=" >> $GITHUB_OUTPUT
         else
           echo "output-format-param=--output-format ${{ inputs.output-format }}" >> $GITHUB_OUTPUT

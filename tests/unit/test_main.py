@@ -14,7 +14,6 @@ from dbt_bouncer.utils import get_check_objects
     [
         ("json", "coverage.json", True),
         ("junit", "coverage.xml", False),
-        ("text", "coverage.txt", False),
     ],
 )
 def test_cli_output_formats(output_format, output_file_suffix, is_json, tmp_path):

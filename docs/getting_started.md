@@ -85,7 +85,7 @@ jobs:
                 config-file: ./<PATH_TO_CONFIG_FILE>
                 only: manifest_checks # optional, defaults to running all checks
                 output-file: results.json # optional, default does not save a results file
-                output-format: text # optional, one of: json, junit, text. Defaults to text
+                output-format: json # optional, one of: json, junit. Defaults to json
                 output-only-failures: false # optional, defaults to true
                 send-pr-comment: true # optional, defaults to true
                 show-all-failures: false # optional, defaults to false
@@ -116,7 +116,7 @@ from dbt_bouncer.main import run_bouncer
 exit_code = run_bouncer(
     config_file=Path("path/to/dbt-bouncer.yml"),
     output_file=Path("results.json"),  # optional
-    output_format="json",  # optional, one of: "json", "junit", "text". Defaults to "text"
+    output_format="json",  # optional, one of: "json", "junit". Defaults to "json"
 )
 ```
 
