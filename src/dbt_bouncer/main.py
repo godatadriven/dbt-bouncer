@@ -318,3 +318,32 @@ manifest_checks:
         f.write(config_content)
 
     logging.info(f"Created `{config_path}`.")
+
+
+@cli.command(name="list")
+def list_checks() -> None:
+    """List all available dbt-bouncer checks, grouped by category."""
+    import itertools
+
+    from dbt_bouncer.utils import get_check_objects
+
+    # Map module path segment -> display category name
+    category_labels = {
+        "catalog": "catalog_checks",
+        "manifest": "manifest_checks",
+        "run_results": "run_results_checks",
+    }
+
+    def category_key(check_class: type) -> str:
+        # e.g. "dbt_bouncer.checks.manifest.check_models" -> "manifest"
+        parts = check_class.__module__.split(".")
+        return parts[2] if len(parts) > 2 else "other"
+
+    checks = sorted(get_check_objects(), key=lambda c: (category_key(c), c.__name__))
+    for category, group in itertools.groupby(checks, key=category_key):
+        label = category_labels.get(category, category)
+        click.echo(f"{label}:")
+        for check_class in group:
+            docstring = (check_class.__doc__ or "").strip()
+            description = docstring.splitlines()[0] if docstring else ""
+            click.echo(f"  {check_class.__name__}:\n      {description}\n")
