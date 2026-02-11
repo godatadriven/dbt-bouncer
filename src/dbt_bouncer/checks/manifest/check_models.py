@@ -655,6 +655,66 @@ class CheckModelGrantPrivilegeRequired(BaseCheck):
             )
 
 
+class CheckModelHasConstraints(BaseCheck):
+    """Table and incremental models must have the specified constraint types defined.
+
+    Parameters:
+        required_constraint_types (list[Literal["check", "custom", "foreign_key", "not_null", "primary_key", "unique"]]): List of constraint types that must be present on the model.
+
+    Receives:
+        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_model_has_constraints
+              required_constraint_types:
+                - primary_key
+              include: ^models/marts
+        ```
+
+    """
+
+    model: "DbtBouncerModelBase | None" = Field(default=None)
+    name: Literal["check_model_has_constraints"]
+    required_constraint_types: list[
+        Literal["check", "custom", "foreign_key", "not_null", "primary_key", "unique"]
+    ]
+
+    def execute(self) -> None:
+        """Execute the check.
+
+        Raises:
+            DbtBouncerFailedCheckError: If required constraint types are missing.
+
+        """
+        if self.model is None:
+            raise DbtBouncerFailedCheckError("self.model is None")
+        materialization = (
+            self.model.config.materialized
+            if self.model.config and hasattr(self.model.config, "materialized")
+            else None
+        )
+        if materialization not in ("table", "incremental"):
+            return
+        constraints = self.model.constraints or []
+        actual_types = {
+            (c.type.value if hasattr(c.type, "value") else str(c.type))
+            for c in constraints
+        }
+        missing_types = sorted(set(self.required_constraint_types) - actual_types)
+        if missing_types:
+            raise DbtBouncerFailedCheckError(
+                f"`{get_clean_model_name(self.model.unique_id)}` is missing required constraint types: {missing_types}"
+            )
+
+
 class CheckModelHasContractsEnforced(BaseCheck):
     """Model must have contracts enforced.
 
