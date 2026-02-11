@@ -1462,3 +1462,29 @@ def test_cli_unsupported_dbt_version(tmp_path):
         >= 0
     )
     assert result.exit_code == 1
+
+
+def test_cli_list():
+    """Test that `dbt-bouncer list` outputs all built-in checks grouped by category."""
+    runner = CliRunner()
+    result = runner.invoke(cli, ["list"])
+
+    assert result.exit_code == 0
+    # Category headers are present
+    assert "catalog_checks:" in result.output
+    assert "manifest_checks:" in result.output
+    assert "run_results_checks:" in result.output
+    # Spot-check a check from each category
+    assert "CheckColumnDescriptionPopulated:" in result.output
+    assert "CheckModelDescriptionPopulated:" in result.output
+    assert "CheckSourceDescriptionPopulated:" in result.output
+    assert "CheckRunResultsMaxExecutionTime:" in result.output
+    # Descriptions are included
+    assert "Columns must have a populated description." in result.output
+    # catalog_checks header appears before manifest_checks header
+    assert result.output.index("catalog_checks:") < result.output.index(
+        "manifest_checks:"
+    )
+    assert result.output.index("manifest_checks:") < result.output.index(
+        "run_results_checks:"
+    )
