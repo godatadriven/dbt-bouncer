@@ -130,6 +130,18 @@ def runner(
         "unit_tests": unit_tests,
     }
 
+    # Pre-compute unique_id -> meta lookup for catalog_node skip_checks
+    meta_by_unique_id: dict[str, Any] = {}
+    for resource_key in ["models", "seeds", "snapshots"]:
+        for resource in resource_map.get(resource_key, []):
+            inner_attr = resource_key.rstrip("s")  # "models" -> "model"
+            node = getattr(resource, inner_attr, None)
+            if node is not None and hasattr(node, "unique_id"):
+                try:
+                    meta_by_unique_id[node.unique_id] = node.config.meta
+                except AttributeError:
+                    meta_by_unique_id[node.unique_id] = getattr(node, "meta", {})
+
     list_of_check_configs = []
     for check_category in check_categories:
         list_of_check_configs.extend(getattr(bouncer_config, check_category))
@@ -168,19 +180,7 @@ def runner(
                     except AttributeError:
                         d = getattr(i, iterate_value).meta
                 elif iterate_value == "catalog_node":
-                    # Lookup corresponding manifest node to read meta config
-                    d = {}
-                    if hasattr(i, "unique_id"):
-                        for model_resource in resource_map.get("models", []):
-                            if (
-                                hasattr(model_resource, "model")
-                                and model_resource.model.unique_id == i.unique_id
-                            ):
-                                try:
-                                    d = model_resource.model.config.meta
-                                except AttributeError:
-                                    d = getattr(model_resource.model, "meta", {})
-                                break
+                    d = meta_by_unique_id.get(getattr(i, "unique_id", ""), {})
                 elif iterate_value == "run_result":
                     d = {}
                 elif iterate_value in ["macro"]:
