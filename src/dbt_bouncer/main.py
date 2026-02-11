@@ -9,6 +9,7 @@ from dbt_bouncer.version import version
 
 def run_bouncer(
     config_file: PurePath | None = None,
+    check: str = "",
     create_pr_comment_file: bool = False,
     only: str = "",
     output_file: Path | None = None,
@@ -21,6 +22,7 @@ def run_bouncer(
 
     Args:
         config_file: Location of the YML config file.
+        check: Limit the checks run to specific check names, comma-separated.
         create_pr_comment_file: Create a `github-comment.md` file.
         only: Limit the checks run to specific categories.
         output_file: Location of the json file where check metadata will be saved.
@@ -57,6 +59,9 @@ def run_bouncer(
         raise RuntimeError(
             f"`--only` contains an invalid value (`{x}`). Valid values are `{valid_check_categories}` or any comma-separated combination."
         )
+
+    # Parse `--check` into a set of check names (empty set means run all)
+    check_names: set[str] = {x.strip() for x in check.strip().split(",") if x.strip()}
 
     # Using local imports to speed up CLI startup
     from dbt_bouncer.config_file_validator import (
@@ -119,18 +124,38 @@ def run_bouncer(
 
     for category in check_categories:
         if category in only_parsed:
-            for idx, check in enumerate(getattr(bouncer_config, category)):
+            for idx, check_obj in enumerate(getattr(bouncer_config, category)):
                 # Add indices to uniquely identify checks
-                check.index = idx
+                check_obj.index = idx
 
                 # Handle global `exclude` and `include` args
-                if bouncer_config.include and not check.include:
-                    check.include = bouncer_config.include
-                if bouncer_config.exclude and not check.exclude:
-                    check.exclude = bouncer_config.exclude
+                if bouncer_config.include and not check_obj.include:
+                    check_obj.include = bouncer_config.include
+                if bouncer_config.exclude and not check_obj.exclude:
+                    check_obj.exclude = bouncer_config.exclude
         else:
             # i.e. if `only` used then remove non-specified check categories
             setattr(bouncer_config, category, [])
+
+    # Filter to specific check names when `--check` is provided
+    if check_names:
+        all_configured_names: set[str] = {
+            c.name
+            for category in check_categories
+            for c in getattr(bouncer_config, category)
+        }
+        unknown_names = check_names - all_configured_names
+        if unknown_names:
+            logging.warning(
+                f"`--check` contains values not found in the (possibly filtered) config: {sorted(unknown_names)}. No checks will run for these names."
+            )
+
+        for category in check_categories:
+            setattr(
+                bouncer_config,
+                category,
+                [c for c in getattr(bouncer_config, category) if c.name in check_names],
+            )
 
     logging.debug(f"{bouncer_config=}")
 
@@ -202,6 +227,13 @@ def run_bouncer(
     type=click.BOOL,
 )
 @click.option(
+    "--check",
+    default="",
+    help="Limit the checks run to specific check names, comma-separated. Examples: 'check_model_has_unique_test', 'check_model_names,check_source_freshness_populated'.",
+    required=False,
+    type=str,
+)
+@click.option(
     "--only",
     default="",
     help="Limit the checks run to specific categories, comma-separated. Examples: 'manifest_checks', 'catalog_checks,manifest_checks'.",
@@ -230,6 +262,7 @@ def run_bouncer(
 @click.version_option()
 def cli(
     ctx: click.Context,
+    check: str,
     config_file: PurePath,
     create_pr_comment_file: bool,
     only: str,
@@ -242,6 +275,7 @@ def cli(
     if ctx.invoked_subcommand is None:
         config_file_source = ctx.get_parameter_source("config_file").name  # type: ignore[union-attr]
         exit_code = run_bouncer(
+            check=check,
             config_file=config_file,
             create_pr_comment_file=create_pr_comment_file,
             only=only,
@@ -295,3 +329,32 @@ manifest_checks:
         f.write(config_content)
 
     logging.info(f"Created `{config_path}`.")
+
+
+@cli.command(name="list")
+def list_checks() -> None:
+    """List all available dbt-bouncer checks, grouped by category."""
+    import itertools
+
+    from dbt_bouncer.utils import get_check_objects
+
+    # Map module path segment -> display category name
+    category_labels = {
+        "catalog": "catalog_checks",
+        "manifest": "manifest_checks",
+        "run_results": "run_results_checks",
+    }
+
+    def category_key(check_class: type) -> str:
+        # e.g. "dbt_bouncer.checks.manifest.check_models" -> "manifest"
+        parts = check_class.__module__.split(".")
+        return parts[2] if len(parts) > 2 else "other"
+
+    checks = sorted(get_check_objects(), key=lambda c: (category_key(c), c.__name__))
+    for category, group in itertools.groupby(checks, key=category_key):
+        label = category_labels.get(category, category)
+        click.echo(f"{label}:")
+        for check_class in group:
+            docstring = (check_class.__doc__ or "").strip()
+            description = docstring.splitlines()[0] if docstring else ""
+            click.echo(f"  {check_class.__name__}:\n      {description}\n")
