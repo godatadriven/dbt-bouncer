@@ -15,6 +15,9 @@ models:
 
     versions:
     - v: 2
+      constraints:
+        - type: primary_key
+          columns: [customer_id]
       columns:
         - name: customer_id
           data_type: bigint
@@ -58,6 +61,9 @@ models:
           description: Sum of all payments a customer has made
 
     - v: 1
+      constraints:
+        - type: primary_key
+          columns: [customer_id]
       columns:
         - name: customer_id
           data_type: bigint
@@ -107,6 +113,9 @@ models:
         write: ['operations']
       meta:
         maturity: gold
+    constraints:
+      - type: primary_key
+        columns: [order_id]
 
     columns:
       - name: order_id
