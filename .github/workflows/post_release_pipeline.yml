@@ -10,7 +10,14 @@ env:
     DBT_PROJECT_DIR: dbt_project
 
 jobs:
+    pypi-pause:
+        runs-on: ubuntu-22.04
+        steps:
+            # PyPi appears to be "slow" to register new packages, adding manual delay to account for this
+            - run: sleep 240
+
     docker-tests:
+        needs: [pypi-pause]
         permissions:
           contents: read
         runs-on: ubuntu-22.04
@@ -26,6 +33,7 @@ jobs:
                   --config-file /app/dbt-bouncer-example.yml
 
     github-action-test:
+        needs: [pypi-pause]
         permissions:
           contents: read
         runs-on: ubuntu-22.04
@@ -38,12 +46,6 @@ jobs:
               with:
                 config-file: ./dbt-bouncer/dbt-bouncer-example.yml
                 send-pr-comment: false
-
-    pypi-pause:
-        runs-on: ubuntu-22.04
-        steps:
-            # PyPi appears to be "slow" to register new packages, adding manual delay to account for this
-            - run: sleep 240
 
     pypi-tests:
         needs: [pypi-pause]
