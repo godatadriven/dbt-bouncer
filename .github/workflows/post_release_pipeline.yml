@@ -14,7 +14,7 @@ jobs:
         runs-on: ubuntu-22.04
         steps:
             # PyPi appears to be "slow" to register new packages, adding manual delay to account for this
-            - run: sleep 240
+            - run: sleep 360
 
     docker-tests:
         needs: [pypi-pause]
