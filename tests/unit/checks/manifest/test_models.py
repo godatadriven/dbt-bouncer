@@ -25,6 +25,7 @@ from dbt_bouncer.checks.manifest.check_models import (
     CheckModelFileName,
     CheckModelGrantPrivilege,
     CheckModelGrantPrivilegeRequired,
+    CheckModelHasConstraints,
     CheckModelHasContractsEnforced,
     CheckModelHasExposure,
     CheckModelHasMetaKeys,
@@ -748,6 +749,69 @@ def test_check_model_grant_privilege_required(privilege, model, expectation):
             privilege=privilege,
             model=model,
             name="check_model_grant_privilege_required",
+        ).execute()
+
+
+_TEST_DATA_FOR_CHECK_MODEL_HAS_CONSTRAINTS = [
+    pytest.param(
+        ["primary_key"],
+        {
+            "config": {"materialized": "table"},
+            "constraints": [{"type": "primary_key"}],
+        },
+        does_not_raise(),
+        id="table_has_required_constraint",
+    ),
+    pytest.param(
+        ["primary_key"],
+        {
+            "config": {"materialized": "view"},
+            "constraints": [],
+        },
+        does_not_raise(),
+        id="view_skipped",
+    ),
+    pytest.param(
+        ["primary_key"],
+        {
+            "config": {"materialized": "ephemeral"},
+            "constraints": [],
+        },
+        does_not_raise(),
+        id="ephemeral_skipped",
+    ),
+    pytest.param(
+        ["primary_key"],
+        {
+            "config": {"materialized": "table"},
+            "constraints": [],
+        },
+        pytest.raises(DbtBouncerFailedCheckError),
+        id="table_missing_required_constraint",
+    ),
+    pytest.param(
+        ["primary_key", "not_null"],
+        {
+            "config": {"materialized": "incremental"},
+            "constraints": [{"type": "primary_key"}],
+        },
+        pytest.raises(DbtBouncerFailedCheckError),
+        id="incremental_missing_one_constraint",
+    ),
+]
+
+
+@pytest.mark.parametrize(
+    ("required_constraint_types", "model", "expectation"),
+    _TEST_DATA_FOR_CHECK_MODEL_HAS_CONSTRAINTS,
+    indirect=["model"],
+)
+def test_check_model_has_constraints(required_constraint_types, model, expectation):
+    with expectation:
+        CheckModelHasConstraints(
+            model=model,
+            name="check_model_has_constraints",
+            required_constraint_types=required_constraint_types,
         ).execute()
 
 
