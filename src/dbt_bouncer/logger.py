@@ -53,6 +53,10 @@ def configure_console_logging(verbosity: int):
     else:
         loglevel = logging.INFO if verbosity == 0 else max(2 - verbosity, 0) * 10
 
+    # Remove any previously added StreamHandlers (but not subclasses like pytest's LogCaptureHandler)
+    logger.handlers = [
+        h for h in logger.handlers if type(h) is not logging.StreamHandler
+    ]
     console_handler = logging.StreamHandler()
     console_handler.setLevel(loglevel)
     console_handler.setFormatter(CustomFormatter(logging_level=loglevel))
