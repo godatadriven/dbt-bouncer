@@ -41,7 +41,7 @@ def test_runner_coverage(caplog, tmp_path):
 
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=UserWarning)
-            from dbt_artifacts_parser.parser import parse_manifest
+            from dbt_bouncer.artifact_parsers.parsers_manifest import parse_manifest
 
         results = runner(
             ctx=BouncerContext(
@@ -64,28 +64,30 @@ def test_runner_coverage(caplog, tmp_path):
                     "create_pr_comment_file": False,
                     "exposures": [],
                     "macros": [],
-                    "manifest_obj": parse_manifest(
-                        {
-                            "child_map": {},
-                            "disabled": {},
-                            "docs": {},
-                            "exposures": {},
-                            "group_map": {},
-                            "groups": {},
-                            "macros": {},
-                            "metadata": {
-                                "dbt_schema_version": "https://schemas.getdbt.com/dbt/manifest/v12.json",
-                                "project_name": "dbt_bouncer_test_project",
+                    "manifest_obj": DbtBouncerManifest(
+                        manifest=parse_manifest(
+                            {
+                                "child_map": {},
+                                "disabled": {},
+                                "docs": {},
+                                "exposures": {},
+                                "group_map": {},
+                                "groups": {},
+                                "macros": {},
+                                "metadata": {
+                                    "dbt_schema_version": "https://schemas.getdbt.com/dbt/manifest/v12.json",
+                                    "project_name": "dbt_bouncer_test_project",
+                                },
+                                "metrics": {},
+                                "nodes": {},
+                                "parent_map": {},
+                                "saved_queries": {},
+                                "selectors": {},
+                                "semantic_models": {},
+                                "sources": {},
+                                "unit_tests": {},
                             },
-                            "metrics": {},
-                            "nodes": {},
-                            "parent_map": {},
-                            "saved_queries": {},
-                            "selectors": {},
-                            "semantic_models": {},
-                            "sources": {},
-                            "unit_tests": {},
-                        },
+                        )
                     ),
                     "models": [
                         DbtBouncerModel(
@@ -164,7 +166,7 @@ def test_runner_failure():
 
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=UserWarning)
-            from dbt_artifacts_parser.parser import parse_manifest
+            from dbt_bouncer.artifact_parsers.parsers_manifest import parse_manifest
 
         results = runner(
             ctx=BouncerContext(
@@ -187,28 +189,30 @@ def test_runner_failure():
                     "create_pr_comment_file": False,
                     "exposures": [],
                     "macros": [],
-                    "manifest_obj": parse_manifest(
-                        {
-                            "child_map": {},
-                            "disabled": {},
-                            "docs": {},
-                            "exposures": {},
-                            "group_map": {},
-                            "groups": {},
-                            "macros": {},
-                            "metadata": {
-                                "dbt_schema_version": "https://schemas.getdbt.com/dbt/manifest/v12.json",
-                                "project_name": "dbt_bouncer_test_project",
+                    "manifest_obj": DbtBouncerManifest(
+                        manifest=parse_manifest(
+                            {
+                                "child_map": {},
+                                "disabled": {},
+                                "docs": {},
+                                "exposures": {},
+                                "group_map": {},
+                                "groups": {},
+                                "macros": {},
+                                "metadata": {
+                                    "dbt_schema_version": "https://schemas.getdbt.com/dbt/manifest/v12.json",
+                                    "project_name": "dbt_bouncer_test_project",
+                                },
+                                "metrics": {},
+                                "nodes": {},
+                                "parent_map": {},
+                                "saved_queries": {},
+                                "selectors": {},
+                                "semantic_models": {},
+                                "sources": {},
+                                "unit_tests": {},
                             },
-                            "metrics": {},
-                            "nodes": {},
-                            "parent_map": {},
-                            "saved_queries": {},
-                            "selectors": {},
-                            "semantic_models": {},
-                            "sources": {},
-                            "unit_tests": {},
-                        },
+                        )
                     ),
                     "models": [
                         DbtBouncerModel(
@@ -280,7 +284,7 @@ def test_runner_skip(tmp_path):
 
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=UserWarning)
-            from dbt_artifacts_parser.parser import parse_manifest
+            from dbt_bouncer.artifact_parsers.parsers_manifest import parse_manifest
 
         results = runner(
             ctx=BouncerContext(
@@ -303,28 +307,30 @@ def test_runner_skip(tmp_path):
                     "create_pr_comment_file": False,
                     "exposures": [],
                     "macros": [],
-                    "manifest_obj": parse_manifest(
-                        {
-                            "child_map": {},
-                            "disabled": {},
-                            "docs": {},
-                            "exposures": {},
-                            "group_map": {},
-                            "groups": {},
-                            "macros": {},
-                            "metadata": {
-                                "dbt_schema_version": "https://schemas.getdbt.com/dbt/manifest/v12.json",
-                                "project_name": "dbt_bouncer_test_project",
+                    "manifest_obj": DbtBouncerManifest(
+                        manifest=parse_manifest(
+                            {
+                                "child_map": {},
+                                "disabled": {},
+                                "docs": {},
+                                "exposures": {},
+                                "group_map": {},
+                                "groups": {},
+                                "macros": {},
+                                "metadata": {
+                                    "dbt_schema_version": "https://schemas.getdbt.com/dbt/manifest/v12.json",
+                                    "project_name": "dbt_bouncer_test_project",
+                                },
+                                "metrics": {},
+                                "nodes": {},
+                                "parent_map": {},
+                                "saved_queries": {},
+                                "selectors": {},
+                                "semantic_models": {},
+                                "sources": {},
+                                "unit_tests": {},
                             },
-                            "metrics": {},
-                            "nodes": {},
-                            "parent_map": {},
-                            "saved_queries": {},
-                            "selectors": {},
-                            "semantic_models": {},
-                            "sources": {},
-                            "unit_tests": {},
-                        },
+                        )
                     ),
                     "models": [
                         DbtBouncerModel(
@@ -440,7 +446,7 @@ def test_runner_success():
 
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=UserWarning)
-            from dbt_artifacts_parser.parser import parse_manifest
+            from dbt_bouncer.artifact_parsers.parsers_manifest import parse_manifest
 
         results = runner(
             ctx=BouncerContext(
@@ -463,28 +469,30 @@ def test_runner_success():
                     "create_pr_comment_file": False,
                     "exposures": [],
                     "macros": [],
-                    "manifest_obj": parse_manifest(
-                        {
-                            "child_map": {},
-                            "disabled": {},
-                            "docs": {},
-                            "exposures": {},
-                            "group_map": {},
-                            "groups": {},
-                            "macros": {},
-                            "metadata": {
-                                "dbt_schema_version": "https://schemas.getdbt.com/dbt/manifest/v12.json",
-                                "project_name": "dbt_bouncer_test_project",
+                    "manifest_obj": DbtBouncerManifest(
+                        manifest=parse_manifest(
+                            {
+                                "child_map": {},
+                                "disabled": {},
+                                "docs": {},
+                                "exposures": {},
+                                "group_map": {},
+                                "groups": {},
+                                "macros": {},
+                                "metadata": {
+                                    "dbt_schema_version": "https://schemas.getdbt.com/dbt/manifest/v12.json",
+                                    "project_name": "dbt_bouncer_test_project",
+                                },
+                                "metrics": {},
+                                "nodes": {},
+                                "parent_map": {},
+                                "saved_queries": {},
+                                "selectors": {},
+                                "semantic_models": {},
+                                "sources": {},
+                                "unit_tests": {},
                             },
-                            "metrics": {},
-                            "nodes": {},
-                            "parent_map": {},
-                            "saved_queries": {},
-                            "selectors": {},
-                            "semantic_models": {},
-                            "sources": {},
-                            "unit_tests": {},
-                        },
+                        )
                     ),
                     "models": [
                         DbtBouncerModel(
@@ -549,7 +557,7 @@ def test_runner_windows(caplog, tmp_path):
 
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", category=UserWarning)
-        from dbt_artifacts_parser.parser import parse_manifest
+        from dbt_bouncer.artifact_parsers.parsers_manifest import parse_manifest
 
     results = runner(
         ctx=BouncerContext(
@@ -572,28 +580,30 @@ def test_runner_windows(caplog, tmp_path):
                 "create_pr_comment_file": False,
                 "exposures": [],
                 "macros": [],
-                "manifest_obj": parse_manifest(
-                    {
-                        "child_map": {},
-                        "disabled": {},
-                        "docs": {},
-                        "exposures": {},
-                        "group_map": {},
-                        "groups": {},
-                        "macros": {},
-                        "metadata": {
-                            "dbt_schema_version": "https://schemas.getdbt.com/dbt/manifest/v12.json",
-                            "project_name": "dbt_bouncer_test_project",
+                "manifest_obj": DbtBouncerManifest(
+                    manifest=parse_manifest(
+                        {
+                            "child_map": {},
+                            "disabled": {},
+                            "docs": {},
+                            "exposures": {},
+                            "group_map": {},
+                            "groups": {},
+                            "macros": {},
+                            "metadata": {
+                                "dbt_schema_version": "https://schemas.getdbt.com/dbt/manifest/v12.json",
+                                "project_name": "dbt_bouncer_test_project",
+                            },
+                            "metrics": {},
+                            "nodes": {},
+                            "parent_map": {},
+                            "saved_queries": {},
+                            "selectors": {},
+                            "semantic_models": {},
+                            "sources": {},
+                            "unit_tests": {},
                         },
-                        "metrics": {},
-                        "nodes": {},
-                        "parent_map": {},
-                        "saved_queries": {},
-                        "selectors": {},
-                        "semantic_models": {},
-                        "sources": {},
-                        "unit_tests": {},
-                    },
+                    )
                 ),
                 "models": [
                     DbtBouncerModel(
@@ -674,7 +684,7 @@ def test_runner_check_id(tmp_path):
 
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=UserWarning)
-            from dbt_artifacts_parser.parser import parse_manifest
+            from dbt_bouncer.artifact_parsers.parsers_manifest import parse_manifest
 
         results = runner(
             ctx=BouncerContext(
@@ -697,28 +707,30 @@ def test_runner_check_id(tmp_path):
                     "create_pr_comment_file": False,
                     "exposures": [],
                     "macros": [],
-                    "manifest_obj": parse_manifest(
-                        {
-                            "child_map": {},
-                            "disabled": {},
-                            "docs": {},
-                            "exposures": {},
-                            "group_map": {},
-                            "groups": {},
-                            "macros": {},
-                            "metadata": {
-                                "dbt_schema_version": "https://schemas.getdbt.com/dbt/manifest/v12.json",
-                                "project_name": "dbt_bouncer_test_project",
+                    "manifest_obj": DbtBouncerManifest(
+                        manifest=parse_manifest(
+                            {
+                                "child_map": {},
+                                "disabled": {},
+                                "docs": {},
+                                "exposures": {},
+                                "group_map": {},
+                                "groups": {},
+                                "macros": {},
+                                "metadata": {
+                                    "dbt_schema_version": "https://schemas.getdbt.com/dbt/manifest/v12.json",
+                                    "project_name": "dbt_bouncer_test_project",
+                                },
+                                "metrics": {},
+                                "nodes": {},
+                                "parent_map": {},
+                                "saved_queries": {},
+                                "selectors": {},
+                                "semantic_models": {},
+                                "sources": {},
+                                "unit_tests": {},
                             },
-                            "metrics": {},
-                            "nodes": {},
-                            "parent_map": {},
-                            "saved_queries": {},
-                            "selectors": {},
-                            "semantic_models": {},
-                            "sources": {},
-                            "unit_tests": {},
-                        },
+                        )
                     ),
                     "models": [
                         DbtBouncerModel(
@@ -839,7 +851,7 @@ def test_runner_output_only_failures(output_only_failures, num_checks, tmp_path)
 
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=UserWarning)
-            from dbt_artifacts_parser.parser import parse_manifest
+            from dbt_bouncer.artifact_parsers.parsers_manifest import parse_manifest
 
         runner(
             ctx=BouncerContext(
@@ -862,28 +874,30 @@ def test_runner_output_only_failures(output_only_failures, num_checks, tmp_path)
                     "create_pr_comment_file": False,
                     "exposures": [],
                     "macros": [],
-                    "manifest_obj": parse_manifest(
-                        {
-                            "child_map": {},
-                            "disabled": {},
-                            "docs": {},
-                            "exposures": {},
-                            "group_map": {},
-                            "groups": {},
-                            "macros": {},
-                            "metadata": {
-                                "dbt_schema_version": "https://schemas.getdbt.com/dbt/manifest/v12.json",
-                                "project_name": "dbt_bouncer_test_project",
+                    "manifest_obj": DbtBouncerManifest(
+                        manifest=parse_manifest(
+                            {
+                                "child_map": {},
+                                "disabled": {},
+                                "docs": {},
+                                "exposures": {},
+                                "group_map": {},
+                                "groups": {},
+                                "macros": {},
+                                "metadata": {
+                                    "dbt_schema_version": "https://schemas.getdbt.com/dbt/manifest/v12.json",
+                                    "project_name": "dbt_bouncer_test_project",
+                                },
+                                "metrics": {},
+                                "nodes": {},
+                                "parent_map": {},
+                                "saved_queries": {},
+                                "selectors": {},
+                                "semantic_models": {},
+                                "sources": {},
+                                "unit_tests": {},
                             },
-                            "metrics": {},
-                            "nodes": {},
-                            "parent_map": {},
-                            "saved_queries": {},
-                            "selectors": {},
-                            "semantic_models": {},
-                            "sources": {},
-                            "unit_tests": {},
-                        },
+                        )
                     ),
                     "models": [
                         DbtBouncerModel(
