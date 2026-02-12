@@ -28,9 +28,6 @@ if TYPE_CHECKING:
     from dbt_bouncer.artifact_parsers.parsers_manifest import DbtBouncerManifest
 
 
-from dbt_bouncer.artifact_parsers.parsers_common import load_dbt_artifact
-
-
 class DbtBouncerCatalog(BaseModel):
     """Model for all catalog objects."""
 
@@ -62,6 +59,8 @@ def parse_catalog(
         TypeError: If the loaded artifact is not of the expected type.
 
     """
+    from dbt_bouncer.artifact_parsers.parsers_common import load_dbt_artifact
+
     catalog_obj = load_dbt_artifact(
         artifact_name="catalog.json",
         dbt_artifacts_dir=artifact_dir,

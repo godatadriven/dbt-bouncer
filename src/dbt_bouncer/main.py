@@ -3,6 +3,7 @@ from pathlib import Path, PurePath
 
 import click
 
+from dbt_bouncer.context import BouncerContext
 from dbt_bouncer.logger import configure_console_logging
 from dbt_bouncer.version import version
 
@@ -182,7 +183,7 @@ def run_bouncer(
     logging.info("Running checks...")
     from dbt_bouncer.runner import runner
 
-    results = runner(
+    ctx = BouncerContext(
         bouncer_config=bouncer_config,
         catalog_nodes=project_catalog_nodes,
         catalog_sources=project_catalog_sources,
@@ -204,6 +205,7 @@ def run_bouncer(
         tests=project_tests,
         unit_tests=project_unit_tests,
     )
+    results = runner(ctx=ctx)
     return results[0]
 
 
