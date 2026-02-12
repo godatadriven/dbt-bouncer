@@ -3,6 +3,7 @@ from pathlib import Path, PurePath
 
 import click
 
+from dbt_bouncer.context import BouncerContext
 from dbt_bouncer.logger import configure_console_logging
 from dbt_bouncer.version import version
 
@@ -182,7 +183,7 @@ def run_bouncer(
     logging.info("Running checks...")
     from dbt_bouncer.runner import runner
 
-    results = runner(
+    ctx = BouncerContext(
         bouncer_config=bouncer_config,
         catalog_nodes=project_catalog_nodes,
         catalog_sources=project_catalog_sources,
@@ -204,7 +205,167 @@ def run_bouncer(
         tests=project_tests,
         unit_tests=project_unit_tests,
     )
+    results = runner(ctx=ctx)
     return results[0]
+
+
+@click.group(invoke_without_command=True)
+@click.option(
+    "--config-file",
+    default=Path("dbt-bouncer.yml"),
+    help="Location of the YML config file.",
+    required=False,
+    type=PurePath,
+)
+@click.option(
+    "--create-pr-comment-file",
+    default=False,
+    help="Create a `github-comment.md` file that will be sent to GitHub as a PR comment. Defaults to True when `dbt-bouncer` is run as a GitHub Action.",
+    hidden=True,
+    required=False,
+    type=click.BOOL,
+)
+@click.option(
+    "--check",
+    default="",
+    help="Limit the checks run to specific check names, comma-separated. Examples: 'check_model_has_unique_test', 'check_model_names,check_source_freshness_populated'.",
+    required=False,
+    type=str,
+)
+@click.option(
+    "--only",
+    default="",
+    help="Limit the checks run to specific categories, comma-separated. Examples: 'manifest_checks', 'catalog_checks,manifest_checks'.",
+    required=False,
+    type=str,
+)
+@click.option(
+    "--output-file",
+    default=None,
+    help="Location of the file where check metadata will be saved.",
+    required=False,
+    type=Path,
+)
+@click.option(
+    "--output-format",
+    default="json",
+    help="Format for the output file or stdout when no output file is specified. Choices: csv, json, junit, sarif, tap. Defaults to json.",
+    required=False,
+    type=click.Choice(["csv", "json", "junit", "sarif", "tap"], case_sensitive=False),
+)
+@click.option(
+    "--output-only-failures",
+    help="If passed then only failures will be included in the output file.",
+    is_flag=True,
+)
+@click.option(
+    "--show-all-failures",
+    help="If passed then all failures will be printed to the console.",
+    is_flag=True,
+)
+@click.option("-v", "--verbosity", help="Verbosity.", default=0, count=True)
+@click.pass_context
+@click.version_option()
+def cli(
+    ctx: click.Context,
+    check: str,
+    config_file: PurePath,
+    create_pr_comment_file: bool,
+    only: str,
+    output_file: Path | None,
+    output_format: str,
+    output_only_failures: bool,
+    show_all_failures: bool,
+    verbosity: int,
+) -> None:
+    """Entrypoint for dbt-bouncer."""
+    if ctx.invoked_subcommand is None:
+        config_file_source = ctx.get_parameter_source("config_file").name  # type: ignore[union-attr]
+        exit_code = run_bouncer(
+            check=check,
+            config_file=config_file,
+            create_pr_comment_file=create_pr_comment_file,
+            only=only,
+            output_file=output_file,
+            output_format=output_format,
+            output_only_failures=output_only_failures,
+            show_all_failures=show_all_failures,
+            verbosity=verbosity,
+            config_file_source=config_file_source,
+        )
+        ctx.exit(exit_code)
+
+
+@cli.command()
+def init() -> None:
+    """Create a basic dbt-bouncer.yml file.
+
+    Raises:
+        RuntimeError: If the config file already exists.
+
+    """
+    config_content = """# dbt-bouncer configuration file
+# This file is used to configure dbt-bouncer checks.
+
+dbt_artifacts_dir: target # Directory where dbt artifacts (manifest.json, etc.) are located.
+
+manifest_checks:
+  - name: check_model_description_populated
+    description: All models must have a description.
+
+  - name: check_model_names
+    description: Models in the staging layer should always start with "stg_".
+    include: ^models/staging
+    model_name_pattern: ^stg_
+
+  - name: check_model_has_unique_test
+    description: All models must have a unique test defined.
+
+# Example: check that relies on `catalog.json` being present
+# catalog_checks:
+#   - name: check_column_description_populated
+#     description: All columns in the marts layer must have a description.
+#     include: ^models/marts
+"""
+    configure_console_logging(verbosity=0)
+
+    config_path = Path("dbt-bouncer.yml")
+    if config_path.exists():
+        raise RuntimeError(f"{config_path} already exists.")
+
+    with Path(config_path).open("w") as f:
+        f.write(config_content)
+
+    logging.info(f"Created `{config_path}`.")
+
+
+@cli.command(name="list")
+def list_checks() -> None:
+    """List all available dbt-bouncer checks, grouped by category."""
+    import itertools
+
+    from dbt_bouncer.utils import get_check_objects
+
+    # Map module path segment -> display category name
+    category_labels = {
+        "catalog": "catalog_checks",
+        "manifest": "manifest_checks",
+        "run_results": "run_results_checks",
+    }
+
+    def category_key(check_class: type) -> str:
+        # e.g. "dbt_bouncer.checks.manifest.check_models" -> "manifest"
+        parts = check_class.__module__.split(".")
+        return parts[2] if len(parts) > 2 else "other"
+
+    checks = sorted(get_check_objects(), key=lambda c: (category_key(c), c.__name__))
+    for category, group in itertools.groupby(checks, key=category_key):
+        label = category_labels.get(category, category)
+        click.echo(f"{label}:")
+        for check_class in group:
+            docstring = (check_class.__doc__ or "").strip()
+            description = docstring.splitlines()[0] if docstring else ""
+            click.echo(f"  {check_class.__name__}:\n      {description}\n")
 
 
 @click.group(invoke_without_command=True)

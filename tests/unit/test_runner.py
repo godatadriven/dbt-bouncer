@@ -18,6 +18,7 @@ from dbt_bouncer.artifact_parsers.parsers_manifest import (
     DbtBouncerManifest,
     DbtBouncerModel,
 )
+from dbt_bouncer.context import BouncerContext
 from dbt_bouncer.logger import configure_console_logging
 from dbt_bouncer.main import cli
 from dbt_bouncer.runner import runner
@@ -43,90 +44,97 @@ def test_runner_coverage(caplog, tmp_path):
             from dbt_artifacts_parser.parser import parse_manifest
 
         results = runner(
-            bouncer_config=DbtBouncerConf(
+            ctx=BouncerContext(
                 **{
-                    "manifest_checks": [
-                        {
-                            "exclude": None,
-                            "include": None,
-                            "index": 0,
-                            "name": "check_model_description_populated",
-                        },
-                    ]
-                }
-            ),
-            catalog_nodes=[],
-            catalog_sources=[],
-            check_categories=["manifest_checks"],
-            create_pr_comment_file=False,
-            exposures=[],
-            macros=[],
-            manifest_obj=parse_manifest(
-                {
-                    "child_map": {},
-                    "disabled": {},
-                    "docs": {},
-                    "exposures": {},
-                    "group_map": {},
-                    "groups": {},
-                    "macros": {},
-                    "metadata": {
-                        "dbt_schema_version": "https://schemas.getdbt.com/dbt/manifest/v12.json",
-                        "project_name": "dbt_bouncer_test_project",
-                    },
-                    "metrics": {},
-                    "nodes": {},
-                    "parent_map": {},
-                    "saved_queries": {},
-                    "selectors": {},
-                    "semantic_models": {},
-                    "sources": {},
-                    "unit_tests": {},
-                },
-            ),
-            models=[
-                DbtBouncerModel(
-                    **{
-                        "model": Nodes4(
-                            **{
-                                "access": "public",
-                                "alias": "stg_payments",
-                                "checksum": {"name": "sha256", "checksum": ""},
-                                "columns": {
-                                    "col_1": {
-                                        "index": 1,
-                                        "name": "col_1",
-                                        "type": "INTEGER",
-                                    },
+                    "bouncer_config": DbtBouncerConf(
+                        **{
+                            "manifest_checks": [
+                                {
+                                    "exclude": None,
+                                    "include": None,
+                                    "index": 0,
+                                    "name": "check_model_description_populated",
                                 },
-                                "config": {"meta": None},
-                                "description": "This is a description",
-                                "fqn": ["dbt_bouncer_test_project", "stg_payments"],
-                                "name": "stg_payments",
+                            ]
+                        }
+                    ),
+                    "catalog_nodes": [],
+                    "catalog_sources": [],
+                    "check_categories": ["manifest_checks"],
+                    "create_pr_comment_file": False,
+                    "exposures": [],
+                    "macros": [],
+                    "manifest_obj": parse_manifest(
+                        {
+                            "child_map": {},
+                            "disabled": {},
+                            "docs": {},
+                            "exposures": {},
+                            "group_map": {},
+                            "groups": {},
+                            "macros": {},
+                            "metadata": {
+                                "dbt_schema_version": "https://schemas.getdbt.com/dbt/manifest/v12.json",
+                                "project_name": "dbt_bouncer_test_project",
+                            },
+                            "metrics": {},
+                            "nodes": {},
+                            "parent_map": {},
+                            "saved_queries": {},
+                            "selectors": {},
+                            "semantic_models": {},
+                            "sources": {},
+                            "unit_tests": {},
+                        },
+                    ),
+                    "models": [
+                        DbtBouncerModel(
+                            **{
+                                "model": Nodes4(
+                                    **{
+                                        "access": "public",
+                                        "alias": "stg_payments",
+                                        "checksum": {"name": "sha256", "checksum": ""},
+                                        "columns": {
+                                            "col_1": {
+                                                "index": 1,
+                                                "name": "col_1",
+                                                "type": "INTEGER",
+                                            },
+                                        },
+                                        "config": {"meta": None},
+                                        "description": "This is a description",
+                                        "fqn": [
+                                            "dbt_bouncer_test_project",
+                                            "stg_payments",
+                                        ],
+                                        "name": "stg_payments",
+                                        "original_file_path": "models/staging/stg_payments.sql",
+                                        "package_name": "dbt_bouncer_test_project",
+                                        "path": "staging/stg_payments.sql",
+                                        "resource_type": "model",
+                                        "schema": "main",
+                                        "unique_id": "model.dbt_bouncer_test_project.stg_payments",
+                                    },
+                                ),
                                 "original_file_path": "models/staging/stg_payments.sql",
-                                "package_name": "dbt_bouncer_test_project",
-                                "path": "staging/stg_payments.sql",
-                                "resource_type": "model",
-                                "schema": "main",
                                 "unique_id": "model.dbt_bouncer_test_project.stg_payments",
                             },
                         ),
-                        "original_file_path": "models/staging/stg_payments.sql",
-                        "unique_id": "model.dbt_bouncer_test_project.stg_payments",
-                    },
-                ),
-            ],
-            output_file=tmp_path / "coverage.json",
-            output_format="json",
-            output_only_failures=False,
-            run_results=[],
-            seeds=[],
-            semantic_models=[],
-            snapshots=[],
-            show_all_failures=False,
-            sources=[],
-            tests=[],
-            unit_tests=[],
+                    ],
+                    "output_file": tmp_path / "coverage.json",
+                    "output_format": "json",
+                    "output_only_failures": False,
+                    "run_results": [],
+                    "seeds": [],
+                    "semantic_models": [],
+                    "snapshots": [],
+                    "show_all_failures": False,
+                    "sources": [],
+                    "tests": [],
+                    "unit_tests": [],
+                }
+            )
         )
 
     with Path.open(tmp_path / "coverage.json", "r") as f:
@@ -159,90 +167,97 @@ def test_runner_failure():
             from dbt_artifacts_parser.parser import parse_manifest
 
         results = runner(
-            bouncer_config=DbtBouncerConf(
+            ctx=BouncerContext(
                 **{
-                    "manifest_checks": [
-                        {
-                            "exclude": None,
-                            "include": None,
-                            "index": 0,
-                            "name": "check_model_description_populated",
-                        },
-                    ]
-                }
-            ),
-            catalog_nodes=[],
-            catalog_sources=[],
-            check_categories=["manifest_checks"],
-            create_pr_comment_file=False,
-            exposures=[],
-            macros=[],
-            manifest_obj=parse_manifest(
-                {
-                    "child_map": {},
-                    "disabled": {},
-                    "docs": {},
-                    "exposures": {},
-                    "group_map": {},
-                    "groups": {},
-                    "macros": {},
-                    "metadata": {
-                        "dbt_schema_version": "https://schemas.getdbt.com/dbt/manifest/v12.json",
-                        "project_name": "dbt_bouncer_test_project",
-                    },
-                    "metrics": {},
-                    "nodes": {},
-                    "parent_map": {},
-                    "saved_queries": {},
-                    "selectors": {},
-                    "semantic_models": {},
-                    "sources": {},
-                    "unit_tests": {},
-                },
-            ),
-            models=[
-                DbtBouncerModel(
-                    **{
-                        "model": Nodes4(
-                            **{
-                                "access": "public",
-                                "alias": "stg_payments",
-                                "checksum": {"name": "sha256", "checksum": ""},
-                                "columns": {
-                                    "col_1": {
-                                        "index": 1,
-                                        "name": "col_1",
-                                        "type": "INTEGER",
-                                    },
+                    "bouncer_config": DbtBouncerConf(
+                        **{
+                            "manifest_checks": [
+                                {
+                                    "exclude": None,
+                                    "include": None,
+                                    "index": 0,
+                                    "name": "check_model_description_populated",
                                 },
-                                "config": {"meta": None},
-                                "description": "",
-                                "fqn": ["dbt_bouncer_test_project", "stg_payments"],
-                                "name": "stg_payments",
+                            ]
+                        }
+                    ),
+                    "catalog_nodes": [],
+                    "catalog_sources": [],
+                    "check_categories": ["manifest_checks"],
+                    "create_pr_comment_file": False,
+                    "exposures": [],
+                    "macros": [],
+                    "manifest_obj": parse_manifest(
+                        {
+                            "child_map": {},
+                            "disabled": {},
+                            "docs": {},
+                            "exposures": {},
+                            "group_map": {},
+                            "groups": {},
+                            "macros": {},
+                            "metadata": {
+                                "dbt_schema_version": "https://schemas.getdbt.com/dbt/manifest/v12.json",
+                                "project_name": "dbt_bouncer_test_project",
+                            },
+                            "metrics": {},
+                            "nodes": {},
+                            "parent_map": {},
+                            "saved_queries": {},
+                            "selectors": {},
+                            "semantic_models": {},
+                            "sources": {},
+                            "unit_tests": {},
+                        },
+                    ),
+                    "models": [
+                        DbtBouncerModel(
+                            **{
+                                "model": Nodes4(
+                                    **{
+                                        "access": "public",
+                                        "alias": "stg_payments",
+                                        "checksum": {"name": "sha256", "checksum": ""},
+                                        "columns": {
+                                            "col_1": {
+                                                "index": 1,
+                                                "name": "col_1",
+                                                "type": "INTEGER",
+                                            },
+                                        },
+                                        "config": {"meta": None},
+                                        "description": "",
+                                        "fqn": [
+                                            "dbt_bouncer_test_project",
+                                            "stg_payments",
+                                        ],
+                                        "name": "stg_payments",
+                                        "original_file_path": "models/staging/stg_payments.sql",
+                                        "package_name": "dbt_bouncer_test_project",
+                                        "path": "staging/stg_payments.sql",
+                                        "resource_type": "model",
+                                        "schema": "main",
+                                        "unique_id": "model.dbt_bouncer_test_project.stg_payments",
+                                    },
+                                ),
                                 "original_file_path": "models/staging/stg_payments.sql",
-                                "package_name": "dbt_bouncer_test_project",
-                                "path": "staging/stg_payments.sql",
-                                "resource_type": "model",
-                                "schema": "main",
                                 "unique_id": "model.dbt_bouncer_test_project.stg_payments",
                             },
                         ),
-                        "original_file_path": "models/staging/stg_payments.sql",
-                        "unique_id": "model.dbt_bouncer_test_project.stg_payments",
-                    },
-                ),
-            ],
-            output_file=None,
-            output_format="json",
-            output_only_failures=False,
-            run_results=[],
-            seeds=[],
-            semantic_models=[],
-            snapshots=[],
-            show_all_failures=False,
-            sources=[],
-            tests=[],
-            unit_tests=[],
+                    ],
+                    "output_file": None,
+                    "output_format": "json",
+                    "output_only_failures": False,
+                    "run_results": [],
+                    "seeds": [],
+                    "semantic_models": [],
+                    "snapshots": [],
+                    "show_all_failures": False,
+                    "sources": [],
+                    "tests": [],
+                    "unit_tests": [],
+                }
+            )
         )
 
     assert results[0] == 1
@@ -268,128 +283,138 @@ def test_runner_skip(tmp_path):
             from dbt_artifacts_parser.parser import parse_manifest
 
         results = runner(
-            bouncer_config=DbtBouncerConf(
+            ctx=BouncerContext(
                 **{
-                    "manifest_checks": [
-                        {
-                            "exclude": None,
-                            "include": None,
-                            "index": 0,
-                            "name": "check_model_description_populated",
-                        },
-                    ]
-                }
-            ),
-            catalog_nodes=[],
-            catalog_sources=[],
-            check_categories=["manifest_checks"],
-            create_pr_comment_file=False,
-            exposures=[],
-            macros=[],
-            manifest_obj=parse_manifest(
-                {
-                    "child_map": {},
-                    "disabled": {},
-                    "docs": {},
-                    "exposures": {},
-                    "group_map": {},
-                    "groups": {},
-                    "macros": {},
-                    "metadata": {
-                        "dbt_schema_version": "https://schemas.getdbt.com/dbt/manifest/v12.json",
-                        "project_name": "dbt_bouncer_test_project",
-                    },
-                    "metrics": {},
-                    "nodes": {},
-                    "parent_map": {},
-                    "saved_queries": {},
-                    "selectors": {},
-                    "semantic_models": {},
-                    "sources": {},
-                    "unit_tests": {},
-                },
-            ),
-            models=[
-                DbtBouncerModel(
-                    **{
-                        "model": Nodes4(
-                            **{
-                                "access": "public",
-                                "alias": "stg_payments",
-                                "checksum": {"name": "sha256", "checksum": ""},
-                                "columns": {
-                                    "col_1": {
-                                        "index": 1,
-                                        "name": "col_1",
-                                        "type": "INTEGER",
-                                    },
+                    "bouncer_config": DbtBouncerConf(
+                        **{
+                            "manifest_checks": [
+                                {
+                                    "exclude": None,
+                                    "include": None,
+                                    "index": 0,
+                                    "name": "check_model_description_populated",
                                 },
-                                "config": {"meta": None},
-                                "description": "This is a description",
-                                "fqn": ["dbt_bouncer_test_project", "stg_payments"],
-                                "name": "stg_payments",
+                            ]
+                        }
+                    ),
+                    "catalog_nodes": [],
+                    "catalog_sources": [],
+                    "check_categories": ["manifest_checks"],
+                    "create_pr_comment_file": False,
+                    "exposures": [],
+                    "macros": [],
+                    "manifest_obj": parse_manifest(
+                        {
+                            "child_map": {},
+                            "disabled": {},
+                            "docs": {},
+                            "exposures": {},
+                            "group_map": {},
+                            "groups": {},
+                            "macros": {},
+                            "metadata": {
+                                "dbt_schema_version": "https://schemas.getdbt.com/dbt/manifest/v12.json",
+                                "project_name": "dbt_bouncer_test_project",
+                            },
+                            "metrics": {},
+                            "nodes": {},
+                            "parent_map": {},
+                            "saved_queries": {},
+                            "selectors": {},
+                            "semantic_models": {},
+                            "sources": {},
+                            "unit_tests": {},
+                        },
+                    ),
+                    "models": [
+                        DbtBouncerModel(
+                            **{
+                                "model": Nodes4(
+                                    **{
+                                        "access": "public",
+                                        "alias": "stg_payments",
+                                        "checksum": {"name": "sha256", "checksum": ""},
+                                        "columns": {
+                                            "col_1": {
+                                                "index": 1,
+                                                "name": "col_1",
+                                                "type": "INTEGER",
+                                            },
+                                        },
+                                        "config": {"meta": None},
+                                        "description": "This is a description",
+                                        "fqn": [
+                                            "dbt_bouncer_test_project",
+                                            "stg_payments",
+                                        ],
+                                        "name": "stg_payments",
+                                        "original_file_path": "models/staging/stg_payments.sql",
+                                        "package_name": "dbt_bouncer_test_project",
+                                        "path": "staging/stg_payments.sql",
+                                        "resource_type": "model",
+                                        "schema": "main",
+                                        "unique_id": "model.dbt_bouncer_test_project.stg_payments",
+                                    },
+                                ),
                                 "original_file_path": "models/staging/stg_payments.sql",
-                                "package_name": "dbt_bouncer_test_project",
-                                "path": "staging/stg_payments.sql",
-                                "resource_type": "model",
-                                "schema": "main",
                                 "unique_id": "model.dbt_bouncer_test_project.stg_payments",
                             },
                         ),
-                        "original_file_path": "models/staging/stg_payments.sql",
-                        "unique_id": "model.dbt_bouncer_test_project.stg_payments",
-                    },
-                ),
-                DbtBouncerModel(
-                    **{
-                        "model": Nodes4(
+                        DbtBouncerModel(
                             **{
-                                "access": "public",
-                                "alias": "stg_orders",
-                                "checksum": {"name": "sha256", "checksum": ""},
-                                "columns": {
-                                    "col_1": {
-                                        "index": 1,
-                                        "name": "col_1",
-                                        "type": "INTEGER",
+                                "model": Nodes4(
+                                    **{
+                                        "access": "public",
+                                        "alias": "stg_orders",
+                                        "checksum": {"name": "sha256", "checksum": ""},
+                                        "columns": {
+                                            "col_1": {
+                                                "index": 1,
+                                                "name": "col_1",
+                                                "type": "INTEGER",
+                                            },
+                                        },
+                                        "config": {
+                                            "meta": {
+                                                "dbt-bouncer": {
+                                                    "skip_checks": [
+                                                        "check_model_description_populated"
+                                                    ]
+                                                }
+                                            }
+                                        },
+                                        "description": None,
+                                        "fqn": [
+                                            "dbt_bouncer_test_project",
+                                            "stg_orders",
+                                        ],
+                                        "name": "stg_orders",
+                                        "original_file_path": "models/staging/stg_orders.sql",
+                                        "package_name": "dbt_bouncer_test_project",
+                                        "path": "staging/stg_orders.sql",
+                                        "resource_type": "model",
+                                        "schema": "main",
+                                        "unique_id": "model.dbt_bouncer_test_project.stg_orders",
                                     },
-                                },
-                                "config": {
-                                    "meta": {
-                                        "dbt-bouncer": {
-                                            "skip_checks": [
-                                                "check_model_description_populated"
-                                            ]
-                                        }
-                                    }
-                                },
-                                "description": None,
-                                "fqn": ["dbt_bouncer_test_project", "stg_orders"],
-                                "name": "stg_orders",
+                                ),
                                 "original_file_path": "models/staging/stg_orders.sql",
-                                "package_name": "dbt_bouncer_test_project",
-                                "path": "staging/stg_orders.sql",
-                                "resource_type": "model",
-                                "schema": "main",
                                 "unique_id": "model.dbt_bouncer_test_project.stg_orders",
                             },
                         ),
-                        "original_file_path": "models/staging/stg_orders.sql",
-                        "unique_id": "model.dbt_bouncer_test_project.stg_orders",
-                    },
-                ),
-            ],
-            output_file=tmp_path / "coverage.json",
-            output_format="json",
-            output_only_failures=False,
-            run_results=[],
-            seeds=[],
-            semantic_models=[],
-            snapshots=[],
-            show_all_failures=False,
-            sources=[],
-            tests=[],
-            unit_tests=[],
+                    ],
+                    "output_file": tmp_path / "coverage.json",
+                    "output_format": "json",
+                    "output_only_failures": False,
+                    "run_results": [],
+                    "seeds": [],
+                    "semantic_models": [],
+                    "snapshots": [],
+                    "show_all_failures": False,
+                    "sources": [],
+                    "tests": [],
+                    "unit_tests": [],
+                }
+            )
         )
 
     with Path.open(tmp_path / "coverage.json", "r") as f:
@@ -418,90 +443,97 @@ def test_runner_success():
             from dbt_artifacts_parser.parser import parse_manifest
 
         results = runner(
-            bouncer_config=DbtBouncerConf(
+            ctx=BouncerContext(
                 **{
-                    "manifest_checks": [
-                        {
-                            "exclude": None,
-                            "include": None,
-                            "index": 0,
-                            "name": "check_model_description_populated",
-                        },
-                    ]
-                }
-            ),
-            catalog_nodes=[],
-            catalog_sources=[],
-            check_categories=["manifest_checks"],
-            create_pr_comment_file=False,
-            exposures=[],
-            macros=[],
-            manifest_obj=parse_manifest(
-                {
-                    "child_map": {},
-                    "disabled": {},
-                    "docs": {},
-                    "exposures": {},
-                    "group_map": {},
-                    "groups": {},
-                    "macros": {},
-                    "metadata": {
-                        "dbt_schema_version": "https://schemas.getdbt.com/dbt/manifest/v12.json",
-                        "project_name": "dbt_bouncer_test_project",
-                    },
-                    "metrics": {},
-                    "nodes": {},
-                    "parent_map": {},
-                    "saved_queries": {},
-                    "selectors": {},
-                    "semantic_models": {},
-                    "sources": {},
-                    "unit_tests": {},
-                },
-            ),
-            models=[
-                DbtBouncerModel(
-                    **{
-                        "model": Nodes4(
-                            **{
-                                "access": "public",
-                                "alias": "stg_payments",
-                                "checksum": {"name": "sha256", "checksum": ""},
-                                "columns": {
-                                    "col_1": {
-                                        "index": 1,
-                                        "name": "col_1",
-                                        "type": "INTEGER",
-                                    },
+                    "bouncer_config": DbtBouncerConf(
+                        **{
+                            "manifest_checks": [
+                                {
+                                    "exclude": None,
+                                    "include": None,
+                                    "index": 0,
+                                    "name": "check_model_description_populated",
                                 },
-                                "config": {"meta": None},
-                                "description": "This is a description",
-                                "fqn": ["dbt_bouncer_test_project", "stg_payments"],
-                                "name": "stg_payments",
+                            ]
+                        }
+                    ),
+                    "catalog_nodes": [],
+                    "catalog_sources": [],
+                    "check_categories": ["manifest_checks"],
+                    "create_pr_comment_file": False,
+                    "exposures": [],
+                    "macros": [],
+                    "manifest_obj": parse_manifest(
+                        {
+                            "child_map": {},
+                            "disabled": {},
+                            "docs": {},
+                            "exposures": {},
+                            "group_map": {},
+                            "groups": {},
+                            "macros": {},
+                            "metadata": {
+                                "dbt_schema_version": "https://schemas.getdbt.com/dbt/manifest/v12.json",
+                                "project_name": "dbt_bouncer_test_project",
+                            },
+                            "metrics": {},
+                            "nodes": {},
+                            "parent_map": {},
+                            "saved_queries": {},
+                            "selectors": {},
+                            "semantic_models": {},
+                            "sources": {},
+                            "unit_tests": {},
+                        },
+                    ),
+                    "models": [
+                        DbtBouncerModel(
+                            **{
+                                "model": Nodes4(
+                                    **{
+                                        "access": "public",
+                                        "alias": "stg_payments",
+                                        "checksum": {"name": "sha256", "checksum": ""},
+                                        "columns": {
+                                            "col_1": {
+                                                "index": 1,
+                                                "name": "col_1",
+                                                "type": "INTEGER",
+                                            },
+                                        },
+                                        "config": {"meta": None},
+                                        "description": "This is a description",
+                                        "fqn": [
+                                            "dbt_bouncer_test_project",
+                                            "stg_payments",
+                                        ],
+                                        "name": "stg_payments",
+                                        "original_file_path": "models/staging/stg_payments.sql",
+                                        "package_name": "dbt_bouncer_test_project",
+                                        "path": "staging/stg_payments.sql",
+                                        "resource_type": "model",
+                                        "schema": "main",
+                                        "unique_id": "model.dbt_bouncer_test_project.stg_payments",
+                                    },
+                                ),
                                 "original_file_path": "models/staging/stg_payments.sql",
-                                "package_name": "dbt_bouncer_test_project",
-                                "path": "staging/stg_payments.sql",
-                                "resource_type": "model",
-                                "schema": "main",
                                 "unique_id": "model.dbt_bouncer_test_project.stg_payments",
                             },
                         ),
-                        "original_file_path": "models/staging/stg_payments.sql",
-                        "unique_id": "model.dbt_bouncer_test_project.stg_payments",
-                    },
-                ),
-            ],
-            output_file=None,
-            output_format="json",
-            output_only_failures=False,
-            run_results=[],
-            seeds=[],
-            semantic_models=[],
-            snapshots=[],
-            show_all_failures=False,
-            sources=[],
-            tests=[],
-            unit_tests=[],
+                    ],
+                    "output_file": None,
+                    "output_format": "json",
+                    "output_only_failures": False,
+                    "run_results": [],
+                    "seeds": [],
+                    "semantic_models": [],
+                    "snapshots": [],
+                    "show_all_failures": False,
+                    "sources": [],
+                    "tests": [],
+                    "unit_tests": [],
+                }
+            )
         )
 
     assert results[0] == 0
@@ -520,91 +552,98 @@ def test_runner_windows(caplog, tmp_path):
         from dbt_artifacts_parser.parser import parse_manifest
 
     results = runner(
-        bouncer_config=DbtBouncerConf(
+        ctx=BouncerContext(
             **{
-                "manifest_checks": [
-                    {
-                        "exclude": None,
-                        "include": None,
-                        "index": 0,
-                        "name": "check_model_documented_in_same_directory",
-                    },
-                ]
-            }
-        ),
-        catalog_nodes=[],
-        catalog_sources=[],
-        check_categories=["manifest_checks"],
-        create_pr_comment_file=False,
-        exposures=[],
-        macros=[],
-        manifest_obj=parse_manifest(
-            {
-                "child_map": {},
-                "disabled": {},
-                "docs": {},
-                "exposures": {},
-                "group_map": {},
-                "groups": {},
-                "macros": {},
-                "metadata": {
-                    "dbt_schema_version": "https://schemas.getdbt.com/dbt/manifest/v12.json",
-                    "project_name": "dbt_bouncer_test_project",
-                },
-                "metrics": {},
-                "nodes": {},
-                "parent_map": {},
-                "saved_queries": {},
-                "selectors": {},
-                "semantic_models": {},
-                "sources": {},
-                "unit_tests": {},
-            },
-        ),
-        models=[
-            DbtBouncerModel(
-                **{
-                    "model": Nodes4(
-                        **{
-                            "access": "public",
-                            "alias": "stg_payments",
-                            "checksum": {"name": "sha256", "checksum": ""},
-                            "columns": {
-                                "col_1": {
-                                    "index": 1,
-                                    "name": "col_1",
-                                    "type": "INTEGER",
-                                },
+                "bouncer_config": DbtBouncerConf(
+                    **{
+                        "manifest_checks": [
+                            {
+                                "exclude": None,
+                                "include": None,
+                                "index": 0,
+                                "name": "check_model_documented_in_same_directory",
                             },
-                            "config": {"meta": None},
-                            "description": "This is a description",
-                            "fqn": ["dbt_bouncer_test_project", "stg_payments"],
-                            "name": "stg_payments",
-                            "original_file_path": "models\\staging\\stg_payments.sql",
-                            "package_name": "dbt_bouncer_test_project",
-                            "patch_path": "dbt_bouncer_test_project://models\\staging\\_stg__models.yml",
-                            "path": "staging\\stg_payments.sql",
-                            "resource_type": "model",
-                            "schema": "main",
+                        ]
+                    }
+                ),
+                "catalog_nodes": [],
+                "catalog_sources": [],
+                "check_categories": ["manifest_checks"],
+                "create_pr_comment_file": False,
+                "exposures": [],
+                "macros": [],
+                "manifest_obj": parse_manifest(
+                    {
+                        "child_map": {},
+                        "disabled": {},
+                        "docs": {},
+                        "exposures": {},
+                        "group_map": {},
+                        "groups": {},
+                        "macros": {},
+                        "metadata": {
+                            "dbt_schema_version": "https://schemas.getdbt.com/dbt/manifest/v12.json",
+                            "project_name": "dbt_bouncer_test_project",
+                        },
+                        "metrics": {},
+                        "nodes": {},
+                        "parent_map": {},
+                        "saved_queries": {},
+                        "selectors": {},
+                        "semantic_models": {},
+                        "sources": {},
+                        "unit_tests": {},
+                    },
+                ),
+                "models": [
+                    DbtBouncerModel(
+                        **{
+                            "model": Nodes4(
+                                **{
+                                    "access": "public",
+                                    "alias": "stg_payments",
+                                    "checksum": {"name": "sha256", "checksum": ""},
+                                    "columns": {
+                                        "col_1": {
+                                            "index": 1,
+                                            "name": "col_1",
+                                            "type": "INTEGER",
+                                        },
+                                    },
+                                    "config": {"meta": None},
+                                    "description": "This is a description",
+                                    "fqn": [
+                                        "dbt_bouncer_test_project",
+                                        "stg_payments",
+                                    ],
+                                    "name": "stg_payments",
+                                    "original_file_path": "models\\staging\\stg_payments.sql",
+                                    "package_name": "dbt_bouncer_test_project",
+                                    "patch_path": "dbt_bouncer_test_project://models\\staging\\_stg__models.yml",
+                                    "path": "staging\\stg_payments.sql",
+                                    "resource_type": "model",
+                                    "schema": "main",
+                                    "unique_id": "model.dbt_bouncer_test_project.stg_payments",
+                                },
+                            ),
+                            "original_file_path": "models/staging/stg_payments.sql",
                             "unique_id": "model.dbt_bouncer_test_project.stg_payments",
                         },
                     ),
-                    "original_file_path": "models/staging/stg_payments.sql",
-                    "unique_id": "model.dbt_bouncer_test_project.stg_payments",
-                },
-            ),
-        ],
-        output_file=tmp_path / "coverage.json",
-        output_format="json",
-        output_only_failures=False,
-        run_results=[],
-        seeds=[],
-        semantic_models=[],
-        snapshots=[],
-        show_all_failures=False,
-        sources=[],
-        tests=[],
-        unit_tests=[],
+                ],
+                "output_file": tmp_path / "coverage.json",
+                "output_format": "json",
+                "output_only_failures": False,
+                "run_results": [],
+                "seeds": [],
+                "semantic_models": [],
+                "snapshots": [],
+                "show_all_failures": False,
+                "sources": [],
+                "tests": [],
+                "unit_tests": [],
+            }
+        )
     )
 
     with Path.open(tmp_path / "coverage.json", "r") as f:
@@ -638,128 +677,132 @@ def test_runner_check_id(tmp_path):
             from dbt_artifacts_parser.parser import parse_manifest
 
         results = runner(
-            bouncer_config=DbtBouncerConf(
+            ctx=BouncerContext(
                 **{
-                    "manifest_checks": [
-                        {
-                            "exclude": None,
-                            "include": None,
-                            "index": 0,
-                            "name": "check_model_description_populated",
-                        },
-                    ]
-                }
-            ),
-            catalog_nodes=[],
-            catalog_sources=[],
-            check_categories=["manifest_checks"],
-            create_pr_comment_file=False,
-            exposures=[],
-            macros=[],
-            manifest_obj=parse_manifest(
-                {
-                    "child_map": {},
-                    "disabled": {},
-                    "docs": {},
-                    "exposures": {},
-                    "group_map": {},
-                    "groups": {},
-                    "macros": {},
-                    "metadata": {
-                        "dbt_schema_version": "https://schemas.getdbt.com/dbt/manifest/v12.json",
-                        "project_name": "dbt_bouncer_test_project",
-                    },
-                    "metrics": {},
-                    "nodes": {},
-                    "parent_map": {},
-                    "saved_queries": {},
-                    "selectors": {},
-                    "semantic_models": {},
-                    "sources": {},
-                    "unit_tests": {},
-                },
-            ),
-            models=[
-                DbtBouncerModel(
-                    **{
-                        "model": Nodes4(
-                            **{
-                                "access": "public",
-                                "alias": "stg_payments_v1",
-                                "checksum": {"name": "sha256", "checksum": ""},
-                                "columns": {
-                                    "col_1": {
-                                        "index": 1,
-                                        "name": "col_1",
-                                        "type": "INTEGER",
-                                    },
+                    "bouncer_config": DbtBouncerConf(
+                        **{
+                            "manifest_checks": [
+                                {
+                                    "exclude": None,
+                                    "include": None,
+                                    "index": 0,
+                                    "name": "check_model_description_populated",
                                 },
-                                "config": {"meta": None},
-                                "description": "This is a description",
-                                "fqn": [
-                                    "dbt_bouncer_test_project",
-                                    "stg_payments",
-                                    "v1",
-                                ],
-                                "name": "stg_payments",
+                            ]
+                        }
+                    ),
+                    "catalog_nodes": [],
+                    "catalog_sources": [],
+                    "check_categories": ["manifest_checks"],
+                    "create_pr_comment_file": False,
+                    "exposures": [],
+                    "macros": [],
+                    "manifest_obj": parse_manifest(
+                        {
+                            "child_map": {},
+                            "disabled": {},
+                            "docs": {},
+                            "exposures": {},
+                            "group_map": {},
+                            "groups": {},
+                            "macros": {},
+                            "metadata": {
+                                "dbt_schema_version": "https://schemas.getdbt.com/dbt/manifest/v12.json",
+                                "project_name": "dbt_bouncer_test_project",
+                            },
+                            "metrics": {},
+                            "nodes": {},
+                            "parent_map": {},
+                            "saved_queries": {},
+                            "selectors": {},
+                            "semantic_models": {},
+                            "sources": {},
+                            "unit_tests": {},
+                        },
+                    ),
+                    "models": [
+                        DbtBouncerModel(
+                            **{
+                                "model": Nodes4(
+                                    **{
+                                        "access": "public",
+                                        "alias": "stg_payments_v1",
+                                        "checksum": {"name": "sha256", "checksum": ""},
+                                        "columns": {
+                                            "col_1": {
+                                                "index": 1,
+                                                "name": "col_1",
+                                                "type": "INTEGER",
+                                            },
+                                        },
+                                        "config": {"meta": None},
+                                        "description": "This is a description",
+                                        "fqn": [
+                                            "dbt_bouncer_test_project",
+                                            "stg_payments",
+                                            "v1",
+                                        ],
+                                        "name": "stg_payments",
+                                        "original_file_path": "models/staging/stg_payments_v1.sql",
+                                        "package_name": "dbt_bouncer_test_project",
+                                        "path": "staging/stg_payments_v1.sql",
+                                        "resource_type": "model",
+                                        "schema": "main",
+                                        "unique_id": "model.dbt_bouncer_test_project.stg_payments.v1",
+                                    },
+                                ),
                                 "original_file_path": "models/staging/stg_payments_v1.sql",
-                                "package_name": "dbt_bouncer_test_project",
-                                "path": "staging/stg_payments_v1.sql",
-                                "resource_type": "model",
-                                "schema": "main",
                                 "unique_id": "model.dbt_bouncer_test_project.stg_payments.v1",
                             },
                         ),
-                        "original_file_path": "models/staging/stg_payments_v1.sql",
-                        "unique_id": "model.dbt_bouncer_test_project.stg_payments.v1",
-                    },
-                ),
-                DbtBouncerModel(
-                    **{
-                        "model": Nodes4(
+                        DbtBouncerModel(
                             **{
-                                "access": "public",
-                                "alias": "stg_payments_v2",
-                                "checksum": {"name": "sha256", "checksum": ""},
-                                "columns": {
-                                    "col_1": {
-                                        "index": 1,
-                                        "name": "col_1",
-                                        "type": "INTEGER",
+                                "model": Nodes4(
+                                    **{
+                                        "access": "public",
+                                        "alias": "stg_payments_v2",
+                                        "checksum": {"name": "sha256", "checksum": ""},
+                                        "columns": {
+                                            "col_1": {
+                                                "index": 1,
+                                                "name": "col_1",
+                                                "type": "INTEGER",
+                                            },
+                                        },
+                                        "config": {"meta": None},
+                                        "description": "This is a description",
+                                        "fqn": [
+                                            "dbt_bouncer_test_project",
+                                            "stg_payments",
+                                            "v2",
+                                        ],
+                                        "name": "stg_payments",
+                                        "original_file_path": "models/staging/stg_payments_v2.sql",
+                                        "package_name": "dbt_bouncer_test_project",
+                                        "path": "staging/stg_payments_v2.sql",
+                                        "resource_type": "model",
+                                        "schema": "main",
+                                        "unique_id": "model.dbt_bouncer_test_project.stg_payments.v2",
                                     },
-                                },
-                                "config": {"meta": None},
-                                "description": "This is a description",
-                                "fqn": [
-                                    "dbt_bouncer_test_project",
-                                    "stg_payments",
-                                    "v2",
-                                ],
-                                "name": "stg_payments",
+                                ),
                                 "original_file_path": "models/staging/stg_payments_v2.sql",
-                                "package_name": "dbt_bouncer_test_project",
-                                "path": "staging/stg_payments_v2.sql",
-                                "resource_type": "model",
-                                "schema": "main",
                                 "unique_id": "model.dbt_bouncer_test_project.stg_payments.v2",
                             },
                         ),
-                        "original_file_path": "models/staging/stg_payments_v2.sql",
-                        "unique_id": "model.dbt_bouncer_test_project.stg_payments.v2",
-                    },
-                ),
-            ],
-            output_file=tmp_path / "output.json",
-            output_format="json",
-            output_only_failures=False,
-            run_results=[],
-            seeds=[],
-            semantic_models=[],
-            snapshots=[],
-            show_all_failures=False,
-            sources=[],
-            tests=[],
-            unit_tests=[],
+                    ],
+                    "output_file": tmp_path / "output.json",
+                    "output_format": "json",
+                    "output_only_failures": False,
+                    "run_results": [],
+                    "seeds": [],
+                    "semantic_models": [],
+                    "snapshots": [],
+                    "show_all_failures": False,
+                    "sources": [],
+                    "tests": [],
+                    "unit_tests": [],
+                }
+            )
         )
 
     with Path.open(tmp_path / "output.json", "r") as f:
@@ -799,120 +842,130 @@ def test_runner_output_only_failures(output_only_failures, num_checks, tmp_path)
             from dbt_artifacts_parser.parser import parse_manifest
 
         runner(
-            bouncer_config=DbtBouncerConf(
+            ctx=BouncerContext(
                 **{
-                    "manifest_checks": [
-                        {
-                            "exclude": None,
-                            "include": None,
-                            "index": 0,
-                            "name": "check_model_description_populated",
-                        },
-                    ]
-                }
-            ),
-            catalog_nodes=[],
-            catalog_sources=[],
-            check_categories=["manifest_checks"],
-            create_pr_comment_file=False,
-            exposures=[],
-            macros=[],
-            manifest_obj=parse_manifest(
-                {
-                    "child_map": {},
-                    "disabled": {},
-                    "docs": {},
-                    "exposures": {},
-                    "group_map": {},
-                    "groups": {},
-                    "macros": {},
-                    "metadata": {
-                        "dbt_schema_version": "https://schemas.getdbt.com/dbt/manifest/v12.json",
-                        "project_name": "dbt_bouncer_test_project",
-                    },
-                    "metrics": {},
-                    "nodes": {},
-                    "parent_map": {},
-                    "saved_queries": {},
-                    "selectors": {},
-                    "semantic_models": {},
-                    "sources": {},
-                    "unit_tests": {},
-                },
-            ),
-            models=[
-                DbtBouncerModel(
-                    **{
-                        "model": Nodes4(
-                            **{
-                                "access": "public",
-                                "alias": "stg_payments",
-                                "checksum": {"name": "sha256", "checksum": ""},
-                                "columns": {
-                                    "col_1": {
-                                        "index": 1,
-                                        "name": "col_1",
-                                        "type": "INTEGER",
-                                    },
+                    "bouncer_config": DbtBouncerConf(
+                        **{
+                            "manifest_checks": [
+                                {
+                                    "exclude": None,
+                                    "include": None,
+                                    "index": 0,
+                                    "name": "check_model_description_populated",
                                 },
-                                "config": {"meta": None},
-                                "description": "",
-                                "fqn": ["dbt_bouncer_test_project", "stg_payments"],
-                                "name": "stg_payments",
+                            ]
+                        }
+                    ),
+                    "catalog_nodes": [],
+                    "catalog_sources": [],
+                    "check_categories": ["manifest_checks"],
+                    "create_pr_comment_file": False,
+                    "exposures": [],
+                    "macros": [],
+                    "manifest_obj": parse_manifest(
+                        {
+                            "child_map": {},
+                            "disabled": {},
+                            "docs": {},
+                            "exposures": {},
+                            "group_map": {},
+                            "groups": {},
+                            "macros": {},
+                            "metadata": {
+                                "dbt_schema_version": "https://schemas.getdbt.com/dbt/manifest/v12.json",
+                                "project_name": "dbt_bouncer_test_project",
+                            },
+                            "metrics": {},
+                            "nodes": {},
+                            "parent_map": {},
+                            "saved_queries": {},
+                            "selectors": {},
+                            "semantic_models": {},
+                            "sources": {},
+                            "unit_tests": {},
+                        },
+                    ),
+                    "models": [
+                        DbtBouncerModel(
+                            **{
+                                "model": Nodes4(
+                                    **{
+                                        "access": "public",
+                                        "alias": "stg_payments",
+                                        "checksum": {"name": "sha256", "checksum": ""},
+                                        "columns": {
+                                            "col_1": {
+                                                "index": 1,
+                                                "name": "col_1",
+                                                "type": "INTEGER",
+                                            },
+                                        },
+                                        "config": {"meta": None},
+                                        "description": "",
+                                        "fqn": [
+                                            "dbt_bouncer_test_project",
+                                            "stg_payments",
+                                        ],
+                                        "name": "stg_payments",
+                                        "original_file_path": "models/staging/stg_payments.sql",
+                                        "package_name": "dbt_bouncer_test_project",
+                                        "path": "staging/stg_payments.sql",
+                                        "resource_type": "model",
+                                        "schema": "main",
+                                        "unique_id": "model.dbt_bouncer_test_project.stg_payments",
+                                    },
+                                ),
                                 "original_file_path": "models/staging/stg_payments.sql",
-                                "package_name": "dbt_bouncer_test_project",
-                                "path": "staging/stg_payments.sql",
-                                "resource_type": "model",
-                                "schema": "main",
                                 "unique_id": "model.dbt_bouncer_test_project.stg_payments",
                             },
                         ),
-                        "original_file_path": "models/staging/stg_payments.sql",
-                        "unique_id": "model.dbt_bouncer_test_project.stg_payments",
-                    },
-                ),
-                DbtBouncerModel(
-                    **{
-                        "model": Nodes4(
+                        DbtBouncerModel(
                             **{
-                                "access": "public",
-                                "alias": "stg_orders",
-                                "checksum": {"name": "sha256", "checksum": ""},
-                                "columns": {
-                                    "col_1": {
-                                        "index": 1,
-                                        "name": "col_1",
-                                        "type": "INTEGER",
+                                "model": Nodes4(
+                                    **{
+                                        "access": "public",
+                                        "alias": "stg_orders",
+                                        "checksum": {"name": "sha256", "checksum": ""},
+                                        "columns": {
+                                            "col_1": {
+                                                "index": 1,
+                                                "name": "col_1",
+                                                "type": "INTEGER",
+                                            },
+                                        },
+                                        "config": {"meta": None},
+                                        "description": "This is a populated description",
+                                        "fqn": [
+                                            "dbt_bouncer_test_project",
+                                            "stg_orders",
+                                        ],
+                                        "name": "stg_orders",
+                                        "original_file_path": "models/staging/stg_orders.sql",
+                                        "package_name": "dbt_bouncer_test_project",
+                                        "path": "staging/stg_orders.sql",
+                                        "resource_type": "model",
+                                        "schema": "main",
+                                        "unique_id": "model.dbt_bouncer_test_project.stg_orders",
                                     },
-                                },
-                                "config": {"meta": None},
-                                "description": "This is a populated description",
-                                "fqn": ["dbt_bouncer_test_project", "stg_orders"],
-                                "name": "stg_orders",
+                                ),
                                 "original_file_path": "models/staging/stg_orders.sql",
-                                "package_name": "dbt_bouncer_test_project",
-                                "path": "staging/stg_orders.sql",
-                                "resource_type": "model",
-                                "schema": "main",
                                 "unique_id": "model.dbt_bouncer_test_project.stg_orders",
                             },
                         ),
-                        "original_file_path": "models/staging/stg_orders.sql",
-                        "unique_id": "model.dbt_bouncer_test_project.stg_orders",
-                    },
-                ),
-            ],
-            output_file=Path(tmp_path / "output.json"),
-            output_format="json",
-            output_only_failures=output_only_failures,
-            run_results=[],
-            seeds=[],
-            semantic_models=[],
-            snapshots=[],
-            show_all_failures=False,
-            sources=[],
-            tests=[],
-            unit_tests=[],
+                    ],
+                    "output_file": Path(tmp_path / "output.json"),
+                    "output_format": "json",
+                    "output_only_failures": output_only_failures,
+                    "run_results": [],
+                    "seeds": [],
+                    "semantic_models": [],
+                    "snapshots": [],
+                    "show_all_failures": False,
+                    "sources": [],
+                    "tests": [],
+                    "unit_tests": [],
+                }
+            )
         )
 
     with Path.open(tmp_path / "output.json", "r") as f:
@@ -955,189 +1008,193 @@ def test_runner_skip_catalog_check(tmp_path):
             )
 
         results = runner(
-            bouncer_config=DbtBouncerConf(
+            ctx=BouncerContext(
                 **{
-                    "catalog_checks": [
-                        {
-                            "exclude": None,
-                            "include": None,
-                            "index": 0,
-                            "name": "check_columns_are_all_documented",
-                        },
-                    ],
-                }
-            ),
-            catalog_nodes=[
-                DbtBouncerCatalogNode(
-                    catalog_node=CatalogNodes(
+                    "bouncer_config": DbtBouncerConf(
                         **{
-                            "columns": {
-                                "col_1": {
-                                    "index": 1,
-                                    "name": "col_1",
-                                    "type": "INTEGER",
+                            "catalog_checks": [
+                                {
+                                    "exclude": None,
+                                    "include": None,
+                                    "index": 0,
+                                    "name": "check_columns_are_all_documented",
                                 },
-                            },
-                            "metadata": {
-                                "name": "stg_payments",
-                                "schema": "main",
-                                "type": "VIEW",
-                            },
-                            "stats": {},
-                            "unique_id": "model.dbt_bouncer_test_project.stg_payments",
+                            ],
                         }
                     ),
-                    original_file_path="models/staging/stg_payments.sql",
-                    unique_id="model.dbt_bouncer_test_project.stg_payments",
-                ),
-                DbtBouncerCatalogNode(
-                    catalog_node=CatalogNodes(
-                        **{
-                            "columns": {
-                                "col_1": {
-                                    "index": 1,
-                                    "name": "col_1",
-                                    "type": "INTEGER",
-                                },
-                                "col_2": {
-                                    "index": 2,
-                                    "name": "col_2",
-                                    "type": "VARCHAR",
-                                },
-                            },
-                            "metadata": {
-                                "name": "stg_orders",
-                                "schema": "main",
-                                "type": "VIEW",
-                            },
-                            "stats": {},
-                            "unique_id": "model.dbt_bouncer_test_project.stg_orders",
-                        }
-                    ),
-                    original_file_path="models/staging/stg_orders.sql",
-                    unique_id="model.dbt_bouncer_test_project.stg_orders",
-                ),
-            ],
-            catalog_sources=[],
-            check_categories=["catalog_checks"],
-            create_pr_comment_file=False,
-            exposures=[],
-            macros=[],
-            manifest_obj=DbtBouncerManifest(
-                manifest=ManifestLatest(
-                    **{
-                        "metadata": Metadata(
-                            dbt_schema_version="https://schemas.getdbt.com/dbt/manifest/v12.json",
-                            project_name="dbt_bouncer_test_project",
-                            adapter_type="postgres",
-                        ),
-                        "child_map": {},
-                        "disabled": {},
-                        "docs": {},
-                        "exposures": {},
-                        "group_map": {},
-                        "groups": {},
-                        "macros": {},
-                        "metrics": {},
-                        "nodes": {},
-                        "parent_map": {},
-                        "saved_queries": {},
-                        "selectors": {},
-                        "semantic_models": {},
-                        "sources": {},
-                        "unit_tests": {},
-                    },
-                ),
-            ),
-            models=[
-                DbtBouncerModel(
-                    **{
-                        "model": Nodes4(
-                            **{
-                                "access": "public",
-                                "alias": "stg_payments",
-                                "checksum": {"name": "sha256", "checksum": ""},
-                                "columns": {
-                                    "col_1": {
-                                        "description": "Column 1 description",
-                                        "index": 1,
-                                        "name": "col_1",
-                                        "type": "INTEGER",
+                    "catalog_nodes": [
+                        DbtBouncerCatalogNode(
+                            catalog_node=CatalogNodes(
+                                **{
+                                    "columns": {
+                                        "col_1": {
+                                            "index": 1,
+                                            "name": "col_1",
+                                            "type": "INTEGER",
+                                        },
                                     },
-                                },
-                                "config": {"meta": None},
-                                "description": "Payments staging model",
-                                "fqn": [
-                                    "dbt_bouncer_test_project",
-                                    "stg_payments",
-                                ],
-                                "name": "stg_payments",
+                                    "metadata": {
+                                        "name": "stg_payments",
+                                        "schema": "main",
+                                        "type": "VIEW",
+                                    },
+                                    "stats": {},
+                                    "unique_id": "model.dbt_bouncer_test_project.stg_payments",
+                                }
+                            ),
+                            original_file_path="models/staging/stg_payments.sql",
+                            unique_id="model.dbt_bouncer_test_project.stg_payments",
+                        ),
+                        DbtBouncerCatalogNode(
+                            catalog_node=CatalogNodes(
+                                **{
+                                    "columns": {
+                                        "col_1": {
+                                            "index": 1,
+                                            "name": "col_1",
+                                            "type": "INTEGER",
+                                        },
+                                        "col_2": {
+                                            "index": 2,
+                                            "name": "col_2",
+                                            "type": "VARCHAR",
+                                        },
+                                    },
+                                    "metadata": {
+                                        "name": "stg_orders",
+                                        "schema": "main",
+                                        "type": "VIEW",
+                                    },
+                                    "stats": {},
+                                    "unique_id": "model.dbt_bouncer_test_project.stg_orders",
+                                }
+                            ),
+                            original_file_path="models/staging/stg_orders.sql",
+                            unique_id="model.dbt_bouncer_test_project.stg_orders",
+                        ),
+                    ],
+                    "catalog_sources": [],
+                    "check_categories": ["catalog_checks"],
+                    "create_pr_comment_file": False,
+                    "exposures": [],
+                    "macros": [],
+                    "manifest_obj": DbtBouncerManifest(
+                        manifest=ManifestLatest(
+                            **{
+                                "metadata": Metadata(
+                                    dbt_schema_version="https://schemas.getdbt.com/dbt/manifest/v12.json",
+                                    project_name="dbt_bouncer_test_project",
+                                    adapter_type="postgres",
+                                ),
+                                "child_map": {},
+                                "disabled": {},
+                                "docs": {},
+                                "exposures": {},
+                                "group_map": {},
+                                "groups": {},
+                                "macros": {},
+                                "metrics": {},
+                                "nodes": {},
+                                "parent_map": {},
+                                "saved_queries": {},
+                                "selectors": {},
+                                "semantic_models": {},
+                                "sources": {},
+                                "unit_tests": {},
+                            },
+                        ),
+                    ),
+                    "models": [
+                        DbtBouncerModel(
+                            **{
+                                "model": Nodes4(
+                                    **{
+                                        "access": "public",
+                                        "alias": "stg_payments",
+                                        "checksum": {"name": "sha256", "checksum": ""},
+                                        "columns": {
+                                            "col_1": {
+                                                "description": "Column 1 description",
+                                                "index": 1,
+                                                "name": "col_1",
+                                                "type": "INTEGER",
+                                            },
+                                        },
+                                        "config": {"meta": None},
+                                        "description": "Payments staging model",
+                                        "fqn": [
+                                            "dbt_bouncer_test_project",
+                                            "stg_payments",
+                                        ],
+                                        "name": "stg_payments",
+                                        "original_file_path": "models/staging/stg_payments.sql",
+                                        "package_name": "dbt_bouncer_test_project",
+                                        "path": "staging/stg_payments.sql",
+                                        "resource_type": "model",
+                                        "schema": "main",
+                                        "unique_id": "model.dbt_bouncer_test_project.stg_payments",
+                                    },
+                                ),
                                 "original_file_path": "models/staging/stg_payments.sql",
-                                "package_name": "dbt_bouncer_test_project",
-                                "path": "staging/stg_payments.sql",
-                                "resource_type": "model",
-                                "schema": "main",
                                 "unique_id": "model.dbt_bouncer_test_project.stg_payments",
                             },
                         ),
-                        "original_file_path": "models/staging/stg_payments.sql",
-                        "unique_id": "model.dbt_bouncer_test_project.stg_payments",
-                    },
-                ),
-                DbtBouncerModel(
-                    **{
-                        "model": Nodes4(
+                        DbtBouncerModel(
                             **{
-                                "access": "public",
-                                "alias": "stg_orders",
-                                "checksum": {"name": "sha256", "checksum": ""},
-                                "columns": {
-                                    "col_1": {
-                                        "description": "Column 1 description",
-                                        "index": 1,
-                                        "name": "col_1",
-                                        "type": "INTEGER",
+                                "model": Nodes4(
+                                    **{
+                                        "access": "public",
+                                        "alias": "stg_orders",
+                                        "checksum": {"name": "sha256", "checksum": ""},
+                                        "columns": {
+                                            "col_1": {
+                                                "description": "Column 1 description",
+                                                "index": 1,
+                                                "name": "col_1",
+                                                "type": "INTEGER",
+                                            },
+                                        },
+                                        "config": {
+                                            "meta": {
+                                                "dbt-bouncer": {
+                                                    "skip_checks": [
+                                                        "check_columns_are_all_documented"
+                                                    ]
+                                                }
+                                            }
+                                        },
+                                        "description": "Orders staging model",
+                                        "fqn": [
+                                            "dbt_bouncer_test_project",
+                                            "stg_orders",
+                                        ],
+                                        "name": "stg_orders",
+                                        "original_file_path": "models/staging/stg_orders.sql",
+                                        "package_name": "dbt_bouncer_test_project",
+                                        "path": "staging/stg_orders.sql",
+                                        "resource_type": "model",
+                                        "schema": "main",
+                                        "unique_id": "model.dbt_bouncer_test_project.stg_orders",
                                     },
-                                },
-                                "config": {
-                                    "meta": {
-                                        "dbt-bouncer": {
-                                            "skip_checks": [
-                                                "check_columns_are_all_documented"
-                                            ]
-                                        }
-                                    }
-                                },
-                                "description": "Orders staging model",
-                                "fqn": [
-                                    "dbt_bouncer_test_project",
-                                    "stg_orders",
-                                ],
-                                "name": "stg_orders",
+                                ),
                                 "original_file_path": "models/staging/stg_orders.sql",
-                                "package_name": "dbt_bouncer_test_project",
-                                "path": "staging/stg_orders.sql",
-                                "resource_type": "model",
-                                "schema": "main",
                                 "unique_id": "model.dbt_bouncer_test_project.stg_orders",
                             },
                         ),
-                        "original_file_path": "models/staging/stg_orders.sql",
-                        "unique_id": "model.dbt_bouncer_test_project.stg_orders",
-                    },
-                ),
-            ],
-            output_file=tmp_path / "coverage.json",
-            output_format="json",
-            output_only_failures=False,
-            run_results=[],
-            seeds=[],
-            semantic_models=[],
-            snapshots=[],
-            show_all_failures=False,
-            sources=[],
-            tests=[],
-            unit_tests=[],
+                    ],
+                    "output_file": tmp_path / "coverage.json",
+                    "output_format": "json",
+                    "output_only_failures": False,
+                    "run_results": [],
+                    "seeds": [],
+                    "semantic_models": [],
+                    "snapshots": [],
+                    "show_all_failures": False,
+                    "sources": [],
+                    "tests": [],
+                    "unit_tests": [],
+                }
+            )
         )
 
     with Path.open(tmp_path / "coverage.json", "r") as f:

@@ -1,0 +1,51 @@
+"""A context object to hold all the data needed for a bouncer run."""
+
+from pathlib import Path
+from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
+    UnitTests,
+)
+
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from dbt_bouncer.artifact_parsers.parsers_common import (
+        DbtBouncerCatalogNode,
+        DbtBouncerManifest,
+        DbtBouncerModel,
+        DbtBouncerRunResult,
+        DbtBouncerSeed,
+        DbtBouncerSemanticModel,
+        DbtBouncerSnapshot,
+        DbtBouncerSource,
+        DbtBouncerTest,
+    )
+from dbt_bouncer.artifact_parsers.parsers_manifest import (
+    DbtBouncerExposureBase,
+    DbtBouncerMacroBase,
+)
+from dbt_bouncer.config_file_parser import DbtBouncerConfBase
+from pydantic import BaseModel
+
+
+class BouncerContext(BaseModel):
+    """A context object to hold all the data needed for a bouncer run."""
+
+    bouncer_config: "DbtBouncerConfBase"
+    catalog_nodes: list["DbtBouncerCatalogNode"]
+    catalog_sources: list["DbtBouncerCatalogNode"]
+    check_categories: list[str]
+    create_pr_comment_file: bool
+    exposures: list["DbtBouncerExposureBase"]
+    macros: list["DbtBouncerMacroBase"]
+    manifest_obj: "DbtBouncerManifest"
+    models: list["DbtBouncerModel"]
+    output_file: Path | None
+    output_format: str
+    output_only_failures: bool
+    run_results: list["DbtBouncerRunResult"]
+    seeds: list["DbtBouncerSeed"]
+    semantic_models: list["DbtBouncerSemanticModel"]
+    show_all_failures: bool
+    snapshots: list["DbtBouncerSnapshot"]
+    sources: list["DbtBouncerSource"]
+    tests: list["DbtBouncerTest"]
+    unit_tests: list["UnitTests"]
