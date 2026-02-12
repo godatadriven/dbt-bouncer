@@ -9,6 +9,7 @@
     - [Macros](./manifest/check_macros.md)
     - [Metadata](./manifest/check_metadata.md)
     - [Models](./manifest/check_models.md)
+    - [Seeds](./manifest/check_seeds.md)
     - [Semantic Models](./manifest/check_semantic_models.md)
     - [Snapshots](./manifest/check_snapshots.md)
     - [Sources](./manifest/check_sources.md)
