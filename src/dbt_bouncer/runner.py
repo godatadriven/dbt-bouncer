@@ -19,25 +19,7 @@ from dbt_bouncer.utils import (
 )
 
 if TYPE_CHECKING:
-    from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
-        UnitTests,
-    )
-    from dbt_bouncer.artifact_parsers.parsers_common import (
-        DbtBouncerCatalogNode,
-        DbtBouncerManifest,
-        DbtBouncerModel,
-        DbtBouncerRunResult,
-        DbtBouncerSeed,
-        DbtBouncerSemanticModel,
-        DbtBouncerSnapshot,
-        DbtBouncerSource,
-        DbtBouncerTest,
-    )
-    from dbt_bouncer.artifact_parsers.parsers_manifest import (
-        DbtBouncerExposureBase,
-        DbtBouncerMacroBase,
-    )
-    from dbt_bouncer.config_file_parser import DbtBouncerConfBase
+    from dbt_bouncer.context import BouncerContext
 
 
 def _should_run_check(
@@ -71,26 +53,7 @@ def _should_run_check(
 
 
 def runner(
-    bouncer_config: "DbtBouncerConfBase",
-    catalog_nodes: list["DbtBouncerCatalogNode"],
-    catalog_sources: list["DbtBouncerCatalogNode"],
-    check_categories: list[str],
-    create_pr_comment_file: bool,
-    exposures: list["DbtBouncerExposureBase"],
-    macros: list["DbtBouncerMacroBase"],
-    manifest_obj: "DbtBouncerManifest",
-    models: list["DbtBouncerModel"],
-    output_file: Path | None,
-    output_format: str,
-    run_results: list["DbtBouncerRunResult"],
-    seeds: list["DbtBouncerSeed"],
-    semantic_models: list["DbtBouncerSemanticModel"],
-    output_only_failures: bool,
-    show_all_failures: bool,
-    snapshots: list["DbtBouncerSnapshot"],
-    sources: list["DbtBouncerSource"],
-    tests: list["DbtBouncerTest"],
-    unit_tests: list["UnitTests"],
+    ctx: "BouncerContext",
 ) -> tuple[int, list[Any]]:
     """Run dbt-bouncer checks.
 
@@ -102,33 +65,33 @@ def runner(
 
     """
     parsed_data = {
-        "catalog_nodes": catalog_nodes,
-        "catalog_sources": catalog_sources,
-        "exposures": exposures,
-        "macros": macros,
-        "manifest_obj": manifest_obj,
-        "models": [m.model for m in models],
-        "run_results": [r.run_result for r in run_results],
-        "seeds": [s.seed for s in seeds],
-        "semantic_models": [s.semantic_model for s in semantic_models],
-        "snapshots": [s.snapshot for s in snapshots],
-        "sources": sources,
-        "tests": [t.test for t in tests],
-        "unit_tests": unit_tests,
+        "catalog_nodes": ctx.catalog_nodes,
+        "catalog_sources": ctx.catalog_sources,
+        "exposures": ctx.exposures,
+        "macros": ctx.macros,
+        "manifest_obj": ctx.manifest_obj,
+        "models": [m.model for m in ctx.models],
+        "run_results": [r.run_result for r in ctx.run_results],
+        "seeds": [s.seed for s in ctx.seeds],
+        "semantic_models": [s.semantic_model for s in ctx.semantic_models],
+        "snapshots": [s.snapshot for s in ctx.snapshots],
+        "sources": ctx.sources,
+        "tests": [t.test for t in ctx.tests],
+        "unit_tests": ctx.unit_tests,
     }
 
     resource_map: dict[str, Any] = {
-        "catalog_nodes": catalog_nodes,
-        "catalog_sources": catalog_sources,
-        "exposures": exposures,
-        "macros": macros,
-        "models": models,
-        "run_results": run_results,
-        "seeds": seeds,
-        "semantic_models": semantic_models,
-        "snapshots": snapshots,
-        "sources": sources,
-        "unit_tests": unit_tests,
+        "catalog_nodes": ctx.catalog_nodes,
+        "catalog_sources": ctx.catalog_sources,
+        "exposures": ctx.exposures,
+        "macros": ctx.macros,
+        "models": ctx.models,
+        "run_results": ctx.run_results,
+        "seeds": ctx.seeds,
+        "semantic_models": ctx.semantic_models,
+        "snapshots": ctx.snapshots,
+        "sources": ctx.sources,
+        "unit_tests": ctx.unit_tests,
     }
 
     # Pre-compute unique_id -> meta lookup for catalog_node skip_checks
@@ -144,8 +107,8 @@ def runner(
                     meta_by_unique_id[node.unique_id] = getattr(node, "meta", {})
 
     list_of_check_configs = []
-    for check_category in check_categories:
-        list_of_check_configs.extend(getattr(bouncer_config, check_category))
+    for check_category in ctx.check_categories:
+        list_of_check_configs.extend(getattr(ctx.bouncer_config, check_category))
 
     checks_to_run = []
     for check in sorted(list_of_check_configs, key=operator.attrgetter("index")):
@@ -304,7 +267,7 @@ def runner(
             f"`dbt-bouncer` {'failed' if num_checks_error > 0 else 'has warnings'}. Please see below for more details or run `dbt-bouncer` with the `-v` flag."
             + (
                 ""
-                if num_checks_error < 25 or show_all_failures
+                if num_checks_error < 25 or ctx.show_all_failures
                 else " More than 25 checks failed, to see a full list of all failed checks re-run `dbt-bouncer` with (one of) the `--output-file` or `--show-all-failures` flags."
             )
         )
@@ -321,7 +284,7 @@ def runner(
         logger(
             ("Failed checks:\n" if num_checks_error > 0 else "Warning checks:\n")
             + tabulate(
-                failed_checks if show_all_failures else failed_checks[:25],
+                failed_checks if ctx.show_all_failures else failed_checks[:25],
                 headers={
                     "check_run_id": "Check name",
                     "severity": "Severity",
@@ -331,12 +294,12 @@ def runner(
             ),
         )
 
-        if create_pr_comment_file:
+        if ctx.create_pr_comment_file:
             create_github_comment_file(
                 failed_checks=[
                     [f["check_run_id"], f["failure_message"]] for f in failed_checks
                 ],
-                show_all_failures=show_all_failures,
+                show_all_failures=ctx.show_all_failures,
             )
 
     logging.info(
@@ -345,14 +308,14 @@ def runner(
 
     results_to_save = (
         [r for r in results if r["outcome"] == "failed"]
-        if output_only_failures
+        if ctx.output_only_failures
         else results
     )
 
-    if output_file is not None:
-        coverage_file = Path().cwd() / output_file
+    if ctx.output_file is not None:
+        coverage_file = Path().cwd() / ctx.output_file
         logging.info(f"Saving coverage file to `{coverage_file}`.")
-        coverage_file.write_bytes(_format_results(results_to_save, output_format))
+        coverage_file.write_bytes(_format_results(results_to_save, ctx.output_format))
 
     return 1 if num_checks_error != 0 else 0, results
 
