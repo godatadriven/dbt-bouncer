@@ -155,6 +155,7 @@ exclude = [
     ".venv",
     "LICENSE.md",
 ]
+MD007.indent = 2
 respect_gitignore = true
 
 [tool.uv]
