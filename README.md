@@ -2,7 +2,6 @@
   <img src="https://github.com/godatadriven/dbt-bouncer/raw/main/docs/assets/logo.svg" alt="dbt-bouncer logo" width="500"/>
 </p>
 
-
 <h1 align="center">
   dbt-bouncer
 </h1>
@@ -12,49 +11,49 @@
 
 <div align="center">
   <a>
-	<img src="https://img.shields.io/github/release/godatadriven/dbt-bouncer.svg?logo=github">
+    <img src="https://img.shields.io/github/release/godatadriven/dbt-bouncer.svg?logo=github">
   </a>
   <a>
-	<img src="https://img.shields.io/badge/License-MIT-yellow.svg">
+    <img src="https://img.shields.io/badge/License-MIT-yellow.svg">
   </a>
   <a>
-	<img alt="security: bandit" href="https://github.com/PyCQA/bandit" src="https://img.shields.io/badge/security-bandit-yellow.svg">
+    <img alt="security: bandit" href="https://github.com/PyCQA/bandit" src="https://img.shields.io/badge/security-bandit-yellow.svg">
   </a>
   <a>
-	<img src="https://img.shields.io/github/last-commit/godatadriven/dbt-bouncer/main">
+    <img src="https://img.shields.io/github/last-commit/godatadriven/dbt-bouncer/main">
   </a>
   <a>
-	<img src="https://img.shields.io/github/commits-since/godatadriven/dbt-bouncer/latest">
-  </a>
-</div>
-
-<div align="center">
-  <a>
-	<img alt="dbt-core" src="https://img.shields.io/badge/dbt--core%20-%3E%3D1.7-333?logo=dbt">
-  </a>
-  <a>
-	<img alt="dbt Cloud Supported" src="https://img.shields.io/badge/dbt%20Cloud%20-Supported-ff694a?logo=dbt">
-  </a>
-  <a>
-	<img alt="Docker Supported" src="https://img.shields.io/badge/Docker%20-Supported-0db7ed?logo=docker">
-  </a>
-  <a>
-	<img alt="GitHub Supported" src="https://img.shields.io/badge/GitHub%20-Supported-333?logo=github">
+    <img src="https://img.shields.io/github/commits-since/godatadriven/dbt-bouncer/latest">
   </a>
 </div>
 
 <div align="center">
   <a>
-	<img src="https://github.com/godatadriven/dbt-bouncer/actions/workflows/merge_pipeline.yml/badge.svg">
+    <img alt="dbt-core" src="https://img.shields.io/badge/dbt--core%20-%3E%3D1.7-333?logo=dbt">
   </a>
   <a>
-	<img src="https://github.com/godatadriven/dbt-bouncer/actions/workflows/post_release_pipeline.yml/badge.svg">
+    <img alt="dbt Cloud Supported" src="https://img.shields.io/badge/dbt%20Cloud%20-Supported-ff694a?logo=dbt">
   </a>
   <a>
-	<img src="https://img.shields.io/badge/style-ruff-41B5BE?style=flat">
+    <img alt="Docker Supported" src="https://img.shields.io/badge/Docker%20-Supported-0db7ed?logo=docker">
   </a>
   <a>
-	<img src="https://www.aschey.tech/tokei/github/godatadriven/dbt-bouncer?category=code">
+    <img alt="GitHub Supported" src="https://img.shields.io/badge/GitHub%20-Supported-333?logo=github">
+  </a>
+</div>
+
+<div align="center">
+  <a>
+    <img src="https://github.com/godatadriven/dbt-bouncer/actions/workflows/merge_pipeline.yml/badge.svg">
+  </a>
+  <a>
+    <img src="https://github.com/godatadriven/dbt-bouncer/actions/workflows/post_release_pipeline.yml/badge.svg">
+  </a>
+  <a>
+    <img src="https://img.shields.io/badge/style-ruff-41B5BE?style=flat">
+  </a>
+  <a>
+    <img src="https://www.aschey.tech/tokei/github/godatadriven/dbt-bouncer?category=code">
   </a>
 </div>
 <br/>
@@ -85,7 +84,7 @@ All documentation can be found on `dbt-bouncer` [documentation website](https://
 
 1. Run `dbt-bouncer`:
 
-    ```
+    ```text
     $ dbt-bouncer
 
     [...]
