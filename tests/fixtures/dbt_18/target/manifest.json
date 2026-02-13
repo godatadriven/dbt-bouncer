@@ -479,7 +479,9 @@
         "order_id": {
           "name": "order_id",
           "description": "This is a unique identifier for an order",
-          "meta": {},
+          "meta": {
+            "maturity": "gold"
+          },
           "data_type": "integer",
           "constraints": [],
           "quote": null,
@@ -488,7 +490,9 @@
         "customer_id": {
           "name": "customer_id",
           "description": "Foreign key to the customers table",
-          "meta": {},
+          "meta": {
+            "maturity": "gold"
+          },
           "data_type": "integer",
           "constraints": [],
           "quote": null,
@@ -497,7 +501,9 @@
         "order_date": {
           "name": "order_date",
           "description": "Date (UTC) that the order was placed",
-          "meta": {},
+          "meta": {
+            "maturity": "gold"
+          },
           "data_type": "date",
           "constraints": [],
           "quote": null,
@@ -506,7 +512,9 @@
         "status": {
           "name": "status",
           "description": "Orders can be one of the following statuses:\n\n| status         | description                                                                                                            |\n|----------------|------------------------------------------------------------------------------------------------------------------------|\n| placed         | The order has been placed but has not yet left the warehouse                                                           |\n| shipped        | The order has ben shipped to the customer and is currently in transit                                                  |\n| completed      | The order has been received by the customer                                                                            |\n| return_pending | The customer has indicated that they would like to return the order, but it has not yet been received at the warehouse |\n| returned       | The order has been returned by the customer and received at the warehouse                                              |",
-          "meta": {},
+          "meta": {
+            "maturity": "gold"
+          },
           "data_type": "string",
           "constraints": [],
           "quote": null,
@@ -515,7 +523,9 @@
         "amount": {
           "name": "amount",
           "description": "Total amount (AUD) of the order",
-          "meta": {},
+          "meta": {
+            "maturity": "gold"
+          },
           "data_type": "double",
           "constraints": [],
           "quote": null,
@@ -524,7 +534,9 @@
         "credit_card_amount": {
           "name": "credit_card_amount",
           "description": "Amount of the order (AUD) paid for by credit card",
-          "meta": {},
+          "meta": {
+            "maturity": "gold"
+          },
           "data_type": "double",
           "constraints": [],
           "quote": null,
@@ -533,7 +545,9 @@
         "coupon_amount": {
           "name": "coupon_amount",
           "description": "Amount of the order (AUD) paid for by coupon",
-          "meta": {},
+          "meta": {
+            "maturity": "gold"
+          },
           "data_type": "double",
           "constraints": [],
           "quote": null,
@@ -542,7 +556,9 @@
         "bank_transfer_amount": {
           "name": "bank_transfer_amount",
           "description": "Amount of the order (AUD) paid for by bank transfer",
-          "meta": {},
+          "meta": {
+            "maturity": "gold"
+          },
           "data_type": "double",
           "constraints": [],
           "quote": null,
@@ -551,7 +567,9 @@
         "gift_card_amount": {
           "name": "gift_card_amount",
           "description": "Amount of the order (AUD) paid for by gift card",
-          "meta": {},
+          "meta": {
+            "maturity": "gold"
+          },
           "data_type": "double",
           "constraints": [],
           "quote": null,
@@ -7467,7 +7485,9 @@
         "customer_id": {
           "name": "customer_id",
           "description": "This is a unique identifier for a customer",
-          "meta": {},
+          "meta": {
+            "maturity": "gold"
+          },
           "data_type": "bigint",
           "constraints": [],
           "quote": null,
@@ -7476,7 +7496,9 @@
         "first_name": {
           "name": "first_name",
           "description": "Customer's first name. PII.",
-          "meta": {},
+          "meta": {
+            "maturity": "gold"
+          },
           "data_type": "string",
           "constraints": [],
           "quote": null,
@@ -7485,7 +7507,9 @@
         "last_name": {
           "name": "last_name",
           "description": "Customer's last name. PII.",
-          "meta": {},
+          "meta": {
+            "maturity": "gold"
+          },
           "data_type": "string",
           "constraints": [],
           "quote": null,
@@ -7494,7 +7518,9 @@
         "new_column": {
           "name": "new_column",
           "description": "New column to simulate a new version of this model",
-          "meta": {},
+          "meta": {
+            "maturity": "gold"
+          },
           "data_type": "string",
           "constraints": [],
           "quote": null,
@@ -7503,7 +7529,9 @@
         "first_order_date": {
           "name": "first_order_date",
           "description": "Date (UTC) of a customer's first order",
-          "meta": {},
+          "meta": {
+            "maturity": "gold"
+          },
           "data_type": "date",
           "constraints": [],
           "quote": null,
@@ -7512,7 +7540,9 @@
         "most_recent_order_date": {
           "name": "most_recent_order_date",
           "description": "Date (UTC) of a customer's most recent order",
-          "meta": {},
+          "meta": {
+            "maturity": "gold"
+          },
           "data_type": "date",
           "constraints": [],
           "quote": null,
@@ -7521,7 +7551,9 @@
         "number_of_orders": {
           "name": "number_of_orders",
           "description": "Count of the number of orders a customer has placed",
-          "meta": {},
+          "meta": {
+            "maturity": "gold"
+          },
           "data_type": "bigint",
           "constraints": [],
           "quote": null,
@@ -7530,7 +7562,9 @@
         "is_recurring_customer": {
           "name": "is_recurring_customer",
           "description": "Boolean indicating whether a customer has placed more than five orders",
-          "meta": {},
+          "meta": {
+            "maturity": "gold"
+          },
           "data_type": "boolean",
           "constraints": [],
           "quote": null,
@@ -7539,7 +7573,9 @@
         "customer_lifetime_value": {
           "name": "customer_lifetime_value",
           "description": "Sum of all payments a customer has made",
-          "meta": {},
+          "meta": {
+            "maturity": "gold"
+          },
           "data_type": "double",
           "constraints": [],
           "quote": null,
@@ -7694,7 +7730,9 @@
         "customer_id": {
           "name": "customer_id",
           "description": "This is a unique identifier for a customer",
-          "meta": {},
+          "meta": {
+            "maturity": "gold"
+          },
           "data_type": "bigint",
           "constraints": [],
           "quote": null,
@@ -7703,7 +7741,9 @@
         "first_name": {
           "name": "first_name",
           "description": "Customer's first name. PII.",
-          "meta": {},
+          "meta": {
+            "maturity": "gold"
+          },
           "data_type": "string",
           "constraints": [],
           "quote": null,
@@ -7712,7 +7752,9 @@
         "last_name": {
           "name": "last_name",
           "description": "Customer's last name. PII.",
-          "meta": {},
+          "meta": {
+            "maturity": "gold"
+          },
           "data_type": "string",
           "constraints": [],
           "quote": null,
@@ -7721,7 +7763,9 @@
         "first_order_date": {
           "name": "first_order_date",
           "description": "Date (UTC) of a customer's first order",
-          "meta": {},
+          "meta": {
+            "maturity": "gold"
+          },
           "data_type": "date",
           "constraints": [],
           "quote": null,
@@ -7730,7 +7774,9 @@
         "most_recent_order_date": {
           "name": "most_recent_order_date",
           "description": "Date (UTC) of a customer's most recent order",
-          "meta": {},
+          "meta": {
+            "maturity": "gold"
+          },
           "data_type": "date",
           "constraints": [],
           "quote": null,
@@ -7739,7 +7785,9 @@
         "number_of_orders": {
           "name": "number_of_orders",
           "description": "Count of the number of orders a customer has placed",
-          "meta": {},
+          "meta": {
+            "maturity": "gold"
+          },
           "data_type": "bigint",
           "constraints": [],
           "quote": null,
@@ -7748,7 +7796,9 @@
         "is_recurring_customer": {
           "name": "is_recurring_customer",
           "description": "Boolean indicating whether a customer has placed more than five orders",
-          "meta": {},
+          "meta": {
+            "maturity": "gold"
+          },
           "data_type": "boolean",
           "constraints": [],
           "quote": null,
@@ -7757,7 +7807,9 @@
         "customer_lifetime_value": {
           "name": "customer_lifetime_value",
           "description": "Sum of all payments a customer has made",
-          "meta": {},
+          "meta": {
+            "maturity": "gold"
+          },
           "data_type": "double",
           "constraints": [],
           "quote": null,
