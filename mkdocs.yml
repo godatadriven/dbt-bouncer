@@ -47,6 +47,7 @@ nav:
       - Semantic Models: checks/manifest/check_semantic_models.md
       - Snapshots: checks/manifest/check_snapshots.md
       - Sources: checks/manifest/check_sources.md
+      - Tests: checks/manifest/check_tests.md
       - Unit Tests: checks/manifest/check_unit_tests.md
     - Run Results:
       - Run Results: checks/run_results/check_run_results.md
