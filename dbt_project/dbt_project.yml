@@ -17,6 +17,12 @@ clean-targets:
   - "dbt_packages"
 
 
+tests:
+  dbt_bouncer_test_project:
+    marts:
+      +tags:
+        - critical
+
 models:
   dbt_bouncer_test_project:
     intermediate:

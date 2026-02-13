@@ -217,6 +217,12 @@ manifest_checks:
   - name: check_source_used_by_models_in_same_directory
   - name: check_source_used_by_only_one_model
 
+  # Tests
+  - name: check_test_has_tags
+    include: ^models/marts
+    tags:
+      - critical
+
   # Unit tests
   - name: check_unit_test_coverage
     include: ^models/marts

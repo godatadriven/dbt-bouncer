@@ -91,6 +91,7 @@ def runner(
         "semantic_models": ctx.semantic_models,
         "snapshots": ctx.snapshots,
         "sources": ctx.sources,
+        "tests": ctx.tests,
         "unit_tests": ctx.unit_tests,
     }
 
@@ -123,6 +124,7 @@ def runner(
             "semantic_model",
             "snapshot",
             "source",
+            "test",
             "unit_test",
         }
         iterate_over_value = valid_iterate_over_values.intersection(
@@ -149,6 +151,8 @@ def runner(
                     d = {}
                 elif iterate_value in ["macro"]:
                     d = i.meta
+                elif iterate_value == "test":
+                    d = getattr(getattr(i, "test", i), "meta", {}) or {}
                 else:
                     try:
                         d = i.config.meta
@@ -162,7 +166,7 @@ def runner(
                 if _should_run_check(check_i, i, iterate_over_value, meta_config):
                     check_run_id = (
                         f"{check_i.name}:{check_i.index}:{i.unique_id.split('.')[-1]}"
-                        if iterate_value in ["exposure", "macro", "unit_test"]
+                        if iterate_value in ["exposure", "macro", "test", "unit_test"]
                         else f"{check_i.name}:{check_i.index}:{'_'.join(getattr(i, iterate_value).unique_id.split('.')[2:])}"
                     )
                     setattr(check_i, iterate_value, getattr(i, iterate_value, i))

@@ -13,6 +13,7 @@
     - [Semantic Models](./manifest/check_semantic_models.md)
     - [Snapshots](./manifest/check_snapshots.md)
     - [Sources](./manifest/check_sources.md)
+    - [Tests](./manifest/check_tests.md)
     - [Unit Tests](./manifest/check_unit_tests.md)
 - Run Results checks:
     - [Run Results](./run_results/check_run_results.md)
