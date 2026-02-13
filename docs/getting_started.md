@@ -2,9 +2,9 @@
 
 1. Generate dbt artifacts by running a dbt command:
 
-    - `dbt parse` to generate a `manifest.json` artifact (no database connection required!).
-    - `dbt docs generate` to generate a `catalog.json` artifact (necessary if you are using catalog checks).
-    - `dbt run` (or any other command that implies it e.g. `dbt build`) to generate a `run_results.json` artifact (necessary if you are using run results checks).
+   * `dbt parse` to generate a `manifest.json` artifact (no database connection required!).
+   * `dbt docs generate` to generate a `catalog.json` artifact (necessary if you are using catalog checks).
+   * `dbt run` (or any other command that implies it e.g. `dbt build`) to generate a `run_results.json` artifact (necessary if you are using run results checks).
 
 1. Create a `dbt-bouncer.yml` config file, details [here](./config_file.md). Alternatively, you can run `dbt-bouncer init` to generate a basic configuration file.
 
@@ -59,6 +59,7 @@ uvx dbt-bouncer --config-file <PATH_TO_CONFIG_FILE>
 ### GitHub Actions
 
 Run `dbt-bouncer` as part of your CI pipeline:
+
 ```yaml
 name: CI pipeline
 
@@ -133,12 +134,12 @@ In addition to the checks built into `dbt-bouncer`, the ability to add custom ch
 1. In this directory create a subdirectory named `catalog`, `manifest` or `run_results` depending on the type of artifact you want to check.
 1. In this subdirectory create a python file that defines a check. The check must meet the following criteria:
 
-    * Start with "Check".
-    * Inherit from dbt_bouncer.check_base.BaseCheck.
-    * Have a name attribute that is a string whose value is the snake case equivalent of the class name.
-    * A default value provided for optional input arguments and arguments that are received at execution time.
-    * Have a doc string that includes a description of the check, a list of possible input parameters and at least one example.
-    * A clear message in the event of a failure.
+   * Start with "Check".
+   * Inherit from dbt_bouncer.check_base.BaseCheck.
+   * Have a name attribute that is a string whose value is the snake case equivalent of the class name.
+   * A default value provided for optional input arguments and arguments that are received at execution time.
+   * Have a doc string that includes a description of the check, a list of possible input parameters and at least one example.
+   * A clear message in the event of a failure.
 
 1. In your config file, add the name of the check and any desired arguments.
 1. Run `dbt-bouncer`, your custom check will be executed.

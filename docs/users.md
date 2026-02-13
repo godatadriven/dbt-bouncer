@@ -8,7 +8,7 @@ To add your company:
 1. Add your company to the `Users` section in [users.md](https://github.com/godatadriven/dbt-bouncer/blob/main/docs/users.md), retaining alphabetical order.
 1. Open a [pull request](https://github.com/godatadriven/dbt-bouncer/compare).
 
-# Users
+## Users
 
 <p>
     <h3>Aurai</h3>
@@ -40,9 +40,9 @@ To add your company:
     <img src="https://github.com/godatadriven/dbt-bouncer/raw/main/docs/assets/xebia_logo-large-transparent.png" width="500"/>
 </p>
 
-# `dbt-bouncer` in the wild
+## `dbt-bouncer` in the wild
 
-## Blogs:
+## Blogs
 
 * [Automate Sensitive Data Protection with Metadata-Driven Masking](https://xebia.com/blog/automate-sensitive-data-protection-with-metadata-driven-masking/)
 * [Maintaining conventions in dbt projects with dbt-bouncer](https://xebia.com/blog/maintaining-conventions-in-dbt-projects-with-dbt-bouncer/)

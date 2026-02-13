@@ -1,0 +1,19 @@
+[global]
+disable = [
+    "MD013",  # Line length: documentation intentionally has long lines
+    "MD033",  # Inline HTML: used for badges and styled elements in README
+    "MD041",  # First line heading: not required for all docs pages
+    "MD046",  # Code block style: allow both fenced and indented styles
+    "MD059",  # Link text: existing link definitions use short reference names
+]
+exclude = [
+    ".git",
+    ".github",
+    "node_modules",
+    "vendor",
+    "dist",
+    "build",
+    "CHANGELOG.md",
+    "LICENSE.md",
+]
+respect_gitignore = true

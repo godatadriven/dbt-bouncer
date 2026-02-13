@@ -141,3 +141,8 @@ skip-magic-trailing-comma = false
 
 [tool.uv]
 package = true
+
+[dependency-groups]
+dev = [
+    "rumdl>=0.1.19",
+]

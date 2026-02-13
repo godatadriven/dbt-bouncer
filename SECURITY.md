@@ -2,7 +2,6 @@
 
 ## Supported Versions
 
-
 | dbt Core | dbt-bouncer 0.* | dbt-bouncer 1.* |
 | - | - | - |
 | 1.11 | :x: | :white_check_mark: (>1.31.2rc3) |

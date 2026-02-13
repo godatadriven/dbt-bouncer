@@ -56,6 +56,14 @@ repos:
             types_or: [python, pyi]
     - repo: local
       hooks:
+        - id: rumdl
+          entry: uv run rumdl check --config rumdl.toml
+          language: system
+          name: rumdl
+          require_serial: true
+          types_or: [markdown]
+    - repo: local
+      hooks:
         - id: sqlfmt
           entry: uv run sqlfmt
           language: system
