@@ -57,7 +57,7 @@ repos:
     - repo: local
       hooks:
         - id: rumdl
-          entry: uv run rumdl check --config rumdl.toml
+          entry: uv run rumdl check --fix
           language: system
           name: rumdl
           require_serial: true

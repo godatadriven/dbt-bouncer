@@ -379,6 +379,7 @@ dev = [
     { name = "pytest-xdist" },
     { name = "pyupgrade" },
     { name = "ruff" },
+    { name = "rumdl" },
     { name = "shandy-sqlfmt", extra = ["jinjafmt"] },
     { name = "ty" },
 ]
@@ -390,11 +391,6 @@ docs = [
     { name = "mkdocs-material" },
     { name = "mkdocstrings-python" },
     { name = "pymdown-extensions" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "rumdl" },
 ]
 
 [package.metadata]
@@ -427,15 +423,13 @@ requires-dist = [
     { name = "pyyaml", specifier = "<7" },
     { name = "requests", specifier = ">=2,<3" },
     { name = "ruff", marker = "extra == 'dev'", specifier = "~=0.0" },
+    { name = "rumdl", marker = "extra == 'dev'", specifier = ">=0.1.19" },
     { name = "semver", specifier = "<4" },
     { name = "shandy-sqlfmt", extras = ["jinjafmt"], marker = "extra == 'dev'", specifier = "~=0.0" },
     { name = "tabulate", specifier = "<1" },
     { name = "ty", marker = "extra == 'dev'", specifier = ">=0.0.7" },
 ]
 provides-extras = ["dev", "docs"]
-
-[package.metadata.requires-dev]
-dev = [{ name = "rumdl", specifier = ">=0.1.19" }]
 
 [[package]]
 name = "dbt-common"
