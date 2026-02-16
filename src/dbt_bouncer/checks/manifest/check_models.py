@@ -1311,6 +1311,7 @@ class CheckModelMaxChainedViews(BaseCheck):
     )
     model: "DbtBouncerModelBase | None" = Field(default=None)
     models: list["DbtBouncerModelBase"] = Field(default=[])
+    models_by_unique_id: "dict[str, DbtBouncerModelBase] | None" = Field(default=None)
     name: Literal["check_model_max_chained_views"]
     package_name: str | None = Field(default=None)
 
@@ -1323,7 +1324,9 @@ class CheckModelMaxChainedViews(BaseCheck):
         """
         model = self._require_model()
         manifest_obj = self._require_manifest()
-        models_by_id = {m.unique_id: m for m in self.models}
+        models_by_id: dict[str, "DbtBouncerModelBase"] = self.models_by_unique_id or {
+            m.unique_id: m for m in self.models
+        }
 
         def return_upstream_view_models(
             materializations,
