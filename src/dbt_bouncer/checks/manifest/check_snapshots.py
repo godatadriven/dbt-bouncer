@@ -1,6 +1,7 @@
+import re
 from typing import TYPE_CHECKING, Literal
 
-from pydantic import Field
+from pydantic import Field, PrivateAttr
 
 from dbt_bouncer.check_base import BaseCheck
 
@@ -50,25 +51,26 @@ class CheckSnapshotHasTags(BaseCheck):
             DbtBouncerFailedCheckError: If snapshot does not have required tags.
 
         """
-        snapshot = self._require_snapshot()
-        snapshot_tags = snapshot.tags or []
+        if self.snapshot is None:
+            raise DbtBouncerFailedCheckError("self.snapshot is None")
+        snapshot_tags = self.snapshot.tags or []
         if self.criteria == "any":
             if not any(tag in snapshot_tags for tag in self.tags):
                 raise DbtBouncerFailedCheckError(
-                    f"`{snapshot.name}` does not have any of the required tags: {self.tags}."
+                    f"`{self.snapshot.name}` does not have any of the required tags: {self.tags}."
                 )
         elif self.criteria == "all":
             missing_tags = [tag for tag in self.tags if tag not in snapshot_tags]
             if missing_tags:
                 raise DbtBouncerFailedCheckError(
-                    f"`{snapshot.name}` is missing required tags: {missing_tags}."
+                    f"`{self.snapshot.name}` is missing required tags: {missing_tags}."
                 )
         elif (
             self.criteria == "one"
             and sum(tag in snapshot_tags for tag in self.tags) != 1
         ):
             raise DbtBouncerFailedCheckError(
-                f"`{snapshot.name}` must have exactly one of the required tags: {self.tags}."
+                f"`{self.snapshot.name}` must have exactly one of the required tags: {self.tags}."
             )
 
 
@@ -101,6 +103,12 @@ class CheckSnapshotNames(BaseCheck):
     snapshot: "DbtBouncerSnapshotBase | None" = Field(default=None)
     snapshot_name_pattern: str
 
+    _compiled_pattern: re.Pattern[str] = PrivateAttr()
+
+    def model_post_init(self, __context: object) -> None:
+        """Compile the regex pattern once at initialisation time."""
+        self._compiled_pattern = compile_pattern(self.snapshot_name_pattern.strip())
+
     def execute(self) -> None:
         """Execute the check.
 
@@ -108,13 +116,9 @@ class CheckSnapshotNames(BaseCheck):
             DbtBouncerFailedCheckError: If snapshot name does not match regex.
 
         """
-        snapshot = self._require_snapshot()
-        if (
-            compile_pattern(self.snapshot_name_pattern.strip()).match(
-                str(snapshot.name)
-            )
-            is None
-        ):
+        if self.snapshot is None:
+            raise DbtBouncerFailedCheckError("self.snapshot is None")
+        if self._compiled_pattern.match(str(self.snapshot.name)) is None:
             raise DbtBouncerFailedCheckError(
-                f"`{snapshot.name}` does not match the supplied regex `{self.snapshot_name_pattern.strip()})`."
+                f"`{self.snapshot.name}` does not match the supplied regex `{self.snapshot_name_pattern.strip()})`."
             )
