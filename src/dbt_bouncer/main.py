@@ -116,7 +116,6 @@ def run_bouncer(
         config_file_contents=dict(config_file_contents),
         custom_checks_dir=Path(custom_checks_dir) if custom_checks_dir else None,
     )
-    del config_file_contents
     logging.debug(f"{bouncer_config=}")
 
     for category in check_categories:
