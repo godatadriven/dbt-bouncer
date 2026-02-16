@@ -12,6 +12,7 @@ from progress.bar import Bar
 from tabulate import tabulate
 
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
+from dbt_bouncer.resource_type import ResourceType
 from dbt_bouncer.utils import (
     create_github_comment_file,
     get_nested_value,
@@ -113,20 +114,7 @@ def runner(
 
     checks_to_run = []
     for check in sorted(list_of_check_configs, key=operator.attrgetter("index")):
-        valid_iterate_over_values = {
-            "catalog_node",
-            "catalog_source",
-            "exposure",
-            "macro",
-            "model",
-            "run_result",
-            "seed",
-            "semantic_model",
-            "snapshot",
-            "source",
-            "test",
-            "unit_test",
-        }
+        valid_iterate_over_values = {rt.value for rt in ResourceType}
         iterate_over_value = valid_iterate_over_values.intersection(
             set(check.__class__.__annotations__.keys()),
         )
