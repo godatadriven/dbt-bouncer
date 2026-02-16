@@ -185,12 +185,12 @@ To add a new check follow the below steps:
 1. Within the chosen directory assess if a suitable file already exists. For example, if your check applies to a model then `manifest/check_models.py` is a suitable location.
 1. Within the chosen file, add a Pydantic model, this object must meet the following criteria:
 
-   - Start with "Check".
-   - Inherit from `dbt_bouncer.check_base.BaseCheck`.
-   - Have a `name` attribute that is a string whose value is the snake case equivalent of the class name.
-   - A `default` value provided for optional input arguments and arguments that are received at execution time.
-   - Have a doc string that includes a description of the check, a list of possible input parameters and at least one example.
-   - A clear message in the event of a failure.
+    - Start with "Check".
+    - Inherit from `dbt_bouncer.check_base.BaseCheck`.
+    - Have a `name` attribute that is a string whose value is the snake case equivalent of the class name.
+    - A `default` value provided for optional input arguments and arguments that are received at execution time.
+    - Have a doc string that includes a description of the check, a list of possible input parameters and at least one example.
+    - A clear message in the event of a failure.
 
 1. After the check is added, add the check to `dbt-bouncer-example.yml` and run `dbt-bouncer --config-file dbt-bouncer-example.yml` to ensure the check succeeds.
 1. (Optional) If the dbt project located in `./dbt_project` needs to be updated then do so and also run `make build-artifacts` to generate the new test artifacts.

@@ -17,5 +17,5 @@ This page provides documentation for the `dbt-bouncer` CLI.
 
 - `1`:
 
-  - At least one check has failed. Check the logs for more information.
-  - A fatal error occurred during check setup or check execution. Check the logs for more information.
+    - At least one check has failed. Check the logs for more information.
+    - A fatal error occurred during check setup or check execution. Check the logs for more information.
