@@ -45,16 +45,14 @@ class CheckSemanticModelOnNonPublicModels(BaseCheck):
             DbtBouncerFailedCheckError: If semantic model is based on non-public models.
 
         """
-        if self.semantic_model is None:
-            raise DbtBouncerFailedCheckError("self.semantic_model is None")
-
+        semantic_model = self._require_semantic_model()
         non_public_upstream_dependencies = []
-        for model in getattr(self.semantic_model.depends_on, "nodes", []) or []:
+        for model in getattr(semantic_model.depends_on, "nodes", []) or []:
             if (
                 next(m for m in self.models if m.unique_id == model).resource_type
                 == "model"
                 and next(m for m in self.models if m.unique_id == model).package_name
-                == self.semantic_model.package_name
+                == semantic_model.package_name
             ):
                 model_obj = next(m for m in self.models if m.unique_id == model)
                 if model_obj.access and model_obj.access.value != "public":
@@ -62,5 +60,5 @@ class CheckSemanticModelOnNonPublicModels(BaseCheck):
 
         if non_public_upstream_dependencies:
             raise DbtBouncerFailedCheckError(
-                f"Semantic model `{self.semantic_model.name}` is based on a model(s) that is not public: {non_public_upstream_dependencies}."
+                f"Semantic model `{semantic_model.name}` is based on a model(s) that is not public: {non_public_upstream_dependencies}."
             )

@@ -1,7 +1,8 @@
-from typing import TYPE_CHECKING, ClassVar, Literal
+from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import is_description_populated
 
 if TYPE_CHECKING:
@@ -49,6 +50,20 @@ class BaseCheck(BaseModel):
         description="Severity of the check, one of 'error' or 'warn'.",
     )
 
+    catalog_node: Any = Field(default=None)
+    catalog_source: Any = Field(default=None)
+    exposure: Any = Field(default=None)
+    macro: Any = Field(default=None)
+    manifest_obj: Any = Field(default=None)
+    model: Any = Field(default=None)
+    run_result: Any = Field(default=None)
+    seed: Any = Field(default=None)
+    semantic_model: Any = Field(default=None)
+    snapshot: Any = Field(default=None)
+    source: Any = Field(default=None)
+    test: Any = Field(default=None)
+    unit_test: Any = Field(default=None)
+
     _min_description_length: ClassVar[int] = 4
 
     # Helper methods
@@ -86,3 +101,185 @@ class BaseCheck(BaseModel):
             min_description_length=min_description_length
             or self._min_description_length,
         )
+
+    def _require_model(self) -> Any:
+        """Require that the model field is not None.
+
+        Returns:
+            The model object.
+
+        Raises:
+            DbtBouncerFailedCheckError: If model is None.
+
+        """
+        if self.model is None:
+            raise DbtBouncerFailedCheckError("self.model is None")
+        return self.model
+
+    def _require_seed(self) -> Any:
+        """Require that the seed field is not None.
+
+        Returns:
+            The seed object.
+
+        Raises:
+            DbtBouncerFailedCheckError: If seed is None.
+
+        """
+        if self.seed is None:
+            raise DbtBouncerFailedCheckError("self.seed is None")
+        return self.seed
+
+    def _require_snapshot(self) -> Any:
+        """Require that the snapshot field is not None.
+
+        Returns:
+            The snapshot object.
+
+        Raises:
+            DbtBouncerFailedCheckError: If snapshot is None.
+
+        """
+        if self.snapshot is None:
+            raise DbtBouncerFailedCheckError("self.snapshot is None")
+        return self.snapshot
+
+    def _require_source(self) -> Any:
+        """Require that the source field is not None.
+
+        Returns:
+            The source object.
+
+        Raises:
+            DbtBouncerFailedCheckError: If source is None.
+
+        """
+        if self.source is None:
+            raise DbtBouncerFailedCheckError("self.source is None")
+        return self.source
+
+    def _require_test(self) -> Any:
+        """Require that the test field is not None.
+
+        Returns:
+            The test object.
+
+        Raises:
+            DbtBouncerFailedCheckError: If test is None.
+
+        """
+        if self.test is None:
+            raise DbtBouncerFailedCheckError("self.test is None")
+        return self.test
+
+    def _require_exposure(self) -> Any:
+        """Require that the exposure field is not None.
+
+        Returns:
+            The exposure object.
+
+        Raises:
+            DbtBouncerFailedCheckError: If exposure is None.
+
+        """
+        if self.exposure is None:
+            raise DbtBouncerFailedCheckError("self.exposure is None")
+        return self.exposure
+
+    def _require_macro(self) -> Any:
+        """Require that the macro field is not None.
+
+        Returns:
+            The macro object.
+
+        Raises:
+            DbtBouncerFailedCheckError: If macro is None.
+
+        """
+        if self.macro is None:
+            raise DbtBouncerFailedCheckError("self.macro is None")
+        return self.macro
+
+    def _require_catalog_node(self) -> Any:
+        """Require that the catalog_node field is not None.
+
+        Returns:
+            The catalog_node object.
+
+        Raises:
+            DbtBouncerFailedCheckError: If catalog_node is None.
+
+        """
+        if self.catalog_node is None:
+            raise DbtBouncerFailedCheckError("self.catalog_node is None")
+        return self.catalog_node
+
+    def _require_catalog_source(self) -> Any:
+        """Require that the catalog_source field is not None.
+
+        Returns:
+            The catalog_source object.
+
+        Raises:
+            DbtBouncerFailedCheckError: If catalog_source is None.
+
+        """
+        if self.catalog_source is None:
+            raise DbtBouncerFailedCheckError("self.catalog_source is None")
+        return self.catalog_source
+
+    def _require_run_result(self) -> Any:
+        """Require that the run_result field is not None.
+
+        Returns:
+            The run_result object.
+
+        Raises:
+            DbtBouncerFailedCheckError: If run_result is None.
+
+        """
+        if self.run_result is None:
+            raise DbtBouncerFailedCheckError("self.run_result is None")
+        return self.run_result
+
+    def _require_manifest(self) -> Any:
+        """Require that the manifest_obj field is not None.
+
+        Returns:
+            The manifest object.
+
+        Raises:
+            DbtBouncerFailedCheckError: If manifest_obj is None.
+
+        """
+        if self.manifest_obj is None:
+            raise DbtBouncerFailedCheckError("self.manifest_obj is None")
+        return self.manifest_obj
+
+    def _require_semantic_model(self) -> Any:
+        """Require that the semantic_model field is not None.
+
+        Returns:
+            The semantic_model object.
+
+        Raises:
+            DbtBouncerFailedCheckError: If semantic_model is None.
+
+        """
+        if self.semantic_model is None:
+            raise DbtBouncerFailedCheckError("self.semantic_model is None")
+        return self.semantic_model
+
+    def _require_unit_test(self) -> Any:
+        """Require that the unit_test field is not None.
+
+        Returns:
+            The unit_test object.
+
+        Raises:
+            DbtBouncerFailedCheckError: If unit_test is None.
+
+        """
+        if self.unit_test is None:
+            raise DbtBouncerFailedCheckError("self.unit_test is None")
+        return self.unit_test

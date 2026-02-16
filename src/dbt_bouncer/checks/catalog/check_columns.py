@@ -68,20 +68,16 @@ class CheckColumnDescriptionPopulated(BaseCheck):
             DbtBouncerFailedCheckError: If description is not populated.
 
         """
-        if self.catalog_node is None:
-            raise DbtBouncerFailedCheckError("self.catalog_node is None")
-
-        if self.manifest_obj is None:
-            raise DbtBouncerFailedCheckError("self.manifest_obj is None")
-
-        if self.is_catalog_node_a_model(self.catalog_node, self.models):
+        catalog_node = self._require_catalog_node()
+        manifest_obj = self._require_manifest()
+        if self.is_catalog_node_a_model(catalog_node, self.models):
             model = next(
-                m for m in self.models if m.unique_id == self.catalog_node.unique_id
+                m for m in self.models if m.unique_id == catalog_node.unique_id
             )
             non_complying_columns = []
-            for _, v in self.catalog_node.columns.items():
+            for _, v in catalog_node.columns.items():
                 # Snowflake saves column descriptions in the 'comment' field in catalog.json
-                if self.manifest_obj.manifest.metadata.adapter_type in ["snowflake"]:
+                if manifest_obj.manifest.metadata.adapter_type in ["snowflake"]:
                     description = getattr(v, "comment", "") or ""
                 else:
                     columns = model.columns or {}
@@ -97,7 +93,7 @@ class CheckColumnDescriptionPopulated(BaseCheck):
 
             if non_complying_columns:
                 raise DbtBouncerFailedCheckError(
-                    f"`{str(self.catalog_node.unique_id).split('.')[-1]}` has columns that do not have a populated description: {non_complying_columns}"
+                    f"`{str(catalog_node.unique_id).split('.')[-1]}` has columns that do not have a populated description: {non_complying_columns}"
                 )
 
 
@@ -141,11 +137,10 @@ class CheckColumnHasSpecifiedTest(BaseCheck):
             DbtBouncerFailedCheckError: If column does not have specified test.
 
         """
-        if self.catalog_node is None:
-            raise DbtBouncerFailedCheckError("self.catalog_node is None")
+        catalog_node = self._require_catalog_node()
         columns_to_check = [
             v.name
-            for _, v in self.catalog_node.columns.items()
+            for _, v in catalog_node.columns.items()
             if compile_pattern(self.column_name_pattern.strip()).match(str(v.name))
             is not None
         ]
@@ -157,14 +152,14 @@ class CheckColumnHasSpecifiedTest(BaseCheck):
                 test_metadata
                 and attached_node
                 and getattr(test_metadata, "name", None) == self.test_name
-                and attached_node == self.catalog_node.unique_id
+                and attached_node == catalog_node.unique_id
             ):
                 tested_columns.add(getattr(t, "column_name", ""))
         non_complying_columns = [c for c in columns_to_check if c not in tested_columns]
 
         if non_complying_columns:
             raise DbtBouncerFailedCheckError(
-                f"`{str(self.catalog_node.unique_id).split('.')[-1]}` has columns that should have a `{self.test_name}` test: {non_complying_columns}"
+                f"`{str(catalog_node.unique_id).split('.')[-1]}` has columns that should have a `{self.test_name}` test: {non_complying_columns}"
             )
 
 
@@ -240,12 +235,11 @@ class CheckColumnNameCompliesToColumnType(BaseCheck):
             DbtBouncerFailedCheckError: If column name does not comply to column type.
 
         """
-        if self.catalog_node is None:
-            raise DbtBouncerFailedCheckError("self.catalog_node is None")
+        catalog_node = self._require_catalog_node()
         if self.type_pattern:
             non_complying_columns = [
                 v.name
-                for _, v in self.catalog_node.columns.items()
+                for _, v in catalog_node.columns.items()
                 if compile_pattern(self.type_pattern.strip()).match(str(v.type)) is None
                 and compile_pattern(self.column_name_pattern.strip()).match(str(v.name))
                 is not None
@@ -253,13 +247,13 @@ class CheckColumnNameCompliesToColumnType(BaseCheck):
 
             if non_complying_columns:
                 raise DbtBouncerFailedCheckError(
-                    f"`{str(self.catalog_node.unique_id).split('.')[-1]}` has columns that don't comply with the specified data type regexp pattern (`{self.column_name_pattern}`): {non_complying_columns}"
+                    f"`{str(catalog_node.unique_id).split('.')[-1]}` has columns that don't comply with the specified data type regexp pattern (`{self.column_name_pattern}`): {non_complying_columns}"
                 )
 
         elif self.types:
             non_complying_columns = [
                 v.name
-                for _, v in self.catalog_node.columns.items()
+                for _, v in catalog_node.columns.items()
                 if v.type in self.types
                 and compile_pattern(self.column_name_pattern.strip()).match(str(v.name))
                 is None
@@ -267,7 +261,7 @@ class CheckColumnNameCompliesToColumnType(BaseCheck):
 
             if non_complying_columns:
                 raise DbtBouncerFailedCheckError(
-                    f"`{str(self.catalog_node.unique_id).split('.')[-1]}` has columns that don't comply with the specified regexp pattern (`{self.column_name_pattern}`): {non_complying_columns}"
+                    f"`{str(catalog_node.unique_id).split('.')[-1]}` has columns that don't comply with the specified regexp pattern (`{self.column_name_pattern}`): {non_complying_columns}"
                 )
 
     @model_validator(mode="after")
@@ -319,19 +313,18 @@ class CheckColumnNames(BaseCheck):
             DbtBouncerFailedCheckError: If column name does not match regex.
 
         """
-        if self.catalog_node is None:
-            raise DbtBouncerFailedCheckError("self.catalog_node is None")
-        if self.is_catalog_node_a_model(self.catalog_node, self.models):
+        catalog_node = self._require_catalog_node()
+        if self.is_catalog_node_a_model(catalog_node, self.models):
             non_complying_columns: list[str] = []
             non_complying_columns.extend(
                 v.name
-                for _, v in self.catalog_node.columns.items()
+                for _, v in catalog_node.columns.items()
                 if re.fullmatch(self.column_name_pattern.strip(), str(v.name)) is None
             )
 
             if non_complying_columns:
                 raise DbtBouncerFailedCheckError(
-                    f"`{str(self.catalog_node.unique_id).split('.')[-1]}` has columns ({non_complying_columns}) that do not match the supplied regex: `{self.column_name_pattern.strip()}`."
+                    f"`{str(catalog_node.unique_id).split('.')[-1]}` has columns ({non_complying_columns}) that do not match the supplied regex: `{self.column_name_pattern.strip()}`."
                 )
 
 
@@ -371,36 +364,34 @@ class CheckColumnsAreAllDocumented(BaseCheck):
             DbtBouncerFailedCheckError: If columns are undocumented.
 
         """
-        if self.catalog_node is None:
-            raise DbtBouncerFailedCheckError("self.catalog_node is None")
-        if self.manifest_obj is None:
-            raise DbtBouncerFailedCheckError("self.manifest_obj is None")
-        if self.is_catalog_node_a_model(self.catalog_node, self.models):
+        catalog_node = self._require_catalog_node()
+        manifest_obj = self._require_manifest()
+        if self.is_catalog_node_a_model(catalog_node, self.models):
             model = next(
-                m for m in self.models if m.unique_id == self.catalog_node.unique_id
+                m for m in self.models if m.unique_id == catalog_node.unique_id
             )
 
-            if self.manifest_obj.manifest.metadata.adapter_type in ["snowflake"]:
+            if manifest_obj.manifest.metadata.adapter_type in ["snowflake"]:
                 self.case_sensitive = False
 
             model_columns = model.columns or {}
             if self.case_sensitive:
                 undocumented_columns = [
                     v.name
-                    for _, v in self.catalog_node.columns.items()
+                    for _, v in catalog_node.columns.items()
                     if v.name not in model_columns
                 ]
             else:
                 model_columns_lower = {c.lower() for c in model_columns}
                 undocumented_columns = [
                     v.name
-                    for _, v in self.catalog_node.columns.items()
+                    for _, v in catalog_node.columns.items()
                     if v.name.lower() not in model_columns_lower
                 ]
 
             if undocumented_columns:
                 raise DbtBouncerFailedCheckError(
-                    f"`{str(self.catalog_node.unique_id).split('.')[-1]}` has columns that are not included in the models properties file: {undocumented_columns}"
+                    f"`{str(catalog_node.unique_id).split('.')[-1]}` has columns that are not included in the models properties file: {undocumented_columns}"
                 )
 
 
@@ -438,14 +429,13 @@ class CheckColumnsAreDocumentedInPublicModels(BaseCheck):
             DbtBouncerFailedCheckError: If columns are undocumented in public model.
 
         """
-        if self.catalog_node is None:
-            raise DbtBouncerFailedCheckError("self.catalog_node is None")
-        if self.is_catalog_node_a_model(self.catalog_node, self.models):
+        catalog_node = self._require_catalog_node()
+        if self.is_catalog_node_a_model(catalog_node, self.models):
             model = next(
-                m for m in self.models if m.unique_id == self.catalog_node.unique_id
+                m for m in self.models if m.unique_id == catalog_node.unique_id
             )
             non_complying_columns = []
-            for _, v in self.catalog_node.columns.items():
+            for _, v in catalog_node.columns.items():
                 if model.access and model.access.value == "public":
                     model_columns = model.columns or {}
                     column_config = model_columns.get(v.name)
@@ -456,5 +446,5 @@ class CheckColumnsAreDocumentedInPublicModels(BaseCheck):
 
             if non_complying_columns:
                 raise DbtBouncerFailedCheckError(
-                    f"`{str(self.catalog_node.unique_id).split('.')[-1]}` is a public model but has columns that don't have a populated description: {non_complying_columns}"
+                    f"`{str(catalog_node.unique_id).split('.')[-1]}` is a public model but has columns that don't have a populated description: {non_complying_columns}"
                 )
