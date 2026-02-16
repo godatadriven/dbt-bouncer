@@ -1,16 +1,16 @@
 from typing import TYPE_CHECKING, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import ConfigDict, Field
+
+from dbt_bouncer.check_base import BaseCheck
+from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
+from dbt_bouncer.utils import compile_pattern
 
 if TYPE_CHECKING:
     from dbt_bouncer.artifact_parsers.parsers_manifest import DbtBouncerManifest
 
 
-from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
-from dbt_bouncer.utils import compile_pattern
-
-
-class CheckProjectName(BaseModel):
+class CheckProjectName(BaseCheck):
     """Enforce that the name of the dbt project matches a supplied regex. Generally used to enforce that project names conform to something like  `company_<DOMAIN>`.
 
     Parameters:
