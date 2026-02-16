@@ -201,7 +201,7 @@ def _load_custom_checks(
             appended.
 
     Raises:
-        RuntimeError: If a custom check file fails to load.
+        Warns if a custom check file fails to load (the file is skipped).
 
     """
     logging.debug(f"{custom_checks_dir=}")
@@ -230,9 +230,10 @@ def _load_custom_checks(
                         module, unique_module_name, check_objects
                     )
             except Exception as e:
-                raise RuntimeError(
-                    f"Failed to load custom check file {check_file}: {e}"
-                ) from e
+                logging.warning(
+                    f"Failed to load custom check file `{check_file}`: {e}. "
+                    "This file will be skipped."
+                )
     else:
         logging.warning(
             f"Custom checks directory `{custom_checks_dir}` does not exist."
