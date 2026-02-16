@@ -9,7 +9,7 @@ This page provides documentation for the `dbt-bouncer` CLI.
     :show_hidden: False
     :style: plain
 
-### Exit codes
+## Exit codes
 
 `dbt-bouncer` returns the following exit codes:
 

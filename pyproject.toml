@@ -49,9 +49,11 @@ dev = [
   "pytest-cov>=5,<8",
   "pytest-xdist~=3.0",
   "pyupgrade~=3.0",
+  "rumdl>=0.1.19",
   "ruff~=0.0",
   "shandy-sqlfmt[jinjafmt]~=0.0",
   "ty>=0.0.7"
+
 ]
 docs = [
   "mike~=2.0",
@@ -138,6 +140,24 @@ indent-style = "space"
 line-ending = "auto"
 quote-style = "double"
 skip-magic-trailing-comma = false
+
+[tool.rumdl]
+disable = [
+    "MD007", # Indentation
+    "MD013",  # Line length
+    "MD033",  # Inline HTML
+    "MD041",  # First line heading
+    "MD046",  # Code block style
+    "MD059",  # Link text
+]
+exclude = [
+    ".git",
+    ".github",
+    ".venv",
+    "LICENSE.md",
+]
+MD007.indent = 4
+respect_gitignore = true
 
 [tool.uv]
 package = true

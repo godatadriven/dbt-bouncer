@@ -10,5 +10,4 @@ Orders can be one of the following statuses:
 | return_pending | The customer has indicated that they would like to return the order, but it has not yet been received at the warehouse |
 | returned       | The order has been returned by the customer and received at the warehouse                                              |
 
-
 {% enddocs %}
