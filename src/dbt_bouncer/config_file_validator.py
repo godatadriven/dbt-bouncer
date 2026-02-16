@@ -10,7 +10,7 @@ import click
 import yaml
 from pydantic import ValidationError
 
-from dbt_bouncer.utils import compile_pattern, load_config_from_yaml
+from dbt_bouncer.utils import compile_pattern, get_check_registry, load_config_from_yaml
 
 if TYPE_CHECKING:
     from dbt_bouncer.config_file_parser import DbtBouncerConfBase
@@ -316,6 +316,7 @@ def validate_conf(
     except ValidationError as e:
         import jellyfish
 
+        accepted_names = list(get_check_registry(custom_checks_dir).keys())
         error_message: list[str] = []
         for error in e.errors():
             if (
@@ -328,9 +329,6 @@ def validate_conf(
                 incorrect_name = error["msg"][
                     error["msg"].find("tag") + 5 : error["msg"].find("found using") - 2
                 ]
-                accepted_names = error["msg"][
-                    error["msg"].find("tags:") + 7 : -1
-                ].split("', '")
                 min_dist = 100
                 for name in accepted_names:
                     dist = jellyfish.levenshtein_distance(name, incorrect_name)
