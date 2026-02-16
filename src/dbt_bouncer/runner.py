@@ -82,6 +82,7 @@ def runner(
         "macros": ctx.macros,
         "manifest_obj": ctx.manifest_obj,
         "models": [m.model for m in ctx.models],
+        "models_by_unique_id": {m.model.unique_id: m.model for m in ctx.models},
         "run_results": [r.run_result for r in ctx.run_results],
         "seeds": [s.seed for s in ctx.seeds],
         "semantic_models": [s.semantic_model for s in ctx.semantic_models],
