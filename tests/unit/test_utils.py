@@ -345,8 +345,10 @@ class CheckCustomExample:
         assert len(check_objects) == 1
         assert check_objects[0].__name__ == "CheckCustomExample"
 
-    def test_raises_on_invalid_check_file(self, tmp_path):
-        """Test that an error is raised when a custom check file is invalid."""
+    def test_warns_on_invalid_check_file(self, tmp_path, caplog):
+        """Test that a warning is logged and the file is skipped when a custom check file is invalid."""
+        import logging
+
         from dbt_bouncer.utils import _load_custom_checks
 
         custom_dir = tmp_path / "custom_checks"
@@ -357,8 +359,12 @@ class CheckCustomExample:
         check_file.write_text("this is not valid python syntax !!!")
 
         check_objects: list[Any] = []
-        with pytest.raises(RuntimeError, match="Failed to load custom check file"):
+        with caplog.at_level(logging.WARNING):
+            # Should not raise — the file is skipped with a warning
             _load_custom_checks(custom_dir, check_objects)
+
+        assert any("check_broken.py" in msg for msg in caplog.messages)
+        assert any("skipped" in msg.lower() for msg in caplog.messages)
 
     def test_warns_on_nonexistent_directory(self, tmp_path, caplog):
         """Test that a warning is logged when the custom check directory does not exist."""
