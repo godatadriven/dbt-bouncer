@@ -398,7 +398,7 @@ class CheckModelDescriptionContainsRegexPattern(BaseCheck):
         ```yaml
         manifest_checks:
             - name: check_model_description_contains_regex_pattern
-            - regex_pattern: .*pattern_to_match.*
+            - regexp_pattern: .*pattern_to_match.*
         ```
 
     """
