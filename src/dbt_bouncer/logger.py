@@ -1,5 +1,7 @@
+import json
 import logging
 import os
+from datetime import datetime
 
 
 class CustomFormatter(logging.Formatter):
@@ -41,6 +43,29 @@ class CustomFormatter(logging.Formatter):
         return formatter.format(record)
 
 
+class JsonFormatter(logging.Formatter):
+    """JSON formatter for structured logging."""
+
+    def format(self, record: logging.LogRecord) -> str:
+        """Format log record as JSON.
+
+        Returns:
+            str: JSON formatted log record.
+
+        """
+        log_data = {
+            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "level": record.levelname,
+            "message": record.getMessage(),
+            "module": record.module,
+            "function": record.funcName,
+            "line": record.lineno,
+        }
+        if record.exc_info:
+            log_data["exception"] = self.formatException(record.exc_info)
+        return json.dumps(log_data)
+
+
 def configure_console_logging(verbosity: int):
     """Initialise a logger with the specified log level."""
     logger = logging.getLogger("")
@@ -59,5 +84,10 @@ def configure_console_logging(verbosity: int):
     ]
     console_handler = logging.StreamHandler()
     console_handler.setLevel(loglevel)
-    console_handler.setFormatter(CustomFormatter(logging_level=loglevel))
+
+    # Use JSON format if LOG_FORMAT=json env var is set
+    if os.getenv("LOG_FORMAT") == "json":
+        console_handler.setFormatter(JsonFormatter())
+    else:
+        console_handler.setFormatter(CustomFormatter(logging_level=loglevel))
     logger.addHandler(console_handler)
