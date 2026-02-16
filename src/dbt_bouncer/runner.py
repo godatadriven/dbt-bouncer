@@ -3,6 +3,7 @@
 import logging
 import operator
 import traceback
+from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, NotRequired, TypedDict
@@ -233,10 +234,28 @@ def runner(
                 )
         return check
 
+    def _execute_batch(batch: list[CheckToRun]) -> int:
+        """Execute all checks in a batch sequentially and return the count.
+
+        Returns:
+            int: Number of checks executed.
+
+        """
+        for check in batch:
+            _execute_check(check)
+        return len(batch)
+
+    # Group checks by class to reduce ThreadPoolExecutor scheduling overhead.
+    # Checks of the same class run sequentially within a batch; different
+    # classes run in parallel across threads.
+    batches: dict[str, list[CheckToRun]] = defaultdict(list)
+    for check in checks_to_run:
+        batches[check["check"].__class__.__name__].append(check)
+
     bar = Bar("Running checks...", max=len(checks_to_run))
     with ThreadPoolExecutor() as executor:
         futures = {
-            executor.submit(_execute_check, check): check for check in checks_to_run
+            executor.submit(_execute_batch, batch): batch for batch in batches.values()
         }
         for future in as_completed(futures):
             future.result()
