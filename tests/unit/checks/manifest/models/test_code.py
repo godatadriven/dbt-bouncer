@@ -6,6 +6,7 @@ from dbt_bouncer.artifact_parsers.parser import wrap_dict
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.checks.manifest.models.code import (
     CheckModelCodeDoesNotContainRegexpPattern,
+    CheckModelHardCodedReferences,
     CheckModelHasSemiColon,
     CheckModelMaxNumberOfLines,
 )
@@ -45,6 +46,56 @@ def test_check_model_code_does_not_contain_regexp_pattern(
             model=model,
             name="check_model_code_does_not_contain_regexp_pattern",
             regexp_pattern=regexp_pattern,
+        ).execute()
+
+
+_TEST_DATA_FOR_CHECK_MODEL_HARD_CODED_REFERENCES = [
+    pytest.param(
+        {"raw_code": "SELECT * FROM {{ ref('other_model') }}", "tags": []},
+        does_not_raise(),
+        id="ref_jinja",
+    ),
+    pytest.param(
+        {"raw_code": "SELECT * FROM {{ source('src', 'tbl') }}", "tags": []},
+        does_not_raise(),
+        id="source_jinja",
+    ),
+    pytest.param(
+        {"raw_code": "WITH cte AS (SELECT 1) SELECT * FROM cte", "tags": []},
+        does_not_raise(),
+        id="cte_single_part",
+    ),
+    pytest.param(
+        {"raw_code": "SELECT * FROM myschema.my_table", "tags": []},
+        pytest.raises(DbtBouncerFailedCheckError),
+        id="bare_schema_table",
+    ),
+    pytest.param(
+        {
+            "raw_code": "SELECT a FROM t1 JOIN myschema.other_table ON t1.id = other_table.id",
+            "tags": [],
+        },
+        pytest.raises(DbtBouncerFailedCheckError),
+        id="bare_join_schema_table",
+    ),
+    pytest.param(
+        {"raw_code": "SELECT * FROM catalog.schema.table_name", "tags": []},
+        pytest.raises(DbtBouncerFailedCheckError),
+        id="three_part_identifier",
+    ),
+]
+
+
+@pytest.mark.parametrize(
+    ("model", "expectation"),
+    _TEST_DATA_FOR_CHECK_MODEL_HARD_CODED_REFERENCES,
+    indirect=["model"],
+)
+def test_check_model_hard_coded_references(model, expectation):
+    with expectation:
+        CheckModelHardCodedReferences(
+            model=model,
+            name="check_model_hard_coded_references",
         ).execute()
 
 
