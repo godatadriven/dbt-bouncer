@@ -47,21 +47,20 @@ class CheckTestHasTags(BaseCheck):
             DbtBouncerFailedCheckError: If the test does not have the required tags.
 
         """
-        if self.test is None:
-            raise DbtBouncerFailedCheckError("self.test is None")
-        test_tags = self.test.tags or []
+        test = self._require_test()
+        test_tags = test.tags or []
         if self.criteria == "any":
             if not any(tag in test_tags for tag in self.tags):
                 raise DbtBouncerFailedCheckError(
-                    f"`{self.test.unique_id}` does not have any of the required tags: {self.tags}."
+                    f"`{test.unique_id}` does not have any of the required tags: {self.tags}."
                 )
         elif self.criteria == "all":
             missing_tags = [tag for tag in self.tags if tag not in test_tags]
             if missing_tags:
                 raise DbtBouncerFailedCheckError(
-                    f"`{self.test.unique_id}` is missing required tags: {missing_tags}."
+                    f"`{test.unique_id}` is missing required tags: {missing_tags}."
                 )
         elif self.criteria == "one" and sum(tag in test_tags for tag in self.tags) != 1:
             raise DbtBouncerFailedCheckError(
-                f"`{self.test.unique_id}` must have exactly one of the required tags: {self.tags}."
+                f"`{test.unique_id}` must have exactly one of the required tags: {self.tags}."
             )

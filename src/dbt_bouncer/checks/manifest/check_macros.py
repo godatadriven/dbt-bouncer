@@ -66,10 +66,9 @@ class CheckMacroArgumentsDescriptionPopulated(BaseCheck):
             DbtBouncerFailedCheckError: If macro arguments are not populated.
 
         """
-        if self.macro is None:
-            raise DbtBouncerFailedCheckError("self.macro is None")
+        macro = self._require_macro()
         environment = Environment(autoescape=True, extensions=[TagExtension])
-        ast = environment.parse(self.macro.macro_sql)
+        ast = environment.parse(macro.macro_sql)
 
         if hasattr(ast.body[0], "args"):
             # Assume macro is a "true" macro
@@ -99,11 +98,11 @@ class CheckMacroArgumentsDescriptionPopulated(BaseCheck):
         # macro.arguments: List of args manually added to the properties file
 
         non_complying_args = []
-        if self.macro.arguments:
+        if macro.arguments:
             for arg in macro_arguments:
-                macro_doc_raw = [x for x in self.macro.arguments if x.name == arg]
+                macro_doc_raw = [x for x in macro.arguments if x.name == arg]
                 if macro_doc_raw == [] or (
-                    arg not in [x.name for x in self.macro.arguments]
+                    arg not in [x.name for x in macro.arguments]
                     or not self._is_description_populated(
                         str(macro_doc_raw[0].description or ""),
                         self.min_description_length,
@@ -113,7 +112,7 @@ class CheckMacroArgumentsDescriptionPopulated(BaseCheck):
 
         if non_complying_args != []:
             raise DbtBouncerFailedCheckError(
-                f"Macro `{self.macro.name}` does not have a populated description for the following argument(s): {non_complying_args}."
+                f"Macro `{macro.name}` does not have a populated description for the following argument(s): {non_complying_args}."
             )
 
 
@@ -153,16 +152,15 @@ class CheckMacroCodeDoesNotContainRegexpPattern(BaseCheck):
             DbtBouncerFailedCheckError: If macro code contains banned string.
 
         """
-        if self.macro is None:
-            raise DbtBouncerFailedCheckError("self.macro is None")
+        macro = self._require_macro()
         if (
             compile_pattern(self.regexp_pattern.strip(), flags=re.DOTALL).match(
-                self.macro.macro_sql
+                macro.macro_sql
             )
             is not None
         ):
             raise DbtBouncerFailedCheckError(
-                f"Macro `{self.macro.name}` contains a banned string: `{self.regexp_pattern.strip()}`."
+                f"Macro `{macro.name}` contains a banned string: `{self.regexp_pattern.strip()}`."
             )
 
 
@@ -206,13 +204,12 @@ class CheckMacroDescriptionPopulated(BaseCheck):
             DbtBouncerFailedCheckError: If macro description is not populated.
 
         """
-        if self.macro is None:
-            raise DbtBouncerFailedCheckError("self.macro is None")
+        macro = self._require_macro()
         if not self._is_description_populated(
-            str(self.macro.description or ""), self.min_description_length
+            str(macro.description or ""), self.min_description_length
         ):
             raise DbtBouncerFailedCheckError(
-                f"Macro `{self.macro.name}` does not have a populated description."
+                f"Macro `{macro.name}` does not have a populated description."
             )
 
 
@@ -255,13 +252,12 @@ class CheckMacroMaxNumberOfLines(BaseCheck):
             DbtBouncerFailedCheckError: If max lines exceeded.
 
         """
-        if self.macro is None:
-            raise DbtBouncerFailedCheckError("self.macro is None")
-        actual_number_of_lines = self.macro.macro_sql.count("\n") + 1
+        macro = self._require_macro()
+        actual_number_of_lines = macro.macro_sql.count("\n") + 1
 
         if actual_number_of_lines > self.max_number_of_lines:
             raise DbtBouncerFailedCheckError(
-                f"Macro `{self.macro.name}` has {actual_number_of_lines} lines, this is more than the maximum permitted number of lines ({self.max_number_of_lines})."
+                f"Macro `{macro.name}` has {actual_number_of_lines} lines, this is more than the maximum permitted number of lines ({self.max_number_of_lines})."
             )
 
 
@@ -297,20 +293,19 @@ class CheckMacroNameMatchesFileName(BaseCheck):
             DbtBouncerFailedCheckError: If macro name does not match file name.
 
         """
-        if self.macro is None:
-            raise DbtBouncerFailedCheckError("self.macro is None")
-        file_path = Path(clean_path_str(self.macro.original_file_path))
+        macro = self._require_macro()
+        file_path = Path(clean_path_str(macro.original_file_path))
         file_stem = file_path.stem
 
-        if self.macro.name.startswith("test_"):
-            if self.macro.name[5:] != file_stem:
+        if macro.name.startswith("test_"):
+            if macro.name[5:] != file_stem:
                 raise DbtBouncerFailedCheckError(
-                    f"Macro `{self.macro.unique_id}` is not in a file named `{self.macro.name[5:]}.sql`."
+                    f"Macro `{macro.unique_id}` is not in a file named `{macro.name[5:]}.sql`."
                 )
         else:
-            if self.macro.name != file_stem:
+            if macro.name != file_stem:
                 raise DbtBouncerFailedCheckError(
-                    f"Macro `{self.macro.name}` is not in a file of the same name."
+                    f"Macro `{macro.name}` is not in a file of the same name."
                 )
 
 
@@ -344,9 +339,8 @@ class CheckMacroPropertyFileLocation(BaseCheck):
             DbtBouncerFailedCheckError: If property file location is incorrect.
 
         """
-        if self.macro is None:
-            raise DbtBouncerFailedCheckError("self.macro is None")
-        original_path = Path(clean_path_str(self.macro.original_file_path))
+        macro = self._require_macro()
+        original_path = Path(clean_path_str(macro.original_file_path))
 
         # Logic matches previous manual splitting:
         # If path is `macros/utils/file.sql`, we want `_utils`.
@@ -354,14 +348,14 @@ class CheckMacroPropertyFileLocation(BaseCheck):
         subdir_parts = original_path.parent.parts[1:]
         expected_substr = "_" + "_".join(subdir_parts) if subdir_parts else ""
 
-        if self.macro.patch_path is None:
+        if macro.patch_path is None:
             raise DbtBouncerFailedCheckError(
-                f"Macro `{self.macro.name}` is not defined in a `.yml` properties file."
+                f"Macro `{macro.name}` is not defined in a `.yml` properties file."
             )
-        clean_patch_path = clean_path_str(self.macro.patch_path)
+        clean_patch_path = clean_path_str(macro.patch_path)
         if clean_patch_path is None:
             raise DbtBouncerFailedCheckError(
-                f"Macro `{self.macro.name}` has an invalid patch path."
+                f"Macro `{macro.name}` has an invalid patch path."
             )
 
         patch_path = Path(clean_patch_path)
@@ -373,18 +367,18 @@ class CheckMacroPropertyFileLocation(BaseCheck):
         elif expected_substr == "":  # i.e. macro in ./macros
             if properties_yml_name != "_macros.yml":
                 raise DbtBouncerFailedCheckError(
-                    f"The properties file for `{self.macro.name}` (`{properties_yml_name}`) should be `_macros.yml`."
+                    f"The properties file for `{macro.name}` (`{properties_yml_name}`) should be `_macros.yml`."
                 )
         else:
             if not properties_yml_name.startswith("_"):
                 raise DbtBouncerFailedCheckError(
-                    f"The properties file for `{self.macro.name}` (`{properties_yml_name}`) does not start with an underscore."
+                    f"The properties file for `{macro.name}` (`{properties_yml_name}`) does not start with an underscore."
                 )
             if expected_substr not in properties_yml_name:
                 raise DbtBouncerFailedCheckError(
-                    f"The properties file for `{self.macro.name}` (`{properties_yml_name}`) does not contain the expected substring (`{expected_substr}`)."
+                    f"The properties file for `{macro.name}` (`{properties_yml_name}`) does not contain the expected substring (`{expected_substr}`)."
                 )
             if not properties_yml_name.endswith("__macros.yml"):
                 raise DbtBouncerFailedCheckError(
-                    f"The properties file for `{self.macro.name}` (`{properties_yml_name}`) does not end with `__macros.yml`."
+                    f"The properties file for `{macro.name}` (`{properties_yml_name}`) does not end with `__macros.yml`."
                 )

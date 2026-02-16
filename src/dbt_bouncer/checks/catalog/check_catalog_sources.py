@@ -51,18 +51,16 @@ class CheckSourceColumnsAreAllDocumented(BaseCheck):
             DbtBouncerFailedCheckError: If columns are undocumented.
 
         """
-        if self.catalog_source is None:
-            raise DbtBouncerFailedCheckError("self.catalog_source is None")
-
+        catalog_source = self._require_catalog_source()
         source = next(
-            s for s in self.sources if s.unique_id == self.catalog_source.unique_id
+            s for s in self.sources if s.unique_id == catalog_source.unique_id
         )
         undocumented_columns = [
             v.name
-            for _, v in self.catalog_source.columns.items()
+            for _, v in catalog_source.columns.items()
             if v.name not in source.columns
         ]
         if undocumented_columns:
             raise DbtBouncerFailedCheckError(
-                f"`{self.catalog_source.unique_id}` has columns that are not included in the sources properties file: {undocumented_columns}"
+                f"`{catalog_source.unique_id}` has columns that are not included in the sources properties file: {undocumented_columns}"
             )

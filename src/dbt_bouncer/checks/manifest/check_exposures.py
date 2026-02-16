@@ -55,20 +55,19 @@ class CheckExposureOnModel(BaseCheck):
             DbtBouncerFailedCheckError: If upstream models number is not within limits.
 
         """
-        if self.exposure is None:
-            raise DbtBouncerFailedCheckError("self.exposure is None")
-        depends_on = self.exposure.depends_on
+        exposure = self._require_exposure()
+        depends_on = exposure.depends_on
         number_of_upstream_models = (
             len(getattr(depends_on, "nodes", []) or []) if depends_on else 0
         )
 
         if number_of_upstream_models < self.minimum_number_of_models:
             raise DbtBouncerFailedCheckError(
-                f"`{self.exposure.name}` is based on less models ({number_of_upstream_models}) than the minimum permitted ({self.minimum_number_of_models})."
+                f"`{exposure.name}` is based on less models ({number_of_upstream_models}) than the minimum permitted ({self.minimum_number_of_models})."
             )
         if number_of_upstream_models > self.maximum_number_of_models:
             raise DbtBouncerFailedCheckError(
-                f"`{self.exposure.name}` is based on more models ({number_of_upstream_models}) than the maximum permitted ({self.maximum_number_of_models})."
+                f"`{exposure.name}` is based on more models ({number_of_upstream_models}) than the maximum permitted ({self.maximum_number_of_models})."
             )
 
 
@@ -104,16 +103,15 @@ class CheckExposureOnNonPublicModels(BaseCheck):
             DbtBouncerFailedCheckError: If exposure is based on non-public models.
 
         """
-        if self.exposure is None:
-            raise DbtBouncerFailedCheckError("self.exposure is None")
+        exposure = self._require_exposure()
         models_by_id = {m.unique_id: m for m in self.models}
         non_public_upstream_dependencies = []
-        for node_id in getattr(self.exposure.depends_on, "nodes", []) or []:
+        for node_id in getattr(exposure.depends_on, "nodes", []) or []:
             model_obj = models_by_id.get(node_id)
             if (
                 model_obj
                 and model_obj.resource_type == "model"
-                and model_obj.package_name == self.exposure.package_name
+                and model_obj.package_name == exposure.package_name
                 and model_obj.access
                 and model_obj.access.value != "public"
             ):
@@ -121,7 +119,7 @@ class CheckExposureOnNonPublicModels(BaseCheck):
 
         if non_public_upstream_dependencies:
             raise DbtBouncerFailedCheckError(
-                f"`{self.exposure.name}` is based on a model(s) that is not public: {non_public_upstream_dependencies}."
+                f"`{exposure.name}` is based on a model(s) that is not public: {non_public_upstream_dependencies}."
             )
 
 
@@ -171,16 +169,15 @@ class CheckExposureOnView(BaseCheck):
             DbtBouncerFailedCheckError: If exposure is based on a model that is not a table.
 
         """
-        if self.exposure is None:
-            raise DbtBouncerFailedCheckError("self.exposure is None")
+        exposure = self._require_exposure()
         models_by_id = {m.unique_id: m for m in self.models}
         non_table_upstream_dependencies = []
-        for node_id in getattr(self.exposure.depends_on, "nodes", []) or []:
+        for node_id in getattr(exposure.depends_on, "nodes", []) or []:
             model_obj = models_by_id.get(node_id)
             if (
                 model_obj
                 and model_obj.resource_type == "model"
-                and model_obj.package_name == self.exposure.package_name
+                and model_obj.package_name == exposure.package_name
                 and model_obj.config
                 and model_obj.config.materialized in self.materializations_to_include
             ):
@@ -188,5 +185,5 @@ class CheckExposureOnView(BaseCheck):
 
         if non_table_upstream_dependencies:
             raise DbtBouncerFailedCheckError(
-                f"`{self.exposure.name}` is based on a model that is not a table: {non_table_upstream_dependencies}."
+                f"`{exposure.name}` is based on a model that is not a table: {non_table_upstream_dependencies}."
             )

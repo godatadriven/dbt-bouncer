@@ -51,12 +51,10 @@ class CheckRunResultsMaxExecutionTime(BaseCheck):
             DbtBouncerFailedCheckError: If execution time is greater than permitted.
 
         """
-        if self.run_result is None:
-            raise DbtBouncerFailedCheckError("self.run_result is None")
-
-        if self.run_result.execution_time > self.max_execution_time_seconds:
+        run_result = self._require_run_result()
+        if run_result.execution_time > self.max_execution_time_seconds:
             raise DbtBouncerFailedCheckError(
-                f"`{self.run_result.unique_id.split('.')[-1]}` has an execution time ({self.run_result.execution_time} greater than permitted ({self.max_execution_time_seconds}s)."
+                f"`{run_result.unique_id.split('.')[-1]}` has an execution time ({run_result.execution_time} greater than permitted ({self.max_execution_time_seconds}s)."
             )
 
 
@@ -102,13 +100,9 @@ class CheckRunResultsMaxGigabytesBilled(BaseCheck):
             RuntimeError: If running with adapter other than `dbt-bigquery`.
 
         """
-        if self.run_result is None:
-            raise DbtBouncerFailedCheckError("self.run_result is None")
-
+        run_result = self._require_run_result()
         try:
-            gigabytes_billed = self.run_result.adapter_response["bytes_billed"] / (
-                1000**3
-            )
+            gigabytes_billed = run_result.adapter_response["bytes_billed"] / (1000**3)
         except KeyError as e:
             raise RuntimeError(
                 "`bytes_billed` not found in adapter response. Are you using the `dbt-bigquery` adapter?",
@@ -116,5 +110,5 @@ class CheckRunResultsMaxGigabytesBilled(BaseCheck):
 
         if gigabytes_billed > self.max_gigabytes_billed:
             raise DbtBouncerFailedCheckError(
-                f"`{self.run_result.unique_id.split('.')[-2]}` results in ({gigabytes_billed} billed bytes, this is greater than permitted ({self.max_gigabytes_billed})."
+                f"`{run_result.unique_id.split('.')[-2]}` results in ({gigabytes_billed} billed bytes, this is greater than permitted ({self.max_gigabytes_billed})."
             )
