@@ -7,6 +7,7 @@ import logging
 import os
 import re
 import sys
+import typing
 from collections.abc import Mapping
 from functools import lru_cache
 from pathlib import Path
@@ -289,6 +290,36 @@ def get_check_objects(
     logging.debug(f"Loaded {len(check_objects)} `Check*` classes.")
 
     return check_objects
+
+
+@lru_cache
+def get_check_registry(
+    custom_checks_dir: Path | None = None,
+) -> dict[str, type["BaseCheck"]]:
+    """Return a registry mapping check names to their classes.
+
+    The name used as key is the ``name`` Literal field value on each check class
+    (e.g. ``"check_model_access"`` → ``CheckModelAccess``). This enables O(1)
+    lookup and is used for validation and error-message generation.
+
+    Args:
+        custom_checks_dir: Path to a directory containing custom checks.
+
+    Returns:
+        dict[str, type[BaseCheck]]: Mapping of check name → class.
+
+    """
+    registry: dict[str, type["BaseCheck"]] = {}
+    for cls in get_check_objects(custom_checks_dir):
+        # Each check class has a `name: Literal["check_..."]` field annotation.
+        # Pydantic stores the Literal type in the annotation; extract the value
+        # via typing.get_args since `model_fields["name"].default` is PydanticUndefined.
+        name_field = cls.model_fields.get("name")
+        if name_field is not None:
+            args = typing.get_args(name_field.annotation)
+            if args:
+                registry[args[0]] = cls
+    return registry
 
 
 def get_clean_model_name(unique_id: str) -> str:
