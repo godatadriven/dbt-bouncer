@@ -339,6 +339,45 @@ manifest_checks:
     logging.info(f"Created `{config_path}`.")
 
 
+@cli.command()
+@click.option(
+    "--config-file",
+    default=Path("dbt-bouncer.yml"),
+    help="Location of the YML config file.",
+    required=False,
+    type=PurePath,
+)
+@click.pass_context
+def validate(ctx: click.Context, config_file: PurePath) -> None:
+    """Validate the dbt-bouncer configuration file.
+
+    Checks for YAML syntax errors and common configuration issues,
+    reporting line numbers for any issues found.
+
+    Raises:
+        RuntimeError: If the config file is not found.
+
+    """
+    configure_console_logging(verbosity=0)
+
+    config_path = Path(config_file)
+    if not config_path.exists():
+        raise RuntimeError(f"Config file not found: {config_path}")
+
+    from dbt_bouncer.config_file_validator import lint_config_file
+
+    issues = lint_config_file(config_path)
+
+    if not issues:
+        logging.info("Config file is valid!")
+        ctx.exit(0)
+    else:
+        logging.error(f"Found {len(issues)} issue(s) in config file:")
+        for issue in issues:
+            logging.error(f"  Line {issue['line']}: {issue['message']}")
+        ctx.exit(1)
+
+
 @cli.command(name="list")
 def list_checks() -> None:
     """List all available dbt-bouncer checks, grouped by category."""

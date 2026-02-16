@@ -326,3 +326,111 @@ def test_validate_conf_valid(f, expectation):
             check_categories=[x for x in conf if x.endswith("_checks")],
             config_file_contents=conf,
         )
+
+
+def test_lint_config_file_valid(tmp_path):
+    """Test lint_config_file with a valid config."""
+    from dbt_bouncer.config_file_validator import lint_config_file
+
+    config = {
+        "manifest_checks": [
+            {"name": "check_model_description_populated"},
+        ],
+    }
+    config_file = tmp_path / "dbt-bouncer.yml"
+    with Path.open(config_file, "w") as f:
+        yaml.dump(config, f)
+
+    issues = lint_config_file(config_file)
+    assert issues == []
+
+
+def test_lint_config_file_missing_name(tmp_path):
+    """Test lint_config_file with missing name field."""
+    from dbt_bouncer.config_file_validator import lint_config_file
+
+    config = {
+        "manifest_checks": [
+            {"description": "Missing name field"},
+        ],
+    }
+    config_file = tmp_path / "dbt-bouncer.yml"
+    with Path.open(config_file, "w") as f:
+        yaml.dump(config, f)
+
+    issues = lint_config_file(config_file)
+    assert len(issues) == 1
+    assert issues[0]["message"] == "Check is missing required 'name' field"
+    assert issues[0]["severity"] == "error"
+
+
+def test_lint_config_file_yaml_syntax_error(tmp_path):
+    """Test lint_config_file with YAML syntax error."""
+    from dbt_bouncer.config_file_validator import lint_config_file
+
+    config_file = tmp_path / "dbt-bouncer.yml"
+    with Path.open(config_file, "w") as f:
+        f.write("manifest_checks:\n  - name: test\n    invalid yaml: [}")
+
+    issues = lint_config_file(config_file)
+    assert len(issues) == 1
+    assert "YAML syntax error" in issues[0]["message"]
+    assert issues[0]["severity"] == "error"
+
+
+def test_lint_config_file_not_list(tmp_path):
+    """Test lint_config_file when check category is not a list."""
+    from dbt_bouncer.config_file_validator import lint_config_file
+
+    config = {
+        "manifest_checks": "not a list",
+    }
+    config_file = tmp_path / "dbt-bouncer.yml"
+    with Path.open(config_file, "w") as f:
+        yaml.dump(config, f)
+
+    issues = lint_config_file(config_file)
+    assert len(issues) == 1
+    assert "must be a list" in issues[0]["message"]
+
+
+def test_lint_config_file_empty(tmp_path):
+    """Test lint_config_file with empty config."""
+    from dbt_bouncer.config_file_validator import lint_config_file
+
+    config_file = tmp_path / "dbt-bouncer.yml"
+    config_file.write_text("")
+
+    issues = lint_config_file(config_file)
+    assert len(issues) == 1
+    assert issues[0]["message"] == "Config file is empty"
+
+
+def test_lint_config_file_not_yaml(tmp_path):
+    """Test lint_config_file with non-YAML file."""
+    from dbt_bouncer.config_file_validator import lint_config_file
+
+    config_file = tmp_path / "dbt-bouncer.txt"
+    config_file.write_text("not yaml")
+
+    issues = lint_config_file(config_file)
+    assert issues == []
+
+
+def test_lint_config_file_multiple_issues(tmp_path):
+    """Test lint_config_file with multiple issues."""
+    from dbt_bouncer.config_file_validator import lint_config_file
+
+    config = {
+        "manifest_checks": [
+            {"description": "Missing name 1"},
+            {"name": "check_model_description_populated"},
+            {"description": "Missing name 2"},
+        ],
+    }
+    config_file = tmp_path / "dbt-bouncer.yml"
+    with Path.open(config_file, "w") as f:
+        yaml.dump(config, f)
+
+    issues = lint_config_file(config_file)
+    assert len(issues) == 2

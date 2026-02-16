@@ -7,6 +7,7 @@ from pathlib import Path, PurePath
 from typing import TYPE_CHECKING, Any
 
 import click
+import yaml
 from pydantic import ValidationError
 
 from dbt_bouncer.utils import compile_pattern, load_config_from_yaml
@@ -146,6 +147,98 @@ def load_config_file_contents(
             raise RuntimeError(
                 f"Config file must be either a `pyproject.toml`, `.yaml` or `.yml` file. Got {config_file_path.suffix}."
             )
+
+
+def lint_config_file(config_file_path: Path) -> list[dict[str, Any]]:
+    """Lint the config file and return a list of issues with line numbers.
+
+    Args:
+        config_file_path: Path to the config file.
+
+    Returns:
+        list[dict[str, Any]]: List of issues found, each with 'line', 'message', and 'severity'.
+
+    """
+    issues: list[dict[str, Any]] = []
+
+    if config_file_path.suffix not in [".yml", ".yaml"]:
+        return issues
+
+    try:
+        with Path.open(config_file_path, "r") as f:
+            content = f.read()
+            yaml.safe_load(content)
+    except yaml.YAMLError as e:
+        problem_mark = getattr(e, "problem_mark", None)
+        if problem_mark:
+            issues.append(
+                {
+                    "line": problem_mark.line + 1,
+                    "message": f"YAML syntax error: {getattr(e, 'problem', str(e))}",
+                    "severity": "error",
+                }
+            )
+        else:
+            issues.append(
+                {
+                    "line": 1,
+                    "message": f"YAML syntax error: {e}",
+                    "severity": "error",
+                }
+            )
+        return issues
+
+    try:
+        with Path.open(config_file_path, "r") as f:
+            data = yaml.safe_load(f)
+    except Exception:
+        return issues
+
+    if not data:
+        issues.append(
+            {
+                "line": 1,
+                "message": "Config file is empty",
+                "severity": "error",
+            }
+        )
+        return issues
+
+    valid_categories = {"manifest_checks", "catalog_checks", "run_results_checks"}
+    for category in valid_categories:
+        if category in data:
+            checks = data[category]
+            if not isinstance(checks, list):
+                issues.append(
+                    {
+                        "line": 1,
+                        "message": f"'{category}' must be a list, got {type(checks).__name__}",
+                        "severity": "error",
+                    }
+                )
+                continue
+
+            for idx, check in enumerate(checks):
+                if not isinstance(check, dict):
+                    issues.append(
+                        {
+                            "line": idx + 1,
+                            "message": f"Check must be a dictionary, got {type(check).__name__}",
+                            "severity": "error",
+                        }
+                    )
+                    continue
+
+                if "name" not in check:
+                    issues.append(
+                        {
+                            "line": idx + 1,
+                            "message": "Check is missing required 'name' field",
+                            "severity": "error",
+                        }
+                    )
+
+    return issues
 
 
 def validate_conf(
