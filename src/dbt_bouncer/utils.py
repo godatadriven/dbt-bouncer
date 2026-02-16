@@ -98,7 +98,9 @@ def resource_in_path(check, resource) -> bool:
         bool: Whether the check is applicable to the resource.
 
     """
-    return object_in_path(check.include, resource.original_file_path) and not (
+    if not object_in_path(check.include, resource.original_file_path):
+        return False
+    return not (
         check.exclude is not None
         and object_in_path(check.exclude, resource.original_file_path)
     )
