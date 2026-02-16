@@ -66,6 +66,35 @@ class BaseCheck(BaseModel):
 
     _min_description_length: ClassVar[int] = 4
 
+    def _inject_context(
+        self,
+        parsed_data: dict[str, Any],
+        resource: Any = None,
+        iterate_over_value: str | None = None,
+    ) -> None:
+        """Inject a resource and global context data into this check instance.
+
+        This replaces the ad-hoc setattr calls in runner.py with a single,
+        self-documenting method on the check base class.
+
+        Args:
+            parsed_data: Dict of global context keys (manifest, catalog_nodes, etc.) to inject.
+            resource: The dbt resource object to inject (e.g. a DbtBouncerModel wrapper).
+                      When None, only global context is injected (for non-iterating checks).
+            iterate_over_value: The annotation key that names the resource field (e.g. "model").
+
+        """
+        # Inject the specific resource into the matching field (only for iterating checks)
+        if resource is not None and iterate_over_value is not None:
+            object.__setattr__(
+                self,
+                iterate_over_value,
+                getattr(resource, iterate_over_value, resource),
+            )
+        # Inject any global context fields that the check declares
+        for key in parsed_data.keys() & self.__class__.__annotations__.keys():
+            object.__setattr__(self, key, parsed_data[key])
+
     # Helper methods
     def is_catalog_node_a_model(
         self, catalog_node: "CatalogNodes", models: list["DbtBouncerModelBase"]

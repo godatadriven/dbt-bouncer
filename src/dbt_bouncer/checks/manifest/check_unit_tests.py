@@ -1,7 +1,7 @@
 import logging
 from typing import TYPE_CHECKING, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import ConfigDict, Field
 
 from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.utils import get_package_version_number
@@ -19,7 +19,7 @@ from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import object_in_path
 
 
-class CheckUnitTestCoverage(BaseModel):
+class CheckUnitTestCoverage(BaseCheck):
     """Set the minimum percentage of models that have a unit test.
 
     !!! warning

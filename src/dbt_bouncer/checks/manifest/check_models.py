@@ -3,7 +3,7 @@ import re
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import ConfigDict, Field
 
 from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import NestedDict
@@ -1922,7 +1922,7 @@ class CheckModelVersionPinnedInRef(BaseCheck):
             )
 
 
-class CheckModelsDocumentationCoverage(BaseModel):
+class CheckModelsDocumentationCoverage(BaseCheck):
     """Set the minimum percentage of models that have a populated description.
 
     Parameters:
@@ -1998,7 +1998,7 @@ class CheckModelsDocumentationCoverage(BaseModel):
             )
 
 
-class CheckModelsTestCoverage(BaseModel):
+class CheckModelsTestCoverage(BaseCheck):
     """Set the minimum percentage of models that have at least one test.
 
     Parameters:
