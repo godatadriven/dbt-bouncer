@@ -1,6 +1,7 @@
+import re
 from typing import TYPE_CHECKING, Literal
 
-from pydantic import ConfigDict, Field
+from pydantic import ConfigDict, Field, PrivateAttr
 
 from dbt_bouncer.check_base import BaseCheck
 
@@ -54,12 +55,13 @@ class CheckSeedDescriptionPopulated(BaseCheck):
             DbtBouncerFailedCheckError: If description is not populated.
 
         """
-        seed = self._require_seed()
+        if self.seed is None:
+            raise DbtBouncerFailedCheckError("self.seed is None")
         if not self._is_description_populated(
-            seed.description or "", self.min_description_length
+            self.seed.description or "", self.min_description_length
         ):
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(seed.unique_id)}` does not have a populated description."
+                f"`{get_clean_model_name(self.seed.unique_id)}` does not have a populated description."
             )
 
 
@@ -94,6 +96,12 @@ class CheckSeedNames(BaseCheck):
     seed: "DbtBouncerSeedBase | None" = Field(default=None)
     seed_name_pattern: str
 
+    _compiled_pattern: re.Pattern[str] = PrivateAttr()
+
+    def model_post_init(self, __context: object) -> None:
+        """Compile the regex pattern once at initialisation time."""
+        self._compiled_pattern = compile_pattern(self.seed_name_pattern.strip())
+
     def execute(self) -> None:
         """Execute the check.
 
@@ -101,11 +109,9 @@ class CheckSeedNames(BaseCheck):
             DbtBouncerFailedCheckError: If model name does not match regex.
 
         """
-        seed = self._require_seed()
-        if (
-            compile_pattern(self.seed_name_pattern.strip()).match(str(seed.name))
-            is None
-        ):
+        if self.seed is None:
+            raise DbtBouncerFailedCheckError("self.seed is None")
+        if self._compiled_pattern.match(str(self.seed.name)) is None:
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(seed.unique_id)}` does not match the supplied regex `{self.seed_name_pattern.strip()}`."
+                f"`{get_clean_model_name(self.seed.unique_id)}` does not match the supplied regex `{self.seed_name_pattern.strip()}`."
             )
