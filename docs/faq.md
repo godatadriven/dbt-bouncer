@@ -102,17 +102,17 @@ The goal of a CI pipeline is to test the changes in a pull request but also to p
       dbt-bouncer --only run_results_checks
       ```
 
-Additionally, you can use the `--check` flag to run only specific checks by name. This is useful for debugging or validating a single convention:
+    Additionally, you can use the `--check` flag to run only specific checks by name. This is useful for debugging or validating a single convention:
 
-    ```shell
-    dbt-bouncer --check check_model_has_unique_test
-    ```
+      ```shell
+      dbt-bouncer --check check_model_has_unique_test
+      ```
 
     Multiple checks can be specified as a comma-separated list:
 
-    ```shell
-    dbt-bouncer --check check_model_has_unique_test,check_model_description_populated
-    ```
+      ```shell
+      dbt-bouncer --check check_model_has_unique_test,check_model_description_populated
+      ```
 
     The `--check` and `--only` flags can be combined: `--only` restricts to the specified categories, then `--check` further narrows to only the named checks within those categories.
 
