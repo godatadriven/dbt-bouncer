@@ -257,13 +257,17 @@ def runner(
         }
         for c in checks_to_run
     ]
-    num_checks_error = len(
-        [c for c in results if c["outcome"] == "failed" and c["severity"] == "error"]
-    )
-    num_checks_warn = len(
-        [c for c in results if c["outcome"] == "failed" and c["severity"] == "warn"]
-    )
-    num_checks_success = len([c for c in results if c["outcome"] == "success"])
+    num_checks_error = 0
+    num_checks_warn = 0
+    num_checks_success = 0
+    for r in results:
+        if r["outcome"] == "failed":
+            if r["severity"] == "error":
+                num_checks_error += 1
+            else:
+                num_checks_warn += 1
+        else:
+            num_checks_success += 1
 
     if num_checks_error > 0 or num_checks_warn > 0:
         logger = logging.error if num_checks_error > 0 else logging.warning
