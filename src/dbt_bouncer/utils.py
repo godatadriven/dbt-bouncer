@@ -349,6 +349,7 @@ def load_config_from_yaml(config_file: Path) -> Mapping[str, Any]:
     """
     config_path = Path().cwd() / config_file
     logging.debug(f"Loading config from {config_path}...")
+    logging.debug(f"Loading config from {config_file}...")
     if (
         not config_path.exists()
     ):  # Shouldn't be needed as click should have already checked this
