@@ -90,8 +90,12 @@ def run_bouncer(
         logging.info(
             f"Setting `severity` for all checks to `{config_file_contents['severity']}`."
         )
-        for c in config_file_contents["manifest_checks"]:
-            c["severity"] = config_file_contents["severity"]
+        for category in config_file_contents:
+            if category.endswith("_checks") and isinstance(
+                config_file_contents[category], list
+            ):
+                for c in config_file_contents[category]:
+                    c["severity"] = config_file_contents["severity"]
 
     logging.debug(f"{config_file_contents=}")
 

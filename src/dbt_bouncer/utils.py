@@ -396,8 +396,14 @@ def compile_pattern(pattern: str, flags: int = 0) -> re.Pattern[str]:
     Returns:
         re.Pattern[str]: The compiled pattern.
 
+    Raises:
+        re.error: If the pattern is invalid.
+
     """
-    return re.compile(pattern, flags)
+    try:
+        return re.compile(pattern, flags)
+    except re.error as e:
+        raise re.error(f"Invalid regex pattern '{pattern}': {e}") from e
 
 
 def object_in_path(include_pattern: str | None, path: str) -> bool:
