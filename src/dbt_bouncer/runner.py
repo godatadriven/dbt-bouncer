@@ -133,7 +133,7 @@ def runner(
         if len(iterate_over_value) == 1:
             iterate_value = next(iter(iterate_over_value))
             for i in resource_map[f"{iterate_value}s"]:
-                check_i = check.model_copy(deep=True)
+                check_i = check.model_copy(deep=False)
                 if iterate_value in [
                     "model",
                     "seed",
@@ -169,12 +169,9 @@ def runner(
                         if iterate_value in ["exposure", "macro", "test", "unit_test"]
                         else f"{check_i.name}:{check_i.index}:{'_'.join(getattr(i, iterate_value).unique_id.split('.')[2:])}"
                     )
-                    setattr(check_i, iterate_value, getattr(i, iterate_value, i))
-
-                    for x in (
-                        parsed_data.keys() & check_i.__class__.__annotations__.keys()
-                    ):
-                        setattr(check_i, x, parsed_data[x])
+                    check_i._inject_context(
+                        parsed_data, resource=i, iterate_over_value=iterate_value
+                    )
 
                     checks_to_run.append(
                         {
@@ -189,8 +186,7 @@ def runner(
             )
         else:
             check_run_id = f"{check.name}:{check.index}"
-            for x in parsed_data.keys() & check.__class__.__annotations__.keys():
-                setattr(check, x, parsed_data[x])
+            check._inject_context(parsed_data)
             checks_to_run.append(
                 {
                     "check": check,
