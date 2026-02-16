@@ -5,7 +5,7 @@ import operator
 import traceback
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, NotRequired, TypedDict
 
 import orjson
 from progress.bar import Bar
@@ -21,6 +21,16 @@ from dbt_bouncer.utils import (
 
 if TYPE_CHECKING:
     from dbt_bouncer.context import BouncerContext
+
+
+class CheckToRun(TypedDict):
+    """A single check instance ready for execution, with its run context."""
+
+    check: Any
+    check_run_id: str
+    failure_message: NotRequired[list[str] | str]
+    outcome: NotRequired[str]
+    severity: str
 
 
 def _should_run_check(
@@ -81,7 +91,7 @@ def runner(
         "unit_tests": ctx.unit_tests,
     }
 
-    resource_map: dict[str, Any] = {
+    resource_map: dict[str, list[Any]] = {
         "catalog_nodes": ctx.catalog_nodes,
         "catalog_sources": ctx.catalog_sources,
         "exposures": ctx.exposures,
@@ -112,7 +122,7 @@ def runner(
     for check_category in ctx.check_categories:
         list_of_check_configs.extend(getattr(ctx.bouncer_config, check_category))
 
-    checks_to_run = []
+    checks_to_run: list[CheckToRun] = []
     for check in sorted(list_of_check_configs, key=operator.attrgetter("index")):
         valid_iterate_over_values = {rt.value for rt in ResourceType}
         iterate_over_value = valid_iterate_over_values.intersection(
@@ -185,7 +195,7 @@ def runner(
 
     logging.info(f"Assembled {len(checks_to_run)} checks, running...")
 
-    def _execute_check(check: dict[str, Any]) -> dict[str, Any]:
+    def _execute_check(check: CheckToRun) -> CheckToRun:
         """Execute a single check and return the result.
 
         Returns:
@@ -289,7 +299,8 @@ def runner(
         if ctx.create_pr_comment_file:
             create_github_comment_file(
                 failed_checks=[
-                    [f["check_run_id"], f["failure_message"]] for f in failed_checks
+                    [str(f["check_run_id"]), str(f.get("failure_message", ""))]
+                    for f in failed_checks
                 ],
                 show_all_failures=ctx.show_all_failures,
             )
