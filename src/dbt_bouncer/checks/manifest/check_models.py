@@ -3,7 +3,7 @@ import re
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, PrivateAttr
+from pydantic import ConfigDict, Field, PrivateAttr
 
 from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import NestedDict
