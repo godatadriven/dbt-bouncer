@@ -2,9 +2,10 @@
 
 import logging
 import operator
+import sys
 import traceback
 from collections import defaultdict
-from concurrent.futures import ProcessPoolExecutor, as_completed
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, NotRequired, TypedDict
 
@@ -264,20 +265,24 @@ def runner(
 
     logging.info(f"Assembled {len(checks_to_run)} checks, running...")
 
-    # Group checks by class; each batch runs in a separate process via
-    # ProcessPoolExecutor, bypassing the GIL for true parallelism.
+    # Group checks by class so each batch can be executed together.
     batches: dict[str, list[CheckToRun]] = defaultdict(list)
     for check in checks_to_run:
         batches[check["check"].__class__.__name__].append(check)
 
-    # ProcessPoolExecutor sends batches to worker processes via pickle.
-    # Worker-side mutations are returned (not reflected in originals), so
-    # collect the completed dicts from each future's return value.
+    # On Unix, ProcessPoolExecutor uses fork() which copies sys.modules so
+    # dynamically-loaded check classes are visible in workers — bypassing the GIL.
+    # On Windows, spawn() is used instead: worker processes start fresh and cannot
+    # find dynamically-loaded modules, so fall back to ThreadPoolExecutor there.
+    executor_class = (
+        ThreadPoolExecutor if sys.platform == "win32" else ProcessPoolExecutor
+    )
+
+    # Results are returned from workers (mutations not reflected in originals),
+    # so collect completed dicts from each future's return value.
     completed_checks: list[CheckToRun] = []
     bar = Bar("Running checks...", max=len(checks_to_run))
-    # ProcessPoolExecutor: as_completed() is driven by the main thread, so
-    # bar.next() is always called from one thread — no lock needed.
-    with ProcessPoolExecutor() as executor:
+    with executor_class() as executor:
         futures = {
             executor.submit(_execute_batch, batch): batch for batch in batches.values()
         }
