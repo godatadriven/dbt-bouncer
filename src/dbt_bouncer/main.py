@@ -183,8 +183,10 @@ def run_bouncer(
     )
 
     logging.info("Running checks...")
-    from dbt_bouncer.context import BouncerContext
+    from dbt_bouncer.context import BouncerContext, _rebuild_bouncer_context
     from dbt_bouncer.runner import runner
+
+    _rebuild_bouncer_context()
 
     ctx = BouncerContext(
         bouncer_config=bouncer_config,
