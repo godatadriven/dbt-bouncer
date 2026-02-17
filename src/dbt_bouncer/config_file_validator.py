@@ -164,7 +164,10 @@ def lint_config_file(config_file_path: Path) -> list[dict[str, Any]]:
 
     try:
         content = config_file_path.read_text()
-        data = yaml.safe_load(content)
+        try:
+            data = yaml.load(content, Loader=yaml.CSafeLoader)
+        except AttributeError:
+            data = yaml.safe_load(content)
     except yaml.YAMLError as e:
         problem_mark = getattr(e, "problem_mark", None)
         if problem_mark:
