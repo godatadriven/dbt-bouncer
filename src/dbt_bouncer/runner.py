@@ -25,6 +25,10 @@ if TYPE_CHECKING:
     from dbt_bouncer.context import BouncerContext
 
 
+_VALID_ITERATE_OVER_VALUES = frozenset(rt.value for rt in ResourceType)
+_CLASS_ITERATE_CACHE: dict[type, frozenset[str]] = {}
+
+
 class CheckToRun(TypedDict):
     """A single check instance ready for execution, with its run context."""
 
@@ -38,7 +42,7 @@ class CheckToRun(TypedDict):
 def _should_run_check(
     check: Any,
     resource: Any,
-    iterate_over_value: set[str],
+    iterate_over_value: frozenset[str],
     meta_config: list[str],
 ) -> bool:
     """Determine if a check should run against a given resource.
@@ -127,10 +131,12 @@ def runner(
 
     checks_to_run: list[CheckToRun] = []
     for check in sorted(list_of_check_configs, key=operator.attrgetter("index")):
-        valid_iterate_over_values = {rt.value for rt in ResourceType}
-        iterate_over_value = valid_iterate_over_values.intersection(
-            set(check.__class__.__annotations__.keys()),
-        )
+        cls = check.__class__
+        if cls not in _CLASS_ITERATE_CACHE:
+            _CLASS_ITERATE_CACHE[cls] = _VALID_ITERATE_OVER_VALUES.intersection(
+                frozenset(cls.__annotations__.keys()),
+            )
+        iterate_over_value = _CLASS_ITERATE_CACHE[cls]
         if len(iterate_over_value) == 1:
             iterate_value = next(iter(iterate_over_value))
             for i in resource_map[f"{iterate_value}s"]:
