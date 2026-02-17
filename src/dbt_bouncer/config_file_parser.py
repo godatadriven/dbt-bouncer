@@ -8,7 +8,7 @@ from typing import Any, Literal
 from pydantic import BaseModel, ConfigDict, Field
 from typing_extensions import Annotated
 
-from dbt_bouncer.utils import clean_path_str, get_check_objects
+from dbt_bouncer.utils import get_check_objects
 
 
 def get_check_types(
@@ -25,16 +25,17 @@ def get_check_types(
         list[str]: The check types.
 
     """
-    check_classes: list[dict[str, Any | Path]] = [
-        {
-            "class": x,
-            "source_file": Path(clean_path_str(inspect.getfile(x))),
-        }
-        for x in get_check_objects(custom_checks_dir)
-    ]
+
+    def _get_category(check_class: type) -> str:
+        module = check_class.__module__
+        if module.startswith("dbt_bouncer.checks."):
+            return module.split(".")[2]
+        return Path(inspect.getfile(check_class)).parts[-2]
 
     filtered_classes = [
-        x["class"] for x in check_classes if x["source_file"].parts[-2] == check_type
+        x
+        for x in get_check_objects(custom_checks_dir)
+        if _get_category(x) == check_type
     ]
     if not filtered_classes:
         return list[Any]  # type: ignore[return-value]
