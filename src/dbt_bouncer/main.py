@@ -3,7 +3,6 @@ from pathlib import Path, PurePath
 
 import click
 
-from dbt_bouncer.context import BouncerContext
 from dbt_bouncer.logger import configure_console_logging
 from dbt_bouncer.version import version
 
@@ -184,6 +183,7 @@ def run_bouncer(
     )
 
     logging.info("Running checks...")
+    from dbt_bouncer.context import BouncerContext
     from dbt_bouncer.runner import runner
 
     ctx = BouncerContext(
