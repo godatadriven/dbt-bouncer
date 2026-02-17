@@ -195,6 +195,15 @@ def runner(
                 },
             )
 
+    del (
+        ctx.models,
+        ctx.run_results,
+        ctx.seeds,
+        ctx.semantic_models,
+        ctx.snapshots,
+        ctx.tests,
+    )
+
     logging.info(f"Assembled {len(checks_to_run)} checks, running...")
 
     def _execute_check(check: CheckToRun) -> CheckToRun:
