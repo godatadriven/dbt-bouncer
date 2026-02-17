@@ -2,10 +2,9 @@
 
 import logging
 import operator
-import threading
 import traceback
 from collections import defaultdict
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, NotRequired, TypedDict
 
@@ -67,6 +66,55 @@ def _should_run_check(
         return False
 
     return not (meta_config and check.name in meta_config)
+
+
+def _execute_check(check: "CheckToRun") -> None:
+    """Execute a single check, mutating it in-place with outcome and failure_message.
+
+    Module-level so it can be submitted to ProcessPoolExecutor.
+
+    """
+    logging.debug(f"Running {check['check_run_id']}...")
+    try:
+        check["check"].execute()
+        check["outcome"] = "success"
+    except Exception as e:
+        if isinstance(e, DbtBouncerFailedCheckError):
+            failure_message = e.message
+        else:
+            failure_message_full = list(
+                traceback.TracebackException.from_exception(e).format(),
+            )
+            failure_message = failure_message_full[-1].strip()
+
+        if check["check"].description:
+            failure_message = f"{check['check'].description} - {failure_message}"
+
+        logging.debug(
+            f"Check {check['check_run_id']} failed: {' '.join(failure_message)}"
+        )
+        check["outcome"] = "failed"
+        check["failure_message"] = failure_message
+
+        if not isinstance(e, DbtBouncerFailedCheckError):
+            check["severity"] = "warn"
+            check["failure_message"] = (
+                f"`dbt-bouncer` encountered an error ({failure_message}), run with `-v` to see more details or report an issue at https://github.com/godatadriven/dbt-bouncer/issues."
+            )
+
+
+def _execute_batch(batch: "list[CheckToRun]") -> "list[CheckToRun]":
+    """Execute all checks in a batch sequentially and return the completed batch.
+
+    Module-level so it can be submitted to ProcessPoolExecutor.
+
+    Returns:
+        list[CheckToRun]: The batch with each check's outcome and failure_message set.
+
+    """
+    for check in batch:
+        _execute_check(check)
+    return batch
 
 
 def runner(
@@ -216,72 +264,28 @@ def runner(
 
     logging.info(f"Assembled {len(checks_to_run)} checks, running...")
 
-    def _execute_check(check: CheckToRun) -> CheckToRun:
-        """Execute a single check and return the result.
-
-        Returns:
-            dict[str, Any]: The check dict with outcome and optional failure_message set.
-
-        """
-        logging.debug(f"Running {check['check_run_id']}...")
-        try:
-            check["check"].execute()
-            check["outcome"] = "success"
-        except Exception as e:
-            if isinstance(e, DbtBouncerFailedCheckError):
-                failure_message = e.message
-            else:
-                failure_message_full = list(
-                    traceback.TracebackException.from_exception(e).format(),
-                )
-                failure_message = failure_message_full[-1].strip()
-
-            if check["check"].description:
-                failure_message = f"{check['check'].description} - {failure_message}"
-
-            logging.debug(
-                f"Check {check['check_run_id']} failed: {' '.join(failure_message)}"
-            )
-            check["outcome"] = "failed"
-            check["failure_message"] = failure_message
-
-            # If a check encountered an issue, change severity to warn
-            if not isinstance(e, DbtBouncerFailedCheckError):
-                check["severity"] = "warn"
-                check["failure_message"] = (
-                    f"`dbt-bouncer` encountered an error ({failure_message}), run with `-v` to see more details or report an issue at https://github.com/godatadriven/dbt-bouncer/issues."
-                )
-        return check
-
-    def _execute_batch(batch: list[CheckToRun]) -> int:
-        """Execute all checks in a batch sequentially and return the count.
-
-        Returns:
-            int: Number of checks executed.
-
-        """
-        for check in batch:
-            _execute_check(check)
-        return len(batch)
-
-    # Group checks by class to reduce ThreadPoolExecutor scheduling overhead.
-    # Checks of the same class run sequentially within a batch; different
-    # classes run in parallel across threads.
+    # Group checks by class; each batch runs in a separate process via
+    # ProcessPoolExecutor, bypassing the GIL for true parallelism.
     batches: dict[str, list[CheckToRun]] = defaultdict(list)
     for check in checks_to_run:
         batches[check["check"].__class__.__name__].append(check)
 
+    # ProcessPoolExecutor sends batches to worker processes via pickle.
+    # Worker-side mutations are returned (not reflected in originals), so
+    # collect the completed dicts from each future's return value.
+    completed_checks: list[CheckToRun] = []
     bar = Bar("Running checks...", max=len(checks_to_run))
-    progress_lock = threading.Lock()
-    with ThreadPoolExecutor() as executor:
+    # ProcessPoolExecutor: as_completed() is driven by the main thread, so
+    # bar.next() is always called from one thread — no lock needed.
+    with ProcessPoolExecutor() as executor:
         futures = {
             executor.submit(_execute_batch, batch): batch for batch in batches.values()
         }
         for future in as_completed(futures):
-            batch_size = future.result()
-            with progress_lock:
-                for _ in range(batch_size):
-                    bar.next()
+            completed_batch = future.result()
+            completed_checks.extend(completed_batch)
+            for _ in completed_batch:
+                bar.next()
     bar.finish()
 
     results = [
@@ -291,7 +295,7 @@ def runner(
             "outcome": c["outcome"],
             "severity": c["severity"],
         }
-        for c in checks_to_run
+        for c in completed_checks
     ]
     num_checks_error = 0
     num_checks_warn = 0
