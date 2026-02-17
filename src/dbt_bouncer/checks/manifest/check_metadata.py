@@ -1,6 +1,7 @@
+import re
 from typing import TYPE_CHECKING, Literal
 
-from pydantic import ConfigDict, Field
+from pydantic import ConfigDict, Field, PrivateAttr
 
 from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
@@ -51,6 +52,14 @@ class CheckProjectName(BaseCheck):
         description="Severity of the check, one of 'error' or 'warn'.",
     )
 
+    _compiled_project_name_pattern: re.Pattern[str] = PrivateAttr()
+
+    def model_post_init(self, __context: object) -> None:
+        """Compile the regex pattern once at initialisation time."""
+        self._compiled_project_name_pattern = compile_pattern(
+            self.project_name_pattern.strip()
+        )
+
     def execute(self) -> None:
         """Execute the check.
 
@@ -65,7 +74,7 @@ class CheckProjectName(BaseCheck):
             self.package_name or self.manifest_obj.manifest.metadata.project_name
         )
         if (
-            compile_pattern(self.project_name_pattern.strip()).match(
+            self._compiled_project_name_pattern.match(
                 str(package_name),
             )
             is None

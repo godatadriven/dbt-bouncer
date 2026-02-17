@@ -533,6 +533,12 @@ class CheckModelDirectories(BaseCheck):
     name: Literal["check_model_directories"]
     permitted_sub_directories: list[str]
 
+    _compiled_include: re.Pattern[str] = PrivateAttr()
+
+    def model_post_init(self, __context: object) -> None:
+        """Compile the regex pattern once at initialisation time."""
+        self._compiled_include = compile_pattern(self.include.strip().rstrip("/"))
+
     def execute(self) -> None:
         """Execute the check.
 
@@ -543,9 +549,7 @@ class CheckModelDirectories(BaseCheck):
         if self.model is None:
             raise DbtBouncerFailedCheckError("self.model is None")
         clean_path = clean_path_str(self.model.original_file_path)
-        matched_path = compile_pattern(self.include.strip().rstrip("/")).match(
-            clean_path
-        )
+        matched_path = self._compiled_include.match(clean_path)
         if matched_path is None:
             raise DbtBouncerFailedCheckError("matched_path is None")
         path_after_match = clean_path[matched_path.end() + 1 :]

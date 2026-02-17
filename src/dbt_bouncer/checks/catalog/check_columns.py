@@ -18,7 +18,7 @@ if TYPE_CHECKING:
         DbtBouncerModelBase,
         DbtBouncerTestBase,
     )
-from pydantic import model_validator
+from pydantic import PrivateAttr, model_validator
 
 from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.utils import compile_pattern
@@ -130,6 +130,14 @@ class CheckColumnHasSpecifiedTest(BaseCheck):
     test_name: str
     tests: list["DbtBouncerTestBase"] = Field(default=[])
 
+    _compiled_column_name_pattern: re.Pattern[str] = PrivateAttr()
+
+    def model_post_init(self, __context: object) -> None:
+        """Compile the regex pattern once at initialisation time."""
+        self._compiled_column_name_pattern = compile_pattern(
+            self.column_name_pattern.strip()
+        )
+
     def execute(self) -> None:
         """Execute the check.
 
@@ -141,8 +149,7 @@ class CheckColumnHasSpecifiedTest(BaseCheck):
         columns_to_check = [
             v.name
             for _, v in catalog_node.columns.items()
-            if compile_pattern(self.column_name_pattern.strip()).match(str(v.name))
-            is not None
+            if self._compiled_column_name_pattern.match(str(v.name)) is not None
         ]
         tested_columns = set()
         for t in self.tests:
@@ -228,6 +235,17 @@ class CheckColumnNameCompliesToColumnType(BaseCheck):
     type_pattern: str | None = None
     types: list[str] | None = None
 
+    _compiled_column_name_pattern: re.Pattern[str] = PrivateAttr()
+    _compiled_type_pattern: re.Pattern[str] | None = PrivateAttr()
+
+    def model_post_init(self, __context: object) -> None:
+        """Compile the regex patterns once at initialisation time."""
+        self._compiled_column_name_pattern = compile_pattern(
+            self.column_name_pattern.strip()
+        )
+        if self.type_pattern:
+            self._compiled_type_pattern = compile_pattern(self.type_pattern.strip())
+
     def execute(self) -> None:
         """Execute the check.
 
@@ -240,9 +258,8 @@ class CheckColumnNameCompliesToColumnType(BaseCheck):
             non_complying_columns = [
                 v.name
                 for _, v in catalog_node.columns.items()
-                if compile_pattern(self.type_pattern.strip()).match(str(v.type)) is None
-                and compile_pattern(self.column_name_pattern.strip()).match(str(v.name))
-                is not None
+                if self._compiled_type_pattern.match(str(v.type)) is None
+                and self._compiled_column_name_pattern.match(str(v.name)) is not None
             ]
 
             if non_complying_columns:
@@ -255,8 +272,7 @@ class CheckColumnNameCompliesToColumnType(BaseCheck):
                 v.name
                 for _, v in catalog_node.columns.items()
                 if v.type in self.types
-                and compile_pattern(self.column_name_pattern.strip()).match(str(v.name))
-                is None
+                and self._compiled_column_name_pattern.match(str(v.name)) is None
             ]
 
             if non_complying_columns:
