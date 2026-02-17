@@ -1,7 +1,7 @@
 import inspect
 import operator
 import os
-from functools import reduce
+from functools import lru_cache, reduce
 from pathlib import Path
 from typing import Any, Literal
 
@@ -83,6 +83,7 @@ class DbtBouncerConfBase(BaseModel):
     )
 
 
+@lru_cache(maxsize=None)
 def create_bouncer_conf_class(
     custom_checks_dir: Path | None = None,
 ) -> type[DbtBouncerConfBase]:
@@ -116,8 +117,3 @@ def create_bouncer_conf_class(
         run_results_checks: run_results_type = Field(default=[])  # type: ignore[valid-type]
 
     return DbtBouncerConf
-
-
-# Module-level class for TYPE_CHECKING imports and backwards compatibility
-DbtBouncerConfAllCategories = create_bouncer_conf_class()
-DbtBouncerConf = DbtBouncerConfAllCategories
