@@ -46,17 +46,23 @@ class CheckSemanticModelOnNonPublicModels(BaseCheck):
 
         """
         semantic_model = self._require_semantic_model()
+        models_by_id = (
+            self.models_by_unique_id
+            if self.models_by_unique_id
+            else {m.unique_id: m for m in self.models}
+        )
         non_public_upstream_dependencies = []
         for model in getattr(semantic_model.depends_on, "nodes", []) or []:
+            model_obj = models_by_id.get(model)
+            if not model_obj:
+                continue
             if (
-                next(m for m in self.models if m.unique_id == model).resource_type
-                == "model"
-                and next(m for m in self.models if m.unique_id == model).package_name
-                == semantic_model.package_name
+                model_obj.resource_type == "model"
+                and model_obj.package_name == semantic_model.package_name
+                and model_obj.access
+                and model_obj.access.value != "public"
             ):
-                model_obj = next(m for m in self.models if m.unique_id == model)
-                if model_obj.access and model_obj.access.value != "public":
-                    non_public_upstream_dependencies.append(model_obj.name)
+                non_public_upstream_dependencies.append(model_obj.name)
 
         if non_public_upstream_dependencies:
             raise DbtBouncerFailedCheckError(

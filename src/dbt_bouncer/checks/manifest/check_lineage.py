@@ -81,7 +81,11 @@ class CheckLineagePermittedUpstreamModels(BaseCheck):
             and x.split(".")[1]
             == (self.package_name or self.manifest_obj.manifest.metadata.project_name)
         ]
-        models_by_id = {m.unique_id: m for m in self.models}
+        models_by_id = (
+            self.models_by_unique_id
+            if self.models_by_unique_id
+            else {m.unique_id: m for m in self.models}
+        )
         not_permitted_upstream_models = [
             upstream_model
             for upstream_model in upstream_models

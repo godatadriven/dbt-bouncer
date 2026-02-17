@@ -1374,7 +1374,11 @@ class CheckModelMaxChainedViews(BaseCheck):
         if self.manifest_obj is None:
             raise DbtBouncerFailedCheckError("self.manifest_obj is None")
 
-        models_by_id = {m.unique_id: m for m in self.models}
+        models_by_id = (
+            self.models_by_unique_id
+            if self.models_by_unique_id
+            else {m.unique_id: m for m in self.models}
+        )
 
         def return_upstream_view_models(
             materializations,
