@@ -163,9 +163,8 @@ def lint_config_file(config_file_path: Path) -> list[dict[str, Any]]:
         return issues
 
     try:
-        with Path.open(config_file_path, "r") as f:
-            content = f.read()
-            yaml.safe_load(content)
+        content = config_file_path.read_text()
+        data = yaml.safe_load(content)
     except yaml.YAMLError as e:
         problem_mark = getattr(e, "problem_mark", None)
         if problem_mark:
@@ -185,10 +184,6 @@ def lint_config_file(config_file_path: Path) -> list[dict[str, Any]]:
                 }
             )
         return issues
-
-    try:
-        with Path.open(config_file_path, "r") as f:
-            data = yaml.safe_load(f)
     except Exception:
         return issues
 
