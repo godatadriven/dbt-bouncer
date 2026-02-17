@@ -104,7 +104,11 @@ class CheckExposureOnNonPublicModels(BaseCheck):
 
         """
         exposure = self._require_exposure()
-        models_by_id = {m.unique_id: m for m in self.models}
+        models_by_id = (
+            self.models_by_unique_id
+            if self.models_by_unique_id
+            else {m.unique_id: m for m in self.models}
+        )
         non_public_upstream_dependencies = []
         for node_id in getattr(exposure.depends_on, "nodes", []) or []:
             model_obj = models_by_id.get(node_id)
@@ -170,7 +174,11 @@ class CheckExposureOnView(BaseCheck):
 
         """
         exposure = self._require_exposure()
-        models_by_id = {m.unique_id: m for m in self.models}
+        models_by_id = (
+            self.models_by_unique_id
+            if self.models_by_unique_id
+            else {m.unique_id: m for m in self.models}
+        )
         non_table_upstream_dependencies = []
         for node_id in getattr(exposure.depends_on, "nodes", []) or []:
             model_obj = models_by_id.get(node_id)

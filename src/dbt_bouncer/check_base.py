@@ -64,6 +64,11 @@ class BaseCheck(BaseModel):
     test: Any = Field(default=None)
     unit_test: Any = Field(default=None)
 
+    models_by_unique_id: dict[str, Any] | None = Field(default=None)
+    sources_by_unique_id: dict[str, Any] | None = Field(default=None)
+    exposures_by_unique_id: dict[str, Any] | None = Field(default=None)
+    tests_by_unique_id: dict[str, Any] | None = Field(default=None)
+
     _min_description_length: ClassVar[int] = 4
 
     def _inject_context(
