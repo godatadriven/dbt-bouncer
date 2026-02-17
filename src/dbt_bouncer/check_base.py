@@ -5,6 +5,9 @@ from pydantic import BaseModel, ConfigDict, Field
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import is_description_populated
 
+# Cache annotation key sets per check class to avoid rebuilding on every injection call.
+_ANNOTATION_KEYS_CACHE: dict[type, frozenset[str]] = {}
+
 if TYPE_CHECKING:
     import warnings
 
@@ -97,7 +100,10 @@ class BaseCheck(BaseModel):
                 getattr(resource, iterate_over_value, resource),
             )
         # Inject any global context fields that the check declares
-        for key in parsed_data.keys() & self.__class__.__annotations__.keys():
+        cls = self.__class__
+        if cls not in _ANNOTATION_KEYS_CACHE:
+            _ANNOTATION_KEYS_CACHE[cls] = frozenset(cls.__annotations__.keys())
+        for key in parsed_data.keys() & _ANNOTATION_KEYS_CACHE[cls]:
             object.__setattr__(self, key, parsed_data[key])
 
     # Helper methods
