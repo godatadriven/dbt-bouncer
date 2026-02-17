@@ -112,9 +112,7 @@ def load_config_file_contents(
             with Path(config_file_path).open("rb") as f:
                 toml_cfg = tomllib.load(f)
             if "dbt-bouncer" in toml_cfg["tool"]:
-                return next(
-                    v for k, v in toml_cfg["tool"].items() if k == "dbt-bouncer"
-                )
+                return toml_cfg["tool"]["dbt-bouncer"]
             else:
                 logging.warning(
                     "Cannot find a `dbt-bouncer.yml` file or a `dbt-bouncer` section found in pyproject.toml."
