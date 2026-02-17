@@ -390,7 +390,10 @@ def load_config_from_yaml(config_file: Path) -> Mapping[str, Any]:
         raise FileNotFoundError(f"No config file found at {config_path}.")
 
     with Path.open(config_path, "r") as f:
-        conf = yaml.safe_load(f)
+        try:
+            conf = yaml.load(f, Loader=yaml.CSafeLoader)
+        except AttributeError:
+            conf = yaml.safe_load(f)
 
     logging.info(f"Loaded config from {config_file}...")
 
