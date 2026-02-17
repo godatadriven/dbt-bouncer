@@ -2,6 +2,7 @@
 
 import logging
 import operator
+import threading
 import traceback
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -253,13 +254,16 @@ def runner(
         batches[check["check"].__class__.__name__].append(check)
 
     bar = Bar("Running checks...", max=len(checks_to_run))
+    progress_lock = threading.Lock()
     with ThreadPoolExecutor() as executor:
         futures = {
             executor.submit(_execute_batch, batch): batch for batch in batches.values()
         }
         for future in as_completed(futures):
-            future.result()
-            bar.next()
+            batch_size = future.result()
+            with progress_lock:
+                for _ in range(batch_size):
+                    bar.next()
     bar.finish()
 
     results = [
