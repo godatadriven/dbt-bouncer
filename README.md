@@ -96,6 +96,23 @@ All documentation can be found on `dbt-bouncer` [documentation website](https://
     | check_model_directories: | error    | AssertionError: `model` is located in `utilities`, this is not a valid sub-directory. |
     ```
 
+### Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `LOG_LEVEL` | Set to `DEBUG` for verbose logging | `INFO` |
+| `LOG_FORMAT` | Set to `json` for structured JSON logging | (human-readable) |
+
+Example:
+
+```shell
+# Debug logging
+LOG_LEVEL=DEBUG dbt-bouncer
+
+# JSON output for log aggregation
+LOG_FORMAT=json dbt-bouncer
+```
+
 ## Reporting bugs and contributing code
 
 - Want to report a bug or request a feature? Let us know and open [an issue](https://github.com/godatadriven/dbt-bouncer/issues/new/choose).
