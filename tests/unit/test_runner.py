@@ -35,9 +35,11 @@ def test_runner_coverage(caplog, tmp_path):
     )
 
     with ctx:
-        from dbt_bouncer.config_file_parser import (
-            DbtBouncerConfAllCategories as DbtBouncerConf,
+        from dbt_bouncer.config_file_parser import (  # noqa: N812
+            create_bouncer_conf_class as DbtBouncerConf,
         )
+
+        DbtBouncerConf = DbtBouncerConf()  # noqa: N806
 
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=UserWarning)
@@ -160,9 +162,11 @@ def test_runner_failure():
     )
 
     with ctx:
-        from dbt_bouncer.config_file_parser import (
-            DbtBouncerConfAllCategories as DbtBouncerConf,
+        from dbt_bouncer.config_file_parser import (  # noqa: N812
+            create_bouncer_conf_class as DbtBouncerConf,
         )
+
+        DbtBouncerConf = DbtBouncerConf()  # noqa: N806
 
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=UserWarning)
@@ -278,9 +282,11 @@ def test_runner_skip(tmp_path):
     )
 
     with ctx:
-        from dbt_bouncer.config_file_parser import (
-            DbtBouncerConfAllCategories as DbtBouncerConf,
+        from dbt_bouncer.config_file_parser import (  # noqa: N812
+            create_bouncer_conf_class as DbtBouncerConf,
         )
+
+        DbtBouncerConf = DbtBouncerConf()  # noqa: N806
 
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=UserWarning)
@@ -440,9 +446,11 @@ def test_runner_success():
     )
 
     with ctx:
-        from dbt_bouncer.config_file_parser import (
-            DbtBouncerConfAllCategories as DbtBouncerConf,
+        from dbt_bouncer.config_file_parser import (  # noqa: N812
+            create_bouncer_conf_class as DbtBouncerConf,
         )
+
+        DbtBouncerConf = DbtBouncerConf()  # noqa: N806
 
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=UserWarning)
@@ -551,9 +559,11 @@ def test_runner_windows(caplog, tmp_path):
     configure_console_logging(verbosity=0)
     ctx = MagicMock(obj={"verbosity": 3})
     push_context(ctx)
-    from dbt_bouncer.config_file_parser import (
-        DbtBouncerConfAllCategories as DbtBouncerConf,
+    from dbt_bouncer.config_file_parser import (  # noqa: N812
+        create_bouncer_conf_class as DbtBouncerConf,
     )
+
+    DbtBouncerConf = DbtBouncerConf()  # noqa: N806
 
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", category=UserWarning)
@@ -678,9 +688,11 @@ def test_runner_check_id(tmp_path):
     )
 
     with ctx:
-        from dbt_bouncer.config_file_parser import (
-            DbtBouncerConfAllCategories as DbtBouncerConf,
+        from dbt_bouncer.config_file_parser import (  # noqa: N812
+            create_bouncer_conf_class as DbtBouncerConf,
         )
+
+        DbtBouncerConf = DbtBouncerConf()  # noqa: N806
 
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=UserWarning)
@@ -845,9 +857,11 @@ def test_runner_output_only_failures(output_only_failures, num_checks, tmp_path)
     )
 
     with ctx:
-        from dbt_bouncer.config_file_parser import (
-            DbtBouncerConfAllCategories as DbtBouncerConf,
+        from dbt_bouncer.config_file_parser import (  # noqa: N812
+            create_bouncer_conf_class as DbtBouncerConf,
         )
+
+        DbtBouncerConf = DbtBouncerConf()  # noqa: N806
 
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=UserWarning)
@@ -1007,9 +1021,11 @@ def test_runner_skip_catalog_check(tmp_path):
     )
 
     with ctx:
-        from dbt_bouncer.config_file_parser import (
-            DbtBouncerConfAllCategories as DbtBouncerConf,
+        from dbt_bouncer.config_file_parser import (  # noqa: N812
+            create_bouncer_conf_class as DbtBouncerConf,
         )
+
+        DbtBouncerConf = DbtBouncerConf()  # noqa: N806
 
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=UserWarning)
