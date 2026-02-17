@@ -1,3 +1,4 @@
+import re
 from typing import TYPE_CHECKING, Literal
 
 from dbt_bouncer.check_base import BaseCheck
@@ -8,7 +9,7 @@ if TYPE_CHECKING:
         DbtBouncerModelBase,
     )
 
-from pydantic import Field
+from pydantic import Field, PrivateAttr
 
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import clean_path_str, compile_pattern, get_clean_model_name
@@ -54,6 +55,14 @@ class CheckLineagePermittedUpstreamModels(BaseCheck):
     package_name: str | None = Field(default=None)
     upstream_path_pattern: str
 
+    _compiled_upstream_path_pattern: re.Pattern[str] = PrivateAttr()
+
+    def model_post_init(self, __context: object) -> None:
+        """Compile the regex pattern once at initialisation time."""
+        self._compiled_upstream_path_pattern = compile_pattern(
+            self.upstream_path_pattern.strip()
+        )
+
     def execute(self) -> None:
         """Execute the check.
 
@@ -77,7 +86,7 @@ class CheckLineagePermittedUpstreamModels(BaseCheck):
             upstream_model
             for upstream_model in upstream_models
             if upstream_model in models_by_id
-            and compile_pattern(self.upstream_path_pattern.strip()).match(
+            and self._compiled_upstream_path_pattern.match(
                 clean_path_str(models_by_id[upstream_model].original_file_path),
             )
             is None
