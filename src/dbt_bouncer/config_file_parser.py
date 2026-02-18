@@ -118,3 +118,33 @@ def create_bouncer_conf_class(
         run_results_checks: run_results_type = Field(default=[])  # type: ignore[valid-type]
 
     return DbtBouncerConf
+
+
+def __getattr__(name: str) -> "type[DbtBouncerConfBase]":
+    """Lazy module-level attributes using PEP 562.
+
+    DbtBouncerConf and DbtBouncerConfAllCategories are computed on first access
+    rather than at import time to avoid triggering the expensive check-module
+    discovery (glob + importlib of 17 files) when only DbtBouncerConfBase is needed.
+
+    Args:
+        name: The attribute name to look up.
+
+    Returns:
+        type[DbtBouncerConfBase]: The resolved Pydantic model class.
+
+    Raises:
+        AttributeError: If the attribute name is not recognized.
+
+    """
+    if name in ("DbtBouncerConf", "DbtBouncerConfAllCategories"):
+        import sys
+
+        result = create_bouncer_conf_class()
+        # Cache in module globals so subsequent attribute access is O(1).
+        # Use setattr to satisfy static type checkers (ModuleType has no
+        # DbtBouncerConf attribute by default).
+        setattr(sys.modules[__name__], "DbtBouncerConf", result)  # noqa: B010
+        setattr(sys.modules[__name__], "DbtBouncerConfAllCategories", result)  # noqa: B010
+        return result
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
