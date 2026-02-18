@@ -49,5 +49,5 @@ def test_programmatic_failure_path(tmp_path):
 
 
 def test_programmatic_missing_config():
-    with pytest.raises(FileNotFoundError or RuntimeError):  # type: ignore[truthy-function]
+    with pytest.raises((FileNotFoundError, RuntimeError)):
         run_bouncer(config_file=Path("non-existent-config.yml"))

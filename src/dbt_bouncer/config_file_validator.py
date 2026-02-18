@@ -51,6 +51,9 @@ def get_config_file_path(
 
     if config_file_source == "COMMANDLINE":
         logging.debug(f"Config file passed via command line: {config_file}")
+        config_file_path = Path(config_file)
+        if not config_file_path.exists():
+            raise RuntimeError(f"Config file not found: {config_file}")
         return config_file
 
     if config_file_path_via_env_var := os.getenv("DBT_BOUNCER_CONFIG_FILE"):
@@ -66,7 +69,7 @@ def get_config_file_path(
             return config_file_path
 
     # Read config from pyproject.toml
-    logging.info("Loading config from pyproject.toml, if exists...")
+    logging.debug("Loading config from pyproject.toml, if exists...")
     if (Path().cwd() / "pyproject.toml").exists():
         pyproject_toml_dir = Path().cwd()
     else:
