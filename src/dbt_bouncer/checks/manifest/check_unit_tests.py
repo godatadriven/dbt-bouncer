@@ -81,8 +81,7 @@ class CheckUnitTestCoverage(BaseCheck):
             DbtBouncerFailedCheckError: If unit test coverage is less than permitted minimum.
 
         """
-        if self.manifest_obj is None:
-            raise DbtBouncerFailedCheckError("self.manifest_obj is None")
+        self._require_manifest()
         if get_package_version_number(
             self.manifest_obj.manifest.metadata.dbt_version or "0.0.0"
         ) >= get_package_version_number("1.8.0"):
@@ -157,10 +156,8 @@ class CheckUnitTestExpectFormats(BaseCheck):
             DbtBouncerFailedCheckError: If unit test expect format is not permitted.
 
         """
-        if self.manifest_obj is None:
-            raise DbtBouncerFailedCheckError("self.manifest_obj is None")
-        if self.unit_test is None:
-            raise DbtBouncerFailedCheckError("self.unit_test is None")
+        self._require_manifest()
+        self._require_unit_test()
         if get_package_version_number(
             self.manifest_obj.manifest.metadata.dbt_version or "0.0.0"
         ) >= get_package_version_number("1.8.0"):
@@ -232,10 +229,8 @@ class CheckUnitTestGivenFormats(BaseCheck):
             DbtBouncerFailedCheckError: If unit test given formats are not permitted.
 
         """
-        if self.manifest_obj is None:
-            raise DbtBouncerFailedCheckError("self.manifest_obj is None")
-        if self.unit_test is None:
-            raise DbtBouncerFailedCheckError("self.unit_test is None")
+        self._require_manifest()
+        self._require_unit_test()
         if get_package_version_number(
             self.manifest_obj.manifest.metadata.dbt_version or "0.0.0"
         ) >= get_package_version_number("1.8.0"):

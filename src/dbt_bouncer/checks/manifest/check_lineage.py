@@ -70,10 +70,8 @@ class CheckLineagePermittedUpstreamModels(BaseCheck):
             DbtBouncerFailedCheckError: If upstream models are not permitted.
 
         """
-        if self.model is None:
-            raise DbtBouncerFailedCheckError("self.model is None")
-        if self.manifest_obj is None:
-            raise DbtBouncerFailedCheckError("self.manifest_obj is None")
+        self._require_model()
+        self._require_manifest()
         upstream_models = [
             x
             for x in getattr(self.model.depends_on, "nodes", []) or []
@@ -132,8 +130,7 @@ class CheckLineageSeedCannotBeUsed(BaseCheck):
             DbtBouncerFailedCheckError: If seed is referenced.
 
         """
-        if self.model is None:
-            raise DbtBouncerFailedCheckError("self.model is None")
+        self._require_model()
         if [
             x
             for x in getattr(self.model.depends_on, "nodes", []) or []
@@ -175,8 +172,7 @@ class CheckLineageSourceCannotBeUsed(BaseCheck):
             DbtBouncerFailedCheckError: If source is referenced.
 
         """
-        if self.model is None:
-            raise DbtBouncerFailedCheckError("self.model is None")
+        self._require_model()
         if [
             x
             for x in getattr(self.model.depends_on, "nodes", []) or []

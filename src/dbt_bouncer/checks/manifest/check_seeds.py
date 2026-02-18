@@ -55,8 +55,7 @@ class CheckSeedDescriptionPopulated(BaseCheck):
             DbtBouncerFailedCheckError: If description is not populated.
 
         """
-        if self.seed is None:
-            raise DbtBouncerFailedCheckError("self.seed is None")
+        self._require_seed()
         if not self._is_description_populated(
             self.seed.description or "", self.min_description_length
         ):
@@ -109,8 +108,7 @@ class CheckSeedNames(BaseCheck):
             DbtBouncerFailedCheckError: If model name does not match regex.
 
         """
-        if self.seed is None:
-            raise DbtBouncerFailedCheckError("self.seed is None")
+        self._require_seed()
         if self._compiled_pattern.match(str(self.seed.name)) is None:
             raise DbtBouncerFailedCheckError(
                 f"`{get_clean_model_name(self.seed.unique_id)}` does not match the supplied regex `{self.seed_name_pattern.strip()}`."
