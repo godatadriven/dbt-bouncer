@@ -67,8 +67,7 @@ class CheckProjectName(BaseCheck):
             DbtBouncerFailedCheckError: If project name does not match regex.
 
         """
-        if self.manifest_obj is None:
-            raise DbtBouncerFailedCheckError("self.manifest_obj is None")
+        self._require_manifest()
 
         package_name = (
             self.package_name or self.manifest_obj.manifest.metadata.project_name

@@ -51,8 +51,7 @@ class CheckSnapshotHasTags(BaseCheck):
             DbtBouncerFailedCheckError: If snapshot does not have required tags.
 
         """
-        if self.snapshot is None:
-            raise DbtBouncerFailedCheckError("self.snapshot is None")
+        self._require_snapshot()
         snapshot_tags = self.snapshot.tags or []
         if self.criteria == "any":
             if not any(tag in snapshot_tags for tag in self.tags):
@@ -116,8 +115,7 @@ class CheckSnapshotNames(BaseCheck):
             DbtBouncerFailedCheckError: If snapshot name does not match regex.
 
         """
-        if self.snapshot is None:
-            raise DbtBouncerFailedCheckError("self.snapshot is None")
+        self._require_snapshot()
         if self._compiled_pattern.match(str(self.snapshot.name)) is None:
             raise DbtBouncerFailedCheckError(
                 f"`{self.snapshot.name}` does not match the supplied regex `{self.snapshot_name_pattern.strip()})`."

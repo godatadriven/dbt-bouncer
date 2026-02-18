@@ -66,8 +66,7 @@ class CheckMacroArgumentsDescriptionPopulated(BaseCheck):
             DbtBouncerFailedCheckError: If macro arguments are not populated.
 
         """
-        if self.macro is None:
-            raise DbtBouncerFailedCheckError("self.macro is None")
+        self._require_macro()
         environment = Environment(autoescape=True, extensions=[TagExtension])
         ast = environment.parse(self.macro.macro_sql)
 
@@ -161,8 +160,7 @@ class CheckMacroCodeDoesNotContainRegexpPattern(BaseCheck):
             DbtBouncerFailedCheckError: If macro code contains banned string.
 
         """
-        if self.macro is None:
-            raise DbtBouncerFailedCheckError("self.macro is None")
+        self._require_macro()
         if self._compiled_pattern.match(self.macro.macro_sql) is not None:
             raise DbtBouncerFailedCheckError(
                 f"Macro `{self.macro.name}` contains a banned string: `{self.regexp_pattern.strip()}`."
@@ -209,8 +207,7 @@ class CheckMacroDescriptionPopulated(BaseCheck):
             DbtBouncerFailedCheckError: If macro description is not populated.
 
         """
-        if self.macro is None:
-            raise DbtBouncerFailedCheckError("self.macro is None")
+        self._require_macro()
         if not self._is_description_populated(
             str(self.macro.description or ""), self.min_description_length
         ):
@@ -258,8 +255,7 @@ class CheckMacroMaxNumberOfLines(BaseCheck):
             DbtBouncerFailedCheckError: If max lines exceeded.
 
         """
-        if self.macro is None:
-            raise DbtBouncerFailedCheckError("self.macro is None")
+        self._require_macro()
         actual_number_of_lines = self.macro.macro_sql.count("\n") + 1
 
         if actual_number_of_lines > self.max_number_of_lines:
@@ -300,8 +296,7 @@ class CheckMacroNameMatchesFileName(BaseCheck):
             DbtBouncerFailedCheckError: If macro name does not match file name.
 
         """
-        if self.macro is None:
-            raise DbtBouncerFailedCheckError("self.macro is None")
+        self._require_macro()
         file_path = Path(clean_path_str(self.macro.original_file_path))
         file_stem = file_path.stem
 
@@ -347,8 +342,7 @@ class CheckMacroPropertyFileLocation(BaseCheck):
             DbtBouncerFailedCheckError: If property file location is incorrect.
 
         """
-        if self.macro is None:
-            raise DbtBouncerFailedCheckError("self.macro is None")
+        self._require_macro()
         original_path = Path(clean_path_str(self.macro.original_file_path))
 
         # Logic matches previous manual splitting:
