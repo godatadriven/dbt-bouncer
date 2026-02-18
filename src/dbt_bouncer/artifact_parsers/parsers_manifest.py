@@ -37,7 +37,6 @@ with warnings.catch_warnings():
     from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
         Macro as Macro_v11,
     )
-    from dbt_artifacts_parser.parsers.manifest.manifest_v11 import ManifestV11
     from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
         ModelNode as ModelNode_v11,
     )
@@ -74,7 +73,7 @@ from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
 class DbtBouncerManifest(BaseModel):
     """Model for all manifest objects."""
 
-    manifest: ManifestV11 | ManifestLatest
+    manifest: Any  # ManifestV11 | ManifestLatest, kept as Any for flexibility
 
 
 DbtBouncerExposureBase: TypeAlias = Exposure_v11 | Exposures
@@ -169,7 +168,7 @@ class DbtBouncerTest(BaseModel):
 
 def parse_manifest(
     manifest: dict[str, Any],
-) -> ManifestV11 | ManifestLatest:
+) -> ManifestLatest | Any:
     """Parse manifest.json.
 
     Args:
@@ -179,12 +178,19 @@ def parse_manifest(
         ValueError: If the manifest.json is not a valid manifest.json
 
     Returns:
-       ManifestV11 | ManifestLatest
+       ManifestLatest | Any (ManifestV11 for v11 manifests)
 
     """
     dbt_schema_version = manifest["metadata"]["dbt_schema_version"]
     match dbt_schema_version:
         case "https://schemas.getdbt.com/dbt/manifest/v11.json":
+            import warnings as _w
+
+            with _w.catch_warnings():
+                _w.filterwarnings("ignore", category=UserWarning)
+                from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
+                    ManifestV11,
+                )
             return ManifestV11(**manifest)
         case "https://schemas.getdbt.com/dbt/manifest/v12.json":
             from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
