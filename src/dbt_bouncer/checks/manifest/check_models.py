@@ -1,7 +1,10 @@
 import logging
 import re
 from pathlib import Path
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Literal, cast
+
+if TYPE_CHECKING:
+    from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import Nodes4
 
 from pydantic import ConfigDict, Field, PrivateAttr
 
@@ -588,18 +591,19 @@ class CheckModelDocumentedInSameDirectory(BaseCheck):
 
         """
         self._require_model()
-        model_sql_path = Path(clean_path_str(self.model.original_file_path))
+        model = cast("Nodes4", self.model)
+        model_sql_path = Path(clean_path_str(model.original_file_path))
         model_sql_dir = model_sql_path.parent.parts
 
         if not (
-            hasattr(self.model, "patch_path")
-            and clean_path_str(self.model.patch_path or "") is not None
+            hasattr(model, "patch_path")
+            and clean_path_str(model.patch_path or "") is not None
         ):
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` is not documented."
+                f"`{get_clean_model_name(model.unique_id)}` is not documented."
             )
 
-        patch_path_str = clean_path_str(self.model.patch_path or "")
+        patch_path_str = clean_path_str(model.patch_path or "")
         start_idx = patch_path_str.find("models")
         if start_idx != -1:
             patch_path_str = patch_path_str[start_idx:]
