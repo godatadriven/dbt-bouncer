@@ -250,3 +250,75 @@ def test_cli_manifest_doesnt_exist(tmp_path):
     assert type(result.exception) in [FileNotFoundError]
     assert result.exception.args[0].find("No manifest.json found at") == 0  # type: ignore[union-attr]
     assert result.exit_code != 0
+
+
+def test_cli_manifest_group_owner_email_list():
+    """Test that manifests with group owner email as a list are parsed correctly."""
+    import orjson
+
+    from dbt_bouncer.artifact_parsers.parsers_manifest import parse_manifest
+
+    manifest_json_path = Path("dbt_project") / "target/manifest.json"
+    manifest = orjson.loads(manifest_json_path.read_bytes())
+
+    manifest["groups"] = {
+        "group.dbt_bouncer_test_project.analytics_engineering": {
+            "name": "analytics_engineering",
+            "resource_type": "group",
+            "package_name": "dbt_bouncer_test_project",
+            "path": "models/",
+            "original_file_path": "models/schema.yml",
+            "unique_id": "group.dbt_bouncer_test_project.analytics_engineering",
+            "owner": {
+                "name": "Analytics Engineering Team",
+                "email": [
+                    "user1@example.com",
+                    "user2@example.com",
+                    "user3@example.com",
+                ],
+            },
+        }
+    }
+
+    parsed_manifest = parse_manifest(manifest)
+
+    group_email = parsed_manifest.groups[
+        "group.dbt_bouncer_test_project.analytics_engineering"
+    ].owner.email
+    assert group_email == [
+        "user1@example.com",
+        "user2@example.com",
+        "user3@example.com",
+    ]
+
+
+def test_cli_manifest_group_owner_email_string():
+    """Test that manifests with group owner email as a string are parsed correctly."""
+    import orjson
+
+    from dbt_bouncer.artifact_parsers.parsers_manifest import parse_manifest
+
+    manifest_json_path = Path("dbt_project") / "target/manifest.json"
+    manifest = orjson.loads(manifest_json_path.read_bytes())
+
+    manifest["groups"] = {
+        "group.dbt_bouncer_test_project.analytics_engineering": {
+            "name": "analytics_engineering",
+            "resource_type": "group",
+            "package_name": "dbt_bouncer_test_project",
+            "path": "models/",
+            "original_file_path": "models/schema.yml",
+            "unique_id": "group.dbt_bouncer_test_project.analytics_engineering",
+            "owner": {
+                "name": "Analytics Engineering Team",
+                "email": "single@example.com",
+            },
+        }
+    }
+
+    parsed_manifest = parse_manifest(manifest)
+
+    group_email = parsed_manifest.groups[
+        "group.dbt_bouncer_test_project.analytics_engineering"
+    ].owner.email
+    assert group_email == "single@example.com"

@@ -43,15 +43,11 @@ class Metadata(BaseParserModel):
         None,
         description="A unique identifier for the project, hashed from the project name",
     )
-    user_id: UUID | None = Field(
-        None, description="A unique identifier for the user"
-    )
+    user_id: UUID | None = Field(None, description="A unique identifier for the user")
     send_anonymous_usage_stats: bool | None = Field(
         None, description="Whether dbt is configured to send anonymous usage statistics"
     )
-    adapter_type: str | None = Field(
-        None, description="The type name of the adapter"
-    )
+    adapter_type: str | None = Field(None, description="The type name of the adapter")
 
 
 class Checksum(BaseParserModel):
@@ -1394,7 +1390,7 @@ class Owner(BaseParserModel):
         extra="allow",
     )
     field_extra: dict[str, Any] | None = Field(None, alias="_extra")
-    email: str | None = None
+    email: str | list[str] | None = None
     name: str | None = None
 
 
@@ -3852,28 +3848,31 @@ class ManifestLatest(BaseParserModel):
     selectors: dict[str, Any] = Field(
         ..., description="The selectors defined in selectors.yml"
     )
-    disabled: None | (
-        dict[
-            str,
-            list[
-                (
-                    Disabled |
-                    Disabled1 |
-                    Disabled2 |
-                    Disabled3 |
-                    Disabled4 |
-                    Disabled5 |
-                    Disabled6 |
-                    Disabled7 |
-                    Disabled8 |
-                    Disabled9 |
-                    Disabled10 |
-                    Disabled11 |
-                    Disabled12 |
-                    Disabled13
-                )
-            ],
-        ]
+    disabled: (
+        None
+        | (
+            dict[
+                str,
+                list[
+                    (
+                        Disabled
+                        | Disabled1
+                        | Disabled2
+                        | Disabled3
+                        | Disabled4
+                        | Disabled5
+                        | Disabled6
+                        | Disabled7
+                        | Disabled8
+                        | Disabled9
+                        | Disabled10
+                        | Disabled11
+                        | Disabled12
+                        | Disabled13
+                    )
+                ],
+            ]
+        )
     ) = Field(..., description="A mapping of the disabled nodes in the target")
     parent_map: dict[str, list[str]] | None = Field(
         ..., description="A mapping from\xa0child nodes to their dependencies"
