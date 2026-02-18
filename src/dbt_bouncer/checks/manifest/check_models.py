@@ -1053,7 +1053,8 @@ class CheckModelHasSemiColon(BaseCheck):
         """
         if self.model is None:
             raise DbtBouncerFailedCheckError("self.model is None")
-        if (self.model.raw_code or "").strip()[-1] == ";":
+        raw_code = (self.model.raw_code or "").strip()
+        if raw_code and raw_code[-1] == ";":
             raise DbtBouncerFailedCheckError(
                 f"`{get_clean_model_name(self.model.unique_id)}` ends with a semi-colon, this is not permitted."
             )
