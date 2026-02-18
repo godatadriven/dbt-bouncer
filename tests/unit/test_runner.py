@@ -21,7 +21,7 @@ from dbt_bouncer.artifact_parsers.parsers_manifest import (
 from dbt_bouncer.context import BouncerContext
 from dbt_bouncer.logger import configure_console_logging
 from dbt_bouncer.main import cli
-from dbt_bouncer.runner import runner
+from dbt_bouncer.runner import _should_run_check, runner
 
 
 def test_runner_coverage(caplog, tmp_path):
@@ -1234,3 +1234,76 @@ def test_runner_skip_catalog_check(tmp_path):
     assert results[0] == 0
     # Only stg_payments check was executed (stg_orders was skipped)
     assert len(coverage) == 1
+
+
+def test_should_run_check_include_pattern_no_match():
+    """Test that check doesn't run when include pattern doesn't match."""
+    from dbt_bouncer.utils import resource_in_path
+
+    check = MagicMock()
+    check.include = "^models/marts"
+    check.exclude = None
+
+    resource = MagicMock()
+    resource.original_file_path = "models/staging/stg_orders.sql"
+
+    assert resource_in_path(check, resource) is False
+
+
+def test_should_run_check_exclude_pattern_matches():
+    """Test that check doesn't run when exclude pattern matches."""
+    from dbt_bouncer.utils import resource_in_path
+
+    check = MagicMock()
+    check.include = None
+    check.exclude = ".*_tmp.*"
+
+    resource = MagicMock()
+    resource.original_file_path = "models/staging/stg_orders_tmp.sql"
+
+    assert resource_in_path(check, resource) is False
+
+
+def test_should_run_check_materialization_mismatch():
+    """Test that check doesn't run when materialization doesn't match."""
+    check = MagicMock()
+    check.include = None
+    check.exclude = None
+    check.name = "test_check"
+    check.materialization = "table"
+
+    resource = MagicMock()
+    resource.model.config.materialized = "view"
+    resource.original_file_path = "models/staging/stg_orders.sql"
+
+    assert _should_run_check(check, resource, frozenset({"model"}), []) is False
+
+
+def test_should_run_check_materialization_matches():
+    """Test that check runs when materialization matches."""
+    check = MagicMock()
+    check.include = None
+    check.exclude = None
+    check.name = "test_check"
+    check.materialization = "view"
+
+    resource = MagicMock()
+    resource.model.config.materialized = "view"
+    resource.original_file_path = "models/staging/stg_orders.sql"
+
+    assert _should_run_check(check, resource, frozenset({"model"}), []) is True
+
+
+def test_should_run_check_non_model_resource():
+    """Test that materialization check is skipped for non-model resources."""
+    check = MagicMock()
+    check.include = None
+    check.exclude = None
+    check.name = "test_check"
+    check.materialization = "table"
+
+    resource = MagicMock()
+    resource.original_file_path = "macros/my_macro.sql"
+
+    # Should still run for non-model resources, materialization check is skipped
+    assert _should_run_check(check, resource, frozenset({"macro"}), []) is True
