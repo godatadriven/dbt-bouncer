@@ -54,6 +54,7 @@ jobs:
             --hash "$PR_HEAD_SHA" \
             --project dbt-bouncer \
             --start-point main \
+            --start-point-reset \
             --testbed ubuntu-2204 \
             --threshold-max-sample-size 16 \
             --threshold-measure latency \
