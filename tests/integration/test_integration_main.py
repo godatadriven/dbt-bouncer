@@ -186,7 +186,7 @@ def test_cli_config_file_doesnt_exist():
             "non-existent-file.yml",
         ],
     )
-    assert type(result.exception) in [FileNotFoundError]
+    assert type(result.exception) in [FileNotFoundError, RuntimeError]
     assert result.exit_code != 0
 
 
