@@ -107,7 +107,7 @@ class Config(BaseParserModel):
     alias: str | None = None
     schema_: str | None = Field(None, alias="schema")
     database: str | None = None
-    tags: list[str] | str | None = None
+    tags: str | list[str] | str | None = None
     meta: dict[str, Any] | None = None
     group: str | None = None
     materialized: str | None = "seed"
@@ -159,7 +159,7 @@ class Columns(BaseParserModel):
     data_type: str | None = None
     constraints: list[Constraint] | None = None
     quote: bool | None = None
-    tags: list[str] | None = None
+    tags: str | list[str] | None = None
     field_extra: dict[str, Any] | None = Field(None, alias="_extra")
 
 
@@ -200,7 +200,7 @@ class Config1(BaseParserModel):
     alias: str | None = None
     schema_: str | None = Field(None, alias="schema")
     database: str | None = None
-    tags: list[str] | str | None = None
+    tags: str | list[str] | str | None = None
     meta: dict[str, Any] | None = None
     group: str | None = None
     materialized: str | None = "view"
@@ -233,7 +233,7 @@ class DeferRelation(BaseParserModel):
     description: str
     compiled_code: str | None = None
     meta: dict[str, Any]
-    tags: list[str]
+    tags: str | list[str]
     config: Config1 | None = None
 
 
@@ -253,7 +253,7 @@ class Nodes(BaseParserModel):
     alias: str
     checksum: Checksum = Field(..., title="FileHash")
     config: Config | None = Field(None, title="SeedConfig")
-    tags: list[str] | None = None
+    tags: str | list[str] | None = None
     description: str | None = ""
     columns: dict[str, Columns] | None = None
     meta: dict[str, Any] | None = None
@@ -280,7 +280,7 @@ class Config2(BaseParserModel):
     alias: str | None = None
     schema_: str | None = Field(None, alias="schema")
     database: str | None = None
-    tags: list[str] | str | None = None
+    tags: str | list[str] | str | None = None
     meta: dict[str, Any] | None = None
     group: str | None = None
     materialized: str | None = "view"
@@ -321,7 +321,7 @@ class Columns1(BaseParserModel):
     data_type: str | None = None
     constraints: list[Constraint1] | None = None
     quote: bool | None = None
-    tags: list[str] | None = None
+    tags: str | list[str] | None = None
     field_extra: dict[str, Any] | None = Field(None, alias="_extra")
 
 
@@ -375,7 +375,7 @@ class Nodes1(BaseParserModel):
     alias: str
     checksum: Checksum = Field(..., title="FileHash")
     config: Config2 | None = Field(None, title="NodeConfig")
-    tags: list[str] | None = None
+    tags: str | list[str] | None = None
     description: str | None = ""
     columns: dict[str, Columns1] | None = None
     meta: dict[str, Any] | None = None
@@ -411,7 +411,7 @@ class Config3(BaseParserModel):
     alias: str | None = None
     schema_: str | None = Field("dbt_test__audit", alias="schema")
     database: str | None = None
-    tags: list[str] | str | None = None
+    tags: str | list[str] | str | None = None
     meta: dict[str, Any] | None = None
     group: str | None = None
     materialized: str | None = "test"
@@ -448,7 +448,7 @@ class Columns2(BaseParserModel):
     data_type: str | None = None
     constraints: list[Constraint2] | None = None
     quote: bool | None = None
-    tags: list[str] | None = None
+    tags: str | list[str] | None = None
     field_extra: dict[str, Any] | None = Field(None, alias="_extra")
 
 
@@ -468,7 +468,7 @@ class Nodes2(BaseParserModel):
     alias: str
     checksum: Checksum = Field(..., title="FileHash")
     config: Config3 | None = Field(None, title="TestConfig")
-    tags: list[str] | None = None
+    tags: str | list[str] | None = None
     description: str | None = ""
     columns: dict[str, Columns2] | None = None
     meta: dict[str, Any] | None = None
@@ -512,7 +512,7 @@ class Config4(BaseParserModel):
     alias: str | None = None
     schema_: str | None = Field(None, alias="schema")
     database: str | None = None
-    tags: list[str] | str | None = None
+    tags: str | list[str] | str | None = None
     meta: dict[str, Any] | None = None
     group: str | None = None
     materialized: str | None = "view"
@@ -553,7 +553,7 @@ class Columns3(BaseParserModel):
     data_type: str | None = None
     constraints: list[Constraint3] | None = None
     quote: bool | None = None
-    tags: list[str] | None = None
+    tags: str | list[str] | None = None
     field_extra: dict[str, Any] | None = Field(None, alias="_extra")
 
 
@@ -582,7 +582,7 @@ class Nodes3(BaseParserModel):
     alias: str
     checksum: Checksum = Field(..., title="FileHash")
     config: Config4 | None = Field(None, title="NodeConfig")
-    tags: list[str] | None = None
+    tags: str | list[str] | None = None
     description: str | None = ""
     columns: dict[str, Columns3] | None = None
     meta: dict[str, Any] | None = None
@@ -633,7 +633,7 @@ class Config5(BaseParserModel):
     alias: str | None = None
     schema_: str | None = Field(None, alias="schema")
     database: str | None = None
-    tags: list[str] | str | None = None
+    tags: str | list[str] | str | None = None
     meta: dict[str, Any] | None = None
     group: str | None = None
     materialized: str | None = "view"
@@ -675,7 +675,7 @@ class Columns4(BaseParserModel):
     data_type: str | None = None
     constraints: list[Constraint4] | None = None
     quote: bool | None = None
-    tags: list[str] | None = None
+    tags: str | list[str] | None = None
     field_extra: dict[str, Any] | None = Field(None, alias="_extra")
 
 
@@ -717,7 +717,7 @@ class Config6(BaseParserModel):
     alias: str | None = None
     schema_: str | None = Field(None, alias="schema")
     database: str | None = None
-    tags: list[str] | str | None = None
+    tags: str | list[str] | str | None = None
     meta: dict[str, Any] | None = None
     group: str | None = None
     materialized: str | None = "view"
@@ -750,7 +750,7 @@ class DeferRelation1(BaseParserModel):
     description: str
     compiled_code: str | None = None
     meta: dict[str, Any]
-    tags: list[str]
+    tags: str | list[str]
     config: Config6 | None = None
 
 
@@ -770,7 +770,7 @@ class Nodes4(BaseParserModel):
     alias: str
     checksum: Checksum = Field(..., title="FileHash")
     config: Config5 | None = Field(None, title="ModelConfig")
-    tags: list[str] | None = None
+    tags: str | list[str] | None = None
     description: str | None = ""
     columns: dict[str, Columns4] | None = None
     meta: dict[str, Any] | None = None
@@ -814,7 +814,7 @@ class Config7(BaseParserModel):
     alias: str | None = None
     schema_: str | None = Field(None, alias="schema")
     database: str | None = None
-    tags: list[str] | str | None = None
+    tags: str | list[str] | str | None = None
     meta: dict[str, Any] | None = None
     group: str | None = None
     materialized: str | None = "view"
@@ -855,7 +855,7 @@ class Columns5(BaseParserModel):
     data_type: str | None = None
     constraints: list[Constraint6] | None = None
     quote: bool | None = None
-    tags: list[str] | None = None
+    tags: str | list[str] | None = None
     field_extra: dict[str, Any] | None = Field(None, alias="_extra")
 
 
@@ -884,7 +884,7 @@ class Nodes5(BaseParserModel):
     alias: str
     checksum: Checksum = Field(..., title="FileHash")
     config: Config7 | None = Field(None, title="NodeConfig")
-    tags: list[str] | None = None
+    tags: str | list[str] | None = None
     description: str | None = ""
     columns: dict[str, Columns5] | None = None
     meta: dict[str, Any] | None = None
@@ -920,7 +920,7 @@ class Config8(BaseParserModel):
     alias: str | None = None
     schema_: str | None = Field("dbt_test__audit", alias="schema")
     database: str | None = None
-    tags: list[str] | str | None = None
+    tags: str | list[str] | str | None = None
     meta: dict[str, Any] | None = None
     group: str | None = None
     materialized: str | None = "test"
@@ -957,7 +957,7 @@ class Columns6(BaseParserModel):
     data_type: str | None = None
     constraints: list[Constraint7] | None = None
     quote: bool | None = None
-    tags: list[str] | None = None
+    tags: str | list[str] | None = None
     field_extra: dict[str, Any] | None = Field(None, alias="_extra")
 
 
@@ -986,7 +986,7 @@ class Nodes6(BaseParserModel):
     alias: str
     checksum: Checksum = Field(..., title="FileHash")
     config: Config8 | None = Field(None, title="TestConfig")
-    tags: list[str] | None = None
+    tags: str | list[str] | None = None
     description: str | None = ""
     columns: dict[str, Columns6] | None = None
     meta: dict[str, Any] | None = None
@@ -1034,7 +1034,7 @@ class Config9(BaseParserModel):
     alias: str | None = None
     schema_: str | None = Field(None, alias="schema")
     database: str | None = None
-    tags: list[str] | str | None = None
+    tags: str | list[str] | str | None = None
     meta: dict[str, Any] | None = None
     group: str | None = None
     materialized: str | None = "snapshot"
@@ -1080,7 +1080,7 @@ class Columns7(BaseParserModel):
     data_type: str | None = None
     constraints: list[Constraint8] | None = None
     quote: bool | None = None
-    tags: list[str] | None = None
+    tags: str | list[str] | None = None
     field_extra: dict[str, Any] | None = Field(None, alias="_extra")
 
 
@@ -1110,7 +1110,7 @@ class Config10(BaseParserModel):
     alias: str | None = None
     schema_: str | None = Field(None, alias="schema")
     database: str | None = None
-    tags: list[str] | str | None = None
+    tags: str | list[str] | str | None = None
     meta: dict[str, Any] | None = None
     group: str | None = None
     materialized: str | None = "view"
@@ -1143,7 +1143,7 @@ class DeferRelation2(BaseParserModel):
     description: str
     compiled_code: str | None = None
     meta: dict[str, Any]
-    tags: list[str]
+    tags: str | list[str]
     config: Config10 | None = None
 
 
@@ -1163,7 +1163,7 @@ class Nodes7(BaseParserModel):
     alias: str
     checksum: Checksum = Field(..., title="FileHash")
     config: Config9 = Field(..., title="SnapshotConfig")
-    tags: list[str] | None = None
+    tags: str | list[str] | None = None
     description: str | None = ""
     columns: dict[str, Columns7] | None = None
     meta: dict[str, Any] | None = None
@@ -1277,7 +1277,7 @@ class Columns8(BaseParserModel):
     data_type: str | None = None
     constraints: list[Constraint9] | None = None
     quote: bool | None = None
-    tags: list[str] | None = None
+    tags: str | list[str] | None = None
     field_extra: dict[str, Any] | None = Field(None, alias="_extra")
 
 
@@ -1314,7 +1314,7 @@ class Sources(BaseParserModel):
     columns: dict[str, Columns8] | None = None
     meta: dict[str, Any] | None = None
     source_meta: dict[str, Any] | None = None
-    tags: list[str] | None = None
+    tags: str | list[str] | None = None
     config: Config11 | None = Field(None, title="SourceConfig")
     patch_path: str | None = None
     unrendered_config: dict[str, Any] | None = None
@@ -1425,7 +1425,7 @@ class Exposures(BaseParserModel):
     label: str | None = None
     maturity: Maturity | None = None
     meta: dict[str, Any] | None = None
-    tags: list[str] | None = None
+    tags: str | list[str] | None = None
     config: Config11 | None = Field(None, title="ExposureConfig")
     unrendered_config: dict[str, Any] | None = None
     url: str | None = None
@@ -1734,7 +1734,7 @@ class Metrics(BaseParserModel):
     filter: Filter7 | None = None
     metadata: Metadata1 | None = None
     meta: dict[str, Any] | None = None
-    tags: list[str] | None = None
+    tags: str | list[str] | None = None
     config: Config13 | None = Field(None, title="MetricConfig")
     unrendered_config: dict[str, Any] | None = None
     sources: list[list[str]] | None = None
@@ -1775,7 +1775,7 @@ class Config14(BaseParserModel):
     alias: str | None = None
     schema_: str | None = Field(None, alias="schema")
     database: str | None = None
-    tags: list[str] | str | None = None
+    tags: str | list[str] | str | None = None
     meta: dict[str, Any] | None = None
     group: str | None = None
     materialized: str | None = "seed"
@@ -1827,7 +1827,7 @@ class Columns9(BaseParserModel):
     data_type: str | None = None
     constraints: list[Constraint10] | None = None
     quote: bool | None = None
-    tags: list[str] | None = None
+    tags: str | list[str] | None = None
     field_extra: dict[str, Any] | None = Field(None, alias="_extra")
 
 
@@ -1847,7 +1847,7 @@ class Config15(BaseParserModel):
     alias: str | None = None
     schema_: str | None = Field(None, alias="schema")
     database: str | None = None
-    tags: list[str] | str | None = None
+    tags: str | list[str] | str | None = None
     meta: dict[str, Any] | None = None
     group: str | None = None
     materialized: str | None = "view"
@@ -1880,7 +1880,7 @@ class DeferRelation3(BaseParserModel):
     description: str
     compiled_code: str | None = None
     meta: dict[str, Any]
-    tags: list[str]
+    tags: str | list[str]
     config: Config15 | None = None
 
 
@@ -1900,7 +1900,7 @@ class Disabled(BaseParserModel):
     alias: str
     checksum: Checksum = Field(..., title="FileHash")
     config: Config14 | None = Field(None, title="SeedConfig")
-    tags: list[str] | None = None
+    tags: str | list[str] | None = None
     description: str | None = ""
     columns: dict[str, Columns9] | None = None
     meta: dict[str, Any] | None = None
@@ -1927,7 +1927,7 @@ class Config16(BaseParserModel):
     alias: str | None = None
     schema_: str | None = Field(None, alias="schema")
     database: str | None = None
-    tags: list[str] | str | None = None
+    tags: str | list[str] | str | None = None
     meta: dict[str, Any] | None = None
     group: str | None = None
     materialized: str | None = "view"
@@ -1968,7 +1968,7 @@ class Columns10(BaseParserModel):
     data_type: str | None = None
     constraints: list[Constraint11] | None = None
     quote: bool | None = None
-    tags: list[str] | None = None
+    tags: str | list[str] | None = None
     field_extra: dict[str, Any] | None = Field(None, alias="_extra")
 
 
@@ -2005,7 +2005,7 @@ class Disabled1(BaseParserModel):
     alias: str
     checksum: Checksum = Field(..., title="FileHash")
     config: Config16 | None = Field(None, title="NodeConfig")
-    tags: list[str] | None = None
+    tags: str | list[str] | None = None
     description: str | None = ""
     columns: dict[str, Columns10] | None = None
     meta: dict[str, Any] | None = None
@@ -2041,7 +2041,7 @@ class Config17(BaseParserModel):
     alias: str | None = None
     schema_: str | None = Field("dbt_test__audit", alias="schema")
     database: str | None = None
-    tags: list[str] | str | None = None
+    tags: str | list[str] | str | None = None
     meta: dict[str, Any] | None = None
     group: str | None = None
     materialized: str | None = "test"
@@ -2078,7 +2078,7 @@ class Columns11(BaseParserModel):
     data_type: str | None = None
     constraints: list[Constraint12] | None = None
     quote: bool | None = None
-    tags: list[str] | None = None
+    tags: str | list[str] | None = None
     field_extra: dict[str, Any] | None = Field(None, alias="_extra")
 
 
@@ -2098,7 +2098,7 @@ class Disabled2(BaseParserModel):
     alias: str
     checksum: Checksum = Field(..., title="FileHash")
     config: Config17 | None = Field(None, title="TestConfig")
-    tags: list[str] | None = None
+    tags: str | list[str] | None = None
     description: str | None = ""
     columns: dict[str, Columns11] | None = None
     meta: dict[str, Any] | None = None
@@ -2142,7 +2142,7 @@ class Config18(BaseParserModel):
     alias: str | None = None
     schema_: str | None = Field(None, alias="schema")
     database: str | None = None
-    tags: list[str] | str | None = None
+    tags: str | list[str] | str | None = None
     meta: dict[str, Any] | None = None
     group: str | None = None
     materialized: str | None = "view"
@@ -2183,7 +2183,7 @@ class Columns12(BaseParserModel):
     data_type: str | None = None
     constraints: list[Constraint13] | None = None
     quote: bool | None = None
-    tags: list[str] | None = None
+    tags: str | list[str] | None = None
     field_extra: dict[str, Any] | None = Field(None, alias="_extra")
 
 
@@ -2212,7 +2212,7 @@ class Disabled3(BaseParserModel):
     alias: str
     checksum: Checksum = Field(..., title="FileHash")
     config: Config18 | None = Field(None, title="NodeConfig")
-    tags: list[str] | None = None
+    tags: str | list[str] | None = None
     description: str | None = ""
     columns: dict[str, Columns12] | None = None
     meta: dict[str, Any] | None = None
@@ -2258,7 +2258,7 @@ class Config19(BaseParserModel):
     alias: str | None = None
     schema_: str | None = Field(None, alias="schema")
     database: str | None = None
-    tags: list[str] | str | None = None
+    tags: str | list[str] | str | None = None
     meta: dict[str, Any] | None = None
     group: str | None = None
     materialized: str | None = "view"
@@ -2300,7 +2300,7 @@ class Columns13(BaseParserModel):
     data_type: str | None = None
     constraints: list[Constraint14] | None = None
     quote: bool | None = None
-    tags: list[str] | None = None
+    tags: str | list[str] | None = None
     field_extra: dict[str, Any] | None = Field(None, alias="_extra")
 
 
@@ -2342,7 +2342,7 @@ class Config20(BaseParserModel):
     alias: str | None = None
     schema_: str | None = Field(None, alias="schema")
     database: str | None = None
-    tags: list[str] | str | None = None
+    tags: str | list[str] | str | None = None
     meta: dict[str, Any] | None = None
     group: str | None = None
     materialized: str | None = "view"
@@ -2375,7 +2375,7 @@ class DeferRelation4(BaseParserModel):
     description: str
     compiled_code: str | None = None
     meta: dict[str, Any]
-    tags: list[str]
+    tags: str | list[str]
     config: Config20 | None = None
 
 
@@ -2395,7 +2395,7 @@ class Disabled4(BaseParserModel):
     alias: str
     checksum: Checksum = Field(..., title="FileHash")
     config: Config19 | None = Field(None, title="ModelConfig")
-    tags: list[str] | None = None
+    tags: str | list[str] | None = None
     description: str | None = ""
     columns: dict[str, Columns13] | None = None
     meta: dict[str, Any] | None = None
@@ -2438,7 +2438,7 @@ class Config21(BaseParserModel):
     alias: str | None = None
     schema_: str | None = Field(None, alias="schema")
     database: str | None = None
-    tags: list[str] | str | None = None
+    tags: str | list[str] | str | None = None
     meta: dict[str, Any] | None = None
     group: str | None = None
     materialized: str | None = "view"
@@ -2479,7 +2479,7 @@ class Columns14(BaseParserModel):
     data_type: str | None = None
     constraints: list[Constraint16] | None = None
     quote: bool | None = None
-    tags: list[str] | None = None
+    tags: str | list[str] | None = None
     field_extra: dict[str, Any] | None = Field(None, alias="_extra")
 
 
@@ -2508,7 +2508,7 @@ class Disabled5(BaseParserModel):
     alias: str
     checksum: Checksum = Field(..., title="FileHash")
     config: Config21 | None = Field(None, title="NodeConfig")
-    tags: list[str] | None = None
+    tags: str | list[str] | None = None
     description: str | None = ""
     columns: dict[str, Columns14] | None = None
     meta: dict[str, Any] | None = None
@@ -2544,7 +2544,7 @@ class Config22(BaseParserModel):
     alias: str | None = None
     schema_: str | None = Field("dbt_test__audit", alias="schema")
     database: str | None = None
-    tags: list[str] | str | None = None
+    tags: str | list[str] | str | None = None
     meta: dict[str, Any] | None = None
     group: str | None = None
     materialized: str | None = "test"
@@ -2581,7 +2581,7 @@ class Columns15(BaseParserModel):
     data_type: str | None = None
     constraints: list[Constraint17] | None = None
     quote: bool | None = None
-    tags: list[str] | None = None
+    tags: str | list[str] | None = None
     field_extra: dict[str, Any] | None = Field(None, alias="_extra")
 
 
@@ -2601,7 +2601,7 @@ class Disabled6(BaseParserModel):
     alias: str
     checksum: Checksum = Field(..., title="FileHash")
     config: Config22 | None = Field(None, title="TestConfig")
-    tags: list[str] | None = None
+    tags: str | list[str] | None = None
     description: str | None = ""
     columns: dict[str, Columns15] | None = None
     meta: dict[str, Any] | None = None
@@ -2649,7 +2649,7 @@ class Config23(BaseParserModel):
     alias: str | None = None
     schema_: str | None = Field(None, alias="schema")
     database: str | None = None
-    tags: list[str] | str | None = None
+    tags: str | list[str] | str | None = None
     meta: dict[str, Any] | None = None
     group: str | None = None
     materialized: str | None = "snapshot"
@@ -2660,7 +2660,7 @@ class Config23(BaseParserModel):
     quoting: dict[str, Any] | None = None
     column_types: dict[str, Any] | None = None
     full_refresh: bool | None = None
-    unique_key: str | None = None
+    unique_key: str | list[str] | None = None
     on_schema_change: str | None = "ignore"
     on_configuration_change: OnConfigurationChange | None = None
     grants: dict[str, Any] | None = None
@@ -2695,7 +2695,7 @@ class Columns16(BaseParserModel):
     data_type: str | None = None
     constraints: list[Constraint18] | None = None
     quote: bool | None = None
-    tags: list[str] | None = None
+    tags: str | list[str] | None = None
     field_extra: dict[str, Any] | None = Field(None, alias="_extra")
 
 
@@ -2725,7 +2725,7 @@ class Config24(BaseParserModel):
     alias: str | None = None
     schema_: str | None = Field(None, alias="schema")
     database: str | None = None
-    tags: list[str] | str | None = None
+    tags: str | list[str] | str | None = None
     meta: dict[str, Any] | None = None
     group: str | None = None
     materialized: str | None = "view"
@@ -2758,7 +2758,7 @@ class DeferRelation5(BaseParserModel):
     description: str
     compiled_code: str | None = None
     meta: dict[str, Any]
-    tags: list[str]
+    tags: str | list[str]
     config: Config24 | None = None
 
 
@@ -2778,7 +2778,7 @@ class Disabled7(BaseParserModel):
     alias: str
     checksum: Checksum = Field(..., title="FileHash")
     config: Config23 = Field(..., title="SnapshotConfig")
-    tags: list[str] | None = None
+    tags: str | list[str] | None = None
     description: str | None = ""
     columns: dict[str, Columns16] | None = None
     meta: dict[str, Any] | None = None
@@ -2864,7 +2864,7 @@ class Columns17(BaseParserModel):
     data_type: str | None = None
     constraints: list[Constraint19] | None = None
     quote: bool | None = None
-    tags: list[str] | None = None
+    tags: str | list[str] | None = None
     field_extra: dict[str, Any] | None = Field(None, alias="_extra")
 
 
@@ -2901,7 +2901,7 @@ class Disabled8(BaseParserModel):
     columns: dict[str, Columns17] | None = None
     meta: dict[str, Any] | None = None
     source_meta: dict[str, Any] | None = None
-    tags: list[str] | None = None
+    tags: str | list[str] | None = None
     config: Config25 | None = Field(None, title="SourceConfig")
     patch_path: str | None = None
     unrendered_config: dict[str, Any] | None = None
@@ -2934,7 +2934,7 @@ class Disabled9(BaseParserModel):
     label: str | None = None
     maturity: Maturity | None = None
     meta: dict[str, Any] | None = None
-    tags: list[str] | None = None
+    tags: str | list[str] | None = None
     config: Config25 | None = Field(None, title="ExposureConfig")
     unrendered_config: dict[str, Any] | None = None
     url: str | None = None
@@ -3189,7 +3189,7 @@ class Disabled10(BaseParserModel):
     filter: Filter15 | None = None
     metadata: Metadata2 | None = None
     meta: dict[str, Any] | None = None
-    tags: list[str] | None = None
+    tags: str | list[str] | None = None
     config: Config27 | None = Field(None, title="MetricConfig")
     unrendered_config: dict[str, Any] | None = None
     sources: list[list[str]] | None = None
