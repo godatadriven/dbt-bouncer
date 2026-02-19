@@ -27,7 +27,7 @@ To add your company:
 
 <p>
     <h3>Eneco</h3>
-    <img src="https://github.com/godatadriven/dbt-bouncer/raw/main/docs/assets/eneco_logo.png" width="500"/>
+    <img src="https://upload.wikimedia.org/wikipedia/commons/5/5d/Eneco_logo.svg" width="500"/>
 </p>
 
 <p>
