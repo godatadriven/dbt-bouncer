@@ -26,6 +26,11 @@ To add your company:
 </p>
 
 <p>
+    <h3>Eneco</h3>
+    <img src="https://github.com/godatadriven/dbt-bouncer/raw/main/docs/assets/eneco_logo.png" width="500"/>
+</p>
+
+<p>
     <h3>Nationale Loterij</h3>
     <img src="https://github.com/godatadriven/dbt-bouncer/raw/main/docs/assets/nationale_loterij_logo.svg" width="500"/>
 </p>
