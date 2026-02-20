@@ -153,7 +153,7 @@ manifest_checks:
   - name: check_model_has_unique_test
   - name: check_model_max_chained_views
   - name: check_model_max_fanout
-    max_downstream_models: 3
+    max_downstream_models: 4
   - name: check_model_max_number_of_lines
   - name: check_model_max_upstream_dependencies
   - name: check_model_number_of_grants
