@@ -612,7 +612,7 @@ def test_cli_include(tmp_path):
                 "access": "protected",
                 "name": "check_model_access",
             },
-            11,
+            12,
         ),
         (
             {
@@ -689,7 +689,7 @@ def test_cli_materialization(manifest_check, num_checks, tmp_path):
 
 NUM_CATALOG_CHECKS = 1
 NUM_MANIFEST_CHECKS = 3
-NUM_RUN_RESULTS_CHECKS = 48
+NUM_RUN_RESULTS_CHECKS = 54
 
 
 @pytest.mark.parametrize(
