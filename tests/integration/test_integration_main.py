@@ -53,38 +53,36 @@ def test_cli_happy_path(caplog, dbt_artifacts_dir, tmp_path):
     for record in caplog.messages:
         if record.startswith("Parsed `manifest.json`"):
             summary_count_manifest += 1
-            exposures_text = re.search(r"\d* exposures", record).group(0)  # type: ignore[union-attr]
-            exposures_num = int(re.search(r"\d*", exposures_text).group(0))  # type: ignore[union-attr]
+            # The record now contains a table format
+            # Extract counts using regex for each category
+            exposures_match = re.search(r"Exposures\s+(\d+)", record)
+            assert exposures_match, "Could not find Exposures in table"
+            exposures_num = int(exposures_match.group(1))
             assert exposures_num > 0, f"Only found {exposures_num} exposures."
 
-            macros_text = re.search(r"\d* macros", record).group(0)  # type: ignore[union-attr]
-            macros_num = int(re.search(r"\d*", macros_text).group(0))  # type: ignore[union-attr]
+            macros_match = re.search(r"Macros\s+(\d+)", record)
+            assert macros_match, "Could not find Macros in table"
+            macros_num = int(macros_match.group(1))
             assert macros_num > 0, f"Only found {macros_num} macros."
 
-            nodes_text = re.search(r"\d* nodes", record).group(0)  # type: ignore[union-attr]
-            nodes_num = int(re.search(r"\d*", nodes_text).group(0))  # type: ignore[union-attr]
+            nodes_match = re.search(r"Nodes\s+(\d+)", record)
+            assert nodes_match, "Could not find Nodes in table"
+            nodes_num = int(nodes_match.group(1))
             assert nodes_num > 0, f"Only found {nodes_num} nodes."
 
-            seeds_text = re.search(r"\d* seeds", record).group(0)  # type: ignore[union-attr]
-            seeds_num = int(re.search(r"\d*", seeds_text).group(0))  # type: ignore[union-attr]
-            assert seeds_num > 0, f"Only found {seeds_num} semantic models."
+            seeds_match = re.search(r"Seeds\s+(\d+)", record)
+            assert seeds_match, "Could not find Seeds in table"
+            seeds_num = int(seeds_match.group(1))
+            assert seeds_num > 0, f"Only found {seeds_num} seeds."
 
-            semantic_models_text = re.search(r"\d* sources", record).group(0)  # type: ignore[union-attr]
-            semantic_models_num = int(re.search(r"\d*", semantic_models_text).group(0))  # type: ignore[union-attr]
-            assert semantic_models_num > 0, (
-                f"Only found {semantic_models_num} semantic models."
-            )
-
-            snapshots_text = re.search(r"\d* sources", record).group(0)  # type: ignore[union-attr]
-            snapshots_num = int(re.search(r"\d*", snapshots_text).group(0))  # type: ignore[union-attr]
-            assert snapshots_num > 0, f"Only found {snapshots_num} snapshots."
-
-            sources_text = re.search(r"\d* sources", record).group(0)  # type: ignore[union-attr]
-            sources_num = int(re.search(r"\d*", sources_text).group(0))  # type: ignore[union-attr]
+            sources_match = re.search(r"Sources\s+(\d+)", record)
+            assert sources_match, "Could not find Sources in table"
+            sources_num = int(sources_match.group(1))
             assert sources_num > 0, f"Only found {sources_num} sources."
 
-            tests_text = re.search(r"\d* tests", record).group(0)  # type: ignore[union-attr]
-            tests_num = int(re.search(r"\d*", tests_text).group(0))  # type: ignore[union-attr]
+            tests_match = re.search(r"Tests\s+(\d+)", record)
+            assert tests_match, "Could not find Tests in table"
+            tests_num = int(tests_match.group(1))
             assert tests_num > 0, f"Only found {tests_num} tests."
 
     summary_count_run_results = 0
