@@ -48,6 +48,23 @@ conf={'dbt_artifacts_dir': 'dbt_project/target', 'catalog_checks': [{'name': 'ch
 Validating conf...
 ```
 
+When parsing `manifest.json`, `dbt-bouncer` displays a summary table of discovered resources:
+
+```shell
+Parsed `manifest.json`, found `my_project` project:
+Category           Count
+-----------------  -----
+Exposures              0
+Macros                30
+Nodes                733
+Seeds                 12
+Semantic Models        0
+Snapshots             33
+Sources              287
+Tests                445
+Unit Tests             0
+```
+
 ### Running as an executable using [uv](https://github.com/astral-sh/uv)
 
 Run `dbt-bouncer` as a standalone Python executable using `uv`:

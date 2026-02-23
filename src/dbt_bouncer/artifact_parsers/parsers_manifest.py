@@ -4,6 +4,7 @@ from enum import Enum
 from typing import Any, TypeAlias, cast
 
 from pydantic import BaseModel
+from tabulate import tabulate
 
 from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import ManifestLatest
 from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
@@ -320,8 +321,23 @@ def parse_manifest_artifact(
         == (package_name or manifest_obj.manifest.metadata.project_name)
     ]
 
+    project_name = package_name or manifest_obj.manifest.metadata.project_name
+    table_data = [
+        ["Exposures", len(project_exposures)],
+        ["Macros", len(project_macros)],
+        ["Nodes", len(project_models)],
+        ["Seeds", len(project_seeds)],
+        ["Semantic Models", len(project_semantic_models)],
+        ["Snapshots", len(project_snapshots)],
+        ["Sources", len(project_sources)],
+        ["Tests", len(project_tests)],
+        ["Unit Tests", len(project_unit_tests)],
+    ]
+    table = tabulate(
+        table_data, headers=["Category", "Count"], colalign=("left", "right")
+    )
     logging.info(
-        f"Parsed `manifest.json`, found `{(package_name or manifest_obj.manifest.metadata.project_name)}` project: {len(project_exposures)} exposures, {len(project_macros)} macros, {len(project_models)} nodes, {len(project_seeds)} seeds, {len(project_semantic_models)} semantic models, {len(project_snapshots)} snapshots, {len(project_sources)} sources, {len(project_tests)} tests, {len(project_unit_tests)} unit tests.",
+        f"Parsed `manifest.json`, found `{project_name}` project:\n{table}",
     )
     return (
         project_exposures,
