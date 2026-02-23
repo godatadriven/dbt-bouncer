@@ -21,10 +21,11 @@ if TYPE_CHECKING:
 from pydantic import PrivateAttr, model_validator
 
 from dbt_bouncer.check_base import BaseCheck
+from dbt_bouncer.checks._mixins import CatalogNodeMixin, ManifestMixin
 from dbt_bouncer.utils import compile_pattern
 
 
-class CheckColumnDescriptionPopulated(BaseCheck):
+class CheckColumnDescriptionPopulated(CatalogNodeMixin, ManifestMixin, BaseCheck):
     """Columns must have a populated description.
 
     Parameters:
@@ -55,8 +56,6 @@ class CheckColumnDescriptionPopulated(BaseCheck):
 
     """
 
-    catalog_node: "CatalogNodes | None" = Field(default=None)
-    manifest_obj: "DbtBouncerManifest | None" = Field(default=None)
     min_description_length: int | None = Field(default=None)
     models: list["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_column_description_populated"]
@@ -97,7 +96,7 @@ class CheckColumnDescriptionPopulated(BaseCheck):
                 )
 
 
-class CheckColumnHasSpecifiedTest(BaseCheck):
+class CheckColumnHasSpecifiedTest(CatalogNodeMixin, BaseCheck):
     """Columns that match the specified regexp pattern must have a specified test.
 
     Parameters:
@@ -124,7 +123,6 @@ class CheckColumnHasSpecifiedTest(BaseCheck):
 
     """
 
-    catalog_node: "CatalogNodes | None" = Field(default=None)
     column_name_pattern: str
     name: Literal["check_column_has_specified_test"]
     test_name: str
@@ -170,7 +168,7 @@ class CheckColumnHasSpecifiedTest(BaseCheck):
             )
 
 
-class CheckColumnNameCompliesToColumnType(BaseCheck):
+class CheckColumnNameCompliesToColumnType(CatalogNodeMixin, BaseCheck):
     """Columns with the specified regexp naming pattern must have data types that comply to the specified regexp pattern or list of data types.
 
     Note: One of `type_pattern` or `types` must be specified.
@@ -229,7 +227,6 @@ class CheckColumnNameCompliesToColumnType(BaseCheck):
 
     """
 
-    catalog_node: "CatalogNodes | None" = Field(default=None)
     column_name_pattern: str
     name: Literal["check_column_name_complies_to_column_type"]
     type_pattern: str | None = None
@@ -289,7 +286,7 @@ class CheckColumnNameCompliesToColumnType(BaseCheck):
         return self
 
 
-class CheckColumnNames(BaseCheck):
+class CheckColumnNames(CatalogNodeMixin, BaseCheck):
     """Columns must have a name that matches the supplied regex.
 
     Parameters:
@@ -317,7 +314,6 @@ class CheckColumnNames(BaseCheck):
 
     model_config = ConfigDict(extra="forbid", protected_namespaces=())
 
-    catalog_node: "CatalogNodes | None" = Field(default=None)
     column_name_pattern: str
     models: list["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_column_names"]
@@ -344,7 +340,7 @@ class CheckColumnNames(BaseCheck):
                 )
 
 
-class CheckColumnsAreAllDocumented(BaseCheck):
+class CheckColumnsAreAllDocumented(CatalogNodeMixin, ManifestMixin, BaseCheck):
     """All columns in a model should be included in the model's properties file, i.e. `.yml` file.
 
     Receives:
@@ -368,8 +364,6 @@ class CheckColumnsAreAllDocumented(BaseCheck):
     """
 
     case_sensitive: bool | None = Field(default=True)
-    catalog_node: "CatalogNodes | None" = Field(default=None)
-    manifest_obj: "DbtBouncerManifest | None" = Field(default=None)
     models: list["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_columns_are_all_documented"]
 
@@ -411,7 +405,7 @@ class CheckColumnsAreAllDocumented(BaseCheck):
                 )
 
 
-class CheckColumnsAreDocumentedInPublicModels(BaseCheck):
+class CheckColumnsAreDocumentedInPublicModels(CatalogNodeMixin, BaseCheck):
     """Columns should have a populated description in public models.
 
     Receives:
@@ -433,7 +427,6 @@ class CheckColumnsAreDocumentedInPublicModels(BaseCheck):
 
     """
 
-    catalog_node: "CatalogNodes | None" = Field(default=None)
     min_description_length: int | None = Field(default=None)
     models: list["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_columns_are_documented_in_public_models"]

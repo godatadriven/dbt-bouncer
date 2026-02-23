@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING, Literal
 from pydantic import Field
 
 from dbt_bouncer.check_base import BaseCheck
+from dbt_bouncer.checks._mixins import CatalogSourceMixin
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 
 if TYPE_CHECKING:
@@ -19,7 +20,7 @@ if TYPE_CHECKING:
         )
 
 
-class CheckSourceColumnsAreAllDocumented(BaseCheck):
+class CheckSourceColumnsAreAllDocumented(CatalogSourceMixin, BaseCheck):
     """All columns in a source should be included in the source's properties file, i.e. `.yml` file.
 
     Receives:
@@ -40,7 +41,6 @@ class CheckSourceColumnsAreAllDocumented(BaseCheck):
 
     """
 
-    catalog_source: "CatalogNodes | None" = Field(default=None)
     name: Literal["check_source_columns_are_all_documented"]
     sources: list["DbtBouncerSourceBase"] = Field(default=[])
 

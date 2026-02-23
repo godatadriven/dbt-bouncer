@@ -136,8 +136,10 @@ def runner(
     for check in sorted(list_of_check_configs, key=operator.attrgetter("index")):
         cls = check.__class__
         if cls not in _CLASS_ITERATE_CACHE:
+            # Use model_fields so we include fields from mixins (ModelMixin, etc.)
+            field_names = frozenset(getattr(cls, "model_fields", cls.__annotations__).keys())
             _CLASS_ITERATE_CACHE[cls] = _VALID_ITERATE_OVER_VALUES.intersection(
-                frozenset(cls.__annotations__.keys()),
+                field_names,
             )
         iterate_over_value = _CLASS_ITERATE_CACHE[cls]
         if len(iterate_over_value) == 1:

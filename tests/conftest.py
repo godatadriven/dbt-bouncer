@@ -30,6 +30,7 @@ def _rebuild_all_check_models():
     )
     from dbt_bouncer.artifact_parsers.parsers_manifest import (
         DbtBouncerExposureBase,
+        DbtBouncerMacroBase,
         DbtBouncerManifest,
         DbtBouncerModelBase,
         DbtBouncerSeedBase,
@@ -46,6 +47,7 @@ def _rebuild_all_check_models():
     types_namespace = {
         "CatalogNodes": CatalogNodes,
         "DbtBouncerExposureBase": DbtBouncerExposureBase,
+        "DbtBouncerMacroBase": DbtBouncerMacroBase,
         "DbtBouncerManifest": DbtBouncerManifest,
         "DbtBouncerModelBase": DbtBouncerModelBase,
         "DbtBouncerRunResultBase": DbtBouncerRunResultBase,

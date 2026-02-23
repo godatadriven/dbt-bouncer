@@ -9,6 +9,7 @@ if TYPE_CHECKING:
 from pydantic import ConfigDict, Field, PrivateAttr
 
 from dbt_bouncer.check_base import BaseCheck
+from dbt_bouncer.checks._mixins import ManifestMixin, ModelMixin
 from dbt_bouncer.checks.common import NestedDict
 from dbt_bouncer.utils import (
     find_missing_meta_keys,
@@ -31,7 +32,7 @@ from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import clean_path_str, compile_pattern, get_clean_model_name
 
 
-class CheckModelAccess(BaseCheck):
+class CheckModelAccess(ModelMixin, BaseCheck):
     """Models must have the specified access attribute. Requires dbt 1.7+.
 
     Parameters:
@@ -65,7 +66,6 @@ class CheckModelAccess(BaseCheck):
     """
 
     access: Literal["private", "protected", "public"]
-    model: "DbtBouncerModelBase | None" = Field(default=None)
     name: Literal["check_model_access"]
 
     def execute(self) -> None:
@@ -82,7 +82,7 @@ class CheckModelAccess(BaseCheck):
             )
 
 
-class CheckModelCodeDoesNotContainRegexpPattern(BaseCheck):
+class CheckModelCodeDoesNotContainRegexpPattern(ModelMixin, BaseCheck):
     """The raw code for a model must not match the specified regexp pattern.
 
     Parameters:
@@ -108,7 +108,6 @@ class CheckModelCodeDoesNotContainRegexpPattern(BaseCheck):
 
     """
 
-    model: "DbtBouncerModelBase | None" = Field(default=None)
     name: Literal["check_model_code_does_not_contain_regexp_pattern"]
     regexp_pattern: str
 
@@ -134,7 +133,7 @@ class CheckModelCodeDoesNotContainRegexpPattern(BaseCheck):
             )
 
 
-class CheckModelColumnsHaveMetaKeys(BaseCheck):
+class CheckModelColumnsHaveMetaKeys(ModelMixin, BaseCheck):
     """Columns defined for models must have the specified keys in the `meta` config.
 
     Parameters:
@@ -162,7 +161,6 @@ class CheckModelColumnsHaveMetaKeys(BaseCheck):
     """
 
     keys: NestedDict
-    model: "DbtBouncerModelBase | None" = Field(default=None)
     name: Literal["check_model_columns_have_meta_keys"]
 
     def execute(self) -> None:
@@ -188,7 +186,7 @@ class CheckModelColumnsHaveMetaKeys(BaseCheck):
             )
 
 
-class CheckModelColumnsHaveTypes(BaseCheck):
+class CheckModelColumnsHaveTypes(ModelMixin, BaseCheck):
     """Columns defined for models must have a `data_type` declared.
 
     Receives:
@@ -210,7 +208,6 @@ class CheckModelColumnsHaveTypes(BaseCheck):
 
     """
 
-    model: "DbtBouncerModelBase | None" = Field(default=None)
     name: Literal["check_model_columns_have_types"]
 
     def execute(self) -> None:
@@ -231,7 +228,7 @@ class CheckModelColumnsHaveTypes(BaseCheck):
             )
 
 
-class CheckModelContractsEnforcedForPublicModel(BaseCheck):
+class CheckModelContractsEnforcedForPublicModel(ModelMixin, BaseCheck):
     """Public models must have contracts enforced.
 
     Receives:
@@ -252,7 +249,6 @@ class CheckModelContractsEnforcedForPublicModel(BaseCheck):
 
     """
 
-    model: "DbtBouncerModelBase | None" = Field(default=None)
     name: Literal["check_model_contract_enforced_for_public_model"]
 
     def execute(self) -> None:
@@ -273,7 +269,7 @@ class CheckModelContractsEnforcedForPublicModel(BaseCheck):
             )
 
 
-class CheckModelDependsOnMacros(BaseCheck):
+class CheckModelDependsOnMacros(ModelMixin, BaseCheck):
     """Models must depend on the specified macros.
 
     Parameters:
@@ -306,7 +302,6 @@ class CheckModelDependsOnMacros(BaseCheck):
     """
 
     criteria: Literal["any", "all", "one"] = Field(default="all")
-    model: "DbtBouncerModelBase | None" = Field(default=None)
     name: Literal["check_model_depends_on_macros"]
     required_macros: list[str]
 
@@ -344,7 +339,7 @@ class CheckModelDependsOnMacros(BaseCheck):
             )
 
 
-class CheckModelDependsOnMultipleSources(BaseCheck):
+class CheckModelDependsOnMultipleSources(ModelMixin, BaseCheck):
     """Models cannot reference more than one source.
 
     Parameters:
@@ -365,7 +360,6 @@ class CheckModelDependsOnMultipleSources(BaseCheck):
 
     """
 
-    model: "DbtBouncerModelBase | None" = Field(default=None)
     name: Literal["check_model_depends_on_multiple_sources"]
 
     def execute(self) -> None:
@@ -386,7 +380,7 @@ class CheckModelDependsOnMultipleSources(BaseCheck):
             )
 
 
-class CheckModelDescriptionContainsRegexPattern(BaseCheck):
+class CheckModelDescriptionContainsRegexPattern(ModelMixin, BaseCheck):
     """Models must have a description that matches the provided pattern.
 
     Receives:
@@ -409,7 +403,6 @@ class CheckModelDescriptionContainsRegexPattern(BaseCheck):
 
     """
 
-    model: "DbtBouncerModelBase | None" = Field(default=None)
     name: Literal["check_model_description_contains_regex_pattern"]
     regexp_pattern: str
 
@@ -435,7 +428,7 @@ class CheckModelDescriptionContainsRegexPattern(BaseCheck):
             )
 
 
-class CheckModelDescriptionPopulated(BaseCheck):
+class CheckModelDescriptionPopulated(ModelMixin, BaseCheck):
     """Models must have a populated description.
 
     Parameters:
@@ -465,7 +458,6 @@ class CheckModelDescriptionPopulated(BaseCheck):
     """
 
     min_description_length: int | None = Field(default=None)
-    model: "DbtBouncerModelBase | None" = Field(default=None)
     name: Literal["check_model_description_populated"]
 
     def execute(self) -> None:
@@ -484,7 +476,7 @@ class CheckModelDescriptionPopulated(BaseCheck):
             )
 
 
-class CheckModelDirectories(BaseCheck):
+class CheckModelDirectories(ModelMixin, BaseCheck):
     """Only specified sub-directories are permitted.
 
     Parameters:
@@ -523,7 +515,6 @@ class CheckModelDirectories(BaseCheck):
     """
 
     include: str
-    model: "DbtBouncerModelBase | None" = Field(default=None)
     name: Literal["check_model_directories"]
     permitted_sub_directories: list[str]
 
@@ -559,7 +550,7 @@ class CheckModelDirectories(BaseCheck):
                 )
 
 
-class CheckModelDocumentedInSameDirectory(BaseCheck):
+class CheckModelDocumentedInSameDirectory(ModelMixin, BaseCheck):
     """Models must be documented in the same directory where they are defined (i.e. `.yml` and `.sql` files are in the same directory).
 
     Receives:
@@ -580,7 +571,6 @@ class CheckModelDocumentedInSameDirectory(BaseCheck):
 
     """
 
-    model: "DbtBouncerModelBase | None" = Field(default=None)
     name: Literal["check_model_documented_in_same_directory"]
 
     def execute(self) -> None:
@@ -617,7 +607,7 @@ class CheckModelDocumentedInSameDirectory(BaseCheck):
             )
 
 
-class CheckModelFileName(BaseCheck):
+class CheckModelFileName(ModelMixin, BaseCheck):
     r"""Models must have a file name that matches the supplied regex.
 
     Parameters:
@@ -645,7 +635,6 @@ class CheckModelFileName(BaseCheck):
     """
 
     file_name_pattern: str
-    model: "DbtBouncerModelBase | None" = Field(default=None)
     name: Literal["check_model_file_name"]
 
     _compiled_pattern: re.Pattern[str] = PrivateAttr()
@@ -669,7 +658,7 @@ class CheckModelFileName(BaseCheck):
             )
 
 
-class CheckModelGrantPrivilege(BaseCheck):
+class CheckModelGrantPrivilege(ModelMixin, BaseCheck):
     """Model can have grant privileges that match the specified pattern.
 
     Receives:
@@ -693,7 +682,6 @@ class CheckModelGrantPrivilege(BaseCheck):
 
     """
 
-    model: "DbtBouncerModelBase | None" = Field(default=None)
     name: Literal["check_model_grant_privilege"]
     privilege_pattern: str
 
@@ -723,7 +711,7 @@ class CheckModelGrantPrivilege(BaseCheck):
             )
 
 
-class CheckModelGrantPrivilegeRequired(BaseCheck):
+class CheckModelGrantPrivilegeRequired(ModelMixin, BaseCheck):
     """Model must have the specified grant privilege.
 
     Receives:
@@ -747,7 +735,6 @@ class CheckModelGrantPrivilegeRequired(BaseCheck):
 
     """
 
-    model: "DbtBouncerModelBase | None" = Field(default=None)
     name: Literal["check_model_grant_privilege_required"]
     privilege: str
 
@@ -767,7 +754,7 @@ class CheckModelGrantPrivilegeRequired(BaseCheck):
             )
 
 
-class CheckModelHasConstraints(BaseCheck):
+class CheckModelHasConstraints(ModelMixin, BaseCheck):
     """Table and incremental models must have the specified constraint types defined.
 
     Parameters:
@@ -793,7 +780,6 @@ class CheckModelHasConstraints(BaseCheck):
 
     """
 
-    model: "DbtBouncerModelBase | None" = Field(default=None)
     name: Literal["check_model_has_constraints"]
     required_constraint_types: list[
         Literal["check", "custom", "foreign_key", "not_null", "primary_key", "unique"]
@@ -826,7 +812,7 @@ class CheckModelHasConstraints(BaseCheck):
             )
 
 
-class CheckModelHasContractsEnforced(BaseCheck):
+class CheckModelHasContractsEnforced(ModelMixin, BaseCheck):
     """Model must have contracts enforced.
 
     Receives:
@@ -848,7 +834,6 @@ class CheckModelHasContractsEnforced(BaseCheck):
 
     """
 
-    model: "DbtBouncerModelBase | None" = Field(default=None)
     name: Literal["check_model_has_contracts_enforced"]
 
     def execute(self) -> None:
@@ -865,7 +850,7 @@ class CheckModelHasContractsEnforced(BaseCheck):
             )
 
 
-class CheckModelHasExposure(BaseCheck):
+class CheckModelHasExposure(ModelMixin, BaseCheck):
     """Models must have an exposure.
 
     Receives:
@@ -892,7 +877,6 @@ class CheckModelHasExposure(BaseCheck):
     model_config = ConfigDict(extra="forbid", protected_namespaces=())
 
     exposures: list["DbtBouncerExposureBase"] = Field(default=[])
-    model: "DbtBouncerModelBase | None" = Field(default=None)
     name: Literal["check_model_has_exposure"]
 
     def execute(self) -> None:
@@ -915,7 +899,7 @@ class CheckModelHasExposure(BaseCheck):
             )
 
 
-class CheckModelHasMetaKeys(BaseCheck):
+class CheckModelHasMetaKeys(ModelMixin, BaseCheck):
     """The `meta` config for models must have the specified keys.
 
     Parameters:
@@ -941,7 +925,6 @@ class CheckModelHasMetaKeys(BaseCheck):
     """
 
     keys: NestedDict
-    model: "DbtBouncerModelBase | None" = Field(default=None)
     name: Literal["check_model_has_meta_keys"]
 
     def execute(self) -> None:
@@ -962,7 +945,7 @@ class CheckModelHasMetaKeys(BaseCheck):
             )
 
 
-class CheckModelHasNoUpstreamDependencies(BaseCheck):
+class CheckModelHasNoUpstreamDependencies(ModelMixin, BaseCheck):
     """Identify if models have no upstream dependencies as this likely indicates hard-coded tables references.
 
     Receives:
@@ -983,7 +966,6 @@ class CheckModelHasNoUpstreamDependencies(BaseCheck):
 
     """
 
-    model: "DbtBouncerModelBase | None" = Field(default=None)
     name: Literal["check_model_has_no_upstream_dependencies"]
 
     def execute(self) -> None:
@@ -1004,7 +986,7 @@ class CheckModelHasNoUpstreamDependencies(BaseCheck):
             )
 
 
-class CheckModelHasSemiColon(BaseCheck):
+class CheckModelHasSemiColon(ModelMixin, BaseCheck):
     """Model may not end with a semi-colon (`;`).
 
     Receives:
@@ -1026,7 +1008,6 @@ class CheckModelHasSemiColon(BaseCheck):
 
     """
 
-    model: "DbtBouncerModelBase | None" = Field(default=None)
     name: Literal["check_model_has_semi_colon"]
 
     def execute(self) -> None:
@@ -1044,7 +1025,7 @@ class CheckModelHasSemiColon(BaseCheck):
             )
 
 
-class CheckModelHasTags(BaseCheck):
+class CheckModelHasTags(ModelMixin, BaseCheck):
     """Models must have the specified tags.
 
     Parameters:
@@ -1071,7 +1052,6 @@ class CheckModelHasTags(BaseCheck):
     """
 
     criteria: Literal["any", "all", "one"] = Field(default="all")
-    model: "DbtBouncerModelBase | None" = Field(default=None)
     name: Literal["check_model_has_tags"]
     tags: list[str]
 
@@ -1103,7 +1083,7 @@ class CheckModelHasTags(BaseCheck):
             )
 
 
-class CheckModelHasUniqueTest(BaseCheck):
+class CheckModelHasUniqueTest(ModelMixin, BaseCheck):
     """Models must have a test for uniqueness of a column.
 
     Parameters:
@@ -1143,7 +1123,6 @@ class CheckModelHasUniqueTest(BaseCheck):
             "unique",
         ],
     )
-    model: "DbtBouncerModelBase | None" = Field(default=None)
     name: Literal["check_model_has_unique_test"]
     tests: list["DbtBouncerTestBase"] = Field(default=[])
 
@@ -1181,7 +1160,7 @@ class CheckModelHasUniqueTest(BaseCheck):
             )
 
 
-class CheckModelHasUnitTests(BaseCheck):
+class CheckModelHasUnitTests(ManifestMixin, ModelMixin, BaseCheck):
     """Models must have more than the specified number of unit tests.
 
     Parameters:
@@ -1217,9 +1196,7 @@ class CheckModelHasUnitTests(BaseCheck):
 
     """
 
-    manifest_obj: "DbtBouncerManifest | None" = Field(default=None)
     min_number_of_unit_tests: int = Field(default=1)
-    model: "DbtBouncerModelBase | None" = Field(default=None)
     name: Literal["check_model_has_unit_tests"]
     unit_tests: list["UnitTests"] = Field(default=[])
 
@@ -1254,7 +1231,7 @@ class CheckModelHasUnitTests(BaseCheck):
             )
 
 
-class CheckModelLatestVersionSpecified(BaseCheck):
+class CheckModelLatestVersionSpecified(ModelMixin, BaseCheck):
     r"""Check that the `latest_version` attribute of the model is set.
 
     Receives:
@@ -1278,7 +1255,6 @@ class CheckModelLatestVersionSpecified(BaseCheck):
 
     model_config = ConfigDict(extra="forbid", protected_namespaces=())
 
-    model: "DbtBouncerModelBase | None" = Field(default=None)
     name: Literal["check_model_latest_version_specified"]
 
     def execute(self) -> None:
@@ -1295,7 +1271,7 @@ class CheckModelLatestVersionSpecified(BaseCheck):
             )
 
 
-class CheckModelMaxChainedViews(BaseCheck):
+class CheckModelMaxChainedViews(ManifestMixin, ModelMixin, BaseCheck):
     """Models cannot have more than the specified number of upstream dependents that are not tables.
 
     Parameters:
@@ -1330,14 +1306,12 @@ class CheckModelMaxChainedViews(BaseCheck):
 
     """
 
-    manifest_obj: "DbtBouncerManifest | None" = Field(default=None)
     materializations_to_include: list[str] = Field(
         default=["ephemeral", "view"],
     )
     max_chained_views: int = Field(
         default=3,
     )
-    model: "DbtBouncerModelBase | None" = Field(default=None)
     models: list["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_model_max_chained_views"]
     package_name: str | None = Field(default=None)
@@ -1429,7 +1403,7 @@ class CheckModelMaxChainedViews(BaseCheck):
             )
 
 
-class CheckModelMaxFanout(BaseCheck):
+class CheckModelMaxFanout(ModelMixin, BaseCheck):
     """Models cannot have more than the specified number of downstream models.
 
     Parameters:
@@ -1456,7 +1430,6 @@ class CheckModelMaxFanout(BaseCheck):
     """
 
     max_downstream_models: int = Field(default=3)
-    model: "DbtBouncerModelBase | None" = Field(default=None)
     models: list["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_model_max_fanout"]
 
@@ -1480,7 +1453,7 @@ class CheckModelMaxFanout(BaseCheck):
             )
 
 
-class CheckModelMaxNumberOfLines(BaseCheck):
+class CheckModelMaxNumberOfLines(ModelMixin, BaseCheck):
     """Models may not have more than the specified number of lines.
 
     Parameters:
@@ -1508,7 +1481,6 @@ class CheckModelMaxNumberOfLines(BaseCheck):
 
     """
 
-    model: "DbtBouncerModelBase | None" = Field(default=None)
     name: Literal["check_model_max_number_of_lines"]
     max_number_of_lines: int = Field(default=100)
 
@@ -1528,7 +1500,7 @@ class CheckModelMaxNumberOfLines(BaseCheck):
             )
 
 
-class CheckModelMaxUpstreamDependencies(BaseCheck):
+class CheckModelMaxUpstreamDependencies(ModelMixin, BaseCheck):
     """Limit the number of upstream dependencies a model has.
 
     Parameters:
@@ -1564,7 +1536,6 @@ class CheckModelMaxUpstreamDependencies(BaseCheck):
     max_upstream_sources: int = Field(
         default=1,
     )
-    model: "DbtBouncerModelBase | None" = Field(default=None)
     name: Literal["check_model_max_upstream_dependencies"]
 
     def execute(self) -> None:
@@ -1604,7 +1575,7 @@ class CheckModelMaxUpstreamDependencies(BaseCheck):
             )
 
 
-class CheckModelNames(BaseCheck):
+class CheckModelNames(ModelMixin, BaseCheck):
     """Models must have a name that matches the supplied regex.
 
     Parameters:
@@ -1635,7 +1606,6 @@ class CheckModelNames(BaseCheck):
 
     model_config = ConfigDict(extra="forbid", protected_namespaces=())
 
-    model: "DbtBouncerModelBase | None" = Field(default=None)
     name: Literal["check_model_names"]
     model_name_pattern: str
 
@@ -1659,7 +1629,7 @@ class CheckModelNames(BaseCheck):
             )
 
 
-class CheckModelNumberOfGrants(BaseCheck):
+class CheckModelNumberOfGrants(ModelMixin, BaseCheck):
     """Model can have the specified number of privileges.
 
     Receives:
@@ -1685,7 +1655,6 @@ class CheckModelNumberOfGrants(BaseCheck):
 
     """
 
-    model: "DbtBouncerModelBase | None" = Field(default=None)
     name: Literal["check_model_number_of_grants"]
     max_number_of_privileges: int = Field(default=100)
     min_number_of_privileges: int = Field(default=0)
@@ -1712,7 +1681,7 @@ class CheckModelNumberOfGrants(BaseCheck):
             )
 
 
-class CheckModelPropertyFileLocation(BaseCheck):
+class CheckModelPropertyFileLocation(ModelMixin, BaseCheck):
     """Model properties files must follow the guidance provided by dbt [here](https://docs.getdbt.com/best-practices/how-we-structure/1-guide-overview).
 
     Parameters:
@@ -1733,7 +1702,6 @@ class CheckModelPropertyFileLocation(BaseCheck):
 
     """
 
-    model: "DbtBouncerModelBase | None" = Field(default=None)
     name: Literal["check_model_property_file_location"]
 
     def execute(self) -> None:
@@ -1784,7 +1752,7 @@ class CheckModelPropertyFileLocation(BaseCheck):
             )
 
 
-class CheckModelSchemaName(BaseCheck):
+class CheckModelSchemaName(ModelMixin, BaseCheck):
     """Models must have a schema name that matches the supplied regex.
 
     Note that most setups will use schema names in development that are prefixed, for example:
@@ -1821,7 +1789,6 @@ class CheckModelSchemaName(BaseCheck):
 
     model_config = ConfigDict(extra="forbid", protected_namespaces=())
 
-    model: "DbtBouncerModelBase | None" = Field(default=None)
     name: Literal["check_model_schema_name"]
     schema_name_pattern: str
 
@@ -1845,7 +1812,7 @@ class CheckModelSchemaName(BaseCheck):
             )
 
 
-class CheckModelVersionAllowed(BaseCheck):
+class CheckModelVersionAllowed(ModelMixin, BaseCheck):
     r"""Check that the version of the model matches the supplied regex pattern.
 
     Parameters:
@@ -1877,7 +1844,6 @@ class CheckModelVersionAllowed(BaseCheck):
 
     model_config = ConfigDict(extra="forbid", protected_namespaces=())
 
-    model: "DbtBouncerModelBase | None" = Field(default=None)
     name: Literal["check_model_version_allowed"]
     version_pattern: str
 
@@ -1903,7 +1869,7 @@ class CheckModelVersionAllowed(BaseCheck):
             )
 
 
-class CheckModelVersionPinnedInRef(BaseCheck):
+class CheckModelVersionPinnedInRef(ManifestMixin, ModelMixin, BaseCheck):
     r"""Check that the version of the model is always specified in downstream nodes.
 
     Receives:
@@ -1928,8 +1894,6 @@ class CheckModelVersionPinnedInRef(BaseCheck):
 
     model_config = ConfigDict(extra="forbid", protected_namespaces=())
 
-    manifest_obj: "DbtBouncerManifest | None" = Field(default=None)
-    model: "DbtBouncerModelBase | None" = Field(default=None)
     name: Literal["check_model_version_pinned_in_ref"]
 
     def execute(self) -> None:
@@ -1997,14 +1961,6 @@ class CheckModelsDocumentationCoverage(BaseCheck):
 
     model_config = ConfigDict(extra="forbid")
 
-    description: str | None = Field(
-        default=None,
-        description="Description of what the check does and why it is implemented.",
-    )
-    index: int | None = Field(
-        default=None,
-        description="Index to uniquely identify the check, calculated at runtime.",
-    )
     min_model_documentation_coverage_pct: int = Field(
         default=100,
         ge=0,
@@ -2012,10 +1968,6 @@ class CheckModelsDocumentationCoverage(BaseCheck):
     )
     models: list["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_model_documentation_coverage"]
-    severity: Literal["error", "warn"] | None = Field(
-        default="error",
-        description="Severity of the check, one of 'error' or 'warn'.",
-    )
 
     def execute(self) -> None:
         """Execute the check.
@@ -2067,14 +2019,6 @@ class CheckModelsTestCoverage(BaseCheck):
 
     model_config = ConfigDict(extra="forbid")
 
-    description: str | None = Field(
-        default=None,
-        description="Description of what the check does and why it is implemented.",
-    )
-    index: int | None = Field(
-        default=None,
-        description="Index to uniquely identify the check, calculated at runtime.",
-    )
     name: Literal["check_model_test_coverage"]
     min_model_test_coverage_pct: float = Field(
         default=100,
@@ -2082,10 +2026,6 @@ class CheckModelsTestCoverage(BaseCheck):
         le=100,
     )
     models: list["DbtBouncerModelBase"] = Field(default=[])
-    severity: Literal["error", "warn"] | None = Field(
-        default="error",
-        description="Severity of the check, one of 'error' or 'warn'.",
-    )
     tests: list["DbtBouncerTestBase"] = Field(default=[])
 
     def execute(self) -> None:

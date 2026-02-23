@@ -13,11 +13,12 @@ if TYPE_CHECKING:
 from pydantic import Field, PrivateAttr
 
 from dbt_bouncer.check_base import BaseCheck
+from dbt_bouncer.checks._mixins import SourceMixin
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import clean_path_str, compile_pattern, find_missing_meta_keys
 
 
-class CheckSourceDescriptionPopulated(BaseCheck):
+class CheckSourceDescriptionPopulated(SourceMixin, BaseCheck):
     """Sources must have a populated description.
 
     Parameters:
@@ -47,7 +48,6 @@ class CheckSourceDescriptionPopulated(BaseCheck):
 
     min_description_length: int | None = Field(default=None)
     name: Literal["check_source_description_populated"]
-    source: "DbtBouncerSourceBase | None" = Field(default=None)
 
     def execute(self) -> None:
         """Execute the check.
@@ -65,7 +65,7 @@ class CheckSourceDescriptionPopulated(BaseCheck):
             )
 
 
-class CheckSourceFreshnessPopulated(BaseCheck):
+class CheckSourceFreshnessPopulated(SourceMixin, BaseCheck):
     """Sources must have a populated freshness.
 
     Receives:
@@ -86,7 +86,6 @@ class CheckSourceFreshnessPopulated(BaseCheck):
     """
 
     name: Literal["check_source_freshness_populated"]
-    source: "DbtBouncerSourceBase | None" = Field(default=None)
 
     def execute(self) -> None:
         """Execute the check.
@@ -114,7 +113,7 @@ class CheckSourceFreshnessPopulated(BaseCheck):
             raise DbtBouncerFailedCheckError(error_msg)
 
 
-class CheckSourceHasMetaKeys(BaseCheck):
+class CheckSourceHasMetaKeys(SourceMixin, BaseCheck):
     """The `meta` config for sources must have the specified keys.
 
     Parameters:
@@ -144,7 +143,6 @@ class CheckSourceHasMetaKeys(BaseCheck):
 
     keys: "NestedDict"
     name: Literal["check_source_has_meta_keys"]
-    source: "DbtBouncerSourceBase | None" = Field(default=None)
 
     def execute(self) -> None:
         """Execute the check.
@@ -165,7 +163,7 @@ class CheckSourceHasMetaKeys(BaseCheck):
             )
 
 
-class CheckSourceHasTags(BaseCheck):
+class CheckSourceHasTags(SourceMixin, BaseCheck):
     """Sources must have the specified tags.
 
     Parameters:
@@ -192,7 +190,6 @@ class CheckSourceHasTags(BaseCheck):
 
     criteria: Literal["any", "all", "one"] = Field(default="all")
     name: Literal["check_source_has_tags"]
-    source: "DbtBouncerSourceBase | None" = Field(default=None)
     tags: list[str]
 
     def execute(self) -> None:
@@ -223,7 +220,7 @@ class CheckSourceHasTags(BaseCheck):
             )
 
 
-class CheckSourceLoaderPopulated(BaseCheck):
+class CheckSourceLoaderPopulated(SourceMixin, BaseCheck):
     """Sources must have a populated loader.
 
     Parameters:
@@ -244,7 +241,6 @@ class CheckSourceLoaderPopulated(BaseCheck):
     """
 
     name: Literal["check_source_loader_populated"]
-    source: "DbtBouncerSourceBase | None" = Field(default=None)
 
     def execute(self) -> None:
         """Execute the check.
@@ -260,7 +256,7 @@ class CheckSourceLoaderPopulated(BaseCheck):
             )
 
 
-class CheckSourceNames(BaseCheck):
+class CheckSourceNames(SourceMixin, BaseCheck):
     """Sources must have a name that matches the supplied regex.
 
     Parameters:
@@ -287,7 +283,6 @@ class CheckSourceNames(BaseCheck):
 
     name: Literal["check_source_names"]
     source_name_pattern: str
-    source: "DbtBouncerSourceBase | None" = Field(default=None)
 
     _compiled_pattern: re.Pattern[str] = PrivateAttr()
 
@@ -309,7 +304,7 @@ class CheckSourceNames(BaseCheck):
             )
 
 
-class CheckSourceNotOrphaned(BaseCheck):
+class CheckSourceNotOrphaned(SourceMixin, BaseCheck):
     """Sources must be referenced in at least one model.
 
     Receives:
@@ -332,7 +327,6 @@ class CheckSourceNotOrphaned(BaseCheck):
 
     models: list["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_source_not_orphaned"]
-    source: "DbtBouncerSourceBase | None" = Field(default=None)
 
     def execute(self) -> None:
         """Execute the check.
@@ -353,7 +347,7 @@ class CheckSourceNotOrphaned(BaseCheck):
             )
 
 
-class CheckSourcePropertyFileLocation(BaseCheck):
+class CheckSourcePropertyFileLocation(SourceMixin, BaseCheck):
     """Source properties files must follow the guidance provided by dbt [here](https://docs.getdbt.com/best-practices/how-we-structure/1-guide-overview).
 
     Receives:
@@ -374,7 +368,6 @@ class CheckSourcePropertyFileLocation(BaseCheck):
     """
 
     name: Literal["check_source_property_file_location"]
-    source: "DbtBouncerSourceBase | None" = Field(default=None)
 
     def execute(self) -> None:
         """Execute the check.
@@ -412,7 +405,7 @@ class CheckSourcePropertyFileLocation(BaseCheck):
             )
 
 
-class CheckSourceUsedByModelsInSameDirectory(BaseCheck):
+class CheckSourceUsedByModelsInSameDirectory(SourceMixin, BaseCheck):
     """Sources can only be referenced by models that are located in the same directory where the source is defined.
 
     Parameters:
@@ -435,7 +428,6 @@ class CheckSourceUsedByModelsInSameDirectory(BaseCheck):
 
     models: list["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_source_used_by_models_in_same_directory"]
-    source: "DbtBouncerSourceBase | None" = Field(default=None)
 
     def execute(self) -> None:
         """Execute the check.
@@ -461,7 +453,7 @@ class CheckSourceUsedByModelsInSameDirectory(BaseCheck):
             )
 
 
-class CheckSourceUsedByOnlyOneModel(BaseCheck):
+class CheckSourceUsedByOnlyOneModel(SourceMixin, BaseCheck):
     """Each source can be referenced by a maximum of one model.
 
     Receives:
@@ -484,7 +476,6 @@ class CheckSourceUsedByOnlyOneModel(BaseCheck):
 
     models: list["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_source_used_by_only_one_model"]
-    source: "DbtBouncerSourceBase | None" = Field(default=None)
 
     def execute(self) -> None:
         """Execute the check.

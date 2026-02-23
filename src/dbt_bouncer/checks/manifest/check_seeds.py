@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Literal
 from pydantic import ConfigDict, Field, PrivateAttr
 
 from dbt_bouncer.check_base import BaseCheck
+from dbt_bouncer.checks._mixins import SeedMixin
 
 if TYPE_CHECKING:
     from dbt_bouncer.artifact_parsers.parsers_manifest import (
@@ -14,7 +15,7 @@ from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import compile_pattern, get_clean_model_name
 
 
-class CheckSeedDescriptionPopulated(BaseCheck):
+class CheckSeedDescriptionPopulated(SeedMixin, BaseCheck):
     """Seeds must have a populated description.
 
     Parameters:
@@ -46,7 +47,6 @@ class CheckSeedDescriptionPopulated(BaseCheck):
 
     min_description_length: int | None = Field(default=None)
     name: Literal["check_seed_description_populated"]
-    seed: "DbtBouncerSeedBase | None" = Field(default=None)
 
     def execute(self) -> None:
         """Execute the check.
@@ -64,7 +64,7 @@ class CheckSeedDescriptionPopulated(BaseCheck):
             )
 
 
-class CheckSeedNames(BaseCheck):
+class CheckSeedNames(SeedMixin, BaseCheck):
     """Seed must have a name that matches the supplied regex.
 
     Parameters:
@@ -92,7 +92,6 @@ class CheckSeedNames(BaseCheck):
     model_config = ConfigDict(extra="forbid", protected_namespaces=())
 
     name: Literal["check_seed_names"]
-    seed: "DbtBouncerSeedBase | None" = Field(default=None)
     seed_name_pattern: str
 
     _compiled_pattern: re.Pattern[str] = PrivateAttr()

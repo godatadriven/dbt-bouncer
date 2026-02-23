@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Literal
 from pydantic import ConfigDict, Field
 
 from dbt_bouncer.check_base import BaseCheck
+from dbt_bouncer.checks._mixins import ManifestMixin, UnitTestMixin
 from dbt_bouncer.utils import get_package_version_number
 
 if TYPE_CHECKING:
@@ -19,7 +20,7 @@ from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import object_in_path
 
 
-class CheckUnitTestCoverage(BaseCheck):
+class CheckUnitTestCoverage(ManifestMixin, BaseCheck):
     """Set the minimum percentage of models that have a unit test.
 
     !!! warning
@@ -48,19 +49,7 @@ class CheckUnitTestCoverage(BaseCheck):
     """
 
     model_config = ConfigDict(extra="forbid")
-    description: str | None = Field(
-        default=None,
-        description="Description of what the check does and why it is implemented.",
-    )
-    include: str | None = Field(
-        default=None,
-        description="Regexp to match which paths to include.",
-    )
-    index: int | None = Field(
-        default=None,
-        description="Index to uniquely identify the check, calculated at runtime.",
-    )
-    manifest_obj: "DbtBouncerManifest | None" = Field(default=None)
+
     min_unit_test_coverage_pct: int = Field(
         default=100,
         ge=0,
@@ -68,10 +57,6 @@ class CheckUnitTestCoverage(BaseCheck):
     )
     models: list["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_unit_test_coverage"]
-    severity: Literal["error", "warn"] | None = Field(
-        default="error",
-        description="Severity of the check, one of 'error' or 'warn'.",
-    )
     unit_tests: list["UnitTests"] = Field(default=[])
 
     def execute(self) -> None:
@@ -112,7 +97,7 @@ class CheckUnitTestCoverage(BaseCheck):
             )
 
 
-class CheckUnitTestExpectFormats(BaseCheck):
+class CheckUnitTestExpectFormats(ManifestMixin, UnitTestMixin, BaseCheck):
     """Unit tests can only use the specified formats.
 
     !!! warning
@@ -142,12 +127,10 @@ class CheckUnitTestExpectFormats(BaseCheck):
 
     """
 
-    manifest_obj: "DbtBouncerManifest | None" = Field(default=None)
     name: Literal["check_unit_test_expect_format"]
     permitted_formats: list[Literal["csv", "dict", "sql"]] = Field(
         default=["csv", "dict", "sql"],
     )
-    unit_test: "UnitTests | None" = Field(default=None)
 
     def execute(self) -> None:
         """Execute the check.
@@ -185,7 +168,7 @@ class CheckUnitTestExpectFormats(BaseCheck):
             )
 
 
-class CheckUnitTestGivenFormats(BaseCheck):
+class CheckUnitTestGivenFormats(ManifestMixin, UnitTestMixin, BaseCheck):
     """Unit tests can only use the specified formats.
 
     !!! warning
@@ -215,12 +198,10 @@ class CheckUnitTestGivenFormats(BaseCheck):
 
     """
 
-    manifest_obj: "DbtBouncerManifest | None" = Field(default=None)
     name: Literal["check_unit_test_given_formats"]
     permitted_formats: list[Literal["csv", "dict", "sql"]] = Field(
         default=["csv", "dict", "sql"],
     )
-    unit_test: "UnitTests | None" = Field(default=None)
 
     def execute(self) -> None:
         """Execute the check.

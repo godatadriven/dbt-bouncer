@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING, Literal
 from pydantic import Field
 
 from dbt_bouncer.check_base import BaseCheck
+from dbt_bouncer.checks._mixins import RunResultMixin
 
 if TYPE_CHECKING:
     from dbt_bouncer.artifact_parsers.parsers_run_results import DbtBouncerRunResultBase
@@ -10,7 +11,7 @@ if TYPE_CHECKING:
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 
 
-class CheckRunResultsMaxExecutionTime(BaseCheck):
+class CheckRunResultsMaxExecutionTime(RunResultMixin, BaseCheck):
     """Each result can take a maximum duration (seconds).
 
     Parameters:
@@ -42,7 +43,6 @@ class CheckRunResultsMaxExecutionTime(BaseCheck):
 
     max_execution_time_seconds: float
     name: Literal["check_run_results_max_execution_time"]
-    run_result: "DbtBouncerRunResultBase | None" = Field(default=None)
 
     def execute(self) -> None:
         """Execute the check.
@@ -58,7 +58,7 @@ class CheckRunResultsMaxExecutionTime(BaseCheck):
             )
 
 
-class CheckRunResultsMaxGigabytesBilled(BaseCheck):
+class CheckRunResultsMaxGigabytesBilled(RunResultMixin, BaseCheck):
     """Each result can have a maximum number of gigabytes billed.
 
     !!! note
@@ -90,7 +90,6 @@ class CheckRunResultsMaxGigabytesBilled(BaseCheck):
 
     max_gigabytes_billed: float
     name: Literal["check_run_results_max_gigabytes_billed"]
-    run_result: "DbtBouncerRunResultBase | None" = Field(default=None)
 
     def execute(self) -> None:
         """Execute the check.

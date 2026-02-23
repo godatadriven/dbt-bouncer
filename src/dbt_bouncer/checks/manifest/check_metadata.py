@@ -4,14 +4,12 @@ from typing import TYPE_CHECKING, Literal
 from pydantic import ConfigDict, Field, PrivateAttr
 
 from dbt_bouncer.check_base import BaseCheck
+from dbt_bouncer.checks._mixins import ManifestMixin
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import compile_pattern
 
-if TYPE_CHECKING:
-    from dbt_bouncer.artifact_parsers.parsers_manifest import DbtBouncerManifest
 
-
-class CheckProjectName(BaseCheck):
+class CheckProjectName(ManifestMixin, BaseCheck):
     """Enforce that the name of the dbt project matches a supplied regex. Generally used to enforce that project names conform to something like  `company_<DOMAIN>`.
 
     Parameters:
@@ -35,22 +33,9 @@ class CheckProjectName(BaseCheck):
 
     model_config = ConfigDict(extra="forbid")
 
-    description: str | None = Field(
-        default=None,
-        description="Description of what the check does and why it is implemented.",
-    )
-    index: int | None = Field(
-        default=None,
-        description="Index to uniquely identify the check, calculated at runtime.",
-    )
-    manifest_obj: "DbtBouncerManifest | None" = Field(default=None)
     name: Literal["check_project_name"]
     package_name: str | None = Field(default=None)
     project_name_pattern: str
-    severity: Literal["error", "warn"] | None = Field(
-        default="error",
-        description="Severity of the check, one of 'error' or 'warn'.",
-    )
 
     _compiled_project_name_pattern: re.Pattern[str] = PrivateAttr()
 

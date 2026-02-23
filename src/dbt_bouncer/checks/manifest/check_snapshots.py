@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Literal
 from pydantic import Field, PrivateAttr
 
 from dbt_bouncer.check_base import BaseCheck
+from dbt_bouncer.checks._mixins import SnapshotMixin
 
 if TYPE_CHECKING:
     from dbt_bouncer.artifact_parsers.parsers_manifest import (
@@ -14,7 +15,7 @@ from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import compile_pattern
 
 
-class CheckSnapshotHasTags(BaseCheck):
+class CheckSnapshotHasTags(SnapshotMixin, BaseCheck):
     """Snapshots must have the specified tags.
 
     Parameters:
@@ -41,7 +42,6 @@ class CheckSnapshotHasTags(BaseCheck):
 
     criteria: Literal["any", "all", "one"] = Field(default="all")
     name: Literal["check_snapshot_has_tags"]
-    snapshot: "DbtBouncerSnapshotBase | None" = Field(default=None)
     tags: list[str]
 
     def execute(self) -> None:
@@ -73,7 +73,7 @@ class CheckSnapshotHasTags(BaseCheck):
             )
 
 
-class CheckSnapshotNames(BaseCheck):
+class CheckSnapshotNames(SnapshotMixin, BaseCheck):
     """Snapshots must have a name that matches the supplied regex.
 
     Parameters:
@@ -99,7 +99,6 @@ class CheckSnapshotNames(BaseCheck):
     """
 
     name: Literal["check_snapshot_names"]
-    snapshot: "DbtBouncerSnapshotBase | None" = Field(default=None)
     snapshot_name_pattern: str
 
     _compiled_pattern: re.Pattern[str] = PrivateAttr()

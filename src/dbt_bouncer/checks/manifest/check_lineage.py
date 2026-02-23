@@ -2,6 +2,7 @@ import re
 from typing import TYPE_CHECKING, Literal
 
 from dbt_bouncer.check_base import BaseCheck
+from dbt_bouncer.checks._mixins import ManifestMixin, ModelMixin
 
 if TYPE_CHECKING:
     from dbt_bouncer.artifact_parsers.parsers_manifest import (
@@ -15,7 +16,7 @@ from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import clean_path_str, compile_pattern, get_clean_model_name
 
 
-class CheckLineagePermittedUpstreamModels(BaseCheck):
+class CheckLineagePermittedUpstreamModels(ManifestMixin, ModelMixin, BaseCheck):
     """Upstream models must have a path that matches the provided `upstream_path_pattern`.
 
     Parameters:
@@ -48,8 +49,6 @@ class CheckLineagePermittedUpstreamModels(BaseCheck):
 
     """
 
-    manifest_obj: "DbtBouncerManifest | None" = Field(default=None)
-    model: "DbtBouncerModelBase | None" = Field(default=None)
     models: list["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_lineage_permitted_upstream_models"]
     package_name: str | None = Field(default=None)
@@ -99,7 +98,7 @@ class CheckLineagePermittedUpstreamModels(BaseCheck):
             )
 
 
-class CheckLineageSeedCannotBeUsed(BaseCheck):
+class CheckLineageSeedCannotBeUsed(ModelMixin, BaseCheck):
     """Seed cannot be referenced in models with a path that matches the specified `include` config.
 
     Receives:
@@ -120,7 +119,6 @@ class CheckLineageSeedCannotBeUsed(BaseCheck):
 
     """
 
-    model: "DbtBouncerModelBase | None" = Field(default=None)
     name: Literal["check_lineage_seed_cannot_be_used"]
 
     def execute(self) -> None:
@@ -141,7 +139,7 @@ class CheckLineageSeedCannotBeUsed(BaseCheck):
             )
 
 
-class CheckLineageSourceCannotBeUsed(BaseCheck):
+class CheckLineageSourceCannotBeUsed(ModelMixin, BaseCheck):
     """Sources cannot be referenced in models with a path that matches the specified `include` config.
 
     Receives:
@@ -162,7 +160,6 @@ class CheckLineageSourceCannotBeUsed(BaseCheck):
 
     """
 
-    model: "DbtBouncerModelBase | None" = Field(default=None)
     name: Literal["check_lineage_source_cannot_be_used"]
 
     def execute(self) -> None:

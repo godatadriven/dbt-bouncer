@@ -3,13 +3,14 @@ from typing import TYPE_CHECKING, Literal
 from pydantic import Field
 
 from dbt_bouncer.check_base import BaseCheck
+from dbt_bouncer.checks._mixins import TestMixin
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 
 if TYPE_CHECKING:
     from dbt_bouncer.artifact_parsers.parsers_manifest import DbtBouncerTestBase
 
 
-class CheckTestHasTags(BaseCheck):
+class CheckTestHasTags(TestMixin, BaseCheck):
     """Data tests must have the specified tags.
 
     Parameters:
@@ -38,7 +39,6 @@ class CheckTestHasTags(BaseCheck):
     criteria: Literal["any", "all", "one"] = Field(default="any")
     name: Literal["check_test_has_tags"]
     tags: list[str]
-    test: "DbtBouncerTestBase | None" = Field(default=None)
 
     def execute(self) -> None:
         """Execute the check.

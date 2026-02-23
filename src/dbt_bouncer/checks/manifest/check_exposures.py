@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING, Literal
 from pydantic import Field
 
 from dbt_bouncer.check_base import BaseCheck
+from dbt_bouncer.checks._mixins import ExposureMixin
 
 if TYPE_CHECKING:
     from dbt_bouncer.artifact_parsers.parsers_manifest import (
@@ -13,7 +14,7 @@ if TYPE_CHECKING:
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 
 
-class CheckExposureOnModel(BaseCheck):
+class CheckExposureOnModel(ExposureMixin, BaseCheck):
     """Exposures should depend on a model.
 
     Parameters:
@@ -43,7 +44,6 @@ class CheckExposureOnModel(BaseCheck):
 
     """
 
-    exposure: "DbtBouncerExposureBase | None" = Field(default=None)
     maximum_number_of_models: int = Field(default=100)
     minimum_number_of_models: int = Field(default=1)
     name: Literal["check_exposure_based_on_model"]
@@ -71,7 +71,7 @@ class CheckExposureOnModel(BaseCheck):
             )
 
 
-class CheckExposureOnNonPublicModels(BaseCheck):
+class CheckExposureOnNonPublicModels(ExposureMixin, BaseCheck):
     """Exposures should be based on public models only.
 
     Receives:
@@ -92,7 +92,6 @@ class CheckExposureOnNonPublicModels(BaseCheck):
 
     """
 
-    exposure: "DbtBouncerExposureBase | None" = Field(default=None)
     models: list["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_exposure_based_on_non_public_models"]
 
@@ -127,7 +126,7 @@ class CheckExposureOnNonPublicModels(BaseCheck):
             )
 
 
-class CheckExposureOnView(BaseCheck):
+class CheckExposureOnView(ExposureMixin, BaseCheck):
     """Exposures should not be based on views.
 
     Parameters:
@@ -159,7 +158,6 @@ class CheckExposureOnView(BaseCheck):
 
     """
 
-    exposure: "DbtBouncerExposureBase | None" = Field(default=None)
     materializations_to_include: list[str] = Field(
         default=["ephemeral", "view"],
     )

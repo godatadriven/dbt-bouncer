@@ -14,6 +14,7 @@ from jinja2 import Environment, nodes
 from jinja2_simple_tags import StandaloneTag
 
 from dbt_bouncer.check_base import BaseCheck
+from dbt_bouncer.checks._mixins import MacroMixin
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 
 
@@ -21,7 +22,7 @@ class TagExtension(StandaloneTag):
     tags: ClassVar = {"do", "endmaterialization", "endtest", "materialization", "test"}
 
 
-class CheckMacroArgumentsDescriptionPopulated(BaseCheck):
+class CheckMacroArgumentsDescriptionPopulated(MacroMixin, BaseCheck):
     """Macro arguments must have a populated description.
 
     Parameters:
@@ -56,7 +57,6 @@ class CheckMacroArgumentsDescriptionPopulated(BaseCheck):
     """
 
     min_description_length: int | None = Field(default=None)
-    macro: "Macros | None" = Field(default=None)
     name: Literal["check_macro_arguments_description_populated"]
 
     def execute(self) -> None:
@@ -116,7 +116,7 @@ class CheckMacroArgumentsDescriptionPopulated(BaseCheck):
             )
 
 
-class CheckMacroCodeDoesNotContainRegexpPattern(BaseCheck):
+class CheckMacroCodeDoesNotContainRegexpPattern(MacroMixin, BaseCheck):
     """The raw code for a macro must not match the specified regexp pattern.
 
     Parameters:
@@ -141,7 +141,6 @@ class CheckMacroCodeDoesNotContainRegexpPattern(BaseCheck):
 
     """
 
-    macro: "Macros | None" = Field(default=None)
     name: Literal["check_macro_code_does_not_contain_regexp_pattern"]
     regexp_pattern: str
 
@@ -167,7 +166,7 @@ class CheckMacroCodeDoesNotContainRegexpPattern(BaseCheck):
             )
 
 
-class CheckMacroDescriptionPopulated(BaseCheck):
+class CheckMacroDescriptionPopulated(MacroMixin, BaseCheck):
     """Macros must have a populated description.
 
     Parameters:
@@ -196,7 +195,6 @@ class CheckMacroDescriptionPopulated(BaseCheck):
 
     """
 
-    macro: "Macros | None" = Field(default=None)
     min_description_length: int | None = Field(default=None)
     name: Literal["check_macro_description_populated"]
 
@@ -216,7 +214,7 @@ class CheckMacroDescriptionPopulated(BaseCheck):
             )
 
 
-class CheckMacroMaxNumberOfLines(BaseCheck):
+class CheckMacroMaxNumberOfLines(MacroMixin, BaseCheck):
     """Macros may not have more than the specified number of lines.
 
     Parameters:
@@ -244,7 +242,6 @@ class CheckMacroMaxNumberOfLines(BaseCheck):
 
     """
 
-    macro: "Macros | None" = Field(default=None)
     name: Literal["check_macro_max_number_of_lines"]
     max_number_of_lines: int = Field(default=50)
 
@@ -264,7 +261,7 @@ class CheckMacroMaxNumberOfLines(BaseCheck):
             )
 
 
-class CheckMacroNameMatchesFileName(BaseCheck):
+class CheckMacroNameMatchesFileName(MacroMixin, BaseCheck):
     """Macros names must be the same as the file they are contained in.
 
     Generic tests are also macros, however to document these tests the "name" value must be preceded with "test_".
@@ -286,7 +283,6 @@ class CheckMacroNameMatchesFileName(BaseCheck):
 
     """
 
-    macro: "Macros | None" = Field(default=None)
     name: Literal["check_macro_name_matches_file_name"]
 
     def execute(self) -> None:
@@ -312,7 +308,7 @@ class CheckMacroNameMatchesFileName(BaseCheck):
                 )
 
 
-class CheckMacroPropertyFileLocation(BaseCheck):
+class CheckMacroPropertyFileLocation(MacroMixin, BaseCheck):
     """Macro properties files must follow the guidance provided by dbt [here](https://docs.getdbt.com/best-practices/how-we-structure/5-the-rest-of-the-project#how-we-use-the-other-folders).
 
     Receives:
@@ -332,7 +328,6 @@ class CheckMacroPropertyFileLocation(BaseCheck):
 
     """
 
-    macro: "Macros | None" = Field(default=None)
     name: Literal["check_macro_property_file_location"]
 
     def execute(self) -> None:
