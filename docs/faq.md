@@ -61,17 +61,7 @@ jobs:
 
 ## Does `dbt-bouncer` support Python models?
 
-Yes! `dbt-bouncer` fully supports [Python models](https://docs.getdbt.com/docs/build/python-models) (introduced in dbt 1.3). All checks that work with SQL models also work with Python models, including:
-
-- Model naming conventions (`check_model_names`)
-- Documentation requirements (`check_model_description_populated`, `check_model_documented_in_same_directory`)
-- Meta configuration (`check_model_has_meta_keys`)
-- Testing requirements (`check_model_has_unique_test`)
-- Code pattern checks using regex (`check_model_code_does_not_contain_regexp_pattern`)
-- Line count limits (`check_model_max_number_of_lines`)
-- File location validation (`check_model_property_file_location`)
-
-Python models are treated the same as SQL models in the manifest, with the key difference being the `language` field set to `"python"` instead of `"sql"`. This means `dbt-bouncer` can enforce conventions on your Python models just as it does for SQL models.
+Yes! `dbt-bouncer` fully supports [Python models](https://docs.getdbt.com/docs/build/python-models) (introduced in dbt 1.3). All checks that work with SQL models also work with Python models, this means `dbt-bouncer` can enforce conventions on your Python models just as it does for SQL models.
 
 ### Example
 
