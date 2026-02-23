@@ -72,6 +72,14 @@ repos:
           types_or: [sql, jinja]
     - repo: local
       hooks:
+        - id: tombi
+          entry: uv run tombi format
+          language: system
+          name: tombi
+          require_serial: true
+          types: [toml]
+    - repo: local
+      hooks:
         - id: pyupgrade
           entry: uv run pyupgrade
           language: system

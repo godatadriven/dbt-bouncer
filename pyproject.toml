@@ -1,5 +1,18 @@
 [project]
-authors = [{name="Padraic Slattery", email= "pgoslatara@gmail.com"}]
+name = "dbt-bouncer"
+version = "0.0.0"
+description = "Configure and enforce conventions for your dbt project."
+readme = "README.md"
+requires-python = ">=3.11,<3.15"
+license = "MIT"
+authors = [{ name = "Padraic Slattery", email = "pgoslatara@gmail.com" }]
+maintainers = [{ name = "Padraic Slattery", email = "pgoslatara@gmail.com" }]
+keywords = [
+  "CI/CD",
+  "cli",
+  "dbt",
+  "python",
+]
 classifiers = [
   "Programming Language :: Python",
   "Programming Language :: Python :: 3",
@@ -9,12 +22,12 @@ classifiers = [
   "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: 3.14",
 ]
-dependencies =[
-  "click (!=8.3.0,!=8.3.1,<9)", # Due to this issue: https://github.com/pallets/click/issues/3110
+dependencies = [
+  "click (!=8.3.0,!=8.3.1,<9)",  # Due to this issue: https://github.com/pallets/click/issues/3110
   "dbt-artifacts-parser (>=0.8)",
   "jellyfish (>=1,<2)",
-  "jinja2 (>=3,<4)",
   "jinja2-simple-tags (<1)",
+  "jinja2 (>=3,<4)",
   "junitparser (>=2,<5)",
   "orjson (>=3,<4)",
   "packaging (<26)",
@@ -22,22 +35,15 @@ dependencies =[
   "pydantic (>=2,<3)",
   "pyyaml (<7)",
   "requests (>=2,<3)",
-  "tabulate (<1)",
-  "semver (<4)"
+  "semver (<4)",
+  "tabulate (<1)"
 ]
-description = "Configure and enforce conventions for your dbt project."
-keywords = [
-  "python",
-  "cli",
-  "dbt",
-  "CI/CD",
-]
-license ="MIT"
-maintainers = [{name="Padraic Slattery",email="pgoslatara@gmail.com"}]
-name = "dbt-bouncer"
-readme = "README.md"
-requires-python = ">=3.11,<3.15"
-version = "0.0.0"
+
+[project.urls]
+repository = "https://github.com/godatadriven/dbt-bouncer"
+
+[project.scripts]
+dbt-bouncer = "dbt_bouncer.main:cli"
 
 [project.optional-dependencies]
 dev = [
@@ -53,7 +59,6 @@ dev = [
   "ruff~=0.0",
   "shandy-sqlfmt[jinjafmt]~=0.0",
   "ty>=0.0.7"
-
 ]
 docs = [
   "mike~=2.0",
@@ -65,15 +70,14 @@ docs = [
   "pymdown-extensions~=10.0"
 ]
 
-[project.scripts]
-dbt-bouncer = "dbt_bouncer.main:cli"
-
-[project.urls]
-repository = "https://github.com/godatadriven/dbt-bouncer"
+[dependency-groups]
+dev = [
+  "tombi>=0.7.32",
+]
 
 [tool.coverage.report]
 exclude_lines = [
-    "if TYPE_CHECKING:",
+  "if TYPE_CHECKING:",
 ]
 
 [tool.dbt-bouncer]
@@ -89,42 +93,80 @@ model_name_pattern = "^stg_"
 
 [tool.ruff]
 exclude = [
-    ".bzr",
-    ".direnv",
-    ".eggs",
-    ".git",
-    ".git-rewrite",
-    ".hg",
-    ".ipynb_checkpoints",
-    ".mypy_cache",
-    ".nox",
-    ".pants.d",
-    ".pyenv",
-    ".pytest_cache",
-    ".pytype",
-    ".ruff_cache",
-    ".svn",
-    ".tox",
-    ".venv",
-    ".vscode",
-    "__pypackages__",
-    "_build",
-    "buck-out",
-    "build",
-    "dist",
-    "node_modules",
-    "site-packages",
-    "src/dbt_bouncer/artifact_parsers/dbt_cloud",
-    "venv",
+  ".bzr",
+  ".direnv",
+  ".eggs",
+  ".git",
+  ".git-rewrite",
+  ".hg",
+  ".ipynb_checkpoints",
+  ".mypy_cache",
+  ".nox",
+  ".pants.d",
+  ".pyenv",
+  ".pytest_cache",
+  ".pytype",
+  ".ruff_cache",
+  ".svn",
+  ".tox",
+  ".venv",
+  ".vscode",
+  "__pypackages__",
+  "_build",
+  "buck-out",
+  "build",
+  "dist",
+  "node_modules",
+  "site-packages",
+  "src/dbt_bouncer/artifact_parsers/dbt_cloud",
+  "venv",
 ]
 line-length = 88
 indent-width = 4
 target-version = "py311"
 
 [tool.ruff.lint]
-ignore = ["COM812", "D100", "D203", "D213", "D406", "D407", "D409", "E501", "G004", "LOG015", "S101"]
-preview=true
-select = ["A", "ARG", "B", "C4", "COM", "D", "DOC", "E", "EXE", "F", "I", "ICN", "LOG", "G", "N", "PT", "PTH", "Q", "RUF", "S", "SIM", "T20", "TCH", "TID", "W"]
+ignore = [
+  "COM812",
+  "D100",
+  "D203",
+  "D213",
+  "D406",
+  "D407",
+  "D409",
+  "E501",
+  "G004",
+  "LOG015",
+  "S101"
+]
+preview = true
+select = [
+  "A",
+  "ARG",
+  "B",
+  "C4",
+  "COM",
+  "D",
+  "DOC",
+  "E",
+  "EXE",
+  "F",
+  "I",
+  "ICN",
+  "LOG",
+  "G",
+  "N",
+  "PT",
+  "PTH",
+  "Q",
+  "RUF",
+  "S",
+  "SIM",
+  "T20",
+  "TCH",
+  "TID",
+  "W"
+]
 unfixable = ["B"]
 
 [tool.ruff.lint.per-file-ignores]
@@ -143,18 +185,18 @@ skip-magic-trailing-comma = false
 
 [tool.rumdl]
 disable = [
-    "MD007", # Indentation
-    "MD013",  # Line length
-    "MD033",  # Inline HTML
-    "MD041",  # First line heading
-    "MD046",  # Code block style
-    "MD059",  # Link text
+  "MD007",  # Indentation
+  "MD013",  # Line length
+  "MD033",  # Inline HTML
+  "MD041",  # First line heading
+  "MD046",  # Code block style
+  "MD059",  # Link text
 ]
 exclude = [
-    ".git",
-    ".github",
-    ".venv",
-    "LICENSE.md",
+  ".git",
+  ".github",
+  ".venv",
+  "LICENSE.md",
 ]
 MD007.indent = 4
 respect_gitignore = true
