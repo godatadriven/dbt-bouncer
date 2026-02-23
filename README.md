@@ -85,7 +85,7 @@ All documentation can be found on `dbt-bouncer` [documentation website](https://
 1. Run `dbt-bouncer`:
 
     ```text
-    $ dbt-bouncer
+    $ dbt-bouncer run
 
     [...]
     Running checks... |################################| 20/20

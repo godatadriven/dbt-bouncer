@@ -9,6 +9,18 @@ This page provides documentation for the `dbt-bouncer` CLI.
     :show_hidden: False
     :style: plain
 
+## Run command
+
+The `run` subcommand executes dbt-bouncer checks against your dbt project:
+
+```bash
+dbt-bouncer run --config-file dbt-bouncer.yml
+```
+
+This is the primary command for running checks. For backwards compatibility, `dbt-bouncer` (without the `run` subcommand) still works and behaves identically.
+
+All the main CLI options (`--check`, `--only`, `--output-file`, etc.) work with both `dbt-bouncer run` and the legacy `dbt-bouncer` invocation.
+
 ## Validate command
 
 The `validate` subcommand checks your configuration file for common issues:
