@@ -59,6 +59,44 @@ jobs:
 
     dbt Cloud now supports a "[versionless](https://docs.getdbt.com/docs/dbt-versions/upgrade-dbt-version-in-cloud#versionless)" option, which allows dbt projects to be run with the latest version of dbt. One effect of choosing this option is that dbt artifacts may receive non-breaking changes ([source](https://github.com/dbt-labs/dbt-core/blob/main/core/dbt/artifacts/README.md#making-changes-to-dbtartifacts)), these may or may not be compatible with `dbt-bouncer`. If you encounter a bug as a result of this, please open an [issue](https://github.com/godatadriven/dbt-bouncer/issues) and we'll investigate.
 
+## Does `dbt-bouncer` support Python models?
+
+Yes! `dbt-bouncer` fully supports [Python models](https://docs.getdbt.com/docs/build/python-models) (introduced in dbt 1.3). All checks that work with SQL models also work with Python models, including:
+
+- Model naming conventions (`check_model_names`)
+- Documentation requirements (`check_model_description_populated`, `check_model_documented_in_same_directory`)
+- Meta configuration (`check_model_has_meta_keys`)
+- Testing requirements (`check_model_has_unique_test`)
+- Code pattern checks using regex (`check_model_code_does_not_contain_regexp_pattern`)
+- Line count limits (`check_model_max_number_of_lines`)
+- File location validation (`check_model_property_file_location`)
+
+Python models are treated the same as SQL models in the manifest, with the key difference being the `language` field set to `"python"` instead of `"sql"`. This means `dbt-bouncer` can enforce conventions on your Python models just as it does for SQL models.
+
+### Example
+
+A Python model can be validated with the same checks as SQL models:
+
+```yaml
+manifest_checks:
+  - name: check_model_has_meta_keys
+    keys:
+      - maturity
+  - name: check_model_description_populated
+  - name: check_model_code_does_not_contain_regexp_pattern
+    regexp_pattern: .*\.to_pandas\(\)  # Discourage memory-intensive operations
+```
+
+The check `check_model_code_does_not_contain_regexp_pattern` will match against the Python code in `raw_code`, allowing you to enforce conventions like avoiding certain libraries or patterns in your Python models.
+
+!!! tip
+
+    You can use regex patterns to enforce Python-specific conventions, such as:
+
+    - Preventing certain imports: `regexp_pattern: .*import\s+os.*`
+    - Discouraging memory-intensive operations: `regexp_pattern: .*\.to_pandas\(\).*`
+    - Enforcing use of specific libraries: Use `include`/`exclude` patterns to target only Python models
+
 ## How to configure `dbt-bouncer` for use in a CI pipeline?
 
 `dbt-bouncer` is designed to be use primarily in a CI pipeline such as GitHub Actions or Azure DevOps. To do this we create a config file such as:
