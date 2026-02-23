@@ -58,6 +58,7 @@ dev = [
   "rumdl>=0.1.19",
   "ruff~=0.0",
   "shandy-sqlfmt[jinjafmt]~=0.0",
+  "tombi>=0.7.32",
   "ty>=0.0.7"
 ]
 docs = [
@@ -68,11 +69,6 @@ docs = [
   "mkdocs-git-revision-date-localized-plugin~=1.0",
   "mkdocs-material~=9.0",
   "pymdown-extensions~=10.0"
-]
-
-[dependency-groups]
-dev = [
-  "tombi>=0.7.32",
 ]
 
 [tool.coverage.report]
