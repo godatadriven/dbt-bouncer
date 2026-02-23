@@ -381,6 +381,7 @@ dev = [
     { name = "ruff" },
     { name = "rumdl" },
     { name = "shandy-sqlfmt", extra = ["jinjafmt"] },
+    { name = "tombi" },
     { name = "ty" },
 ]
 docs = [
@@ -427,6 +428,7 @@ requires-dist = [
     { name = "semver", specifier = "<4" },
     { name = "shandy-sqlfmt", extras = ["jinjafmt"], marker = "extra == 'dev'", specifier = "~=0.0" },
     { name = "tabulate", specifier = "<1" },
+    { name = "tombi", marker = "extra == 'dev'", specifier = ">=0.7.32" },
     { name = "ty", marker = "extra == 'dev'", specifier = ">=0.0.7" },
 ]
 provides-extras = ["dev", "docs"]
@@ -1998,6 +2000,28 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/69/ed/8f07e893132d5051d86a553e749d5c89b2a4776eb3a579b72ed61f8559ca/tokenize_rt-6.2.0.tar.gz", hash = "sha256:8439c042b330c553fdbe1758e4a05c0ed460dbbbb24a606f11f0dee75da4cad6", size = 5476, upload-time = "2025-05-23T23:48:00.035Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/33/f0/3fe8c6e69135a845f4106f2ff8b6805638d4e85c264e70114e8126689587/tokenize_rt-6.2.0-py2.py3-none-any.whl", hash = "sha256:a152bf4f249c847a66497a4a95f63376ed68ac6abf092a2f7cfb29d044ecff44", size = 6004, upload-time = "2025-05-23T23:47:58.812Z" },
+]
+
+[[package]]
+name = "tombi"
+version = "0.7.32"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/4b/57/046b94d4ff214b7fac45c63e986361cdf85556696a9b1952b311ad6d37b9/tombi-0.7.32.tar.gz", hash = "sha256:16b4300189e2ce4da9f2eac5e11c42f677d7025b9b52d04d625fa57b584730da", size = 496674, upload-time = "2026-02-22T03:41:29.092Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/09/53/91a305653e6b9361db95c65192b15fefe04b93b217a735388bf3824f2390/tombi-0.7.32-py3-none-macosx_10_12_x86_64.whl", hash = "sha256:e8f647d2bc119c6ad0942bc9804a638e2a6d4dbb93829f9780392a0b120953e4", size = 8859818, upload-time = "2026-02-22T03:41:20.03Z" },
+    { url = "https://files.pythonhosted.org/packages/88/c7/ebed8bbeab4a0864789495d8f8c8ece5546d5098195c684b86b888869df9/tombi-0.7.32-py3-none-macosx_11_0_arm64.whl", hash = "sha256:509f453c62c85360c3d9e5ddef4379e55d23a9a8c8bcfd6dc70f873c06b7dc2d", size = 8579195, upload-time = "2026-02-22T03:41:18.394Z" },
+    { url = "https://files.pythonhosted.org/packages/11/64/160df7092be1c87046df8ed459696a20ce6277edf9d376e9f7fe24afe879/tombi-0.7.32-py3-none-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:acd9a814f97b5aa50b34e3409dda4abe42893eca38f063967bb5b88825b83f50", size = 8775644, upload-time = "2026-02-22T03:23:40.133Z" },
+    { url = "https://files.pythonhosted.org/packages/76/70/2eee0557ed168ec10ae5c7550e05a98ddd64c2cab2ea8d3abfec8a61827c/tombi-0.7.32-py3-none-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:30c7889d340af7edc412e2fac988916bcc8f04856a33a5440a7c2c5bdb301398", size = 9910278, upload-time = "2026-02-22T03:23:45.86Z" },
+    { url = "https://files.pythonhosted.org/packages/21/a3/503917fd0aaf8e47720d2fdfd53efd7a46a22f3224d4db53ba0380ddcb24/tombi-0.7.32-py3-none-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:1a8cd11b01c54374c7f79c99645eb089ffa485ded4188cc397e35cee729f9577", size = 10078858, upload-time = "2026-02-22T03:23:41.997Z" },
+    { url = "https://files.pythonhosted.org/packages/04/fc/065a11db4f1c4462eeca4ecc38145f91c14373a7dcdf4cb4aa3650d2c193/tombi-0.7.32-py3-none-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:50471bc8e5aa4e15406c3e3d2d96fbb9c0e43e8270621109e2f848d7445971a9", size = 8928780, upload-time = "2026-02-22T03:23:44.125Z" },
+    { url = "https://files.pythonhosted.org/packages/97/5c/83599e224fa53e714f2720291b550b1f7a827585409a8512c742fda06e34/tombi-0.7.32-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:22bf727c26c0903637c3437ba94670bc80ffd77795449bfc4e40d217580d3a1a", size = 9236436, upload-time = "2026-02-22T03:23:47.868Z" },
+    { url = "https://files.pythonhosted.org/packages/c7/3a/e26bd40a7e8cb17a728ba6adebd90a4e32f8431525e6403cde05893b7ad3/tombi-0.7.32-py3-none-manylinux_2_28_aarch64.whl", hash = "sha256:e88d040beb3ac49b60fef5844db99215b2b6086120b6c1473b095e6a3eb042b1", size = 9048557, upload-time = "2026-02-22T03:23:38.152Z" },
+    { url = "https://files.pythonhosted.org/packages/52/ba/bba521683ff1453d79c46cd202cdbb2b0564b1d77e7b54b605daa1393b49/tombi-0.7.32-py3-none-musllinux_1_2_aarch64.whl", hash = "sha256:dee4491435c7b4c42aa99aa350eb8c549d993539df35665aef31e5f792bcb750", size = 9089057, upload-time = "2026-02-22T03:41:21.868Z" },
+    { url = "https://files.pythonhosted.org/packages/16/6c/b7f6c7d3da2bb8669a722cb51673c5fb3ec8c329070cd4a07568b1aa6242/tombi-0.7.32-py3-none-musllinux_1_2_armv7l.whl", hash = "sha256:cda47b243bd5008d231fc3fbd25f05a017a2401aea37d532ff749ac01d1bd495", size = 8820600, upload-time = "2026-02-22T03:41:23.647Z" },
+    { url = "https://files.pythonhosted.org/packages/62/2f/6f45ca4172a533bb0c8ccd4e5df243c44130439105f6da3f21714e81f753/tombi-0.7.32-py3-none-musllinux_1_2_i686.whl", hash = "sha256:aff383866aea7be7cb2195f98247b4777067f58096e858dc944b45e2a58b0081", size = 9399853, upload-time = "2026-02-22T03:41:25.456Z" },
+    { url = "https://files.pythonhosted.org/packages/4e/17/08dd011467667de2804244d998dd55e9fbae406f56f2f00cc9e422c9e4b2/tombi-0.7.32-py3-none-musllinux_1_2_x86_64.whl", hash = "sha256:96712c544a2bc2e41e6279385fbf505d2452a9d5002ce729edce35152a06e9a9", size = 9454657, upload-time = "2026-02-22T03:41:27.271Z" },
+    { url = "https://files.pythonhosted.org/packages/74/4a/9fc4057d1439ea6df12b5fc622a1c183eb53ce95abbdef4de23e3a69e992/tombi-0.7.32-py3-none-win32.whl", hash = "sha256:28763e99ce95b4d4bd93e77725344fcaabf582edc699afa4dd0090f531269ac9", size = 7011392, upload-time = "2026-02-22T03:41:31.452Z" },
+    { url = "https://files.pythonhosted.org/packages/de/a8/aae970ca184db55ca249144d3e93988b9574eae93cf2a8451fb113210e91/tombi-0.7.32-py3-none-win_amd64.whl", hash = "sha256:a66fa401e82dc46011816c192e9eb886a861e1ca4630c6b6680ea65468b5213c", size = 8104985, upload-time = "2026-02-22T03:41:30.114Z" },
 ]
 
 [[package]]
