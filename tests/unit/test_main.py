@@ -1636,3 +1636,70 @@ def test_cli_list():
     assert result.output.index("manifest_checks:") < result.output.index(
         "run_results_checks:"
     )
+
+
+def test_cli_run_command(tmp_path):
+    """Test that `dbt-bouncer run` works the same as `dbt-bouncer`."""
+    # Config file
+    bouncer_config = {
+        "dbt_artifacts_dir": ".",
+        "manifest_checks": [
+            {
+                "name": "check_model_directories",
+                "include": "models",
+                "permitted_sub_directories": ["staging"],
+            },
+        ],
+    }
+
+    with Path(tmp_path / "dbt-bouncer.yml").open("w") as f:
+        yaml.dump(bouncer_config, f)
+
+    # Manifest file
+    with Path.open(Path("./dbt_project/target/manifest.json"), "r") as f:
+        manifest = json.load(f)
+
+    with Path.open(tmp_path / "manifest.json", "w") as f:
+        json.dump(manifest, f)
+
+    output_file = tmp_path / "output.json"
+
+    # Run dbt-bouncer with explicit "run" command
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        [
+            "run",
+            "--config-file",
+            Path(tmp_path / "dbt-bouncer.yml").__str__(),
+            "--output-file",
+            output_file,
+            "--output-format",
+            "json",
+        ],
+    )
+
+    assert result.exit_code == 1  # Should fail due to directory check
+    assert output_file.exists()
+    content = json.loads(output_file.read_bytes())
+    assert len(content) > 0
+
+    # Verify backwards compatibility: run without "run" command
+    output_file_legacy = tmp_path / "output_legacy.json"
+    result_legacy = runner.invoke(
+        cli,
+        [
+            "--config-file",
+            Path(tmp_path / "dbt-bouncer.yml").__str__(),
+            "--output-file",
+            output_file_legacy,
+            "--output-format",
+            "json",
+        ],
+    )
+
+    assert result_legacy.exit_code == 1  # Should fail the same way
+    assert output_file_legacy.exists()
+    content_legacy = json.loads(output_file_legacy.read_bytes())
+    # Both should produce the same checks
+    assert len(content) == len(content_legacy)

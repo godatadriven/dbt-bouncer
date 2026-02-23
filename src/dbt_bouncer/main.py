@@ -283,7 +283,11 @@ def cli(
     show_all_failures: bool,
     verbosity: int,
 ) -> None:
-    """Entrypoint for dbt-bouncer."""
+    """Entrypoint for dbt-bouncer.
+
+    When invoked without a subcommand, runs checks for backwards compatibility.
+    Use 'dbt-bouncer run' for the explicit command.
+    """
     if ctx.invoked_subcommand is None:
         config_file_source = ctx.get_parameter_source("config_file").name  # type: ignore[union-attr]
         exit_code = run_bouncer(
@@ -299,6 +303,91 @@ def cli(
             config_file_source=config_file_source,
         )
         ctx.exit(exit_code)
+
+
+@cli.command()
+@click.option(
+    "--config-file",
+    default=Path("dbt-bouncer.yml"),
+    help="Location of the YML config file.",
+    required=False,
+    type=PurePath,
+)
+@click.option(
+    "--create-pr-comment-file",
+    default=False,
+    help="Create a `github-comment.md` file that will be sent to GitHub as a PR comment. Defaults to True when `dbt-bouncer` is run as a GitHub Action.",
+    hidden=True,
+    required=False,
+    type=click.BOOL,
+)
+@click.option(
+    "--check",
+    default="",
+    help="Limit the checks run to specific check names, comma-separated. Examples: 'check_model_has_unique_test', 'check_model_names,check_source_freshness_populated'.",
+    required=False,
+    type=str,
+)
+@click.option(
+    "--only",
+    default="",
+    help="Limit the checks run to specific categories, comma-separated. Examples: 'manifest_checks', 'catalog_checks,manifest_checks'.",
+    required=False,
+    type=str,
+)
+@click.option(
+    "--output-file",
+    default=None,
+    help="Location of the file where check metadata will be saved.",
+    required=False,
+    type=Path,
+)
+@click.option(
+    "--output-format",
+    default="json",
+    help="Format for the output file or stdout when no output file is specified. Choices: csv, json, junit, sarif, tap. Defaults to json.",
+    required=False,
+    type=click.Choice(["csv", "json", "junit", "sarif", "tap"], case_sensitive=False),
+)
+@click.option(
+    "--output-only-failures",
+    help="If passed then only failures will be included in the output file.",
+    is_flag=True,
+)
+@click.option(
+    "--show-all-failures",
+    help="If passed then all failures will be printed to the console.",
+    is_flag=True,
+)
+@click.option("-v", "--verbosity", help="Verbosity.", default=0, count=True)
+@click.pass_context
+def run(
+    ctx: click.Context,
+    check: str,
+    config_file: PurePath,
+    create_pr_comment_file: bool,
+    only: str,
+    output_file: Path | None,
+    output_format: str,
+    output_only_failures: bool,
+    show_all_failures: bool,
+    verbosity: int,
+) -> None:
+    """Run dbt-bouncer checks against your dbt project."""
+    config_file_source = ctx.get_parameter_source("config_file").name  # type: ignore[union-attr]
+    exit_code = run_bouncer(
+        check=check,
+        config_file=config_file,
+        create_pr_comment_file=create_pr_comment_file,
+        only=only,
+        output_file=output_file,
+        output_format=output_format,
+        output_only_failures=output_only_failures,
+        show_all_failures=show_all_failures,
+        verbosity=verbosity,
+        config_file_source=config_file_source,
+    )
+    ctx.exit(exit_code)
 
 
 @cli.command()
