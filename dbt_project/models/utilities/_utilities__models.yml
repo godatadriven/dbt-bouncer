@@ -1,0 +1,20 @@
+version: 2
+
+models:
+  - name: py_order_stats
+    description: Python model example for testing Python model support in dbt-bouncer.
+    config:
+      meta:
+        maturity: gold
+    columns:
+      - name: order_id
+        description: Primary key for orders.
+        tests:
+          - unique
+          - not_null
+      - name: customer_id
+        description: Foreign key to customers.
+      - name: order_date
+        description: Date the order was placed.
+      - name: status
+        description: Current status of the order.
