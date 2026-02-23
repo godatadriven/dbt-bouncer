@@ -854,6 +854,95 @@ reporting line numbers for any issues found.</p>
 </span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>  Line 1: Check is missing required &#39;name&#39; field
 </span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>  Line 3: YAML syntax error: ...
 </span></code></pre></div>
+<h2 id="cli-options">CLI Options<a class="headerlink" href="#cli-options" title="Permanent link">#</a></h2>
+<p>The following options are available for the <code>run</code> command (and the legacy <code>dbt-bouncer</code> invocation):</p>
+<h3 id="-config-file"><code>--config-file</code><a class="headerlink" href="#-config-file" title="Permanent link">#</a></h3>
+<p><strong>Type:</strong> Path
+<strong>Default:</strong> <code>dbt-bouncer.yml</code>
+<strong>Required:</strong> No</p>
+<p>Specifies the location of the YAML configuration file containing your dbt-bouncer checks.</p>
+<p><strong>Example:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>dbt-bouncer<span class="w"> </span>run<span class="w"> </span>--config-file<span class="w"> </span>config/checks.yml
+</span></code></pre></div>
+<h3 id="-check"><code>--check</code><a class="headerlink" href="#-check" title="Permanent link">#</a></h3>
+<p><strong>Type:</strong> String (comma-separated)
+<strong>Default:</strong> Empty (runs all checks)
+<strong>Required:</strong> No</p>
+<p>Limits the checks run to specific check names. Multiple checks can be specified as a comma-separated list.</p>
+<p><strong>Examples:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="c1"># Run a single check</span>
+</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>dbt-bouncer<span class="w"> </span>run<span class="w"> </span>--check<span class="w"> </span>check_model_has_unique_test
+</span><span id="__span-15-3"><a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>
+</span><span id="__span-15-4"><a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="c1"># Run multiple checks</span>
+</span><span id="__span-15-5"><a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>dbt-bouncer<span class="w"> </span>run<span class="w"> </span>--check<span class="w"> </span>check_model_names,check_source_freshness_populated
+</span></code></pre></div>
+<h3 id="-only"><code>--only</code><a class="headerlink" href="#-only" title="Permanent link">#</a></h3>
+<p><strong>Type:</strong> String (comma-separated)
+<strong>Default:</strong> Empty (runs all categories)
+<strong>Required:</strong> No</p>
+<p>Limits the checks run to specific categories. Multiple categories can be specified as a comma-separated list.</p>
+<p><strong>Examples:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="c1"># Run only manifest checks</span>
+</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>dbt-bouncer<span class="w"> </span>run<span class="w"> </span>--only<span class="w"> </span>manifest_checks
+</span><span id="__span-16-3"><a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>
+</span><span id="__span-16-4"><a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="c1"># Run catalog and manifest checks</span>
+</span><span id="__span-16-5"><a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a>dbt-bouncer<span class="w"> </span>run<span class="w"> </span>--only<span class="w"> </span>catalog_checks,manifest_checks
+</span></code></pre></div>
+<h3 id="-output-file"><code>--output-file</code><a class="headerlink" href="#-output-file" title="Permanent link">#</a></h3>
+<p><strong>Type:</strong> Path
+<strong>Default:</strong> None (outputs to stdout)
+<strong>Required:</strong> No</p>
+<p>Specifies the location where check metadata will be saved. If not provided, results are written to stdout.</p>
+<p><strong>Example:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>dbt-bouncer<span class="w"> </span>run<span class="w"> </span>--output-file<span class="w"> </span>results/check-results.json
+</span></code></pre></div>
+<h3 id="-output-format"><code>--output-format</code><a class="headerlink" href="#-output-format" title="Permanent link">#</a></h3>
+<p><strong>Type:</strong> Choice
+<strong>Options:</strong> <code>csv</code>, <code>json</code>, <code>junit</code>, <code>sarif</code>, <code>tap</code>
+<strong>Default:</strong> <code>json</code>
+<strong>Required:</strong> No</p>
+<p>Specifies the format for the output file or stdout when no output file is specified.</p>
+<p><strong>Examples:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="c1"># Output as JSON (default)</span>
+</span><span id="__span-18-2"><a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>dbt-bouncer<span class="w"> </span>run<span class="w"> </span>--output-format<span class="w"> </span>json
+</span><span id="__span-18-3"><a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>
+</span><span id="__span-18-4"><a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a><span class="c1"># Output as JUnit XML for CI integration</span>
+</span><span id="__span-18-5"><a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a>dbt-bouncer<span class="w"> </span>run<span class="w"> </span>--output-format<span class="w"> </span>junit<span class="w"> </span>--output-file<span class="w"> </span>results.xml
+</span><span id="__span-18-6"><a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a>
+</span><span id="__span-18-7"><a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a><span class="c1"># Output as SARIF for GitHub Code Scanning</span>
+</span><span id="__span-18-8"><a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a>dbt-bouncer<span class="w"> </span>run<span class="w"> </span>--output-format<span class="w"> </span>sarif<span class="w"> </span>--output-file<span class="w"> </span>results.sarif
+</span></code></pre></div>
+<h3 id="-output-only-failures"><code>--output-only-failures</code><a class="headerlink" href="#-output-only-failures" title="Permanent link">#</a></h3>
+<p><strong>Type:</strong> Flag
+<strong>Default:</strong> False
+<strong>Required:</strong> No</p>
+<p>When passed, only failures will be included in the output file. Successful checks are omitted.</p>
+<p><strong>Example:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>dbt-bouncer<span class="w"> </span>run<span class="w"> </span>--output-file<span class="w"> </span>results.json<span class="w"> </span>--output-only-failures
+</span></code></pre></div>
+<h3 id="-show-all-failures"><code>--show-all-failures</code><a class="headerlink" href="#-show-all-failures" title="Permanent link">#</a></h3>
+<p><strong>Type:</strong> Flag
+<strong>Default:</strong> False
+<strong>Required:</strong> No</p>
+<p>When passed, all failures will be printed to the console, even if an output file is specified.</p>
+<p><strong>Example:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>dbt-bouncer<span class="w"> </span>run<span class="w"> </span>--show-all-failures
+</span></code></pre></div>
+<h3 id="-v-verbosity"><code>-v, --verbosity</code><a class="headerlink" href="#-v-verbosity" title="Permanent link">#</a></h3>
+<p><strong>Type:</strong> Counter
+<strong>Default:</strong> 0
+<strong>Required:</strong> No</p>
+<p>Controls the verbosity of logging output. Can be specified multiple times to increase verbosity.</p>
+<p><strong>Examples:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="c1"># Basic logging</span>
+</span><span id="__span-21-2"><a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>dbt-bouncer<span class="w"> </span>run<span class="w"> </span>-v
+</span><span id="__span-21-3"><a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>
+</span><span id="__span-21-4"><a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a><span class="c1"># More verbose logging</span>
+</span><span id="__span-21-5"><a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a>dbt-bouncer<span class="w"> </span>run<span class="w"> </span>-vv
+</span><span id="__span-21-6"><a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a>
+</span><span id="__span-21-7"><a id="__codelineno-21-7" name="__codelineno-21-7" href="#__codelineno-21-7"></a><span class="c1"># Maximum verbosity</span>
+</span><span id="__span-21-8"><a id="__codelineno-21-8" name="__codelineno-21-8" href="#__codelineno-21-8"></a>dbt-bouncer<span class="w"> </span>run<span class="w"> </span>-vvv
+</span></code></pre></div>
 <h2 id="exit-codes">Exit codes<a class="headerlink" href="#exit-codes" title="Permanent link">#</a></h2>
 <p><code>dbt-bouncer</code> returns the following exit codes:</p>
 <ul>
@@ -888,7 +977,7 @@ reporting line numbers for any issues found.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="February 23, 2026 19:45:02 UTC">February 23, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="February 23, 2026 20:04:29 UTC">February 23, 2026</span>
   </span>
 
     
