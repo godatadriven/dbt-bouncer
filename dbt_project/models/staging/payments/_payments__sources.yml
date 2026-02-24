@@ -34,7 +34,7 @@ sources:
           owner: Annabelle
         tags:
           - example_tag
-      - name: Non_Comforming_Name
+      - name: Non_Conforming_Name
         config:
           meta:
             dbt-bouncer:

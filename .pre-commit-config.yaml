@@ -19,6 +19,11 @@ repos:
           - id: debug-statements
           - id: end-of-file-fixer
             exclude: dbt_project/target/manifest.json,tests/fixtures/dbt_16/target/manifest.json,tests/fixtures/dbt_17/target/manifest.json,tests/fixtures/dbt_18/target/manifest.json
+    - repo: https://github.com/streetsidesoftware/cspell-cli
+      rev: v9.7.0
+      hooks:
+          - id: cspell
+            files: ^(docs/|[^/]+\.md$)
     - repo: local
       hooks:
         - id: ruff
