@@ -1,0 +1,51 @@
+{
+  "version": "0.2",
+  "language": "en-GB",
+  "words": [
+    "Aurai",
+    "Dataroots",
+    "docstrings",
+    "elif",
+    "endfor",
+    "endwith",
+    "Eneco",
+    "filterwarnings",
+    "godatadriven",
+    "Griffe",
+    "griffe",
+    "Jinja",
+    "Loterij",
+    "mkdocs",
+    "Nationale",
+    "pathlib",
+    "pgoslatara",
+    "prek",
+    "pydantic",
+    "Pydantic",
+    "pypi",
+    "pyproject",
+    "pytest",
+    "pslattery",
+    "sarif",
+    "SARIF",
+    "Tiqets",
+    "venv",
+    "versionless",
+    "virtualenv",
+    "virtualenvs",
+    "Xebia"
+  ],
+  "ignorePaths": [
+    "dist",
+    "*.json",
+    "*.lock",
+    "**/__pycache__",
+    "**/.pytest_cache",
+    "**/target",
+    ".git",
+    "**/*.svg"
+  ],
+  "ignoreRegExpList": [
+    "/\\b[A-Z]{2,}_[A-Z_]+\\b/g"
+  ]
+}

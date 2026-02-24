@@ -195,7 +195,7 @@ An example:
             from dbt_bouncer.parsers import DbtBouncerModelBase
 
 
-    class CheckModelDepcrecationDate(BaseCheck):
+    class CheckModelDeprecationDate(BaseCheck):
 
         model: "DbtBouncerModelBase" = Field(default=None)
         name: Literal["check_model_deprecation_date"]
