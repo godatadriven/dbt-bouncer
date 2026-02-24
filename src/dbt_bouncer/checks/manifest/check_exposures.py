@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 
 
-class CheckExposureOnModel(BaseCheck):
+class CheckExposureBasedOnModel(BaseCheck):
     """Exposures should depend on a model.
 
     Parameters:
@@ -71,63 +71,7 @@ class CheckExposureOnModel(BaseCheck):
             )
 
 
-class CheckExposureOnNonPublicModels(BaseCheck):
-    """Exposures should be based on public models only.
-
-    Receives:
-        exposure (DbtBouncerExposureBase): The DbtBouncerExposureBase object to check.
-        models (list[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
-
-    Other Parameters:
-        description (str | None): Description of what the check does and why it is implemented.
-        exclude (str | None): Regex pattern to match the exposure path (i.e the .yml file where the exposure is configured). Exposure paths that match the pattern will not be checked.
-        include (str | None): Regex pattern to match the exposure path (i.e the .yml file where the exposure is configured). Only exposure paths that match the pattern will be checked.
-        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
-
-    Example(s):
-        ```yaml
-        manifest_checks:
-            - name: check_exposure_based_on_non_public_models
-        ```
-
-    """
-
-    exposure: "DbtBouncerExposureBase | None" = Field(default=None)
-    models: list["DbtBouncerModelBase"] = Field(default=[])
-    name: Literal["check_exposure_based_on_non_public_models"]
-
-    def execute(self) -> None:
-        """Execute the check.
-
-        Raises:
-            DbtBouncerFailedCheckError: If exposure is based on non-public models.
-
-        """
-        exposure = self._require_exposure()
-        models_by_id = (
-            self.models_by_unique_id
-            if self.models_by_unique_id
-            else {m.unique_id: m for m in self.models}
-        )
-        non_public_upstream_dependencies = []
-        for node_id in getattr(exposure.depends_on, "nodes", []) or []:
-            model_obj = models_by_id.get(node_id)
-            if (
-                model_obj
-                and model_obj.resource_type == "model"
-                and model_obj.package_name == exposure.package_name
-                and model_obj.access
-                and model_obj.access.value != "public"
-            ):
-                non_public_upstream_dependencies.append(model_obj.name)
-
-        if non_public_upstream_dependencies:
-            raise DbtBouncerFailedCheckError(
-                f"`{exposure.name}` is based on a model(s) that is not public: {non_public_upstream_dependencies}."
-            )
-
-
-class CheckExposureOnView(BaseCheck):
+class CheckExposureBasedOnView(BaseCheck):
     """Exposures should not be based on views.
 
     Parameters:
@@ -194,4 +138,60 @@ class CheckExposureOnView(BaseCheck):
         if non_table_upstream_dependencies:
             raise DbtBouncerFailedCheckError(
                 f"`{exposure.name}` is based on a model that is not a table: {non_table_upstream_dependencies}."
+            )
+
+
+class CheckExposureOnNonPublicModels(BaseCheck):
+    """Exposures should be based on public models only.
+
+    Receives:
+        exposure (DbtBouncerExposureBase): The DbtBouncerExposureBase object to check.
+        models (list[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the exposure path (i.e the .yml file where the exposure is configured). Exposure paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the exposure path (i.e the .yml file where the exposure is configured). Only exposure paths that match the pattern will be checked.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_exposure_based_on_non_public_models
+        ```
+
+    """
+
+    exposure: "DbtBouncerExposureBase | None" = Field(default=None)
+    models: list["DbtBouncerModelBase"] = Field(default=[])
+    name: Literal["check_exposure_based_on_non_public_models"]
+
+    def execute(self) -> None:
+        """Execute the check.
+
+        Raises:
+            DbtBouncerFailedCheckError: If exposure is based on non-public models.
+
+        """
+        exposure = self._require_exposure()
+        models_by_id = (
+            self.models_by_unique_id
+            if self.models_by_unique_id
+            else {m.unique_id: m for m in self.models}
+        )
+        non_public_upstream_dependencies = []
+        for node_id in getattr(exposure.depends_on, "nodes", []) or []:
+            model_obj = models_by_id.get(node_id)
+            if (
+                model_obj
+                and model_obj.resource_type == "model"
+                and model_obj.package_name == exposure.package_name
+                and model_obj.access
+                and model_obj.access.value != "public"
+            ):
+                non_public_upstream_dependencies.append(model_obj.name)
+
+        if non_public_upstream_dependencies:
+            raise DbtBouncerFailedCheckError(
+                f"`{exposure.name}` is based on a model(s) that is not public: {non_public_upstream_dependencies}."
             )

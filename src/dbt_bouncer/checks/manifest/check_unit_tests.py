@@ -112,7 +112,7 @@ class CheckUnitTestCoverage(BaseCheck):
             )
 
 
-class CheckUnitTestExpectFormats(BaseCheck):
+class CheckUnitTestExpectFormat(BaseCheck):
     """Unit tests can only use the specified formats.
 
     !!! warning

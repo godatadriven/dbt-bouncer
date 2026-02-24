@@ -6,7 +6,7 @@ from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import Nodes4, UnitT
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.checks.manifest.check_unit_tests import (
     CheckUnitTestCoverage,
-    CheckUnitTestExpectFormats,
+    CheckUnitTestExpectFormat,
     CheckUnitTestGivenFormats,
 )
 
@@ -320,7 +320,7 @@ def test_check_unit_test_expect_format(
     expectation,
 ):
     with expectation:
-        CheckUnitTestExpectFormats(
+        CheckUnitTestExpectFormat(
             manifest_obj=manifest_obj,
             name="check_unit_test_expect_format",
             permitted_formats=permitted_formats,

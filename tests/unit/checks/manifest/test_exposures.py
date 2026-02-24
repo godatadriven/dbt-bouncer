@@ -5,9 +5,9 @@ import pytest
 from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import Exposures, Nodes4
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.checks.manifest.check_exposures import (
-    CheckExposureOnModel,
+    CheckExposureBasedOnModel,
+    CheckExposureBasedOnView,
     CheckExposureOnNonPublicModels,
-    CheckExposureOnView,
 )
 
 
@@ -91,7 +91,7 @@ def test_check_exposure_based_on_model(
     exposure, maximum_number_of_models, minimum_number_of_models, expectation
 ):
     with expectation:
-        CheckExposureOnModel(
+        CheckExposureBasedOnModel(
             exposure=exposure,
             maximum_number_of_models=maximum_number_of_models,
             minimum_number_of_models=minimum_number_of_models,
@@ -409,7 +409,7 @@ def test_check_exposure_based_on_view(
     expectation,
 ):
     with expectation:
-        CheckExposureOnView(
+        CheckExposureBasedOnView(
             exposure=exposure,
             materializations_to_include=materializations_to_include,
             models=models,
