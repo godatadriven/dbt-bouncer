@@ -118,7 +118,7 @@ The goal of a CI pipeline is to test the changes in a pull request but also to p
       dbt-bouncer --only manifest_checks
       ```
 
-  1. dbt requires models to be materialised before it can generate a `catalog.json` file. By running `dbt run --empty` we can materialise every model without processing any data. Once these materialisations are performed we can run our catalog checks via:
+  1. dbt requires models to be materialised before it can generate a `catalog.json` file. By running `dbt run --empty` we can materialise every model without processing any data. Once these materializations are performed we can run our catalog checks via:
 
       ```shell
       dbt-bouncer --only catalog_checks
@@ -178,7 +178,7 @@ manifest_checks:
 
 ## How to set up `dbt-bouncer` in a dbt Mesh?
 
-A [dbt Mesh](https://docs.getdbt.com/best-practices/how-we-mesh/mesh-1-intro#what-is-dbt-mesh) is a collection of dbt projects in an organisation, some of which can read models from other dbt projects. Natively supported by dbt Cloud, a dbt Mesh can also be set up with dbt Core using a plugin such as [dbt-loom](https://github.com/nicholasyager/dbt-loom).
+A [dbt Mesh](https://docs.getdbt.com/best-practices/how-we-mesh/mesh-1-intro#what-is-dbt-mesh) is a collection of dbt projects in an organization, some of which can read models from other dbt projects. Natively supported by dbt Cloud, a dbt Mesh can also be set up with dbt Core using a plugin such as [dbt-loom](https://github.com/nicholasyager/dbt-loom).
 
 One challenge in a dbt Mesh is the large number of developers working across multiple dbt projects leading to differing conventions being implemented. There are multiple approaches to using `dbt-bouncer` in a dbt Mesh, two are outlined below.
 
