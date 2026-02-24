@@ -231,7 +231,7 @@ class CheckModelColumnsHaveTypes(BaseCheck):
             )
 
 
-class CheckModelContractsEnforcedForPublicModel(BaseCheck):
+class CheckModelContractEnforcedForPublicModel(BaseCheck):
     """Public models must have contracts enforced.
 
     Receives:
@@ -557,6 +557,82 @@ class CheckModelDirectories(BaseCheck):
                 raise DbtBouncerFailedCheckError(
                     f"`{get_clean_model_name(self.model.unique_id)}` is located in the `{directory_to_check}` sub-directory, this is not a valid sub-directory ({self.permitted_sub_directories})."
                 )
+
+
+class CheckModelDocumentationCoverage(BaseCheck):
+    """Set the minimum percentage of models that have a populated description.
+
+    Parameters:
+        min_description_length (int | None): Minimum length required for the description to be considered populated.
+        min_model_documentation_coverage_pct (float): The minimum percentage of models that must have a populated description.
+
+    Receives:
+        models (list[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_model_documentation_coverage
+              min_model_documentation_coverage_pct: 90
+        ```
+        ```yaml
+        manifest_checks:
+            - name: check_model_documentation_coverage
+              min_description_length: 25 # Setting a stricter requirement for description length
+        ```
+
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    description: str | None = Field(
+        default=None,
+        description="Description of what the check does and why it is implemented.",
+    )
+    index: int | None = Field(
+        default=None,
+        description="Index to uniquely identify the check, calculated at runtime.",
+    )
+    min_model_documentation_coverage_pct: int = Field(
+        default=100,
+        ge=0,
+        le=100,
+    )
+    models: list["DbtBouncerModelBase"] = Field(default=[])
+    name: Literal["check_model_documentation_coverage"]
+    severity: Literal["error", "warn"] | None = Field(
+        default="error",
+        description="Severity of the check, one of 'error' or 'warn'.",
+    )
+
+    def execute(self) -> None:
+        """Execute the check.
+
+        Raises:
+            DbtBouncerFailedCheckError: If documentation coverage is less than minimum.
+
+        """
+        num_models = len(self.models)
+        models_with_description = []
+        for model in self.models:
+            if is_description_populated(
+                description=model.description or "", min_description_length=4
+            ):
+                models_with_description.append(model.unique_id)
+
+        num_models_with_descriptions = len(models_with_description)
+        model_description_coverage_pct = (
+            num_models_with_descriptions / num_models
+        ) * 100
+
+        if model_description_coverage_pct < self.min_model_documentation_coverage_pct:
+            raise DbtBouncerFailedCheckError(
+                f"Only {model_description_coverage_pct}% of models have a populated description, this is less than the permitted minimum of {self.min_model_documentation_coverage_pct}%."
+            )
 
 
 class CheckModelDocumentedInSameDirectory(BaseCheck):
@@ -1845,6 +1921,76 @@ class CheckModelSchemaName(BaseCheck):
             )
 
 
+class CheckModelTestCoverage(BaseCheck):
+    """Set the minimum percentage of models that have at least one test.
+
+    Parameters:
+        min_model_test_coverage_pct (float): The minimum percentage of models that must have at least one test.
+        models (list[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
+        tests (list[DbtBouncerTestBase]): List of DbtBouncerTestBase objects parsed from `manifest.json`.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_model_test_coverage
+              min_model_test_coverage_pct: 90
+        ```
+
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    description: str | None = Field(
+        default=None,
+        description="Description of what the check does and why it is implemented.",
+    )
+    index: int | None = Field(
+        default=None,
+        description="Index to uniquely identify the check, calculated at runtime.",
+    )
+    name: Literal["check_model_test_coverage"]
+    min_model_test_coverage_pct: float = Field(
+        default=100,
+        ge=0,
+        le=100,
+    )
+    models: list["DbtBouncerModelBase"] = Field(default=[])
+    severity: Literal["error", "warn"] | None = Field(
+        default="error",
+        description="Severity of the check, one of 'error' or 'warn'.",
+    )
+    tests: list["DbtBouncerTestBase"] = Field(default=[])
+
+    def execute(self) -> None:
+        """Execute the check.
+
+        Raises:
+            DbtBouncerFailedCheckError: If test coverage is less than minimum.
+
+        """
+        num_models = len(self.models)
+        # Build set of model IDs that have at least one test
+        tested_model_ids = {
+            node
+            for test in self.tests
+            if test.depends_on
+            for node in (getattr(test.depends_on, "nodes", []) or [])
+        }
+        model_ids = {m.unique_id for m in self.models}
+        num_models_with_tests = len(model_ids & tested_model_ids)
+        model_test_coverage_pct = (num_models_with_tests / num_models) * 100
+
+        if model_test_coverage_pct < self.min_model_test_coverage_pct:
+            raise DbtBouncerFailedCheckError(
+                f"Only {model_test_coverage_pct}% of models have at least one test, this is less than the permitted minimum of {self.min_model_test_coverage_pct}%."
+            )
+
+
 class CheckModelVersionAllowed(BaseCheck):
     r"""Check that the version of the model matches the supplied regex pattern.
 
@@ -1964,150 +2110,4 @@ class CheckModelVersionPinnedInRef(BaseCheck):
         if downstream_models_with_unversioned_refs:
             raise DbtBouncerFailedCheckError(
                 f"`{self.model.name}` is referenced without a pinned version in downstream models: {downstream_models_with_unversioned_refs}."
-            )
-
-
-class CheckModelsDocumentationCoverage(BaseCheck):
-    """Set the minimum percentage of models that have a populated description.
-
-    Parameters:
-        min_description_length (int | None): Minimum length required for the description to be considered populated.
-        min_model_documentation_coverage_pct (float): The minimum percentage of models that must have a populated description.
-
-    Receives:
-        models (list[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
-
-    Other Parameters:
-        description (str | None): Description of what the check does and why it is implemented.
-        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
-
-    Example(s):
-        ```yaml
-        manifest_checks:
-            - name: check_model_documentation_coverage
-              min_model_documentation_coverage_pct: 90
-        ```
-        ```yaml
-        manifest_checks:
-            - name: check_model_documentation_coverage
-              min_description_length: 25 # Setting a stricter requirement for description length
-        ```
-
-    """
-
-    model_config = ConfigDict(extra="forbid")
-
-    description: str | None = Field(
-        default=None,
-        description="Description of what the check does and why it is implemented.",
-    )
-    index: int | None = Field(
-        default=None,
-        description="Index to uniquely identify the check, calculated at runtime.",
-    )
-    min_model_documentation_coverage_pct: int = Field(
-        default=100,
-        ge=0,
-        le=100,
-    )
-    models: list["DbtBouncerModelBase"] = Field(default=[])
-    name: Literal["check_model_documentation_coverage"]
-    severity: Literal["error", "warn"] | None = Field(
-        default="error",
-        description="Severity of the check, one of 'error' or 'warn'.",
-    )
-
-    def execute(self) -> None:
-        """Execute the check.
-
-        Raises:
-            DbtBouncerFailedCheckError: If documentation coverage is less than minimum.
-
-        """
-        num_models = len(self.models)
-        models_with_description = []
-        for model in self.models:
-            if is_description_populated(
-                description=model.description or "", min_description_length=4
-            ):
-                models_with_description.append(model.unique_id)
-
-        num_models_with_descriptions = len(models_with_description)
-        model_description_coverage_pct = (
-            num_models_with_descriptions / num_models
-        ) * 100
-
-        if model_description_coverage_pct < self.min_model_documentation_coverage_pct:
-            raise DbtBouncerFailedCheckError(
-                f"Only {model_description_coverage_pct}% of models have a populated description, this is less than the permitted minimum of {self.min_model_documentation_coverage_pct}%."
-            )
-
-
-class CheckModelsTestCoverage(BaseCheck):
-    """Set the minimum percentage of models that have at least one test.
-
-    Parameters:
-        min_model_test_coverage_pct (float): The minimum percentage of models that must have at least one test.
-        models (list[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
-        tests (list[DbtBouncerTestBase]): List of DbtBouncerTestBase objects parsed from `manifest.json`.
-
-    Other Parameters:
-        description (str | None): Description of what the check does and why it is implemented.
-        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
-
-
-    Example(s):
-        ```yaml
-        manifest_checks:
-            - name: check_model_test_coverage
-              min_model_test_coverage_pct: 90
-        ```
-
-    """
-
-    model_config = ConfigDict(extra="forbid")
-
-    description: str | None = Field(
-        default=None,
-        description="Description of what the check does and why it is implemented.",
-    )
-    index: int | None = Field(
-        default=None,
-        description="Index to uniquely identify the check, calculated at runtime.",
-    )
-    name: Literal["check_model_test_coverage"]
-    min_model_test_coverage_pct: float = Field(
-        default=100,
-        ge=0,
-        le=100,
-    )
-    models: list["DbtBouncerModelBase"] = Field(default=[])
-    severity: Literal["error", "warn"] | None = Field(
-        default="error",
-        description="Severity of the check, one of 'error' or 'warn'.",
-    )
-    tests: list["DbtBouncerTestBase"] = Field(default=[])
-
-    def execute(self) -> None:
-        """Execute the check.
-
-        Raises:
-            DbtBouncerFailedCheckError: If test coverage is less than minimum.
-
-        """
-        num_models = len(self.models)
-        # Build set of model IDs that have at least one test
-        tested_model_ids = {
-            node
-            for test in self.tests
-            if test.depends_on
-            for node in (getattr(test.depends_on, "nodes", []) or [])
-        }
-        model_ids = {m.unique_id for m in self.models}
-        num_models_with_tests = len(model_ids & tested_model_ids)
-        model_test_coverage_pct = (num_models_with_tests / num_models) * 100
-
-        if model_test_coverage_pct < self.min_model_test_coverage_pct:
-            raise DbtBouncerFailedCheckError(
-                f"Only {model_test_coverage_pct}% of models have at least one test, this is less than the permitted minimum of {self.min_model_test_coverage_pct}%."
             )

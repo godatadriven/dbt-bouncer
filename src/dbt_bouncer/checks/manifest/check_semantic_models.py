@@ -13,7 +13,7 @@ from pydantic import Field
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 
 
-class CheckSemanticModelOnNonPublicModels(BaseCheck):
+class CheckSemanticModelBasedOnNonPublicModels(BaseCheck):
     """Semantic models should be based on public models only.
 
     Receives:

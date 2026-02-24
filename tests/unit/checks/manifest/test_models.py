@@ -17,12 +17,13 @@ from dbt_bouncer.checks.manifest.check_models import (
     CheckModelCodeDoesNotContainRegexpPattern,
     CheckModelColumnsHaveMetaKeys,
     CheckModelColumnsHaveTypes,
-    CheckModelContractsEnforcedForPublicModel,
+    CheckModelContractEnforcedForPublicModel,
     CheckModelDependsOnMacros,
     CheckModelDependsOnMultipleSources,
     CheckModelDescriptionContainsRegexPattern,
     CheckModelDescriptionPopulated,
     CheckModelDirectories,
+    CheckModelDocumentationCoverage,
     CheckModelDocumentedInSameDirectory,
     CheckModelFileName,
     CheckModelGrantPrivilege,
@@ -45,8 +46,7 @@ from dbt_bouncer.checks.manifest.check_models import (
     CheckModelNumberOfGrants,
     CheckModelPropertyFileLocation,
     CheckModelSchemaName,
-    CheckModelsDocumentationCoverage,
-    CheckModelsTestCoverage,
+    CheckModelTestCoverage,
     CheckModelVersionAllowed,
     CheckModelVersionPinnedInRef,
 )
@@ -325,7 +325,7 @@ _TEST_DATA_FOR_CHECK_MODEL_CONTRACT_ENFORCED_FOR_PUBLIC_MODEL = [
 )
 def test_check_model_contract_enforced_for_public_model(model, expectation):
     with expectation:
-        CheckModelContractsEnforcedForPublicModel(
+        CheckModelContractEnforcedForPublicModel(
             model=model, name="check_model_contract_enforced_for_public_model"
         ).execute()
 
@@ -592,7 +592,7 @@ def test_check_model_documentation_coverage(
     expectation,
 ):
     with expectation:
-        CheckModelsDocumentationCoverage(
+        CheckModelDocumentationCoverage(
             min_model_documentation_coverage_pct=min_model_documentation_coverage_pct,
             models=models,
             name="check_model_documentation_coverage",
@@ -2805,7 +2805,7 @@ def test_check_model_test_coverage(
     expectation,
 ):
     with expectation:
-        CheckModelsTestCoverage(
+        CheckModelTestCoverage(
             min_model_test_coverage_pct=min_model_test_coverage_pct,
             models=models,
             name="check_model_test_coverage",

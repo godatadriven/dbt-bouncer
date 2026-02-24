@@ -8,7 +8,7 @@ from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
 )
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.checks.manifest.check_semantic_models import (
-    CheckSemanticModelOnNonPublicModels,
+    CheckSemanticModelBasedOnNonPublicModels,
 )
 
 
@@ -101,7 +101,7 @@ def test_check_semantic_model_based_on_non_public_models(
     models, semantic_model, expectation
 ):
     with expectation:
-        CheckSemanticModelOnNonPublicModels(
+        CheckSemanticModelBasedOnNonPublicModels(
             models=models,
             name="check_semantic_model_based_on_non_public_models",
             semantic_model=semantic_model,

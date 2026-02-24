@@ -39,6 +39,7 @@ catalog_checks:
   - name: check_columns_are_all_documented
     include: ^models/marts
   - name: check_columns_are_documented_in_public_models
+  - name: check_seed_columns_are_all_documented
   - name: check_source_columns_are_all_documented
     exclude: ^models/staging/crm # Not a good idea, here for demonstration purposes only
 
@@ -184,6 +185,11 @@ manifest_checks:
     model_name_pattern: ^int_
 
   # Seeds
+  - name: check_seed_column_names
+    seed_column_name_pattern: ^[a-z_]*$
+  - name: check_seed_columns_have_types
+  - name: check_seed_description_populated
+  # - name: check_seed_has_unit_tests
   - name: check_seed_names
     include: ^seeds
     seed_name_pattern: ^raw_
@@ -253,3 +259,6 @@ run_results_checks:
     include: ^models/staging
     exclude: ^models/staging/crm
     max_execution_time_seconds: 10
+  # dbt-bigquery only
+  # - name: check_run_results_max_gigabytes_billed
+  #   max_gigabytes_billed: 10
