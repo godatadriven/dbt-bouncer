@@ -689,7 +689,7 @@ def test_cli_materialization(manifest_check, num_checks, tmp_path):
 
 NUM_CATALOG_CHECKS = 1
 NUM_MANIFEST_CHECKS = 3
-NUM_RUN_RESULTS_CHECKS = 56
+NUM_RUN_RESULTS_CHECKS = 51
 
 
 @pytest.mark.parametrize(
