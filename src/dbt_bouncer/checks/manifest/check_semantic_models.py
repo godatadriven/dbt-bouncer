@@ -6,7 +6,6 @@ from dbt_bouncer.checks._mixins import SemanticModelMixin
 if TYPE_CHECKING:
     from dbt_bouncer.artifact_parsers.parsers_manifest import (
         DbtBouncerModelBase,
-        DbtBouncerSemanticModelBase,
     )
 
 from pydantic import Field

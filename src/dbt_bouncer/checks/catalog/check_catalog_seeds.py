@@ -3,11 +3,10 @@ from typing import TYPE_CHECKING, Literal
 from pydantic import Field
 
 from dbt_bouncer.check_base import BaseCheck
+from dbt_bouncer.checks._mixins import CatalogNodeMixin, ManifestMixin
 
 if TYPE_CHECKING:
-    from dbt_bouncer.artifact_parsers.parsers_catalog import CatalogNodes
     from dbt_bouncer.artifact_parsers.parsers_manifest import (
-        DbtBouncerManifest,
         DbtBouncerSeedBase,
     )
 
@@ -15,7 +14,7 @@ from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import get_clean_model_name
 
 
-class CheckSeedColumnsAreAllDocumented(BaseCheck):
+class CheckSeedColumnsAreAllDocumented(CatalogNodeMixin, ManifestMixin, BaseCheck):
     """All columns in a seed CSV file should be included in the seed's properties file, i.e. `.yml` file.
 
     Receives:
@@ -37,8 +36,6 @@ class CheckSeedColumnsAreAllDocumented(BaseCheck):
 
     """
 
-    catalog_node: "CatalogNodes | None" = Field(default=None)
-    manifest_obj: "DbtBouncerManifest | None" = Field(default=None)
     name: Literal["check_seed_columns_are_all_documented"]
     seeds: list["DbtBouncerSeedBase"] = Field(default=[])
 

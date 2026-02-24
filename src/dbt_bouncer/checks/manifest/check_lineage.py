@@ -6,7 +6,6 @@ from dbt_bouncer.checks._mixins import ManifestMixin, ModelMixin
 
 if TYPE_CHECKING:
     from dbt_bouncer.artifact_parsers.parsers_manifest import (
-        DbtBouncerManifest,
         DbtBouncerModelBase,
     )
 

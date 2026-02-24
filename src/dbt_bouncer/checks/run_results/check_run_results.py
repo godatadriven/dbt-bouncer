@@ -1,13 +1,7 @@
-from typing import TYPE_CHECKING, Literal
-
-from pydantic import Field
+from typing import Literal
 
 from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks._mixins import RunResultMixin
-
-if TYPE_CHECKING:
-    from dbt_bouncer.artifact_parsers.parsers_run_results import DbtBouncerRunResultBase
-
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 
 

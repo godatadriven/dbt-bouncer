@@ -15,9 +15,6 @@ if TYPE_CHECKING:
 
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", category=UserWarning)
-        from dbt_artifacts_parser.parsers.catalog.catalog_v1 import (
-            Nodes as CatalogNodes,
-        )
 
 
 class CheckSourceColumnsAreAllDocumented(CatalogSourceMixin, BaseCheck):

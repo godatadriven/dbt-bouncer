@@ -7,7 +7,6 @@ from dbt_bouncer.checks._mixins import ExposureMixin
 
 if TYPE_CHECKING:
     from dbt_bouncer.artifact_parsers.parsers_manifest import (
-        DbtBouncerExposureBase,
         DbtBouncerModelBase,
     )
 

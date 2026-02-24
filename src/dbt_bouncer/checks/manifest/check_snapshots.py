@@ -1,16 +1,10 @@
 import re
-from typing import TYPE_CHECKING, Literal
+from typing import Literal
 
 from pydantic import Field, PrivateAttr
 
 from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks._mixins import SnapshotMixin
-
-if TYPE_CHECKING:
-    from dbt_bouncer.artifact_parsers.parsers_manifest import (
-        DbtBouncerSnapshotBase,
-    )
-
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import compile_pattern
 

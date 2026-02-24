@@ -5,15 +5,11 @@ from typing import TYPE_CHECKING, Literal
 from pydantic import ConfigDict, Field, PrivateAttr
 
 from dbt_bouncer.check_base import BaseCheck
-from dbt_bouncer.checks._mixins import SeedMixin
+from dbt_bouncer.checks._mixins import ManifestMixin, SeedMixin
 
 if TYPE_CHECKING:
     from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
         UnitTests,
-    )
-    from dbt_bouncer.artifact_parsers.parsers_manifest import (
-        DbtBouncerManifest,
-        DbtBouncerSeedBase,
     )
 
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
@@ -24,7 +20,7 @@ from dbt_bouncer.utils import (
 )
 
 
-class CheckSeedColumnNames(BaseCheck):
+class CheckSeedColumnNames(SeedMixin, BaseCheck):
     """Seed columns must have names that match the supplied regex.
 
     Parameters:
@@ -51,7 +47,6 @@ class CheckSeedColumnNames(BaseCheck):
     model_config = ConfigDict(extra="forbid", protected_namespaces=())
 
     name: Literal["check_seed_column_names"]
-    seed: "DbtBouncerSeedBase | None" = Field(default=None)
     seed_column_name_pattern: str
 
     _compiled_pattern: re.Pattern[str] = PrivateAttr()
@@ -81,7 +76,7 @@ class CheckSeedColumnNames(BaseCheck):
             )
 
 
-class CheckSeedColumnsHaveTypes(BaseCheck):
+class CheckSeedColumnsHaveTypes(SeedMixin, BaseCheck):
     """Columns defined for seeds must have a `data_type` declared.
 
     Receives:
@@ -102,7 +97,6 @@ class CheckSeedColumnsHaveTypes(BaseCheck):
     """
 
     name: Literal["check_seed_columns_have_types"]
-    seed: "DbtBouncerSeedBase | None" = Field(default=None)
 
     def execute(self) -> None:
         """Execute the check.
@@ -171,7 +165,7 @@ class CheckSeedDescriptionPopulated(SeedMixin, BaseCheck):
             )
 
 
-class CheckSeedHasUnitTests(BaseCheck):
+class CheckSeedHasUnitTests(ManifestMixin, SeedMixin, BaseCheck):
     """Seeds must have more than the specified number of unit tests.
 
     Parameters:
@@ -206,10 +200,8 @@ class CheckSeedHasUnitTests(BaseCheck):
 
     """
 
-    manifest_obj: "DbtBouncerManifest | None" = Field(default=None)
     min_number_of_unit_tests: int = Field(default=1)
     name: Literal["check_seed_has_unit_tests"]
-    seed: "DbtBouncerSeedBase | None" = Field(default=None)
     unit_tests: list["UnitTests"] = Field(default=[])
 
     def execute(self) -> None:
@@ -243,7 +235,7 @@ class CheckSeedHasUnitTests(BaseCheck):
             )
 
 
-class CheckSeedNames(BaseCheck):
+class CheckSeedNames(SeedMixin, BaseCheck):
     """Seed must have a name that matches the supplied regex.
 
     Parameters:

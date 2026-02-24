@@ -10,11 +10,7 @@ if TYPE_CHECKING:
 
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", category=UserWarning)
-        from dbt_artifacts_parser.parsers.catalog.catalog_v1 import (
-            Nodes as CatalogNodes,
-        )
     from dbt_bouncer.artifact_parsers.parsers_manifest import (
-        DbtBouncerManifest,
         DbtBouncerModelBase,
         DbtBouncerTestBase,
     )

@@ -1,13 +1,10 @@
-from typing import TYPE_CHECKING, Literal
+from typing import Literal
 
 from pydantic import Field
 
 from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks._mixins import TestMixin
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
-
-if TYPE_CHECKING:
-    from dbt_bouncer.artifact_parsers.parsers_manifest import DbtBouncerTestBase
 
 
 class CheckTestHasTags(TestMixin, BaseCheck):

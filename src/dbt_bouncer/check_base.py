@@ -3,7 +3,6 @@ from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import is_description_populated
 
 # Cache annotation key sets per check class to avoid rebuilding on every injection call.

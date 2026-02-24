@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING, Literal
 if TYPE_CHECKING:
     from dbt_bouncer.artifact_parsers.parsers_manifest import (
         DbtBouncerModelBase,
-        DbtBouncerSourceBase,
     )
     from dbt_bouncer.checks.common import NestedDict
 

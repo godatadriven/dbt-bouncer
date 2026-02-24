@@ -1,5 +1,5 @@
 import re
-from typing import TYPE_CHECKING, Literal
+from typing import Literal
 
 from pydantic import ConfigDict, Field, PrivateAttr
 

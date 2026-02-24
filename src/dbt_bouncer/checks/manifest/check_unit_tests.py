@@ -12,7 +12,6 @@ if TYPE_CHECKING:
         UnitTests,
     )
     from dbt_bouncer.artifact_parsers.parsers_manifest import (
-        DbtBouncerManifest,
         DbtBouncerModelBase,
     )
 

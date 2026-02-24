@@ -1,21 +1,15 @@
 import re
 from pathlib import Path
-from typing import TYPE_CHECKING, ClassVar, Literal
-
-from pydantic import Field, PrivateAttr
-
-from dbt_bouncer.utils import clean_path_str, compile_pattern
-
-if TYPE_CHECKING:
-    from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import Macros
-
+from typing import ClassVar, Literal
 
 from jinja2 import Environment, nodes
 from jinja2_simple_tags import StandaloneTag
+from pydantic import Field, PrivateAttr
 
 from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks._mixins import MacroMixin
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
+from dbt_bouncer.utils import clean_path_str, compile_pattern
 
 
 class TagExtension(StandaloneTag):

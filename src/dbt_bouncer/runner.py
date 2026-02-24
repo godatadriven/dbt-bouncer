@@ -137,7 +137,9 @@ def runner(
         cls = check.__class__
         if cls not in _CLASS_ITERATE_CACHE:
             # Use model_fields so we include fields from mixins (ModelMixin, etc.)
-            field_names = frozenset(getattr(cls, "model_fields", cls.__annotations__).keys())
+            field_names = frozenset(
+                getattr(cls, "model_fields", cls.__annotations__).keys()
+            )
             _CLASS_ITERATE_CACHE[cls] = _VALID_ITERATE_OVER_VALUES.intersection(
                 field_names,
             )
