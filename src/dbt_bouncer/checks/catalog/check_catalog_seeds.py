@@ -18,6 +18,10 @@ from dbt_bouncer.utils import get_clean_model_name
 class CheckSeedColumnsAreAllDocumented(BaseCheck):
     """All columns in a seed CSV file should be included in the seed's properties file, i.e. `.yml` file.
 
+    !!! warning
+
+        This check is only supported for dbt 1.9.0 and above.
+
     Receives:
         catalog_node (CatalogNodes): The CatalogNodes object to check.
         manifest_obj (DbtBouncerManifest): The DbtBouncerManifest object parsed from `manifest.json`.

@@ -23,6 +23,15 @@ def test_cli_happy_path(caplog, dbt_artifacts_dir, tmp_path):
 
     config_file = Path(tmp_path / "dbt-bouncer-example.yml")
 
+    # These checks doesn't work with dbt-core < 1.9
+    if clean_path_str(dbt_artifacts_dir).split("/")[-1] in ["dbt_17", "dbt_18"]:
+        for item in bouncer_config["catalog_checks"]:
+            if item["name"] in ["check_seed_columns_are_all_documented"]:
+                bouncer_config["catalog_checks"].remove(item)
+        for item in bouncer_config["manifest_checks"]:
+            if item["name"] in ["check_seed_description_populated"]:
+                bouncer_config["manifest_checks"].remove(item)
+
     # Due to non-backwards compatible dbt-fusion changes, this check doesn't work with dbt-core < 1.10
     if clean_path_str(dbt_artifacts_dir).split("/")[-1] in [
         "dbt_17",
