@@ -1,9 +1,16 @@
+import logging
+import re
+from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, PrivateAttr
 
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
-from dbt_bouncer.utils import is_description_populated
+from dbt_bouncer.utils import (
+    compile_pattern,
+    get_package_version_number,
+    is_description_populated,
+)
 
 # Cache annotation key sets per check class to avoid rebuilding on every injection call.
 _ANNOTATION_KEYS_CACHE: dict[type, frozenset[str]] = {}
@@ -323,3 +330,150 @@ class BaseCheck(BaseModel):
         if self.unit_test is None:
             raise DbtBouncerFailedCheckError("self.unit_test is None")
         return self.unit_test
+
+
+class BaseNamePatternCheck(ABC, BaseCheck):
+    """Abstract base for checks that validate a resource name against a regex pattern.
+
+    Subclasses must define: _name_pattern (str), _resource_name (str), _resource_display_name (str).
+    """
+
+    _compiled_pattern: re.Pattern[str] = PrivateAttr()
+
+    def model_post_init(self, __context: object) -> None:
+        """Compile the regex pattern once at initialisation time."""
+        self._compiled_pattern = compile_pattern(self._name_pattern.strip())
+
+    def execute(self) -> None:
+        """Execute the check: require name to match the pattern.
+
+        Raises:
+            DbtBouncerFailedCheckError: If name does not match the pattern.
+
+        """
+        if self._compiled_pattern.match(self._resource_name) is None:
+            raise DbtBouncerFailedCheckError(
+                f"`{self._resource_display_name}` does not match the supplied regex `{self._name_pattern.strip()}`."
+            )
+
+    @property
+    @abstractmethod
+    def _name_pattern(self) -> str: ...
+
+    @property
+    @abstractmethod
+    def _resource_name(self) -> str: ...
+
+    @property
+    @abstractmethod
+    def _resource_display_name(self) -> str: ...
+
+
+class BaseDescriptionPopulatedCheck(ABC, BaseCheck):
+    """Abstract base for checks that require a populated description.
+
+    Subclasses must define: _resource_description (str), _resource_display_name (str).
+    """
+
+    min_description_length: int | None = Field(default=None)
+
+    def execute(self) -> None:
+        """Execute the check: require description to be populated.
+
+        Raises:
+            DbtBouncerFailedCheckError: If description is not populated.
+
+        """
+        if not self._is_description_populated(
+            self._resource_description, self.min_description_length
+        ):
+            raise DbtBouncerFailedCheckError(
+                f"`{self._resource_display_name}` does not have a populated description."
+            )
+
+    @property
+    @abstractmethod
+    def _resource_description(self) -> str: ...
+
+    @property
+    @abstractmethod
+    def _resource_display_name(self) -> str: ...
+
+
+class BaseColumnsHaveTypesCheck(ABC, BaseCheck):
+    """Abstract base for checks that require all columns to have a data_type.
+
+    Subclasses must define: _resource_columns (dict-like with .data_type on values), _resource_display_name (str).
+    """
+
+    def execute(self) -> None:
+        """Execute the check: require all columns to have a declared data_type.
+
+        Raises:
+            DbtBouncerFailedCheckError: If any column lacks a declared data_type.
+
+        """
+        columns = self._resource_columns
+        untyped_columns = [
+            col_name for col_name, col in columns.items() if not col.data_type
+        ]
+        if untyped_columns:
+            raise DbtBouncerFailedCheckError(
+                f"`{self._resource_display_name}` has columns without a declared `data_type`: {untyped_columns}"
+            )
+
+    @property
+    @abstractmethod
+    def _resource_columns(self) -> dict[str, Any]: ...
+
+    @property
+    @abstractmethod
+    def _resource_display_name(self) -> str: ...
+
+
+class BaseHasUnitTestsCheck(ABC, BaseCheck):
+    """Abstract base for checks that require a minimum number of unit tests (dbt 1.8+).
+
+    Subclasses must define: _resource_unique_id (str), _resource_display_name (str).
+    """
+
+    manifest_obj: Any = Field(default=None)
+    min_number_of_unit_tests: int = Field(default=1)
+    unit_tests: list[Any] = Field(default=[])
+
+    def execute(self) -> None:
+        """Execute the check: require at least min_number_of_unit_tests for the resource.
+
+        Raises:
+            DbtBouncerFailedCheckError: If unit test count is below the minimum.
+
+        """
+        self._require_manifest()
+        if get_package_version_number(
+            self.manifest_obj.manifest.metadata.dbt_version or "0.0.0"
+        ) >= get_package_version_number("1.8.0"):
+            num_unit_tests = len(
+                [
+                    t.unique_id
+                    for t in self.unit_tests
+                    if t.depends_on
+                    and t.depends_on.nodes
+                    and t.depends_on.nodes[0] == self._resource_unique_id
+                ],
+            )
+            if num_unit_tests < self.min_number_of_unit_tests:
+                raise DbtBouncerFailedCheckError(
+                    f"`{self._resource_display_name}` has {num_unit_tests} unit tests, this is less than the minimum of {self.min_number_of_unit_tests}."
+                )
+        else:
+            logging.warning(
+                "The unit tests check is only supported for dbt 1.8.0 and above.",
+            )
+
+    @property
+    @abstractmethod
+    def _resource_unique_id(self) -> str: ...
+
+    @property
+    @abstractmethod
+    def _resource_display_name(self) -> str: ...
