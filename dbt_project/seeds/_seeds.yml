@@ -1,0 +1,36 @@
+version: 2
+
+seeds:
+  - name: raw_customers
+    description: Raw customer data
+    columns:
+      - name: id
+        data_type: integer
+      - name: first_name
+        data_type: varchar
+      - name: last_name
+        data_type: varchar
+
+  - name: raw_orders
+    description: Raw order data
+    columns:
+      - name: id
+        data_type: integer
+      - name: user_id
+        data_type: integer
+      - name: order_date
+        data_type: date
+      - name: status
+        data_type: varchar
+
+  - name: raw_payments
+    description: Raw payment data
+    columns:
+      - name: id
+        data_type: integer
+      - name: order_id
+        data_type: integer
+      - name: payment_method
+        data_type: varchar
+      - name: amount
+        data_type: integer
