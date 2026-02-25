@@ -25,8 +25,8 @@ def test_init_shows_rich_header(tmp_path, monkeypatch):
     # Use default inputs
     result = runner.invoke(app, ["init"], input="\n\n\n\n")
 
-    # Check for the header emoji and text
-    assert "🚀" in result.stdout
+    # Check for the header marker and text
+    assert ">>" in result.stdout
     assert "dbt-bouncer initialization" in result.stdout
 
 
@@ -38,8 +38,8 @@ def test_init_shows_rich_success_message(tmp_path, monkeypatch):
     # Use default inputs
     result = runner.invoke(app, ["init"], input="\n\n\n\n")
 
-    # Check for success message and emoji
-    assert "✓" in result.stdout
+    # Check for success message marker
+    assert "[OK]" in result.stdout
     assert "Created dbt-bouncer.yml" in result.stdout
 
 

@@ -383,7 +383,7 @@ def runner(
     if num_checks_error == 0 and num_checks_warn == 0:
         console.print(
             Panel(
-                f"[bold green]✓ All checks passed! SUCCESS={num_checks_success} WARN={num_checks_warn} ERROR={num_checks_error}[/bold green]",
+                f"[bold green][OK] All checks passed! SUCCESS={num_checks_success} WARN={num_checks_warn} ERROR={num_checks_error}[/bold green]",
                 border_style="green",
             )
         )

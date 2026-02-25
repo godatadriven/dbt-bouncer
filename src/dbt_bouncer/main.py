@@ -451,7 +451,7 @@ def init() -> None:
     from rich.console import Console
 
     console = Console()
-    console.print("\n[bold blue]🚀 dbt-bouncer initialization[/bold blue]\n")
+    console.print("\n[bold blue]>> dbt-bouncer initialization[/bold blue]\n")
 
     # Interactive prompts
     artifacts_dir = typer.prompt(
@@ -516,7 +516,7 @@ def init() -> None:
     with Path(config_path).open("w") as f:
         yaml.dump(config_dict, f, default_flow_style=False, sort_keys=False)
 
-    console.print(f"\n[bold green]✓ Created {config_path}[/bold green]")
+    console.print(f"\n[bold green][OK] Created {config_path}[/bold green]")
     console.print(
         f"  Added [cyan]{len(manifest_checks)}[/cyan] checks to get you started.\n"
     )
