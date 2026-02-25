@@ -438,7 +438,7 @@ requires-dist = [
     { name = "shandy-sqlfmt", extras = ["jinjafmt"], marker = "extra == 'dev'", specifier = "~=0.0" },
     { name = "tombi", marker = "extra == 'dev'", specifier = ">=0.7.32" },
     { name = "ty", marker = "extra == 'dev'", specifier = ">=0.0.7" },
-    { name = "typer", specifier = "~=0.24.1" },
+    { name = "typer", specifier = ">=0.12,<1" },
 ]
 provides-extras = ["dev", "docs"]
 
