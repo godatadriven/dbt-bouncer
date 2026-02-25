@@ -86,32 +86,31 @@ All documentation can be found on `dbt-bouncer` [documentation website](https://
 
     ```text
     $ dbt-bouncer run
-
-    [...]
-    Running checks... |################################| 20/20
-    Done. SUCCESS=19 WARN=0 ERROR=1
+    Running dbt-bouncer (X.X.X)...
+    Loaded config from dbt-bouncer-example.yml...
+    Validating conf...
+    Parsed artifacts for `dbt_bouncer_test_project` project:
+    ┏━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━┓
+    ┃ Artifact      ┃ Category        ┃ Count ┃
+    ┡━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━╇━━━━━━━┩
+    │ manifest.json │ Exposures       │     2 │
+    │               │ Macros          │     3 │
+    │               │ Nodes           │    12 │
+    │               │ Seeds           │     3 │
+    │               │ Semantic Models │     1 │
+    │               │ Snapshots       │     2 │
+    │               │ Sources         │     4 │
+    │               │ Tests           │    36 │
+    │               │ Unit Tests      │     3 │
+    └───────────────┴─────────────────┴───────┘
+    Assembled 366 checks, running...
+    Running checks... ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100%
+    `dbt-bouncer` failed. Please see below for more details or run `dbt-bouncer` with the `-v` flag.
     Failed checks:
-    | Check name               | Severity | Failure message                                                                       |
-    |--------------------------|----------|---------------------------------------------------------------------------------------|
-    | check_model_directories: | error    | AssertionError: `model` is located in `utilities`, this is not a valid sub-directory. |
+    Check name                          Severity  Failure message
+    check_model_names:48:orders         error     Models in the staging layer should always start with "stg_". - `stg_orders` does not match the supplied regex `^stg_`.
+    Done. SUCCESS=365 WARN=0 ERROR=1
     ```
-
-### Environment Variables
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `LOG_LEVEL` | Set to `DEBUG` for verbose logging | `INFO` |
-| `LOG_FORMAT` | Set to `json` for structured JSON logging | (human-readable) |
-
-Example:
-
-```shell
-# Debug logging
-LOG_LEVEL=DEBUG dbt-bouncer
-
-# JSON output for log aggregation
-LOG_FORMAT=json dbt-bouncer
-```
 
 ## Reporting bugs and contributing code
 

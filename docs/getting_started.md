@@ -52,17 +52,19 @@ When parsing `manifest.json`, `dbt-bouncer` displays a summary table of discover
 
 ```shell
 Parsed `manifest.json`, found `my_project` project:
-Category           Count
------------------  -----
-Exposures              0
-Macros                30
-Nodes                733
-Seeds                 12
-Semantic Models        0
-Snapshots             33
-Sources              287
-Tests                445
-Unit Tests             0
+┏━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━┓
+┃ Artifact      ┃ Category        ┃ Count ┃
+┡━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━╇━━━━━━━┩
+│ manifest.json │ Exposures       │     2 │
+│               │ Macros          │     3 │
+│               │ Nodes           │    12 │
+│               │ Seeds           │     3 │
+│               │ Semantic Models │     1 │
+│               │ Snapshots       │     2 │
+│               │ Sources         │     4 │
+│               │ Tests           │    36 │
+│               │ Unit Tests      │     3 │
+└───────────────┴─────────────────┴───────┘
 ```
 
 ### Running as an executable using [uv](https://github.com/astral-sh/uv)

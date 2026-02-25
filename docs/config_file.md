@@ -58,10 +58,9 @@ Produces this failure message:
 ```shell
 `dbt-bouncer` failed. Please see below for more details or run `dbt-bouncer` with the `-v` flag.
 Failed checks:
-| Check name                         | Severity   | Failure message                                                                                                                           |
-|------------------------------------|------------|-------------------------------------------------------------------------------------------------------------------------------------------|
-| check_model_names:36:orders        | error      | Models in the staging layer should always start with "stg_". - AssertionError: `orders` does not match the supplied regex `^stg_`.       |
-Done. SUCCESS=250 WARN=0 ERROR=1
+Check name                          Severity  Failure message
+check_model_names:48:orders         error     Models in the staging layer should always start with "stg_". - `stg_orders` does not match the supplied regex `^stg_`.
+Done. SUCCESS=365 WARN=0 ERROR=1
 ```
 
 ### Exclude and Include
