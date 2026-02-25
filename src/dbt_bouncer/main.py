@@ -189,7 +189,6 @@ def run_bouncer(
         bouncer_config=bouncer_config, dbt_artifacts_dir=dbt_artifacts_dir
     )
 
-    logging.info("Running checks...")
     from dbt_bouncer.context import BouncerContext, _rebuild_bouncer_context
     from dbt_bouncer.runner import runner
 

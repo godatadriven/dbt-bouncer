@@ -238,7 +238,7 @@ def parse_dbt_artifacts(
     string_io = io.StringIO()
     console = Console(file=string_io, force_terminal=False)
     console.print(table)
-    table_str = string_io.getvalue()
+    table_str = string_io.getvalue().rstrip()
 
     logging.info(
         f"Parsed artifacts for `{project_name}` project:\n{table_str}",
