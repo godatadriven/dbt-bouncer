@@ -204,7 +204,9 @@ def parse_dbt_artifacts(
     from rich.console import Console
     from rich.table import Table
 
-    project_name = bouncer_config.package_name or manifest_obj.manifest.metadata.project_name
+    project_name = (
+        bouncer_config.package_name or manifest_obj.manifest.metadata.project_name
+    )
     table = Table(title=None, show_header=True, header_style="bold")
     table.add_column("Artifact", justify="left")
     table.add_column("Category", justify="left")
@@ -220,16 +222,23 @@ def parse_dbt_artifacts(
     table.add_row("", "Tests", str(len(project_tests)))
     table.add_row("", "Unit Tests", str(len(project_unit_tests)))
 
-    if hasattr(bouncer_config, "catalog_checks") and bouncer_config.catalog_checks != []:
+    if (
+        hasattr(bouncer_config, "catalog_checks")
+        and bouncer_config.catalog_checks != []
+    ):
         table.add_row("catalog.json", "Nodes", str(len(project_catalog_nodes)))
         table.add_row("", "Sources", str(len(project_catalog_sources)))
 
-    if hasattr(bouncer_config, "run_results_checks") and bouncer_config.run_results_checks != []:
+    if (
+        hasattr(bouncer_config, "run_results_checks")
+        and bouncer_config.run_results_checks != []
+    ):
         table.add_row("run_results.json", "Results", str(len(project_run_results)))
 
-    console = Console(file=io.StringIO(), force_terminal=False)
+    string_io = io.StringIO()
+    console = Console(file=string_io, force_terminal=False)
     console.print(table)
-    table_str = console.file.getvalue()
+    table_str = string_io.getvalue()
 
     logging.info(
         f"Parsed artifacts for `{project_name}` project:\n{table_str}",

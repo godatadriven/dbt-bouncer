@@ -4,13 +4,7 @@ import logging
 from pathlib import Path
 from unittest.mock import MagicMock
 
-import orjson
-
 from dbt_bouncer.artifact_parsers.parsers_common import parse_dbt_artifacts
-from dbt_bouncer.artifact_parsers.parsers_manifest import (
-    DbtBouncerManifest,
-    parse_manifest,
-)
 
 
 def test_parse_manifest_artifact_table_output(caplog):

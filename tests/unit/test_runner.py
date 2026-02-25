@@ -5,6 +5,7 @@ from unittest.mock import MagicMock
 
 import pytest
 import typer
+from typer.main import get_command
 
 from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
     Metadata,
@@ -26,7 +27,7 @@ from dbt_bouncer.runner import _should_run_check, runner
 def test_runner_coverage(caplog, tmp_path):
     configure_console_logging(verbosity=0)
     ctx = typer.Context(
-        typer.main.get_command(app),
+        get_command(app),
         obj={
             "config_file_path": "",
             "custom_checks_dir": None,
@@ -153,7 +154,7 @@ def test_runner_coverage(caplog, tmp_path):
 
 def test_runner_failure():
     ctx = typer.Context(
-        typer.main.get_command(app),
+        get_command(app),
         obj={
             "config_file_path": "",
             "custom_checks_dir": None,
@@ -273,7 +274,7 @@ def test_runner_failure():
 def test_runner_skip(tmp_path):
     configure_console_logging(verbosity=0)
     ctx = typer.Context(
-        typer.main.get_command(app),
+        get_command(app),
         obj={
             "config_file_path": "",
             "custom_checks_dir": None,
@@ -437,7 +438,7 @@ def test_runner_skip(tmp_path):
 
 def test_runner_success():
     ctx = typer.Context(
-        typer.main.get_command(app),
+        get_command(app),
         obj={
             "config_file_path": "",
             "custom_checks_dir": None,
@@ -677,7 +678,7 @@ def test_runner_windows(caplog, tmp_path):
 def test_runner_check_id(tmp_path):
     configure_console_logging(verbosity=0)
     ctx = typer.Context(
-        typer.main.get_command(app),
+        get_command(app),
         obj={
             "config_file_path": "",
             "custom_checks_dir": None,
@@ -846,7 +847,7 @@ def test_runner_check_id(tmp_path):
 )
 def test_runner_output_only_failures(output_only_failures, num_checks, tmp_path):
     ctx = typer.Context(
-        typer.main.get_command(app),
+        get_command(app),
         obj={
             "config_file_path": "",
             "custom_checks_dir": None,
@@ -1010,7 +1011,7 @@ def test_runner_skip_catalog_check(tmp_path):
     """
     configure_console_logging(verbosity=0)
     ctx = typer.Context(
-        typer.main.get_command(app),
+        get_command(app),
         obj={
             "config_file_path": "",
             "custom_checks_dir": None,

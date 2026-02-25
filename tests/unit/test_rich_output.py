@@ -1,6 +1,5 @@
 """Tests for Rich output enhancements."""
 
-
 import pytest
 from typer.testing import CliRunner
 

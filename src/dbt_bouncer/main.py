@@ -540,9 +540,7 @@ def validate(
     """
     configure_console_logging(verbosity=0)
 
-    config_path = (
-        Path("dbt-bouncer.yml") if config_file is None else Path(config_file)
-    )
+    config_path = Path("dbt-bouncer.yml") if config_file is None else Path(config_file)
 
     if not config_path.exists():
         raise RuntimeError(f"Config file not found: {config_path}")
