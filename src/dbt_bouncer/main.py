@@ -3,6 +3,7 @@ from pathlib import Path, PurePath
 from typing import Annotated, Optional
 
 import typer
+from typer.main import get_command
 
 from dbt_bouncer.logger import configure_console_logging
 from dbt_bouncer.version import version as get_version
@@ -221,7 +222,7 @@ def run_bouncer(
 
 
 @app.callback(invoke_without_command=True)
-def cli(
+def main_callback(
     ctx: typer.Context,
     config_file: Annotated[
         Path,
@@ -586,3 +587,7 @@ def list_checks() -> None:
             docstring = (check_class.__doc__ or "").strip()
             description = docstring.splitlines()[0] if docstring else ""
             typer.echo(f"  {check_class.__name__}:\n      {description}\n")
+
+
+# For mkdocs-click compatibility - export the underlying Click command
+cli = get_command(app)

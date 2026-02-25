@@ -28,7 +28,7 @@ def test_cli_invalid_config_file():
 def test_cli_help():
     """Test CLI help output."""
     runner = CliRunner()
-    result = runner.invoke(app, ["--help"])
+    result = runner.invoke(app, ["--help"], color=False)
 
     assert result.exit_code == 0
     assert "--config-file" in result.output
