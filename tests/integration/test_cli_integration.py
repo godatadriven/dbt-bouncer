@@ -1,6 +1,21 @@
+import re
+
 from typer.testing import CliRunner
 
 from dbt_bouncer.main import app
+
+
+def strip_ansi(text: str) -> str:
+    """Remove ANSI escape codes from text.
+
+    Args:
+        text: Text containing ANSI escape codes.
+
+    Returns:
+        Text with ANSI codes removed.
+
+    """
+    return re.sub(r"\x1b\[[0-9;]*m", "", text)
 
 
 def test_list_checks_command():
@@ -28,10 +43,12 @@ def test_cli_invalid_config_file():
 def test_cli_help():
     """Test CLI help output."""
     runner = CliRunner()
-    result = runner.invoke(app, ["--help"], color=False)
+    result = runner.invoke(app, ["--help"])
 
     assert result.exit_code == 0
-    assert "--config-file" in result.output
+    # Strip ANSI codes since Rich may add them even in test environments
+    clean_output = strip_ansi(result.output)
+    assert "--config-file" in clean_output
 
 
 def test_init_help():
