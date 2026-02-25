@@ -1,4 +1,3 @@
-import logging
 import warnings
 from typing import TYPE_CHECKING
 
@@ -92,8 +91,5 @@ def parse_catalog(
         if k.split(".")[1]
         == (package_name or manifest_obj.manifest.metadata.project_name)
     ]
-    logging.info(
-        f"Parsed `catalog.json`: {len(project_catalog_nodes)} nodes, {len(project_catalog_sources)} sources.",
-    )
 
     return project_catalog_nodes, project_catalog_sources

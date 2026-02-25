@@ -1,4 +1,3 @@
-import logging
 import warnings
 from typing import TYPE_CHECKING, Any, TypeAlias
 
@@ -131,7 +130,5 @@ def parse_run_results_artifact(
         if r.unique_id.split(".")[1]
         == (package_name or manifest_obj.manifest.metadata.project_name)
     ]
-    logging.info(
-        f"Parsed `run_results.json`: {len(project_run_results)} results.",
-    )
+
     return project_run_results

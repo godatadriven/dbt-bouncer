@@ -10,8 +10,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, NotRequired, TypedDict
 
 import orjson
-from progress.bar import Bar
-from tabulate import tabulate
 
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.resource_type import ResourceType
@@ -271,18 +269,28 @@ def runner(
     for check in checks_to_run:
         batches[check["check"].__class__.__name__].append(check)
 
-    bar = Bar("Running checks...", max=len(checks_to_run))
+    from rich.console import Console
+    from rich.progress import BarColumn, Progress, TaskProgressColumn, TextColumn
+
+    console = Console()
     progress_lock = threading.Lock()
-    with ThreadPoolExecutor() as executor:
-        futures = {
-            executor.submit(_execute_batch, batch): batch for batch in batches.values()
-        }
-        for future in as_completed(futures):
-            batch_size = future.result()
-            with progress_lock:
-                for _ in range(batch_size):
-                    bar.next()
-    bar.finish()
+
+    with Progress(
+        TextColumn("[progress.description]{task.description}"),
+        BarColumn(),
+        TaskProgressColumn(),
+        console=console,
+    ) as progress:
+        task = progress.add_task("Running checks...", total=len(checks_to_run))
+        with ThreadPoolExecutor() as executor:
+            futures = {
+                executor.submit(_execute_batch, batch): batch
+                for batch in batches.values()
+            }
+            for future in as_completed(futures):
+                batch_size = future.result()
+                with progress_lock:
+                    progress.update(task, advance=batch_size)
 
     results = [
         {
@@ -325,18 +333,39 @@ def runner(
             if r["outcome"] == "failed"
         ]
         logging.debug(f"{failed_checks=}")
-        logger(
-            ("Failed checks:\n" if num_checks_error > 0 else "Warning checks:\n")
-            + tabulate(
-                failed_checks if ctx.show_all_failures else failed_checks[:25],
-                headers={
-                    "check_run_id": "Check name",
-                    "severity": "Severity",
-                    "failure_message": "Failure message",
-                },
-                tablefmt="github",
-            ),
+        from rich.console import Console
+        from rich.table import Table
+
+        console = Console()
+        title = "Failed checks:" if num_checks_error > 0 else "Warning checks:"
+
+        table = Table(
+            title=title,
+            title_justify="left",
+            box=None,
+            show_header=True,
+            header_style="bold",
         )
+        table.add_column("Check name")
+        table.add_column("Severity")
+        table.add_column("Failure message")
+
+        checks_to_display = (
+            failed_checks if ctx.show_all_failures else failed_checks[:25]
+        )
+
+        for check in checks_to_display:
+            # Determine color based on severity string
+            sev = str(check.get("severity", "")).lower()
+            sev_color = "red" if "error" in sev else "yellow"
+
+            table.add_row(
+                str(check.get("check_run_id", "")),
+                f"[{sev_color}]{sev}[/{sev_color}]",
+                str(check.get("failure_message", "")),
+            )
+
+        console.print(table)
 
         if ctx.create_pr_comment_file:
             create_github_comment_file(
@@ -347,9 +376,23 @@ def runner(
                 show_all_failures=ctx.show_all_failures,
             )
 
-    logging.info(
-        f"Done. SUCCESS={num_checks_success} WARN={num_checks_warn} ERROR={num_checks_error}",
-    )
+    from rich.console import Console
+    from rich.panel import Panel
+
+    console = Console()
+    if num_checks_error == 0 and num_checks_warn == 0:
+        console.print(
+            Panel(
+                f"[bold green]✓ All checks passed! SUCCESS={num_checks_success} WARN={num_checks_warn} ERROR={num_checks_error}[/bold green]",
+                border_style="green",
+            )
+        )
+    else:
+        console.print(
+            f"Done. [bold green]SUCCESS={num_checks_success}[/bold green] "
+            f"[bold yellow]WARN={num_checks_warn}[/bold yellow] "
+            f"[bold red]ERROR={num_checks_error}[/bold red]"
+        )
 
     results_to_save = (
         [r for r in results if r["outcome"] == "failed"]

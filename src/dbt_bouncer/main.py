@@ -1,10 +1,16 @@
 import logging
 from pathlib import Path, PurePath
+from typing import Annotated, Optional
 
-import click
+import typer
 
 from dbt_bouncer.logger import configure_console_logging
-from dbt_bouncer.version import version
+from dbt_bouncer.version import version as get_version
+
+app = typer.Typer(
+    no_args_is_help=False,
+    context_settings={"help_option_names": ["-h", "--help"]},
+)
 
 
 def run_bouncer(
@@ -42,7 +48,7 @@ def run_bouncer(
 
     """
     configure_console_logging(verbosity)
-    logging.info(f"Running dbt-bouncer ({version()})...")
+    logging.info(f"Running dbt-bouncer ({get_version()})...")
 
     # Validate `only` has valid values
     valid_check_categories = ["catalog_checks", "manifest_checks", "run_results_checks"]
@@ -214,247 +220,330 @@ def run_bouncer(
     return results[0]
 
 
-@click.group(invoke_without_command=True)
-@click.option(
-    "--config-file",
-    default=Path("dbt-bouncer.yml"),
-    help="Location of the YML config file.",
-    required=False,
-    type=PurePath,
-)
-@click.option(
-    "--create-pr-comment-file",
-    default=False,
-    help="Create a `github-comment.md` file that will be sent to GitHub as a PR comment. Defaults to True when `dbt-bouncer` is run as a GitHub Action.",
-    hidden=True,
-    required=False,
-    type=click.BOOL,
-)
-@click.option(
-    "--check",
-    default="",
-    help="Limit the checks run to specific check names, comma-separated. Examples: 'check_model_has_unique_test', 'check_model_names,check_source_freshness_populated'.",
-    required=False,
-    type=str,
-)
-@click.option(
-    "--only",
-    default="",
-    help="Limit the checks run to specific categories, comma-separated. Examples: 'manifest_checks', 'catalog_checks,manifest_checks'.",
-    required=False,
-    type=str,
-)
-@click.option(
-    "--output-file",
-    default=None,
-    help="Location of the file where check metadata will be saved.",
-    required=False,
-    type=Path,
-)
-@click.option(
-    "--output-format",
-    default="json",
-    help="Format for the output file or stdout when no output file is specified. Choices: csv, json, junit, sarif, tap. Defaults to json.",
-    required=False,
-    type=click.Choice(["csv", "json", "junit", "sarif", "tap"], case_sensitive=False),
-)
-@click.option(
-    "--output-only-failures",
-    help="If passed then only failures will be included in the output file.",
-    is_flag=True,
-)
-@click.option(
-    "--show-all-failures",
-    help="If passed then all failures will be printed to the console.",
-    is_flag=True,
-)
-@click.option("-v", "--verbosity", help="Verbosity.", default=0, count=True)
-@click.pass_context
-@click.version_option()
+@app.callback(invoke_without_command=True)
 def cli(
-    ctx: click.Context,
-    check: str,
-    config_file: PurePath,
-    create_pr_comment_file: bool,
-    only: str,
-    output_file: Path | None,
-    output_format: str,
-    output_only_failures: bool,
-    show_all_failures: bool,
-    verbosity: int,
+    ctx: typer.Context,
+    config_file: Annotated[
+        Path,
+        typer.Option(help="Location of the YML config file."),
+    ] = Path("dbt-bouncer.yml"),
+    create_pr_comment_file: Annotated[
+        bool,
+        typer.Option(
+            hidden=True,
+            help="Create a `github-comment.md` file that will be sent to GitHub as a PR comment. Defaults to True when `dbt-bouncer` is run as a GitHub Action.",
+        ),
+    ] = False,
+    check: Annotated[
+        str,
+        typer.Option(
+            help="Limit the checks run to specific check names, comma-separated. Examples: 'check_model_has_unique_test', 'check_model_names,check_source_freshness_populated'."
+        ),
+    ] = "",
+    only: Annotated[
+        str,
+        typer.Option(
+            help="Limit the checks run to specific categories, comma-separated. Examples: 'manifest_checks', 'catalog_checks,manifest_checks'."
+        ),
+    ] = "",
+    output_file: Annotated[
+        Optional[Path],
+        typer.Option(help="Location of the file where check metadata will be saved."),
+    ] = None,
+    output_format: Annotated[
+        str,
+        typer.Option(
+            help="Format for the output file or stdout when no output file is specified. Choices: csv, json, junit, sarif, tap. Defaults to json.",
+            case_sensitive=False,
+        ),
+    ] = "json",
+    output_only_failures: Annotated[
+        bool,
+        typer.Option(
+            help="If passed then only failures will be included in the output file."
+        ),
+    ] = False,
+    show_all_failures: Annotated[
+        bool,
+        typer.Option(
+            help="If passed then all failures will be printed to the console."
+        ),
+    ] = False,
+    verbosity: Annotated[
+        int,
+        typer.Option("-v", "--verbosity", help="Verbosity.", count=True),
+    ] = 0,
+    version: Annotated[
+        bool,
+        typer.Option("--version", help="Show version and exit."),
+    ] = False,
 ) -> None:
     """Entrypoint for dbt-bouncer.
 
     When invoked without a subcommand, runs checks for backwards compatibility.
     Use 'dbt-bouncer run' for the explicit command.
+
+    Raises:
+        Exit: If the version flag is passed or an invalid output format is provided.
+
     """
+    # Handle version flag
+    if version:
+        typer.echo(get_version())
+        raise typer.Exit()
+
+    # Validate output format
+    valid_formats = ["csv", "json", "junit", "sarif", "tap"]
+    if output_format.lower() not in valid_formats:
+        typer.echo(
+            f"Error: Invalid output format '{output_format}'. Choose from: {', '.join(valid_formats)}"
+        )
+        raise typer.Exit(1)
+
     if ctx.invoked_subcommand is None:
-        config_file_source = ctx.get_parameter_source("config_file").name  # type: ignore[union-attr]
+        # Determine config file source
+        config_file_source = (
+            "COMMANDLINE" if config_file != Path("dbt-bouncer.yml") else "DEFAULT"
+        )
+
         exit_code = run_bouncer(
             check=check,
             config_file=config_file,
             create_pr_comment_file=create_pr_comment_file,
             only=only,
             output_file=output_file,
-            output_format=output_format,
+            output_format=output_format.lower(),
             output_only_failures=output_only_failures,
             show_all_failures=show_all_failures,
             verbosity=verbosity,
             config_file_source=config_file_source,
         )
-        ctx.exit(exit_code)
+        raise typer.Exit(exit_code)
 
 
-@cli.command()
-@click.option(
-    "--config-file",
-    default=Path("dbt-bouncer.yml"),
-    help="Location of the YML config file.",
-    required=False,
-    type=PurePath,
-)
-@click.option(
-    "--create-pr-comment-file",
-    default=False,
-    help="Create a `github-comment.md` file that will be sent to GitHub as a PR comment. Defaults to True when `dbt-bouncer` is run as a GitHub Action.",
-    hidden=True,
-    required=False,
-    type=click.BOOL,
-)
-@click.option(
-    "--check",
-    default="",
-    help="Limit the checks run to specific check names, comma-separated. Examples: 'check_model_has_unique_test', 'check_model_names,check_source_freshness_populated'.",
-    required=False,
-    type=str,
-)
-@click.option(
-    "--only",
-    default="",
-    help="Limit the checks run to specific categories, comma-separated. Examples: 'manifest_checks', 'catalog_checks,manifest_checks'.",
-    required=False,
-    type=str,
-)
-@click.option(
-    "--output-file",
-    default=None,
-    help="Location of the file where check metadata will be saved.",
-    required=False,
-    type=Path,
-)
-@click.option(
-    "--output-format",
-    default="json",
-    help="Format for the output file or stdout when no output file is specified. Choices: csv, json, junit, sarif, tap. Defaults to json.",
-    required=False,
-    type=click.Choice(["csv", "json", "junit", "sarif", "tap"], case_sensitive=False),
-)
-@click.option(
-    "--output-only-failures",
-    help="If passed then only failures will be included in the output file.",
-    is_flag=True,
-)
-@click.option(
-    "--show-all-failures",
-    help="If passed then all failures will be printed to the console.",
-    is_flag=True,
-)
-@click.option("-v", "--verbosity", help="Verbosity.", default=0, count=True)
-@click.pass_context
+@app.command()
 def run(
-    ctx: click.Context,
-    check: str,
-    config_file: PurePath,
-    create_pr_comment_file: bool,
-    only: str,
-    output_file: Path | None,
-    output_format: str,
-    output_only_failures: bool,
-    show_all_failures: bool,
-    verbosity: int,
+    config_file: Annotated[
+        Optional[Path],
+        typer.Option(help="Location of the YML config file."),
+    ] = Path("dbt-bouncer.yml"),
+    create_pr_comment_file: Annotated[
+        bool,
+        typer.Option(
+            hidden=True,
+            help="Create a `github-comment.md` file that will be sent to GitHub as a PR comment. Defaults to True when `dbt-bouncer` is run as a GitHub Action.",
+        ),
+    ] = False,
+    check: Annotated[
+        str,
+        typer.Option(
+            help="Limit the checks run to specific check names, comma-separated.",
+            rich_help_panel="Check Selection",
+        ),
+    ] = "",
+    only: Annotated[
+        str,
+        typer.Option(
+            help="Limit the checks run to specific categories, comma-separated.",
+            rich_help_panel="Check Selection",
+        ),
+    ] = "",
+    output_file: Annotated[
+        Optional[Path],
+        typer.Option(
+            help="Location of the file where check metadata will be saved.",
+            rich_help_panel="Output Options",
+        ),
+    ] = None,
+    output_format: Annotated[
+        str,
+        typer.Option(
+            help="Format for the output file or stdout when no output file is specified. Choices: csv, json, junit, sarif, tap. Defaults to json.",
+            case_sensitive=False,
+            rich_help_panel="Output Options",
+        ),
+    ] = "json",
+    output_only_failures: Annotated[
+        bool,
+        typer.Option(
+            help="If passed then only failures will be included in the output file.",
+            rich_help_panel="Output Options",
+        ),
+    ] = False,
+    show_all_failures: Annotated[
+        bool,
+        typer.Option(
+            help="If passed then all failures will be printed to the console.",
+            rich_help_panel="Display Options",
+        ),
+    ] = False,
+    verbosity: Annotated[
+        int,
+        typer.Option(
+            "-v",
+            "--verbosity",
+            help="Verbosity.",
+            count=True,
+            rich_help_panel="Display Options",
+        ),
+    ] = 0,
 ) -> None:
-    """Run dbt-bouncer checks against your dbt project."""
-    config_file_source = ctx.get_parameter_source("config_file").name  # type: ignore[union-attr]
+    """Run dbt-bouncer checks against your dbt project.
+
+    [bold]Examples:[/bold]
+
+      Run all checks with default config:
+        [cyan]$ dbt-bouncer run[/cyan]
+
+      Run specific checks only:
+        [cyan]$ dbt-bouncer run --check check_model_names,check_model_has_unique_test[/cyan]
+
+      Run manifest checks only with custom config:
+        [cyan]$ dbt-bouncer run --only manifest_checks --config-file my-config.yml[/cyan]
+
+      Save results to JSON file:
+        [cyan]$ dbt-bouncer run --output-file results.json --output-format json[/cyan]
+
+    Raises:
+        Exit: If an invalid output format is provided or the checks fail.
+
+    """
+    # Validate output format
+    valid_formats = ["csv", "json", "junit", "sarif", "tap"]
+    if output_format.lower() not in valid_formats:
+        typer.echo(
+            f"Error: Invalid output format '{output_format}'. Choose from: {', '.join(valid_formats)}"
+        )
+        raise typer.Exit(1)
+
+    # Determine config file source
+    config_file_source = (
+        "COMMANDLINE" if config_file != Path("dbt-bouncer.yml") else "DEFAULT"
+    )
+
     exit_code = run_bouncer(
         check=check,
         config_file=config_file,
         create_pr_comment_file=create_pr_comment_file,
         only=only,
         output_file=output_file,
-        output_format=output_format,
+        output_format=output_format.lower(),
         output_only_failures=output_only_failures,
         show_all_failures=show_all_failures,
         verbosity=verbosity,
         config_file_source=config_file_source,
     )
-    ctx.exit(exit_code)
+    raise typer.Exit(exit_code)
 
 
-@cli.command()
+@app.command()
 def init() -> None:
-    """Create a basic dbt-bouncer.yml file.
+    """Create a dbt-bouncer.yml file interactively.
+
+    Asks questions to customize your initial configuration.
 
     Raises:
-        RuntimeError: If the config file already exists.
+        Abort: If the user declines to overwrite an existing config file.
 
     """
-    config_content = """# dbt-bouncer configuration file
-# This file is used to configure dbt-bouncer checks.
+    import yaml
+    from rich.console import Console
 
-dbt_artifacts_dir: target # Directory where dbt artifacts (manifest.json, etc.) are located.
+    console = Console()
+    console.print("\n[bold blue]🚀 dbt-bouncer initialization[/bold blue]\n")
 
-manifest_checks:
-  - name: check_model_description_populated
-    description: All models must have a description.
+    # Interactive prompts
+    artifacts_dir = typer.prompt(
+        "Where are your dbt artifacts located?", default="target"
+    )
 
-  - name: check_model_names
-    description: Models in the staging layer should always start with "stg_".
-    include: ^models/staging
-    model_name_pattern: ^stg_
+    check_descriptions = typer.confirm("Check for model descriptions?", default=True)
 
-  - name: check_model_has_unique_test
-    description: All models must have a unique test defined.
+    check_unique_tests = typer.confirm(
+        "Check for unique tests on models?", default=True
+    )
 
-# Example: check that relies on `catalog.json` being present
-# catalog_checks:
-#   - name: check_column_description_populated
-#     description: All columns in the marts layer must have a description.
-#     include: ^models/marts
-"""
-    configure_console_logging(verbosity=0)
+    check_naming = typer.confirm(
+        "Check naming conventions for staging models?", default=True
+    )
+
+    # Build config based on answers
+    manifest_checks = []
+
+    if check_descriptions:
+        manifest_checks.append(
+            {
+                "name": "check_model_description_populated",
+                "description": "All models must have a description.",
+            }
+        )
+
+    if check_unique_tests:
+        manifest_checks.append(
+            {
+                "name": "check_model_has_unique_test",
+                "description": "All models must have a unique test defined.",
+            }
+        )
+
+    if check_naming:
+        manifest_checks.append(
+            {
+                "name": "check_model_names",
+                "description": "Models in the staging layer should always start with 'stg_'.",
+                "include": "^models/staging",
+                "model_name_pattern": "^stg_",
+            }
+        )
+
+    config_dict = {
+        "dbt_artifacts_dir": artifacts_dir,
+        "manifest_checks": manifest_checks,
+    }
 
     config_path = Path("dbt-bouncer.yml")
     if config_path.exists():
-        raise RuntimeError(f"{config_path} already exists.")
+        overwrite = typer.confirm(
+            f"\n[yellow]Warning:[/yellow] {config_path} already exists. Overwrite?",
+            default=False,
+        )
+        if not overwrite:
+            console.print("[red]Aborted.[/red]")
+            raise typer.Abort()
 
+    # Write YAML config
     with Path(config_path).open("w") as f:
-        f.write(config_content)
+        yaml.dump(config_dict, f, default_flow_style=False, sort_keys=False)
 
-    logging.info(f"Created `{config_path}`.")
+    console.print(f"\n[bold green]✓ Created {config_path}[/bold green]")
+    console.print(
+        f"  Added [cyan]{len(manifest_checks)}[/cyan] checks to get you started.\n"
+    )
 
 
-@cli.command()
-@click.option(
-    "--config-file",
-    default=Path("dbt-bouncer.yml"),
-    help="Location of the YML config file.",
-    required=False,
-    type=PurePath,
-)
-@click.pass_context
-def validate(ctx: click.Context, config_file: PurePath) -> None:
+@app.command()
+def validate(
+    config_file: Annotated[
+        Optional[Path],
+        typer.Option(help="Location of the YML config file."),
+    ] = Path("dbt-bouncer.yml"),
+) -> None:
     """Validate the dbt-bouncer configuration file.
 
     Checks for YAML syntax errors and common configuration issues,
     reporting line numbers for any issues found.
 
     Raises:
+        Exit: If the config file is valid or if issues are found.
         RuntimeError: If the config file is not found.
 
     """
     configure_console_logging(verbosity=0)
 
-    config_path = Path(config_file)
+    config_path = (
+        Path("dbt-bouncer.yml") if config_file is None else Path(config_file)
+    )
+
     if not config_path.exists():
         raise RuntimeError(f"Config file not found: {config_path}")
 
@@ -464,15 +553,15 @@ def validate(ctx: click.Context, config_file: PurePath) -> None:
 
     if not issues:
         logging.info("Config file is valid!")
-        ctx.exit(0)
+        raise typer.Exit(0)
     else:
         logging.error(f"Found {len(issues)} issue(s) in config file:")
         for issue in issues:
             logging.error(f"  Line {issue['line']}: {issue['message']}")
-        ctx.exit(1)
+        raise typer.Exit(1)
 
 
-@cli.command(name="list")
+@app.command(name="list")
 def list_checks() -> None:
     """List all available dbt-bouncer checks, grouped by category."""
     import itertools
@@ -494,8 +583,8 @@ def list_checks() -> None:
     checks = sorted(get_check_objects(), key=lambda c: (category_key(c), c.__name__))
     for category, group in itertools.groupby(checks, key=category_key):
         label = category_labels.get(category, category)
-        click.echo(f"{label}:")
+        typer.echo(f"{label}:")
         for check_class in group:
             docstring = (check_class.__doc__ or "").strip()
             description = docstring.splitlines()[0] if docstring else ""
-            click.echo(f"  {check_class.__name__}:\n      {description}\n")
+            typer.echo(f"  {check_class.__name__}:\n      {description}\n")

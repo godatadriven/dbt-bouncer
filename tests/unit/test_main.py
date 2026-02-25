@@ -3,9 +3,9 @@ from pathlib import Path, PurePath
 
 import pytest
 import yaml
-from click.testing import CliRunner
+from typer.testing import CliRunner
 
-from dbt_bouncer.main import cli
+from dbt_bouncer.main import app
 from dbt_bouncer.utils import get_check_objects
 
 
@@ -48,7 +48,7 @@ def test_cli_output_formats(output_format, output_file_suffix, is_json, tmp_path
     # Run dbt-bouncer
     runner = CliRunner()
     result = runner.invoke(
-        cli,
+        app,
         [
             "--config-file",
             Path(tmp_path / "dbt-bouncer.yml").__str__(),
@@ -122,7 +122,7 @@ class CheckMyCustomCheck(BaseCheck):
     monkeypatch.chdir(tmp_path)
     runner = CliRunner()
     result = runner.invoke(
-        cli,
+        app,
         ["--config-file", PurePath("dbt-bouncer.yml").as_posix()],
     )
 
@@ -163,7 +163,7 @@ def test_cli_description(tmp_path):
     # Run dbt-bouncer
     runner = CliRunner()
     runner.invoke(
-        cli,
+        app,
         [
             "--config-file",
             Path(tmp_path / "dbt-bouncer.yml").__str__(),
@@ -224,7 +224,7 @@ def test_cli_exclude(tmp_path):
     # Run dbt-bouncer
     runner = CliRunner()
     runner.invoke(
-        cli,
+        app,
         [
             "--config-file",
             Path(tmp_path / "dbt-bouncer.yml").__str__(),
@@ -273,7 +273,7 @@ def test_cli_exclude_and_include(tmp_path):
     # Run dbt-bouncer
     runner = CliRunner()
     runner.invoke(
-        cli,
+        app,
         [
             "--config-file",
             Path(tmp_path / "dbt-bouncer.yml").__str__(),
@@ -327,7 +327,7 @@ def test_cli_global_exclude(tmp_path):
     # Run dbt-bouncer
     runner = CliRunner()
     runner.invoke(
-        cli,
+        app,
         [
             "--config-file",
             Path(tmp_path / "dbt-bouncer.yml").__str__(),
@@ -376,7 +376,7 @@ def test_cli_global_and_local_include(tmp_path):
     # Run dbt-bouncer
     runner = CliRunner()
     runner.invoke(
-        cli,
+        app,
         [
             "--config-file",
             Path(tmp_path / "dbt-bouncer.yml").__str__(),
@@ -425,7 +425,7 @@ def test_cli_global_exclude_and_include(tmp_path):
     # Run dbt-bouncer
     runner = CliRunner()
     runner.invoke(
-        cli,
+        app,
         [
             "--config-file",
             Path(tmp_path / "dbt-bouncer.yml").__str__(),
@@ -480,7 +480,7 @@ def test_cli_global_exclude_and_local_include(tmp_path):
     # Run dbt-bouncer
     runner = CliRunner()
     runner.invoke(
-        cli,
+        app,
         [
             "--config-file",
             Path(tmp_path / "dbt-bouncer.yml").__str__(),
@@ -534,7 +534,7 @@ def test_cli_global_include(tmp_path):
     # Run dbt-bouncer
     runner = CliRunner()
     runner.invoke(
-        cli,
+        app,
         [
             "--config-file",
             Path(tmp_path / "dbt-bouncer.yml").__str__(),
@@ -582,7 +582,7 @@ def test_cli_include(tmp_path):
     # Run dbt-bouncer
     runner = CliRunner()
     runner.invoke(
-        cli,
+        app,
         [
             "--config-file",
             Path(tmp_path / "dbt-bouncer.yml").__str__(),
@@ -672,7 +672,7 @@ def test_cli_materialization(manifest_check, num_checks, tmp_path):
     # Run dbt-bouncer
     runner = CliRunner()
     runner.invoke(
-        cli,
+        app,
         [
             "--config-file",
             Path(tmp_path / "dbt-bouncer.yml").__str__(),
@@ -749,7 +749,7 @@ def test_cli_only(only_value, exit_code, number_of_checks_run, tmp_path):
     # Run dbt-bouncer
     runner = CliRunner()
     result = runner.invoke(
-        cli,
+        app,
         [
             "--config-file",
             Path(tmp_path / "dbt-bouncer.yml").__str__(),
@@ -816,7 +816,7 @@ def test_cli_check(check_value, exit_code, number_of_checks_run, tmp_path):
     # Run dbt-bouncer
     runner = CliRunner()
     result = runner.invoke(
-        cli,
+        app,
         [
             "--config-file",
             Path(tmp_path / "dbt-bouncer.yml").__str__(),
@@ -888,7 +888,7 @@ def test_cli_check_combined_with_only(
         args.extend(["--only", only_value])
 
     runner = CliRunner()
-    result = runner.invoke(cli, args)
+    result = runner.invoke(app, args)
     assert result.exit_code == exit_code
 
     with Path.open(tmp_path / "results.json", "r") as f:
@@ -1302,7 +1302,7 @@ def test_cli_package_name(package_name, number_of_checks_run, tmp_path):
     # Run dbt-bouncer
     runner = CliRunner()
     result = runner.invoke(
-        cli,
+        app,
         [
             "--config-file",
             Path(tmp_path / "dbt-bouncer.yml").__str__(),
@@ -1344,7 +1344,7 @@ def test_cli_severity_default(tmp_path):
     # Run dbt-bouncer
     runner = CliRunner()
     result = runner.invoke(
-        cli,
+        app,
         [
             "--config-file",
             Path(tmp_path / "dbt-bouncer.yml").__str__(),
@@ -1394,7 +1394,7 @@ def test_cli_severity_error(tmp_path):
     # Run dbt-bouncer
     runner = CliRunner()
     result = runner.invoke(
-        cli,
+        app,
         [
             "--config-file",
             Path(tmp_path / "dbt-bouncer.yml").__str__(),
@@ -1445,7 +1445,7 @@ def test_cli_severity_global_priority(tmp_path):
     # Run dbt-bouncer
     runner = CliRunner()
     result = runner.invoke(
-        cli,
+        app,
         [
             "--config-file",
             Path(tmp_path / "dbt-bouncer.yml").__str__(),
@@ -1495,7 +1495,7 @@ def test_cli_severity_global_warn(tmp_path):
     # Run dbt-bouncer
     runner = CliRunner()
     result = runner.invoke(
-        cli,
+        app,
         [
             "--config-file",
             Path(tmp_path / "dbt-bouncer.yml").__str__(),
@@ -1545,7 +1545,7 @@ def test_cli_severity_warn(tmp_path):
     # Run dbt-bouncer
     runner = CliRunner()
     result = runner.invoke(
-        cli,
+        app,
         [
             "--config-file",
             Path(tmp_path / "dbt-bouncer.yml").__str__(),
@@ -1595,7 +1595,7 @@ def test_cli_unsupported_dbt_version(tmp_path):
     # Run dbt-bouncer
     runner = CliRunner()
     result = runner.invoke(
-        cli,
+        app,
         [
             "--config-file",
             Path(tmp_path / "dbt-bouncer.yml").__str__(),
@@ -1615,7 +1615,7 @@ def test_cli_unsupported_dbt_version(tmp_path):
 def test_cli_list():
     """Test that `dbt-bouncer list` outputs all built-in checks grouped by category."""
     runner = CliRunner()
-    result = runner.invoke(cli, ["list"])
+    result = runner.invoke(app, ["list"])
 
     assert result.exit_code == 0
     # Category headers are present
@@ -1667,7 +1667,7 @@ def test_cli_run_command(tmp_path):
     # Run dbt-bouncer with explicit "run" command
     runner = CliRunner()
     result = runner.invoke(
-        cli,
+        app,
         [
             "run",
             "--config-file",
@@ -1687,7 +1687,7 @@ def test_cli_run_command(tmp_path):
     # Verify backwards compatibility: run without "run" command
     output_file_legacy = tmp_path / "output_legacy.json"
     result_legacy = runner.invoke(
-        cli,
+        app,
         [
             "--config-file",
             Path(tmp_path / "dbt-bouncer.yml").__str__(),
