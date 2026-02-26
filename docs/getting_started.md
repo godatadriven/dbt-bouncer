@@ -48,21 +48,27 @@ conf={'dbt_artifacts_dir': 'dbt_project/target', 'catalog_checks': [{'name': 'ch
 Validating conf...
 ```
 
-When parsing `manifest.json`, `dbt-bouncer` displays a summary table of discovered resources:
+When parsing artifacts, `dbt-bouncer` displays a summary table of discovered resources:
 
 ```shell
-Parsed `manifest.json`, found `my_project` project:
-Category           Count
------------------  -----
-Exposures              0
-Macros                30
-Nodes                733
-Seeds                 12
-Semantic Models        0
-Snapshots             33
-Sources              287
-Tests                445
-Unit Tests             0
+            Parsed artifacts for
+            'dbt_bouncer_test_project'
+╭──────────────────┬─────────────────┬───────╮
+│ Artifact         │ Category        │ Count │
+├──────────────────┼─────────────────┼───────┤
+│ manifest.json    │ Exposures       │     2 │
+│                  │ Macros          │     3 │
+│                  │ Nodes           │    12 │
+│                  │ Seeds           │     3 │
+│                  │ Semantic Models │     1 │
+│                  │ Snapshots       │     2 │
+│                  │ Sources         │     4 │
+│                  │ Tests           │    36 │
+│                  │ Unit Tests      │     3 │
+│ catalog.json     │ Nodes           │    13 │
+│                  │ Sources         │     0 │
+│ run_results.json │ Results         │    51 │
+╰──────────────────┴─────────────────┴───────╯
 ```
 
 ### Running as an executable using [uv](https://github.com/astral-sh/uv)

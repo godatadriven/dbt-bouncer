@@ -3,17 +3,18 @@ from contextlib import nullcontext as does_not_raise
 from pathlib import Path
 from unittest import mock
 
-import click
 import pytest
+import typer
 import yaml
 from pydantic import PydanticUserError
+from typer.main import get_command
 
 from dbt_bouncer.config_file_validator import (
     get_config_file_path,
     load_config_file_contents,
     validate_conf,
 )
-from dbt_bouncer.main import cli
+from dbt_bouncer.main import app
 
 
 def test_get_file_config_path_commandline(tmp_path):
@@ -140,8 +141,8 @@ def test_load_config_file_contents_pyproject_toml_no_bouncer_section(
 
 def test_validate_conf_target_default_value(monkeypatch):
     monkeypatch.delenv("DBT_PROJECT_DIR", raising=False)
-    ctx = click.Context(
-        cli,
+    ctx = typer.Context(
+        get_command(app),
         obj={
             "config_file_path": "",
             "custom_checks_dir": None,
@@ -163,8 +164,8 @@ def test_validate_conf_target_default_value(monkeypatch):
 
 
 def test_validate_conf_target_env_var():
-    ctx = click.Context(
-        cli,
+    ctx = typer.Context(
+        get_command(app),
         obj={
             "config_file_path": "",
             "custom_checks_dir": None,
@@ -188,8 +189,8 @@ def test_validate_conf_target_env_var():
 
 def test_validate_conf_target_override(monkeypatch):
     monkeypatch.delenv("DBT_PROJECT_DIR", raising=False)
-    ctx = click.Context(
-        cli,
+    ctx = typer.Context(
+        get_command(app),
         obj={
             "config_file_path": "",
             "custom_checks_dir": None,
@@ -229,8 +230,8 @@ def test_validate_conf_invalid(f, expectation):
     with Path.open(f, "r") as fp:
         conf = yaml.safe_load(fp)
 
-    ctx = click.Context(
-        cli,
+    ctx = typer.Context(
+        get_command(app),
         obj={
             "config_file_path": "",
             "custom_checks_dir": None,
@@ -246,8 +247,8 @@ def test_validate_conf_invalid(f, expectation):
 
 
 def test_validate_conf_incorrect_name():
-    ctx = click.Context(
-        cli,
+    ctx = typer.Context(
+        get_command(app),
         obj={
             "config_file_path": "",
             "custom_checks_dir": None,
@@ -269,8 +270,8 @@ def test_validate_conf_incorrect_name():
 
 
 def test_validate_conf_incorrect_names():
-    ctx = click.Context(
-        cli,
+    ctx = typer.Context(
+        get_command(app),
         obj={
             "config_file_path": "",
             "custom_checks_dir": None,
@@ -313,8 +314,8 @@ def test_validate_conf_valid(f, expectation):
     with Path.open(f, "r") as fp:
         conf = yaml.safe_load(fp)
 
-    ctx = click.Context(
-        cli,
+    ctx = typer.Context(
+        get_command(app),
         obj={
             "config_file_path": "",
             "custom_checks_dir": None,

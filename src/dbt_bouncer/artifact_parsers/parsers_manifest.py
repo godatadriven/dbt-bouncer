@@ -1,10 +1,8 @@
-import logging
 import warnings
 from enum import Enum
-from typing import Any, TypeAlias, cast
+from typing import Any, TypeAlias
 
 from pydantic import BaseModel
-from tabulate import tabulate
 
 from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import ManifestLatest
 from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
@@ -257,7 +255,7 @@ def parse_manifest_artifact(
             case "model" if v.package_name == target_package:
                 project_models.append(
                     DbtBouncerModel(
-                        model=cast("Any", v),
+                        model=v,
                         original_file_path=str(clean_path_str(v.original_file_path)),
                         unique_id=k,
                     ),
@@ -266,7 +264,7 @@ def parse_manifest_artifact(
                 project_seeds.append(
                     DbtBouncerSeed(
                         original_file_path=str(clean_path_str(v.original_file_path)),
-                        seed=cast("Any", v),
+                        seed=v,
                         unique_id=k,
                     ),
                 )
@@ -274,7 +272,7 @@ def parse_manifest_artifact(
                 project_snapshots.append(
                     DbtBouncerSnapshot(
                         original_file_path=str(clean_path_str(v.original_file_path)),
-                        snapshot=cast("Any", v),
+                        snapshot=v,
                         unique_id=k,
                     ),
                 )
@@ -282,7 +280,7 @@ def parse_manifest_artifact(
                 project_tests.append(
                     DbtBouncerTest(
                         original_file_path=str(clean_path_str(v.original_file_path)),
-                        test=cast("Any", v),
+                        test=v,
                         unique_id=k,
                     ),
                 )
@@ -302,7 +300,7 @@ def parse_manifest_artifact(
     project_semantic_models = [
         DbtBouncerSemanticModel(
             original_file_path=str(clean_path_str(v.original_file_path)),
-            semantic_model=cast("Any", v),
+            semantic_model=v,
             unique_id=k,
         )
         for k, v in manifest_obj.manifest.semantic_models.items()
@@ -313,7 +311,7 @@ def parse_manifest_artifact(
     project_sources = [
         DbtBouncerSource(
             original_file_path=str(clean_path_str(v.original_file_path)),
-            source=cast("Any", v),
+            source=v,
             unique_id=k,
         )
         for k, v in manifest_obj.manifest.sources.items()
@@ -321,24 +319,6 @@ def parse_manifest_artifact(
         == (package_name or manifest_obj.manifest.metadata.project_name)
     ]
 
-    project_name = package_name or manifest_obj.manifest.metadata.project_name
-    table_data = [
-        ["Exposures", len(project_exposures)],
-        ["Macros", len(project_macros)],
-        ["Nodes", len(project_models)],
-        ["Seeds", len(project_seeds)],
-        ["Semantic Models", len(project_semantic_models)],
-        ["Snapshots", len(project_snapshots)],
-        ["Sources", len(project_sources)],
-        ["Tests", len(project_tests)],
-        ["Unit Tests", len(project_unit_tests)],
-    ]
-    table = tabulate(
-        table_data, headers=["Category", "Count"], colalign=("left", "right")
-    )
-    logging.info(
-        f"Parsed `manifest.json`, found `{project_name}` project:\n{table}",
-    )
     return (
         project_exposures,
         project_macros,

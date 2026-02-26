@@ -2,27 +2,24 @@
 
 import logging
 from pathlib import Path
+from unittest.mock import MagicMock
 
-import orjson
-
-from dbt_bouncer.artifact_parsers.parsers_manifest import (
-    DbtBouncerManifest,
-    parse_manifest,
-    parse_manifest_artifact,
-)
+from dbt_bouncer.artifact_parsers.parsers_common import parse_dbt_artifacts
 
 
 def test_parse_manifest_artifact_table_output(caplog):
-    """Test that parse_manifest_artifact outputs a table format."""
+    """Test that parse_dbt_artifacts outputs a table format."""
     caplog.set_level(logging.INFO)
 
     # Load a test manifest
-    manifest_path = Path("tests/fixtures/dbt_111/target/manifest.json")
-    manifest = parse_manifest(manifest=orjson.loads(manifest_path.read_bytes()))
-    manifest_obj = DbtBouncerManifest(**{"manifest": manifest})
+    dbt_artifacts_dir = Path("tests/fixtures/dbt_111/target")
+    bouncer_config = MagicMock()
+    bouncer_config.package_name = "dbt_bouncer_test_project"
+    bouncer_config.catalog_checks = []
+    bouncer_config.run_results_checks = []
 
-    # Parse the manifest
-    parse_manifest_artifact(manifest_obj)
+    # Parse all artifacts (this will trigger the logging in parsers_common.py)
+    parse_dbt_artifacts(bouncer_config, dbt_artifacts_dir)
 
     # Check that the log contains the table header
     assert any("Category" in record for record in caplog.messages)
@@ -30,7 +27,7 @@ def test_parse_manifest_artifact_table_output(caplog):
 
     # Check that the log contains expected categories
     manifest_log = next(
-        record for record in caplog.messages if "Parsed `manifest.json`" in record
+        record for record in caplog.messages if "Parsed artifacts" in record
     )
     assert "Exposures" in manifest_log
     assert "Macros" in manifest_log
@@ -48,27 +45,29 @@ def test_parse_manifest_artifact_table_format(caplog):
     caplog.set_level(logging.INFO)
 
     # Load a test manifest
-    manifest_path = Path("tests/fixtures/dbt_111/target/manifest.json")
-    manifest = parse_manifest(manifest=orjson.loads(manifest_path.read_bytes()))
-    manifest_obj = DbtBouncerManifest(**{"manifest": manifest})
+    dbt_artifacts_dir = Path("tests/fixtures/dbt_111/target")
+    bouncer_config = MagicMock()
+    bouncer_config.package_name = "dbt_bouncer_test_project"
+    bouncer_config.catalog_checks = []
+    bouncer_config.run_results_checks = []
 
-    # Parse the manifest
-    parse_manifest_artifact(manifest_obj)
+    # Parse all artifacts
+    parse_dbt_artifacts(bouncer_config, dbt_artifacts_dir)
 
     # Get the manifest log message
     manifest_log = next(
-        record for record in caplog.messages if "Parsed `manifest.json`" in record
+        record for record in caplog.messages if "Parsed artifacts" in record
     )
 
-    # Check that it contains table separators (from tabulate)
+    # Check that it contains table separators
     assert "---" in manifest_log or "━" in manifest_log or "─" in manifest_log
 
     # Check that counts are present and numeric
     import re
 
-    # Extract all lines that look like "Category  Number"
+    # Extract all lines that look like "│ Category        │ Count │"
     category_lines = re.findall(
-        r"(Exposures|Macros|Nodes|Seeds|Semantic Models|Snapshots|Sources|Tests|Unit Tests)\s+(\d+)",
+        r"(Exposures|Macros|Nodes|Seeds|Semantic Models|Snapshots|Sources|Tests|Unit Tests).*?│\s+(\d+)",
         manifest_log,
     )
     assert len(category_lines) == 9, (

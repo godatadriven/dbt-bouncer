@@ -6,7 +6,7 @@ from collections.abc import Mapping
 from pathlib import Path, PurePath
 from typing import TYPE_CHECKING, Any
 
-import click
+import typer
 import yaml
 from pydantic import ValidationError
 
@@ -125,7 +125,7 @@ def load_config_file_contents(
                     and os.getenv("CREATE_DBT_BOUNCER_CONFIG_FILE") != "false"
                     and (
                         os.getenv("CREATE_DBT_BOUNCER_CONFIG_FILE") == "true"
-                        or click.confirm(
+                        or typer.confirm(
                             "Do you want `dbt-bouncer` to create a `dbt-bouncer.yml` file in the current directory?"
                         )
                     )

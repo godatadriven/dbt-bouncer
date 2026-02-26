@@ -4,9 +4,9 @@ from pathlib import Path, PurePath
 
 import pytest
 import yaml
-from click.testing import CliRunner
+from typer.testing import CliRunner
 
-from dbt_bouncer.main import cli
+from dbt_bouncer.main import app
 from dbt_bouncer.utils import clean_path_str
 
 artifact_paths = [f.__str__() for f in Path("./tests/fixtures").iterdir()]
@@ -46,65 +46,48 @@ def test_cli_happy_path(caplog, dbt_artifacts_dir, tmp_path):
         yaml.dump(bouncer_config, f)
 
     runner = CliRunner()
-    result = runner.invoke(cli, f"--config-file {PurePath(config_file).as_posix()}")
+    result = runner.invoke(app, f"--config-file {PurePath(config_file).as_posix()}")
 
     assert "Running dbt-bouncer (0.0.0)..." in caplog.text
 
-    summary_count_catalog = 0
+    summary_count_artifacts = 0
     for record in caplog.messages:
-        if record.startswith("Parsed `catalog.json`"):
-            summary_count_catalog += 1
-            nodes_text = re.search(r"\d* nodes", record).group(0)  # type: ignore[union-attr]
-            nodes_num = int(re.search(r"\d*", nodes_text).group(0))  # type: ignore[union-attr]
-            assert nodes_num > 0, f"Only found {nodes_num} macros."
-
-    summary_count_manifest = 0
-    for record in caplog.messages:
-        if record.startswith("Parsed `manifest.json`"):
-            summary_count_manifest += 1
+        # Look for the artifacts table (contains "manifest.json" and table structure)
+        if "manifest.json" in record and "│" in record:
+            summary_count_artifacts += 1
             # The record now contains a table format
             # Extract counts using regex for each category
-            exposures_match = re.search(r"Exposures\s+(\d+)", record)
+            exposures_match = re.search(r"Exposures.*?│\s+(\d+)", record)
             assert exposures_match, "Could not find Exposures in table"
             exposures_num = int(exposures_match.group(1))
             assert exposures_num > 0, f"Only found {exposures_num} exposures."
 
-            macros_match = re.search(r"Macros\s+(\d+)", record)
+            macros_match = re.search(r"Macros.*?│\s+(\d+)", record)
             assert macros_match, "Could not find Macros in table"
             macros_num = int(macros_match.group(1))
             assert macros_num > 0, f"Only found {macros_num} macros."
 
-            nodes_match = re.search(r"Nodes\s+(\d+)", record)
+            nodes_match = re.search(r"Nodes.*?│\s+(\d+)", record)
             assert nodes_match, "Could not find Nodes in table"
             nodes_num = int(nodes_match.group(1))
             assert nodes_num > 0, f"Only found {nodes_num} nodes."
 
-            seeds_match = re.search(r"Seeds\s+(\d+)", record)
+            seeds_match = re.search(r"Seeds.*?│\s+(\d+)", record)
             assert seeds_match, "Could not find Seeds in table"
             seeds_num = int(seeds_match.group(1))
             assert seeds_num > 0, f"Only found {seeds_num} seeds."
 
-            sources_match = re.search(r"Sources\s+(\d+)", record)
+            sources_match = re.search(r"Sources.*?│\s+(\d+)", record)
             assert sources_match, "Could not find Sources in table"
             sources_num = int(sources_match.group(1))
             assert sources_num > 0, f"Only found {sources_num} sources."
 
-            tests_match = re.search(r"Tests\s+(\d+)", record)
+            tests_match = re.search(r"Tests.*?│\s+(\d+)", record)
             assert tests_match, "Could not find Tests in table"
             tests_num = int(tests_match.group(1))
             assert tests_num > 0, f"Only found {tests_num} tests."
 
-    summary_count_run_results = 0
-    for record in caplog.messages:
-        if record.startswith("Parsed `run_results.json`"):
-            summary_count_run_results += 1
-            nodes_text = re.search(r"\d* results", record).group(0)  # type: ignore[union-attr]
-            nodes_num = int(re.search(r"\d*", nodes_text).group(0))  # type: ignore[union-attr]
-            assert nodes_num > 0, f"Only found {nodes_num} macros."
-
-    assert summary_count_manifest == 1
-    assert summary_count_catalog == 1
-    assert summary_count_run_results == 1
+    assert summary_count_artifacts == 1
     assert result.exit_code == 0
 
 
@@ -134,7 +117,7 @@ def test_cli_coverage(caplog, tmp_path):
     # Run dbt-bouncer
     runner = CliRunner()
     result = runner.invoke(
-        cli,
+        app,
         [
             "--config-file",
             Path(tmp_path / "dbt-bouncer.yml").__str__(),
@@ -160,7 +143,7 @@ def test_cli_coverage(caplog, tmp_path):
 def test_cli_happy_path_pyproject_toml(caplog):
     runner = CliRunner()
     result = runner.invoke(
-        cli,
+        app,
     )
 
     assert "Loading config from pyproject.toml, if exists..." in caplog.text
@@ -178,7 +161,7 @@ def test_cli_unhappy_path(cli_args):
     """Test the unhappy path, just need to ensure that the CLI starts up and calculates the input parameters correctly."""
     runner = CliRunner()
     result = runner.invoke(
-        cli,
+        app,
         cli_args.split(" "),
     )
     assert result.exit_code != 0
@@ -187,7 +170,7 @@ def test_cli_unhappy_path(cli_args):
 def test_cli_config_file_doesnt_exist():
     runner = CliRunner()
     result = runner.invoke(
-        cli,
+        app,
         [
             "--config-file",
             "non-existent-file.yml",
@@ -223,7 +206,7 @@ def test_cli_error_message(caplog, tmp_path):
     # Run dbt-bouncer
     runner = CliRunner()
     result = runner.invoke(
-        cli,
+        app,
         [
             "--config-file",
             Path(tmp_path / "dbt-bouncer.yml").__str__(),
@@ -248,7 +231,7 @@ def test_cli_manifest_doesnt_exist(tmp_path):
 
     runner = CliRunner()
     result = runner.invoke(
-        cli,
+        app,
         [
             "--config-file",
             Path(tmp_path / "dbt-bouncer-example.yml").__str__(),

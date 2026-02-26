@@ -2,16 +2,16 @@ import json
 import logging
 
 import pytest
-from click.testing import CliRunner
+from typer.testing import CliRunner
 
 from dbt_bouncer.logger import JsonFormatter, configure_console_logging
-from dbt_bouncer.main import cli
+from dbt_bouncer.main import app
 
 
 def test_logging_debug_cli(caplog) -> None:
     runner = CliRunner()
     runner.invoke(
-        cli,
+        app,
         ["--config-file", "dbt-bouncer-example.yml", "-v"],
     )
     assert "Running dbt-bouncer (0.0.0)..." in caplog.text
@@ -24,7 +24,7 @@ def test_logging_debug_env_var(caplog) -> None:
 
         runner = CliRunner()
         runner.invoke(
-            cli,
+            app,
             ["--config-file", "dbt-bouncer-example.yml"],
         )
         assert "Running dbt-bouncer (0.0.0)..." in caplog.text
@@ -36,7 +36,7 @@ def test_logging_debug_env_var(caplog) -> None:
 def test_logging_info(caplog) -> None:
     runner = CliRunner()
     runner.invoke(
-        cli,
+        app,
         ["--config-file", "dbt-bouncer-example.yml"],
     )
     assert "Running dbt-bouncer (0.0.0)..." in caplog.text

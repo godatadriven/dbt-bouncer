@@ -198,6 +198,58 @@ def parse_dbt_artifacts(
     else:
         project_run_results = []
 
+    import io
+    import logging
+
+    from rich.console import Console
+    from rich.table import Table
+
+    project_name = (
+        bouncer_config.package_name or manifest_obj.manifest.metadata.project_name
+    )
+    from rich import box
+
+    table = Table(
+        title=f"[bold cyan]Parsed artifacts for '{project_name}'[/bold cyan]",
+        show_header=True,
+        header_style="bold cyan",
+        box=box.ROUNDED,
+        border_style="cyan",
+    )
+    table.add_column("Artifact", justify="left", style="dim")
+    table.add_column("Category", justify="left", style="bright_white")
+    table.add_column("Count", justify="right", style="bold green")
+
+    table.add_row("manifest.json", "Exposures", str(len(project_exposures)))
+    table.add_row("", "Macros", str(len(project_macros)))
+    table.add_row("", "Nodes", str(len(project_models)))
+    table.add_row("", "Seeds", str(len(project_seeds)))
+    table.add_row("", "Semantic Models", str(len(project_semantic_models)))
+    table.add_row("", "Snapshots", str(len(project_snapshots)))
+    table.add_row("", "Sources", str(len(project_sources)))
+    table.add_row("", "Tests", str(len(project_tests)))
+    table.add_row("", "Unit Tests", str(len(project_unit_tests)))
+
+    if (
+        hasattr(bouncer_config, "catalog_checks")
+        and bouncer_config.catalog_checks != []
+    ):
+        table.add_row("catalog.json", "Nodes", str(len(project_catalog_nodes)))
+        table.add_row("", "Sources", str(len(project_catalog_sources)))
+
+    if (
+        hasattr(bouncer_config, "run_results_checks")
+        and bouncer_config.run_results_checks != []
+    ):
+        table.add_row("run_results.json", "Results", str(len(project_run_results)))
+
+    string_io = io.StringIO()
+    console = Console(file=string_io, force_terminal=False)
+    console.print(table)
+    table_str = string_io.getvalue().rstrip()
+
+    logging.info(f"\n{table_str}")
+
     return (
         manifest_obj,
         project_exposures,
