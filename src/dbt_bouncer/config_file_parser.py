@@ -5,7 +5,7 @@ from functools import lru_cache, reduce
 from pathlib import Path
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, create_model
 from typing_extensions import Annotated
 
 from dbt_bouncer.utils import get_check_objects
@@ -110,11 +110,10 @@ def create_bouncer_conf_class(
         check_type="run_results", custom_checks_dir=custom_checks_dir
     )
 
-    class DbtBouncerConf(DbtBouncerConfBase):
-        """Config file contents for dbt-bouncer."""
-
-        catalog_checks: catalog_type = Field(default=[])  # type: ignore[valid-type]
-        manifest_checks: manifest_type = Field(default=[])  # type: ignore[valid-type]
-        run_results_checks: run_results_type = Field(default=[])  # type: ignore[valid-type]
-
-    return DbtBouncerConf
+    return create_model(  # type: ignore[call-overload]
+        "DbtBouncerConf",
+        __base__=DbtBouncerConfBase,
+        catalog_checks=(catalog_type, Field(default=[])),
+        manifest_checks=(manifest_type, Field(default=[])),
+        run_results_checks=(run_results_type, Field(default=[])),
+    )
