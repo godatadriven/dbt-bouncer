@@ -256,6 +256,79 @@ def lint_config_file(config_file_path: Path) -> list[dict[str, Any]]:
     return issues
 
 
+def _import_artifact_types() -> dict[str, Any]:
+    """Import all artifact parser types needed for Pydantic model_rebuild().
+
+    These types are used in the type annotations of DbtBouncerConf fields.
+    Returning them as an explicit namespace dict avoids polluting the module
+    scope and removes the need for ``# noqa: F401`` suppression comments.
+
+    Returns:
+        dict[str, Any]: Namespace mapping type names to their classes.
+
+    """
+    import warnings
+
+    from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
+        Exposures,
+        Macros,
+        UnitTests,
+    )
+    from dbt_bouncer.artifact_parsers.parsers_catalog import DbtBouncerCatalogNode
+    from dbt_bouncer.artifact_parsers.parsers_manifest import (
+        DbtBouncerExposureBase,
+        DbtBouncerManifest,
+        DbtBouncerModel,
+        DbtBouncerModelBase,
+        DbtBouncerSeed,
+        DbtBouncerSeedBase,
+        DbtBouncerSemanticModel,
+        DbtBouncerSemanticModelBase,
+        DbtBouncerSnapshot,
+        DbtBouncerSnapshotBase,
+        DbtBouncerSource,
+        DbtBouncerSourceBase,
+        DbtBouncerTest,
+        DbtBouncerTestBase,
+    )
+    from dbt_bouncer.artifact_parsers.parsers_run_results import (
+        DbtBouncerRunResult,
+        DbtBouncerRunResultBase,
+    )
+    from dbt_bouncer.checks.common import NestedDict
+
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", category=UserWarning)
+        from dbt_artifacts_parser.parsers.catalog.catalog_v1 import (
+            Nodes as CatalogNodes,
+        )
+
+    return {
+        "CatalogNodes": CatalogNodes,
+        "DbtBouncerCatalogNode": DbtBouncerCatalogNode,
+        "DbtBouncerExposureBase": DbtBouncerExposureBase,
+        "DbtBouncerManifest": DbtBouncerManifest,
+        "DbtBouncerModel": DbtBouncerModel,
+        "DbtBouncerModelBase": DbtBouncerModelBase,
+        "DbtBouncerRunResult": DbtBouncerRunResult,
+        "DbtBouncerRunResultBase": DbtBouncerRunResultBase,
+        "DbtBouncerSeed": DbtBouncerSeed,
+        "DbtBouncerSeedBase": DbtBouncerSeedBase,
+        "DbtBouncerSemanticModel": DbtBouncerSemanticModel,
+        "DbtBouncerSemanticModelBase": DbtBouncerSemanticModelBase,
+        "DbtBouncerSnapshot": DbtBouncerSnapshot,
+        "DbtBouncerSnapshotBase": DbtBouncerSnapshotBase,
+        "DbtBouncerSource": DbtBouncerSource,
+        "DbtBouncerSourceBase": DbtBouncerSourceBase,
+        "DbtBouncerTest": DbtBouncerTest,
+        "DbtBouncerTestBase": DbtBouncerTestBase,
+        "Exposures": Exposures,
+        "Macros": Macros,
+        "NestedDict": NestedDict,
+        "UnitTests": UnitTests,
+    }
+
+
 def validate_conf(
     check_categories,  #: list[Literal["catalog_checks"], Literal["manifest_checks"], Literal["run_results_checks"]],
     config_file_contents: dict[str, Any],
@@ -272,13 +345,7 @@ def validate_conf(
     """
     logging.info("Validating conf...")
 
-    # Import all types needed by DbtBouncerConf before model_rebuild().
-    # Since the class has fields for all check categories, all referenced
-    # types must be importable regardless of which categories are in the config.
-    import warnings
-
-    from dbt_bouncer.checks.common import NestedDict  # noqa: F401
-
+    # Load check modules conditionally based on which categories are configured.
     if "catalog_checks" in check_categories:
         import dbt_bouncer.checks.catalog
     if "manifest_checks" in check_categories:
@@ -286,51 +353,14 @@ def validate_conf(
     if "run_results_checks" in check_categories:
         import dbt_bouncer.checks.run_results  # noqa: F401
 
-    from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
-        Exposures,  # noqa: F401
-        Macros,  # noqa: F401
-        UnitTests,  # noqa: F401
-    )
-    from dbt_bouncer.artifact_parsers.parsers_catalog import (  # noqa: F401
-        DbtBouncerCatalogNode,
-    )
-    from dbt_bouncer.artifact_parsers.parsers_manifest import (  # noqa: F401
-        DbtBouncerExposureBase,
-        DbtBouncerManifest,
-        DbtBouncerModel,
-        DbtBouncerModelBase,
-        DbtBouncerSeed,
-        DbtBouncerSeedBase,
-        DbtBouncerSemanticModel,
-        DbtBouncerSemanticModelBase,
-        DbtBouncerSnapshot,
-        DbtBouncerSnapshotBase,
-        DbtBouncerSource,
-        DbtBouncerSourceBase,
-        DbtBouncerTest,
-        DbtBouncerTestBase,
-    )
-    from dbt_bouncer.artifact_parsers.parsers_run_results import (  # noqa: F401
-        DbtBouncerRunResult,
-        DbtBouncerRunResultBase,
-    )
-
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", category=UserWarning)
-        from dbt_artifacts_parser.parsers.catalog.catalog_v1 import (
-            Nodes as CatalogNodes,  # noqa: F401
-        )
-
     from dbt_bouncer.config_file_parser import create_bouncer_conf_class
 
     DbtBouncerConf = create_bouncer_conf_class(custom_checks_dir=custom_checks_dir)  # noqa: N806
-    DbtBouncerConf.model_rebuild()
+    DbtBouncerConf.model_rebuild(_types_namespace=_import_artifact_types())
 
     try:
         return DbtBouncerConf(**config_file_contents)
     except ValidationError as e:
-        import jellyfish
-
         accepted_names = list(get_check_registry(custom_checks_dir).keys())
         error_message: list[str] = []
         for error in e.errors():
