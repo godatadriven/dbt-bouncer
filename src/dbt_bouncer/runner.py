@@ -10,6 +10,11 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, NotRequired, TypedDict
 
 import orjson
+from rich import box
+from rich.console import Console
+from rich.panel import Panel
+from rich.progress import BarColumn, Progress, TaskProgressColumn, TextColumn
+from rich.table import Table
 
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.resource_type import ResourceType
@@ -269,9 +274,6 @@ def runner(
     for check in checks_to_run:
         batches[check["check"].__class__.__name__].append(check)
 
-    from rich.console import Console
-    from rich.progress import BarColumn, Progress, TaskProgressColumn, TextColumn
-
     console = Console()
     progress_lock = threading.Lock()
 
@@ -333,12 +335,6 @@ def runner(
             if r["outcome"] == "failed"
         ]
         logging.debug(f"{failed_checks=}")
-        from rich.console import Console
-        from rich.table import Table
-
-        console = Console()
-        from rich import box
-
         # Set title and style based on severity
         if num_checks_error > 0:
             title = "[bold red]Failed checks[/bold red]"
@@ -385,10 +381,6 @@ def runner(
                 show_all_failures=ctx.show_all_failures,
             )
 
-    from rich.console import Console
-    from rich.panel import Panel
-
-    console = Console()
     if num_checks_error == 0 and num_checks_warn == 0:
         console.print(
             Panel(
