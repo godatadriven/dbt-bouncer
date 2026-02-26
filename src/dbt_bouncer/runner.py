@@ -84,26 +84,10 @@ def runner(
         RuntimeError: If more than one "iterate_over" argument is found.
 
     """
-    parsed_data = {
-        "catalog_nodes": ctx.catalog_nodes,
-        "catalog_sources": ctx.catalog_sources,
-        "exposures": ctx.exposures,
-        "macros": ctx.macros,
-        "manifest_obj": ctx.manifest_obj,
-        "models": [m.model for m in ctx.models],
-        "models_by_unique_id": {m.model.unique_id: m.model for m in ctx.models},
-        "sources_by_unique_id": {s.source.unique_id: s.source for s in ctx.sources},
-        "exposures_by_unique_id": {e.unique_id: e for e in ctx.exposures},
-        "tests_by_unique_id": {t.test.unique_id: t.test for t in ctx.tests},
-        "run_results": [r.run_result for r in ctx.run_results],
-        "seeds": [s.seed for s in ctx.seeds],
-        "semantic_models": [s.semantic_model for s in ctx.semantic_models],
-        "snapshots": [s.snapshot for s in ctx.snapshots],
-        "sources": ctx.sources,
-        "tests": [t.test for t in ctx.tests],
-        "unit_tests": ctx.unit_tests,
-    }
-
+    # resource_map: wrapper objects used for check iteration.
+    # Keys that are already plain lists (catalog_nodes, catalog_sources, exposures,
+    # macros, sources, unit_tests) are identical in both dicts; the others differ
+    # because parsed_data stores unwrapped inner objects for context injection.
     resource_map: dict[str, list[Any]] = {
         "catalog_nodes": ctx.catalog_nodes,
         "catalog_sources": ctx.catalog_sources,
@@ -117,6 +101,36 @@ def runner(
         "sources": ctx.sources,
         "tests": ctx.tests,
         "unit_tests": ctx.unit_tests,
+    }
+
+    # parsed_data: context injected into each check via _inject_context.
+    # Shared keys reference resource_map directly; wrapped collections are
+    # unwrapped here so checks receive plain inner objects (e.g. DbtBouncerModel).
+    parsed_data = {
+        # Identical to resource_map — reference it to avoid duplication
+        "catalog_nodes": resource_map["catalog_nodes"],
+        "catalog_sources": resource_map["catalog_sources"],
+        "exposures": resource_map["exposures"],
+        "macros": resource_map["macros"],
+        "sources": resource_map["sources"],
+        "unit_tests": resource_map["unit_tests"],
+        # Unwrapped inner objects for global context injection
+        "models": [m.model for m in resource_map["models"]],
+        "run_results": [r.run_result for r in resource_map["run_results"]],
+        "seeds": [s.seed for s in resource_map["seeds"]],
+        "semantic_models": [s.semantic_model for s in resource_map["semantic_models"]],
+        "snapshots": [s.snapshot for s in resource_map["snapshots"]],
+        "tests": [t.test for t in resource_map["tests"]],
+        # Additional context not in resource_map
+        "manifest_obj": ctx.manifest_obj,
+        "models_by_unique_id": {
+            m.model.unique_id: m.model for m in resource_map["models"]
+        },
+        "sources_by_unique_id": {
+            s.source.unique_id: s.source for s in resource_map["sources"]
+        },
+        "exposures_by_unique_id": {e.unique_id: e for e in resource_map["exposures"]},
+        "tests_by_unique_id": {t.test.unique_id: t.test for t in resource_map["tests"]},
     }
 
     # Pre-compute unique_id -> meta lookup for catalog_node skip_checks
