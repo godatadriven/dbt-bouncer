@@ -89,27 +89,35 @@ All documentation can be found on `dbt-bouncer` [documentation website](https://
     Running dbt-bouncer (X.X.X)...
     Loaded config from dbt-bouncer-example.yml...
     Validating conf...
-    Parsed artifacts for `dbt_bouncer_test_project` project:
-    ┏━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━┓
-    ┃ Artifact      ┃ Category        ┃ Count ┃
-    ┡━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━╇━━━━━━━┩
-    │ manifest.json │ Exposures       │     2 │
-    │               │ Macros          │     3 │
-    │               │ Nodes           │    12 │
-    │               │ Seeds           │     3 │
-    │               │ Semantic Models │     1 │
-    │               │ Snapshots       │     2 │
-    │               │ Sources         │     4 │
-    │               │ Tests           │    36 │
-    │               │ Unit Tests      │     3 │
-    └───────────────┴─────────────────┴───────┘
-    Assembled 366 checks, running...
+
+                Parsed artifacts for
+              'dbt_bouncer_test_project'
+    ╭──────────────────┬─────────────────┬───────╮
+    │ Artifact         │ Category        │ Count │
+    ├──────────────────┼─────────────────┼───────┤
+    │ manifest.json    │ Exposures       │     2 │
+    │                  │ Macros          │     3 │
+    │                  │ Nodes           │    12 │
+    │                  │ Seeds           │     3 │
+    │                  │ Semantic Models │     1 │
+    │                  │ Snapshots       │     2 │
+    │                  │ Sources         │     4 │
+    │                  │ Tests           │    36 │
+    │                  │ Unit Tests      │     3 │
+    │ catalog.json     │ Nodes           │    13 │
+    │                  │ Sources         │     0 │
+    │ run_results.json │ Results         │    51 │
+    ╰──────────────────┴─────────────────┴───────╯
+    Assembled 463 checks, running...
     Running checks... ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100%
     `dbt-bouncer` failed. Please see below for more details or run `dbt-bouncer` with the `-v` flag.
-    Failed checks:
-    Check name                          Severity  Failure message
-    check_model_names:48:orders         error     Models in the staging layer should always start with "stg_". - `stg_orders` does not match the supplied regex `^stg_`.
-    Done. SUCCESS=365 WARN=0 ERROR=1
+    Failed checks
+    ╭────────────────────────────────────┬────────────┬──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+    │ Check name                         │  Severity  │ Failure message                                                                                                          │
+    ├────────────────────────────────────┼────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+    │ check_model_names:48:orders        │   ERROR    │ Models in the staging layer should always start with "stg_". - `orders` does not match the supplied regex `^stg_`.       │
+    ╰────────────────────────────────────┴────────────┴──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+    Done. SUCCESS=462 WARN=0 ERROR=1
     ```
 
 ## Reporting bugs and contributing code

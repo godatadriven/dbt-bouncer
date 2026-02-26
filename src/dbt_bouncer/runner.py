@@ -337,18 +337,27 @@ def runner(
         from rich.table import Table
 
         console = Console()
-        title = "Failed checks:" if num_checks_error > 0 else "Warning checks:"
+        from rich import box
+
+        # Set title and style based on severity
+        if num_checks_error > 0:
+            title = "[bold red]Failed checks[/bold red]"
+            border_color = "red"
+        else:
+            title = "[bold yellow]Warning checks[/bold yellow]"
+            border_color = "yellow"
 
         table = Table(
             title=title,
             title_justify="left",
-            box=None,
+            box=box.ROUNDED,
+            border_style=border_color,
             show_header=True,
-            header_style="bold",
+            header_style=f"bold {border_color}",
         )
-        table.add_column("Check name")
-        table.add_column("Severity")
-        table.add_column("Failure message")
+        table.add_column("Check name", justify="left", style="cyan", no_wrap=True)
+        table.add_column("Severity", justify="center", width=10)
+        table.add_column("Failure message", justify="left")
 
         checks_to_display = (
             failed_checks if ctx.show_all_failures else failed_checks[:25]
@@ -361,7 +370,7 @@ def runner(
 
             table.add_row(
                 str(check.get("check_run_id", "")),
-                f"[{sev_color}]{sev}[/{sev_color}]",
+                f"[bold {sev_color}]{sev.upper()}[/bold {sev_color}]",
                 str(check.get("failure_message", "")),
             )
 

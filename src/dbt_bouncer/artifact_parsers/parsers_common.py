@@ -207,10 +207,18 @@ def parse_dbt_artifacts(
     project_name = (
         bouncer_config.package_name or manifest_obj.manifest.metadata.project_name
     )
-    table = Table(title=None, show_header=True, header_style="bold")
-    table.add_column("Artifact", justify="left")
-    table.add_column("Category", justify="left")
-    table.add_column("Count", justify="right")
+    from rich import box
+
+    table = Table(
+        title=f"[bold cyan]Parsed artifacts for '{project_name}'[/bold cyan]",
+        show_header=True,
+        header_style="bold cyan",
+        box=box.ROUNDED,
+        border_style="cyan",
+    )
+    table.add_column("Artifact", justify="left", style="dim")
+    table.add_column("Category", justify="left", style="bright_white")
+    table.add_column("Count", justify="right", style="bold green")
 
     table.add_row("manifest.json", "Exposures", str(len(project_exposures)))
     table.add_row("", "Macros", str(len(project_macros)))
@@ -240,9 +248,7 @@ def parse_dbt_artifacts(
     console.print(table)
     table_str = string_io.getvalue().rstrip()
 
-    logging.info(
-        f"Parsed artifacts for `{project_name}` project:\n{table_str}",
-    )
+    logging.info(f"\n{table_str}")
 
     return (
         manifest_obj,
