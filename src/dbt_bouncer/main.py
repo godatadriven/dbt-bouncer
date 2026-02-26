@@ -5,24 +5,9 @@ from typing import Annotated, Optional
 import typer
 from typer.main import get_command
 
+from dbt_bouncer.enums import OutputFormat
 from dbt_bouncer.logger import configure_console_logging
 from dbt_bouncer.version import version as get_version
-
-_VALID_OUTPUT_FORMATS = ["csv", "json", "junit", "sarif", "tap"]
-
-
-def _validate_output_format(output_format: str) -> None:
-    """Validate output format, exiting with error if invalid.
-
-    Raises:
-        Exit: If the output format is not in the list of valid formats.
-
-    """
-    if output_format.lower() not in _VALID_OUTPUT_FORMATS:
-        typer.echo(
-            f"Error: Invalid output format '{output_format}'. Choose from: {', '.join(_VALID_OUTPUT_FORMATS)}"
-        )
-        raise typer.Exit(1)
 
 
 def _detect_config_file_source(config_file: Path | None) -> str:
@@ -51,7 +36,7 @@ def run_bouncer(
     create_pr_comment_file: bool = False,
     only: str = "",
     output_file: Path | None = None,
-    output_format: str = "json",
+    output_format: OutputFormat = OutputFormat.JSON,
     output_only_failures: bool = False,
     show_all_failures: bool = False,
     verbosity: int = 0,
@@ -225,6 +210,12 @@ def run_bouncer(
 
     _rebuild_bouncer_context()
 
+    normalized_output_format = (
+        output_format.value
+        if isinstance(output_format, OutputFormat)
+        else OutputFormat(output_format.lower()).value
+    )
+
     ctx = BouncerContext(
         bouncer_config=bouncer_config,
         catalog_nodes=project_catalog_nodes,
@@ -236,7 +227,7 @@ def run_bouncer(
         manifest_obj=manifest_obj,
         models=project_models,
         output_file=output_file,
-        output_format=output_format,
+        output_format=normalized_output_format,
         output_only_failures=output_only_failures,
         run_results=project_run_results,
         seeds=project_seeds,
@@ -282,12 +273,12 @@ def main_callback(
         typer.Option(help="Location of the file where check metadata will be saved."),
     ] = None,
     output_format: Annotated[
-        str,
+        OutputFormat,
         typer.Option(
             help="Format for the output file or stdout when no output file is specified. Choices: csv, json, junit, sarif, tap. Defaults to json.",
             case_sensitive=False,
         ),
-    ] = "json",
+    ] = OutputFormat.JSON,
     output_only_failures: Annotated[
         bool,
         typer.Option(
@@ -323,9 +314,6 @@ def main_callback(
         typer.echo(get_version())
         raise typer.Exit()
 
-    # Validate output format
-    _validate_output_format(output_format)
-
     if ctx.invoked_subcommand is None:
         config_file_source = _detect_config_file_source(config_file)
 
@@ -335,7 +323,7 @@ def main_callback(
             create_pr_comment_file=create_pr_comment_file,
             only=only,
             output_file=output_file,
-            output_format=output_format.lower(),
+            output_format=output_format,
             output_only_failures=output_only_failures,
             show_all_failures=show_all_failures,
             verbosity=verbosity,
@@ -379,13 +367,13 @@ def run(
         ),
     ] = None,
     output_format: Annotated[
-        str,
+        OutputFormat,
         typer.Option(
             help="Format for the output file or stdout when no output file is specified. Choices: csv, json, junit, sarif, tap. Defaults to json.",
             case_sensitive=False,
             rich_help_panel="Output Options",
         ),
-    ] = "json",
+    ] = OutputFormat.JSON,
     output_only_failures: Annotated[
         bool,
         typer.Option(
@@ -431,9 +419,6 @@ def run(
         Exit: If an invalid output format is provided or the checks fail.
 
     """
-    # Validate output format
-    _validate_output_format(output_format)
-
     config_file_source = _detect_config_file_source(config_file)
 
     exit_code = run_bouncer(
@@ -442,7 +427,7 @@ def run(
         create_pr_comment_file=create_pr_comment_file,
         only=only,
         output_file=output_file,
-        output_format=output_format.lower(),
+        output_format=output_format,
         output_only_failures=output_only_failures,
         show_all_failures=show_all_failures,
         verbosity=verbosity,
