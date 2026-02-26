@@ -16,9 +16,21 @@ if TYPE_CHECKING:
         from dbt_artifacts_parser.parsers.catalog.catalog_v1 import (
             Nodes as CatalogNodes,
         )
-    from dbt_bouncer.artifact_parsers.parsers_manifest import (
-        DbtBouncerModelBase,
+    from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
+        Macros,
+        UnitTests,
     )
+    from dbt_bouncer.artifact_parsers.parsers_manifest import (
+        DbtBouncerExposureBase,
+        DbtBouncerManifest,
+        DbtBouncerModelBase,
+        DbtBouncerSeedBase,
+        DbtBouncerSemanticModelBase,
+        DbtBouncerSnapshotBase,
+        DbtBouncerSourceBase,
+        DbtBouncerTestBase,
+    )
+    from dbt_bouncer.artifact_parsers.parsers_run_results import DbtBouncerRunResultBase
 
 
 class BaseCheck(BaseModel):
@@ -53,24 +65,26 @@ class BaseCheck(BaseModel):
         description="Severity of the check, one of 'error' or 'warn'.",
     )
 
-    catalog_node: Any = Field(default=None)
-    catalog_source: Any = Field(default=None)
-    exposure: Any = Field(default=None)
-    macro: Any = Field(default=None)
-    manifest_obj: Any = Field(default=None)
-    model: Any = Field(default=None)
-    run_result: Any = Field(default=None)
-    seed: Any = Field(default=None)
-    semantic_model: Any = Field(default=None)
-    snapshot: Any = Field(default=None)
-    source: Any = Field(default=None)
-    test: Any = Field(default=None)
-    unit_test: Any = Field(default=None)
+    catalog_node: "CatalogNodes | None" = Field(default=None)
+    catalog_source: "CatalogNodes | None" = Field(default=None)
+    exposure: "DbtBouncerExposureBase | None" = Field(default=None)
+    macro: "Macros | None" = Field(default=None)
+    manifest_obj: "DbtBouncerManifest | None" = Field(default=None)
+    model: "DbtBouncerModelBase | None" = Field(default=None)
+    run_result: "DbtBouncerRunResultBase | None" = Field(default=None)
+    seed: "DbtBouncerSeedBase | None" = Field(default=None)
+    semantic_model: "DbtBouncerSemanticModelBase | None" = Field(default=None)
+    snapshot: "DbtBouncerSnapshotBase | None" = Field(default=None)
+    source: "DbtBouncerSourceBase | None" = Field(default=None)
+    test: "DbtBouncerTestBase | None" = Field(default=None)
+    unit_test: "UnitTests | None" = Field(default=None)
 
-    models_by_unique_id: dict[str, Any] | None = Field(default=None)
-    sources_by_unique_id: dict[str, Any] | None = Field(default=None)
-    exposures_by_unique_id: dict[str, Any] | None = Field(default=None)
-    tests_by_unique_id: dict[str, Any] | None = Field(default=None)
+    models_by_unique_id: "dict[str, DbtBouncerModelBase] | None" = Field(default=None)
+    sources_by_unique_id: "dict[str, DbtBouncerSourceBase] | None" = Field(default=None)
+    exposures_by_unique_id: "dict[str, DbtBouncerExposureBase] | None" = Field(
+        default=None
+    )
+    tests_by_unique_id: "dict[str, DbtBouncerTestBase] | None" = Field(default=None)
 
     _min_description_length: ClassVar[int] = 4
 
