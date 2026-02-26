@@ -8,6 +8,37 @@ from typer.main import get_command
 from dbt_bouncer.logger import configure_console_logging
 from dbt_bouncer.version import version as get_version
 
+_VALID_OUTPUT_FORMATS = ["csv", "json", "junit", "sarif", "tap"]
+
+
+def _validate_output_format(output_format: str) -> None:
+    """Validate output format, exiting with error if invalid.
+
+    Raises:
+        Exit: If the output format is not in the list of valid formats.
+
+    """
+    if output_format.lower() not in _VALID_OUTPUT_FORMATS:
+        typer.echo(
+            f"Error: Invalid output format '{output_format}'. Choose from: {', '.join(_VALID_OUTPUT_FORMATS)}"
+        )
+        raise typer.Exit(1)
+
+
+def _detect_config_file_source(config_file: Path | None) -> str:
+    """Detect the source of the config file.
+
+    Returns:
+        str: 'COMMANDLINE' if a non-default config file was provided, else 'DEFAULT'.
+
+    """
+    return (
+        "COMMANDLINE"
+        if config_file is not None and config_file != Path("dbt-bouncer.yml")
+        else "DEFAULT"
+    )
+
+
 app = typer.Typer(
     no_args_is_help=False,
     context_settings={"help_option_names": ["-h", "--help"]},
@@ -293,18 +324,10 @@ def main_callback(
         raise typer.Exit()
 
     # Validate output format
-    valid_formats = ["csv", "json", "junit", "sarif", "tap"]
-    if output_format.lower() not in valid_formats:
-        typer.echo(
-            f"Error: Invalid output format '{output_format}'. Choose from: {', '.join(valid_formats)}"
-        )
-        raise typer.Exit(1)
+    _validate_output_format(output_format)
 
     if ctx.invoked_subcommand is None:
-        # Determine config file source
-        config_file_source = (
-            "COMMANDLINE" if config_file != Path("dbt-bouncer.yml") else "DEFAULT"
-        )
+        config_file_source = _detect_config_file_source(config_file)
 
         exit_code = run_bouncer(
             check=check,
@@ -409,17 +432,9 @@ def run(
 
     """
     # Validate output format
-    valid_formats = ["csv", "json", "junit", "sarif", "tap"]
-    if output_format.lower() not in valid_formats:
-        typer.echo(
-            f"Error: Invalid output format '{output_format}'. Choose from: {', '.join(valid_formats)}"
-        )
-        raise typer.Exit(1)
+    _validate_output_format(output_format)
 
-    # Determine config file source
-    config_file_source = (
-        "COMMANDLINE" if config_file != Path("dbt-bouncer.yml") else "DEFAULT"
-    )
+    config_file_source = _detect_config_file_source(config_file)
 
     exit_code = run_bouncer(
         check=check,
