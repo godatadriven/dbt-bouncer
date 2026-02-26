@@ -6,6 +6,7 @@ from collections.abc import Mapping
 from pathlib import Path, PurePath
 from typing import TYPE_CHECKING, Any
 
+import jellyfish
 import typer
 import yaml
 from pydantic import ValidationError
@@ -200,6 +201,7 @@ def lint_config_file(config_file_path: Path) -> list[dict[str, Any]]:
         )
         return issues
 
+    registry = get_check_registry()
     valid_categories = {"manifest_checks", "catalog_checks", "run_results_checks"}
     for category in valid_categories:
         if category in data:
@@ -230,6 +232,23 @@ def lint_config_file(config_file_path: Path) -> list[dict[str, Any]]:
                         {
                             "line": idx + 1,
                             "message": "Check is missing required 'name' field",
+                            "severity": "error",
+                        }
+                    )
+                    continue  # Cannot validate the name if it's absent
+
+                check_name = check["name"]
+                if check_name not in registry:
+                    best_match = min(
+                        registry.keys(),
+                        key=lambda k: jellyfish.levenshtein_distance(k, check_name),
+                        default=None,
+                    )
+                    suggestion = f" Did you mean '{best_match}'?" if best_match else ""
+                    issues.append(
+                        {
+                            "line": idx + 1,
+                            "message": f"Unknown check name '{check_name}'.{suggestion}",
                             "severity": "error",
                         }
                     )
