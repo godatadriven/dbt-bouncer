@@ -32,6 +32,65 @@ _VALID_ITERATE_OVER_VALUES = frozenset(rt.value for rt in ResourceType)
 _CLASS_ITERATE_CACHE: dict[type, frozenset[str]] = {}
 
 
+def _get_resource_meta(
+    resource: Any,
+    iterate_value: str,
+    meta_by_unique_id: dict[str, Any],
+) -> dict[str, Any]:
+    """Extract the dbt-bouncer meta config for a resource.
+
+    Different resource types store their meta config in different locations.
+    This helper centralises that per-type logic.
+
+    Args:
+        resource: The wrapper resource object (e.g. DbtBouncerModel).
+        iterate_value: The singular resource type name (e.g. "model", "test").
+        meta_by_unique_id: Pre-built mapping of unique_id -> meta for catalog nodes.
+
+    Returns:
+        dict[str, Any]: The meta dict for the resource, or {} if not applicable.
+
+    """
+    if iterate_value in {"model", "seed", "semantic_model", "snapshot", "source"}:
+        try:
+            return getattr(resource, iterate_value).config.meta or {}
+        except AttributeError:
+            return getattr(resource, iterate_value).meta or {}
+    elif iterate_value == "catalog_node":
+        return meta_by_unique_id.get(getattr(resource, "unique_id", ""), {})
+    elif iterate_value == "run_result":
+        return {}
+    elif iterate_value == "macro":
+        return resource.meta or {}
+    elif iterate_value == "test":
+        return getattr(getattr(resource, "test", resource), "meta", {}) or {}
+    else:
+        try:
+            return resource.config.meta or {}
+        except AttributeError:
+            return resource.meta or {}
+
+
+def _build_check_run_id(check: Any, resource: Any, iterate_value: str) -> str:
+    """Build a unique run ID string for a check against a specific resource.
+
+    Args:
+        check: The check instance (must have .name and .index attributes).
+        resource: The wrapper resource object.
+        iterate_value: The singular resource type name (e.g. "model", "exposure").
+
+    Returns:
+        str: The check run ID in the format "check_name:index:resource_suffix".
+
+    """
+    match iterate_value:
+        case "exposure" | "macro" | "test" | "unit_test":
+            suffix = resource.unique_id.split(".")[-1]
+        case _:
+            suffix = "_".join(getattr(resource, iterate_value).unique_id.split(".")[2:])
+    return f"{check.name}:{check.index}:{suffix}"
+
+
 class CheckToRun(TypedDict):
     """A single check instance ready for execution, with its run context."""
 
@@ -147,41 +206,14 @@ def runner(
             iterate_value = next(iter(iterate_over_value))
             for i in resource_map[f"{iterate_value}s"]:
                 check_i = check.model_copy(deep=False)
-                if iterate_value in [
-                    "model",
-                    "seed",
-                    "semantic_model",
-                    "snapshot",
-                    "source",
-                ]:
-                    try:
-                        d = getattr(i, iterate_value).config.meta
-                    except AttributeError:
-                        d = getattr(i, iterate_value).meta
-                elif iterate_value == "catalog_node":
-                    d = meta_by_unique_id.get(getattr(i, "unique_id", ""), {})
-                elif iterate_value == "run_result":
-                    d = {}
-                elif iterate_value in ["macro"]:
-                    d = i.meta
-                elif iterate_value == "test":
-                    d = getattr(getattr(i, "test", i), "meta", {}) or {}
-                else:
-                    try:
-                        d = i.config.meta
-                    except AttributeError:
-                        d = i.meta
+                d = _get_resource_meta(i, iterate_value, meta_by_unique_id)
                 meta_config = get_nested_value(
                     d,
                     ["dbt-bouncer", "skip_checks"],
                     [],
                 )
                 if _should_run_check(check_i, i, iterate_over_value, meta_config):
-                    check_run_id = (
-                        f"{check_i.name}:{check_i.index}:{i.unique_id.split('.')[-1]}"
-                        if iterate_value in ["exposure", "macro", "test", "unit_test"]
-                        else f"{check_i.name}:{check_i.index}:{'_'.join(getattr(i, iterate_value).unique_id.split('.')[2:])}"
-                    )
+                    check_run_id = _build_check_run_id(check_i, i, iterate_value)
                     check_i._inject_context(
                         parsed_data, resource=i, iterate_over_value=iterate_value
                     )
