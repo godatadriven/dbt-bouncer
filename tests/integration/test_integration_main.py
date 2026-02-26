@@ -52,7 +52,8 @@ def test_cli_happy_path(caplog, dbt_artifacts_dir, tmp_path):
 
     summary_count_artifacts = 0
     for record in caplog.messages:
-        if record.startswith("Parsed artifacts"):
+        # Look for the artifacts table (contains "manifest.json" and table structure)
+        if "manifest.json" in record and "│" in record:
             summary_count_artifacts += 1
             # The record now contains a table format
             # Extract counts using regex for each category
