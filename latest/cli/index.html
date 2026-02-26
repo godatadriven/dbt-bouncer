@@ -794,11 +794,15 @@ Use 'dbt-bouncer run' for the explicit command.</p>
 </span></code></pre></div>
 <h2 id="list">list<a class="headerlink" href="#list" title="Permanent link">#</a></h2>
 <p>List all available dbt-bouncer checks, grouped by category.</p>
+<p>Raises:
+    Exit: If an invalid output format is provided.</p>
 <p><strong>Usage:</strong></p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>dbt-bouncer list [OPTIONS]
 </span></code></pre></div>
 <p><strong>Options:</strong></p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>  -h, --help  Show this message and exit.
+<div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>  --output-format TEXT  Output format. Choices: text, json. Defaults to text.
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>                        [default: text]
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>  -h, --help            Show this message and exit.
 </span></code></pre></div>
 <h2 id="run">run<a class="headerlink" href="#run" title="Permanent link">#</a></h2>
 <p>Run dbt-bouncer checks against your dbt project.</p>
