@@ -142,184 +142,137 @@ class BaseCheck(BaseModel):
             or self._min_description_length,
         )
 
-    def _require_model(self) -> Any:
-        """Require that the model field is not None.
+    def _require(self, field: str) -> Any:
+        """Return the named field, raising DbtBouncerFailedCheckError if it is None.
+
+        Args:
+            field: The attribute name on this check instance (e.g. "model", "seed").
 
         Returns:
-            The model object.
+            The field value.
 
         Raises:
-            DbtBouncerFailedCheckError: If model is None.
+            DbtBouncerFailedCheckError: If the field is None.
 
         """
-        if self.model is None:
-            raise DbtBouncerFailedCheckError("self.model is None")
-        return self.model
-
-    def _require_seed(self) -> Any:
-        """Require that the seed field is not None.
-
-        Returns:
-            The seed object.
-
-        Raises:
-            DbtBouncerFailedCheckError: If seed is None.
-
-        """
-        if self.seed is None:
-            raise DbtBouncerFailedCheckError("self.seed is None")
-        return self.seed
-
-    def _require_snapshot(self) -> Any:
-        """Require that the snapshot field is not None.
-
-        Returns:
-            The snapshot object.
-
-        Raises:
-            DbtBouncerFailedCheckError: If snapshot is None.
-
-        """
-        if self.snapshot is None:
-            raise DbtBouncerFailedCheckError("self.snapshot is None")
-        return self.snapshot
-
-    def _require_source(self) -> Any:
-        """Require that the source field is not None.
-
-        Returns:
-            The source object.
-
-        Raises:
-            DbtBouncerFailedCheckError: If source is None.
-
-        """
-        if self.source is None:
-            raise DbtBouncerFailedCheckError("self.source is None")
-        return self.source
-
-    def _require_test(self) -> Any:
-        """Require that the test field is not None.
-
-        Returns:
-            The test object.
-
-        Raises:
-            DbtBouncerFailedCheckError: If test is None.
-
-        """
-        if self.test is None:
-            raise DbtBouncerFailedCheckError("self.test is None")
-        return self.test
-
-    def _require_exposure(self) -> Any:
-        """Require that the exposure field is not None.
-
-        Returns:
-            The exposure object.
-
-        Raises:
-            DbtBouncerFailedCheckError: If exposure is None.
-
-        """
-        if self.exposure is None:
-            raise DbtBouncerFailedCheckError("self.exposure is None")
-        return self.exposure
-
-    def _require_macro(self) -> Any:
-        """Require that the macro field is not None.
-
-        Returns:
-            The macro object.
-
-        Raises:
-            DbtBouncerFailedCheckError: If macro is None.
-
-        """
-        if self.macro is None:
-            raise DbtBouncerFailedCheckError("self.macro is None")
-        return self.macro
+        val = getattr(self, field, None)
+        if val is None:
+            raise DbtBouncerFailedCheckError(f"self.{field} is None")
+        return val
 
     def _require_catalog_node(self) -> Any:
-        """Require that the catalog_node field is not None.
+        """Require catalog_node.
 
         Returns:
             The catalog_node object.
 
-        Raises:
-            DbtBouncerFailedCheckError: If catalog_node is None.
-
         """
-        if self.catalog_node is None:
-            raise DbtBouncerFailedCheckError("self.catalog_node is None")
-        return self.catalog_node
+        return self._require("catalog_node")
 
     def _require_catalog_source(self) -> Any:
-        """Require that the catalog_source field is not None.
+        """Require catalog_source.
 
         Returns:
             The catalog_source object.
 
-        Raises:
-            DbtBouncerFailedCheckError: If catalog_source is None.
-
         """
-        if self.catalog_source is None:
-            raise DbtBouncerFailedCheckError("self.catalog_source is None")
-        return self.catalog_source
+        return self._require("catalog_source")
 
-    def _require_run_result(self) -> Any:
-        """Require that the run_result field is not None.
+    def _require_exposure(self) -> Any:
+        """Require exposure.
 
         Returns:
-            The run_result object.
-
-        Raises:
-            DbtBouncerFailedCheckError: If run_result is None.
+            The exposure object.
 
         """
-        if self.run_result is None:
-            raise DbtBouncerFailedCheckError("self.run_result is None")
-        return self.run_result
+        return self._require("exposure")
+
+    def _require_macro(self) -> Any:
+        """Require macro.
+
+        Returns:
+            The macro object.
+
+        """
+        return self._require("macro")
 
     def _require_manifest(self) -> Any:
-        """Require that the manifest_obj field is not None.
+        """Require manifest_obj.
 
         Returns:
             The manifest object.
 
-        Raises:
-            DbtBouncerFailedCheckError: If manifest_obj is None.
+        """
+        return self._require("manifest_obj")
+
+    def _require_model(self) -> Any:
+        """Require model.
+
+        Returns:
+            The model object.
 
         """
-        if self.manifest_obj is None:
-            raise DbtBouncerFailedCheckError("self.manifest_obj is None")
-        return self.manifest_obj
+        return self._require("model")
+
+    def _require_run_result(self) -> Any:
+        """Require run_result.
+
+        Returns:
+            The run_result object.
+
+        """
+        return self._require("run_result")
+
+    def _require_seed(self) -> Any:
+        """Require seed.
+
+        Returns:
+            The seed object.
+
+        """
+        return self._require("seed")
 
     def _require_semantic_model(self) -> Any:
-        """Require that the semantic_model field is not None.
+        """Require semantic_model.
 
         Returns:
             The semantic_model object.
 
-        Raises:
-            DbtBouncerFailedCheckError: If semantic_model is None.
+        """
+        return self._require("semantic_model")
+
+    def _require_snapshot(self) -> Any:
+        """Require snapshot.
+
+        Returns:
+            The snapshot object.
 
         """
-        if self.semantic_model is None:
-            raise DbtBouncerFailedCheckError("self.semantic_model is None")
-        return self.semantic_model
+        return self._require("snapshot")
+
+    def _require_source(self) -> Any:
+        """Require source.
+
+        Returns:
+            The source object.
+
+        """
+        return self._require("source")
+
+    def _require_test(self) -> Any:
+        """Require test.
+
+        Returns:
+            The test object.
+
+        """
+        return self._require("test")
 
     def _require_unit_test(self) -> Any:
-        """Require that the unit_test field is not None.
+        """Require unit_test.
 
         Returns:
             The unit_test object.
 
-        Raises:
-            DbtBouncerFailedCheckError: If unit_test is None.
-
         """
-        if self.unit_test is None:
-            raise DbtBouncerFailedCheckError("self.unit_test is None")
-        return self.unit_test
+        return self._require("unit_test")
