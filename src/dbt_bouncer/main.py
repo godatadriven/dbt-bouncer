@@ -513,7 +513,13 @@ def init() -> None:
 
     # Write YAML config
     with Path(config_path).open("w") as f:
-        yaml.dump(config_dict, f, default_flow_style=False, sort_keys=False)
+        yaml.dump(
+            config_dict,
+            f,
+            default_flow_style=False,
+            sort_keys=False,
+            Dumper=yaml.CSafeDumper,
+        )
 
     console.print(f"\n[bold green][OK] Created {config_path}[/bold green]")
     console.print(
