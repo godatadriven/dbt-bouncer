@@ -19,6 +19,7 @@ from semver import Version
 
 if TYPE_CHECKING:
     from dbt_bouncer.check_base import BaseCheck
+    from dbt_bouncer.resource_adapter import ResourceWrapper
 
 
 def clean_path_str(path: str) -> str:
@@ -92,7 +93,7 @@ def get_nested_value(
     return current_level
 
 
-def resource_in_path(check: "BaseCheck", resource: Any) -> bool:
+def resource_in_path(check: "BaseCheck", resource: "ResourceWrapper") -> bool:
     """Validate that a check is applicable to a specific resource path.
 
     Returns:
