@@ -327,21 +327,18 @@ def main_callback(
     _validate_output_format(output_format)
 
     if ctx.invoked_subcommand is None:
-        config_file_source = _detect_config_file_source(config_file)
-
-        exit_code = run_bouncer(
+        ctx.invoke(
+            run,
             check=check,
             config_file=config_file,
             create_pr_comment_file=create_pr_comment_file,
             only=only,
             output_file=output_file,
-            output_format=output_format.lower(),
+            output_format=output_format,
             output_only_failures=output_only_failures,
             show_all_failures=show_all_failures,
             verbosity=verbosity,
-            config_file_source=config_file_source,
         )
-        raise typer.Exit(exit_code)
 
 
 @app.command()
