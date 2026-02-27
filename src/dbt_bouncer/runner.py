@@ -164,33 +164,26 @@ def runner(
     }
 
     # parsed_data: context injected into each check via _inject_context.
-    # Shared keys reference resource_map directly; wrapped collections are
-    # unwrapped here so checks receive plain inner objects (e.g. DbtBouncerModel).
+    # Uses cached_property accessors on BouncerContext so each derived
+    # collection is computed at most once per runner() call.
     parsed_data = {
-        # Identical to resource_map — reference it to avoid duplication
-        "catalog_nodes": resource_map["catalog_nodes"],
-        "catalog_sources": resource_map["catalog_sources"],
-        "exposures": resource_map["exposures"],
-        "macros": resource_map["macros"],
-        "sources": resource_map["sources"],
-        "unit_tests": resource_map["unit_tests"],
-        # Unwrapped inner objects for global context injection
-        "models": [m.model for m in resource_map["models"]],
-        "run_results": [r.run_result for r in resource_map["run_results"]],
-        "seeds": [s.seed for s in resource_map["seeds"]],
-        "semantic_models": [s.semantic_model for s in resource_map["semantic_models"]],
-        "snapshots": [s.snapshot for s in resource_map["snapshots"]],
-        "tests": [t.test for t in resource_map["tests"]],
-        # Additional context not in resource_map
+        "catalog_nodes": ctx.catalog_nodes,
+        "catalog_sources": ctx.catalog_sources,
+        "exposures": ctx.exposures,
+        "exposures_by_unique_id": ctx.exposures_by_unique_id,
+        "macros": ctx.macros,
         "manifest_obj": ctx.manifest_obj,
-        "models_by_unique_id": {
-            m.model.unique_id: m.model for m in resource_map["models"]
-        },
-        "sources_by_unique_id": {
-            s.source.unique_id: s.source for s in resource_map["sources"]
-        },
-        "exposures_by_unique_id": {e.unique_id: e for e in resource_map["exposures"]},
-        "tests_by_unique_id": {t.test.unique_id: t.test for t in resource_map["tests"]},
+        "models": ctx.models_flat,
+        "models_by_unique_id": ctx.models_by_unique_id,
+        "run_results": ctx.run_results_flat,
+        "seeds": ctx.seeds_flat,
+        "semantic_models": ctx.semantic_models_flat,
+        "snapshots": ctx.snapshots_flat,
+        "sources": ctx.sources,
+        "sources_by_unique_id": ctx.sources_by_unique_id,
+        "tests": ctx.tests_flat,
+        "tests_by_unique_id": ctx.tests_by_unique_id,
+        "unit_tests": ctx.unit_tests,
     }
 
     # Pre-compute unique_id -> meta lookup for catalog_node skip_checks
