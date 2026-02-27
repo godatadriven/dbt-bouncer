@@ -96,7 +96,7 @@ class CheckToRun(TypedDict):
 
     check: Any
     check_run_id: str
-    failure_message: NotRequired[list[str] | str]
+    failure_message: NotRequired[str]
     outcome: NotRequired[str]
     severity: str
 
@@ -288,9 +288,7 @@ def runner(
             if check["check"].description:
                 failure_message = f"{check['check'].description} - {failure_message}"
 
-            logging.debug(
-                f"Check {check['check_run_id']} failed: {' '.join(failure_message)}"
-            )
+            logging.debug(f"Check {check['check_run_id']} failed: {failure_message}")
             check["outcome"] = "failed"
             check["failure_message"] = failure_message
 
