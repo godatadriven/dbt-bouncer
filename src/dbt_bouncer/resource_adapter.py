@@ -12,7 +12,8 @@ that satisfies ``ResourceWrapper`` and follow these steps:
 4. Add the resource to ``resource_map`` and ``parsed_data`` in ``runner.py``.
 5. Add the resource field to ``BaseCheck`` in ``check_base.py``.
 6. Add a ``_require_<resource>`` guard method to ``BaseCheck``.
-7. Create a ``checks/<resource>/`` directory with the check modules.
+7. Add check modules to the appropriate existing directory: ``checks/catalog/``,
+   ``checks/manifest/``, or ``checks/run_results/``.
 
 Design notes
 ------------
