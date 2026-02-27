@@ -133,6 +133,10 @@ def find_missing_meta_keys(meta_config, required_keys) -> list[str]:
     ]
 
 
+_SEPARATOR = ">"
+_ESCAPED_SEPARATOR = "\\>"
+
+
 def flatten(
     structure: Any,
     key: str = "",
@@ -148,13 +152,19 @@ def flatten(
     if flattened is None:
         flattened = {}
     if not isinstance(structure, (dict, list)):
-        flattened[((path + ">") if path else "") + key] = structure
+        flattened[((path + _SEPARATOR) if path else "") + key] = structure
     elif isinstance(structure, list):
         for i, item in enumerate(structure):
-            flatten(item, f"{i}", f"{path}>{key}", flattened)
+            flatten(item, f"{i}", f"{path}{_SEPARATOR}{key}", flattened)
     else:
         for new_key, value in structure.items():
-            flatten(value, new_key, f"{path}>{key}", flattened)
+            # Escape the separator in string keys to prevent path corruption
+            escaped_key = (
+                new_key.replace(_SEPARATOR, _ESCAPED_SEPARATOR)
+                if isinstance(new_key, str)
+                else new_key
+            )
+            flatten(value, escaped_key, f"{path}{_SEPARATOR}{key}", flattened)
     return flattened
 
 
