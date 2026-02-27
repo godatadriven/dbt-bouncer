@@ -540,6 +540,9 @@ def init() -> None:
     console.print(
         f"  Added [cyan]{len(manifest_checks)}[/cyan] checks to get you started.\n"
     )
+    console.print(
+        "  Run [cyan]dbt-bouncer validate[/cyan] to confirm your config is valid.\n"
+    )
 
 
 @app.command()
