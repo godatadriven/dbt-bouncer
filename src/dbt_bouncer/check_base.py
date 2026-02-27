@@ -174,119 +174,119 @@ class BaseCheck(BaseModel):
             raise DbtBouncerFailedCheckError(f"self.{field} is None")
         return val
 
-    def _require_catalog_node(self) -> Any:
+    def _require_catalog_node(self) -> "CatalogNodes":
         """Require catalog_node.
 
         Returns:
-            The catalog_node object.
+            CatalogNodes: The catalog_node object.
 
         """
-        return self._require("catalog_node")
+        return self._require("catalog_node")  # type: ignore[return-value]
 
-    def _require_catalog_source(self) -> Any:
+    def _require_catalog_source(self) -> "CatalogNodes":
         """Require catalog_source.
 
         Returns:
-            The catalog_source object.
+            CatalogNodes: The catalog_source object.
 
         """
-        return self._require("catalog_source")
+        return self._require("catalog_source")  # type: ignore[return-value]
 
-    def _require_exposure(self) -> Any:
+    def _require_exposure(self) -> "DbtBouncerExposureBase":
         """Require exposure.
 
         Returns:
-            The exposure object.
+            DbtBouncerExposureBase: The exposure object.
 
         """
-        return self._require("exposure")
+        return self._require("exposure")  # type: ignore[return-value]
 
-    def _require_macro(self) -> Any:
+    def _require_macro(self) -> "Macros":
         """Require macro.
 
         Returns:
-            The macro object.
+            Macros: The macro object.
 
         """
-        return self._require("macro")
+        return self._require("macro")  # type: ignore[return-value]
 
-    def _require_manifest(self) -> Any:
+    def _require_manifest(self) -> "DbtBouncerManifest":
         """Require manifest_obj.
 
         Returns:
-            The manifest object.
+            DbtBouncerManifest: The manifest object.
 
         """
-        return self._require("manifest_obj")
+        return self._require("manifest_obj")  # type: ignore[return-value]
 
-    def _require_model(self) -> Any:
+    def _require_model(self) -> "DbtBouncerModelBase":
         """Require model.
 
         Returns:
-            The model object.
+            DbtBouncerModelBase: The model object.
 
         """
-        return self._require("model")
+        return self._require("model")  # type: ignore[return-value]
 
-    def _require_run_result(self) -> Any:
+    def _require_run_result(self) -> "DbtBouncerRunResultBase":
         """Require run_result.
 
         Returns:
-            The run_result object.
+            DbtBouncerRunResultBase: The run_result object.
 
         """
-        return self._require("run_result")
+        return self._require("run_result")  # type: ignore[return-value]
 
-    def _require_seed(self) -> Any:
+    def _require_seed(self) -> "DbtBouncerSeedBase":
         """Require seed.
 
         Returns:
-            The seed object.
+            DbtBouncerSeedBase: The seed object.
 
         """
-        return self._require("seed")
+        return self._require("seed")  # type: ignore[return-value]
 
-    def _require_semantic_model(self) -> Any:
+    def _require_semantic_model(self) -> "DbtBouncerSemanticModelBase":
         """Require semantic_model.
 
         Returns:
-            The semantic_model object.
+            DbtBouncerSemanticModelBase: The semantic_model object.
 
         """
-        return self._require("semantic_model")
+        return self._require("semantic_model")  # type: ignore[return-value]
 
-    def _require_snapshot(self) -> Any:
+    def _require_snapshot(self) -> "DbtBouncerSnapshotBase":
         """Require snapshot.
 
         Returns:
-            The snapshot object.
+            DbtBouncerSnapshotBase: The snapshot object.
 
         """
-        return self._require("snapshot")
+        return self._require("snapshot")  # type: ignore[return-value]
 
-    def _require_source(self) -> Any:
+    def _require_source(self) -> "DbtBouncerSourceBase":
         """Require source.
 
         Returns:
-            The source object.
+            DbtBouncerSourceBase: The source object.
 
         """
-        return self._require("source")
+        return self._require("source")  # type: ignore[return-value]
 
-    def _require_test(self) -> Any:
+    def _require_test(self) -> "DbtBouncerTestBase":
         """Require test.
 
         Returns:
-            The test object.
+            DbtBouncerTestBase: The test object.
 
         """
-        return self._require("test")
+        return self._require("test")  # type: ignore[return-value]
 
-    def _require_unit_test(self) -> Any:
+    def _require_unit_test(self) -> "UnitTests":
         """Require unit_test.
 
         Returns:
-            The unit_test object.
+            UnitTests: The unit_test object.
 
         """
-        return self._require("unit_test")
+        return self._require("unit_test")  # type: ignore[return-value]
