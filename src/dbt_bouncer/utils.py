@@ -92,7 +92,7 @@ def get_nested_value(
     return current_level
 
 
-def resource_in_path(check, resource) -> bool:
+def resource_in_path(check: "BaseCheck", resource: Any) -> bool:
     """Validate that a check is applicable to a specific resource path.
 
     Returns:
@@ -383,7 +383,6 @@ def load_config_from_yaml(config_file: Path) -> Mapping[str, Any]:
     """
     config_path = Path().cwd() / config_file
     logging.debug(f"Loading config from {config_path}...")
-    logging.debug(f"Loading config from {config_file}...")
     if (
         not config_path.exists()
     ):  # Shouldn't be needed as click should have already checked this

@@ -15,7 +15,7 @@ def test_logging_debug_cli(caplog) -> None:
         ["--config-file", "dbt-bouncer-example.yml", "-v"],
     )
     assert "Running dbt-bouncer (0.0.0)..." in caplog.text
-    assert len([r for r in caplog.messages if r.find("Loading config from") >= 0]) >= 2
+    assert len([r for r in caplog.messages if r.find("Loading config from") >= 0]) >= 1
 
 
 def test_logging_debug_env_var(caplog) -> None:
@@ -29,7 +29,7 @@ def test_logging_debug_env_var(caplog) -> None:
         )
         assert "Running dbt-bouncer (0.0.0)..." in caplog.text
         assert (
-            len([r for r in caplog.messages if r.find("Loading config from") >= 0]) >= 2
+            len([r for r in caplog.messages if r.find("Loading config from") >= 0]) >= 1
         )
 
 

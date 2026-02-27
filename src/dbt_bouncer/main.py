@@ -315,9 +315,8 @@ def main_callback(
         raise typer.Exit()
 
     if ctx.invoked_subcommand is None:
-        config_file_source = _detect_config_file_source(config_file)
-
-        exit_code = run_bouncer(
+        ctx.invoke(
+            run,
             check=check,
             config_file=config_file,
             create_pr_comment_file=create_pr_comment_file,
@@ -327,9 +326,7 @@ def main_callback(
             output_only_failures=output_only_failures,
             show_all_failures=show_all_failures,
             verbosity=verbosity,
-            config_file_source=config_file_source,
         )
-        raise typer.Exit(exit_code)
 
 
 @app.command()
@@ -525,6 +522,9 @@ def init() -> None:
     console.print(
         f"  Added [cyan]{len(manifest_checks)}[/cyan] checks to get you started.\n"
     )
+    console.print(
+        "  Run [cyan]dbt-bouncer validate[/cyan] to confirm your config is valid.\n"
+    )
 
 
 @app.command()
@@ -566,9 +566,23 @@ def validate(
 
 
 @app.command(name="list")
-def list_checks() -> None:
-    """List all available dbt-bouncer checks, grouped by category."""
+def list_checks(
+    output_format: Annotated[
+        str,
+        typer.Option(
+            help="Output format. Choices: text, json. Defaults to text.",
+            case_sensitive=False,
+        ),
+    ] = "text",
+) -> None:
+    """List all available dbt-bouncer checks, grouped by category.
+
+    Raises:
+        Exit: If an invalid output format is provided.
+
+    """
     import itertools
+    import json
 
     from dbt_bouncer.utils import get_check_objects
 
@@ -584,14 +598,34 @@ def list_checks() -> None:
         parts = check_class.__module__.split(".")
         return parts[2] if len(parts) > 2 else "other"
 
+    if output_format.lower() not in ("text", "json"):
+        typer.echo(
+            f"Error: Invalid output format '{output_format}'. Choose from: text, json"
+        )
+        raise typer.Exit(1)
+
     checks = sorted(get_check_objects(), key=lambda c: (category_key(c), c.__name__))
-    for category, group in itertools.groupby(checks, key=category_key):
-        label = category_labels.get(category, category)
-        typer.echo(f"{label}:")
-        for check_class in group:
-            docstring = (check_class.__doc__ or "").strip()
-            description = docstring.splitlines()[0] if docstring else ""
-            typer.echo(f"  {check_class.__name__}:\n      {description}\n")
+
+    if output_format.lower() == "json":
+        result: dict[str, list[dict[str, str]]] = {}
+        for category, group in itertools.groupby(checks, key=category_key):
+            label = category_labels.get(category, category)
+            result[label] = []
+            for check_class in group:
+                docstring = (check_class.__doc__ or "").strip()
+                description = docstring.splitlines()[0] if docstring else ""
+                result[label].append(
+                    {"name": check_class.__name__, "description": description}
+                )
+        typer.echo(json.dumps(result, indent=2))
+    else:
+        for category, group in itertools.groupby(checks, key=category_key):
+            label = category_labels.get(category, category)
+            typer.echo(f"{label}:")
+            for check_class in group:
+                docstring = (check_class.__doc__ or "").strip()
+                description = docstring.splitlines()[0] if docstring else ""
+                typer.echo(f"  {check_class.__name__}:\n      {description}\n")
 
 
 # For mkdocs-click compatibility - export the underlying Click command

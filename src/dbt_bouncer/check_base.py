@@ -16,9 +16,21 @@ if TYPE_CHECKING:
         from dbt_artifacts_parser.parsers.catalog.catalog_v1 import (
             Nodes as CatalogNodes,
         )
-    from dbt_bouncer.artifact_parsers.parsers_manifest import (
-        DbtBouncerModelBase,
+    from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
+        Macros,
+        UnitTests,
     )
+    from dbt_bouncer.artifact_parsers.parsers_manifest import (
+        DbtBouncerExposureBase,
+        DbtBouncerManifest,
+        DbtBouncerModelBase,
+        DbtBouncerSeedBase,
+        DbtBouncerSemanticModelBase,
+        DbtBouncerSnapshotBase,
+        DbtBouncerSourceBase,
+        DbtBouncerTestBase,
+    )
+    from dbt_bouncer.artifact_parsers.parsers_run_results import DbtBouncerRunResultBase
 
 
 class BaseCheck(BaseModel):
@@ -53,24 +65,26 @@ class BaseCheck(BaseModel):
         description="Severity of the check, one of 'error' or 'warn'.",
     )
 
-    catalog_node: Any = Field(default=None)
-    catalog_source: Any = Field(default=None)
-    exposure: Any = Field(default=None)
-    macro: Any = Field(default=None)
-    manifest_obj: Any = Field(default=None)
-    model: Any = Field(default=None)
-    run_result: Any = Field(default=None)
-    seed: Any = Field(default=None)
-    semantic_model: Any = Field(default=None)
-    snapshot: Any = Field(default=None)
-    source: Any = Field(default=None)
-    test: Any = Field(default=None)
-    unit_test: Any = Field(default=None)
+    catalog_node: "CatalogNodes | None" = Field(default=None)
+    catalog_source: "CatalogNodes | None" = Field(default=None)
+    exposure: "DbtBouncerExposureBase | None" = Field(default=None)
+    macro: "Macros | None" = Field(default=None)
+    manifest_obj: "DbtBouncerManifest | None" = Field(default=None)
+    model: "DbtBouncerModelBase | None" = Field(default=None)
+    run_result: "DbtBouncerRunResultBase | None" = Field(default=None)
+    seed: "DbtBouncerSeedBase | None" = Field(default=None)
+    semantic_model: "DbtBouncerSemanticModelBase | None" = Field(default=None)
+    snapshot: "DbtBouncerSnapshotBase | None" = Field(default=None)
+    source: "DbtBouncerSourceBase | None" = Field(default=None)
+    test: "DbtBouncerTestBase | None" = Field(default=None)
+    unit_test: "UnitTests | None" = Field(default=None)
 
-    models_by_unique_id: dict[str, Any] | None = Field(default=None)
-    sources_by_unique_id: dict[str, Any] | None = Field(default=None)
-    exposures_by_unique_id: dict[str, Any] | None = Field(default=None)
-    tests_by_unique_id: dict[str, Any] | None = Field(default=None)
+    models_by_unique_id: "dict[str, DbtBouncerModelBase] | None" = Field(default=None)
+    sources_by_unique_id: "dict[str, DbtBouncerSourceBase] | None" = Field(default=None)
+    exposures_by_unique_id: "dict[str, DbtBouncerExposureBase] | None" = Field(
+        default=None
+    )
+    tests_by_unique_id: "dict[str, DbtBouncerTestBase] | None" = Field(default=None)
 
     _min_description_length: ClassVar[int] = 4
 
@@ -107,22 +121,6 @@ class BaseCheck(BaseModel):
             object.__setattr__(self, key, parsed_data[key])
 
     # Helper methods
-    def is_catalog_node_a_model(
-        self, catalog_node: "CatalogNodes", models: list["DbtBouncerModelBase"]
-    ) -> bool:
-        """Check if a catalog node is a model.
-
-        Args:
-            catalog_node (CatalogNodes): The CatalogNodes object to check.
-            models (list[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
-
-        Returns:
-            bool: Whether a catalog node is a model.
-
-        """
-        model = next((m for m in models if m.unique_id == catalog_node.unique_id), None)
-        return model is not None and model.resource_type == "model"
-
     def _is_description_populated(
         self, description: str, min_description_length: int | None
     ) -> bool:
@@ -160,119 +158,119 @@ class BaseCheck(BaseModel):
             raise DbtBouncerFailedCheckError(f"self.{field} is None")
         return val
 
-    def _require_catalog_node(self) -> Any:
+    def _require_catalog_node(self) -> "CatalogNodes":
         """Require catalog_node.
 
         Returns:
-            The catalog_node object.
+            CatalogNodes: The catalog_node object.
 
         """
-        return self._require("catalog_node")
+        return self._require("catalog_node")  # type: ignore[return-value]
 
-    def _require_catalog_source(self) -> Any:
+    def _require_catalog_source(self) -> "CatalogNodes":
         """Require catalog_source.
 
         Returns:
-            The catalog_source object.
+            CatalogNodes: The catalog_source object.
 
         """
-        return self._require("catalog_source")
+        return self._require("catalog_source")  # type: ignore[return-value]
 
-    def _require_exposure(self) -> Any:
+    def _require_exposure(self) -> "DbtBouncerExposureBase":
         """Require exposure.
 
         Returns:
-            The exposure object.
+            DbtBouncerExposureBase: The exposure object.
 
         """
-        return self._require("exposure")
+        return self._require("exposure")  # type: ignore[return-value]
 
-    def _require_macro(self) -> Any:
+    def _require_macro(self) -> "Macros":
         """Require macro.
 
         Returns:
-            The macro object.
+            Macros: The macro object.
 
         """
-        return self._require("macro")
+        return self._require("macro")  # type: ignore[return-value]
 
-    def _require_manifest(self) -> Any:
+    def _require_manifest(self) -> "DbtBouncerManifest":
         """Require manifest_obj.
 
         Returns:
-            The manifest object.
+            DbtBouncerManifest: The manifest object.
 
         """
-        return self._require("manifest_obj")
+        return self._require("manifest_obj")  # type: ignore[return-value]
 
-    def _require_model(self) -> Any:
+    def _require_model(self) -> "DbtBouncerModelBase":
         """Require model.
 
         Returns:
-            The model object.
+            DbtBouncerModelBase: The model object.
 
         """
-        return self._require("model")
+        return self._require("model")  # type: ignore[return-value]
 
-    def _require_run_result(self) -> Any:
+    def _require_run_result(self) -> "DbtBouncerRunResultBase":
         """Require run_result.
 
         Returns:
-            The run_result object.
+            DbtBouncerRunResultBase: The run_result object.
 
         """
-        return self._require("run_result")
+        return self._require("run_result")  # type: ignore[return-value]
 
-    def _require_seed(self) -> Any:
+    def _require_seed(self) -> "DbtBouncerSeedBase":
         """Require seed.
 
         Returns:
-            The seed object.
+            DbtBouncerSeedBase: The seed object.
 
         """
-        return self._require("seed")
+        return self._require("seed")  # type: ignore[return-value]
 
-    def _require_semantic_model(self) -> Any:
+    def _require_semantic_model(self) -> "DbtBouncerSemanticModelBase":
         """Require semantic_model.
 
         Returns:
-            The semantic_model object.
+            DbtBouncerSemanticModelBase: The semantic_model object.
 
         """
-        return self._require("semantic_model")
+        return self._require("semantic_model")  # type: ignore[return-value]
 
-    def _require_snapshot(self) -> Any:
+    def _require_snapshot(self) -> "DbtBouncerSnapshotBase":
         """Require snapshot.
 
         Returns:
-            The snapshot object.
+            DbtBouncerSnapshotBase: The snapshot object.
 
         """
-        return self._require("snapshot")
+        return self._require("snapshot")  # type: ignore[return-value]
 
-    def _require_source(self) -> Any:
+    def _require_source(self) -> "DbtBouncerSourceBase":
         """Require source.
 
         Returns:
-            The source object.
+            DbtBouncerSourceBase: The source object.
 
         """
-        return self._require("source")
+        return self._require("source")  # type: ignore[return-value]
 
-    def _require_test(self) -> Any:
+    def _require_test(self) -> "DbtBouncerTestBase":
         """Require test.
 
         Returns:
-            The test object.
+            DbtBouncerTestBase: The test object.
 
         """
-        return self._require("test")
+        return self._require("test")  # type: ignore[return-value]
 
-    def _require_unit_test(self) -> Any:
+    def _require_unit_test(self) -> "UnitTests":
         """Require unit_test.
 
         Returns:
-            The unit_test object.
+            UnitTests: The unit_test object.
 
         """
-        return self._require("unit_test")
+        return self._require("unit_test")  # type: ignore[return-value]

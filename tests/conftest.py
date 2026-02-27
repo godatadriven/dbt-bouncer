@@ -70,6 +70,25 @@ def _rebuild_all_check_models():
     dbt_bouncer_conf_all_categories.model_rebuild(_types_namespace=types_namespace)
 
 
+@pytest.fixture(autouse=True)
+def _clear_module_caches():
+    """Clear module-level memoization caches between tests.
+
+    Both _CLASS_ITERATE_CACHE (runner.py) and _ANNOTATION_KEYS_CACHE
+    (check_base.py) are pure derivations of class structure. Clearing them
+    between tests prevents state leaking across test boundaries when class
+    annotations are patched or models are rebuilt with different namespaces.
+    """
+    from dbt_bouncer import runner
+    from dbt_bouncer.check_base import _ANNOTATION_KEYS_CACHE
+
+    runner._CLASS_ITERATE_CACHE.clear()
+    _ANNOTATION_KEYS_CACHE.clear()
+    yield
+    runner._CLASS_ITERATE_CACHE.clear()
+    _ANNOTATION_KEYS_CACHE.clear()
+
+
 @pytest.fixture(scope="session")
 def manifest_obj():
     from dbt_bouncer.artifact_parsers.parsers_manifest import (
