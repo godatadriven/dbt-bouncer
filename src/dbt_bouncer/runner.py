@@ -4,7 +4,7 @@ import logging
 import operator
 import threading
 import traceback
-from collections import defaultdict
+from collections import Counter, defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, NotRequired, TypedDict
@@ -263,6 +263,39 @@ def runner(
         ctx.snapshots,
         ctx.tests,
     )
+
+    if ctx.dry_run:
+        counts: Counter[tuple[str, str]] = Counter()
+        for c in checks_to_run:
+            check_name = c["check"].__class__.__name__
+            resource_type = next(
+                iter(_CLASS_ITERATE_CACHE.get(c["check"].__class__, {"(none)"})),
+                "(none)",
+            )
+            counts[check_name, resource_type] += 1
+
+        dry_run_console = Console()
+        table = Table(
+            title="[bold cyan]Dry run — checks that would execute[/bold cyan]",
+            title_justify="left",
+            box=box.ROUNDED,
+            border_style="cyan",
+            show_header=True,
+            header_style="bold cyan",
+        )
+        table.add_column("Check name", justify="left", style="cyan", no_wrap=True)
+        table.add_column("Resource type", justify="center")
+        table.add_column("Count", justify="right")
+        for (check_name, resource_type), count in sorted(counts.items()):
+            table.add_row(check_name, resource_type, str(count))
+        dry_run_console.print(table)
+        dry_run_console.print(
+            Panel(
+                f"[bold cyan]Dry run complete. {len(checks_to_run)} check(s) would run.[/bold cyan]",
+                border_style="cyan",
+            )
+        )
+        return 0, []
 
     logging.info(f"Assembled {len(checks_to_run)} checks, running...")
 

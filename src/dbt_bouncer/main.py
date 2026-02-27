@@ -34,6 +34,7 @@ def run_bouncer(
     config_file: PurePath | None = None,
     check: str = "",
     create_pr_comment_file: bool = False,
+    dry_run: bool = False,
     only: str = "",
     output_file: Path | None = None,
     output_format: OutputFormat = OutputFormat.JSON,
@@ -48,6 +49,7 @@ def run_bouncer(
         config_file: Location of the YML config file.
         check: Limit the checks run to specific check names, comma-separated.
         create_pr_comment_file: Create a `github-comment.md` file.
+        dry_run: If True, print which checks would run without executing them.
         only: Limit the checks run to specific categories.
         output_file: Location of the file where check metadata will be saved.
         output_format: Format for the output file or stdout (csv, json, junit, sarif, tap).
@@ -222,6 +224,7 @@ def run_bouncer(
         catalog_sources=project_catalog_sources,
         check_categories=check_categories,
         create_pr_comment_file=create_pr_comment_file,
+        dry_run=dry_run,
         exposures=project_exposures,
         macros=project_macros,
         manifest_obj=manifest_obj,
@@ -349,6 +352,13 @@ def run(
             rich_help_panel="Check Selection",
         ),
     ] = "",
+    dry_run: Annotated[
+        bool,
+        typer.Option(
+            help="Print which checks would run (name, resource type, count) without executing them.",
+            rich_help_panel="Check Selection",
+        ),
+    ] = False,
     only: Annotated[
         str,
         typer.Option(
@@ -422,6 +432,7 @@ def run(
         check=check,
         config_file=config_file,
         create_pr_comment_file=create_pr_comment_file,
+        dry_run=dry_run,
         only=only,
         output_file=output_file,
         output_format=output_format,
