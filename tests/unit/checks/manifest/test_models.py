@@ -12,41 +12,61 @@ from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
 )
 from dbt_bouncer.artifact_parsers.parsers_manifest import DbtBouncerManifest
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
-from dbt_bouncer.checks.manifest.check_models import (
+from dbt_bouncer.checks.manifest.check_models_access import (
     CheckModelAccess,
-    CheckModelCodeDoesNotContainRegexpPattern,
-    CheckModelColumnsHaveMetaKeys,
-    CheckModelColumnsHaveTypes,
     CheckModelContractEnforcedForPublicModel,
-    CheckModelDependsOnMacros,
-    CheckModelDependsOnMultipleSources,
-    CheckModelDescriptionContainsRegexPattern,
-    CheckModelDescriptionPopulated,
-    CheckModelDirectories,
-    CheckModelDocumentationCoverage,
-    CheckModelDocumentedInSameDirectory,
-    CheckModelFileName,
     CheckModelGrantPrivilege,
     CheckModelGrantPrivilegeRequired,
-    CheckModelHasConstraints,
     CheckModelHasContractsEnforced,
-    CheckModelHasExposure,
-    CheckModelHasMetaKeys,
-    CheckModelHasNoUpstreamDependencies,
-    CheckModelHasSemiColon,
-    CheckModelHasTags,
-    CheckModelHasUniqueTest,
-    CheckModelHasUnitTests,
-    CheckModelLatestVersionSpecified,
-    CheckModelMaxChainedViews,
-    CheckModelMaxFanout,
-    CheckModelMaxNumberOfLines,
-    CheckModelMaxUpstreamDependencies,
-    CheckModelNames,
     CheckModelNumberOfGrants,
+)
+from dbt_bouncer.checks.manifest.check_models_code import (
+    CheckModelCodeDoesNotContainRegexpPattern,
+    CheckModelHasSemiColon,
+    CheckModelMaxNumberOfLines,
+)
+from dbt_bouncer.checks.manifest.check_models_columns import (
+    CheckModelColumnsHaveMetaKeys,
+    CheckModelColumnsHaveTypes,
+    CheckModelHasConstraints,
+)
+from dbt_bouncer.checks.manifest.check_models_description import (
+    CheckModelDescriptionContainsRegexPattern,
+    CheckModelDescriptionPopulated,
+    CheckModelDocumentationCoverage,
+    CheckModelDocumentedInSameDirectory,
+)
+from dbt_bouncer.checks.manifest.check_models_directories import (
+    CheckModelDirectories,
+    CheckModelFileName,
     CheckModelPropertyFileLocation,
     CheckModelSchemaName,
+)
+from dbt_bouncer.checks.manifest.check_models_meta import (
+    CheckModelHasMetaKeys,
+)
+from dbt_bouncer.checks.manifest.check_models_naming import (
+    CheckModelNames,
+)
+from dbt_bouncer.checks.manifest.check_models_tags import (
+    CheckModelHasTags,
+)
+from dbt_bouncer.checks.manifest.check_models_tests import (
+    CheckModelHasUniqueTest,
+    CheckModelHasUnitTests,
     CheckModelTestCoverage,
+)
+from dbt_bouncer.checks.manifest.check_models_upstream import (
+    CheckModelDependsOnMacros,
+    CheckModelDependsOnMultipleSources,
+    CheckModelHasExposure,
+    CheckModelHasNoUpstreamDependencies,
+    CheckModelMaxChainedViews,
+    CheckModelMaxFanout,
+    CheckModelMaxUpstreamDependencies,
+)
+from dbt_bouncer.checks.manifest.check_models_versioning import (
+    CheckModelLatestVersionSpecified,
     CheckModelVersionAllowed,
     CheckModelVersionPinnedInRef,
 )
