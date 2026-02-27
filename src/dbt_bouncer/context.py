@@ -1,7 +1,7 @@
 """A context object to hold all the data needed for a bouncer run."""
 
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
 from pydantic import BaseModel
 
@@ -26,6 +26,7 @@ if TYPE_CHECKING:
 class BouncerContext(BaseModel):
     """A context object to hold all the data needed for a bouncer run."""
 
+    _model_rebuilt: ClassVar[bool] = False
     bouncer_config: "DbtBouncerConfBase"
     catalog_nodes: list["DbtBouncerCatalogNode"]
     catalog_sources: list["DbtBouncerCatalogNode"]
@@ -48,13 +49,9 @@ class BouncerContext(BaseModel):
     unit_tests: list["UnitTests"]
 
 
-_CONTEXT_REBUILT: bool = False
-
-
 def _rebuild_bouncer_context() -> None:
     """Rebuild BouncerContext to resolve forward references after heavy imports."""
-    global _CONTEXT_REBUILT
-    if _CONTEXT_REBUILT:
+    if BouncerContext._model_rebuilt:
         return
 
     # These imports are required for model_rebuild() to resolve forward references.
@@ -82,4 +79,4 @@ def _rebuild_bouncer_context() -> None:
     from dbt_bouncer.config_file_parser import DbtBouncerConfBase  # noqa: F401
 
     BouncerContext.model_rebuild()
-    _CONTEXT_REBUILT = True
+    BouncerContext._model_rebuilt = True
