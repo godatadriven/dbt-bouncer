@@ -121,22 +121,6 @@ class BaseCheck(BaseModel):
             object.__setattr__(self, key, parsed_data[key])
 
     # Helper methods
-    def is_catalog_node_a_model(
-        self, catalog_node: "CatalogNodes", models: list["DbtBouncerModelBase"]
-    ) -> bool:
-        """Check if a catalog node is a model.
-
-        Args:
-            catalog_node (CatalogNodes): The CatalogNodes object to check.
-            models (list[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
-
-        Returns:
-            bool: Whether a catalog node is a model.
-
-        """
-        model = next((m for m in models if m.unique_id == catalog_node.unique_id), None)
-        return model is not None and model.resource_type == "model"
-
     def _is_description_populated(
         self, description: str, min_description_length: int | None
     ) -> bool:
