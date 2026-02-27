@@ -613,6 +613,51 @@ def list_checks(
         parts = check_class.__module__.split(".")
         return parts[2] if len(parts) > 2 else "other"
 
+    # Fields inherited from BaseCheck that are not check-specific parameters.
+    base_fields = frozenset(
+        {
+            "catalog_node",
+            "catalog_source",
+            "description",
+            "exclude",
+            "exposure",
+            "exposures_by_unique_id",
+            "include",
+            "index",
+            "macro",
+            "manifest_obj",
+            "materialization",
+            "model",
+            "models_by_unique_id",
+            "run_result",
+            "seed",
+            "semantic_model",
+            "severity",
+            "snapshot",
+            "source",
+            "sources_by_unique_id",
+            "test",
+            "tests_by_unique_id",
+            "unit_test",
+        }
+    )
+
+    def _get_check_params(check_class: type) -> dict[str, str]:  # type: ignore[type-arg]
+        """Return configurable parameter names and their type annotations.
+
+        Returns:
+            dict[str, str]: Mapping of field name to type string.
+
+        """
+        params: dict[str, str] = {}
+        for field_name, field_info in check_class.model_fields.items():  # type: ignore[attr-defined]
+            if field_name in base_fields:
+                continue
+            annotation = field_info.annotation
+            type_str = getattr(annotation, "__name__", None) or str(annotation)
+            params[field_name] = type_str
+        return params
+
     if output_format.lower() not in ("text", "json"):
         typer.echo(
             f"Error: Invalid output format '{output_format}'. Choose from: text, json"
@@ -622,7 +667,7 @@ def list_checks(
     checks = sorted(get_check_objects(), key=lambda c: (category_key(c), c.__name__))
 
     if output_format.lower() == "json":
-        result: dict[str, list[dict[str, str]]] = {}
+        result: dict[str, list[dict[str, object]]] = {}
         for category, group in itertools.groupby(checks, key=category_key):
             label = category_labels.get(category, category)
             result[label] = []
@@ -630,7 +675,11 @@ def list_checks(
                 docstring = (check_class.__doc__ or "").strip()
                 description = docstring.splitlines()[0] if docstring else ""
                 result[label].append(
-                    {"name": check_class.__name__, "description": description}
+                    {
+                        "description": description,
+                        "name": check_class.__name__,
+                        "parameters": _get_check_params(check_class),
+                    }
                 )
         typer.echo(json.dumps(result, indent=2))
     else:
@@ -640,7 +689,18 @@ def list_checks(
             for check_class in group:
                 docstring = (check_class.__doc__ or "").strip()
                 description = docstring.splitlines()[0] if docstring else ""
-                typer.echo(f"  {check_class.__name__}:\n      {description}\n")
+                params = _get_check_params(check_class)
+                params_text = (
+                    "\n".join(
+                        f"        {name}: {type_str}"
+                        for name, type_str in params.items()
+                    )
+                    if params
+                    else "        (none)"
+                )
+                typer.echo(
+                    f"  {check_class.__name__}:\n      {description}\n      Parameters:\n{params_text}\n"
+                )
 
 
 # For mkdocs-click compatibility - export the underlying Click command
