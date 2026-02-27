@@ -28,6 +28,7 @@ if TYPE_CHECKING:
     from dbt_bouncer.context import BouncerContext
 
 
+_MAX_BATCH_SIZE: int = 500
 _VALID_ITERATE_OVER_VALUES = frozenset(rt.value for rt in ResourceType)
 _CLASS_ITERATE_CACHE: dict[type, frozenset[str]] = {}
 
@@ -314,9 +315,15 @@ def runner(
     # Group checks by class to reduce ThreadPoolExecutor scheduling overhead.
     # Checks of the same class run sequentially within a batch; different
     # classes run in parallel across threads.
+    # Cap batch size to avoid submitting one giant task for large check sets.
     batches: dict[str, list[CheckToRun]] = defaultdict(list)
     for check in checks_to_run:
         batches[check["check"].__class__.__name__].append(check)
+
+    batches_to_run: list[list[CheckToRun]] = []
+    for batch in batches.values():
+        for i in range(0, max(len(batch), 1), _MAX_BATCH_SIZE):
+            batches_to_run.append(batch[i : i + _MAX_BATCH_SIZE])
 
     console = Console()
     progress_lock = threading.Lock()
@@ -331,7 +338,7 @@ def runner(
         with ThreadPoolExecutor() as executor:
             futures = {
                 executor.submit(_execute_batch, batch): batch
-                for batch in batches.values()
+                for batch in batches_to_run
             }
             for future in as_completed(futures):
                 batch_size = future.result()
