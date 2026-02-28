@@ -66,8 +66,8 @@ class CheckSeedColumnNames(BaseCheck):
             DbtBouncerFailedCheckError: If column name does not match regex.
 
         """
-        self._require_seed()
-        seed_columns = self.seed.columns or {}
+        seed = self._require_seed()
+        seed_columns = seed.columns or {}
         non_complying_columns = [
             col_name
             for col_name in seed_columns
@@ -76,7 +76,7 @@ class CheckSeedColumnNames(BaseCheck):
 
         if non_complying_columns:
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.seed.unique_id)}` has columns that do not match the supplied regex `{self.seed_column_name_pattern.strip()}`: {non_complying_columns}"
+                f"`{get_clean_model_name(seed.unique_id)}` has columns that do not match the supplied regex `{self.seed_column_name_pattern.strip()}`: {non_complying_columns}"
             )
 
 
@@ -110,14 +110,14 @@ class CheckSeedColumnsHaveTypes(BaseCheck):
             DbtBouncerFailedCheckError: If any column lacks a declared `data_type`.
 
         """
-        self._require_seed()
-        columns = self.seed.columns or {}
+        seed = self._require_seed()
+        columns = seed.columns or {}
         untyped_columns = [
             col_name for col_name, col in columns.items() if not col.data_type
         ]
         if untyped_columns:
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.seed.unique_id)}` has columns without a declared `data_type`: {untyped_columns}"
+                f"`{get_clean_model_name(seed.unique_id)}` has columns without a declared `data_type`: {untyped_columns}"
             )
 
 
@@ -162,12 +162,12 @@ class CheckSeedDescriptionPopulated(BaseCheck):
             DbtBouncerFailedCheckError: If description is not populated.
 
         """
-        self._require_seed()
+        seed = self._require_seed()
         if not self._is_description_populated(
-            self.seed.description or "", self.min_description_length
+            seed.description or "", self.min_description_length
         ):
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.seed.unique_id)}` does not have a populated description."
+                f"`{get_clean_model_name(seed.unique_id)}` does not have a populated description."
             )
 
 
@@ -219,10 +219,10 @@ class CheckSeedHasUnitTests(BaseCheck):
             DbtBouncerFailedCheckError: If seed does not have enough unit tests.
 
         """
-        self._require_manifest()
-        self._require_seed()
+        manifest_obj = self._require_manifest()
+        seed = self._require_seed()
         if get_package_version_number(
-            self.manifest_obj.manifest.metadata.dbt_version or "0.0.0"
+            manifest_obj.manifest.metadata.dbt_version or "0.0.0"
         ) >= get_package_version_number("1.8.0"):
             num_unit_tests = len(
                 [
@@ -230,12 +230,12 @@ class CheckSeedHasUnitTests(BaseCheck):
                     for t in self.unit_tests
                     if t.depends_on
                     and t.depends_on.nodes
-                    and t.depends_on.nodes[0] == self.seed.unique_id
+                    and t.depends_on.nodes[0] == seed.unique_id
                 ],
             )
             if num_unit_tests < self.min_number_of_unit_tests:
                 raise DbtBouncerFailedCheckError(
-                    f"`{get_clean_model_name(self.seed.unique_id)}` has {num_unit_tests} unit tests, this is less than the minimum of {self.min_number_of_unit_tests}."
+                    f"`{get_clean_model_name(seed.unique_id)}` has {num_unit_tests} unit tests, this is less than the minimum of {self.min_number_of_unit_tests}."
                 )
         else:
             logging.warning(
@@ -287,8 +287,8 @@ class CheckSeedNames(BaseCheck):
             DbtBouncerFailedCheckError: If model name does not match regex.
 
         """
-        self._require_seed()
-        if self._compiled_pattern.match(str(self.seed.name)) is None:
+        seed = self._require_seed()
+        if self._compiled_pattern.match(str(seed.name)) is None:
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.seed.unique_id)}` does not match the supplied regex `{self.seed_name_pattern.strip()}`."
+                f"`{get_clean_model_name(seed.unique_id)}` does not match the supplied regex `{self.seed_name_pattern.strip()}`."
             )

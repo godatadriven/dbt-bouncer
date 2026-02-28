@@ -179,22 +179,18 @@ def runner(
         "sources": resource_map["sources"],
         "unit_tests": resource_map["unit_tests"],
         # Unwrapped inner objects for global context injection
-        "models": [m.model for m in resource_map["models"]],
-        "run_results": [r.run_result for r in resource_map["run_results"]],
-        "seeds": [s.seed for s in resource_map["seeds"]],
-        "semantic_models": [s.semantic_model for s in resource_map["semantic_models"]],
-        "snapshots": [s.snapshot for s in resource_map["snapshots"]],
-        "tests": [t.test for t in resource_map["tests"]],
+        "models": [m.model for m in ctx.models],
+        "run_results": [r.run_result for r in ctx.run_results],
+        "seeds": [s.seed for s in ctx.seeds],
+        "semantic_models": [s.semantic_model for s in ctx.semantic_models],
+        "snapshots": [s.snapshot for s in ctx.snapshots],
+        "tests": [t.test for t in ctx.tests],
         # Additional context not in resource_map
         "manifest_obj": ctx.manifest_obj,
-        "models_by_unique_id": {
-            m.model.unique_id: m.model for m in resource_map["models"]
-        },
-        "sources_by_unique_id": {
-            s.source.unique_id: s.source for s in resource_map["sources"]
-        },
-        "exposures_by_unique_id": {e.unique_id: e for e in resource_map["exposures"]},
-        "tests_by_unique_id": {t.test.unique_id: t.test for t in resource_map["tests"]},
+        "models_by_unique_id": {m.model.unique_id: m.model for m in ctx.models},
+        "sources_by_unique_id": {s.source.unique_id: s.source for s in ctx.sources},
+        "exposures_by_unique_id": {e.unique_id: e for e in ctx.exposures},
+        "tests_by_unique_id": {t.test.unique_id: t.test for t in ctx.tests},
     }
 
     # Pre-compute unique_id -> meta lookup for catalog_node skip_checks

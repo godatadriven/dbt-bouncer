@@ -56,12 +56,12 @@ class CheckSourceDescriptionPopulated(BaseCheck):
             DbtBouncerFailedCheckError: If description is not populated.
 
         """
-        self._require_source()
+        source = self._require_source()
         if not self._is_description_populated(
-            self.source.description or "", self.min_description_length
+            source.description or "", self.min_description_length
         ):
             raise DbtBouncerFailedCheckError(
-                f"`{self.source.source_name}.{self.source.name}` does not have a populated description."
+                f"`{source.source_name}.{source.name}` does not have a populated description."
             )
 
 
@@ -95,19 +95,21 @@ class CheckSourceFreshnessPopulated(BaseCheck):
             DbtBouncerFailedCheckError: If freshness is not populated.
 
         """
-        self._require_source()
-        error_msg = f"`{self.source.source_name}.{self.source.name}` does not have a populated freshness."
-        if self.source.freshness is None:
+        source = self._require_source()
+        error_msg = (
+            f"`{source.source_name}.{source.name}` does not have a populated freshness."
+        )
+        if source.freshness is None:
             raise DbtBouncerFailedCheckError(error_msg)
         has_error_after = (
-            self.source.freshness.error_after
-            and self.source.freshness.error_after.count is not None
-            and self.source.freshness.error_after.period is not None
+            source.freshness.error_after
+            and source.freshness.error_after.count is not None
+            and source.freshness.error_after.period is not None
         )
         has_warn_after = (
-            self.source.freshness.warn_after
-            and self.source.freshness.warn_after.count is not None
-            and self.source.freshness.warn_after.period is not None
+            source.freshness.warn_after
+            and source.freshness.warn_after.count is not None
+            and source.freshness.warn_after.period is not None
         )
 
         if not (has_error_after or has_warn_after):
@@ -153,15 +155,15 @@ class CheckSourceHasMetaKeys(BaseCheck):
             DbtBouncerFailedCheckError: If required meta keys are missing.
 
         """
-        self._require_source()
+        source = self._require_source()
         missing_keys = find_missing_meta_keys(
-            meta_config=self.source.meta,
+            meta_config=source.meta,
             required_keys=self.keys.model_dump(),
         )
 
         if missing_keys != []:
             raise DbtBouncerFailedCheckError(
-                f"`{self.source.source_name}.{self.source.name}` is missing the following keys from the `meta` config: {[x.replace('>>', '') for x in missing_keys]}"
+                f"`{source.source_name}.{source.name}` is missing the following keys from the `meta` config: {[x.replace('>>', '') for x in missing_keys]}"
             )
 
 
@@ -202,24 +204,24 @@ class CheckSourceHasTags(BaseCheck):
             DbtBouncerFailedCheckError: If source does not have required tags.
 
         """
-        self._require_source()
-        source_tags = self.source.tags or []
+        source = self._require_source()
+        source_tags = source.tags or []
         if self.criteria == "any":
             if not any(tag in source_tags for tag in self.tags):
                 raise DbtBouncerFailedCheckError(
-                    f"`{self.source.source_name}.{self.source.name}` does not have any of the required tags: {self.tags}."
+                    f"`{source.source_name}.{source.name}` does not have any of the required tags: {self.tags}."
                 )
         elif self.criteria == "all":
             missing_tags = set(self.tags) - set(source_tags)
             if missing_tags:
                 raise DbtBouncerFailedCheckError(
-                    f"`{self.source.source_name}.{self.source.name}` is missing required tags: {missing_tags}."
+                    f"`{source.source_name}.{source.name}` is missing required tags: {missing_tags}."
                 )
         elif (
             self.criteria == "one" and sum(tag in source_tags for tag in self.tags) != 1
         ):
             raise DbtBouncerFailedCheckError(
-                f"`{self.source.source_name}.{self.source.name}` must have exactly one of the required tags: {self.tags}."
+                f"`{source.source_name}.{source.name}` must have exactly one of the required tags: {self.tags}."
             )
 
 
@@ -253,10 +255,10 @@ class CheckSourceLoaderPopulated(BaseCheck):
             DbtBouncerFailedCheckError: If loader is not populated.
 
         """
-        self._require_source()
-        if self.source.loader == "":
+        source = self._require_source()
+        if source.loader == "":
             raise DbtBouncerFailedCheckError(
-                f"`{self.source.source_name}.{self.source.name}` does not have a populated loader."
+                f"`{source.source_name}.{source.name}` does not have a populated loader."
             )
 
 
@@ -302,10 +304,10 @@ class CheckSourceNames(BaseCheck):
             DbtBouncerFailedCheckError: If source name does not match regex.
 
         """
-        self._require_source()
-        if self._compiled_pattern.match(str(self.source.name)) is None:
+        source = self._require_source()
+        if self._compiled_pattern.match(str(source.name)) is None:
             raise DbtBouncerFailedCheckError(
-                f"`{self.source.source_name}.{self.source.name}` does not match the supplied regex `({self.source_name_pattern.strip()})`."
+                f"`{source.source_name}.{source.name}` does not match the supplied regex `({self.source_name_pattern.strip()})`."
             )
 
 
@@ -341,15 +343,15 @@ class CheckSourceNotOrphaned(BaseCheck):
             DbtBouncerFailedCheckError: If source is orphaned.
 
         """
-        self._require_source()
+        source = self._require_source()
         num_refs = sum(
-            self.source.unique_id in getattr(model.depends_on, "nodes", [])
+            source.unique_id in getattr(model.depends_on, "nodes", [])
             for model in self.models
             if model.depends_on
         )
         if num_refs < 1:
             raise DbtBouncerFailedCheckError(
-                f"Source `{self.source.source_name}.{self.source.name}` is orphaned, i.e. not referenced by any model."
+                f"Source `{source.source_name}.{source.name}` is orphaned, i.e. not referenced by any model."
             )
 
 
@@ -383,8 +385,8 @@ class CheckSourcePropertyFileLocation(BaseCheck):
             DbtBouncerFailedCheckError: If property file location is incorrect.
 
         """
-        self._require_source()
-        original_path = Path(clean_path_str(self.source.original_file_path))
+        source = self._require_source()
+        original_path = Path(clean_path_str(source.original_file_path))
 
         if (
             len(original_path.parts) > 2
@@ -400,15 +402,15 @@ class CheckSourcePropertyFileLocation(BaseCheck):
 
         if not properties_yml_name.startswith("_"):
             raise DbtBouncerFailedCheckError(
-                f"The properties file for `{self.source.source_name}.{self.source.name}` (`{properties_yml_name}`) does not start with an underscore."
+                f"The properties file for `{source.source_name}.{source.name}` (`{properties_yml_name}`) does not start with an underscore."
             )
         if expected_substring not in properties_yml_name:
             raise DbtBouncerFailedCheckError(
-                f"The properties file for `{self.source.source_name}.{self.source.name}` (`{properties_yml_name}`) does not contain the expected substring (`{expected_substring}`)."
+                f"The properties file for `{source.source_name}.{source.name}` (`{properties_yml_name}`) does not contain the expected substring (`{expected_substring}`)."
             )
         if not properties_yml_name.endswith("__sources.yml"):
             raise DbtBouncerFailedCheckError(
-                f"The properties file for `{self.source.source_name}.{self.source.name}` (`{properties_yml_name}`) does not end with `__sources.yml`."
+                f"The properties file for `{source.source_name}.{source.name}` (`{properties_yml_name}`) does not end with `__sources.yml`."
             )
 
 
@@ -444,20 +446,20 @@ class CheckSourceUsedByModelsInSameDirectory(BaseCheck):
             DbtBouncerFailedCheckError: If source is referenced by models in different directory.
 
         """
-        self._require_source()
+        source = self._require_source()
         reffed_models_not_in_same_dir = []
         for model in self.models:
             if (
                 model.depends_on
-                and self.source.unique_id in getattr(model.depends_on, "nodes", [])
+                and source.unique_id in getattr(model.depends_on, "nodes", [])
                 and model.original_file_path.split("/")[:-1]
-                != self.source.original_file_path.split("/")[:-1]
+                != source.original_file_path.split("/")[:-1]
             ):
                 reffed_models_not_in_same_dir.append(model.name)
 
         if len(reffed_models_not_in_same_dir) != 0:
             raise DbtBouncerFailedCheckError(
-                f"Source `{self.source.source_name}.{self.source.name}` is referenced by models defined in a different directory: {reffed_models_not_in_same_dir}"
+                f"Source `{source.source_name}.{source.name}` is referenced by models defined in a different directory: {reffed_models_not_in_same_dir}"
             )
 
 
@@ -493,13 +495,13 @@ class CheckSourceUsedByOnlyOneModel(BaseCheck):
             DbtBouncerFailedCheckError: If source is referenced by more than one model.
 
         """
-        self._require_source()
+        source = self._require_source()
         num_refs = sum(
-            self.source.unique_id in getattr(model.depends_on, "nodes", [])
+            source.unique_id in getattr(model.depends_on, "nodes", [])
             for model in self.models
             if model.depends_on
         )
         if num_refs > 1:
             raise DbtBouncerFailedCheckError(
-                f"Source `{self.source.source_name}.{self.source.name}` is referenced by more than one model."
+                f"Source `{source.source_name}.{source.name}` is referenced by more than one model."
             )

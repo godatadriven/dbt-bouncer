@@ -75,10 +75,10 @@ class CheckModelAccess(BaseCheck):
             DbtBouncerFailedCheckError: If access is incorrect.
 
         """
-        self._require_model()
-        if self.model.access and self.model.access.value != self.access:
+        model = self._require_model()
+        if model.access and model.access.value != self.access:
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` has `{self.model.access.value}` access, it should have access `{self.access}`."
+                f"`{get_clean_model_name(model.unique_id)}` has `{model.access.value}` access, it should have access `{self.access}`."
             )
 
 
@@ -127,10 +127,10 @@ class CheckModelCodeDoesNotContainRegexpPattern(BaseCheck):
             DbtBouncerFailedCheckError: If code contains banned string.
 
         """
-        self._require_model()
-        if self._compiled_pattern.match(str(self.model.raw_code)) is not None:
+        model = self._require_model()
+        if self._compiled_pattern.match(str(model.raw_code)) is not None:
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` contains a banned string: `{self.regexp_pattern}`."
+                f"`{get_clean_model_name(model.unique_id)}` contains a banned string: `{self.regexp_pattern}`."
             )
 
 
@@ -172,8 +172,8 @@ class CheckModelColumnsHaveMetaKeys(BaseCheck):
             DbtBouncerFailedCheckError: If any model column is missing required meta keys.
 
         """
-        self._require_model()
-        columns = self.model.columns or {}
+        model = self._require_model()
+        columns = model.columns or {}
         failing_columns: dict[str, list[str]] = {}
         for col_name, col in columns.items():
             missing_keys = find_missing_meta_keys(
@@ -184,7 +184,7 @@ class CheckModelColumnsHaveMetaKeys(BaseCheck):
                 failing_columns[col_name] = [k.replace(">>", "") for k in missing_keys]
         if failing_columns:
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` has columns missing required `meta` keys: {failing_columns}"
+                f"`{get_clean_model_name(model.unique_id)}` has columns missing required `meta` keys: {failing_columns}"
             )
 
 
@@ -220,14 +220,14 @@ class CheckModelColumnsHaveTypes(BaseCheck):
             DbtBouncerFailedCheckError: If any column lacks a declared `data_type`.
 
         """
-        self._require_model()
-        columns = self.model.columns or {}
+        model = self._require_model()
+        columns = model.columns or {}
         untyped_columns = [
             col_name for col_name, col in columns.items() if not col.data_type
         ]
         if untyped_columns:
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` has columns without a declared `data_type`: {untyped_columns}"
+                f"`{get_clean_model_name(model.unique_id)}` has columns without a declared `data_type`: {untyped_columns}"
             )
 
 
@@ -262,14 +262,14 @@ class CheckModelContractEnforcedForPublicModel(BaseCheck):
             DbtBouncerFailedCheckError: If contracts are not enforced for public model.
 
         """
-        self._require_model()
+        model = self._require_model()
         if (
-            self.model.access
-            and self.model.access.value == "public"
-            and (not self.model.contract or self.model.contract.enforced is not True)
+            model.access
+            and model.access.value == "public"
+            and (not model.contract or model.contract.enforced is not True)
         ):
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` is a public model but does not have contracts enforced."
+                f"`{get_clean_model_name(model.unique_id)}` is a public model but does not have contracts enforced."
             )
 
 
@@ -317,15 +317,15 @@ class CheckModelDependsOnMacros(BaseCheck):
             DbtBouncerFailedCheckError: If model does not depend on required macros.
 
         """
-        self._require_model()
+        model = self._require_model()
         upstream_macros = [
             (".").join(m.split(".")[1:])
-            for m in getattr(self.model.depends_on, "macros", []) or []
+            for m in getattr(model.depends_on, "macros", []) or []
         ]
         if self.criteria == "any":
             if not any(macro in upstream_macros for macro in self.required_macros):
                 raise DbtBouncerFailedCheckError(
-                    f"`{get_clean_model_name(self.model.unique_id)}` does not depend on any of the required macros: {self.required_macros}."
+                    f"`{get_clean_model_name(model.unique_id)}` does not depend on any of the required macros: {self.required_macros}."
                 )
         elif self.criteria == "all":
             missing_macros = [
@@ -333,14 +333,14 @@ class CheckModelDependsOnMacros(BaseCheck):
             ]
             if missing_macros:
                 raise DbtBouncerFailedCheckError(
-                    f"`{get_clean_model_name(self.model.unique_id)}` is missing required macros: {missing_macros}."
+                    f"`{get_clean_model_name(model.unique_id)}` is missing required macros: {missing_macros}."
                 )
         elif (
             self.criteria == "one"
             and sum(macro in upstream_macros for macro in self.required_macros) != 1
         ):
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` must depend on exactly one of the required macros: {self.required_macros}."
+                f"`{get_clean_model_name(model.unique_id)}` must depend on exactly one of the required macros: {self.required_macros}."
             )
 
 
@@ -375,14 +375,14 @@ class CheckModelDependsOnMultipleSources(BaseCheck):
             DbtBouncerFailedCheckError: If model references more than one source.
 
         """
-        self._require_model()
+        model = self._require_model()
         num_reffed_sources = sum(
             x.split(".")[0] == "source"
-            for x in getattr(self.model.depends_on, "nodes", []) or []
+            for x in getattr(model.depends_on, "nodes", []) or []
         )
         if num_reffed_sources > 1:
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` references more than one source."
+                f"`{get_clean_model_name(model.unique_id)}` references more than one source."
             )
 
 
@@ -428,10 +428,10 @@ class CheckModelDescriptionContainsRegexPattern(BaseCheck):
             DbtBouncerFailedCheckError: If description does not match regex.
 
         """
-        self._require_model()
-        if not self._compiled_pattern.match(str(self.model.description)):
+        model = self._require_model()
+        if not self._compiled_pattern.match(str(model.description)):
             raise DbtBouncerFailedCheckError(
-                f"""`{get_clean_model_name(self.model.unique_id)}`'s description "{self.model.description}" doesn't match the supplied regex: {self.regexp_pattern}."""
+                f"""`{get_clean_model_name(model.unique_id)}`'s description "{model.description}" doesn't match the supplied regex: {self.regexp_pattern}."""
             )
 
 
@@ -475,12 +475,12 @@ class CheckModelDescriptionPopulated(BaseCheck):
             DbtBouncerFailedCheckError: If description is not populated.
 
         """
-        self._require_model()
+        model = self._require_model()
         if not self._is_description_populated(
-            self.model.description or "", self.min_description_length
+            model.description or "", self.min_description_length
         ):
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` does not have a populated description."
+                f"`{get_clean_model_name(model.unique_id)}` does not have a populated description."
             )
 
 
@@ -540,22 +540,22 @@ class CheckModelDirectories(BaseCheck):
             DbtBouncerFailedCheckError: If model located in `./models` or invalid subdirectory.
 
         """
-        self._require_model()
-        clean_path = clean_path_str(self.model.original_file_path)
+        model = self._require_model()
+        clean_path = clean_path_str(model.original_file_path)
         matched_path = self._compiled_include.match(clean_path)
         if matched_path is None:
             raise DbtBouncerFailedCheckError("matched_path is None")
         path_after_match = clean_path[matched_path.end() + 1 :]
         directory_to_check = Path(path_after_match).parts[0]
 
-        if directory_to_check.replace(".sql", "") == self.model.name:
+        if directory_to_check.replace(".sql", "") == model.name:
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` is not located in a valid sub-directory ({self.permitted_sub_directories})."
+                f"`{get_clean_model_name(model.unique_id)}` is not located in a valid sub-directory ({self.permitted_sub_directories})."
             )
         else:
             if directory_to_check not in self.permitted_sub_directories:
                 raise DbtBouncerFailedCheckError(
-                    f"`{get_clean_model_name(self.model.unique_id)}` is located in the `{directory_to_check}` sub-directory, this is not a valid sub-directory ({self.permitted_sub_directories})."
+                    f"`{get_clean_model_name(model.unique_id)}` is located in the `{directory_to_check}` sub-directory, this is not a valid sub-directory ({self.permitted_sub_directories})."
                 )
 
 
@@ -666,7 +666,7 @@ class CheckModelDocumentedInSameDirectory(BaseCheck):
             DbtBouncerFailedCheckError: If model is not documented in same directory.
 
         """
-        self._require_model()
+        model = self._require_model()
         model = cast("Nodes4", self.model)
         model_sql_path = Path(clean_path_str(model.original_file_path))
         model_sql_dir = model_sql_path.parent.parts
@@ -689,7 +689,7 @@ class CheckModelDocumentedInSameDirectory(BaseCheck):
 
         if model_doc_dir != model_sql_dir:
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` is documented in a different directory to the `.sql` file: `{'/'.join(model_doc_dir)}` vs `{'/'.join(model_sql_dir)}`."
+                f"`{get_clean_model_name(model.unique_id)}` is documented in a different directory to the `.sql` file: `{'/'.join(model_doc_dir)}` vs `{'/'.join(model_sql_dir)}`."
             )
 
 
@@ -737,11 +737,11 @@ class CheckModelFileName(BaseCheck):
             DbtBouncerFailedCheckError: If file name does not match regex.
 
         """
-        self._require_model()
-        file_name = Path(clean_path_str(self.model.original_file_path)).name
+        model = self._require_model()
+        file_name = Path(clean_path_str(model.original_file_path)).name
         if self._compiled_pattern.match(file_name) is None:
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` is in a file that does not match the supplied regex `{self.file_name_pattern.strip()}`."
+                f"`{get_clean_model_name(model.unique_id)}` is in a file that does not match the supplied regex `{self.file_name_pattern.strip()}`."
             )
 
 
@@ -786,8 +786,8 @@ class CheckModelGrantPrivilege(BaseCheck):
             DbtBouncerFailedCheckError: If grant privileges do not match regex.
 
         """
-        self._require_model()
-        config = self.model.config
+        model = self._require_model()
+        config = model.config
         grants = config.grants if config else {}
         non_complying_grants = [
             i for i in (grants or {}) if self._compiled_pattern.match(str(i)) is None
@@ -795,7 +795,7 @@ class CheckModelGrantPrivilege(BaseCheck):
 
         if non_complying_grants:
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` has grants (`{self.privilege_pattern}`) that don't comply with the specified regexp pattern ({non_complying_grants})."
+                f"`{get_clean_model_name(model.unique_id)}` has grants (`{self.privilege_pattern}`) that don't comply with the specified regexp pattern ({non_complying_grants})."
             )
 
 
@@ -834,12 +834,12 @@ class CheckModelGrantPrivilegeRequired(BaseCheck):
             DbtBouncerFailedCheckError: If required grant privilege is missing.
 
         """
-        self._require_model()
-        config = self.model.config
+        model = self._require_model()
+        config = model.config
         grants = config.grants if config else {}
         if self.privilege not in (grants or {}):
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` does not have the required grant privilege (`{self.privilege}`)."
+                f"`{get_clean_model_name(model.unique_id)}` does not have the required grant privilege (`{self.privilege}`)."
             )
 
 
@@ -882,15 +882,15 @@ class CheckModelHasConstraints(BaseCheck):
             DbtBouncerFailedCheckError: If required constraint types are missing.
 
         """
-        self._require_model()
+        model = self._require_model()
         materialization = (
-            self.model.config.materialized
-            if self.model.config and hasattr(self.model.config, "materialized")
+            model.config.materialized
+            if model.config and hasattr(model.config, "materialized")
             else None
         )
         if materialization not in ("table", "incremental"):
             return
-        constraints = self.model.constraints or []
+        constraints = model.constraints or []
         actual_types = {
             (c.type.value if hasattr(c.type, "value") else str(c.type))
             for c in constraints
@@ -898,7 +898,7 @@ class CheckModelHasConstraints(BaseCheck):
         missing_types = sorted(set(self.required_constraint_types) - actual_types)
         if missing_types:
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` is missing required constraint types: {missing_types}"
+                f"`{get_clean_model_name(model.unique_id)}` is missing required constraint types: {missing_types}"
             )
 
 
@@ -934,10 +934,10 @@ class CheckModelHasContractsEnforced(BaseCheck):
             DbtBouncerFailedCheckError: If contracts are not enforced.
 
         """
-        self._require_model()
-        if not self.model.contract or self.model.contract.enforced is not True:
+        model = self._require_model()
+        if not model.contract or model.contract.enforced is not True:
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` does not have contracts enforced."
+                f"`{get_clean_model_name(model.unique_id)}` does not have contracts enforced."
             )
 
 
@@ -978,16 +978,16 @@ class CheckModelHasExposure(BaseCheck):
             DbtBouncerFailedCheckError: If model does not have an exposure.
 
         """
-        self._require_model()
+        model = self._require_model()
         models_in_exposures = {
             node
             for e in self.exposures
             for node in (getattr(e.depends_on, "nodes", []) or [])
         }
 
-        if self.model.unique_id not in models_in_exposures:
+        if model.unique_id not in models_in_exposures:
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` does not have an associated exposure."
+                f"`{get_clean_model_name(model.unique_id)}` does not have an associated exposure."
             )
 
 
@@ -1027,14 +1027,14 @@ class CheckModelHasMetaKeys(BaseCheck):
             DbtBouncerFailedCheckError: If required meta keys are missing.
 
         """
-        self._require_model()
+        model = self._require_model()
         missing_keys = find_missing_meta_keys(
-            meta_config=self.model.meta,
+            meta_config=model.meta,
             required_keys=self.keys.model_dump(),
         )
         if missing_keys != []:
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` is missing the following keys from the `meta` config: {[x.replace('>>', '') for x in missing_keys]}"
+                f"`{get_clean_model_name(model.unique_id)}` is missing the following keys from the `meta` config: {[x.replace('>>', '') for x in missing_keys]}"
             )
 
 
@@ -1069,14 +1069,14 @@ class CheckModelHasNoUpstreamDependencies(BaseCheck):
             DbtBouncerFailedCheckError: If model has no upstream dependencies.
 
         """
-        self._require_model()
+        model = self._require_model()
         if (
-            not self.model.depends_on
-            or not self.model.depends_on.nodes
-            or len(self.model.depends_on.nodes) <= 0
+            not model.depends_on
+            or not model.depends_on.nodes
+            or len(model.depends_on.nodes) <= 0
         ):
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` has no upstream dependencies, this likely indicates hard-coded tables references."
+                f"`{get_clean_model_name(model.unique_id)}` has no upstream dependencies, this likely indicates hard-coded tables references."
             )
 
 
@@ -1112,11 +1112,11 @@ class CheckModelHasSemiColon(BaseCheck):
             DbtBouncerFailedCheckError: If model ends with a semi-colon.
 
         """
-        self._require_model()
-        raw_code = (self.model.raw_code or "").strip()
+        model = self._require_model()
+        raw_code = (model.raw_code or "").strip()
         if raw_code and raw_code[-1] == ";":
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` ends with a semi-colon, this is not permitted."
+                f"`{get_clean_model_name(model.unique_id)}` ends with a semi-colon, this is not permitted."
             )
 
 
@@ -1158,24 +1158,24 @@ class CheckModelHasTags(BaseCheck):
             DbtBouncerFailedCheckError: If model does not have required tags.
 
         """
-        self._require_model()
-        model_tags = self.model.tags or []
+        model = self._require_model()
+        model_tags = model.tags or []
         if self.criteria == "any":
             if not any(tag in model_tags for tag in self.tags):
                 raise DbtBouncerFailedCheckError(
-                    f"`{get_clean_model_name(self.model.unique_id)}` does not have any of the required tags: {self.tags}."
+                    f"`{get_clean_model_name(model.unique_id)}` does not have any of the required tags: {self.tags}."
                 )
         elif self.criteria == "all":
             missing_tags = [tag for tag in self.tags if tag not in model_tags]
             if missing_tags:
                 raise DbtBouncerFailedCheckError(
-                    f"`{get_clean_model_name(self.model.unique_id)}` is missing required tags: {missing_tags}."
+                    f"`{get_clean_model_name(model.unique_id)}` is missing required tags: {missing_tags}."
                 )
         elif (
             self.criteria == "one" and sum(tag in model_tags for tag in self.tags) != 1
         ):
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` must have exactly one of the required tags: {self.tags}."
+                f"`{get_clean_model_name(model.unique_id)}` must have exactly one of the required tags: {self.tags}."
             )
 
 
@@ -1230,14 +1230,14 @@ class CheckModelHasUniqueTest(BaseCheck):
             DbtBouncerFailedCheckError: If model does not have a unique test.
 
         """
-        self._require_model()
+        model = self._require_model()
         num_unique_tests = 0
         for test in self.tests:
             test_metadata = getattr(test, "test_metadata", None)
             attached_node = getattr(test, "attached_node", None)
             if (
                 test_metadata
-                and attached_node == self.model.unique_id
+                and attached_node == model.unique_id
                 and (
                     (
                         f"{getattr(test_metadata, 'namespace', '')}.{getattr(test_metadata, 'name', '')}"
@@ -1253,7 +1253,7 @@ class CheckModelHasUniqueTest(BaseCheck):
                 num_unique_tests += 1
         if num_unique_tests < 1:
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` does not have a test for uniqueness of a column."
+                f"`{get_clean_model_name(model.unique_id)}` does not have a test for uniqueness of a column."
             )
 
 
@@ -1306,10 +1306,10 @@ class CheckModelHasUnitTests(BaseCheck):
             DbtBouncerFailedCheckError: If model does not have enough unit tests.
 
         """
-        self._require_manifest()
-        self._require_model()
+        manifest_obj = self._require_manifest()
+        model = self._require_model()
         if get_package_version_number(
-            self.manifest_obj.manifest.metadata.dbt_version or "0.0.0"
+            manifest_obj.manifest.metadata.dbt_version or "0.0.0"
         ) >= get_package_version_number("1.8.0"):
             num_unit_tests = len(
                 [
@@ -1317,12 +1317,12 @@ class CheckModelHasUnitTests(BaseCheck):
                     for t in self.unit_tests
                     if t.depends_on
                     and t.depends_on.nodes
-                    and t.depends_on.nodes[0] == self.model.unique_id
+                    and t.depends_on.nodes[0] == model.unique_id
                 ],
             )
             if num_unit_tests < self.min_number_of_unit_tests:
                 raise DbtBouncerFailedCheckError(
-                    f"`{get_clean_model_name(self.model.unique_id)}` has {num_unit_tests} unit tests, this is less than the minimum of {self.min_number_of_unit_tests}."
+                    f"`{get_clean_model_name(model.unique_id)}` has {num_unit_tests} unit tests, this is less than the minimum of {self.min_number_of_unit_tests}."
                 )
         else:
             logging.warning(
@@ -1364,10 +1364,10 @@ class CheckModelLatestVersionSpecified(BaseCheck):
             DbtBouncerFailedCheckError: If latest version is not specified.
 
         """
-        self._require_model()
-        if self.model.latest_version is None:
+        model = self._require_model()
+        if model.latest_version is None:
             raise DbtBouncerFailedCheckError(
-                f"`{self.model.name}` does not have a specified `latest_version`."
+                f"`{model.name}` does not have a specified `latest_version`."
             )
 
 
@@ -1425,8 +1425,8 @@ class CheckModelMaxChainedViews(BaseCheck):
             DbtBouncerFailedCheckError: If max chained views exceeded.
 
         """
-        self._require_model()
-        self._require_manifest()
+        model = self._require_model()
+        manifest_obj = self._require_manifest()
 
         models_by_id = (
             self.models_by_unique_id
@@ -1491,17 +1491,16 @@ class CheckModelMaxChainedViews(BaseCheck):
                 return_upstream_view_models(
                     materializations=self.materializations_to_include,
                     max_chained_views=self.max_chained_views,
-                    model_unique_ids_to_check=[self.model.unique_id],
+                    model_unique_ids_to_check=[model.unique_id],
                     package_name=(
-                        self.package_name
-                        or self.manifest_obj.manifest.metadata.project_name
+                        self.package_name or manifest_obj.manifest.metadata.project_name
                     ),
                 ),
             )
             != 0
         ):
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` has more than {self.max_chained_views} upstream dependents that are not tables."
+                f"`{get_clean_model_name(model.unique_id)}` has more than {self.max_chained_views} upstream dependents that are not tables."
             )
 
 
@@ -1543,16 +1542,16 @@ class CheckModelMaxFanout(BaseCheck):
             DbtBouncerFailedCheckError: If max fanout exceeded.
 
         """
-        self._require_model()
+        model = self._require_model()
         num_downstream_models = sum(
-            self.model.unique_id
+            model.unique_id
             in (getattr(m.depends_on, "nodes", []) if m.depends_on else [])
             for m in self.models
         )
 
         if num_downstream_models > self.max_downstream_models:
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` has {num_downstream_models} downstream models, which is more than the permitted maximum of {self.max_downstream_models}."
+                f"`{get_clean_model_name(model.unique_id)}` has {num_downstream_models} downstream models, which is more than the permitted maximum of {self.max_downstream_models}."
             )
 
 
@@ -1595,12 +1594,12 @@ class CheckModelMaxNumberOfLines(BaseCheck):
             DbtBouncerFailedCheckError: If max lines exceeded.
 
         """
-        self._require_model()
-        actual_number_of_lines = (self.model.raw_code or "").count("\n") + 1
+        model = self._require_model()
+        actual_number_of_lines = (model.raw_code or "").count("\n") + 1
 
         if actual_number_of_lines > self.max_number_of_lines:
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` has {actual_number_of_lines} lines, this is more than the maximum permitted number of lines ({self.max_number_of_lines})."
+                f"`{get_clean_model_name(model.unique_id)}` has {actual_number_of_lines} lines, this is more than the maximum permitted number of lines ({self.max_number_of_lines})."
             )
 
 
@@ -1650,8 +1649,8 @@ class CheckModelMaxUpstreamDependencies(BaseCheck):
             DbtBouncerFailedCheckError: If max upstream dependencies exceeded.
 
         """
-        self._require_model()
-        depends_on = self.model.depends_on
+        model = self._require_model()
+        depends_on = model.depends_on
         if depends_on:
             num_upstream_macros = len(list(getattr(depends_on, "macros", []) or []))
             nodes = getattr(depends_on, "nodes", []) or []
@@ -1668,15 +1667,15 @@ class CheckModelMaxUpstreamDependencies(BaseCheck):
 
         if num_upstream_macros > self.max_upstream_macros:
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` has {num_upstream_macros} upstream macros, which is more than the permitted maximum of {self.max_upstream_macros}."
+                f"`{get_clean_model_name(model.unique_id)}` has {num_upstream_macros} upstream macros, which is more than the permitted maximum of {self.max_upstream_macros}."
             )
         if num_upstream_models > self.max_upstream_models:
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` has {num_upstream_models} upstream models, which is more than the permitted maximum of {self.max_upstream_models}."
+                f"`{get_clean_model_name(model.unique_id)}` has {num_upstream_models} upstream models, which is more than the permitted maximum of {self.max_upstream_models}."
             )
         if num_upstream_sources > self.max_upstream_sources:
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` has {num_upstream_sources} upstream sources, which is more than the permitted maximum of {self.max_upstream_sources}."
+                f"`{get_clean_model_name(model.unique_id)}` has {num_upstream_sources} upstream sources, which is more than the permitted maximum of {self.max_upstream_sources}."
             )
 
 
@@ -1728,10 +1727,10 @@ class CheckModelNames(BaseCheck):
             DbtBouncerFailedCheckError: If model name does not match regex.
 
         """
-        self._require_model()
-        if self._compiled_pattern.match(str(self.model.name)) is None:
+        model = self._require_model()
+        if self._compiled_pattern.match(str(model.name)) is None:
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` does not match the supplied regex `{self.model_name_pattern.strip()}`."
+                f"`{get_clean_model_name(model.unique_id)}` does not match the supplied regex `{self.model_name_pattern.strip()}`."
             )
 
 
@@ -1773,18 +1772,18 @@ class CheckModelNumberOfGrants(BaseCheck):
             DbtBouncerFailedCheckError: If number of grants is not within limits.
 
         """
-        self._require_model()
-        config = self.model.config
+        model = self._require_model()
+        config = model.config
         grants = config.grants if config else {}
         num_grants = len((grants or {}).keys())
 
         if num_grants < self.min_number_of_privileges:
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` has less grants (`{num_grants}`) than the specified minimum ({self.min_number_of_privileges})."
+                f"`{get_clean_model_name(model.unique_id)}` has less grants (`{num_grants}`) than the specified minimum ({self.min_number_of_privileges})."
             )
         if num_grants > self.max_number_of_privileges:
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` has more grants (`{num_grants}`) than the specified maximum ({self.max_number_of_privileges})."
+                f"`{get_clean_model_name(model.unique_id)}` has more grants (`{num_grants}`) than the specified maximum ({self.max_number_of_privileges})."
             )
 
 
@@ -1819,17 +1818,17 @@ class CheckModelPropertyFileLocation(BaseCheck):
             DbtBouncerFailedCheckError: If property file location is incorrect.
 
         """
-        self._require_model()
+        model = self._require_model()
         if not (
             hasattr(self.model, "patch_path")
-            and self.model.patch_path
-            and clean_path_str(self.model.patch_path or "") is not None
+            and model.patch_path
+            and clean_path_str(model.patch_path or "") is not None
         ):
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` is not documented."
+                f"`{get_clean_model_name(model.unique_id)}` is not documented."
             )
 
-        original_path = Path(clean_path_str(self.model.original_file_path))
+        original_path = Path(clean_path_str(model.original_file_path))
         relevant_parts = original_path.parts[1:-1]
 
         mapped_parts = []
@@ -1844,19 +1843,19 @@ class CheckModelPropertyFileLocation(BaseCheck):
                 mapped_parts.append(part)
 
         expected_substr = "_".join(mapped_parts)
-        properties_yml_name = Path(clean_path_str(self.model.patch_path or "")).name
+        properties_yml_name = Path(clean_path_str(model.patch_path or "")).name
 
         if not properties_yml_name.startswith("_"):
             raise DbtBouncerFailedCheckError(
-                f"The properties file for `{get_clean_model_name(self.model.unique_id)}` (`{properties_yml_name}`) does not start with an underscore."
+                f"The properties file for `{get_clean_model_name(model.unique_id)}` (`{properties_yml_name}`) does not start with an underscore."
             )
         if expected_substr not in properties_yml_name:
             raise DbtBouncerFailedCheckError(
-                f"The properties file for `{get_clean_model_name(self.model.unique_id)}` (`{properties_yml_name}`) does not contain the expected substring (`{expected_substr}`)."
+                f"The properties file for `{get_clean_model_name(model.unique_id)}` (`{properties_yml_name}`) does not contain the expected substring (`{expected_substr}`)."
             )
         if not properties_yml_name.endswith("__models.yml"):
             raise DbtBouncerFailedCheckError(
-                f"The properties file for `{get_clean_model_name(self.model.unique_id)}` (`{properties_yml_name}`) does not end with `__models.yml`."
+                f"The properties file for `{get_clean_model_name(model.unique_id)}` (`{properties_yml_name}`) does not end with `__models.yml`."
             )
 
 
@@ -1914,10 +1913,10 @@ class CheckModelSchemaName(BaseCheck):
             DbtBouncerFailedCheckError: If schema name does not match regex.
 
         """
-        self._require_model()
-        if self._compiled_pattern.match(str(self.model.schema_)) is None:
+        model = self._require_model()
+        if self._compiled_pattern.match(str(model.schema_)) is None:
             raise DbtBouncerFailedCheckError(
-                f"`{self.model.schema_}` does not match the supplied regex `{self.schema_name_pattern.strip()})`."
+                f"`{model.schema_}` does not match the supplied regex `{self.schema_name_pattern.strip()})`."
             )
 
 
@@ -2040,12 +2039,10 @@ class CheckModelVersionAllowed(BaseCheck):
             DbtBouncerFailedCheckError: If version is not allowed.
 
         """
-        self._require_model()
-        if self.model.version and (
-            self._compiled_pattern.match(str(self.model.version)) is None
-        ):
+        model = self._require_model()
+        if model.version and (self._compiled_pattern.match(str(model.version)) is None):
             raise DbtBouncerFailedCheckError(
-                f"Version `{self.model.version}` in `{self.model.name}` does not match the supplied regex `{self.version_pattern.strip()})`."
+                f"Version `{model.version}` in `{model.name}` does not match the supplied regex `{self.version_pattern.strip()})`."
             )
 
 
@@ -2085,29 +2082,29 @@ class CheckModelVersionPinnedInRef(BaseCheck):
             DbtBouncerFailedCheckError: If version is not pinned in ref.
 
         """
-        self._require_model()
-        self._require_manifest()
-        child_map = self.manifest_obj.manifest.child_map
-        if child_map and self.model.unique_id in child_map:
+        model = self._require_model()
+        manifest_obj = self._require_manifest()
+        child_map = manifest_obj.manifest.child_map
+        if child_map and model.unique_id in child_map:
             downstream_models = [
-                x for x in child_map[self.model.unique_id] if x.startswith("model.")
+                x for x in child_map[model.unique_id] if x.startswith("model.")
             ]
         else:
             downstream_models = []
 
         downstream_models_with_unversioned_refs: list[str] = []
         for m in downstream_models:
-            node = self.manifest_obj.manifest.nodes.get(m)
+            node = manifest_obj.manifest.nodes.get(m)
             refs = getattr(node, "refs", None)
             if node and refs and isinstance(refs, list):
                 downstream_models_with_unversioned_refs.extend(
                     m
                     for ref in refs
-                    if getattr(ref, "name", None) == self.model.unique_id.split(".")[-1]
+                    if getattr(ref, "name", None) == model.unique_id.split(".")[-1]
                     and not getattr(ref, "version", None)
                 )
 
         if downstream_models_with_unversioned_refs:
             raise DbtBouncerFailedCheckError(
-                f"`{self.model.name}` is referenced without a pinned version in downstream models: {downstream_models_with_unversioned_refs}."
+                f"`{model.name}` is referenced without a pinned version in downstream models: {downstream_models_with_unversioned_refs}."
             )

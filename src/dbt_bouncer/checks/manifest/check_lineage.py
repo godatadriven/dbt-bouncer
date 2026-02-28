@@ -70,14 +70,14 @@ class CheckLineagePermittedUpstreamModels(BaseCheck):
             DbtBouncerFailedCheckError: If upstream models are not permitted.
 
         """
-        self._require_model()
-        self._require_manifest()
+        model = self._require_model()
+        manifest_obj = self._require_manifest()
         upstream_models = [
             x
-            for x in getattr(self.model.depends_on, "nodes", []) or []
+            for x in getattr(getattr(model, "depends_on", None), "nodes", []) or []
             if x.split(".")[0] == "model"
             and x.split(".")[1]
-            == (self.package_name or self.manifest_obj.manifest.metadata.project_name)
+            == (self.package_name or manifest_obj.manifest.metadata.project_name)
         ]
         models_by_id = (
             self.models_by_unique_id
@@ -95,7 +95,7 @@ class CheckLineagePermittedUpstreamModels(BaseCheck):
         ]
         if not_permitted_upstream_models:
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` references upstream models that are not permitted: {[m.split('.')[-1] for m in not_permitted_upstream_models]}."
+                f"`{get_clean_model_name(model.unique_id)}` references upstream models that are not permitted: {[m.split('.')[-1] for m in not_permitted_upstream_models]}."
             )
 
 
@@ -130,14 +130,14 @@ class CheckLineageSeedCannotBeUsed(BaseCheck):
             DbtBouncerFailedCheckError: If seed is referenced.
 
         """
-        self._require_model()
+        model = self._require_model()
         if [
             x
-            for x in getattr(self.model.depends_on, "nodes", []) or []
+            for x in getattr(getattr(model, "depends_on", None), "nodes", []) or []
             if x.split(".")[0] == "seed"
         ]:
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` references a seed even though this is not permitted."
+                f"`{get_clean_model_name(model.unique_id)}` references a seed even though this is not permitted."
             )
 
 
@@ -172,12 +172,12 @@ class CheckLineageSourceCannotBeUsed(BaseCheck):
             DbtBouncerFailedCheckError: If source is referenced.
 
         """
-        self._require_model()
+        model = self._require_model()
         if [
             x
-            for x in getattr(self.model.depends_on, "nodes", []) or []
+            for x in getattr(getattr(model, "depends_on", None), "nodes", []) or []
             if x.split(".")[0] == "source"
         ]:
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` references a source even though this is not permitted."
+                f"`{get_clean_model_name(model.unique_id)}` references a source even though this is not permitted."
             )
