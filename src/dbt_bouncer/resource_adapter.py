@@ -29,6 +29,8 @@ passed as raw dbt-artifacts-parser objects and iterated directly.
 
 from typing import Protocol, runtime_checkable
 
+_REQUIRED_ATTRS: frozenset[str] = frozenset({"original_file_path", "unique_id"})
+
 
 @runtime_checkable
 class ResourceWrapper(Protocol):
@@ -49,3 +51,29 @@ class ResourceWrapper(Protocol):
 
     unique_id: str
     original_file_path: str
+
+    @classmethod
+    def __subclasshook__(cls, other: type) -> bool:
+        """Support ``issubclass(cls, ResourceWrapper)`` on Python 3.11.
+
+        Python 3.11 raises ``TypeError`` for ``issubclass()`` on
+        ``@runtime_checkable`` protocols that declare data attributes
+        (non-method members).  This hook teaches Python how to check
+        structural compatibility for such protocols by inspecting the
+        accumulated ``__annotations__`` across the candidate class's MRO.
+
+        Returns:
+            ``True`` if *other* declares all required attributes, or
+            ``NotImplemented`` to let Python fall back to its default
+            subclass check logic.
+
+        """
+        if cls is ResourceWrapper:
+            # Collect annotations from the full MRO so that inherited
+            # fields (e.g. from a Pydantic base model) are included.
+            annotations: dict[str, object] = {}
+            for klass in reversed(other.__mro__):
+                annotations.update(getattr(klass, "__annotations__", {}))
+            if _REQUIRED_ATTRS.issubset(annotations):
+                return True
+        return NotImplemented
