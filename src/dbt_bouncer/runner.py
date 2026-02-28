@@ -7,7 +7,7 @@ import traceback
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, NotRequired, TypedDict
+from typing import TYPE_CHECKING, Any, NotRequired, TypedDict, cast
 
 from rich import box
 from rich.console import Console
@@ -26,6 +26,7 @@ from dbt_bouncer.utils import (
 
 if TYPE_CHECKING:
     from dbt_bouncer.context import BouncerContext
+    from dbt_bouncer.resource_adapter import ResourceWrapper
 
 
 _MAX_BATCH_SIZE: int = 500
@@ -148,20 +149,23 @@ def runner(
     # Keys that are already plain lists (catalog_nodes, catalog_sources, exposures,
     # macros, sources, unit_tests) are identical in both dicts; the others differ
     # because parsed_data stores unwrapped inner objects for context injection.
-    resource_map: dict[str, list[Any]] = {
-        "catalog_nodes": ctx.catalog_nodes,
-        "catalog_sources": ctx.catalog_sources,
-        "exposures": ctx.exposures,
-        "macros": ctx.macros,
-        "models": ctx.models,
-        "run_results": ctx.run_results,
-        "seeds": ctx.seeds,
-        "semantic_models": ctx.semantic_models,
-        "snapshots": ctx.snapshots,
-        "sources": ctx.sources,
-        "tests": ctx.tests,
-        "unit_tests": ctx.unit_tests,
-    }
+    resource_map: dict[str, list["ResourceWrapper"]] = cast(
+        "dict[str, list[ResourceWrapper]]",
+        {
+            "catalog_nodes": ctx.catalog_nodes,
+            "catalog_sources": ctx.catalog_sources,
+            "exposures": ctx.exposures,
+            "macros": ctx.macros,
+            "models": ctx.models,
+            "run_results": ctx.run_results,
+            "seeds": ctx.seeds,
+            "semantic_models": ctx.semantic_models,
+            "snapshots": ctx.snapshots,
+            "sources": ctx.sources,
+            "tests": ctx.tests,
+            "unit_tests": ctx.unit_tests,
+        },
+    )
 
     # parsed_data: context injected into each check via _inject_context.
     # Shared keys reference resource_map directly; wrapped collections are
@@ -175,22 +179,18 @@ def runner(
         "sources": resource_map["sources"],
         "unit_tests": resource_map["unit_tests"],
         # Unwrapped inner objects for global context injection
-        "models": [m.model for m in resource_map["models"]],
-        "run_results": [r.run_result for r in resource_map["run_results"]],
-        "seeds": [s.seed for s in resource_map["seeds"]],
-        "semantic_models": [s.semantic_model for s in resource_map["semantic_models"]],
-        "snapshots": [s.snapshot for s in resource_map["snapshots"]],
-        "tests": [t.test for t in resource_map["tests"]],
+        "models": [m.model for m in ctx.models],
+        "run_results": [r.run_result for r in ctx.run_results],
+        "seeds": [s.seed for s in ctx.seeds],
+        "semantic_models": [s.semantic_model for s in ctx.semantic_models],
+        "snapshots": [s.snapshot for s in ctx.snapshots],
+        "tests": [t.test for t in ctx.tests],
         # Additional context not in resource_map
         "manifest_obj": ctx.manifest_obj,
-        "models_by_unique_id": {
-            m.model.unique_id: m.model for m in resource_map["models"]
-        },
-        "sources_by_unique_id": {
-            s.source.unique_id: s.source for s in resource_map["sources"]
-        },
-        "exposures_by_unique_id": {e.unique_id: e for e in resource_map["exposures"]},
-        "tests_by_unique_id": {t.test.unique_id: t.test for t in resource_map["tests"]},
+        "models_by_unique_id": {m.model.unique_id: m.model for m in ctx.models},
+        "sources_by_unique_id": {s.source.unique_id: s.source for s in ctx.sources},
+        "exposures_by_unique_id": {e.unique_id: e for e in ctx.exposures},
+        "tests_by_unique_id": {t.test.unique_id: t.test for t in ctx.tests},
     }
 
     # Pre-compute unique_id -> meta lookup for catalog_node skip_checks

@@ -515,7 +515,7 @@ def init() -> None:
             f,
             default_flow_style=False,
             sort_keys=False,
-            Dumper=yaml.CSafeDumper,
+            Dumper=yaml.CSafeDumper,  # type: ignore[attr-defined]
         )
 
     console.print(f"\n[bold green][OK] Created {config_path}[/bold green]")

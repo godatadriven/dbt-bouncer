@@ -81,9 +81,9 @@ class CheckUnitTestCoverage(BaseCheck):
             DbtBouncerFailedCheckError: If unit test coverage is less than permitted minimum.
 
         """
-        self._require_manifest()
+        manifest_obj = self._require_manifest()
         if get_package_version_number(
-            self.manifest_obj.manifest.metadata.dbt_version or "0.0.0"
+            manifest_obj.manifest.metadata.dbt_version or "0.0.0"
         ) >= get_package_version_number("1.8.0"):
             relevant_models = [
                 m.unique_id
@@ -156,26 +156,24 @@ class CheckUnitTestExpectFormat(BaseCheck):
             DbtBouncerFailedCheckError: If unit test expect format is not permitted.
 
         """
-        self._require_manifest()
-        self._require_unit_test()
+        manifest_obj = self._require_manifest()
+        unit_test = self._require_unit_test()
         if get_package_version_number(
-            self.manifest_obj.manifest.metadata.dbt_version or "0.0.0"
+            manifest_obj.manifest.metadata.dbt_version or "0.0.0"
         ) >= get_package_version_number("1.8.0"):
-            if self.unit_test.expect.format is None:
+            if unit_test.expect.format is None:
                 raise DbtBouncerFailedCheckError(
-                    f"Unit test `{self.unit_test.name}` does not have an `expect` format defined. "
+                    f"Unit test `{unit_test.name}` does not have an `expect` format defined. "
                     f"Permitted formats are: {self.permitted_formats}."
                 )
 
             format_value = (
-                self.unit_test.expect.format.value
-                if self.unit_test.expect.format
-                else None
+                unit_test.expect.format.value if unit_test.expect.format else None
             )
 
             if format_value not in self.permitted_formats:
                 raise DbtBouncerFailedCheckError(
-                    f"Unit test `{self.unit_test.name}` has an `expect` format that is not permitted. "
+                    f"Unit test `{unit_test.name}` has an `expect` format that is not permitted. "
                     f"Permitted formats are: {self.permitted_formats}. "
                     f"Found: {format_value}"
                 )
@@ -229,17 +227,17 @@ class CheckUnitTestGivenFormats(BaseCheck):
             DbtBouncerFailedCheckError: If unit test given formats are not permitted.
 
         """
-        self._require_manifest()
-        self._require_unit_test()
+        manifest_obj = self._require_manifest()
+        unit_test = self._require_unit_test()
         if get_package_version_number(
-            self.manifest_obj.manifest.metadata.dbt_version or "0.0.0"
+            manifest_obj.manifest.metadata.dbt_version or "0.0.0"
         ) >= get_package_version_number("1.8.0"):
             given_formats = [
-                i.format.value for i in self.unit_test.given if i.format is not None
+                i.format.value for i in unit_test.given if i.format is not None
             ]
             if not all(e in self.permitted_formats for e in given_formats):
                 raise DbtBouncerFailedCheckError(
-                    f"Unit test `{self.unit_test.name}` has given formats which are not permitted. Permitted formats are: {self.permitted_formats}."
+                    f"Unit test `{unit_test.name}` has given formats which are not permitted. Permitted formats are: {self.permitted_formats}."
                 )
         else:
             logging.warning(

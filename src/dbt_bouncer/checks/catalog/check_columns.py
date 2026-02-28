@@ -271,7 +271,7 @@ class CheckColumnNameCompliesToColumnType(BaseCheck):
 
         """
         catalog_node = self._require_catalog_node()
-        if self.type_pattern:
+        if self.type_pattern and self._compiled_type_pattern is not None:
             non_complying_columns = [
                 v.name
                 for _, v in catalog_node.columns.items()
