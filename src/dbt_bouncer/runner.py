@@ -7,7 +7,7 @@ import traceback
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, NotRequired, TypedDict
+from typing import TYPE_CHECKING, Any, NotRequired, TypedDict, cast
 
 from rich import box
 from rich.console import Console
@@ -26,6 +26,7 @@ from dbt_bouncer.utils import (
 
 if TYPE_CHECKING:
     from dbt_bouncer.context import BouncerContext
+    from dbt_bouncer.resource_adapter import ResourceWrapper
 
 
 _MAX_BATCH_SIZE: int = 500
@@ -148,20 +149,23 @@ def runner(
     # Keys that are already plain lists (catalog_nodes, catalog_sources, exposures,
     # macros, sources, unit_tests) are identical in both dicts; the others differ
     # because parsed_data stores unwrapped inner objects for context injection.
-    resource_map: dict[str, list[Any]] = {
-        "catalog_nodes": ctx.catalog_nodes,
-        "catalog_sources": ctx.catalog_sources,
-        "exposures": ctx.exposures,
-        "macros": ctx.macros,
-        "models": ctx.models,
-        "run_results": ctx.run_results,
-        "seeds": ctx.seeds,
-        "semantic_models": ctx.semantic_models,
-        "snapshots": ctx.snapshots,
-        "sources": ctx.sources,
-        "tests": ctx.tests,
-        "unit_tests": ctx.unit_tests,
-    }
+    resource_map: dict[str, list["ResourceWrapper"]] = cast(
+        "dict[str, list[ResourceWrapper]]",
+        {
+            "catalog_nodes": ctx.catalog_nodes,
+            "catalog_sources": ctx.catalog_sources,
+            "exposures": ctx.exposures,
+            "macros": ctx.macros,
+            "models": ctx.models,
+            "run_results": ctx.run_results,
+            "seeds": ctx.seeds,
+            "semantic_models": ctx.semantic_models,
+            "snapshots": ctx.snapshots,
+            "sources": ctx.sources,
+            "tests": ctx.tests,
+            "unit_tests": ctx.unit_tests,
+        },
+    )
 
     # parsed_data: context injected into each check via _inject_context.
     # Shared keys reference resource_map directly; wrapped collections are
