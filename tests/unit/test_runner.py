@@ -64,6 +64,7 @@ def test_runner_coverage(caplog, tmp_path):
                     "catalog_sources": [],
                     "check_categories": ["manifest_checks"],
                     "create_pr_comment_file": False,
+                    "dry_run": False,
                     "exposures": [],
                     "macros": [],
                     "manifest_obj": DbtBouncerManifest(
@@ -191,6 +192,7 @@ def test_runner_failure():
                     "catalog_sources": [],
                     "check_categories": ["manifest_checks"],
                     "create_pr_comment_file": False,
+                    "dry_run": False,
                     "exposures": [],
                     "macros": [],
                     "manifest_obj": DbtBouncerManifest(
@@ -311,6 +313,7 @@ def test_runner_skip(tmp_path):
                     "catalog_sources": [],
                     "check_categories": ["manifest_checks"],
                     "create_pr_comment_file": False,
+                    "dry_run": False,
                     "exposures": [],
                     "macros": [],
                     "manifest_obj": DbtBouncerManifest(
@@ -475,6 +478,7 @@ def test_runner_success():
                     "catalog_sources": [],
                     "check_categories": ["manifest_checks"],
                     "create_pr_comment_file": False,
+                    "dry_run": False,
                     "exposures": [],
                     "macros": [],
                     "manifest_obj": DbtBouncerManifest(
@@ -586,6 +590,7 @@ def test_runner_windows(caplog, tmp_path):
                 "catalog_sources": [],
                 "check_categories": ["manifest_checks"],
                 "create_pr_comment_file": False,
+                "dry_run": False,
                 "exposures": [],
                 "macros": [],
                 "manifest_obj": DbtBouncerManifest(
@@ -715,6 +720,7 @@ def test_runner_check_id(tmp_path):
                     "catalog_sources": [],
                     "check_categories": ["manifest_checks"],
                     "create_pr_comment_file": False,
+                    "dry_run": False,
                     "exposures": [],
                     "macros": [],
                     "manifest_obj": DbtBouncerManifest(
@@ -884,6 +890,7 @@ def test_runner_output_only_failures(output_only_failures, num_checks, tmp_path)
                     "catalog_sources": [],
                     "check_categories": ["manifest_checks"],
                     "create_pr_comment_file": False,
+                    "dry_run": False,
                     "exposures": [],
                     "macros": [],
                     "manifest_obj": DbtBouncerManifest(
@@ -1104,6 +1111,7 @@ def test_runner_skip_catalog_check(tmp_path):
                     "catalog_sources": [],
                     "check_categories": ["catalog_checks"],
                     "create_pr_comment_file": False,
+                    "dry_run": False,
                     "exposures": [],
                     "macros": [],
                     "manifest_obj": DbtBouncerManifest(

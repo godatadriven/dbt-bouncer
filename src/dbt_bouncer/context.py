@@ -43,6 +43,7 @@ class BouncerContext(BaseModel):
     catalog_sources: list["DbtBouncerCatalogNode"]
     check_categories: list[str]
     create_pr_comment_file: bool
+    dry_run: bool
     exposures: list["DbtBouncerExposureBase"]
     macros: list["DbtBouncerMacroBase"]
     manifest_obj: "DbtBouncerManifest"
