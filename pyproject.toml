@@ -191,6 +191,7 @@ exclude = [
   ".github",
   ".venv",
   "LICENSE.md",
+  "docs/plans",
 ]
 MD007.indent = 4
 respect_gitignore = true
