@@ -15,7 +15,7 @@
       benchmark-main-branch:
         permissions:
           contents: read
-        runs-on: ubuntu-22.04
+        runs-on: ubuntu-24.04
         steps:
           - uses: actions/checkout@v6
 
@@ -47,7 +47,7 @@
       deploy-docs:
           permissions:
             contents: write
-          runs-on: ubuntu-22.04
+          runs-on: ubuntu-24.04
           steps:
               - uses: actions/checkout@v6
 
@@ -75,7 +75,7 @@
       docker-tests:
         permissions:
           contents: read
-        runs-on: ubuntu-22.04
+        runs-on: ubuntu-24.04
         steps:
             - name: Checkout
               uses: actions/checkout@v6
@@ -127,7 +127,7 @@
             fail-fast: false
             matrix:
                 operating-system:
-                  - ubuntu-22.04
+                  - ubuntu-24.04
                   - windows-latest
                 python-version:
                     - '3.11'

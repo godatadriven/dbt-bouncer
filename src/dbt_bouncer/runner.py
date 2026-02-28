@@ -28,6 +28,7 @@ if TYPE_CHECKING:
     from dbt_bouncer.context import BouncerContext
 
 
+_MAX_BATCH_SIZE: int = 500
 _VALID_ITERATE_OVER_VALUES = frozenset(rt.value for rt in ResourceType)
 _CLASS_ITERATE_CACHE: dict[type, frozenset[str]] = {}
 
@@ -96,7 +97,7 @@ class CheckToRun(TypedDict):
 
     check: Any
     check_run_id: str
-    failure_message: NotRequired[list[str] | str]
+    failure_message: NotRequired[str]
     outcome: NotRequired[str]
     severity: str
 
@@ -143,26 +144,10 @@ def runner(
         RuntimeError: If more than one "iterate_over" argument is found.
 
     """
-    parsed_data = {
-        "catalog_nodes": ctx.catalog_nodes,
-        "catalog_sources": ctx.catalog_sources,
-        "exposures": ctx.exposures,
-        "macros": ctx.macros,
-        "manifest_obj": ctx.manifest_obj,
-        "models": [m.model for m in ctx.models],
-        "models_by_unique_id": {m.model.unique_id: m.model for m in ctx.models},
-        "sources_by_unique_id": {s.source.unique_id: s.source for s in ctx.sources},
-        "exposures_by_unique_id": {e.unique_id: e for e in ctx.exposures},
-        "tests_by_unique_id": {t.test.unique_id: t.test for t in ctx.tests},
-        "run_results": [r.run_result for r in ctx.run_results],
-        "seeds": [s.seed for s in ctx.seeds],
-        "semantic_models": [s.semantic_model for s in ctx.semantic_models],
-        "snapshots": [s.snapshot for s in ctx.snapshots],
-        "sources": ctx.sources,
-        "tests": [t.test for t in ctx.tests],
-        "unit_tests": ctx.unit_tests,
-    }
-
+    # resource_map: wrapper objects used for check iteration.
+    # Keys that are already plain lists (catalog_nodes, catalog_sources, exposures,
+    # macros, sources, unit_tests) are identical in both dicts; the others differ
+    # because parsed_data stores unwrapped inner objects for context injection.
     resource_map: dict[str, list[Any]] = {
         "catalog_nodes": ctx.catalog_nodes,
         "catalog_sources": ctx.catalog_sources,
@@ -175,6 +160,29 @@ def runner(
         "snapshots": ctx.snapshots,
         "sources": ctx.sources,
         "tests": ctx.tests,
+        "unit_tests": ctx.unit_tests,
+    }
+
+    # parsed_data: context injected into each check via _inject_context.
+    # Uses cached_property accessors on BouncerContext so each derived
+    # collection is computed at most once per runner() call.
+    parsed_data = {
+        "catalog_nodes": ctx.catalog_nodes,
+        "catalog_sources": ctx.catalog_sources,
+        "exposures": ctx.exposures,
+        "exposures_by_unique_id": ctx.exposures_by_unique_id,
+        "macros": ctx.macros,
+        "manifest_obj": ctx.manifest_obj,
+        "models": ctx.models_flat,
+        "models_by_unique_id": ctx.models_by_unique_id,
+        "run_results": ctx.run_results_flat,
+        "seeds": ctx.seeds_flat,
+        "semantic_models": ctx.semantic_models_flat,
+        "snapshots": ctx.snapshots_flat,
+        "sources": ctx.sources,
+        "sources_by_unique_id": ctx.sources_by_unique_id,
+        "tests": ctx.tests_flat,
+        "tests_by_unique_id": ctx.tests_by_unique_id,
         "unit_tests": ctx.unit_tests,
     }
 
@@ -274,9 +282,7 @@ def runner(
             if check["check"].description:
                 failure_message = f"{check['check'].description} - {failure_message}"
 
-            logging.debug(
-                f"Check {check['check_run_id']} failed: {' '.join(failure_message)}"
-            )
+            logging.debug(f"Check {check['check_run_id']} failed: {failure_message}")
             check["outcome"] = "failed"
             check["failure_message"] = failure_message
 
@@ -302,9 +308,15 @@ def runner(
     # Group checks by class to reduce ThreadPoolExecutor scheduling overhead.
     # Checks of the same class run sequentially within a batch; different
     # classes run in parallel across threads.
+    # Cap batch size to avoid submitting one giant task for large check sets.
     batches: dict[str, list[CheckToRun]] = defaultdict(list)
     for check in checks_to_run:
         batches[check["check"].__class__.__name__].append(check)
+
+    batches_to_run: list[list[CheckToRun]] = []
+    for batch in batches.values():
+        for i in range(0, max(len(batch), 1), _MAX_BATCH_SIZE):
+            batches_to_run.append(batch[i : i + _MAX_BATCH_SIZE])
 
     console = Console()
     progress_lock = threading.Lock()
@@ -319,7 +331,7 @@ def runner(
         with ThreadPoolExecutor() as executor:
             futures = {
                 executor.submit(_execute_batch, batch): batch
-                for batch in batches.values()
+                for batch in batches_to_run
             }
             for future in as_completed(futures):
                 batch_size = future.result()

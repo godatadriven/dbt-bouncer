@@ -24,6 +24,23 @@ from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.utils import compile_pattern
 
 
+def _is_catalog_node_a_model(
+    catalog_node: "CatalogNodes", models: list["DbtBouncerModelBase"]
+) -> bool:
+    """Return True if a catalog node corresponds to a dbt model.
+
+    Args:
+        catalog_node (CatalogNodes): The CatalogNodes object to check.
+        models (list[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
+
+    Returns:
+        bool: Whether a catalog node is a model.
+
+    """
+    model = next((m for m in models if m.unique_id == catalog_node.unique_id), None)
+    return model is not None and model.resource_type == "model"
+
+
 class CheckColumnDescriptionPopulated(BaseCheck):
     """Columns must have a populated description.
 
@@ -70,7 +87,7 @@ class CheckColumnDescriptionPopulated(BaseCheck):
         """
         catalog_node = self._require_catalog_node()
         manifest_obj = self._require_manifest()
-        if self.is_catalog_node_a_model(catalog_node, self.models):
+        if _is_catalog_node_a_model(catalog_node, self.models):
             model = next(
                 m for m in self.models if m.unique_id == catalog_node.unique_id
             )
@@ -330,7 +347,7 @@ class CheckColumnNames(BaseCheck):
 
         """
         catalog_node = self._require_catalog_node()
-        if self.is_catalog_node_a_model(catalog_node, self.models):
+        if _is_catalog_node_a_model(catalog_node, self.models):
             non_complying_columns: list[str] = []
             non_complying_columns.extend(
                 v.name
@@ -382,7 +399,7 @@ class CheckColumnsAreAllDocumented(BaseCheck):
         """
         catalog_node = self._require_catalog_node()
         manifest_obj = self._require_manifest()
-        if self.is_catalog_node_a_model(catalog_node, self.models):
+        if _is_catalog_node_a_model(catalog_node, self.models):
             model = next(
                 m for m in self.models if m.unique_id == catalog_node.unique_id
             )
@@ -446,7 +463,7 @@ class CheckColumnsAreDocumentedInPublicModels(BaseCheck):
 
         """
         catalog_node = self._require_catalog_node()
-        if self.is_catalog_node_a_model(catalog_node, self.models):
+        if _is_catalog_node_a_model(catalog_node, self.models):
             model = next(
                 m for m in self.models if m.unique_id == catalog_node.unique_id
             )
