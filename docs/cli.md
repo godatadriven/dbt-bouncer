@@ -67,6 +67,33 @@ Specifies the location of the YAML configuration file containing your dbt-bounce
 dbt-bouncer run --config-file config/checks.yml
 ```
 
+### `--dry-run`
+
+**Type:** Flag
+**Default:** False
+**Required:** No
+
+When passed, assembles the full check list as normal but prints a summary table showing the check name, resource type, and count for each check that would run — then exits with code 0 without executing any checks. Useful for previewing which checks are in scope before a full run.
+
+**Example:**
+
+```bash
+dbt-bouncer run --dry-run
+```
+
+Example output:
+
+```text
+╭─ Dry run — checks that would execute ─────────────────────╮
+│ Check name                     │ Resource type │ Count     │
+│ CheckModelNamePattern          │ model         │  1234     │
+│ CheckModelDescriptionPopulated │ model         │  1234     │
+│ CheckSourceDescriptionPopulated│ source        │    56     │
+╰────────────────────────────────────────────────────────────╯
+
+Dry run complete. 2524 check(s) would run.
+```
+
 ### `--check`
 
 **Type:** String (comma-separated)
