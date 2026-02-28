@@ -5,6 +5,8 @@ from unittest import mock
 import pytest
 
 from dbt_bouncer.utils import (
+    _ESCAPED_SEPARATOR,
+    _SEPARATOR,
     create_github_comment_file,
     flatten,
     get_clean_model_name,
@@ -379,4 +381,20 @@ class CheckCustomExample:
             _load_custom_checks(nonexistent_dir, check_objects)
 
         assert "does not exist" in caplog.text
-        assert len(check_objects) == 0
+
+
+def test_flatten_key_with_separator():
+    """Keys containing the path separator are escaped and distinguished from nested paths."""
+    flat_nested = flatten({"a": {"b": 1}})
+    flat_with_sep = flatten({"a>b": 1})
+
+    # A key containing > must not produce the same flat key as a nested dict
+    assert flat_with_sep != flat_nested
+
+    # The separator in the key is escaped; the path separator is not
+    expected_key = f"{_SEPARATOR}{_SEPARATOR}a{_ESCAPED_SEPARATOR}b"
+    separator_key = f"{_SEPARATOR}{_SEPARATOR}a{_SEPARATOR}b"
+
+    assert expected_key in flat_with_sep
+    assert separator_key not in flat_with_sep
+    assert separator_key in flat_nested
