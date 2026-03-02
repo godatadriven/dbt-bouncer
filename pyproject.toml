@@ -29,7 +29,7 @@ dependencies = [
   "jinja2 (>=3,<4)",
   "junitparser (>=2,<5)",
   "orjson (>=3,<4)",
-  "packaging (<26)",
+  "packaging (<27)",
   "pydantic (>=2,<3)",
   "pyyaml (<7)",
   "rich (>=13,<14)",
