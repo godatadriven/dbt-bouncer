@@ -116,36 +116,91 @@ def _rebuild_bouncer_context() -> None:
     if BouncerContext._model_rebuilt:
         return
 
-    # These imports are required for model_rebuild() to resolve forward references.
-    # They trigger heavy module loads (manifest_latest, manifest_v11, etc.)
-    from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (  # noqa: F401
-        UnitTests,
-    )
-    from dbt_bouncer.artifact_parsers.parsers_catalog import (  # noqa: F401
-        DbtBouncerCatalogNode,
-    )
-    from dbt_bouncer.artifact_parsers.parsers_manifest import (  # noqa: F401
-        DbtBouncerExposureBase,
-        DbtBouncerMacroBase,
+    # Import the real types for model_rebuild namespace.
+    # By this point, the heavy modules (manifest_latest, manifest_v11) are
+    # already loaded by _import_artifact_types() in validate_conf().
+    import warnings
+
+    from dbt_bouncer.artifact_parsers.dbt_cloud import manifest_latest as _ml
+    from dbt_bouncer.artifact_parsers.parsers_catalog import DbtBouncerCatalogNode
+    from dbt_bouncer.artifact_parsers.parsers_manifest import (
         DbtBouncerManifest,
         DbtBouncerModel,
-        DbtBouncerModelBase,
         DbtBouncerSeed,
-        DbtBouncerSeedBase,
         DbtBouncerSemanticModel,
-        DbtBouncerSemanticModelBase,
         DbtBouncerSnapshot,
-        DbtBouncerSnapshotBase,
         DbtBouncerSource,
-        DbtBouncerSourceBase,
         DbtBouncerTest,
-        DbtBouncerTestBase,
     )
-    from dbt_bouncer.artifact_parsers.parsers_run_results import (  # noqa: F401
+    from dbt_bouncer.artifact_parsers.parsers_run_results import (
         DbtBouncerRunResult,
         DbtBouncerRunResultBase,
     )
-    from dbt_bouncer.config_file_parser import DbtBouncerConfBase  # noqa: F401
+    from dbt_bouncer.config_file_parser import DbtBouncerConfBase
 
-    BouncerContext.model_rebuild()
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", category=UserWarning)
+        from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
+            Exposure as Exposure_v11,
+        )
+        from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
+            GenericTestNode as GenericTestNode_v11,
+        )
+        from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
+            Macro as Macro_v11,
+        )
+        from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
+            ModelNode as ModelNode_v11,
+        )
+        from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
+            SeedNode as SeedNode_v11,
+        )
+        from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
+            SemanticModel as SemanticModel_v11,
+        )
+        from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
+            SingularTestNode as SingularTestNode_v11,
+        )
+        from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
+            SnapshotNode as SnapshotNode_v11,
+        )
+        from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
+            SourceDefinition as SourceDefinition_v11,
+        )
+
+    # Build the real TypeAlias unions for the namespace
+    types_namespace = {
+        "DbtBouncerCatalogNode": DbtBouncerCatalogNode,
+        "DbtBouncerConfBase": DbtBouncerConfBase,
+        "DbtBouncerExposureBase": Exposure_v11 | _ml.Exposures,
+        "DbtBouncerMacroBase": Macro_v11 | _ml.Macros,
+        "DbtBouncerManifest": DbtBouncerManifest,
+        "DbtBouncerModel": DbtBouncerModel,
+        "DbtBouncerModelBase": ModelNode_v11 | _ml.Nodes4 | _ml.Nodes4,
+        "DbtBouncerRunResult": DbtBouncerRunResult,
+        "DbtBouncerRunResultBase": DbtBouncerRunResultBase,
+        "DbtBouncerSeed": DbtBouncerSeed,
+        "DbtBouncerSeedBase": SeedNode_v11 | _ml.Nodes,
+        "DbtBouncerSemanticModel": DbtBouncerSemanticModel,
+        "DbtBouncerSemanticModelBase": SemanticModel_v11
+        | _ml.SemanticModels
+        | _ml.SemanticModels,
+        "DbtBouncerSnapshot": DbtBouncerSnapshot,
+        "DbtBouncerSnapshotBase": _ml.Nodes7 | SnapshotNode_v11,
+        "DbtBouncerSource": DbtBouncerSource,
+        "DbtBouncerSourceBase": SourceDefinition_v11 | _ml.Sources | _ml.Sources,
+        "DbtBouncerTest": DbtBouncerTest,
+        "DbtBouncerTestBase": (
+            GenericTestNode_v11
+            | SingularTestNode_v11
+            | _ml.Nodes1
+            | _ml.Nodes2
+            | _ml.Nodes6
+            | _ml.Nodes2
+            | _ml.Nodes6
+        ),
+        "UnitTests": _ml.UnitTests,
+    }
+
+    BouncerContext.model_rebuild(_types_namespace=types_namespace)
     BouncerContext._model_rebuilt = True
