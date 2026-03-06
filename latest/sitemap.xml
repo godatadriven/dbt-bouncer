@@ -37,7 +37,15 @@
          <lastmod>2026-03-06</lastmod>
     </url>
     <url>
-         <loc>https://godatadriven.github.io/dbt-bouncer/latest/checks/catalog/check_columns/</loc>
+         <loc>https://godatadriven.github.io/dbt-bouncer/latest/checks/catalog/columns/description/</loc>
+         <lastmod>2026-03-06</lastmod>
+    </url>
+    <url>
+         <loc>https://godatadriven.github.io/dbt-bouncer/latest/checks/catalog/columns/naming/</loc>
+         <lastmod>2026-03-06</lastmod>
+    </url>
+    <url>
+         <loc>https://godatadriven.github.io/dbt-bouncer/latest/checks/catalog/columns/tests/</loc>
          <lastmod>2026-03-06</lastmod>
     </url>
     <url>
