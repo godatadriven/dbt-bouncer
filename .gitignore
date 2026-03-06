@@ -165,6 +165,7 @@ benchmark_results.json
 changed_files.txt
 coverage.json
 dbt.duckdb
+docs/plans
 github-comment.md
 pytest-coverage.txt
 results.json
