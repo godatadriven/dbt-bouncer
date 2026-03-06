@@ -2,7 +2,10 @@
 
 - Catalog checks:
       - [Catalog Sources](./catalog/check_catalog_sources.md)
-      - [Columns](./catalog/check_columns.md)
+      - Columns
+          - [Description](./catalog/columns/description.md)
+          - [Naming](./catalog/columns/naming.md)
+          - [Tests](./catalog/columns/tests.md)
 - Manifest checks:
       - [Exposures](./manifest/check_exposures.md)
       - [Lineage](./manifest/check_lineage.md)
