@@ -145,15 +145,6 @@ def _ensure_loaded() -> None:
         | _ml.Nodes6
     )
 
-    # Rebuild wrapper classes now that real types are available
-    DbtBouncerExposure.model_rebuild()
-    DbtBouncerModel.model_rebuild()
-    DbtBouncerSeed.model_rebuild()
-    DbtBouncerSemanticModel.model_rebuild()
-    DbtBouncerSnapshot.model_rebuild()
-    DbtBouncerSource.model_rebuild()
-    DbtBouncerTest.model_rebuild()
-
 
 def __getattr__(name: str) -> Any:
     if name in _LAZY_NAMES:
@@ -285,6 +276,8 @@ def parse_manifest_artifact(
         list[DbtBouncerUnitTest]: List of unit tests in the project.
 
     """
+    _ensure_loaded()
+
     project_exposures = [
         v
         for _, v in manifest_obj.manifest.exposures.items()
@@ -343,14 +336,22 @@ def parse_manifest_artifact(
                 )
 
     project_semantic_models = [
-        v
-        for _, v in manifest_obj.manifest.semantic_models.items()
+        DbtBouncerSemanticModel(
+            original_file_path=str(clean_path_str(v.original_file_path)),
+            semantic_model=v,
+            unique_id=k,
+        )
+        for k, v in manifest_obj.manifest.semantic_models.items()
         if v.package_name
         == (package_name or manifest_obj.manifest.metadata.project_name)
     ]
     project_sources = [
-        v
-        for _, v in manifest_obj.manifest.sources.items()
+        DbtBouncerSource(
+            original_file_path=str(clean_path_str(v.original_file_path)),
+            source=v,
+            unique_id=k,
+        )
+        for k, v in manifest_obj.manifest.sources.items()
         if v.package_name
         == (package_name or manifest_obj.manifest.metadata.project_name)
     ]
