@@ -83,7 +83,7 @@ def get_nested_value(
     """
     current_level = d
     for key in keys:
-        if isinstance(current_level, dict):
+        if isinstance(current_level, dict) or hasattr(current_level, "get"):
             current_level = current_level.get(key, default)  # type: ignore[assignment]
             if current_level is default and key != keys[-1]:
                 return default
@@ -151,9 +151,18 @@ def flatten(
     """
     if flattened is None:
         flattened = {}
-    if not isinstance(structure, (dict, list)):
+    is_dict_like = isinstance(structure, dict) or (
+        hasattr(structure, "items") and hasattr(structure, "keys")
+    )
+    is_list_like = isinstance(structure, list) or (
+        hasattr(structure, "__iter__")
+        and hasattr(structure, "__len__")
+        and not isinstance(structure, (str, bytes))
+        and not is_dict_like
+    )
+    if not is_dict_like and not is_list_like:
         flattened[((path + _SEPARATOR) if path else "") + key] = structure
-    elif isinstance(structure, list):
+    elif is_list_like:
         for i, item in enumerate(structure):
             flatten(item, f"{i}", f"{path}{_SEPARATOR}{key}", flattened)
     else:
