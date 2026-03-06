@@ -1,4 +1,4 @@
-"""Checks related to source property file locations."""
+"""Checks related to source directory and file locations."""
 
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal

@@ -30,7 +30,7 @@
           - [Loader](./manifest/sources/loader.md)
           - [Meta](./manifest/sources/meta.md)
           - [Naming](./manifest/sources/naming.md)
-          - [Properties](./manifest/sources/properties.md)
+          - [Directories](./manifest/sources/directories.md)
           - [Tags](./manifest/sources/tags.md)
       - [Tests](./manifest/check_tests.md)
       - [Unit Tests](./manifest/check_unit_tests.md)

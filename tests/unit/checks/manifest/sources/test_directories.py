@@ -4,7 +4,7 @@ import pytest
 
 from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import Sources
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
-from dbt_bouncer.checks.manifest.sources.properties import (
+from dbt_bouncer.checks.manifest.sources.directories import (
     CheckSourcePropertyFileLocation,
 )
 
