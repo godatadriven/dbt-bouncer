@@ -2,15 +2,13 @@ from __future__ import annotations
 
 import warnings
 from enum import Enum
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, TypeAlias
 
 from pydantic import BaseModel
 
 from dbt_bouncer.utils import clean_path_str, get_package_version_number
 
 if TYPE_CHECKING:
-    from typing import TypeAlias
-
     from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
         Exposure as Exposure_v11,
     )
@@ -71,18 +69,97 @@ if TYPE_CHECKING:
         | Nodes2
         | Nodes6
     )
-else:
-    # At runtime, these are just sentinel strings.  Pydantic resolves the
-    # real types via ``model_rebuild(_types_namespace=...)`` called in
-    # ``config_file_validator.validate_conf()``.
-    DbtBouncerExposureBase = Any
-    DbtBouncerMacroBase = Any
-    DbtBouncerModelBase = Any
-    DbtBouncerSeedBase = Any
-    DbtBouncerSemanticModelBase = Any
-    DbtBouncerSnapshotBase = Any
-    DbtBouncerSourceBase = Any
-    DbtBouncerTestBase = Any
+
+# Lazy loading via PEP 562.  The TypeAlias unions and their constituent
+# types are imported on first access, deferring the expensive
+# manifest_latest.py and manifest_v11 loads until actually needed.
+_LAZY_NAMES: set[str] = {
+    "DbtBouncerExposureBase",
+    "DbtBouncerMacroBase",
+    "DbtBouncerModelBase",
+    "DbtBouncerSeedBase",
+    "DbtBouncerSemanticModelBase",
+    "DbtBouncerSnapshotBase",
+    "DbtBouncerSourceBase",
+    "DbtBouncerTestBase",
+}
+
+_loaded = False
+
+
+def _ensure_loaded() -> None:
+    global _loaded
+    if _loaded:
+        return
+    _loaded = True
+
+    import dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest as _ml
+
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", category=UserWarning)
+        from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
+            Exposure as _Exposure_v11,
+        )
+        from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
+            GenericTestNode as _GenericTestNode_v11,
+        )
+        from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
+            Macro as _Macro_v11,
+        )
+        from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
+            ModelNode as _ModelNode_v11,
+        )
+        from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
+            SeedNode as _SeedNode_v11,
+        )
+        from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
+            SemanticModel as _SemanticModel_v11,
+        )
+        from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
+            SingularTestNode as _SingularTestNode_v11,
+        )
+        from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
+            SnapshotNode as _SnapshotNode_v11,
+        )
+        from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
+            SourceDefinition as _SourceDefinition_v11,
+        )
+
+    g = globals()
+    g["DbtBouncerExposureBase"] = _Exposure_v11 | _ml.Exposures
+    g["DbtBouncerMacroBase"] = _Macro_v11 | _ml.Macros
+    g["DbtBouncerModelBase"] = _ModelNode_v11 | _ml.Nodes4 | _ml.Nodes4
+    g["DbtBouncerSeedBase"] = _SeedNode_v11 | _ml.Nodes
+    g["DbtBouncerSemanticModelBase"] = (
+        _SemanticModel_v11 | _ml.SemanticModels | _ml.SemanticModels
+    )
+    g["DbtBouncerSnapshotBase"] = _ml.Nodes7 | _SnapshotNode_v11
+    g["DbtBouncerSourceBase"] = _SourceDefinition_v11 | _ml.Sources | _ml.Sources
+    g["DbtBouncerTestBase"] = (
+        _GenericTestNode_v11
+        | _SingularTestNode_v11
+        | _ml.Nodes1
+        | _ml.Nodes2
+        | _ml.Nodes6
+        | _ml.Nodes2
+        | _ml.Nodes6
+    )
+
+    # Rebuild wrapper classes now that real types are available
+    DbtBouncerExposure.model_rebuild()
+    DbtBouncerModel.model_rebuild()
+    DbtBouncerSeed.model_rebuild()
+    DbtBouncerSemanticModel.model_rebuild()
+    DbtBouncerSnapshot.model_rebuild()
+    DbtBouncerSource.model_rebuild()
+    DbtBouncerTest.model_rebuild()
+
+
+def __getattr__(name: str) -> Any:
+    if name in _LAZY_NAMES:
+        _ensure_loaded()
+        return globals()[name]
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 class DbtBouncerManifest(BaseModel):

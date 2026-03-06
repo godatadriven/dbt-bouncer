@@ -202,5 +202,22 @@ def _rebuild_bouncer_context() -> None:
         "UnitTests": _ml.UnitTests,
     }
 
+    # Rebuild wrapper classes first — their field types are Any at runtime
+    # and need the real union types before BouncerContext can validate.
+    from dbt_bouncer.artifact_parsers.parsers_manifest import (
+        DbtBouncerExposure,
+    )
+
+    for cls in (
+        DbtBouncerExposure,
+        DbtBouncerModel,
+        DbtBouncerSeed,
+        DbtBouncerSemanticModel,
+        DbtBouncerSnapshot,
+        DbtBouncerSource,
+        DbtBouncerTest,
+    ):
+        cls.model_rebuild(_types_namespace=types_namespace)
+
     BouncerContext.model_rebuild(_types_namespace=types_namespace)
     BouncerContext._model_rebuilt = True
