@@ -251,9 +251,17 @@ def _load_custom_checks(
         )
 
 
+_CATEGORY_TO_SUBDIR: dict[str, str] = {
+    "catalog_checks": "catalog",
+    "manifest_checks": "manifest",
+    "run_results_checks": "run_results",
+}
+
+
 @lru_cache
 def get_check_objects(
     custom_checks_dir: Path | None = None,
+    check_categories: frozenset[str] | None = None,
 ) -> list[type["BaseCheck"]]:
     """Get list of Check* classes.
 
@@ -271,6 +279,10 @@ def get_check_objects(
 
     Args:
         custom_checks_dir: Path to a directory containing custom checks.
+        check_categories: Optional frozenset of category names (e.g.
+            ``"catalog_checks"``, ``"manifest_checks"``,
+            ``"run_results_checks"``) to limit which subdirectories are
+            scanned.  When ``None``, all subdirectories are scanned.
 
     Returns:
         list[type[BaseCheck]]: List of Check* classes.
@@ -279,9 +291,22 @@ def get_check_objects(
     check_objects: list[type["BaseCheck"]] = []
 
     # 1. Load internal checks
-    check_files = [
-        f for f in (Path(__file__).parent / "checks").glob("**/*.py") if f.is_file()
-    ]
+    checks_dir = Path(__file__).parent / "checks"
+
+    if check_categories is not None:
+        # Only scan the subdirectories that correspond to configured categories
+        subdirs = [
+            checks_dir / _CATEGORY_TO_SUBDIR[cat]
+            for cat in check_categories
+            if cat in _CATEGORY_TO_SUBDIR
+        ]
+        check_files: list[Path] = []
+        for subdir in subdirs:
+            check_files.extend(f for f in subdir.glob("**/*.py") if f.is_file())
+        # Always include top-level .py files (e.g. common.py)
+        check_files.extend(f for f in checks_dir.glob("*.py") if f.is_file())
+    else:
+        check_files = [f for f in checks_dir.glob("**/*.py") if f.is_file()]
     for check_file in check_files:
         index = check_file.parts.index("checks")
         module_name = ".".join(
