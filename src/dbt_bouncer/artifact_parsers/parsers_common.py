@@ -96,6 +96,90 @@ def load_dbt_artifact(
         return run_results_obj
 
 
+def log_parsed_artifacts_table(
+    *,
+    bouncer_config: "DbtBouncerConfBase",
+    project_name: str,
+    project_exposures: list,
+    project_macros: list,
+    project_models: list,
+    project_seeds: list,
+    project_semantic_models: list,
+    project_snapshots: list,
+    project_sources: list,
+    project_tests: list,
+    project_unit_tests: list,
+    project_catalog_nodes: list,
+    project_catalog_sources: list,
+    project_run_results: list,
+) -> None:
+    """Log a summary table of parsed dbt artifacts.
+
+    Args:
+        bouncer_config: The bouncer configuration.
+        project_name: The dbt project name.
+        project_exposures: List of parsed exposures.
+        project_macros: List of parsed macros.
+        project_models: List of parsed models.
+        project_seeds: List of parsed seeds.
+        project_semantic_models: List of parsed semantic models.
+        project_snapshots: List of parsed snapshots.
+        project_sources: List of parsed sources.
+        project_tests: List of parsed tests.
+        project_unit_tests: List of parsed unit tests.
+        project_catalog_nodes: List of parsed catalog nodes.
+        project_catalog_sources: List of parsed catalog sources.
+        project_run_results: List of parsed run results.
+
+    """
+    import io
+
+    from rich import box
+    from rich.console import Console
+    from rich.table import Table
+
+    table = Table(
+        title=f"[bold cyan]Parsed artifacts for '{project_name}'[/bold cyan]",
+        show_header=True,
+        header_style="bold cyan",
+        box=box.ROUNDED,
+        border_style="cyan",
+    )
+    table.add_column("Artifact", justify="left", style="dim")
+    table.add_column("Category", justify="left", style="bright_white")
+    table.add_column("Count", justify="right", style="bold green")
+
+    table.add_row("manifest.json", "Exposures", str(len(project_exposures)))
+    table.add_row("", "Macros", str(len(project_macros)))
+    table.add_row("", "Nodes", str(len(project_models)))
+    table.add_row("", "Seeds", str(len(project_seeds)))
+    table.add_row("", "Semantic Models", str(len(project_semantic_models)))
+    table.add_row("", "Snapshots", str(len(project_snapshots)))
+    table.add_row("", "Sources", str(len(project_sources)))
+    table.add_row("", "Tests", str(len(project_tests)))
+    table.add_row("", "Unit Tests", str(len(project_unit_tests)))
+
+    if (
+        hasattr(bouncer_config, "catalog_checks")
+        and bouncer_config.catalog_checks != []
+    ):
+        table.add_row("catalog.json", "Nodes", str(len(project_catalog_nodes)))
+        table.add_row("", "Sources", str(len(project_catalog_sources)))
+
+    if (
+        hasattr(bouncer_config, "run_results_checks")
+        and bouncer_config.run_results_checks != []
+    ):
+        table.add_row("run_results.json", "Results", str(len(project_run_results)))
+
+    string_io = io.StringIO()
+    console = Console(file=string_io, force_terminal=False)
+    console.print(table)
+    table_str = string_io.getvalue().rstrip()
+
+    logging.info(f"\n{table_str}")
+
+
 def parse_dbt_artifacts(
     bouncer_config: "DbtBouncerConfBase", dbt_artifacts_dir: Path
 ) -> tuple[
@@ -198,57 +282,23 @@ def parse_dbt_artifacts(
     else:
         project_run_results = []
 
-    import io
-    import logging
-
-    from rich.console import Console
-    from rich.table import Table
-
-    project_name = (
-        bouncer_config.package_name or manifest_obj.manifest.metadata.project_name
+    log_parsed_artifacts_table(
+        bouncer_config=bouncer_config,
+        project_name=bouncer_config.package_name
+        or manifest_obj.manifest.metadata.project_name,
+        project_exposures=project_exposures,
+        project_macros=project_macros,
+        project_models=project_models,
+        project_seeds=project_seeds,
+        project_semantic_models=project_semantic_models,
+        project_snapshots=project_snapshots,
+        project_sources=project_sources,
+        project_tests=project_tests,
+        project_unit_tests=project_unit_tests,
+        project_catalog_nodes=project_catalog_nodes,
+        project_catalog_sources=project_catalog_sources,
+        project_run_results=project_run_results,
     )
-    from rich import box
-
-    table = Table(
-        title=f"[bold cyan]Parsed artifacts for '{project_name}'[/bold cyan]",
-        show_header=True,
-        header_style="bold cyan",
-        box=box.ROUNDED,
-        border_style="cyan",
-    )
-    table.add_column("Artifact", justify="left", style="dim")
-    table.add_column("Category", justify="left", style="bright_white")
-    table.add_column("Count", justify="right", style="bold green")
-
-    table.add_row("manifest.json", "Exposures", str(len(project_exposures)))
-    table.add_row("", "Macros", str(len(project_macros)))
-    table.add_row("", "Nodes", str(len(project_models)))
-    table.add_row("", "Seeds", str(len(project_seeds)))
-    table.add_row("", "Semantic Models", str(len(project_semantic_models)))
-    table.add_row("", "Snapshots", str(len(project_snapshots)))
-    table.add_row("", "Sources", str(len(project_sources)))
-    table.add_row("", "Tests", str(len(project_tests)))
-    table.add_row("", "Unit Tests", str(len(project_unit_tests)))
-
-    if (
-        hasattr(bouncer_config, "catalog_checks")
-        and bouncer_config.catalog_checks != []
-    ):
-        table.add_row("catalog.json", "Nodes", str(len(project_catalog_nodes)))
-        table.add_row("", "Sources", str(len(project_catalog_sources)))
-
-    if (
-        hasattr(bouncer_config, "run_results_checks")
-        and bouncer_config.run_results_checks != []
-    ):
-        table.add_row("run_results.json", "Results", str(len(project_run_results)))
-
-    string_io = io.StringIO()
-    console = Console(file=string_io, force_terminal=False)
-    console.print(table)
-    table_str = string_io.getvalue().rstrip()
-
-    logging.info(f"\n{table_str}")
 
     return (
         manifest_obj,

@@ -64,10 +64,17 @@ def _rebuild_all_check_models():
     for check_cls in get_check_objects():
         check_cls.model_rebuild(_types_namespace=types_namespace)
 
-    from dbt_bouncer.config_file_parser import create_bouncer_conf_class
+    from dbt_bouncer.config_file_parser import (
+        create_bouncer_conf_class,
+    )
 
     dbt_bouncer_conf_all_categories = create_bouncer_conf_class()
     dbt_bouncer_conf_all_categories.model_rebuild(_types_namespace=types_namespace)
+
+    # Also rebuild BouncerContext so tests can construct it directly
+    from dbt_bouncer.context import _rebuild_bouncer_context
+
+    _rebuild_bouncer_context()
 
 
 @pytest.fixture(autouse=True)

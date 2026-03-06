@@ -233,6 +233,27 @@ def run_bouncer(
             else []
         )
 
+        from dbt_bouncer.artifact_parsers.parsers_common import (
+            log_parsed_artifacts_table,
+        )
+
+        log_parsed_artifacts_table(
+            bouncer_config=bouncer_config,
+            project_name=pkg or manifest_obj.manifest.metadata.project_name,
+            project_exposures=project_exposures,
+            project_macros=project_macros,
+            project_models=project_models,
+            project_seeds=project_seeds,
+            project_semantic_models=project_semantic_models,
+            project_snapshots=project_snapshots,
+            project_sources=project_sources,
+            project_tests=project_tests,
+            project_unit_tests=project_unit_tests,
+            project_catalog_nodes=project_catalog_nodes,
+            project_catalog_sources=project_catalog_sources,
+            project_run_results=project_run_results,
+        )
+
         from dbt_bouncer.context import BouncerContext
 
         ctx = BouncerContext.model_construct(
