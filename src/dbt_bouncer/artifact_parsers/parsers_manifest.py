@@ -1,32 +1,14 @@
+from __future__ import annotations
+
 import warnings
 from enum import Enum
-from typing import Any, TypeAlias
+from typing import TYPE_CHECKING, Any, TypeAlias
 
 from pydantic import BaseModel
 
-from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import ManifestLatest
-from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
-    Nodes as SeedsLatest,
-)
-from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
-    Nodes2 as Nodes2Latest,
-)
-from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
-    Nodes4 as Nodes4Latest,
-)
-from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
-    Nodes6 as Nodes6Latest,
-)
-from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
-    SemanticModels as SemanticModelsLatest,
-)
-from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
-    Sources as SourcesLatest,
-)
 from dbt_bouncer.utils import clean_path_str, get_package_version_number
 
-with warnings.catch_warnings():
-    warnings.filterwarnings("ignore", category=UserWarning)
+if TYPE_CHECKING:
     from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
         Exposure as Exposure_v11,
     )
@@ -55,27 +37,126 @@ with warnings.catch_warnings():
         SourceDefinition as SourceDefinition_v11,
     )
 
-from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
-    Exposures,
-    Macros,
-    Nodes1,
-    Nodes2,
-    Nodes4,
-    Nodes6,
-    Nodes7,
-    SemanticModels,
-    Sources,
-    UnitTests,
-)
+    from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
+        Exposures,
+        Macros,
+        Nodes,
+        Nodes1,
+        Nodes2,
+        Nodes4,
+        Nodes6,
+        Nodes7,
+        SemanticModels,
+        Sources,
+        UnitTests,
+    )
+
+    DbtBouncerExposureBase: TypeAlias = Exposure_v11 | Exposures
+    DbtBouncerMacroBase: TypeAlias = Macro_v11 | Macros
+    DbtBouncerModelBase: TypeAlias = ModelNode_v11 | Nodes4 | Nodes4
+    DbtBouncerSeedBase: TypeAlias = SeedNode_v11 | Nodes
+    DbtBouncerSemanticModelBase: TypeAlias = (
+        SemanticModel_v11 | SemanticModels | SemanticModels
+    )
+    DbtBouncerSnapshotBase: TypeAlias = Nodes7 | SnapshotNode_v11
+    DbtBouncerSourceBase: TypeAlias = SourceDefinition_v11 | Sources | Sources
+    DbtBouncerTestBase: TypeAlias = (
+        GenericTestNode_v11
+        | SingularTestNode_v11
+        | Nodes1
+        | Nodes2
+        | Nodes6
+        | Nodes2
+        | Nodes6
+    )
+
+# Lazy loading via PEP 562.  The TypeAlias unions and their constituent
+# types are imported on first access, deferring the expensive
+# manifest_latest.py and manifest_v11 loads until actually needed.
+_LAZY_NAMES: set[str] = {
+    "DbtBouncerExposureBase",
+    "DbtBouncerMacroBase",
+    "DbtBouncerModelBase",
+    "DbtBouncerSeedBase",
+    "DbtBouncerSemanticModelBase",
+    "DbtBouncerSnapshotBase",
+    "DbtBouncerSourceBase",
+    "DbtBouncerTestBase",
+}
+
+_loaded = False
+
+
+def _ensure_loaded() -> None:
+    global _loaded
+    if _loaded:
+        return
+    _loaded = True
+
+    import dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest as _ml
+
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", category=UserWarning)
+        from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
+            Exposure as _Exposure_v11,
+        )
+        from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
+            GenericTestNode as _GenericTestNode_v11,
+        )
+        from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
+            Macro as _Macro_v11,
+        )
+        from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
+            ModelNode as _ModelNode_v11,
+        )
+        from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
+            SeedNode as _SeedNode_v11,
+        )
+        from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
+            SemanticModel as _SemanticModel_v11,
+        )
+        from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
+            SingularTestNode as _SingularTestNode_v11,
+        )
+        from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
+            SnapshotNode as _SnapshotNode_v11,
+        )
+        from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
+            SourceDefinition as _SourceDefinition_v11,
+        )
+
+    g = globals()
+    g["DbtBouncerExposureBase"] = _Exposure_v11 | _ml.Exposures
+    g["DbtBouncerMacroBase"] = _Macro_v11 | _ml.Macros
+    g["DbtBouncerModelBase"] = _ModelNode_v11 | _ml.Nodes4 | _ml.Nodes4
+    g["DbtBouncerSeedBase"] = _SeedNode_v11 | _ml.Nodes
+    g["DbtBouncerSemanticModelBase"] = (
+        _SemanticModel_v11 | _ml.SemanticModels | _ml.SemanticModels
+    )
+    g["DbtBouncerSnapshotBase"] = _ml.Nodes7 | _SnapshotNode_v11
+    g["DbtBouncerSourceBase"] = _SourceDefinition_v11 | _ml.Sources | _ml.Sources
+    g["DbtBouncerTestBase"] = (
+        _GenericTestNode_v11
+        | _SingularTestNode_v11
+        | _ml.Nodes1
+        | _ml.Nodes2
+        | _ml.Nodes6
+        | _ml.Nodes2
+        | _ml.Nodes6
+    )
+
+
+def __getattr__(name: str) -> Any:
+    if name in _LAZY_NAMES:
+        _ensure_loaded()
+        return globals()[name]
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 class DbtBouncerManifest(BaseModel):
     """Model for all manifest objects."""
 
     manifest: Any  # ManifestV11 | ManifestLatest, kept as Any for flexibility
-
-
-DbtBouncerExposureBase: TypeAlias = Exposure_v11 | Exposures
 
 
 class DbtBouncerExposure(BaseModel):
@@ -86,21 +167,12 @@ class DbtBouncerExposure(BaseModel):
     unique_id: str
 
 
-DbtBouncerMacroBase: TypeAlias = Macro_v11 | Macros
-
-
-DbtBouncerModelBase: TypeAlias = ModelNode_v11 | Nodes4 | Nodes4Latest
-
-
 class DbtBouncerModel(BaseModel):
     """Model for all model nodes in `manifest.json`."""
 
     model: DbtBouncerModelBase
     original_file_path: str
     unique_id: str
-
-
-DbtBouncerSeedBase: TypeAlias = SeedNode_v11 | SeedsLatest
 
 
 class DbtBouncerSeed(BaseModel):
@@ -111,20 +183,12 @@ class DbtBouncerSeed(BaseModel):
     unique_id: str
 
 
-DbtBouncerSemanticModelBase: TypeAlias = (
-    SemanticModel_v11 | SemanticModels | SemanticModelsLatest
-)
-
-
 class DbtBouncerSemanticModel(BaseModel):
     """Model for all semantic model nodes in `manifest.json`."""
 
     original_file_path: str
     semantic_model: DbtBouncerSemanticModelBase
     unique_id: str
-
-
-DbtBouncerSnapshotBase: TypeAlias = Nodes7 | SnapshotNode_v11
 
 
 class DbtBouncerSnapshot(BaseModel):
@@ -135,26 +199,12 @@ class DbtBouncerSnapshot(BaseModel):
     unique_id: str
 
 
-DbtBouncerSourceBase: TypeAlias = SourceDefinition_v11 | Sources | SourcesLatest
-
-
 class DbtBouncerSource(BaseModel):
     """Model for all source nodes in `manifest.json`."""
 
     original_file_path: str
     source: DbtBouncerSourceBase
     unique_id: str
-
-
-DbtBouncerTestBase: TypeAlias = (
-    GenericTestNode_v11
-    | SingularTestNode_v11
-    | Nodes1
-    | Nodes2
-    | Nodes6
-    | Nodes2Latest
-    | Nodes6Latest
-)
 
 
 class DbtBouncerTest(BaseModel):
@@ -167,7 +217,7 @@ class DbtBouncerTest(BaseModel):
 
 def parse_manifest(
     manifest: dict[str, Any],
-) -> ManifestLatest | Any:
+) -> Any:
     """Parse manifest.json.
 
     Args:
@@ -177,16 +227,14 @@ def parse_manifest(
         ValueError: If the manifest.json is not a valid manifest.json
 
     Returns:
-       ManifestLatest | Any (ManifestV11 for v11 manifests)
+       ManifestLatest or ManifestV11 depending on schema version
 
     """
     dbt_schema_version = manifest["metadata"]["dbt_schema_version"]
     match dbt_schema_version:
         case "https://schemas.getdbt.com/dbt/manifest/v11.json":
-            import warnings as _w
-
-            with _w.catch_warnings():
-                _w.filterwarnings("ignore", category=UserWarning)
+            with warnings.catch_warnings():
+                warnings.filterwarnings("ignore", category=UserWarning)
                 from dbt_artifacts_parser.parsers.manifest.manifest_v11 import (
                     ManifestV11,
                 )
@@ -228,6 +276,8 @@ def parse_manifest_artifact(
         list[DbtBouncerUnitTest]: List of unit tests in the project.
 
     """
+    _ensure_loaded()
+
     project_exposures = [
         v
         for _, v in manifest_obj.manifest.exposures.items()
@@ -285,6 +335,27 @@ def parse_manifest_artifact(
                     ),
                 )
 
+    project_semantic_models = [
+        DbtBouncerSemanticModel(
+            original_file_path=str(clean_path_str(v.original_file_path)),
+            semantic_model=v,
+            unique_id=k,
+        )
+        for k, v in manifest_obj.manifest.semantic_models.items()
+        if v.package_name
+        == (package_name or manifest_obj.manifest.metadata.project_name)
+    ]
+    project_sources = [
+        DbtBouncerSource(
+            original_file_path=str(clean_path_str(v.original_file_path)),
+            source=v,
+            unique_id=k,
+        )
+        for k, v in manifest_obj.manifest.sources.items()
+        if v.package_name
+        == (package_name or manifest_obj.manifest.metadata.project_name)
+    ]
+
     if get_package_version_number(
         manifest_obj.manifest.metadata.dbt_version or "0.0.0"
     ) >= get_package_version_number("1.8.0"):
@@ -296,28 +367,6 @@ def parse_manifest_artifact(
         ]
     else:
         project_unit_tests = []
-
-    project_semantic_models = [
-        DbtBouncerSemanticModel(
-            original_file_path=str(clean_path_str(v.original_file_path)),
-            semantic_model=v,
-            unique_id=k,
-        )
-        for k, v in manifest_obj.manifest.semantic_models.items()
-        if v.package_name
-        == (package_name or manifest_obj.manifest.metadata.project_name)
-    ]
-
-    project_sources = [
-        DbtBouncerSource(
-            original_file_path=str(clean_path_str(v.original_file_path)),
-            source=v,
-            unique_id=k,
-        )
-        for k, v in manifest_obj.manifest.sources.items()
-        if v.package_name
-        == (package_name or manifest_obj.manifest.metadata.project_name)
-    ]
 
     return (
         project_exposures,
