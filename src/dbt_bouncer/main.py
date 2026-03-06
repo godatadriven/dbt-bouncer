@@ -187,30 +187,7 @@ def run_bouncer(
         config_file_path.parent / (bouncer_config.dbt_artifacts_dir or "target")
     )
 
-    from dbt_bouncer.artifact_parsers.parsers_common import parse_dbt_artifacts
-
-    (
-        manifest_obj,
-        project_exposures,
-        project_macros,
-        project_models,
-        project_seeds,
-        project_semantic_models,
-        project_snapshots,
-        project_sources,
-        project_tests,
-        project_unit_tests,
-        project_catalog_nodes,
-        project_catalog_sources,
-        project_run_results,
-    ) = parse_dbt_artifacts(
-        bouncer_config=bouncer_config, dbt_artifacts_dir=dbt_artifacts_dir
-    )
-
-    from dbt_bouncer.context import BouncerContext, _rebuild_bouncer_context
-    from dbt_bouncer.runner import runner
-
-    _rebuild_bouncer_context()
+    from dbt_bouncer.artifact_parsers.rust_adapter import RUST_AVAILABLE
 
     normalized_output_format = (
         output_format.value
@@ -218,29 +195,119 @@ def run_bouncer(
         else OutputFormat(output_format.lower()).value
     )
 
-    ctx = BouncerContext(
-        bouncer_config=bouncer_config,
-        catalog_nodes=project_catalog_nodes,
-        catalog_sources=project_catalog_sources,
-        check_categories=check_categories,
-        create_pr_comment_file=create_pr_comment_file,
-        dry_run=dry_run,
-        exposures=project_exposures,
-        macros=project_macros,
-        manifest_obj=manifest_obj,
-        models=project_models,
-        output_file=output_file,
-        output_format=normalized_output_format,
-        output_only_failures=output_only_failures,
-        run_results=project_run_results,
-        seeds=project_seeds,
-        semantic_models=project_semantic_models,
-        show_all_failures=show_all_failures,
-        snapshots=project_snapshots,
-        sources=project_sources,
-        tests=project_tests,
-        unit_tests=project_unit_tests,
-    )
+    if RUST_AVAILABLE:
+        from dbt_bouncer.artifact_parsers.rust_adapter import (
+            load_catalog_artifact_rust,
+            load_manifest_artifact_rust,
+            load_run_results_artifact_rust,
+        )
+
+        pkg = bouncer_config.package_name or None
+
+        (
+            manifest_obj,
+            project_exposures,
+            project_macros,
+            project_models,
+            project_seeds,
+            project_semantic_models,
+            project_snapshots,
+            project_sources,
+            project_tests,
+            project_unit_tests,
+        ) = load_manifest_artifact_rust(dbt_artifacts_dir, package_name=pkg)
+
+        project_catalog_nodes, project_catalog_sources = (
+            load_catalog_artifact_rust(
+                dbt_artifacts_dir, manifest_obj, package_name=pkg
+            )
+            if any(cat.startswith("catalog") for cat in check_categories)
+            else ([], [])
+        )
+
+        project_run_results = (
+            load_run_results_artifact_rust(
+                dbt_artifacts_dir, manifest_obj, package_name=pkg
+            )
+            if "run_results_checks" in check_categories
+            else []
+        )
+
+        from dbt_bouncer.context import BouncerContext
+
+        ctx = BouncerContext.model_construct(
+            bouncer_config=bouncer_config,
+            catalog_nodes=project_catalog_nodes,
+            catalog_sources=project_catalog_sources,
+            check_categories=check_categories,
+            create_pr_comment_file=create_pr_comment_file,
+            dry_run=dry_run,
+            exposures=project_exposures,
+            macros=project_macros,
+            manifest_obj=manifest_obj,
+            models=project_models,
+            output_file=output_file,
+            output_format=normalized_output_format,
+            output_only_failures=output_only_failures,
+            run_results=project_run_results,
+            seeds=project_seeds,
+            semantic_models=project_semantic_models,
+            show_all_failures=show_all_failures,
+            snapshots=project_snapshots,
+            sources=project_sources,
+            tests=project_tests,
+            unit_tests=project_unit_tests,
+        )
+    else:
+        from dbt_bouncer.artifact_parsers.parsers_common import parse_dbt_artifacts
+
+        (
+            manifest_obj,
+            project_exposures,
+            project_macros,
+            project_models,
+            project_seeds,
+            project_semantic_models,
+            project_snapshots,
+            project_sources,
+            project_tests,
+            project_unit_tests,
+            project_catalog_nodes,
+            project_catalog_sources,
+            project_run_results,
+        ) = parse_dbt_artifacts(
+            bouncer_config=bouncer_config, dbt_artifacts_dir=dbt_artifacts_dir
+        )
+
+        from dbt_bouncer.context import BouncerContext, _rebuild_bouncer_context
+
+        _rebuild_bouncer_context()
+
+        ctx = BouncerContext(
+            bouncer_config=bouncer_config,
+            catalog_nodes=project_catalog_nodes,
+            catalog_sources=project_catalog_sources,
+            check_categories=check_categories,
+            create_pr_comment_file=create_pr_comment_file,
+            dry_run=dry_run,
+            exposures=project_exposures,
+            macros=project_macros,
+            manifest_obj=manifest_obj,
+            models=project_models,
+            output_file=output_file,
+            output_format=normalized_output_format,
+            output_only_failures=output_only_failures,
+            run_results=project_run_results,
+            seeds=project_seeds,
+            semantic_models=project_semantic_models,
+            show_all_failures=show_all_failures,
+            snapshots=project_snapshots,
+            sources=project_sources,
+            tests=project_tests,
+            unit_tests=project_unit_tests,
+        )
+    from dbt_bouncer.runner import runner
+
     results = runner(ctx=ctx)
     return results[0]
 
