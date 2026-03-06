@@ -258,6 +258,52 @@ def lint_config_file(config_file_path: Path) -> list[dict[str, Any]]:
     return issues
 
 
+def _get_stub_namespace() -> dict[str, Any]:
+    """Return a lightweight namespace for Pydantic model_rebuild() during config validation.
+
+    All forward-reference types are mapped to ``Any`` except ``NestedDict``,
+    which is used in config-level check fields (e.g. ``keys: NestedDict``) and
+    must be the real class.  The artifact wrapper types (``DbtBouncerModel``,
+    ``DbtBouncerManifest``, ``Macros``, etc.) all have ``default=None`` on
+    ``BaseCheck`` and are never populated from the config file, so ``Any`` is
+    sufficient for validation.
+
+    Returns:
+        dict[str, Any]: Namespace mapping type names to ``Any`` (or the real
+        class for ``NestedDict``).
+
+    """
+    from dbt_bouncer.checks.common import NestedDict
+
+    stub_keys = [
+        "CatalogNodes",
+        "DbtBouncerCatalogNode",
+        "DbtBouncerExposureBase",
+        "DbtBouncerManifest",
+        "DbtBouncerModel",
+        "DbtBouncerModelBase",
+        "DbtBouncerRunResult",
+        "DbtBouncerRunResultBase",
+        "DbtBouncerSeed",
+        "DbtBouncerSeedBase",
+        "DbtBouncerSemanticModel",
+        "DbtBouncerSemanticModelBase",
+        "DbtBouncerSnapshot",
+        "DbtBouncerSnapshotBase",
+        "DbtBouncerSource",
+        "DbtBouncerSourceBase",
+        "DbtBouncerTest",
+        "DbtBouncerTestBase",
+        "Exposures",
+        "Macros",
+        "UnitTests",
+    ]
+
+    namespace: dict[str, Any] = dict.fromkeys(stub_keys, Any)
+    namespace["NestedDict"] = NestedDict
+    return namespace
+
+
 def _import_artifact_types(check_categories: list[str]) -> dict[str, Any]:
     """Import artifact parser types needed for Pydantic model_rebuild().
 
@@ -377,9 +423,7 @@ def validate_conf(
         check_categories=frozenset(check_categories),
     )
     if id(DbtBouncerConf) not in _rebuilt_classes:
-        DbtBouncerConf.model_rebuild(
-            _types_namespace=_import_artifact_types(check_categories)
-        )
+        DbtBouncerConf.model_rebuild(_types_namespace=_get_stub_namespace())
         _rebuilt_classes.add(id(DbtBouncerConf))
 
     try:
