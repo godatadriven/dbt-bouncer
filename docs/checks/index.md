@@ -23,7 +23,15 @@
       - [Seeds](./manifest/check_seeds.md)
       - [Semantic Models](./manifest/check_semantic_models.md)
       - [Snapshots](./manifest/check_snapshots.md)
-      - [Sources](./manifest/check_sources.md)
+      - Sources
+          - [Description](./manifest/sources/description.md)
+          - [Freshness](./manifest/sources/freshness.md)
+          - [Lineage](./manifest/sources/lineage.md)
+          - [Loader](./manifest/sources/loader.md)
+          - [Meta](./manifest/sources/meta.md)
+          - [Naming](./manifest/sources/naming.md)
+          - [Properties](./manifest/sources/properties.md)
+          - [Tags](./manifest/sources/tags.md)
       - [Tests](./manifest/check_tests.md)
       - [Unit Tests](./manifest/check_unit_tests.md)
 - Run Results checks:

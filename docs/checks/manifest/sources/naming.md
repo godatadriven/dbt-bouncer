@@ -1,7 +1,7 @@
-# Manifest Checks: Sources
+# Naming
 
 !!! note
 
     The below checks require `manifest.json` to be present.
 
-::: manifest.check_sources
+::: manifest.sources.naming
