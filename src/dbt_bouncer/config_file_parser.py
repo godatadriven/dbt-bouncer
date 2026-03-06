@@ -87,6 +87,7 @@ class DbtBouncerConfBase(BaseModel):
 @lru_cache(maxsize=None)
 def create_bouncer_conf_class(
     custom_checks_dir: Path | None = None,
+    check_categories: frozenset[str] | None = None,
 ) -> type[DbtBouncerConfBase]:
     """Create a DbtBouncerConf Pydantic model class with check types resolved at call time.
 
@@ -95,25 +96,32 @@ def create_bouncer_conf_class(
 
     Args:
         custom_checks_dir: Path to a directory containing custom checks.
+        check_categories: Configured check categories. When provided, only
+            fields for these categories are built with discriminated unions;
+            unconfigured categories default to ``list[Any]``.
 
     Returns:
         type[DbtBouncerConfBase]: A Pydantic model class with the appropriate check type fields.
 
     """
-    catalog_type = get_check_types(
-        check_type="catalog", custom_checks_dir=custom_checks_dir
-    )
-    manifest_type = get_check_types(
-        check_type="manifest", custom_checks_dir=custom_checks_dir
-    )
-    run_results_type = get_check_types(
-        check_type="run_results", custom_checks_dir=custom_checks_dir
-    )
+    category_to_check_type = {
+        "catalog_checks": "catalog",
+        "manifest_checks": "manifest",
+        "run_results_checks": "run_results",
+    }
+
+    fields: dict[str, tuple[Any, Any]] = {}
+    for category, check_type in category_to_check_type.items():
+        if check_categories is None or category in check_categories:
+            resolved_type = get_check_types(
+                check_type=check_type, custom_checks_dir=custom_checks_dir
+            )
+        else:
+            resolved_type = list[Any]
+        fields[category] = (resolved_type, Field(default=[]))
 
     return create_model(  # type: ignore[call-overload]
         "DbtBouncerConf",
         __base__=DbtBouncerConfBase,
-        catalog_checks=(catalog_type, Field(default=[])),
-        manifest_checks=(manifest_type, Field(default=[])),
-        run_results_checks=(run_results_type, Field(default=[])),
+        **fields,
     )

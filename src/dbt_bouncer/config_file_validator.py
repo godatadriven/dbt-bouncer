@@ -258,77 +258,103 @@ def lint_config_file(config_file_path: Path) -> list[dict[str, Any]]:
     return issues
 
 
-def _import_artifact_types() -> dict[str, Any]:
-    """Import all artifact parser types needed for Pydantic model_rebuild().
+def _import_artifact_types(check_categories: list[str]) -> dict[str, Any]:
+    """Import artifact parser types needed for Pydantic model_rebuild().
 
-    These types are used in the type annotations of DbtBouncerConf fields.
-    Returning them as an explicit namespace dict avoids polluting the module
-    scope and removes the need for ``# noqa: F401`` suppression comments.
+    Only imports types required by the configured check categories, avoiding
+    expensive imports (e.g. manifest_latest ~0.5s) when not needed.
+
+    Args:
+        check_categories: List of configured category names, e.g.
+            ``["manifest_checks", "catalog_checks", "run_results_checks"]``.
 
     Returns:
         dict[str, Any]: Namespace mapping type names to their classes.
 
     """
-    import warnings
-
-    from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
-        Exposures,
-        Macros,
-        UnitTests,
-    )
-    from dbt_bouncer.artifact_parsers.parsers_catalog import DbtBouncerCatalogNode
-    from dbt_bouncer.artifact_parsers.parsers_manifest import (
-        DbtBouncerExposureBase,
-        DbtBouncerManifest,
-        DbtBouncerModel,
-        DbtBouncerModelBase,
-        DbtBouncerSeed,
-        DbtBouncerSeedBase,
-        DbtBouncerSemanticModel,
-        DbtBouncerSemanticModelBase,
-        DbtBouncerSnapshot,
-        DbtBouncerSnapshotBase,
-        DbtBouncerSource,
-        DbtBouncerSourceBase,
-        DbtBouncerTest,
-        DbtBouncerTestBase,
-    )
-    from dbt_bouncer.artifact_parsers.parsers_run_results import (
-        DbtBouncerRunResult,
-        DbtBouncerRunResultBase,
-    )
     from dbt_bouncer.checks.common import NestedDict
 
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", category=UserWarning)
-        from dbt_artifacts_parser.parsers.catalog.catalog_v1 import (
-            Nodes as CatalogNodes,
+    types_namespace: dict[str, Any] = {
+        "NestedDict": NestedDict,
+    }
+
+    if "manifest_checks" in check_categories:
+        from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
+            Exposures,
+            Macros,
+            UnitTests,
+        )
+        from dbt_bouncer.artifact_parsers.parsers_manifest import (
+            DbtBouncerExposureBase,
+            DbtBouncerManifest,
+            DbtBouncerModel,
+            DbtBouncerModelBase,
+            DbtBouncerSeed,
+            DbtBouncerSeedBase,
+            DbtBouncerSemanticModel,
+            DbtBouncerSemanticModelBase,
+            DbtBouncerSnapshot,
+            DbtBouncerSnapshotBase,
+            DbtBouncerSource,
+            DbtBouncerSourceBase,
+            DbtBouncerTest,
+            DbtBouncerTestBase,
         )
 
-    return {
-        "CatalogNodes": CatalogNodes,
-        "DbtBouncerCatalogNode": DbtBouncerCatalogNode,
-        "DbtBouncerExposureBase": DbtBouncerExposureBase,
-        "DbtBouncerManifest": DbtBouncerManifest,
-        "DbtBouncerModel": DbtBouncerModel,
-        "DbtBouncerModelBase": DbtBouncerModelBase,
-        "DbtBouncerRunResult": DbtBouncerRunResult,
-        "DbtBouncerRunResultBase": DbtBouncerRunResultBase,
-        "DbtBouncerSeed": DbtBouncerSeed,
-        "DbtBouncerSeedBase": DbtBouncerSeedBase,
-        "DbtBouncerSemanticModel": DbtBouncerSemanticModel,
-        "DbtBouncerSemanticModelBase": DbtBouncerSemanticModelBase,
-        "DbtBouncerSnapshot": DbtBouncerSnapshot,
-        "DbtBouncerSnapshotBase": DbtBouncerSnapshotBase,
-        "DbtBouncerSource": DbtBouncerSource,
-        "DbtBouncerSourceBase": DbtBouncerSourceBase,
-        "DbtBouncerTest": DbtBouncerTest,
-        "DbtBouncerTestBase": DbtBouncerTestBase,
-        "Exposures": Exposures,
-        "Macros": Macros,
-        "NestedDict": NestedDict,
-        "UnitTests": UnitTests,
-    }
+        types_namespace.update(
+            {
+                "DbtBouncerExposureBase": DbtBouncerExposureBase,
+                "DbtBouncerManifest": DbtBouncerManifest,
+                "DbtBouncerModel": DbtBouncerModel,
+                "DbtBouncerModelBase": DbtBouncerModelBase,
+                "DbtBouncerSeed": DbtBouncerSeed,
+                "DbtBouncerSeedBase": DbtBouncerSeedBase,
+                "DbtBouncerSemanticModel": DbtBouncerSemanticModel,
+                "DbtBouncerSemanticModelBase": DbtBouncerSemanticModelBase,
+                "DbtBouncerSnapshot": DbtBouncerSnapshot,
+                "DbtBouncerSnapshotBase": DbtBouncerSnapshotBase,
+                "DbtBouncerSource": DbtBouncerSource,
+                "DbtBouncerSourceBase": DbtBouncerSourceBase,
+                "DbtBouncerTest": DbtBouncerTest,
+                "DbtBouncerTestBase": DbtBouncerTestBase,
+                "Exposures": Exposures,
+                "Macros": Macros,
+                "UnitTests": UnitTests,
+            }
+        )
+
+    if "catalog_checks" in check_categories:
+        import warnings
+
+        from dbt_bouncer.artifact_parsers.parsers_catalog import DbtBouncerCatalogNode
+
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", category=UserWarning)
+            from dbt_artifacts_parser.parsers.catalog.catalog_v1 import (
+                Nodes as CatalogNodes,
+            )
+
+        types_namespace.update(
+            {
+                "CatalogNodes": CatalogNodes,
+                "DbtBouncerCatalogNode": DbtBouncerCatalogNode,
+            }
+        )
+
+    if "run_results_checks" in check_categories:
+        from dbt_bouncer.artifact_parsers.parsers_run_results import (
+            DbtBouncerRunResult,
+            DbtBouncerRunResultBase,
+        )
+
+        types_namespace.update(
+            {
+                "DbtBouncerRunResult": DbtBouncerRunResult,
+                "DbtBouncerRunResultBase": DbtBouncerRunResultBase,
+            }
+        )
+
+    return types_namespace
 
 
 def validate_conf(
@@ -357,9 +383,14 @@ def validate_conf(
 
     from dbt_bouncer.config_file_parser import create_bouncer_conf_class
 
-    DbtBouncerConf = create_bouncer_conf_class(custom_checks_dir=custom_checks_dir)  # noqa: N806
+    DbtBouncerConf = create_bouncer_conf_class(  # noqa: N806
+        custom_checks_dir=custom_checks_dir,
+        check_categories=frozenset(check_categories),
+    )
     if id(DbtBouncerConf) not in _rebuilt_classes:
-        DbtBouncerConf.model_rebuild(_types_namespace=_import_artifact_types())
+        DbtBouncerConf.model_rebuild(
+            _types_namespace=_import_artifact_types(check_categories)
+        )
         _rebuilt_classes.add(id(DbtBouncerConf))
 
     try:
