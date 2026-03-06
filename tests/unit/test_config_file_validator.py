@@ -1,6 +1,7 @@
 import os
 from contextlib import nullcontext as does_not_raise
 from pathlib import Path
+from typing import Any
 from unittest import mock
 
 import pytest
@@ -10,6 +11,8 @@ from pydantic import PydanticUserError
 from typer.main import get_command
 
 from dbt_bouncer.config_file_validator import (
+    _get_stub_namespace,
+    _import_artifact_types,
     get_config_file_path,
     load_config_file_contents,
     validate_conf,
@@ -435,3 +438,59 @@ def test_lint_config_file_multiple_issues(tmp_path):
 
     issues = lint_config_file(config_file)
     assert len(issues) == 2
+
+
+def test_get_stub_namespace_keys_match_import_artifact_types():
+    """Stub namespace must contain exactly the same keys as _import_artifact_types.
+
+    This ensures config validation resolves every forward reference that the
+    real import would resolve, preventing PydanticUserError on model_rebuild().
+    """
+    stub_keys = set(_get_stub_namespace().keys())
+    real_keys = set(
+        _import_artifact_types(
+            check_categories=["catalog_checks", "manifest_checks", "run_results_checks"]
+        ).keys()
+    )
+    assert stub_keys == real_keys
+
+
+def test_get_stub_namespace_nested_dict_is_real_class():
+    """NestedDict must be the real class, not Any — it is used in config fields."""
+    from dbt_bouncer.checks.common import NestedDict
+
+    ns = _get_stub_namespace()
+    assert ns["NestedDict"] is NestedDict
+
+
+def test_get_stub_namespace_artifact_types_are_any():
+    """All types except NestedDict should be Any stubs."""
+    ns = _get_stub_namespace()
+    for key, value in ns.items():
+        if key != "NestedDict":
+            assert value is Any, f"{key} should be Any but is {value}"
+
+
+def test_validate_conf_with_stub_namespace(monkeypatch):
+    """Config validation must succeed using stub types (no real artifact imports needed)."""
+    monkeypatch.delenv("DBT_PROJECT_DIR", raising=False)
+    ctx = typer.Context(
+        get_command(app),
+        obj={
+            "config_file_path": "",
+            "custom_checks_dir": None,
+        },
+    )
+
+    with ctx:
+        bouncer_config = validate_conf(
+            check_categories=["manifest_checks"],
+            config_file_contents={
+                "manifest_checks": [
+                    {"name": "check_model_has_unique_test"},
+                    {"name": "check_exposure_based_on_view"},
+                ]
+            },
+        )
+
+    assert bouncer_config.dbt_artifacts_dir == "./target"
