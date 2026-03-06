@@ -272,9 +272,29 @@ def _import_artifact_types(check_categories: list[str]) -> dict[str, Any]:
         dict[str, Any]: Namespace mapping type names to their classes.
 
     """
+    import warnings
+
+    # BaseCheck references CatalogNodes and DbtBouncerRunResultBase in
+    # annotations shared by ALL check subclasses, so they must always be
+    # in the namespace regardless of which categories are configured.
+    from dbt_bouncer.artifact_parsers.parsers_catalog import DbtBouncerCatalogNode
+    from dbt_bouncer.artifact_parsers.parsers_run_results import (
+        DbtBouncerRunResult,
+        DbtBouncerRunResultBase,
+    )
     from dbt_bouncer.checks.common import NestedDict
 
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", category=UserWarning)
+        from dbt_artifacts_parser.parsers.catalog.catalog_v1 import (
+            Nodes as CatalogNodes,
+        )
+
     types_namespace: dict[str, Any] = {
+        "CatalogNodes": CatalogNodes,
+        "DbtBouncerCatalogNode": DbtBouncerCatalogNode,
+        "DbtBouncerRunResult": DbtBouncerRunResult,
+        "DbtBouncerRunResultBase": DbtBouncerRunResultBase,
         "NestedDict": NestedDict,
     }
 
@@ -320,37 +340,6 @@ def _import_artifact_types(check_categories: list[str]) -> dict[str, Any]:
                 "Exposures": Exposures,
                 "Macros": Macros,
                 "UnitTests": UnitTests,
-            }
-        )
-
-    if "catalog_checks" in check_categories:
-        import warnings
-
-        from dbt_bouncer.artifact_parsers.parsers_catalog import DbtBouncerCatalogNode
-
-        with warnings.catch_warnings():
-            warnings.filterwarnings("ignore", category=UserWarning)
-            from dbt_artifacts_parser.parsers.catalog.catalog_v1 import (
-                Nodes as CatalogNodes,
-            )
-
-        types_namespace.update(
-            {
-                "CatalogNodes": CatalogNodes,
-                "DbtBouncerCatalogNode": DbtBouncerCatalogNode,
-            }
-        )
-
-    if "run_results_checks" in check_categories:
-        from dbt_bouncer.artifact_parsers.parsers_run_results import (
-            DbtBouncerRunResult,
-            DbtBouncerRunResultBase,
-        )
-
-        types_namespace.update(
-            {
-                "DbtBouncerRunResult": DbtBouncerRunResult,
-                "DbtBouncerRunResultBase": DbtBouncerRunResultBase,
             }
         )
 
