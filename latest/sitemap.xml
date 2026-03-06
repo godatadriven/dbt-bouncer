@@ -77,10 +77,6 @@
          <lastmod>2026-03-06</lastmod>
     </url>
     <url>
-         <loc>https://godatadriven.github.io/dbt-bouncer/latest/checks/manifest/check_sources/</loc>
-         <lastmod>2026-03-06</lastmod>
-    </url>
-    <url>
          <loc>https://godatadriven.github.io/dbt-bouncer/latest/checks/manifest/check_tests/</loc>
          <lastmod>2026-03-06</lastmod>
     </url>
@@ -130,6 +126,38 @@
     </url>
     <url>
          <loc>https://godatadriven.github.io/dbt-bouncer/latest/checks/manifest/models/versioning/</loc>
+         <lastmod>2026-03-06</lastmod>
+    </url>
+    <url>
+         <loc>https://godatadriven.github.io/dbt-bouncer/latest/checks/manifest/sources/description/</loc>
+         <lastmod>2026-03-06</lastmod>
+    </url>
+    <url>
+         <loc>https://godatadriven.github.io/dbt-bouncer/latest/checks/manifest/sources/directories/</loc>
+         <lastmod>2026-03-06</lastmod>
+    </url>
+    <url>
+         <loc>https://godatadriven.github.io/dbt-bouncer/latest/checks/manifest/sources/freshness/</loc>
+         <lastmod>2026-03-06</lastmod>
+    </url>
+    <url>
+         <loc>https://godatadriven.github.io/dbt-bouncer/latest/checks/manifest/sources/lineage/</loc>
+         <lastmod>2026-03-06</lastmod>
+    </url>
+    <url>
+         <loc>https://godatadriven.github.io/dbt-bouncer/latest/checks/manifest/sources/loader/</loc>
+         <lastmod>2026-03-06</lastmod>
+    </url>
+    <url>
+         <loc>https://godatadriven.github.io/dbt-bouncer/latest/checks/manifest/sources/meta/</loc>
+         <lastmod>2026-03-06</lastmod>
+    </url>
+    <url>
+         <loc>https://godatadriven.github.io/dbt-bouncer/latest/checks/manifest/sources/naming/</loc>
+         <lastmod>2026-03-06</lastmod>
+    </url>
+    <url>
+         <loc>https://godatadriven.github.io/dbt-bouncer/latest/checks/manifest/sources/tags/</loc>
          <lastmod>2026-03-06</lastmod>
     </url>
     <url>
