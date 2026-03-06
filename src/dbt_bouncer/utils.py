@@ -280,13 +280,13 @@ def get_check_objects(
 
     # 1. Load internal checks
     check_files = [
-        f for f in (Path(__file__).parent / "checks").glob("*/*.py") if f.is_file()
+        f for f in (Path(__file__).parent / "checks").glob("**/*.py") if f.is_file()
     ]
     for check_file in check_files:
-        # e.g. dbt_bouncer.checks.manifest.check_models
+        index = check_file.parts.index("checks")
         module_name = ".".join(
-            ["dbt_bouncer", "checks", check_file.parts[-2], check_file.stem]
-        )
+            ["dbt_bouncer", "checks"] + list(check_file.parts[index + 1 :])  # noqa: RUF005
+        )[:-3]  # Remove .py suffix
         try:
             module = importlib.import_module(module_name)
             _extract_checks_from_module(module, module_name, check_objects)

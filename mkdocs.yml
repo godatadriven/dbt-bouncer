@@ -42,7 +42,18 @@ nav:
       - Lineage: checks/manifest/check_lineage.md
       - Macros: checks/manifest/check_macros.md
       - Metadata: checks/manifest/check_metadata.md
-      - Models: checks/manifest/check_models.md
+      - Models:
+          - checks/manifest/models/access.md
+          - checks/manifest/models/code.md
+          - checks/manifest/models/columns.md
+          - checks/manifest/models/description.md
+          - checks/manifest/models/directories.md
+          - checks/manifest/models/lineage.md
+          - checks/manifest/models/meta.md
+          - checks/manifest/models/naming.md
+          - checks/manifest/models/tags.md
+          - checks/manifest/models/tests.md
+          - checks/manifest/models/versioning.md
       - Seeds: checks/manifest/check_seeds.md
       - Semantic Models: checks/manifest/check_semantic_models.md
       - Snapshots: checks/manifest/check_snapshots.md
