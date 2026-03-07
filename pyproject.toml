@@ -69,6 +69,10 @@ docs = [
   "pymdown-extensions~=10.0"
 ]
 
+[build-system]
+requires = ["maturin>=1.12,<2.0"]
+build-backend = "maturin"
+
 [tool.coverage.report]
 exclude_lines = [
   "if TYPE_CHECKING:",
@@ -84,6 +88,10 @@ name = "check_model_has_unique_test"
 name = "check_model_names"
 include = "^staging"
 model_name_pattern = "^stg_"
+
+[tool.maturin]
+features = ["pyo3/extension-module"]
+python-source = "src"
 
 [tool.ruff]
 exclude = [
