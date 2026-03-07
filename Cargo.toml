@@ -1,11 +1,12 @@
 [package]
 name = "dbt-bouncer-rust"
-version = "0.1.0"
+version = "0.0.0"
 edition = "2021"
 
 [lib]
 crate-type = ["cdylib"]
 name = "dbt_artifacts_rs"
+path = "src/lib.rs"
 
 [dependencies]
 pyo3 = { version = "0.23", features = ["extension-module"] }
