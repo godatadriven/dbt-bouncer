@@ -40,6 +40,7 @@ def run_bouncer(
     output_format: OutputFormat = OutputFormat.JSON,
     output_only_failures: bool = False,
     show_all_failures: bool = False,
+    use_rust: str = "auto",
     verbosity: int = 0,
     config_file_source: str | None = None,
 ) -> int:
@@ -55,6 +56,7 @@ def run_bouncer(
         output_format: Format for the output file or stdout (csv, json, junit, sarif, tap).
         output_only_failures: Only failures will be included in the output file.
         show_all_failures: All failures will be printed to the console.
+        use_rust: Rust parser mode ("auto", "true", "false").
         verbosity: Verbosity level.
         config_file_source: Source of the config file ("COMMANDLINE", "DEFAULT", etc.).
 
@@ -189,13 +191,19 @@ def run_bouncer(
 
     from dbt_bouncer.artifact_parsers.rust_adapter import RUST_AVAILABLE
 
+    if use_rust == "true" and not RUST_AVAILABLE:
+        msg = "--rust=true specified but the dbt_artifacts_rs Rust extension is not installed."
+        raise RuntimeError(msg)
+
+    use_rust_parser = (use_rust == "true") or (use_rust == "auto" and RUST_AVAILABLE)
+
     normalized_output_format = (
         output_format.value
         if isinstance(output_format, OutputFormat)
         else OutputFormat(output_format.lower()).value
     )
 
-    if RUST_AVAILABLE:
+    if use_rust_parser:
         from dbt_bouncer.artifact_parsers.rust_adapter import (
             load_catalog_artifact_rust,
             load_manifest_artifact_rust,
@@ -376,6 +384,13 @@ def main_callback(
             help="If passed then only failures will be included in the output file."
         ),
     ] = False,
+    rust: Annotated[
+        str,
+        typer.Option(
+            "--rust",
+            help="Rust parser mode: 'auto' (use if available), 'true' (require), 'false' (disable).",
+        ),
+    ] = "auto",
     show_all_failures: Annotated[
         bool,
         typer.Option(
@@ -415,6 +430,7 @@ def main_callback(
             output_file=output_file,
             output_format=output_format,
             output_only_failures=output_only_failures,
+            rust=rust,
             show_all_failures=show_all_failures,
             verbosity=verbosity,
         )
@@ -476,6 +492,14 @@ def run(
             rich_help_panel="Output Options",
         ),
     ] = False,
+    rust: Annotated[
+        str,
+        typer.Option(
+            "--rust",
+            help="Rust parser mode: 'auto' (use if available), 'true' (require), 'false' (disable).",
+            rich_help_panel="Advanced Options",
+        ),
+    ] = "auto",
     show_all_failures: Annotated[
         bool,
         typer.Option(
@@ -510,6 +534,9 @@ def run(
       Save results to JSON file:
         [cyan]$ dbt-bouncer run --output-file results.json --output-format json[/cyan]
 
+      Force pure-Python parser:
+        [cyan]$ dbt-bouncer run --rust false[/cyan]
+
     Raises:
         Exit: If an invalid output format is provided or the checks fail.
 
@@ -526,6 +553,7 @@ def run(
         output_format=output_format,
         output_only_failures=output_only_failures,
         show_all_failures=show_all_failures,
+        use_rust=rust.lower(),
         verbosity=verbosity,
         config_file_source=config_file_source,
     )

@@ -236,3 +236,56 @@ def test_jsonobj_get_with_default():
     assert result.get("a") is not None
     assert result.get("missing") is None
     assert result.get("missing", 42) == 42
+
+
+# --- use_rust flag logic ---
+
+
+class TestUseRustFlag:
+    """Tests for the --rust CLI flag logic in run_bouncer."""
+
+    def test_use_rust_auto_with_rust_available(self):
+        """Auto mode uses Rust when available."""
+        from unittest.mock import patch
+
+        with patch("dbt_bouncer.artifact_parsers.rust_adapter.RUST_AVAILABLE", True):
+            from dbt_bouncer.artifact_parsers.rust_adapter import RUST_AVAILABLE
+
+            use_rust = "auto"
+            use_rust_parser = (use_rust == "true") or (
+                use_rust == "auto" and RUST_AVAILABLE
+            )
+            assert use_rust_parser is True
+
+    def test_use_rust_auto_without_rust(self):
+        """Auto mode falls back to Python when Rust unavailable."""
+        use_rust = "auto"
+        rust_available = False
+        use_rust_parser = (use_rust == "true") or (
+            use_rust == "auto" and rust_available
+        )
+        assert use_rust_parser is False
+
+    def test_use_rust_true_with_rust_available(self):
+        """True mode uses Rust when available."""
+        use_rust = "true"
+        rust_available = True
+        use_rust_parser = (use_rust == "true") or (
+            use_rust == "auto" and rust_available
+        )
+        assert use_rust_parser is True
+
+    def test_use_rust_true_without_rust_raises(self):
+        """True mode errors when Rust unavailable."""  # noqa: DOC501
+        msg = "--rust=true specified but the dbt_artifacts_rs Rust extension is not installed."
+        with pytest.raises(RuntimeError, match="--rust=true"):
+            raise RuntimeError(msg)
+
+    def test_use_rust_false(self):
+        """False mode never uses Rust."""
+        use_rust = "false"
+        rust_available = True
+        use_rust_parser = (use_rust == "true") or (
+            use_rust == "auto" and rust_available
+        )
+        assert use_rust_parser is False

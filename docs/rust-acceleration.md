@@ -26,6 +26,27 @@ except ImportError:
 
 When `RUST_AVAILABLE` is `True`, dbt-bouncer routes artifact parsing through the Rust path. Otherwise, it uses the pure-Python parser. No configuration is needed.
 
+### The `--rust` flag
+
+You can override auto-detection with the `--rust` flag on the `run` command:
+
+| Value | Behaviour |
+|---|---|
+| `auto` (default) | Use Rust if available, fall back to Python |
+| `true` | Require Rust — error if the extension is not installed |
+| `false` | Force pure-Python parser, even if Rust is available |
+
+```bash
+# Default: auto-detect
+dbt-bouncer run
+
+# Force Rust (fails if extension missing)
+dbt-bouncer run --rust true
+
+# Force pure-Python
+dbt-bouncer run --rust false
+```
+
 ## Pre-built wheels
 
 Pre-built wheels are published for:
