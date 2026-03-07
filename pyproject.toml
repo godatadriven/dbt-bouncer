@@ -90,7 +90,7 @@ include = "^staging"
 model_name_pattern = "^stg_"
 
 [tool.maturin]
-features = ["pyo3/extension-module"]
+features = ["extension-module"]
 python-source = "src"
 
 [tool.ruff]

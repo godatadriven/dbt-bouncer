@@ -40,9 +40,10 @@ rust-build: ## Build and install the Rust extension in dev mode
 	maturin develop
 
 rust-test: ## Run Rust unit tests
-	cargo test
+	@PYO3_PYTHON=$${PYO3_PYTHON:-python3} cargo test
 
 test: ## Run all tests
+	$(MAKE) rust-test
 	$(MAKE) test-unit
 	$(MAKE) test-integration
 
