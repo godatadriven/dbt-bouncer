@@ -36,6 +36,12 @@ build-artifacts: ## Build dbt artifacts for testing
 install: ## Install dependencies
 	uv sync --extra=dev --extra=docs
 
+rust-build: ## Build and install the Rust extension in dev mode
+	maturin develop
+
+rust-test: ## Run Rust unit tests
+	cargo test
+
 test: ## Run all tests
 	$(MAKE) test-unit
 	$(MAKE) test-integration
