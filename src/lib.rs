@@ -366,3 +366,353 @@ fn dbt_artifacts_rs(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(parse_run_results_json, m)?)?;
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+
+    // --- Parse functions ---
+
+    #[test]
+    fn test_parse_manifest_json_valid() {
+        Python::with_gil(|py| {
+            let json_str = r#"{"metadata": {"dbt_version": "1.7.0"}, "nodes": {}}"#;
+            let result = parse_manifest_json(py, json_str);
+            assert!(result.is_ok());
+        });
+    }
+
+    #[test]
+    fn test_parse_manifest_json_invalid() {
+        Python::with_gil(|py| {
+            let result = parse_manifest_json(py, "not json");
+            assert!(result.is_err());
+        });
+    }
+
+    #[test]
+    fn test_parse_catalog_json_valid() {
+        Python::with_gil(|py| {
+            let json_str = r#"{"metadata": {}, "nodes": {}, "sources": {}}"#;
+            let result = parse_catalog_json(py, json_str);
+            assert!(result.is_ok());
+        });
+    }
+
+    #[test]
+    fn test_parse_catalog_json_invalid() {
+        Python::with_gil(|py| {
+            let result = parse_catalog_json(py, "{broken");
+            assert!(result.is_err());
+        });
+    }
+
+    #[test]
+    fn test_parse_run_results_json_valid() {
+        Python::with_gil(|py| {
+            let json_str = r#"{"metadata": {}, "results": []}"#;
+            let result = parse_run_results_json(py, json_str);
+            assert!(result.is_ok());
+        });
+    }
+
+    #[test]
+    fn test_parse_run_results_json_invalid() {
+        Python::with_gil(|py| {
+            let result = parse_run_results_json(py, "");
+            assert!(result.is_err());
+        });
+    }
+
+    // --- JsonObj attribute access ---
+
+    #[test]
+    fn test_getattr_exact_match() {
+        Python::with_gil(|py| {
+            let obj = JsonObj {
+                data: json!({"name": "my_model"}),
+            };
+            let result = obj.__getattr__(py, "name").unwrap();
+            let s: String = result.extract(py).unwrap();
+            assert_eq!(s, "my_model");
+        });
+    }
+
+    #[test]
+    fn test_getattr_missing_key() {
+        Python::with_gil(|py| {
+            let obj = JsonObj {
+                data: json!({"name": "my_model"}),
+            };
+            let result = obj.__getattr__(py, "missing");
+            assert!(result.is_err());
+        });
+    }
+
+    #[test]
+    fn test_getattr_trailing_underscore() {
+        Python::with_gil(|py| {
+            let obj = JsonObj {
+                data: json!({"schema": "public"}),
+            };
+            let result = obj.__getattr__(py, "schema_").unwrap();
+            let s: String = result.extract(py).unwrap();
+            assert_eq!(s, "public");
+        });
+    }
+
+    #[test]
+    fn test_getattr_enum_field_returns_jsonobj() {
+        Python::with_gil(|py| {
+            let obj = JsonObj {
+                data: json!({"access": "public"}),
+            };
+            let result = obj.__getattr__(py, "access").unwrap();
+            // Should be a JsonObj, not a plain string
+            let is_string: Result<String, _> = result.extract(py);
+            assert!(
+                is_string.is_err(),
+                "enum fields should return JsonObj, not plain string"
+            );
+        });
+    }
+
+    #[test]
+    fn test_getattr_value_on_primitive() {
+        Python::with_gil(|py| {
+            let obj = JsonObj {
+                data: json!("hello"),
+            };
+            let result = obj.__getattr__(py, "value").unwrap();
+            let s: String = result.extract(py).unwrap();
+            assert_eq!(s, "hello");
+        });
+    }
+
+    // --- JsonObj dict operations ---
+
+    #[test]
+    fn test_getitem_string_key() {
+        Python::with_gil(|py| {
+            let obj = JsonObj {
+                data: json!({"key": "val"}),
+            };
+            let key = "key".into_pyobject(py).unwrap().into_any().unbind();
+            let result = obj.__getitem__(py, key).unwrap();
+            let s: String = result.extract(py).unwrap();
+            assert_eq!(s, "val");
+        });
+    }
+
+    #[test]
+    fn test_getitem_missing_key() {
+        Python::with_gil(|py| {
+            let obj = JsonObj {
+                data: json!({"key": "val"}),
+            };
+            let key = "missing".into_pyobject(py).unwrap().into_any().unbind();
+            let result = obj.__getitem__(py, key);
+            assert!(result.is_err());
+        });
+    }
+
+    #[test]
+    fn test_getitem_array_index() {
+        Python::with_gil(|py| {
+            let obj = JsonObj {
+                data: json!([10, 20, 30]),
+            };
+            let key = 1i64.into_pyobject(py).unwrap().into_any().unbind();
+            let result = obj.__getitem__(py, key).unwrap();
+            let i: i64 = result.extract(py).unwrap();
+            assert_eq!(i, 20);
+        });
+    }
+
+    #[test]
+    fn test_getitem_negative_index() {
+        Python::with_gil(|py| {
+            let obj = JsonObj {
+                data: json!([10, 20, 30]),
+            };
+            let key = (-1i64).into_pyobject(py).unwrap().into_any().unbind();
+            let result = obj.__getitem__(py, key).unwrap();
+            let i: i64 = result.extract(py).unwrap();
+            assert_eq!(i, 30);
+        });
+    }
+
+    #[test]
+    fn test_len_object() {
+        let obj = JsonObj {
+            data: json!({"a": 1, "b": 2}),
+        };
+        assert_eq!(obj.__len__(), 2);
+    }
+
+    #[test]
+    fn test_len_array() {
+        let obj = JsonObj {
+            data: json!([1, 2, 3]),
+        };
+        assert_eq!(obj.__len__(), 3);
+    }
+
+    #[test]
+    fn test_contains_object_key() {
+        Python::with_gil(|py| {
+            let obj = JsonObj {
+                data: json!({"name": "x"}),
+            };
+            let key = "name".into_pyobject(py).unwrap().into_any().unbind();
+            assert!(obj.__contains__(py, key).unwrap());
+        });
+    }
+
+    #[test]
+    fn test_contains_array_value() {
+        Python::with_gil(|py| {
+            let obj = JsonObj {
+                data: json!(["a", "b", "c"]),
+            };
+            let key = "b".into_pyobject(py).unwrap().into_any().unbind();
+            assert!(obj.__contains__(py, key).unwrap());
+        });
+    }
+
+    #[test]
+    fn test_contains_array_missing() {
+        Python::with_gil(|py| {
+            let obj = JsonObj {
+                data: json!(["a", "b"]),
+            };
+            let key = "z".into_pyobject(py).unwrap().into_any().unbind();
+            assert!(!obj.__contains__(py, key).unwrap());
+        });
+    }
+
+    // --- Primitives ---
+
+    #[test]
+    fn test_bool_truthy() {
+        assert!(JsonObj { data: json!(true) }.__bool__());
+        assert!(JsonObj { data: json!(1) }.__bool__());
+        assert!(JsonObj {
+            data: json!("hello")
+        }
+        .__bool__());
+        assert!(JsonObj { data: json!([1]) }.__bool__());
+        assert!(JsonObj {
+            data: json!({"a": 1})
+        }
+        .__bool__());
+    }
+
+    #[test]
+    fn test_bool_falsy() {
+        assert!(!JsonObj { data: json!(false) }.__bool__());
+        assert!(!JsonObj { data: json!(null) }.__bool__());
+        assert!(!JsonObj { data: json!(0) }.__bool__());
+        assert!(!JsonObj { data: json!("") }.__bool__());
+        assert!(!JsonObj { data: json!([]) }.__bool__());
+        assert!(!JsonObj {
+            data: json!({})
+        }
+        .__bool__());
+    }
+
+    #[test]
+    fn test_eq_string() {
+        Python::with_gil(|py| {
+            let obj = JsonObj {
+                data: json!("hello"),
+            };
+            let other = "hello".into_pyobject(py).unwrap().into_any().unbind();
+            assert!(obj.__eq__(py, other));
+        });
+    }
+
+    #[test]
+    fn test_eq_int() {
+        Python::with_gil(|py| {
+            let obj = JsonObj { data: json!(42) };
+            let other = 42i64.into_pyobject(py).unwrap().into_any().unbind();
+            assert!(obj.__eq__(py, other));
+        });
+    }
+
+    #[test]
+    fn test_eq_null_none() {
+        Python::with_gil(|py| {
+            let obj = JsonObj { data: json!(null) };
+            assert!(obj.__eq__(py, py.None()));
+        });
+    }
+
+    #[test]
+    fn test_repr_short() {
+        let obj = JsonObj {
+            data: json!({"a": 1}),
+        };
+        let r = obj.__repr__();
+        assert!(r.starts_with("JsonObj("));
+        assert!(r.contains("\"a\""));
+    }
+
+    #[test]
+    fn test_str() {
+        let obj = JsonObj { data: json!(42) };
+        assert_eq!(obj.__str__(), "42");
+    }
+
+    // --- Dict-like methods ---
+
+    #[test]
+    fn test_get_existing_key() {
+        Python::with_gil(|py| {
+            let obj = JsonObj {
+                data: json!({"x": 10}),
+            };
+            let result = obj.get(py, "x", None).unwrap();
+            let i: i64 = result.extract(py).unwrap();
+            assert_eq!(i, 10);
+        });
+    }
+
+    #[test]
+    fn test_get_missing_key_returns_default() {
+        Python::with_gil(|py| {
+            let obj = JsonObj {
+                data: json!({"x": 10}),
+            };
+            let result = obj.get(py, "y", None).unwrap();
+            assert!(result.is_none(py));
+        });
+    }
+
+    #[test]
+    fn test_keys() {
+        Python::with_gil(|py| {
+            let obj = JsonObj {
+                data: json!({"a": 1, "b": 2}),
+            };
+            let result = obj.keys(py).unwrap();
+            let list: Vec<String> = result.extract(py).unwrap();
+            assert!(list.contains(&"a".to_string()));
+            assert!(list.contains(&"b".to_string()));
+            assert_eq!(list.len(), 2);
+        });
+    }
+
+    #[test]
+    fn test_keys_on_non_object() {
+        Python::with_gil(|py| {
+            let obj = JsonObj {
+                data: json!([1, 2]),
+            };
+            let result = obj.keys(py);
+            assert!(result.is_err());
+        });
+    }
+}
