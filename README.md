@@ -120,6 +120,12 @@ All documentation can be found on `dbt-bouncer` [documentation website](https://
     Done. SUCCESS=462 WARN=0 ERROR=1
     ```
 
+## Performance
+
+Pre-built wheels for common platforms include a Rust-based JSON parser that speeds up artifact loading by ~12x. The Rust extension is auto-detected at runtime — if it's not available for your platform, dbt-bouncer falls back to the pure-Python parser transparently.
+
+**Platforms with pre-built wheels:** Linux (x86_64), macOS (x86_64, ARM64), Windows (x64).
+
 ## Reporting bugs and contributing code
 
 - Want to report a bug or request a feature? Let us know and open [an issue](https://github.com/godatadriven/dbt-bouncer/issues/new/choose).
