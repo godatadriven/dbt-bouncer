@@ -50,8 +50,91 @@ jobs:
                 cat changed_files.txt
                 cat changed_files.txt | xargs uv run prek run --files
 
-    unit-tests:
+    cargo-test:
         needs: [prek]
+        runs-on: ubuntu-24.04
+        steps:
+            - uses: actions/checkout@v6
+
+            - name: Install Rust toolchain
+              uses: dtolnay/rust-toolchain@stable
+
+            - name: Cache cargo registry and build
+              uses: actions/cache@v4
+              with:
+                path: |
+                    ~/.cargo/registry
+                    ~/.cargo/git
+                    target
+                key: cargo-${{ runner.os }}-${{ hashFiles('Cargo.lock') }}
+                restore-keys: cargo-${{ runner.os }}-
+
+            - name: Run cargo test
+              run: cargo test
+
+    build-wheels:
+        needs: [cargo-test]
+        strategy:
+            matrix:
+                include:
+                    - os: ubuntu-24.04
+                      target: x86_64
+                      artifact: wheels-linux-x86_64
+                    - os: macos-latest
+                      target: aarch64
+                      artifact: wheels-macos-aarch64
+                    - os: macos-15-intel
+                      target: x86_64
+                      artifact: wheels-macos-x86_64
+                    - os: windows-2025
+                      target: x64
+                      artifact: wheels-windows-x64
+        runs-on: ${{ matrix.os }}
+        steps:
+            - uses: actions/checkout@v6
+
+            - uses: actions/setup-python@v6
+              with:
+                python-version: '3.11'
+
+            - name: Build wheel
+              uses: PyO3/maturin-action@v1
+              with:
+                target: ${{ matrix.target }}
+                args: --release --out dist --find-interpreter
+                sccache: true
+                manylinux: auto
+
+            - name: Upload wheel
+              uses: actions/upload-artifact@v6
+              with:
+                name: ${{ matrix.artifact }}
+                path: dist
+
+    build-pure-python-wheel:
+        needs: [prek]
+        runs-on: ubuntu-24.04
+        steps:
+            - uses: actions/checkout@v6
+
+            - uses: actions/setup-python@v6
+              with:
+                python-version: '3.11'
+
+            - name: Install build tools
+              run: pip install maturin
+
+            - name: Build pure-Python sdist
+              run: maturin sdist --out dist
+
+            - name: Upload sdist
+              uses: actions/upload-artifact@v6
+              with:
+                name: wheels-sdist
+                path: dist
+
+    unit-tests:
+        needs: [prek, build-wheels]
         runs-on: ${{ matrix.operating-system }}
         # permissions:
         #     checks: write
@@ -81,6 +164,17 @@ jobs:
               uses: ./.github/actions/setup_python_env
               with:
                 python-version: ${{ matrix.python-version }}
+
+            - name: Download Rust wheel
+              uses: actions/download-artifact@v7
+              with:
+                pattern: wheels-*
+                path: dist
+                merge-multiple: true
+
+            - name: Install Rust extension
+              run: |
+                pip install --find-links dist dbt_artifacts_rs || echo "No matching wheel for this platform, running pure-Python"
 
             - name: Run pytest (Windows)
               if: matrix.operating-system == 'windows-2025'
