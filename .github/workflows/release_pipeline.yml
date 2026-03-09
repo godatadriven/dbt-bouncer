@@ -34,18 +34,31 @@
                       - os: ubuntu-24.04
                         target: x86_64
                         artifact: wheels-linux-x86_64
+                        manylinux: auto
                       - os: ubuntu-24.04
                         target: aarch64
                         artifact: wheels-linux-aarch64
+                        manylinux: auto
+                      - os: ubuntu-24.04
+                        target: x86_64-unknown-linux-musl
+                        artifact: wheels-musllinux-x86_64
+                        manylinux: musllinux_1_2
+                      - os: ubuntu-24.04
+                        target: aarch64-unknown-linux-musl
+                        artifact: wheels-musllinux-aarch64
+                        manylinux: musllinux_1_2
                       - os: macos-latest
                         target: aarch64
                         artifact: wheels-macos-aarch64
+                        manylinux: auto
                       - os: macos-15-intel
                         target: x86_64
                         artifact: wheels-macos-x86_64
+                        manylinux: auto
                       - os: windows-2025
                         target: x64
                         artifact: wheels-windows-x64
+                        manylinux: auto
           runs-on: ${{ matrix.os }}
           steps:
               - uses: actions/checkout@v6
@@ -60,7 +73,7 @@
                   target: ${{ matrix.target }}
                   args: --release --out dist --find-interpreter
                   sccache: true
-                  manylinux: auto
+                  manylinux: ${{ matrix.manylinux }}
 
               - name: Upload wheel
                 uses: actions/upload-artifact@v6

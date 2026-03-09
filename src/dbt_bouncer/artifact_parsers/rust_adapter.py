@@ -44,7 +44,7 @@ def parse_manifest_rust(json_str: str) -> Any:
         Any: A JsonObj that supports attribute access for all manifest fields.
 
     """
-    return dbt_artifacts_rs.parse_manifest_json(json_str)  # type: ignore[attr-defined]
+    return dbt_artifacts_rs.parse_manifest_json(json_str)
 
 
 def parse_catalog_rust(json_str: str) -> Any:
@@ -54,7 +54,7 @@ def parse_catalog_rust(json_str: str) -> Any:
         Any: A JsonObj wrapping the catalog data.
 
     """
-    return dbt_artifacts_rs.parse_catalog_json(json_str)  # type: ignore[attr-defined]
+    return dbt_artifacts_rs.parse_catalog_json(json_str)
 
 
 def parse_run_results_rust(json_str: str) -> Any:
@@ -64,7 +64,7 @@ def parse_run_results_rust(json_str: str) -> Any:
         Any: A JsonObj wrapping the run results data.
 
     """
-    return dbt_artifacts_rs.parse_run_results_json(json_str)  # type: ignore[attr-defined]
+    return dbt_artifacts_rs.parse_run_results_json(json_str)
 
 
 def load_manifest_artifact_rust(

@@ -1,7 +1,16 @@
+use std::sync::Arc;
+
 use pyo3::exceptions::{PyAttributeError, PyIndexError, PyKeyError, PyTypeError, PyValueError};
 use pyo3::prelude::*;
 use pyo3::types::{PyList, PyTuple};
 use serde_json::Value;
+
+/// A segment in the path from the root JSON value to a nested position.
+#[derive(Clone, Debug)]
+enum PathSegment {
+    Key(String),
+    Index(usize),
+}
 
 /// A generic Python-accessible wrapper around a JSON value.
 ///
@@ -9,15 +18,60 @@ use serde_json::Value;
 /// - JSON arrays support indexing (`[0]`), iteration, `len()`, and containment (`in`).
 /// - Primitives are returned as native Python types (str, int, float, bool, None).
 /// - Accessing `.value` on a primitive returns itself (for Pydantic enum compatibility).
+///
+/// Internally, the root JSON tree is stored in an `Arc<Value>` and shared across
+/// all nested `JsonObj` instances. Each wrapper holds a `path` that lazily
+/// resolves to the current position — no deep cloning occurs on access.
 #[pyclass(name = "JsonObj", module = "dbt_artifacts_rs")]
 #[derive(Clone, Debug)]
 struct JsonObj {
-    data: Value,
+    root: Arc<Value>,
+    path: Vec<PathSegment>,
+}
+
+impl JsonObj {
+    /// Navigate from root to the current position by following `self.path`.
+    fn resolve(&self) -> &Value {
+        let mut current = self.root.as_ref();
+        for seg in &self.path {
+            current = match seg {
+                PathSegment::Key(k) => current.get(k.as_str()).unwrap_or(&Value::Null),
+                PathSegment::Index(i) => current.get(*i).unwrap_or(&Value::Null),
+            };
+        }
+        current
+    }
+
+    /// Build a child `JsonObj` that shares the same root but with an extended path.
+    fn child_with_key(&self, key: String) -> Self {
+        let mut new_path = self.path.clone();
+        new_path.push(PathSegment::Key(key));
+        JsonObj {
+            root: Arc::clone(&self.root),
+            path: new_path,
+        }
+    }
+
+    /// Build a child `JsonObj` that shares the same root but with an extended index path.
+    fn child_with_index(&self, index: usize) -> Self {
+        let mut new_path = self.path.clone();
+        new_path.push(PathSegment::Index(index));
+        JsonObj {
+            root: Arc::clone(&self.root),
+            path: new_path,
+        }
+    }
 }
 
 /// Convert a serde_json::Value to a Python object.
-/// Primitives become native Python types; objects/arrays become JsonObj.
-fn value_to_py(py: Python<'_>, v: &Value) -> PyResult<PyObject> {
+/// Primitives become native Python types; objects/arrays become JsonObj
+/// sharing the same `Arc<Value>` root with an extended path.
+fn value_to_py(
+    py: Python<'_>,
+    root: &Arc<Value>,
+    path: &[PathSegment],
+    v: &Value,
+) -> PyResult<PyObject> {
     match v {
         Value::Null => Ok(py.None()),
         Value::Bool(b) => Ok(b.into_pyobject(py).unwrap().to_owned().into_any().unbind()),
@@ -32,7 +86,10 @@ fn value_to_py(py: Python<'_>, v: &Value) -> PyResult<PyObject> {
         }
         Value::String(s) => Ok(s.into_pyobject(py).unwrap().into_any().unbind()),
         Value::Array(_) | Value::Object(_) => {
-            let obj = JsonObj { data: v.clone() };
+            let obj = JsonObj {
+                root: Arc::clone(root),
+                path: path.to_vec(),
+            };
             Ok(obj.into_pyobject(py).unwrap().into_any().unbind())
         }
     }
@@ -41,9 +98,11 @@ fn value_to_py(py: Python<'_>, v: &Value) -> PyResult<PyObject> {
 #[pymethods]
 impl JsonObj {
     fn __getattr__(&self, py: Python<'_>, name: &str) -> PyResult<PyObject> {
+        let data = self.resolve();
+
         // Special case: .value on a primitive returns itself (for Pydantic enum compat)
         if name == "value" {
-            match &self.data {
+            match data {
                 Value::String(s) => {
                     return Ok(s.into_pyobject(py).unwrap().into_any().unbind())
                 }
@@ -62,7 +121,7 @@ impl JsonObj {
             }
         }
 
-        match &self.data {
+        match data {
             Value::Object(map) => {
                 // Try exact match
                 if let Some(v) = map.get(name) {
@@ -70,20 +129,21 @@ impl JsonObj {
                     // as JsonObj so that .value returns the string (Pydantic enum compat).
                     if matches!(name, "access" | "format" | "resource_type") {
                         if let Value::String(_) = v {
-                            return Ok(JsonObj { data: v.clone() }
-                                .into_pyobject(py)
-                                .unwrap()
-                                .into_any()
-                                .unbind());
+                            let child = self.child_with_key(name.to_string());
+                            return Ok(child.into_pyobject(py).unwrap().into_any().unbind());
                         }
                     }
-                    return value_to_py(py, v);
+                    let mut child_path = self.path.clone();
+                    child_path.push(PathSegment::Key(name.to_string()));
+                    return value_to_py(py, &self.root, &child_path, v);
                 }
-                // Try without trailing underscore (Pydantic alias: schema_ → schema)
+                // Try without trailing underscore (Pydantic alias: schema_ -> schema)
                 if name.ends_with('_') {
                     let trimmed = &name[..name.len() - 1];
                     if let Some(v) = map.get(trimmed) {
-                        return value_to_py(py, v);
+                        let mut child_path = self.path.clone();
+                        child_path.push(PathSegment::Key(trimmed.to_string()));
+                        return value_to_py(py, &self.root, &child_path, v);
                     }
                 }
                 Err(PyAttributeError::new_err(format!(
@@ -97,11 +157,17 @@ impl JsonObj {
     }
 
     fn __getitem__(&self, py: Python<'_>, key: Py<PyAny>) -> PyResult<PyObject> {
+        let data = self.resolve();
+
         // Try string key (dict access)
         if let Ok(s) = key.extract::<String>(py) {
-            return match &self.data {
+            return match data {
                 Value::Object(map) => match map.get(&s) {
-                    Some(v) => value_to_py(py, v),
+                    Some(v) => {
+                        let mut child_path = self.path.clone();
+                        child_path.push(PathSegment::Key(s));
+                        value_to_py(py, &self.root, &child_path, v)
+                    }
                     None => Err(PyKeyError::new_err(s)),
                 },
                 _ => Err(PyTypeError::new_err("object is not subscriptable")),
@@ -109,7 +175,7 @@ impl JsonObj {
         }
         // Try integer key (array access)
         if let Ok(i) = key.extract::<isize>(py) {
-            return match &self.data {
+            return match data {
                 Value::Array(arr) => {
                     let idx = if i < 0 {
                         (arr.len() as isize + i) as usize
@@ -117,7 +183,11 @@ impl JsonObj {
                         i as usize
                     };
                     match arr.get(idx) {
-                        Some(v) => value_to_py(py, v),
+                        Some(v) => {
+                            let mut child_path = self.path.clone();
+                            child_path.push(PathSegment::Index(idx));
+                            value_to_py(py, &self.root, &child_path, v)
+                        }
                         None => Err(PyIndexError::new_err("index out of range")),
                     }
                 }
@@ -128,7 +198,7 @@ impl JsonObj {
     }
 
     fn __len__(&self) -> usize {
-        match &self.data {
+        match self.resolve() {
             Value::Object(map) => map.len(),
             Value::Array(arr) => arr.len(),
             Value::String(s) => s.len(),
@@ -137,7 +207,8 @@ impl JsonObj {
     }
 
     fn __iter__(&self, py: Python<'_>) -> PyResult<PyObject> {
-        match &self.data {
+        let data = self.resolve();
+        match data {
             Value::Object(map) => {
                 let keys: Vec<PyObject> = map
                     .keys()
@@ -150,7 +221,12 @@ impl JsonObj {
             Value::Array(arr) => {
                 let items: Vec<PyObject> = arr
                     .iter()
-                    .map(|v| value_to_py(py, v))
+                    .enumerate()
+                    .map(|(i, v)| {
+                        let mut child_path = self.path.clone();
+                        child_path.push(PathSegment::Index(i));
+                        value_to_py(py, &self.root, &child_path, v)
+                    })
                     .collect::<PyResult<_>>()?;
                 let list = PyList::new(py, &items).unwrap();
                 list.call_method0("__iter__")
@@ -161,7 +237,8 @@ impl JsonObj {
     }
 
     fn __contains__(&self, py: Python<'_>, key: Py<PyAny>) -> PyResult<bool> {
-        match &self.data {
+        let data = self.resolve();
+        match data {
             Value::Object(map) => {
                 if let Ok(s) = key.extract::<String>(py) {
                     Ok(map.contains_key(&s))
@@ -188,7 +265,7 @@ impl JsonObj {
     }
 
     fn __bool__(&self) -> bool {
-        match &self.data {
+        match self.resolve() {
             Value::Null => false,
             Value::Bool(b) => *b,
             Value::Number(n) => n.as_f64().is_some_and(|f| f != 0.0),
@@ -199,7 +276,8 @@ impl JsonObj {
     }
 
     fn __repr__(&self) -> String {
-        let preview = serde_json::to_string(&self.data).unwrap_or_default();
+        let data = self.resolve();
+        let preview = serde_json::to_string(data).unwrap_or_default();
         if preview.len() > 200 {
             format!("JsonObj({}...)", &preview[..200])
         } else {
@@ -208,34 +286,38 @@ impl JsonObj {
     }
 
     fn __str__(&self) -> String {
-        serde_json::to_string(&self.data).unwrap_or_default()
+        serde_json::to_string(self.resolve()).unwrap_or_default()
     }
 
     fn __eq__(&self, py: Python<'_>, other: Py<PyAny>) -> bool {
+        let data = self.resolve();
         if let Ok(s) = other.extract::<String>(py) {
-            self.data.as_str() == Some(&s)
+            data.as_str() == Some(&s)
         } else if let Ok(i) = other.extract::<i64>(py) {
-            self.data.as_i64() == Some(i)
+            data.as_i64() == Some(i)
         } else if let Ok(f) = other.extract::<f64>(py) {
-            self.data.as_f64() == Some(f)
+            data.as_f64() == Some(f)
         } else if let Ok(b) = other.extract::<bool>(py) {
-            self.data.as_bool() == Some(b)
+            data.as_bool() == Some(b)
         } else if other.is_none(py) {
-            self.data.is_null()
+            data.is_null()
         } else {
             false
         }
     }
 
-    /// Dict-like .items() → list of (key, value) tuples.
+    /// Dict-like .items() -> list of (key, value) tuples.
     fn items(&self, py: Python<'_>) -> PyResult<PyObject> {
-        match &self.data {
+        let data = self.resolve();
+        match data {
             Value::Object(map) => {
                 let items: Vec<PyObject> = map
                     .iter()
                     .map(|(k, v)| {
                         let py_k: PyObject = k.into_pyobject(py).unwrap().into_any().unbind();
-                        let py_v = value_to_py(py, v)?;
+                        let mut child_path = self.path.clone();
+                        child_path.push(PathSegment::Key(k.clone()));
+                        let py_v = value_to_py(py, &self.root, &child_path, v)?;
                         let tup = PyTuple::new(py, [py_k, py_v]).unwrap();
                         Ok(tup.into_any().unbind())
                     })
@@ -246,9 +328,10 @@ impl JsonObj {
         }
     }
 
-    /// Dict-like .keys() → list of keys.
+    /// Dict-like .keys() -> list of keys.
     fn keys(&self, py: Python<'_>) -> PyResult<PyObject> {
-        match &self.data {
+        let data = self.resolve();
+        match data {
             Value::Object(map) => {
                 let keys: Vec<PyObject> = map
                     .keys()
@@ -260,13 +343,18 @@ impl JsonObj {
         }
     }
 
-    /// Dict-like .values() → list of values.
+    /// Dict-like .values() -> list of values.
     fn values(&self, py: Python<'_>) -> PyResult<PyObject> {
-        match &self.data {
+        let data = self.resolve();
+        match data {
             Value::Object(map) => {
                 let vals: Vec<PyObject> = map
-                    .values()
-                    .map(|v| value_to_py(py, v))
+                    .iter()
+                    .map(|(k, v)| {
+                        let mut child_path = self.path.clone();
+                        child_path.push(PathSegment::Key(k.clone()));
+                        value_to_py(py, &self.root, &child_path, v)
+                    })
                     .collect::<PyResult<_>>()?;
                 Ok(PyList::new(py, &vals).unwrap().into_any().unbind())
             }
@@ -277,9 +365,14 @@ impl JsonObj {
     /// Dict-like .get(key, default=None).
     #[pyo3(signature = (key, default=None))]
     fn get(&self, py: Python<'_>, key: &str, default: Option<PyObject>) -> PyResult<PyObject> {
-        match &self.data {
+        let data = self.resolve();
+        match data {
             Value::Object(map) => match map.get(key) {
-                Some(v) => value_to_py(py, v),
+                Some(v) => {
+                    let mut child_path = self.path.clone();
+                    child_path.push(PathSegment::Key(key.to_string()));
+                    value_to_py(py, &self.root, &child_path, v)
+                }
                 None => Ok(default.unwrap_or_else(|| py.None())),
             },
             _ => Ok(default.unwrap_or_else(|| py.None())),
@@ -295,7 +388,8 @@ impl JsonObj {
 impl JsonObj {
     /// Recursively convert to native Python types.
     fn deep_convert(&self, py: Python<'_>) -> PyResult<PyObject> {
-        match &self.data {
+        let data = self.resolve();
+        match data {
             Value::Null => Ok(py.None()),
             Value::Bool(b) => Ok(b.into_pyobject(py).unwrap().to_owned().into_any().unbind()),
             Value::Number(n) => {
@@ -311,14 +405,15 @@ impl JsonObj {
             Value::Array(arr) => {
                 let items: Vec<PyObject> = arr
                     .iter()
-                    .map(|v| JsonObj { data: v.clone() }.deep_convert(py))
+                    .enumerate()
+                    .map(|(i, _)| self.child_with_index(i).deep_convert(py))
                     .collect::<PyResult<_>>()?;
                 Ok(PyList::new(py, &items).unwrap().into_any().unbind())
             }
             Value::Object(map) => {
                 let dict = pyo3::types::PyDict::new(py);
-                for (k, v) in map {
-                    dict.set_item(k, JsonObj { data: v.clone() }.deep_convert(py)?)?;
+                for (k, _) in map {
+                    dict.set_item(k, self.child_with_key(k.clone()).deep_convert(py)?)?;
                 }
                 Ok(dict.into_any().unbind())
             }
@@ -335,7 +430,12 @@ impl JsonObj {
 fn parse_manifest_json(py: Python<'_>, json_str: &str) -> PyResult<PyObject> {
     let data: Value = serde_json::from_str(json_str)
         .map_err(|e| PyValueError::new_err(format!("Invalid manifest JSON: {e}")))?;
-    Ok(JsonObj { data }.into_pyobject(py).unwrap().into_any().unbind())
+    let root = Arc::new(data);
+    Ok(JsonObj { root, path: vec![] }
+        .into_pyobject(py)
+        .unwrap()
+        .into_any()
+        .unbind())
 }
 
 /// Parse a dbt catalog JSON string into a JsonObj.
@@ -343,7 +443,12 @@ fn parse_manifest_json(py: Python<'_>, json_str: &str) -> PyResult<PyObject> {
 fn parse_catalog_json(py: Python<'_>, json_str: &str) -> PyResult<PyObject> {
     let data: Value = serde_json::from_str(json_str)
         .map_err(|e| PyValueError::new_err(format!("Invalid catalog JSON: {e}")))?;
-    Ok(JsonObj { data }.into_pyobject(py).unwrap().into_any().unbind())
+    let root = Arc::new(data);
+    Ok(JsonObj { root, path: vec![] }
+        .into_pyobject(py)
+        .unwrap()
+        .into_any()
+        .unbind())
 }
 
 /// Parse a dbt run-results JSON string into a JsonObj.
@@ -351,7 +456,12 @@ fn parse_catalog_json(py: Python<'_>, json_str: &str) -> PyResult<PyObject> {
 fn parse_run_results_json(py: Python<'_>, json_str: &str) -> PyResult<PyObject> {
     let data: Value = serde_json::from_str(json_str)
         .map_err(|e| PyValueError::new_err(format!("Invalid run_results JSON: {e}")))?;
-    Ok(JsonObj { data }.into_pyobject(py).unwrap().into_any().unbind())
+    let root = Arc::new(data);
+    Ok(JsonObj { root, path: vec![] }
+        .into_pyobject(py)
+        .unwrap()
+        .into_any()
+        .unbind())
 }
 
 // ---------------------------------------------------------------------------
@@ -371,6 +481,14 @@ fn dbt_artifacts_rs(m: &Bound<'_, PyModule>) -> PyResult<()> {
 mod tests {
     use super::*;
     use serde_json::json;
+
+    /// Helper to create a root-level JsonObj from a Value.
+    fn make_obj(v: Value) -> JsonObj {
+        JsonObj {
+            root: Arc::new(v),
+            path: vec![],
+        }
+    }
 
     // --- Parse functions ---
 
@@ -430,9 +548,7 @@ mod tests {
     #[test]
     fn test_getattr_exact_match() {
         Python::with_gil(|py| {
-            let obj = JsonObj {
-                data: json!({"name": "my_model"}),
-            };
+            let obj = make_obj(json!({"name": "my_model"}));
             let result = obj.__getattr__(py, "name").unwrap();
             let s: String = result.extract(py).unwrap();
             assert_eq!(s, "my_model");
@@ -442,9 +558,7 @@ mod tests {
     #[test]
     fn test_getattr_missing_key() {
         Python::with_gil(|py| {
-            let obj = JsonObj {
-                data: json!({"name": "my_model"}),
-            };
+            let obj = make_obj(json!({"name": "my_model"}));
             let result = obj.__getattr__(py, "missing");
             assert!(result.is_err());
         });
@@ -453,9 +567,7 @@ mod tests {
     #[test]
     fn test_getattr_trailing_underscore() {
         Python::with_gil(|py| {
-            let obj = JsonObj {
-                data: json!({"schema": "public"}),
-            };
+            let obj = make_obj(json!({"schema": "public"}));
             let result = obj.__getattr__(py, "schema_").unwrap();
             let s: String = result.extract(py).unwrap();
             assert_eq!(s, "public");
@@ -465,9 +577,7 @@ mod tests {
     #[test]
     fn test_getattr_enum_field_returns_jsonobj() {
         Python::with_gil(|py| {
-            let obj = JsonObj {
-                data: json!({"access": "public"}),
-            };
+            let obj = make_obj(json!({"access": "public"}));
             let result = obj.__getattr__(py, "access").unwrap();
             // Should be a JsonObj, not a plain string
             let is_string: Result<String, _> = result.extract(py);
@@ -481,9 +591,7 @@ mod tests {
     #[test]
     fn test_getattr_value_on_primitive() {
         Python::with_gil(|py| {
-            let obj = JsonObj {
-                data: json!("hello"),
-            };
+            let obj = make_obj(json!("hello"));
             let result = obj.__getattr__(py, "value").unwrap();
             let s: String = result.extract(py).unwrap();
             assert_eq!(s, "hello");
@@ -495,9 +603,7 @@ mod tests {
     #[test]
     fn test_getitem_string_key() {
         Python::with_gil(|py| {
-            let obj = JsonObj {
-                data: json!({"key": "val"}),
-            };
+            let obj = make_obj(json!({"key": "val"}));
             let key = "key".into_pyobject(py).unwrap().into_any().unbind();
             let result = obj.__getitem__(py, key).unwrap();
             let s: String = result.extract(py).unwrap();
@@ -508,9 +614,7 @@ mod tests {
     #[test]
     fn test_getitem_missing_key() {
         Python::with_gil(|py| {
-            let obj = JsonObj {
-                data: json!({"key": "val"}),
-            };
+            let obj = make_obj(json!({"key": "val"}));
             let key = "missing".into_pyobject(py).unwrap().into_any().unbind();
             let result = obj.__getitem__(py, key);
             assert!(result.is_err());
@@ -520,9 +624,7 @@ mod tests {
     #[test]
     fn test_getitem_array_index() {
         Python::with_gil(|py| {
-            let obj = JsonObj {
-                data: json!([10, 20, 30]),
-            };
+            let obj = make_obj(json!([10, 20, 30]));
             let key = 1i64.into_pyobject(py).unwrap().into_any().unbind();
             let result = obj.__getitem__(py, key).unwrap();
             let i: i64 = result.extract(py).unwrap();
@@ -533,9 +635,7 @@ mod tests {
     #[test]
     fn test_getitem_negative_index() {
         Python::with_gil(|py| {
-            let obj = JsonObj {
-                data: json!([10, 20, 30]),
-            };
+            let obj = make_obj(json!([10, 20, 30]));
             let key = (-1i64).into_pyobject(py).unwrap().into_any().unbind();
             let result = obj.__getitem__(py, key).unwrap();
             let i: i64 = result.extract(py).unwrap();
@@ -545,26 +645,20 @@ mod tests {
 
     #[test]
     fn test_len_object() {
-        let obj = JsonObj {
-            data: json!({"a": 1, "b": 2}),
-        };
+        let obj = make_obj(json!({"a": 1, "b": 2}));
         assert_eq!(obj.__len__(), 2);
     }
 
     #[test]
     fn test_len_array() {
-        let obj = JsonObj {
-            data: json!([1, 2, 3]),
-        };
+        let obj = make_obj(json!([1, 2, 3]));
         assert_eq!(obj.__len__(), 3);
     }
 
     #[test]
     fn test_contains_object_key() {
         Python::with_gil(|py| {
-            let obj = JsonObj {
-                data: json!({"name": "x"}),
-            };
+            let obj = make_obj(json!({"name": "x"}));
             let key = "name".into_pyobject(py).unwrap().into_any().unbind();
             assert!(obj.__contains__(py, key).unwrap());
         });
@@ -573,9 +667,7 @@ mod tests {
     #[test]
     fn test_contains_array_value() {
         Python::with_gil(|py| {
-            let obj = JsonObj {
-                data: json!(["a", "b", "c"]),
-            };
+            let obj = make_obj(json!(["a", "b", "c"]));
             let key = "b".into_pyobject(py).unwrap().into_any().unbind();
             assert!(obj.__contains__(py, key).unwrap());
         });
@@ -584,9 +676,7 @@ mod tests {
     #[test]
     fn test_contains_array_missing() {
         Python::with_gil(|py| {
-            let obj = JsonObj {
-                data: json!(["a", "b"]),
-            };
+            let obj = make_obj(json!(["a", "b"]));
             let key = "z".into_pyobject(py).unwrap().into_any().unbind();
             assert!(!obj.__contains__(py, key).unwrap());
         });
@@ -596,38 +686,27 @@ mod tests {
 
     #[test]
     fn test_bool_truthy() {
-        assert!(JsonObj { data: json!(true) }.__bool__());
-        assert!(JsonObj { data: json!(1) }.__bool__());
-        assert!(JsonObj {
-            data: json!("hello")
-        }
-        .__bool__());
-        assert!(JsonObj { data: json!([1]) }.__bool__());
-        assert!(JsonObj {
-            data: json!({"a": 1})
-        }
-        .__bool__());
+        assert!(make_obj(json!(true)).__bool__());
+        assert!(make_obj(json!(1)).__bool__());
+        assert!(make_obj(json!("hello")).__bool__());
+        assert!(make_obj(json!([1])).__bool__());
+        assert!(make_obj(json!({"a": 1})).__bool__());
     }
 
     #[test]
     fn test_bool_falsy() {
-        assert!(!JsonObj { data: json!(false) }.__bool__());
-        assert!(!JsonObj { data: json!(null) }.__bool__());
-        assert!(!JsonObj { data: json!(0) }.__bool__());
-        assert!(!JsonObj { data: json!("") }.__bool__());
-        assert!(!JsonObj { data: json!([]) }.__bool__());
-        assert!(!JsonObj {
-            data: json!({})
-        }
-        .__bool__());
+        assert!(!make_obj(json!(false)).__bool__());
+        assert!(!make_obj(json!(null)).__bool__());
+        assert!(!make_obj(json!(0)).__bool__());
+        assert!(!make_obj(json!("")).__bool__());
+        assert!(!make_obj(json!([])).__bool__());
+        assert!(!make_obj(json!({})).__bool__());
     }
 
     #[test]
     fn test_eq_string() {
         Python::with_gil(|py| {
-            let obj = JsonObj {
-                data: json!("hello"),
-            };
+            let obj = make_obj(json!("hello"));
             let other = "hello".into_pyobject(py).unwrap().into_any().unbind();
             assert!(obj.__eq__(py, other));
         });
@@ -636,7 +715,7 @@ mod tests {
     #[test]
     fn test_eq_int() {
         Python::with_gil(|py| {
-            let obj = JsonObj { data: json!(42) };
+            let obj = make_obj(json!(42));
             let other = 42i64.into_pyobject(py).unwrap().into_any().unbind();
             assert!(obj.__eq__(py, other));
         });
@@ -645,16 +724,14 @@ mod tests {
     #[test]
     fn test_eq_null_none() {
         Python::with_gil(|py| {
-            let obj = JsonObj { data: json!(null) };
+            let obj = make_obj(json!(null));
             assert!(obj.__eq__(py, py.None()));
         });
     }
 
     #[test]
     fn test_repr_short() {
-        let obj = JsonObj {
-            data: json!({"a": 1}),
-        };
+        let obj = make_obj(json!({"a": 1}));
         let r = obj.__repr__();
         assert!(r.starts_with("JsonObj("));
         assert!(r.contains("\"a\""));
@@ -662,7 +739,7 @@ mod tests {
 
     #[test]
     fn test_str() {
-        let obj = JsonObj { data: json!(42) };
+        let obj = make_obj(json!(42));
         assert_eq!(obj.__str__(), "42");
     }
 
@@ -671,9 +748,7 @@ mod tests {
     #[test]
     fn test_get_existing_key() {
         Python::with_gil(|py| {
-            let obj = JsonObj {
-                data: json!({"x": 10}),
-            };
+            let obj = make_obj(json!({"x": 10}));
             let result = obj.get(py, "x", None).unwrap();
             let i: i64 = result.extract(py).unwrap();
             assert_eq!(i, 10);
@@ -683,9 +758,7 @@ mod tests {
     #[test]
     fn test_get_missing_key_returns_default() {
         Python::with_gil(|py| {
-            let obj = JsonObj {
-                data: json!({"x": 10}),
-            };
+            let obj = make_obj(json!({"x": 10}));
             let result = obj.get(py, "y", None).unwrap();
             assert!(result.is_none(py));
         });
@@ -694,9 +767,7 @@ mod tests {
     #[test]
     fn test_keys() {
         Python::with_gil(|py| {
-            let obj = JsonObj {
-                data: json!({"a": 1, "b": 2}),
-            };
+            let obj = make_obj(json!({"a": 1, "b": 2}));
             let result = obj.keys(py).unwrap();
             let list: Vec<String> = result.extract(py).unwrap();
             assert!(list.contains(&"a".to_string()));
@@ -708,9 +779,7 @@ mod tests {
     #[test]
     fn test_keys_on_non_object() {
         Python::with_gil(|py| {
-            let obj = JsonObj {
-                data: json!([1, 2]),
-            };
+            let obj = make_obj(json!([1, 2]));
             let result = obj.keys(py);
             assert!(result.is_err());
         });
