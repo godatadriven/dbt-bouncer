@@ -2,10 +2,7 @@ from contextlib import nullcontext as does_not_raise
 
 import pytest
 
-from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
-    Nodes4,
-    SemanticModels,
-)
+from dbt_bouncer.artifact_parsers.fast_parser import wrap_dict
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.checks.manifest.check_semantic_models import (
     CheckSemanticModelBasedOnNonPublicModels,
@@ -17,8 +14,8 @@ from dbt_bouncer.checks.manifest.check_semantic_models import (
     [
         (
             [
-                Nodes4(
-                    **{
+                wrap_dict(
+                    {
                         "access": "public",
                         "alias": "model_1",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -40,8 +37,8 @@ from dbt_bouncer.checks.manifest.check_semantic_models import (
                     },
                 )
             ],
-            SemanticModels(
-                **{
+            wrap_dict(
+                {
                     "depends_on": {"nodes": ["model.package_name.model_1"]},
                     "fqn": ["package_name", "marts", "finance", "semantic_model_1"],
                     "model": "ref('model_1')",
@@ -57,8 +54,8 @@ from dbt_bouncer.checks.manifest.check_semantic_models import (
         ),
         (
             [
-                Nodes4(
-                    **{
+                wrap_dict(
+                    {
                         "access": "protected",
                         "alias": "model_1",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -80,8 +77,8 @@ from dbt_bouncer.checks.manifest.check_semantic_models import (
                     },
                 ),
             ],
-            SemanticModels(
-                **{
+            wrap_dict(
+                {
                     "depends_on": {"nodes": ["model.package_name.model_1"]},
                     "fqn": ["package_name", "marts", "finance", "semantic_model_1"],
                     "model": "ref('model_1')",

@@ -2,7 +2,7 @@ from contextlib import nullcontext as does_not_raise
 
 import pytest
 
-from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import Nodes4
+from dbt_bouncer.artifact_parsers.fast_parser import wrap_dict
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.checks.manifest.models.code import (
     CheckModelCodeDoesNotContainRegexpPattern,
@@ -249,24 +249,26 @@ def test_check_python_model_code_does_not_contain_regexp_pattern(
     raw_code, regexp_pattern, expectation
 ):
     """Test that regexp pattern checking works with Python models."""
-    model = Nodes4(
-        alias="test_model",
-        checksum={"name": "sha256", "checksum": "abc123"},
-        columns={},
-        config={},
-        depends_on={"macros": [], "nodes": []},
-        fqn=["project", "test_model"],
-        language="python",
-        name="test_model",
-        original_file_path="models/test_model.py",
-        package_name="project",
-        path="test_model.py",
-        raw_code=raw_code,
-        refs=[],
-        resource_type="model",
-        schema="main",
-        sources=[],
-        unique_id="model.project.test_model",
+    model = wrap_dict(
+        {
+            "alias": "test_model",
+            "checksum": {"name": "sha256", "checksum": "abc123"},
+            "columns": {},
+            "config": {},
+            "depends_on": {"macros": [], "nodes": []},
+            "fqn": ["project", "test_model"],
+            "language": "python",
+            "name": "test_model",
+            "original_file_path": "models/test_model.py",
+            "package_name": "project",
+            "path": "test_model.py",
+            "raw_code": raw_code,
+            "refs": [],
+            "resource_type": "model",
+            "schema": "main",
+            "sources": [],
+            "unique_id": "model.project.test_model",
+        }
     )
 
     with expectation:

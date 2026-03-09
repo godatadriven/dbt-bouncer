@@ -2,7 +2,7 @@ from contextlib import nullcontext as does_not_raise
 
 import pytest
 
-from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import Nodes7
+from dbt_bouncer.artifact_parsers.fast_parser import wrap_dict
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.checks.manifest.check_snapshots import (
     CheckSnapshotHasTags,
@@ -14,8 +14,8 @@ from dbt_bouncer.checks.manifest.check_snapshots import (
     ("snapshot", "tags", "criteria", "expectation"),
     [
         (
-            Nodes7(
-                **{
+            wrap_dict(
+                {
                     "alias": "snapshot_1",
                     "checksum": {"name": "sha256", "checksum": ""},
                     "config": {},
@@ -35,8 +35,8 @@ from dbt_bouncer.checks.manifest.check_snapshots import (
             does_not_raise(),
         ),
         (
-            Nodes7(
-                **{
+            wrap_dict(
+                {
                     "alias": "snapshot_1",
                     "checksum": {"name": "sha256", "checksum": ""},
                     "config": {},
@@ -56,8 +56,8 @@ from dbt_bouncer.checks.manifest.check_snapshots import (
             pytest.raises(DbtBouncerFailedCheckError),
         ),
         (
-            Nodes7(
-                **{
+            wrap_dict(
+                {
                     "alias": "snapshot_1",
                     "checksum": {"name": "sha256", "checksum": ""},
                     "config": {},
@@ -77,8 +77,8 @@ from dbt_bouncer.checks.manifest.check_snapshots import (
             does_not_raise(),
         ),
         (
-            Nodes7(
-                **{
+            wrap_dict(
+                {
                     "alias": "snapshot_1",
                     "checksum": {"name": "sha256", "checksum": ""},
                     "config": {},
@@ -98,8 +98,8 @@ from dbt_bouncer.checks.manifest.check_snapshots import (
             pytest.raises(DbtBouncerFailedCheckError),
         ),
         (
-            Nodes7(
-                **{
+            wrap_dict(
+                {
                     "alias": "snapshot_1",
                     "checksum": {"name": "sha256", "checksum": ""},
                     "config": {},
@@ -119,8 +119,8 @@ from dbt_bouncer.checks.manifest.check_snapshots import (
             does_not_raise(),
         ),
         (
-            Nodes7(
-                **{
+            wrap_dict(
+                {
                     "alias": "snapshot_1",
                     "checksum": {"name": "sha256", "checksum": ""},
                     "config": {},
@@ -157,8 +157,8 @@ def test_check_snapshot_has_tags(snapshot, tags, criteria, expectation):
         (
             "",
             "^snp_",
-            Nodes7(
-                **{
+            wrap_dict(
+                {
                     "alias": "snp_1",
                     "checksum": {"name": "sha256", "checksum": ""},
                     "config": {},
@@ -178,8 +178,8 @@ def test_check_snapshot_has_tags(snapshot, tags, criteria, expectation):
         (
             "",
             "^snp_",
-            Nodes7(
-                **{
+            wrap_dict(
+                {
                     "alias": "snapshot_1",
                     "checksum": {"name": "sha256", "checksum": ""},
                     "config": {},

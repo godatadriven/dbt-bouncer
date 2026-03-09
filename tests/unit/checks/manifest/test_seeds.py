@@ -1,16 +1,9 @@
 from contextlib import nullcontext as does_not_raise
+from types import SimpleNamespace
 
 import pytest
 
-from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
-    ManifestLatest,
-    Metadata,
-    UnitTests,
-)
-from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
-    Nodes as SeedsLatest,
-)
-from dbt_bouncer.artifact_parsers.parsers_manifest import DbtBouncerManifest
+from dbt_bouncer.artifact_parsers.fast_parser import wrap_dict
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.checks.manifest.check_seeds import (
     CheckSeedColumnNames,
@@ -25,8 +18,8 @@ from dbt_bouncer.checks.manifest.check_seeds import (
     ("seed", "seed_column_name_pattern", "expectation"),
     [
         pytest.param(
-            SeedsLatest(
-                **{
+            wrap_dict(
+                {
                     "alias": "raw_customers",
                     "checksum": {"name": "sha256", "checksum": ""},
                     "columns": {
@@ -49,8 +42,8 @@ from dbt_bouncer.checks.manifest.check_seeds import (
             id="all_columns_match_pattern",
         ),
         pytest.param(
-            SeedsLatest(
-                **{
+            wrap_dict(
+                {
                     "alias": "raw_customers",
                     "checksum": {"name": "sha256", "checksum": ""},
                     "columns": {
@@ -87,8 +80,8 @@ def test_check_seed_column_names(seed, seed_column_name_pattern, expectation):
     ("seed", "expectation"),
     [
         pytest.param(
-            SeedsLatest(
-                **{
+            wrap_dict(
+                {
                     "alias": "raw_customers",
                     "checksum": {"name": "sha256", "checksum": ""},
                     "columns": {
@@ -110,8 +103,8 @@ def test_check_seed_column_names(seed, seed_column_name_pattern, expectation):
             id="all_columns_have_types",
         ),
         pytest.param(
-            SeedsLatest(
-                **{
+            wrap_dict(
+                {
                     "alias": "raw_customers",
                     "checksum": {"name": "sha256", "checksum": ""},
                     "columns": {
@@ -146,8 +139,8 @@ def test_check_seed_columns_have_types(seed, expectation):
     ("seed", "expectation"),
     [
         pytest.param(
-            SeedsLatest(
-                **{
+            wrap_dict(
+                {
                     "alias": "raw_customers",
                     "checksum": {"name": "sha256", "checksum": ""},
                     "columns": {},
@@ -165,8 +158,8 @@ def test_check_seed_columns_have_types(seed, expectation):
             does_not_raise(),
         ),
         pytest.param(
-            SeedsLatest(
-                **{
+            wrap_dict(
+                {
                     "alias": "raw_customers",
                     "checksum": {"name": "sha256", "checksum": ""},
                     "columns": {},
@@ -187,8 +180,8 @@ def test_check_seed_columns_have_types(seed, expectation):
             does_not_raise(),
         ),
         pytest.param(
-            SeedsLatest(
-                **{
+            wrap_dict(
+                {
                     "alias": "raw_customers",
                     "checksum": {"name": "sha256", "checksum": ""},
                     "columns": {},
@@ -206,8 +199,8 @@ def test_check_seed_columns_have_types(seed, expectation):
             pytest.raises(DbtBouncerFailedCheckError),
         ),
         pytest.param(
-            SeedsLatest(
-                **{
+            wrap_dict(
+                {
                     "alias": "raw_customers",
                     "checksum": {"name": "sha256", "checksum": ""},
                     "columns": {},
@@ -225,8 +218,8 @@ def test_check_seed_columns_have_types(seed, expectation):
             pytest.raises(DbtBouncerFailedCheckError),
         ),
         pytest.param(
-            SeedsLatest(
-                **{
+            wrap_dict(
+                {
                     "alias": "raw_customers",
                     "checksum": {"name": "sha256", "checksum": ""},
                     "columns": {},
@@ -245,8 +238,8 @@ def test_check_seed_columns_have_types(seed, expectation):
             pytest.raises(DbtBouncerFailedCheckError),
         ),
         pytest.param(
-            SeedsLatest(
-                **{
+            wrap_dict(
+                {
                     "alias": "raw_customers",
                     "checksum": {"name": "sha256", "checksum": ""},
                     "columns": {},
@@ -264,8 +257,8 @@ def test_check_seed_columns_have_types(seed, expectation):
             pytest.raises(DbtBouncerFailedCheckError),
         ),
         pytest.param(
-            SeedsLatest(
-                **{
+            wrap_dict(
+                {
                     "alias": "raw_customers",
                     "checksum": {"name": "sha256", "checksum": ""},
                     "columns": {},
@@ -296,24 +289,15 @@ def test_check_seed_description_populated(seed, expectation):
     ("manifest_obj", "min_number_of_unit_tests", "seed", "unit_tests", "expectation"),
     [
         pytest.param(
-            DbtBouncerManifest(
-                manifest=ManifestLatest(
-                    **{
-                        "metadata": Metadata(
-                            dbt_schema_version="https://schemas.getdbt.com/dbt/manifest/v12.json",
-                            dbt_version="1.8.0",
-                            generated_at=None,
-                            invocation_id=None,
-                            invocation_started_at=None,
-                            env=None,
-                            project_name="dbt_bouncer_test_project",
-                            project_id=None,
-                            user_id=None,
-                            send_anonymous_usage_stats=None,
-                            adapter_type="postgres",
-                            quoting=None,
-                            run_started_at=None,
-                        ),
+            SimpleNamespace(
+                manifest=wrap_dict(
+                    {
+                        "metadata": {
+                            "dbt_schema_version": "https://schemas.getdbt.com/dbt/manifest/v12.json",
+                            "dbt_version": "1.8.0",
+                            "project_name": "dbt_bouncer_test_project",
+                            "adapter_type": "postgres",
+                        },
                         "nodes": {},
                         "sources": {},
                         "macros": {},
@@ -333,8 +317,8 @@ def test_check_seed_description_populated(seed, expectation):
                 ),
             ),
             1,
-            SeedsLatest(
-                **{
+            wrap_dict(
+                {
                     "alias": "raw_customers",
                     "checksum": {"name": "sha256", "checksum": ""},
                     "columns": {},
@@ -349,8 +333,8 @@ def test_check_seed_description_populated(seed, expectation):
                 }
             ),
             [
-                UnitTests(
-                    **{
+                wrap_dict(
+                    {
                         "depends_on": {
                             "nodes": [
                                 "seed.package_name.raw_customers",
@@ -377,24 +361,15 @@ def test_check_seed_description_populated(seed, expectation):
             id="has_unit_test",
         ),
         pytest.param(
-            DbtBouncerManifest(
-                manifest=ManifestLatest(
-                    **{
-                        "metadata": Metadata(
-                            dbt_schema_version="https://schemas.getdbt.com/dbt/manifest/v12.json",
-                            dbt_version="1.8.0",
-                            generated_at=None,
-                            invocation_id=None,
-                            invocation_started_at=None,
-                            env=None,
-                            project_name="dbt_bouncer_test_project",
-                            project_id=None,
-                            user_id=None,
-                            send_anonymous_usage_stats=None,
-                            adapter_type="postgres",
-                            quoting=None,
-                            run_started_at=None,
-                        ),
+            SimpleNamespace(
+                manifest=wrap_dict(
+                    {
+                        "metadata": {
+                            "dbt_schema_version": "https://schemas.getdbt.com/dbt/manifest/v12.json",
+                            "dbt_version": "1.8.0",
+                            "project_name": "dbt_bouncer_test_project",
+                            "adapter_type": "postgres",
+                        },
                         "nodes": {},
                         "sources": {},
                         "macros": {},
@@ -414,8 +389,8 @@ def test_check_seed_description_populated(seed, expectation):
                 ),
             ),
             2,
-            SeedsLatest(
-                **{
+            wrap_dict(
+                {
                     "alias": "raw_customers",
                     "checksum": {"name": "sha256", "checksum": ""},
                     "columns": {},
@@ -430,8 +405,8 @@ def test_check_seed_description_populated(seed, expectation):
                 }
             ),
             [
-                UnitTests(
-                    **{
+                wrap_dict(
+                    {
                         "depends_on": {
                             "nodes": [
                                 "seed.package_name.raw_customers",
@@ -480,8 +455,8 @@ def test_check_seed_has_unit_tests(
     ("seed", "seed_name_pattern", "expectation"),
     [
         pytest.param(
-            SeedsLatest(
-                **{
+            wrap_dict(
+                {
                     "alias": "raw_customers",
                     "checksum": {"name": "sha256", "checksum": ""},
                     "columns": {},
@@ -499,8 +474,8 @@ def test_check_seed_has_unit_tests(
             does_not_raise(),
         ),
         pytest.param(
-            SeedsLatest(
-                **{
+            wrap_dict(
+                {
                     "alias": "raw_customers",
                     "checksum": {"name": "sha256", "checksum": ""},
                     "columns": {},

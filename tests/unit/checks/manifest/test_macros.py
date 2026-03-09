@@ -2,7 +2,7 @@ from contextlib import nullcontext as does_not_raise
 
 import pytest
 
-from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import Macros
+from dbt_bouncer.artifact_parsers.fast_parser import wrap_dict
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.checks.manifest.check_macros import (
     CheckMacroArgumentsDescriptionPopulated,
@@ -26,7 +26,7 @@ def macro(request):
         "resource_type": "macro",
         "unique_id": "macro.package_name.macro_1",
     }
-    return Macros(**{**default_macro, **getattr(request, "param", {})})
+    return wrap_dict({**default_macro, **getattr(request, "param", {})})
 
 
 _TEST_DATA_FOR_CHECK_MACRO_ARGUMENTS_DESCRIPTION_POPULATED = [

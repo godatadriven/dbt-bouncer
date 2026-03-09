@@ -2,7 +2,7 @@ from contextlib import nullcontext as does_not_raise
 
 import pytest
 
-from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import Nodes4
+from dbt_bouncer.artifact_parsers.fast_parser import wrap_dict
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.checks.manifest.check_lineage import (
     CheckLineagePermittedUpstreamModels,
@@ -16,8 +16,8 @@ from dbt_bouncer.checks.manifest.check_lineage import (
     [
         (
             "manifest_obj",
-            Nodes4(
-                **{
+            wrap_dict(
+                {
                     "alias": "int_model",
                     "checksum": {"name": "sha256", "checksum": ""},
                     "columns": {
@@ -41,8 +41,8 @@ from dbt_bouncer.checks.manifest.check_lineage import (
                 },
             ),
             [
-                Nodes4(
-                    **{
+                wrap_dict(
+                    {
                         "alias": "stg_model_1",
                         "checksum": {"name": "sha256", "checksum": ""},
                         "columns": {
@@ -68,8 +68,8 @@ from dbt_bouncer.checks.manifest.check_lineage import (
         ),
         (
             "manifest_obj",
-            Nodes4(
-                **{
+            wrap_dict(
+                {
                     "alias": "int_model",
                     "checksum": {"name": "sha256", "checksum": ""},
                     "columns": {
@@ -96,8 +96,8 @@ from dbt_bouncer.checks.manifest.check_lineage import (
         ),
         (
             "manifest_obj",
-            Nodes4(
-                **{
+            wrap_dict(
+                {
                     "alias": "mart_model",
                     "checksum": {"name": "sha256", "checksum": ""},
                     "columns": {
@@ -121,8 +121,8 @@ from dbt_bouncer.checks.manifest.check_lineage import (
                 },
             ),
             [
-                Nodes4(
-                    **{
+                wrap_dict(
+                    {
                         "alias": "mart_other_model",
                         "checksum": {"name": "sha256", "checksum": ""},
                         "columns": {
@@ -170,8 +170,8 @@ def test_check_lineage_permitted_upstream_models(
     ("model", "expectation"),
     [
         (
-            Nodes4(
-                **{
+            wrap_dict(
+                {
                     "alias": "int_model_2",
                     "checksum": {"name": "sha256", "checksum": ""},
                     "columns": {
@@ -195,8 +195,8 @@ def test_check_lineage_permitted_upstream_models(
             does_not_raise(),
         ),
         (
-            Nodes4(
-                **{
+            wrap_dict(
+                {
                     "alias": "int_model_2",
                     "checksum": {"name": "sha256", "checksum": ""},
                     "columns": {
@@ -233,8 +233,8 @@ def test_check_lineage_seed_cannot_be_used(model, expectation):
     ("model", "expectation"),
     [
         (
-            Nodes4(
-                **{
+            wrap_dict(
+                {
                     "alias": "int_model_2",
                     "checksum": {"name": "sha256", "checksum": ""},
                     "columns": {
@@ -258,8 +258,8 @@ def test_check_lineage_seed_cannot_be_used(model, expectation):
             does_not_raise(),
         ),
         (
-            Nodes4(
-                **{
+            wrap_dict(
+                {
                     "alias": "int_model_2",
                     "checksum": {"name": "sha256", "checksum": ""},
                     "columns": {

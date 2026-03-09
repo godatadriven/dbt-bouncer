@@ -2,7 +2,7 @@ from contextlib import nullcontext as does_not_raise
 
 import pytest
 
-from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import Sources
+from dbt_bouncer.artifact_parsers.fast_parser import wrap_dict
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.checks.manifest.sources.naming import (
     CheckSourceNames,
@@ -14,8 +14,8 @@ from dbt_bouncer.checks.manifest.sources.naming import (
     [
         (
             "^[a-z_]*$",
-            Sources(
-                **{
+            wrap_dict(
+                {
                     "description": "",
                     "fqn": ["package_name", "source_1", "model_a"],
                     "identifier": "model_a",
@@ -36,8 +36,8 @@ from dbt_bouncer.checks.manifest.sources.naming import (
         ),
         (
             "^[a-z_]*$",
-            Sources(
-                **{
+            wrap_dict(
+                {
                     "description": "",
                     "fqn": ["package_name", "source_1", "model_1"],
                     "identifier": "model_1",

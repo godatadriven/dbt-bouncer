@@ -6,6 +6,7 @@ import pytest
 import yaml
 from typer.testing import CliRunner
 
+from dbt_bouncer.artifact_parsers.fast_parser import wrap_dict
 from dbt_bouncer.main import app
 from dbt_bouncer.utils import clean_path_str
 
@@ -246,8 +247,6 @@ def test_cli_manifest_group_owner_email_list():
     """Test that manifests with group owner email as a list are parsed correctly."""
     import orjson
 
-    from dbt_bouncer.artifact_parsers.parsers_manifest import parse_manifest
-
     manifest_json_path = Path("dbt_project") / "target/manifest.json"
     manifest = orjson.loads(manifest_json_path.read_bytes())
 
@@ -270,7 +269,7 @@ def test_cli_manifest_group_owner_email_list():
         }
     }
 
-    parsed_manifest = parse_manifest(manifest)
+    parsed_manifest = wrap_dict(manifest)
 
     group_email = parsed_manifest.groups[
         "group.dbt_bouncer_test_project.analytics_engineering"
@@ -285,8 +284,6 @@ def test_cli_manifest_group_owner_email_list():
 def test_cli_manifest_group_owner_email_string():
     """Test that manifests with group owner email as a string are parsed correctly."""
     import orjson
-
-    from dbt_bouncer.artifact_parsers.parsers_manifest import parse_manifest
 
     manifest_json_path = Path("dbt_project") / "target/manifest.json"
     manifest = orjson.loads(manifest_json_path.read_bytes())
@@ -306,7 +303,7 @@ def test_cli_manifest_group_owner_email_string():
         }
     }
 
-    parsed_manifest = parse_manifest(manifest)
+    parsed_manifest = wrap_dict(manifest)
 
     group_email = parsed_manifest.groups[
         "group.dbt_bouncer_test_project.analytics_engineering"

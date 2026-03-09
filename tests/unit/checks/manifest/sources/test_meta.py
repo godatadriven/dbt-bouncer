@@ -2,7 +2,7 @@ from contextlib import nullcontext as does_not_raise
 
 import pytest
 
-from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import Sources
+from dbt_bouncer.artifact_parsers.fast_parser import wrap_dict
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.checks.manifest.sources.meta import (
     CheckSourceHasMetaKeys,
@@ -14,8 +14,8 @@ from dbt_bouncer.checks.manifest.sources.meta import (
     [
         (
             ["owner"],
-            Sources(
-                **{
+            wrap_dict(
+                {
                     "description": "Description that is more than 4 characters.",
                     "fqn": ["package_name", "source_1", "table_1"],
                     "identifier": "table_1",
@@ -36,8 +36,8 @@ from dbt_bouncer.checks.manifest.sources.meta import (
         ),
         (
             ["owner"],
-            Sources(
-                **{
+            wrap_dict(
+                {
                     "description": "Description that is more than 4 characters.",
                     "fqn": ["package_name", "source_1", "table_1"],
                     "identifier": "table_1",
@@ -58,8 +58,8 @@ from dbt_bouncer.checks.manifest.sources.meta import (
         ),
         (
             ["owner", {"name": ["first", "last"]}],
-            Sources(
-                **{
+            wrap_dict(
+                {
                     "description": "Description that is more than 4 characters.",
                     "fqn": ["package_name", "source_1", "table_1"],
                     "identifier": "table_1",
@@ -83,8 +83,8 @@ from dbt_bouncer.checks.manifest.sources.meta import (
         ),
         (
             ["owner"],
-            Sources(
-                **{
+            wrap_dict(
+                {
                     "description": "Description that is more than 4 characters.",
                     "fqn": ["package_name", "source_1", "table_1"],
                     "identifier": "table_1",
@@ -105,8 +105,8 @@ from dbt_bouncer.checks.manifest.sources.meta import (
         ),
         (
             ["owner"],
-            Sources(
-                **{
+            wrap_dict(
+                {
                     "description": "Description that is more than 4 characters.",
                     "fqn": ["package_name", "source_1", "table_1"],
                     "identifier": "table_1",
@@ -127,8 +127,8 @@ from dbt_bouncer.checks.manifest.sources.meta import (
         ),
         (
             ["owner", {"name": ["first", "last"]}],
-            Sources(
-                **{
+            wrap_dict(
+                {
                     "description": "Description that is more than 4 characters.",
                     "fqn": ["package_name", "source_1", "table_1"],
                     "identifier": "table_1",

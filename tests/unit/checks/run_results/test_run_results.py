@@ -1,9 +1,8 @@
 from contextlib import nullcontext as does_not_raise
 
 import pytest
-from pydantic import TypeAdapter
 
-from dbt_bouncer.artifact_parsers.parsers_run_results import DbtBouncerRunResultBase
+from dbt_bouncer.artifact_parsers.fast_parser import wrap_dict
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.checks.run_results.check_run_results import (
     CheckRunResultsMaxExecutionTime,
@@ -21,9 +20,7 @@ def run_result(request):
         "timing": [],
         "unique_id": "model.package_name.model_1",
     }
-    return TypeAdapter(DbtBouncerRunResultBase).validate_python(
-        {**default_run_result, **getattr(request, "param", {})}
-    )
+    return wrap_dict({**default_run_result, **getattr(request, "param", {})})
 
 
 _TEST_DATA_FOR_CHECK_RUN_RESULTS_MAX_GIGABYTES_BILLED = [

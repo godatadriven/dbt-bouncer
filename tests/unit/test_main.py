@@ -94,16 +94,15 @@ def test_cli_custom_checks_dir(caplog, monkeypatch, tmp_path):
     Path(tmp_path / "my_checks_dir/__init__.py").write_text("")
     Path(tmp_path / "my_checks_dir/manifest/check_models.py").write_text(
         """
-from pydantic import Field
-from typing import Literal
-from dbt_bouncer.check_base import BaseCheck
-from typing import TYPE_CHECKING
+from typing import Any, Literal
 
-if TYPE_CHECKING:
-    from dbt_bouncer.parsers import DbtBouncerModelBase
+from pydantic import Field
+
+from dbt_bouncer.check_base import BaseCheck
+
 
 class CheckMyCustomCheck(BaseCheck):
-    model: "DbtBouncerModelBase" = Field(default=None)
+    model: Any = Field(default=None)
     name: Literal["check_my_custom_check"]
 
     def execute(self) -> None:

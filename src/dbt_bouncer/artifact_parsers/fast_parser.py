@@ -42,11 +42,11 @@ class DictProxy(dict):
     def __getattr__(self, name: str) -> Any:
         """Look up *name* as a dict key, falling back to underscore-stripped alias.
 
-        Returns:
-            Any: Proxy-wrapped value.
+        Missing keys return ``None`` to match the Pydantic default behaviour
+        where optional fields default to ``None``.
 
-        Raises:
-            AttributeError: If the key is not found.
+        Returns:
+            Any: Proxy-wrapped value, or ``None`` if the key is absent.
 
         """
         try:
@@ -59,7 +59,8 @@ class DictProxy(dict):
                     return _wrap_value(dict.__getitem__(self, stripped))
                 except KeyError:
                     pass
-        raise AttributeError(f"'{type(self).__name__}' has no attribute {name!r}")
+        # Missing keys return None (matches Pydantic optional field defaults)
+        return None
 
     def __getitem__(self, key: Any) -> Any:
         """Return a proxy-wrapped value for *key*.

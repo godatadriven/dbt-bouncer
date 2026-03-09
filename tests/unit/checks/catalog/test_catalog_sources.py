@@ -3,11 +3,11 @@ from contextlib import nullcontext as does_not_raise
 
 import pytest
 
+from dbt_bouncer.artifact_parsers.fast_parser import wrap_dict
+
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
-    from dbt_artifacts_parser.parsers.catalog.catalog_v1 import Nodes as CatalogNodes
 
-from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import Sources
 from dbt_bouncer.checks.catalog.check_catalog_sources import (
     CheckSourceColumnsAreAllDocumented,
 )
@@ -37,7 +37,7 @@ def catalog_source(request):
         "stats": {},
         "unique_id": "source.package_name.source_1.table_1",
     }
-    return CatalogNodes(**{**default_catalog_source, **getattr(request, "param", {})})
+    return wrap_dict({**default_catalog_source, **getattr(request, "param", {})})
 
 
 @pytest.fixture
@@ -64,7 +64,7 @@ def sources(request):
         "source_name": "source_1",
         "unique_id": "source.package_name.source_1.table_1",
     }
-    return [Sources(**{**default_source, **getattr(request, "param", {})})]
+    return [wrap_dict({**default_source, **getattr(request, "param", {})})]
 
 
 _TEST_DATA_FOR_CHECK_SOURCE_COLUMNS_ARE_ALL_DOCUMENTED = [

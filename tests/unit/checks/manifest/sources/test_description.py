@@ -2,7 +2,7 @@ from contextlib import nullcontext as does_not_raise
 
 import pytest
 
-from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import Sources
+from dbt_bouncer.artifact_parsers.fast_parser import wrap_dict
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.checks.manifest.sources.description import (
     CheckSourceDescriptionPopulated,
@@ -13,8 +13,8 @@ from dbt_bouncer.checks.manifest.sources.description import (
     ("source", "expectation"),
     [
         (
-            Sources(
-                **{
+            wrap_dict(
+                {
                     "description": "Description that is more than 4 characters.",
                     "fqn": ["package_name", "source_1", "table_1"],
                     "identifier": "table_1",
@@ -33,8 +33,8 @@ from dbt_bouncer.checks.manifest.sources.description import (
             does_not_raise(),
         ),
         (
-            Sources(
-                **{
+            wrap_dict(
+                {
                     "description": """A
                             multiline
                             description
@@ -56,8 +56,8 @@ from dbt_bouncer.checks.manifest.sources.description import (
             does_not_raise(),
         ),
         (
-            Sources(
-                **{
+            wrap_dict(
+                {
                     "description": "",
                     "fqn": ["package_name", "source_1", "table_1"],
                     "identifier": "table_1",
@@ -76,8 +76,8 @@ from dbt_bouncer.checks.manifest.sources.description import (
             pytest.raises(DbtBouncerFailedCheckError),
         ),
         (
-            Sources(
-                **{
+            wrap_dict(
+                {
                     "description": " ",
                     "fqn": ["package_name", "source_1", "table_1"],
                     "identifier": "table_1",
@@ -96,8 +96,8 @@ from dbt_bouncer.checks.manifest.sources.description import (
             pytest.raises(DbtBouncerFailedCheckError),
         ),
         (
-            Sources(
-                **{
+            wrap_dict(
+                {
                     "description": """
                             """,
                     "fqn": ["package_name", "source_1", "table_1"],
@@ -117,8 +117,8 @@ from dbt_bouncer.checks.manifest.sources.description import (
             pytest.raises(DbtBouncerFailedCheckError),
         ),
         (
-            Sources(
-                **{
+            wrap_dict(
+                {
                     "description": "-",
                     "fqn": ["package_name", "source_1", "table_1"],
                     "identifier": "table_1",
@@ -137,8 +137,8 @@ from dbt_bouncer.checks.manifest.sources.description import (
             pytest.raises(DbtBouncerFailedCheckError),
         ),
         (
-            Sources(
-                **{
+            wrap_dict(
+                {
                     "description": "null",
                     "fqn": ["package_name", "source_1", "table_1"],
                     "identifier": "table_1",
