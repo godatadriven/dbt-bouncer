@@ -1,7 +1,22 @@
+from __future__ import annotations
+
 from typing import Any, ClassVar
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from dbt_bouncer.artifact_types import (  # noqa: TC001 - needed at runtime for Pydantic model_rebuild
+    CatalogNodeEntry,
+    ExposureNode,
+    MacroNode,
+    ModelNode,
+    RunResultEntry,
+    SeedNode,
+    SemanticModelNode,
+    SnapshotNode,
+    SourceNode,
+    TestNode,
+    UnitTestNode,
+)
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.enums import CheckSeverity, Materialization
 from dbt_bouncer.utils import is_description_populated
@@ -13,7 +28,7 @@ _ANNOTATION_KEYS_CACHE: dict[type, frozenset[str]] = {}
 class BaseCheck(BaseModel):
     """Base class for all checks."""
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(arbitrary_types_allowed=True, extra="forbid")
 
     description: str | None = Field(
         default=None,
@@ -40,24 +55,24 @@ class BaseCheck(BaseModel):
         description="Severity of the check, one of 'error' or 'warn'.",
     )
 
-    catalog_node: Any | None = Field(default=None)
-    catalog_source: Any | None = Field(default=None)
-    exposure: Any | None = Field(default=None)
-    macro: Any | None = Field(default=None)
+    catalog_node: CatalogNodeEntry | None = Field(default=None)
+    catalog_source: CatalogNodeEntry | None = Field(default=None)
+    exposure: ExposureNode | None = Field(default=None)
+    macro: MacroNode | None = Field(default=None)
     manifest_obj: Any | None = Field(default=None)
-    model: Any | None = Field(default=None)
-    run_result: Any | None = Field(default=None)
-    seed: Any | None = Field(default=None)
-    semantic_model: Any | None = Field(default=None)
-    snapshot: Any | None = Field(default=None)
-    source: Any | None = Field(default=None)
-    test: Any | None = Field(default=None)
-    unit_test: Any | None = Field(default=None)
+    model: ModelNode | None = Field(default=None)
+    run_result: RunResultEntry | None = Field(default=None)
+    seed: SeedNode | None = Field(default=None)
+    semantic_model: SemanticModelNode | None = Field(default=None)
+    snapshot: SnapshotNode | None = Field(default=None)
+    source: SourceNode | None = Field(default=None)
+    test: TestNode | None = Field(default=None)
+    unit_test: UnitTestNode | None = Field(default=None)
 
-    models_by_unique_id: dict[str, Any] | None = Field(default=None)
-    sources_by_unique_id: dict[str, Any] | None = Field(default=None)
-    exposures_by_unique_id: dict[str, Any] | None = Field(default=None)
-    tests_by_unique_id: dict[str, Any] | None = Field(default=None)
+    models_by_unique_id: dict[str, ModelNode] | None = Field(default=None)
+    sources_by_unique_id: dict[str, SourceNode] | None = Field(default=None)
+    exposures_by_unique_id: dict[str, ExposureNode] | None = Field(default=None)
+    tests_by_unique_id: dict[str, TestNode] | None = Field(default=None)
 
     _min_description_length: ClassVar[int] = 4
 
@@ -134,38 +149,38 @@ class BaseCheck(BaseModel):
             raise DbtBouncerFailedCheckError(f"self.{field} is None")
         return val
 
-    def _require_catalog_node(self) -> Any:
+    def _require_catalog_node(self) -> CatalogNodeEntry:
         """Require catalog_node.
 
         Returns:
-            Any: The catalog_node object.
+            CatalogNodeEntry: The catalog_node object.
 
         """
         return self._require("catalog_node")
 
-    def _require_catalog_source(self) -> Any:
+    def _require_catalog_source(self) -> CatalogNodeEntry:
         """Require catalog_source.
 
         Returns:
-            Any: The catalog_source object.
+            CatalogNodeEntry: The catalog_source object.
 
         """
         return self._require("catalog_source")
 
-    def _require_exposure(self) -> Any:
+    def _require_exposure(self) -> ExposureNode:
         """Require exposure.
 
         Returns:
-            Any: The exposure object.
+            ExposureNode: The exposure object.
 
         """
         return self._require("exposure")
 
-    def _require_macro(self) -> Any:
+    def _require_macro(self) -> MacroNode:
         """Require macro.
 
         Returns:
-            Any: The macro object.
+            MacroNode: The macro object.
 
         """
         return self._require("macro")
@@ -179,74 +194,74 @@ class BaseCheck(BaseModel):
         """
         return self._require("manifest_obj")
 
-    def _require_model(self) -> Any:
+    def _require_model(self) -> ModelNode:
         """Require model.
 
         Returns:
-            Any: The model object.
+            ModelNode: The model object.
 
         """
         return self._require("model")
 
-    def _require_run_result(self) -> Any:
+    def _require_run_result(self) -> RunResultEntry:
         """Require run_result.
 
         Returns:
-            Any: The run_result object.
+            RunResultEntry: The run_result object.
 
         """
         return self._require("run_result")
 
-    def _require_seed(self) -> Any:
+    def _require_seed(self) -> SeedNode:
         """Require seed.
 
         Returns:
-            Any: The seed object.
+            SeedNode: The seed object.
 
         """
         return self._require("seed")
 
-    def _require_semantic_model(self) -> Any:
+    def _require_semantic_model(self) -> SemanticModelNode:
         """Require semantic_model.
 
         Returns:
-            Any: The semantic_model object.
+            SemanticModelNode: The semantic_model object.
 
         """
         return self._require("semantic_model")
 
-    def _require_snapshot(self) -> Any:
+    def _require_snapshot(self) -> SnapshotNode:
         """Require snapshot.
 
         Returns:
-            Any: The snapshot object.
+            SnapshotNode: The snapshot object.
 
         """
         return self._require("snapshot")
 
-    def _require_source(self) -> Any:
+    def _require_source(self) -> SourceNode:
         """Require source.
 
         Returns:
-            Any: The source object.
+            SourceNode: The source object.
 
         """
         return self._require("source")
 
-    def _require_test(self) -> Any:
+    def _require_test(self) -> TestNode:
         """Require test.
 
         Returns:
-            Any: The test object.
+            TestNode: The test object.
 
         """
         return self._require("test")
 
-    def _require_unit_test(self) -> Any:
+    def _require_unit_test(self) -> UnitTestNode:
         """Require unit_test.
 
         Returns:
-            Any: The unit_test object.
+            UnitTestNode: The unit_test object.
 
         """
         return self._require("unit_test")

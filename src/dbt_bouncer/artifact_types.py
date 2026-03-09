@@ -17,6 +17,7 @@ from typing import Any, Protocol, runtime_checkable
 class ColumnInfo(Protocol):
     """Column metadata from the dbt manifest or catalog."""
 
+    data_type: str | None
     description: str
     index: int
     meta: dict[str, Any]
@@ -63,6 +64,7 @@ class FreshnessRule(Protocol):
 class MacroArgument(Protocol):
     """Argument definition for a dbt macro."""
 
+    description: str
     name: str
 
 
@@ -163,6 +165,7 @@ class ModelNode(Protocol):
     original_file_path: str
     patch_path: str | None
     raw_code: str
+    package_name: str
     resource_type: str
     schema_: str
     tags: list[str]

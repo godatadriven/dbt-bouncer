@@ -155,10 +155,10 @@ class CheckModelHasConstraints(BaseCheck):
         if materialization not in (Materialization.TABLE, Materialization.INCREMENTAL):
             return
         constraints = model.constraints or []
-        actual_types = {
-            (c.type.value if hasattr(c.type, "value") else str(c.type))
-            for c in constraints
-        }
+        actual_types: set[str] = set()
+        for c in constraints:
+            c_type = getattr(c, "type")  # noqa: B009 - avoids ty shadowing of builtin `type`
+            actual_types.add(c_type.value if hasattr(c_type, "value") else str(c_type))
         missing_types = sorted(set(self.required_constraint_types) - actual_types)
         if missing_types:
             raise DbtBouncerFailedCheckError(
