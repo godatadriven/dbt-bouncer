@@ -1,19 +1,13 @@
 """Checks related to source directory and file locations."""
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Literal
-
-if TYPE_CHECKING:
-    from dbt_bouncer.artifact_parsers.parsers_manifest import (
-        DbtBouncerSourceBase,
-    )
+from typing import Any, Literal
 
 from pydantic import Field
 
 from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import clean_path_str
-
 
 class CheckSourcePropertyFileLocation(BaseCheck):
     """Source properties files must follow the guidance provided by dbt [here](https://docs.getdbt.com/best-practices/how-we-structure/1-guide-overview).
@@ -36,7 +30,7 @@ class CheckSourcePropertyFileLocation(BaseCheck):
     """
 
     name: Literal["check_source_property_file_location"]
-    source: "DbtBouncerSourceBase | None" = Field(default=None)
+    source: Any | None = Field(default=None)
 
     def execute(self) -> None:
         """Execute the check.

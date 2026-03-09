@@ -1,19 +1,13 @@
 """Checks related to model naming conventions."""
 
 import re
-from typing import TYPE_CHECKING, Literal
-
-if TYPE_CHECKING:
-    from dbt_bouncer.artifact_parsers.parsers_manifest import (
-        DbtBouncerModelBase,
-    )
+from typing import Any, Literal
 
 from pydantic import ConfigDict, Field, PrivateAttr
 
 from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import compile_pattern, get_clean_model_name
-
 
 class CheckModelNames(BaseCheck):
     """Models must have a name that matches the supplied regex.
@@ -46,7 +40,7 @@ class CheckModelNames(BaseCheck):
 
     model_config = ConfigDict(extra="forbid", protected_namespaces=())
 
-    model: "DbtBouncerModelBase | None" = Field(default=None)
+    model: Any | None = Field(default=None)
     name: Literal["check_model_names"]
     model_name_pattern: str
 

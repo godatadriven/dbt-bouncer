@@ -1,28 +1,14 @@
 """Checks related to column descriptions and documentation coverage."""
 
-from typing import TYPE_CHECKING, Literal
+from typing import Any, Literal
 
 from pydantic import Field
 
 from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 
-if TYPE_CHECKING:
-    import warnings
-
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", category=UserWarning)
-        from dbt_artifacts_parser.parsers.catalog.catalog_v1 import (
-            Nodes as CatalogNodes,
-        )
-    from dbt_bouncer.artifact_parsers.parsers_manifest import (
-        DbtBouncerManifest,
-        DbtBouncerModelBase,
-    )
-
-
 def _is_catalog_node_a_model(
-    catalog_node: "CatalogNodes", models: list["DbtBouncerModelBase"]
+    catalog_node: Any, models: list[Any]
 ) -> bool:
     """Return True if a catalog node corresponds to a dbt model.
 
@@ -36,7 +22,6 @@ def _is_catalog_node_a_model(
     """
     model = next((m for m in models if m.unique_id == catalog_node.unique_id), None)
     return model is not None and model.resource_type == "model"
-
 
 class CheckColumnDescriptionPopulated(BaseCheck):
     """Columns must have a populated description.
@@ -69,10 +54,10 @@ class CheckColumnDescriptionPopulated(BaseCheck):
 
     """
 
-    catalog_node: "CatalogNodes | None" = Field(default=None)
-    manifest_obj: "DbtBouncerManifest | None" = Field(default=None)
+    catalog_node: Any | None = Field(default=None)
+    manifest_obj: Any | None = Field(default=None)
     min_description_length: int | None = Field(default=None)
-    models: list["DbtBouncerModelBase"] = Field(default=[])
+    models: list[Any] = Field(default=[])
     name: Literal["check_column_description_populated"]
 
     def execute(self) -> None:
@@ -110,7 +95,6 @@ class CheckColumnDescriptionPopulated(BaseCheck):
                     f"`{str(catalog_node.unique_id).split('.')[-1]}` has columns that do not have a populated description: {non_complying_columns}"
                 )
 
-
 class CheckColumnsAreAllDocumented(BaseCheck):
     """All columns in a model should be included in the model's properties file, i.e. `.yml` file.
 
@@ -135,9 +119,9 @@ class CheckColumnsAreAllDocumented(BaseCheck):
     """
 
     case_sensitive: bool | None = Field(default=True)
-    catalog_node: "CatalogNodes | None" = Field(default=None)
-    manifest_obj: "DbtBouncerManifest | None" = Field(default=None)
-    models: list["DbtBouncerModelBase"] = Field(default=[])
+    catalog_node: Any | None = Field(default=None)
+    manifest_obj: Any | None = Field(default=None)
+    models: list[Any] = Field(default=[])
     name: Literal["check_columns_are_all_documented"]
 
     def execute(self) -> None:
@@ -177,7 +161,6 @@ class CheckColumnsAreAllDocumented(BaseCheck):
                     f"`{str(catalog_node.unique_id).split('.')[-1]}` has columns that are not included in the models properties file: {undocumented_columns}"
                 )
 
-
 class CheckColumnsAreDocumentedInPublicModels(BaseCheck):
     """Columns should have a populated description in public models.
 
@@ -200,9 +183,9 @@ class CheckColumnsAreDocumentedInPublicModels(BaseCheck):
 
     """
 
-    catalog_node: "CatalogNodes | None" = Field(default=None)
+    catalog_node: Any | None = Field(default=None)
     min_description_length: int | None = Field(default=None)
-    models: list["DbtBouncerModelBase"] = Field(default=[])
+    models: list[Any] = Field(default=[])
     name: Literal["check_columns_are_documented_in_public_models"]
 
     def execute(self) -> None:

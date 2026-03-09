@@ -1,24 +1,13 @@
 """Checks related to model test coverage and test configuration."""
 
 import logging
-from typing import TYPE_CHECKING, Literal
-
-if TYPE_CHECKING:
-    from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
-        UnitTests,
-    )
-    from dbt_bouncer.artifact_parsers.parsers_manifest import (
-        DbtBouncerManifest,
-        DbtBouncerModelBase,
-        DbtBouncerTestBase,
-    )
+from typing import Any, Literal
 
 from pydantic import ConfigDict, Field
 
 from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import get_clean_model_name, get_package_version_number
-
 
 class CheckModelHasUniqueTest(BaseCheck):
     """Models must have a test for uniqueness of a column.
@@ -60,9 +49,9 @@ class CheckModelHasUniqueTest(BaseCheck):
             "unique",
         ],
     )
-    model: "DbtBouncerModelBase | None" = Field(default=None)
+    model: Any | None = Field(default=None)
     name: Literal["check_model_has_unique_test"]
-    tests: list["DbtBouncerTestBase"] = Field(default=[])
+    tests: list[Any] = Field(default=[])
 
     def execute(self) -> None:
         """Execute the check.
@@ -96,7 +85,6 @@ class CheckModelHasUniqueTest(BaseCheck):
             raise DbtBouncerFailedCheckError(
                 f"`{get_clean_model_name(model.unique_id)}` does not have a test for uniqueness of a column."
             )
-
 
 class CheckModelHasUnitTests(BaseCheck):
     """Models must have more than the specified number of unit tests.
@@ -134,11 +122,11 @@ class CheckModelHasUnitTests(BaseCheck):
 
     """
 
-    manifest_obj: "DbtBouncerManifest | None" = Field(default=None)
+    manifest_obj: Any | None = Field(default=None)
     min_number_of_unit_tests: int = Field(default=1)
-    model: "DbtBouncerModelBase | None" = Field(default=None)
+    model: Any | None = Field(default=None)
     name: Literal["check_model_has_unit_tests"]
-    unit_tests: list["UnitTests"] = Field(default=[])
+    unit_tests: list[Any] = Field(default=[])
 
     def execute(self) -> None:
         """Execute the check.
@@ -170,7 +158,6 @@ class CheckModelHasUnitTests(BaseCheck):
                 "The `check_model_has_unit_tests` check is only supported for dbt 1.8.0 and above.",
             )
 
-
 class CheckModelTestCoverage(BaseCheck):
     """Set the minimum percentage of models that have at least one test.
 
@@ -182,7 +169,6 @@ class CheckModelTestCoverage(BaseCheck):
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
-
 
     Example(s):
         ```yaml
@@ -209,12 +195,12 @@ class CheckModelTestCoverage(BaseCheck):
         ge=0,
         le=100,
     )
-    models: list["DbtBouncerModelBase"] = Field(default=[])
+    models: list[Any] = Field(default=[])
     severity: Literal["error", "warn"] | None = Field(
         default="error",
         description="Severity of the check, one of 'error' or 'warn'.",
     )
-    tests: list["DbtBouncerTestBase"] = Field(default=[])
+    tests: list[Any] = Field(default=[])
 
     def execute(self) -> None:
         """Execute the check.

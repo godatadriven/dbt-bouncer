@@ -1,23 +1,9 @@
-from typing import TYPE_CHECKING, Literal
+from typing import Any, Literal
 
 from pydantic import Field
 
 from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
-
-if TYPE_CHECKING:
-    import warnings
-
-    from dbt_bouncer.artifact_parsers.parsers_manifest import (
-        DbtBouncerSourceBase,
-    )
-
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", category=UserWarning)
-        from dbt_artifacts_parser.parsers.catalog.catalog_v1 import (
-            Nodes as CatalogNodes,
-        )
-
 
 class CheckSourceColumnsAreAllDocumented(BaseCheck):
     """All columns in a source should be included in the source's properties file, i.e. `.yml` file.
@@ -40,9 +26,9 @@ class CheckSourceColumnsAreAllDocumented(BaseCheck):
 
     """
 
-    catalog_source: "CatalogNodes | None" = Field(default=None)
+    catalog_source: Any | None = Field(default=None)
     name: Literal["check_source_columns_are_all_documented"]
-    sources: list["DbtBouncerSourceBase"] = Field(default=[])
+    sources: list[Any] = Field(default=[])
 
     def execute(self) -> None:
         """Execute the check.

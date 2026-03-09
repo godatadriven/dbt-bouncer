@@ -1,26 +1,13 @@
 """Checks related to column tests."""
 
 import re
-from typing import TYPE_CHECKING, Literal
+from typing import Any, Literal
 
 from pydantic import Field, PrivateAttr
 
 from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import compile_pattern
-
-if TYPE_CHECKING:
-    import warnings
-
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", category=UserWarning)
-        from dbt_artifacts_parser.parsers.catalog.catalog_v1 import (
-            Nodes as CatalogNodes,
-        )
-    from dbt_bouncer.artifact_parsers.parsers_manifest import (
-        DbtBouncerTestBase,
-    )
-
 
 class CheckColumnHasSpecifiedTest(BaseCheck):
     """Columns that match the specified regexp pattern must have a specified test.
@@ -49,11 +36,11 @@ class CheckColumnHasSpecifiedTest(BaseCheck):
 
     """
 
-    catalog_node: "CatalogNodes | None" = Field(default=None)
+    catalog_node: Any | None = Field(default=None)
     column_name_pattern: str
     name: Literal["check_column_has_specified_test"]
     test_name: str
-    tests: list["DbtBouncerTestBase"] = Field(default=[])
+    tests: list[Any] = Field(default=[])
 
     _compiled_column_name_pattern: re.Pattern[str] = PrivateAttr()
 

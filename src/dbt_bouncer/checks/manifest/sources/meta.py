@@ -1,19 +1,12 @@
 """Checks related to source meta configuration."""
 
-from typing import TYPE_CHECKING, Literal
-
-if TYPE_CHECKING:
-    from dbt_bouncer.artifact_parsers.parsers_manifest import (
-        DbtBouncerSourceBase,
-    )
-    from dbt_bouncer.checks.common import NestedDict
+from typing import Any, Literal
 
 from pydantic import Field
 
 from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import find_missing_meta_keys
-
 
 class CheckSourceHasMetaKeys(BaseCheck):
     """The `meta` config for sources must have the specified keys.
@@ -45,7 +38,7 @@ class CheckSourceHasMetaKeys(BaseCheck):
 
     keys: "NestedDict"
     name: Literal["check_source_has_meta_keys"]
-    source: "DbtBouncerSourceBase | None" = Field(default=None)
+    source: Any | None = Field(default=None)
 
     def execute(self) -> None:
         """Execute the check.

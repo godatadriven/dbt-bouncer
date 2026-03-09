@@ -1,18 +1,12 @@
 """Checks related to model tags."""
 
-from typing import TYPE_CHECKING, Literal
-
-if TYPE_CHECKING:
-    from dbt_bouncer.artifact_parsers.parsers_manifest import (
-        DbtBouncerModelBase,
-    )
+from typing import Any, Literal
 
 from pydantic import Field
 
 from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import get_clean_model_name
-
 
 class CheckModelHasTags(BaseCheck):
     """Models must have the specified tags.
@@ -41,7 +35,7 @@ class CheckModelHasTags(BaseCheck):
     """
 
     criteria: Literal["any", "all", "one"] = Field(default="all")
-    model: "DbtBouncerModelBase | None" = Field(default=None)
+    model: Any | None = Field(default=None)
     name: Literal["check_model_has_tags"]
     tags: list[str]
 

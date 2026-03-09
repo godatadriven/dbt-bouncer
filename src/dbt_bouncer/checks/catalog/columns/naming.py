@@ -1,7 +1,7 @@
 """Checks related to column naming conventions."""
 
 import re
-from typing import TYPE_CHECKING, Literal
+from typing import Any, Literal
 
 from pydantic import ConfigDict, Field, PrivateAttr, model_validator
 
@@ -9,21 +9,8 @@ from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import compile_pattern
 
-if TYPE_CHECKING:
-    import warnings
-
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", category=UserWarning)
-        from dbt_artifacts_parser.parsers.catalog.catalog_v1 import (
-            Nodes as CatalogNodes,
-        )
-    from dbt_bouncer.artifact_parsers.parsers_manifest import (
-        DbtBouncerModelBase,
-    )
-
-
 def _is_catalog_node_a_model(
-    catalog_node: "CatalogNodes", models: list["DbtBouncerModelBase"]
+    catalog_node: Any, models: list[Any]
 ) -> bool:
     """Return True if a catalog node corresponds to a dbt model.
 
@@ -37,7 +24,6 @@ def _is_catalog_node_a_model(
     """
     model = next((m for m in models if m.unique_id == catalog_node.unique_id), None)
     return model is not None and model.resource_type == "model"
-
 
 class CheckColumnNameCompliesToColumnType(BaseCheck):
     """Columns with the specified regexp naming pattern must have data types that comply to the specified regexp pattern or list of data types.
@@ -98,7 +84,7 @@ class CheckColumnNameCompliesToColumnType(BaseCheck):
 
     """
 
-    catalog_node: "CatalogNodes | None" = Field(default=None)
+    catalog_node: Any | None = Field(default=None)
     column_name_pattern: str
     name: Literal["check_column_name_complies_to_column_type"]
     type_pattern: str | None = None
@@ -158,7 +144,6 @@ class CheckColumnNameCompliesToColumnType(BaseCheck):
             raise ValueError("Only one of 'type_pattern' or 'types' can be supplied.")
         return self
 
-
 class CheckColumnNames(BaseCheck):
     """Columns must have a name that matches the supplied regex.
 
@@ -187,9 +172,9 @@ class CheckColumnNames(BaseCheck):
 
     model_config = ConfigDict(extra="forbid", protected_namespaces=())
 
-    catalog_node: "CatalogNodes | None" = Field(default=None)
+    catalog_node: Any | None = Field(default=None)
     column_name_pattern: str
-    models: list["DbtBouncerModelBase"] = Field(default=[])
+    models: list[Any] = Field(default=[])
     name: Literal["check_column_names"]
 
     def execute(self) -> None:

@@ -1,19 +1,13 @@
 """Checks related to source naming conventions."""
 
 import re
-from typing import TYPE_CHECKING, Literal
-
-if TYPE_CHECKING:
-    from dbt_bouncer.artifact_parsers.parsers_manifest import (
-        DbtBouncerSourceBase,
-    )
+from typing import Any, Literal
 
 from pydantic import Field, PrivateAttr
 
 from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import compile_pattern
-
 
 class CheckSourceNames(BaseCheck):
     """Sources must have a name that matches the supplied regex.
@@ -42,7 +36,7 @@ class CheckSourceNames(BaseCheck):
 
     name: Literal["check_source_names"]
     source_name_pattern: str
-    source: "DbtBouncerSourceBase | None" = Field(default=None)
+    source: Any | None = Field(default=None)
 
     _compiled_pattern: re.Pattern[str] = PrivateAttr()
 

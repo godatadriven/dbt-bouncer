@@ -1,18 +1,11 @@
-from typing import TYPE_CHECKING, Literal
+from typing import Any, Literal
 
 from pydantic import Field
 
 from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.enums import Materialization
 
-if TYPE_CHECKING:
-    from dbt_bouncer.artifact_parsers.parsers_manifest import (
-        DbtBouncerExposureBase,
-        DbtBouncerModelBase,
-    )
-
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
-
 
 class CheckExposureBasedOnModel(BaseCheck):
     """Exposures should depend on a model.
@@ -44,7 +37,7 @@ class CheckExposureBasedOnModel(BaseCheck):
 
     """
 
-    exposure: "DbtBouncerExposureBase | None" = Field(default=None)
+    exposure: Any | None = Field(default=None)
     maximum_number_of_models: int = Field(default=100)
     minimum_number_of_models: int = Field(default=1)
     name: Literal["check_exposure_based_on_model"]
@@ -70,7 +63,6 @@ class CheckExposureBasedOnModel(BaseCheck):
             raise DbtBouncerFailedCheckError(
                 f"`{exposure.name}` is based on more models ({number_of_upstream_models}) than the maximum permitted ({self.maximum_number_of_models})."
             )
-
 
 class CheckExposureBasedOnView(BaseCheck):
     """Exposures should not be based on views.
@@ -104,11 +96,11 @@ class CheckExposureBasedOnView(BaseCheck):
 
     """
 
-    exposure: "DbtBouncerExposureBase | None" = Field(default=None)
+    exposure: Any | None = Field(default=None)
     materializations_to_include: list[str] = Field(
         default=[Materialization.EPHEMERAL, Materialization.VIEW],
     )
-    models: list["DbtBouncerModelBase"] = Field(default=[])
+    models: list[Any] = Field(default=[])
     name: Literal["check_exposure_based_on_view"]
 
     def execute(self) -> None:
@@ -141,7 +133,6 @@ class CheckExposureBasedOnView(BaseCheck):
                 f"`{exposure.name}` is based on a model that is not a table: {non_table_upstream_dependencies}."
             )
 
-
 class CheckExposureOnNonPublicModels(BaseCheck):
     """Exposures should be based on public models only.
 
@@ -163,8 +154,8 @@ class CheckExposureOnNonPublicModels(BaseCheck):
 
     """
 
-    exposure: "DbtBouncerExposureBase | None" = Field(default=None)
-    models: list["DbtBouncerModelBase"] = Field(default=[])
+    exposure: Any | None = Field(default=None)
+    models: list[Any] = Field(default=[])
     name: Literal["check_exposure_based_on_non_public_models"]
 
     def execute(self) -> None:

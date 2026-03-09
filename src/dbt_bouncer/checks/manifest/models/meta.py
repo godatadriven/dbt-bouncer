@@ -1,18 +1,12 @@
 """Checks related to model meta configuration."""
 
-from typing import TYPE_CHECKING, Literal
-
-if TYPE_CHECKING:
-    from dbt_bouncer.artifact_parsers.parsers_manifest import (
-        DbtBouncerModelBase,
-    )
+from typing import Any, Literal
 
 from pydantic import Field
 
 from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError, NestedDict
 from dbt_bouncer.utils import find_missing_meta_keys, get_clean_model_name
-
 
 class CheckModelHasMetaKeys(BaseCheck):
     """The `meta` config for models must have the specified keys.
@@ -40,7 +34,7 @@ class CheckModelHasMetaKeys(BaseCheck):
     """
 
     keys: NestedDict
-    model: "DbtBouncerModelBase | None" = Field(default=None)
+    model: Any | None = Field(default=None)
     name: Literal["check_model_has_meta_keys"]
 
     def execute(self) -> None:

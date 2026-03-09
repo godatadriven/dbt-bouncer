@@ -1,19 +1,12 @@
 import re
-from typing import TYPE_CHECKING, Literal
+from typing import Any, Literal
 
 from dbt_bouncer.check_base import BaseCheck
-
-if TYPE_CHECKING:
-    from dbt_bouncer.artifact_parsers.parsers_manifest import (
-        DbtBouncerManifest,
-        DbtBouncerModelBase,
-    )
 
 from pydantic import Field, PrivateAttr
 
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import clean_path_str, compile_pattern, get_clean_model_name
-
 
 class CheckLineagePermittedUpstreamModels(BaseCheck):
     """Upstream models must have a path that matches the provided `upstream_path_pattern`.
@@ -48,9 +41,9 @@ class CheckLineagePermittedUpstreamModels(BaseCheck):
 
     """
 
-    manifest_obj: "DbtBouncerManifest | None" = Field(default=None)
-    model: "DbtBouncerModelBase | None" = Field(default=None)
-    models: list["DbtBouncerModelBase"] = Field(default=[])
+    manifest_obj: Any | None = Field(default=None)
+    model: Any | None = Field(default=None)
+    models: list[Any] = Field(default=[])
     name: Literal["check_lineage_permitted_upstream_models"]
     package_name: str | None = Field(default=None)
     upstream_path_pattern: str
@@ -98,7 +91,6 @@ class CheckLineagePermittedUpstreamModels(BaseCheck):
                 f"`{get_clean_model_name(model.unique_id)}` references upstream models that are not permitted: {[m.split('.')[-1] for m in not_permitted_upstream_models]}."
             )
 
-
 class CheckLineageSeedCannotBeUsed(BaseCheck):
     """Seed cannot be referenced in models with a path that matches the specified `include` config.
 
@@ -120,7 +112,7 @@ class CheckLineageSeedCannotBeUsed(BaseCheck):
 
     """
 
-    model: "DbtBouncerModelBase | None" = Field(default=None)
+    model: Any | None = Field(default=None)
     name: Literal["check_lineage_seed_cannot_be_used"]
 
     def execute(self) -> None:
@@ -139,7 +131,6 @@ class CheckLineageSeedCannotBeUsed(BaseCheck):
             raise DbtBouncerFailedCheckError(
                 f"`{get_clean_model_name(model.unique_id)}` references a seed even though this is not permitted."
             )
-
 
 class CheckLineageSourceCannotBeUsed(BaseCheck):
     """Sources cannot be referenced in models with a path that matches the specified `include` config.
@@ -162,7 +153,7 @@ class CheckLineageSourceCannotBeUsed(BaseCheck):
 
     """
 
-    model: "DbtBouncerModelBase | None" = Field(default=None)
+    model: Any | None = Field(default=None)
     name: Literal["check_lineage_source_cannot_be_used"]
 
     def execute(self) -> None:

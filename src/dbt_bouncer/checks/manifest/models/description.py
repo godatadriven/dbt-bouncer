@@ -2,13 +2,7 @@
 
 import re
 from pathlib import Path
-from typing import TYPE_CHECKING, Literal, cast
-
-if TYPE_CHECKING:
-    from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import Nodes4
-    from dbt_bouncer.artifact_parsers.parsers_manifest import (
-        DbtBouncerModelBase,
-    )
+from typing import Any, Literal, cast
 
 from pydantic import ConfigDict, Field, PrivateAttr
 
@@ -20,7 +14,6 @@ from dbt_bouncer.utils import (
     get_clean_model_name,
     is_description_populated,
 )
-
 
 class CheckModelDescriptionContainsRegexPattern(BaseCheck):
     """Models must have a description that matches the provided pattern.
@@ -45,7 +38,7 @@ class CheckModelDescriptionContainsRegexPattern(BaseCheck):
 
     """
 
-    model: "DbtBouncerModelBase | None" = Field(default=None)
+    model: Any | None = Field(default=None)
     name: Literal["check_model_description_contains_regex_pattern"]
     regexp_pattern: str
 
@@ -69,7 +62,6 @@ class CheckModelDescriptionContainsRegexPattern(BaseCheck):
             raise DbtBouncerFailedCheckError(
                 f"""`{get_clean_model_name(model.unique_id)}`'s description "{model.description}" doesn't match the supplied regex: {self.regexp_pattern}."""
             )
-
 
 class CheckModelDescriptionPopulated(BaseCheck):
     """Models must have a populated description.
@@ -101,7 +93,7 @@ class CheckModelDescriptionPopulated(BaseCheck):
     """
 
     min_description_length: int | None = Field(default=None)
-    model: "DbtBouncerModelBase | None" = Field(default=None)
+    model: Any | None = Field(default=None)
     name: Literal["check_model_description_populated"]
 
     def execute(self) -> None:
@@ -118,7 +110,6 @@ class CheckModelDescriptionPopulated(BaseCheck):
             raise DbtBouncerFailedCheckError(
                 f"`{get_clean_model_name(model.unique_id)}` does not have a populated description."
             )
-
 
 class CheckModelDocumentationCoverage(BaseCheck):
     """Set the minimum percentage of models that have a populated description.
@@ -163,7 +154,7 @@ class CheckModelDocumentationCoverage(BaseCheck):
         ge=0,
         le=100,
     )
-    models: list["DbtBouncerModelBase"] = Field(default=[])
+    models: list[Any] = Field(default=[])
     name: Literal["check_model_documentation_coverage"]
     severity: Literal["error", "warn"] | None = Field(
         default="error",
@@ -195,7 +186,6 @@ class CheckModelDocumentationCoverage(BaseCheck):
                 f"Only {model_description_coverage_pct}% of models have a populated description, this is less than the permitted minimum of {self.min_model_documentation_coverage_pct}%."
             )
 
-
 class CheckModelDocumentedInSameDirectory(BaseCheck):
     """Models must be documented in the same directory where they are defined (i.e. `.yml` and `.sql` files are in the same directory).
 
@@ -217,7 +207,7 @@ class CheckModelDocumentedInSameDirectory(BaseCheck):
 
     """
 
-    model: "DbtBouncerModelBase | None" = Field(default=None)
+    model: Any | None = Field(default=None)
     name: Literal["check_model_documented_in_same_directory"]
 
     def execute(self) -> None:
@@ -228,7 +218,7 @@ class CheckModelDocumentedInSameDirectory(BaseCheck):
 
         """
         self._require_model()
-        model = cast("Nodes4", self.model)
+        model = cast(Any, self.model)
         model_sql_path = Path(clean_path_str(model.original_file_path))
         model_sql_dir = model_sql_path.parent.parts
 

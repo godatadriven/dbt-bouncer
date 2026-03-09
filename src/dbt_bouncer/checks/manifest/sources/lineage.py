@@ -1,18 +1,11 @@
 """Checks related to source lineage and usage."""
 
-from typing import TYPE_CHECKING, Literal
-
-if TYPE_CHECKING:
-    from dbt_bouncer.artifact_parsers.parsers_manifest import (
-        DbtBouncerModelBase,
-        DbtBouncerSourceBase,
-    )
+from typing import Any, Literal
 
 from pydantic import Field
 
 from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
-
 
 class CheckSourceNotOrphaned(BaseCheck):
     """Sources must be referenced in at least one model.
@@ -35,9 +28,9 @@ class CheckSourceNotOrphaned(BaseCheck):
 
     """
 
-    models: list["DbtBouncerModelBase"] = Field(default=[])
+    models: list[Any] = Field(default=[])
     name: Literal["check_source_not_orphaned"]
-    source: "DbtBouncerSourceBase | None" = Field(default=None)
+    source: Any | None = Field(default=None)
 
     def execute(self) -> None:
         """Execute the check.
@@ -56,7 +49,6 @@ class CheckSourceNotOrphaned(BaseCheck):
             raise DbtBouncerFailedCheckError(
                 f"Source `{source.source_name}.{source.name}` is orphaned, i.e. not referenced by any model."
             )
-
 
 class CheckSourceUsedByModelsInSameDirectory(BaseCheck):
     """Sources can only be referenced by models that are located in the same directory where the source is defined.
@@ -79,9 +71,9 @@ class CheckSourceUsedByModelsInSameDirectory(BaseCheck):
 
     """
 
-    models: list["DbtBouncerModelBase"] = Field(default=[])
+    models: list[Any] = Field(default=[])
     name: Literal["check_source_used_by_models_in_same_directory"]
-    source: "DbtBouncerSourceBase | None" = Field(default=None)
+    source: Any | None = Field(default=None)
 
     def execute(self) -> None:
         """Execute the check.
@@ -106,7 +98,6 @@ class CheckSourceUsedByModelsInSameDirectory(BaseCheck):
                 f"Source `{source.source_name}.{source.name}` is referenced by models defined in a different directory: {reffed_models_not_in_same_dir}"
             )
 
-
 class CheckSourceUsedByOnlyOneModel(BaseCheck):
     """Each source can be referenced by a maximum of one model.
 
@@ -128,9 +119,9 @@ class CheckSourceUsedByOnlyOneModel(BaseCheck):
 
     """
 
-    models: list["DbtBouncerModelBase"] = Field(default=[])
+    models: list[Any] = Field(default=[])
     name: Literal["check_source_used_by_only_one_model"]
-    source: "DbtBouncerSourceBase | None" = Field(default=None)
+    source: Any | None = Field(default=None)
 
     def execute(self) -> None:
         """Execute the check.

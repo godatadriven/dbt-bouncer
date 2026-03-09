@@ -1,17 +1,11 @@
 """Checks related to source tags."""
 
-from typing import TYPE_CHECKING, Literal
-
-if TYPE_CHECKING:
-    from dbt_bouncer.artifact_parsers.parsers_manifest import (
-        DbtBouncerSourceBase,
-    )
+from typing import Any, Literal
 
 from pydantic import Field
 
 from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
-
 
 class CheckSourceHasTags(BaseCheck):
     """Sources must have the specified tags.
@@ -40,7 +34,7 @@ class CheckSourceHasTags(BaseCheck):
 
     criteria: Literal["any", "all", "one"] = Field(default="all")
     name: Literal["check_source_has_tags"]
-    source: "DbtBouncerSourceBase | None" = Field(default=None)
+    source: Any | None = Field(default=None)
     tags: list[str]
 
     def execute(self) -> None:

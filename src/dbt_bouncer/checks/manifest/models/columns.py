@@ -1,11 +1,6 @@
 """Checks related to model column definitions, types, and constraints."""
 
-from typing import TYPE_CHECKING, Literal
-
-if TYPE_CHECKING:
-    from dbt_bouncer.artifact_parsers.parsers_manifest import (
-        DbtBouncerModelBase,
-    )
+from typing import Any, Literal
 
 from pydantic import Field
 
@@ -13,7 +8,6 @@ from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError, NestedDict
 from dbt_bouncer.enums import Materialization
 from dbt_bouncer.utils import find_missing_meta_keys, get_clean_model_name
-
 
 class CheckModelColumnsHaveMetaKeys(BaseCheck):
     """Columns defined for models must have the specified keys in the `meta` config.
@@ -43,7 +37,7 @@ class CheckModelColumnsHaveMetaKeys(BaseCheck):
     """
 
     keys: NestedDict
-    model: "DbtBouncerModelBase | None" = Field(default=None)
+    model: Any | None = Field(default=None)
     name: Literal["check_model_columns_have_meta_keys"]
 
     def execute(self) -> None:
@@ -68,7 +62,6 @@ class CheckModelColumnsHaveMetaKeys(BaseCheck):
                 f"`{get_clean_model_name(model.unique_id)}` has columns missing required `meta` keys: {failing_columns}"
             )
 
-
 class CheckModelColumnsHaveTypes(BaseCheck):
     """Columns defined for models must have a `data_type` declared.
 
@@ -91,7 +84,7 @@ class CheckModelColumnsHaveTypes(BaseCheck):
 
     """
 
-    model: "DbtBouncerModelBase | None" = Field(default=None)
+    model: Any | None = Field(default=None)
     name: Literal["check_model_columns_have_types"]
 
     def execute(self) -> None:
@@ -110,7 +103,6 @@ class CheckModelColumnsHaveTypes(BaseCheck):
             raise DbtBouncerFailedCheckError(
                 f"`{get_clean_model_name(model.unique_id)}` has columns without a declared `data_type`: {untyped_columns}"
             )
-
 
 class CheckModelHasConstraints(BaseCheck):
     """Table and incremental models must have the specified constraint types defined.
@@ -138,7 +130,7 @@ class CheckModelHasConstraints(BaseCheck):
 
     """
 
-    model: "DbtBouncerModelBase | None" = Field(default=None)
+    model: Any | None = Field(default=None)
     name: Literal["check_model_has_constraints"]
     required_constraint_types: list[
         Literal["check", "custom", "foreign_key", "not_null", "primary_key", "unique"]

@@ -1,20 +1,13 @@
 """Checks related to model versioning."""
 
 import re
-from typing import TYPE_CHECKING, Literal
-
-if TYPE_CHECKING:
-    from dbt_bouncer.artifact_parsers.parsers_manifest import (
-        DbtBouncerManifest,
-        DbtBouncerModelBase,
-    )
+from typing import Any, Literal
 
 from pydantic import ConfigDict, Field, PrivateAttr
 
 from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import compile_pattern
-
 
 class CheckModelLatestVersionSpecified(BaseCheck):
     r"""Check that the `latest_version` attribute of the model is set.
@@ -40,7 +33,7 @@ class CheckModelLatestVersionSpecified(BaseCheck):
 
     model_config = ConfigDict(extra="forbid", protected_namespaces=())
 
-    model: "DbtBouncerModelBase | None" = Field(default=None)
+    model: Any | None = Field(default=None)
     name: Literal["check_model_latest_version_specified"]
 
     def execute(self) -> None:
@@ -55,7 +48,6 @@ class CheckModelLatestVersionSpecified(BaseCheck):
             raise DbtBouncerFailedCheckError(
                 f"`{model.name}` does not have a specified `latest_version`."
             )
-
 
 class CheckModelVersionAllowed(BaseCheck):
     r"""Check that the version of the model matches the supplied regex pattern.
@@ -89,7 +81,7 @@ class CheckModelVersionAllowed(BaseCheck):
 
     model_config = ConfigDict(extra="forbid", protected_namespaces=())
 
-    model: "DbtBouncerModelBase | None" = Field(default=None)
+    model: Any | None = Field(default=None)
     name: Literal["check_model_version_allowed"]
     version_pattern: str
 
@@ -111,7 +103,6 @@ class CheckModelVersionAllowed(BaseCheck):
             raise DbtBouncerFailedCheckError(
                 f"Version `{model.version}` in `{model.name}` does not match the supplied regex `{self.version_pattern.strip()})`."
             )
-
 
 class CheckModelVersionPinnedInRef(BaseCheck):
     r"""Check that the version of the model is always specified in downstream nodes.
@@ -138,8 +129,8 @@ class CheckModelVersionPinnedInRef(BaseCheck):
 
     model_config = ConfigDict(extra="forbid", protected_namespaces=())
 
-    manifest_obj: "DbtBouncerManifest | None" = Field(default=None)
-    model: "DbtBouncerModelBase | None" = Field(default=None)
+    manifest_obj: Any | None = Field(default=None)
+    model: Any | None = Field(default=None)
     name: Literal["check_model_version_pinned_in_ref"]
 
     def execute(self) -> None:

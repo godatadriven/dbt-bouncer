@@ -1,17 +1,11 @@
 """Checks related to source loaders."""
 
-from typing import TYPE_CHECKING, Literal
-
-if TYPE_CHECKING:
-    from dbt_bouncer.artifact_parsers.parsers_manifest import (
-        DbtBouncerSourceBase,
-    )
+from typing import Any, Literal
 
 from pydantic import Field
 
 from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
-
 
 class CheckSourceLoaderPopulated(BaseCheck):
     """Sources must have a populated loader.
@@ -34,7 +28,7 @@ class CheckSourceLoaderPopulated(BaseCheck):
     """
 
     name: Literal["check_source_loader_populated"]
-    source: "DbtBouncerSourceBase | None" = Field(default=None)
+    source: Any | None = Field(default=None)
 
     def execute(self) -> None:
         """Execute the check.

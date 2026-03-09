@@ -1,19 +1,10 @@
 import logging
 import re
-from typing import TYPE_CHECKING, Literal
+from typing import Any, Literal
 
 from pydantic import ConfigDict, Field, PrivateAttr
 
 from dbt_bouncer.check_base import BaseCheck
-
-if TYPE_CHECKING:
-    from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
-        UnitTests,
-    )
-    from dbt_bouncer.artifact_parsers.parsers_manifest import (
-        DbtBouncerManifest,
-        DbtBouncerSeedBase,
-    )
 
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import (
@@ -21,7 +12,6 @@ from dbt_bouncer.utils import (
     get_clean_model_name,
     get_package_version_number,
 )
-
 
 class CheckSeedColumnNames(BaseCheck):
     """Seed columns must have names that match the supplied regex.
@@ -50,7 +40,7 @@ class CheckSeedColumnNames(BaseCheck):
     model_config = ConfigDict(extra="forbid", protected_namespaces=())
 
     name: Literal["check_seed_column_names"]
-    seed: "DbtBouncerSeedBase | None" = Field(default=None)
+    seed: Any | None = Field(default=None)
     seed_column_name_pattern: str
 
     _compiled_pattern: re.Pattern[str] = PrivateAttr()
@@ -79,7 +69,6 @@ class CheckSeedColumnNames(BaseCheck):
                 f"`{get_clean_model_name(seed.unique_id)}` has columns that do not match the supplied regex `{self.seed_column_name_pattern.strip()}`: {non_complying_columns}"
             )
 
-
 class CheckSeedColumnsHaveTypes(BaseCheck):
     """Columns defined for seeds must have a `data_type` declared.
 
@@ -101,7 +90,7 @@ class CheckSeedColumnsHaveTypes(BaseCheck):
     """
 
     name: Literal["check_seed_columns_have_types"]
-    seed: "DbtBouncerSeedBase | None" = Field(default=None)
+    seed: Any | None = Field(default=None)
 
     def execute(self) -> None:
         """Execute the check.
@@ -119,7 +108,6 @@ class CheckSeedColumnsHaveTypes(BaseCheck):
             raise DbtBouncerFailedCheckError(
                 f"`{get_clean_model_name(seed.unique_id)}` has columns without a declared `data_type`: {untyped_columns}"
             )
-
 
 class CheckSeedDescriptionPopulated(BaseCheck):
     """Seeds must have a populated description.
@@ -153,7 +141,7 @@ class CheckSeedDescriptionPopulated(BaseCheck):
 
     min_description_length: int | None = Field(default=None)
     name: Literal["check_seed_description_populated"]
-    seed: "DbtBouncerSeedBase | None" = Field(default=None)
+    seed: Any | None = Field(default=None)
 
     def execute(self) -> None:
         """Execute the check.
@@ -169,7 +157,6 @@ class CheckSeedDescriptionPopulated(BaseCheck):
             raise DbtBouncerFailedCheckError(
                 f"`{get_clean_model_name(seed.unique_id)}` does not have a populated description."
             )
-
 
 class CheckSeedHasUnitTests(BaseCheck):
     """Seeds must have more than the specified number of unit tests.
@@ -206,11 +193,11 @@ class CheckSeedHasUnitTests(BaseCheck):
 
     """
 
-    manifest_obj: "DbtBouncerManifest | None" = Field(default=None)
+    manifest_obj: Any | None = Field(default=None)
     min_number_of_unit_tests: int = Field(default=1)
     name: Literal["check_seed_has_unit_tests"]
-    seed: "DbtBouncerSeedBase | None" = Field(default=None)
-    unit_tests: list["UnitTests"] = Field(default=[])
+    seed: Any | None = Field(default=None)
+    unit_tests: list[Any] = Field(default=[])
 
     def execute(self) -> None:
         """Execute the check.
@@ -242,7 +229,6 @@ class CheckSeedHasUnitTests(BaseCheck):
                 "The `check_seed_has_unit_tests` check is only supported for dbt 1.8.0 and above.",
             )
 
-
 class CheckSeedNames(BaseCheck):
     """Seed must have a name that matches the supplied regex.
 
@@ -271,7 +257,7 @@ class CheckSeedNames(BaseCheck):
     model_config = ConfigDict(extra="forbid", protected_namespaces=())
 
     name: Literal["check_seed_names"]
-    seed: "DbtBouncerSeedBase | None" = Field(default=None)
+    seed: Any | None = Field(default=None)
     seed_name_pattern: str
 
     _compiled_pattern: re.Pattern[str] = PrivateAttr()

@@ -1,13 +1,6 @@
 """Checks related to model upstream dependencies and lineage."""
 
-from typing import TYPE_CHECKING, Literal
-
-if TYPE_CHECKING:
-    from dbt_bouncer.artifact_parsers.parsers_manifest import (
-        DbtBouncerExposureBase,
-        DbtBouncerManifest,
-        DbtBouncerModelBase,
-    )
+from typing import Any, Literal
 
 from pydantic import ConfigDict, Field
 
@@ -15,7 +8,6 @@ from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.enums import Materialization
 from dbt_bouncer.utils import get_clean_model_name
-
 
 class CheckModelDependsOnMacros(BaseCheck):
     """Models must depend on the specified macros.
@@ -50,7 +42,7 @@ class CheckModelDependsOnMacros(BaseCheck):
     """
 
     criteria: Literal["any", "all", "one"] = Field(default="all")
-    model: "DbtBouncerModelBase | None" = Field(default=None)
+    model: Any | None = Field(default=None)
     name: Literal["check_model_depends_on_macros"]
     required_macros: list[str]
 
@@ -87,7 +79,6 @@ class CheckModelDependsOnMacros(BaseCheck):
                 f"`{get_clean_model_name(model.unique_id)}` must depend on exactly one of the required macros: {self.required_macros}."
             )
 
-
 class CheckModelDependsOnMultipleSources(BaseCheck):
     """Models cannot reference more than one source.
 
@@ -109,7 +100,7 @@ class CheckModelDependsOnMultipleSources(BaseCheck):
 
     """
 
-    model: "DbtBouncerModelBase | None" = Field(default=None)
+    model: Any | None = Field(default=None)
     name: Literal["check_model_depends_on_multiple_sources"]
 
     def execute(self) -> None:
@@ -128,7 +119,6 @@ class CheckModelDependsOnMultipleSources(BaseCheck):
             raise DbtBouncerFailedCheckError(
                 f"`{get_clean_model_name(model.unique_id)}` references more than one source."
             )
-
 
 class CheckModelHasExposure(BaseCheck):
     """Models must have an exposure.
@@ -156,8 +146,8 @@ class CheckModelHasExposure(BaseCheck):
 
     model_config = ConfigDict(extra="forbid", protected_namespaces=())
 
-    exposures: list["DbtBouncerExposureBase"] = Field(default=[])
-    model: "DbtBouncerModelBase | None" = Field(default=None)
+    exposures: list[Any] = Field(default=[])
+    model: Any | None = Field(default=None)
     name: Literal["check_model_has_exposure"]
 
     def execute(self) -> None:
@@ -178,7 +168,6 @@ class CheckModelHasExposure(BaseCheck):
             raise DbtBouncerFailedCheckError(
                 f"`{get_clean_model_name(model.unique_id)}` does not have an associated exposure."
             )
-
 
 class CheckModelHasNoUpstreamDependencies(BaseCheck):
     """Identify if models have no upstream dependencies as this likely indicates hard-coded tables references.
@@ -201,7 +190,7 @@ class CheckModelHasNoUpstreamDependencies(BaseCheck):
 
     """
 
-    model: "DbtBouncerModelBase | None" = Field(default=None)
+    model: Any | None = Field(default=None)
     name: Literal["check_model_has_no_upstream_dependencies"]
 
     def execute(self) -> None:
@@ -220,7 +209,6 @@ class CheckModelHasNoUpstreamDependencies(BaseCheck):
             raise DbtBouncerFailedCheckError(
                 f"`{get_clean_model_name(model.unique_id)}` has no upstream dependencies, this likely indicates hard-coded tables references."
             )
-
 
 class CheckModelMaxChainedViews(BaseCheck):
     """Models cannot have more than the specified number of upstream dependents that are not tables.
@@ -257,15 +245,15 @@ class CheckModelMaxChainedViews(BaseCheck):
 
     """
 
-    manifest_obj: "DbtBouncerManifest | None" = Field(default=None)
+    manifest_obj: Any | None = Field(default=None)
     materializations_to_include: list[str] = Field(
         default=[Materialization.EPHEMERAL, Materialization.VIEW],
     )
     max_chained_views: int = Field(
         default=3,
     )
-    model: "DbtBouncerModelBase | None" = Field(default=None)
-    models: list["DbtBouncerModelBase"] = Field(default=[])
+    model: Any | None = Field(default=None)
+    models: list[Any] = Field(default=[])
     name: Literal["check_model_max_chained_views"]
     package_name: str | None = Field(default=None)
 
@@ -354,7 +342,6 @@ class CheckModelMaxChainedViews(BaseCheck):
                 f"`{get_clean_model_name(model.unique_id)}` has more than {self.max_chained_views} upstream dependents that are not tables."
             )
 
-
 class CheckModelMaxFanout(BaseCheck):
     """Models cannot have more than the specified number of downstream models.
 
@@ -382,8 +369,8 @@ class CheckModelMaxFanout(BaseCheck):
     """
 
     max_downstream_models: int = Field(default=3)
-    model: "DbtBouncerModelBase | None" = Field(default=None)
-    models: list["DbtBouncerModelBase"] = Field(default=[])
+    model: Any | None = Field(default=None)
+    models: list[Any] = Field(default=[])
     name: Literal["check_model_max_fanout"]
 
     def execute(self) -> None:
@@ -404,7 +391,6 @@ class CheckModelMaxFanout(BaseCheck):
             raise DbtBouncerFailedCheckError(
                 f"`{get_clean_model_name(model.unique_id)}` has {num_downstream_models} downstream models, which is more than the permitted maximum of {self.max_downstream_models}."
             )
-
 
 class CheckModelMaxUpstreamDependencies(BaseCheck):
     """Limit the number of upstream dependencies a model has.
@@ -442,7 +428,7 @@ class CheckModelMaxUpstreamDependencies(BaseCheck):
     max_upstream_sources: int = Field(
         default=1,
     )
-    model: "DbtBouncerModelBase | None" = Field(default=None)
+    model: Any | None = Field(default=None)
     name: Literal["check_model_max_upstream_dependencies"]
 
     def execute(self) -> None:

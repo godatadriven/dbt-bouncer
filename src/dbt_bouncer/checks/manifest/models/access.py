@@ -1,19 +1,13 @@
 """Checks related to model access controls and contract enforcement."""
 
 import re
-from typing import TYPE_CHECKING, Literal
-
-if TYPE_CHECKING:
-    from dbt_bouncer.artifact_parsers.parsers_manifest import (
-        DbtBouncerModelBase,
-    )
+from typing import Any, Literal
 
 from pydantic import Field, PrivateAttr
 
 from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import compile_pattern, get_clean_model_name
-
 
 class CheckModelAccess(BaseCheck):
     """Models must have the specified access attribute. Requires dbt 1.7+.
@@ -49,7 +43,7 @@ class CheckModelAccess(BaseCheck):
     """
 
     access: Literal["private", "protected", "public"]
-    model: "DbtBouncerModelBase | None" = Field(default=None)
+    model: Any | None = Field(default=None)
     name: Literal["check_model_access"]
 
     def execute(self) -> None:
@@ -64,7 +58,6 @@ class CheckModelAccess(BaseCheck):
             raise DbtBouncerFailedCheckError(
                 f"`{get_clean_model_name(model.unique_id)}` has `{model.access.value}` access, it should have access `{self.access}`."
             )
-
 
 class CheckModelContractEnforcedForPublicModel(BaseCheck):
     """Public models must have contracts enforced.
@@ -87,7 +80,7 @@ class CheckModelContractEnforcedForPublicModel(BaseCheck):
 
     """
 
-    model: "DbtBouncerModelBase | None" = Field(default=None)
+    model: Any | None = Field(default=None)
     name: Literal["check_model_contract_enforced_for_public_model"]
 
     def execute(self) -> None:
@@ -106,7 +99,6 @@ class CheckModelContractEnforcedForPublicModel(BaseCheck):
             raise DbtBouncerFailedCheckError(
                 f"`{get_clean_model_name(model.unique_id)}` is a public model but does not have contracts enforced."
             )
-
 
 class CheckModelGrantPrivilege(BaseCheck):
     """Model can have grant privileges that match the specified pattern.
@@ -132,7 +124,7 @@ class CheckModelGrantPrivilege(BaseCheck):
 
     """
 
-    model: "DbtBouncerModelBase | None" = Field(default=None)
+    model: Any | None = Field(default=None)
     name: Literal["check_model_grant_privilege"]
     privilege_pattern: str
 
@@ -161,7 +153,6 @@ class CheckModelGrantPrivilege(BaseCheck):
                 f"`{get_clean_model_name(model.unique_id)}` has grants (`{self.privilege_pattern}`) that don't comply with the specified regexp pattern ({non_complying_grants})."
             )
 
-
 class CheckModelGrantPrivilegeRequired(BaseCheck):
     """Model must have the specified grant privilege.
 
@@ -186,7 +177,7 @@ class CheckModelGrantPrivilegeRequired(BaseCheck):
 
     """
 
-    model: "DbtBouncerModelBase | None" = Field(default=None)
+    model: Any | None = Field(default=None)
     name: Literal["check_model_grant_privilege_required"]
     privilege: str
 
@@ -204,7 +195,6 @@ class CheckModelGrantPrivilegeRequired(BaseCheck):
             raise DbtBouncerFailedCheckError(
                 f"`{get_clean_model_name(model.unique_id)}` does not have the required grant privilege (`{self.privilege}`)."
             )
-
 
 class CheckModelHasContractsEnforced(BaseCheck):
     """Model must have contracts enforced.
@@ -228,7 +218,7 @@ class CheckModelHasContractsEnforced(BaseCheck):
 
     """
 
-    model: "DbtBouncerModelBase | None" = Field(default=None)
+    model: Any | None = Field(default=None)
     name: Literal["check_model_has_contracts_enforced"]
 
     def execute(self) -> None:
@@ -243,7 +233,6 @@ class CheckModelHasContractsEnforced(BaseCheck):
             raise DbtBouncerFailedCheckError(
                 f"`{get_clean_model_name(model.unique_id)}` does not have contracts enforced."
             )
-
 
 class CheckModelNumberOfGrants(BaseCheck):
     """Model can have the specified number of privileges.
@@ -271,7 +260,7 @@ class CheckModelNumberOfGrants(BaseCheck):
 
     """
 
-    model: "DbtBouncerModelBase | None" = Field(default=None)
+    model: Any | None = Field(default=None)
     name: Literal["check_model_number_of_grants"]
     max_number_of_privileges: int = Field(default=100)
     min_number_of_privileges: int = Field(default=0)
