@@ -23,7 +23,6 @@ classifiers = [
   "Programming Language :: Python :: 3.14",
 ]
 dependencies = [
-  "dbt-artifacts-parser (>=0.8)",
   "jellyfish (>=1,<2)",
   "jinja2-simple-tags (<1)",
   "jinja2 (>=3,<4)",
