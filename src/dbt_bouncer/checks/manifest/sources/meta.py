@@ -5,7 +5,7 @@ from typing import Any, Literal
 from pydantic import Field
 
 from dbt_bouncer.check_base import BaseCheck
-from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
+from dbt_bouncer.checks.common import DbtBouncerFailedCheckError, NestedDict
 from dbt_bouncer.utils import find_missing_meta_keys
 
 class CheckSourceHasMetaKeys(BaseCheck):
