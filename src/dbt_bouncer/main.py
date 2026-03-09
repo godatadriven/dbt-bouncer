@@ -43,12 +43,11 @@ def _build_context(
     check_categories: list[str],
     create_pr_comment_file: bool,
     dbt_artifacts_dir: Path,
-    dry_run: bool,
-    fast: bool,
     output_file: Path | None,
     output_format: str,
     output_only_failures: bool,
-    show_all_failures: bool,
+    dry_run: bool = False,
+    show_all_failures: bool = False,
 ) -> BouncerContext:
     """Parse artifacts and build a BouncerContext.
 
@@ -56,58 +55,8 @@ def _build_context(
         BouncerContext: Ready-to-run context.
 
     """
+    from dbt_bouncer.artifact_parsers.fast_parser import parse_dbt_artifacts
     from dbt_bouncer.context import BouncerContext
-
-    if fast:
-        from dbt_bouncer.artifact_parsers.fast_parser import (
-            parse_dbt_artifacts_fast,
-        )
-
-        (
-            manifest_obj,
-            project_exposures,
-            project_macros,
-            project_models,
-            project_seeds,
-            project_semantic_models,
-            project_snapshots,
-            project_sources,
-            project_tests,
-            project_unit_tests,
-            project_catalog_nodes,
-            project_catalog_sources,
-            project_run_results,
-        ) = parse_dbt_artifacts_fast(
-            bouncer_config=bouncer_config, dbt_artifacts_dir=dbt_artifacts_dir
-        )
-
-        # Skip Pydantic validation for fast parser (proxy types don't match)
-        return BouncerContext.model_construct(
-            bouncer_config=bouncer_config,
-            catalog_nodes=project_catalog_nodes,
-            catalog_sources=project_catalog_sources,
-            check_categories=check_categories,
-            create_pr_comment_file=create_pr_comment_file,
-            dry_run=dry_run,
-            exposures=project_exposures,
-            macros=project_macros,
-            manifest_obj=manifest_obj,
-            models=project_models,
-            output_file=output_file,
-            output_format=output_format,
-            output_only_failures=output_only_failures,
-            run_results=project_run_results,
-            seeds=project_seeds,
-            semantic_models=project_semantic_models,
-            show_all_failures=show_all_failures,
-            snapshots=project_snapshots,
-            sources=project_sources,
-            tests=project_tests,
-            unit_tests=project_unit_tests,
-        )
-
-    from dbt_bouncer.artifact_parsers.parsers_common import parse_dbt_artifacts
-    from dbt_bouncer.context import _rebuild_bouncer_context
 
     (
         manifest_obj,
@@ -127,8 +76,7 @@ def _build_context(
         bouncer_config=bouncer_config, dbt_artifacts_dir=dbt_artifacts_dir
     )
 
-    _rebuild_bouncer_context()
-    return BouncerContext(
+    return BouncerContext.model_construct(
         bouncer_config=bouncer_config,
         catalog_nodes=project_catalog_nodes,
         catalog_sources=project_catalog_sources,
@@ -158,7 +106,6 @@ def run_bouncer(
     check: str = "",
     create_pr_comment_file: bool = False,
     dry_run: bool = False,
-    fast: bool = True,
     only: str = "",
     output_file: Path | None = None,
     output_format: OutputFormat = OutputFormat.JSON,
@@ -174,7 +121,6 @@ def run_bouncer(
         check: Limit the checks run to specific check names, comma-separated.
         create_pr_comment_file: Create a `github-comment.md` file.
         dry_run: If True, print which checks would run without executing them.
-        fast: Use orjson-based fast parser (bypasses Pydantic validation). Defaults to True.
         only: Limit the checks run to specific categories.
         output_file: Location of the file where check metadata will be saved.
         output_format: Format for the output file or stdout (csv, json, junit, sarif, tap).
@@ -326,7 +272,6 @@ def run_bouncer(
         create_pr_comment_file=create_pr_comment_file,
         dbt_artifacts_dir=dbt_artifacts_dir,
         dry_run=dry_run,
-        fast=fast,
         output_file=output_file,
         output_format=normalized_output_format,
         output_only_failures=output_only_failures,
@@ -450,14 +395,6 @@ def run(
             rich_help_panel="Check Selection",
         ),
     ] = False,
-    fast: Annotated[
-        bool,
-        typer.Option(
-            "--fast/--no-fast",
-            help="Use fast orjson-based parser (bypasses Pydantic validation). Enabled by default.",
-            rich_help_panel="Performance",
-        ),
-    ] = True,
     only: Annotated[
         str,
         typer.Option(
@@ -532,7 +469,6 @@ def run(
         config_file=config_file,
         create_pr_comment_file=create_pr_comment_file,
         dry_run=dry_run,
-        fast=fast,
         only=only,
         output_file=output_file,
         output_format=output_format,
