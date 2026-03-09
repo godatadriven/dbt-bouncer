@@ -106,7 +106,7 @@ class DictProxy(dict):
 class ListProxy(list):
     """List subclass with lazy proxy wrapping of elements."""
 
-    def __getitem__(self, key: Any) -> Any:
+    def __getitem__(self, key: Any) -> Any:  # type: ignore[invalid-method-override]
         """Return proxy-wrapped element(s) at *key*.
 
         Returns:
