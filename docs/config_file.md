@@ -6,6 +6,7 @@ The following options are available, in order of priority:
 1. A file passed via the `--config-file` CLI flag.
 1. A file path passed via the `DBT_BOUNCER_CONFIG_FILE` environment variable.
 1. A file named `dbt-bouncer.yml` in the current working directory.
+1. A file named `dbt-bouncer.toml` in the current working directory.
 1. A `[tool.dbt-bouncer]` section in `pyproject.toml`.
 
 Here is an example config file in `yaml`:
@@ -21,7 +22,22 @@ manifest_checks:
     model_name_pattern: ^stg_
 ```
 
-And the same config in `toml`:
+And the same config in `dbt-bouncer.toml`:
+
+```toml
+# [Optional] Directory where the dbt artifacts exists, generally the `target` directory inside a dbt project. Defaults to `$DBT_PROJECT_DIR/target` if $DBT_PROJECT_DIR is set, else `./target`.
+dbt_artifacts_dir = "target"
+
+[[manifest_checks]]
+name = "check_macro_name_matches_file_name"
+
+[[manifest_checks]]
+name = "check_model_names"
+include = "^models/staging"
+model_name_pattern = "^stg_"
+```
+
+Or in `pyproject.toml`:
 
 ```toml
 [tool.dbt-bouncer]
