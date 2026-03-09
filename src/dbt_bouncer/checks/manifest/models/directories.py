@@ -72,22 +72,22 @@ class CheckModelDirectories(BaseCheck):
             DbtBouncerFailedCheckError: If model located in `./models` or invalid subdirectory.
 
         """
-        self._require_model()
-        clean_path = clean_path_str(self.model.original_file_path)
+        model = self._require_model()
+        clean_path = clean_path_str(model.original_file_path)
         matched_path = self._compiled_include.match(clean_path)
         if matched_path is None:
             raise DbtBouncerFailedCheckError("matched_path is None")
         path_after_match = clean_path[matched_path.end() + 1 :]
         directory_to_check = Path(path_after_match).parts[0]
 
-        if directory_to_check.replace(".sql", "") == self.model.name:
+        if directory_to_check.replace(".sql", "") == model.name:
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` is not located in a valid sub-directory ({self.permitted_sub_directories})."
+                f"`{get_clean_model_name(model.unique_id)}` is not located in a valid sub-directory ({self.permitted_sub_directories})."
             )
         else:
             if directory_to_check not in self.permitted_sub_directories:
                 raise DbtBouncerFailedCheckError(
-                    f"`{get_clean_model_name(self.model.unique_id)}` is located in the `{directory_to_check}` sub-directory, this is not a valid sub-directory ({self.permitted_sub_directories})."
+                    f"`{get_clean_model_name(model.unique_id)}` is located in the `{directory_to_check}` sub-directory, this is not a valid sub-directory ({self.permitted_sub_directories})."
                 )
 
 
@@ -135,11 +135,11 @@ class CheckModelFileName(BaseCheck):
             DbtBouncerFailedCheckError: If file name does not match regex.
 
         """
-        self._require_model()
-        file_name = Path(clean_path_str(self.model.original_file_path)).name
+        model = self._require_model()
+        file_name = Path(clean_path_str(model.original_file_path)).name
         if self._compiled_pattern.match(file_name) is None:
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` is in a file that does not match the supplied regex `{self.file_name_pattern.strip()}`."
+                f"`{get_clean_model_name(model.unique_id)}` is in a file that does not match the supplied regex `{self.file_name_pattern.strip()}`."
             )
 
 
@@ -174,17 +174,17 @@ class CheckModelPropertyFileLocation(BaseCheck):
             DbtBouncerFailedCheckError: If property file location is incorrect.
 
         """
-        self._require_model()
+        model = self._require_model()
         if not (
-            hasattr(self.model, "patch_path")
-            and self.model.patch_path
-            and clean_path_str(self.model.patch_path or "") is not None
+            hasattr(model, "patch_path")
+            and model.patch_path
+            and clean_path_str(model.patch_path or "") is not None
         ):
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` is not documented."
+                f"`{get_clean_model_name(model.unique_id)}` is not documented."
             )
 
-        original_path = Path(clean_path_str(self.model.original_file_path))
+        original_path = Path(clean_path_str(model.original_file_path))
         relevant_parts = original_path.parts[1:-1]
 
         mapped_parts = []
@@ -199,19 +199,19 @@ class CheckModelPropertyFileLocation(BaseCheck):
                 mapped_parts.append(part)
 
         expected_substr = "_".join(mapped_parts)
-        properties_yml_name = Path(clean_path_str(self.model.patch_path or "")).name
+        properties_yml_name = Path(clean_path_str(model.patch_path or "")).name
 
         if not properties_yml_name.startswith("_"):
             raise DbtBouncerFailedCheckError(
-                f"The properties file for `{get_clean_model_name(self.model.unique_id)}` (`{properties_yml_name}`) does not start with an underscore."
+                f"The properties file for `{get_clean_model_name(model.unique_id)}` (`{properties_yml_name}`) does not start with an underscore."
             )
         if expected_substr not in properties_yml_name:
             raise DbtBouncerFailedCheckError(
-                f"The properties file for `{get_clean_model_name(self.model.unique_id)}` (`{properties_yml_name}`) does not contain the expected substring (`{expected_substr}`)."
+                f"The properties file for `{get_clean_model_name(model.unique_id)}` (`{properties_yml_name}`) does not contain the expected substring (`{expected_substr}`)."
             )
         if not properties_yml_name.endswith("__models.yml"):
             raise DbtBouncerFailedCheckError(
-                f"The properties file for `{get_clean_model_name(self.model.unique_id)}` (`{properties_yml_name}`) does not end with `__models.yml`."
+                f"The properties file for `{get_clean_model_name(model.unique_id)}` (`{properties_yml_name}`) does not end with `__models.yml`."
             )
 
 
@@ -269,8 +269,8 @@ class CheckModelSchemaName(BaseCheck):
             DbtBouncerFailedCheckError: If schema name does not match regex.
 
         """
-        self._require_model()
-        if self._compiled_pattern.match(str(self.model.schema_)) is None:
+        model = self._require_model()
+        if self._compiled_pattern.match(str(model.schema_)) is None:
             raise DbtBouncerFailedCheckError(
-                f"`{self.model.schema_}` does not match the supplied regex `{self.schema_name_pattern.strip()})`."
+                f"`{model.schema_}` does not match the supplied regex `{self.schema_name_pattern.strip()})`."
             )

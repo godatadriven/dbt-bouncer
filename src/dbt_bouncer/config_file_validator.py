@@ -84,7 +84,7 @@ def get_config_file_path(
     if (Path().cwd() / ConfigFileName.PYPROJECT_TOML).exists():
         pyproject_toml_dir = Path().cwd()
     else:
-        pyproject_toml_dir = next(  # type: ignore[assignment]
+        pyproject_toml_dir = next(
             (
                 parent
                 for parent in Path().cwd().parents
@@ -186,7 +186,7 @@ def lint_config_file(config_file_path: Path) -> list[dict[str, Any]]:
 
     try:
         content = config_file_path.read_text()
-        data = yaml.load(content, Loader=yaml.CSafeLoader)
+        data = yaml.load(content, Loader=yaml.CSafeLoader)  # type: ignore[possibly-missing-attribute]
     except yaml.YAMLError as e:
         problem_mark = getattr(e, "problem_mark", None)
         if problem_mark:
@@ -415,11 +415,11 @@ def validate_conf(
 ) -> "DbtBouncerConfBase":
     """Validate the configuration and return the Pydantic model.
 
-    Raises:
-        RuntimeError: If the configuration is invalid.
-
     Returns:
         DbtBouncerConf: The validated configuration.
+
+    Raises:
+        RuntimeError: If the configuration is invalid.
 
     """
     logging.info("Validating conf...")

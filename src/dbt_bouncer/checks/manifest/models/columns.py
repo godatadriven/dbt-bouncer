@@ -53,8 +53,8 @@ class CheckModelColumnsHaveMetaKeys(BaseCheck):
             DbtBouncerFailedCheckError: If any model column is missing required meta keys.
 
         """
-        self._require_model()
-        columns = self.model.columns or {}
+        model = self._require_model()
+        columns = model.columns or {}
         failing_columns: dict[str, list[str]] = {}
         for col_name, col in columns.items():
             missing_keys = find_missing_meta_keys(
@@ -65,7 +65,7 @@ class CheckModelColumnsHaveMetaKeys(BaseCheck):
                 failing_columns[col_name] = [k.replace(">>", "") for k in missing_keys]
         if failing_columns:
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` has columns missing required `meta` keys: {failing_columns}"
+                f"`{get_clean_model_name(model.unique_id)}` has columns missing required `meta` keys: {failing_columns}"
             )
 
 
@@ -101,14 +101,14 @@ class CheckModelColumnsHaveTypes(BaseCheck):
             DbtBouncerFailedCheckError: If any column lacks a declared `data_type`.
 
         """
-        self._require_model()
-        columns = self.model.columns or {}
+        model = self._require_model()
+        columns = model.columns or {}
         untyped_columns = [
             col_name for col_name, col in columns.items() if not col.data_type
         ]
         if untyped_columns:
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` has columns without a declared `data_type`: {untyped_columns}"
+                f"`{get_clean_model_name(model.unique_id)}` has columns without a declared `data_type`: {untyped_columns}"
             )
 
 
@@ -151,15 +151,15 @@ class CheckModelHasConstraints(BaseCheck):
             DbtBouncerFailedCheckError: If required constraint types are missing.
 
         """
-        self._require_model()
+        model = self._require_model()
         materialization = (
-            self.model.config.materialized
-            if self.model.config and hasattr(self.model.config, "materialized")
+            model.config.materialized
+            if model.config and hasattr(model.config, "materialized")
             else None
         )
         if materialization not in (Materialization.TABLE, Materialization.INCREMENTAL):
             return
-        constraints = self.model.constraints or []
+        constraints = model.constraints or []
         actual_types = {
             (c.type.value if hasattr(c.type, "value") else str(c.type))
             for c in constraints
@@ -167,5 +167,5 @@ class CheckModelHasConstraints(BaseCheck):
         missing_types = sorted(set(self.required_constraint_types) - actual_types)
         if missing_types:
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` is missing required constraint types: {missing_types}"
+                f"`{get_clean_model_name(model.unique_id)}` is missing required constraint types: {missing_types}"
             )

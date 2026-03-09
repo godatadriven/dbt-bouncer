@@ -61,15 +61,15 @@ class CheckModelDependsOnMacros(BaseCheck):
             DbtBouncerFailedCheckError: If model does not depend on required macros.
 
         """
-        self._require_model()
+        model = self._require_model()
         upstream_macros = [
             (".").join(m.split(".")[1:])
-            for m in getattr(self.model.depends_on, "macros", []) or []
+            for m in getattr(model.depends_on, "macros", []) or []
         ]
         if self.criteria == "any":
             if not any(macro in upstream_macros for macro in self.required_macros):
                 raise DbtBouncerFailedCheckError(
-                    f"`{get_clean_model_name(self.model.unique_id)}` does not depend on any of the required macros: {self.required_macros}."
+                    f"`{get_clean_model_name(model.unique_id)}` does not depend on any of the required macros: {self.required_macros}."
                 )
         elif self.criteria == "all":
             missing_macros = [
@@ -77,14 +77,14 @@ class CheckModelDependsOnMacros(BaseCheck):
             ]
             if missing_macros:
                 raise DbtBouncerFailedCheckError(
-                    f"`{get_clean_model_name(self.model.unique_id)}` is missing required macros: {missing_macros}."
+                    f"`{get_clean_model_name(model.unique_id)}` is missing required macros: {missing_macros}."
                 )
         elif (
             self.criteria == "one"
             and sum(macro in upstream_macros for macro in self.required_macros) != 1
         ):
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` must depend on exactly one of the required macros: {self.required_macros}."
+                f"`{get_clean_model_name(model.unique_id)}` must depend on exactly one of the required macros: {self.required_macros}."
             )
 
 
@@ -119,14 +119,14 @@ class CheckModelDependsOnMultipleSources(BaseCheck):
             DbtBouncerFailedCheckError: If model references more than one source.
 
         """
-        self._require_model()
+        model = self._require_model()
         num_reffed_sources = sum(
             x.split(".")[0] == "source"
-            for x in getattr(self.model.depends_on, "nodes", []) or []
+            for x in getattr(model.depends_on, "nodes", []) or []
         )
         if num_reffed_sources > 1:
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` references more than one source."
+                f"`{get_clean_model_name(model.unique_id)}` references more than one source."
             )
 
 
@@ -167,16 +167,16 @@ class CheckModelHasExposure(BaseCheck):
             DbtBouncerFailedCheckError: If model does not have an exposure.
 
         """
-        self._require_model()
+        model = self._require_model()
         models_in_exposures = {
             node
             for e in self.exposures
             for node in (getattr(e.depends_on, "nodes", []) or [])
         }
 
-        if self.model.unique_id not in models_in_exposures:
+        if model.unique_id not in models_in_exposures:
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` does not have an associated exposure."
+                f"`{get_clean_model_name(model.unique_id)}` does not have an associated exposure."
             )
 
 
@@ -211,14 +211,14 @@ class CheckModelHasNoUpstreamDependencies(BaseCheck):
             DbtBouncerFailedCheckError: If model has no upstream dependencies.
 
         """
-        self._require_model()
+        model = self._require_model()
         if (
-            not self.model.depends_on
-            or not self.model.depends_on.nodes
-            or len(self.model.depends_on.nodes) <= 0
+            not model.depends_on
+            or not model.depends_on.nodes
+            or len(model.depends_on.nodes) <= 0
         ):
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` has no upstream dependencies, this likely indicates hard-coded tables references."
+                f"`{get_clean_model_name(model.unique_id)}` has no upstream dependencies, this likely indicates hard-coded tables references."
             )
 
 
@@ -276,8 +276,8 @@ class CheckModelMaxChainedViews(BaseCheck):
             DbtBouncerFailedCheckError: If max chained views exceeded.
 
         """
-        self._require_model()
-        self._require_manifest()
+        model = self._require_model()
+        manifest_obj = self._require_manifest()
 
         models_by_id = (
             self.models_by_unique_id
@@ -342,17 +342,16 @@ class CheckModelMaxChainedViews(BaseCheck):
                 return_upstream_view_models(
                     materializations=self.materializations_to_include,
                     max_chained_views=self.max_chained_views,
-                    model_unique_ids_to_check=[self.model.unique_id],
+                    model_unique_ids_to_check=[model.unique_id],
                     package_name=(
-                        self.package_name
-                        or self.manifest_obj.manifest.metadata.project_name
+                        self.package_name or manifest_obj.manifest.metadata.project_name
                     ),
                 ),
             )
             != 0
         ):
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` has more than {self.max_chained_views} upstream dependents that are not tables."
+                f"`{get_clean_model_name(model.unique_id)}` has more than {self.max_chained_views} upstream dependents that are not tables."
             )
 
 
@@ -394,16 +393,16 @@ class CheckModelMaxFanout(BaseCheck):
             DbtBouncerFailedCheckError: If max fanout exceeded.
 
         """
-        self._require_model()
+        model = self._require_model()
         num_downstream_models = sum(
-            self.model.unique_id
+            model.unique_id
             in (getattr(m.depends_on, "nodes", []) if m.depends_on else [])
             for m in self.models
         )
 
         if num_downstream_models > self.max_downstream_models:
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` has {num_downstream_models} downstream models, which is more than the permitted maximum of {self.max_downstream_models}."
+                f"`{get_clean_model_name(model.unique_id)}` has {num_downstream_models} downstream models, which is more than the permitted maximum of {self.max_downstream_models}."
             )
 
 
@@ -453,8 +452,8 @@ class CheckModelMaxUpstreamDependencies(BaseCheck):
             DbtBouncerFailedCheckError: If max upstream dependencies exceeded.
 
         """
-        self._require_model()
-        depends_on = self.model.depends_on
+        model = self._require_model()
+        depends_on = model.depends_on
         if depends_on:
             num_upstream_macros = len(list(getattr(depends_on, "macros", []) or []))
             nodes = getattr(depends_on, "nodes", []) or []
@@ -471,13 +470,13 @@ class CheckModelMaxUpstreamDependencies(BaseCheck):
 
         if num_upstream_macros > self.max_upstream_macros:
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` has {num_upstream_macros} upstream macros, which is more than the permitted maximum of {self.max_upstream_macros}."
+                f"`{get_clean_model_name(model.unique_id)}` has {num_upstream_macros} upstream macros, which is more than the permitted maximum of {self.max_upstream_macros}."
             )
         if num_upstream_models > self.max_upstream_models:
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` has {num_upstream_models} upstream models, which is more than the permitted maximum of {self.max_upstream_models}."
+                f"`{get_clean_model_name(model.unique_id)}` has {num_upstream_models} upstream models, which is more than the permitted maximum of {self.max_upstream_models}."
             )
         if num_upstream_sources > self.max_upstream_sources:
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` has {num_upstream_sources} upstream sources, which is more than the permitted maximum of {self.max_upstream_sources}."
+                f"`{get_clean_model_name(model.unique_id)}` has {num_upstream_sources} upstream sources, which is more than the permitted maximum of {self.max_upstream_sources}."
             )

@@ -46,15 +46,15 @@ class CheckSourceNotOrphaned(BaseCheck):
             DbtBouncerFailedCheckError: If source is orphaned.
 
         """
-        self._require_source()
+        source = self._require_source()
         num_refs = sum(
-            self.source.unique_id in getattr(model.depends_on, "nodes", [])
+            source.unique_id in getattr(model.depends_on, "nodes", [])
             for model in self.models
             if model.depends_on
         )
         if num_refs < 1:
             raise DbtBouncerFailedCheckError(
-                f"Source `{self.source.source_name}.{self.source.name}` is orphaned, i.e. not referenced by any model."
+                f"Source `{source.source_name}.{source.name}` is orphaned, i.e. not referenced by any model."
             )
 
 
@@ -90,20 +90,20 @@ class CheckSourceUsedByModelsInSameDirectory(BaseCheck):
             DbtBouncerFailedCheckError: If source is referenced by models in different directory.
 
         """
-        self._require_source()
+        source = self._require_source()
         reffed_models_not_in_same_dir = []
         for model in self.models:
             if (
                 model.depends_on
-                and self.source.unique_id in getattr(model.depends_on, "nodes", [])
+                and source.unique_id in getattr(model.depends_on, "nodes", [])
                 and model.original_file_path.split("/")[:-1]
-                != self.source.original_file_path.split("/")[:-1]
+                != source.original_file_path.split("/")[:-1]
             ):
                 reffed_models_not_in_same_dir.append(model.name)
 
         if len(reffed_models_not_in_same_dir) != 0:
             raise DbtBouncerFailedCheckError(
-                f"Source `{self.source.source_name}.{self.source.name}` is referenced by models defined in a different directory: {reffed_models_not_in_same_dir}"
+                f"Source `{source.source_name}.{source.name}` is referenced by models defined in a different directory: {reffed_models_not_in_same_dir}"
             )
 
 
@@ -139,13 +139,13 @@ class CheckSourceUsedByOnlyOneModel(BaseCheck):
             DbtBouncerFailedCheckError: If source is referenced by more than one model.
 
         """
-        self._require_source()
+        source = self._require_source()
         num_refs = sum(
-            self.source.unique_id in getattr(model.depends_on, "nodes", [])
+            source.unique_id in getattr(model.depends_on, "nodes", [])
             for model in self.models
             if model.depends_on
         )
         if num_refs > 1:
             raise DbtBouncerFailedCheckError(
-                f"Source `{self.source.source_name}.{self.source.name}` is referenced by more than one model."
+                f"Source `{source.source_name}.{source.name}` is referenced by more than one model."
             )

@@ -52,10 +52,10 @@ class CheckSourceDescriptionPopulated(BaseCheck):
             DbtBouncerFailedCheckError: If description is not populated.
 
         """
-        self._require_source()
+        source = self._require_source()
         if not self._is_description_populated(
-            self.source.description or "", self.min_description_length
+            source.description or "", self.min_description_length
         ):
             raise DbtBouncerFailedCheckError(
-                f"`{self.source.source_name}.{self.source.name}` does not have a populated description."
+                f"`{source.source_name}.{source.name}` does not have a populated description."
             )

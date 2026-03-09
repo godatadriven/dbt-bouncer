@@ -164,7 +164,7 @@ class BaseCheck(BaseModel):
             CatalogNodes: The catalog_node object.
 
         """
-        return self._require("catalog_node")  # type: ignore[return-value]
+        return self._require("catalog_node")
 
     def _require_catalog_source(self) -> "CatalogNodes":
         """Require catalog_source.
@@ -173,7 +173,7 @@ class BaseCheck(BaseModel):
             CatalogNodes: The catalog_source object.
 
         """
-        return self._require("catalog_source")  # type: ignore[return-value]
+        return self._require("catalog_source")
 
     def _require_exposure(self) -> "DbtBouncerExposureBase":
         """Require exposure.
@@ -182,7 +182,7 @@ class BaseCheck(BaseModel):
             DbtBouncerExposureBase: The exposure object.
 
         """
-        return self._require("exposure")  # type: ignore[return-value]
+        return self._require("exposure")
 
     def _require_macro(self) -> "Macros":
         """Require macro.
@@ -191,7 +191,7 @@ class BaseCheck(BaseModel):
             Macros: The macro object.
 
         """
-        return self._require("macro")  # type: ignore[return-value]
+        return self._require("macro")
 
     def _require_manifest(self) -> "DbtBouncerManifest":
         """Require manifest_obj.
@@ -200,7 +200,7 @@ class BaseCheck(BaseModel):
             DbtBouncerManifest: The manifest object.
 
         """
-        return self._require("manifest_obj")  # type: ignore[return-value]
+        return self._require("manifest_obj")
 
     def _require_model(self) -> "DbtBouncerModelBase":
         """Require model.
@@ -209,7 +209,7 @@ class BaseCheck(BaseModel):
             DbtBouncerModelBase: The model object.
 
         """
-        return self._require("model")  # type: ignore[return-value]
+        return self._require("model")
 
     def _require_run_result(self) -> "DbtBouncerRunResultBase":
         """Require run_result.
@@ -218,7 +218,7 @@ class BaseCheck(BaseModel):
             DbtBouncerRunResultBase: The run_result object.
 
         """
-        return self._require("run_result")  # type: ignore[return-value]
+        return self._require("run_result")
 
     def _require_seed(self) -> "DbtBouncerSeedBase":
         """Require seed.
@@ -227,7 +227,7 @@ class BaseCheck(BaseModel):
             DbtBouncerSeedBase: The seed object.
 
         """
-        return self._require("seed")  # type: ignore[return-value]
+        return self._require("seed")
 
     def _require_semantic_model(self) -> "DbtBouncerSemanticModelBase":
         """Require semantic_model.
@@ -236,7 +236,7 @@ class BaseCheck(BaseModel):
             DbtBouncerSemanticModelBase: The semantic_model object.
 
         """
-        return self._require("semantic_model")  # type: ignore[return-value]
+        return self._require("semantic_model")
 
     def _require_snapshot(self) -> "DbtBouncerSnapshotBase":
         """Require snapshot.
@@ -245,7 +245,7 @@ class BaseCheck(BaseModel):
             DbtBouncerSnapshotBase: The snapshot object.
 
         """
-        return self._require("snapshot")  # type: ignore[return-value]
+        return self._require("snapshot")
 
     def _require_source(self) -> "DbtBouncerSourceBase":
         """Require source.
@@ -254,7 +254,7 @@ class BaseCheck(BaseModel):
             DbtBouncerSourceBase: The source object.
 
         """
-        return self._require("source")  # type: ignore[return-value]
+        return self._require("source")
 
     def _require_test(self) -> "DbtBouncerTestBase":
         """Require test.
@@ -263,7 +263,7 @@ class BaseCheck(BaseModel):
             DbtBouncerTestBase: The test object.
 
         """
-        return self._require("test")  # type: ignore[return-value]
+        return self._require("test")
 
     def _require_unit_test(self) -> "UnitTests":
         """Require unit_test.
@@ -272,4 +272,4 @@ class BaseCheck(BaseModel):
             UnitTests: The unit_test object.
 
         """
-        return self._require("unit_test")  # type: ignore[return-value]
+        return self._require("unit_test")

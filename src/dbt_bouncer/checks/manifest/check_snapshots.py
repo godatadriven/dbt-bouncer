@@ -51,25 +51,25 @@ class CheckSnapshotHasTags(BaseCheck):
             DbtBouncerFailedCheckError: If snapshot does not have required tags.
 
         """
-        self._require_snapshot()
-        snapshot_tags = self.snapshot.tags or []
+        snapshot = self._require_snapshot()
+        snapshot_tags = snapshot.tags or []
         if self.criteria == "any":
             if not any(tag in snapshot_tags for tag in self.tags):
                 raise DbtBouncerFailedCheckError(
-                    f"`{self.snapshot.name}` does not have any of the required tags: {self.tags}."
+                    f"`{snapshot.name}` does not have any of the required tags: {self.tags}."
                 )
         elif self.criteria == "all":
             missing_tags = [tag for tag in self.tags if tag not in snapshot_tags]
             if missing_tags:
                 raise DbtBouncerFailedCheckError(
-                    f"`{self.snapshot.name}` is missing required tags: {missing_tags}."
+                    f"`{snapshot.name}` is missing required tags: {missing_tags}."
                 )
         elif (
             self.criteria == "one"
             and sum(tag in snapshot_tags for tag in self.tags) != 1
         ):
             raise DbtBouncerFailedCheckError(
-                f"`{self.snapshot.name}` must have exactly one of the required tags: {self.tags}."
+                f"`{snapshot.name}` must have exactly one of the required tags: {self.tags}."
             )
 
 
@@ -115,8 +115,8 @@ class CheckSnapshotNames(BaseCheck):
             DbtBouncerFailedCheckError: If snapshot name does not match regex.
 
         """
-        self._require_snapshot()
-        if self._compiled_pattern.match(str(self.snapshot.name)) is None:
+        snapshot = self._require_snapshot()
+        if self._compiled_pattern.match(str(snapshot.name)) is None:
             raise DbtBouncerFailedCheckError(
-                f"`{self.snapshot.name}` does not match the supplied regex `{self.snapshot_name_pattern.strip()})`."
+                f"`{snapshot.name}` does not match the supplied regex `{self.snapshot_name_pattern.strip()})`."
             )

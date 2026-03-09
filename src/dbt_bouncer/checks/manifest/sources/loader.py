@@ -43,8 +43,8 @@ class CheckSourceLoaderPopulated(BaseCheck):
             DbtBouncerFailedCheckError: If loader is not populated.
 
         """
-        self._require_source()
-        if self.source.loader == "":
+        source = self._require_source()
+        if source.loader == "":
             raise DbtBouncerFailedCheckError(
-                f"`{self.source.source_name}.{self.source.name}` does not have a populated loader."
+                f"`{source.source_name}.{source.name}` does not have a populated loader."
             )

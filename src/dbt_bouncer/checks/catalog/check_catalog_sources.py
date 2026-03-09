@@ -58,7 +58,7 @@ class CheckSourceColumnsAreAllDocumented(BaseCheck):
         undocumented_columns = [
             v.name
             for _, v in catalog_source.columns.items()
-            if v.name not in source.columns
+            if v.name not in (source.columns or {})
         ]
         if undocumented_columns:
             raise DbtBouncerFailedCheckError(

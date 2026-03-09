@@ -71,14 +71,14 @@ class CheckModelHasUniqueTest(BaseCheck):
             DbtBouncerFailedCheckError: If model does not have a unique test.
 
         """
-        self._require_model()
+        model = self._require_model()
         num_unique_tests = 0
         for test in self.tests:
             test_metadata = getattr(test, "test_metadata", None)
             attached_node = getattr(test, "attached_node", None)
             if (
                 test_metadata
-                and attached_node == self.model.unique_id
+                and attached_node == model.unique_id
                 and (
                     (
                         f"{getattr(test_metadata, 'namespace', '')}.{getattr(test_metadata, 'name', '')}"
@@ -94,7 +94,7 @@ class CheckModelHasUniqueTest(BaseCheck):
                 num_unique_tests += 1
         if num_unique_tests < 1:
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` does not have a test for uniqueness of a column."
+                f"`{get_clean_model_name(model.unique_id)}` does not have a test for uniqueness of a column."
             )
 
 
@@ -147,10 +147,10 @@ class CheckModelHasUnitTests(BaseCheck):
             DbtBouncerFailedCheckError: If model does not have enough unit tests.
 
         """
-        self._require_manifest()
-        self._require_model()
+        manifest_obj = self._require_manifest()
+        model = self._require_model()
         if get_package_version_number(
-            self.manifest_obj.manifest.metadata.dbt_version or "0.0.0"
+            manifest_obj.manifest.metadata.dbt_version or "0.0.0"
         ) >= get_package_version_number("1.8.0"):
             num_unit_tests = len(
                 [
@@ -158,12 +158,12 @@ class CheckModelHasUnitTests(BaseCheck):
                     for t in self.unit_tests
                     if t.depends_on
                     and t.depends_on.nodes
-                    and t.depends_on.nodes[0] == self.model.unique_id
+                    and t.depends_on.nodes[0] == model.unique_id
                 ],
             )
             if num_unit_tests < self.min_number_of_unit_tests:
                 raise DbtBouncerFailedCheckError(
-                    f"`{get_clean_model_name(self.model.unique_id)}` has {num_unit_tests} unit tests, this is less than the minimum of {self.min_number_of_unit_tests}."
+                    f"`{get_clean_model_name(model.unique_id)}` has {num_unit_tests} unit tests, this is less than the minimum of {self.min_number_of_unit_tests}."
                 )
         else:
             logging.warning(

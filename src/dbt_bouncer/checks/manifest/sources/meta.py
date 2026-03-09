@@ -54,13 +54,13 @@ class CheckSourceHasMetaKeys(BaseCheck):
             DbtBouncerFailedCheckError: If required meta keys are missing.
 
         """
-        self._require_source()
+        source = self._require_source()
         missing_keys = find_missing_meta_keys(
-            meta_config=self.source.meta,
+            meta_config=source.meta,
             required_keys=self.keys.model_dump(),
         )
 
         if missing_keys != []:
             raise DbtBouncerFailedCheckError(
-                f"`{self.source.source_name}.{self.source.name}` is missing the following keys from the `meta` config: {[x.replace('>>', '') for x in missing_keys]}"
+                f"`{source.source_name}.{source.name}` is missing the following keys from the `meta` config: {[x.replace('>>', '') for x in missing_keys]}"
             )

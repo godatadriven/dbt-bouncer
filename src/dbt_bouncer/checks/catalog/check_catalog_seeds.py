@@ -55,7 +55,9 @@ class CheckSeedColumnsAreAllDocumented(BaseCheck):
         """
         catalog_node = self._require_catalog_node()
         self._require_manifest()
-        if catalog_node.unique_id.startswith("seed."):
+        if catalog_node.unique_id is not None and catalog_node.unique_id.startswith(
+            "seed."
+        ):
             seed = next(s for s in self.seeds if s.unique_id == catalog_node.unique_id)
 
             seed_columns = seed.columns or {}

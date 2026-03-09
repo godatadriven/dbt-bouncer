@@ -45,8 +45,8 @@ class CheckSourcePropertyFileLocation(BaseCheck):
             DbtBouncerFailedCheckError: If property file location is incorrect.
 
         """
-        self._require_source()
-        original_path = Path(clean_path_str(self.source.original_file_path))
+        source = self._require_source()
+        original_path = Path(clean_path_str(source.original_file_path))
 
         if (
             len(original_path.parts) > 2
@@ -62,13 +62,13 @@ class CheckSourcePropertyFileLocation(BaseCheck):
 
         if not properties_yml_name.startswith("_"):
             raise DbtBouncerFailedCheckError(
-                f"The properties file for `{self.source.source_name}.{self.source.name}` (`{properties_yml_name}`) does not start with an underscore."
+                f"The properties file for `{source.source_name}.{source.name}` (`{properties_yml_name}`) does not start with an underscore."
             )
         if expected_substring not in properties_yml_name:
             raise DbtBouncerFailedCheckError(
-                f"The properties file for `{self.source.source_name}.{self.source.name}` (`{properties_yml_name}`) does not contain the expected substring (`{expected_substring}`)."
+                f"The properties file for `{source.source_name}.{source.name}` (`{properties_yml_name}`) does not contain the expected substring (`{expected_substring}`)."
             )
         if not properties_yml_name.endswith("__sources.yml"):
             raise DbtBouncerFailedCheckError(
-                f"The properties file for `{self.source.source_name}.{self.source.name}` (`{properties_yml_name}`) does not end with `__sources.yml`."
+                f"The properties file for `{source.source_name}.{source.name}` (`{properties_yml_name}`) does not end with `__sources.yml`."
             )

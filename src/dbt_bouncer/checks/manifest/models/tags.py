@@ -52,22 +52,22 @@ class CheckModelHasTags(BaseCheck):
             DbtBouncerFailedCheckError: If model does not have required tags.
 
         """
-        self._require_model()
-        model_tags = self.model.tags or []
+        model = self._require_model()
+        model_tags = model.tags or []
         if self.criteria == "any":
             if not any(tag in model_tags for tag in self.tags):
                 raise DbtBouncerFailedCheckError(
-                    f"`{get_clean_model_name(self.model.unique_id)}` does not have any of the required tags: {self.tags}."
+                    f"`{get_clean_model_name(model.unique_id)}` does not have any of the required tags: {self.tags}."
                 )
         elif self.criteria == "all":
             missing_tags = [tag for tag in self.tags if tag not in model_tags]
             if missing_tags:
                 raise DbtBouncerFailedCheckError(
-                    f"`{get_clean_model_name(self.model.unique_id)}` is missing required tags: {missing_tags}."
+                    f"`{get_clean_model_name(model.unique_id)}` is missing required tags: {missing_tags}."
                 )
         elif (
             self.criteria == "one" and sum(tag in model_tags for tag in self.tags) != 1
         ):
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` must have exactly one of the required tags: {self.tags}."
+                f"`{get_clean_model_name(model.unique_id)}` must have exactly one of the required tags: {self.tags}."
             )

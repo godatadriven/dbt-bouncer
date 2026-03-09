@@ -57,8 +57,8 @@ class CheckSourceNames(BaseCheck):
             DbtBouncerFailedCheckError: If source name does not match regex.
 
         """
-        self._require_source()
-        if self._compiled_pattern.match(str(self.source.name)) is None:
+        source = self._require_source()
+        if self._compiled_pattern.match(str(source.name)) is None:
             raise DbtBouncerFailedCheckError(
-                f"`{self.source.source_name}.{self.source.name}` does not match the supplied regex `({self.source_name_pattern.strip()})`."
+                f"`{source.source_name}.{source.name}` does not match the supplied regex `({self.source_name_pattern.strip()})`."
             )

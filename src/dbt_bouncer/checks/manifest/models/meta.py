@@ -50,12 +50,12 @@ class CheckModelHasMetaKeys(BaseCheck):
             DbtBouncerFailedCheckError: If required meta keys are missing.
 
         """
-        self._require_model()
+        model = self._require_model()
         missing_keys = find_missing_meta_keys(
-            meta_config=self.model.meta,
+            meta_config=model.meta,
             required_keys=self.keys.model_dump(),
         )
         if missing_keys != []:
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` is missing the following keys from the `meta` config: {[x.replace('>>', '') for x in missing_keys]}"
+                f"`{get_clean_model_name(model.unique_id)}` is missing the following keys from the `meta` config: {[x.replace('>>', '') for x in missing_keys]}"
             )

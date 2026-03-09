@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import logging
 from pathlib import Path, PurePath
-from typing import Annotated, Optional
+from typing import TYPE_CHECKING, Annotated
 
 import typer
 from typer.main import get_command
@@ -8,6 +10,10 @@ from typer.main import get_command
 from dbt_bouncer.enums import ConfigFileName, OutputFormat
 from dbt_bouncer.logger import configure_console_logging
 from dbt_bouncer.version import version as get_version
+
+if TYPE_CHECKING:
+    from dbt_bouncer.config_file_parser import DbtBouncerConfBase
+    from dbt_bouncer.context import BouncerContext
 
 
 def _detect_config_file_source(config_file: Path | None) -> str:
@@ -32,11 +38,127 @@ app = typer.Typer(
 )
 
 
+def _build_context(
+    bouncer_config: DbtBouncerConfBase,
+    check_categories: list[str],
+    create_pr_comment_file: bool,
+    dbt_artifacts_dir: Path,
+    dry_run: bool,
+    fast: bool,
+    output_file: Path | None,
+    output_format: str,
+    output_only_failures: bool,
+    show_all_failures: bool,
+) -> BouncerContext:
+    """Parse artifacts and build a BouncerContext.
+
+    Returns:
+        BouncerContext: Ready-to-run context.
+
+    """
+    from dbt_bouncer.context import BouncerContext
+
+    if fast:
+        from dbt_bouncer.artifact_parsers.fast_parser import (
+            parse_dbt_artifacts_fast,
+        )
+
+        (
+            manifest_obj,
+            project_exposures,
+            project_macros,
+            project_models,
+            project_seeds,
+            project_semantic_models,
+            project_snapshots,
+            project_sources,
+            project_tests,
+            project_unit_tests,
+            project_catalog_nodes,
+            project_catalog_sources,
+            project_run_results,
+        ) = parse_dbt_artifacts_fast(
+            bouncer_config=bouncer_config, dbt_artifacts_dir=dbt_artifacts_dir
+        )
+
+        # Skip Pydantic validation for fast parser (proxy types don't match)
+        return BouncerContext.model_construct(
+            bouncer_config=bouncer_config,
+            catalog_nodes=project_catalog_nodes,
+            catalog_sources=project_catalog_sources,
+            check_categories=check_categories,
+            create_pr_comment_file=create_pr_comment_file,
+            dry_run=dry_run,
+            exposures=project_exposures,
+            macros=project_macros,
+            manifest_obj=manifest_obj,
+            models=project_models,
+            output_file=output_file,
+            output_format=output_format,
+            output_only_failures=output_only_failures,
+            run_results=project_run_results,
+            seeds=project_seeds,
+            semantic_models=project_semantic_models,
+            show_all_failures=show_all_failures,
+            snapshots=project_snapshots,
+            sources=project_sources,
+            tests=project_tests,
+            unit_tests=project_unit_tests,
+        )
+
+    from dbt_bouncer.artifact_parsers.parsers_common import parse_dbt_artifacts
+    from dbt_bouncer.context import _rebuild_bouncer_context
+
+    (
+        manifest_obj,
+        project_exposures,
+        project_macros,
+        project_models,
+        project_seeds,
+        project_semantic_models,
+        project_snapshots,
+        project_sources,
+        project_tests,
+        project_unit_tests,
+        project_catalog_nodes,
+        project_catalog_sources,
+        project_run_results,
+    ) = parse_dbt_artifacts(
+        bouncer_config=bouncer_config, dbt_artifacts_dir=dbt_artifacts_dir
+    )
+
+    _rebuild_bouncer_context()
+    return BouncerContext(
+        bouncer_config=bouncer_config,
+        catalog_nodes=project_catalog_nodes,
+        catalog_sources=project_catalog_sources,
+        check_categories=check_categories,
+        create_pr_comment_file=create_pr_comment_file,
+        dry_run=dry_run,
+        exposures=project_exposures,
+        macros=project_macros,
+        manifest_obj=manifest_obj,
+        models=project_models,
+        output_file=output_file,
+        output_format=output_format,
+        output_only_failures=output_only_failures,
+        run_results=project_run_results,
+        seeds=project_seeds,
+        semantic_models=project_semantic_models,
+        show_all_failures=show_all_failures,
+        snapshots=project_snapshots,
+        sources=project_sources,
+        tests=project_tests,
+        unit_tests=project_unit_tests,
+    )
+
+
 def run_bouncer(
     config_file: PurePath | None = None,
     check: str = "",
     create_pr_comment_file: bool = False,
     dry_run: bool = False,
+    fast: bool = True,
     only: str = "",
     output_file: Path | None = None,
     output_format: OutputFormat = OutputFormat.JSON,
@@ -52,6 +174,7 @@ def run_bouncer(
         check: Limit the checks run to specific check names, comma-separated.
         create_pr_comment_file: Create a `github-comment.md` file.
         dry_run: If True, print which checks would run without executing them.
+        fast: Use orjson-based fast parser (bypasses Pydantic validation). Defaults to True.
         only: Limit the checks run to specific categories.
         output_file: Location of the file where check metadata will be saved.
         output_format: Format for the output file or stdout (csv, json, junit, sarif, tap).
@@ -189,30 +312,7 @@ def run_bouncer(
         config_file_path.parent / (bouncer_config.dbt_artifacts_dir or "target")
     )
 
-    from dbt_bouncer.artifact_parsers.parsers_common import parse_dbt_artifacts
-
-    (
-        manifest_obj,
-        project_exposures,
-        project_macros,
-        project_models,
-        project_seeds,
-        project_semantic_models,
-        project_snapshots,
-        project_sources,
-        project_tests,
-        project_unit_tests,
-        project_catalog_nodes,
-        project_catalog_sources,
-        project_run_results,
-    ) = parse_dbt_artifacts(
-        bouncer_config=bouncer_config, dbt_artifacts_dir=dbt_artifacts_dir
-    )
-
-    from dbt_bouncer.context import BouncerContext, _rebuild_bouncer_context
     from dbt_bouncer.runner import runner
-
-    _rebuild_bouncer_context()
 
     normalized_output_format = (
         output_format.value
@@ -220,28 +320,17 @@ def run_bouncer(
         else OutputFormat(output_format.lower()).value
     )
 
-    ctx = BouncerContext(
+    ctx = _build_context(
         bouncer_config=bouncer_config,
-        catalog_nodes=project_catalog_nodes,
-        catalog_sources=project_catalog_sources,
         check_categories=check_categories,
         create_pr_comment_file=create_pr_comment_file,
+        dbt_artifacts_dir=dbt_artifacts_dir,
         dry_run=dry_run,
-        exposures=project_exposures,
-        macros=project_macros,
-        manifest_obj=manifest_obj,
-        models=project_models,
+        fast=fast,
         output_file=output_file,
         output_format=normalized_output_format,
         output_only_failures=output_only_failures,
-        run_results=project_run_results,
-        seeds=project_seeds,
-        semantic_models=project_semantic_models,
         show_all_failures=show_all_failures,
-        snapshots=project_snapshots,
-        sources=project_sources,
-        tests=project_tests,
-        unit_tests=project_unit_tests,
     )
     results = runner(ctx=ctx)
     return results[0]
@@ -274,7 +363,7 @@ def main_callback(
         ),
     ] = "",
     output_file: Annotated[
-        Optional[Path],
+        Path | None,
         typer.Option(help="Location of the file where check metadata will be saved."),
     ] = None,
     output_format: Annotated[
@@ -337,7 +426,7 @@ def main_callback(
 @app.command()
 def run(
     config_file: Annotated[
-        Optional[Path],
+        Path | None,
         typer.Option(help="Location of the config file (YML, YAML, or TOML)."),
     ] = Path(ConfigFileName.DBT_BOUNCER_YML),
     create_pr_comment_file: Annotated[
@@ -361,6 +450,14 @@ def run(
             rich_help_panel="Check Selection",
         ),
     ] = False,
+    fast: Annotated[
+        bool,
+        typer.Option(
+            "--fast/--no-fast",
+            help="Use fast orjson-based parser (bypasses Pydantic validation). Enabled by default.",
+            rich_help_panel="Performance",
+        ),
+    ] = True,
     only: Annotated[
         str,
         typer.Option(
@@ -369,7 +466,7 @@ def run(
         ),
     ] = "",
     output_file: Annotated[
-        Optional[Path],
+        Path | None,
         typer.Option(
             help="Location of the file where check metadata will be saved.",
             rich_help_panel="Output Options",
@@ -435,6 +532,7 @@ def run(
         config_file=config_file,
         create_pr_comment_file=create_pr_comment_file,
         dry_run=dry_run,
+        fast=fast,
         only=only,
         output_file=output_file,
         output_format=output_format,
@@ -528,7 +626,7 @@ def init() -> None:
             f,
             default_flow_style=False,
             sort_keys=False,
-            Dumper=yaml.CSafeDumper,
+            Dumper=yaml.CSafeDumper,  # type: ignore[possibly-missing-attribute]
         )
 
     console.print(f"\n[bold green][OK] Created {config_path}[/bold green]")
@@ -543,7 +641,7 @@ def init() -> None:
 @app.command()
 def validate(
     config_file: Annotated[
-        Optional[Path],
+        Path | None,
         typer.Option(help="Location of the config file (YML, YAML, or TOML)."),
     ] = Path(ConfigFileName.DBT_BOUNCER_YML),
 ) -> None:
@@ -644,7 +742,7 @@ def list_checks(
         }
     )
 
-    def _get_check_params(check_class: type) -> dict[str, str]:  # type: ignore[type-arg]
+    def _get_check_params(check_class: type) -> dict[str, str]:
         """Return configurable parameter names and their type annotations.
 
         Returns:

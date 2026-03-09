@@ -43,19 +43,21 @@ class CheckSourceFreshnessPopulated(BaseCheck):
             DbtBouncerFailedCheckError: If freshness is not populated.
 
         """
-        self._require_source()
-        error_msg = f"`{self.source.source_name}.{self.source.name}` does not have a populated freshness."
-        if self.source.freshness is None:
+        source = self._require_source()
+        error_msg = (
+            f"`{source.source_name}.{source.name}` does not have a populated freshness."
+        )
+        if source.freshness is None:
             raise DbtBouncerFailedCheckError(error_msg)
         has_error_after = (
-            self.source.freshness.error_after
-            and self.source.freshness.error_after.count is not None
-            and self.source.freshness.error_after.period is not None
+            source.freshness.error_after
+            and source.freshness.error_after.count is not None
+            and source.freshness.error_after.period is not None
         )
         has_warn_after = (
-            self.source.freshness.warn_after
-            and self.source.freshness.warn_after.count is not None
-            and self.source.freshness.warn_after.period is not None
+            source.freshness.warn_after
+            and source.freshness.warn_after.count is not None
+            and source.freshness.warn_after.period is not None
         )
 
         if not (has_error_after or has_warn_after):

@@ -64,10 +64,10 @@ class CheckModelDescriptionContainsRegexPattern(BaseCheck):
             DbtBouncerFailedCheckError: If description does not match regex.
 
         """
-        self._require_model()
-        if not self._compiled_pattern.match(str(self.model.description)):
+        model = self._require_model()
+        if not self._compiled_pattern.match(str(model.description)):
             raise DbtBouncerFailedCheckError(
-                f"""`{get_clean_model_name(self.model.unique_id)}`'s description "{self.model.description}" doesn't match the supplied regex: {self.regexp_pattern}."""
+                f"""`{get_clean_model_name(model.unique_id)}`'s description "{model.description}" doesn't match the supplied regex: {self.regexp_pattern}."""
             )
 
 
@@ -111,12 +111,12 @@ class CheckModelDescriptionPopulated(BaseCheck):
             DbtBouncerFailedCheckError: If description is not populated.
 
         """
-        self._require_model()
+        model = self._require_model()
         if not self._is_description_populated(
-            self.model.description or "", self.min_description_length
+            model.description or "", self.min_description_length
         ):
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` does not have a populated description."
+                f"`{get_clean_model_name(model.unique_id)}` does not have a populated description."
             )
 
 
@@ -250,5 +250,5 @@ class CheckModelDocumentedInSameDirectory(BaseCheck):
 
         if model_doc_dir != model_sql_dir:
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` is documented in a different directory to the `.sql` file: `{'/'.join(model_doc_dir)}` vs `{'/'.join(model_sql_dir)}`."
+                f"`{get_clean_model_name(model.unique_id)}` is documented in a different directory to the `.sql` file: `{'/'.join(model_doc_dir)}` vs `{'/'.join(model_sql_dir)}`."
             )

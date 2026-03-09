@@ -63,8 +63,8 @@ class CheckModelNames(BaseCheck):
             DbtBouncerFailedCheckError: If model name does not match regex.
 
         """
-        self._require_model()
-        if self._compiled_pattern.match(str(self.model.name)) is None:
+        model = self._require_model()
+        if self._compiled_pattern.match(str(model.name)) is None:
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` does not match the supplied regex `{self.model_name_pattern.strip()}`."
+                f"`{get_clean_model_name(model.unique_id)}` does not match the supplied regex `{self.model_name_pattern.strip()}`."
             )

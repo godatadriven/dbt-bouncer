@@ -50,22 +50,22 @@ class CheckSourceHasTags(BaseCheck):
             DbtBouncerFailedCheckError: If source does not have required tags.
 
         """
-        self._require_source()
-        source_tags = self.source.tags or []
+        source = self._require_source()
+        source_tags = source.tags or []
         if self.criteria == "any":
             if not any(tag in source_tags for tag in self.tags):
                 raise DbtBouncerFailedCheckError(
-                    f"`{self.source.source_name}.{self.source.name}` does not have any of the required tags: {self.tags}."
+                    f"`{source.source_name}.{source.name}` does not have any of the required tags: {self.tags}."
                 )
         elif self.criteria == "all":
             missing_tags = set(self.tags) - set(source_tags)
             if missing_tags:
                 raise DbtBouncerFailedCheckError(
-                    f"`{self.source.source_name}.{self.source.name}` is missing required tags: {missing_tags}."
+                    f"`{source.source_name}.{source.name}` is missing required tags: {missing_tags}."
                 )
         elif (
             self.criteria == "one" and sum(tag in source_tags for tag in self.tags) != 1
         ):
             raise DbtBouncerFailedCheckError(
-                f"`{self.source.source_name}.{self.source.name}` must have exactly one of the required tags: {self.tags}."
+                f"`{source.source_name}.{source.name}` must have exactly one of the required tags: {self.tags}."
             )
