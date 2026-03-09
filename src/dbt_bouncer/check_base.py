@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, ClassVar
+from typing import Any, ClassVar
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -8,30 +8,6 @@ from dbt_bouncer.utils import is_description_populated
 
 # Cache annotation key sets per check class to avoid rebuilding on every injection call.
 _ANNOTATION_KEYS_CACHE: dict[type, frozenset[str]] = {}
-
-if TYPE_CHECKING:
-    import warnings
-
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", category=UserWarning)
-        from dbt_artifacts_parser.parsers.catalog.catalog_v1 import (
-            Nodes as CatalogNodes,
-        )
-    from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
-        Macros,
-        UnitTests,
-    )
-    from dbt_bouncer.artifact_parsers.parsers_manifest import (
-        DbtBouncerExposureBase,
-        DbtBouncerManifest,
-        DbtBouncerModelBase,
-        DbtBouncerSeedBase,
-        DbtBouncerSemanticModelBase,
-        DbtBouncerSnapshotBase,
-        DbtBouncerSourceBase,
-        DbtBouncerTestBase,
-    )
-    from dbt_bouncer.artifact_parsers.parsers_run_results import DbtBouncerRunResultBase
 
 
 class BaseCheck(BaseModel):
@@ -64,26 +40,26 @@ class BaseCheck(BaseModel):
         description="Severity of the check, one of 'error' or 'warn'.",
     )
 
-    catalog_node: "CatalogNodes | None" = Field(default=None)
-    catalog_source: "CatalogNodes | None" = Field(default=None)
-    exposure: "DbtBouncerExposureBase | None" = Field(default=None)
-    macro: "Macros | None" = Field(default=None)
-    manifest_obj: "DbtBouncerManifest | None" = Field(default=None)
-    model: "DbtBouncerModelBase | None" = Field(default=None)
-    run_result: "DbtBouncerRunResultBase | None" = Field(default=None)
-    seed: "DbtBouncerSeedBase | None" = Field(default=None)
-    semantic_model: "DbtBouncerSemanticModelBase | None" = Field(default=None)
-    snapshot: "DbtBouncerSnapshotBase | None" = Field(default=None)
-    source: "DbtBouncerSourceBase | None" = Field(default=None)
-    test: "DbtBouncerTestBase | None" = Field(default=None)
-    unit_test: "UnitTests | None" = Field(default=None)
+    catalog_node: Any | None = Field(default=None)
+    catalog_source: Any | None = Field(default=None)
+    exposure: Any | None = Field(default=None)
+    macro: Any | None = Field(default=None)
+    manifest_obj: Any | None = Field(default=None)
+    model: Any | None = Field(default=None)
+    run_result: Any | None = Field(default=None)
+    seed: Any | None = Field(default=None)
+    semantic_model: Any | None = Field(default=None)
+    snapshot: Any | None = Field(default=None)
+    source: Any | None = Field(default=None)
+    test: Any | None = Field(default=None)
+    unit_test: Any | None = Field(default=None)
 
-    models_by_unique_id: "dict[str, DbtBouncerModelBase] | None" = Field(default=None)
-    sources_by_unique_id: "dict[str, DbtBouncerSourceBase] | None" = Field(default=None)
-    exposures_by_unique_id: "dict[str, DbtBouncerExposureBase] | None" = Field(
+    models_by_unique_id: dict[str, Any] | None = Field(default=None)
+    sources_by_unique_id: dict[str, Any] | None = Field(default=None)
+    exposures_by_unique_id: dict[str, Any] | None = Field(
         default=None
     )
-    tests_by_unique_id: "dict[str, DbtBouncerTestBase] | None" = Field(default=None)
+    tests_by_unique_id: dict[str, Any] | None = Field(default=None)
 
     _min_description_length: ClassVar[int] = 4
 
@@ -157,119 +133,119 @@ class BaseCheck(BaseModel):
             raise DbtBouncerFailedCheckError(f"self.{field} is None")
         return val
 
-    def _require_catalog_node(self) -> "CatalogNodes":
+    def _require_catalog_node(self) -> Any:
         """Require catalog_node.
 
         Returns:
-            CatalogNodes: The catalog_node object.
+            Any: The catalog_node object.
 
         """
         return self._require("catalog_node")
 
-    def _require_catalog_source(self) -> "CatalogNodes":
+    def _require_catalog_source(self) -> Any:
         """Require catalog_source.
 
         Returns:
-            CatalogNodes: The catalog_source object.
+            Any: The catalog_source object.
 
         """
         return self._require("catalog_source")
 
-    def _require_exposure(self) -> "DbtBouncerExposureBase":
+    def _require_exposure(self) -> Any:
         """Require exposure.
 
         Returns:
-            DbtBouncerExposureBase: The exposure object.
+            Any: The exposure object.
 
         """
         return self._require("exposure")
 
-    def _require_macro(self) -> "Macros":
+    def _require_macro(self) -> Any:
         """Require macro.
 
         Returns:
-            Macros: The macro object.
+            Any: The macro object.
 
         """
         return self._require("macro")
 
-    def _require_manifest(self) -> "DbtBouncerManifest":
+    def _require_manifest(self) -> Any:
         """Require manifest_obj.
 
         Returns:
-            DbtBouncerManifest: The manifest object.
+            Any: The manifest object.
 
         """
         return self._require("manifest_obj")
 
-    def _require_model(self) -> "DbtBouncerModelBase":
+    def _require_model(self) -> Any:
         """Require model.
 
         Returns:
-            DbtBouncerModelBase: The model object.
+            Any: The model object.
 
         """
         return self._require("model")
 
-    def _require_run_result(self) -> "DbtBouncerRunResultBase":
+    def _require_run_result(self) -> Any:
         """Require run_result.
 
         Returns:
-            DbtBouncerRunResultBase: The run_result object.
+            Any: The run_result object.
 
         """
         return self._require("run_result")
 
-    def _require_seed(self) -> "DbtBouncerSeedBase":
+    def _require_seed(self) -> Any:
         """Require seed.
 
         Returns:
-            DbtBouncerSeedBase: The seed object.
+            Any: The seed object.
 
         """
         return self._require("seed")
 
-    def _require_semantic_model(self) -> "DbtBouncerSemanticModelBase":
+    def _require_semantic_model(self) -> Any:
         """Require semantic_model.
 
         Returns:
-            DbtBouncerSemanticModelBase: The semantic_model object.
+            Any: The semantic_model object.
 
         """
         return self._require("semantic_model")
 
-    def _require_snapshot(self) -> "DbtBouncerSnapshotBase":
+    def _require_snapshot(self) -> Any:
         """Require snapshot.
 
         Returns:
-            DbtBouncerSnapshotBase: The snapshot object.
+            Any: The snapshot object.
 
         """
         return self._require("snapshot")
 
-    def _require_source(self) -> "DbtBouncerSourceBase":
+    def _require_source(self) -> Any:
         """Require source.
 
         Returns:
-            DbtBouncerSourceBase: The source object.
+            Any: The source object.
 
         """
         return self._require("source")
 
-    def _require_test(self) -> "DbtBouncerTestBase":
+    def _require_test(self) -> Any:
         """Require test.
 
         Returns:
-            DbtBouncerTestBase: The test object.
+            Any: The test object.
 
         """
         return self._require("test")
 
-    def _require_unit_test(self) -> "UnitTests":
+    def _require_unit_test(self) -> Any:
         """Require unit_test.
 
         Returns:
-            UnitTests: The unit_test object.
+            Any: The unit_test object.
 
         """
         return self._require("unit_test")
