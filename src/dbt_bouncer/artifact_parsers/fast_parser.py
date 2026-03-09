@@ -161,7 +161,17 @@ def _make_wrapper(
     )
 
 
-def parse_dbt_artifacts_fast(
+def wrap_dict(data: dict[str, Any]) -> DictProxy:
+    """Wrap a plain dict as a DictProxy with attribute access.
+
+    Returns:
+        DictProxy: The wrapped dict with attribute access support.
+
+    """
+    return DictProxy(data)
+
+
+def parse_dbt_artifacts(
     bouncer_config: DbtBouncerConfBase,
     dbt_artifacts_dir: Path,
 ) -> tuple[
@@ -181,8 +191,7 @@ def parse_dbt_artifacts_fast(
 ]:
     """Parse all dbt artifacts using orjson + proxy, bypassing Pydantic validation.
 
-    Returns the same 13-tuple as parse_dbt_artifacts() but with lightweight
-    proxy objects instead of Pydantic models.
+    Returns a 13-tuple of lightweight proxy objects instead of Pydantic models.
 
     Returns:
         tuple: 13-tuple of (manifest_obj, exposures, macros, models, seeds,
