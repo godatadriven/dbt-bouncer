@@ -81,11 +81,14 @@ class BaseCheck(BaseModel):
         """
         # Inject the specific resource into the matching field (only for iterating checks)
         if resource is not None and iterate_over_value is not None:
-            object.__setattr__(
-                self,
-                iterate_over_value,
-                getattr(resource, iterate_over_value, resource),
-            )
+            # Wrapped resources (SimpleNamespace) have the inner attribute (e.g. .model);
+            # unwrapped resources (bare DictProxy for exposures/macros/unit_tests) don't.
+            # Use hasattr on SimpleNamespace or dict-key check on DictProxy.
+            if isinstance(resource, dict):
+                inner = resource.get(iterate_over_value, resource)
+            else:
+                inner = getattr(resource, iterate_over_value, resource)
+            object.__setattr__(self, iterate_over_value, inner)
         # Inject any global context fields that the check declares
         cls = self.__class__
         if cls not in _ANNOTATION_KEYS_CACHE:
