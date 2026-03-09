@@ -5,6 +5,7 @@ from typing import Any, Literal
 
 from pydantic import ConfigDict, Field, PrivateAttr
 
+from dbt_bouncer.artifact_types import ManifestWrapper
 from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import compile_pattern
@@ -132,7 +133,7 @@ class CheckModelVersionPinnedInRef(BaseCheck):
 
     model_config = ConfigDict(extra="forbid", protected_namespaces=())
 
-    manifest_obj: Any | None = Field(default=None)
+    manifest_obj: ManifestWrapper | None = Field(default=None)
     model: Any | None = Field(default=None)
     name: Literal["check_model_version_pinned_in_ref"]
 

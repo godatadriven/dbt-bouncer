@@ -1,8 +1,9 @@
 import re
-from typing import Any, Literal
+from typing import Literal
 
 from pydantic import ConfigDict, Field, PrivateAttr
 
+from dbt_bouncer.artifact_types import ManifestWrapper
 from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import compile_pattern
@@ -40,7 +41,7 @@ class CheckProjectName(BaseCheck):
         default=None,
         description="Index to uniquely identify the check, calculated at runtime.",
     )
-    manifest_obj: Any | None = Field(default=None)
+    manifest_obj: ManifestWrapper | None = Field(default=None)
     name: Literal["check_project_name"]
     package_name: str | None = Field(default=None)
     project_name_pattern: str

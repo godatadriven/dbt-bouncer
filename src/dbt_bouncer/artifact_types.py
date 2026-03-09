@@ -246,3 +246,87 @@ class UnitTestNode(Protocol):
     given: list[UnitTestGiven]
     name: str
     unique_id: str
+
+
+# ---------------------------------------------------------------------------
+# Wrapper protocols for SimpleNamespace resource containers
+# ---------------------------------------------------------------------------
+
+
+@runtime_checkable
+class CatalogNodeWrapper(Protocol):
+    """Wrapper around a catalog node entry with path metadata."""
+
+    catalog_node: CatalogNodeEntry
+    original_file_path: str
+    unique_id: str
+
+
+@runtime_checkable
+class ManifestWrapper(Protocol):
+    """Wrapper around the parsed manifest artifact."""
+
+    manifest: ManifestObject
+
+
+@runtime_checkable
+class ModelWrapper(Protocol):
+    """Wrapper around a model node with path metadata."""
+
+    model: ModelNode
+    original_file_path: str
+    unique_id: str
+
+
+@runtime_checkable
+class RunResultWrapper(Protocol):
+    """Wrapper around a run result entry with path metadata."""
+
+    original_file_path: str
+    run_result: RunResultEntry
+    unique_id: str
+
+
+@runtime_checkable
+class SeedWrapper(Protocol):
+    """Wrapper around a seed node with path metadata."""
+
+    original_file_path: str
+    seed: SeedNode
+    unique_id: str
+
+
+@runtime_checkable
+class SemanticModelWrapper(Protocol):
+    """Wrapper around a semantic model node with path metadata."""
+
+    original_file_path: str
+    semantic_model: SemanticModelNode
+    unique_id: str
+
+
+@runtime_checkable
+class SnapshotWrapper(Protocol):
+    """Wrapper around a snapshot node with path metadata."""
+
+    original_file_path: str
+    snapshot: SnapshotNode
+    unique_id: str
+
+
+@runtime_checkable
+class SourceWrapper(Protocol):
+    """Wrapper around a source node with path metadata."""
+
+    original_file_path: str
+    source: SourceNode
+    unique_id: str
+
+
+@runtime_checkable
+class TestWrapper(Protocol):
+    """Wrapper around a test node with path metadata."""
+
+    original_file_path: str
+    test: TestNode
+    unique_id: str

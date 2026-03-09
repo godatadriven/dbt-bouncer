@@ -3,6 +3,7 @@ from typing import Any, Literal
 
 from pydantic import Field, PrivateAttr
 
+from dbt_bouncer.artifact_types import ManifestWrapper
 from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import clean_path_str, compile_pattern, get_clean_model_name
@@ -41,7 +42,7 @@ class CheckLineagePermittedUpstreamModels(BaseCheck):
 
     """
 
-    manifest_obj: Any | None = Field(default=None)
+    manifest_obj: ManifestWrapper | None = Field(default=None)
     model: Any | None = Field(default=None)
     models: list[Any] = Field(default=[])
     name: Literal["check_lineage_permitted_upstream_models"]

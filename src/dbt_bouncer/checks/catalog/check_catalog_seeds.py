@@ -2,6 +2,7 @@ from typing import Any, Literal
 
 from pydantic import Field
 
+from dbt_bouncer.artifact_types import ManifestWrapper
 from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import get_clean_model_name
@@ -34,7 +35,7 @@ class CheckSeedColumnsAreAllDocumented(BaseCheck):
     """
 
     catalog_node: Any | None = Field(default=None)
-    manifest_obj: Any | None = Field(default=None)
+    manifest_obj: ManifestWrapper | None = Field(default=None)
     name: Literal["check_seed_columns_are_all_documented"]
     seeds: list[Any] = Field(default=[])
 

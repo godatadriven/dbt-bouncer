@@ -3,6 +3,7 @@ from typing import Any, Literal
 
 from pydantic import ConfigDict, Field
 
+from dbt_bouncer.artifact_types import ManifestWrapper
 from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import get_package_version_number, object_in_path
@@ -49,7 +50,7 @@ class CheckUnitTestCoverage(BaseCheck):
         default=None,
         description="Index to uniquely identify the check, calculated at runtime.",
     )
-    manifest_obj: Any | None = Field(default=None)
+    manifest_obj: ManifestWrapper | None = Field(default=None)
     min_unit_test_coverage_pct: int = Field(
         default=100,
         ge=0,
@@ -131,7 +132,7 @@ class CheckUnitTestExpectFormat(BaseCheck):
 
     """
 
-    manifest_obj: Any | None = Field(default=None)
+    manifest_obj: ManifestWrapper | None = Field(default=None)
     name: Literal["check_unit_test_expect_format"]
     permitted_formats: list[Literal["csv", "dict", "sql"]] = Field(
         default=["csv", "dict", "sql"],
@@ -202,7 +203,7 @@ class CheckUnitTestGivenFormats(BaseCheck):
 
     """
 
-    manifest_obj: Any | None = Field(default=None)
+    manifest_obj: ManifestWrapper | None = Field(default=None)
     name: Literal["check_unit_test_given_formats"]
     permitted_formats: list[Literal["csv", "dict", "sql"]] = Field(
         default=["csv", "dict", "sql"],

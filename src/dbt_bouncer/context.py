@@ -4,22 +4,32 @@ from __future__ import annotations
 
 from functools import cached_property
 from pathlib import Path  # noqa: TC003 - needed at runtime for Pydantic model_rebuild
-from typing import Any
 
 from pydantic import BaseModel, ConfigDict
 
 from dbt_bouncer.artifact_types import (  # noqa: TC001 - needed at runtime for Pydantic model_rebuild
-    CatalogNodeEntry,
+    CatalogNodeWrapper,
     ExposureNode,
     MacroNode,
+    ManifestWrapper,
     ModelNode,
+    ModelWrapper,
     RunResultEntry,
+    RunResultWrapper,
     SeedNode,
+    SeedWrapper,
     SemanticModelNode,
+    SemanticModelWrapper,
     SnapshotNode,
+    SnapshotWrapper,
     SourceNode,
+    SourceWrapper,
     TestNode,
+    TestWrapper,
     UnitTestNode,
+)
+from dbt_bouncer.config_file_parser import (
+    DbtBouncerConfBase,  # noqa: TC001 - needed at runtime for Pydantic model_rebuild
 )
 
 
@@ -29,26 +39,26 @@ class BouncerContext(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True, ignored_types=(cached_property,)
     )
-    bouncer_config: Any
-    catalog_nodes: list[CatalogNodeEntry]
-    catalog_sources: list[CatalogNodeEntry]
+    bouncer_config: DbtBouncerConfBase
+    catalog_nodes: list[CatalogNodeWrapper]
+    catalog_sources: list[CatalogNodeWrapper]
     check_categories: list[str]
     create_pr_comment_file: bool
     dry_run: bool
     exposures: list[ExposureNode]
     macros: list[MacroNode]
-    manifest_obj: Any
-    models: list[Any]
+    manifest_obj: ManifestWrapper
+    models: list[ModelWrapper]
     output_file: Path | None
     output_format: str
     output_only_failures: bool
-    run_results: list[Any]
-    seeds: list[Any]
-    semantic_models: list[Any]
+    run_results: list[RunResultWrapper]
+    seeds: list[SeedWrapper]
+    semantic_models: list[SemanticModelWrapper]
     show_all_failures: bool
-    snapshots: list[Any]
-    sources: list[Any]
-    tests: list[Any]
+    snapshots: list[SnapshotWrapper]
+    sources: list[SourceWrapper]
+    tests: list[TestWrapper]
     unit_tests: list[UnitTestNode]
 
     @cached_property

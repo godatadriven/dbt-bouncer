@@ -4,6 +4,7 @@ from typing import Any, Literal
 
 from pydantic import ConfigDict, Field
 
+from dbt_bouncer.artifact_types import ManifestWrapper
 from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.enums import Materialization
@@ -250,7 +251,7 @@ class CheckModelMaxChainedViews(BaseCheck):
 
     """
 
-    manifest_obj: Any | None = Field(default=None)
+    manifest_obj: ManifestWrapper | None = Field(default=None)
     materializations_to_include: list[str] = Field(
         default=[Materialization.EPHEMERAL, Materialization.VIEW],
     )

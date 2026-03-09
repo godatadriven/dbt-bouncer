@@ -4,6 +4,7 @@ from typing import Any, Literal
 
 from pydantic import Field
 
+from dbt_bouncer.artifact_types import ManifestWrapper
 from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 
@@ -55,7 +56,7 @@ class CheckColumnDescriptionPopulated(BaseCheck):
     """
 
     catalog_node: Any | None = Field(default=None)
-    manifest_obj: Any | None = Field(default=None)
+    manifest_obj: ManifestWrapper | None = Field(default=None)
     min_description_length: int | None = Field(default=None)
     models: list[Any] = Field(default=[])
     name: Literal["check_column_description_populated"]
@@ -121,7 +122,7 @@ class CheckColumnsAreAllDocumented(BaseCheck):
 
     case_sensitive: bool | None = Field(default=True)
     catalog_node: Any | None = Field(default=None)
-    manifest_obj: Any | None = Field(default=None)
+    manifest_obj: ManifestWrapper | None = Field(default=None)
     models: list[Any] = Field(default=[])
     name: Literal["check_columns_are_all_documented"]
 

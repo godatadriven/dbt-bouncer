@@ -8,6 +8,7 @@ from dbt_bouncer.artifact_types import (  # noqa: TC001 - needed at runtime for 
     CatalogNodeEntry,
     ExposureNode,
     MacroNode,
+    ManifestWrapper,
     ModelNode,
     RunResultEntry,
     SeedNode,
@@ -59,7 +60,7 @@ class BaseCheck(BaseModel):
     catalog_source: CatalogNodeEntry | None = Field(default=None)
     exposure: ExposureNode | None = Field(default=None)
     macro: MacroNode | None = Field(default=None)
-    manifest_obj: Any | None = Field(default=None)
+    manifest_obj: ManifestWrapper | None = Field(default=None)
     model: ModelNode | None = Field(default=None)
     run_result: RunResultEntry | None = Field(default=None)
     seed: SeedNode | None = Field(default=None)
@@ -185,14 +186,14 @@ class BaseCheck(BaseModel):
         """
         return self._require("macro")
 
-    def _require_manifest(self) -> Any:
+    def _require_manifest(self) -> ManifestWrapper:
         """Require manifest_obj.
 
         Returns:
-            Any: The manifest object.
+            ManifestWrapper: The manifest object.
 
         """
-        return self._require("manifest_obj")
+        return self._require("manifest_obj")  # type: ignore[return-value]
 
     def _require_model(self) -> ModelNode:
         """Require model.
