@@ -15,6 +15,7 @@ from dbt_bouncer.utils import (
     is_description_populated,
 )
 
+
 class CheckModelDescriptionContainsRegexPattern(BaseCheck):
     """Models must have a description that matches the provided pattern.
 
@@ -63,6 +64,7 @@ class CheckModelDescriptionContainsRegexPattern(BaseCheck):
                 f"""`{get_clean_model_name(model.unique_id)}`'s description "{model.description}" doesn't match the supplied regex: {self.regexp_pattern}."""
             )
 
+
 class CheckModelDescriptionPopulated(BaseCheck):
     """Models must have a populated description.
 
@@ -110,6 +112,7 @@ class CheckModelDescriptionPopulated(BaseCheck):
             raise DbtBouncerFailedCheckError(
                 f"`{get_clean_model_name(model.unique_id)}` does not have a populated description."
             )
+
 
 class CheckModelDocumentationCoverage(BaseCheck):
     """Set the minimum percentage of models that have a populated description.
@@ -186,6 +189,7 @@ class CheckModelDocumentationCoverage(BaseCheck):
                 f"Only {model_description_coverage_pct}% of models have a populated description, this is less than the permitted minimum of {self.min_model_documentation_coverage_pct}%."
             )
 
+
 class CheckModelDocumentedInSameDirectory(BaseCheck):
     """Models must be documented in the same directory where they are defined (i.e. `.yml` and `.sql` files are in the same directory).
 
@@ -218,7 +222,7 @@ class CheckModelDocumentedInSameDirectory(BaseCheck):
 
         """
         self._require_model()
-        model = cast(Any, self.model)
+        model = cast("Any", self.model)
         model_sql_path = Path(clean_path_str(model.original_file_path))
         model_sql_dir = model_sql_path.parent.parts
 

@@ -9,6 +9,7 @@ from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import compile_pattern, get_clean_model_name
 
+
 class CheckModelNames(BaseCheck):
     """Models must have a name that matches the supplied regex.
 

@@ -7,6 +7,7 @@ from pydantic import Field
 from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 
+
 class CheckSourceFreshnessPopulated(BaseCheck):
     """Sources must have a populated freshness.
 

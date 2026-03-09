@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from functools import cached_property
-from pathlib import Path
+from pathlib import Path  # noqa: TC003 - needed at runtime for Pydantic model_rebuild
 from typing import Any
 
 from pydantic import BaseModel, ConfigDict
@@ -12,7 +12,9 @@ from pydantic import BaseModel, ConfigDict
 class BouncerContext(BaseModel):
     """A context object to hold all the data needed for a bouncer run."""
 
-    model_config = ConfigDict(arbitrary_types_allowed=True, ignored_types=(cached_property,))
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True, ignored_types=(cached_property,)
+    )
     bouncer_config: Any
     catalog_nodes: list[Any]
     catalog_sources: list[Any]

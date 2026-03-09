@@ -9,9 +9,8 @@ from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import compile_pattern
 
-def _is_catalog_node_a_model(
-    catalog_node: Any, models: list[Any]
-) -> bool:
+
+def _is_catalog_node_a_model(catalog_node: Any, models: list[Any]) -> bool:
     """Return True if a catalog node corresponds to a dbt model.
 
     Args:
@@ -24,6 +23,7 @@ def _is_catalog_node_a_model(
     """
     model = next((m for m in models if m.unique_id == catalog_node.unique_id), None)
     return model is not None and model.resource_type == "model"
+
 
 class CheckColumnNameCompliesToColumnType(BaseCheck):
     """Columns with the specified regexp naming pattern must have data types that comply to the specified regexp pattern or list of data types.
@@ -143,6 +143,7 @@ class CheckColumnNameCompliesToColumnType(BaseCheck):
         if self.type_pattern is not None and self.types is not None:
             raise ValueError("Only one of 'type_pattern' or 'types' can be supplied.")
         return self
+
 
 class CheckColumnNames(BaseCheck):
     """Columns must have a name that matches the supplied regex.

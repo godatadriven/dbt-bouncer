@@ -9,6 +9,7 @@ from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import get_clean_model_name, get_package_version_number
 
+
 class CheckModelHasUniqueTest(BaseCheck):
     """Models must have a test for uniqueness of a column.
 
@@ -86,6 +87,7 @@ class CheckModelHasUniqueTest(BaseCheck):
                 f"`{get_clean_model_name(model.unique_id)}` does not have a test for uniqueness of a column."
             )
 
+
 class CheckModelHasUnitTests(BaseCheck):
     """Models must have more than the specified number of unit tests.
 
@@ -157,6 +159,7 @@ class CheckModelHasUnitTests(BaseCheck):
             logging.warning(
                 "The `check_model_has_unit_tests` check is only supported for dbt 1.8.0 and above.",
             )
+
 
 class CheckModelTestCoverage(BaseCheck):
     """Set the minimum percentage of models that have at least one test.

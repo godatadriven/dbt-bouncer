@@ -4,9 +4,9 @@ from typing import Any, Literal
 from pydantic import Field, PrivateAttr
 
 from dbt_bouncer.check_base import BaseCheck
-
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import compile_pattern
+
 
 class CheckSnapshotHasTags(BaseCheck):
     """Snapshots must have the specified tags.
@@ -65,6 +65,7 @@ class CheckSnapshotHasTags(BaseCheck):
             raise DbtBouncerFailedCheckError(
                 f"`{snapshot.name}` must have exactly one of the required tags: {self.tags}."
             )
+
 
 class CheckSnapshotNames(BaseCheck):
     """Snapshots must have a name that matches the supplied regex.

@@ -9,6 +9,7 @@ from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import compile_pattern
 
+
 class CheckModelLatestVersionSpecified(BaseCheck):
     r"""Check that the `latest_version` attribute of the model is set.
 
@@ -48,6 +49,7 @@ class CheckModelLatestVersionSpecified(BaseCheck):
             raise DbtBouncerFailedCheckError(
                 f"`{model.name}` does not have a specified `latest_version`."
             )
+
 
 class CheckModelVersionAllowed(BaseCheck):
     r"""Check that the version of the model matches the supplied regex pattern.
@@ -103,6 +105,7 @@ class CheckModelVersionAllowed(BaseCheck):
             raise DbtBouncerFailedCheckError(
                 f"Version `{model.version}` in `{model.name}` does not match the supplied regex `{self.version_pattern.strip()})`."
             )
+
 
 class CheckModelVersionPinnedInRef(BaseCheck):
     r"""Check that the version of the model is always specified in downstream nodes.

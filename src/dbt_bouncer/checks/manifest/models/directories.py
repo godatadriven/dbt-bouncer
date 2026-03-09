@@ -10,6 +10,7 @@ from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import clean_path_str, compile_pattern, get_clean_model_name
 
+
 class CheckModelDirectories(BaseCheck):
     """Only specified sub-directories are permitted.
 
@@ -84,6 +85,7 @@ class CheckModelDirectories(BaseCheck):
                     f"`{get_clean_model_name(model.unique_id)}` is located in the `{directory_to_check}` sub-directory, this is not a valid sub-directory ({self.permitted_sub_directories})."
                 )
 
+
 class CheckModelFileName(BaseCheck):
     r"""Models must have a file name that matches the supplied regex.
 
@@ -134,6 +136,7 @@ class CheckModelFileName(BaseCheck):
             raise DbtBouncerFailedCheckError(
                 f"`{get_clean_model_name(model.unique_id)}` is in a file that does not match the supplied regex `{self.file_name_pattern.strip()}`."
             )
+
 
 class CheckModelPropertyFileLocation(BaseCheck):
     """Model properties files must follow the guidance provided by dbt [here](https://docs.getdbt.com/best-practices/how-we-structure/1-guide-overview).
@@ -205,6 +208,7 @@ class CheckModelPropertyFileLocation(BaseCheck):
             raise DbtBouncerFailedCheckError(
                 f"The properties file for `{get_clean_model_name(model.unique_id)}` (`{properties_yml_name}`) does not end with `__models.yml`."
             )
+
 
 class CheckModelSchemaName(BaseCheck):
     """Models must have a schema name that matches the supplied regex.

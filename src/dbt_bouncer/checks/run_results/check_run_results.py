@@ -3,8 +3,8 @@ from typing import Any, Literal
 from pydantic import Field
 
 from dbt_bouncer.check_base import BaseCheck
-
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
+
 
 class CheckRunResultsMaxExecutionTime(BaseCheck):
     """Each result can take a maximum duration (seconds).
@@ -52,6 +52,7 @@ class CheckRunResultsMaxExecutionTime(BaseCheck):
             raise DbtBouncerFailedCheckError(
                 f"`{run_result.unique_id.split('.')[-1]}` has an execution time ({run_result.execution_time} greater than permitted ({self.max_execution_time_seconds}s)."
             )
+
 
 class CheckRunResultsMaxGigabytesBilled(BaseCheck):
     """Each result can have a maximum number of gigabytes billed.

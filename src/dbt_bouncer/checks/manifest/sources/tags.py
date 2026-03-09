@@ -7,6 +7,7 @@ from pydantic import Field
 from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 
+
 class CheckSourceHasTags(BaseCheck):
     """Sources must have the specified tags.
 

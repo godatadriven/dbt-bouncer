@@ -8,6 +8,7 @@ from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError, NestedDict
 from dbt_bouncer.utils import find_missing_meta_keys, get_clean_model_name
 
+
 class CheckModelHasMetaKeys(BaseCheck):
     """The `meta` config for models must have the specified keys.
 

@@ -1,10 +1,10 @@
 from typing import Any, Literal
 
-from dbt_bouncer.check_base import BaseCheck
-
 from pydantic import Field
 
+from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
+
 
 class CheckSemanticModelBasedOnNonPublicModels(BaseCheck):
     """Semantic models should be based on public models only.

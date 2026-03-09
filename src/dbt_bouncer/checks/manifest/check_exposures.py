@@ -3,9 +3,9 @@ from typing import Any, Literal
 from pydantic import Field
 
 from dbt_bouncer.check_base import BaseCheck
+from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.enums import Materialization
 
-from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 
 class CheckExposureBasedOnModel(BaseCheck):
     """Exposures should depend on a model.
@@ -63,6 +63,7 @@ class CheckExposureBasedOnModel(BaseCheck):
             raise DbtBouncerFailedCheckError(
                 f"`{exposure.name}` is based on more models ({number_of_upstream_models}) than the maximum permitted ({self.maximum_number_of_models})."
             )
+
 
 class CheckExposureBasedOnView(BaseCheck):
     """Exposures should not be based on views.
@@ -132,6 +133,7 @@ class CheckExposureBasedOnView(BaseCheck):
             raise DbtBouncerFailedCheckError(
                 f"`{exposure.name}` is based on a model that is not a table: {non_table_upstream_dependencies}."
             )
+
 
 class CheckExposureOnNonPublicModels(BaseCheck):
     """Exposures should be based on public models only.

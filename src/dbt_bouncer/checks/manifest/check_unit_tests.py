@@ -4,10 +4,9 @@ from typing import Any, Literal
 from pydantic import ConfigDict, Field
 
 from dbt_bouncer.check_base import BaseCheck
-from dbt_bouncer.utils import get_package_version_number
-
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
-from dbt_bouncer.utils import object_in_path
+from dbt_bouncer.utils import get_package_version_number, object_in_path
+
 
 class CheckUnitTestCoverage(BaseCheck):
     """Set the minimum percentage of models that have a unit test.
@@ -101,6 +100,7 @@ class CheckUnitTestCoverage(BaseCheck):
                 "The `check_unit_test_expect_format` check is only supported for dbt 1.8.0 and above.",
             )
 
+
 class CheckUnitTestExpectFormat(BaseCheck):
     """Unit tests can only use the specified formats.
 
@@ -170,6 +170,7 @@ class CheckUnitTestExpectFormat(BaseCheck):
             logging.warning(
                 "The `check_unit_test_expect_format` check is only supported for dbt 1.8.0 and above.",
             )
+
 
 class CheckUnitTestGivenFormats(BaseCheck):
     """Unit tests can only use the specified formats.

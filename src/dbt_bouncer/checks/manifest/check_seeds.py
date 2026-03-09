@@ -5,13 +5,13 @@ from typing import Any, Literal
 from pydantic import ConfigDict, Field, PrivateAttr
 
 from dbt_bouncer.check_base import BaseCheck
-
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import (
     compile_pattern,
     get_clean_model_name,
     get_package_version_number,
 )
+
 
 class CheckSeedColumnNames(BaseCheck):
     """Seed columns must have names that match the supplied regex.
@@ -69,6 +69,7 @@ class CheckSeedColumnNames(BaseCheck):
                 f"`{get_clean_model_name(seed.unique_id)}` has columns that do not match the supplied regex `{self.seed_column_name_pattern.strip()}`: {non_complying_columns}"
             )
 
+
 class CheckSeedColumnsHaveTypes(BaseCheck):
     """Columns defined for seeds must have a `data_type` declared.
 
@@ -108,6 +109,7 @@ class CheckSeedColumnsHaveTypes(BaseCheck):
             raise DbtBouncerFailedCheckError(
                 f"`{get_clean_model_name(seed.unique_id)}` has columns without a declared `data_type`: {untyped_columns}"
             )
+
 
 class CheckSeedDescriptionPopulated(BaseCheck):
     """Seeds must have a populated description.
@@ -157,6 +159,7 @@ class CheckSeedDescriptionPopulated(BaseCheck):
             raise DbtBouncerFailedCheckError(
                 f"`{get_clean_model_name(seed.unique_id)}` does not have a populated description."
             )
+
 
 class CheckSeedHasUnitTests(BaseCheck):
     """Seeds must have more than the specified number of unit tests.
@@ -228,6 +231,7 @@ class CheckSeedHasUnitTests(BaseCheck):
             logging.warning(
                 "The `check_seed_has_unit_tests` check is only supported for dbt 1.8.0 and above.",
             )
+
 
 class CheckSeedNames(BaseCheck):
     """Seed must have a name that matches the supplied regex.

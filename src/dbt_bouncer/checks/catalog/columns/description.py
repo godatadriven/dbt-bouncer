@@ -7,9 +7,8 @@ from pydantic import Field
 from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 
-def _is_catalog_node_a_model(
-    catalog_node: Any, models: list[Any]
-) -> bool:
+
+def _is_catalog_node_a_model(catalog_node: Any, models: list[Any]) -> bool:
     """Return True if a catalog node corresponds to a dbt model.
 
     Args:
@@ -22,6 +21,7 @@ def _is_catalog_node_a_model(
     """
     model = next((m for m in models if m.unique_id == catalog_node.unique_id), None)
     return model is not None and model.resource_type == "model"
+
 
 class CheckColumnDescriptionPopulated(BaseCheck):
     """Columns must have a populated description.
@@ -95,6 +95,7 @@ class CheckColumnDescriptionPopulated(BaseCheck):
                     f"`{str(catalog_node.unique_id).split('.')[-1]}` has columns that do not have a populated description: {non_complying_columns}"
                 )
 
+
 class CheckColumnsAreAllDocumented(BaseCheck):
     """All columns in a model should be included in the model's properties file, i.e. `.yml` file.
 
@@ -160,6 +161,7 @@ class CheckColumnsAreAllDocumented(BaseCheck):
                 raise DbtBouncerFailedCheckError(
                     f"`{str(catalog_node.unique_id).split('.')[-1]}` has columns that are not included in the models properties file: {undocumented_columns}"
                 )
+
 
 class CheckColumnsAreDocumentedInPublicModels(BaseCheck):
     """Columns should have a populated description in public models.

@@ -290,8 +290,6 @@ def _get_stub_namespace() -> dict[str, Any]:
     return {"NestedDict": NestedDict}
 
 
-
-
 def validate_conf(
     check_categories,  #: list[Literal["catalog_checks"], Literal["manifest_checks"], Literal["run_results_checks"]],
     config_file_contents: dict[str, Any],

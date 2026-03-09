@@ -9,6 +9,7 @@ from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import compile_pattern, get_clean_model_name
 
+
 class CheckModelAccess(BaseCheck):
     """Models must have the specified access attribute. Requires dbt 1.7+.
 
@@ -59,6 +60,7 @@ class CheckModelAccess(BaseCheck):
                 f"`{get_clean_model_name(model.unique_id)}` has `{model.access.value}` access, it should have access `{self.access}`."
             )
 
+
 class CheckModelContractEnforcedForPublicModel(BaseCheck):
     """Public models must have contracts enforced.
 
@@ -99,6 +101,7 @@ class CheckModelContractEnforcedForPublicModel(BaseCheck):
             raise DbtBouncerFailedCheckError(
                 f"`{get_clean_model_name(model.unique_id)}` is a public model but does not have contracts enforced."
             )
+
 
 class CheckModelGrantPrivilege(BaseCheck):
     """Model can have grant privileges that match the specified pattern.
@@ -153,6 +156,7 @@ class CheckModelGrantPrivilege(BaseCheck):
                 f"`{get_clean_model_name(model.unique_id)}` has grants (`{self.privilege_pattern}`) that don't comply with the specified regexp pattern ({non_complying_grants})."
             )
 
+
 class CheckModelGrantPrivilegeRequired(BaseCheck):
     """Model must have the specified grant privilege.
 
@@ -196,6 +200,7 @@ class CheckModelGrantPrivilegeRequired(BaseCheck):
                 f"`{get_clean_model_name(model.unique_id)}` does not have the required grant privilege (`{self.privilege}`)."
             )
 
+
 class CheckModelHasContractsEnforced(BaseCheck):
     """Model must have contracts enforced.
 
@@ -233,6 +238,7 @@ class CheckModelHasContractsEnforced(BaseCheck):
             raise DbtBouncerFailedCheckError(
                 f"`{get_clean_model_name(model.unique_id)}` does not have contracts enforced."
             )
+
 
 class CheckModelNumberOfGrants(BaseCheck):
     """Model can have the specified number of privileges.

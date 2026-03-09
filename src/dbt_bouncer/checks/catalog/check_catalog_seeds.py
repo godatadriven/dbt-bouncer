@@ -3,9 +3,9 @@ from typing import Any, Literal
 from pydantic import Field
 
 from dbt_bouncer.check_base import BaseCheck
-
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import get_clean_model_name
+
 
 class CheckSeedColumnsAreAllDocumented(BaseCheck):
     """All columns in a seed CSV file should be included in the seed's properties file, i.e. `.yml` file.

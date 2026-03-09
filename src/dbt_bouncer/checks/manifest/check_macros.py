@@ -2,18 +2,18 @@ import re
 from pathlib import Path
 from typing import Any, ClassVar, Literal
 
-from pydantic import Field, PrivateAttr
-
-from dbt_bouncer.utils import clean_path_str, compile_pattern
-
 from jinja2 import Environment, nodes
 from jinja2_simple_tags import StandaloneTag
+from pydantic import Field, PrivateAttr
 
 from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
+from dbt_bouncer.utils import clean_path_str, compile_pattern
+
 
 class TagExtension(StandaloneTag):
     tags: ClassVar = {"do", "endmaterialization", "endtest", "materialization", "test"}
+
 
 class CheckMacroArgumentsDescriptionPopulated(BaseCheck):
     """Macro arguments must have a populated description.
@@ -109,6 +109,7 @@ class CheckMacroArgumentsDescriptionPopulated(BaseCheck):
                 f"Macro `{macro.name}` does not have a populated description for the following argument(s): {non_complying_args}."
             )
 
+
 class CheckMacroCodeDoesNotContainRegexpPattern(BaseCheck):
     """The raw code for a macro must not match the specified regexp pattern.
 
@@ -159,6 +160,7 @@ class CheckMacroCodeDoesNotContainRegexpPattern(BaseCheck):
                 f"Macro `{macro.name}` contains a banned string: `{self.regexp_pattern.strip()}`."
             )
 
+
 class CheckMacroDescriptionPopulated(BaseCheck):
     """Macros must have a populated description.
 
@@ -207,6 +209,7 @@ class CheckMacroDescriptionPopulated(BaseCheck):
                 f"Macro `{macro.name}` does not have a populated description."
             )
 
+
 class CheckMacroMaxNumberOfLines(BaseCheck):
     """Macros may not have more than the specified number of lines.
 
@@ -254,6 +257,7 @@ class CheckMacroMaxNumberOfLines(BaseCheck):
                 f"Macro `{macro.name}` has {actual_number_of_lines} lines, this is more than the maximum permitted number of lines ({self.max_number_of_lines})."
             )
 
+
 class CheckMacroNameMatchesFileName(BaseCheck):
     """Macros names must be the same as the file they are contained in.
 
@@ -300,6 +304,7 @@ class CheckMacroNameMatchesFileName(BaseCheck):
                 raise DbtBouncerFailedCheckError(
                     f"Macro `{macro.name}` is not in a file of the same name."
                 )
+
 
 class CheckMacroPropertyFileLocation(BaseCheck):
     """Macro properties files must follow the guidance provided by dbt [here](https://docs.getdbt.com/best-practices/how-we-structure/5-the-rest-of-the-project#how-we-use-the-other-folders).

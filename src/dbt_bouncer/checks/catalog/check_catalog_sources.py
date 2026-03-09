@@ -5,6 +5,7 @@ from pydantic import Field
 from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 
+
 class CheckSourceColumnsAreAllDocumented(BaseCheck):
     """All columns in a source should be included in the source's properties file, i.e. `.yml` file.
 

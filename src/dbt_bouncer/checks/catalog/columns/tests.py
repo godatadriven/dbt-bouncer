@@ -9,6 +9,7 @@ from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import compile_pattern
 
+
 class CheckColumnHasSpecifiedTest(BaseCheck):
     """Columns that match the specified regexp pattern must have a specified test.
 

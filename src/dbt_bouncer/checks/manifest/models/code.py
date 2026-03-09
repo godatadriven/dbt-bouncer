@@ -9,6 +9,7 @@ from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import compile_pattern, get_clean_model_name
 
+
 class CheckModelCodeDoesNotContainRegexpPattern(BaseCheck):
     """The raw code for a model must not match the specified regexp pattern.
 
@@ -60,6 +61,7 @@ class CheckModelCodeDoesNotContainRegexpPattern(BaseCheck):
                 f"`{get_clean_model_name(model.unique_id)}` contains a banned string: `{self.regexp_pattern}`."
             )
 
+
 class CheckModelHasSemiColon(BaseCheck):
     """Model may not end with a semi-colon (`;`).
 
@@ -98,6 +100,7 @@ class CheckModelHasSemiColon(BaseCheck):
             raise DbtBouncerFailedCheckError(
                 f"`{get_clean_model_name(model.unique_id)}` ends with a semi-colon, this is not permitted."
             )
+
 
 class CheckModelMaxNumberOfLines(BaseCheck):
     """Models may not have more than the specified number of lines.

@@ -8,6 +8,7 @@ from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import get_clean_model_name
 
+
 class CheckModelHasTags(BaseCheck):
     """Models must have the specified tags.
 

@@ -7,6 +7,7 @@ from pydantic import Field
 from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 
+
 class CheckSourceNotOrphaned(BaseCheck):
     """Sources must be referenced in at least one model.
 
@@ -49,6 +50,7 @@ class CheckSourceNotOrphaned(BaseCheck):
             raise DbtBouncerFailedCheckError(
                 f"Source `{source.source_name}.{source.name}` is orphaned, i.e. not referenced by any model."
             )
+
 
 class CheckSourceUsedByModelsInSameDirectory(BaseCheck):
     """Sources can only be referenced by models that are located in the same directory where the source is defined.
@@ -97,6 +99,7 @@ class CheckSourceUsedByModelsInSameDirectory(BaseCheck):
             raise DbtBouncerFailedCheckError(
                 f"Source `{source.source_name}.{source.name}` is referenced by models defined in a different directory: {reffed_models_not_in_same_dir}"
             )
+
 
 class CheckSourceUsedByOnlyOneModel(BaseCheck):
     """Each source can be referenced by a maximum of one model.
