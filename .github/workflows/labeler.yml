@@ -1,6 +1,8 @@
 name: Label PRs
 
 on:
+  # Use pull_request_target (not pull_request) so the workflow has write
+  # permissions to add labels on PRs from forks.
   pull_request_target:
     types: [opened]
 
