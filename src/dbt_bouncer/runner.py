@@ -16,8 +16,8 @@ from rich.progress import BarColumn, Progress, TaskProgressColumn, TextColumn
 from rich.table import Table
 
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
+from dbt_bouncer.enums import ResourceType
 from dbt_bouncer.formatters import _format_results
-from dbt_bouncer.resource_type import ResourceType
 from dbt_bouncer.utils import (
     create_github_comment_file,
     get_nested_value,
