@@ -1,0 +1,25 @@
+# Labels applied based on changed files.
+# Used by actions/labeler@v6 as a second pass in the labeler workflow.
+
+documentation:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'docs/**'
+          - '*.md'
+
+github_actions:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '.github/**'
+
+python:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'src/**/*.py'
+          - 'tests/**/*.py'
+
+dependencies:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'pyproject.toml'
+          - 'uv.lock'

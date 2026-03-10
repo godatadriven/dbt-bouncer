@@ -1,0 +1,20 @@
+# Labels applied based on PR branch name prefix.
+# Used by actions/labeler@v6 in the labeler workflow.
+
+bug:
+  - head-branch: ['^fix', '^bugfix', '^hotfix']
+
+documentation:
+  - head-branch: ['^docs']
+
+enhancement:
+  - head-branch: ['^feat', '^feature']
+
+performance:
+  - head-branch: ['^perf']
+
+refactor:
+  - head-branch: ['^refactor']
+
+ci:
+  - head-branch: ['^ci']
