@@ -5,7 +5,7 @@ from typing import Annotated, Optional
 import typer
 from typer.main import get_command
 
-from dbt_bouncer.enums import OutputFormat
+from dbt_bouncer.enums import ConfigFileName, OutputFormat
 from dbt_bouncer.logger import configure_console_logging
 from dbt_bouncer.version import version as get_version
 
@@ -20,8 +20,8 @@ def _detect_config_file_source(config_file: Path | None) -> str:
     return (
         "COMMANDLINE"
         if config_file is not None
-        and config_file != Path("dbt-bouncer.yml")
-        and config_file != Path("dbt-bouncer.toml")
+        and config_file != Path(ConfigFileName.DBT_BOUNCER_YML)
+        and config_file != Path(ConfigFileName.DBT_BOUNCER_TOML)
         else "DEFAULT"
     )
 
@@ -93,7 +93,7 @@ def run_bouncer(
     )
 
     if config_file is None:
-        config_file = Path("dbt-bouncer.yml")
+        config_file = Path(ConfigFileName.DBT_BOUNCER_YML)
         if config_file_source is None:
             config_file_source = "DEFAULT"
     else:
@@ -253,7 +253,7 @@ def main_callback(
     config_file: Annotated[
         Path,
         typer.Option(help="Location of the config file (YML, YAML, or TOML)."),
-    ] = Path("dbt-bouncer.yml"),
+    ] = Path(ConfigFileName.DBT_BOUNCER_YML),
     create_pr_comment_file: Annotated[
         bool,
         typer.Option(
@@ -339,7 +339,7 @@ def run(
     config_file: Annotated[
         Optional[Path],
         typer.Option(help="Location of the config file (YML, YAML, or TOML)."),
-    ] = Path("dbt-bouncer.yml"),
+    ] = Path(ConfigFileName.DBT_BOUNCER_YML),
     create_pr_comment_file: Annotated[
         bool,
         typer.Option(
@@ -511,7 +511,7 @@ def init() -> None:
         "manifest_checks": manifest_checks,
     }
 
-    config_path = Path("dbt-bouncer.yml")
+    config_path = Path(ConfigFileName.DBT_BOUNCER_YML)
     if config_path.exists():
         overwrite = typer.confirm(
             f"\n[yellow]Warning:[/yellow] {config_path} already exists. Overwrite?",
@@ -545,7 +545,7 @@ def validate(
     config_file: Annotated[
         Optional[Path],
         typer.Option(help="Location of the config file (YML, YAML, or TOML)."),
-    ] = Path("dbt-bouncer.yml"),
+    ] = Path(ConfigFileName.DBT_BOUNCER_YML),
 ) -> None:
     """Validate the dbt-bouncer configuration file.
 
@@ -559,7 +559,11 @@ def validate(
     """
     configure_console_logging(verbosity=0)
 
-    config_path = Path("dbt-bouncer.yml") if config_file is None else Path(config_file)
+    config_path = (
+        Path(ConfigFileName.DBT_BOUNCER_YML)
+        if config_file is None
+        else Path(config_file)
+    )
 
     if not config_path.exists():
         raise RuntimeError(f"Config file not found: {config_path}")

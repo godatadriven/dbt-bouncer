@@ -11,6 +11,7 @@ import typer
 import yaml
 from pydantic import ValidationError
 
+from dbt_bouncer.enums import ConfigFileName
 from dbt_bouncer.utils import compile_pattern, get_check_registry, load_config_from_yaml
 
 if TYPE_CHECKING:
@@ -73,21 +74,21 @@ def get_config_file_path(
             return config_file_path
 
     # Check for dbt-bouncer.toml in the current working directory
-    toml_config_path = Path.cwd() / "dbt-bouncer.toml"
+    toml_config_path = Path.cwd() / ConfigFileName.DBT_BOUNCER_TOML
     if toml_config_path.exists():
         logging.debug(f"Found dbt-bouncer.toml: {toml_config_path}")
         return toml_config_path
 
     # Read config from pyproject.toml
     logging.debug("Loading config from pyproject.toml, if exists...")
-    if (Path().cwd() / "pyproject.toml").exists():
+    if (Path().cwd() / ConfigFileName.PYPROJECT_TOML).exists():
         pyproject_toml_dir = Path().cwd()
     else:
         pyproject_toml_dir = next(  # type: ignore[assignment]
             (
                 parent
                 for parent in Path().cwd().parents
-                if (parent / "pyproject.toml").exists()
+                if (parent / ConfigFileName.PYPROJECT_TOML).exists()
             ),
             None,
         )  # i.e. look in parent directories for a pyproject.toml file
@@ -98,7 +99,7 @@ def get_config_file_path(
                 "No config file found. Please provide a `dbt-bouncer.yml`, `dbt-bouncer.toml`, or a `pyproject.toml` with a `[tool.dbt-bouncer]` section. Alternatively, pass the path via the `--config-file` flag.",
             )
 
-    return pyproject_toml_dir / "pyproject.toml"
+    return pyproject_toml_dir / ConfigFileName.PYPROJECT_TOML
 
 
 def load_config_file_contents(
@@ -126,7 +127,7 @@ def load_config_file_contents(
                 toml_cfg = tomllib.load(f)
 
             # dbt-bouncer.toml: config is at the top level
-            if config_file_path.name == "dbt-bouncer.toml":
+            if config_file_path.name == ConfigFileName.DBT_BOUNCER_TOML:
                 return toml_cfg
 
             # pyproject.toml: config is under [tool.dbt-bouncer]
@@ -146,7 +147,9 @@ def load_config_file_contents(
                         )
                     )
                 ):
-                    created_config_file = Path.cwd().joinpath("dbt-bouncer.yml")
+                    created_config_file = Path.cwd().joinpath(
+                        ConfigFileName.DBT_BOUNCER_YML
+                    )
                     created_config_file.touch()
                     logging.info(
                         "A `dbt-bouncer.yml` file has been created in the current directory with default settings."

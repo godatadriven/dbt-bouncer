@@ -1,6 +1,14 @@
 from enum import StrEnum, auto
 
 
+class ConfigFileName(StrEnum):
+    """Config file names recognised by dbt-bouncer."""
+
+    DBT_BOUNCER_TOML = "dbt-bouncer.toml"
+    DBT_BOUNCER_YML = "dbt-bouncer.yml"
+    PYPROJECT_TOML = "pyproject.toml"
+
+
 class OutputFormat(StrEnum):
     """Supported output formats for CLI and programmatic output."""
 
