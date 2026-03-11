@@ -1,0 +1,27 @@
+changelog:
+  categories:
+    - title: Bug Fixes
+      labels:
+        - bug
+    - title: New Features
+      labels:
+        - enhancement
+    - title: Performance
+      labels:
+        - performance
+    - title: Refactoring
+      labels:
+        - refactor
+    - title: Documentation
+      labels:
+        - documentation
+    - title: CI
+      labels:
+        - ci
+        - github_actions
+    - title: Dependencies
+      labels:
+        - dependencies
+    - title: Other Changes
+      labels:
+        - '*'

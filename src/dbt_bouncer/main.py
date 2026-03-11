@@ -19,7 +19,9 @@ def _detect_config_file_source(config_file: Path | None) -> str:
     """
     return (
         "COMMANDLINE"
-        if config_file is not None and config_file != Path("dbt-bouncer.yml")
+        if config_file is not None
+        and config_file != Path("dbt-bouncer.yml")
+        and config_file != Path("dbt-bouncer.toml")
         else "DEFAULT"
     )
 
@@ -46,7 +48,7 @@ def run_bouncer(
     """Programmatic entrypoint for dbt-bouncer.
 
     Args:
-        config_file: Location of the YML config file.
+        config_file: Location of the config file (YML, YAML, or TOML).
         check: Limit the checks run to specific check names, comma-separated.
         create_pr_comment_file: Create a `github-comment.md` file.
         dry_run: If True, print which checks would run without executing them.
@@ -250,7 +252,7 @@ def main_callback(
     ctx: typer.Context,
     config_file: Annotated[
         Path,
-        typer.Option(help="Location of the YML config file."),
+        typer.Option(help="Location of the config file (YML, YAML, or TOML)."),
     ] = Path("dbt-bouncer.yml"),
     create_pr_comment_file: Annotated[
         bool,
@@ -336,7 +338,7 @@ def main_callback(
 def run(
     config_file: Annotated[
         Optional[Path],
-        typer.Option(help="Location of the YML config file."),
+        typer.Option(help="Location of the config file (YML, YAML, or TOML)."),
     ] = Path("dbt-bouncer.yml"),
     create_pr_comment_file: Annotated[
         bool,
@@ -542,7 +544,7 @@ def init() -> None:
 def validate(
     config_file: Annotated[
         Optional[Path],
-        typer.Option(help="Location of the YML config file."),
+        typer.Option(help="Location of the config file (YML, YAML, or TOML)."),
     ] = Path("dbt-bouncer.yml"),
 ) -> None:
     """Validate the dbt-bouncer configuration file.

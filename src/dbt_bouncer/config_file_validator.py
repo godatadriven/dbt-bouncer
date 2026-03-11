@@ -40,7 +40,8 @@ def get_config_file_path(
     1. The file passed via the `--config-file` CLI flag.
     2. The file passed via the `DBT_BOUNCER_CONFIG_FILE` environment variable.
     3. A file named `dbt-bouncer.yml` in the current working directory.
-    4. A `[tool.dbt-bouncer]` section in `pyproject.toml` (in current working directory or parent directories).
+    4. A file named `dbt-bouncer.toml` in the current working directory.
+    5. A `[tool.dbt-bouncer]` section in `pyproject.toml` (in current working directory or parent directories).
 
     Returns:
         PurePath: Config file for dbt-bouncer.
@@ -71,6 +72,12 @@ def get_config_file_path(
         if config_file_path.exists():
             return config_file_path
 
+    # Check for dbt-bouncer.toml in the current working directory
+    toml_config_path = Path.cwd() / "dbt-bouncer.toml"
+    if toml_config_path.exists():
+        logging.debug(f"Found dbt-bouncer.toml: {toml_config_path}")
+        return toml_config_path
+
     # Read config from pyproject.toml
     logging.debug("Loading config from pyproject.toml, if exists...")
     if (Path().cwd() / "pyproject.toml").exists():
@@ -88,7 +95,7 @@ def get_config_file_path(
         if pyproject_toml_dir is None:
             logging.debug("No pyproject.toml found.")
             raise RuntimeError(
-                "No pyproject.toml found. Please ensure you have a pyproject.toml file in the root of your project correctly configured to work with `dbt-bouncer`. Alternatively, you can pass the path to your config file via the `--config-file` flag.",
+                "No config file found. Please provide a `dbt-bouncer.yml`, `dbt-bouncer.toml`, or a `pyproject.toml` with a `[tool.dbt-bouncer]` section. Alternatively, pass the path via the `--config-file` flag.",
             )
 
     return pyproject_toml_dir / "pyproject.toml"
@@ -117,11 +124,17 @@ def load_config_file_contents(
         case ".toml":
             with Path(config_file_path).open("rb") as f:
                 toml_cfg = tomllib.load(f)
-            if "dbt-bouncer" in toml_cfg["tool"]:
+
+            # dbt-bouncer.toml: config is at the top level
+            if config_file_path.name == "dbt-bouncer.toml":
+                return toml_cfg
+
+            # pyproject.toml: config is under [tool.dbt-bouncer]
+            if toml_cfg.get("tool", {}).get("dbt-bouncer"):
                 return toml_cfg["tool"]["dbt-bouncer"]
             else:
                 logging.warning(
-                    "Cannot find a `dbt-bouncer.yml` file or a `dbt-bouncer` section found in pyproject.toml."
+                    "Cannot find a `dbt-bouncer.yml` file, `dbt-bouncer.toml` file, or a `[tool.dbt-bouncer]` section in pyproject.toml."
                 )
                 if (
                     allow_default_config_file_creation is True
@@ -145,11 +158,11 @@ def load_config_file_contents(
 
                 else:
                     raise RuntimeError(
-                        "No configuration for `dbt-bouncer` could be found. You can pass the path to your config file via the `--config-file` flag. Alternatively, your pyproject.toml file can be configured to work with `dbt-bouncer`.",
+                        "No configuration for `dbt-bouncer` could be found. You can pass the path to your config file via the `--config-file` flag. Alternatively, configure `pyproject.toml` or use a `dbt-bouncer.toml` file.",
                     )
         case _:
             raise RuntimeError(
-                f"Config file must be either a `pyproject.toml`, `.yaml` or `.yml` file. Got {config_file_path.suffix}."
+                f"Config file must be a `.toml`, `.yaml`, or `.yml` file. Got {config_file_path.suffix}."
             )
 
 

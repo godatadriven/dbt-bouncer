@@ -1,0 +1,6 @@
+# Fallback: if no branch-name label matched, apply "enhancement" by default.
+# Used by actions/labeler@v6 as a final pass in the labeler workflow.
+
+enhancement:
+  - changed-files:
+      - any-glob-to-any-file: '**'
