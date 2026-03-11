@@ -9,6 +9,7 @@ from pydantic import BaseModel, ConfigDict
 
 from dbt_bouncer.artifact_types import (  # noqa: TC001 - needed at runtime for Pydantic model_rebuild
     CatalogNodeWrapper,
+    CatalogSourceWrapper,
     ExposureNode,
     MacroNode,
     ManifestWrapper,
@@ -41,7 +42,7 @@ class BouncerContext(BaseModel):
     )
     bouncer_config: DbtBouncerConfBase
     catalog_nodes: list[CatalogNodeWrapper]
-    catalog_sources: list[CatalogNodeWrapper]
+    catalog_sources: list[CatalogSourceWrapper]
     check_categories: list[str]
     create_pr_comment_file: bool
     dry_run: bool

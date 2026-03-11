@@ -263,6 +263,15 @@ class CatalogNodeWrapper(Protocol):
 
 
 @runtime_checkable
+class CatalogSourceWrapper(Protocol):
+    """Wrapper around a catalog source entry with path metadata."""
+
+    catalog_source: CatalogNodeEntry
+    original_file_path: str
+    unique_id: str
+
+
+@runtime_checkable
 class ManifestWrapper(Protocol):
     """Wrapper around the parsed manifest artifact."""
 

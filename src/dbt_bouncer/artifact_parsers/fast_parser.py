@@ -335,7 +335,7 @@ def parse_dbt_artifacts(
                 original_file_path=clean_path_str(sources_dict[k]["original_file_path"])
                 if k in sources_dict
                 else "",
-                catalog_node=DictProxy(v),
+                catalog_source=DictProxy(v),
             )
             for k, v in catalog_dict.get("sources", {}).items()
             if k.split(".")[1] == target_package
