@@ -3,7 +3,7 @@ from contextlib import nullcontext as does_not_raise
 
 import pytest
 
-from dbt_bouncer.artifact_parsers.fast_parser import wrap_dict
+from dbt_bouncer.artifact_parsers.parser import wrap_dict
 
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)

@@ -55,7 +55,7 @@ def _build_context(
         BouncerContext: Ready-to-run context.
 
     """
-    from dbt_bouncer.artifact_parsers.fast_parser import parse_dbt_artifacts
+    from dbt_bouncer.artifact_parsers.parser import parse_dbt_artifacts
     from dbt_bouncer.context import BouncerContext
 
     artifacts = parse_dbt_artifacts(

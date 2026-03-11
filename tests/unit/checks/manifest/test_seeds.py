@@ -3,7 +3,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from dbt_bouncer.artifact_parsers.fast_parser import wrap_dict
+from dbt_bouncer.artifact_parsers.parser import wrap_dict
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.checks.manifest.check_seeds import (
     CheckSeedColumnNames,

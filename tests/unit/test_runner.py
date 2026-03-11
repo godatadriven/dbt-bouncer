@@ -7,7 +7,7 @@ import pytest
 import typer
 from typer.main import get_command
 
-from dbt_bouncer.artifact_parsers.fast_parser import wrap_dict
+from dbt_bouncer.artifact_parsers.parser import wrap_dict
 from dbt_bouncer.context import BouncerContext
 from dbt_bouncer.logger import configure_console_logging
 from dbt_bouncer.main import app

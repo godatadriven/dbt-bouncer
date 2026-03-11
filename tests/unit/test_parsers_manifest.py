@@ -5,7 +5,7 @@ import re
 from pathlib import Path
 from unittest.mock import MagicMock
 
-from dbt_bouncer.artifact_parsers.fast_parser import parse_dbt_artifacts
+from dbt_bouncer.artifact_parsers.parser import parse_dbt_artifacts
 
 
 def test_parse_manifest_artifact_table_output(caplog):
@@ -19,7 +19,7 @@ def test_parse_manifest_artifact_table_output(caplog):
     bouncer_config.catalog_checks = []
     bouncer_config.run_results_checks = []
 
-    # Parse all artifacts (this will trigger the logging in fast_parser.py)
+    # Parse all artifacts (this will trigger the logging in parser.py)
     parse_dbt_artifacts(bouncer_config, dbt_artifacts_dir)
 
     # Check that the log contains the table header

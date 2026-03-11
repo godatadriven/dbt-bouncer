@@ -6,7 +6,7 @@ import pytest
 import yaml
 from typer.testing import CliRunner
 
-from dbt_bouncer.artifact_parsers.fast_parser import wrap_dict
+from dbt_bouncer.artifact_parsers.parser import wrap_dict
 from dbt_bouncer.main import app
 from dbt_bouncer.utils import clean_path_str
 
