@@ -1,9 +1,12 @@
 import os
-from typing import Any
+from types import ModuleType
+from typing import Any, Literal
 from unittest import mock
+from unittest.mock import MagicMock, patch
 
 import pytest
 
+from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.utils import (
     _ESCAPED_SEPARATOR,
     _SEPARATOR,
@@ -398,3 +401,150 @@ def test_flatten_key_with_separator():
     assert expected_key in flat_with_sep
     assert separator_key not in flat_with_sep
     assert separator_key in flat_nested
+
+
+# -- Helpers for entry point tests --
+
+
+class CheckEntryPointFake(BaseCheck):
+    """Fake check for entry point testing."""
+
+    name: Literal["check_entry_point_fake"]
+
+    def execute(self) -> None:
+        """No-op execute for testing."""
+
+
+def _make_fake_ep(name: str, target: object) -> MagicMock:
+    """Create a fake entry point that loads to the given target.
+
+    Returns:
+        A MagicMock mimicking an importlib.metadata entry point.
+
+    """
+    ep = MagicMock()
+    ep.name = name
+    ep.load.return_value = target
+    return ep
+
+
+# -- Entry point tests --
+
+
+def test_load_entry_point_checks_discovers_from_module():
+    """Entry point pointing to a module discovers Check* classes."""
+    from dbt_bouncer.utils import _load_entry_point_checks
+
+    fake_module = ModuleType("fake_plugin.checks")
+    fake_module.CheckEntryPointFake = CheckEntryPointFake  # type: ignore[attr-defined]
+    original_module = CheckEntryPointFake.__module__
+    CheckEntryPointFake.__module__ = "fake_plugin.checks"
+
+    ep = _make_fake_ep("fake_plugin", fake_module)
+    check_objects: list[type[BaseCheck]] = []
+    with patch("dbt_bouncer.utils.entry_points", return_value=[ep]):
+        _load_entry_point_checks(check_objects)
+
+    CheckEntryPointFake.__module__ = original_module
+    assert CheckEntryPointFake in check_objects
+
+
+def test_load_entry_point_checks_discovers_single_class():
+    """Entry point pointing directly to a class is added."""
+    from dbt_bouncer.utils import _load_entry_point_checks
+
+    ep = _make_fake_ep("direct_class", CheckEntryPointFake)
+    check_objects: list[type[BaseCheck]] = []
+    with patch("dbt_bouncer.utils.entry_points", return_value=[ep]):
+        _load_entry_point_checks(check_objects)
+
+    assert CheckEntryPointFake in check_objects
+
+
+def test_load_entry_point_checks_handles_import_error():
+    """Entry points that fail to load are skipped with a warning."""
+    from dbt_bouncer.utils import _load_entry_point_checks
+
+    ep = _make_fake_ep("broken_plugin", None)
+    ep.load.side_effect = ImportError("no such module")
+
+    check_objects: list[type[BaseCheck]] = []
+    with patch("dbt_bouncer.utils.entry_points", return_value=[ep]):
+        _load_entry_point_checks(check_objects)
+
+    assert check_objects == []
+
+
+def test_load_entry_point_checks_walks_packages():
+    """Entry point pointing to a package recursively discovers submodule checks."""
+    from dbt_bouncer.utils import _load_entry_point_checks
+
+    # Simulate a package with a submodule containing a check class
+    fake_package = ModuleType("fake_pkg")
+    fake_package.__path__ = ["/fake/path"]  # type: ignore[attr-defined]
+    fake_package.__name__ = "fake_pkg"
+
+    fake_submodule = ModuleType("fake_pkg.sub")
+    fake_submodule.CheckEntryPointFake = CheckEntryPointFake  # type: ignore[attr-defined]
+    original_module = CheckEntryPointFake.__module__
+    CheckEntryPointFake.__module__ = "fake_pkg.sub"
+
+    def mock_walk(_path, **_kwargs):
+        yield (None, "fake_pkg.sub", False)
+
+    check_objects: list[type[BaseCheck]] = []
+    with (
+        patch(
+            "dbt_bouncer.utils.entry_points",
+            return_value=[_make_fake_ep("fake_pkg", fake_package)],
+        ),
+        patch("dbt_bouncer.utils.pkgutil.walk_packages", side_effect=mock_walk),
+        patch("importlib.import_module", return_value=fake_submodule),
+    ):
+        _load_entry_point_checks(check_objects)
+
+    CheckEntryPointFake.__module__ = original_module
+    assert CheckEntryPointFake in check_objects
+
+
+def test_get_check_objects_includes_entry_points():
+    """get_check_objects() integrates entry point checks."""
+    from dbt_bouncer.utils import get_check_objects
+
+    fake_module = ModuleType("ep_plugin.checks")
+    fake_module.CheckEntryPointFake = CheckEntryPointFake  # type: ignore[attr-defined]
+    original_module = CheckEntryPointFake.__module__
+    CheckEntryPointFake.__module__ = "ep_plugin.checks"
+
+    ep = _make_fake_ep("ep_plugin", fake_module)
+    get_check_objects.cache_clear()
+
+    with patch("dbt_bouncer.utils.entry_points", return_value=[ep]):
+        results = get_check_objects()
+
+    CheckEntryPointFake.__module__ = original_module
+    get_check_objects.cache_clear()
+    assert CheckEntryPointFake in results
+
+
+def test_get_check_objects_deduplicates():
+    """Same class from multiple sources appears only once."""
+    from dbt_bouncer.utils import get_check_objects
+
+    fake_module = ModuleType("dedup_plugin.checks")
+    fake_module.CheckEntryPointFake = CheckEntryPointFake  # type: ignore[attr-defined]
+    original_module = CheckEntryPointFake.__module__
+    CheckEntryPointFake.__module__ = "dedup_plugin.checks"
+
+    # Create two entry points that both resolve to the same class
+    ep1 = _make_fake_ep("plugin1", fake_module)
+    ep2 = _make_fake_ep("plugin2", fake_module)
+    get_check_objects.cache_clear()
+
+    with patch("dbt_bouncer.utils.entry_points", return_value=[ep1, ep2]):
+        results = get_check_objects()
+
+    CheckEntryPointFake.__module__ = original_module
+    get_check_objects.cache_clear()
+    count = sum(1 for cls in results if cls is CheckEntryPointFake)
+    assert count == 1

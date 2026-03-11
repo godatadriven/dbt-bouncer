@@ -42,6 +42,11 @@ repository = "https://github.com/godatadriven/dbt-bouncer"
 [project.scripts]
 dbt-bouncer = "dbt_bouncer.main:app"
 
+[project.entry-points."dbt_bouncer.checks"]
+catalog = "dbt_bouncer.checks.catalog"
+manifest = "dbt_bouncer.checks.manifest"
+run_results = "dbt_bouncer.checks.run_results"
+
 [project.optional-dependencies]
 dev = [
   "bandit~=1.0",
