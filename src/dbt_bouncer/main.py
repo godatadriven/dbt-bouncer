@@ -58,46 +58,32 @@ def _build_context(
     from dbt_bouncer.artifact_parsers.fast_parser import parse_dbt_artifacts
     from dbt_bouncer.context import BouncerContext
 
-    (
-        manifest_obj,
-        project_exposures,
-        project_macros,
-        project_models,
-        project_seeds,
-        project_semantic_models,
-        project_snapshots,
-        project_sources,
-        project_tests,
-        project_unit_tests,
-        project_catalog_nodes,
-        project_catalog_sources,
-        project_run_results,
-    ) = parse_dbt_artifacts(
+    artifacts = parse_dbt_artifacts(
         bouncer_config=bouncer_config, dbt_artifacts_dir=dbt_artifacts_dir
     )
 
     return BouncerContext.model_construct(
         bouncer_config=bouncer_config,
-        catalog_nodes=project_catalog_nodes,
-        catalog_sources=project_catalog_sources,
+        catalog_nodes=artifacts.catalog_nodes,
+        catalog_sources=artifacts.catalog_sources,
         check_categories=check_categories,
         create_pr_comment_file=create_pr_comment_file,
         dry_run=dry_run,
-        exposures=project_exposures,
-        macros=project_macros,
-        manifest_obj=manifest_obj,
-        models=project_models,
+        exposures=artifacts.exposures,
+        macros=artifacts.macros,
+        manifest_obj=artifacts.manifest_obj,
+        models=artifacts.models,
         output_file=output_file,
         output_format=output_format,
         output_only_failures=output_only_failures,
-        run_results=project_run_results,
-        seeds=project_seeds,
-        semantic_models=project_semantic_models,
+        run_results=artifacts.run_results,
+        seeds=artifacts.seeds,
+        semantic_models=artifacts.semantic_models,
         show_all_failures=show_all_failures,
-        snapshots=project_snapshots,
-        sources=project_sources,
-        tests=project_tests,
-        unit_tests=project_unit_tests,
+        snapshots=artifacts.snapshots,
+        sources=artifacts.sources,
+        tests=artifacts.tests,
+        unit_tests=artifacts.unit_tests,
     )
 
 

@@ -10,7 +10,7 @@ from __future__ import annotations
 import io
 import logging
 from types import SimpleNamespace
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, NamedTuple
 
 import orjson
 
@@ -172,32 +172,32 @@ def wrap_dict(data: dict[str, Any]) -> DictProxy:
     return DictProxy(data)
 
 
+class ParsedArtifacts(NamedTuple):
+    """Parsed dbt artifacts returned by :func:`parse_dbt_artifacts`."""
+
+    manifest_obj: SimpleNamespace
+    exposures: list[DictProxy]
+    macros: list[DictProxy]
+    models: list[SimpleNamespace]
+    seeds: list[SimpleNamespace]
+    semantic_models: list[SimpleNamespace]
+    snapshots: list[SimpleNamespace]
+    sources: list[SimpleNamespace]
+    tests: list[SimpleNamespace]
+    unit_tests: list[DictProxy]
+    catalog_nodes: list[SimpleNamespace]
+    catalog_sources: list[SimpleNamespace]
+    run_results: list[SimpleNamespace]
+
+
 def parse_dbt_artifacts(
     bouncer_config: DbtBouncerConfBase,
     dbt_artifacts_dir: Path,
-) -> tuple[
-    SimpleNamespace,
-    list[DictProxy],
-    list[DictProxy],
-    list[SimpleNamespace],
-    list[SimpleNamespace],
-    list[SimpleNamespace],
-    list[SimpleNamespace],
-    list[SimpleNamespace],
-    list[SimpleNamespace],
-    list[DictProxy],
-    list[SimpleNamespace],
-    list[SimpleNamespace],
-    list[SimpleNamespace],
-]:
+) -> ParsedArtifacts:
     """Parse all dbt artifacts using orjson + proxy, bypassing Pydantic validation.
 
-    Returns a 13-tuple of lightweight proxy objects instead of Pydantic models.
-
     Returns:
-        tuple: 13-tuple of (manifest_obj, exposures, macros, models, seeds,
-            semantic_models, snapshots, sources, tests, unit_tests,
-            catalog_nodes, catalog_sources, run_results).
+        ParsedArtifacts: Named tuple of lightweight proxy objects.
 
     Raises:
         AssertionError: If the dbt version is below the minimum supported version.
@@ -400,20 +400,20 @@ def parse_dbt_artifacts(
         project_run_results=project_run_results,
     )
 
-    return (
-        manifest_obj,
-        project_exposures,
-        project_macros,
-        project_models,
-        project_seeds,
-        project_semantic_models,
-        project_snapshots,
-        project_sources,
-        project_tests,
-        project_unit_tests,
-        project_catalog_nodes,
-        project_catalog_sources,
-        project_run_results,
+    return ParsedArtifacts(
+        manifest_obj=manifest_obj,
+        exposures=project_exposures,
+        macros=project_macros,
+        models=project_models,
+        seeds=project_seeds,
+        semantic_models=project_semantic_models,
+        snapshots=project_snapshots,
+        sources=project_sources,
+        tests=project_tests,
+        unit_tests=project_unit_tests,
+        catalog_nodes=project_catalog_nodes,
+        catalog_sources=project_catalog_sources,
+        run_results=project_run_results,
     )
 
 
