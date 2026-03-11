@@ -59,6 +59,18 @@ def test_get_file_config_path_env_var(tmp_path):
     assert config_file_path == Path(custom_config_file_path)
 
 
+DBT_BOUNCER_TOML_SAMPLE_CONFIG = """\
+dbt_artifacts_dir = "dbt_project/target"
+
+[[manifest_checks]]
+name = "check_model_has_unique_test"
+
+[[manifest_checks]]
+include = "^staging"
+model_name_pattern = "^stg_"
+name = "check_model_names"
+"""
+
 PYPROJECT_TOML_SAMPLE_CONFIG = """\
 [tool.dbt-bouncer]
 dbt_artifacts_dir = "dbt_project/target"
@@ -104,6 +116,48 @@ def test_get_file_config_path_pyproject_toml_recursive(monkeypatch, tmp_path):
         config_file_source="DEFAULT",
     )
     assert config_file_path == pyproject_file
+
+
+def test_get_file_config_path_dbt_bouncer_toml(monkeypatch, tmp_path):
+    monkeypatch.chdir(tmp_path)
+
+    toml_file = tmp_path / "dbt-bouncer.toml"
+    toml_file.write_text(DBT_BOUNCER_TOML_SAMPLE_CONFIG)
+
+    config_file_path = get_config_file_path(
+        config_file="dbt_bouncer.yml",
+        config_file_source="DEFAULT",
+    )
+
+    assert config_file_path == toml_file
+
+
+def test_get_file_config_path_yml_preferred_over_toml(monkeypatch, tmp_path):
+    """dbt-bouncer.yml should take priority over dbt-bouncer.toml."""
+    monkeypatch.chdir(tmp_path)
+
+    yml_file = tmp_path / "dbt-bouncer.yml"
+    yml_file.write_text("manifest_checks: []")
+    toml_file = tmp_path / "dbt-bouncer.toml"
+    toml_file.write_text(DBT_BOUNCER_TOML_SAMPLE_CONFIG)
+
+    config_file_path = get_config_file_path(
+        config_file=str(yml_file),
+        config_file_source="DEFAULT",
+    )
+
+    assert config_file_path == yml_file
+
+
+def test_load_config_file_contents_dbt_bouncer_toml(tmp_path):
+    toml_file = tmp_path / "dbt-bouncer.toml"
+    toml_file.write_text(DBT_BOUNCER_TOML_SAMPLE_CONFIG)
+
+    contents = load_config_file_contents(config_file_path=toml_file)
+
+    assert contents["dbt_artifacts_dir"] == "dbt_project/target"
+    assert len(contents["manifest_checks"]) == 2
+    assert contents["manifest_checks"][0]["name"] == "check_model_has_unique_test"
 
 
 def test_load_config_file_contents_create_default_config_file(
