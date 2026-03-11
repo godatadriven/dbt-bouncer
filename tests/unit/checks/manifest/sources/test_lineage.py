@@ -3,6 +3,7 @@ from contextlib import nullcontext as does_not_raise
 import pytest
 
 from dbt_bouncer.artifact_parsers.parser import wrap_dict
+from dbt_bouncer.check_context import CheckContext
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.checks.manifest.sources.lineage import (
     CheckSourceNotOrphaned,
@@ -181,11 +182,12 @@ from dbt_bouncer.checks.manifest.sources.lineage import (
 )
 def test_check_source_not_orphaned(models, source, expectation):
     with expectation:
-        CheckSourceNotOrphaned(
-            models=models,
+        check = CheckSourceNotOrphaned(
             name="check_source_not_orphaned",
             source=source,
-        ).execute()
+        )
+        check._ctx = CheckContext(models=models)
+        check.execute()
 
 
 @pytest.mark.parametrize(
@@ -289,11 +291,12 @@ def test_check_source_not_orphaned(models, source, expectation):
 )
 def test_check_source_used_by_models_in_same_directory(models, source, expectation):
     with expectation:
-        CheckSourceUsedByModelsInSameDirectory(
-            models=models,
+        check = CheckSourceUsedByModelsInSameDirectory(
             name="check_source_used_by_models_in_same_directory",
             source=source,
-        ).execute()
+        )
+        check._ctx = CheckContext(models=models)
+        check.execute()
 
 
 @pytest.mark.parametrize(
@@ -466,8 +469,9 @@ def test_check_source_used_by_models_in_same_directory(models, source, expectati
 )
 def test_check_source_used_by_only_one_model(models, source, expectation):
     with expectation:
-        CheckSourceUsedByOnlyOneModel(
-            models=models,
+        check = CheckSourceUsedByOnlyOneModel(
             name="check_source_used_by_only_one_model",
             source=source,
-        ).execute()
+        )
+        check._ctx = CheckContext(models=models)
+        check.execute()

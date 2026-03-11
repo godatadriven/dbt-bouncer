@@ -4,6 +4,7 @@ from types import SimpleNamespace
 import pytest
 
 from dbt_bouncer.artifact_parsers.parser import wrap_dict
+from dbt_bouncer.check_context import CheckContext
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.checks.manifest.check_seeds import (
     CheckSeedColumnNames,
@@ -442,13 +443,16 @@ def test_check_seed_has_unit_tests(
     expectation,
 ):
     with expectation:
-        CheckSeedHasUnitTests(
-            manifest_obj=manifest_obj,
+        check = CheckSeedHasUnitTests(
             min_number_of_unit_tests=min_number_of_unit_tests,
             seed=seed,
             name="check_seed_has_unit_tests",
+        )
+        check._ctx = CheckContext(
+            manifest_obj=manifest_obj,
             unit_tests=unit_tests,
-        ).execute()
+        )
+        check.execute()
 
 
 @pytest.mark.parametrize(

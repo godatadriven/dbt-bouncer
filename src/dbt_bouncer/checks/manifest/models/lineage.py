@@ -4,7 +4,6 @@ from typing import Any, Literal
 
 from pydantic import ConfigDict, Field
 
-from dbt_bouncer.artifact_types import ManifestWrapper
 from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.enums import Materialization
@@ -150,7 +149,6 @@ class CheckModelHasExposure(BaseCheck):
 
     model_config = ConfigDict(extra="forbid", protected_namespaces=())
 
-    exposures: list[Any] = Field(default=[])
     model: Any | None = Field(default=None)
     name: Literal["check_model_has_exposure"]
 
@@ -164,7 +162,7 @@ class CheckModelHasExposure(BaseCheck):
         model = self._require_model()
         models_in_exposures = {
             node
-            for e in self.exposures
+            for e in self._ctx.exposures
             for node in (getattr(e.depends_on, "nodes", []) or [])
         }
 
@@ -251,7 +249,6 @@ class CheckModelMaxChainedViews(BaseCheck):
 
     """
 
-    manifest_obj: ManifestWrapper | None = Field(default=None)
     materializations_to_include: list[str] = Field(
         default=[Materialization.EPHEMERAL, Materialization.VIEW],
     )
@@ -259,7 +256,6 @@ class CheckModelMaxChainedViews(BaseCheck):
         default=3,
     )
     model: Any | None = Field(default=None)
-    models: list[Any] = Field(default=[])
     name: Literal["check_model_max_chained_views"]
     package_name: str | None = Field(default=None)
 
@@ -274,9 +270,9 @@ class CheckModelMaxChainedViews(BaseCheck):
         manifest_obj = self._require_manifest()
 
         models_by_id = (
-            self.models_by_unique_id
-            if self.models_by_unique_id
-            else {m.unique_id: m for m in self.models}
+            self._ctx.models_by_unique_id
+            if self._ctx.models_by_unique_id
+            else {m.unique_id: m for m in self._ctx.models}
         )
 
         def return_upstream_view_models(
@@ -377,7 +373,6 @@ class CheckModelMaxFanout(BaseCheck):
 
     max_downstream_models: int = Field(default=3)
     model: Any | None = Field(default=None)
-    models: list[Any] = Field(default=[])
     name: Literal["check_model_max_fanout"]
 
     def execute(self) -> None:
@@ -391,7 +386,7 @@ class CheckModelMaxFanout(BaseCheck):
         num_downstream_models = sum(
             model.unique_id
             in (getattr(m.depends_on, "nodes", []) if m.depends_on else [])
-            for m in self.models
+            for m in self._ctx.models
         )
 
         if num_downstream_models > self.max_downstream_models:

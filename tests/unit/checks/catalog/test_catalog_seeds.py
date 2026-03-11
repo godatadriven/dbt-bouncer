@@ -4,6 +4,7 @@ from types import SimpleNamespace
 import pytest
 
 from dbt_bouncer.artifact_parsers.parser import wrap_dict
+from dbt_bouncer.check_context import CheckContext
 from dbt_bouncer.checks.catalog.check_catalog_seeds import (
     CheckSeedColumnsAreAllDocumented,
 )
@@ -116,8 +117,11 @@ from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 )
 def test_check_seed_columns_are_all_documented(catalog_node, seeds, expectation):
     with expectation:
-        CheckSeedColumnsAreAllDocumented(
+        check = CheckSeedColumnsAreAllDocumented(
             catalog_node=catalog_node,
+            name="check_seed_columns_are_all_documented",
+        )
+        check._ctx = CheckContext(
             manifest_obj=SimpleNamespace(
                 manifest=wrap_dict(
                     {
@@ -145,6 +149,6 @@ def test_check_seed_columns_are_all_documented(catalog_node, seeds, expectation)
                     }
                 )
             ),
-            name="check_seed_columns_are_all_documented",
             seeds=seeds,
-        ).execute()
+        )
+        check.execute()

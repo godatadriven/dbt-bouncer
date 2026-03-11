@@ -3,6 +3,7 @@ from contextlib import nullcontext as does_not_raise
 import pytest
 from pydantic import ValidationError
 
+from dbt_bouncer.check_context import CheckContext
 from dbt_bouncer.checks.catalog.columns.naming import (
     CheckColumnNameCompliesToColumnType,
     CheckColumnNames,
@@ -235,9 +236,10 @@ def test_check_column_names(
     expectation,
 ):
     with expectation:
-        CheckColumnNames(
+        check = CheckColumnNames(
             catalog_node=catalog_node,
             column_name_pattern=column_name_pattern,
-            models=models,
             name="check_column_names",
-        ).execute()
+        )
+        check._ctx = CheckContext(models=models)
+        check.execute()

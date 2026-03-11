@@ -146,28 +146,27 @@ def runner(
         "unit_tests": ctx.unit_tests,
     }
 
-    # parsed_data: context injected into each check via _inject_context.
-    # Uses cached_property accessors on BouncerContext so each derived
-    # collection is computed at most once per runner() call.
-    parsed_data = {
-        "catalog_nodes": ctx.catalog_nodes,
-        "catalog_sources": ctx.catalog_sources,
-        "exposures": ctx.exposures,
-        "exposures_by_unique_id": ctx.exposures_by_unique_id,
-        "macros": ctx.macros,
-        "manifest_obj": ctx.manifest_obj,
-        "models": ctx.models_flat,
-        "models_by_unique_id": ctx.models_by_unique_id,
-        "run_results": ctx.run_results_flat,
-        "seeds": ctx.seeds_flat,
-        "semantic_models": ctx.semantic_models_flat,
-        "snapshots": ctx.snapshots_flat,
-        "sources": ctx.sources,
-        "sources_by_unique_id": ctx.sources_by_unique_id,
-        "tests": ctx.tests_flat,
-        "tests_by_unique_id": ctx.tests_by_unique_id,
-        "unit_tests": ctx.unit_tests,
-    }
+    from dbt_bouncer.check_context import CheckContext
+
+    check_ctx = CheckContext(
+        catalog_nodes=ctx.catalog_nodes,
+        catalog_sources=ctx.catalog_sources,
+        exposures=ctx.exposures,
+        exposures_by_unique_id=ctx.exposures_by_unique_id,
+        macros=ctx.macros,
+        manifest_obj=ctx.manifest_obj,
+        models=ctx.models_flat,
+        models_by_unique_id=ctx.models_by_unique_id,
+        run_results=ctx.run_results_flat,
+        seeds=ctx.seeds_flat,
+        semantic_models=ctx.semantic_models_flat,
+        snapshots=ctx.snapshots_flat,
+        sources=ctx.sources,
+        sources_by_unique_id=ctx.sources_by_unique_id,
+        tests=ctx.tests_flat,
+        tests_by_unique_id=ctx.tests_by_unique_id,
+        unit_tests=ctx.unit_tests,
+    )
 
     # Pre-compute unique_id -> meta lookup for catalog_node skip_checks
     meta_by_unique_id: dict[str, Any] = {}
@@ -205,9 +204,8 @@ def runner(
                 )
                 if _should_run_check(check_i, i, iterate_over_value, meta_config):
                     check_run_id = _build_check_run_id(check_i, i, iterate_value)
-                    check_i._inject_context(
-                        parsed_data, resource=i, iterate_over_value=iterate_value
-                    )
+                    check_i.set_resource(i, iterate_value)
+                    check_i._ctx = check_ctx
 
                     checks_to_run.append(
                         {
@@ -222,7 +220,7 @@ def runner(
             )
         else:
             check_run_id = f"{check.name}:{check.index}"
-            check._inject_context(parsed_data)
+            check._ctx = check_ctx
             checks_to_run.append(
                 {
                     "check": check,

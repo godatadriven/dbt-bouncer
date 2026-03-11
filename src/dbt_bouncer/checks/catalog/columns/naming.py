@@ -175,7 +175,6 @@ class CheckColumnNames(BaseCheck):
 
     catalog_node: Any | None = Field(default=None)
     column_name_pattern: str
-    models: list[Any] = Field(default=[])
     name: Literal["check_column_names"]
 
     def execute(self) -> None:
@@ -186,7 +185,7 @@ class CheckColumnNames(BaseCheck):
 
         """
         catalog_node = self._require_catalog_node()
-        if _is_catalog_node_a_model(catalog_node, self.models):
+        if _is_catalog_node_a_model(catalog_node, self._ctx.models):
             non_complying_columns: list[str] = []
             non_complying_columns.extend(
                 v.name

@@ -3,6 +3,7 @@ from contextlib import nullcontext as does_not_raise
 import pytest
 
 from dbt_bouncer.artifact_parsers.parser import wrap_dict
+from dbt_bouncer.check_context import CheckContext
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.checks.manifest.check_lineage import (
     CheckLineagePermittedUpstreamModels,
@@ -157,13 +158,16 @@ def test_check_lineage_permitted_upstream_models(
     expectation,
 ):
     with expectation:
-        CheckLineagePermittedUpstreamModels(
-            manifest_obj=manifest_obj,
+        check = CheckLineagePermittedUpstreamModels(
             model=model,
-            models=models,
             name="check_lineage_permitted_upstream_models",
             upstream_path_pattern=upstream_path_pattern,
-        ).execute()
+        )
+        check._ctx = CheckContext(
+            manifest_obj=manifest_obj,
+            models=models,
+        )
+        check.execute()
 
 
 @pytest.mark.parametrize(

@@ -27,7 +27,6 @@ class CheckSemanticModelBasedOnNonPublicModels(BaseCheck):
 
     """
 
-    models: list[Any] = Field(default=[])
     name: Literal["check_semantic_model_based_on_non_public_models"]
     semantic_model: Any | None = Field(default=None)
 
@@ -40,9 +39,9 @@ class CheckSemanticModelBasedOnNonPublicModels(BaseCheck):
         """
         semantic_model = self._require_semantic_model()
         models_by_id = (
-            self.models_by_unique_id
-            if self.models_by_unique_id
-            else {m.unique_id: m for m in self.models}
+            self._ctx.models_by_unique_id
+            if self._ctx.models_by_unique_id
+            else {m.unique_id: m for m in self._ctx.models}
         )
         non_public_upstream_dependencies = []
         for model in getattr(semantic_model.depends_on, "nodes", []) or []:

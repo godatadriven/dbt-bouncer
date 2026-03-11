@@ -3,6 +3,7 @@ from contextlib import nullcontext as does_not_raise
 import pytest
 
 from dbt_bouncer.artifact_parsers.parser import wrap_dict
+from dbt_bouncer.check_context import CheckContext
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.checks.manifest.check_semantic_models import (
     CheckSemanticModelBasedOnNonPublicModels,
@@ -98,8 +99,9 @@ def test_check_semantic_model_based_on_non_public_models(
     models, semantic_model, expectation
 ):
     with expectation:
-        CheckSemanticModelBasedOnNonPublicModels(
-            models=models,
+        check = CheckSemanticModelBasedOnNonPublicModels(
             name="check_semantic_model_based_on_non_public_models",
             semantic_model=semantic_model,
-        ).execute()
+        )
+        check._ctx = CheckContext(models=models)
+        check.execute()

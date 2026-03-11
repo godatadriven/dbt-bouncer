@@ -5,7 +5,6 @@ from typing import Any, Literal
 
 from pydantic import ConfigDict, Field
 
-from dbt_bouncer.artifact_types import ManifestWrapper
 from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import get_clean_model_name, get_package_version_number
@@ -53,7 +52,6 @@ class CheckModelHasUniqueTest(BaseCheck):
     )
     model: Any | None = Field(default=None)
     name: Literal["check_model_has_unique_test"]
-    tests: list[Any] = Field(default=[])
 
     def execute(self) -> None:
         """Execute the check.
@@ -64,7 +62,7 @@ class CheckModelHasUniqueTest(BaseCheck):
         """
         model = self._require_model()
         num_unique_tests = 0
-        for test in self.tests:
+        for test in self._ctx.tests:
             test_metadata = getattr(test, "test_metadata", None)
             attached_node = getattr(test, "attached_node", None)
             if (
@@ -125,11 +123,9 @@ class CheckModelHasUnitTests(BaseCheck):
 
     """
 
-    manifest_obj: ManifestWrapper | None = Field(default=None)
     min_number_of_unit_tests: int = Field(default=1)
     model: Any | None = Field(default=None)
     name: Literal["check_model_has_unit_tests"]
-    unit_tests: list[Any] = Field(default=[])
 
     def execute(self) -> None:
         """Execute the check.
@@ -146,7 +142,7 @@ class CheckModelHasUnitTests(BaseCheck):
             num_unit_tests = len(
                 [
                     t.unique_id
-                    for t in self.unit_tests
+                    for t in self._ctx.unit_tests
                     if t.depends_on
                     and t.depends_on.nodes
                     and t.depends_on.nodes[0] == model.unique_id
@@ -199,12 +195,10 @@ class CheckModelTestCoverage(BaseCheck):
         ge=0,
         le=100,
     )
-    models: list[Any] = Field(default=[])
     severity: Literal["error", "warn"] | None = Field(
         default="error",
         description="Severity of the check, one of 'error' or 'warn'.",
     )
-    tests: list[Any] = Field(default=[])
 
     def execute(self) -> None:
         """Execute the check.
@@ -213,15 +207,15 @@ class CheckModelTestCoverage(BaseCheck):
             DbtBouncerFailedCheckError: If test coverage is less than minimum.
 
         """
-        num_models = len(self.models)
+        num_models = len(self._ctx.models)
         # Build set of model IDs that have at least one test
         tested_model_ids = {
             node
-            for test in self.tests
+            for test in self._ctx.tests
             if test.depends_on
             for node in (getattr(test.depends_on, "nodes", []) or [])
         }
-        model_ids = {m.unique_id for m in self.models}
+        model_ids = {m.unique_id for m in self._ctx.models}
         num_models_with_tests = len(model_ids & tested_model_ids)
         model_test_coverage_pct = (num_models_with_tests / num_models) * 100
 

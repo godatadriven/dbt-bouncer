@@ -2,6 +2,7 @@ from contextlib import nullcontext as does_not_raise
 
 import pytest
 
+from dbt_bouncer.check_context import CheckContext
 from dbt_bouncer.checks.catalog.columns.tests import (
     CheckColumnHasSpecifiedTest,
 )
@@ -69,10 +70,11 @@ def test_check_column_has_specified_test(
     expectation,
 ):
     with expectation:
-        CheckColumnHasSpecifiedTest(
+        check = CheckColumnHasSpecifiedTest(
             catalog_node=catalog_node,
             column_name_pattern=column_name_pattern,
             name="check_column_has_specified_test",
             test_name=test_name,
-            tests=tests,
-        ).execute()
+        )
+        check._ctx = CheckContext(tests=tests)
+        check.execute()

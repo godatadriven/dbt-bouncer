@@ -2,6 +2,7 @@ from contextlib import nullcontext as does_not_raise
 
 import pytest
 
+from dbt_bouncer.check_context import CheckContext
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.checks.manifest.check_metadata import CheckProjectName
 
@@ -24,8 +25,9 @@ from dbt_bouncer.checks.manifest.check_metadata import CheckProjectName
 )
 def test_check_project_name(manifest_obj, project_name_pattern, expectation):
     with expectation:
-        CheckProjectName(
-            manifest_obj=manifest_obj,
+        check = CheckProjectName(
             name="check_project_name",
             project_name_pattern=project_name_pattern,
-        ).execute()
+        )
+        check._ctx = CheckContext(manifest_obj=manifest_obj)
+        check.execute()

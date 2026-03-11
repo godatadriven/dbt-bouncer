@@ -41,7 +41,6 @@ class CheckColumnHasSpecifiedTest(BaseCheck):
     column_name_pattern: str
     name: Literal["check_column_has_specified_test"]
     test_name: str
-    tests: list[Any] = Field(default=[])
 
     _compiled_column_name_pattern: re.Pattern[str] = PrivateAttr()
 
@@ -65,7 +64,7 @@ class CheckColumnHasSpecifiedTest(BaseCheck):
             if self._compiled_column_name_pattern.match(str(v.name)) is not None
         ]
         tested_columns = set()
-        for t in self.tests:
+        for t in self._ctx.tests:
             test_metadata = getattr(t, "test_metadata", None)
             attached_node = getattr(t, "attached_node", None)
             if (

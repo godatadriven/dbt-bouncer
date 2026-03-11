@@ -2,6 +2,7 @@ from contextlib import nullcontext as does_not_raise
 
 import pytest
 
+from dbt_bouncer.check_context import CheckContext
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.checks.manifest.models.description import (
     CheckModelDescriptionContainsRegexPattern,
@@ -232,11 +233,12 @@ def test_check_model_documentation_coverage(
     expectation,
 ):
     with expectation:
-        CheckModelDocumentationCoverage(
+        check = CheckModelDocumentationCoverage(
             min_model_documentation_coverage_pct=min_model_documentation_coverage_pct,
-            models=models,
             name="check_model_documentation_coverage",
-        ).execute()
+        )
+        check._ctx = CheckContext(models=models)
+        check.execute()
 
 
 _TEST_DATA_FOR_CHECK_MODEL_DOCUMENTED_IN_SAME_DIRECTORY = [

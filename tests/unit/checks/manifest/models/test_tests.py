@@ -2,6 +2,7 @@ from contextlib import nullcontext as does_not_raise
 
 import pytest
 
+from dbt_bouncer.check_context import CheckContext
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.checks.manifest.models.tests import (
     CheckModelHasUniqueTest,
@@ -57,12 +58,13 @@ def test_check_model_has_unique_test(
     expectation,
 ):
     with expectation:
-        CheckModelHasUniqueTest(
+        check = CheckModelHasUniqueTest(
             accepted_uniqueness_tests=accepted_uniqueness_tests,
             model=model,
             name="check_model_has_unique_test",
-            tests=tests,
-        ).execute()
+        )
+        check._ctx = CheckContext(tests=tests)
+        check.execute()
 
 
 _TEST_DATA_FOR_CHECK_MODEL_HAS_UNIT_TESTS = [
@@ -98,13 +100,16 @@ def test_check_model_has_unit_tests(
     expectation,
 ):
     with expectation:
-        CheckModelHasUnitTests(
-            manifest_obj=manifest_obj,
+        check = CheckModelHasUnitTests(
             min_number_of_unit_tests=min_number_of_unit_tests,
             model=model,
             name="check_model_has_unit_tests",
+        )
+        check._ctx = CheckContext(
+            manifest_obj=manifest_obj,
             unit_tests=unit_tests,
-        ).execute()
+        )
+        check.execute()
 
 
 _TEST_DATA_FOR_CHECK_MODEL_TEST_COVERAGE = [
@@ -228,9 +233,9 @@ def test_check_model_test_coverage(
     expectation,
 ):
     with expectation:
-        CheckModelTestCoverage(
+        check = CheckModelTestCoverage(
             min_model_test_coverage_pct=min_model_test_coverage_pct,
-            models=models,
             name="check_model_test_coverage",
-            tests=tests,
-        ).execute()
+        )
+        check._ctx = CheckContext(models=models, tests=tests)
+        check.execute()

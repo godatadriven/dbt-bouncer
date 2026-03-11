@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any, ClassVar
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, PrivateAttr
 
 from dbt_bouncer.artifact_types import (  # noqa: TC001 - needed at runtime for Pydantic model_rebuild
     CatalogNodeEntry,
@@ -21,9 +21,6 @@ from dbt_bouncer.artifact_types import (  # noqa: TC001 - needed at runtime for 
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.enums import CheckSeverity, Materialization
 from dbt_bouncer.utils import is_description_populated
-
-# Cache annotation key sets per check class to avoid rebuilding on every injection call.
-_ANNOTATION_KEYS_CACHE: dict[type, frozenset[str]] = {}
 
 
 class BaseCheck(BaseModel):
@@ -60,7 +57,6 @@ class BaseCheck(BaseModel):
     catalog_source: CatalogNodeEntry | None = Field(default=None)
     exposure: ExposureNode | None = Field(default=None)
     macro: MacroNode | None = Field(default=None)
-    manifest_obj: ManifestWrapper | None = Field(default=None)
     model: ModelNode | None = Field(default=None)
     run_result: RunResultEntry | None = Field(default=None)
     seed: SeedNode | None = Field(default=None)
@@ -70,47 +66,22 @@ class BaseCheck(BaseModel):
     test: TestNode | None = Field(default=None)
     unit_test: UnitTestNode | None = Field(default=None)
 
-    models_by_unique_id: dict[str, ModelNode] | None = Field(default=None)
-    sources_by_unique_id: dict[str, SourceNode] | None = Field(default=None)
-    exposures_by_unique_id: dict[str, ExposureNode] | None = Field(default=None)
-    tests_by_unique_id: dict[str, TestNode] | None = Field(default=None)
-
+    _ctx: Any = PrivateAttr(default=None)
     _min_description_length: ClassVar[int] = 4
 
-    def _inject_context(
-        self,
-        parsed_data: dict[str, Any],
-        resource: Any = None,
-        iterate_over_value: str | None = None,
-    ) -> None:
-        """Inject a resource and global context data into this check instance.
-
-        This replaces the ad-hoc setattr calls in runner.py with a single,
-        self-documenting method on the check base class.
+    def set_resource(self, resource: Any, iterate_over_value: str) -> None:
+        """Set the per-iteration resource on this check instance.
 
         Args:
-            parsed_data: Dict of global context keys (manifest, catalog_nodes, etc.) to inject.
-            resource: The dbt resource object to inject (e.g. a ModelWrapper).
-                      When None, only global context is injected (for non-iterating checks).
-            iterate_over_value: The annotation key that names the resource field (e.g. "model").
+            resource: The dbt resource wrapper object (e.g. DbtBouncerModel).
+            iterate_over_value: The field name to set (e.g. "model", "seed").
 
         """
-        # Inject the specific resource into the matching field (only for iterating checks)
-        if resource is not None and iterate_over_value is not None:
-            # Wrapped resources (SimpleNamespace) have the inner attribute (e.g. .model);
-            # unwrapped resources (bare DictProxy for exposures/macros/unit_tests) don't.
-            # Use hasattr on SimpleNamespace or dict-key check on DictProxy.
-            if isinstance(resource, dict):
-                inner = resource.get(iterate_over_value, resource)
-            else:
-                inner = getattr(resource, iterate_over_value, resource)
-            object.__setattr__(self, iterate_over_value, inner)
-        # Inject any global context fields that the check declares
-        cls = self.__class__
-        if cls not in _ANNOTATION_KEYS_CACHE:
-            _ANNOTATION_KEYS_CACHE[cls] = frozenset(cls.__annotations__.keys())
-        for key in parsed_data.keys() & _ANNOTATION_KEYS_CACHE[cls]:
-            object.__setattr__(self, key, parsed_data[key])
+        object.__setattr__(
+            self,
+            iterate_over_value,
+            getattr(resource, iterate_over_value, resource),
+        )
 
     # Helper methods
     def _is_description_populated(
@@ -135,6 +106,8 @@ class BaseCheck(BaseModel):
     def _require(self, field: str) -> Any:
         """Return the named field, raising DbtBouncerFailedCheckError if it is None.
 
+        Checks the instance first, then falls back to _ctx for global context fields.
+
         Args:
             field: The attribute name on this check instance (e.g. "model", "seed").
 
@@ -146,6 +119,8 @@ class BaseCheck(BaseModel):
 
         """
         val = getattr(self, field, None)
+        if val is None and self._ctx is not None:
+            val = getattr(self._ctx, field, None)
         if val is None:
             raise DbtBouncerFailedCheckError(f"self.{field} is None")
         return val

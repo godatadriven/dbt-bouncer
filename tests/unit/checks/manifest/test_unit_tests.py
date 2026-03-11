@@ -3,6 +3,7 @@ from contextlib import nullcontext as does_not_raise
 import pytest
 
 from dbt_bouncer.artifact_parsers.parser import wrap_dict
+from dbt_bouncer.check_context import CheckContext
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.checks.manifest.check_unit_tests import (
     CheckUnitTestCoverage,
@@ -256,15 +257,18 @@ def test_check_unit_test_coverage(
     expectation,
 ):
     with expectation:
-        CheckUnitTestCoverage(
+        check = CheckUnitTestCoverage(
             description=description,
             include=include,
-            manifest_obj=manifest_obj,
             min_unit_test_coverage_pct=min_unit_test_coverage_pct,
-            models=models,
             name="check_unit_test_coverage",
+        )
+        check._ctx = CheckContext(
+            manifest_obj=manifest_obj,
+            models=models,
             unit_tests=unit_tests,
-        ).execute()
+        )
+        check.execute()
 
 
 @pytest.mark.parametrize(
@@ -320,12 +324,13 @@ def test_check_unit_test_expect_format(
     expectation,
 ):
     with expectation:
-        CheckUnitTestExpectFormat(
-            manifest_obj=manifest_obj,
+        check = CheckUnitTestExpectFormat(
             name="check_unit_test_expect_format",
             permitted_formats=permitted_formats,
             unit_test=unit_test,
-        ).execute()
+        )
+        check._ctx = CheckContext(manifest_obj=manifest_obj)
+        check.execute()
 
 
 @pytest.mark.parametrize(
@@ -387,9 +392,10 @@ def test_check_unit_test_given_formats(
     expectation,
 ):
     with expectation:
-        CheckUnitTestGivenFormats(
-            manifest_obj=manifest_obj,
+        check = CheckUnitTestGivenFormats(
             name="check_unit_test_given_formats",
             permitted_formats=permitted_formats,
             unit_test=unit_test,
-        ).execute()
+        )
+        check._ctx = CheckContext(manifest_obj=manifest_obj)
+        check.execute()

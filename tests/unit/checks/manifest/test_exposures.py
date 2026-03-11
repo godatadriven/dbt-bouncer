@@ -3,6 +3,7 @@ from contextlib import nullcontext as does_not_raise
 import pytest
 
 from dbt_bouncer.artifact_parsers.parser import wrap_dict
+from dbt_bouncer.check_context import CheckContext
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.checks.manifest.check_exposures import (
     CheckExposureBasedOnModel,
@@ -204,11 +205,12 @@ def test_check_exposure_based_on_model(
 )
 def test_check_exposure_based_on_non_public_models(exposure, models, expectation):
     with expectation:
-        CheckExposureOnNonPublicModels(
+        check = CheckExposureOnNonPublicModels(
             exposure=exposure,
-            models=models,
             name="check_exposure_based_on_non_public_models",
-        ).execute()
+        )
+        check._ctx = CheckContext(models=models)
+        check.execute()
 
 
 @pytest.mark.parametrize(
@@ -409,9 +411,10 @@ def test_check_exposure_based_on_view(
     expectation,
 ):
     with expectation:
-        CheckExposureBasedOnView(
+        check = CheckExposureBasedOnView(
             exposure=exposure,
             materializations_to_include=materializations_to_include,
-            models=models,
             name="check_exposure_based_on_view",
-        ).execute()
+        )
+        check._ctx = CheckContext(models=models)
+        check.execute()
