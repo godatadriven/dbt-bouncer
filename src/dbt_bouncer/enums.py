@@ -1,12 +1,35 @@
 from enum import StrEnum, auto
 
 
+class CheckOutcome(StrEnum):
+    """Possible outcomes of a dbt-bouncer check execution."""
+
+    FAILED = "failed"
+    SUCCESS = "success"
+
+
+class CheckSeverity(StrEnum):
+    """Severity levels for dbt-bouncer check results."""
+
+    ERROR = "error"
+    WARN = "warn"
+
+
 class ConfigFileName(StrEnum):
     """Config file names recognised by dbt-bouncer."""
 
     DBT_BOUNCER_TOML = "dbt-bouncer.toml"
     DBT_BOUNCER_YML = "dbt-bouncer.yml"
     PYPROJECT_TOML = "pyproject.toml"
+
+
+class Materialization(StrEnum):
+    """dbt materialization strategies."""
+
+    EPHEMERAL = "ephemeral"
+    INCREMENTAL = "incremental"
+    TABLE = "table"
+    VIEW = "view"
 
 
 class OutputFormat(StrEnum):

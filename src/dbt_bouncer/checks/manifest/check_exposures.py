@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING, Literal
 from pydantic import Field
 
 from dbt_bouncer.check_base import BaseCheck
+from dbt_bouncer.enums import Materialization
 
 if TYPE_CHECKING:
     from dbt_bouncer.artifact_parsers.parsers_manifest import (
@@ -105,7 +106,7 @@ class CheckExposureBasedOnView(BaseCheck):
 
     exposure: "DbtBouncerExposureBase | None" = Field(default=None)
     materializations_to_include: list[str] = Field(
-        default=["ephemeral", "view"],
+        default=[Materialization.EPHEMERAL, Materialization.VIEW],
     )
     models: list["DbtBouncerModelBase"] = Field(default=[])
     name: Literal["check_exposure_based_on_view"]
