@@ -1,14 +1,3 @@
-FROM rust:slim-bookworm AS rust-builder
-
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    curl \
-    git \
-    wget \
-    && rm -rf /var/lib/apt/lists/*
-
-RUN cargo install --version 1.20.0 hyperfine
-
 FROM python:3.11.14-slim AS base
 
 ARG USER_ID=1001
@@ -39,7 +28,9 @@ COPY --from=ghcr.io/astral-sh/uv:0.9.18 /uv /uvx /bin/
 
 RUN curl --proto '=https' --tlsv1.2 -sSfL https://bencher.dev/download/install-cli.sh | sh
 
-COPY --from=rust-builder /usr/local/cargo/bin/hyperfine /usr/local/bin/hyperfine
+RUN curl -fsSL https://github.com/sharkdp/hyperfine/releases/download/v1.20.0/hyperfine_1.20.0_amd64.deb -o /tmp/hyperfine.deb && \
+    dpkg -i /tmp/hyperfine.deb && \
+    rm /tmp/hyperfine.deb
 
 # Set initial PATH, virtual env settings, and disable compfix for ZSH setup
 ENV BENCHER_VERSION=0.5.9 \

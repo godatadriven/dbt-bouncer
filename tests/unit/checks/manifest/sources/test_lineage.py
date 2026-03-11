@@ -2,7 +2,7 @@ from contextlib import nullcontext as does_not_raise
 
 import pytest
 
-from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import Nodes4, Sources
+from dbt_bouncer.artifact_parsers.parser import wrap_dict
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.checks.manifest.sources.lineage import (
     CheckSourceNotOrphaned,
@@ -16,8 +16,8 @@ from dbt_bouncer.checks.manifest.sources.lineage import (
     [
         (
             [
-                Nodes4(
-                    **{
+                wrap_dict(
+                    {
                         "alias": "model_1",
                         "checksum": {"name": "sha256", "checksum": ""},
                         "columns": {
@@ -41,8 +41,8 @@ from dbt_bouncer.checks.manifest.sources.lineage import (
                     },
                 ),
             ],
-            Sources(
-                **{
+            wrap_dict(
+                {
                     "description": "",
                     "fqn": ["package_name", "source_1", "table_1"],
                     "identifier": "table_1",
@@ -63,8 +63,8 @@ from dbt_bouncer.checks.manifest.sources.lineage import (
         ),
         (
             [
-                Nodes4(
-                    **{
+                wrap_dict(
+                    {
                         "alias": "model_1",
                         "checksum": {"name": "sha256", "checksum": ""},
                         "columns": {
@@ -87,8 +87,8 @@ from dbt_bouncer.checks.manifest.sources.lineage import (
                         "unique_id": "model.package_name.model_1",
                     },
                 ),
-                Nodes4(
-                    **{
+                wrap_dict(
+                    {
                         "alias": "model_2",
                         "checksum": {"name": "sha256", "checksum": ""},
                         "columns": {
@@ -112,8 +112,8 @@ from dbt_bouncer.checks.manifest.sources.lineage import (
                     },
                 ),
             ],
-            Sources(
-                **{
+            wrap_dict(
+                {
                     "description": "",
                     "fqn": ["package_name", "source_1", "table_1"],
                     "identifier": "table_1",
@@ -134,8 +134,8 @@ from dbt_bouncer.checks.manifest.sources.lineage import (
         ),
         (
             [
-                Nodes4(
-                    **{
+                wrap_dict(
+                    {
                         "alias": "model_2",
                         "checksum": {"name": "sha256", "checksum": ""},
                         "columns": {
@@ -157,8 +157,8 @@ from dbt_bouncer.checks.manifest.sources.lineage import (
                     },
                 ),
             ],
-            Sources(
-                **{
+            wrap_dict(
+                {
                     "description": "",
                     "fqn": ["package_name", "source_1", "table_1"],
                     "identifier": "table_1",
@@ -193,8 +193,8 @@ def test_check_source_not_orphaned(models, source, expectation):
     [
         (
             [
-                Nodes4(
-                    **{
+                wrap_dict(
+                    {
                         "alias": "model_2",
                         "checksum": {"name": "sha256", "checksum": ""},
                         "columns": {
@@ -218,8 +218,8 @@ def test_check_source_not_orphaned(models, source, expectation):
                     },
                 ),
             ],
-            Sources(
-                **{
+            wrap_dict(
+                {
                     "description": "",
                     "fqn": ["package_name", "source_1", "table_1"],
                     "identifier": "table_1",
@@ -240,8 +240,8 @@ def test_check_source_not_orphaned(models, source, expectation):
         ),
         (
             [
-                Nodes4(
-                    **{
+                wrap_dict(
+                    {
                         "alias": "model_2",
                         "checksum": {"name": "sha256", "checksum": ""},
                         "columns": {
@@ -265,8 +265,8 @@ def test_check_source_not_orphaned(models, source, expectation):
                     },
                 ),
             ],
-            Sources(
-                **{
+            wrap_dict(
+                {
                     "description": "",
                     "fqn": ["package_name", "source_1", "table_1"],
                     "identifier": "table_1",
@@ -301,8 +301,8 @@ def test_check_source_used_by_models_in_same_directory(models, source, expectati
     [
         (
             [
-                Nodes4(
-                    **{
+                wrap_dict(
+                    {
                         "alias": "model_2",
                         "checksum": {"name": "sha256", "checksum": ""},
                         "columns": {
@@ -326,8 +326,8 @@ def test_check_source_used_by_models_in_same_directory(models, source, expectati
                     },
                 ),
             ],
-            Sources(
-                **{
+            wrap_dict(
+                {
                     "description": "",
                     "fqn": ["package_name", "source_1", "table_1"],
                     "identifier": "table_1",
@@ -348,8 +348,8 @@ def test_check_source_used_by_models_in_same_directory(models, source, expectati
         ),
         (
             [
-                Nodes4(
-                    **{
+                wrap_dict(
+                    {
                         "alias": "model_2",
                         "checksum": {"name": "sha256", "checksum": ""},
                         "columns": {
@@ -371,8 +371,8 @@ def test_check_source_used_by_models_in_same_directory(models, source, expectati
                     },
                 ),
             ],
-            Sources(
-                **{
+            wrap_dict(
+                {
                     "description": "",
                     "fqn": ["package_name", "source_1", "table_1"],
                     "identifier": "table_1",
@@ -393,8 +393,8 @@ def test_check_source_used_by_models_in_same_directory(models, source, expectati
         ),
         (
             [
-                Nodes4(
-                    **{
+                wrap_dict(
+                    {
                         "alias": "model_1",
                         "checksum": {"name": "sha256", "checksum": ""},
                         "columns": {
@@ -417,8 +417,8 @@ def test_check_source_used_by_models_in_same_directory(models, source, expectati
                         "unique_id": "model.package_name.model_1",
                     },
                 ),
-                Nodes4(
-                    **{
+                wrap_dict(
+                    {
                         "alias": "model_2",
                         "checksum": {"name": "sha256", "checksum": ""},
                         "columns": {
@@ -442,8 +442,8 @@ def test_check_source_used_by_models_in_same_directory(models, source, expectati
                     },
                 ),
             ],
-            Sources(
-                **{
+            wrap_dict(
+                {
                     "description": "",
                     "fqn": ["package_name", "source_1", "table_1"],
                     "identifier": "table_1",

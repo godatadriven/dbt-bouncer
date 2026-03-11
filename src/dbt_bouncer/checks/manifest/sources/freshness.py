@@ -1,11 +1,6 @@
 """Checks related to source freshness."""
 
-from typing import TYPE_CHECKING, Literal
-
-if TYPE_CHECKING:
-    from dbt_bouncer.artifact_parsers.parsers_manifest import (
-        DbtBouncerSourceBase,
-    )
+from typing import Any, Literal
 
 from pydantic import Field
 
@@ -17,7 +12,7 @@ class CheckSourceFreshnessPopulated(BaseCheck):
     """Sources must have a populated freshness.
 
     Receives:
-        source (DbtBouncerSource): The DbtBouncerSourceBase object to check.
+        source (SourceNode): The SourceNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -34,7 +29,7 @@ class CheckSourceFreshnessPopulated(BaseCheck):
     """
 
     name: Literal["check_source_freshness_populated"]
-    source: "DbtBouncerSourceBase | None" = Field(default=None)
+    source: Any | None = Field(default=None)
 
     def execute(self) -> None:
         """Execute the check.
@@ -43,19 +38,21 @@ class CheckSourceFreshnessPopulated(BaseCheck):
             DbtBouncerFailedCheckError: If freshness is not populated.
 
         """
-        self._require_source()
-        error_msg = f"`{self.source.source_name}.{self.source.name}` does not have a populated freshness."
-        if self.source.freshness is None:
+        source = self._require_source()
+        error_msg = (
+            f"`{source.source_name}.{source.name}` does not have a populated freshness."
+        )
+        if source.freshness is None:
             raise DbtBouncerFailedCheckError(error_msg)
         has_error_after = (
-            self.source.freshness.error_after
-            and self.source.freshness.error_after.count is not None
-            and self.source.freshness.error_after.period is not None
+            source.freshness.error_after
+            and source.freshness.error_after.count is not None
+            and source.freshness.error_after.period is not None
         )
         has_warn_after = (
-            self.source.freshness.warn_after
-            and self.source.freshness.warn_after.count is not None
-            and self.source.freshness.warn_after.period is not None
+            source.freshness.warn_after
+            and source.freshness.warn_after.count is not None
+            and source.freshness.warn_after.period is not None
         )
 
         if not (has_error_after or has_warn_after):

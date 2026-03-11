@@ -1,11 +1,6 @@
 """Checks related to source descriptions."""
 
-from typing import TYPE_CHECKING, Literal
-
-if TYPE_CHECKING:
-    from dbt_bouncer.artifact_parsers.parsers_manifest import (
-        DbtBouncerSourceBase,
-    )
+from typing import Any, Literal
 
 from pydantic import Field
 
@@ -20,7 +15,7 @@ class CheckSourceDescriptionPopulated(BaseCheck):
         min_description_length (int | None): Minimum length required for the description to be considered populated.
 
     Receives:
-        source (DbtBouncerSourceBase): The DbtBouncerSourceBase object to check.
+        source (SourceNode): The SourceNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -43,7 +38,7 @@ class CheckSourceDescriptionPopulated(BaseCheck):
 
     min_description_length: int | None = Field(default=None)
     name: Literal["check_source_description_populated"]
-    source: "DbtBouncerSourceBase | None" = Field(default=None)
+    source: Any | None = Field(default=None)
 
     def execute(self) -> None:
         """Execute the check.
@@ -52,10 +47,10 @@ class CheckSourceDescriptionPopulated(BaseCheck):
             DbtBouncerFailedCheckError: If description is not populated.
 
         """
-        self._require_source()
+        source = self._require_source()
         if not self._is_description_populated(
-            self.source.description or "", self.min_description_length
+            source.description or "", self.min_description_length
         ):
             raise DbtBouncerFailedCheckError(
-                f"`{self.source.source_name}.{self.source.name}` does not have a populated description."
+                f"`{source.source_name}.{source.name}` does not have a populated description."
             )

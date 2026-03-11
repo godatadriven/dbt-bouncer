@@ -23,7 +23,6 @@ classifiers = [
   "Programming Language :: Python :: 3.14",
 ]
 dependencies = [
-  "dbt-artifacts-parser (>=0.8)",
   "jellyfish (>=1,<2)",
   "jinja2-simple-tags (<1)",
   "jinja2 (>=3,<4)",
@@ -112,7 +111,6 @@ exclude = [
   "dist",
   "node_modules",
   "site-packages",
-  "src/dbt_bouncer/artifact_parsers/dbt_cloud",
   "venv",
 ]
 line-length = 88

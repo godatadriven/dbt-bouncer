@@ -1,15 +1,9 @@
 import re
-from typing import TYPE_CHECKING, Literal
+from typing import Any, Literal
 
 from pydantic import Field, PrivateAttr
 
 from dbt_bouncer.check_base import BaseCheck
-
-if TYPE_CHECKING:
-    from dbt_bouncer.artifact_parsers.parsers_manifest import (
-        DbtBouncerSnapshotBase,
-    )
-
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import compile_pattern
 
@@ -19,7 +13,7 @@ class CheckSnapshotHasTags(BaseCheck):
 
     Parameters:
         criteria: (Literal["any", "all", "one"] | None): Whether the snapshot must have any, all, or exactly one of the specified tags. Default: `all`.
-        snapshot (DbtBouncerSnapshotBase): The DbtBouncerSnapshotBase object to check.
+        snapshot (SnapshotNode): The SnapshotNode object to check.
         tags (list[str]): List of tags to check for.
 
     Other Parameters:
@@ -41,7 +35,7 @@ class CheckSnapshotHasTags(BaseCheck):
 
     criteria: Literal["any", "all", "one"] = Field(default="all")
     name: Literal["check_snapshot_has_tags"]
-    snapshot: "DbtBouncerSnapshotBase | None" = Field(default=None)
+    snapshot: Any | None = Field(default=None)
     tags: list[str]
 
     def execute(self) -> None:
@@ -51,25 +45,25 @@ class CheckSnapshotHasTags(BaseCheck):
             DbtBouncerFailedCheckError: If snapshot does not have required tags.
 
         """
-        self._require_snapshot()
-        snapshot_tags = self.snapshot.tags or []
+        snapshot = self._require_snapshot()
+        snapshot_tags = snapshot.tags or []
         if self.criteria == "any":
             if not any(tag in snapshot_tags for tag in self.tags):
                 raise DbtBouncerFailedCheckError(
-                    f"`{self.snapshot.name}` does not have any of the required tags: {self.tags}."
+                    f"`{snapshot.name}` does not have any of the required tags: {self.tags}."
                 )
         elif self.criteria == "all":
             missing_tags = [tag for tag in self.tags if tag not in snapshot_tags]
             if missing_tags:
                 raise DbtBouncerFailedCheckError(
-                    f"`{self.snapshot.name}` is missing required tags: {missing_tags}."
+                    f"`{snapshot.name}` is missing required tags: {missing_tags}."
                 )
         elif (
             self.criteria == "one"
             and sum(tag in snapshot_tags for tag in self.tags) != 1
         ):
             raise DbtBouncerFailedCheckError(
-                f"`{self.snapshot.name}` must have exactly one of the required tags: {self.tags}."
+                f"`{snapshot.name}` must have exactly one of the required tags: {self.tags}."
             )
 
 
@@ -80,7 +74,7 @@ class CheckSnapshotNames(BaseCheck):
         snapshot_name_pattern (str): Regexp the snapshot name must match.
 
     Receives:
-        snapshot (DbtBouncerSnapshotBase): The DbtBouncerSnapshotBase object to check.
+        snapshot (SnapshotNode): The SnapshotNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -99,7 +93,7 @@ class CheckSnapshotNames(BaseCheck):
     """
 
     name: Literal["check_snapshot_names"]
-    snapshot: "DbtBouncerSnapshotBase | None" = Field(default=None)
+    snapshot: Any | None = Field(default=None)
     snapshot_name_pattern: str
 
     _compiled_pattern: re.Pattern[str] = PrivateAttr()
@@ -115,8 +109,8 @@ class CheckSnapshotNames(BaseCheck):
             DbtBouncerFailedCheckError: If snapshot name does not match regex.
 
         """
-        self._require_snapshot()
-        if self._compiled_pattern.match(str(self.snapshot.name)) is None:
+        snapshot = self._require_snapshot()
+        if self._compiled_pattern.match(str(snapshot.name)) is None:
             raise DbtBouncerFailedCheckError(
-                f"`{self.snapshot.name}` does not match the supplied regex `{self.snapshot_name_pattern.strip()})`."
+                f"`{snapshot.name}` does not match the supplied regex `{self.snapshot_name_pattern.strip()})`."
             )

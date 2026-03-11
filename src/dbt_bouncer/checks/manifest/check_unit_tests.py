@@ -1,22 +1,12 @@
 import logging
-from typing import TYPE_CHECKING, Literal
+from typing import Any, Literal
 
 from pydantic import ConfigDict, Field
 
+from dbt_bouncer.artifact_types import ManifestWrapper
 from dbt_bouncer.check_base import BaseCheck
-from dbt_bouncer.utils import get_package_version_number
-
-if TYPE_CHECKING:
-    from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
-        UnitTests,
-    )
-    from dbt_bouncer.artifact_parsers.parsers_manifest import (
-        DbtBouncerManifest,
-        DbtBouncerModelBase,
-    )
-
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
-from dbt_bouncer.utils import object_in_path
+from dbt_bouncer.utils import get_package_version_number, object_in_path
 
 
 class CheckUnitTestCoverage(BaseCheck):
@@ -30,7 +20,7 @@ class CheckUnitTestCoverage(BaseCheck):
         min_unit_test_coverage_pct (float): The minimum percentage of models that must have a unit test.
 
     Receives:
-        models (list[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
+        models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.
         unit_tests (list[UnitTests]): List of UnitTests objects parsed from `manifest.json`.
 
     Other Parameters:
@@ -60,19 +50,19 @@ class CheckUnitTestCoverage(BaseCheck):
         default=None,
         description="Index to uniquely identify the check, calculated at runtime.",
     )
-    manifest_obj: "DbtBouncerManifest | None" = Field(default=None)
+    manifest_obj: ManifestWrapper | None = Field(default=None)
     min_unit_test_coverage_pct: int = Field(
         default=100,
         ge=0,
         le=100,
     )
-    models: list["DbtBouncerModelBase"] = Field(default=[])
+    models: list[Any] = Field(default=[])
     name: Literal["check_unit_test_coverage"]
     severity: Literal["error", "warn"] | None = Field(
         default="error",
         description="Severity of the check, one of 'error' or 'warn'.",
     )
-    unit_tests: list["UnitTests"] = Field(default=[])
+    unit_tests: list[Any] = Field(default=[])
 
     def execute(self) -> None:
         """Execute the check.
@@ -81,9 +71,9 @@ class CheckUnitTestCoverage(BaseCheck):
             DbtBouncerFailedCheckError: If unit test coverage is less than permitted minimum.
 
         """
-        self._require_manifest()
+        manifest_obj = self._require_manifest()
         if get_package_version_number(
-            self.manifest_obj.manifest.metadata.dbt_version or "0.0.0"
+            manifest_obj.manifest.metadata.dbt_version or "0.0.0"
         ) >= get_package_version_number("1.8.0"):
             relevant_models = [
                 m.unique_id
@@ -123,7 +113,7 @@ class CheckUnitTestExpectFormat(BaseCheck):
         permitted_formats (list[Literal["csv", "dict", "sql"]] | None): A list of formats that are allowed to be used for `expect` input in a unit test.
 
     Receives:
-        manifest_obj (DbtBouncerManifest): The DbtBouncerManifest object parsed from `manifest.json`.
+        manifest_obj (ManifestObject): The ManifestObject object parsed from `manifest.json`.
         unit_test (UnitTests): The UnitTests object to check.
 
     Other Parameters:
@@ -142,12 +132,12 @@ class CheckUnitTestExpectFormat(BaseCheck):
 
     """
 
-    manifest_obj: "DbtBouncerManifest | None" = Field(default=None)
+    manifest_obj: ManifestWrapper | None = Field(default=None)
     name: Literal["check_unit_test_expect_format"]
     permitted_formats: list[Literal["csv", "dict", "sql"]] = Field(
         default=["csv", "dict", "sql"],
     )
-    unit_test: "UnitTests | None" = Field(default=None)
+    unit_test: Any | None = Field(default=None)
 
     def execute(self) -> None:
         """Execute the check.
@@ -156,26 +146,24 @@ class CheckUnitTestExpectFormat(BaseCheck):
             DbtBouncerFailedCheckError: If unit test expect format is not permitted.
 
         """
-        self._require_manifest()
-        self._require_unit_test()
+        manifest_obj = self._require_manifest()
+        unit_test = self._require_unit_test()
         if get_package_version_number(
-            self.manifest_obj.manifest.metadata.dbt_version or "0.0.0"
+            manifest_obj.manifest.metadata.dbt_version or "0.0.0"
         ) >= get_package_version_number("1.8.0"):
-            if self.unit_test.expect.format is None:
+            if unit_test.expect.format is None:
                 raise DbtBouncerFailedCheckError(
-                    f"Unit test `{self.unit_test.name}` does not have an `expect` format defined. "
+                    f"Unit test `{unit_test.name}` does not have an `expect` format defined. "
                     f"Permitted formats are: {self.permitted_formats}."
                 )
 
             format_value = (
-                self.unit_test.expect.format.value
-                if self.unit_test.expect.format
-                else None
+                unit_test.expect.format.value if unit_test.expect.format else None
             )
 
             if format_value not in self.permitted_formats:
                 raise DbtBouncerFailedCheckError(
-                    f"Unit test `{self.unit_test.name}` has an `expect` format that is not permitted. "
+                    f"Unit test `{unit_test.name}` has an `expect` format that is not permitted. "
                     f"Permitted formats are: {self.permitted_formats}. "
                     f"Found: {format_value}"
                 )
@@ -196,7 +184,7 @@ class CheckUnitTestGivenFormats(BaseCheck):
         permitted_formats (list[Literal["csv", "dict", "sql"]] | None): A list of formats that are allowed to be used for `expect` input in a unit test.
 
     Receives:
-        manifest_obj (DbtBouncerManifest): The DbtBouncerManifest object parsed from `manifest.json`.
+        manifest_obj (ManifestObject): The ManifestObject object parsed from `manifest.json`.
         unit_test (UnitTests): The UnitTests object to check.
 
     Other Parameters:
@@ -215,12 +203,12 @@ class CheckUnitTestGivenFormats(BaseCheck):
 
     """
 
-    manifest_obj: "DbtBouncerManifest | None" = Field(default=None)
+    manifest_obj: ManifestWrapper | None = Field(default=None)
     name: Literal["check_unit_test_given_formats"]
     permitted_formats: list[Literal["csv", "dict", "sql"]] = Field(
         default=["csv", "dict", "sql"],
     )
-    unit_test: "UnitTests | None" = Field(default=None)
+    unit_test: Any | None = Field(default=None)
 
     def execute(self) -> None:
         """Execute the check.
@@ -229,17 +217,17 @@ class CheckUnitTestGivenFormats(BaseCheck):
             DbtBouncerFailedCheckError: If unit test given formats are not permitted.
 
         """
-        self._require_manifest()
-        self._require_unit_test()
+        manifest_obj = self._require_manifest()
+        unit_test = self._require_unit_test()
         if get_package_version_number(
-            self.manifest_obj.manifest.metadata.dbt_version or "0.0.0"
+            manifest_obj.manifest.metadata.dbt_version or "0.0.0"
         ) >= get_package_version_number("1.8.0"):
             given_formats = [
-                i.format.value for i in self.unit_test.given if i.format is not None
+                i.format.value for i in unit_test.given if i.format is not None
             ]
             if not all(e in self.permitted_formats for e in given_formats):
                 raise DbtBouncerFailedCheckError(
-                    f"Unit test `{self.unit_test.name}` has given formats which are not permitted. Permitted formats are: {self.permitted_formats}."
+                    f"Unit test `{unit_test.name}` has given formats which are not permitted. Permitted formats are: {self.permitted_formats}."
                 )
         else:
             logging.warning(

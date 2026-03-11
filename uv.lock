@@ -345,23 +345,10 @@ wheels = [
 ]
 
 [[package]]
-name = "dbt-artifacts-parser"
-version = "0.12.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "pydantic" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/4a/5a/fa9f9227fdef03c969920a2d75f4552898f7643388df506d870d2e2be733/dbt_artifacts_parser-0.12.0.tar.gz", hash = "sha256:9d1c0ed41926102c1c39fdd780e1a332f58c9b794e94dba0dcf5dfefc847d6ea", size = 229564, upload-time = "2025-11-27T06:07:26.852Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/d1/a7/1efa2adeea33e4942d4cf54593a4436a63fecb609684393b6b8a5dcc4197/dbt_artifacts_parser-0.12.0-py3-none-any.whl", hash = "sha256:3db93df7969c3f22c6fbf75a51b0af4c21b189d8db6f3c54e8471102c775bb0d", size = 234910, upload-time = "2025-11-27T06:07:25.268Z" },
-]
-
-[[package]]
 name = "dbt-bouncer"
 version = "0.0.0"
 source = { editable = "." }
 dependencies = [
-    { name = "dbt-artifacts-parser" },
     { name = "jellyfish" },
     { name = "jinja2" },
     { name = "jinja2-simple-tags" },
@@ -404,7 +391,6 @@ docs = [
 [package.metadata]
 requires-dist = [
     { name = "bandit", marker = "extra == 'dev'", specifier = "~=1.0" },
-    { name = "dbt-artifacts-parser", specifier = ">=0.8" },
     { name = "dbt-core", marker = "extra == 'dev'", specifier = ">=1.11.2,<2" },
     { name = "dbt-duckdb", marker = "extra == 'dev'", specifier = "~=1.0" },
     { name = "jellyfish", specifier = ">=1,<2" },

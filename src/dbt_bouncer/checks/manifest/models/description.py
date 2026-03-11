@@ -2,13 +2,7 @@
 
 import re
 from pathlib import Path
-from typing import TYPE_CHECKING, Literal, cast
-
-if TYPE_CHECKING:
-    from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import Nodes4
-    from dbt_bouncer.artifact_parsers.parsers_manifest import (
-        DbtBouncerModelBase,
-    )
+from typing import Any, Literal, cast
 
 from pydantic import ConfigDict, Field, PrivateAttr
 
@@ -26,7 +20,7 @@ class CheckModelDescriptionContainsRegexPattern(BaseCheck):
     """Models must have a description that matches the provided pattern.
 
     Receives:
-        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+        model (ModelNode): The ModelNode object to check.
         regexp_pattern (str): The regexp pattern that should match the model description.
 
     Other Parameters:
@@ -45,7 +39,7 @@ class CheckModelDescriptionContainsRegexPattern(BaseCheck):
 
     """
 
-    model: "DbtBouncerModelBase | None" = Field(default=None)
+    model: Any | None = Field(default=None)
     name: Literal["check_model_description_contains_regex_pattern"]
     regexp_pattern: str
 
@@ -64,10 +58,10 @@ class CheckModelDescriptionContainsRegexPattern(BaseCheck):
             DbtBouncerFailedCheckError: If description does not match regex.
 
         """
-        self._require_model()
-        if not self._compiled_pattern.match(str(self.model.description)):
+        model = self._require_model()
+        if not self._compiled_pattern.match(str(model.description)):
             raise DbtBouncerFailedCheckError(
-                f"""`{get_clean_model_name(self.model.unique_id)}`'s description "{self.model.description}" doesn't match the supplied regex: {self.regexp_pattern}."""
+                f"""`{get_clean_model_name(model.unique_id)}`'s description "{model.description}" doesn't match the supplied regex: {self.regexp_pattern}."""
             )
 
 
@@ -78,7 +72,7 @@ class CheckModelDescriptionPopulated(BaseCheck):
         min_description_length (int | None): Minimum length required for the description to be considered populated.
 
     Receives:
-        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+        model (ModelNode): The ModelNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -101,7 +95,7 @@ class CheckModelDescriptionPopulated(BaseCheck):
     """
 
     min_description_length: int | None = Field(default=None)
-    model: "DbtBouncerModelBase | None" = Field(default=None)
+    model: Any | None = Field(default=None)
     name: Literal["check_model_description_populated"]
 
     def execute(self) -> None:
@@ -111,12 +105,12 @@ class CheckModelDescriptionPopulated(BaseCheck):
             DbtBouncerFailedCheckError: If description is not populated.
 
         """
-        self._require_model()
+        model = self._require_model()
         if not self._is_description_populated(
-            self.model.description or "", self.min_description_length
+            model.description or "", self.min_description_length
         ):
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` does not have a populated description."
+                f"`{get_clean_model_name(model.unique_id)}` does not have a populated description."
             )
 
 
@@ -128,7 +122,7 @@ class CheckModelDocumentationCoverage(BaseCheck):
         min_model_documentation_coverage_pct (float): The minimum percentage of models that must have a populated description.
 
     Receives:
-        models (list[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
+        models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -163,7 +157,7 @@ class CheckModelDocumentationCoverage(BaseCheck):
         ge=0,
         le=100,
     )
-    models: list["DbtBouncerModelBase"] = Field(default=[])
+    models: list[Any] = Field(default=[])
     name: Literal["check_model_documentation_coverage"]
     severity: Literal["error", "warn"] | None = Field(
         default="error",
@@ -200,7 +194,7 @@ class CheckModelDocumentedInSameDirectory(BaseCheck):
     """Models must be documented in the same directory where they are defined (i.e. `.yml` and `.sql` files are in the same directory).
 
     Receives:
-        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+        model (ModelNode): The ModelNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -217,7 +211,7 @@ class CheckModelDocumentedInSameDirectory(BaseCheck):
 
     """
 
-    model: "DbtBouncerModelBase | None" = Field(default=None)
+    model: Any | None = Field(default=None)
     name: Literal["check_model_documented_in_same_directory"]
 
     def execute(self) -> None:
@@ -228,7 +222,7 @@ class CheckModelDocumentedInSameDirectory(BaseCheck):
 
         """
         self._require_model()
-        model = cast("Nodes4", self.model)
+        model = cast("Any", self.model)
         model_sql_path = Path(clean_path_str(model.original_file_path))
         model_sql_dir = model_sql_path.parent.parts
 
@@ -250,5 +244,5 @@ class CheckModelDocumentedInSameDirectory(BaseCheck):
 
         if model_doc_dir != model_sql_dir:
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` is documented in a different directory to the `.sql` file: `{'/'.join(model_doc_dir)}` vs `{'/'.join(model_sql_dir)}`."
+                f"`{get_clean_model_name(model.unique_id)}` is documented in a different directory to the `.sql` file: `{'/'.join(model_doc_dir)}` vs `{'/'.join(model_sql_dir)}`."
             )

@@ -1,17 +1,10 @@
-from typing import TYPE_CHECKING, Literal
+from typing import Any, Literal
 
 from pydantic import Field
 
 from dbt_bouncer.check_base import BaseCheck
-from dbt_bouncer.enums import Materialization
-
-if TYPE_CHECKING:
-    from dbt_bouncer.artifact_parsers.parsers_manifest import (
-        DbtBouncerExposureBase,
-        DbtBouncerModelBase,
-    )
-
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
+from dbt_bouncer.enums import Materialization
 
 
 class CheckExposureBasedOnModel(BaseCheck):
@@ -22,7 +15,7 @@ class CheckExposureBasedOnModel(BaseCheck):
         minimum_number_of_models (int | None): The minimum number of models an exposure can depend on, defaults to 1.
 
     Receives:
-        exposure (DbtBouncerExposureBase): The DbtBouncerExposureBase object to check.
+        exposure (ExposureNode): The ExposureNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -44,7 +37,7 @@ class CheckExposureBasedOnModel(BaseCheck):
 
     """
 
-    exposure: "DbtBouncerExposureBase | None" = Field(default=None)
+    exposure: Any | None = Field(default=None)
     maximum_number_of_models: int = Field(default=100)
     minimum_number_of_models: int = Field(default=1)
     name: Literal["check_exposure_based_on_model"]
@@ -79,8 +72,8 @@ class CheckExposureBasedOnView(BaseCheck):
         materializations_to_include (list[str] | None): List of materializations to include in the check.
 
     Receives:
-        exposure (DbtBouncerExposureBase): The DbtBouncerExposureBase object to check.
-        models (list[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
+        exposure (ExposureNode): The ExposureNode object to check.
+        models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -104,11 +97,11 @@ class CheckExposureBasedOnView(BaseCheck):
 
     """
 
-    exposure: "DbtBouncerExposureBase | None" = Field(default=None)
+    exposure: Any | None = Field(default=None)
     materializations_to_include: list[str] = Field(
         default=[Materialization.EPHEMERAL, Materialization.VIEW],
     )
-    models: list["DbtBouncerModelBase"] = Field(default=[])
+    models: list[Any] = Field(default=[])
     name: Literal["check_exposure_based_on_view"]
 
     def execute(self) -> None:
@@ -146,8 +139,8 @@ class CheckExposureOnNonPublicModels(BaseCheck):
     """Exposures should be based on public models only.
 
     Receives:
-        exposure (DbtBouncerExposureBase): The DbtBouncerExposureBase object to check.
-        models (list[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
+        exposure (ExposureNode): The ExposureNode object to check.
+        models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -163,8 +156,8 @@ class CheckExposureOnNonPublicModels(BaseCheck):
 
     """
 
-    exposure: "DbtBouncerExposureBase | None" = Field(default=None)
-    models: list["DbtBouncerModelBase"] = Field(default=[])
+    exposure: Any | None = Field(default=None)
+    models: list[Any] = Field(default=[])
     name: Literal["check_exposure_based_on_non_public_models"]
 
     def execute(self) -> None:

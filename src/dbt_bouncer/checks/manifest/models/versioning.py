@@ -1,16 +1,11 @@
 """Checks related to model versioning."""
 
 import re
-from typing import TYPE_CHECKING, Literal
-
-if TYPE_CHECKING:
-    from dbt_bouncer.artifact_parsers.parsers_manifest import (
-        DbtBouncerManifest,
-        DbtBouncerModelBase,
-    )
+from typing import Any, Literal
 
 from pydantic import ConfigDict, Field, PrivateAttr
 
+from dbt_bouncer.artifact_types import ManifestWrapper
 from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import compile_pattern
@@ -20,7 +15,7 @@ class CheckModelLatestVersionSpecified(BaseCheck):
     r"""Check that the `latest_version` attribute of the model is set.
 
     Receives:
-        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+        model (ModelNode): The ModelNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -40,7 +35,7 @@ class CheckModelLatestVersionSpecified(BaseCheck):
 
     model_config = ConfigDict(extra="forbid", protected_namespaces=())
 
-    model: "DbtBouncerModelBase | None" = Field(default=None)
+    model: Any | None = Field(default=None)
     name: Literal["check_model_latest_version_specified"]
 
     def execute(self) -> None:
@@ -50,10 +45,10 @@ class CheckModelLatestVersionSpecified(BaseCheck):
             DbtBouncerFailedCheckError: If latest version is not specified.
 
         """
-        self._require_model()
-        if self.model.latest_version is None:
+        model = self._require_model()
+        if model.latest_version is None:
             raise DbtBouncerFailedCheckError(
-                f"`{self.model.name}` does not have a specified `latest_version`."
+                f"`{model.name}` does not have a specified `latest_version`."
             )
 
 
@@ -64,7 +59,7 @@ class CheckModelVersionAllowed(BaseCheck):
         version_pattern (str): Regexp the version must match.
 
     Receives:
-        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+        model (ModelNode): The ModelNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -89,7 +84,7 @@ class CheckModelVersionAllowed(BaseCheck):
 
     model_config = ConfigDict(extra="forbid", protected_namespaces=())
 
-    model: "DbtBouncerModelBase | None" = Field(default=None)
+    model: Any | None = Field(default=None)
     name: Literal["check_model_version_allowed"]
     version_pattern: str
 
@@ -106,12 +101,10 @@ class CheckModelVersionAllowed(BaseCheck):
             DbtBouncerFailedCheckError: If version is not allowed.
 
         """
-        self._require_model()
-        if self.model.version and (
-            self._compiled_pattern.match(str(self.model.version)) is None
-        ):
+        model = self._require_model()
+        if model.version and (self._compiled_pattern.match(str(model.version)) is None):
             raise DbtBouncerFailedCheckError(
-                f"Version `{self.model.version}` in `{self.model.name}` does not match the supplied regex `{self.version_pattern.strip()})`."
+                f"Version `{model.version}` in `{model.name}` does not match the supplied regex `{self.version_pattern.strip()})`."
             )
 
 
@@ -119,8 +112,8 @@ class CheckModelVersionPinnedInRef(BaseCheck):
     r"""Check that the version of the model is always specified in downstream nodes.
 
     Receives:
-        manifest_obj (DbtBouncerManifest): The DbtBouncerManifest object parsed from `manifest.json`.
-        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+        manifest_obj (ManifestObject): The ManifestObject object parsed from `manifest.json`.
+        model (ModelNode): The ModelNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -140,8 +133,8 @@ class CheckModelVersionPinnedInRef(BaseCheck):
 
     model_config = ConfigDict(extra="forbid", protected_namespaces=())
 
-    manifest_obj: "DbtBouncerManifest | None" = Field(default=None)
-    model: "DbtBouncerModelBase | None" = Field(default=None)
+    manifest_obj: ManifestWrapper | None = Field(default=None)
+    model: Any | None = Field(default=None)
     name: Literal["check_model_version_pinned_in_ref"]
 
     def execute(self) -> None:
@@ -151,29 +144,29 @@ class CheckModelVersionPinnedInRef(BaseCheck):
             DbtBouncerFailedCheckError: If version is not pinned in ref.
 
         """
-        self._require_model()
-        self._require_manifest()
-        child_map = self.manifest_obj.manifest.child_map
-        if child_map and self.model.unique_id in child_map:
+        model = self._require_model()
+        manifest_obj = self._require_manifest()
+        child_map = manifest_obj.manifest.child_map
+        if child_map and model.unique_id in child_map:
             downstream_models = [
-                x for x in child_map[self.model.unique_id] if x.startswith("model.")
+                x for x in child_map[model.unique_id] if x.startswith("model.")
             ]
         else:
             downstream_models = []
 
         downstream_models_with_unversioned_refs: list[str] = []
         for m in downstream_models:
-            node = self.manifest_obj.manifest.nodes.get(m)
+            node = manifest_obj.manifest.nodes.get(m)
             refs = getattr(node, "refs", None)
             if node and refs and isinstance(refs, list):
                 downstream_models_with_unversioned_refs.extend(
                     m
                     for ref in refs
-                    if getattr(ref, "name", None) == self.model.unique_id.split(".")[-1]
+                    if getattr(ref, "name", None) == model.unique_id.split(".")[-1]
                     and not getattr(ref, "version", None)
                 )
 
         if downstream_models_with_unversioned_refs:
             raise DbtBouncerFailedCheckError(
-                f"`{self.model.name}` is referenced without a pinned version in downstream models: {downstream_models_with_unversioned_refs}."
+                f"`{model.name}` is referenced without a pinned version in downstream models: {downstream_models_with_unversioned_refs}."
             )

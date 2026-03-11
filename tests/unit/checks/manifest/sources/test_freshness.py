@@ -2,7 +2,7 @@ from contextlib import nullcontext as does_not_raise
 
 import pytest
 
-from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import Sources
+from dbt_bouncer.artifact_parsers.parser import wrap_dict
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.checks.manifest.sources.freshness import (
     CheckSourceFreshnessPopulated,
@@ -13,8 +13,8 @@ from dbt_bouncer.checks.manifest.sources.freshness import (
     ("source", "expectation"),
     [
         (
-            Sources(
-                **{
+            wrap_dict(
+                {
                     "description": "Description that is more than 4 characters.",
                     "fqn": ["package_name", "source_1", "table_1"],
                     "freshness": {
@@ -38,8 +38,8 @@ from dbt_bouncer.checks.manifest.sources.freshness import (
             does_not_raise(),
         ),
         (
-            Sources(
-                **{
+            wrap_dict(
+                {
                     "description": "Description that is more than 4 characters.",
                     "fqn": ["package_name", "source_1", "table_1"],
                     "freshness": {
@@ -63,8 +63,8 @@ from dbt_bouncer.checks.manifest.sources.freshness import (
             does_not_raise(),
         ),
         (
-            Sources(
-                **{
+            wrap_dict(
+                {
                     "description": "Description that is more than 4 characters.",
                     "fqn": ["package_name", "source_1", "table_1"],
                     "freshness": {
@@ -88,8 +88,8 @@ from dbt_bouncer.checks.manifest.sources.freshness import (
             does_not_raise(),
         ),
         (
-            Sources(
-                **{
+            wrap_dict(
+                {
                     "description": "Description that is more than 4 characters.",
                     "fqn": ["package_name", "source_1", "table_1"],
                     "freshness": {
@@ -113,8 +113,8 @@ from dbt_bouncer.checks.manifest.sources.freshness import (
             pytest.raises(DbtBouncerFailedCheckError),
         ),
         (
-            Sources(
-                **{
+            wrap_dict(
+                {
                     "description": "Description that is more than 4 characters.",
                     "fqn": ["package_name", "source_1", "table_1"],
                     "freshness": None,

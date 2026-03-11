@@ -24,5 +24,5 @@ class DbtBouncerFailedCheckError(Exception):
         return self.message
 
 
-class NestedDict(RootModel):  # type: ignore[type-arg]
+class NestedDict(RootModel):
     root: dict[str, "NestedDict"] | list["NestedDict"] | str

@@ -12,7 +12,6 @@ from typer.main import get_command
 
 from dbt_bouncer.config_file_validator import (
     _get_stub_namespace,
-    _import_artifact_types,
     get_config_file_path,
     load_config_file_contents,
     validate_conf,
@@ -492,21 +491,6 @@ def test_lint_config_file_multiple_issues(tmp_path):
 
     issues = lint_config_file(config_file)
     assert len(issues) == 2
-
-
-def test_get_stub_namespace_keys_match_import_artifact_types():
-    """Stub namespace must contain exactly the same keys as _import_artifact_types.
-
-    This ensures config validation resolves every forward reference that the
-    real import would resolve, preventing PydanticUserError on model_rebuild().
-    """
-    stub_keys = set(_get_stub_namespace().keys())
-    real_keys = set(
-        _import_artifact_types(
-            check_categories=["catalog_checks", "manifest_checks", "run_results_checks"]
-        ).keys()
-    )
-    assert stub_keys == real_keys
 
 
 def test_get_stub_namespace_nested_dict_is_real_class():

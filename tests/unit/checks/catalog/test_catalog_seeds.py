@@ -1,16 +1,9 @@
 from contextlib import nullcontext as does_not_raise
+from types import SimpleNamespace
 
 import pytest
 
-from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
-    ManifestLatest,
-    Metadata,
-)
-from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
-    Nodes as SeedsLatest,
-)
-from dbt_bouncer.artifact_parsers.parsers_catalog import CatalogNodes
-from dbt_bouncer.artifact_parsers.parsers_manifest import DbtBouncerManifest
+from dbt_bouncer.artifact_parsers.parser import wrap_dict
 from dbt_bouncer.checks.catalog.check_catalog_seeds import (
     CheckSeedColumnsAreAllDocumented,
 )
@@ -21,8 +14,8 @@ from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
     ("catalog_node", "seeds", "expectation"),
     [
         pytest.param(
-            CatalogNodes(
-                **{
+            wrap_dict(
+                {
                     "columns": {
                         "id": {"name": "id", "type": "INTEGER", "index": 1},
                         "first_name": {
@@ -47,8 +40,8 @@ from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
                 }
             ),
             [
-                SeedsLatest(
-                    **{
+                wrap_dict(
+                    {
                         "alias": "raw_customers",
                         "checksum": {"name": "sha256", "checksum": ""},
                         "columns": {
@@ -71,8 +64,8 @@ from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
             id="all_columns_documented",
         ),
         pytest.param(
-            CatalogNodes(
-                **{
+            wrap_dict(
+                {
                     "columns": {
                         "id": {"name": "id", "type": "INTEGER", "index": 1},
                         "first_name": {
@@ -97,8 +90,8 @@ from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
                 }
             ),
             [
-                SeedsLatest(
-                    **{
+                wrap_dict(
+                    {
                         "alias": "raw_customers",
                         "checksum": {"name": "sha256", "checksum": ""},
                         "columns": {
@@ -125,24 +118,15 @@ def test_check_seed_columns_are_all_documented(catalog_node, seeds, expectation)
     with expectation:
         CheckSeedColumnsAreAllDocumented(
             catalog_node=catalog_node,
-            manifest_obj=DbtBouncerManifest(
-                manifest=ManifestLatest(
-                    **{
-                        "metadata": Metadata(
-                            dbt_schema_version="https://schemas.getdbt.com/dbt/manifest/v12.json",
-                            dbt_version="1.8.0",
-                            generated_at=None,
-                            invocation_id=None,
-                            invocation_started_at=None,
-                            env=None,
-                            project_name="dbt_bouncer_test_project",
-                            project_id=None,
-                            user_id=None,
-                            send_anonymous_usage_stats=None,
-                            adapter_type="postgres",
-                            quoting=None,
-                            run_started_at=None,
-                        ),
+            manifest_obj=SimpleNamespace(
+                manifest=wrap_dict(
+                    {
+                        "metadata": {
+                            "dbt_schema_version": "https://schemas.getdbt.com/dbt/manifest/v12.json",
+                            "dbt_version": "1.8.0",
+                            "project_name": "dbt_bouncer_test_project",
+                            "adapter_type": "postgres",
+                        },
                         "nodes": {},
                         "sources": {},
                         "macros": {},
@@ -159,7 +143,7 @@ def test_check_seed_columns_are_all_documented(catalog_node, seeds, expectation)
                         "semantic_models": {},
                         "unit_tests": {},
                     }
-                ),
+                )
             ),
             name="check_seed_columns_are_all_documented",
             seeds=seeds,

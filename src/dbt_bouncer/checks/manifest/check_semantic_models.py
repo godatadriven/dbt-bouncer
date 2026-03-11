@@ -1,15 +1,8 @@
-from typing import TYPE_CHECKING, Literal
-
-from dbt_bouncer.check_base import BaseCheck
-
-if TYPE_CHECKING:
-    from dbt_bouncer.artifact_parsers.parsers_manifest import (
-        DbtBouncerModelBase,
-        DbtBouncerSemanticModelBase,
-    )
+from typing import Any, Literal
 
 from pydantic import Field
 
+from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 
 
@@ -17,8 +10,8 @@ class CheckSemanticModelBasedOnNonPublicModels(BaseCheck):
     """Semantic models should be based on public models only.
 
     Receives:
-        models (list[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
-        semantic_model (DbtBouncerSemanticModelBase): The DbtBouncerSemanticModelBase object to check.
+        models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.
+        semantic_model (SemanticModelNode): The SemanticModelNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -34,9 +27,9 @@ class CheckSemanticModelBasedOnNonPublicModels(BaseCheck):
 
     """
 
-    models: list["DbtBouncerModelBase"] = Field(default=[])
+    models: list[Any] = Field(default=[])
     name: Literal["check_semantic_model_based_on_non_public_models"]
-    semantic_model: "DbtBouncerSemanticModelBase | None" = Field(default=None)
+    semantic_model: Any | None = Field(default=None)
 
     def execute(self) -> None:
         """Execute the check.

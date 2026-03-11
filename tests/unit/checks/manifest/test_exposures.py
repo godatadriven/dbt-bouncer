@@ -2,7 +2,7 @@ from contextlib import nullcontext as does_not_raise
 
 import pytest
 
-from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import Exposures, Nodes4
+from dbt_bouncer.artifact_parsers.parser import wrap_dict
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.checks.manifest.check_exposures import (
     CheckExposureBasedOnModel,
@@ -15,8 +15,8 @@ from dbt_bouncer.checks.manifest.check_exposures import (
     ("exposure", "maximum_number_of_models", "minimum_number_of_models", "expectation"),
     [
         (
-            Exposures(
-                **{
+            wrap_dict(
+                {
                     "depends_on": {"nodes": ["model.package_name.model_1"]},
                     "fqn": ["package_name", "marts", "finance", "exposure_1"],
                     "name": "exposure_1",
@@ -37,8 +37,8 @@ from dbt_bouncer.checks.manifest.check_exposures import (
             does_not_raise(),
         ),
         (
-            Exposures(
-                **{
+            wrap_dict(
+                {
                     "depends_on": {
                         "nodes": [
                             "model.package_name.model_1",
@@ -64,8 +64,8 @@ from dbt_bouncer.checks.manifest.check_exposures import (
             pytest.raises(DbtBouncerFailedCheckError),
         ),
         (
-            Exposures(
-                **{
+            wrap_dict(
+                {
                     "depends_on": {"nodes": ["model.package_name.model_1"]},
                     "fqn": ["package_name", "marts", "finance", "exposure_1"],
                     "name": "exposure_1",
@@ -103,8 +103,8 @@ def test_check_exposure_based_on_model(
     ("exposure", "models", "expectation"),
     [
         (
-            Exposures(
-                **{
+            wrap_dict(
+                {
                     "depends_on": {"nodes": ["model.package_name.model_1"]},
                     "fqn": ["package_name", "marts", "finance", "exposure_1"],
                     "name": "exposure_1",
@@ -121,8 +121,8 @@ def test_check_exposure_based_on_model(
                 },
             ),
             [
-                Nodes4(
-                    **{
+                wrap_dict(
+                    {
                         "access": "public",
                         "alias": "model_1",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -152,8 +152,8 @@ def test_check_exposure_based_on_model(
             does_not_raise(),
         ),
         (
-            Exposures(
-                **{
+            wrap_dict(
+                {
                     "depends_on": {"nodes": ["model.package_name.model_1"]},
                     "fqn": ["package_name", "marts", "finance", "exposure_1"],
                     "name": "exposure_1",
@@ -170,8 +170,8 @@ def test_check_exposure_based_on_model(
                 },
             ),
             [
-                Nodes4(
-                    **{
+                wrap_dict(
+                    {
                         "access": "protected",
                         "alias": "model_1",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -215,8 +215,8 @@ def test_check_exposure_based_on_non_public_models(exposure, models, expectation
     ("exposure", "materializations_to_include", "models", "expectation"),
     [
         (
-            Exposures(
-                **{
+            wrap_dict(
+                {
                     "depends_on": {"nodes": ["model.package_name.model_1"]},
                     "fqn": ["package_name", "marts", "finance", "exposure_1"],
                     "name": "exposure_1",
@@ -234,8 +234,8 @@ def test_check_exposure_based_on_non_public_models(exposure, models, expectation
             ),
             ["ephemeral", "view"],
             [
-                Nodes4(
-                    **{
+                wrap_dict(
+                    {
                         "access": "protected",
                         "alias": "model_1",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -266,8 +266,8 @@ def test_check_exposure_based_on_non_public_models(exposure, models, expectation
             does_not_raise(),
         ),
         (
-            Exposures(
-                **{
+            wrap_dict(
+                {
                     "depends_on": {
                         "nodes": [
                             "model.package_name.model_1",
@@ -290,8 +290,8 @@ def test_check_exposure_based_on_non_public_models(exposure, models, expectation
             ),
             ["ephemeral", "view"],
             [
-                Nodes4(
-                    **{
+                wrap_dict(
+                    {
                         "access": "protected",
                         "alias": "model_1",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -318,8 +318,8 @@ def test_check_exposure_based_on_non_public_models(exposure, models, expectation
                         "unique_id": "model.package_name.model_1",
                     },
                 ),
-                Nodes4(
-                    **{
+                wrap_dict(
+                    {
                         "access": "protected",
                         "alias": "model_2",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -350,8 +350,8 @@ def test_check_exposure_based_on_non_public_models(exposure, models, expectation
             pytest.raises(DbtBouncerFailedCheckError),
         ),
         (
-            Exposures(
-                **{
+            wrap_dict(
+                {
                     "depends_on": {"nodes": ["model.package_name.model_1"]},
                     "fqn": ["package_name", "marts", "finance", "exposure_1"],
                     "name": "exposure_1",
@@ -369,8 +369,8 @@ def test_check_exposure_based_on_non_public_models(exposure, models, expectation
             ),
             ["ephemeral", "view"],
             [
-                Nodes4(
-                    **{
+                wrap_dict(
+                    {
                         "access": "protected",
                         "alias": "model_1",
                         "checksum": {"name": "sha256", "checksum": ""},

@@ -1,23 +1,13 @@
 import json
-import warnings
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 import pytest
 import typer
 from typer.main import get_command
 
-from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
-    Metadata,
-    Nodes4,
-)
-from dbt_bouncer.artifact_parsers.parsers_catalog import (
-    DbtBouncerCatalogNode,
-)
-from dbt_bouncer.artifact_parsers.parsers_manifest import (
-    DbtBouncerManifest,
-    DbtBouncerModel,
-)
+from dbt_bouncer.artifact_parsers.parser import wrap_dict
 from dbt_bouncer.context import BouncerContext
 from dbt_bouncer.logger import configure_console_logging
 from dbt_bouncer.main import app
@@ -40,13 +30,8 @@ def test_runner_coverage(caplog, tmp_path):
         )
 
         DbtBouncerConf = DbtBouncerConf()  # noqa: N806
-
-        with warnings.catch_warnings():
-            warnings.filterwarnings("ignore", category=UserWarning)
-            from dbt_bouncer.artifact_parsers.parsers_manifest import parse_manifest
-
         results = runner(
-            ctx=BouncerContext(
+            ctx=BouncerContext.model_construct(
                 **{
                     "bouncer_config": DbtBouncerConf(
                         **{
@@ -67,8 +52,8 @@ def test_runner_coverage(caplog, tmp_path):
                     "dry_run": False,
                     "exposures": [],
                     "macros": [],
-                    "manifest_obj": DbtBouncerManifest(
-                        manifest=parse_manifest(
+                    "manifest_obj": SimpleNamespace(
+                        manifest=wrap_dict(
                             {
                                 "child_map": {},
                                 "disabled": {},
@@ -93,10 +78,10 @@ def test_runner_coverage(caplog, tmp_path):
                         )
                     ),
                     "models": [
-                        DbtBouncerModel(
+                        SimpleNamespace(
                             **{
-                                "model": Nodes4(
-                                    **{
+                                "model": wrap_dict(
+                                    {
                                         "access": "public",
                                         "alias": "stg_payments",
                                         "checksum": {"name": "sha256", "checksum": ""},
@@ -168,13 +153,8 @@ def test_runner_failure():
         )
 
         DbtBouncerConf = DbtBouncerConf()  # noqa: N806
-
-        with warnings.catch_warnings():
-            warnings.filterwarnings("ignore", category=UserWarning)
-            from dbt_bouncer.artifact_parsers.parsers_manifest import parse_manifest
-
         results = runner(
-            ctx=BouncerContext(
+            ctx=BouncerContext.model_construct(
                 **{
                     "bouncer_config": DbtBouncerConf(
                         **{
@@ -195,8 +175,8 @@ def test_runner_failure():
                     "dry_run": False,
                     "exposures": [],
                     "macros": [],
-                    "manifest_obj": DbtBouncerManifest(
-                        manifest=parse_manifest(
+                    "manifest_obj": SimpleNamespace(
+                        manifest=wrap_dict(
                             {
                                 "child_map": {},
                                 "disabled": {},
@@ -221,10 +201,10 @@ def test_runner_failure():
                         )
                     ),
                     "models": [
-                        DbtBouncerModel(
+                        SimpleNamespace(
                             **{
-                                "model": Nodes4(
-                                    **{
+                                "model": wrap_dict(
+                                    {
                                         "access": "public",
                                         "alias": "stg_payments",
                                         "checksum": {"name": "sha256", "checksum": ""},
@@ -289,13 +269,8 @@ def test_runner_skip(tmp_path):
         )
 
         DbtBouncerConf = DbtBouncerConf()  # noqa: N806
-
-        with warnings.catch_warnings():
-            warnings.filterwarnings("ignore", category=UserWarning)
-            from dbt_bouncer.artifact_parsers.parsers_manifest import parse_manifest
-
         results = runner(
-            ctx=BouncerContext(
+            ctx=BouncerContext.model_construct(
                 **{
                     "bouncer_config": DbtBouncerConf(
                         **{
@@ -316,8 +291,8 @@ def test_runner_skip(tmp_path):
                     "dry_run": False,
                     "exposures": [],
                     "macros": [],
-                    "manifest_obj": DbtBouncerManifest(
-                        manifest=parse_manifest(
+                    "manifest_obj": SimpleNamespace(
+                        manifest=wrap_dict(
                             {
                                 "child_map": {},
                                 "disabled": {},
@@ -342,10 +317,10 @@ def test_runner_skip(tmp_path):
                         )
                     ),
                     "models": [
-                        DbtBouncerModel(
+                        SimpleNamespace(
                             **{
-                                "model": Nodes4(
-                                    **{
+                                "model": wrap_dict(
+                                    {
                                         "access": "public",
                                         "alias": "stg_payments",
                                         "checksum": {"name": "sha256", "checksum": ""},
@@ -375,10 +350,10 @@ def test_runner_skip(tmp_path):
                                 "unique_id": "model.dbt_bouncer_test_project.stg_payments",
                             },
                         ),
-                        DbtBouncerModel(
+                        SimpleNamespace(
                             **{
-                                "model": Nodes4(
-                                    **{
+                                "model": wrap_dict(
+                                    {
                                         "access": "public",
                                         "alias": "stg_orders",
                                         "checksum": {"name": "sha256", "checksum": ""},
@@ -454,13 +429,8 @@ def test_runner_success():
         )
 
         DbtBouncerConf = DbtBouncerConf()  # noqa: N806
-
-        with warnings.catch_warnings():
-            warnings.filterwarnings("ignore", category=UserWarning)
-            from dbt_bouncer.artifact_parsers.parsers_manifest import parse_manifest
-
         results = runner(
-            ctx=BouncerContext(
+            ctx=BouncerContext.model_construct(
                 **{
                     "bouncer_config": DbtBouncerConf(
                         **{
@@ -481,8 +451,8 @@ def test_runner_success():
                     "dry_run": False,
                     "exposures": [],
                     "macros": [],
-                    "manifest_obj": DbtBouncerManifest(
-                        manifest=parse_manifest(
+                    "manifest_obj": SimpleNamespace(
+                        manifest=wrap_dict(
                             {
                                 "child_map": {},
                                 "disabled": {},
@@ -507,10 +477,10 @@ def test_runner_success():
                         )
                     ),
                     "models": [
-                        DbtBouncerModel(
+                        SimpleNamespace(
                             **{
-                                "model": Nodes4(
-                                    **{
+                                "model": wrap_dict(
+                                    {
                                         "access": "public",
                                         "alias": "stg_payments",
                                         "checksum": {"name": "sha256", "checksum": ""},
@@ -566,13 +536,8 @@ def test_runner_windows(caplog, tmp_path):
     )
 
     DbtBouncerConf = DbtBouncerConf()  # noqa: N806
-
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", category=UserWarning)
-        from dbt_bouncer.artifact_parsers.parsers_manifest import parse_manifest
-
     results = runner(
-        ctx=BouncerContext(
+        ctx=BouncerContext.model_construct(
             **{
                 "bouncer_config": DbtBouncerConf(
                     **{
@@ -593,8 +558,8 @@ def test_runner_windows(caplog, tmp_path):
                 "dry_run": False,
                 "exposures": [],
                 "macros": [],
-                "manifest_obj": DbtBouncerManifest(
-                    manifest=parse_manifest(
+                "manifest_obj": SimpleNamespace(
+                    manifest=wrap_dict(
                         {
                             "child_map": {},
                             "disabled": {},
@@ -619,10 +584,10 @@ def test_runner_windows(caplog, tmp_path):
                     )
                 ),
                 "models": [
-                    DbtBouncerModel(
+                    SimpleNamespace(
                         **{
-                            "model": Nodes4(
-                                **{
+                            "model": wrap_dict(
+                                {
                                     "access": "public",
                                     "alias": "stg_payments",
                                     "checksum": {"name": "sha256", "checksum": ""},
@@ -696,13 +661,8 @@ def test_runner_check_id(tmp_path):
         )
 
         DbtBouncerConf = DbtBouncerConf()  # noqa: N806
-
-        with warnings.catch_warnings():
-            warnings.filterwarnings("ignore", category=UserWarning)
-            from dbt_bouncer.artifact_parsers.parsers_manifest import parse_manifest
-
         results = runner(
-            ctx=BouncerContext(
+            ctx=BouncerContext.model_construct(
                 **{
                     "bouncer_config": DbtBouncerConf(
                         **{
@@ -723,8 +683,8 @@ def test_runner_check_id(tmp_path):
                     "dry_run": False,
                     "exposures": [],
                     "macros": [],
-                    "manifest_obj": DbtBouncerManifest(
-                        manifest=parse_manifest(
+                    "manifest_obj": SimpleNamespace(
+                        manifest=wrap_dict(
                             {
                                 "child_map": {},
                                 "disabled": {},
@@ -749,10 +709,10 @@ def test_runner_check_id(tmp_path):
                         )
                     ),
                     "models": [
-                        DbtBouncerModel(
+                        SimpleNamespace(
                             **{
-                                "model": Nodes4(
-                                    **{
+                                "model": wrap_dict(
+                                    {
                                         "access": "public",
                                         "alias": "stg_payments_v1",
                                         "checksum": {"name": "sha256", "checksum": ""},
@@ -783,10 +743,10 @@ def test_runner_check_id(tmp_path):
                                 "unique_id": "model.dbt_bouncer_test_project.stg_payments.v1",
                             },
                         ),
-                        DbtBouncerModel(
+                        SimpleNamespace(
                             **{
-                                "model": Nodes4(
-                                    **{
+                                "model": wrap_dict(
+                                    {
                                         "access": "public",
                                         "alias": "stg_payments_v2",
                                         "checksum": {"name": "sha256", "checksum": ""},
@@ -866,13 +826,8 @@ def test_runner_output_only_failures(output_only_failures, num_checks, tmp_path)
         )
 
         DbtBouncerConf = DbtBouncerConf()  # noqa: N806
-
-        with warnings.catch_warnings():
-            warnings.filterwarnings("ignore", category=UserWarning)
-            from dbt_bouncer.artifact_parsers.parsers_manifest import parse_manifest
-
         runner(
-            ctx=BouncerContext(
+            ctx=BouncerContext.model_construct(
                 **{
                     "bouncer_config": DbtBouncerConf(
                         **{
@@ -893,8 +848,8 @@ def test_runner_output_only_failures(output_only_failures, num_checks, tmp_path)
                     "dry_run": False,
                     "exposures": [],
                     "macros": [],
-                    "manifest_obj": DbtBouncerManifest(
-                        manifest=parse_manifest(
+                    "manifest_obj": SimpleNamespace(
+                        manifest=wrap_dict(
                             {
                                 "child_map": {},
                                 "disabled": {},
@@ -919,10 +874,10 @@ def test_runner_output_only_failures(output_only_failures, num_checks, tmp_path)
                         )
                     ),
                     "models": [
-                        DbtBouncerModel(
+                        SimpleNamespace(
                             **{
-                                "model": Nodes4(
-                                    **{
+                                "model": wrap_dict(
+                                    {
                                         "access": "public",
                                         "alias": "stg_payments",
                                         "checksum": {"name": "sha256", "checksum": ""},
@@ -952,10 +907,10 @@ def test_runner_output_only_failures(output_only_failures, num_checks, tmp_path)
                                 "unique_id": "model.dbt_bouncer_test_project.stg_payments",
                             },
                         ),
-                        DbtBouncerModel(
+                        SimpleNamespace(
                             **{
-                                "model": Nodes4(
-                                    **{
+                                "model": wrap_dict(
+                                    {
                                         "access": "public",
                                         "alias": "stg_orders",
                                         "checksum": {"name": "sha256", "checksum": ""},
@@ -1032,18 +987,8 @@ def test_runner_skip_catalog_check(tmp_path):
 
         DbtBouncerConf = DbtBouncerConf()  # noqa: N806
 
-        with warnings.catch_warnings():
-            warnings.filterwarnings("ignore", category=UserWarning)
-            from dbt_artifacts_parser.parsers.catalog.catalog_v1 import (
-                Nodes as CatalogNodes,
-            )
-
-            from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
-                ManifestLatest,
-            )
-
         results = runner(
-            ctx=BouncerContext(
+            ctx=BouncerContext.model_construct(
                 **{
                     "bouncer_config": DbtBouncerConf(
                         **{
@@ -1058,9 +1003,9 @@ def test_runner_skip_catalog_check(tmp_path):
                         }
                     ),
                     "catalog_nodes": [
-                        DbtBouncerCatalogNode(
-                            catalog_node=CatalogNodes(
-                                **{
+                        SimpleNamespace(
+                            catalog_node=wrap_dict(
+                                {
                                     "columns": {
                                         "col_1": {
                                             "index": 1,
@@ -1080,9 +1025,9 @@ def test_runner_skip_catalog_check(tmp_path):
                             original_file_path="models/staging/stg_payments.sql",
                             unique_id="model.dbt_bouncer_test_project.stg_payments",
                         ),
-                        DbtBouncerCatalogNode(
-                            catalog_node=CatalogNodes(
-                                **{
+                        SimpleNamespace(
+                            catalog_node=wrap_dict(
+                                {
                                     "columns": {
                                         "col_1": {
                                             "index": 1,
@@ -1114,14 +1059,14 @@ def test_runner_skip_catalog_check(tmp_path):
                     "dry_run": False,
                     "exposures": [],
                     "macros": [],
-                    "manifest_obj": DbtBouncerManifest(
-                        manifest=ManifestLatest(
-                            **{
-                                "metadata": Metadata(
-                                    dbt_schema_version="https://schemas.getdbt.com/dbt/manifest/v12.json",
-                                    project_name="dbt_bouncer_test_project",
-                                    adapter_type="postgres",
-                                ),
+                    "manifest_obj": SimpleNamespace(
+                        manifest=wrap_dict(
+                            {
+                                "metadata": {
+                                    "dbt_schema_version": "https://schemas.getdbt.com/dbt/manifest/v12.json",
+                                    "project_name": "dbt_bouncer_test_project",
+                                    "adapter_type": "postgres",
+                                },
                                 "child_map": {},
                                 "disabled": {},
                                 "docs": {},
@@ -1141,10 +1086,10 @@ def test_runner_skip_catalog_check(tmp_path):
                         ),
                     ),
                     "models": [
-                        DbtBouncerModel(
+                        SimpleNamespace(
                             **{
-                                "model": Nodes4(
-                                    **{
+                                "model": wrap_dict(
+                                    {
                                         "access": "public",
                                         "alias": "stg_payments",
                                         "checksum": {"name": "sha256", "checksum": ""},
@@ -1175,10 +1120,10 @@ def test_runner_skip_catalog_check(tmp_path):
                                 "unique_id": "model.dbt_bouncer_test_project.stg_payments",
                             },
                         ),
-                        DbtBouncerModel(
+                        SimpleNamespace(
                             **{
-                                "model": Nodes4(
-                                    **{
+                                "model": wrap_dict(
+                                    {
                                         "access": "public",
                                         "alias": "stg_orders",
                                         "checksum": {"name": "sha256", "checksum": ""},

@@ -1,10 +1,11 @@
-"""Unit tests for parsers_manifest module."""
+"""Unit tests for artifact parsing module."""
 
 import logging
+import re
 from pathlib import Path
 from unittest.mock import MagicMock
 
-from dbt_bouncer.artifact_parsers.parsers_common import parse_dbt_artifacts
+from dbt_bouncer.artifact_parsers.parser import parse_dbt_artifacts
 
 
 def test_parse_manifest_artifact_table_output(caplog):
@@ -18,7 +19,7 @@ def test_parse_manifest_artifact_table_output(caplog):
     bouncer_config.catalog_checks = []
     bouncer_config.run_results_checks = []
 
-    # Parse all artifacts (this will trigger the logging in parsers_common.py)
+    # Parse all artifacts (this will trigger the logging in parser.py)
     parse_dbt_artifacts(bouncer_config, dbt_artifacts_dir)
 
     # Check that the log contains the table header
@@ -63,8 +64,6 @@ def test_parse_manifest_artifact_table_format(caplog):
     assert "---" in manifest_log or "━" in manifest_log or "─" in manifest_log
 
     # Check that counts are present and numeric
-    import re
-
     # Extract all lines that look like "│ Category        │ Count │"
     category_lines = re.findall(
         r"(Exposures|Macros|Nodes|Seeds|Semantic Models|Snapshots|Sources|Tests|Unit Tests).*?│\s+(\d+)",

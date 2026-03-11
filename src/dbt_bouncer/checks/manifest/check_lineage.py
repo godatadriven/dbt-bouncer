@@ -1,16 +1,10 @@
 import re
-from typing import TYPE_CHECKING, Literal
-
-from dbt_bouncer.check_base import BaseCheck
-
-if TYPE_CHECKING:
-    from dbt_bouncer.artifact_parsers.parsers_manifest import (
-        DbtBouncerManifest,
-        DbtBouncerModelBase,
-    )
+from typing import Any, Literal
 
 from pydantic import Field, PrivateAttr
 
+from dbt_bouncer.artifact_types import ManifestWrapper
+from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import clean_path_str, compile_pattern, get_clean_model_name
 
@@ -22,9 +16,9 @@ class CheckLineagePermittedUpstreamModels(BaseCheck):
         upstream_path_pattern (str): Regexp pattern to match the upstream model(s) path.
 
     Receives:
-        manifest_obj (DbtBouncerManifest): The manifest object.
-        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
-        models (list[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
+        manifest_obj (ManifestObject): The manifest object.
+        model (ModelNode): The ModelNode object to check.
+        models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -48,9 +42,9 @@ class CheckLineagePermittedUpstreamModels(BaseCheck):
 
     """
 
-    manifest_obj: "DbtBouncerManifest | None" = Field(default=None)
-    model: "DbtBouncerModelBase | None" = Field(default=None)
-    models: list["DbtBouncerModelBase"] = Field(default=[])
+    manifest_obj: ManifestWrapper | None = Field(default=None)
+    model: Any | None = Field(default=None)
+    models: list[Any] = Field(default=[])
     name: Literal["check_lineage_permitted_upstream_models"]
     package_name: str | None = Field(default=None)
     upstream_path_pattern: str
@@ -70,14 +64,14 @@ class CheckLineagePermittedUpstreamModels(BaseCheck):
             DbtBouncerFailedCheckError: If upstream models are not permitted.
 
         """
-        self._require_model()
-        self._require_manifest()
+        model = self._require_model()
+        manifest_obj = self._require_manifest()
         upstream_models = [
             x
-            for x in getattr(self.model.depends_on, "nodes", []) or []
+            for x in getattr(model.depends_on, "nodes", []) or []
             if x.split(".")[0] == "model"
             and x.split(".")[1]
-            == (self.package_name or self.manifest_obj.manifest.metadata.project_name)
+            == (self.package_name or manifest_obj.manifest.metadata.project_name)
         ]
         models_by_id = (
             self.models_by_unique_id
@@ -95,7 +89,7 @@ class CheckLineagePermittedUpstreamModels(BaseCheck):
         ]
         if not_permitted_upstream_models:
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` references upstream models that are not permitted: {[m.split('.')[-1] for m in not_permitted_upstream_models]}."
+                f"`{get_clean_model_name(model.unique_id)}` references upstream models that are not permitted: {[m.split('.')[-1] for m in not_permitted_upstream_models]}."
             )
 
 
@@ -103,7 +97,7 @@ class CheckLineageSeedCannotBeUsed(BaseCheck):
     """Seed cannot be referenced in models with a path that matches the specified `include` config.
 
     Receives:
-        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+        model (ModelNode): The ModelNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -120,7 +114,7 @@ class CheckLineageSeedCannotBeUsed(BaseCheck):
 
     """
 
-    model: "DbtBouncerModelBase | None" = Field(default=None)
+    model: Any | None = Field(default=None)
     name: Literal["check_lineage_seed_cannot_be_used"]
 
     def execute(self) -> None:
@@ -130,14 +124,14 @@ class CheckLineageSeedCannotBeUsed(BaseCheck):
             DbtBouncerFailedCheckError: If seed is referenced.
 
         """
-        self._require_model()
+        model = self._require_model()
         if [
             x
-            for x in getattr(self.model.depends_on, "nodes", []) or []
+            for x in getattr(model.depends_on, "nodes", []) or []
             if x.split(".")[0] == "seed"
         ]:
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` references a seed even though this is not permitted."
+                f"`{get_clean_model_name(model.unique_id)}` references a seed even though this is not permitted."
             )
 
 
@@ -145,7 +139,7 @@ class CheckLineageSourceCannotBeUsed(BaseCheck):
     """Sources cannot be referenced in models with a path that matches the specified `include` config.
 
     Receives:
-        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+        model (ModelNode): The ModelNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -162,7 +156,7 @@ class CheckLineageSourceCannotBeUsed(BaseCheck):
 
     """
 
-    model: "DbtBouncerModelBase | None" = Field(default=None)
+    model: Any | None = Field(default=None)
     name: Literal["check_lineage_source_cannot_be_used"]
 
     def execute(self) -> None:
@@ -172,12 +166,12 @@ class CheckLineageSourceCannotBeUsed(BaseCheck):
             DbtBouncerFailedCheckError: If source is referenced.
 
         """
-        self._require_model()
+        model = self._require_model()
         if [
             x
-            for x in getattr(self.model.depends_on, "nodes", []) or []
+            for x in getattr(model.depends_on, "nodes", []) or []
             if x.split(".")[0] == "source"
         ]:
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` references a source even though this is not permitted."
+                f"`{get_clean_model_name(model.unique_id)}` references a source even though this is not permitted."
             )

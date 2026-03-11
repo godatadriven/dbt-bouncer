@@ -2,7 +2,7 @@ from contextlib import nullcontext as does_not_raise
 
 import pytest
 
-from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import Nodes6
+from dbt_bouncer.artifact_parsers.parser import wrap_dict
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.checks.manifest.check_tests import CheckTestHasTags
 
@@ -24,7 +24,7 @@ def test_node(request):
         "test_metadata": {"name": "not_null"},
         "unique_id": "test.package_name.not_null_model_1_col_1.abc123",
     }
-    return Nodes6(**{**default_test, **getattr(request, "param", {})})
+    return wrap_dict({**default_test, **getattr(request, "param", {})})
 
 
 _TEST_DATA_FOR_CHECK_TEST_HAS_TAGS = [

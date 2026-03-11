@@ -1,7 +1,10 @@
 from pathlib import Path
+from types import SimpleNamespace
 
 import orjson
 import pytest
+
+from dbt_bouncer.artifact_parsers.parser import wrap_dict
 
 
 def pytest_configure(config):
@@ -17,46 +20,13 @@ def pytest_configure(config):
 def _rebuild_all_check_models():
     """Rebuild all Check* Pydantic models to resolve forward references.
 
-    This replaces the per-file model_rebuild() calls that were previously
-    scattered across every test module.
+    Since we no longer use Pydantic artifact types, this only needs to
+    rebuild check classes and the bouncer conf/context with Any stubs.
     """
-    from dbt_artifacts_parser.parsers.catalog.catalog_v1 import (
-        Nodes as CatalogNodes,
-    )
-
-    from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
-        Macros,
-        UnitTests,
-    )
-    from dbt_bouncer.artifact_parsers.parsers_manifest import (
-        DbtBouncerExposureBase,
-        DbtBouncerManifest,
-        DbtBouncerModelBase,
-        DbtBouncerSeedBase,
-        DbtBouncerSemanticModelBase,
-        DbtBouncerSnapshotBase,
-        DbtBouncerSourceBase,
-        DbtBouncerTestBase,
-    )
-    from dbt_bouncer.artifact_parsers.parsers_run_results import (
-        DbtBouncerRunResultBase,
-    )
     from dbt_bouncer.checks.common import NestedDict
 
     types_namespace = {
-        "CatalogNodes": CatalogNodes,
-        "DbtBouncerExposureBase": DbtBouncerExposureBase,
-        "DbtBouncerManifest": DbtBouncerManifest,
-        "DbtBouncerModelBase": DbtBouncerModelBase,
-        "DbtBouncerRunResultBase": DbtBouncerRunResultBase,
-        "DbtBouncerSeedBase": DbtBouncerSeedBase,
-        "DbtBouncerSemanticModelBase": DbtBouncerSemanticModelBase,
-        "DbtBouncerSnapshotBase": DbtBouncerSnapshotBase,
-        "DbtBouncerSourceBase": DbtBouncerSourceBase,
-        "DbtBouncerTestBase": DbtBouncerTestBase,
-        "Macros": Macros,
         "NestedDict": NestedDict,
-        "UnitTests": UnitTests,
     }
 
     from dbt_bouncer.utils import get_check_objects
@@ -68,6 +38,10 @@ def _rebuild_all_check_models():
 
     dbt_bouncer_conf_all_categories = create_bouncer_conf_class()
     dbt_bouncer_conf_all_categories.model_rebuild(_types_namespace=types_namespace)
+
+    from dbt_bouncer.context import BouncerContext
+
+    BouncerContext.model_rebuild(_types_namespace=types_namespace)
 
 
 @pytest.fixture(autouse=True)
@@ -91,13 +65,6 @@ def _clear_module_caches():
 
 @pytest.fixture(scope="session")
 def manifest_obj():
-    from dbt_bouncer.artifact_parsers.parsers_manifest import (
-        DbtBouncerManifest,
-        parse_manifest,
-    )
-
     manifest_json_path = Path("dbt_project") / "target/manifest.json"
-    manifest_obj = parse_manifest(
-        manifest=orjson.loads(manifest_json_path.read_bytes())
-    )
-    return DbtBouncerManifest(**{"manifest": manifest_obj})
+    manifest_data = orjson.loads(manifest_json_path.read_bytes())
+    return SimpleNamespace(manifest=wrap_dict(manifest_data))

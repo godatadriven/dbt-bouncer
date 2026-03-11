@@ -1,14 +1,12 @@
 import re
-from typing import TYPE_CHECKING, Literal
+from typing import Literal
 
 from pydantic import ConfigDict, Field, PrivateAttr
 
+from dbt_bouncer.artifact_types import ManifestWrapper
 from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import compile_pattern
-
-if TYPE_CHECKING:
-    from dbt_bouncer.artifact_parsers.parsers_manifest import DbtBouncerManifest
 
 
 class CheckProjectName(BaseCheck):
@@ -18,7 +16,7 @@ class CheckProjectName(BaseCheck):
         project_name_pattern (str): Regex pattern to match the project name.
 
     Receives:
-        manifest_obj (DbtBouncerManifest): The manifest object.
+        manifest_obj (ManifestObject): The manifest object.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -43,7 +41,7 @@ class CheckProjectName(BaseCheck):
         default=None,
         description="Index to uniquely identify the check, calculated at runtime.",
     )
-    manifest_obj: "DbtBouncerManifest | None" = Field(default=None)
+    manifest_obj: ManifestWrapper | None = Field(default=None)
     name: Literal["check_project_name"]
     package_name: str | None = Field(default=None)
     project_name_pattern: str
@@ -67,11 +65,9 @@ class CheckProjectName(BaseCheck):
             DbtBouncerFailedCheckError: If project name does not match regex.
 
         """
-        self._require_manifest()
+        manifest_obj = self._require_manifest()
 
-        package_name = (
-            self.package_name or self.manifest_obj.manifest.metadata.project_name
-        )
+        package_name = self.package_name or manifest_obj.manifest.metadata.project_name
         if (
             self._compiled_project_name_pattern.match(
                 str(package_name),

@@ -1,16 +1,9 @@
-from typing import TYPE_CHECKING, Literal
+from typing import Any, Literal
 
 from pydantic import Field
 
+from dbt_bouncer.artifact_types import ManifestWrapper
 from dbt_bouncer.check_base import BaseCheck
-
-if TYPE_CHECKING:
-    from dbt_bouncer.artifact_parsers.parsers_catalog import CatalogNodes
-    from dbt_bouncer.artifact_parsers.parsers_manifest import (
-        DbtBouncerManifest,
-        DbtBouncerSeedBase,
-    )
-
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import get_clean_model_name
 
@@ -23,9 +16,9 @@ class CheckSeedColumnsAreAllDocumented(BaseCheck):
         This check is only supported for dbt 1.9.0 and above.
 
     Receives:
-        catalog_node (CatalogNodes): The CatalogNodes object to check.
-        manifest_obj (DbtBouncerManifest): The DbtBouncerManifest object parsed from `manifest.json`.
-        seeds (list[DbtBouncerSeedBase]): List of DbtBouncerSeedBase objects parsed from `manifest.json`.
+        catalog_node (CatalogNodeEntry): The CatalogNodeEntry object to check.
+        manifest_obj (ManifestObject): The ManifestObject object parsed from `manifest.json`.
+        seeds (list[SeedNode]): List of SeedNode objects parsed from `manifest.json`.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -41,10 +34,10 @@ class CheckSeedColumnsAreAllDocumented(BaseCheck):
 
     """
 
-    catalog_node: "CatalogNodes | None" = Field(default=None)
-    manifest_obj: "DbtBouncerManifest | None" = Field(default=None)
+    catalog_node: Any | None = Field(default=None)
+    manifest_obj: ManifestWrapper | None = Field(default=None)
     name: Literal["check_seed_columns_are_all_documented"]
-    seeds: list["DbtBouncerSeedBase"] = Field(default=[])
+    seeds: list[Any] = Field(default=[])
 
     def execute(self) -> None:
         """Execute the check.
@@ -55,7 +48,9 @@ class CheckSeedColumnsAreAllDocumented(BaseCheck):
         """
         catalog_node = self._require_catalog_node()
         self._require_manifest()
-        if catalog_node.unique_id.startswith("seed."):
+        if catalog_node.unique_id is not None and catalog_node.unique_id.startswith(
+            "seed."
+        ):
             seed = next(s for s in self.seeds if s.unique_id == catalog_node.unique_id)
 
             seed_columns = seed.columns or {}

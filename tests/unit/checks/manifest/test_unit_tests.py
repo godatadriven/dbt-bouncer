@@ -2,7 +2,7 @@ from contextlib import nullcontext as does_not_raise
 
 import pytest
 
-from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import Nodes4, UnitTests
+from dbt_bouncer.artifact_parsers.parser import wrap_dict
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.checks.manifest.check_unit_tests import (
     CheckUnitTestCoverage,
@@ -28,8 +28,8 @@ from dbt_bouncer.checks.manifest.check_unit_tests import (
             "manifest_obj",
             100,
             [
-                Nodes4(
-                    **{
+                wrap_dict(
+                    {
                         "access": "public",
                         "alias": "model_2",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -52,8 +52,8 @@ from dbt_bouncer.checks.manifest.check_unit_tests import (
                 ),
             ],
             [
-                UnitTests(
-                    **{
+                wrap_dict(
+                    {
                         "depends_on": {
                             "macros": [],
                             "nodes": ["model.package_name.model_2"],
@@ -87,8 +87,8 @@ from dbt_bouncer.checks.manifest.check_unit_tests import (
             "manifest_obj",
             75,
             [
-                Nodes4(
-                    **{
+                wrap_dict(
+                    {
                         "access": "public",
                         "alias": "model_1",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -109,8 +109,8 @@ from dbt_bouncer.checks.manifest.check_unit_tests import (
                         "unique_id": "model.package_name.model_1",
                     },
                 ),
-                Nodes4(
-                    **{
+                wrap_dict(
+                    {
                         "access": "public",
                         "alias": "model_2",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -133,8 +133,8 @@ from dbt_bouncer.checks.manifest.check_unit_tests import (
                 ),
             ],
             [
-                UnitTests(
-                    **{
+                wrap_dict(
+                    {
                         "depends_on": {
                             "macros": [],
                             "nodes": ["model.package_name.model_2"],
@@ -168,8 +168,8 @@ from dbt_bouncer.checks.manifest.check_unit_tests import (
             "manifest_obj",
             75,
             [
-                Nodes4(
-                    **{
+                wrap_dict(
+                    {
                         "access": "public",
                         "alias": "model_1",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -190,8 +190,8 @@ from dbt_bouncer.checks.manifest.check_unit_tests import (
                         "unique_id": "model.package_name.model_1",
                     },
                 ),
-                Nodes4(
-                    **{
+                wrap_dict(
+                    {
                         "access": "public",
                         "alias": "model_2",
                         "checksum": {"name": "sha256", "checksum": ""},
@@ -214,8 +214,8 @@ from dbt_bouncer.checks.manifest.check_unit_tests import (
                 ),
             ],
             [
-                UnitTests(
-                    **{
+                wrap_dict(
+                    {
                         "depends_on": {
                             "macros": [],
                             "nodes": ["model.package_name.model_2"],
@@ -273,8 +273,8 @@ def test_check_unit_test_coverage(
         (
             "manifest_obj",
             ["csv", "dict", "sql"],
-            UnitTests(
-                **{
+            wrap_dict(
+                {
                     "expect": {"format": "dict", "rows": [{"id": 1}]},
                     "fqn": ["package_name", "staging", "crm", "model_1", "unit_test_1"],
                     "given": [
@@ -294,8 +294,8 @@ def test_check_unit_test_coverage(
         (
             "manifest_obj",
             ["csv", "sql"],
-            UnitTests(
-                **{
+            wrap_dict(
+                {
                     "expect": {"format": "dict", "rows": [{"id": 1}]},
                     "fqn": ["package_name", "staging", "crm", "model_1", "unit_test_1"],
                     "given": [{"input": "ref(input_1)", "format": "csv"}],
@@ -334,8 +334,8 @@ def test_check_unit_test_expect_format(
         (
             "manifest_obj",
             ["csv", "dict", "sql"],
-            UnitTests(
-                **{
+            wrap_dict(
+                {
                     "model": "model_1",
                     "given": [
                         {"input": "ref(input_1)", "format": "csv"},
@@ -357,8 +357,8 @@ def test_check_unit_test_expect_format(
         (
             "manifest_obj",
             ["csv", "dict"],
-            UnitTests(
-                **{
+            wrap_dict(
+                {
                     "model": "model_1",
                     "given": [
                         {"input": "ref(input_1)", "format": "csv"},

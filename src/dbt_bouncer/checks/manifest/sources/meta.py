@@ -1,17 +1,11 @@
 """Checks related to source meta configuration."""
 
-from typing import TYPE_CHECKING, Literal
-
-if TYPE_CHECKING:
-    from dbt_bouncer.artifact_parsers.parsers_manifest import (
-        DbtBouncerSourceBase,
-    )
-    from dbt_bouncer.checks.common import NestedDict
+from typing import Any, Literal
 
 from pydantic import Field
 
 from dbt_bouncer.check_base import BaseCheck
-from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
+from dbt_bouncer.checks.common import DbtBouncerFailedCheckError, NestedDict
 from dbt_bouncer.utils import find_missing_meta_keys
 
 
@@ -22,7 +16,7 @@ class CheckSourceHasMetaKeys(BaseCheck):
         keys (NestedDict): A list (that may contain sub-lists) of required keys.
 
     Receives:
-        source (DbtBouncerSource): The DbtBouncerSourceBase object to check.
+        source (SourceNode): The SourceNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -45,7 +39,7 @@ class CheckSourceHasMetaKeys(BaseCheck):
 
     keys: "NestedDict"
     name: Literal["check_source_has_meta_keys"]
-    source: "DbtBouncerSourceBase | None" = Field(default=None)
+    source: Any | None = Field(default=None)
 
     def execute(self) -> None:
         """Execute the check.
@@ -54,13 +48,13 @@ class CheckSourceHasMetaKeys(BaseCheck):
             DbtBouncerFailedCheckError: If required meta keys are missing.
 
         """
-        self._require_source()
+        source = self._require_source()
         missing_keys = find_missing_meta_keys(
-            meta_config=self.source.meta,
+            meta_config=source.meta,
             required_keys=self.keys.model_dump(),
         )
 
         if missing_keys != []:
             raise DbtBouncerFailedCheckError(
-                f"`{self.source.source_name}.{self.source.name}` is missing the following keys from the `meta` config: {[x.replace('>>', '') for x in missing_keys]}"
+                f"`{source.source_name}.{source.name}` is missing the following keys from the `meta` config: {[x.replace('>>', '') for x in missing_keys]}"
             )

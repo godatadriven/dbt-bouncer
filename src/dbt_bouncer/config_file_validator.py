@@ -84,7 +84,7 @@ def get_config_file_path(
     if (Path().cwd() / ConfigFileName.PYPROJECT_TOML).exists():
         pyproject_toml_dir = Path().cwd()
     else:
-        pyproject_toml_dir = next(  # type: ignore[assignment]
+        pyproject_toml_dir = next(
             (
                 parent
                 for parent in Path().cwd().parents
@@ -186,7 +186,7 @@ def lint_config_file(config_file_path: Path) -> list[dict[str, Any]]:
 
     try:
         content = config_file_path.read_text()
-        data = yaml.load(content, Loader=yaml.CSafeLoader)
+        data = yaml.load(content, Loader=yaml.CSafeLoader)  # type: ignore[possibly-missing-attribute]
     except yaml.YAMLError as e:
         problem_mark = getattr(e, "problem_mark", None)
         if problem_mark:
@@ -277,135 +277,17 @@ def lint_config_file(config_file_path: Path) -> list[dict[str, Any]]:
 def _get_stub_namespace() -> dict[str, Any]:
     """Return a lightweight namespace for Pydantic model_rebuild() during config validation.
 
-    All forward-reference types are mapped to ``Any`` except ``NestedDict``,
-    which is used in config-level check fields (e.g. ``keys: NestedDict``) and
-    must be the real class.  The artifact wrapper types (``DbtBouncerModel``,
-    ``DbtBouncerManifest``, ``Macros``, etc.) all have ``default=None`` on
-    ``BaseCheck`` and are never populated from the config file, so ``Any`` is
-    sufficient for validation.
+    ``NestedDict`` is the only forward reference used in check field annotations
+    that must resolve to a real class. All artifact wrapper types now use ``Any``
+    directly in ``BaseCheck``, so no stubs are needed for them.
 
     Returns:
-        dict[str, Any]: Namespace mapping type names to ``Any`` (or the real
-        class for ``NestedDict``).
+        dict[str, Any]: Namespace mapping type names for ``model_rebuild()``.
 
     """
     from dbt_bouncer.checks.common import NestedDict
 
-    stub_keys = [
-        "CatalogNodes",
-        "DbtBouncerCatalogNode",
-        "DbtBouncerExposureBase",
-        "DbtBouncerManifest",
-        "DbtBouncerModel",
-        "DbtBouncerModelBase",
-        "DbtBouncerRunResult",
-        "DbtBouncerRunResultBase",
-        "DbtBouncerSeed",
-        "DbtBouncerSeedBase",
-        "DbtBouncerSemanticModel",
-        "DbtBouncerSemanticModelBase",
-        "DbtBouncerSnapshot",
-        "DbtBouncerSnapshotBase",
-        "DbtBouncerSource",
-        "DbtBouncerSourceBase",
-        "DbtBouncerTest",
-        "DbtBouncerTestBase",
-        "Exposures",
-        "Macros",
-        "UnitTests",
-    ]
-
-    namespace: dict[str, Any] = dict.fromkeys(stub_keys, Any)
-    namespace["NestedDict"] = NestedDict
-    return namespace
-
-
-def _import_artifact_types(check_categories: list[str]) -> dict[str, Any]:
-    """Import artifact parser types needed for Pydantic model_rebuild().
-
-    Only imports types required by the configured check categories, avoiding
-    expensive imports (e.g. manifest_latest ~0.5s) when not needed.
-
-    Args:
-        check_categories: List of configured category names, e.g.
-            ``["manifest_checks", "catalog_checks", "run_results_checks"]``.
-
-    Returns:
-        dict[str, Any]: Namespace mapping type names to their classes.
-
-    """
-    import warnings
-
-    # BaseCheck references CatalogNodes and DbtBouncerRunResultBase in
-    # annotations shared by ALL check subclasses, so they must always be
-    # in the namespace regardless of which categories are configured.
-    from dbt_bouncer.artifact_parsers.parsers_catalog import DbtBouncerCatalogNode
-    from dbt_bouncer.artifact_parsers.parsers_run_results import (
-        DbtBouncerRunResult,
-        DbtBouncerRunResultBase,
-    )
-    from dbt_bouncer.checks.common import NestedDict
-
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", category=UserWarning)
-        from dbt_artifacts_parser.parsers.catalog.catalog_v1 import (
-            Nodes as CatalogNodes,
-        )
-
-    types_namespace: dict[str, Any] = {
-        "CatalogNodes": CatalogNodes,
-        "DbtBouncerCatalogNode": DbtBouncerCatalogNode,
-        "DbtBouncerRunResult": DbtBouncerRunResult,
-        "DbtBouncerRunResultBase": DbtBouncerRunResultBase,
-        "NestedDict": NestedDict,
-    }
-
-    if "manifest_checks" in check_categories:
-        from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
-            Exposures,
-            Macros,
-            UnitTests,
-        )
-        from dbt_bouncer.artifact_parsers.parsers_manifest import (
-            DbtBouncerExposureBase,
-            DbtBouncerManifest,
-            DbtBouncerModel,
-            DbtBouncerModelBase,
-            DbtBouncerSeed,
-            DbtBouncerSeedBase,
-            DbtBouncerSemanticModel,
-            DbtBouncerSemanticModelBase,
-            DbtBouncerSnapshot,
-            DbtBouncerSnapshotBase,
-            DbtBouncerSource,
-            DbtBouncerSourceBase,
-            DbtBouncerTest,
-            DbtBouncerTestBase,
-        )
-
-        types_namespace.update(
-            {
-                "DbtBouncerExposureBase": DbtBouncerExposureBase,
-                "DbtBouncerManifest": DbtBouncerManifest,
-                "DbtBouncerModel": DbtBouncerModel,
-                "DbtBouncerModelBase": DbtBouncerModelBase,
-                "DbtBouncerSeed": DbtBouncerSeed,
-                "DbtBouncerSeedBase": DbtBouncerSeedBase,
-                "DbtBouncerSemanticModel": DbtBouncerSemanticModel,
-                "DbtBouncerSemanticModelBase": DbtBouncerSemanticModelBase,
-                "DbtBouncerSnapshot": DbtBouncerSnapshot,
-                "DbtBouncerSnapshotBase": DbtBouncerSnapshotBase,
-                "DbtBouncerSource": DbtBouncerSource,
-                "DbtBouncerSourceBase": DbtBouncerSourceBase,
-                "DbtBouncerTest": DbtBouncerTest,
-                "DbtBouncerTestBase": DbtBouncerTestBase,
-                "Exposures": Exposures,
-                "Macros": Macros,
-                "UnitTests": UnitTests,
-            }
-        )
-
-    return types_namespace
+    return {"NestedDict": NestedDict}
 
 
 def validate_conf(
@@ -415,11 +297,11 @@ def validate_conf(
 ) -> "DbtBouncerConfBase":
     """Validate the configuration and return the Pydantic model.
 
-    Raises:
-        RuntimeError: If the configuration is invalid.
-
     Returns:
         DbtBouncerConf: The validated configuration.
+
+    Raises:
+        RuntimeError: If the configuration is invalid.
 
     """
     logging.info("Validating conf...")

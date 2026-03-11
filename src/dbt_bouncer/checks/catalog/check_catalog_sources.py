@@ -1,30 +1,17 @@
-from typing import TYPE_CHECKING, Literal
+from typing import Any, Literal
 
 from pydantic import Field
 
 from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 
-if TYPE_CHECKING:
-    import warnings
-
-    from dbt_bouncer.artifact_parsers.parsers_manifest import (
-        DbtBouncerSourceBase,
-    )
-
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", category=UserWarning)
-        from dbt_artifacts_parser.parsers.catalog.catalog_v1 import (
-            Nodes as CatalogNodes,
-        )
-
 
 class CheckSourceColumnsAreAllDocumented(BaseCheck):
     """All columns in a source should be included in the source's properties file, i.e. `.yml` file.
 
     Receives:
-        catalog_source (CatalogNodes): The CatalogNodes object to check.
-        sources (list[DbtBouncerSourceBase]): List of DbtBouncerSourceBase objects parsed from `catalog.json`.
+        catalog_source (CatalogNodeEntry): The CatalogNodeEntry object to check.
+        sources (list[SourceNode]): List of SourceNode objects parsed from `catalog.json`.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -40,9 +27,9 @@ class CheckSourceColumnsAreAllDocumented(BaseCheck):
 
     """
 
-    catalog_source: "CatalogNodes | None" = Field(default=None)
+    catalog_source: Any | None = Field(default=None)
     name: Literal["check_source_columns_are_all_documented"]
-    sources: list["DbtBouncerSourceBase"] = Field(default=[])
+    sources: list[Any] = Field(default=[])
 
     def execute(self) -> None:
         """Execute the check.
@@ -58,7 +45,7 @@ class CheckSourceColumnsAreAllDocumented(BaseCheck):
         undocumented_columns = [
             v.name
             for _, v in catalog_source.columns.items()
-            if v.name not in source.columns
+            if v.name not in (source.columns or {})
         ]
         if undocumented_columns:
             raise DbtBouncerFailedCheckError(

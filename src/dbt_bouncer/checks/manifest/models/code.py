@@ -1,12 +1,7 @@
 """Checks related to model source code content and structure."""
 
 import re
-from typing import TYPE_CHECKING, Literal
-
-if TYPE_CHECKING:
-    from dbt_bouncer.artifact_parsers.parsers_manifest import (
-        DbtBouncerModelBase,
-    )
+from typing import Any, Literal
 
 from pydantic import Field, PrivateAttr
 
@@ -22,7 +17,7 @@ class CheckModelCodeDoesNotContainRegexpPattern(BaseCheck):
         regexp_pattern (str): The regexp pattern that should not be matched by the model code.
 
     Receives:
-        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+        model (ModelNode): The ModelNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -41,7 +36,7 @@ class CheckModelCodeDoesNotContainRegexpPattern(BaseCheck):
 
     """
 
-    model: "DbtBouncerModelBase | None" = Field(default=None)
+    model: Any | None = Field(default=None)
     name: Literal["check_model_code_does_not_contain_regexp_pattern"]
     regexp_pattern: str
 
@@ -60,10 +55,10 @@ class CheckModelCodeDoesNotContainRegexpPattern(BaseCheck):
             DbtBouncerFailedCheckError: If code contains banned string.
 
         """
-        self._require_model()
-        if self._compiled_pattern.match(str(self.model.raw_code)) is not None:
+        model = self._require_model()
+        if self._compiled_pattern.match(str(model.raw_code)) is not None:
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` contains a banned string: `{self.regexp_pattern}`."
+                f"`{get_clean_model_name(model.unique_id)}` contains a banned string: `{self.regexp_pattern}`."
             )
 
 
@@ -71,7 +66,7 @@ class CheckModelHasSemiColon(BaseCheck):
     """Model may not end with a semi-colon (`;`).
 
     Receives:
-        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+        model (ModelNode): The ModelNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -89,7 +84,7 @@ class CheckModelHasSemiColon(BaseCheck):
 
     """
 
-    model: "DbtBouncerModelBase | None" = Field(default=None)
+    model: Any | None = Field(default=None)
     name: Literal["check_model_has_semi_colon"]
 
     def execute(self) -> None:
@@ -99,11 +94,11 @@ class CheckModelHasSemiColon(BaseCheck):
             DbtBouncerFailedCheckError: If model ends with a semi-colon.
 
         """
-        self._require_model()
-        raw_code = (self.model.raw_code or "").strip()
+        model = self._require_model()
+        raw_code = (model.raw_code or "").strip()
         if raw_code and raw_code[-1] == ";":
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` ends with a semi-colon, this is not permitted."
+                f"`{get_clean_model_name(model.unique_id)}` ends with a semi-colon, this is not permitted."
             )
 
 
@@ -113,7 +108,7 @@ class CheckModelMaxNumberOfLines(BaseCheck):
     Parameters:
         max_number_of_lines (int): The maximum number of permitted lines.
 
-        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+        model (ModelNode): The ModelNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -135,7 +130,7 @@ class CheckModelMaxNumberOfLines(BaseCheck):
 
     """
 
-    model: "DbtBouncerModelBase | None" = Field(default=None)
+    model: Any | None = Field(default=None)
     name: Literal["check_model_max_number_of_lines"]
     max_number_of_lines: int = Field(default=100)
 
@@ -146,10 +141,10 @@ class CheckModelMaxNumberOfLines(BaseCheck):
             DbtBouncerFailedCheckError: If max lines exceeded.
 
         """
-        self._require_model()
-        actual_number_of_lines = (self.model.raw_code or "").count("\n") + 1
+        model = self._require_model()
+        actual_number_of_lines = (model.raw_code or "").count("\n") + 1
 
         if actual_number_of_lines > self.max_number_of_lines:
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` has {actual_number_of_lines} lines, this is more than the maximum permitted number of lines ({self.max_number_of_lines})."
+                f"`{get_clean_model_name(model.unique_id)}` has {actual_number_of_lines} lines, this is more than the maximum permitted number of lines ({self.max_number_of_lines})."
             )

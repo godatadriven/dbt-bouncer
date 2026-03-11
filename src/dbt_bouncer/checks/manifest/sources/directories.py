@@ -1,12 +1,7 @@
 """Checks related to source directory and file locations."""
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Literal
-
-if TYPE_CHECKING:
-    from dbt_bouncer.artifact_parsers.parsers_manifest import (
-        DbtBouncerSourceBase,
-    )
+from typing import Any, Literal
 
 from pydantic import Field
 
@@ -19,7 +14,7 @@ class CheckSourcePropertyFileLocation(BaseCheck):
     """Source properties files must follow the guidance provided by dbt [here](https://docs.getdbt.com/best-practices/how-we-structure/1-guide-overview).
 
     Receives:
-        source (DbtBouncerSource): The DbtBouncerSourceBase object to check.
+        source (SourceNode): The SourceNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -36,7 +31,7 @@ class CheckSourcePropertyFileLocation(BaseCheck):
     """
 
     name: Literal["check_source_property_file_location"]
-    source: "DbtBouncerSourceBase | None" = Field(default=None)
+    source: Any | None = Field(default=None)
 
     def execute(self) -> None:
         """Execute the check.
@@ -45,8 +40,8 @@ class CheckSourcePropertyFileLocation(BaseCheck):
             DbtBouncerFailedCheckError: If property file location is incorrect.
 
         """
-        self._require_source()
-        original_path = Path(clean_path_str(self.source.original_file_path))
+        source = self._require_source()
+        original_path = Path(clean_path_str(source.original_file_path))
 
         if (
             len(original_path.parts) > 2
@@ -62,13 +57,13 @@ class CheckSourcePropertyFileLocation(BaseCheck):
 
         if not properties_yml_name.startswith("_"):
             raise DbtBouncerFailedCheckError(
-                f"The properties file for `{self.source.source_name}.{self.source.name}` (`{properties_yml_name}`) does not start with an underscore."
+                f"The properties file for `{source.source_name}.{source.name}` (`{properties_yml_name}`) does not start with an underscore."
             )
         if expected_substring not in properties_yml_name:
             raise DbtBouncerFailedCheckError(
-                f"The properties file for `{self.source.source_name}.{self.source.name}` (`{properties_yml_name}`) does not contain the expected substring (`{expected_substring}`)."
+                f"The properties file for `{source.source_name}.{source.name}` (`{properties_yml_name}`) does not contain the expected substring (`{expected_substring}`)."
             )
         if not properties_yml_name.endswith("__sources.yml"):
             raise DbtBouncerFailedCheckError(
-                f"The properties file for `{self.source.source_name}.{self.source.name}` (`{properties_yml_name}`) does not end with `__sources.yml`."
+                f"The properties file for `{source.source_name}.{source.name}` (`{properties_yml_name}`) does not end with `__sources.yml`."
             )

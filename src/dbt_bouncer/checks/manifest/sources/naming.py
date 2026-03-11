@@ -1,12 +1,7 @@
 """Checks related to source naming conventions."""
 
 import re
-from typing import TYPE_CHECKING, Literal
-
-if TYPE_CHECKING:
-    from dbt_bouncer.artifact_parsers.parsers_manifest import (
-        DbtBouncerSourceBase,
-    )
+from typing import Any, Literal
 
 from pydantic import Field, PrivateAttr
 
@@ -22,7 +17,7 @@ class CheckSourceNames(BaseCheck):
         source_name_pattern (str): Regexp the source name must match.
 
     Receives:
-        source (DbtBouncerSource): The DbtBouncerSourceBase object to check.
+        source (SourceNode): The SourceNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -42,7 +37,7 @@ class CheckSourceNames(BaseCheck):
 
     name: Literal["check_source_names"]
     source_name_pattern: str
-    source: "DbtBouncerSourceBase | None" = Field(default=None)
+    source: Any | None = Field(default=None)
 
     _compiled_pattern: re.Pattern[str] = PrivateAttr()
 
@@ -57,8 +52,8 @@ class CheckSourceNames(BaseCheck):
             DbtBouncerFailedCheckError: If source name does not match regex.
 
         """
-        self._require_source()
-        if self._compiled_pattern.match(str(self.source.name)) is None:
+        source = self._require_source()
+        if self._compiled_pattern.match(str(source.name)) is None:
             raise DbtBouncerFailedCheckError(
-                f"`{self.source.source_name}.{self.source.name}` does not match the supplied regex `({self.source_name_pattern.strip()})`."
+                f"`{source.source_name}.{source.name}` does not match the supplied regex `({self.source_name_pattern.strip()})`."
             )

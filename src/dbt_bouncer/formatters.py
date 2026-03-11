@@ -79,7 +79,7 @@ def _format_junit(results: list[dict[str, Any]]) -> bytes:
             classname="dbt-bouncer",
         )
         if result["outcome"] == CheckOutcome.FAILED:
-            tc.result = [
+            tc.result = [  # type: ignore[invalid-assignment]
                 Failure(
                     message=result.get("failure_message") or "",
                     type_=result.get("severity", CheckSeverity.ERROR),

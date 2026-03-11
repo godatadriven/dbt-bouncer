@@ -1,20 +1,11 @@
 import logging
 import re
-from typing import TYPE_CHECKING, Literal
+from typing import Any, Literal
 
 from pydantic import ConfigDict, Field, PrivateAttr
 
+from dbt_bouncer.artifact_types import ManifestWrapper
 from dbt_bouncer.check_base import BaseCheck
-
-if TYPE_CHECKING:
-    from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
-        UnitTests,
-    )
-    from dbt_bouncer.artifact_parsers.parsers_manifest import (
-        DbtBouncerManifest,
-        DbtBouncerSeedBase,
-    )
-
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import (
     compile_pattern,
@@ -30,7 +21,7 @@ class CheckSeedColumnNames(BaseCheck):
         seed_column_name_pattern (str): Regexp the column name must match.
 
     Receives:
-        seed (DbtBouncerSeedBase): The DbtBouncerSeedBase object to check.
+        seed (SeedNode): The SeedNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -50,7 +41,7 @@ class CheckSeedColumnNames(BaseCheck):
     model_config = ConfigDict(extra="forbid", protected_namespaces=())
 
     name: Literal["check_seed_column_names"]
-    seed: "DbtBouncerSeedBase | None" = Field(default=None)
+    seed: Any | None = Field(default=None)
     seed_column_name_pattern: str
 
     _compiled_pattern: re.Pattern[str] = PrivateAttr()
@@ -66,8 +57,8 @@ class CheckSeedColumnNames(BaseCheck):
             DbtBouncerFailedCheckError: If column name does not match regex.
 
         """
-        self._require_seed()
-        seed_columns = self.seed.columns or {}
+        seed = self._require_seed()
+        seed_columns = seed.columns or {}
         non_complying_columns = [
             col_name
             for col_name in seed_columns
@@ -76,7 +67,7 @@ class CheckSeedColumnNames(BaseCheck):
 
         if non_complying_columns:
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.seed.unique_id)}` has columns that do not match the supplied regex `{self.seed_column_name_pattern.strip()}`: {non_complying_columns}"
+                f"`{get_clean_model_name(seed.unique_id)}` has columns that do not match the supplied regex `{self.seed_column_name_pattern.strip()}`: {non_complying_columns}"
             )
 
 
@@ -84,7 +75,7 @@ class CheckSeedColumnsHaveTypes(BaseCheck):
     """Columns defined for seeds must have a `data_type` declared.
 
     Receives:
-        seed (DbtBouncerSeedBase): The DbtBouncerSeedBase object to check.
+        seed (SeedNode): The SeedNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -101,7 +92,7 @@ class CheckSeedColumnsHaveTypes(BaseCheck):
     """
 
     name: Literal["check_seed_columns_have_types"]
-    seed: "DbtBouncerSeedBase | None" = Field(default=None)
+    seed: Any | None = Field(default=None)
 
     def execute(self) -> None:
         """Execute the check.
@@ -110,14 +101,14 @@ class CheckSeedColumnsHaveTypes(BaseCheck):
             DbtBouncerFailedCheckError: If any column lacks a declared `data_type`.
 
         """
-        self._require_seed()
-        columns = self.seed.columns or {}
+        seed = self._require_seed()
+        columns = seed.columns or {}
         untyped_columns = [
             col_name for col_name, col in columns.items() if not col.data_type
         ]
         if untyped_columns:
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.seed.unique_id)}` has columns without a declared `data_type`: {untyped_columns}"
+                f"`{get_clean_model_name(seed.unique_id)}` has columns without a declared `data_type`: {untyped_columns}"
             )
 
 
@@ -128,7 +119,7 @@ class CheckSeedDescriptionPopulated(BaseCheck):
         min_description_length (int | None): Minimum length required for the description to be considered populated.
 
     Receives:
-        seed (DbtBouncerSeedBase): The DbtBouncerSeedBase object to check.
+        seed (SeedNode): The SeedNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -153,7 +144,7 @@ class CheckSeedDescriptionPopulated(BaseCheck):
 
     min_description_length: int | None = Field(default=None)
     name: Literal["check_seed_description_populated"]
-    seed: "DbtBouncerSeedBase | None" = Field(default=None)
+    seed: Any | None = Field(default=None)
 
     def execute(self) -> None:
         """Execute the check.
@@ -162,12 +153,12 @@ class CheckSeedDescriptionPopulated(BaseCheck):
             DbtBouncerFailedCheckError: If description is not populated.
 
         """
-        self._require_seed()
+        seed = self._require_seed()
         if not self._is_description_populated(
-            self.seed.description or "", self.min_description_length
+            seed.description or "", self.min_description_length
         ):
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.seed.unique_id)}` does not have a populated description."
+                f"`{get_clean_model_name(seed.unique_id)}` does not have a populated description."
             )
 
 
@@ -178,8 +169,8 @@ class CheckSeedHasUnitTests(BaseCheck):
         min_number_of_unit_tests (int | None): The minimum number of unit tests that a seed must have.
 
     Receives:
-        manifest_obj (DbtBouncerManifest): The DbtBouncerManifest object parsed from `manifest.json`.
-        seed (DbtBouncerSeedBase): The DbtBouncerSeedBase object to check.
+        manifest_obj (ManifestObject): The ManifestObject object parsed from `manifest.json`.
+        seed (SeedNode): The SeedNode object to check.
         unit_tests (list[UnitTests]): List of UnitTests objects parsed from `manifest.json`.
 
     Other Parameters:
@@ -206,11 +197,11 @@ class CheckSeedHasUnitTests(BaseCheck):
 
     """
 
-    manifest_obj: "DbtBouncerManifest | None" = Field(default=None)
+    manifest_obj: ManifestWrapper | None = Field(default=None)
     min_number_of_unit_tests: int = Field(default=1)
     name: Literal["check_seed_has_unit_tests"]
-    seed: "DbtBouncerSeedBase | None" = Field(default=None)
-    unit_tests: list["UnitTests"] = Field(default=[])
+    seed: Any | None = Field(default=None)
+    unit_tests: list[Any] = Field(default=[])
 
     def execute(self) -> None:
         """Execute the check.
@@ -219,10 +210,10 @@ class CheckSeedHasUnitTests(BaseCheck):
             DbtBouncerFailedCheckError: If seed does not have enough unit tests.
 
         """
-        self._require_manifest()
-        self._require_seed()
+        manifest_obj = self._require_manifest()
+        seed = self._require_seed()
         if get_package_version_number(
-            self.manifest_obj.manifest.metadata.dbt_version or "0.0.0"
+            manifest_obj.manifest.metadata.dbt_version or "0.0.0"
         ) >= get_package_version_number("1.8.0"):
             num_unit_tests = len(
                 [
@@ -230,12 +221,12 @@ class CheckSeedHasUnitTests(BaseCheck):
                     for t in self.unit_tests
                     if t.depends_on
                     and t.depends_on.nodes
-                    and t.depends_on.nodes[0] == self.seed.unique_id
+                    and t.depends_on.nodes[0] == seed.unique_id
                 ],
             )
             if num_unit_tests < self.min_number_of_unit_tests:
                 raise DbtBouncerFailedCheckError(
-                    f"`{get_clean_model_name(self.seed.unique_id)}` has {num_unit_tests} unit tests, this is less than the minimum of {self.min_number_of_unit_tests}."
+                    f"`{get_clean_model_name(seed.unique_id)}` has {num_unit_tests} unit tests, this is less than the minimum of {self.min_number_of_unit_tests}."
                 )
         else:
             logging.warning(
@@ -250,7 +241,7 @@ class CheckSeedNames(BaseCheck):
         seed_name_pattern (str): Regexp the seed name must match.
 
     Receives:
-        seed (DbtBouncerSeedBase): The DbtBouncerSeedBase object to check.
+        seed (SeedNode): The SeedNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -271,7 +262,7 @@ class CheckSeedNames(BaseCheck):
     model_config = ConfigDict(extra="forbid", protected_namespaces=())
 
     name: Literal["check_seed_names"]
-    seed: "DbtBouncerSeedBase | None" = Field(default=None)
+    seed: Any | None = Field(default=None)
     seed_name_pattern: str
 
     _compiled_pattern: re.Pattern[str] = PrivateAttr()
@@ -287,8 +278,8 @@ class CheckSeedNames(BaseCheck):
             DbtBouncerFailedCheckError: If model name does not match regex.
 
         """
-        self._require_seed()
-        if self._compiled_pattern.match(str(self.seed.name)) is None:
+        seed = self._require_seed()
+        if self._compiled_pattern.match(str(seed.name)) is None:
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.seed.unique_id)}` does not match the supplied regex `{self.seed_name_pattern.strip()}`."
+                f"`{get_clean_model_name(seed.unique_id)}` does not match the supplied regex `{self.seed_name_pattern.strip()}`."
             )

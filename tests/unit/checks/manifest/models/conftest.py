@@ -1,16 +1,9 @@
 from contextlib import nullcontext as does_not_raise  # noqa: F401
+from types import SimpleNamespace
 
 import pytest
 
-from dbt_bouncer.artifact_parsers.dbt_cloud.manifest_latest import (
-    Exposures,
-    ManifestLatest,
-    Metadata,
-    Nodes4,
-    Nodes6,
-    UnitTests,
-)
-from dbt_bouncer.artifact_parsers.parsers_manifest import DbtBouncerManifest
+from dbt_bouncer.artifact_parsers.parser import wrap_dict
 
 
 @pytest.fixture
@@ -35,7 +28,7 @@ def model(request):
         "schema": "main",
         "unique_id": "model.package_name.model_1",
     }
-    return Nodes4(**{**default_model, **getattr(request, "param", {})})
+    return wrap_dict({**default_model, **getattr(request, "param", {})})
 
 
 @pytest.fixture
@@ -60,7 +53,7 @@ def models(request):
         "unique_id": "model.package_name.model_1",
     }
     params = getattr(request, "param", [])
-    return [Nodes4(**{**default_model, **p}) for p in params]
+    return [wrap_dict({**default_model, **p}) for p in params]
 
 
 @pytest.fixture
@@ -88,7 +81,7 @@ def tests(request):
         "unique_id": "test.package_name.not_null_model_1_unique.cf6c17daed",
     }
     params = getattr(request, "param", [])
-    return [Nodes6(**{**default_test, **p}) for p in params]
+    return [wrap_dict({**default_test, **p}) for p in params]
 
 
 @pytest.fixture
@@ -109,7 +102,7 @@ def exposures(request):
         "unique_id": "exposure.package_name.exposure_1",
     }
     params = getattr(request, "param", [])
-    return [Exposures(**{**default_exposure, **p}) for p in params]
+    return [wrap_dict({**default_exposure, **p}) for p in params]
 
 
 @pytest.fixture
@@ -138,27 +131,18 @@ def unit_tests(request):
         "unique_id": "unit_test.package_name.model_1.unit_test_1",
     }
     params = getattr(request, "param", [])
-    return [UnitTests(**{**default_unit_test, **p}) for p in params]
+    return [wrap_dict({**default_unit_test, **p}) for p in params]
 
 
 @pytest.fixture
 def manifest_obj(request):
     default_manifest = {
-        "metadata": Metadata(
-            dbt_schema_version="https://schemas.getdbt.com/dbt/manifest/v12.json",
-            dbt_version="1.11.0a1",
-            generated_at=None,
-            invocation_id=None,
-            invocation_started_at=None,
-            env=None,
-            project_name="dbt_bouncer_test_project",
-            project_id=None,
-            user_id=None,
-            send_anonymous_usage_stats=None,
-            adapter_type="postgres",
-            quoting=None,
-            run_started_at=None,
-        ),
+        "metadata": {
+            "dbt_schema_version": "https://schemas.getdbt.com/dbt/manifest/v12.json",
+            "dbt_version": "1.11.0a1",
+            "project_name": "dbt_bouncer_test_project",
+            "adapter_type": "postgres",
+        },
         "nodes": {},
         "sources": {},
         "macros": {},
@@ -183,7 +167,7 @@ def manifest_obj(request):
 
     if "manifest" in params:
         manifest_data = {**default_manifest, **params["manifest"]}
-        return DbtBouncerManifest(manifest=ManifestLatest(**manifest_data))
+        return SimpleNamespace(manifest=wrap_dict(manifest_data))
 
     manifest_data = {**default_manifest, **params}
-    return DbtBouncerManifest(manifest=ManifestLatest(**manifest_data))
+    return SimpleNamespace(manifest=wrap_dict(manifest_data))

@@ -1,12 +1,7 @@
 """Checks related to model naming conventions."""
 
 import re
-from typing import TYPE_CHECKING, Literal
-
-if TYPE_CHECKING:
-    from dbt_bouncer.artifact_parsers.parsers_manifest import (
-        DbtBouncerModelBase,
-    )
+from typing import Any, Literal
 
 from pydantic import ConfigDict, Field, PrivateAttr
 
@@ -22,7 +17,7 @@ class CheckModelNames(BaseCheck):
         model_name_pattern (str): Regexp the model name must match.
 
     Receives:
-        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+        model (ModelNode): The ModelNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -46,7 +41,7 @@ class CheckModelNames(BaseCheck):
 
     model_config = ConfigDict(extra="forbid", protected_namespaces=())
 
-    model: "DbtBouncerModelBase | None" = Field(default=None)
+    model: Any | None = Field(default=None)
     name: Literal["check_model_names"]
     model_name_pattern: str
 
@@ -63,8 +58,8 @@ class CheckModelNames(BaseCheck):
             DbtBouncerFailedCheckError: If model name does not match regex.
 
         """
-        self._require_model()
-        if self._compiled_pattern.match(str(self.model.name)) is None:
+        model = self._require_model()
+        if self._compiled_pattern.match(str(model.name)) is None:
             raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(self.model.unique_id)}` does not match the supplied regex `{self.model_name_pattern.strip()}`."
+                f"`{get_clean_model_name(model.unique_id)}` does not match the supplied regex `{self.model_name_pattern.strip()}`."
             )

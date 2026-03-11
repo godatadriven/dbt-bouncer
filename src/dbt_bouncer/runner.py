@@ -44,7 +44,7 @@ def _get_resource_meta(
     This helper centralises that per-type logic.
 
     Args:
-        resource: The wrapper resource object (e.g. DbtBouncerModel).
+        resource: The wrapper resource object (e.g. ModelWrapper).
         iterate_value: The singular resource type name (e.g. "model", "test").
         meta_by_unique_id: Pre-built mapping of unique_id -> meta for catalog nodes.
 
