@@ -13,7 +13,7 @@ class CheckSourceHasTags(BaseCheck):
 
     Parameters:
         criteria: (Literal["any", "all", "one"] | None): Whether the source must have any, all, or exactly one of the specified tags. Default: `all`.
-        source (DbtBouncerSource): The DbtBouncerSourceBase object to check.
+        source (SourceNode): The SourceNode object to check.
         tags (list[str]): List of tags to check for.
 
     Other Parameters:

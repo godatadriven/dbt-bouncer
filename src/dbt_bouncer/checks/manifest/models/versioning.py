@@ -15,7 +15,7 @@ class CheckModelLatestVersionSpecified(BaseCheck):
     r"""Check that the `latest_version` attribute of the model is set.
 
     Receives:
-        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+        model (ModelNode): The ModelNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -59,7 +59,7 @@ class CheckModelVersionAllowed(BaseCheck):
         version_pattern (str): Regexp the version must match.
 
     Receives:
-        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+        model (ModelNode): The ModelNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -112,8 +112,8 @@ class CheckModelVersionPinnedInRef(BaseCheck):
     r"""Check that the version of the model is always specified in downstream nodes.
 
     Receives:
-        manifest_obj (DbtBouncerManifest): The DbtBouncerManifest object parsed from `manifest.json`.
-        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+        manifest_obj (ManifestObject): The ManifestObject object parsed from `manifest.json`.
+        model (ModelNode): The ModelNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.

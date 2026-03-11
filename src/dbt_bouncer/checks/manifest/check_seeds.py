@@ -21,7 +21,7 @@ class CheckSeedColumnNames(BaseCheck):
         seed_column_name_pattern (str): Regexp the column name must match.
 
     Receives:
-        seed (DbtBouncerSeedBase): The DbtBouncerSeedBase object to check.
+        seed (SeedNode): The SeedNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -75,7 +75,7 @@ class CheckSeedColumnsHaveTypes(BaseCheck):
     """Columns defined for seeds must have a `data_type` declared.
 
     Receives:
-        seed (DbtBouncerSeedBase): The DbtBouncerSeedBase object to check.
+        seed (SeedNode): The SeedNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -119,7 +119,7 @@ class CheckSeedDescriptionPopulated(BaseCheck):
         min_description_length (int | None): Minimum length required for the description to be considered populated.
 
     Receives:
-        seed (DbtBouncerSeedBase): The DbtBouncerSeedBase object to check.
+        seed (SeedNode): The SeedNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -169,8 +169,8 @@ class CheckSeedHasUnitTests(BaseCheck):
         min_number_of_unit_tests (int | None): The minimum number of unit tests that a seed must have.
 
     Receives:
-        manifest_obj (DbtBouncerManifest): The DbtBouncerManifest object parsed from `manifest.json`.
-        seed (DbtBouncerSeedBase): The DbtBouncerSeedBase object to check.
+        manifest_obj (ManifestObject): The ManifestObject object parsed from `manifest.json`.
+        seed (SeedNode): The SeedNode object to check.
         unit_tests (list[UnitTests]): List of UnitTests objects parsed from `manifest.json`.
 
     Other Parameters:
@@ -241,7 +241,7 @@ class CheckSeedNames(BaseCheck):
         seed_name_pattern (str): Regexp the seed name must match.
 
     Receives:
-        seed (DbtBouncerSeedBase): The DbtBouncerSeedBase object to check.
+        seed (SeedNode): The SeedNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.

@@ -20,7 +20,7 @@ class CheckUnitTestCoverage(BaseCheck):
         min_unit_test_coverage_pct (float): The minimum percentage of models that must have a unit test.
 
     Receives:
-        models (list[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
+        models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.
         unit_tests (list[UnitTests]): List of UnitTests objects parsed from `manifest.json`.
 
     Other Parameters:
@@ -113,7 +113,7 @@ class CheckUnitTestExpectFormat(BaseCheck):
         permitted_formats (list[Literal["csv", "dict", "sql"]] | None): A list of formats that are allowed to be used for `expect` input in a unit test.
 
     Receives:
-        manifest_obj (DbtBouncerManifest): The DbtBouncerManifest object parsed from `manifest.json`.
+        manifest_obj (ManifestObject): The ManifestObject object parsed from `manifest.json`.
         unit_test (UnitTests): The UnitTests object to check.
 
     Other Parameters:
@@ -184,7 +184,7 @@ class CheckUnitTestGivenFormats(BaseCheck):
         permitted_formats (list[Literal["csv", "dict", "sql"]] | None): A list of formats that are allowed to be used for `expect` input in a unit test.
 
     Receives:
-        manifest_obj (DbtBouncerManifest): The DbtBouncerManifest object parsed from `manifest.json`.
+        manifest_obj (ManifestObject): The ManifestObject object parsed from `manifest.json`.
         unit_test (UnitTests): The UnitTests object to check.
 
     Other Parameters:

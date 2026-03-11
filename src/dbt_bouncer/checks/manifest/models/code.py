@@ -17,7 +17,7 @@ class CheckModelCodeDoesNotContainRegexpPattern(BaseCheck):
         regexp_pattern (str): The regexp pattern that should not be matched by the model code.
 
     Receives:
-        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+        model (ModelNode): The ModelNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -66,7 +66,7 @@ class CheckModelHasSemiColon(BaseCheck):
     """Model may not end with a semi-colon (`;`).
 
     Receives:
-        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+        model (ModelNode): The ModelNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -108,7 +108,7 @@ class CheckModelMaxNumberOfLines(BaseCheck):
     Parameters:
         max_number_of_lines (int): The maximum number of permitted lines.
 
-        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+        model (ModelNode): The ModelNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.

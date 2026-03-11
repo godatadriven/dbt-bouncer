@@ -14,7 +14,7 @@ class CheckSourcePropertyFileLocation(BaseCheck):
     """Source properties files must follow the guidance provided by dbt [here](https://docs.getdbt.com/best-practices/how-we-structure/1-guide-overview).
 
     Receives:
-        source (DbtBouncerSource): The DbtBouncerSourceBase object to check.
+        source (SourceNode): The SourceNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.

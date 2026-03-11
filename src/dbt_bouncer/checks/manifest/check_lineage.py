@@ -16,9 +16,9 @@ class CheckLineagePermittedUpstreamModels(BaseCheck):
         upstream_path_pattern (str): Regexp pattern to match the upstream model(s) path.
 
     Receives:
-        manifest_obj (DbtBouncerManifest): The manifest object.
-        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
-        models (list[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
+        manifest_obj (ManifestObject): The manifest object.
+        model (ModelNode): The ModelNode object to check.
+        models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -97,7 +97,7 @@ class CheckLineageSeedCannotBeUsed(BaseCheck):
     """Seed cannot be referenced in models with a path that matches the specified `include` config.
 
     Receives:
-        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+        model (ModelNode): The ModelNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -139,7 +139,7 @@ class CheckLineageSourceCannotBeUsed(BaseCheck):
     """Sources cannot be referenced in models with a path that matches the specified `include` config.
 
     Receives:
-        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+        model (ModelNode): The ModelNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.

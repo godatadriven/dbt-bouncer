@@ -13,8 +13,8 @@ def _is_catalog_node_a_model(catalog_node: Any, models: list[Any]) -> bool:
     """Return True if a catalog node corresponds to a dbt model.
 
     Args:
-        catalog_node (CatalogNodes): The CatalogNodes object to check.
-        models (list[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
+        catalog_node (CatalogNodeEntry): The CatalogNodeEntry object to check.
+        models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.
 
     Returns:
         bool: Whether a catalog node is a model.
@@ -31,9 +31,9 @@ class CheckColumnDescriptionPopulated(BaseCheck):
         min_description_length (int | None): Minimum length required for the description to be considered populated.
 
     Receives:
-        catalog_node (CatalogNodes): The CatalogNodes object to check.
-        manifest_obj (DbtBouncerManifest): The DbtBouncerManifest object parsed from `manifest.json`.
-        models (list[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
+        catalog_node (CatalogNodeEntry): The CatalogNodeEntry object to check.
+        manifest_obj (ManifestObject): The ManifestObject object parsed from `manifest.json`.
+        models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -102,9 +102,9 @@ class CheckColumnsAreAllDocumented(BaseCheck):
 
     Receives:
         case_sensitive (bool | None): Whether the column names are case sensitive or not. Necessary for adapters like `dbt-snowflake` where the column in `catalog.json` is uppercase but the column in `manifest.json` can be lowercase. Defaults to `false` for `dbt-snowflake`, otherwise `true`.
-        catalog_node (CatalogNodes): The CatalogNodes object to check.
-        manifest_obj (DbtBouncerManifest): The DbtBouncerManifest object parsed from `manifest.json`.
-        models (list[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
+        catalog_node (CatalogNodeEntry): The CatalogNodeEntry object to check.
+        manifest_obj (ManifestObject): The ManifestObject object parsed from `manifest.json`.
+        models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -168,9 +168,9 @@ class CheckColumnsAreDocumentedInPublicModels(BaseCheck):
     """Columns should have a populated description in public models.
 
     Receives:
-        catalog_node (CatalogNodes): The CatalogNodes object to check.
+        catalog_node (CatalogNodeEntry): The CatalogNodeEntry object to check.
         min_description_length (int | None): Minimum length required for the description to be considered populated.
-        models (list[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
+        models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.

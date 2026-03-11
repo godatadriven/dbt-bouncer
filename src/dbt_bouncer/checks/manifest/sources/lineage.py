@@ -12,8 +12,8 @@ class CheckSourceNotOrphaned(BaseCheck):
     """Sources must be referenced in at least one model.
 
     Receives:
-        models (list[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
-        source (DbtBouncerSource): The DbtBouncerSourceBase object to check.
+        models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.
+        source (SourceNode): The SourceNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -56,8 +56,8 @@ class CheckSourceUsedByModelsInSameDirectory(BaseCheck):
     """Sources can only be referenced by models that are located in the same directory where the source is defined.
 
     Parameters:
-        models (list[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
-        source (DbtBouncerSource): The DbtBouncerSourceBase object to check.
+        models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.
+        source (SourceNode): The SourceNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -105,8 +105,8 @@ class CheckSourceUsedByOnlyOneModel(BaseCheck):
     """Each source can be referenced by a maximum of one model.
 
     Receives:
-        models (list[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
-        source (DbtBouncerSource): The DbtBouncerSourceBase object to check.
+        models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.
+        source (SourceNode): The SourceNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.

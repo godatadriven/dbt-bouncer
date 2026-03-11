@@ -16,8 +16,8 @@ class CheckModelHasUniqueTest(BaseCheck):
 
     Parameters:
         accepted_uniqueness_tests (list[str] | None): List of tests that are accepted as uniqueness tests.
-        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
-        tests (list[DbtBouncerTestBase]): List of DbtBouncerTestBase objects parsed from `manifest.json`.
+        model (ModelNode): The ModelNode object to check.
+        tests (list[TestNode]): List of TestNode objects parsed from `manifest.json`.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -96,8 +96,8 @@ class CheckModelHasUnitTests(BaseCheck):
         min_number_of_unit_tests (int | None): The minimum number of unit tests that a model must have.
 
     Receives:
-        manifest_obj (DbtBouncerManifest): The DbtBouncerManifest object parsed from `manifest.json`.
-        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+        manifest_obj (ManifestObject): The ManifestObject object parsed from `manifest.json`.
+        model (ModelNode): The ModelNode object to check.
         unit_tests (list[UnitTests]): List of UnitTests objects parsed from `manifest.json`.
 
     Other Parameters:
@@ -167,8 +167,8 @@ class CheckModelTestCoverage(BaseCheck):
 
     Parameters:
         min_model_test_coverage_pct (float): The minimum percentage of models that must have at least one test.
-        models (list[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
-        tests (list[DbtBouncerTestBase]): List of DbtBouncerTestBase objects parsed from `manifest.json`.
+        models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.
+        tests (list[TestNode]): List of TestNode objects parsed from `manifest.json`.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.

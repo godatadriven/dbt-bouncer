@@ -16,9 +16,9 @@ class CheckSeedColumnsAreAllDocumented(BaseCheck):
         This check is only supported for dbt 1.9.0 and above.
 
     Receives:
-        catalog_node (CatalogNodes): The CatalogNodes object to check.
-        manifest_obj (DbtBouncerManifest): The DbtBouncerManifest object parsed from `manifest.json`.
-        seeds (list[DbtBouncerSeedBase]): List of DbtBouncerSeedBase objects parsed from `manifest.json`.
+        catalog_node (CatalogNodeEntry): The CatalogNodeEntry object to check.
+        manifest_obj (ManifestObject): The ManifestObject object parsed from `manifest.json`.
+        seeds (list[SeedNode]): List of SeedNode objects parsed from `manifest.json`.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.

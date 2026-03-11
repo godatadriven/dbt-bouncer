@@ -90,7 +90,7 @@ class BaseCheck(BaseModel):
 
         Args:
             parsed_data: Dict of global context keys (manifest, catalog_nodes, etc.) to inject.
-            resource: The dbt resource object to inject (e.g. a DbtBouncerModel wrapper).
+            resource: The dbt resource object to inject (e.g. a ModelWrapper).
                       When None, only global context is injected (for non-iterating checks).
             iterate_over_value: The annotation key that names the resource field (e.g. "model").
 

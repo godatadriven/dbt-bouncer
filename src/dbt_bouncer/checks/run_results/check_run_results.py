@@ -13,7 +13,7 @@ class CheckRunResultsMaxExecutionTime(BaseCheck):
         max_execution_time_seconds (float): The maximum execution time (seconds) allowed for a node.
 
     Receives:
-        run_result (DbtBouncerRunResult): The DbtBouncerRunResult object to check.
+        run_result (RunResultEntry): The RunResultEntry object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -63,7 +63,7 @@ class CheckRunResultsMaxGigabytesBilled(BaseCheck):
 
     Parameters:
         max_gigabytes_billed (float): The maximum number of gigabytes billed.
-        run_result (DbtBouncerRunResult): The DbtBouncerRunResult object to check.
+        run_result (RunResultEntry): The RunResultEntry object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.

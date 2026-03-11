@@ -17,7 +17,7 @@ class CheckSourceNames(BaseCheck):
         source_name_pattern (str): Regexp the source name must match.
 
     Receives:
-        source (DbtBouncerSource): The DbtBouncerSourceBase object to check.
+        source (SourceNode): The SourceNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.

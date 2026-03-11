@@ -19,7 +19,7 @@ class CheckModelDirectories(BaseCheck):
         permitted_sub_directories (list[str]): List of permitted sub-directories.
 
     Receives:
-        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+        model (ModelNode): The ModelNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -93,7 +93,7 @@ class CheckModelFileName(BaseCheck):
         file_name_pattern (str): Regexp the file name must match. Please account for the `.sql` extension.
 
     Receives:
-        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+        model (ModelNode): The ModelNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -142,7 +142,7 @@ class CheckModelPropertyFileLocation(BaseCheck):
     """Model properties files must follow the guidance provided by dbt [here](https://docs.getdbt.com/best-practices/how-we-structure/1-guide-overview).
 
     Parameters:
-        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+        model (ModelNode): The ModelNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -223,7 +223,7 @@ class CheckModelSchemaName(BaseCheck):
         schema_name_pattern (str): Regexp the schema name must match.
 
     Receives:
-        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+        model (ModelNode): The ModelNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.

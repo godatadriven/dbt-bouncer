@@ -20,7 +20,7 @@ class CheckModelDescriptionContainsRegexPattern(BaseCheck):
     """Models must have a description that matches the provided pattern.
 
     Receives:
-        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+        model (ModelNode): The ModelNode object to check.
         regexp_pattern (str): The regexp pattern that should match the model description.
 
     Other Parameters:
@@ -72,7 +72,7 @@ class CheckModelDescriptionPopulated(BaseCheck):
         min_description_length (int | None): Minimum length required for the description to be considered populated.
 
     Receives:
-        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+        model (ModelNode): The ModelNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -122,7 +122,7 @@ class CheckModelDocumentationCoverage(BaseCheck):
         min_model_documentation_coverage_pct (float): The minimum percentage of models that must have a populated description.
 
     Receives:
-        models (list[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
+        models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -194,7 +194,7 @@ class CheckModelDocumentedInSameDirectory(BaseCheck):
     """Models must be documented in the same directory where they are defined (i.e. `.yml` and `.sql` files are in the same directory).
 
     Receives:
-        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+        model (ModelNode): The ModelNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.

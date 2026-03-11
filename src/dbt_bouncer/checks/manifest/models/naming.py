@@ -17,7 +17,7 @@ class CheckModelNames(BaseCheck):
         model_name_pattern (str): Regexp the model name must match.
 
     Receives:
-        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+        model (ModelNode): The ModelNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.

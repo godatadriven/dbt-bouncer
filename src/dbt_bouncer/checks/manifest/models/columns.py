@@ -17,7 +17,7 @@ class CheckModelColumnsHaveMetaKeys(BaseCheck):
         keys (NestedDict): A list (that may contain sub-lists) of required keys.
 
     Receives:
-        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+        model (ModelNode): The ModelNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -68,7 +68,7 @@ class CheckModelColumnsHaveTypes(BaseCheck):
     """Columns defined for models must have a `data_type` declared.
 
     Receives:
-        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+        model (ModelNode): The ModelNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -114,7 +114,7 @@ class CheckModelHasConstraints(BaseCheck):
         required_constraint_types (list[Literal["check", "custom", "foreign_key", "not_null", "primary_key", "unique"]]): List of constraint types that must be present on the model.
 
     Receives:
-        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+        model (ModelNode): The ModelNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.

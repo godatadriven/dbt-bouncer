@@ -10,8 +10,8 @@ class CheckSemanticModelBasedOnNonPublicModels(BaseCheck):
     """Semantic models should be based on public models only.
 
     Receives:
-        models (list[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
-        semantic_model (DbtBouncerSemanticModelBase): The DbtBouncerSemanticModelBase object to check.
+        models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.
+        semantic_model (SemanticModelNode): The SemanticModelNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.

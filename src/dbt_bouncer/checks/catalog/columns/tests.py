@@ -18,8 +18,8 @@ class CheckColumnHasSpecifiedTest(BaseCheck):
         test_name (str): Name of the test to check for.
 
     Receives:
-        catalog_node (CatalogNodes): The CatalogNodes object to check.
-        tests (list[DbtBouncerTestBase]): List of DbtBouncerTestBase objects parsed from `manifest.json`.
+        catalog_node (CatalogNodeEntry): The CatalogNodeEntry object to check.
+        tests (list[TestNode]): List of TestNode objects parsed from `manifest.json`.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.

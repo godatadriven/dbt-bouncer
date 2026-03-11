@@ -14,7 +14,7 @@ class CheckTestHasTags(BaseCheck):
         tags (list[str]): List of tags to check for.
 
     Receives:
-        test (DbtBouncerTestBase): The DbtBouncerTestBase object to check.
+        test (TestNode): The TestNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.

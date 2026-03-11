@@ -14,7 +14,7 @@ class CheckModelHasMetaKeys(BaseCheck):
 
     Parameters:
         keys (NestedDict): A list (that may contain sub-lists) of required keys.
-        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+        model (ModelNode): The ModelNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.

@@ -12,7 +12,7 @@ class CheckSourceFreshnessPopulated(BaseCheck):
     """Sources must have a populated freshness.
 
     Receives:
-        source (DbtBouncerSource): The DbtBouncerSourceBase object to check.
+        source (SourceNode): The SourceNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.

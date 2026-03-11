@@ -17,7 +17,7 @@ class CheckModelAccess(BaseCheck):
         access (Literal["private", "protected", "public"]): The access level to check for.
 
     Receives:
-        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+        model (ModelNode): The ModelNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -65,7 +65,7 @@ class CheckModelContractEnforcedForPublicModel(BaseCheck):
     """Public models must have contracts enforced.
 
     Receives:
-        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+        model (ModelNode): The ModelNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -107,7 +107,7 @@ class CheckModelGrantPrivilege(BaseCheck):
     """Model can have grant privileges that match the specified pattern.
 
     Receives:
-        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+        model (ModelNode): The ModelNode object to check.
         privilege_pattern (str): Regex pattern to match the privilege.
 
     Other Parameters:
@@ -161,7 +161,7 @@ class CheckModelGrantPrivilegeRequired(BaseCheck):
     """Model must have the specified grant privilege.
 
     Receives:
-        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+        model (ModelNode): The ModelNode object to check.
         privilege (str): The privilege that is required.
 
     Other Parameters:
@@ -205,7 +205,7 @@ class CheckModelHasContractsEnforced(BaseCheck):
     """Model must have contracts enforced.
 
     Receives:
-        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+        model (ModelNode): The ModelNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -246,7 +246,7 @@ class CheckModelNumberOfGrants(BaseCheck):
     Receives:
         max_number_of_privileges (int | None): Maximum number of privileges, inclusive.
         min_number_of_privileges (int | None): Minimum number of privileges, inclusive.
-        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+        model (ModelNode): The ModelNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.

@@ -15,7 +15,7 @@ class CheckExposureBasedOnModel(BaseCheck):
         minimum_number_of_models (int | None): The minimum number of models an exposure can depend on, defaults to 1.
 
     Receives:
-        exposure (DbtBouncerExposureBase): The DbtBouncerExposureBase object to check.
+        exposure (ExposureNode): The ExposureNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -72,8 +72,8 @@ class CheckExposureBasedOnView(BaseCheck):
         materializations_to_include (list[str] | None): List of materializations to include in the check.
 
     Receives:
-        exposure (DbtBouncerExposureBase): The DbtBouncerExposureBase object to check.
-        models (list[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
+        exposure (ExposureNode): The ExposureNode object to check.
+        models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -139,8 +139,8 @@ class CheckExposureOnNonPublicModels(BaseCheck):
     """Exposures should be based on public models only.
 
     Receives:
-        exposure (DbtBouncerExposureBase): The DbtBouncerExposureBase object to check.
-        models (list[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
+        exposure (ExposureNode): The ExposureNode object to check.
+        models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.

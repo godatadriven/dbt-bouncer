@@ -16,7 +16,7 @@ class CheckSourceHasMetaKeys(BaseCheck):
         keys (NestedDict): A list (that may contain sub-lists) of required keys.
 
     Receives:
-        source (DbtBouncerSource): The DbtBouncerSourceBase object to check.
+        source (SourceNode): The SourceNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.

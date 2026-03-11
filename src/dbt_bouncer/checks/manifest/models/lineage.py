@@ -19,7 +19,7 @@ class CheckModelDependsOnMacros(BaseCheck):
         required_macros: (list[str]): List of macros the model must depend on. All macros must specify a namespace, e.g. `dbt.is_incremental`.
 
     Receives:
-        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+        model (ModelNode): The ModelNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -86,7 +86,7 @@ class CheckModelDependsOnMultipleSources(BaseCheck):
     """Models cannot reference more than one source.
 
     Parameters:
-        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+        model (ModelNode): The ModelNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -128,8 +128,8 @@ class CheckModelHasExposure(BaseCheck):
     """Models must have an exposure.
 
     Receives:
-        exposures (list[DbtBouncerExposureBase]):  List of DbtBouncerExposureBase objects parsed from `manifest.json`.
-        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+        exposures (list[ExposureNode]):  List of ExposureNode objects parsed from `manifest.json`.
+        model (ModelNode): The ModelNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -178,7 +178,7 @@ class CheckModelHasNoUpstreamDependencies(BaseCheck):
     """Identify if models have no upstream dependencies as this likely indicates hard-coded tables references.
 
     Receives:
-        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+        model (ModelNode): The ModelNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -224,8 +224,8 @@ class CheckModelMaxChainedViews(BaseCheck):
         max_chained_views (int | None): The maximum number of upstream dependents that are not tables.
 
     Receives:
-        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
-        models (list[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
+        model (ModelNode): The ModelNode object to check.
+        models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -356,8 +356,8 @@ class CheckModelMaxFanout(BaseCheck):
         max_downstream_models (int | None): The maximum number of permitted downstream models.
 
     Receives:
-        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
-        models (list[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
+        model (ModelNode): The ModelNode object to check.
+        models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -409,7 +409,7 @@ class CheckModelMaxUpstreamDependencies(BaseCheck):
         max_upstream_sources (int | None): The maximum number of permitted upstream sources.
 
     Receives:
-        model (DbtBouncerModelBase): The DbtBouncerModelBase object to check.
+        model (ModelNode): The ModelNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.

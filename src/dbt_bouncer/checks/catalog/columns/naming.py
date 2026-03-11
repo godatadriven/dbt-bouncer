@@ -14,8 +14,8 @@ def _is_catalog_node_a_model(catalog_node: Any, models: list[Any]) -> bool:
     """Return True if a catalog node corresponds to a dbt model.
 
     Args:
-        catalog_node (CatalogNodes): The CatalogNodes object to check.
-        models (list[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
+        catalog_node (CatalogNodeEntry): The CatalogNodeEntry object to check.
+        models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.
 
     Returns:
         bool: Whether a catalog node is a model.
@@ -36,7 +36,7 @@ class CheckColumnNameCompliesToColumnType(BaseCheck):
         types (list[str] | None): List of data types to check.
 
     Receives:
-        catalog_node (CatalogNodes): The CatalogNodes object to check.
+        catalog_node (CatalogNodeEntry): The CatalogNodeEntry object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -152,8 +152,8 @@ class CheckColumnNames(BaseCheck):
         columns_name_pattern (str): Regexp the column name must match.
 
     Receives:
-        catalog_node (CatalogNodes): The CatalogNodes object to check.
-        models (list[DbtBouncerModelBase]): List of DbtBouncerModelBase objects parsed from `manifest.json`.
+        catalog_node (CatalogNodeEntry): The CatalogNodeEntry object to check.
+        models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.

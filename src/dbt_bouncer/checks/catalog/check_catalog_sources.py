@@ -10,8 +10,8 @@ class CheckSourceColumnsAreAllDocumented(BaseCheck):
     """All columns in a source should be included in the source's properties file, i.e. `.yml` file.
 
     Receives:
-        catalog_source (CatalogNodes): The CatalogNodes object to check.
-        sources (list[DbtBouncerSourceBase]): List of DbtBouncerSourceBase objects parsed from `catalog.json`.
+        catalog_source (CatalogNodeEntry): The CatalogNodeEntry object to check.
+        sources (list[SourceNode]): List of SourceNode objects parsed from `catalog.json`.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.

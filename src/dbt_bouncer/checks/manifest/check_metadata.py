@@ -16,7 +16,7 @@ class CheckProjectName(BaseCheck):
         project_name_pattern (str): Regex pattern to match the project name.
 
     Receives:
-        manifest_obj (DbtBouncerManifest): The manifest object.
+        manifest_obj (ManifestObject): The manifest object.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.

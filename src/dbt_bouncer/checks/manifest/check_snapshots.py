@@ -13,7 +13,7 @@ class CheckSnapshotHasTags(BaseCheck):
 
     Parameters:
         criteria: (Literal["any", "all", "one"] | None): Whether the snapshot must have any, all, or exactly one of the specified tags. Default: `all`.
-        snapshot (DbtBouncerSnapshotBase): The DbtBouncerSnapshotBase object to check.
+        snapshot (SnapshotNode): The SnapshotNode object to check.
         tags (list[str]): List of tags to check for.
 
     Other Parameters:
@@ -74,7 +74,7 @@ class CheckSnapshotNames(BaseCheck):
         snapshot_name_pattern (str): Regexp the snapshot name must match.
 
     Receives:
-        snapshot (DbtBouncerSnapshotBase): The DbtBouncerSnapshotBase object to check.
+        snapshot (SnapshotNode): The SnapshotNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
