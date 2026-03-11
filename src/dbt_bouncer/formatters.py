@@ -6,6 +6,8 @@ from typing import Any
 
 import orjson
 
+from dbt_bouncer.enums import CheckOutcome, CheckSeverity
+
 
 def _format_results(results: list[dict[str, Any]], output_format: str) -> bytes:
     """Serialise check results to the requested format.
@@ -76,11 +78,11 @@ def _format_junit(results: list[dict[str, Any]]) -> bytes:
             name=result["check_run_id"],
             classname="dbt-bouncer",
         )
-        if result["outcome"] == "failed":
+        if result["outcome"] == CheckOutcome.FAILED:
             tc.result = [
                 Failure(
                     message=result.get("failure_message") or "",
-                    type_=result.get("severity", "error"),
+                    type_=result.get("severity", CheckSeverity.ERROR),
                 )
             ]
         test_cases.append(tc)
@@ -108,8 +110,8 @@ def _format_sarif(results: list[dict[str, Any]]) -> bytes:
     """
     sarif_results = []
     for r in results:
-        level = "warning" if r.get("severity") == "warn" else "error"
-        if r["outcome"] == "failed":
+        level = "warning" if r.get("severity") == CheckSeverity.WARN else "error"
+        if r["outcome"] == CheckOutcome.FAILED:
             sarif_results.append(
                 {
                     "ruleId": r["check_run_id"],
@@ -156,9 +158,9 @@ def _format_tap(results: list[dict[str, Any]]) -> bytes:
     """
     lines = ["TAP version 13", f"1..{len(results)}"]
     for i, r in enumerate(results, 1):
-        status = "ok" if r["outcome"] != "failed" else "not ok"
+        status = "ok" if r["outcome"] != CheckOutcome.FAILED else "not ok"
         lines.append(f"{status} {i} - {r['check_run_id']}")
-        if r["outcome"] == "failed" and r.get("failure_message"):
+        if r["outcome"] == CheckOutcome.FAILED and r.get("failure_message"):
             for msg_line in r["failure_message"].splitlines():
                 lines.append(f"  # {msg_line}")
     return "\n".join(lines).encode()

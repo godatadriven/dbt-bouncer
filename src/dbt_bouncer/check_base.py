@@ -1,8 +1,9 @@
-from typing import TYPE_CHECKING, Any, ClassVar, Literal
+from typing import TYPE_CHECKING, Any, ClassVar
 
 from pydantic import BaseModel, ConfigDict, Field
 
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
+from dbt_bouncer.enums import CheckSeverity, Materialization
 from dbt_bouncer.utils import is_description_populated
 
 # Cache annotation key sets per check class to avoid rebuilding on every injection call.
@@ -54,14 +55,12 @@ class BaseCheck(BaseModel):
         default=None,
         description="Index to uniquely identify the check, calculated at runtime.",
     )
-    materialization: Literal["ephemeral", "incremental", "table", "view"] | None = (
-        Field(
-            default=None,
-            description="Limit check to models with the specified materialization.",
-        )
+    materialization: Materialization | None = Field(
+        default=None,
+        description="Limit check to models with the specified materialization.",
     )
-    severity: Literal["error", "warn"] | None = Field(
-        default="error",
+    severity: CheckSeverity | None = Field(
+        default=CheckSeverity.ERROR,
         description="Severity of the check, one of 'error' or 'warn'.",
     )
 

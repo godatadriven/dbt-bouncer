@@ -13,6 +13,7 @@ from pydantic import ConfigDict, Field
 
 from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
+from dbt_bouncer.enums import Materialization
 from dbt_bouncer.utils import get_clean_model_name
 
 
@@ -258,7 +259,7 @@ class CheckModelMaxChainedViews(BaseCheck):
 
     manifest_obj: "DbtBouncerManifest | None" = Field(default=None)
     materializations_to_include: list[str] = Field(
-        default=["ephemeral", "view"],
+        default=[Materialization.EPHEMERAL, Materialization.VIEW],
     )
     max_chained_views: int = Field(
         default=3,

@@ -16,7 +16,7 @@ from rich.progress import BarColumn, Progress, TaskProgressColumn, TextColumn
 from rich.table import Table
 
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
-from dbt_bouncer.enums import ResourceType
+from dbt_bouncer.enums import CheckOutcome, CheckSeverity, ResourceType
 from dbt_bouncer.formatters import _format_results
 from dbt_bouncer.utils import (
     create_github_comment_file,
@@ -302,7 +302,7 @@ def runner(
         logging.debug(f"Running {check['check_run_id']}...")
         try:
             check["check"].execute()
-            check["outcome"] = "success"
+            check["outcome"] = CheckOutcome.SUCCESS
         except Exception as e:
             if isinstance(e, DbtBouncerFailedCheckError):
                 failure_message = e.message
@@ -316,12 +316,12 @@ def runner(
                 failure_message = f"{check['check'].description} - {failure_message}"
 
             logging.debug(f"Check {check['check_run_id']} failed: {failure_message}")
-            check["outcome"] = "failed"
+            check["outcome"] = CheckOutcome.FAILED
             check["failure_message"] = failure_message
 
             # If a check encountered an issue, change severity to warn
             if not isinstance(e, DbtBouncerFailedCheckError):
-                check["severity"] = "warn"
+                check["severity"] = CheckSeverity.WARN
                 check["failure_message"] = (
                     f"`dbt-bouncer` encountered an error ({failure_message}), run with `-v` to see more details or report an issue at https://github.com/godatadriven/dbt-bouncer/issues."
                 )
@@ -384,8 +384,8 @@ def runner(
     num_checks_warn = 0
     num_checks_success = 0
     for r in results:
-        if r["outcome"] == "failed":
-            if r["severity"] == "error":
+        if r["outcome"] == CheckOutcome.FAILED:
+            if r["severity"] == CheckSeverity.ERROR:
                 num_checks_error += 1
             else:
                 num_checks_warn += 1
@@ -409,7 +409,7 @@ def runner(
                 "failure_message": r["failure_message"],
             }
             for r in results
-            if r["outcome"] == "failed"
+            if r["outcome"] == CheckOutcome.FAILED
         ]
         logging.debug(f"{failed_checks=}")
         # Set title and style based on severity
@@ -439,7 +439,7 @@ def runner(
         for check in checks_to_display:
             # Determine color based on severity string
             sev = str(check.get("severity", "")).lower()
-            sev_color = "red" if "error" in sev else "yellow"
+            sev_color = "red" if CheckSeverity.ERROR in sev else "yellow"
 
             table.add_row(
                 str(check.get("check_run_id", "")),
@@ -473,7 +473,7 @@ def runner(
         )
 
     results_to_save = (
-        [r for r in results if r["outcome"] == "failed"]
+        [r for r in results if r["outcome"] == CheckOutcome.FAILED]
         if ctx.output_only_failures
         else results
     )
