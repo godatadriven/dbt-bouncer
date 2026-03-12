@@ -1,208 +1,102 @@
-from contextlib import nullcontext as does_not_raise
-
 import pytest
 
-from dbt_bouncer.artifact_parsers.parser import wrap_dict
-from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
-from dbt_bouncer.checks.manifest.check_snapshots import (
-    CheckSnapshotHasTags,
-    CheckSnapshotNames,
-)
+from dbt_bouncer.testing import check_fails, check_passes
+
+_SNAPSHOT_BASE = {
+    "alias": "snapshot_1",
+    "config": {},
+    "fqn": ["package_name", "snapshot_1", "snapshot_1"],
+    "name": "snapshot_1",
+    "original_file_path": "snapshots/snapshot_1.sql",
+    "path": "snapshot_1.sql",
+    "unique_id": "snapshot.package_name.snapshot_1",
+}
 
 
 @pytest.mark.parametrize(
-    ("snapshot", "tags", "criteria", "expectation"),
+    ("snapshot_overrides", "tags", "criteria", "check_fn"),
     [
-        (
-            wrap_dict(
-                {
-                    "alias": "snapshot_1",
-                    "checksum": {"name": "sha256", "checksum": ""},
-                    "config": {},
-                    "fqn": ["package_name", "snapshot_1", "snapshot_1"],
-                    "name": "snapshot_1",
-                    "original_file_path": "snapshots/snapshot_1.sql",
-                    "package_name": "package_name",
-                    "path": "snapshot_1.sql",
-                    "resource_type": "snapshot",
-                    "schema": "main",
-                    "tags": ["tag_1"],
-                    "unique_id": "snapshot.package_name.snapshot_1",
-                },
-            ),
+        pytest.param(
+            {**_SNAPSHOT_BASE, "tags": ["tag_1"]},
             ["tag_1"],
             "all",
-            does_not_raise(),
+            check_passes,
+            id="has_all_required_tags",
         ),
-        (
-            wrap_dict(
-                {
-                    "alias": "snapshot_1",
-                    "checksum": {"name": "sha256", "checksum": ""},
-                    "config": {},
-                    "fqn": ["package_name", "snapshot_1", "snapshot_1"],
-                    "name": "snapshot_1",
-                    "original_file_path": "snapshots/snapshot_1.sql",
-                    "package_name": "package_name",
-                    "path": "snapshot_1.sql",
-                    "resource_type": "snapshot",
-                    "schema": "main",
-                    "tags": [],
-                    "unique_id": "snapshot.package_name.snapshot_1",
-                },
-            ),
+        pytest.param(
+            {**_SNAPSHOT_BASE, "tags": []},
             ["tag_1"],
             "all",
-            pytest.raises(DbtBouncerFailedCheckError),
+            check_fails,
+            id="missing_all_tags",
         ),
-        (
-            wrap_dict(
-                {
-                    "alias": "snapshot_1",
-                    "checksum": {"name": "sha256", "checksum": ""},
-                    "config": {},
-                    "fqn": ["package_name", "snapshot_1", "snapshot_1"],
-                    "name": "snapshot_1",
-                    "original_file_path": "snapshots/snapshot_1.sql",
-                    "package_name": "package_name",
-                    "path": "snapshot_1.sql",
-                    "resource_type": "snapshot",
-                    "schema": "main",
-                    "tags": ["tag_1"],
-                    "unique_id": "snapshot.package_name.snapshot_1",
-                },
-            ),
+        pytest.param(
+            {**_SNAPSHOT_BASE, "tags": ["tag_1"]},
             ["tag_1", "tag_2"],
             "any",
-            does_not_raise(),
+            check_passes,
+            id="has_any_required_tag",
         ),
-        (
-            wrap_dict(
-                {
-                    "alias": "snapshot_1",
-                    "checksum": {"name": "sha256", "checksum": ""},
-                    "config": {},
-                    "fqn": ["package_name", "snapshot_1", "snapshot_1"],
-                    "name": "snapshot_1",
-                    "original_file_path": "snapshots/snapshot_1.sql",
-                    "package_name": "package_name",
-                    "path": "snapshot_1.sql",
-                    "resource_type": "snapshot",
-                    "schema": "main",
-                    "tags": ["tag_3", "tag_4"],
-                    "unique_id": "snapshot.package_name.snapshot_1",
-                },
-            ),
+        pytest.param(
+            {**_SNAPSHOT_BASE, "tags": ["tag_3", "tag_4"]},
             ["tag_1", "tag_2"],
             "any",
-            pytest.raises(DbtBouncerFailedCheckError),
+            check_fails,
+            id="missing_any_required_tag",
         ),
-        (
-            wrap_dict(
-                {
-                    "alias": "snapshot_1",
-                    "checksum": {"name": "sha256", "checksum": ""},
-                    "config": {},
-                    "fqn": ["package_name", "snapshot_1", "snapshot_1"],
-                    "name": "snapshot_1",
-                    "original_file_path": "snapshots/snapshot_1.sql",
-                    "package_name": "package_name",
-                    "path": "snapshot_1.sql",
-                    "resource_type": "snapshot",
-                    "schema": "main",
-                    "tags": ["tag_1", "tag_3"],
-                    "unique_id": "snapshot.package_name.snapshot_1",
-                },
-            ),
+        pytest.param(
+            {**_SNAPSHOT_BASE, "tags": ["tag_1", "tag_3"]},
             ["tag_1", "tag_2"],
             "one",
-            does_not_raise(),
+            check_passes,
+            id="has_exactly_one_required_tag",
         ),
-        (
-            wrap_dict(
-                {
-                    "alias": "snapshot_1",
-                    "checksum": {"name": "sha256", "checksum": ""},
-                    "config": {},
-                    "fqn": ["package_name", "snapshot_1", "snapshot_1"],
-                    "name": "snapshot_1",
-                    "original_file_path": "snapshots/snapshot_1.sql",
-                    "package_name": "package_name",
-                    "path": "snapshot_1.sql",
-                    "resource_type": "snapshot",
-                    "schema": "main",
-                    "tags": ["tag_1", "tag_2"],
-                    "unique_id": "snapshot.package_name.snapshot_1",
-                },
-            ),
+        pytest.param(
+            {**_SNAPSHOT_BASE, "tags": ["tag_1", "tag_2"]},
             ["tag_1", "tag_2"],
             "one",
-            pytest.raises(DbtBouncerFailedCheckError),
+            check_fails,
+            id="has_too_many_required_tags",
         ),
     ],
 )
-def test_check_snapshot_has_tags(snapshot, tags, criteria, expectation):
-    with expectation:
-        CheckSnapshotHasTags(
-            snapshot=snapshot,
-            name="check_snapshot_has_tags",
-            tags=tags,
-            criteria=criteria,
-        ).execute()
+def test_check_snapshot_has_tags(snapshot_overrides, tags, criteria, check_fn):
+    check_fn(
+        "check_snapshot_has_tags",
+        snapshot=snapshot_overrides,
+        tags=tags,
+        criteria=criteria,
+    )
 
 
 @pytest.mark.parametrize(
-    ("include", "snapshot_name_pattern", "snapshot", "expectation"),
+    ("snapshot_overrides", "check_fn"),
     [
-        (
-            "",
-            "^snp_",
-            wrap_dict(
-                {
-                    "alias": "snp_1",
-                    "checksum": {"name": "sha256", "checksum": ""},
-                    "config": {},
-                    "fqn": ["package_name", "snapshot_1", "snp_1"],
-                    "name": "snp_1",
-                    "original_file_path": "snapshots/snp_1.sql",
-                    "package_name": "package_name",
-                    "path": "snp_1.sql",
-                    "resource_type": "snapshot",
-                    "schema": "main",
-                    "tags": ["tag_1"],
-                    "unique_id": "snapshot.package_name.snp_1",
-                },
-            ),
-            does_not_raise(),
+        pytest.param(
+            {
+                "alias": "snp_1",
+                "config": {},
+                "fqn": ["package_name", "snapshot_1", "snp_1"],
+                "name": "snp_1",
+                "original_file_path": "snapshots/snp_1.sql",
+                "path": "snp_1.sql",
+                "tags": ["tag_1"],
+                "unique_id": "snapshot.package_name.snp_1",
+            },
+            check_passes,
+            id="matches_pattern",
         ),
-        (
-            "",
-            "^snp_",
-            wrap_dict(
-                {
-                    "alias": "snapshot_1",
-                    "checksum": {"name": "sha256", "checksum": ""},
-                    "config": {},
-                    "fqn": ["package_name", "snapshot_1", "snapshot_1"],
-                    "name": "snapshot_1",
-                    "original_file_path": "snapshots/snapshot_1.sql",
-                    "package_name": "package_name",
-                    "path": "snapshot_1.sql",
-                    "resource_type": "snapshot",
-                    "schema": "main",
-                    "tags": ["tag_1"],
-                    "unique_id": "snapshot.package_name.snapshot_1",
-                },
-            ),
-            pytest.raises(DbtBouncerFailedCheckError),
+        pytest.param(
+            {**_SNAPSHOT_BASE, "tags": ["tag_1"]},
+            check_fails,
+            id="does_not_match_pattern",
         ),
     ],
 )
-def test_check_snapshot_names(include, snapshot_name_pattern, snapshot, expectation):
-    with expectation:
-        CheckSnapshotNames(
-            include=include,
-            snapshot_name_pattern=snapshot_name_pattern,
-            snapshot=snapshot,
-            name="check_snapshot_names",
-        ).execute()
+def test_check_snapshot_names(snapshot_overrides, check_fn):
+    check_fn(
+        "check_snapshot_names",
+        include="",
+        snapshot_name_pattern="^snp_",
+        snapshot=snapshot_overrides,
+    )

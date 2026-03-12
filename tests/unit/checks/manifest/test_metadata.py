@@ -1,33 +1,15 @@
-from contextlib import nullcontext as does_not_raise
-
-import pytest
-
-from dbt_bouncer.check_context import CheckContext
-from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
-from dbt_bouncer.checks.manifest.check_metadata import CheckProjectName
+from dbt_bouncer.testing import check_fails, check_passes
 
 
-@pytest.mark.parametrize(
-    ("manifest_obj", "project_name_pattern", "expectation"),
-    [
-        (
-            "manifest_obj",
-            "^dbt_bouncer_",
-            does_not_raise(),
-        ),
-        (
-            "manifest_obj",
-            "^company_",
-            pytest.raises(DbtBouncerFailedCheckError),
-        ),
-    ],
-    indirect=["manifest_obj"],
-)
-def test_check_project_name(manifest_obj, project_name_pattern, expectation):
-    with expectation:
-        check = CheckProjectName(
-            name="check_project_name",
-            project_name_pattern=project_name_pattern,
-        )
-        check._ctx = CheckContext(manifest_obj=manifest_obj)
-        check.execute()
+def test_check_project_name_matches():
+    check_passes(
+        "check_project_name",
+        project_name_pattern="^dbt_bouncer_",
+    )
+
+
+def test_check_project_name_does_not_match():
+    check_fails(
+        "check_project_name",
+        project_name_pattern="^company_",
+    )

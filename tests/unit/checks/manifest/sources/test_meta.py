@@ -1,158 +1,59 @@
-from contextlib import nullcontext as does_not_raise
-
 import pytest
 
-from dbt_bouncer.artifact_parsers.parser import wrap_dict
-from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
-from dbt_bouncer.checks.manifest.sources.meta import (
-    CheckSourceHasMetaKeys,
-)
+from dbt_bouncer.testing import check_fails, check_passes
 
 
-@pytest.mark.parametrize(
-    ("keys", "source", "expectation"),
-    [
-        (
-            ["owner"],
-            wrap_dict(
-                {
-                    "description": "Description that is more than 4 characters.",
-                    "fqn": ["package_name", "source_1", "table_1"],
-                    "identifier": "table_1",
-                    "loader": "",
-                    "meta": {"owner": "Bob"},
-                    "name": "table_1",
-                    "original_file_path": "models/staging/_sources.yml",
-                    "package_name": "package_name",
-                    "path": "models/staging/_sources.yml",
-                    "resource_type": "source",
-                    "schema": "main",
-                    "source_description": "",
-                    "source_name": "source_1",
-                    "unique_id": "source.package_name.source_1.table_1",
-                },
+class TestCheckSourceHasMetaKeys:
+    @pytest.mark.parametrize(
+        ("keys", "meta"),
+        [
+            pytest.param(
+                ["owner"],
+                {"owner": "Bob"},
+                id="single_key",
             ),
-            does_not_raise(),
-        ),
-        (
-            ["owner"],
-            wrap_dict(
-                {
-                    "description": "Description that is more than 4 characters.",
-                    "fqn": ["package_name", "source_1", "table_1"],
-                    "identifier": "table_1",
-                    "loader": "",
-                    "meta": {"maturity": "high", "owner": "Bob"},
-                    "name": "table_1",
-                    "original_file_path": "models/staging/_sources.yml",
-                    "package_name": "package_name",
-                    "path": "models/staging/_sources.yml",
-                    "resource_type": "source",
-                    "schema": "main",
-                    "source_description": "",
-                    "source_name": "source_1",
-                    "unique_id": "source.package_name.source_1.table_1",
-                },
+            pytest.param(
+                ["owner"],
+                {"maturity": "high", "owner": "Bob"},
+                id="extra_keys",
             ),
-            does_not_raise(),
-        ),
-        (
-            ["owner", {"name": ["first", "last"]}],
-            wrap_dict(
-                {
-                    "description": "Description that is more than 4 characters.",
-                    "fqn": ["package_name", "source_1", "table_1"],
-                    "identifier": "table_1",
-                    "loader": "",
-                    "meta": {
-                        "name": {"first": "Bob", "last": "Bobbington"},
-                        "owner": "Bob",
-                    },
-                    "name": "table_1",
-                    "original_file_path": "models/staging/_sources.yml",
-                    "package_name": "package_name",
-                    "path": "models/staging/_sources.yml",
-                    "resource_type": "source",
-                    "schema": "main",
-                    "source_description": "",
-                    "source_name": "source_1",
-                    "unique_id": "source.package_name.source_1.table_1",
-                },
+            pytest.param(
+                ["owner", {"name": ["first", "last"]}],
+                {"name": {"first": "Bob", "last": "Bobbington"}, "owner": "Bob"},
+                id="nested_keys",
             ),
-            does_not_raise(),
-        ),
-        (
-            ["owner"],
-            wrap_dict(
-                {
-                    "description": "Description that is more than 4 characters.",
-                    "fqn": ["package_name", "source_1", "table_1"],
-                    "identifier": "table_1",
-                    "loader": "",
-                    "meta": {},
-                    "name": "table_1",
-                    "original_file_path": "models/staging/_sources.yml",
-                    "package_name": "package_name",
-                    "path": "models/staging/_sources.yml",
-                    "resource_type": "source",
-                    "schema": "main",
-                    "source_description": "",
-                    "source_name": "source_1",
-                    "unique_id": "source.package_name.source_1.table_1",
-                },
-            ),
-            pytest.raises(DbtBouncerFailedCheckError),
-        ),
-        (
-            ["owner"],
-            wrap_dict(
-                {
-                    "description": "Description that is more than 4 characters.",
-                    "fqn": ["package_name", "source_1", "table_1"],
-                    "identifier": "table_1",
-                    "loader": "",
-                    "meta": {"maturity": "high"},
-                    "name": "table_1",
-                    "original_file_path": "models/staging/_sources.yml",
-                    "package_name": "package_name",
-                    "path": "models/staging/_sources.yml",
-                    "resource_type": "source",
-                    "schema": "main",
-                    "source_description": "",
-                    "source_name": "source_1",
-                    "unique_id": "source.package_name.source_1.table_1",
-                },
-            ),
-            pytest.raises(DbtBouncerFailedCheckError),
-        ),
-        (
-            ["owner", {"name": ["first", "last"]}],
-            wrap_dict(
-                {
-                    "description": "Description that is more than 4 characters.",
-                    "fqn": ["package_name", "source_1", "table_1"],
-                    "identifier": "table_1",
-                    "loader": "",
-                    "meta": {"name": {"last": "Bobbington"}, "owner": "Bob"},
-                    "name": "table_1",
-                    "original_file_path": "models/staging/_sources.yml",
-                    "package_name": "package_name",
-                    "path": "models/staging/_sources.yml",
-                    "resource_type": "source",
-                    "schema": "main",
-                    "source_description": "",
-                    "source_name": "source_1",
-                    "unique_id": "source.package_name.source_1.table_1",
-                },
-            ),
-            pytest.raises(DbtBouncerFailedCheckError),
-        ),
-    ],
-)
-def test_check_source_has_meta_keys(keys, source, expectation):
-    with expectation:
-        CheckSourceHasMetaKeys(
+        ],
+    )
+    def test_has_meta_keys(self, keys, meta):
+        check_passes(
+            "check_source_has_meta_keys",
+            source={"meta": meta},
             keys=keys,
-            name="check_source_has_meta_keys",
-            source=source,
-        ).execute()
+        )
+
+    @pytest.mark.parametrize(
+        ("keys", "meta"),
+        [
+            pytest.param(
+                ["owner"],
+                {},
+                id="empty_meta",
+            ),
+            pytest.param(
+                ["owner"],
+                {"maturity": "high"},
+                id="missing_key",
+            ),
+            pytest.param(
+                ["owner", {"name": ["first", "last"]}],
+                {"name": {"last": "Bobbington"}, "owner": "Bob"},
+                id="missing_nested_key",
+            ),
+        ],
+    )
+    def test_missing_meta_keys(self, keys, meta):
+        check_fails(
+            "check_source_has_meta_keys",
+            source={"meta": meta},
+            keys=keys,
+        )

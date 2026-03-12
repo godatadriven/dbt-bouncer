@@ -1,127 +1,50 @@
-from contextlib import nullcontext as does_not_raise
-
 import pytest
 
-from dbt_bouncer.artifact_parsers.parser import wrap_dict
-from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
-from dbt_bouncer.checks.manifest.sources.directories import (
-    CheckSourcePropertyFileLocation,
-)
+from dbt_bouncer.testing import check_fails, check_passes
 
 
-@pytest.mark.parametrize(
-    ("source", "expectation"),
-    [
-        (
-            wrap_dict(
-                {
-                    "description": "",
-                    "fqn": ["package_name", "source_1", "table_1"],
-                    "identifier": "table_1",
-                    "loader": "",
-                    "name": "table_1",
-                    "original_file_path": "models/staging/crm/_crm__sources.yml",
-                    "package_name": "package_name",
-                    "path": "models/staging/crm/_crm__sources.yml",
-                    "resource_type": "source",
-                    "schema": "main",
-                    "source_description": "",
-                    "source_name": "source_1",
-                    "tags": ["tag_1"],
-                    "unique_id": "source.package_name.source_1.table_1",
-                },
+class TestCheckSourcePropertyFileLocation:
+    def test_correct_location(self):
+        check_passes(
+            "check_source_property_file_location",
+            source={
+                "original_file_path": "models/staging/crm/_crm__sources.yml",
+                "path": "models/staging/crm/_crm__sources.yml",
+                "tags": ["tag_1"],
+            },
+        )
+
+    @pytest.mark.parametrize(
+        ("original_file_path", "path"),
+        [
+            pytest.param(
+                "models/staging/crm/_crm__source.yml",
+                "models/staging/crm/_crm__source.yml",
+                id="singular_source",
             ),
-            does_not_raise(),
-        ),
-        (
-            wrap_dict(
-                {
-                    "description": "",
-                    "fqn": ["package_name", "source_1", "table_1"],
-                    "identifier": "table_1",
-                    "loader": "",
-                    "name": "table_1",
-                    "original_file_path": "models/staging/crm/_crm__source.yml",
-                    "package_name": "package_name",
-                    "path": "models/staging/crm/_crm__source.yml",
-                    "resource_type": "source",
-                    "schema": "main",
-                    "source_description": "",
-                    "source_name": "source_1",
-                    "tags": ["tag_1"],
-                    "unique_id": "source.package_name.source_1.table_1",
-                },
+            pytest.param(
+                "models/staging/crm/__source.yml",
+                "models/staging/crm/__source.yml",
+                id="double_underscore",
             ),
-            pytest.raises(DbtBouncerFailedCheckError),
-        ),
-        (
-            wrap_dict(
-                {
-                    "description": "",
-                    "fqn": ["package_name", "source_1", "table_1"],
-                    "identifier": "table_1",
-                    "loader": "",
-                    "name": "table_1",
-                    "original_file_path": "models/staging/crm/__source.yml",
-                    "package_name": "package_name",
-                    "path": "models/staging/crm/__source.yml",
-                    "resource_type": "source",
-                    "schema": "main",
-                    "source_description": "",
-                    "source_name": "source_1",
-                    "tags": ["tag_1"],
-                    "unique_id": "source.package_name.source_1.table_1",
-                },
+            pytest.param(
+                "models/staging/crm/_staging__source.yml",
+                "models/staging/crm/_staging__source.yml",
+                id="wrong_prefix",
             ),
-            pytest.raises(DbtBouncerFailedCheckError),
-        ),
-        (
-            wrap_dict(
-                {
-                    "description": "",
-                    "fqn": ["package_name", "source_1", "table_1"],
-                    "identifier": "table_1",
-                    "loader": "",
-                    "name": "table_1",
-                    "original_file_path": "models/staging/crm/_staging__source.yml",
-                    "package_name": "package_name",
-                    "path": "models/staging/crm/_staging__source.yml",
-                    "resource_type": "source",
-                    "schema": "main",
-                    "source_description": "",
-                    "source_name": "source_1",
-                    "tags": ["tag_1"],
-                    "unique_id": "source.package_name.source_1.table_1",
-                },
+            pytest.param(
+                "models/staging/crm/crm__source.yml",
+                "models/staging/crm/crm__source.yml",
+                id="no_leading_underscore",
             ),
-            pytest.raises(DbtBouncerFailedCheckError),
-        ),
-        (
-            wrap_dict(
-                {
-                    "description": "",
-                    "fqn": ["package_name", "source_1", "table_1"],
-                    "identifier": "table_1",
-                    "loader": "",
-                    "name": "table_1",
-                    "original_file_path": "models/staging/crm/crm__source.yml",
-                    "package_name": "package_name",
-                    "path": "models/staging/crm/crm__source.yml",
-                    "resource_type": "source",
-                    "schema": "main",
-                    "source_description": "",
-                    "source_name": "source_1",
-                    "tags": ["tag_1"],
-                    "unique_id": "source.package_name.source_1.table_1",
-                },
-            ),
-            pytest.raises(DbtBouncerFailedCheckError),
-        ),
-    ],
-)
-def test_check_source_property_file_location(source, expectation):
-    with expectation:
-        CheckSourcePropertyFileLocation(
-            name="check_source_property_file_location",
-            source=source,
-        ).execute()
+        ],
+    )
+    def test_incorrect_location(self, original_file_path, path):
+        check_fails(
+            "check_source_property_file_location",
+            source={
+                "original_file_path": original_file_path,
+                "path": path,
+                "tags": ["tag_1"],
+            },
+        )

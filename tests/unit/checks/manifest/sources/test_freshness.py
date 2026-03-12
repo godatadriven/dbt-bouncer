@@ -1,143 +1,60 @@
-from contextlib import nullcontext as does_not_raise
-
 import pytest
 
-from dbt_bouncer.artifact_parsers.parser import wrap_dict
-from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
-from dbt_bouncer.checks.manifest.sources.freshness import (
-    CheckSourceFreshnessPopulated,
-)
+from dbt_bouncer.testing import check_fails, check_passes
 
 
-@pytest.mark.parametrize(
-    ("source", "expectation"),
-    [
-        (
-            wrap_dict(
+class TestCheckSourceFreshnessPopulated:
+    @pytest.mark.parametrize(
+        "freshness",
+        [
+            pytest.param(
                 {
-                    "description": "Description that is more than 4 characters.",
-                    "fqn": ["package_name", "source_1", "table_1"],
-                    "freshness": {
-                        "warn_after": {"count": 25, "period": "hour"},
-                        "error_after": {"count": None, "period": None},
-                        "filter": None,
-                    },
-                    "identifier": "table_1",
-                    "loader": "",
-                    "name": "table_1",
-                    "original_file_path": "models/staging/_sources.yml",
-                    "package_name": "package_name",
-                    "path": "models/staging/_sources.yml",
-                    "resource_type": "source",
-                    "schema": "main",
-                    "source_description": "",
-                    "source_name": "source_1",
-                    "unique_id": "source.package_name.source_1.table_1",
+                    "warn_after": {"count": 25, "period": "hour"},
+                    "error_after": {"count": None, "period": None},
+                    "filter": None,
                 },
+                id="warn_only",
             ),
-            does_not_raise(),
-        ),
-        (
-            wrap_dict(
+            pytest.param(
                 {
-                    "description": "Description that is more than 4 characters.",
-                    "fqn": ["package_name", "source_1", "table_1"],
-                    "freshness": {
-                        "warn_after": {"count": None, "period": None},
-                        "error_after": {"count": 25, "period": "hour"},
-                        "filter": None,
-                    },
-                    "identifier": "table_1",
-                    "loader": "",
-                    "name": "table_1",
-                    "original_file_path": "models/staging/_sources.yml",
-                    "package_name": "package_name",
-                    "path": "models/staging/_sources.yml",
-                    "resource_type": "source",
-                    "schema": "main",
-                    "source_description": "",
-                    "source_name": "source_1",
-                    "unique_id": "source.package_name.source_1.table_1",
+                    "warn_after": {"count": None, "period": None},
+                    "error_after": {"count": 25, "period": "hour"},
+                    "filter": None,
                 },
+                id="error_only",
             ),
-            does_not_raise(),
-        ),
-        (
-            wrap_dict(
+            pytest.param(
                 {
-                    "description": "Description that is more than 4 characters.",
-                    "fqn": ["package_name", "source_1", "table_1"],
-                    "freshness": {
-                        "warn_after": {"count": 25, "period": "hour"},
-                        "error_after": {"count": 49, "period": "hour"},
-                        "filter": None,
-                    },
-                    "identifier": "table_1",
-                    "loader": "",
-                    "name": "table_1",
-                    "original_file_path": "models/staging/_sources.yml",
-                    "package_name": "package_name",
-                    "path": "models/staging/_sources.yml",
-                    "resource_type": "source",
-                    "schema": "main",
-                    "source_description": "",
-                    "source_name": "source_1",
-                    "unique_id": "source.package_name.source_1.table_1",
+                    "warn_after": {"count": 25, "period": "hour"},
+                    "error_after": {"count": 49, "period": "hour"},
+                    "filter": None,
                 },
+                id="warn_and_error",
             ),
-            does_not_raise(),
-        ),
-        (
-            wrap_dict(
+        ],
+    )
+    def test_freshness_populated(self, freshness):
+        check_passes(
+            "check_source_freshness_populated",
+            source={"freshness": freshness},
+        )
+
+    @pytest.mark.parametrize(
+        "freshness",
+        [
+            pytest.param(
                 {
-                    "description": "Description that is more than 4 characters.",
-                    "fqn": ["package_name", "source_1", "table_1"],
-                    "freshness": {
-                        "warn_after": {"count": None, "period": None},
-                        "error_after": {"count": None, "period": None},
-                        "filter": None,
-                    },
-                    "identifier": "table_1",
-                    "loader": "",
-                    "name": "table_1",
-                    "original_file_path": "models/staging/_sources.yml",
-                    "package_name": "package_name",
-                    "path": "models/staging/_sources.yml",
-                    "resource_type": "source",
-                    "schema": "main",
-                    "source_description": "",
-                    "source_name": "source_1",
-                    "unique_id": "source.package_name.source_1.table_1",
+                    "warn_after": {"count": None, "period": None},
+                    "error_after": {"count": None, "period": None},
+                    "filter": None,
                 },
+                id="all_none",
             ),
-            pytest.raises(DbtBouncerFailedCheckError),
-        ),
-        (
-            wrap_dict(
-                {
-                    "description": "Description that is more than 4 characters.",
-                    "fqn": ["package_name", "source_1", "table_1"],
-                    "freshness": None,
-                    "identifier": "table_1",
-                    "loader": "",
-                    "name": "table_1",
-                    "original_file_path": "models/staging/_sources.yml",
-                    "package_name": "package_name",
-                    "path": "models/staging/_sources.yml",
-                    "resource_type": "source",
-                    "schema": "main",
-                    "source_description": "",
-                    "source_name": "source_1",
-                    "unique_id": "source.package_name.source_1.table_1",
-                },
-            ),
-            pytest.raises(DbtBouncerFailedCheckError),
-        ),
-    ],
-)
-def test_check_source_freshness_populated(source, expectation):
-    with expectation:
-        CheckSourceFreshnessPopulated(
-            name="check_source_freshness_populated",
-            source=source,
-        ).execute()
+            pytest.param(None, id="freshness_none"),
+        ],
+    )
+    def test_freshness_not_populated(self, freshness):
+        check_fails(
+            "check_source_freshness_populated",
+            source={"freshness": freshness},
+        )

@@ -317,6 +317,154 @@ _CATEGORY_TO_SUBDIR: dict[str, str] = {
     "run_results_checks": "run_results",
 }
 
+_SUBDIR_TO_CATEGORY: dict[str, str] = {v: k for k, v in _CATEGORY_TO_SUBDIR.items()}
+
+
+def _build_check_module_map() -> dict[str, dict[str, str]]:
+    """Build a mapping of check_name -> {module, category} by scanning check modules.
+
+    This is the expensive operation that we cache to disk. It imports every
+    check module to discover check classes and their names.
+
+    Returns:
+        dict[str, dict[str, str]]: Mapping like
+            ``{"check_model_names": {"module": "dbt_bouncer.checks.manifest.models.naming", "category": "manifest_checks"}}``.
+
+    """
+    checks_dir = Path(__file__).parent / "checks"
+    mapping: dict[str, dict[str, str]] = {}
+
+    for check_file in (f for f in checks_dir.glob("**/*.py") if f.is_file()):
+        index = check_file.parts.index("checks")
+        module_name = ".".join(
+            ["dbt_bouncer", "checks", *check_file.parts[index + 1 :]]
+        )[:-3]
+
+        # Determine category from path
+        relative_parts = check_file.relative_to(checks_dir).parts
+        category = (
+            _SUBDIR_TO_CATEGORY.get(relative_parts[0], "") if relative_parts else ""
+        )
+
+        try:
+            module = importlib.import_module(module_name)
+        except ImportError:
+            continue
+
+        for name, obj in inspect.getmembers(module):
+            if (
+                inspect.isclass(obj)
+                and name.startswith("Check")
+                and obj.__module__ == module_name
+            ):
+                # Extract the Literal name value
+                name_field = obj.model_fields.get("name")
+                if name_field is not None:
+                    args = typing.get_args(name_field.annotation)
+                    if args:
+                        mapping[args[0]] = {
+                            "module": module_name,
+                            "category": category,
+                        }
+
+    return mapping
+
+
+def _get_check_module_map_cached() -> dict[str, dict[str, str]]:
+    """Get the check name -> module mapping, using disk cache.
+
+    The cache is keyed by the dbt-bouncer version and invalidated when the
+    version changes (e.g. after an upgrade that adds new checks).
+
+    Returns:
+        dict[str, dict[str, str]]: The cached mapping.
+
+    """
+    import json
+
+    from dbt_bouncer.version import version
+
+    cache_dir = Path.home() / ".cache" / "dbt-bouncer"
+    cache_file = cache_dir / f"check_registry_{version()}.json"
+
+    if cache_file.exists():
+        try:
+            return json.loads(cache_file.read_text())
+        except (json.JSONDecodeError, OSError):
+            pass  # Corrupted cache, rebuild
+
+    mapping = _build_check_module_map()
+
+    try:
+        cache_dir.mkdir(parents=True, exist_ok=True)
+        cache_file.write_text(json.dumps(mapping))
+    except OSError:
+        pass  # Can't write cache (e.g. read-only filesystem), continue without it
+
+    return mapping
+
+
+def get_check_objects_for_names(
+    check_names: frozenset[str],
+    custom_checks_dir: Path | None = None,
+) -> list[type["BaseCheck"]]:
+    """Get check classes for a specific set of check names.
+
+    Uses a disk-cached name-to-module mapping to import only the modules that
+    contain the requested checks, avoiding the cost of importing all check
+    modules.
+
+    Falls back to the full ``get_check_objects()`` scan if the cache is
+    unavailable or a requested name is not in the cache.
+
+    Args:
+        check_names: The set of check names to load (e.g.
+            ``{"check_model_names", "check_model_description_populated"}``).
+        custom_checks_dir: Path to a directory containing custom checks.
+
+    Returns:
+        list[type[BaseCheck]]: List of check classes for the requested names.
+
+    """
+    module_map = _get_check_module_map_cached()
+
+    # Check if all requested names are in the cache
+    missing = check_names - module_map.keys()
+    if missing:
+        logging.debug(
+            f"Check names not in cache: {missing}. Falling back to full scan."
+        )
+        return get_check_objects(custom_checks_dir)
+
+    # Import only the needed modules
+    needed_modules: set[str] = {module_map[n]["module"] for n in check_names}
+    check_objects: list[type["BaseCheck"]] = []
+
+    for module_name in sorted(needed_modules):
+        try:
+            module = importlib.import_module(module_name)
+            _extract_checks_from_module(module, module_name, check_objects)
+        except ImportError:
+            logging.warning(f"Failed to import check module: {module_name}")
+
+    # Also load custom checks and entry points
+    if custom_checks_dir is not None:
+        _load_custom_checks(Path(custom_checks_dir), check_objects)
+    _load_entry_point_checks(check_objects)
+
+    # Deduplicate
+    seen: set[type] = set()
+    unique: list[type["BaseCheck"]] = []
+    for cls in check_objects:
+        if cls not in seen:
+            seen.add(cls)
+            unique.append(cls)
+
+    logging.debug(
+        f"Loaded {len(unique)} check classes for {len(check_names)} configured checks."
+    )
+    return unique
+
 
 @lru_cache
 def get_check_objects(
