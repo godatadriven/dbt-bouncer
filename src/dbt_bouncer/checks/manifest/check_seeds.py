@@ -4,7 +4,6 @@ from typing import Any, Literal
 
 from pydantic import ConfigDict, Field, PrivateAttr
 
-from dbt_bouncer.artifact_types import ManifestWrapper
 from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import (
@@ -197,11 +196,9 @@ class CheckSeedHasUnitTests(BaseCheck):
 
     """
 
-    manifest_obj: ManifestWrapper | None = Field(default=None)
     min_number_of_unit_tests: int = Field(default=1)
     name: Literal["check_seed_has_unit_tests"]
     seed: Any | None = Field(default=None)
-    unit_tests: list[Any] = Field(default=[])
 
     def execute(self) -> None:
         """Execute the check.
@@ -218,7 +215,7 @@ class CheckSeedHasUnitTests(BaseCheck):
             num_unit_tests = len(
                 [
                     t.unique_id
-                    for t in self.unit_tests
+                    for t in self._ctx.unit_tests
                     if t.depends_on
                     and t.depends_on.nodes
                     and t.depends_on.nodes[0] == seed.unique_id

@@ -4,7 +4,6 @@ from typing import Any, Literal
 
 from pydantic import Field
 
-from dbt_bouncer.artifact_types import ManifestWrapper
 from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 
@@ -56,9 +55,7 @@ class CheckColumnDescriptionPopulated(BaseCheck):
     """
 
     catalog_node: Any | None = Field(default=None)
-    manifest_obj: ManifestWrapper | None = Field(default=None)
     min_description_length: int | None = Field(default=None)
-    models: list[Any] = Field(default=[])
     name: Literal["check_column_description_populated"]
 
     def execute(self) -> None:
@@ -70,9 +67,9 @@ class CheckColumnDescriptionPopulated(BaseCheck):
         """
         catalog_node = self._require_catalog_node()
         manifest_obj = self._require_manifest()
-        if _is_catalog_node_a_model(catalog_node, self.models):
+        if _is_catalog_node_a_model(catalog_node, self._ctx.models):
             model = next(
-                m for m in self.models if m.unique_id == catalog_node.unique_id
+                m for m in self._ctx.models if m.unique_id == catalog_node.unique_id
             )
             non_complying_columns = []
             for _, v in catalog_node.columns.items():
@@ -122,8 +119,6 @@ class CheckColumnsAreAllDocumented(BaseCheck):
 
     case_sensitive: bool | None = Field(default=True)
     catalog_node: Any | None = Field(default=None)
-    manifest_obj: ManifestWrapper | None = Field(default=None)
-    models: list[Any] = Field(default=[])
     name: Literal["check_columns_are_all_documented"]
 
     def execute(self) -> None:
@@ -135,9 +130,9 @@ class CheckColumnsAreAllDocumented(BaseCheck):
         """
         catalog_node = self._require_catalog_node()
         manifest_obj = self._require_manifest()
-        if _is_catalog_node_a_model(catalog_node, self.models):
+        if _is_catalog_node_a_model(catalog_node, self._ctx.models):
             model = next(
-                m for m in self.models if m.unique_id == catalog_node.unique_id
+                m for m in self._ctx.models if m.unique_id == catalog_node.unique_id
             )
 
             if manifest_obj.manifest.metadata.adapter_type in ["snowflake"]:
@@ -188,7 +183,6 @@ class CheckColumnsAreDocumentedInPublicModels(BaseCheck):
 
     catalog_node: Any | None = Field(default=None)
     min_description_length: int | None = Field(default=None)
-    models: list[Any] = Field(default=[])
     name: Literal["check_columns_are_documented_in_public_models"]
 
     def execute(self) -> None:
@@ -199,9 +193,9 @@ class CheckColumnsAreDocumentedInPublicModels(BaseCheck):
 
         """
         catalog_node = self._require_catalog_node()
-        if _is_catalog_node_a_model(catalog_node, self.models):
+        if _is_catalog_node_a_model(catalog_node, self._ctx.models):
             model = next(
-                m for m in self.models if m.unique_id == catalog_node.unique_id
+                m for m in self._ctx.models if m.unique_id == catalog_node.unique_id
             )
             non_complying_columns = []
             for _, v in catalog_node.columns.items():

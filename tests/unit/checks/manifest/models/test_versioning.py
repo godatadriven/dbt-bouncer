@@ -2,6 +2,7 @@ from contextlib import nullcontext as does_not_raise
 
 import pytest
 
+from dbt_bouncer.check_context import CheckContext
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.checks.manifest.models.versioning import (
     CheckModelLatestVersionSpecified,
@@ -287,8 +288,9 @@ _TEST_DATA_FOR_CHECK_MODEL_VERSION_PINNED_IN_REF = [
 )
 def test_check_model_version_pinned_in_ref(manifest_obj, model, expectation):
     with expectation:
-        CheckModelVersionPinnedInRef(
-            manifest_obj=manifest_obj,
+        check = CheckModelVersionPinnedInRef(
             model=model,
             name="check_model_version_pinned_in_ref",
-        ).execute()
+        )
+        check._ctx = CheckContext(manifest_obj=manifest_obj)
+        check.execute()

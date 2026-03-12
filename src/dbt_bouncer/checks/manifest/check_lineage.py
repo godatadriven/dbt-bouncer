@@ -3,7 +3,6 @@ from typing import Any, Literal
 
 from pydantic import Field, PrivateAttr
 
-from dbt_bouncer.artifact_types import ManifestWrapper
 from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import clean_path_str, compile_pattern, get_clean_model_name
@@ -42,9 +41,7 @@ class CheckLineagePermittedUpstreamModels(BaseCheck):
 
     """
 
-    manifest_obj: ManifestWrapper | None = Field(default=None)
     model: Any | None = Field(default=None)
-    models: list[Any] = Field(default=[])
     name: Literal["check_lineage_permitted_upstream_models"]
     package_name: str | None = Field(default=None)
     upstream_path_pattern: str
@@ -74,9 +71,9 @@ class CheckLineagePermittedUpstreamModels(BaseCheck):
             == (self.package_name or manifest_obj.manifest.metadata.project_name)
         ]
         models_by_id = (
-            self.models_by_unique_id
-            if self.models_by_unique_id
-            else {m.unique_id: m for m in self.models}
+            self._ctx.models_by_unique_id
+            if self._ctx.models_by_unique_id
+            else {m.unique_id: m for m in self._ctx.models}
         )
         not_permitted_upstream_models = [
             upstream_model

@@ -29,7 +29,6 @@ class CheckSourceColumnsAreAllDocumented(BaseCheck):
 
     catalog_source: Any | None = Field(default=None)
     name: Literal["check_source_columns_are_all_documented"]
-    sources: list[Any] = Field(default=[])
 
     def execute(self) -> None:
         """Execute the check.
@@ -40,7 +39,7 @@ class CheckSourceColumnsAreAllDocumented(BaseCheck):
         """
         catalog_source = self._require_catalog_source()
         source = next(
-            s for s in self.sources if s.unique_id == catalog_source.unique_id
+            s for s in self._ctx.sources if s.unique_id == catalog_source.unique_id
         )
         undocumented_columns = [
             v.name

@@ -29,7 +29,6 @@ class CheckSourceNotOrphaned(BaseCheck):
 
     """
 
-    models: list[Any] = Field(default=[])
     name: Literal["check_source_not_orphaned"]
     source: Any | None = Field(default=None)
 
@@ -43,7 +42,7 @@ class CheckSourceNotOrphaned(BaseCheck):
         source = self._require_source()
         num_refs = sum(
             source.unique_id in getattr(model.depends_on, "nodes", [])
-            for model in self.models
+            for model in self._ctx.models
             if model.depends_on
         )
         if num_refs < 1:
@@ -73,7 +72,6 @@ class CheckSourceUsedByModelsInSameDirectory(BaseCheck):
 
     """
 
-    models: list[Any] = Field(default=[])
     name: Literal["check_source_used_by_models_in_same_directory"]
     source: Any | None = Field(default=None)
 
@@ -86,7 +84,7 @@ class CheckSourceUsedByModelsInSameDirectory(BaseCheck):
         """
         source = self._require_source()
         reffed_models_not_in_same_dir = []
-        for model in self.models:
+        for model in self._ctx.models:
             if (
                 model.depends_on
                 and source.unique_id in getattr(model.depends_on, "nodes", [])
@@ -122,7 +120,6 @@ class CheckSourceUsedByOnlyOneModel(BaseCheck):
 
     """
 
-    models: list[Any] = Field(default=[])
     name: Literal["check_source_used_by_only_one_model"]
     source: Any | None = Field(default=None)
 
@@ -136,7 +133,7 @@ class CheckSourceUsedByOnlyOneModel(BaseCheck):
         source = self._require_source()
         num_refs = sum(
             source.unique_id in getattr(model.depends_on, "nodes", [])
-            for model in self.models
+            for model in self._ctx.models
             if model.depends_on
         )
         if num_refs > 1:

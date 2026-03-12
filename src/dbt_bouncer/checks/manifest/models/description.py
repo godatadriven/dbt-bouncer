@@ -157,7 +157,6 @@ class CheckModelDocumentationCoverage(BaseCheck):
         ge=0,
         le=100,
     )
-    models: list[Any] = Field(default=[])
     name: Literal["check_model_documentation_coverage"]
     severity: Literal["error", "warn"] | None = Field(
         default="error",
@@ -171,9 +170,9 @@ class CheckModelDocumentationCoverage(BaseCheck):
             DbtBouncerFailedCheckError: If documentation coverage is less than minimum.
 
         """
-        num_models = len(self.models)
+        num_models = len(self._ctx.models)
         models_with_description = []
-        for model in self.models:
+        for model in self._ctx.models:
             if is_description_populated(
                 description=model.description or "", min_description_length=4
             ):

@@ -101,7 +101,6 @@ class CheckExposureBasedOnView(BaseCheck):
     materializations_to_include: list[str] = Field(
         default=[Materialization.EPHEMERAL, Materialization.VIEW],
     )
-    models: list[Any] = Field(default=[])
     name: Literal["check_exposure_based_on_view"]
 
     def execute(self) -> None:
@@ -113,9 +112,9 @@ class CheckExposureBasedOnView(BaseCheck):
         """
         exposure = self._require_exposure()
         models_by_id = (
-            self.models_by_unique_id
-            if self.models_by_unique_id
-            else {m.unique_id: m for m in self.models}
+            self._ctx.models_by_unique_id
+            if self._ctx.models_by_unique_id
+            else {m.unique_id: m for m in self._ctx.models}
         )
         non_table_upstream_dependencies = []
         for node_id in getattr(exposure.depends_on, "nodes", []) or []:
@@ -157,7 +156,6 @@ class CheckExposureOnNonPublicModels(BaseCheck):
     """
 
     exposure: Any | None = Field(default=None)
-    models: list[Any] = Field(default=[])
     name: Literal["check_exposure_based_on_non_public_models"]
 
     def execute(self) -> None:
@@ -169,9 +167,9 @@ class CheckExposureOnNonPublicModels(BaseCheck):
         """
         exposure = self._require_exposure()
         models_by_id = (
-            self.models_by_unique_id
-            if self.models_by_unique_id
-            else {m.unique_id: m for m in self.models}
+            self._ctx.models_by_unique_id
+            if self._ctx.models_by_unique_id
+            else {m.unique_id: m for m in self._ctx.models}
         )
         non_public_upstream_dependencies = []
         for node_id in getattr(exposure.depends_on, "nodes", []) or []:

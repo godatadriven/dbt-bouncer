@@ -3,7 +3,6 @@ from typing import Any, Literal
 
 from pydantic import ConfigDict, Field
 
-from dbt_bouncer.artifact_types import ManifestWrapper
 from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import get_package_version_number, object_in_path
@@ -50,19 +49,16 @@ class CheckUnitTestCoverage(BaseCheck):
         default=None,
         description="Index to uniquely identify the check, calculated at runtime.",
     )
-    manifest_obj: ManifestWrapper | None = Field(default=None)
     min_unit_test_coverage_pct: int = Field(
         default=100,
         ge=0,
         le=100,
     )
-    models: list[Any] = Field(default=[])
     name: Literal["check_unit_test_coverage"]
     severity: Literal["error", "warn"] | None = Field(
         default="error",
         description="Severity of the check, one of 'error' or 'warn'.",
     )
-    unit_tests: list[Any] = Field(default=[])
 
     def execute(self) -> None:
         """Execute the check.
@@ -77,11 +73,11 @@ class CheckUnitTestCoverage(BaseCheck):
         ) >= get_package_version_number("1.8.0"):
             relevant_models = [
                 m.unique_id
-                for m in self.models
+                for m in self._ctx.models
                 if object_in_path(self.include, m.original_file_path)
             ]
             models_with_unit_test = []
-            for unit_test in self.unit_tests:
+            for unit_test in self._ctx.unit_tests:
                 if unit_test.depends_on and unit_test.depends_on.nodes:
                     for node in unit_test.depends_on.nodes:
                         if node in relevant_models:
@@ -132,7 +128,6 @@ class CheckUnitTestExpectFormat(BaseCheck):
 
     """
 
-    manifest_obj: ManifestWrapper | None = Field(default=None)
     name: Literal["check_unit_test_expect_format"]
     permitted_formats: list[Literal["csv", "dict", "sql"]] = Field(
         default=["csv", "dict", "sql"],
@@ -203,7 +198,6 @@ class CheckUnitTestGivenFormats(BaseCheck):
 
     """
 
-    manifest_obj: ManifestWrapper | None = Field(default=None)
     name: Literal["check_unit_test_given_formats"]
     permitted_formats: list[Literal["csv", "dict", "sql"]] = Field(
         default=["csv", "dict", "sql"],

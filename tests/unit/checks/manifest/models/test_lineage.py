@@ -2,6 +2,7 @@ from contextlib import nullcontext as does_not_raise
 
 import pytest
 
+from dbt_bouncer.check_context import CheckContext
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.checks.manifest.models.lineage import (
     CheckModelDependsOnMacros,
@@ -236,9 +237,9 @@ _TEST_DATA_FOR_CHECK_MODEL_HAS_EXPOSURES = [
 )
 def test_check_model_has_exposures(exposures, model, expectation):
     with expectation:
-        CheckModelHasExposure(
-            exposures=exposures, model=model, name="check_model_has_exposure"
-        ).execute()
+        check = CheckModelHasExposure(model=model, name="check_model_has_exposure")
+        check._ctx = CheckContext(exposures=exposures)
+        check.execute()
 
 
 _TEST_DATA_FOR_CHECK_MODEL_HAS_NO_UPSTREAM_DEPENDENCIES = [
@@ -434,14 +435,17 @@ def test_check_model_max_chained_views(
     expectation,
 ):
     with expectation:
-        CheckModelMaxChainedViews(
-            manifest_obj=manifest_obj,
+        check = CheckModelMaxChainedViews(
             materializations_to_include=materializations_to_include,
             max_chained_views=max_chained_views,
             model=model,
-            models=models,
             name="check_model_max_chained_views",
-        ).execute()
+        )
+        check._ctx = CheckContext(
+            manifest_obj=manifest_obj,
+            models=models,
+        )
+        check.execute()
 
 
 _TEST_DATA_FOR_CHECK_MODEL_MAX_FANOUT = [
@@ -524,12 +528,13 @@ _TEST_DATA_FOR_CHECK_MODEL_MAX_FANOUT = [
 )
 def test_check_model_max_fanout(max_downstream_models, model, models, expectation):
     with expectation:
-        CheckModelMaxFanout(
+        check = CheckModelMaxFanout(
             max_downstream_models=max_downstream_models,
             model=model,
-            models=models,
             name="check_model_max_fanout",
-        ).execute()
+        )
+        check._ctx = CheckContext(models=models)
+        check.execute()
 
 
 _TEST_DATA_FOR_CHECK_MODEL_MAX_UPSTREAM_DEPENDENCIES = [

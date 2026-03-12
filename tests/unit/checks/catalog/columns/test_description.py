@@ -2,6 +2,7 @@ from contextlib import nullcontext as does_not_raise
 
 import pytest
 
+from dbt_bouncer.check_context import CheckContext
 from dbt_bouncer.checks.catalog.columns.description import (
     CheckColumnDescriptionPopulated,
     CheckColumnsAreAllDocumented,
@@ -58,12 +59,15 @@ def test_check_column_description_populated(
     catalog_node, models, manifest_obj, expectation
 ):
     with expectation:
-        CheckColumnDescriptionPopulated(
+        check = CheckColumnDescriptionPopulated(
             catalog_node=catalog_node,
+            name="check_column_description_populated",
+        )
+        check._ctx = CheckContext(
             models=models,
             manifest_obj=manifest_obj,
-            name="check_column_description_populated",
-        ).execute()
+        )
+        check.execute()
 
 
 _TEST_DATA_FOR_CHECK_COLUMN_DESCRIPTION_POPULATED_SNOWFLAKE = [
@@ -122,12 +126,15 @@ def test_check_column_description_populated_snowflake(
     catalog_node, models, manifest_obj, expectation
 ):
     with expectation:
-        CheckColumnDescriptionPopulated(
+        check = CheckColumnDescriptionPopulated(
             catalog_node=catalog_node,
+            name="check_column_description_populated",
+        )
+        check._ctx = CheckContext(
             models=models,
             manifest_obj=manifest_obj,
-            name="check_column_description_populated",
-        ).execute()
+        )
+        check.execute()
 
 
 _TEST_DATA_FOR_CHECK_COLUMNS_ARE_ALL_DOCUMENTED = [
@@ -193,12 +200,15 @@ def test_check_columns_are_all_documented(
     catalog_node, manifest_obj, models, expectation
 ):
     with expectation:
-        CheckColumnsAreAllDocumented(
+        check = CheckColumnsAreAllDocumented(
             catalog_node=catalog_node,
+            name="check_columns_are_all_documented",
+        )
+        check._ctx = CheckContext(
             manifest_obj=manifest_obj,
             models=models,
-            name="check_columns_are_all_documented",
-        ).execute()
+        )
+        check.execute()
 
 
 _TEST_DATA_FOR_CHECK_COLUMNS_ARE_ALL_DOCUMENTED_SNOWFLAKE = [
@@ -234,12 +244,15 @@ def test_check_columns_are_all_documented_snowflake(
     catalog_node, manifest_obj, models, expectation
 ):
     with expectation:
-        CheckColumnsAreAllDocumented(
+        check = CheckColumnsAreAllDocumented(
             catalog_node=catalog_node,
+            name="check_columns_are_all_documented",
+        )
+        check._ctx = CheckContext(
             manifest_obj=manifest_obj,
             models=models,
-            name="check_columns_are_all_documented",
-        ).execute()
+        )
+        check.execute()
 
 
 _TEST_DATA_FOR_CHECK_COLUMNS_ARE_DOCUMENTED_IN_PUBLIC_MODELS = [
@@ -303,8 +316,11 @@ def test_check_columns_are_documented_in_public_models(
     expectation,
 ):
     with expectation:
-        CheckColumnsAreDocumentedInPublicModels(
+        check = CheckColumnsAreDocumentedInPublicModels(
             catalog_node=catalog_node,
-            models=models,
             name="check_columns_are_documented_in_public_models",
-        ).execute()
+        )
+        check._ctx = CheckContext(
+            models=models,
+        )
+        check.execute()

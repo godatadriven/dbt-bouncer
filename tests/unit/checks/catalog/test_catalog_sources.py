@@ -8,6 +8,7 @@ from dbt_bouncer.artifact_parsers.parser import wrap_dict
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=UserWarning)
 
+from dbt_bouncer.check_context import CheckContext
 from dbt_bouncer.checks.catalog.check_catalog_sources import (
     CheckSourceColumnsAreAllDocumented,
 )
@@ -96,8 +97,9 @@ _TEST_DATA_FOR_CHECK_SOURCE_COLUMNS_ARE_ALL_DOCUMENTED = [
 )
 def test_check_source_columns_are_all_documented(catalog_source, sources, expectation):
     with expectation:
-        CheckSourceColumnsAreAllDocumented(
+        check = CheckSourceColumnsAreAllDocumented(
             catalog_source=catalog_source,
             name="check_source_columns_are_all_documented",
-            sources=sources,
-        ).execute()
+        )
+        check._ctx = CheckContext(sources=sources)
+        check.execute()
