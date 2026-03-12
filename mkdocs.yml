@@ -36,7 +36,10 @@ nav:
     - Checks: checks/index.md
     - Catalog:
       - Catalog Sources: checks/catalog/check_catalog_sources.md
-      - Columns: checks/catalog/check_columns.md
+      - Columns:
+          - checks/catalog/columns/description.md
+          - checks/catalog/columns/naming.md
+          - checks/catalog/columns/tests.md
     - Manifest:
       - Exposures: checks/manifest/check_exposures.md
       - Lineage: checks/manifest/check_lineage.md
@@ -57,7 +60,15 @@ nav:
       - Seeds: checks/manifest/check_seeds.md
       - Semantic Models: checks/manifest/check_semantic_models.md
       - Snapshots: checks/manifest/check_snapshots.md
-      - Sources: checks/manifest/check_sources.md
+      - Sources:
+          - checks/manifest/sources/description.md
+          - checks/manifest/sources/directories.md
+          - checks/manifest/sources/freshness.md
+          - checks/manifest/sources/lineage.md
+          - checks/manifest/sources/loader.md
+          - checks/manifest/sources/meta.md
+          - checks/manifest/sources/naming.md
+          - checks/manifest/sources/tags.md
       - Tests: checks/manifest/check_tests.md
       - Unit Tests: checks/manifest/check_unit_tests.md
     - Run Results:
