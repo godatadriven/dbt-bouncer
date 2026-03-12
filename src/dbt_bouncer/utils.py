@@ -5,11 +5,13 @@ import importlib.util
 import inspect
 import logging
 import os
+import pkgutil
 import re
 import sys
 import typing
 from collections.abc import Mapping
 from functools import lru_cache
+from importlib.metadata import entry_points
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -251,6 +253,64 @@ def _load_custom_checks(
         )
 
 
+_ENTRY_POINT_GROUP = "dbt_bouncer.checks"
+
+
+def _load_entry_point_checks(check_objects: list[type["BaseCheck"]]) -> None:
+    """Load check classes from installed packages via entry points.
+
+    Scans the ``dbt_bouncer.checks`` entry point group. Each entry point
+    can resolve to:
+
+    - A module containing Check* classes (inspected directly)
+    - A Check* class (added directly)
+    - A package (recursively walked via pkgutil to find Check* classes
+      in submodules)
+
+    Args:
+        check_objects: A list to which discovered check classes will be
+            appended.
+
+    """
+    eps = entry_points(group=_ENTRY_POINT_GROUP)
+    for ep in eps:
+        try:
+            target = ep.load()
+
+            if inspect.isclass(target) and target.__name__.startswith("Check"):
+                check_objects.append(target)
+            elif inspect.ismodule(target):
+                # Check if it's a package (has __path__) — walk submodules
+                if hasattr(target, "__path__"):
+                    for _importer, modname, _ispkg in pkgutil.walk_packages(
+                        target.__path__, prefix=f"{target.__name__}."
+                    ):
+                        try:
+                            submodule = importlib.import_module(modname)
+                            _extract_checks_from_module(
+                                submodule, modname, check_objects
+                            )
+                        except ImportError:
+                            logging.warning(
+                                f"Failed to import submodule `{modname}` "
+                                f"from entry point `{ep.name}`."
+                            )
+                else:
+                    # Plain module — inspect directly
+                    _extract_checks_from_module(target, target.__name__, check_objects)
+            else:
+                logging.warning(
+                    f"Entry point `{ep.name}` resolved to "
+                    f"{type(target).__name__}, expected a module, package, "
+                    "or Check class. Skipping."
+                )
+        except Exception as e:
+            logging.warning(
+                f"Failed to load entry point `{ep.name}`: {e}. "
+                "This plugin will be skipped."
+            )
+
+
 _CATEGORY_TO_SUBDIR: dict[str, str] = {
     "catalog_checks": "catalog",
     "manifest_checks": "manifest",
@@ -265,13 +325,21 @@ def get_check_objects(
 ) -> list[type["BaseCheck"]]:
     """Get list of Check* classes.
 
-    This function dynamically discovers and loads check classes from two sources:
-    1. Internal checks located in the `checks` directory of the package.
-    2. Custom checks located in the specified `custom_checks_dir` (if provided).
+    This function dynamically discovers and loads check classes from three
+    sources:
+
+    1. Internal checks located in the ``checks`` directory of the package.
+    2. Custom checks located in the specified ``custom_checks_dir`` (if
+       provided).
+    3. Entry-point checks from installed packages registered under the
+       ``dbt_bouncer.checks`` entry point group.
 
     It filters for classes that:
     - Start with "Check".
     - Are defined within the loaded module (not imported).
+
+    Results are deduplicated so a class discovered via multiple paths
+    appears only once.
 
     The result is cached using `@lru_cache` to avoid redundant file scanning
     and module loading on subsequent calls. Import errors in individual files
@@ -321,6 +389,18 @@ def get_check_objects(
     # 2. Load custom checks (if any)
     if custom_checks_dir is not None:
         _load_custom_checks(Path(custom_checks_dir), check_objects)
+
+    # 3. Load entry-point checks (third-party plugins)
+    _load_entry_point_checks(check_objects)
+
+    # Deduplicate (same class could be found via internal scan + entry points)
+    seen: set[type] = set()
+    unique_checks: list[type["BaseCheck"]] = []
+    for cls in check_objects:
+        if cls not in seen:
+            seen.add(cls)
+            unique_checks.append(cls)
+    check_objects = unique_checks
 
     logging.debug(f"Loaded {len(check_objects)} `Check*` classes.")
 
