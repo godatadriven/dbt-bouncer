@@ -198,6 +198,19 @@ To add a new check follow the below steps:
 1. Run `make test` to ensure the tests pass.
 1. Open a PR 🎉!
 
+## AI Agents and Tools
+
+This repository includes configuration for AI coding agents. The setup follows the [AGENTS.md standard](https://agents.md):
+
+- **`AGENTS.md`** — tool-agnostic project instructions (setup, architecture, check authoring, testing, constraints). This is the single source of truth for all AI tools.
+- **`CLAUDE.md`** — Claude Code-specific configuration. References `AGENTS.md` and adds Claude-specific hooks and skills.
+- **`.claude/settings.json`** — runs pre-commit hooks (`prek run --all-files`) automatically on Stop events.
+- **`.claude/skills/`** — reusable skill files:
+  - `/new-check` — scaffolds a new check class with tests
+  - `/build-artifacts` — regenerates test fixtures after `dbt_project/` changes
+
+**Convention:** keep `AGENTS.md` as the shared source of truth. Tool-specific files (e.g. `CLAUDE.md`, `.cursorrules`) should only add tool-specific configuration and reference `AGENTS.md` for everything else.
+
 ## Submitting a Pull Request
 
 Code can be merged into the current development branch `main` by opening a pull request. If the proposal looks like it's on the right track, then a `dbt-bouncer` maintainer will review the PR. They may suggest code revision for style or clarity, or request that you add unit or integration test(s). These are good things! We believe that, with a little bit of help, anyone can contribute high-quality code. Once merged, your contribution will be available for the next release of `dbt-bouncer`.
