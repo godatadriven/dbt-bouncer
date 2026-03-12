@@ -62,6 +62,77 @@ class CheckModelCodeDoesNotContainRegexpPattern(BaseCheck):
             )
 
 
+class CheckModelHardCodedReferences(BaseCheck):
+    """A model must not contain hard-coded table references; use ref() or source() instead.
+
+    Scans ``raw_code`` for patterns like ``FROM schema.table`` or
+    ``JOIN catalog.schema.table`` that are not wrapped in Jinja expressions.
+    Hard-coded references bypass the dbt DAG, break lineage, and are
+    environment-specific.
+
+    !!! warning
+
+        This check is not foolproof and will not catch all hard-coded table
+        references (e.g. references inside complex Jinja logic or comments).
+
+    Receives:
+        model (ModelNode): The ModelNode object to check.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_model_hard_coded_references
+        ```
+
+    """
+
+    model: Any | None = Field(default=None)
+    name: Literal["check_model_hard_coded_references"]
+
+    _jinja_pattern: re.Pattern[str] = PrivateAttr()
+    _hard_coded_ref_pattern: re.Pattern[str] = PrivateAttr()
+
+    def model_post_init(self, __context: object) -> None:
+        """Compile regex patterns once at initialisation time."""
+        # Strip Jinja blocks ({{ ... }}, {% ... %}) before scanning for bare refs
+        object.__setattr__(
+            self,
+            "_jinja_pattern",
+            re.compile(r"\{[{%].*?[%}]\}", re.DOTALL),
+        )
+        # Match FROM or JOIN followed by a dotted identifier (schema.table)
+        # Only multi-part names (with a dot) are flagged; single-part CTE names are not
+        object.__setattr__(
+            self,
+            "_hard_coded_ref_pattern",
+            re.compile(r"\b(?:FROM|JOIN)\s+\w+\.\w+", re.IGNORECASE),
+        )
+
+    def execute(self) -> None:
+        """Execute the check.
+
+        Raises:
+            DbtBouncerFailedCheckError: If the model contains hard-coded table references.
+
+        """
+        model = self._require_model()
+        raw_code = model.raw_code or ""
+        cleaned = self._jinja_pattern.sub("", raw_code)
+        matches = self._hard_coded_ref_pattern.findall(cleaned)
+        if matches:
+            raise DbtBouncerFailedCheckError(
+                f"`{get_clean_model_name(model.unique_id)}` contains hard-coded table "
+                f"references: {matches}. Use `{{{{ ref(...) }}}}` or `{{{{ source(..., ...) }}}}` instead."
+            )
+
+
 class CheckModelHasSemiColon(BaseCheck):
     """Model may not end with a semi-colon (`;`).
 
