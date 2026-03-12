@@ -7,6 +7,7 @@ from typing import Any, Literal, cast
 from pydantic import ConfigDict, Field, PrivateAttr
 
 from dbt_bouncer.check_base import BaseCheck
+from dbt_bouncer.check_patterns import BaseDescriptionPopulatedCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import (
     clean_path_str,
@@ -65,7 +66,7 @@ class CheckModelDescriptionContainsRegexPattern(BaseCheck):
             )
 
 
-class CheckModelDescriptionPopulated(BaseCheck):
+class CheckModelDescriptionPopulated(BaseDescriptionPopulatedCheck):
     """Models must have a populated description.
 
     Parameters:
@@ -94,24 +95,16 @@ class CheckModelDescriptionPopulated(BaseCheck):
 
     """
 
-    min_description_length: int | None = Field(default=None)
     model: Any | None = Field(default=None)
     name: Literal["check_model_description_populated"]
 
-    def execute(self) -> None:
-        """Execute the check.
+    @property
+    def _resource_description(self) -> str:
+        return self._require_model().description or ""
 
-        Raises:
-            DbtBouncerFailedCheckError: If description is not populated.
-
-        """
-        model = self._require_model()
-        if not self._is_description_populated(
-            model.description or "", self.min_description_length
-        ):
-            raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(model.unique_id)}` does not have a populated description."
-            )
+    @property
+    def _resource_display_name(self) -> str:
+        return get_clean_model_name(self._require_model().unique_id)
 
 
 class CheckModelDocumentationCoverage(BaseCheck):

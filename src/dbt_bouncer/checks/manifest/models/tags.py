@@ -4,12 +4,11 @@ from typing import Any, Literal
 
 from pydantic import Field
 
-from dbt_bouncer.check_base import BaseCheck
-from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
+from dbt_bouncer.check_patterns import BaseHasTagsCheck
 from dbt_bouncer.utils import get_clean_model_name
 
 
-class CheckModelHasTags(BaseCheck):
+class CheckModelHasTags(BaseHasTagsCheck):
     """Models must have the specified tags.
 
     Parameters:
@@ -35,34 +34,13 @@ class CheckModelHasTags(BaseCheck):
 
     """
 
-    criteria: Literal["any", "all", "one"] = Field(default="all")
     model: Any | None = Field(default=None)
     name: Literal["check_model_has_tags"]
-    tags: list[str]
 
-    def execute(self) -> None:
-        """Execute the check.
+    @property
+    def _resource_tags(self) -> list[str]:
+        return self._require_model().tags or []
 
-        Raises:
-            DbtBouncerFailedCheckError: If model does not have required tags.
-
-        """
-        model = self._require_model()
-        model_tags = model.tags or []
-        if self.criteria == "any":
-            if not any(tag in model_tags for tag in self.tags):
-                raise DbtBouncerFailedCheckError(
-                    f"`{get_clean_model_name(model.unique_id)}` does not have any of the required tags: {self.tags}."
-                )
-        elif self.criteria == "all":
-            missing_tags = [tag for tag in self.tags if tag not in model_tags]
-            if missing_tags:
-                raise DbtBouncerFailedCheckError(
-                    f"`{get_clean_model_name(model.unique_id)}` is missing required tags: {missing_tags}."
-                )
-        elif (
-            self.criteria == "one" and sum(tag in model_tags for tag in self.tags) != 1
-        ):
-            raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(model.unique_id)}` must have exactly one of the required tags: {self.tags}."
-            )
+    @property
+    def _resource_display_name(self) -> str:
+        return get_clean_model_name(self._require_model().unique_id)

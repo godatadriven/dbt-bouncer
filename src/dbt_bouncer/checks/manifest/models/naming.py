@@ -1,16 +1,14 @@
 """Checks related to model naming conventions."""
 
-import re
 from typing import Any, Literal
 
-from pydantic import ConfigDict, Field, PrivateAttr
+from pydantic import ConfigDict, Field
 
-from dbt_bouncer.check_base import BaseCheck
-from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
-from dbt_bouncer.utils import compile_pattern, get_clean_model_name
+from dbt_bouncer.check_patterns import BaseNamePatternCheck
+from dbt_bouncer.utils import get_clean_model_name
 
 
-class CheckModelNames(BaseCheck):
+class CheckModelNames(BaseNamePatternCheck):
     """Models must have a name that matches the supplied regex.
 
     Parameters:
@@ -42,24 +40,17 @@ class CheckModelNames(BaseCheck):
     model_config = ConfigDict(extra="forbid", protected_namespaces=())
 
     model: Any | None = Field(default=None)
-    name: Literal["check_model_names"]
     model_name_pattern: str
+    name: Literal["check_model_names"]
 
-    _compiled_pattern: re.Pattern[str] = PrivateAttr()
+    @property
+    def _name_pattern(self) -> str:
+        return self.model_name_pattern
 
-    def model_post_init(self, __context: object) -> None:
-        """Compile the regex pattern once at initialisation time."""
-        self._compiled_pattern = compile_pattern(self.model_name_pattern.strip())
+    @property
+    def _resource_name(self) -> str:
+        return str(self._require_model().name)
 
-    def execute(self) -> None:
-        """Execute the check.
-
-        Raises:
-            DbtBouncerFailedCheckError: If model name does not match regex.
-
-        """
-        model = self._require_model()
-        if self._compiled_pattern.match(str(model.name)) is None:
-            raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(model.unique_id)}` does not match the supplied regex `{self.model_name_pattern.strip()}`."
-            )
+    @property
+    def _resource_display_name(self) -> str:
+        return get_clean_model_name(self._require_model().unique_id)

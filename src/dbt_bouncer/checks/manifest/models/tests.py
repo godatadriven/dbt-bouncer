@@ -1,13 +1,13 @@
 """Checks related to model test coverage and test configuration."""
 
-import logging
 from typing import Any, Literal
 
 from pydantic import ConfigDict, Field
 
 from dbt_bouncer.check_base import BaseCheck
+from dbt_bouncer.check_patterns import BaseHasUnitTestsCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
-from dbt_bouncer.utils import get_clean_model_name, get_package_version_number
+from dbt_bouncer.utils import get_clean_model_name
 
 
 class CheckModelHasUniqueTest(BaseCheck):
@@ -87,7 +87,7 @@ class CheckModelHasUniqueTest(BaseCheck):
             )
 
 
-class CheckModelHasUnitTests(BaseCheck):
+class CheckModelHasUnitTests(BaseHasUnitTestsCheck):
     """Models must have more than the specified number of unit tests.
 
     Parameters:
@@ -123,39 +123,16 @@ class CheckModelHasUnitTests(BaseCheck):
 
     """
 
-    min_number_of_unit_tests: int = Field(default=1)
     model: Any | None = Field(default=None)
     name: Literal["check_model_has_unit_tests"]
 
-    def execute(self) -> None:
-        """Execute the check.
+    @property
+    def _resource_unique_id(self) -> str:
+        return self._require_model().unique_id
 
-        Raises:
-            DbtBouncerFailedCheckError: If model does not have enough unit tests.
-
-        """
-        manifest_obj = self._require_manifest()
-        model = self._require_model()
-        if get_package_version_number(
-            manifest_obj.manifest.metadata.dbt_version or "0.0.0"
-        ) >= get_package_version_number("1.8.0"):
-            num_unit_tests = len(
-                [
-                    t.unique_id
-                    for t in self._ctx.unit_tests
-                    if t.depends_on
-                    and t.depends_on.nodes
-                    and t.depends_on.nodes[0] == model.unique_id
-                ],
-            )
-            if num_unit_tests < self.min_number_of_unit_tests:
-                raise DbtBouncerFailedCheckError(
-                    f"`{get_clean_model_name(model.unique_id)}` has {num_unit_tests} unit tests, this is less than the minimum of {self.min_number_of_unit_tests}."
-                )
-        else:
-            logging.warning(
-                "The `check_model_has_unit_tests` check is only supported for dbt 1.8.0 and above.",
-            )
+    @property
+    def _resource_display_name(self) -> str:
+        return get_clean_model_name(self._require_model().unique_id)
 
 
 class CheckModelTestCoverage(BaseCheck):
