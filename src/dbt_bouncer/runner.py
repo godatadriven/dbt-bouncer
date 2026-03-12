@@ -1,34 +1,17 @@
 """Assemble and run all checks."""
 
-import logging
 import operator
-import threading
-import traceback
-from collections import Counter, defaultdict
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from pathlib import Path
 from typing import TYPE_CHECKING, Any, NotRequired, TypedDict
 
-from rich import box
-from rich.console import Console
-from rich.panel import Panel
-from rich.progress import BarColumn, Progress, TaskProgressColumn, TextColumn
-from rich.table import Table
-
-from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
-from dbt_bouncer.enums import CheckOutcome, CheckSeverity, ResourceType
-from dbt_bouncer.formatters import _format_results
-from dbt_bouncer.utils import (
-    create_github_comment_file,
-    get_nested_value,
-    resource_in_path,
-)
+from dbt_bouncer.enums import ResourceType
+from dbt_bouncer.executor import Executor
+from dbt_bouncer.reporter import Reporter
+from dbt_bouncer.utils import get_nested_value, resource_in_path
 
 if TYPE_CHECKING:
     from dbt_bouncer.context import BouncerContext
 
 
-_MAX_BATCH_SIZE: int = 500
 _VALID_ITERATE_OVER_VALUES = frozenset(rt.value for rt in ResourceType)
 _CLASS_ITERATE_CACHE: dict[type, frozenset[str]] = {}
 
@@ -257,230 +240,20 @@ def runner(
         ctx.tests,
     )
 
-    if ctx.dry_run:
-        counts: Counter[tuple[str, str]] = Counter()
-        for c in checks_to_run:
-            check_name = c["check"].__class__.__name__
-            resource_type = next(
-                iter(_CLASS_ITERATE_CACHE.get(c["check"].__class__, {"(none)"})),
-                "(none)",
-            )
-            counts[check_name, resource_type] += 1
-
-        dry_run_console = Console()
-        table = Table(
-            title="[bold cyan]Dry run — checks that would execute[/bold cyan]",
-            title_justify="left",
-            box=box.ROUNDED,
-            border_style="cyan",
-            show_header=True,
-            header_style="bold cyan",
-        )
-        table.add_column("Check name", justify="left", style="cyan", no_wrap=True)
-        table.add_column("Resource type", justify="center")
-        table.add_column("Count", justify="right")
-        for (check_name, resource_type), count in sorted(counts.items()):
-            table.add_row(check_name, resource_type, str(count))
-        dry_run_console.print(table)
-        dry_run_console.print(
-            Panel(
-                f"[bold cyan]Dry run complete. {len(checks_to_run)} check(s) would run.[/bold cyan]",
-                border_style="cyan",
-            )
-        )
-        return 0, []
-
-    logging.info(f"Assembled {len(checks_to_run)} checks, running...")
-
-    def _execute_check(check: CheckToRun) -> CheckToRun:
-        """Execute a single check and return the result.
-
-        Returns:
-            dict[str, Any]: The check dict with outcome and optional failure_message set.
-
-        """
-        logging.debug(f"Running {check['check_run_id']}...")
-        try:
-            check["check"].execute()
-            check["outcome"] = CheckOutcome.SUCCESS
-        except Exception as e:
-            if isinstance(e, DbtBouncerFailedCheckError):
-                failure_message = e.message
-            else:
-                failure_message_full = list(
-                    traceback.TracebackException.from_exception(e).format(),
-                )
-                failure_message = failure_message_full[-1].strip()
-
-            if check["check"].description:
-                failure_message = f"{check['check'].description} - {failure_message}"
-
-            logging.debug(f"Check {check['check_run_id']} failed: {failure_message}")
-            check["outcome"] = CheckOutcome.FAILED
-            check["failure_message"] = failure_message
-
-            # If a check encountered an issue, change severity to warn
-            if not isinstance(e, DbtBouncerFailedCheckError):
-                check["severity"] = CheckSeverity.WARN
-                check["failure_message"] = (
-                    f"`dbt-bouncer` encountered an error ({failure_message}), run with `-v` to see more details or report an issue at https://github.com/godatadriven/dbt-bouncer/issues."
-                )
-        return check
-
-    def _execute_batch(batch: list[CheckToRun]) -> int:
-        """Execute all checks in a batch sequentially and return the count.
-
-        Returns:
-            int: Number of checks executed.
-
-        """
-        for check in batch:
-            _execute_check(check)
-        return len(batch)
-
-    # Group checks by class to reduce ThreadPoolExecutor scheduling overhead.
-    # Checks of the same class run sequentially within a batch; different
-    # classes run in parallel across threads.
-    # Cap batch size to avoid submitting one giant task for large check sets.
-    batches: dict[str, list[CheckToRun]] = defaultdict(list)
-    for check in checks_to_run:
-        batches[check["check"].__class__.__name__].append(check)
-
-    batches_to_run: list[list[CheckToRun]] = []
-    for batch in batches.values():
-        for i in range(0, max(len(batch), 1), _MAX_BATCH_SIZE):
-            batches_to_run.append(batch[i : i + _MAX_BATCH_SIZE])
-
-    console = Console()
-    progress_lock = threading.Lock()
-
-    with Progress(
-        TextColumn("[progress.description]{task.description}"),
-        BarColumn(),
-        TaskProgressColumn(),
-        console=console,
-    ) as progress:
-        task = progress.add_task("Running checks...", total=len(checks_to_run))
-        with ThreadPoolExecutor() as executor:
-            futures = {
-                executor.submit(_execute_batch, batch): batch
-                for batch in batches_to_run
-            }
-            for future in as_completed(futures):
-                batch_size = future.result()
-                with progress_lock:
-                    progress.update(task, advance=batch_size)
-
-    results = [
-        {
-            "check_run_id": c["check_run_id"],
-            "failure_message": c.get("failure_message"),
-            "outcome": c["outcome"],
-            "severity": c["severity"],
-        }
-        for c in checks_to_run
-    ]
-    num_checks_error = 0
-    num_checks_warn = 0
-    num_checks_success = 0
-    for r in results:
-        if r["outcome"] == CheckOutcome.FAILED:
-            if r["severity"] == CheckSeverity.ERROR:
-                num_checks_error += 1
-            else:
-                num_checks_warn += 1
-        else:
-            num_checks_success += 1
-
-    if num_checks_error > 0 or num_checks_warn > 0:
-        logger = logging.error if num_checks_error > 0 else logging.warning
-        logger(
-            f"`dbt-bouncer` {'failed' if num_checks_error > 0 else 'has warnings'}. Please see below for more details or run `dbt-bouncer` with the `-v` flag."
-            + (
-                ""
-                if num_checks_error < 25 or ctx.show_all_failures
-                else " More than 25 checks failed, to see a full list of all failed checks re-run `dbt-bouncer` with (one of) the `--output-file` or `--show-all-failures` flags."
-            )
-        )
-        failed_checks = [
-            {
-                "check_run_id": r["check_run_id"],
-                "severity": r["severity"],
-                "failure_message": r["failure_message"],
-            }
-            for r in results
-            if r["outcome"] == CheckOutcome.FAILED
-        ]
-        logging.debug(f"{failed_checks=}")
-        # Set title and style based on severity
-        if num_checks_error > 0:
-            title = "[bold red]Failed checks[/bold red]"
-            border_color = "red"
-        else:
-            title = "[bold yellow]Warning checks[/bold yellow]"
-            border_color = "yellow"
-
-        table = Table(
-            title=title,
-            title_justify="left",
-            box=box.ROUNDED,
-            border_style=border_color,
-            show_header=True,
-            header_style=f"bold {border_color}",
-        )
-        table.add_column("Check name", justify="left", style="cyan", no_wrap=True)
-        table.add_column("Severity", justify="center", width=10)
-        table.add_column("Failure message", justify="left")
-
-        checks_to_display = (
-            failed_checks if ctx.show_all_failures else failed_checks[:25]
-        )
-
-        for check in checks_to_display:
-            # Determine color based on severity string
-            sev = str(check.get("severity", "")).lower()
-            sev_color = "red" if CheckSeverity.ERROR in sev else "yellow"
-
-            table.add_row(
-                str(check.get("check_run_id", "")),
-                f"[bold {sev_color}]{sev.upper()}[/bold {sev_color}]",
-                str(check.get("failure_message", "")),
-            )
-
-        console.print(table)
-
-        if ctx.create_pr_comment_file:
-            create_github_comment_file(
-                failed_checks=[
-                    [str(f["check_run_id"]), str(f.get("failure_message", ""))]
-                    for f in failed_checks
-                ],
-                show_all_failures=ctx.show_all_failures,
-            )
-
-    if num_checks_error == 0 and num_checks_warn == 0:
-        console.print(
-            Panel(
-                f"[bold green][OK] All checks passed! SUCCESS={num_checks_success} WARN={num_checks_warn} ERROR={num_checks_error}[/bold green]",
-                border_style="green",
-            )
-        )
-    else:
-        console.print(
-            f"Done. [bold green]SUCCESS={num_checks_success}[/bold green] "
-            f"[bold yellow]WARN={num_checks_warn}[/bold yellow] "
-            f"[bold red]ERROR={num_checks_error}[/bold red]"
-        )
-
-    results_to_save = (
-        [r for r in results if r["outcome"] == CheckOutcome.FAILED]
-        if ctx.output_only_failures
-        else results
+    reporter = Reporter(
+        show_all_failures=ctx.show_all_failures,
+        create_pr_comment_file=ctx.create_pr_comment_file,
+        output_file=ctx.output_file,
+        output_format=ctx.output_format,
+        output_only_failures=ctx.output_only_failures,
     )
 
-    if ctx.output_file is not None:
-        coverage_file = Path().cwd() / ctx.output_file
-        logging.info(f"Saving coverage file to `{coverage_file}`.")
-        coverage_file.write_bytes(_format_results(results_to_save, ctx.output_format))
+    if ctx.dry_run:
+        return reporter.report_dry_run(
+            checks_to_run, iterate_cache=_CLASS_ITERATE_CACHE
+        )
 
-    return 1 if num_checks_error != 0 else 0, results
+    executor = Executor()
+    results = executor.run(checks_to_run)
+
+    return reporter.report_results(results)
