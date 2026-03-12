@@ -1,16 +1,17 @@
-import logging
 import re
 from typing import Any, Literal
 
 from pydantic import ConfigDict, Field, PrivateAttr
 
 from dbt_bouncer.check_base import BaseCheck
-from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
-from dbt_bouncer.utils import (
-    compile_pattern,
-    get_clean_model_name,
-    get_package_version_number,
+from dbt_bouncer.check_patterns import (
+    BaseColumnsHaveTypesCheck,
+    BaseDescriptionPopulatedCheck,
+    BaseHasUnitTestsCheck,
+    BaseNamePatternCheck,
 )
+from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
+from dbt_bouncer.utils import compile_pattern, get_clean_model_name
 
 
 class CheckSeedColumnNames(BaseCheck):
@@ -70,7 +71,7 @@ class CheckSeedColumnNames(BaseCheck):
             )
 
 
-class CheckSeedColumnsHaveTypes(BaseCheck):
+class CheckSeedColumnsHaveTypes(BaseColumnsHaveTypesCheck):
     """Columns defined for seeds must have a `data_type` declared.
 
     Receives:
@@ -93,25 +94,16 @@ class CheckSeedColumnsHaveTypes(BaseCheck):
     name: Literal["check_seed_columns_have_types"]
     seed: Any | None = Field(default=None)
 
-    def execute(self) -> None:
-        """Execute the check.
+    @property
+    def _resource_columns(self) -> dict[str, Any]:
+        return self._require_seed().columns or {}
 
-        Raises:
-            DbtBouncerFailedCheckError: If any column lacks a declared `data_type`.
-
-        """
-        seed = self._require_seed()
-        columns = seed.columns or {}
-        untyped_columns = [
-            col_name for col_name, col in columns.items() if not col.data_type
-        ]
-        if untyped_columns:
-            raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(seed.unique_id)}` has columns without a declared `data_type`: {untyped_columns}"
-            )
+    @property
+    def _resource_display_name(self) -> str:
+        return get_clean_model_name(self._require_seed().unique_id)
 
 
-class CheckSeedDescriptionPopulated(BaseCheck):
+class CheckSeedDescriptionPopulated(BaseDescriptionPopulatedCheck):
     """Seeds must have a populated description.
 
     Parameters:
@@ -141,27 +133,19 @@ class CheckSeedDescriptionPopulated(BaseCheck):
 
     model_config = ConfigDict(extra="forbid", protected_namespaces=())
 
-    min_description_length: int | None = Field(default=None)
     name: Literal["check_seed_description_populated"]
     seed: Any | None = Field(default=None)
 
-    def execute(self) -> None:
-        """Execute the check.
+    @property
+    def _resource_description(self) -> str:
+        return self._require_seed().description or ""
 
-        Raises:
-            DbtBouncerFailedCheckError: If description is not populated.
-
-        """
-        seed = self._require_seed()
-        if not self._is_description_populated(
-            seed.description or "", self.min_description_length
-        ):
-            raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(seed.unique_id)}` does not have a populated description."
-            )
+    @property
+    def _resource_display_name(self) -> str:
+        return get_clean_model_name(self._require_seed().unique_id)
 
 
-class CheckSeedHasUnitTests(BaseCheck):
+class CheckSeedHasUnitTests(BaseHasUnitTestsCheck):
     """Seeds must have more than the specified number of unit tests.
 
     Parameters:
@@ -196,42 +180,19 @@ class CheckSeedHasUnitTests(BaseCheck):
 
     """
 
-    min_number_of_unit_tests: int = Field(default=1)
     name: Literal["check_seed_has_unit_tests"]
     seed: Any | None = Field(default=None)
 
-    def execute(self) -> None:
-        """Execute the check.
+    @property
+    def _resource_unique_id(self) -> str:
+        return self._require_seed().unique_id
 
-        Raises:
-            DbtBouncerFailedCheckError: If seed does not have enough unit tests.
-
-        """
-        manifest_obj = self._require_manifest()
-        seed = self._require_seed()
-        if get_package_version_number(
-            manifest_obj.manifest.metadata.dbt_version or "0.0.0"
-        ) >= get_package_version_number("1.8.0"):
-            num_unit_tests = len(
-                [
-                    t.unique_id
-                    for t in self._ctx.unit_tests
-                    if t.depends_on
-                    and t.depends_on.nodes
-                    and t.depends_on.nodes[0] == seed.unique_id
-                ],
-            )
-            if num_unit_tests < self.min_number_of_unit_tests:
-                raise DbtBouncerFailedCheckError(
-                    f"`{get_clean_model_name(seed.unique_id)}` has {num_unit_tests} unit tests, this is less than the minimum of {self.min_number_of_unit_tests}."
-                )
-        else:
-            logging.warning(
-                "The `check_seed_has_unit_tests` check is only supported for dbt 1.8.0 and above.",
-            )
+    @property
+    def _resource_display_name(self) -> str:
+        return get_clean_model_name(self._require_seed().unique_id)
 
 
-class CheckSeedNames(BaseCheck):
+class CheckSeedNames(BaseNamePatternCheck):
     """Seed must have a name that matches the supplied regex.
 
     Parameters:
@@ -262,21 +223,14 @@ class CheckSeedNames(BaseCheck):
     seed: Any | None = Field(default=None)
     seed_name_pattern: str
 
-    _compiled_pattern: re.Pattern[str] = PrivateAttr()
+    @property
+    def _name_pattern(self) -> str:
+        return self.seed_name_pattern
 
-    def model_post_init(self, __context: object) -> None:
-        """Compile the regex pattern once at initialisation time."""
-        self._compiled_pattern = compile_pattern(self.seed_name_pattern.strip())
+    @property
+    def _resource_name(self) -> str:
+        return str(self._require_seed().name)
 
-    def execute(self) -> None:
-        """Execute the check.
-
-        Raises:
-            DbtBouncerFailedCheckError: If model name does not match regex.
-
-        """
-        seed = self._require_seed()
-        if self._compiled_pattern.match(str(seed.name)) is None:
-            raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(seed.unique_id)}` does not match the supplied regex `{self.seed_name_pattern.strip()}`."
-            )
+    @property
+    def _resource_display_name(self) -> str:
+        return get_clean_model_name(self._require_seed().unique_id)

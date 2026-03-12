@@ -4,11 +4,10 @@ from typing import Any, Literal
 
 from pydantic import Field
 
-from dbt_bouncer.check_base import BaseCheck
-from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
+from dbt_bouncer.check_patterns import BaseHasTagsCheck
 
 
-class CheckSourceHasTags(BaseCheck):
+class CheckSourceHasTags(BaseHasTagsCheck):
     """Sources must have the specified tags.
 
     Parameters:
@@ -33,34 +32,14 @@ class CheckSourceHasTags(BaseCheck):
 
     """
 
-    criteria: Literal["any", "all", "one"] = Field(default="all")
     name: Literal["check_source_has_tags"]
     source: Any | None = Field(default=None)
-    tags: list[str]
 
-    def execute(self) -> None:
-        """Execute the check.
+    @property
+    def _resource_tags(self) -> list[str]:
+        return self._require_source().tags or []
 
-        Raises:
-            DbtBouncerFailedCheckError: If source does not have required tags.
-
-        """
+    @property
+    def _resource_display_name(self) -> str:
         source = self._require_source()
-        source_tags = source.tags or []
-        if self.criteria == "any":
-            if not any(tag in source_tags for tag in self.tags):
-                raise DbtBouncerFailedCheckError(
-                    f"`{source.source_name}.{source.name}` does not have any of the required tags: {self.tags}."
-                )
-        elif self.criteria == "all":
-            missing_tags = set(self.tags) - set(source_tags)
-            if missing_tags:
-                raise DbtBouncerFailedCheckError(
-                    f"`{source.source_name}.{source.name}` is missing required tags: {missing_tags}."
-                )
-        elif (
-            self.criteria == "one" and sum(tag in source_tags for tag in self.tags) != 1
-        ):
-            raise DbtBouncerFailedCheckError(
-                f"`{source.source_name}.{source.name}` must have exactly one of the required tags: {self.tags}."
-            )
+        return f"{source.source_name}.{source.name}"

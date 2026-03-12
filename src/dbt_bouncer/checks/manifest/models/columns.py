@@ -5,6 +5,7 @@ from typing import Any, Literal
 from pydantic import Field
 
 from dbt_bouncer.check_base import BaseCheck
+from dbt_bouncer.check_patterns import BaseColumnsHaveTypesCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError, NestedDict
 from dbt_bouncer.enums import Materialization
 from dbt_bouncer.utils import find_missing_meta_keys, get_clean_model_name
@@ -64,7 +65,7 @@ class CheckModelColumnsHaveMetaKeys(BaseCheck):
             )
 
 
-class CheckModelColumnsHaveTypes(BaseCheck):
+class CheckModelColumnsHaveTypes(BaseColumnsHaveTypesCheck):
     """Columns defined for models must have a `data_type` declared.
 
     Receives:
@@ -89,22 +90,13 @@ class CheckModelColumnsHaveTypes(BaseCheck):
     model: Any | None = Field(default=None)
     name: Literal["check_model_columns_have_types"]
 
-    def execute(self) -> None:
-        """Execute the check.
+    @property
+    def _resource_columns(self) -> dict[str, Any]:
+        return self._require_model().columns or {}
 
-        Raises:
-            DbtBouncerFailedCheckError: If any column lacks a declared `data_type`.
-
-        """
-        model = self._require_model()
-        columns = model.columns or {}
-        untyped_columns = [
-            col_name for col_name, col in columns.items() if not col.data_type
-        ]
-        if untyped_columns:
-            raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(model.unique_id)}` has columns without a declared `data_type`: {untyped_columns}"
-            )
+    @property
+    def _resource_display_name(self) -> str:
+        return get_clean_model_name(self._require_model().unique_id)
 
 
 class CheckModelHasConstraints(BaseCheck):

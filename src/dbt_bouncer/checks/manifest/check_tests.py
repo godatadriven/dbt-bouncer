@@ -2,11 +2,10 @@ from typing import Any, Literal
 
 from pydantic import Field
 
-from dbt_bouncer.check_base import BaseCheck
-from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
+from dbt_bouncer.check_patterns import BaseHasTagsCheck
 
 
-class CheckTestHasTags(BaseCheck):
+class CheckTestHasTags(BaseHasTagsCheck):
     """Data tests must have the specified tags.
 
     Parameters:
@@ -37,27 +36,10 @@ class CheckTestHasTags(BaseCheck):
     tags: list[str]
     test: Any | None = Field(default=None)
 
-    def execute(self) -> None:
-        """Execute the check.
+    @property
+    def _resource_tags(self) -> list[str]:
+        return self._require_test().tags or []
 
-        Raises:
-            DbtBouncerFailedCheckError: If the test does not have the required tags.
-
-        """
-        test = self._require_test()
-        test_tags = test.tags or []
-        if self.criteria == "any":
-            if not any(tag in test_tags for tag in self.tags):
-                raise DbtBouncerFailedCheckError(
-                    f"`{test.unique_id}` does not have any of the required tags: {self.tags}."
-                )
-        elif self.criteria == "all":
-            missing_tags = [tag for tag in self.tags if tag not in test_tags]
-            if missing_tags:
-                raise DbtBouncerFailedCheckError(
-                    f"`{test.unique_id}` is missing required tags: {missing_tags}."
-                )
-        elif self.criteria == "one" and sum(tag in test_tags for tag in self.tags) != 1:
-            raise DbtBouncerFailedCheckError(
-                f"`{test.unique_id}` must have exactly one of the required tags: {self.tags}."
-            )
+    @property
+    def _resource_display_name(self) -> str:
+        return str(self._require_test().unique_id)

@@ -4,12 +4,10 @@ from typing import Any, Literal
 
 from pydantic import Field
 
-from dbt_bouncer.check_base import BaseCheck
-from dbt_bouncer.checks.common import DbtBouncerFailedCheckError, NestedDict
-from dbt_bouncer.utils import find_missing_meta_keys
+from dbt_bouncer.check_patterns import BaseHasMetaKeysCheck
 
 
-class CheckSourceHasMetaKeys(BaseCheck):
+class CheckSourceHasMetaKeys(BaseHasMetaKeysCheck):
     """The `meta` config for sources must have the specified keys.
 
     Parameters:
@@ -37,24 +35,14 @@ class CheckSourceHasMetaKeys(BaseCheck):
 
     """
 
-    keys: "NestedDict"
     name: Literal["check_source_has_meta_keys"]
     source: Any | None = Field(default=None)
 
-    def execute(self) -> None:
-        """Execute the check.
+    @property
+    def _resource_meta(self) -> dict[str, Any]:
+        return self._require_source().meta
 
-        Raises:
-            DbtBouncerFailedCheckError: If required meta keys are missing.
-
-        """
+    @property
+    def _resource_display_name(self) -> str:
         source = self._require_source()
-        missing_keys = find_missing_meta_keys(
-            meta_config=source.meta,
-            required_keys=self.keys.model_dump(),
-        )
-
-        if missing_keys != []:
-            raise DbtBouncerFailedCheckError(
-                f"`{source.source_name}.{source.name}` is missing the following keys from the `meta` config: {[x.replace('>>', '') for x in missing_keys]}"
-            )
+        return f"{source.source_name}.{source.name}"

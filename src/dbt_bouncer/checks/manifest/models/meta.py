@@ -4,12 +4,11 @@ from typing import Any, Literal
 
 from pydantic import Field
 
-from dbt_bouncer.check_base import BaseCheck
-from dbt_bouncer.checks.common import DbtBouncerFailedCheckError, NestedDict
-from dbt_bouncer.utils import find_missing_meta_keys, get_clean_model_name
+from dbt_bouncer.check_patterns import BaseHasMetaKeysCheck
+from dbt_bouncer.utils import get_clean_model_name
 
 
-class CheckModelHasMetaKeys(BaseCheck):
+class CheckModelHasMetaKeys(BaseHasMetaKeysCheck):
     """The `meta` config for models must have the specified keys.
 
     Parameters:
@@ -34,23 +33,13 @@ class CheckModelHasMetaKeys(BaseCheck):
 
     """
 
-    keys: NestedDict
     model: Any | None = Field(default=None)
     name: Literal["check_model_has_meta_keys"]
 
-    def execute(self) -> None:
-        """Execute the check.
+    @property
+    def _resource_meta(self) -> dict[str, Any]:
+        return self._require_model().meta
 
-        Raises:
-            DbtBouncerFailedCheckError: If required meta keys are missing.
-
-        """
-        model = self._require_model()
-        missing_keys = find_missing_meta_keys(
-            meta_config=model.meta,
-            required_keys=self.keys.model_dump(),
-        )
-        if missing_keys != []:
-            raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(model.unique_id)}` is missing the following keys from the `meta` config: {[x.replace('>>', '') for x in missing_keys]}"
-            )
+    @property
+    def _resource_display_name(self) -> str:
+        return get_clean_model_name(self._require_model().unique_id)

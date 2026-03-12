@@ -7,6 +7,7 @@ from jinja2_simple_tags import StandaloneTag
 from pydantic import Field, PrivateAttr
 
 from dbt_bouncer.check_base import BaseCheck
+from dbt_bouncer.check_patterns import BaseDescriptionPopulatedCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 from dbt_bouncer.utils import clean_path_str, compile_pattern
 
@@ -161,7 +162,7 @@ class CheckMacroCodeDoesNotContainRegexpPattern(BaseCheck):
             )
 
 
-class CheckMacroDescriptionPopulated(BaseCheck):
+class CheckMacroDescriptionPopulated(BaseDescriptionPopulatedCheck):
     """Macros must have a populated description.
 
     Parameters:
@@ -191,23 +192,15 @@ class CheckMacroDescriptionPopulated(BaseCheck):
     """
 
     macro: Any | None = Field(default=None)
-    min_description_length: int | None = Field(default=None)
     name: Literal["check_macro_description_populated"]
 
-    def execute(self) -> None:
-        """Execute the check.
+    @property
+    def _resource_description(self) -> str:
+        return str(self._require_macro().description or "")
 
-        Raises:
-            DbtBouncerFailedCheckError: If macro description is not populated.
-
-        """
-        macro = self._require_macro()
-        if not self._is_description_populated(
-            str(macro.description or ""), self.min_description_length
-        ):
-            raise DbtBouncerFailedCheckError(
-                f"Macro `{macro.name}` does not have a populated description."
-            )
+    @property
+    def _resource_display_name(self) -> str:
+        return self._require_macro().name
 
 
 class CheckMacroMaxNumberOfLines(BaseCheck):

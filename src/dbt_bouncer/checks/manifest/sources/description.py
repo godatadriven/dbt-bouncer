@@ -4,11 +4,10 @@ from typing import Any, Literal
 
 from pydantic import Field
 
-from dbt_bouncer.check_base import BaseCheck
-from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
+from dbt_bouncer.check_patterns import BaseDescriptionPopulatedCheck
 
 
-class CheckSourceDescriptionPopulated(BaseCheck):
+class CheckSourceDescriptionPopulated(BaseDescriptionPopulatedCheck):
     """Sources must have a populated description.
 
     Parameters:
@@ -36,21 +35,14 @@ class CheckSourceDescriptionPopulated(BaseCheck):
 
     """
 
-    min_description_length: int | None = Field(default=None)
     name: Literal["check_source_description_populated"]
     source: Any | None = Field(default=None)
 
-    def execute(self) -> None:
-        """Execute the check.
+    @property
+    def _resource_description(self) -> str:
+        return self._require_source().description or ""
 
-        Raises:
-            DbtBouncerFailedCheckError: If description is not populated.
-
-        """
+    @property
+    def _resource_display_name(self) -> str:
         source = self._require_source()
-        if not self._is_description_populated(
-            source.description or "", self.min_description_length
-        ):
-            raise DbtBouncerFailedCheckError(
-                f"`{source.source_name}.{source.name}` does not have a populated description."
-            )
+        return f"{source.source_name}.{source.name}"

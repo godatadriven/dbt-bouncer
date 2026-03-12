@@ -1,14 +1,11 @@
-import re
 from typing import Any, Literal
 
-from pydantic import Field, PrivateAttr
+from pydantic import Field
 
-from dbt_bouncer.check_base import BaseCheck
-from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
-from dbt_bouncer.utils import compile_pattern
+from dbt_bouncer.check_patterns import BaseHasTagsCheck, BaseNamePatternCheck
 
 
-class CheckSnapshotHasTags(BaseCheck):
+class CheckSnapshotHasTags(BaseHasTagsCheck):
     """Snapshots must have the specified tags.
 
     Parameters:
@@ -33,41 +30,19 @@ class CheckSnapshotHasTags(BaseCheck):
 
     """
 
-    criteria: Literal["any", "all", "one"] = Field(default="all")
     name: Literal["check_snapshot_has_tags"]
     snapshot: Any | None = Field(default=None)
-    tags: list[str]
 
-    def execute(self) -> None:
-        """Execute the check.
+    @property
+    def _resource_tags(self) -> list[str]:
+        return self._require_snapshot().tags or []
 
-        Raises:
-            DbtBouncerFailedCheckError: If snapshot does not have required tags.
-
-        """
-        snapshot = self._require_snapshot()
-        snapshot_tags = snapshot.tags or []
-        if self.criteria == "any":
-            if not any(tag in snapshot_tags for tag in self.tags):
-                raise DbtBouncerFailedCheckError(
-                    f"`{snapshot.name}` does not have any of the required tags: {self.tags}."
-                )
-        elif self.criteria == "all":
-            missing_tags = [tag for tag in self.tags if tag not in snapshot_tags]
-            if missing_tags:
-                raise DbtBouncerFailedCheckError(
-                    f"`{snapshot.name}` is missing required tags: {missing_tags}."
-                )
-        elif (
-            self.criteria == "one"
-            and sum(tag in snapshot_tags for tag in self.tags) != 1
-        ):
-            raise DbtBouncerFailedCheckError(
-                f"`{snapshot.name}` must have exactly one of the required tags: {self.tags}."
-            )
+    @property
+    def _resource_display_name(self) -> str:
+        return str(self._require_snapshot().name)
 
 
-class CheckSnapshotNames(BaseCheck):
+class CheckSnapshotNames(BaseNamePatternCheck):
     """Snapshots must have a name that matches the supplied regex.
 
     Parameters:
@@ -96,21 +71,14 @@ class CheckSnapshotNames(BaseCheck):
     snapshot: Any | None = Field(default=None)
     snapshot_name_pattern: str
 
-    _compiled_pattern: re.Pattern[str] = PrivateAttr()
+    @property
+    def _name_pattern(self) -> str:
+        return self.snapshot_name_pattern
 
-    def model_post_init(self, __context: object) -> None:
-        """Compile the regex pattern once at initialisation time."""
-        self._compiled_pattern = compile_pattern(self.snapshot_name_pattern.strip())
+    @property
+    def _resource_name(self) -> str:
+        return str(self._require_snapshot().name)
 
-    def execute(self) -> None:
-        """Execute the check.
-
-        Raises:
-            DbtBouncerFailedCheckError: If snapshot name does not match regex.
-
-        """
-        snapshot = self._require_snapshot()
-        if self._compiled_pattern.match(str(snapshot.name)) is None:
-            raise DbtBouncerFailedCheckError(
-                f"`{snapshot.name}` does not match the supplied regex `{self.snapshot_name_pattern.strip()})`."
-            )
+    @property
+    def _resource_display_name(self) -> str:
+        return str(self._require_snapshot().name)

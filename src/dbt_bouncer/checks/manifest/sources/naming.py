@@ -1,16 +1,13 @@
 """Checks related to source naming conventions."""
 
-import re
 from typing import Any, Literal
 
-from pydantic import Field, PrivateAttr
+from pydantic import Field
 
-from dbt_bouncer.check_base import BaseCheck
-from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
-from dbt_bouncer.utils import compile_pattern
+from dbt_bouncer.check_patterns import BaseNamePatternCheck
 
 
-class CheckSourceNames(BaseCheck):
+class CheckSourceNames(BaseNamePatternCheck):
     """Sources must have a name that matches the supplied regex.
 
     Parameters:
@@ -36,24 +33,18 @@ class CheckSourceNames(BaseCheck):
     """
 
     name: Literal["check_source_names"]
-    source_name_pattern: str
     source: Any | None = Field(default=None)
+    source_name_pattern: str
 
-    _compiled_pattern: re.Pattern[str] = PrivateAttr()
+    @property
+    def _name_pattern(self) -> str:
+        return self.source_name_pattern
 
-    def model_post_init(self, __context: object) -> None:
-        """Compile the regex pattern once at initialisation time."""
-        self._compiled_pattern = compile_pattern(self.source_name_pattern.strip())
+    @property
+    def _resource_name(self) -> str:
+        return str(self._require_source().name)
 
-    def execute(self) -> None:
-        """Execute the check.
-
-        Raises:
-            DbtBouncerFailedCheckError: If source name does not match regex.
-
-        """
+    @property
+    def _resource_display_name(self) -> str:
         source = self._require_source()
-        if self._compiled_pattern.match(str(source.name)) is None:
-            raise DbtBouncerFailedCheckError(
-                f"`{source.source_name}.{source.name}` does not match the supplied regex `({self.source_name_pattern.strip()})`."
-            )
+        return f"{source.source_name}.{source.name}"
