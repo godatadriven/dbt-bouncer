@@ -77,11 +77,11 @@ class BaseCheck(BaseModel):
             iterate_over_value: The field name to set (e.g. "model", "seed").
 
         """
-        object.__setattr__(
-            self,
-            iterate_over_value,
-            getattr(resource, iterate_over_value, resource),
-        )
+        if isinstance(resource, dict):
+            inner = resource.get(iterate_over_value, resource)
+        else:
+            inner = getattr(resource, iterate_over_value, resource)
+        object.__setattr__(self, iterate_over_value, inner)
 
     # Helper methods
     def _is_description_populated(
