@@ -70,12 +70,10 @@ class CheckModelHardCodedReferences(BaseCheck):
     Hard-coded references bypass the dbt DAG, break lineage, and are
     environment-specific.
 
-    .. warning::
+    !!! warning
 
         This check is not foolproof and will not catch all hard-coded table
         references (e.g. references inside complex Jinja logic or comments).
-        It also requires the manifest to be **compiled** (``dbt compile`` or
-        ``dbt run``), not just parsed (``dbt parse``), unlike most other checks.
 
     Receives:
         model (ModelNode): The ModelNode object to check.
