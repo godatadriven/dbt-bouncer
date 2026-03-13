@@ -6,7 +6,7 @@ from dbt_bouncer.check_decorator import check, fail
 from dbt_bouncer.utils import compile_pattern, get_clean_model_name
 
 
-@check("check_model_code_does_not_contain_regexp_pattern", iterate_over="model")
+@check
 def check_model_code_does_not_contain_regexp_pattern(model, *, regexp_pattern: str):
     """The raw code for a model must not match the specified regexp pattern."""
     compiled = compile_pattern(regexp_pattern.strip(), flags=re.DOTALL)
@@ -16,7 +16,7 @@ def check_model_code_does_not_contain_regexp_pattern(model, *, regexp_pattern: s
         )
 
 
-@check("check_model_hard_coded_references", iterate_over="model")
+@check
 def check_model_hard_coded_references(model):
     """A model must not contain hard-coded table references; use ref() or source() instead."""
     jinja_pattern = re.compile(r"\{[{%].*?[%}]\}", re.DOTALL)
@@ -32,7 +32,7 @@ def check_model_hard_coded_references(model):
         )
 
 
-@check("check_model_has_semi_colon", iterate_over="model")
+@check
 def check_model_has_semi_colon(model):
     """Model may not end with a semi-colon (`;`)."""
     raw_code = (model.raw_code or "").strip()
@@ -42,7 +42,7 @@ def check_model_has_semi_colon(model):
         )
 
 
-@check("check_model_max_number_of_lines", iterate_over="model")
+@check
 def check_model_max_number_of_lines(model, *, max_number_of_lines: int = 100):
     """Models may not have more than the specified number of lines."""
     actual_number_of_lines = (model.raw_code or "").count("\n") + 1

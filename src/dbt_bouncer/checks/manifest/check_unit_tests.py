@@ -6,7 +6,7 @@ from dbt_bouncer.check_decorator import check, fail
 from dbt_bouncer.utils import get_package_version_number, object_in_path
 
 
-@check("check_unit_test_coverage")
+@check
 def check_unit_test_coverage(
     ctx, *, include: str | None = None, min_unit_test_coverage_pct: int = 100
 ):
@@ -42,7 +42,7 @@ def check_unit_test_coverage(
         )
 
 
-@check("check_unit_test_expect_format", iterate_over="unit_test")
+@check
 def check_unit_test_expect_format(
     unit_test,
     ctx,
@@ -76,7 +76,7 @@ def check_unit_test_expect_format(
         )
 
 
-@check("check_unit_test_given_formats", iterate_over="unit_test")
+@check
 def check_unit_test_given_formats(
     unit_test,
     ctx,

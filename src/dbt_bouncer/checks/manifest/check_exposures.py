@@ -1,7 +1,7 @@
 from dbt_bouncer.check_decorator import check, fail
 
 
-@check("check_exposure_based_on_model", iterate_over="exposure")
+@check
 def check_exposure_based_on_model(
     exposure, *, maximum_number_of_models: int = 100, minimum_number_of_models: int = 1
 ):
@@ -21,7 +21,7 @@ def check_exposure_based_on_model(
         )
 
 
-@check("check_exposure_based_on_view", iterate_over="exposure")
+@check
 def check_exposure_based_on_view(
     exposure,
     ctx,
@@ -52,7 +52,7 @@ def check_exposure_based_on_view(
         )
 
 
-@check("check_exposure_based_on_non_public_models", iterate_over="exposure")
+@check
 def check_exposure_based_on_non_public_models(exposure, ctx):
     """Exposures should be based on public models only."""
     models_by_id = (

@@ -4,7 +4,7 @@ from dbt_bouncer.check_decorator import check, fail
 from dbt_bouncer.utils import compile_pattern, get_clean_model_name
 
 
-@check("check_model_access", iterate_over="model")
+@check
 def check_model_access(model, *, access: str):
     """Models must have the specified access attribute. Requires dbt 1.7+."""
     if model.access and model.access.value != access:
@@ -13,7 +13,7 @@ def check_model_access(model, *, access: str):
         )
 
 
-@check("check_model_contract_enforced_for_public_model", iterate_over="model")
+@check
 def check_model_contract_enforced_for_public_model(model):
     """Public models must have contracts enforced."""
     if (
@@ -26,7 +26,7 @@ def check_model_contract_enforced_for_public_model(model):
         )
 
 
-@check("check_model_grant_privilege", iterate_over="model")
+@check
 def check_model_grant_privilege(model, *, privilege_pattern: str):
     """Model can have grant privileges that match the specified pattern."""
     compiled = compile_pattern(privilege_pattern.strip())
@@ -40,7 +40,7 @@ def check_model_grant_privilege(model, *, privilege_pattern: str):
         )
 
 
-@check("check_model_grant_privilege_required", iterate_over="model")
+@check
 def check_model_grant_privilege_required(model, *, privilege: str):
     """Model must have the specified grant privilege."""
     config = model.config
@@ -51,7 +51,7 @@ def check_model_grant_privilege_required(model, *, privilege: str):
         )
 
 
-@check("check_model_has_contracts_enforced", iterate_over="model")
+@check
 def check_model_has_contracts_enforced(model):
     """Model must have contracts enforced."""
     if not model.contract or model.contract.enforced is not True:
@@ -60,7 +60,7 @@ def check_model_has_contracts_enforced(model):
         )
 
 
-@check("check_model_number_of_grants", iterate_over="model")
+@check
 def check_model_number_of_grants(
     model, *, max_number_of_privileges: int = 100, min_number_of_privileges: int = 0
 ):

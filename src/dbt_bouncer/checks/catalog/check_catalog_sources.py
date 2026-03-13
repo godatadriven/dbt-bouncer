@@ -1,7 +1,7 @@
 from dbt_bouncer.check_decorator import check, fail
 
 
-@check("check_source_columns_are_all_documented", iterate_over="catalog_source")
+@check
 def check_source_columns_are_all_documented(catalog_source, ctx):
     """All columns in a source should be included in the source's properties file."""
     source = next(s for s in ctx.sources if s.unique_id == catalog_source.unique_id)

@@ -5,7 +5,7 @@ from dbt_bouncer.checks.common import NestedDict
 from dbt_bouncer.utils import find_missing_meta_keys
 
 
-@check("check_source_has_meta_keys", iterate_over="source")
+@check
 def check_source_has_meta_keys(source, *, keys: NestedDict):
     """The `meta` config for sources must have the specified keys."""
     display = f"{source.source_name}.{source.name}"

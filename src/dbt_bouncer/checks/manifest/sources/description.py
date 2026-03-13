@@ -4,7 +4,7 @@ from dbt_bouncer.check_decorator import check, fail
 from dbt_bouncer.utils import is_description_populated
 
 
-@check("check_source_description_populated", iterate_over="source")
+@check
 def check_source_description_populated(
     source, *, min_description_length: int | None = None
 ):

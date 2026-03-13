@@ -6,7 +6,7 @@ from dbt_bouncer.enums import Materialization
 from dbt_bouncer.utils import find_missing_meta_keys, get_clean_model_name
 
 
-@check("check_model_columns_have_meta_keys", iterate_over="model")
+@check
 def check_model_columns_have_meta_keys(model, *, keys: NestedDict):
     """Columns defined for models must have the specified keys in the `meta` config."""
     columns = model.columns or {}
@@ -23,7 +23,7 @@ def check_model_columns_have_meta_keys(model, *, keys: NestedDict):
         )
 
 
-@check("check_model_columns_have_types", iterate_over="model")
+@check
 def check_model_columns_have_types(model):
     """Columns defined for models must have a `data_type` declared."""
     columns = model.columns or {}
@@ -36,7 +36,7 @@ def check_model_columns_have_types(model):
         )
 
 
-@check("check_model_has_constraints", iterate_over="model")
+@check
 def check_model_has_constraints(model, *, required_constraint_types: list[str]):
     """Table and incremental models must have the specified constraint types defined."""
     materialization = (

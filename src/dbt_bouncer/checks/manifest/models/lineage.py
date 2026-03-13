@@ -4,7 +4,7 @@ from dbt_bouncer.check_decorator import check, fail
 from dbt_bouncer.utils import get_clean_model_name
 
 
-@check("check_model_depends_on_macros", iterate_over="model")
+@check
 def check_model_depends_on_macros(
     model, *, criteria: str = "all", required_macros: list[str]
 ):
@@ -35,7 +35,7 @@ def check_model_depends_on_macros(
         )
 
 
-@check("check_model_depends_on_multiple_sources", iterate_over="model")
+@check
 def check_model_depends_on_multiple_sources(model):
     """Models cannot reference more than one source."""
     num_reffed_sources = sum(
@@ -48,7 +48,7 @@ def check_model_depends_on_multiple_sources(model):
         )
 
 
-@check("check_model_has_exposure", iterate_over="model")
+@check
 def check_model_has_exposure(model, ctx):
     """Models must have an exposure."""
     models_in_exposures = {
@@ -63,7 +63,7 @@ def check_model_has_exposure(model, ctx):
         )
 
 
-@check("check_model_has_no_upstream_dependencies", iterate_over="model")
+@check
 def check_model_has_no_upstream_dependencies(model):
     """Identify if models have no upstream dependencies as this likely indicates hard-coded tables references."""
     if (
@@ -76,7 +76,7 @@ def check_model_has_no_upstream_dependencies(model):
         )
 
 
-@check("check_model_max_chained_views", iterate_over="model")
+@check
 def check_model_max_chained_views(
     model,
     ctx,
@@ -156,7 +156,7 @@ def check_model_max_chained_views(
         )
 
 
-@check("check_model_max_fanout", iterate_over="model")
+@check
 def check_model_max_fanout(model, ctx, *, max_downstream_models: int = 3):
     """Models cannot have more than the specified number of downstream models."""
     num_downstream_models = sum(
@@ -170,7 +170,7 @@ def check_model_max_fanout(model, ctx, *, max_downstream_models: int = 3):
         )
 
 
-@check("check_model_max_upstream_dependencies", iterate_over="model")
+@check
 def check_model_max_upstream_dependencies(
     model,
     *,

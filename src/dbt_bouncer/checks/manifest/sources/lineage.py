@@ -3,7 +3,7 @@
 from dbt_bouncer.check_decorator import check, fail
 
 
-@check("check_source_not_orphaned", iterate_over="source")
+@check
 def check_source_not_orphaned(source, ctx):
     """Sources must be referenced in at least one model."""
     num_refs = sum(
@@ -17,7 +17,7 @@ def check_source_not_orphaned(source, ctx):
         )
 
 
-@check("check_source_used_by_models_in_same_directory", iterate_over="source")
+@check
 def check_source_used_by_models_in_same_directory(source, ctx):
     """Sources can only be referenced by models that are located in the same directory where the source is defined."""
     reffed_models_not_in_same_dir = []
@@ -36,7 +36,7 @@ def check_source_used_by_models_in_same_directory(source, ctx):
         )
 
 
-@check("check_source_used_by_only_one_model", iterate_over="source")
+@check
 def check_source_used_by_only_one_model(source, ctx):
     """Each source can be referenced by a maximum of one model."""
     num_refs = sum(

@@ -2,7 +2,7 @@ from dbt_bouncer.check_decorator import check, fail
 from dbt_bouncer.utils import compile_pattern
 
 
-@check("check_project_name")
+@check
 def check_project_name(
     ctx, *, package_name: str | None = None, project_name_pattern: str
 ):

@@ -3,7 +3,7 @@
 from dbt_bouncer.check_decorator import check, fail
 
 
-@check("check_source_loader_populated", iterate_over="source")
+@check
 def check_source_loader_populated(source):
     """Sources must have a populated loader."""
     if source.loader == "":

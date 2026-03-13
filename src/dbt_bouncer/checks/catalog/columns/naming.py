@@ -18,7 +18,7 @@ def _is_catalog_node_a_model(catalog_node: Any, models: list[Any]) -> bool:
     return model is not None and model.resource_type == "model"
 
 
-@check("check_column_name_complies_to_column_type", iterate_over="catalog_node")
+@check
 def check_column_name_complies_to_column_type(
     catalog_node,
     *,
@@ -69,7 +69,7 @@ def check_column_name_complies_to_column_type(
             )
 
 
-@check("check_column_names", iterate_over="catalog_node")
+@check
 def check_column_names(catalog_node, ctx, *, column_name_pattern: str):
     """Columns must have a name that matches the supplied regex."""
     if _is_catalog_node_a_model(catalog_node, ctx.models):

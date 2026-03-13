@@ -9,7 +9,7 @@ from dbt_bouncer.utils import (
 )
 
 
-@check("check_seed_column_names", iterate_over="seed")
+@check
 def check_seed_column_names(seed, *, seed_column_name_pattern: str):
     """Seed columns must have names that match the supplied regex."""
     compiled_pattern = compile_pattern(seed_column_name_pattern.strip())
@@ -26,7 +26,7 @@ def check_seed_column_names(seed, *, seed_column_name_pattern: str):
         )
 
 
-@check("check_seed_columns_have_types", iterate_over="seed")
+@check
 def check_seed_columns_have_types(seed):
     """Columns defined for seeds must have a `data_type` declared."""
     columns = seed.columns or {}
@@ -39,7 +39,7 @@ def check_seed_columns_have_types(seed):
         )
 
 
-@check("check_seed_description_populated", iterate_over="seed")
+@check
 def check_seed_description_populated(
     seed, *, min_description_length: int | None = None
 ):
@@ -52,7 +52,7 @@ def check_seed_description_populated(
         )
 
 
-@check("check_seed_has_unit_tests", iterate_over="seed")
+@check
 def check_seed_has_unit_tests(seed, ctx, *, min_number_of_unit_tests: int = 1):
     """Seeds must have more than the specified number of unit tests."""
     manifest_obj = ctx.manifest_obj
@@ -78,7 +78,7 @@ def check_seed_has_unit_tests(seed, ctx, *, min_number_of_unit_tests: int = 1):
         )
 
 
-@check("check_seed_names", iterate_over="seed")
+@check
 def check_seed_names(seed, *, seed_name_pattern: str):
     """Seed must have a name that matches the supplied regex."""
     compiled_pattern = compile_pattern(seed_name_pattern.strip())

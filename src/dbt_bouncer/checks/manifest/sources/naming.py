@@ -4,7 +4,7 @@ from dbt_bouncer.check_decorator import check, fail
 from dbt_bouncer.utils import compile_pattern
 
 
-@check("check_source_names", iterate_over="source")
+@check
 def check_source_names(source, *, source_name_pattern: str):
     """Sources must have a name that matches the supplied regex."""
     compiled = compile_pattern(source_name_pattern.strip())

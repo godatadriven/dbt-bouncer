@@ -4,7 +4,7 @@ from dbt_bouncer.check_decorator import check, fail
 from dbt_bouncer.utils import get_clean_model_name
 
 
-@check("check_model_has_tags", iterate_over="model")
+@check
 def check_model_has_tags(model, *, criteria: str = "all", tags: list[str]):
     """Models must have the specified tags."""
     resource_tags = model.tags or []

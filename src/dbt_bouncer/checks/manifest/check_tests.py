@@ -1,7 +1,7 @@
 from dbt_bouncer.check_decorator import check, fail
 
 
-@check("check_test_has_tags", iterate_over="test")
+@check
 def check_test_has_tags(test, *, criteria: str = "all", tags: list[str]):
     """Data tests must have the specified tags."""
     resource_tags = test.tags or []

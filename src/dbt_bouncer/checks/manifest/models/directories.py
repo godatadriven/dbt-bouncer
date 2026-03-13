@@ -6,7 +6,7 @@ from dbt_bouncer.check_decorator import check, fail
 from dbt_bouncer.utils import clean_path_str, compile_pattern, get_clean_model_name
 
 
-@check("check_model_directories", iterate_over="model")
+@check
 def check_model_directories(
     model, *, include: str, permitted_sub_directories: list[str]
 ):
@@ -29,7 +29,7 @@ def check_model_directories(
         )
 
 
-@check("check_model_file_name", iterate_over="model")
+@check
 def check_model_file_name(model, *, file_name_pattern: str):
     r"""Models must have a file name that matches the supplied regex."""
     compiled = compile_pattern(file_name_pattern.strip())
@@ -40,7 +40,7 @@ def check_model_file_name(model, *, file_name_pattern: str):
         )
 
 
-@check("check_model_property_file_location", iterate_over="model")
+@check
 def check_model_property_file_location(model):
     """Model properties files must follow the guidance provided by dbt."""
     if not (
@@ -81,7 +81,7 @@ def check_model_property_file_location(model):
         )
 
 
-@check("check_model_schema_name", iterate_over="model")
+@check
 def check_model_schema_name(model, *, schema_name_pattern: str):
     """Models must have a schema name that matches the supplied regex."""
     compiled = compile_pattern(schema_name_pattern.strip())

@@ -9,56 +9,56 @@ from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 # --- Decorator-defined checks for testing ---
 
 
-@check("check_decorator_basic", iterate_over="model")
-def _check_decorator_basic(model):
+@check
+def check_decorator_basic(model):
     """Validate basic decorator check."""
     if not model.name:
         fail("Model has no name.")
 
 
-CheckDecoratorBasic = _check_decorator_basic
+CheckDecoratorBasic = check_decorator_basic
 
 
-@check("check_decorator_with_params", iterate_over="model")
-def _check_decorator_with_params(model, *, min_length: int):
+@check
+def check_decorator_with_params(model, *, min_length: int):
     """Validate check with user-configurable params."""
     if len(model.name) < min_length:
         fail(f"Model name `{model.name}` is shorter than {min_length}.")
 
 
-CheckDecoratorWithParams = _check_decorator_with_params
+CheckDecoratorWithParams = check_decorator_with_params
 
 
-@check("check_decorator_with_default_param", iterate_over="model")
-def _check_decorator_with_default_param(model, *, threshold: int = 10):
+@check
+def check_decorator_with_default_param(model, *, threshold: int = 10):
     """Validate check with a param that has a default value."""
 
 
-CheckDecoratorWithDefaultParam = _check_decorator_with_default_param
+CheckDecoratorWithDefaultParam = check_decorator_with_default_param
 
 
-@check("check_decorator_context_only")
-def _check_decorator_context_only(ctx):
+@check
+def check_decorator_context_only(ctx):
     """Validate context-only check (no iterate_over)."""
     if not ctx.models:
         fail("No models found.")
 
 
-CheckDecoratorContextOnly = _check_decorator_context_only
+CheckDecoratorContextOnly = check_decorator_context_only
 
 
-@check("check_decorator_no_ctx", iterate_over="model")
-def _check_decorator_no_ctx(model):
+@check
+def check_decorator_no_ctx(model):
     """Validate check that doesn't need ctx."""
     if not model.name:
         fail("Model has no name.")
 
 
-CheckDecoratorNoCtx = _check_decorator_no_ctx
+CheckDecoratorNoCtx = check_decorator_no_ctx
 
 
-@check("check_decorator_resource_and_ctx", iterate_over="model")
-def _check_decorator_resource_and_ctx(model, ctx):
+@check
+def check_decorator_resource_and_ctx(model, ctx):
     """Validate check that uses both resource and ctx."""
     if not ctx.models:
         fail("No models in context.")
@@ -66,7 +66,7 @@ def _check_decorator_resource_and_ctx(model, ctx):
         fail("Model has no name.")
 
 
-CheckDecoratorResourceAndCtx = _check_decorator_resource_and_ctx
+CheckDecoratorResourceAndCtx = check_decorator_resource_and_ctx
 
 
 # --- Tests ---

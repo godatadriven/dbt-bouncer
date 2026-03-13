@@ -13,7 +13,7 @@ from dbt_bouncer.utils import (
 )
 
 
-@check("check_model_description_contains_regex_pattern", iterate_over="model")
+@check
 def check_model_description_contains_regex_pattern(model, *, regexp_pattern: str):
     """Models must have a description that matches the provided pattern."""
     compiled = compile_pattern(regexp_pattern.strip(), flags=re.DOTALL)
@@ -23,7 +23,7 @@ def check_model_description_contains_regex_pattern(model, *, regexp_pattern: str
         )
 
 
-@check("check_model_description_populated", iterate_over="model")
+@check
 def check_model_description_populated(
     model, *, min_description_length: int | None = None
 ):
@@ -36,7 +36,7 @@ def check_model_description_populated(
         )
 
 
-@check("check_model_documentation_coverage")
+@check
 def check_model_documentation_coverage(
     ctx, *, min_model_documentation_coverage_pct: int = 100
 ):
@@ -58,7 +58,7 @@ def check_model_documentation_coverage(
         )
 
 
-@check("check_model_documented_in_same_directory", iterate_over="model")
+@check
 def check_model_documented_in_same_directory(model):
     """Models must be documented in the same directory where they are defined."""
     model = cast("Any", model)

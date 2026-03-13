@@ -13,7 +13,7 @@ class TagExtension(StandaloneTag):
     tags: ClassVar = {"do", "endmaterialization", "endtest", "materialization", "test"}
 
 
-@check("check_macro_arguments_description_populated", iterate_over="macro")
+@check
 def check_macro_arguments_description_populated(
     macro, *, min_description_length: int | None = None
 ):
@@ -66,7 +66,7 @@ def check_macro_arguments_description_populated(
         )
 
 
-@check("check_macro_code_does_not_contain_regexp_pattern", iterate_over="macro")
+@check
 def check_macro_code_does_not_contain_regexp_pattern(macro, *, regexp_pattern: str):
     """The raw code for a macro must not match the specified regexp pattern."""
     compiled_pattern = compile_pattern(regexp_pattern.strip(), flags=re.DOTALL)
@@ -76,7 +76,7 @@ def check_macro_code_does_not_contain_regexp_pattern(macro, *, regexp_pattern: s
         )
 
 
-@check("check_macro_description_populated", iterate_over="macro")
+@check
 def check_macro_description_populated(
     macro, *, min_description_length: int | None = None
 ):
@@ -87,7 +87,7 @@ def check_macro_description_populated(
         fail(f"`{macro.name}` does not have a populated description.")
 
 
-@check("check_macro_max_number_of_lines", iterate_over="macro")
+@check
 def check_macro_max_number_of_lines(macro, *, max_number_of_lines: int = 100):
     """Macros may not have more than the specified number of lines."""
     actual_number_of_lines = macro.macro_sql.count("\n") + 1
@@ -98,7 +98,7 @@ def check_macro_max_number_of_lines(macro, *, max_number_of_lines: int = 100):
         )
 
 
-@check("check_macro_name_matches_file_name", iterate_over="macro")
+@check
 def check_macro_name_matches_file_name(macro):
     """Macros names must be the same as the file they are contained in."""
     file_path = Path(clean_path_str(macro.original_file_path))
@@ -114,7 +114,7 @@ def check_macro_name_matches_file_name(macro):
             fail(f"Macro `{macro.name}` is not in a file of the same name.")
 
 
-@check("check_macro_property_file_location", iterate_over="macro")
+@check
 def check_macro_property_file_location(macro):
     """Macro properties files must follow the guidance provided by dbt."""
     original_path = Path(clean_path_str(macro.original_file_path))

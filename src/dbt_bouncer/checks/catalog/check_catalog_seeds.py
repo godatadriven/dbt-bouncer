@@ -2,7 +2,7 @@ from dbt_bouncer.check_decorator import check, fail
 from dbt_bouncer.utils import get_clean_model_name
 
 
-@check("check_seed_columns_are_all_documented", iterate_over="catalog_node")
+@check
 def check_seed_columns_are_all_documented(catalog_node, ctx):
     """All columns in a seed CSV file should be included in the seed's properties file."""
     if catalog_node.unique_id is not None and catalog_node.unique_id.startswith(

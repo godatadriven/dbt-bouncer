@@ -4,27 +4,31 @@ Provides a ``@check`` decorator that generates ``BaseCheck`` subclasses from
 plain functions, and a ``fail()`` helper that raises the standard check failure
 exception.
 
-Parameters are inferred from the function signature — keyword-only arguments
-(after ``*``) become user-configurable Pydantic fields on the generated class.
-``ctx`` is injected automatically only when the function declares it.
+Everything is inferred from the function signature:
+
+- **name** — the function name (used in YAML config).
+- **iterate_over** — the first positional parameter (excluding ``ctx``).
+  If there are no positional params (or only ``ctx``), the check is global.
+- **params** — keyword-only arguments become user-configurable Pydantic fields.
+- **ctx** — injected automatically only when the function declares it.
 
 Example::
 
     from dbt_bouncer.check_decorator import check, fail
 
-    @check("check_model_description_populated", iterate_over="model")
+    @check
     def check_model_description_populated(model):
         desc = model.description or ""
         if len(desc.strip()) < 4:
             fail(f"`{model.unique_id}` does not have a populated description.")
 
-    @check("check_model_names", iterate_over="model")
+    @check
     def check_model_names(model, *, model_name_pattern: str):
         import re
         if not re.match(model_name_pattern, str(model.name)):
             fail(f"`{model.unique_id}` does not match pattern `{model_name_pattern}`.")
 
-    @check("check_model_documentation_coverage")
+    @check
     def check_model_documentation_coverage(ctx, *, min_pct: int = 100):
         ...  # context-only check, no iterate_over
 """
@@ -61,110 +65,124 @@ def fail(message: str) -> None:
 
 
 def check(
-    name: str,
-    *,
-    iterate_over: str | None = None,
-) -> Callable[[Callable[..., None]], type[BaseCheck]]:
+    fn: Callable[..., None] | None = None,
+) -> type[BaseCheck] | Callable[[Callable[..., None]], type[BaseCheck]]:
     """Generate a ``BaseCheck`` subclass from a plain function.
 
-    Parameters are inferred from the function's keyword-only arguments
-    (those after ``*``).  The ``ctx`` parameter is injected automatically
-    when declared.
+    Everything is inferred from the function signature:
 
-    Args:
-        name: The check name used in YAML config (e.g. ``"check_model_names"``).
-        iterate_over: The resource type to iterate over (e.g. ``"model"``,
-            ``"source"``).  When ``None``, the check runs once with context only.
+    - **name** — ``fn.__name__`` (must match YAML config ``name:`` value).
+    - **iterate_over** — the first positional parameter that isn't ``ctx``.
+      If there are none, the check is global (runs once with context only).
+    - **params** — keyword-only arguments become Pydantic fields.
+    - **ctx** — injected when the function declares it.
+
+    Supports both ``@check`` and ``@check()`` usage.
 
     Returns:
-        A decorator that accepts a function and returns the generated class.
+        The generated ``BaseCheck`` subclass (or a decorator if called with parens).
 
     """
+    if fn is None:
+        # Called as @check() with parens — return decorator.
+        def wrapper(f: Callable[..., None]) -> type[BaseCheck]:
+            return _build_check_class(f)
 
-    def decorator(fn: Callable[..., None]) -> type[BaseCheck]:
-        sig = inspect.signature(fn)
-        fn_params = sig.parameters
+        return wrapper
 
-        # Detect whether the function wants ctx injected.
-        wants_ctx = "ctx" in fn_params
+    # Called as bare @check — fn is the decorated function.
+    return _build_check_class(fn)
 
-        # Detect whether the function receives the resource as first positional arg.
-        # Positional params that aren't "ctx" and aren't keyword-only are the resource.
-        positional_names = [
-            p.name
-            for p in fn_params.values()
-            if p.kind in (p.POSITIONAL_ONLY, p.POSITIONAL_OR_KEYWORD)
-            and p.name not in _RESERVED_PARAMS
-        ]
-        has_resource_param = bool(positional_names) and iterate_over is not None
 
-        # Extract keyword-only params → become Pydantic fields.
-        param_names: list[str] = []
-        fields: dict[str, Any] = {
-            "name": (Literal[name], Field(default=name)),  # type: ignore[valid-type]
-        }
+def _build_check_class(fn: Callable[..., None]) -> type[BaseCheck]:
+    """Build a BaseCheck subclass from the decorated function.
 
-        # Resource field for iterate_over detection by the runner.
-        if iterate_over is not None:
-            fields[iterate_over] = (Any | None, Field(default=None))
+    Returns:
+        The generated ``BaseCheck`` subclass.
 
-        for param_name, param in fn_params.items():
-            if param.kind != param.KEYWORD_ONLY:
-                continue
+    """
+    name = fn.__name__  # type: ignore[union-attr]
+    sig = inspect.signature(fn)
+    fn_params = sig.parameters
 
-            param_names.append(param_name)
-            annotation = param.annotation
+    # Detect whether the function wants ctx injected.
+    wants_ctx = "ctx" in fn_params
 
-            if annotation is inspect.Parameter.empty:
-                annotation = Any
+    # First non-ctx positional param is the resource → becomes iterate_over.
+    positional_names = [
+        p.name
+        for p in fn_params.values()
+        if p.kind in (p.POSITIONAL_ONLY, p.POSITIONAL_OR_KEYWORD)
+        and p.name not in _RESERVED_PARAMS
+    ]
+    iterate_over: str | None = positional_names[0] if positional_names else None
+    has_resource_param = iterate_over is not None
 
-            if param.default is not inspect.Parameter.empty:
-                fields[param_name] = (annotation, Field(default=param.default))
-            else:
-                fields[param_name] = (annotation, ...)
+    # Extract keyword-only params → become Pydantic fields.
+    param_names: list[str] = []
+    fields: dict[str, Any] = {
+        "name": (Literal[name], Field(default=name)),  # type: ignore[valid-type]
+    }
 
-        # Build the execute() method that delegates to the user function.
-        def execute(self: BaseCheck) -> None:
-            kwargs: dict[str, Any] = {p: getattr(self, p) for p in param_names}
-            args: list[Any] = []
-            if has_resource_param:
-                args.append(getattr(self, iterate_over))  # type: ignore[arg-type]
-            if wants_ctx:
-                args.append(self._ctx)
-            fn(*args, **kwargs)
+    # Resource field for iterate_over detection by the runner.
+    if iterate_over is not None:
+        fields[iterate_over] = (Any | None, Field(default=None))
 
-        # Convert function name to PascalCase class name.
-        class_name = _to_pascal_case(fn.__name__)  # type: ignore[union-attr]
+    for param_name, param in fn_params.items():
+        if param.kind != param.KEYWORD_ONLY:
+            continue
 
-        cls = create_model(
-            class_name,
-            __base__=BaseCheck,
-            **fields,
-        )
+        param_names.append(param_name)
+        annotation = param.annotation
 
-        # Attach the execute method.
-        cls.execute = execute  # type: ignore[attr-defined]
+        if annotation is inspect.Parameter.empty:
+            annotation = Any
 
-        # Store iterate_over as a ClassVar for explicit runner lookup.
-        cls.iterate_over = iterate_over  # type: ignore[attr-defined]
-
-        # Preserve metadata.
-        cls.__module__ = fn.__module__
-        cls.__qualname__ = class_name
-        cls.__doc__ = fn.__doc__ or f"Check: {name}"
-
-        # Inject into the calling module's namespace for check discovery.
-        caller_module = sys.modules.get(fn.__module__)
-        if caller_module is not None:
-            setattr(caller_module, class_name, cls)
+        if param.default is not inspect.Parameter.empty:
+            fields[param_name] = (annotation, Field(default=param.default))
         else:
-            # Fallback: use stack frame (e.g. when __module__ is not yet in sys.modules).
-            frame = inspect.stack()[1]
-            frame.frame.f_globals[class_name] = cls
+            fields[param_name] = (annotation, ...)
 
-        return cls
+    # Build the execute() method that delegates to the user function.
+    def execute(self: BaseCheck) -> None:
+        kwargs: dict[str, Any] = {p: getattr(self, p) for p in param_names}
+        args: list[Any] = []
+        if has_resource_param:
+            args.append(getattr(self, iterate_over))  # type: ignore[arg-type]
+        if wants_ctx:
+            args.append(self._ctx)
+        fn(*args, **kwargs)
 
-    return decorator
+    # Convert function name to PascalCase class name.
+    class_name = _to_pascal_case(name)
+
+    cls = create_model(
+        class_name,
+        __base__=BaseCheck,
+        **fields,
+    )
+
+    # Attach the execute method.
+    cls.execute = execute  # type: ignore[attr-defined]
+
+    # Store iterate_over as a ClassVar for explicit runner lookup.
+    cls.iterate_over = iterate_over  # type: ignore[attr-defined]
+
+    # Preserve metadata.
+    cls.__module__ = fn.__module__
+    cls.__qualname__ = class_name
+    cls.__doc__ = fn.__doc__ or f"Check: {name}"
+
+    # Inject into the calling module's namespace for check discovery.
+    caller_module = sys.modules.get(fn.__module__)
+    if caller_module is not None:
+        setattr(caller_module, class_name, cls)
+    else:
+        # Fallback: use stack frame (e.g. when __module__ is not yet in sys.modules).
+        frame = inspect.stack()[1]
+        frame.frame.f_globals[class_name] = cls
+
+    return cls
 
 
 def _to_pascal_case(snake_name: str) -> str:

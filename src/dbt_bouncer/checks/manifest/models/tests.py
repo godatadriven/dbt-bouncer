@@ -6,7 +6,7 @@ from dbt_bouncer.check_decorator import check, fail
 from dbt_bouncer.utils import get_clean_model_name, get_package_version_number
 
 
-@check("check_model_has_unique_test", iterate_over="model")
+@check
 def check_model_has_unique_test(
     model,
     ctx,
@@ -44,7 +44,7 @@ def check_model_has_unique_test(
         )
 
 
-@check("check_model_has_unit_tests", iterate_over="model")
+@check
 def check_model_has_unit_tests(model, ctx, *, min_number_of_unit_tests: int = 1):
     """Models must have more than the specified number of unit tests."""
     manifest_obj = ctx.manifest_obj
@@ -71,7 +71,7 @@ def check_model_has_unit_tests(model, ctx, *, min_number_of_unit_tests: int = 1)
         )
 
 
-@check("check_model_test_coverage")
+@check
 def check_model_test_coverage(ctx, *, min_model_test_coverage_pct: float = 100):
     """Set the minimum percentage of models that have at least one test."""
     num_models = len(ctx.models)

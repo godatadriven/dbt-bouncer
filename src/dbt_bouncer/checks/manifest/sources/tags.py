@@ -5,7 +5,7 @@ from typing import Literal
 from dbt_bouncer.check_decorator import check, fail
 
 
-@check("check_source_has_tags", iterate_over="source")
+@check
 def check_source_has_tags(
     source, *, criteria: Literal["any", "all", "one"] = "all", tags: list[str]
 ):

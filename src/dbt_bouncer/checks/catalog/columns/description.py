@@ -17,7 +17,7 @@ def _is_catalog_node_a_model(catalog_node: Any, models: list[Any]) -> bool:
     return model is not None and model.resource_type == "model"
 
 
-@check("check_column_description_populated", iterate_over="catalog_node")
+@check
 def check_column_description_populated(
     catalog_node, ctx, *, min_description_length: int | None = None
 ):
@@ -45,7 +45,7 @@ def check_column_description_populated(
             )
 
 
-@check("check_columns_are_all_documented", iterate_over="catalog_node")
+@check
 def check_columns_are_all_documented(
     catalog_node, ctx, *, case_sensitive: bool | None = True
 ):
@@ -77,7 +77,7 @@ def check_columns_are_all_documented(
             )
 
 
-@check("check_columns_are_documented_in_public_models", iterate_over="catalog_node")
+@check
 def check_columns_are_documented_in_public_models(
     catalog_node, ctx, *, min_description_length: int | None = None
 ):
