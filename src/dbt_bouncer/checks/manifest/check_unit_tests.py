@@ -8,7 +8,7 @@ from dbt_bouncer.utils import get_package_version_number, object_in_path
 
 @check("check_unit_test_coverage")
 def check_unit_test_coverage(
-    ctx, *, include: str | None = None, min_unit_test_coverage_pct: int
+    ctx, *, include: str | None = None, min_unit_test_coverage_pct: int = 100
 ):
     """Set the minimum percentage of models that have a unit test."""
     manifest_obj = ctx.manifest_obj

@@ -174,9 +174,9 @@ def check_model_max_fanout(model, ctx, *, max_downstream_models: int = 3):
 def check_model_max_upstream_dependencies(
     model,
     *,
-    max_upstream_macros: int,
-    max_upstream_models: int,
-    max_upstream_sources: int,
+    max_upstream_macros: int = 5,
+    max_upstream_models: int = 5,
+    max_upstream_sources: int = 1,
 ):
     """Limit the number of upstream dependencies a model has."""
     depends_on = model.depends_on
