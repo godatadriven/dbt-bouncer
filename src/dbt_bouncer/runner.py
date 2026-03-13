@@ -211,7 +211,7 @@ def runner(
                 if _should_run_check(check_i, i, iterate_over_value, meta_config):
                     check_run_id = _build_check_run_id(check_i, i, iterate_value)
                     check_i.set_resource(i, iterate_value)
-                    check_i._ctx = check_ctx
+                    check_i.set_context(check_ctx)
 
                     checks_to_run.append(
                         {
@@ -226,7 +226,7 @@ def runner(
             )
         else:
             check_run_id = f"{check.name}:{check.index}"
-            check._ctx = check_ctx
+            check.set_context(check_ctx)
             checks_to_run.append(
                 {
                     "check": check,

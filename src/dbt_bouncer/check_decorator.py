@@ -173,7 +173,9 @@ def _build_check_class(fn: Callable[..., None]) -> type[BaseCheck]:
     cls.__qualname__ = class_name
     cls.__doc__ = fn.__doc__ or f"Check: {name}"
 
-    # Inject into the calling module's namespace for check discovery.
+    # Inject into the calling module's namespace so check discovery
+    # (which scans module attributes for BaseCheck subclasses) finds the
+    # generated class just as if it had been defined with ``class ...``.
     caller_module = sys.modules.get(fn.__module__)
     if caller_module is not None:
         setattr(caller_module, class_name, cls)

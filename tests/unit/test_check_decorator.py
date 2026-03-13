@@ -139,7 +139,7 @@ class TestCheckDecoratorExecution:
 
         ctx = CheckContext(models=[wrap_dict({"name": "m1"})])
         instance = CheckDecoratorContextOnly(name="check_decorator_context_only")
-        instance._ctx = ctx
+        instance.set_context(ctx)
         instance.execute()
 
     def test_context_only_check_without_models(self):
@@ -147,7 +147,7 @@ class TestCheckDecoratorExecution:
 
         ctx = CheckContext(models=[])
         instance = CheckDecoratorContextOnly(name="check_decorator_context_only")
-        instance._ctx = ctx
+        instance.set_context(ctx)
         with pytest.raises(DbtBouncerFailedCheckError, match="No models found"):
             instance.execute()
 
@@ -167,7 +167,7 @@ class TestCheckDecoratorExecution:
         instance = CheckDecoratorResourceAndCtx(
             name="check_decorator_resource_and_ctx", model=model
         )
-        instance._ctx = ctx
+        instance.set_context(ctx)
         instance.execute()
 
 

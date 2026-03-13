@@ -96,6 +96,7 @@ def check_model_xxx(model, *, some_param: str):
 - First positional parameter (excluding `ctx`) = the resource being checked (e.g. `model`, `source`, `exposure`)
 - Keyword-only arguments (after `*`) = user-configurable parameters in YAML
 - Add `ctx` as a parameter only when you need access to other resources (e.g. models list, manifest)
+- **Parameter ordering must be `(resource, ctx, *, params)`** — resource first, `ctx` second. Putting `ctx` before the resource would cause `ctx` to be treated as the iterate_over target (since the decorator picks the first non-reserved positional param). For context-only checks (no resource), use `(ctx, *, params)`.
 - Call `fail()` to signal a check failure
 
 **Steps after writing:**

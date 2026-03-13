@@ -35,6 +35,7 @@ def check_model_xxx(model):
 - **iterate_over** — the first positional parameter (excluding `ctx`). If there are none, the check is global (runs once with context only).
 - **params** — keyword-only arguments (after `*`) become user-configurable Pydantic fields.
 - **ctx** — optional; only include in the signature if the function actually uses it.
+- **Parameter ordering** — must be `(resource, ctx, *, params)`. Resource first, `ctx` second. Putting `ctx` before the resource breaks iterate_over inference. For context-only checks, use `(ctx, *, params)`.
 
 ### Simple check (resource only)
 

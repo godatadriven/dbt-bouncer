@@ -55,7 +55,7 @@ def test_set_resource_and_ctx():
     assert check.model == "the_model"
 
     ctx = CheckContext(manifest_obj="test_manifest")
-    check._ctx = ctx
+    check.set_context(ctx)
     check.execute()
 
 
@@ -63,7 +63,7 @@ def test_ctx_survives_model_copy():
     """_ctx is preserved through model_copy (used in runner iteration)."""
     check = _FakeCheck(name="fake_check")
     ctx = CheckContext(manifest_obj="test_manifest")
-    check._ctx = ctx
+    check.set_context(ctx)
 
     copied = check.model_copy(deep=False)
     # PrivateAttr values are preserved by model_copy

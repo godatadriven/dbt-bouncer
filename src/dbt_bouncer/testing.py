@@ -282,6 +282,24 @@ _CTX_LIST_FIELDS = frozenset(
     if f.name != "manifest_obj"
 )
 
+# Explicit plural-to-singular mapping for CheckContext list fields.
+# Avoids fragile string manipulation (e.g. rstrip("s")) that would break
+# for resource names not following simple s-pluralisation.
+_PLURAL_TO_SINGULAR: dict[str, str] = {
+    "catalog_nodes": "catalog_node",
+    "catalog_sources": "catalog_source",
+    "exposures": "exposure",
+    "macros": "macro",
+    "models": "model",
+    "run_results": "run_result",
+    "seeds": "seed",
+    "semantic_models": "semantic_model",
+    "snapshots": "snapshot",
+    "sources": "source",
+    "tests": "test",
+    "unit_tests": "unit_test",
+}
+
 
 # ---------------------------------------------------------------------------
 # Internal helpers
@@ -387,11 +405,8 @@ def _build_check_context(**kwargs: Any) -> CheckContext:
             else:
                 ctx_kwargs["manifest_obj"] = value
         elif isinstance(value, list):
-            # Determine the singular resource type for wrapping.
-            singular = (
-                field_name.rstrip("s") if field_name.endswith("s") else field_name
-            )
-            if singular in _RESOURCE_DEFAULTS:
+            singular = _PLURAL_TO_SINGULAR.get(field_name)
+            if singular is not None and singular in _RESOURCE_DEFAULTS:
                 ctx_kwargs[field_name] = _build_resource_list(singular, value)
             else:
                 ctx_kwargs[field_name] = value
@@ -440,7 +455,7 @@ def _run_check(name: str, **kwargs: Any) -> None:
 
     # Instantiate the check.
     check = cls(name=name, **resource_kwargs, **param_kwargs)
-    check._ctx = ctx
+    check.set_context(ctx)
     check.execute()
 
 
