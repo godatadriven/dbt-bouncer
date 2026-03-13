@@ -6,15 +6,9 @@ from dbt_bouncer.check_decorator import check, fail
 from dbt_bouncer.utils import get_package_version_number, object_in_path
 
 
-@check(
-    "check_unit_test_coverage",
-    params={
-        "include": (str | None, None),
-        "min_unit_test_coverage_pct": (int, 100),
-    },
-)
+@check("check_unit_test_coverage")
 def check_unit_test_coverage(
-    ctx, *, include: str | None, min_unit_test_coverage_pct: int
+    ctx, *, include: str | None = None, min_unit_test_coverage_pct: int
 ):
     """Set the minimum percentage of models that have a unit test."""
     manifest_obj = ctx.manifest_obj
@@ -44,16 +38,17 @@ def check_unit_test_coverage(
             )
     else:
         logging.warning(
-            "The `check_unit_test_expect_format` check is only supported for dbt 1.8.0 and above.",
+            "The `check_unit_test_expect_format` check is only supported for dbt 1.8.0 and above."
         )
 
 
-@check(
-    "check_unit_test_expect_format",
-    iterate_over="unit_test",
-    params={"permitted_formats": (list[str], ["csv", "dict", "sql"])},
-)
-def check_unit_test_expect_format(unit_test, ctx, *, permitted_formats: list[str]):
+@check("check_unit_test_expect_format", iterate_over="unit_test")
+def check_unit_test_expect_format(
+    unit_test,
+    ctx,
+    *,
+    permitted_formats: list[str] = ["csv", "dict", "sql"],  # noqa: B006
+):
     """Unit tests can only use the specified formats."""
     manifest_obj = ctx.manifest_obj
     if get_package_version_number(
@@ -77,16 +72,17 @@ def check_unit_test_expect_format(unit_test, ctx, *, permitted_formats: list[str
             )
     else:
         logging.warning(
-            "The `check_unit_test_expect_format` check is only supported for dbt 1.8.0 and above.",
+            "The `check_unit_test_expect_format` check is only supported for dbt 1.8.0 and above."
         )
 
 
-@check(
-    "check_unit_test_given_formats",
-    iterate_over="unit_test",
-    params={"permitted_formats": (list[str], ["csv", "dict", "sql"])},
-)
-def check_unit_test_given_formats(unit_test, ctx, *, permitted_formats: list[str]):
+@check("check_unit_test_given_formats", iterate_over="unit_test")
+def check_unit_test_given_formats(
+    unit_test,
+    ctx,
+    *,
+    permitted_formats: list[str] = ["csv", "dict", "sql"],  # noqa: B006
+):
     """Unit tests can only use the specified formats."""
     manifest_obj = ctx.manifest_obj
     if get_package_version_number(
@@ -101,5 +97,5 @@ def check_unit_test_given_formats(unit_test, ctx, *, permitted_formats: list[str
             )
     else:
         logging.warning(
-            "The `check_unit_test_given_formats` check is only supported for dbt 1.8.0 and above.",
+            "The `check_unit_test_given_formats` check is only supported for dbt 1.8.0 and above."
         )

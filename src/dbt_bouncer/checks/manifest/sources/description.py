@@ -4,13 +4,9 @@ from dbt_bouncer.check_decorator import check, fail
 from dbt_bouncer.utils import is_description_populated
 
 
-@check(
-    "check_source_description_populated",
-    iterate_over="source",
-    params={"min_description_length": (int | None, None)},
-)
+@check("check_source_description_populated", iterate_over="source")
 def check_source_description_populated(
-    source, ctx, *, min_description_length: int | None
+    source, *, min_description_length: int | None = None
 ):
     """Sources must have a populated description."""
     desc = source.description or ""

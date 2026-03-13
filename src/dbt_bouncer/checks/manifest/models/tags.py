@@ -4,12 +4,8 @@ from dbt_bouncer.check_decorator import check, fail
 from dbt_bouncer.utils import get_clean_model_name
 
 
-@check(
-    "check_model_has_tags",
-    iterate_over="model",
-    params={"criteria": (str, "all"), "tags": list[str]},
-)
-def check_model_has_tags(model, ctx, *, criteria: str, tags: list[str]):
+@check("check_model_has_tags", iterate_over="model")
+def check_model_has_tags(model, *, criteria: str = "all", tags: list[str]):
     """Models must have the specified tags."""
     resource_tags = model.tags or []
     display_name = get_clean_model_name(model.unique_id)

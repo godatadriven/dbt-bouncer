@@ -2,16 +2,9 @@ from dbt_bouncer.check_decorator import check, fail
 from dbt_bouncer.utils import clean_path_str, compile_pattern, get_clean_model_name
 
 
-@check(
-    "check_lineage_permitted_upstream_models",
-    iterate_over="model",
-    params={
-        "package_name": (str | None, None),
-        "upstream_path_pattern": str,
-    },
-)
+@check("check_lineage_permitted_upstream_models", iterate_over="model")
 def check_lineage_permitted_upstream_models(
-    model, ctx, *, package_name: str | None, upstream_path_pattern: str
+    model, ctx, *, package_name: str | None = None, upstream_path_pattern: str
 ):
     """Upstream models must have a path that matches the provided `upstream_path_pattern`."""
     compiled_upstream_path_pattern = compile_pattern(upstream_path_pattern.strip())
@@ -33,7 +26,7 @@ def check_lineage_permitted_upstream_models(
         for upstream_model in upstream_models
         if upstream_model in models_by_id
         and compiled_upstream_path_pattern.match(
-            clean_path_str(models_by_id[upstream_model].original_file_path),
+            clean_path_str(models_by_id[upstream_model].original_file_path)
         )
         is None
     ]
@@ -43,11 +36,8 @@ def check_lineage_permitted_upstream_models(
         )
 
 
-@check(
-    "check_lineage_seed_cannot_be_used",
-    iterate_over="model",
-)
-def check_lineage_seed_cannot_be_used(model, ctx):
+@check("check_lineage_seed_cannot_be_used", iterate_over="model")
+def check_lineage_seed_cannot_be_used(model):
     """Seed cannot be referenced in models with a path that matches the specified `include` config."""
     if [
         x
@@ -59,11 +49,8 @@ def check_lineage_seed_cannot_be_used(model, ctx):
         )
 
 
-@check(
-    "check_lineage_source_cannot_be_used",
-    iterate_over="model",
-)
-def check_lineage_source_cannot_be_used(model, ctx):
+@check("check_lineage_source_cannot_be_used", iterate_over="model")
+def check_lineage_source_cannot_be_used(model):
     """Sources cannot be referenced in models with a path that matches the specified `include` config."""
     if [
         x

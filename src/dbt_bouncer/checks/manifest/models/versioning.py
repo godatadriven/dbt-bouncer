@@ -4,22 +4,15 @@ from dbt_bouncer.check_decorator import check, fail
 from dbt_bouncer.utils import compile_pattern
 
 
-@check(
-    "check_model_latest_version_specified",
-    iterate_over="model",
-)
-def check_model_latest_version_specified(model, ctx):
+@check("check_model_latest_version_specified", iterate_over="model")
+def check_model_latest_version_specified(model):
     """Check that the ``latest_version`` attribute of the model is set."""
     if model.latest_version is None:
         fail(f"`{model.name}` does not have a specified `latest_version`.")
 
 
-@check(
-    "check_model_version_allowed",
-    iterate_over="model",
-    params={"version_pattern": str},
-)
-def check_model_version_allowed(model, ctx, *, version_pattern: str):
+@check("check_model_version_allowed", iterate_over="model")
+def check_model_version_allowed(model, *, version_pattern: str):
     """Check that the version of the model matches the supplied regex pattern."""
     compiled = compile_pattern(version_pattern.strip())
     if model.version and (compiled.match(str(model.version)) is None):
@@ -28,10 +21,7 @@ def check_model_version_allowed(model, ctx, *, version_pattern: str):
         )
 
 
-@check(
-    "check_model_version_pinned_in_ref",
-    iterate_over="model",
-)
+@check("check_model_version_pinned_in_ref", iterate_over="model")
 def check_model_version_pinned_in_ref(model, ctx):
     """Check that the version of the model is always specified in downstream nodes."""
     manifest_obj = ctx.manifest_obj

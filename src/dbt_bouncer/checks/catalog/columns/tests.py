@@ -4,11 +4,7 @@ from dbt_bouncer.check_decorator import check, fail
 from dbt_bouncer.utils import compile_pattern
 
 
-@check(
-    "check_column_has_specified_test",
-    iterate_over="catalog_node",
-    params={"column_name_pattern": str, "test_name": str},
-)
+@check("check_column_has_specified_test", iterate_over="catalog_node")
 def check_column_has_specified_test(
     catalog_node, ctx, *, column_name_pattern: str, test_name: str
 ):

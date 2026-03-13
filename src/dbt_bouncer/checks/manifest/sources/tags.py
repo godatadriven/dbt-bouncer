@@ -5,13 +5,9 @@ from typing import Literal
 from dbt_bouncer.check_decorator import check, fail
 
 
-@check(
-    "check_source_has_tags",
-    iterate_over="source",
-    params={"criteria": (Literal["any", "all", "one"], "all"), "tags": list[str]},
-)
+@check("check_source_has_tags", iterate_over="source")
 def check_source_has_tags(
-    source, ctx, *, criteria: Literal["any", "all", "one"], tags: list[str]
+    source, *, criteria: Literal["any", "all", "one"] = "all", tags: list[str]
 ):
     """Sources must have the specified tags."""
     resource_tags = source.tags or []

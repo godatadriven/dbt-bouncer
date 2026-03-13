@@ -4,21 +4,29 @@ Provides a ``@check`` decorator that generates ``BaseCheck`` subclasses from
 plain functions, and a ``fail()`` helper that raises the standard check failure
 exception.
 
+Parameters are inferred from the function signature — keyword-only arguments
+(after ``*``) become user-configurable Pydantic fields on the generated class.
+``ctx`` is injected automatically only when the function declares it.
+
 Example::
 
     from dbt_bouncer.check_decorator import check, fail
 
     @check("check_model_description_populated", iterate_over="model")
-    def check_model_description_populated(model, ctx):
+    def check_model_description_populated(model):
         desc = model.description or ""
         if len(desc.strip()) < 4:
             fail(f"`{model.unique_id}` does not have a populated description.")
 
-    @check("check_model_names", iterate_over="model", params={"model_name_pattern": str})
-    def check_model_names(model, ctx, *, model_name_pattern: str):
+    @check("check_model_names", iterate_over="model")
+    def check_model_names(model, *, model_name_pattern: str):
         import re
         if not re.match(model_name_pattern, str(model.name)):
             fail(f"`{model.unique_id}` does not match pattern `{model_name_pattern}`.")
+
+    @check("check_model_documentation_coverage")
+    def check_model_documentation_coverage(ctx, *, min_pct: int = 100):
+        ...  # context-only check, no iterate_over
 """
 
 from __future__ import annotations
@@ -34,6 +42,9 @@ from pydantic import Field, create_model
 
 from dbt_bouncer.check_base import BaseCheck
 from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
+
+# Names reserved for resource / context injection, not user params.
+_RESERVED_PARAMS = frozenset({"ctx"})
 
 
 def fail(message: str) -> None:
@@ -53,22 +64,17 @@ def check(
     name: str,
     *,
     iterate_over: str | None = None,
-    params: dict[str, Any] | None = None,
 ) -> Callable[[Callable[..., None]], type[BaseCheck]]:
     """Generate a ``BaseCheck`` subclass from a plain function.
 
-    The generated class is injected into the calling module's namespace so that
-    dbt-bouncer's check discovery (``get_check_objects``) finds it via the
-    normal filesystem scan.
+    Parameters are inferred from the function's keyword-only arguments
+    (those after ``*``).  The ``ctx`` parameter is injected automatically
+    when declared.
 
     Args:
         name: The check name used in YAML config (e.g. ``"check_model_names"``).
-            Must be unique across all checks.
         iterate_over: The resource type to iterate over (e.g. ``"model"``,
             ``"source"``).  When ``None``, the check runs once with context only.
-        params: Mapping of parameter names to their types.  These become
-            user-configurable Pydantic fields on the generated class.  Use a
-            tuple ``(type, default)`` as the value to specify a default.
 
     Returns:
         A decorator that accepts a function and returns the generated class.
@@ -76,7 +82,24 @@ def check(
     """
 
     def decorator(fn: Callable[..., None]) -> type[BaseCheck]:
-        # Build the Pydantic field definitions for create_model().
+        sig = inspect.signature(fn)
+        fn_params = sig.parameters
+
+        # Detect whether the function wants ctx injected.
+        wants_ctx = "ctx" in fn_params
+
+        # Detect whether the function receives the resource as first positional arg.
+        # Positional params that aren't "ctx" and aren't keyword-only are the resource.
+        positional_names = [
+            p.name
+            for p in fn_params.values()
+            if p.kind in (p.POSITIONAL_ONLY, p.POSITIONAL_OR_KEYWORD)
+            and p.name not in _RESERVED_PARAMS
+        ]
+        has_resource_param = bool(positional_names) and iterate_over is not None
+
+        # Extract keyword-only params → become Pydantic fields.
+        param_names: list[str] = []
         fields: dict[str, Any] = {
             "name": (Literal[name], Field(default=name)),  # type: ignore[valid-type]
         }
@@ -85,33 +108,30 @@ def check(
         if iterate_over is not None:
             fields[iterate_over] = (Any | None, Field(default=None))
 
-        # User-configurable parameters.
-        for param_name, param_spec in (params or {}).items():
-            if (
-                isinstance(param_spec, tuple)
-                and len(param_spec) == 2
-                and _is_type(param_spec[0])
-            ):
-                # (type, default) pair
-                param_type, param_default = param_spec
-                fields[param_name] = (param_type, Field(default=param_default))
-            elif _is_type(param_spec):
-                # Required field — just a type
-                fields[param_name] = (param_spec, ...)
-            else:
-                # Treat as a default value, infer type
-                fields[param_name] = (type(param_spec), Field(default=param_spec))
+        for param_name, param in fn_params.items():
+            if param.kind != param.KEYWORD_ONLY:
+                continue
 
-        # Store iterate_over as a ClassVar so the runner can read it directly.
-        # This is set after create_model since ClassVars can't be passed as fields.
+            param_names.append(param_name)
+            annotation = param.annotation
+
+            if annotation is inspect.Parameter.empty:
+                annotation = Any
+
+            if param.default is not inspect.Parameter.empty:
+                fields[param_name] = (annotation, Field(default=param.default))
+            else:
+                fields[param_name] = (annotation, ...)
 
         # Build the execute() method that delegates to the user function.
         def execute(self: BaseCheck) -> None:
-            kwargs: dict[str, Any] = {p: getattr(self, p) for p in (params or {})}
-            if iterate_over is not None:
-                fn(getattr(self, iterate_over), self._ctx, **kwargs)
-            else:
-                fn(self._ctx, **kwargs)
+            kwargs: dict[str, Any] = {p: getattr(self, p) for p in param_names}
+            args: list[Any] = []
+            if has_resource_param:
+                args.append(getattr(self, iterate_over))  # type: ignore[arg-type]
+            if wants_ctx:
+                args.append(self._ctx)
+            fn(*args, **kwargs)
 
         # Convert function name to PascalCase class name.
         class_name = _to_pascal_case(fn.__name__)  # type: ignore[union-attr]

@@ -6,16 +6,9 @@ from dbt_bouncer.check_decorator import check, fail
 from dbt_bouncer.utils import clean_path_str, compile_pattern, get_clean_model_name
 
 
-@check(
-    "check_model_directories",
-    iterate_over="model",
-    params={
-        "include": str,
-        "permitted_sub_directories": list[str],
-    },
-)
+@check("check_model_directories", iterate_over="model")
 def check_model_directories(
-    model, ctx, *, include: str, permitted_sub_directories: list[str]
+    model, *, include: str, permitted_sub_directories: list[str]
 ):
     """Only specified sub-directories are permitted."""
     compiled_include = compile_pattern(include.strip().rstrip("/"))
@@ -36,12 +29,8 @@ def check_model_directories(
         )
 
 
-@check(
-    "check_model_file_name",
-    iterate_over="model",
-    params={"file_name_pattern": str},
-)
-def check_model_file_name(model, ctx, *, file_name_pattern: str):
+@check("check_model_file_name", iterate_over="model")
+def check_model_file_name(model, *, file_name_pattern: str):
     r"""Models must have a file name that matches the supplied regex."""
     compiled = compile_pattern(file_name_pattern.strip())
     file_name = Path(clean_path_str(model.original_file_path)).name
@@ -52,7 +41,7 @@ def check_model_file_name(model, ctx, *, file_name_pattern: str):
 
 
 @check("check_model_property_file_location", iterate_over="model")
-def check_model_property_file_location(model, ctx):
+def check_model_property_file_location(model):
     """Model properties files must follow the guidance provided by dbt."""
     if not (
         hasattr(model, "patch_path")
@@ -92,12 +81,8 @@ def check_model_property_file_location(model, ctx):
         )
 
 
-@check(
-    "check_model_schema_name",
-    iterate_over="model",
-    params={"schema_name_pattern": str},
-)
-def check_model_schema_name(model, ctx, *, schema_name_pattern: str):
+@check("check_model_schema_name", iterate_over="model")
+def check_model_schema_name(model, *, schema_name_pattern: str):
     """Models must have a schema name that matches the supplied regex."""
     compiled = compile_pattern(schema_name_pattern.strip())
     if compiled.match(str(model.schema_)) is None:

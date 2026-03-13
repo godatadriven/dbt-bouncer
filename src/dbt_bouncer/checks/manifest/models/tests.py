@@ -6,22 +6,9 @@ from dbt_bouncer.check_decorator import check, fail
 from dbt_bouncer.utils import get_clean_model_name, get_package_version_number
 
 
-@check(
-    "check_model_has_unique_test",
-    iterate_over="model",
-    params={
-        "accepted_uniqueness_tests": (
-            list[str] | None,
-            [
-                "dbt_expectations.expect_compound_columns_to_be_unique",
-                "dbt_utils.unique_combination_of_columns",
-                "unique",
-            ],
-        ),
-    },
-)
+@check("check_model_has_unique_test", iterate_over="model")
 def check_model_has_unique_test(
-    model, ctx, *, accepted_uniqueness_tests: list[str] | None
+    model, ctx, *, accepted_uniqueness_tests: list[str] | None = None
 ):
     """Models must have a test for uniqueness of a column."""
     num_unique_tests = 0
@@ -50,12 +37,8 @@ def check_model_has_unique_test(
         )
 
 
-@check(
-    "check_model_has_unit_tests",
-    iterate_over="model",
-    params={"min_number_of_unit_tests": (int, 1)},
-)
-def check_model_has_unit_tests(model, ctx, *, min_number_of_unit_tests: int):
+@check("check_model_has_unit_tests", iterate_over="model")
+def check_model_has_unit_tests(model, ctx, *, min_number_of_unit_tests: int = 1):
     """Models must have more than the specified number of unit tests."""
     manifest_obj = ctx.manifest_obj
     if get_package_version_number(
@@ -68,7 +51,7 @@ def check_model_has_unit_tests(model, ctx, *, min_number_of_unit_tests: int):
                 if t.depends_on
                 and t.depends_on.nodes
                 and t.depends_on.nodes[0] == model.unique_id
-            ],
+            ]
         )
         if num_unit_tests < min_number_of_unit_tests:
             display_name = get_clean_model_name(model.unique_id)
@@ -77,15 +60,12 @@ def check_model_has_unit_tests(model, ctx, *, min_number_of_unit_tests: int):
             )
     else:
         logging.warning(
-            "This unit test check is only supported for dbt 1.8.0 and above.",
+            "This unit test check is only supported for dbt 1.8.0 and above."
         )
 
 
-@check(
-    "check_model_test_coverage",
-    params={"min_model_test_coverage_pct": (float, 100)},
-)
-def check_model_test_coverage(ctx, *, min_model_test_coverage_pct: float):
+@check("check_model_test_coverage")
+def check_model_test_coverage(ctx, *, min_model_test_coverage_pct: float = 100):
     """Set the minimum percentage of models that have at least one test."""
     num_models = len(ctx.models)
     # Build set of model IDs that have at least one test

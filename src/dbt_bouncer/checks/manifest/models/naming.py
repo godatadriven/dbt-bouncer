@@ -4,12 +4,8 @@ from dbt_bouncer.check_decorator import check, fail
 from dbt_bouncer.utils import compile_pattern, get_clean_model_name
 
 
-@check(
-    "check_model_names",
-    iterate_over="model",
-    params={"model_name_pattern": str},
-)
-def check_model_names(model, ctx, *, model_name_pattern: str):
+@check("check_model_names", iterate_over="model")
+def check_model_names(model, *, model_name_pattern: str):
     """Models must have a name that matches the supplied regex."""
     compiled = compile_pattern(model_name_pattern.strip())
     if compiled.match(str(model.name)) is None:

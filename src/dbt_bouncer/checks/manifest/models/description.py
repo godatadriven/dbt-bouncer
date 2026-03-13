@@ -13,12 +13,8 @@ from dbt_bouncer.utils import (
 )
 
 
-@check(
-    "check_model_description_contains_regex_pattern",
-    iterate_over="model",
-    params={"regexp_pattern": str},
-)
-def check_model_description_contains_regex_pattern(model, ctx, *, regexp_pattern: str):
+@check("check_model_description_contains_regex_pattern", iterate_over="model")
+def check_model_description_contains_regex_pattern(model, *, regexp_pattern: str):
     """Models must have a description that matches the provided pattern."""
     compiled = compile_pattern(regexp_pattern.strip(), flags=re.DOTALL)
     if not compiled.match(str(model.description)):
@@ -27,13 +23,9 @@ def check_model_description_contains_regex_pattern(model, ctx, *, regexp_pattern
         )
 
 
-@check(
-    "check_model_description_populated",
-    iterate_over="model",
-    params={"min_description_length": (int | None, None)},
-)
+@check("check_model_description_populated", iterate_over="model")
 def check_model_description_populated(
-    model, ctx, *, min_description_length: int | None
+    model, *, min_description_length: int | None = None
 ):
     """Models must have a populated description."""
     if not is_description_populated(
@@ -44,12 +36,9 @@ def check_model_description_populated(
         )
 
 
-@check(
-    "check_model_documentation_coverage",
-    params={"min_model_documentation_coverage_pct": (int, 100)},
-)
+@check("check_model_documentation_coverage")
 def check_model_documentation_coverage(
-    ctx, *, min_model_documentation_coverage_pct: int
+    ctx, *, min_model_documentation_coverage_pct: int = 100
 ):
     """Set the minimum percentage of models that have a populated description."""
     num_models = len(ctx.models)
@@ -70,7 +59,7 @@ def check_model_documentation_coverage(
 
 
 @check("check_model_documented_in_same_directory", iterate_over="model")
-def check_model_documented_in_same_directory(model, ctx):
+def check_model_documented_in_same_directory(model):
     """Models must be documented in the same directory where they are defined."""
     model = cast("Any", model)
     model_sql_path = Path(clean_path_str(model.original_file_path))

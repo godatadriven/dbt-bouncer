@@ -7,7 +7,7 @@ from dbt_bouncer.utils import clean_path_str
 
 
 @check("check_source_property_file_location", iterate_over="source")
-def check_source_property_file_location(source, ctx):
+def check_source_property_file_location(source):
     """Source properties files must follow the guidance provided by dbt."""
     original_path = Path(clean_path_str(source.original_file_path))
 

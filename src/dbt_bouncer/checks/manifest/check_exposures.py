@@ -1,17 +1,9 @@
 from dbt_bouncer.check_decorator import check, fail
-from dbt_bouncer.enums import Materialization
 
 
-@check(
-    "check_exposure_based_on_model",
-    iterate_over="exposure",
-    params={
-        "maximum_number_of_models": (int, 100),
-        "minimum_number_of_models": (int, 1),
-    },
-)
+@check("check_exposure_based_on_model", iterate_over="exposure")
 def check_exposure_based_on_model(
-    exposure, ctx, *, maximum_number_of_models: int, minimum_number_of_models: int
+    exposure, *, maximum_number_of_models: int, minimum_number_of_models: int
 ):
     """Exposures should depend on a model."""
     depends_on = exposure.depends_on
@@ -29,18 +21,12 @@ def check_exposure_based_on_model(
         )
 
 
-@check(
-    "check_exposure_based_on_view",
-    iterate_over="exposure",
-    params={
-        "materializations_to_include": (
-            list[str],
-            [Materialization.EPHEMERAL, Materialization.VIEW],
-        ),
-    },
-)
+@check("check_exposure_based_on_view", iterate_over="exposure")
 def check_exposure_based_on_view(
-    exposure, ctx, *, materializations_to_include: list[str]
+    exposure,
+    ctx,
+    *,
+    materializations_to_include: list[str] = ["ephemeral", "view"],  # noqa: B006
 ):
     """Exposures should not be based on views."""
     models_by_id = (
@@ -66,10 +52,7 @@ def check_exposure_based_on_view(
         )
 
 
-@check(
-    "check_exposure_based_on_non_public_models",
-    iterate_over="exposure",
-)
+@check("check_exposure_based_on_non_public_models", iterate_over="exposure")
 def check_exposure_based_on_non_public_models(exposure, ctx):
     """Exposures should be based on public models only."""
     models_by_id = (

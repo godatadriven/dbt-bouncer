@@ -6,19 +6,14 @@ from dbt_bouncer.enums import Materialization
 from dbt_bouncer.utils import find_missing_meta_keys, get_clean_model_name
 
 
-@check(
-    "check_model_columns_have_meta_keys",
-    iterate_over="model",
-    params={"keys": NestedDict},
-)
-def check_model_columns_have_meta_keys(model, ctx, *, keys: NestedDict):
+@check("check_model_columns_have_meta_keys", iterate_over="model")
+def check_model_columns_have_meta_keys(model, *, keys: NestedDict):
     """Columns defined for models must have the specified keys in the `meta` config."""
     columns = model.columns or {}
     failing_columns: dict[str, list[str]] = {}
     for col_name, col in columns.items():
         missing_keys = find_missing_meta_keys(
-            meta_config=col.meta or {},
-            required_keys=keys.model_dump(),
+            meta_config=col.meta or {}, required_keys=keys.model_dump()
         )
         if missing_keys:
             failing_columns[col_name] = [k.replace(">>", "") for k in missing_keys]
@@ -29,7 +24,7 @@ def check_model_columns_have_meta_keys(model, ctx, *, keys: NestedDict):
 
 
 @check("check_model_columns_have_types", iterate_over="model")
-def check_model_columns_have_types(model, ctx):
+def check_model_columns_have_types(model):
     """Columns defined for models must have a `data_type` declared."""
     columns = model.columns or {}
     untyped_columns = [
@@ -41,14 +36,8 @@ def check_model_columns_have_types(model, ctx):
         )
 
 
-@check(
-    "check_model_has_constraints",
-    iterate_over="model",
-    params={
-        "required_constraint_types": list[str],
-    },
-)
-def check_model_has_constraints(model, ctx, *, required_constraint_types: list[str]):
+@check("check_model_has_constraints", iterate_over="model")
+def check_model_has_constraints(model, *, required_constraint_types: list[str]):
     """Table and incremental models must have the specified constraint types defined."""
     materialization = (
         model.config.materialized

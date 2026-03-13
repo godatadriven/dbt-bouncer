@@ -4,7 +4,7 @@ from dbt_bouncer.check_decorator import check, fail
 
 
 @check("check_source_freshness_populated", iterate_over="source")
-def check_source_freshness_populated(source, ctx):
+def check_source_freshness_populated(source):
     """Sources must have a populated freshness."""
     display = f"{source.source_name}.{source.name}"
     error_msg = f"`{display}` does not have a populated freshness."

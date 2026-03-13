@@ -1,10 +1,7 @@
 from dbt_bouncer.check_decorator import check, fail
 
 
-@check(
-    "check_semantic_model_based_on_non_public_models",
-    iterate_over="semantic_model",
-)
+@check("check_semantic_model_based_on_non_public_models", iterate_over="semantic_model")
 def check_semantic_model_based_on_non_public_models(semantic_model, ctx):
     """Semantic models should be based on public models only."""
     models_by_id = (

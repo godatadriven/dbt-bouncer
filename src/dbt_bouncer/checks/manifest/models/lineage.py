@@ -1,20 +1,12 @@
 """Checks related to model upstream dependencies and lineage."""
 
 from dbt_bouncer.check_decorator import check, fail
-from dbt_bouncer.enums import Materialization
 from dbt_bouncer.utils import get_clean_model_name
 
 
-@check(
-    "check_model_depends_on_macros",
-    iterate_over="model",
-    params={
-        "criteria": (str, "all"),
-        "required_macros": list[str],
-    },
-)
+@check("check_model_depends_on_macros", iterate_over="model")
 def check_model_depends_on_macros(
-    model, ctx, *, criteria: str, required_macros: list[str]
+    model, *, criteria: str = "all", required_macros: list[str]
 ):
     """Models must depend on the specified macros."""
     upstream_macros = [
@@ -44,7 +36,7 @@ def check_model_depends_on_macros(
 
 
 @check("check_model_depends_on_multiple_sources", iterate_over="model")
-def check_model_depends_on_multiple_sources(model, ctx):
+def check_model_depends_on_multiple_sources(model):
     """Models cannot reference more than one source."""
     num_reffed_sources = sum(
         x.split(".")[0] == "source"
@@ -72,7 +64,7 @@ def check_model_has_exposure(model, ctx):
 
 
 @check("check_model_has_no_upstream_dependencies", iterate_over="model")
-def check_model_has_no_upstream_dependencies(model, ctx):
+def check_model_has_no_upstream_dependencies(model):
     """Identify if models have no upstream dependencies as this likely indicates hard-coded tables references."""
     if (
         not model.depends_on
@@ -84,25 +76,14 @@ def check_model_has_no_upstream_dependencies(model, ctx):
         )
 
 
-@check(
-    "check_model_max_chained_views",
-    iterate_over="model",
-    params={
-        "materializations_to_include": (
-            list[str],
-            [Materialization.EPHEMERAL, Materialization.VIEW],
-        ),
-        "max_chained_views": (int, 3),
-        "package_name": (str | None, None),
-    },
-)
+@check("check_model_max_chained_views", iterate_over="model")
 def check_model_max_chained_views(
     model,
     ctx,
     *,
-    materializations_to_include: list[str],
-    max_chained_views: int,
-    package_name: str | None,
+    materializations_to_include: list[str] = ["ephemeral", "view"],  # noqa: B006
+    max_chained_views: int = 3,
+    package_name: str | None = None,
 ):
     """Models cannot have more than the specified number of upstream dependents that are not tables."""
     manifest_obj = ctx.manifest_obj
@@ -114,11 +95,7 @@ def check_model_max_chained_views(
     )
 
     def return_upstream_view_models(
-        materializations,
-        max_views,
-        model_unique_ids_to_check,
-        pkg_name,
-        depth=0,
+        materializations, max_views, model_unique_ids_to_check, pkg_name, depth=0
     ):
         """Recursive function to return model unique_id's of upstream models that are views.
 
@@ -170,7 +147,7 @@ def check_model_max_chained_views(
                 max_views=max_chained_views,
                 model_unique_ids_to_check=[model.unique_id],
                 pkg_name=(package_name or manifest_obj.manifest.metadata.project_name),
-            ),
+            )
         )
         != 0
     ):
@@ -179,12 +156,8 @@ def check_model_max_chained_views(
         )
 
 
-@check(
-    "check_model_max_fanout",
-    iterate_over="model",
-    params={"max_downstream_models": (int, 3)},
-)
-def check_model_max_fanout(model, ctx, *, max_downstream_models: int):
+@check("check_model_max_fanout", iterate_over="model")
+def check_model_max_fanout(model, ctx, *, max_downstream_models: int = 3):
     """Models cannot have more than the specified number of downstream models."""
     num_downstream_models = sum(
         model.unique_id in (getattr(m.depends_on, "nodes", []) if m.depends_on else [])
@@ -197,18 +170,9 @@ def check_model_max_fanout(model, ctx, *, max_downstream_models: int):
         )
 
 
-@check(
-    "check_model_max_upstream_dependencies",
-    iterate_over="model",
-    params={
-        "max_upstream_macros": (int, 5),
-        "max_upstream_models": (int, 5),
-        "max_upstream_sources": (int, 1),
-    },
-)
+@check("check_model_max_upstream_dependencies", iterate_over="model")
 def check_model_max_upstream_dependencies(
     model,
-    ctx,
     *,
     max_upstream_macros: int,
     max_upstream_models: int,
@@ -219,12 +183,8 @@ def check_model_max_upstream_dependencies(
     if depends_on:
         num_upstream_macros = len(list(getattr(depends_on, "macros", []) or []))
         nodes = getattr(depends_on, "nodes", []) or []
-        num_upstream_models = len(
-            [m for m in nodes if m.split(".")[0] == "model"],
-        )
-        num_upstream_sources = len(
-            [m for m in nodes if m.split(".")[0] == "source"],
-        )
+        num_upstream_models = len([m for m in nodes if m.split(".")[0] == "model"])
+        num_upstream_sources = len([m for m in nodes if m.split(".")[0] == "source"])
     else:
         num_upstream_macros = 0
         num_upstream_models = 0

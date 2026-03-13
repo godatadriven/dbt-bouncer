@@ -17,13 +17,9 @@ def _is_catalog_node_a_model(catalog_node: Any, models: list[Any]) -> bool:
     return model is not None and model.resource_type == "model"
 
 
-@check(
-    "check_column_description_populated",
-    iterate_over="catalog_node",
-    params={"min_description_length": (int | None, None)},
-)
+@check("check_column_description_populated", iterate_over="catalog_node")
 def check_column_description_populated(
-    catalog_node, ctx, *, min_description_length: int | None
+    catalog_node, ctx, *, min_description_length: int | None = None
 ):
     """Columns must have a populated description."""
     if _is_catalog_node_a_model(catalog_node, ctx.models):
@@ -49,12 +45,10 @@ def check_column_description_populated(
             )
 
 
-@check(
-    "check_columns_are_all_documented",
-    iterate_over="catalog_node",
-    params={"case_sensitive": (bool | None, True)},
-)
-def check_columns_are_all_documented(catalog_node, ctx, *, case_sensitive: bool | None):
+@check("check_columns_are_all_documented", iterate_over="catalog_node")
+def check_columns_are_all_documented(
+    catalog_node, ctx, *, case_sensitive: bool | None = True
+):
     """All columns in a model should be included in the model's properties file."""
     if _is_catalog_node_a_model(catalog_node, ctx.models):
         model = next(m for m in ctx.models if m.unique_id == catalog_node.unique_id)
@@ -83,13 +77,9 @@ def check_columns_are_all_documented(catalog_node, ctx, *, case_sensitive: bool 
             )
 
 
-@check(
-    "check_columns_are_documented_in_public_models",
-    iterate_over="catalog_node",
-    params={"min_description_length": (int | None, None)},
-)
+@check("check_columns_are_documented_in_public_models", iterate_over="catalog_node")
 def check_columns_are_documented_in_public_models(
-    catalog_node, ctx, *, min_description_length: int | None
+    catalog_node, ctx, *, min_description_length: int | None = None
 ):
     """Columns should have a populated description in public models."""
     if _is_catalog_node_a_model(catalog_node, ctx.models):
@@ -100,8 +90,7 @@ def check_columns_are_documented_in_public_models(
                 model_columns = model.columns or {}
                 column_config = model_columns.get(v.name)
                 if column_config is None or not is_description_populated(
-                    column_config.description or "",
-                    min_description_length or 4,
+                    column_config.description or "", min_description_length or 4
                 ):
                     non_complying_columns.append(v.name)
 

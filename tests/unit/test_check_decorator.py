@@ -10,7 +10,7 @@ from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
 
 
 @check("check_decorator_basic", iterate_over="model")
-def _check_decorator_basic(model, ctx):  # noqa: ARG001
+def _check_decorator_basic(model):
     """Validate basic decorator check."""
     if not model.name:
         fail("Model has no name.")
@@ -19,12 +19,8 @@ def _check_decorator_basic(model, ctx):  # noqa: ARG001
 CheckDecoratorBasic = _check_decorator_basic
 
 
-@check(
-    "check_decorator_with_params",
-    iterate_over="model",
-    params={"min_length": int},
-)
-def _check_decorator_with_params(model, ctx, *, min_length: int):  # noqa: ARG001
+@check("check_decorator_with_params", iterate_over="model")
+def _check_decorator_with_params(model, *, min_length: int):
     """Validate check with user-configurable params."""
     if len(model.name) < min_length:
         fail(f"Model name `{model.name}` is shorter than {min_length}.")
@@ -33,12 +29,8 @@ def _check_decorator_with_params(model, ctx, *, min_length: int):  # noqa: ARG00
 CheckDecoratorWithParams = _check_decorator_with_params
 
 
-@check(
-    "check_decorator_with_default_param",
-    iterate_over="model",
-    params={"threshold": (int, 10)},
-)
-def _check_decorator_with_default_param(model, ctx, *, threshold: int):
+@check("check_decorator_with_default_param", iterate_over="model")
+def _check_decorator_with_default_param(model, *, threshold: int = 10):
     """Validate check with a param that has a default value."""
 
 
@@ -53,6 +45,28 @@ def _check_decorator_context_only(ctx):
 
 
 CheckDecoratorContextOnly = _check_decorator_context_only
+
+
+@check("check_decorator_no_ctx", iterate_over="model")
+def _check_decorator_no_ctx(model):
+    """Validate check that doesn't need ctx."""
+    if not model.name:
+        fail("Model has no name.")
+
+
+CheckDecoratorNoCtx = _check_decorator_no_ctx
+
+
+@check("check_decorator_resource_and_ctx", iterate_over="model")
+def _check_decorator_resource_and_ctx(model, ctx):
+    """Validate check that uses both resource and ctx."""
+    if not ctx.models:
+        fail("No models in context.")
+    if not model.name:
+        fail("Model has no name.")
+
+
+CheckDecoratorResourceAndCtx = _check_decorator_resource_and_ctx
 
 
 # --- Tests ---
@@ -136,6 +150,25 @@ class TestCheckDecoratorExecution:
         instance._ctx = ctx
         with pytest.raises(DbtBouncerFailedCheckError, match="No models found"):
             instance.execute()
+
+    def test_no_ctx_check_passes(self):
+        from dbt_bouncer.artifact_parsers.parser import wrap_dict
+
+        model = wrap_dict({"name": "stg_orders", "unique_id": "model.pkg.stg_orders"})
+        instance = CheckDecoratorNoCtx(name="check_decorator_no_ctx", model=model)
+        instance.execute()
+
+    def test_resource_and_ctx_check_passes(self):
+        from dbt_bouncer.artifact_parsers.parser import wrap_dict
+        from dbt_bouncer.check_context import CheckContext
+
+        model = wrap_dict({"name": "stg_orders", "unique_id": "model.pkg.stg_orders"})
+        ctx = CheckContext(models=[model])
+        instance = CheckDecoratorResourceAndCtx(
+            name="check_decorator_resource_and_ctx", model=model
+        )
+        instance._ctx = ctx
+        instance.execute()
 
 
 class TestFailHelper:
