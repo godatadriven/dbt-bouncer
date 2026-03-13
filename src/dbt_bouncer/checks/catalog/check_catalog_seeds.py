@@ -1,65 +1,23 @@
-from typing import Any, Literal
-
-from pydantic import Field
-
-from dbt_bouncer.check_base import BaseCheck
-from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
+from dbt_bouncer.check_decorator import check, fail
 from dbt_bouncer.utils import get_clean_model_name
 
 
-class CheckSeedColumnsAreAllDocumented(BaseCheck):
-    """All columns in a seed CSV file should be included in the seed's properties file, i.e. `.yml` file.
+@check("check_seed_columns_are_all_documented", iterate_over="catalog_node")
+def check_seed_columns_are_all_documented(catalog_node, ctx):
+    """All columns in a seed CSV file should be included in the seed's properties file."""
+    if catalog_node.unique_id is not None and catalog_node.unique_id.startswith(
+        "seed."
+    ):
+        seed = next(s for s in ctx.seeds if s.unique_id == catalog_node.unique_id)
 
-    !!! warning
+        seed_columns = seed.columns or {}
+        undocumented_columns = [
+            v.name
+            for _, v in catalog_node.columns.items()
+            if v.name not in seed_columns
+        ]
 
-        This check is only supported for dbt 1.9.0 and above.
-
-    Receives:
-        catalog_node (CatalogNodeEntry): The CatalogNodeEntry object to check.
-        manifest_obj (ManifestObject): The ManifestObject object parsed from `manifest.json`.
-        seeds (list[SeedNode]): List of SeedNode objects parsed from `manifest.json`.
-
-    Other Parameters:
-        description (str | None): Description of what the check does and why it is implemented.
-        exclude (str | None): Regex pattern to match the seed path. Seed paths that match the pattern will not be checked.
-        include (str | None): Regex pattern to match the seed path. Only seed paths that match the pattern will be checked.
-        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
-
-    Example(s):
-        ```yaml
-        catalog_checks:
-            - name: check_seed_columns_are_all_documented
-        ```
-
-    """
-
-    catalog_node: Any | None = Field(default=None)
-    name: Literal["check_seed_columns_are_all_documented"]
-
-    def execute(self) -> None:
-        """Execute the check.
-
-        Raises:
-            DbtBouncerFailedCheckError: If columns are undocumented.
-
-        """
-        catalog_node = self._require_catalog_node()
-        self._require_manifest()
-        if catalog_node.unique_id is not None and catalog_node.unique_id.startswith(
-            "seed."
-        ):
-            seed = next(
-                s for s in self._ctx.seeds if s.unique_id == catalog_node.unique_id
+        if undocumented_columns:
+            fail(
+                f"`{get_clean_model_name(seed.unique_id)}` has columns that are not included in the seed properties file: {undocumented_columns}"
             )
-
-            seed_columns = seed.columns or {}
-            undocumented_columns = [
-                v.name
-                for _, v in catalog_node.columns.items()
-                if v.name not in seed_columns
-            ]
-
-            if undocumented_columns:
-                raise DbtBouncerFailedCheckError(
-                    f"`{get_clean_model_name(seed.unique_id)}` has columns that are not included in the seed properties file: {undocumented_columns}"
-                )

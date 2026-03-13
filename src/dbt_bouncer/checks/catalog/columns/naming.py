@@ -1,21 +1,14 @@
 """Checks related to column naming conventions."""
 
 import re
-from typing import Any, Literal
+from typing import Any
 
-from pydantic import ConfigDict, Field, PrivateAttr, model_validator
-
-from dbt_bouncer.check_base import BaseCheck
-from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
+from dbt_bouncer.check_decorator import check, fail
 from dbt_bouncer.utils import compile_pattern
 
 
 def _is_catalog_node_a_model(catalog_node: Any, models: list[Any]) -> bool:
     """Return True if a catalog node corresponds to a dbt model.
-
-    Args:
-        catalog_node (CatalogNodeEntry): The CatalogNodeEntry object to check.
-        models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.
 
     Returns:
         bool: Whether a catalog node is a model.
@@ -25,175 +18,82 @@ def _is_catalog_node_a_model(catalog_node: Any, models: list[Any]) -> bool:
     return model is not None and model.resource_type == "model"
 
 
-class CheckColumnNameCompliesToColumnType(BaseCheck):
-    """Columns with the specified regexp naming pattern must have data types that comply to the specified regexp pattern or list of data types.
+@check(
+    "check_column_name_complies_to_column_type",
+    iterate_over="catalog_node",
+    params={
+        "column_name_pattern": str,
+        "type_pattern": (str | None, None),
+        "types": (list[str] | None, None),
+    },
+)
+def check_column_name_complies_to_column_type(
+    catalog_node,
+    ctx,
+    *,
+    column_name_pattern: str,
+    type_pattern: str | None,
+    types: list[str] | None,
+):
+    """Columns with the specified regexp naming pattern must have compliant data types.
 
-    Note: One of `type_pattern` or `types` must be specified.
-
-    Parameters:
-        column_name_pattern (str): Regex pattern to match the model name.
-        type_pattern (str | None): Regex pattern to match the data types.
-        types (list[str] | None): List of data types to check.
-
-    Receives:
-        catalog_node (CatalogNodeEntry): The CatalogNodeEntry object to check.
-
-    Other Parameters:
-        description (str | None): Description of what the check does and why it is implemented.
-        exclude (str | None): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
-        include (str | None): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
-        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
-
-    Example(s):
-        ```yaml
-        catalog_checks:
-            # DATE columns must end with "_date"
-            - name: check_column_name_complies_to_column_type
-              column_name_pattern: .*_date$
-              types:
-                - DATE
-        ```
-        ```yaml
-        catalog_checks:
-            # BOOLEAN columns must start with "is_"
-            - name: check_column_name_complies_to_column_type
-              column_name_pattern: ^is_.*
-              types:
-                - BOOLEAN
-        ```
-        ```yaml
-        catalog_checks:
-            # Columns of all types must consist of lowercase letters and underscores. Note that the specified types depend on the underlying database.
-            - name: check_column_name_complies_to_column_type
-              column_name_pattern: ^[a-z_]*$
-              types:
-                - BIGINT
-                - BOOLEAN
-                - DATE
-                - DOUBLE
-                - INTEGER
-                - VARCHAR
-        ```
-        ```yaml
-        catalog_checks:
-            # No STRUCT data types permitted.
-            - name: check_column_name_complies_to_column_type
-              column_name_pattern: ^[a-z_]*$
-              type_pattern: ^(?!STRUCT)
-        ```
+    Raises:
+        ValueError: If neither or both of type_pattern/types are supplied.
 
     """
+    if not (type_pattern or types):
+        msg = "Either 'type_pattern' or 'types' must be supplied."
+        raise ValueError(msg)
+    if type_pattern is not None and types is not None:
+        msg = "Only one of 'type_pattern' or 'types' can be supplied."
+        raise ValueError(msg)
 
-    catalog_node: Any | None = Field(default=None)
-    column_name_pattern: str
-    name: Literal["check_column_name_complies_to_column_type"]
-    type_pattern: str | None = None
-    types: list[str] | None = None
+    compiled_column_name_pattern = compile_pattern(column_name_pattern.strip())
 
-    _compiled_column_name_pattern: re.Pattern[str] = PrivateAttr()
-    _compiled_type_pattern: re.Pattern[str] | None = PrivateAttr()
+    if type_pattern:
+        compiled_type_pattern = compile_pattern(type_pattern.strip())
+        non_complying_columns = [
+            v.name
+            for _, v in catalog_node.columns.items()
+            if compiled_type_pattern.match(str(v.type)) is None
+            and compiled_column_name_pattern.match(str(v.name)) is not None
+        ]
 
-    def model_post_init(self, __context: object) -> None:
-        """Compile the regex patterns once at initialisation time."""
-        self._compiled_column_name_pattern = compile_pattern(
-            self.column_name_pattern.strip()
-        )
-        if self.type_pattern:
-            self._compiled_type_pattern = compile_pattern(self.type_pattern.strip())
-
-    def execute(self) -> None:
-        """Execute the check.
-
-        Raises:
-            DbtBouncerFailedCheckError: If column name does not comply to column type.
-
-        """
-        catalog_node = self._require_catalog_node()
-        if self.type_pattern and self._compiled_type_pattern is not None:
-            compiled_type_pattern = self._compiled_type_pattern
-            non_complying_columns = [
-                v.name
-                for _, v in catalog_node.columns.items()
-                if compiled_type_pattern.match(str(v.type)) is None
-                and self._compiled_column_name_pattern.match(str(v.name)) is not None
-            ]
-
-            if non_complying_columns:
-                raise DbtBouncerFailedCheckError(
-                    f"`{str(catalog_node.unique_id).split('.')[-1]}` has columns that don't comply with the specified data type regexp pattern (`{self.column_name_pattern}`): {non_complying_columns}"
-                )
-
-        elif self.types:
-            non_complying_columns = [
-                v.name
-                for _, v in catalog_node.columns.items()
-                if v.type in self.types
-                and self._compiled_column_name_pattern.match(str(v.name)) is None
-            ]
-
-            if non_complying_columns:
-                raise DbtBouncerFailedCheckError(
-                    f"`{str(catalog_node.unique_id).split('.')[-1]}` has columns that don't comply with the specified regexp pattern (`{self.column_name_pattern}`): {non_complying_columns}"
-                )
-
-    @model_validator(mode="after")
-    def _check_type_pattern_or_types(self) -> "CheckColumnNameCompliesToColumnType":
-        if not (self.type_pattern or self.types):
-            raise ValueError("Either 'type_pattern' or 'types' must be supplied.")
-        if self.type_pattern is not None and self.types is not None:
-            raise ValueError("Only one of 'type_pattern' or 'types' can be supplied.")
-        return self
-
-
-class CheckColumnNames(BaseCheck):
-    """Columns must have a name that matches the supplied regex.
-
-    Parameters:
-        columns_name_pattern (str): Regexp the column name must match.
-
-    Receives:
-        catalog_node (CatalogNodeEntry): The CatalogNodeEntry object to check.
-        models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.
-
-    Other Parameters:
-        description (str | None): Description of what the check does and why it is implemented.
-        exclude (str | None): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
-        include (str | None): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
-        materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
-        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
-
-    Example(s):
-        ```yaml
-        catalog_checks:
-            - name: check_column_names
-              column_name_pattern: [a-z_] # Lowercase only, underscores allowed
-        ```
-
-    """
-
-    model_config = ConfigDict(extra="forbid", protected_namespaces=())
-
-    catalog_node: Any | None = Field(default=None)
-    column_name_pattern: str
-    name: Literal["check_column_names"]
-
-    def execute(self) -> None:
-        """Execute the check.
-
-        Raises:
-            DbtBouncerFailedCheckError: If column name does not match regex.
-
-        """
-        catalog_node = self._require_catalog_node()
-        if _is_catalog_node_a_model(catalog_node, self._ctx.models):
-            non_complying_columns: list[str] = []
-            non_complying_columns.extend(
-                v.name
-                for _, v in catalog_node.columns.items()
-                if re.fullmatch(self.column_name_pattern.strip(), str(v.name)) is None
+        if non_complying_columns:
+            fail(
+                f"`{str(catalog_node.unique_id).split('.')[-1]}` has columns that don't comply with the specified data type regexp pattern (`{column_name_pattern}`): {non_complying_columns}"
             )
 
-            if non_complying_columns:
-                raise DbtBouncerFailedCheckError(
-                    f"`{str(catalog_node.unique_id).split('.')[-1]}` has columns ({non_complying_columns}) that do not match the supplied regex: `{self.column_name_pattern.strip()}`."
-                )
+    elif types:
+        non_complying_columns = [
+            v.name
+            for _, v in catalog_node.columns.items()
+            if v.type in types
+            and compiled_column_name_pattern.match(str(v.name)) is None
+        ]
+
+        if non_complying_columns:
+            fail(
+                f"`{str(catalog_node.unique_id).split('.')[-1]}` has columns that don't comply with the specified regexp pattern (`{column_name_pattern}`): {non_complying_columns}"
+            )
+
+
+@check(
+    "check_column_names",
+    iterate_over="catalog_node",
+    params={"column_name_pattern": str},
+)
+def check_column_names(catalog_node, ctx, *, column_name_pattern: str):
+    """Columns must have a name that matches the supplied regex."""
+    if _is_catalog_node_a_model(catalog_node, ctx.models):
+        non_complying_columns: list[str] = []
+        non_complying_columns.extend(
+            v.name
+            for _, v in catalog_node.columns.items()
+            if re.fullmatch(column_name_pattern.strip(), str(v.name)) is None
+        )
+
+        if non_complying_columns:
+            fail(
+                f"`{str(catalog_node.unique_id).split('.')[-1]}` has columns ({non_complying_columns}) that do not match the supplied regex: `{column_name_pattern.strip()}`."
+            )

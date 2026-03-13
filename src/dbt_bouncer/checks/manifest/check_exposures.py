@@ -1,189 +1,95 @@
-from typing import Any, Literal
-
-from pydantic import Field
-
-from dbt_bouncer.check_base import BaseCheck
-from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
+from dbt_bouncer.check_decorator import check, fail
 from dbt_bouncer.enums import Materialization
 
 
-class CheckExposureBasedOnModel(BaseCheck):
-    """Exposures should depend on a model.
-
-    Parameters:
-        maximum_number_of_models (int | None): The maximum number of models an exposure can depend on, defaults to 100.
-        minimum_number_of_models (int | None): The minimum number of models an exposure can depend on, defaults to 1.
-
-    Receives:
-        exposure (ExposureNode): The ExposureNode object to check.
-
-    Other Parameters:
-        description (str | None): Description of what the check does and why it is implemented.
-        exclude (str | None): Regex pattern to match the exposure path (i.e the .yml file where the exposure is configured). Exposure paths that match the pattern will not be checked.
-        include (str | None): Regex pattern to match the exposure path (i.e the .yml file where the exposure is configured). Only exposure paths that match the pattern will be checked.
-        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
-
-    Example(s):
-        ```yaml
-        manifest_checks:
-            - name: check_exposure_based_on_model
-        ```
-        ```yaml
-        manifest_checks:
-            - name: check_exposure_based_on_model
-              maximum_number_of_models: 3
-              minimum_number_of_models: 1
-        ```
-
-    """
-
-    exposure: Any | None = Field(default=None)
-    maximum_number_of_models: int = Field(default=100)
-    minimum_number_of_models: int = Field(default=1)
-    name: Literal["check_exposure_based_on_model"]
-
-    def execute(self) -> None:
-        """Execute the check.
-
-        Raises:
-            DbtBouncerFailedCheckError: If upstream models number is not within limits.
-
-        """
-        exposure = self._require_exposure()
-        depends_on = exposure.depends_on
-        number_of_upstream_models = (
-            len(getattr(depends_on, "nodes", []) or []) if depends_on else 0
-        )
-
-        if number_of_upstream_models < self.minimum_number_of_models:
-            raise DbtBouncerFailedCheckError(
-                f"`{exposure.name}` is based on less models ({number_of_upstream_models}) than the minimum permitted ({self.minimum_number_of_models})."
-            )
-        if number_of_upstream_models > self.maximum_number_of_models:
-            raise DbtBouncerFailedCheckError(
-                f"`{exposure.name}` is based on more models ({number_of_upstream_models}) than the maximum permitted ({self.maximum_number_of_models})."
-            )
-
-
-class CheckExposureBasedOnView(BaseCheck):
-    """Exposures should not be based on views.
-
-    Parameters:
-        materializations_to_include (list[str] | None): List of materializations to include in the check.
-
-    Receives:
-        exposure (ExposureNode): The ExposureNode object to check.
-        models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.
-
-    Other Parameters:
-        description (str | None): Description of what the check does and why it is implemented.
-        exclude (str | None): Regex pattern to match the exposure path (i.e the .yml file where the exposure is configured). Exposure paths that match the pattern will not be checked.
-        include (str | None): Regex pattern to match the exposure path (i.e the .yml file where the exposure is configured). Only exposure paths that match the pattern will be checked.
-        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
-
-    Example(s):
-        ```yaml
-        manifest_checks:
-            - name: check_exposure_based_on_view
-        ```
-        ```yaml
-        manifest_checks:
-            - name: check_exposure_based_on_view
-              materializations_to_include:
-                - ephemeral
-                - my_custom_materialization
-                - view
-        ```
-
-    """
-
-    exposure: Any | None = Field(default=None)
-    materializations_to_include: list[str] = Field(
-        default=[Materialization.EPHEMERAL, Materialization.VIEW],
+@check(
+    "check_exposure_based_on_model",
+    iterate_over="exposure",
+    params={
+        "maximum_number_of_models": (int, 100),
+        "minimum_number_of_models": (int, 1),
+    },
+)
+def check_exposure_based_on_model(
+    exposure, ctx, *, maximum_number_of_models: int, minimum_number_of_models: int
+):
+    """Exposures should depend on a model."""
+    depends_on = exposure.depends_on
+    number_of_upstream_models = (
+        len(getattr(depends_on, "nodes", []) or []) if depends_on else 0
     )
-    name: Literal["check_exposure_based_on_view"]
 
-    def execute(self) -> None:
-        """Execute the check.
-
-        Raises:
-            DbtBouncerFailedCheckError: If exposure is based on a model that is not a table.
-
-        """
-        exposure = self._require_exposure()
-        models_by_id = (
-            self._ctx.models_by_unique_id
-            if self._ctx.models_by_unique_id
-            else {m.unique_id: m for m in self._ctx.models}
+    if number_of_upstream_models < minimum_number_of_models:
+        fail(
+            f"`{exposure.name}` is based on less models ({number_of_upstream_models}) than the minimum permitted ({minimum_number_of_models})."
         )
-        non_table_upstream_dependencies = []
-        for node_id in getattr(exposure.depends_on, "nodes", []) or []:
-            model_obj = models_by_id.get(node_id)
-            if (
-                model_obj
-                and model_obj.resource_type == "model"
-                and model_obj.package_name == exposure.package_name
-                and model_obj.config
-                and model_obj.config.materialized in self.materializations_to_include
-            ):
-                non_table_upstream_dependencies.append(model_obj.name)
-
-        if non_table_upstream_dependencies:
-            raise DbtBouncerFailedCheckError(
-                f"`{exposure.name}` is based on a model that is not a table: {non_table_upstream_dependencies}."
-            )
-
-
-class CheckExposureOnNonPublicModels(BaseCheck):
-    """Exposures should be based on public models only.
-
-    Receives:
-        exposure (ExposureNode): The ExposureNode object to check.
-        models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.
-
-    Other Parameters:
-        description (str | None): Description of what the check does and why it is implemented.
-        exclude (str | None): Regex pattern to match the exposure path (i.e the .yml file where the exposure is configured). Exposure paths that match the pattern will not be checked.
-        include (str | None): Regex pattern to match the exposure path (i.e the .yml file where the exposure is configured). Only exposure paths that match the pattern will be checked.
-        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
-
-    Example(s):
-        ```yaml
-        manifest_checks:
-            - name: check_exposure_based_on_non_public_models
-        ```
-
-    """
-
-    exposure: Any | None = Field(default=None)
-    name: Literal["check_exposure_based_on_non_public_models"]
-
-    def execute(self) -> None:
-        """Execute the check.
-
-        Raises:
-            DbtBouncerFailedCheckError: If exposure is based on non-public models.
-
-        """
-        exposure = self._require_exposure()
-        models_by_id = (
-            self._ctx.models_by_unique_id
-            if self._ctx.models_by_unique_id
-            else {m.unique_id: m for m in self._ctx.models}
+    if number_of_upstream_models > maximum_number_of_models:
+        fail(
+            f"`{exposure.name}` is based on more models ({number_of_upstream_models}) than the maximum permitted ({maximum_number_of_models})."
         )
-        non_public_upstream_dependencies = []
-        for node_id in getattr(exposure.depends_on, "nodes", []) or []:
-            model_obj = models_by_id.get(node_id)
-            if (
-                model_obj
-                and model_obj.resource_type == "model"
-                and model_obj.package_name == exposure.package_name
-                and model_obj.access
-                and model_obj.access.value != "public"
-            ):
-                non_public_upstream_dependencies.append(model_obj.name)
 
-        if non_public_upstream_dependencies:
-            raise DbtBouncerFailedCheckError(
-                f"`{exposure.name}` is based on a model(s) that is not public: {non_public_upstream_dependencies}."
-            )
+
+@check(
+    "check_exposure_based_on_view",
+    iterate_over="exposure",
+    params={
+        "materializations_to_include": (
+            list[str],
+            [Materialization.EPHEMERAL, Materialization.VIEW],
+        ),
+    },
+)
+def check_exposure_based_on_view(
+    exposure, ctx, *, materializations_to_include: list[str]
+):
+    """Exposures should not be based on views."""
+    models_by_id = (
+        ctx.models_by_unique_id
+        if ctx.models_by_unique_id
+        else {m.unique_id: m for m in ctx.models}
+    )
+    non_table_upstream_dependencies = []
+    for node_id in getattr(exposure.depends_on, "nodes", []) or []:
+        model_obj = models_by_id.get(node_id)
+        if (
+            model_obj
+            and model_obj.resource_type == "model"
+            and model_obj.package_name == exposure.package_name
+            and model_obj.config
+            and model_obj.config.materialized in materializations_to_include
+        ):
+            non_table_upstream_dependencies.append(model_obj.name)
+
+    if non_table_upstream_dependencies:
+        fail(
+            f"`{exposure.name}` is based on a model that is not a table: {non_table_upstream_dependencies}."
+        )
+
+
+@check(
+    "check_exposure_based_on_non_public_models",
+    iterate_over="exposure",
+)
+def check_exposure_based_on_non_public_models(exposure, ctx):
+    """Exposures should be based on public models only."""
+    models_by_id = (
+        ctx.models_by_unique_id
+        if ctx.models_by_unique_id
+        else {m.unique_id: m for m in ctx.models}
+    )
+    non_public_upstream_dependencies = []
+    for node_id in getattr(exposure.depends_on, "nodes", []) or []:
+        model_obj = models_by_id.get(node_id)
+        if (
+            model_obj
+            and model_obj.resource_type == "model"
+            and model_obj.package_name == exposure.package_name
+            and model_obj.access
+            and model_obj.access.value != "public"
+        ):
+            non_public_upstream_dependencies.append(model_obj.name)
+
+    if non_public_upstream_dependencies:
+        fail(
+            f"`{exposure.name}` is based on a model(s) that is not public: {non_public_upstream_dependencies}."
+        )

@@ -1,5 +1,4 @@
 import pytest
-from pydantic import ValidationError
 
 from dbt_bouncer.testing import check_fails, check_passes
 
@@ -94,7 +93,7 @@ class TestCheckColumnNameCompliesToColumnType:
         )
 
     def test_missing_pattern_and_types(self):
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValueError, match=r"type_pattern.*types.*must be supplied"):
             check_passes(
                 "check_column_name_complies_to_column_type",
                 catalog_node={
@@ -122,7 +121,7 @@ class TestCheckColumnNameCompliesToColumnType:
             )
 
     def test_both_pattern_and_types(self):
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValueError, match=r"Only one of.*type_pattern.*types"):
             check_passes(
                 "check_column_name_complies_to_column_type",
                 catalog_node={
