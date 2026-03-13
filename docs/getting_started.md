@@ -157,12 +157,12 @@ In addition to the checks built into `dbt-bouncer`, the ability to add custom ch
 1. In this directory create a subdirectory named `catalog`, `manifest` or `run_results` depending on the type of artifact you want to check.
 1. In this subdirectory create a python file that defines a check. The check must meet the following criteria:
 
-            * Start with "Check".
-            * Inherit from dbt_bouncer.check_base.BaseCheck.
-            * Have a name attribute that is a string whose value is the snake case equivalent of the class name.
-            * A default value provided for optional input arguments and arguments that are received at execution time.
+            * The function name must start with `check_`.
+            * The function must be decorated with `@check` from `dbt_bouncer.check_decorator`.
+            * The first positional parameter determines the resource type (e.g. `model`, `source`, `exposure`).
+            * Use `fail()` from `dbt_bouncer.check_decorator` to signal a check failure.
             * Have a doc string that includes a description of the check, a list of possible input parameters and at least one example.
-            * A clear message in the event of a failure.
+            * A clear message passed to `fail()` in the event of a failure.
 
 1. In your config file, add the name of the check and any desired arguments.
 1. Run `dbt-bouncer`, your custom check will be executed.
@@ -186,30 +186,30 @@ An example:
 * Contents of `check_custom_to_me.py`:
 
     ```python
-    from typing import TYPE_CHECKING, Literal
-
-    from pydantic import Field
-
-    from dbt_bouncer.check_base import BaseCheck
-    from dbt_bouncer.utils import get_clean_model_name
-
-    if TYPE_CHECKING:
-        import warnings
-
-        with warnings.catch_warnings():
-            warnings.filterwarnings("ignore", category=UserWarning)
-            from dbt_bouncer.parsers import DbtBouncerModelBase
+    from dbt_bouncer.check_decorator import check, fail
 
 
-    class CheckModelDeprecationDate(BaseCheck):
+    @check
+    def check_model_deprecation_date(model):
+        """Models cannot have a deprecation date in the past.
 
-        model: "DbtBouncerModelBase" = Field(default=None)
-        name: Literal["check_model_deprecation_date"]
+        Receives:
+            model (ModelNode): The ModelNode object to check.
 
-        def execute(self) -> None:
-            """Execute the check."""
+        Other Parameters:
+            description (str | None): Description of what the check does.
+            exclude (str | None): Regex pattern to exclude model paths.
+            include (str | None): Regex pattern to include model paths.
+            severity (Literal["error", "warn"] | None): Severity level. Default: `error`.
 
-            assert self.model.deprecation_date is not None, f"`{get_clean_model_name(self.model.unique_id)}` requires a `deprecation_date` to be set."
+        Example(s):
+            ```yaml
+            manifest_checks:
+                - name: check_model_deprecation_date
+            ```
+        """
+        if model.deprecation_date is not None:
+            fail(f"`{model.name}` has a deprecation_date set.")
     ```
 
 * Contents of `dbt-bouncer.yml`:

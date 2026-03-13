@@ -32,52 +32,41 @@ make install
   - `catalog/` — catalog checks (`columns/` subdirectory for column-level)
   - `manifest/` — manifest checks (`models/` has 11 files by concern: access, code, columns, description, directories, lineage, meta, naming, tags, tests, versioning; `sources/` similarly split)
   - `run_results/` — run results checks
-- `src/dbt_bouncer/check_base.py` — `BaseCheck` (Pydantic model), all checks inherit from this
-- `src/dbt_bouncer/check_patterns.py` — abstract base classes for common patterns
+- `src/dbt_bouncer/check_base.py` — `BaseCheck` (Pydantic model), used by class-based checks
+- `src/dbt_bouncer/check_decorator.py` — `@check` decorator and `fail()` helper (preferred API)
 - `src/dbt_bouncer/runner.py` — orchestrates check execution
 - `src/dbt_bouncer/executor.py` — parallel execution with `ThreadPoolExecutor`
 - `tests/` — mirrors `src/` structure; fixtures in `tests/fixtures/`
 
 ### Check System
 
-All checks inherit from `BaseCheck`. Before writing a check from scratch, check if a pattern ABC in `check_patterns.py` fits:
-
-- `BaseNamePatternCheck` — validates resource name against regex
-- `BaseDescriptionPopulatedCheck` — checks description is populated
-- `BaseColumnsHaveTypesCheck` — all columns have `data_type`
-- `BaseHasUnitTestsCheck` — minimum unit test count
-- `BaseHasTagsCheck` — required tags (any/all/one criteria)
-- `BaseHasMetaKeysCheck` — required keys in meta config
+Checks are written using the `@check` decorator (preferred) or as class-based `BaseCheck` subclasses (for plugin authors). The decorator API infers the check name and resource type from the function signature.
 
 ### Runner Flow
 
-1. `runner.py` iterates checks, determines the resource type from class annotations
-2. Calls `set_resource()` to inject the per-iteration resource into the check instance
+1. `runner.py` iterates checks, determines the resource type from the function's first positional parameter (decorator API) or class annotations (class-based API)
+2. Injects the per-iteration resource into the check
 3. `Executor` batches checks by class and runs them via `ThreadPoolExecutor`
-4. Failed checks raise `DbtBouncerFailedCheckError` (from `dbt_bouncer.checks.common`)
+4. Failed checks call `fail()` (decorator API) or raise `DbtBouncerFailedCheckError` (class-based API)
 
 **Resource types:** catalog_node, catalog_source, exposure, macro, model, run_result, seed, semantic_model, snapshot, source, test, unit_test
 
 ## Writing a New Check
 
-**Naming:** class `Check<ResourceType>Xxx` (e.g. `CheckModelHasDescription`, `CheckExposureBasedOnModel`), name field is the snake_case equivalent.
+**Naming:** `check_<resource_type>_xxx` (e.g. `check_model_has_description`, `check_exposure_based_on_model`). The check name and resource type are inferred from the function name.
 
-**Template:**
+**Template (decorator API — preferred):**
 
 ```python
-from typing import Any, Literal
-
-from pydantic import Field
-
-from dbt_bouncer.check_base import BaseCheck
-from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
+from dbt_bouncer.check_decorator import check, fail
 
 
-class CheckModelXxx(BaseCheck):
+@check
+def check_model_xxx(model, *, some_param: str):
     """One-line description of the check.
 
     Parameters:
-        param_name (type): Description. (omit this section if no extra params)
+        some_param (str): Description. (omit this section if no extra params)
 
     Receives:
         model (ModelNode): The ModelNode object to check.
@@ -93,9 +82,44 @@ class CheckModelXxx(BaseCheck):
         ```yaml
         manifest_checks:
             - name: check_model_xxx
+              some_param: value
         ```
 
     """
+    if not some_condition:
+        fail(f"`{model.unique_id}` failed: reason.")
+```
+
+**Key rules:**
+
+- `@check` with no arguments — name and `iterate_over` are inferred from the function name
+- First positional parameter (excluding `ctx`) = the resource being checked (e.g. `model`, `source`, `exposure`)
+- Keyword-only arguments (after `*`) = user-configurable parameters in YAML
+- Add `ctx` as a parameter only when you need access to other resources (e.g. models list, manifest)
+- Call `fail()` to signal a check failure
+
+**Steps after writing:**
+
+1. Place in the appropriate submodule under `src/dbt_bouncer/checks/`
+2. Add to `dbt-bouncer-example.yml` and validate: `dbt-bouncer --config-file dbt-bouncer-example.yml`
+3. Write tests (happy + unhappy paths) in the mirror location under `tests/unit/checks/`
+4. Run `make test-unit` and `prek run --all-files`
+
+### Alternative: Class-based checks
+
+For plugin authors or cases requiring custom Pydantic validation, checks can still be written as `BaseCheck` subclasses:
+
+```python
+from typing import Any, Literal
+
+from pydantic import Field
+
+from dbt_bouncer.check_base import BaseCheck
+from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
+
+
+class CheckModelXxx(BaseCheck):
+    """Docstring with Parameters, Receives, Other Parameters, Example(s) sections."""
 
     model: Any | None = Field(default=None)
     name: Literal["check_model_xxx"]
@@ -108,13 +132,6 @@ class CheckModelXxx(BaseCheck):
                 f"`{model.unique_id}` failed: reason."
             )
 ```
-
-**Steps after writing:**
-
-1. Place in the appropriate submodule under `src/dbt_bouncer/checks/`
-2. Add to `dbt-bouncer-example.yml` and validate: `dbt-bouncer --config-file dbt-bouncer-example.yml`
-3. Write tests (happy + unhappy paths) in the mirror location under `tests/unit/checks/`
-4. Run `make test-unit` and `prek run --all-files`
 
 ## Testing
 

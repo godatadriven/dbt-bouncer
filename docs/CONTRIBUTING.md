@@ -179,18 +179,23 @@ uv run pytest ./tests/unit/checks/catalog/test_columns.py::test_check_columns_ar
 
 ## Adding a new check
 
-There are two ways to add a check: the **decorator API** (recommended for most checks) and the **class-based API** (for checks that need pattern ABCs or complex Pydantic validation).
+The recommended way to add a check is with the **decorator API**. The `@check` decorator generates a `BaseCheck` subclass from a plain function. For checks that need complex Pydantic validation, you can also use the **class-based API** (see below).
 
-### Option A: Decorator API (recommended)
+### Decorator API (recommended)
 
-The `@check` decorator generates a `BaseCheck` subclass from a plain function:
+The `@check` decorator infers everything from the function signature:
+
+- **name** = the function name (used in YAML config)
+- **iterate_over** = the first positional parameter (e.g. `model`, `source`, `seed`), or omit for context-only checks
+- **params** = keyword-only arguments (after `*`) become user-configurable parameters
+- **ctx** is optional — only include it in the signature if the function actually uses it
 
 ```python
 # src/dbt_bouncer/checks/manifest/models/naming.py
 from dbt_bouncer.check_decorator import check, fail
 
-@check("check_model_names", iterate_over="model", params={"model_name_pattern": str})
-def check_model_names(model, ctx, *, model_name_pattern: str):
+@check
+def check_model_names(model, *, model_name_pattern: str):
     """Model names must match the supplied regex."""
     import re
     if not re.match(model_name_pattern, str(model.name)):
@@ -200,11 +205,11 @@ def check_model_names(model, ctx, *, model_name_pattern: str):
 **Steps:**
 
 1. Choose the appropriate file in `./src/dbt_bouncer/checks/<category>/`.
-1. Add a function decorated with `@check(name, iterate_over=..., params=...)`:
-    - `name`: snake_case check name used in YAML config.
-    - `iterate_over`: the resource type (`"model"`, `"source"`, `"seed"`, etc.), or omit for context-only checks.
-    - `params`: dict of user-configurable parameters `{param_name: type}`. Use `(type, default)` tuple for optional params.
-    - The function receives the resource as the first arg and `ctx` (CheckContext) as the second.
+1. Add a function decorated with `@check`:
+    - The function name becomes the check name (snake_case, used in YAML config).
+    - The first positional parameter determines the resource type to iterate over (`model`, `source`, `seed`, etc.), or omit for context-only checks.
+    - Keyword-only arguments (after `*`) become user-configurable parameters.
+    - Add `ctx` as a parameter only if the function needs access to the `CheckContext`.
     - Call `fail(message)` to signal a check failure.
 1. Add the check to `dbt-bouncer-example.yml` and run `dbt-bouncer --config-file dbt-bouncer-example.yml`.
 1. Write tests using the test helpers:
@@ -223,12 +228,12 @@ def test_check_model_names_fail():
 5. Run `make test` to ensure tests pass.
 6. Open a PR!
 
-### Option B: Class-based API
+### Class-based API
 
-Use this when you need to inherit from a pattern ABC (see `src/dbt_bouncer/check_patterns.py`) or need complex Pydantic validation:
+Use this when you need complex Pydantic validation:
 
 1. In `./src/dbt_bouncer/checks` choose the appropriate directory for your check.
-1. Within the chosen file, add a Pydantic model inheriting from `BaseCheck` (or a pattern ABC):
+1. Within the chosen file, add a Pydantic model inheriting from `BaseCheck`:
     - Class name starts with "Check".
     - Has a `name: Literal["check_..."]` field.
     - Has an `execute()` method that raises `DbtBouncerFailedCheckError` on failure.
@@ -264,7 +269,7 @@ External packages can register checks via entry points:
 my_checks = "my_package.checks"
 ```
 
-Your module can use either the `@check` decorator or class-based checks. dbt-bouncer discovers them automatically via the entry point. Use `dbt_bouncer.testing` in your own test suite.
+Your module can use the `@check` decorator or class-based checks. dbt-bouncer discovers them automatically via the entry point. Use `dbt_bouncer.testing` in your own test suite.
 
 ## AI Agents and Tools
 

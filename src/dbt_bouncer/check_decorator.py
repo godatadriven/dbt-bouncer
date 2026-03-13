@@ -37,7 +37,7 @@ from __future__ import annotations
 
 import inspect
 import sys
-from typing import TYPE_CHECKING, Any, Literal, get_args, get_origin
+from typing import TYPE_CHECKING, Any, Literal
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -196,21 +196,3 @@ def _to_pascal_case(snake_name: str) -> str:
 
     """
     return "".join(word.capitalize() for word in snake_name.split("_"))
-
-
-def _is_type(obj: Any) -> bool:
-    """Check if obj is a type or a generic alias (e.g. list[str]).
-
-    Args:
-        obj: The object to check.
-
-    Returns:
-        True if obj is a type or typing generic.
-
-    """
-    if isinstance(obj, type):
-        return True
-    # Handle typing generics like list[str], Optional[int], etc.
-    return get_origin(obj) is not None or (
-        hasattr(obj, "__args__") and bool(get_args(obj))
-    )
