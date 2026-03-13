@@ -8,7 +8,24 @@ from dbt_bouncer.utils import clean_path_str
 
 @check
 def check_source_property_file_location(source):
-    """Source properties files must follow the guidance provided by dbt."""
+    """Source properties files must follow the guidance provided by dbt [here](https://docs.getdbt.com/best-practices/how-we-structure/1-guide-overview).
+
+    Receives:
+        source (SourceNode): The SourceNode object to check.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_source_property_file_location
+        ```
+
+    """
     original_path = Path(clean_path_str(source.original_file_path))
 
     if (

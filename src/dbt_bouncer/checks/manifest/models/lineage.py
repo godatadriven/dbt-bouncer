@@ -8,7 +8,36 @@ from dbt_bouncer.utils import get_clean_model_name
 def check_model_depends_on_macros(
     model, *, criteria: str = "all", required_macros: list[str]
 ):
-    """Models must depend on the specified macros."""
+    """Models must depend on the specified macros.
+
+    Parameters:
+        criteria: (Literal["any", "all", "one"] | None): Whether the model must depend on any, all, or exactly one of the specified macros. Default: `any`.
+        required_macros: (list[str]): List of macros the model must depend on. All macros must specify a namespace, e.g. `dbt.is_incremental`.
+
+    Receives:
+        model (ModelNode): The ModelNode object to check.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_model_depends_on_macros
+              required_macros:
+                - dbt.is_incremental
+            - name: check_model_depends_on_macros
+              criteria: one
+              required_macros:
+                - my_package.sampler
+                - my_package.sampling
+        ```
+
+    """
     upstream_macros = [
         (".").join(m.split(".")[1:])
         for m in getattr(model.depends_on, "macros", []) or []
@@ -37,7 +66,25 @@ def check_model_depends_on_macros(
 
 @check
 def check_model_depends_on_multiple_sources(model):
-    """Models cannot reference more than one source."""
+    """Models cannot reference more than one source.
+
+    Parameters:
+        model (ModelNode): The ModelNode object to check.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_model_depends_on_multiple_sources
+        ```
+
+    """
     num_reffed_sources = sum(
         x.split(".")[0] == "source"
         for x in getattr(model.depends_on, "nodes", []) or []
@@ -50,7 +97,28 @@ def check_model_depends_on_multiple_sources(model):
 
 @check
 def check_model_has_exposure(model, ctx):
-    """Models must have an exposure."""
+    """Models must have an exposure.
+
+    Receives:
+        exposures (list[ExposureNode]):  List of ExposureNode objects parsed from `manifest.json`.
+        model (ModelNode): The ModelNode object to check.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_model_has_exposure
+              description: Ensure all marts are part of an exposure.
+              include: ^models/marts
+        ```
+
+    """
     models_in_exposures = {
         node
         for e in ctx.exposures
@@ -65,7 +133,25 @@ def check_model_has_exposure(model, ctx):
 
 @check
 def check_model_has_no_upstream_dependencies(model):
-    """Identify if models have no upstream dependencies as this likely indicates hard-coded tables references."""
+    """Identify if models have no upstream dependencies as this likely indicates hard-coded tables references.
+
+    Receives:
+        model (ModelNode): The ModelNode object to check.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_model_has_no_upstream_dependencies
+        ```
+
+    """
     if (
         not model.depends_on
         or not model.depends_on.nodes
@@ -85,7 +171,39 @@ def check_model_max_chained_views(
     max_chained_views: int = 3,
     package_name: str | None = None,
 ):
-    """Models cannot have more than the specified number of upstream dependents that are not tables."""
+    """Models cannot have more than the specified number of upstream dependents that are not tables.
+
+    Parameters:
+        materializations_to_include (list[str] | None): List of materializations to include in the check.
+        max_chained_views (int | None): The maximum number of upstream dependents that are not tables.
+
+    Receives:
+        model (ModelNode): The ModelNode object to check.
+        models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_model_max_chained_views
+        ```
+        ```yaml
+        manifest_checks:
+            - name: check_model_max_chained_views
+              materializations_to_include:
+                - ephemeral
+                - my_custom_materialization
+                - view
+              max_chained_views: 5
+        ```
+
+    """
     manifest_obj = ctx.manifest_obj
 
     models_by_id = (
@@ -158,7 +276,30 @@ def check_model_max_chained_views(
 
 @check
 def check_model_max_fanout(model, ctx, *, max_downstream_models: int = 3):
-    """Models cannot have more than the specified number of downstream models."""
+    """Models cannot have more than the specified number of downstream models.
+
+    Parameters:
+        max_downstream_models (int | None): The maximum number of permitted downstream models.
+
+    Receives:
+        model (ModelNode): The ModelNode object to check.
+        models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_model_max_fanout
+              max_downstream_models: 2
+        ```
+
+    """
     num_downstream_models = sum(
         model.unique_id in (getattr(m.depends_on, "nodes", []) if m.depends_on else [])
         for m in ctx.models
@@ -178,7 +319,31 @@ def check_model_max_upstream_dependencies(
     max_upstream_models: int = 5,
     max_upstream_sources: int = 1,
 ):
-    """Limit the number of upstream dependencies a model has."""
+    """Limit the number of upstream dependencies a model has.
+
+    Parameters:
+        max_upstream_macros (int | None): The maximum number of permitted upstream macros.
+        max_upstream_models (int | None): The maximum number of permitted upstream models.
+        max_upstream_sources (int | None): The maximum number of permitted upstream sources.
+
+    Receives:
+        model (ModelNode): The ModelNode object to check.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_model_max_upstream_dependencies
+              max_upstream_models: 3
+        ```
+
+    """
     depends_on = model.depends_on
     if depends_on:
         num_upstream_macros = len(list(getattr(depends_on, "macros", []) or []))

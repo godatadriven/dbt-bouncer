@@ -21,7 +21,35 @@ def _is_catalog_node_a_model(catalog_node: Any, models: list[Any]) -> bool:
 def check_column_description_populated(
     catalog_node, ctx, *, min_description_length: int | None = None
 ):
-    """Columns must have a populated description."""
+    """Columns must have a populated description.
+
+    Parameters:
+        min_description_length (int | None): Minimum length required for the description to be considered populated.
+
+    Receives:
+        catalog_node (CatalogNodeEntry): The CatalogNodeEntry object to check.
+        manifest_obj (ManifestObject): The ManifestObject object parsed from `manifest.json`.
+        models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_column_description_populated
+              include: ^models/marts
+        ```
+        ```yaml
+        manifest_checks:
+            - name: check_column_description_populated
+              min_description_length: 25 # Setting a stricter requirement for description length
+        ```
+
+    """
     if _is_catalog_node_a_model(catalog_node, ctx.models):
         model = next(m for m in ctx.models if m.unique_id == catalog_node.unique_id)
         non_complying_columns = []
@@ -49,7 +77,27 @@ def check_column_description_populated(
 def check_columns_are_all_documented(
     catalog_node, ctx, *, case_sensitive: bool | None = True
 ):
-    """All columns in a model should be included in the model's properties file."""
+    """All columns in a model should be included in the model's properties file, i.e. `.yml` file.
+
+    Receives:
+        case_sensitive (bool | None): Whether the column names are case sensitive or not. Necessary for adapters like `dbt-snowflake` where the column in `catalog.json` is uppercase but the column in `manifest.json` can be lowercase. Defaults to `false` for `dbt-snowflake`, otherwise `true`.
+        catalog_node (CatalogNodeEntry): The CatalogNodeEntry object to check.
+        manifest_obj (ManifestObject): The ManifestObject object parsed from `manifest.json`.
+        models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        catalog_checks:
+            - name: check_columns_are_all_documented
+        ```
+
+    """
     if _is_catalog_node_a_model(catalog_node, ctx.models):
         model = next(m for m in ctx.models if m.unique_id == catalog_node.unique_id)
 
@@ -81,7 +129,26 @@ def check_columns_are_all_documented(
 def check_columns_are_documented_in_public_models(
     catalog_node, ctx, *, min_description_length: int | None = None
 ):
-    """Columns should have a populated description in public models."""
+    """Columns should have a populated description in public models.
+
+    Receives:
+        catalog_node (CatalogNodeEntry): The CatalogNodeEntry object to check.
+        min_description_length (int | None): Minimum length required for the description to be considered populated.
+        models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        catalog_checks:
+            - name: check_columns_are_documented_in_public_models
+        ```
+
+    """
     if _is_catalog_node_a_model(catalog_node, ctx.models):
         model = next(m for m in ctx.models if m.unique_id == catalog_node.unique_id)
         non_complying_columns = []

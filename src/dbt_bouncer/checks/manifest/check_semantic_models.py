@@ -3,7 +3,25 @@ from dbt_bouncer.check_decorator import check, fail
 
 @check
 def check_semantic_model_based_on_non_public_models(semantic_model, ctx):
-    """Semantic models should be based on public models only."""
+    """Semantic models should be based on public models only.
+
+    Receives:
+        models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.
+        semantic_model (SemanticModelNode): The SemanticModelNode object to check.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the semantic model path (i.e the .yml file where the semantic model is configured). Semantic model paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the semantic model path (i.e the .yml file where the semantic model is configured). Only semantic model paths that match the pattern will be checked.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_semantic_model_based_on_non_public_models
+        ```
+
+    """
     models_by_id = (
         ctx.models_by_unique_id
         if ctx.models_by_unique_id

@@ -17,7 +17,38 @@ class TagExtension(StandaloneTag):
 def check_macro_arguments_description_populated(
     macro, *, min_description_length: int | None = None
 ):
-    """Macro arguments must have a populated description."""
+    """Macro arguments must have a populated description.
+
+    Parameters:
+        min_description_length (int | None): Minimum length required for the description to be considered populated.
+
+    Receives:
+        macro (Macros): The Macros object to check.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the macro path. Macro paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_macro_arguments_description_populated
+        ```
+        ```yaml
+        # Only "common" macros need to have their arguments populated
+        manifest_checks:
+            - name: check_macro_arguments_description_populated
+              include: ^macros/common
+        ```
+        ```yaml
+        manifest_checks:
+            - name: check_macro_arguments_description_populated
+              min_description_length: 25 # Setting a stricter requirement for description length
+        ```
+
+    """
     environment = Environment(autoescape=True, extensions=[TagExtension])
     ast = environment.parse(macro.macro_sql)
 
@@ -68,7 +99,29 @@ def check_macro_arguments_description_populated(
 
 @check
 def check_macro_code_does_not_contain_regexp_pattern(macro, *, regexp_pattern: str):
-    """The raw code for a macro must not match the specified regexp pattern."""
+    """The raw code for a macro must not match the specified regexp pattern.
+
+    Parameters:
+        regexp_pattern (str): The regexp pattern that should not be matched by the macro code.
+
+    Receives:
+        macro (Macros): The Macros object to check.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the macro path. Macro paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            # Prefer `coalesce` over `ifnull`: [https://docs.sqlfluff.com/en/stable/rules.html#sqlfluff.rules.sphinx.Rule_CV02](https://docs.sqlfluff.com/en/stable/rules.html#sqlfluff.rules.sphinx.Rule_CV02)
+            - name: check_macro_code_does_not_contain_regexp_pattern
+              regexp_pattern: .*[i][f][n][u][l][l].*
+        ```
+
+    """
     compiled_pattern = compile_pattern(regexp_pattern.strip(), flags=re.DOTALL)
     if compiled_pattern.match(macro.macro_sql) is not None:
         fail(
@@ -80,7 +133,33 @@ def check_macro_code_does_not_contain_regexp_pattern(macro, *, regexp_pattern: s
 def check_macro_description_populated(
     macro, *, min_description_length: int | None = None
 ):
-    """Macros must have a populated description."""
+    """Macros must have a populated description.
+
+    Parameters:
+        min_description_length (int | None): Minimum length required for the description to be considered populated.
+
+    Receives:
+        macro (Macros): The Macros object to check.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the macro path. Macro paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_macro_description_populated
+        ```
+        ```yaml
+        # Only "common" macros need to have a populated description
+        manifest_checks:
+            - name: check_macro_description_populated
+              include: ^macros/common
+        ```
+
+    """
     if not is_description_populated(
         str(macro.description or ""), min_description_length or 4
     ):
@@ -89,7 +168,32 @@ def check_macro_description_populated(
 
 @check
 def check_macro_max_number_of_lines(macro, *, max_number_of_lines: int = 100):
-    """Macros may not have more than the specified number of lines."""
+    """Macros may not have more than the specified number of lines.
+
+    Parameters:
+        max_number_of_lines (int): The maximum number of permitted lines.
+
+    Receives:
+        macro (Macros): The Macros object to check.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the macro path. Macro paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_macro_max_number_of_lines
+        ```
+        ```yaml
+        manifest_checks:
+            - name: check_macro_max_number_of_lines
+              max_number_of_lines: 100
+        ```
+
+    """
     actual_number_of_lines = macro.macro_sql.count("\n") + 1
 
     if actual_number_of_lines > max_number_of_lines:
@@ -100,7 +204,26 @@ def check_macro_max_number_of_lines(macro, *, max_number_of_lines: int = 100):
 
 @check
 def check_macro_name_matches_file_name(macro):
-    """Macros names must be the same as the file they are contained in."""
+    """Macros names must be the same as the file they are contained in.
+
+    Generic tests are also macros, however to document these tests the "name" value must be preceded with "test_".
+
+    Receives:
+        macro (Macros): The Macros object to check.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the macro path. Macro paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_macro_name_matches_file_name
+        ```
+
+    """
     file_path = Path(clean_path_str(macro.original_file_path))
     file_stem = file_path.stem
 
@@ -116,7 +239,24 @@ def check_macro_name_matches_file_name(macro):
 
 @check
 def check_macro_property_file_location(macro):
-    """Macro properties files must follow the guidance provided by dbt."""
+    """Macro properties files must follow the guidance provided by dbt [here](https://docs.getdbt.com/best-practices/how-we-structure/5-the-rest-of-the-project#how-we-use-the-other-folders).
+
+    Receives:
+        macro (Macros): The Macros object to check.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the macro path. Macro paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_macro_property_file_location
+        ```
+
+    """
     original_path = Path(clean_path_str(macro.original_file_path))
 
     # Logic matches previous manual splitting:

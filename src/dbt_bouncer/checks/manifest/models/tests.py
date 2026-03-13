@@ -17,7 +17,38 @@ def check_model_has_unique_test(
         "unique",
     ],
 ):
-    """Models must have a test for uniqueness of a column."""
+    """Models must have a test for uniqueness of a column.
+
+    Parameters:
+        accepted_uniqueness_tests (list[str] | None): List of tests that are accepted as uniqueness tests.
+
+    Receives:
+        model (ModelNode): The ModelNode object to check.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_model_has_unique_test
+              include: ^models/marts
+        ```
+        ```yaml
+        manifest_checks:
+        # Example of allowing a custom uniqueness test
+            - name: check_model_has_unique_test
+              accepted_uniqueness_tests:
+                - dbt_expectations.expect_compound_columns_to_be_unique # i.e. tests from packages must include package name
+                - my_custom_uniqueness_test
+                - unique
+        ```
+
+    """
     num_unique_tests = 0
     for test in ctx.tests:
         test_metadata = getattr(test, "test_metadata", None)
@@ -46,7 +77,40 @@ def check_model_has_unique_test(
 
 @check
 def check_model_has_unit_tests(model, ctx, *, min_number_of_unit_tests: int = 1):
-    """Models must have more than the specified number of unit tests."""
+    """Models must have more than the specified number of unit tests.
+
+    Parameters:
+        min_number_of_unit_tests (int | None): The minimum number of unit tests that a model must have.
+
+    Receives:
+        manifest_obj (ManifestObject): The ManifestObject object parsed from `manifest.json`.
+        model (ModelNode): The ModelNode object to check.
+        unit_tests (list[UnitTests]): List of UnitTests objects parsed from `manifest.json`.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    !!! warning
+
+        This check is only supported for dbt 1.8.0 and above.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_model_has_unit_tests
+              include: ^models/marts
+        ```
+        ```yaml
+        manifest_checks:
+            - name: check_model_has_unit_tests
+              min_number_of_unit_tests: 2
+        ```
+
+    """
     manifest_obj = ctx.manifest_obj
     if get_package_version_number(
         manifest_obj.manifest.metadata.dbt_version or "0.0.0"
@@ -73,7 +137,23 @@ def check_model_has_unit_tests(model, ctx, *, min_number_of_unit_tests: int = 1)
 
 @check
 def check_model_test_coverage(ctx, *, min_model_test_coverage_pct: float = 100):
-    """Set the minimum percentage of models that have at least one test."""
+    """Set the minimum percentage of models that have at least one test.
+
+    Parameters:
+        min_model_test_coverage_pct (float): The minimum percentage of models that must have at least one test.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_model_test_coverage
+              min_model_test_coverage_pct: 90
+        ```
+
+    """
     num_models = len(ctx.models)
     # Build set of model IDs that have at least one test
     tested_model_ids = {

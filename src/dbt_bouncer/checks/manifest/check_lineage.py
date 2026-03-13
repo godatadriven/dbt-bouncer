@@ -6,7 +6,37 @@ from dbt_bouncer.utils import clean_path_str, compile_pattern, get_clean_model_n
 def check_lineage_permitted_upstream_models(
     model, ctx, *, package_name: str | None = None, upstream_path_pattern: str
 ):
-    """Upstream models must have a path that matches the provided `upstream_path_pattern`."""
+    """Upstream models must have a path that matches the provided `upstream_path_pattern`.
+
+    Parameters:
+        upstream_path_pattern (str): Regexp pattern to match the upstream model(s) path.
+
+    Receives:
+        manifest_obj (ManifestObject): The manifest object.
+        model (ModelNode): The ModelNode object to check.
+        models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_lineage_permitted_upstream_models
+              include: ^models/staging
+              upstream_path_pattern: $^
+            - name: check_lineage_permitted_upstream_models
+              include: ^models/intermediate
+              upstream_path_pattern: ^models/staging|^models/intermediate
+            - name: check_lineage_permitted_upstream_models
+              include: ^models/marts
+              upstream_path_pattern: ^models/staging|^models/intermediate
+        ```
+
+    """
     compiled_upstream_path_pattern = compile_pattern(upstream_path_pattern.strip())
     manifest_obj = ctx.manifest_obj
     upstream_models = [
@@ -38,7 +68,25 @@ def check_lineage_permitted_upstream_models(
 
 @check
 def check_lineage_seed_cannot_be_used(model):
-    """Seed cannot be referenced in models with a path that matches the specified `include` config."""
+    """Seed cannot be referenced in models with a path that matches the specified `include` config.
+
+    Receives:
+        model (ModelNode): The ModelNode object to check.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_lineage_seed_cannot_be_used
+              include: ^models/intermediate|^models/marts
+        ```
+
+    """
     if [
         x
         for x in getattr(model.depends_on, "nodes", []) or []
@@ -51,7 +99,25 @@ def check_lineage_seed_cannot_be_used(model):
 
 @check
 def check_lineage_source_cannot_be_used(model):
-    """Sources cannot be referenced in models with a path that matches the specified `include` config."""
+    """Sources cannot be referenced in models with a path that matches the specified `include` config.
+
+    Receives:
+        model (ModelNode): The ModelNode object to check.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_lineage_source_cannot_be_used
+              include: ^models/intermediate|^models/marts
+        ```
+
+    """
     if [
         x
         for x in getattr(model.depends_on, "nodes", []) or []

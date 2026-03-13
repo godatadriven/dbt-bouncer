@@ -4,7 +4,30 @@ from dbt_bouncer.utils import get_clean_model_name
 
 @check
 def check_seed_columns_are_all_documented(catalog_node, ctx):
-    """All columns in a seed CSV file should be included in the seed's properties file."""
+    """All columns in a seed CSV file should be included in the seed's properties file, i.e. `.yml` file.
+
+    !!! warning
+
+        This check is only supported for dbt 1.9.0 and above.
+
+    Receives:
+        catalog_node (CatalogNodeEntry): The CatalogNodeEntry object to check.
+        manifest_obj (ManifestObject): The ManifestObject object parsed from `manifest.json`.
+        seeds (list[SeedNode]): List of SeedNode objects parsed from `manifest.json`.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the seed path. Seed paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the seed path. Only seed paths that match the pattern will be checked.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        catalog_checks:
+            - name: check_seed_columns_are_all_documented
+        ```
+
+    """
     if catalog_node.unique_id is not None and catalog_node.unique_id.startswith(
         "seed."
     ):

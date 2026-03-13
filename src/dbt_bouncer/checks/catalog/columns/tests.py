@@ -8,7 +8,31 @@ from dbt_bouncer.utils import compile_pattern
 def check_column_has_specified_test(
     catalog_node, ctx, *, column_name_pattern: str, test_name: str
 ):
-    """Columns that match the specified regexp pattern must have a specified test."""
+    """Columns that match the specified regexp pattern must have a specified test.
+
+    Parameters:
+        column_name_pattern (str): Regex pattern to match the column name.
+        test_name (str): Name of the test to check for.
+
+    Receives:
+        catalog_node (CatalogNodeEntry): The CatalogNodeEntry object to check.
+        tests (list[TestNode]): List of TestNode objects parsed from `manifest.json`.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        catalog_checks:
+            - name: check_column_has_specified_test
+              column_name_pattern: ^is_.*
+              test_name: not_null
+        ```
+
+    """
     compiled_column_name_pattern = compile_pattern(column_name_pattern.strip())
     columns_to_check = [
         v.name

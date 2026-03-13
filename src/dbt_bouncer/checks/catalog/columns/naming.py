@@ -26,10 +26,64 @@ def check_column_name_complies_to_column_type(
     type_pattern: str | None = None,
     types: list[str] | None = None,
 ):
-    """Columns with the specified regexp naming pattern must have compliant data types.
+    """Columns with the specified regexp naming pattern must have data types that comply to the specified regexp pattern or list of data types.
+
+    Note: One of `type_pattern` or `types` must be specified.
 
     Raises:
         ValueError: If neither or both of type_pattern/types are supplied.
+
+    Parameters:
+        column_name_pattern (str): Regex pattern to match the model name.
+        type_pattern (str | None): Regex pattern to match the data types.
+        types (list[str] | None): List of data types to check.
+
+    Receives:
+        catalog_node (CatalogNodeEntry): The CatalogNodeEntry object to check.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        catalog_checks:
+            # DATE columns must end with "_date"
+            - name: check_column_name_complies_to_column_type
+              column_name_pattern: .*_date$
+              types:
+                - DATE
+        ```
+        ```yaml
+        catalog_checks:
+            # BOOLEAN columns must start with "is_"
+            - name: check_column_name_complies_to_column_type
+              column_name_pattern: ^is_.*
+              types:
+                - BOOLEAN
+        ```
+        ```yaml
+        catalog_checks:
+            # Columns of all types must consist of lowercase letters and underscores. Note that the specified types depend on the underlying database.
+            - name: check_column_name_complies_to_column_type
+              column_name_pattern: ^[a-z_]*$
+              types:
+                - BIGINT
+                - BOOLEAN
+                - DATE
+                - DOUBLE
+                - INTEGER
+                - VARCHAR
+        ```
+        ```yaml
+        catalog_checks:
+            # No STRUCT data types permitted.
+            - name: check_column_name_complies_to_column_type
+              column_name_pattern: ^[a-z_]*$
+              type_pattern: ^(?!STRUCT)
+        ```
 
     """
     if not (type_pattern or types):
@@ -71,7 +125,29 @@ def check_column_name_complies_to_column_type(
 
 @check
 def check_column_names(catalog_node, ctx, *, column_name_pattern: str):
-    """Columns must have a name that matches the supplied regex."""
+    """Columns must have a name that matches the supplied regex.
+
+    Parameters:
+        column_name_pattern (str): Regexp the column name must match.
+
+    Receives:
+        catalog_node (CatalogNodeEntry): The CatalogNodeEntry object to check.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        catalog_checks:
+            - name: check_column_names
+              column_name_pattern: [a-z_] # Lowercase only, underscores allowed
+        ```
+
+    """
     if _is_catalog_node_a_model(catalog_node, ctx.models):
         non_complying_columns: list[str] = []
         non_complying_columns.extend(
