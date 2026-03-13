@@ -62,7 +62,7 @@ def check_model_has_contracts_enforced(model):
 
 @check("check_model_number_of_grants", iterate_over="model")
 def check_model_number_of_grants(
-    model, *, max_number_of_privileges: int, min_number_of_privileges: int
+    model, *, max_number_of_privileges: int = 100, min_number_of_privileges: int = 0
 ):
     """Model can have the specified number of privileges."""
     config = model.config
