@@ -198,6 +198,7 @@ manifest_checks:
   - name: check_semantic_model_based_on_non_public_models
 
   # Snapshots
+  - name: check_snapshot_description_populated
   - name: check_snapshot_has_tags
     exclude: snapshots/snapshot_orders.sql
     tags:

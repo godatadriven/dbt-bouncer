@@ -1,5 +1,47 @@
 from dbt_bouncer.check_decorator import check, fail
-from dbt_bouncer.utils import compile_pattern
+from dbt_bouncer.utils import (
+    compile_pattern,
+    get_clean_model_name,
+    is_description_populated,
+)
+
+
+@check
+def check_snapshot_description_populated(
+    snapshot, *, min_description_length: int | None = None
+):
+    """Snapshots must have a populated description.
+
+    Parameters:
+        min_description_length (int | None): Minimum length required for the description to be considered populated.
+
+    Receives:
+        snapshot (SnapshotNode): The SnapshotNode object to check.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the snapshot path. Snapshot paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the snapshot path. Only snapshot paths that match the pattern will be checked.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_snapshot_description_populated
+        ```
+        ```yaml
+        manifest_checks:
+            - name: check_snapshot_description_populated
+              min_description_length: 25 # Setting a stricter requirement for description length
+        ```
+
+    """
+    if not is_description_populated(
+        snapshot.description or "", min_description_length or 4
+    ):
+        fail(
+            f"`{get_clean_model_name(snapshot.unique_id)}` does not have a populated description."
+        )
 
 
 @check

@@ -30,7 +30,10 @@ def test_cli_happy_path(caplog, dbt_artifacts_dir, tmp_path):
             if item["name"] in ["check_seed_columns_are_all_documented"]:
                 bouncer_config["catalog_checks"].remove(item)
         for item in bouncer_config["manifest_checks"]:
-            if item["name"] in ["check_seed_description_populated"]:
+            if item["name"] in [
+                "check_seed_description_populated",
+                "check_snapshot_description_populated",
+            ]:
                 bouncer_config["manifest_checks"].remove(item)
 
     # Due to non-backwards compatible dbt-fusion changes, this check doesn't work with dbt-core < 1.10
