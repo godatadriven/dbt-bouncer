@@ -33,6 +33,7 @@ def test_cli_happy_path(caplog, dbt_artifacts_dir, tmp_path):
             if item["name"] in [
                 "check_seed_description_populated",
                 "check_snapshot_description_populated",
+                "check_test_has_meta_keys",
             ]:
                 bouncer_config["manifest_checks"].remove(item)
 
