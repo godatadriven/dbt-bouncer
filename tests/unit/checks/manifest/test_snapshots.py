@@ -14,6 +14,53 @@ _SNAPSHOT_BASE = {
 
 
 @pytest.mark.parametrize(
+    ("snapshot_overrides", "min_description_length", "check_fn"),
+    [
+        pytest.param(
+            {**_SNAPSHOT_BASE, "description": "A valid description."},
+            None,
+            check_passes,
+            id="has_description",
+        ),
+        pytest.param(
+            {
+                **_SNAPSHOT_BASE,
+                "description": "A valid description that is long enough.",
+            },
+            25,
+            check_passes,
+            id="has_description_min_length",
+        ),
+        pytest.param(
+            {**_SNAPSHOT_BASE, "description": ""},
+            None,
+            check_fails,
+            id="empty_description",
+        ),
+        pytest.param(
+            {**_SNAPSHOT_BASE, "description": "abc"},
+            None,
+            check_fails,
+            id="too_short_description",
+        ),
+        pytest.param(
+            {**_SNAPSHOT_BASE, "description": "Short desc."},
+            25,
+            check_fails,
+            id="below_min_description_length",
+        ),
+    ],
+)
+def test_check_snapshot_description_populated(
+    snapshot_overrides, min_description_length, check_fn
+):
+    kwargs = {"snapshot": snapshot_overrides}
+    if min_description_length is not None:
+        kwargs["min_description_length"] = min_description_length
+    check_fn("check_snapshot_description_populated", **kwargs)
+
+
+@pytest.mark.parametrize(
     ("snapshot_overrides", "tags", "criteria", "check_fn"),
     [
         pytest.param(
