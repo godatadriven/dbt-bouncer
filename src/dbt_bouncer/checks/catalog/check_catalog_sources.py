@@ -1,12 +1,8 @@
-from typing import Any, Literal
-
-from pydantic import Field
-
-from dbt_bouncer.check_base import BaseCheck
-from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
+from dbt_bouncer.check_decorator import check, fail
 
 
-class CheckSourceColumnsAreAllDocumented(BaseCheck):
+@check
+def check_source_columns_are_all_documented(catalog_source, ctx):
     """All columns in a source should be included in the source's properties file, i.e. `.yml` file.
 
     Receives:
@@ -26,27 +22,13 @@ class CheckSourceColumnsAreAllDocumented(BaseCheck):
         ```
 
     """
-
-    catalog_source: Any | None = Field(default=None)
-    name: Literal["check_source_columns_are_all_documented"]
-
-    def execute(self) -> None:
-        """Execute the check.
-
-        Raises:
-            DbtBouncerFailedCheckError: If columns are undocumented.
-
-        """
-        catalog_source = self._require_catalog_source()
-        source = next(
-            s for s in self._ctx.sources if s.unique_id == catalog_source.unique_id
+    source = next(s for s in ctx.sources if s.unique_id == catalog_source.unique_id)
+    undocumented_columns = [
+        v.name
+        for _, v in catalog_source.columns.items()
+        if v.name not in (source.columns or {})
+    ]
+    if undocumented_columns:
+        fail(
+            f"`{catalog_source.unique_id}` has columns that are not included in the sources properties file: {undocumented_columns}"
         )
-        undocumented_columns = [
-            v.name
-            for _, v in catalog_source.columns.items()
-            if v.name not in (source.columns or {})
-        ]
-        if undocumented_columns:
-            raise DbtBouncerFailedCheckError(
-                f"`{catalog_source.unique_id}` has columns that are not included in the sources properties file: {undocumented_columns}"
-            )

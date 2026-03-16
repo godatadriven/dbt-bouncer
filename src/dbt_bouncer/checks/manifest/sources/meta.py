@@ -1,13 +1,12 @@
 """Checks related to source meta configuration."""
 
-from typing import Any, Literal
-
-from pydantic import Field
-
-from dbt_bouncer.check_patterns import BaseHasMetaKeysCheck
+from dbt_bouncer.check_decorator import check, fail
+from dbt_bouncer.checks.common import NestedDict
+from dbt_bouncer.utils import find_missing_meta_keys
 
 
-class CheckSourceHasMetaKeys(BaseHasMetaKeysCheck):
+@check
+def check_source_has_meta_keys(source, *, keys: NestedDict):
     """The `meta` config for sources must have the specified keys.
 
     Parameters:
@@ -34,15 +33,11 @@ class CheckSourceHasMetaKeys(BaseHasMetaKeysCheck):
         ```
 
     """
-
-    name: Literal["check_source_has_meta_keys"]
-    source: Any | None = Field(default=None)
-
-    @property
-    def _resource_meta(self) -> dict[str, Any]:
-        return self._require_source().meta
-
-    @property
-    def _resource_display_name(self) -> str:
-        source = self._require_source()
-        return f"{source.source_name}.{source.name}"
+    display = f"{source.source_name}.{source.name}"
+    missing_keys = find_missing_meta_keys(
+        meta_config=source.meta, required_keys=keys.model_dump()
+    )
+    if missing_keys:
+        fail(
+            f"`{display}` is missing the following keys from the `meta` config: {[x.replace('>>', '') for x in missing_keys]}"
+        )

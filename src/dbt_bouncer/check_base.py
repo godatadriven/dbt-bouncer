@@ -69,6 +69,15 @@ class BaseCheck(BaseModel):
     _ctx: Any = PrivateAttr(default=None)
     _min_description_length: ClassVar[int] = 4
 
+    def set_context(self, ctx: Any) -> None:
+        """Set the execution context for this check instance.
+
+        Args:
+            ctx: A ``CheckContext`` holding parsed dbt artifacts.
+
+        """
+        self._ctx = ctx
+
     def set_resource(self, resource: Any, iterate_over_value: str) -> None:
         """Set the per-iteration resource on this check instance.
 

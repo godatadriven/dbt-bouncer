@@ -1,14 +1,10 @@
 """Checks related to source freshness."""
 
-from typing import Any, Literal
-
-from pydantic import Field
-
-from dbt_bouncer.check_base import BaseCheck
-from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
+from dbt_bouncer.check_decorator import check, fail
 
 
-class CheckSourceFreshnessPopulated(BaseCheck):
+@check
+def check_source_freshness_populated(source):
     """Sources must have a populated freshness.
 
     Receives:
@@ -27,33 +23,22 @@ class CheckSourceFreshnessPopulated(BaseCheck):
         ```
 
     """
+    display = f"{source.source_name}.{source.name}"
+    error_msg = f"`{display}` does not have a populated freshness."
 
-    name: Literal["check_source_freshness_populated"]
-    source: Any | None = Field(default=None)
+    if source.freshness is None:
+        fail(error_msg)
 
-    def execute(self) -> None:
-        """Execute the check.
+    has_error_after = (
+        source.freshness.error_after
+        and source.freshness.error_after.count is not None
+        and source.freshness.error_after.period is not None
+    )
+    has_warn_after = (
+        source.freshness.warn_after
+        and source.freshness.warn_after.count is not None
+        and source.freshness.warn_after.period is not None
+    )
 
-        Raises:
-            DbtBouncerFailedCheckError: If freshness is not populated.
-
-        """
-        source = self._require_source()
-        error_msg = (
-            f"`{source.source_name}.{source.name}` does not have a populated freshness."
-        )
-        if source.freshness is None:
-            raise DbtBouncerFailedCheckError(error_msg)
-        has_error_after = (
-            source.freshness.error_after
-            and source.freshness.error_after.count is not None
-            and source.freshness.error_after.period is not None
-        )
-        has_warn_after = (
-            source.freshness.warn_after
-            and source.freshness.warn_after.count is not None
-            and source.freshness.warn_after.period is not None
-        )
-
-        if not (has_error_after or has_warn_after):
-            raise DbtBouncerFailedCheckError(error_msg)
+    if not (has_error_after or has_warn_after):
+        fail(error_msg)

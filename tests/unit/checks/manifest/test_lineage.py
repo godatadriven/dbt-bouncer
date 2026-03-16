@@ -1,296 +1,170 @@
-from contextlib import nullcontext as does_not_raise
-
 import pytest
 
-from dbt_bouncer.artifact_parsers.parser import wrap_dict
-from dbt_bouncer.check_context import CheckContext
-from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
-from dbt_bouncer.checks.manifest.check_lineage import (
-    CheckLineagePermittedUpstreamModels,
-    CheckLineageSeedCannotBeUsed,
-    CheckLineageSourceCannotBeUsed,
-)
+from dbt_bouncer.testing import check_fails, check_passes
 
 
 @pytest.mark.parametrize(
-    ("manifest_obj", "model", "models", "upstream_path_pattern", "expectation"),
+    ("model_overrides", "ctx_models", "upstream_path_pattern", "check_fn"),
     [
-        (
-            "manifest_obj",
-            wrap_dict(
-                {
-                    "alias": "int_model",
-                    "checksum": {"name": "sha256", "checksum": ""},
-                    "columns": {
-                        "col_1": {
-                            "index": 1,
-                            "name": "col_1",
-                            "type": "INTEGER",
-                        },
-                    },
-                    "depends_on": {
-                        "nodes": ["model.dbt_bouncer_test_project.stg_model_1"],
-                    },
-                    "fqn": ["dbt_bouncer_test_project", "int_model"],
-                    "name": "int_model",
-                    "original_file_path": "intermediate/int_model.sql",
-                    "package_name": "dbt_bouncer_test_project",
-                    "path": "intermediate/int_model.sql",
-                    "resource_type": "model",
-                    "schema": "main",
-                    "unique_id": "model.dbt_bouncer_test_project.int_model",
+        pytest.param(
+            {
+                "alias": "int_model",
+                "depends_on": {
+                    "nodes": ["model.dbt_bouncer_test_project.stg_model_1"],
                 },
-            ),
+                "fqn": ["dbt_bouncer_test_project", "int_model"],
+                "name": "int_model",
+                "original_file_path": "intermediate/int_model.sql",
+                "package_name": "dbt_bouncer_test_project",
+                "path": "intermediate/int_model.sql",
+                "unique_id": "model.dbt_bouncer_test_project.int_model",
+            },
             [
-                wrap_dict(
-                    {
-                        "alias": "stg_model_1",
-                        "checksum": {"name": "sha256", "checksum": ""},
-                        "columns": {
-                            "col_1": {
-                                "index": 1,
-                                "name": "col_1",
-                                "type": "INTEGER",
-                            },
-                        },
-                        "fqn": ["dbt_bouncer_test_project", "stg_model_1"],
-                        "name": "stg_model_1",
-                        "original_file_path": "staging/stg_model_1.sql",
-                        "package_name": "dbt_bouncer_test_project",
-                        "path": "staging/stg_model_1.sql",
-                        "resource_type": "model",
-                        "schema": "main",
-                        "unique_id": "model.dbt_bouncer_test_project.stg_model_1",
-                    },
-                ),
+                {
+                    "alias": "stg_model_1",
+                    "fqn": ["dbt_bouncer_test_project", "stg_model_1"],
+                    "name": "stg_model_1",
+                    "original_file_path": "staging/stg_model_1.sql",
+                    "package_name": "dbt_bouncer_test_project",
+                    "path": "staging/stg_model_1.sql",
+                    "unique_id": "model.dbt_bouncer_test_project.stg_model_1",
+                },
             ],
             "^staging",
-            does_not_raise(),
+            check_passes,
+            id="upstream_matches_pattern",
         ),
-        (
-            "manifest_obj",
-            wrap_dict(
-                {
-                    "alias": "int_model",
-                    "checksum": {"name": "sha256", "checksum": ""},
-                    "columns": {
-                        "col_1": {
-                            "index": 1,
-                            "name": "col_1",
-                            "type": "INTEGER",
-                        },
-                    },
-                    "depends_on": {"nodes": ["model.some_other_package.stg_model"]},
-                    "fqn": ["dbt_bouncer_test_project", "int_model"],
-                    "name": "int_model",
-                    "original_file_path": "intermediate/int_model.sql",
-                    "package_name": "dbt_bouncer_test_project",
-                    "path": "intermediate/int_model.sql",
-                    "resource_type": "model",
-                    "schema": "main",
-                    "unique_id": "model.dbt_bouncer_test_project.int_model",
-                },
-            ),
+        pytest.param(
+            {
+                "alias": "int_model",
+                "depends_on": {"nodes": ["model.some_other_package.stg_model"]},
+                "fqn": ["dbt_bouncer_test_project", "int_model"],
+                "name": "int_model",
+                "original_file_path": "intermediate/int_model.sql",
+                "package_name": "dbt_bouncer_test_project",
+                "path": "intermediate/int_model.sql",
+                "unique_id": "model.dbt_bouncer_test_project.int_model",
+            },
             [],
             "^staging",
-            does_not_raise(),
+            check_passes,
+            id="cross_package_dependency_skipped",
         ),
-        (
-            "manifest_obj",
-            wrap_dict(
-                {
-                    "alias": "mart_model",
-                    "checksum": {"name": "sha256", "checksum": ""},
-                    "columns": {
-                        "col_1": {
-                            "index": 1,
-                            "name": "col_1",
-                            "type": "INTEGER",
-                        },
-                    },
-                    "depends_on": {
-                        "nodes": ["model.dbt_bouncer_test_project.mart_other_model"],
-                    },
-                    "fqn": ["dbt_bouncer_test_project", "mart_model"],
-                    "name": "mart_model",
-                    "original_file_path": "marts/mart_model.sql",
-                    "package_name": "dbt_bouncer_test_project",
-                    "path": "marts/mart_model.sql",
-                    "resource_type": "model",
-                    "schema": "main",
-                    "unique_id": "model.dbt_bouncer_test_project.mart_model",
+        pytest.param(
+            {
+                "alias": "mart_model",
+                "depends_on": {
+                    "nodes": ["model.dbt_bouncer_test_project.mart_other_model"],
                 },
-            ),
+                "fqn": ["dbt_bouncer_test_project", "mart_model"],
+                "name": "mart_model",
+                "original_file_path": "marts/mart_model.sql",
+                "package_name": "dbt_bouncer_test_project",
+                "path": "marts/mart_model.sql",
+                "unique_id": "model.dbt_bouncer_test_project.mart_model",
+            },
             [
-                wrap_dict(
-                    {
-                        "alias": "mart_other_model",
-                        "checksum": {"name": "sha256", "checksum": ""},
-                        "columns": {
-                            "col_1": {
-                                "index": 1,
-                                "name": "col_1",
-                                "type": "INTEGER",
-                            },
-                        },
-                        "fqn": ["dbt_bouncer_test_project", "mart_other_model"],
-                        "name": "mart_other_model",
-                        "original_file_path": "marts/mart_other_model.sql",
-                        "package_name": "dbt_bouncer_test_project",
-                        "path": "marts/mart_other_model.sql",
-                        "resource_type": "model",
-                        "schema": "main",
-                        "unique_id": "model.dbt_bouncer_test_project.mart_other_model",
-                    },
-                ),
+                {
+                    "alias": "mart_other_model",
+                    "fqn": ["dbt_bouncer_test_project", "mart_other_model"],
+                    "name": "mart_other_model",
+                    "original_file_path": "marts/mart_other_model.sql",
+                    "package_name": "dbt_bouncer_test_project",
+                    "path": "marts/mart_other_model.sql",
+                    "unique_id": "model.dbt_bouncer_test_project.mart_other_model",
+                },
             ],
             "^intermediate",
-            pytest.raises(DbtBouncerFailedCheckError),
+            check_fails,
+            id="upstream_violates_pattern",
         ),
     ],
-    indirect=["manifest_obj"],
 )
 def test_check_lineage_permitted_upstream_models(
-    manifest_obj,
-    model,
-    models,
+    model_overrides,
+    ctx_models,
     upstream_path_pattern,
-    expectation,
+    check_fn,
 ):
-    with expectation:
-        check = CheckLineagePermittedUpstreamModels(
-            model=model,
-            name="check_lineage_permitted_upstream_models",
-            upstream_path_pattern=upstream_path_pattern,
-        )
-        check._ctx = CheckContext(
-            manifest_obj=manifest_obj,
-            models=models,
-        )
-        check.execute()
+    check_fn(
+        "check_lineage_permitted_upstream_models",
+        model=model_overrides,
+        upstream_path_pattern=upstream_path_pattern,
+        ctx_models=ctx_models,
+    )
 
 
 @pytest.mark.parametrize(
-    ("model", "expectation"),
+    ("model_overrides", "check_fn"),
     [
-        (
-            wrap_dict(
-                {
-                    "alias": "int_model_2",
-                    "checksum": {"name": "sha256", "checksum": ""},
-                    "columns": {
-                        "col_1": {
-                            "index": 1,
-                            "name": "col_1",
-                            "type": "INTEGER",
-                        },
-                    },
-                    "depends_on": {"nodes": ["model.package_name.stg_model_1"]},
-                    "fqn": ["package_name", "int_model_2"],
-                    "name": "int_model_2",
-                    "original_file_path": "intermediate/int_model_2.sql",
-                    "package_name": "package_name",
-                    "path": "intermediate/int_model_2.sql",
-                    "resource_type": "model",
-                    "schema": "main",
-                    "unique_id": "model.package_name.int_model_2",
-                },
-            ),
-            does_not_raise(),
+        pytest.param(
+            {
+                "alias": "int_model_2",
+                "depends_on": {"nodes": ["model.package_name.stg_model_1"]},
+                "fqn": ["package_name", "int_model_2"],
+                "name": "int_model_2",
+                "original_file_path": "intermediate/int_model_2.sql",
+                "path": "intermediate/int_model_2.sql",
+                "unique_id": "model.package_name.int_model_2",
+            },
+            check_passes,
+            id="no_seed_dependency",
         ),
-        (
-            wrap_dict(
-                {
-                    "alias": "int_model_2",
-                    "checksum": {"name": "sha256", "checksum": ""},
-                    "columns": {
-                        "col_1": {
-                            "index": 1,
-                            "name": "col_1",
-                            "type": "INTEGER",
-                        },
-                    },
-                    "depends_on": {"nodes": ["seed.package_name.seed_1"]},
-                    "fqn": ["package_name", "int_model_2"],
-                    "name": "int_model_2",
-                    "original_file_path": "intermediate/int_model_2.sql",
-                    "package_name": "package_name",
-                    "path": "intermediate/int_model_2.sql",
-                    "resource_type": "model",
-                    "schema": "main",
-                    "unique_id": "model.package_name.int_model_2",
-                },
-            ),
-            pytest.raises(DbtBouncerFailedCheckError),
+        pytest.param(
+            {
+                "alias": "int_model_2",
+                "depends_on": {"nodes": ["seed.package_name.seed_1"]},
+                "fqn": ["package_name", "int_model_2"],
+                "name": "int_model_2",
+                "original_file_path": "intermediate/int_model_2.sql",
+                "path": "intermediate/int_model_2.sql",
+                "unique_id": "model.package_name.int_model_2",
+            },
+            check_fails,
+            id="has_seed_dependency",
         ),
     ],
 )
-def test_check_lineage_seed_cannot_be_used(model, expectation):
-    with expectation:
-        CheckLineageSeedCannotBeUsed(
-            model=model,
-            name="check_lineage_seed_cannot_be_used",
-        ).execute()
+def test_check_lineage_seed_cannot_be_used(model_overrides, check_fn):
+    check_fn(
+        "check_lineage_seed_cannot_be_used",
+        model=model_overrides,
+    )
 
 
 @pytest.mark.parametrize(
-    ("model", "expectation"),
+    ("model_overrides", "check_fn"),
     [
-        (
-            wrap_dict(
-                {
-                    "alias": "int_model_2",
-                    "checksum": {"name": "sha256", "checksum": ""},
-                    "columns": {
-                        "col_1": {
-                            "index": 1,
-                            "name": "col_1",
-                            "type": "INTEGER",
-                        },
-                    },
-                    "depends_on": {"nodes": ["model.package_name.stg_model_1"]},
-                    "fqn": ["package_name", "int_model_2"],
-                    "name": "int_model_2",
-                    "original_file_path": "intermediate/int_model_2.sql",
-                    "package_name": "package_name",
-                    "path": "intermediate/int_model_2.sql",
-                    "resource_type": "model",
-                    "schema": "main",
-                    "unique_id": "model.package_name.int_model_2",
-                },
-            ),
-            does_not_raise(),
+        pytest.param(
+            {
+                "alias": "int_model_2",
+                "depends_on": {"nodes": ["model.package_name.stg_model_1"]},
+                "fqn": ["package_name", "int_model_2"],
+                "name": "int_model_2",
+                "original_file_path": "intermediate/int_model_2.sql",
+                "path": "intermediate/int_model_2.sql",
+                "unique_id": "model.package_name.int_model_2",
+            },
+            check_passes,
+            id="no_source_dependency",
         ),
-        (
-            wrap_dict(
-                {
-                    "alias": "int_model_2",
-                    "checksum": {"name": "sha256", "checksum": ""},
-                    "columns": {
-                        "col_1": {
-                            "index": 1,
-                            "name": "col_1",
-                            "type": "INTEGER",
-                        },
-                    },
-                    "depends_on": {"nodes": ["source.package_name.source_1"]},
-                    "fqn": ["package_name", "int_model_2"],
-                    "name": "int_model_2",
-                    "original_file_path": "intermediate/int_model_2.sql",
-                    "package_name": "package_name",
-                    "path": "intermediate/int_model_2.sql",
-                    "resource_type": "model",
-                    "schema": "main",
-                    "unique_id": "model.package_name.int_model_2",
-                },
-            ),
-            pytest.raises(DbtBouncerFailedCheckError),
+        pytest.param(
+            {
+                "alias": "int_model_2",
+                "depends_on": {"nodes": ["source.package_name.source_1"]},
+                "fqn": ["package_name", "int_model_2"],
+                "name": "int_model_2",
+                "original_file_path": "intermediate/int_model_2.sql",
+                "path": "intermediate/int_model_2.sql",
+                "unique_id": "model.package_name.int_model_2",
+            },
+            check_fails,
+            id="has_source_dependency",
         ),
     ],
 )
-def test_check_lineage_source_cannot_be_used(model, expectation):
-    with expectation:
-        CheckLineageSourceCannotBeUsed(
-            model=model,
-            name="check_lineage_source_cannot_be_used",
-        ).execute()
+def test_check_lineage_source_cannot_be_used(model_overrides, check_fn):
+    check_fn(
+        "check_lineage_source_cannot_be_used",
+        model=model_overrides,
+    )

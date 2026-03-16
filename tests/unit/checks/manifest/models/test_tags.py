@@ -1,98 +1,69 @@
-from contextlib import nullcontext as does_not_raise
-
 import pytest
 
-from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
-from dbt_bouncer.checks.manifest.models.tags import (
-    CheckModelHasTags,
-)
-
-_TEST_DATA_FOR_CHECK_MODEL_HAS_TAGS = [
-    pytest.param(
-        {
-            "tags": ["tag_1"],
-        },
-        ["tag_1"],
-        "all",
-        does_not_raise(),
-        id="has_all_tags",
-    ),
-    pytest.param(
-        {
-            "tags": [],
-        },
-        ["tag_1"],
-        "all",
-        pytest.raises(DbtBouncerFailedCheckError),
-        id="missing_tag",
-    ),
-    pytest.param(
-        {
-            "tags": ["tag_1", "tag_2"],
-        },
-        ["tag_1", "tag_2"],
-        "all",
-        does_not_raise(),
-        id="has_all_multiple_tags",
-    ),
-    pytest.param(
-        {
-            "tags": ["tag_1"],
-        },
-        ["tag_1", "tag_2"],
-        "all",
-        pytest.raises(DbtBouncerFailedCheckError),
-        id="missing_one_tag",
-    ),
-    pytest.param(
-        {
-            "tags": ["tag_1"],
-        },
-        ["tag_1", "tag_2"],
-        "any",
-        does_not_raise(),
-        id="has_any_tag",
-    ),
-    pytest.param(
-        {
-            "tags": ["tag_3", "tag_4"],
-        },
-        ["tag_1", "tag_2"],
-        "any",
-        pytest.raises(DbtBouncerFailedCheckError),
-        id="missing_any_tag",
-    ),
-    pytest.param(
-        {
-            "tags": ["tag_1", "tag_3"],
-        },
-        ["tag_1", "tag_2"],
-        "one",
-        does_not_raise(),
-        id="has_one_tag",
-    ),
-    pytest.param(
-        {
-            "tags": ["tag_1", "tag_2"],
-        },
-        ["tag_1", "tag_2"],
-        "one",
-        pytest.raises(DbtBouncerFailedCheckError),
-        id="has_more_than_one_tag",
-    ),
-]
+from dbt_bouncer.testing import check_fails, check_passes
 
 
-@pytest.mark.parametrize(
-    ("model", "tags", "criteria", "expectation"),
-    _TEST_DATA_FOR_CHECK_MODEL_HAS_TAGS,
-    indirect=["model"],
-)
-def test_check_model_has_tags(model, tags, criteria, expectation):
-    with expectation:
-        CheckModelHasTags(
-            model=model,
-            name="check_model_has_tags",
-            tags=tags,
-            criteria=criteria,
-        ).execute()
+class TestCheckModelHasTags:
+    @pytest.mark.parametrize(
+        ("tags", "criteria", "model"),
+        [
+            pytest.param(
+                ["tag_1"],
+                "all",
+                {"tags": ["tag_1"]},
+                id="has_all_tags",
+            ),
+            pytest.param(
+                ["tag_1", "tag_2"],
+                "all",
+                {"tags": ["tag_1", "tag_2"]},
+                id="has_all_multiple_tags",
+            ),
+            pytest.param(
+                ["tag_1", "tag_2"],
+                "any",
+                {"tags": ["tag_1"]},
+                id="has_any_tag",
+            ),
+            pytest.param(
+                ["tag_1", "tag_2"],
+                "one",
+                {"tags": ["tag_1", "tag_3"]},
+                id="has_one_tag",
+            ),
+        ],
+    )
+    def test_passes(self, tags, criteria, model):
+        check_passes("check_model_has_tags", model=model, tags=tags, criteria=criteria)
+
+    @pytest.mark.parametrize(
+        ("tags", "criteria", "model"),
+        [
+            pytest.param(
+                ["tag_1"],
+                "all",
+                {"tags": []},
+                id="missing_tag",
+            ),
+            pytest.param(
+                ["tag_1", "tag_2"],
+                "all",
+                {"tags": ["tag_1"]},
+                id="missing_one_tag",
+            ),
+            pytest.param(
+                ["tag_1", "tag_2"],
+                "any",
+                {"tags": ["tag_3", "tag_4"]},
+                id="missing_any_tag",
+            ),
+            pytest.param(
+                ["tag_1", "tag_2"],
+                "one",
+                {"tags": ["tag_1", "tag_2"]},
+                id="has_more_than_one_tag",
+            ),
+        ],
+    )
+    def test_fails(self, tags, criteria, model):
+        check_fails("check_model_has_tags", model=model, tags=tags, criteria=criteria)

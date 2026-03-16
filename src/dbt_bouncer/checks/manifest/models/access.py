@@ -1,16 +1,11 @@
 """Checks related to model access controls and contract enforcement."""
 
-import re
-from typing import Any, Literal
-
-from pydantic import Field, PrivateAttr
-
-from dbt_bouncer.check_base import BaseCheck
-from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
+from dbt_bouncer.check_decorator import check, fail
 from dbt_bouncer.utils import compile_pattern, get_clean_model_name
 
 
-class CheckModelAccess(BaseCheck):
+@check
+def check_model_access(model, *, access: str):
     """Models must have the specified access attribute. Requires dbt 1.7+.
 
     Parameters:
@@ -42,26 +37,14 @@ class CheckModelAccess(BaseCheck):
         ```
 
     """
-
-    access: Literal["private", "protected", "public"]
-    model: Any | None = Field(default=None)
-    name: Literal["check_model_access"]
-
-    def execute(self) -> None:
-        """Execute the check.
-
-        Raises:
-            DbtBouncerFailedCheckError: If access is incorrect.
-
-        """
-        model = self._require_model()
-        if model.access and model.access.value != self.access:
-            raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(model.unique_id)}` has `{model.access.value}` access, it should have access `{self.access}`."
-            )
+    if model.access and model.access.value != access:
+        fail(
+            f"`{get_clean_model_name(model.unique_id)}` has `{model.access.value}` access, it should have access `{access}`."
+        )
 
 
-class CheckModelContractEnforcedForPublicModel(BaseCheck):
+@check
+def check_model_contract_enforced_for_public_model(model):
     """Public models must have contracts enforced.
 
     Receives:
@@ -81,29 +64,18 @@ class CheckModelContractEnforcedForPublicModel(BaseCheck):
         ```
 
     """
-
-    model: Any | None = Field(default=None)
-    name: Literal["check_model_contract_enforced_for_public_model"]
-
-    def execute(self) -> None:
-        """Execute the check.
-
-        Raises:
-            DbtBouncerFailedCheckError: If contracts are not enforced for public model.
-
-        """
-        model = self._require_model()
-        if (
-            model.access
-            and model.access.value == "public"
-            and (not model.contract or model.contract.enforced is not True)
-        ):
-            raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(model.unique_id)}` is a public model but does not have contracts enforced."
-            )
+    if (
+        model.access
+        and model.access.value == "public"
+        and (not model.contract or model.contract.enforced is not True)
+    ):
+        fail(
+            f"`{get_clean_model_name(model.unique_id)}` is a public model but does not have contracts enforced."
+        )
 
 
-class CheckModelGrantPrivilege(BaseCheck):
+@check
+def check_model_grant_privilege(model, *, privilege_pattern: str):
     """Model can have grant privileges that match the specified pattern.
 
     Receives:
@@ -126,38 +98,19 @@ class CheckModelGrantPrivilege(BaseCheck):
         ```
 
     """
+    compiled = compile_pattern(privilege_pattern.strip())
+    config = model.config
+    grants = config.grants if config else {}
+    non_complying_grants = [i for i in (grants or {}) if compiled.match(str(i)) is None]
 
-    model: Any | None = Field(default=None)
-    name: Literal["check_model_grant_privilege"]
-    privilege_pattern: str
-
-    _compiled_pattern: re.Pattern[str] = PrivateAttr()
-
-    def model_post_init(self, __context: object) -> None:
-        """Compile the regex pattern once at initialisation time."""
-        self._compiled_pattern = compile_pattern(self.privilege_pattern.strip())
-
-    def execute(self) -> None:
-        """Execute the check.
-
-        Raises:
-            DbtBouncerFailedCheckError: If grant privileges do not match regex.
-
-        """
-        model = self._require_model()
-        config = model.config
-        grants = config.grants if config else {}
-        non_complying_grants = [
-            i for i in (grants or {}) if self._compiled_pattern.match(str(i)) is None
-        ]
-
-        if non_complying_grants:
-            raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(model.unique_id)}` has grants (`{self.privilege_pattern}`) that don't comply with the specified regexp pattern ({non_complying_grants})."
-            )
+    if non_complying_grants:
+        fail(
+            f"`{get_clean_model_name(model.unique_id)}` has grants (`{privilege_pattern}`) that don't comply with the specified regexp pattern ({non_complying_grants})."
+        )
 
 
-class CheckModelGrantPrivilegeRequired(BaseCheck):
+@check
+def check_model_grant_privilege_required(model, *, privilege: str):
     """Model must have the specified grant privilege.
 
     Receives:
@@ -180,28 +133,16 @@ class CheckModelGrantPrivilegeRequired(BaseCheck):
         ```
 
     """
-
-    model: Any | None = Field(default=None)
-    name: Literal["check_model_grant_privilege_required"]
-    privilege: str
-
-    def execute(self) -> None:
-        """Execute the check.
-
-        Raises:
-            DbtBouncerFailedCheckError: If required grant privilege is missing.
-
-        """
-        model = self._require_model()
-        config = model.config
-        grants = config.grants if config else {}
-        if self.privilege not in (grants or {}):
-            raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(model.unique_id)}` does not have the required grant privilege (`{self.privilege}`)."
-            )
+    config = model.config
+    grants = config.grants if config else {}
+    if privilege not in (grants or {}):
+        fail(
+            f"`{get_clean_model_name(model.unique_id)}` does not have the required grant privilege (`{privilege}`)."
+        )
 
 
-class CheckModelHasContractsEnforced(BaseCheck):
+@check
+def check_model_has_contracts_enforced(model):
     """Model must have contracts enforced.
 
     Receives:
@@ -222,25 +163,16 @@ class CheckModelHasContractsEnforced(BaseCheck):
         ```
 
     """
-
-    model: Any | None = Field(default=None)
-    name: Literal["check_model_has_contracts_enforced"]
-
-    def execute(self) -> None:
-        """Execute the check.
-
-        Raises:
-            DbtBouncerFailedCheckError: If contracts are not enforced.
-
-        """
-        model = self._require_model()
-        if not model.contract or model.contract.enforced is not True:
-            raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(model.unique_id)}` does not have contracts enforced."
-            )
+    if not model.contract or model.contract.enforced is not True:
+        fail(
+            f"`{get_clean_model_name(model.unique_id)}` does not have contracts enforced."
+        )
 
 
-class CheckModelNumberOfGrants(BaseCheck):
+@check
+def check_model_number_of_grants(
+    model, *, max_number_of_privileges: int = 100, min_number_of_privileges: int = 0
+):
     """Model can have the specified number of privileges.
 
     Receives:
@@ -265,29 +197,15 @@ class CheckModelNumberOfGrants(BaseCheck):
         ```
 
     """
+    config = model.config
+    grants = config.grants if config else {}
+    num_grants = len((grants or {}).keys())
 
-    model: Any | None = Field(default=None)
-    name: Literal["check_model_number_of_grants"]
-    max_number_of_privileges: int = Field(default=100)
-    min_number_of_privileges: int = Field(default=0)
-
-    def execute(self) -> None:
-        """Execute the check.
-
-        Raises:
-            DbtBouncerFailedCheckError: If number of grants is not within limits.
-
-        """
-        model = self._require_model()
-        config = model.config
-        grants = config.grants if config else {}
-        num_grants = len((grants or {}).keys())
-
-        if num_grants < self.min_number_of_privileges:
-            raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(model.unique_id)}` has less grants (`{num_grants}`) than the specified minimum ({self.min_number_of_privileges})."
-            )
-        if num_grants > self.max_number_of_privileges:
-            raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(model.unique_id)}` has more grants (`{num_grants}`) than the specified maximum ({self.max_number_of_privileges})."
-            )
+    if num_grants < min_number_of_privileges:
+        fail(
+            f"`{get_clean_model_name(model.unique_id)}` has less grants (`{num_grants}`) than the specified minimum ({min_number_of_privileges})."
+        )
+    if num_grants > max_number_of_privileges:
+        fail(
+            f"`{get_clean_model_name(model.unique_id)}` has more grants (`{num_grants}`) than the specified maximum ({max_number_of_privileges})."
+        )

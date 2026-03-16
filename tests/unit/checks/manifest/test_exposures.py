@@ -1,420 +1,170 @@
-from contextlib import nullcontext as does_not_raise
-
 import pytest
 
-from dbt_bouncer.artifact_parsers.parser import wrap_dict
-from dbt_bouncer.check_context import CheckContext
-from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
-from dbt_bouncer.checks.manifest.check_exposures import (
-    CheckExposureBasedOnModel,
-    CheckExposureBasedOnView,
-    CheckExposureOnNonPublicModels,
-)
+from dbt_bouncer.testing import check_fails, check_passes
 
 
 @pytest.mark.parametrize(
-    ("exposure", "maximum_number_of_models", "minimum_number_of_models", "expectation"),
+    (
+        "exposure_overrides",
+        "maximum_number_of_models",
+        "minimum_number_of_models",
+        "check_fn",
+    ),
     [
-        (
-            wrap_dict(
-                {
-                    "depends_on": {"nodes": ["model.package_name.model_1"]},
-                    "fqn": ["package_name", "marts", "finance", "exposure_1"],
-                    "name": "exposure_1",
-                    "original_file_path": "models/marts/finance/_exposures.yml",
-                    "owner": {
-                        "email": "anna.anderson@example.com",
-                        "name": "Anna Anderson",
-                    },
-                    "package_name": "package_name",
-                    "path": "marts/finance/_exposures.yml",
-                    "resource_type": "exposure",
-                    "type": "dashboard",
-                    "unique_id": "exposure.package_name.exposure_1",
-                },
-            ),
+        pytest.param(
+            {"depends_on": {"nodes": ["model.package_name.model_1"]}},
             100,
             1,
-            does_not_raise(),
+            check_passes,
+            id="within_bounds",
         ),
-        (
-            wrap_dict(
-                {
-                    "depends_on": {
-                        "nodes": [
-                            "model.package_name.model_1",
-                            "model.package_name.model_2",
-                        ]
-                    },
-                    "fqn": ["package_name", "marts", "finance", "exposure_1"],
-                    "name": "exposure_1",
-                    "original_file_path": "models/marts/finance/_exposures.yml",
-                    "owner": {
-                        "email": "anna.anderson@example.com",
-                        "name": "Anna Anderson",
-                    },
-                    "package_name": "package_name",
-                    "path": "marts/finance/_exposures.yml",
-                    "resource_type": "exposure",
-                    "type": "dashboard",
-                    "unique_id": "exposure.package_name.exposure_1",
+        pytest.param(
+            {
+                "depends_on": {
+                    "nodes": [
+                        "model.package_name.model_1",
+                        "model.package_name.model_2",
+                    ],
                 },
-            ),
+            },
             1,
             1,
-            pytest.raises(DbtBouncerFailedCheckError),
+            check_fails,
+            id="exceeds_maximum",
         ),
-        (
-            wrap_dict(
-                {
-                    "depends_on": {"nodes": ["model.package_name.model_1"]},
-                    "fqn": ["package_name", "marts", "finance", "exposure_1"],
-                    "name": "exposure_1",
-                    "original_file_path": "models/marts/finance/_exposures.yml",
-                    "owner": {
-                        "email": "anna.anderson@example.com",
-                        "name": "Anna Anderson",
-                    },
-                    "package_name": "package_name",
-                    "path": "marts/finance/_exposures.yml",
-                    "resource_type": "exposure",
-                    "type": "dashboard",
-                    "unique_id": "exposure.package_name.exposure_1",
-                },
-            ),
+        pytest.param(
+            {"depends_on": {"nodes": ["model.package_name.model_1"]}},
             100,
             2,
-            pytest.raises(DbtBouncerFailedCheckError),
+            check_fails,
+            id="below_minimum",
         ),
     ],
 )
 def test_check_exposure_based_on_model(
-    exposure, maximum_number_of_models, minimum_number_of_models, expectation
+    exposure_overrides, maximum_number_of_models, minimum_number_of_models, check_fn
 ):
-    with expectation:
-        CheckExposureBasedOnModel(
-            exposure=exposure,
-            maximum_number_of_models=maximum_number_of_models,
-            minimum_number_of_models=minimum_number_of_models,
-            name="check_exposure_based_on_model",
-        ).execute()
+    check_fn(
+        "check_exposure_based_on_model",
+        exposure=exposure_overrides,
+        maximum_number_of_models=maximum_number_of_models,
+        minimum_number_of_models=minimum_number_of_models,
+    )
 
 
 @pytest.mark.parametrize(
-    ("exposure", "models", "expectation"),
+    ("exposure_overrides", "ctx_models", "check_fn"),
     [
-        (
-            wrap_dict(
-                {
-                    "depends_on": {"nodes": ["model.package_name.model_1"]},
-                    "fqn": ["package_name", "marts", "finance", "exposure_1"],
-                    "name": "exposure_1",
-                    "original_file_path": "models/marts/finance/_exposures.yml",
-                    "owner": {
-                        "email": "anna.anderson@example.com",
-                        "name": "Anna Anderson",
-                    },
-                    "package_name": "package_name",
-                    "path": "marts/finance/_exposures.yml",
-                    "resource_type": "exposure",
-                    "type": "dashboard",
-                    "unique_id": "exposure.package_name.exposure_1",
-                },
-            ),
+        pytest.param(
+            {},
             [
-                wrap_dict(
-                    {
-                        "access": "public",
-                        "alias": "model_1",
-                        "checksum": {"name": "sha256", "checksum": ""},
-                        "columns": {
-                            "col_1": {
-                                "index": 1,
-                                "name": "col_1",
-                                "type": "INTEGER",
-                            },
-                            "col_2": {
-                                "index": 2,
-                                "name": "col_2",
-                                "type": "INTEGER",
-                            },
-                        },
-                        "fqn": ["package_name", "model_1"],
-                        "name": "model_1",
-                        "original_file_path": "model_1.sql",
-                        "package_name": "package_name",
-                        "path": "model_1.sql",
-                        "resource_type": "model",
-                        "schema": "main",
-                        "unique_id": "model.package_name.model_1",
-                    },
-                ),
+                {
+                    "access": "public",
+                    "unique_id": "model.package_name.model_1",
+                },
             ],
-            does_not_raise(),
+            check_passes,
+            id="all_public",
         ),
-        (
-            wrap_dict(
-                {
-                    "depends_on": {"nodes": ["model.package_name.model_1"]},
-                    "fqn": ["package_name", "marts", "finance", "exposure_1"],
-                    "name": "exposure_1",
-                    "original_file_path": "models/marts/finance/_exposures.yml",
-                    "owner": {
-                        "email": "anna.anderson@example.com",
-                        "name": "Anna Anderson",
-                    },
-                    "package_name": "package_name",
-                    "path": "marts/finance/_exposures.yml",
-                    "resource_type": "exposure",
-                    "type": "dashboard",
-                    "unique_id": "exposure.package_name.exposure_1",
-                },
-            ),
+        pytest.param(
+            {},
             [
-                wrap_dict(
-                    {
-                        "access": "protected",
-                        "alias": "model_1",
-                        "checksum": {"name": "sha256", "checksum": ""},
-                        "columns": {
-                            "col_1": {
-                                "index": 1,
-                                "name": "col_1",
-                                "type": "INTEGER",
-                            },
-                            "col_2": {
-                                "index": 2,
-                                "name": "col_2",
-                                "type": "INTEGER",
-                            },
-                        },
-                        "fqn": ["package_name", "model_1"],
-                        "name": "model_1",
-                        "original_file_path": "model_1.sql",
-                        "package_name": "package_name",
-                        "path": "model_1.sql",
-                        "resource_type": "model",
-                        "schema": "main",
-                        "unique_id": "model.package_name.model_1",
-                    },
-                ),
+                {
+                    "access": "protected",
+                    "unique_id": "model.package_name.model_1",
+                },
             ],
-            pytest.raises(DbtBouncerFailedCheckError),
+            check_fails,
+            id="non_public",
         ),
     ],
 )
-def test_check_exposure_based_on_non_public_models(exposure, models, expectation):
-    with expectation:
-        check = CheckExposureOnNonPublicModels(
-            exposure=exposure,
-            name="check_exposure_based_on_non_public_models",
-        )
-        check._ctx = CheckContext(models=models)
-        check.execute()
+def test_check_exposure_based_on_non_public_models(
+    exposure_overrides, ctx_models, check_fn
+):
+    check_fn(
+        "check_exposure_based_on_non_public_models",
+        exposure=exposure_overrides,
+        ctx_models=ctx_models,
+    )
 
 
 @pytest.mark.parametrize(
-    ("exposure", "materializations_to_include", "models", "expectation"),
+    ("exposure_overrides", "materializations_to_include", "ctx_models", "check_fn"),
     [
-        (
-            wrap_dict(
-                {
-                    "depends_on": {"nodes": ["model.package_name.model_1"]},
-                    "fqn": ["package_name", "marts", "finance", "exposure_1"],
-                    "name": "exposure_1",
-                    "original_file_path": "models/marts/finance/_exposures.yml",
-                    "owner": {
-                        "email": "anna.anderson@example.com",
-                        "name": "Anna Anderson",
-                    },
-                    "package_name": "package_name",
-                    "path": "marts/finance/_exposures.yml",
-                    "resource_type": "exposure",
-                    "type": "dashboard",
-                    "unique_id": "exposure.package_name.exposure_1",
-                },
-            ),
+        pytest.param(
+            {},
             ["ephemeral", "view"],
             [
-                wrap_dict(
-                    {
-                        "access": "protected",
-                        "alias": "model_1",
-                        "checksum": {"name": "sha256", "checksum": ""},
-                        "config": {"materialized": "table"},
-                        "columns": {
-                            "col_1": {
-                                "index": 1,
-                                "name": "col_1",
-                                "type": "INTEGER",
-                            },
-                            "col_2": {
-                                "index": 2,
-                                "name": "col_2",
-                                "type": "INTEGER",
-                            },
-                        },
-                        "fqn": ["package_name", "model_1"],
-                        "name": "model_1",
-                        "original_file_path": "model_1.sql",
-                        "package_name": "package_name",
-                        "path": "model_1.sql",
-                        "resource_type": "model",
-                        "schema": "main",
-                        "unique_id": "model.package_name.model_1",
-                    },
-                ),
+                {
+                    "access": "protected",
+                    "config": {"materialized": "table"},
+                    "unique_id": "model.package_name.model_1",
+                },
             ],
-            does_not_raise(),
+            check_passes,
+            id="no_view_dependency",
         ),
-        (
-            wrap_dict(
-                {
-                    "depends_on": {
-                        "nodes": [
-                            "model.package_name.model_1",
-                            "model.package_name.model_2",
-                        ],
-                    },
-                    "fqn": ["package_name", "marts", "finance", "exposure_1"],
-                    "name": "exposure_1",
-                    "original_file_path": "models/marts/finance/_exposures.yml",
-                    "owner": {
-                        "email": "anna.anderson@example.com",
-                        "name": "Anna Anderson",
-                    },
-                    "package_name": "package_name",
-                    "path": "marts/finance/_exposures.yml",
-                    "resource_type": "exposure",
-                    "type": "dashboard",
-                    "unique_id": "exposure.package_name.exposure_1",
+        pytest.param(
+            {
+                "depends_on": {
+                    "nodes": [
+                        "model.package_name.model_1",
+                        "model.package_name.model_2",
+                    ],
                 },
-            ),
+            },
             ["ephemeral", "view"],
             [
-                wrap_dict(
-                    {
-                        "access": "protected",
-                        "alias": "model_1",
-                        "checksum": {"name": "sha256", "checksum": ""},
-                        "config": {"materialized": "view"},
-                        "columns": {
-                            "col_1": {
-                                "index": 1,
-                                "name": "col_1",
-                                "type": "INTEGER",
-                            },
-                            "col_2": {
-                                "index": 2,
-                                "name": "col_2",
-                                "type": "INTEGER",
-                            },
-                        },
-                        "fqn": ["package_name", "model_1"],
-                        "name": "model_1",
-                        "original_file_path": "model_1.sql",
-                        "package_name": "package_name",
-                        "path": "model_1.sql",
-                        "resource_type": "model",
-                        "schema": "main",
-                        "unique_id": "model.package_name.model_1",
-                    },
-                ),
-                wrap_dict(
-                    {
-                        "access": "protected",
-                        "alias": "model_2",
-                        "checksum": {"name": "sha256", "checksum": ""},
-                        "config": {"materialized": "table"},
-                        "columns": {
-                            "col_1": {
-                                "index": 1,
-                                "name": "col_1",
-                                "type": "INTEGER",
-                            },
-                            "col_2": {
-                                "index": 2,
-                                "name": "col_2",
-                                "type": "INTEGER",
-                            },
-                        },
-                        "fqn": ["package_name", "model_2"],
-                        "name": "model_2",
-                        "original_file_path": "model_2.sql",
-                        "package_name": "package_name",
-                        "path": "model_2.sql",
-                        "resource_type": "model",
-                        "schema": "main",
-                        "unique_id": "model.package_name.model_2",
-                    },
-                ),
+                {
+                    "access": "protected",
+                    "alias": "model_1",
+                    "config": {"materialized": "view"},
+                    "name": "model_1",
+                    "unique_id": "model.package_name.model_1",
+                },
+                {
+                    "access": "protected",
+                    "alias": "model_2",
+                    "checksum": {"name": "sha256", "checksum": ""},
+                    "config": {"materialized": "table"},
+                    "fqn": ["package_name", "model_2"],
+                    "name": "model_2",
+                    "original_file_path": "model_2.sql",
+                    "package_name": "package_name",
+                    "path": "model_2.sql",
+                    "resource_type": "model",
+                    "schema": "main",
+                    "unique_id": "model.package_name.model_2",
+                },
             ],
-            pytest.raises(DbtBouncerFailedCheckError),
+            check_fails,
+            id="view_dependency_multi_model",
         ),
-        (
-            wrap_dict(
-                {
-                    "depends_on": {"nodes": ["model.package_name.model_1"]},
-                    "fqn": ["package_name", "marts", "finance", "exposure_1"],
-                    "name": "exposure_1",
-                    "original_file_path": "models/marts/finance/_exposures.yml",
-                    "owner": {
-                        "email": "anna.anderson@example.com",
-                        "name": "Anna Anderson",
-                    },
-                    "package_name": "package_name",
-                    "path": "marts/finance/_exposures.yml",
-                    "resource_type": "exposure",
-                    "type": "dashboard",
-                    "unique_id": "exposure.package_name.exposure_1",
-                },
-            ),
+        pytest.param(
+            {},
             ["ephemeral", "view"],
             [
-                wrap_dict(
-                    {
-                        "access": "protected",
-                        "alias": "model_1",
-                        "checksum": {"name": "sha256", "checksum": ""},
-                        "config": {"materialized": "view"},
-                        "columns": {
-                            "col_1": {
-                                "index": 1,
-                                "name": "col_1",
-                                "type": "INTEGER",
-                            },
-                            "col_2": {
-                                "index": 2,
-                                "name": "col_2",
-                                "type": "INTEGER",
-                            },
-                        },
-                        "fqn": ["package_name", "model_1"],
-                        "name": "model_1",
-                        "original_file_path": "model_1.sql",
-                        "package_name": "package_name",
-                        "path": "model_1.sql",
-                        "resource_type": "model",
-                        "schema": "main",
-                        "unique_id": "model.package_name.model_1",
-                    },
-                ),
+                {
+                    "access": "protected",
+                    "config": {"materialized": "view"},
+                    "unique_id": "model.package_name.model_1",
+                },
             ],
-            pytest.raises(DbtBouncerFailedCheckError),
+            check_fails,
+            id="view_dependency_single_model",
         ),
     ],
 )
 def test_check_exposure_based_on_view(
-    exposure,
+    exposure_overrides,
     materializations_to_include,
-    models,
-    expectation,
+    ctx_models,
+    check_fn,
 ):
-    with expectation:
-        check = CheckExposureBasedOnView(
-            exposure=exposure,
-            materializations_to_include=materializations_to_include,
-            name="check_exposure_based_on_view",
-        )
-        check._ctx = CheckContext(models=models)
-        check.execute()
+    check_fn(
+        "check_exposure_based_on_view",
+        exposure=exposure_overrides,
+        materializations_to_include=materializations_to_include,
+        ctx_models=ctx_models,
+    )

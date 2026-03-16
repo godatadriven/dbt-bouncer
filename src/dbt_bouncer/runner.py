@@ -188,9 +188,15 @@ def runner(
     for check in sorted(list_of_check_configs, key=operator.attrgetter("index")):
         cls = check.__class__
         if cls not in _CLASS_ITERATE_CACHE:
-            _CLASS_ITERATE_CACHE[cls] = _VALID_ITERATE_OVER_VALUES.intersection(
-                frozenset(cls.__annotations__.keys()),
-            )
+            # Prefer explicit iterate_over ClassVar (set by @check decorator)
+            # over annotation introspection.
+            explicit = getattr(cls, "iterate_over", None)
+            if explicit is not None:
+                _CLASS_ITERATE_CACHE[cls] = frozenset({explicit})
+            else:
+                _CLASS_ITERATE_CACHE[cls] = _VALID_ITERATE_OVER_VALUES.intersection(
+                    frozenset(cls.__annotations__.keys()),
+                )
         iterate_over_value = _CLASS_ITERATE_CACHE[cls]
         if len(iterate_over_value) == 1:
             iterate_value = next(iter(iterate_over_value))
@@ -205,7 +211,7 @@ def runner(
                 if _should_run_check(check_i, i, iterate_over_value, meta_config):
                     check_run_id = _build_check_run_id(check_i, i, iterate_value)
                     check_i.set_resource(i, iterate_value)
-                    check_i._ctx = check_ctx
+                    check_i.set_context(check_ctx)
 
                     checks_to_run.append(
                         {
@@ -220,7 +226,7 @@ def runner(
             )
         else:
             check_run_id = f"{check.name}:{check.index}"
-            check._ctx = check_ctx
+            check.set_context(check_ctx)
             checks_to_run.append(
                 {
                     "check": check,

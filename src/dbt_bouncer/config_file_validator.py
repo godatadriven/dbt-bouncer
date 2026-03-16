@@ -306,20 +306,42 @@ def validate_conf(
     """
     logging.info("Validating conf...")
 
-    # Load check modules conditionally based on which categories are configured.
-    if "catalog_checks" in check_categories:
-        import dbt_bouncer.checks.catalog
-    if "manifest_checks" in check_categories:
-        import dbt_bouncer.checks.manifest
-    if "run_results_checks" in check_categories:
-        import dbt_bouncer.checks.run_results  # noqa: F401
+    # Extract check names from config to enable targeted module loading.
+    configured_check_names: set[str] = set()
+    for cat in check_categories:
+        for entry in config_file_contents.get(cat, []):
+            if isinstance(entry, dict) and "name" in entry:
+                configured_check_names.add(entry["name"])
 
-    from dbt_bouncer.config_file_parser import create_bouncer_conf_class
+    if configured_check_names:
+        # Fast path: import only modules containing the configured checks.
+        from dbt_bouncer.config_file_parser import _create_conf_class
+        from dbt_bouncer.utils import get_check_objects_for_names
 
-    DbtBouncerConf = create_bouncer_conf_class(  # noqa: N806
-        custom_checks_dir=custom_checks_dir,
-        check_categories=frozenset(check_categories),
-    )
+        check_objects = get_check_objects_for_names(
+            frozenset(configured_check_names),
+            custom_checks_dir=custom_checks_dir,
+        )
+        DbtBouncerConf = _create_conf_class(  # noqa: N806
+            custom_checks_dir=custom_checks_dir,
+            check_categories=frozenset(check_categories),
+            check_objects=check_objects,
+        )
+    else:
+        # Fallback: no check names to extract, use full scan.
+        if "catalog_checks" in check_categories:
+            import dbt_bouncer.checks.catalog
+        if "manifest_checks" in check_categories:
+            import dbt_bouncer.checks.manifest
+        if "run_results_checks" in check_categories:
+            import dbt_bouncer.checks.run_results  # noqa: F401
+
+        from dbt_bouncer.config_file_parser import create_bouncer_conf_class
+
+        DbtBouncerConf = create_bouncer_conf_class(  # noqa: N806
+            custom_checks_dir=custom_checks_dir,
+            check_categories=frozenset(check_categories),
+        )
     if id(DbtBouncerConf) not in _rebuilt_classes:
         DbtBouncerConf.model_rebuild(_types_namespace=_get_stub_namespace())
         _rebuilt_classes.add(id(DbtBouncerConf))

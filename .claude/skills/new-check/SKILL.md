@@ -11,31 +11,67 @@ Follow these steps to add a new check to dbt-bouncer.
 
 - **Category:** manifest, catalog, or run_results?
 - **Resource type:** model, source, seed, exposure, macro, etc.?
-- **File:** place in the appropriate submodule under `src/dbt_bouncer/checks/<category>/`. For model checks, pick the correct concern file in `manifest/models/` (access, code, columns, description, directories, lineage, meta, naming, tags, tests, or versioning).
+- **File:** place in the appropriate submodule under `src/dbt_bouncer/checks/<category>/`.
 
-## 2. Check for Pattern ABCs
+## 2. Write the Check
 
-Before writing from scratch, check `src/dbt_bouncer/check_patterns.py` for a base class that fits:
+Use the `@check` decorator (bare, no arguments). Everything is inferred from the function signature:
 
-| ABC | Use When |
-|---|---|
-| `BaseNamePatternCheck` | Validating resource name against a regex |
-| `BaseDescriptionPopulatedCheck` | Checking description is populated |
-| `BaseColumnsHaveTypesCheck` | All columns must have `data_type` |
-| `BaseHasUnitTestsCheck` | Minimum unit test count |
-| `BaseHasTagsCheck` | Required tags with criteria |
-| `BaseHasMetaKeysCheck` | Required keys in meta config |
+```python
+from dbt_bouncer.check_decorator import check, fail
 
-If one fits, inherit from it instead of `BaseCheck`.
+@check
+def check_model_xxx(model):
+    """Check description."""
+    if some_condition:
+        fail(f"`{model.unique_id}` failed because ...")
+```
 
-## 3. Write the Check Class
+## 3. Decorator API Reference
 
-- Class name: `Check<ResourceType>Xxx` (e.g. `CheckModelHasDescription`)
-- Name field: snake_case equivalent as a `Literal` (e.g. `Literal["check_model_has_description"]`)
-- Docstring must include: description, Parameters (if applicable), Receives, Other Parameters, Example(s) sections
-- Use `_require_*()` methods (e.g. `self._require_model()`) to get the resource
-- Raise `DbtBouncerFailedCheckError` on failure (from `dbt_bouncer.checks.common`)
-- See `AGENTS.md` for the full template
+`@check` is a bare decorator — it takes **no arguments**. All metadata is inferred from the function signature:
+
+- **name** — the function name (must match the `name:` value in YAML config).
+- **iterate_over** — the first positional parameter (excluding `ctx`). If there are none, the check is global (runs once with context only).
+- **params** — keyword-only arguments (after `*`) become user-configurable Pydantic fields.
+- **ctx** — optional; only include in the signature if the function actually uses it.
+- **Parameter ordering** — must be `(resource, ctx, *, params)`. Resource first, `ctx` second. Putting `ctx` before the resource breaks iterate_over inference. For context-only checks, use `(ctx, *, params)`.
+
+### Simple check (resource only)
+
+```python
+@check
+def check_model_description_populated(model):
+    """Models must have a populated description."""
+    if not model.description or len(model.description.strip()) < 4:
+        fail(f"`{model.unique_id}` does not have a populated description.")
+```
+
+### Check with params
+
+```python
+@check
+def check_model_names(model, *, model_name_pattern: str):
+    """Models must have a name matching the supplied regex."""
+    import re
+    if not re.match(model_name_pattern, model.name, re.IGNORECASE):
+        fail(f"`{model.unique_id}` does not match pattern `{model_name_pattern}`.")
+```
+
+### Context-only check (no resource iteration)
+
+```python
+@check
+def check_model_test_coverage(ctx, *, min_model_test_coverage_pct: float = 100):
+    """Set the minimum percentage of models that have at least one test."""
+    ...
+```
+
+### `fail()` — raises `DbtBouncerFailedCheckError`
+
+```python
+fail("message")
+```
 
 ## 4. Register the Check
 
@@ -45,10 +81,28 @@ If one fits, inherit from it instead of `BaseCheck`.
 
 ## 5. Write Tests
 
-- Create test in the mirror location: `tests/unit/checks/<category>/test_<file>.py`
+Use `check_passes` / `check_fails` from `dbt_bouncer.testing`:
+
+```python
+from dbt_bouncer.testing import check_fails, check_passes
+
+def test_pass():
+    check_passes("check_model_xxx", model={"name": "valid"}, my_param="value")
+
+def test_fail():
+    check_fails("check_model_xxx", model={"name": "invalid"}, my_param="value")
+
+# For context-dependent checks:
+def test_with_context():
+    check_passes("check_model_xxx",
+                 model={"name": "m1"},
+                 ctx_models=[{"name": "m1"}, {"name": "m2"}])
+```
+
+- Resource dicts are auto-merged with sensible defaults (no fixture setup needed)
+- `ctx_*` kwargs build the `CheckContext` automatically
 - Include at least one happy path and one unhappy path test
 - Ensure `__init__.py` exists in the test subdirectory
-- Use fixtures from the nearest `conftest.py`
 
 ## 6. Verify
 

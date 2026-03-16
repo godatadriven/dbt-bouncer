@@ -1,14 +1,10 @@
 """Checks related to source loaders."""
 
-from typing import Any, Literal
-
-from pydantic import Field
-
-from dbt_bouncer.check_base import BaseCheck
-from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
+from dbt_bouncer.check_decorator import check, fail
 
 
-class CheckSourceLoaderPopulated(BaseCheck):
+@check
+def check_source_loader_populated(source):
     """Sources must have a populated loader.
 
     Parameters:
@@ -27,19 +23,5 @@ class CheckSourceLoaderPopulated(BaseCheck):
         ```
 
     """
-
-    name: Literal["check_source_loader_populated"]
-    source: Any | None = Field(default=None)
-
-    def execute(self) -> None:
-        """Execute the check.
-
-        Raises:
-            DbtBouncerFailedCheckError: If loader is not populated.
-
-        """
-        source = self._require_source()
-        if source.loader == "":
-            raise DbtBouncerFailedCheckError(
-                f"`{source.source_name}.{source.name}` does not have a populated loader."
-            )
+    if source.loader == "":
+        fail(f"`{source.source_name}.{source.name}` does not have a populated loader.")

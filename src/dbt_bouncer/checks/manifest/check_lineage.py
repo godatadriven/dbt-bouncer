@@ -1,14 +1,11 @@
-import re
-from typing import Any, Literal
-
-from pydantic import Field, PrivateAttr
-
-from dbt_bouncer.check_base import BaseCheck
-from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
+from dbt_bouncer.check_decorator import check, fail
 from dbt_bouncer.utils import clean_path_str, compile_pattern, get_clean_model_name
 
 
-class CheckLineagePermittedUpstreamModels(BaseCheck):
+@check
+def check_lineage_permitted_upstream_models(
+    model, ctx, *, package_name: str | None = None, upstream_path_pattern: str
+):
     """Upstream models must have a path that matches the provided `upstream_path_pattern`.
 
     Parameters:
@@ -40,57 +37,37 @@ class CheckLineagePermittedUpstreamModels(BaseCheck):
         ```
 
     """
-
-    model: Any | None = Field(default=None)
-    name: Literal["check_lineage_permitted_upstream_models"]
-    package_name: str | None = Field(default=None)
-    upstream_path_pattern: str
-
-    _compiled_upstream_path_pattern: re.Pattern[str] = PrivateAttr()
-
-    def model_post_init(self, __context: object) -> None:
-        """Compile the regex pattern once at initialisation time."""
-        self._compiled_upstream_path_pattern = compile_pattern(
-            self.upstream_path_pattern.strip()
+    compiled_upstream_path_pattern = compile_pattern(upstream_path_pattern.strip())
+    manifest_obj = ctx.manifest_obj
+    upstream_models = [
+        x
+        for x in getattr(model.depends_on, "nodes", []) or []
+        if x.split(".")[0] == "model"
+        and x.split(".")[1]
+        == (package_name or manifest_obj.manifest.metadata.project_name)
+    ]
+    models_by_id = (
+        ctx.models_by_unique_id
+        if ctx.models_by_unique_id
+        else {m.unique_id: m for m in ctx.models}
+    )
+    not_permitted_upstream_models = [
+        upstream_model
+        for upstream_model in upstream_models
+        if upstream_model in models_by_id
+        and compiled_upstream_path_pattern.match(
+            clean_path_str(models_by_id[upstream_model].original_file_path)
+        )
+        is None
+    ]
+    if not_permitted_upstream_models:
+        fail(
+            f"`{get_clean_model_name(model.unique_id)}` references upstream models that are not permitted: {[m.split('.')[-1] for m in not_permitted_upstream_models]}."
         )
 
-    def execute(self) -> None:
-        """Execute the check.
 
-        Raises:
-            DbtBouncerFailedCheckError: If upstream models are not permitted.
-
-        """
-        model = self._require_model()
-        manifest_obj = self._require_manifest()
-        upstream_models = [
-            x
-            for x in getattr(model.depends_on, "nodes", []) or []
-            if x.split(".")[0] == "model"
-            and x.split(".")[1]
-            == (self.package_name or manifest_obj.manifest.metadata.project_name)
-        ]
-        models_by_id = (
-            self._ctx.models_by_unique_id
-            if self._ctx.models_by_unique_id
-            else {m.unique_id: m for m in self._ctx.models}
-        )
-        not_permitted_upstream_models = [
-            upstream_model
-            for upstream_model in upstream_models
-            if upstream_model in models_by_id
-            and self._compiled_upstream_path_pattern.match(
-                clean_path_str(models_by_id[upstream_model].original_file_path),
-            )
-            is None
-        ]
-        if not_permitted_upstream_models:
-            raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(model.unique_id)}` references upstream models that are not permitted: {[m.split('.')[-1] for m in not_permitted_upstream_models]}."
-            )
-
-
-class CheckLineageSeedCannotBeUsed(BaseCheck):
+@check
+def check_lineage_seed_cannot_be_used(model):
     """Seed cannot be referenced in models with a path that matches the specified `include` config.
 
     Receives:
@@ -110,29 +87,18 @@ class CheckLineageSeedCannotBeUsed(BaseCheck):
         ```
 
     """
-
-    model: Any | None = Field(default=None)
-    name: Literal["check_lineage_seed_cannot_be_used"]
-
-    def execute(self) -> None:
-        """Execute the check.
-
-        Raises:
-            DbtBouncerFailedCheckError: If seed is referenced.
-
-        """
-        model = self._require_model()
-        if [
-            x
-            for x in getattr(model.depends_on, "nodes", []) or []
-            if x.split(".")[0] == "seed"
-        ]:
-            raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(model.unique_id)}` references a seed even though this is not permitted."
-            )
+    if [
+        x
+        for x in getattr(model.depends_on, "nodes", []) or []
+        if x.split(".")[0] == "seed"
+    ]:
+        fail(
+            f"`{get_clean_model_name(model.unique_id)}` references a seed even though this is not permitted."
+        )
 
 
-class CheckLineageSourceCannotBeUsed(BaseCheck):
+@check
+def check_lineage_source_cannot_be_used(model):
     """Sources cannot be referenced in models with a path that matches the specified `include` config.
 
     Receives:
@@ -152,23 +118,11 @@ class CheckLineageSourceCannotBeUsed(BaseCheck):
         ```
 
     """
-
-    model: Any | None = Field(default=None)
-    name: Literal["check_lineage_source_cannot_be_used"]
-
-    def execute(self) -> None:
-        """Execute the check.
-
-        Raises:
-            DbtBouncerFailedCheckError: If source is referenced.
-
-        """
-        model = self._require_model()
-        if [
-            x
-            for x in getattr(model.depends_on, "nodes", []) or []
-            if x.split(".")[0] == "source"
-        ]:
-            raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(model.unique_id)}` references a source even though this is not permitted."
-            )
+    if [
+        x
+        for x in getattr(model.depends_on, "nodes", []) or []
+        if x.split(".")[0] == "source"
+    ]:
+        fail(
+            f"`{get_clean_model_name(model.unique_id)}` references a source even though this is not permitted."
+        )

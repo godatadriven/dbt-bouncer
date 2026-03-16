@@ -1,16 +1,13 @@
 """Checks related to column tests."""
 
-import re
-from typing import Any, Literal
-
-from pydantic import Field, PrivateAttr
-
-from dbt_bouncer.check_base import BaseCheck
-from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
+from dbt_bouncer.check_decorator import check, fail
 from dbt_bouncer.utils import compile_pattern
 
 
-class CheckColumnHasSpecifiedTest(BaseCheck):
+@check
+def check_column_has_specified_test(
+    catalog_node, ctx, *, column_name_pattern: str, test_name: str
+):
     """Columns that match the specified regexp pattern must have a specified test.
 
     Parameters:
@@ -36,47 +33,26 @@ class CheckColumnHasSpecifiedTest(BaseCheck):
         ```
 
     """
+    compiled_column_name_pattern = compile_pattern(column_name_pattern.strip())
+    columns_to_check = [
+        v.name
+        for _, v in catalog_node.columns.items()
+        if compiled_column_name_pattern.match(str(v.name)) is not None
+    ]
+    tested_columns = set()
+    for t in ctx.tests:
+        test_metadata = getattr(t, "test_metadata", None)
+        attached_node = getattr(t, "attached_node", None)
+        if (
+            test_metadata
+            and attached_node
+            and getattr(test_metadata, "name", None) == test_name
+            and attached_node == catalog_node.unique_id
+        ):
+            tested_columns.add(getattr(t, "column_name", ""))
+    non_complying_columns = [c for c in columns_to_check if c not in tested_columns]
 
-    catalog_node: Any | None = Field(default=None)
-    column_name_pattern: str
-    name: Literal["check_column_has_specified_test"]
-    test_name: str
-
-    _compiled_column_name_pattern: re.Pattern[str] = PrivateAttr()
-
-    def model_post_init(self, __context: object) -> None:
-        """Compile the regex pattern once at initialisation time."""
-        self._compiled_column_name_pattern = compile_pattern(
-            self.column_name_pattern.strip()
+    if non_complying_columns:
+        fail(
+            f"`{str(catalog_node.unique_id).split('.')[-1]}` has columns that should have a `{test_name}` test: {non_complying_columns}"
         )
-
-    def execute(self) -> None:
-        """Execute the check.
-
-        Raises:
-            DbtBouncerFailedCheckError: If column does not have specified test.
-
-        """
-        catalog_node = self._require_catalog_node()
-        columns_to_check = [
-            v.name
-            for _, v in catalog_node.columns.items()
-            if self._compiled_column_name_pattern.match(str(v.name)) is not None
-        ]
-        tested_columns = set()
-        for t in self._ctx.tests:
-            test_metadata = getattr(t, "test_metadata", None)
-            attached_node = getattr(t, "attached_node", None)
-            if (
-                test_metadata
-                and attached_node
-                and getattr(test_metadata, "name", None) == self.test_name
-                and attached_node == catalog_node.unique_id
-            ):
-                tested_columns.add(getattr(t, "column_name", ""))
-        non_complying_columns = [c for c in columns_to_check if c not in tested_columns]
-
-        if non_complying_columns:
-            raise DbtBouncerFailedCheckError(
-                f"`{str(catalog_node.unique_id).split('.')[-1]}` has columns that should have a `{self.test_name}` test: {non_complying_columns}"
-            )

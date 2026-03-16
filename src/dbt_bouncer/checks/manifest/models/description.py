@@ -2,13 +2,9 @@
 
 import re
 from pathlib import Path
-from typing import Any, Literal, cast
+from typing import Any, cast
 
-from pydantic import ConfigDict, Field, PrivateAttr
-
-from dbt_bouncer.check_base import BaseCheck
-from dbt_bouncer.check_patterns import BaseDescriptionPopulatedCheck
-from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
+from dbt_bouncer.check_decorator import check, fail
 from dbt_bouncer.utils import (
     clean_path_str,
     compile_pattern,
@@ -17,7 +13,8 @@ from dbt_bouncer.utils import (
 )
 
 
-class CheckModelDescriptionContainsRegexPattern(BaseCheck):
+@check
+def check_model_description_contains_regex_pattern(model, *, regexp_pattern: str):
     """Models must have a description that matches the provided pattern.
 
     Receives:
@@ -39,34 +36,17 @@ class CheckModelDescriptionContainsRegexPattern(BaseCheck):
         ```
 
     """
-
-    model: Any | None = Field(default=None)
-    name: Literal["check_model_description_contains_regex_pattern"]
-    regexp_pattern: str
-
-    _compiled_pattern: re.Pattern[str] = PrivateAttr()
-
-    def model_post_init(self, __context: object) -> None:
-        """Compile the regex pattern once at initialisation time."""
-        self._compiled_pattern = compile_pattern(
-            self.regexp_pattern.strip(), flags=re.DOTALL
+    compiled = compile_pattern(regexp_pattern.strip(), flags=re.DOTALL)
+    if not compiled.match(str(model.description)):
+        fail(
+            f"""`{get_clean_model_name(model.unique_id)}`'s description "{model.description}" doesn't match the supplied regex: {regexp_pattern}."""
         )
 
-    def execute(self) -> None:
-        """Execute the check.
 
-        Raises:
-            DbtBouncerFailedCheckError: If description does not match regex.
-
-        """
-        model = self._require_model()
-        if not self._compiled_pattern.match(str(model.description)):
-            raise DbtBouncerFailedCheckError(
-                f"""`{get_clean_model_name(model.unique_id)}`'s description "{model.description}" doesn't match the supplied regex: {self.regexp_pattern}."""
-            )
-
-
-class CheckModelDescriptionPopulated(BaseDescriptionPopulatedCheck):
+@check
+def check_model_description_populated(
+    model, *, min_description_length: int | None = None
+):
     """Models must have a populated description.
 
     Parameters:
@@ -94,24 +74,21 @@ class CheckModelDescriptionPopulated(BaseDescriptionPopulatedCheck):
         ```
 
     """
-
-    model: Any | None = Field(default=None)
-    name: Literal["check_model_description_populated"]
-
-    @property
-    def _resource_description(self) -> str:
-        return self._require_model().description or ""
-
-    @property
-    def _resource_display_name(self) -> str:
-        return get_clean_model_name(self._require_model().unique_id)
+    if not is_description_populated(
+        model.description or "", min_description_length or 4
+    ):
+        fail(
+            f"`{get_clean_model_name(model.unique_id)}` does not have a populated description."
+        )
 
 
-class CheckModelDocumentationCoverage(BaseCheck):
+@check
+def check_model_documentation_coverage(
+    ctx, *, min_model_documentation_coverage_pct: int = 100
+):
     """Set the minimum percentage of models that have a populated description.
 
     Parameters:
-        min_description_length (int | None): Minimum length required for the description to be considered populated.
         min_model_documentation_coverage_pct (float): The minimum percentage of models that must have a populated description.
 
     Receives:
@@ -134,55 +111,25 @@ class CheckModelDocumentationCoverage(BaseCheck):
         ```
 
     """
+    num_models = len(ctx.models)
+    models_with_description = []
+    for model in ctx.models:
+        if is_description_populated(
+            description=model.description or "", min_description_length=4
+        ):
+            models_with_description.append(model.unique_id)
 
-    model_config = ConfigDict(extra="forbid")
+    num_models_with_descriptions = len(models_with_description)
+    model_description_coverage_pct = (num_models_with_descriptions / num_models) * 100
 
-    description: str | None = Field(
-        default=None,
-        description="Description of what the check does and why it is implemented.",
-    )
-    index: int | None = Field(
-        default=None,
-        description="Index to uniquely identify the check, calculated at runtime.",
-    )
-    min_model_documentation_coverage_pct: int = Field(
-        default=100,
-        ge=0,
-        le=100,
-    )
-    name: Literal["check_model_documentation_coverage"]
-    severity: Literal["error", "warn"] | None = Field(
-        default="error",
-        description="Severity of the check, one of 'error' or 'warn'.",
-    )
-
-    def execute(self) -> None:
-        """Execute the check.
-
-        Raises:
-            DbtBouncerFailedCheckError: If documentation coverage is less than minimum.
-
-        """
-        num_models = len(self._ctx.models)
-        models_with_description = []
-        for model in self._ctx.models:
-            if is_description_populated(
-                description=model.description or "", min_description_length=4
-            ):
-                models_with_description.append(model.unique_id)
-
-        num_models_with_descriptions = len(models_with_description)
-        model_description_coverage_pct = (
-            num_models_with_descriptions / num_models
-        ) * 100
-
-        if model_description_coverage_pct < self.min_model_documentation_coverage_pct:
-            raise DbtBouncerFailedCheckError(
-                f"Only {model_description_coverage_pct}% of models have a populated description, this is less than the permitted minimum of {self.min_model_documentation_coverage_pct}%."
-            )
+    if model_description_coverage_pct < min_model_documentation_coverage_pct:
+        fail(
+            f"Only {model_description_coverage_pct}% of models have a populated description, this is less than the permitted minimum of {min_model_documentation_coverage_pct}%."
+        )
 
 
-class CheckModelDocumentedInSameDirectory(BaseCheck):
+@check
+def check_model_documented_in_same_directory(model):
     """Models must be documented in the same directory where they are defined (i.e. `.yml` and `.sql` files are in the same directory).
 
     Receives:
@@ -202,39 +149,25 @@ class CheckModelDocumentedInSameDirectory(BaseCheck):
         ```
 
     """
+    model = cast("Any", model)
+    model_sql_path = Path(clean_path_str(model.original_file_path))
+    model_sql_dir = model_sql_path.parent.parts
 
-    model: Any | None = Field(default=None)
-    name: Literal["check_model_documented_in_same_directory"]
+    if not (
+        hasattr(model, "patch_path")
+        and clean_path_str(model.patch_path or "") is not None
+    ):
+        fail(f"`{get_clean_model_name(model.unique_id)}` is not documented.")
 
-    def execute(self) -> None:
-        """Execute the check.
+    patch_path_str = clean_path_str(model.patch_path or "")
+    start_idx = patch_path_str.find("models")
+    if start_idx != -1:
+        patch_path_str = patch_path_str[start_idx:]
 
-        Raises:
-            DbtBouncerFailedCheckError: If model is not documented in same directory.
+    model_doc_path = Path(patch_path_str)
+    model_doc_dir = model_doc_path.parent.parts
 
-        """
-        self._require_model()
-        model = cast("Any", self.model)
-        model_sql_path = Path(clean_path_str(model.original_file_path))
-        model_sql_dir = model_sql_path.parent.parts
-
-        if not (
-            hasattr(model, "patch_path")
-            and clean_path_str(model.patch_path or "") is not None
-        ):
-            raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(model.unique_id)}` is not documented."
-            )
-
-        patch_path_str = clean_path_str(model.patch_path or "")
-        start_idx = patch_path_str.find("models")
-        if start_idx != -1:
-            patch_path_str = patch_path_str[start_idx:]
-
-        model_doc_path = Path(patch_path_str)
-        model_doc_dir = model_doc_path.parent.parts
-
-        if model_doc_dir != model_sql_dir:
-            raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(model.unique_id)}` is documented in a different directory to the `.sql` file: `{'/'.join(model_doc_dir)}` vs `{'/'.join(model_sql_dir)}`."
-            )
+    if model_doc_dir != model_sql_dir:
+        fail(
+            f"`{get_clean_model_name(model.unique_id)}` is documented in a different directory to the `.sql` file: `{'/'.join(model_doc_dir)}` vs `{'/'.join(model_sql_dir)}`."
+        )

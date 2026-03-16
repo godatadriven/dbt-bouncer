@@ -1,13 +1,11 @@
 """Checks related to source naming conventions."""
 
-from typing import Any, Literal
-
-from pydantic import Field
-
-from dbt_bouncer.check_patterns import BaseNamePatternCheck
+from dbt_bouncer.check_decorator import check, fail
+from dbt_bouncer.utils import compile_pattern
 
 
-class CheckSourceNames(BaseNamePatternCheck):
+@check
+def check_source_names(source, *, source_name_pattern: str):
     """Sources must have a name that matches the supplied regex.
 
     Parameters:
@@ -31,20 +29,9 @@ class CheckSourceNames(BaseNamePatternCheck):
         ```
 
     """
-
-    name: Literal["check_source_names"]
-    source: Any | None = Field(default=None)
-    source_name_pattern: str
-
-    @property
-    def _name_pattern(self) -> str:
-        return self.source_name_pattern
-
-    @property
-    def _resource_name(self) -> str:
-        return str(self._require_source().name)
-
-    @property
-    def _resource_display_name(self) -> str:
-        source = self._require_source()
-        return f"{source.source_name}.{source.name}"
+    compiled = compile_pattern(source_name_pattern.strip())
+    display = f"{source.source_name}.{source.name}"
+    if compiled.match(str(source.name)) is None:
+        fail(
+            f"`{display}` does not match the supplied regex `{source_name_pattern.strip()}`."
+        )

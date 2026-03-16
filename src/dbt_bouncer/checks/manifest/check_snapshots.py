@@ -1,11 +1,9 @@
-from typing import Any, Literal
-
-from pydantic import Field
-
-from dbt_bouncer.check_patterns import BaseHasTagsCheck, BaseNamePatternCheck
+from dbt_bouncer.check_decorator import check, fail
+from dbt_bouncer.utils import compile_pattern
 
 
-class CheckSnapshotHasTags(BaseHasTagsCheck):
+@check
+def check_snapshot_has_tags(snapshot, *, criteria: str = "all", tags: list[str]):
     """Snapshots must have the specified tags.
 
     Parameters:
@@ -29,20 +27,20 @@ class CheckSnapshotHasTags(BaseHasTagsCheck):
         ```
 
     """
+    resource_tags = snapshot.tags or []
+    if criteria == "any":
+        if not any(tag in resource_tags for tag in tags):
+            fail(f"`{snapshot.name}` does not have any of the required tags: {tags}.")
+    elif criteria == "all":
+        missing_tags = [tag for tag in tags if tag not in resource_tags]
+        if missing_tags:
+            fail(f"`{snapshot.name}` is missing required tags: {missing_tags}.")
+    elif criteria == "one" and sum(tag in resource_tags for tag in tags) != 1:
+        fail(f"`{snapshot.name}` must have exactly one of the required tags: {tags}.")
 
-    name: Literal["check_snapshot_has_tags"]
-    snapshot: Any | None = Field(default=None)
 
-    @property
-    def _resource_tags(self) -> list[str]:
-        return self._require_snapshot().tags or []
-
-    @property
-    def _resource_display_name(self) -> str:
-        return str(self._require_snapshot().name)
-
-
-class CheckSnapshotNames(BaseNamePatternCheck):
+@check
+def check_snapshot_names(snapshot, *, snapshot_name_pattern: str):
     """Snapshots must have a name that matches the supplied regex.
 
     Parameters:
@@ -66,19 +64,8 @@ class CheckSnapshotNames(BaseNamePatternCheck):
         ```
 
     """
-
-    name: Literal["check_snapshot_names"]
-    snapshot: Any | None = Field(default=None)
-    snapshot_name_pattern: str
-
-    @property
-    def _name_pattern(self) -> str:
-        return self.snapshot_name_pattern
-
-    @property
-    def _resource_name(self) -> str:
-        return str(self._require_snapshot().name)
-
-    @property
-    def _resource_display_name(self) -> str:
-        return str(self._require_snapshot().name)
+    compiled_pattern = compile_pattern(snapshot_name_pattern.strip())
+    if compiled_pattern.match(str(snapshot.name)) is None:
+        fail(
+            f"`{snapshot.name}` does not match the supplied regex `{snapshot_name_pattern.strip()}`."
+        )

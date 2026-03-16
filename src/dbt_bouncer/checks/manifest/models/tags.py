@@ -1,14 +1,11 @@
 """Checks related to model tags."""
 
-from typing import Any, Literal
-
-from pydantic import Field
-
-from dbt_bouncer.check_patterns import BaseHasTagsCheck
+from dbt_bouncer.check_decorator import check, fail
 from dbt_bouncer.utils import get_clean_model_name
 
 
-class CheckModelHasTags(BaseHasTagsCheck):
+@check
+def check_model_has_tags(model, *, criteria: str = "all", tags: list[str]):
     """Models must have the specified tags.
 
     Parameters:
@@ -33,14 +30,14 @@ class CheckModelHasTags(BaseHasTagsCheck):
         ```
 
     """
-
-    model: Any | None = Field(default=None)
-    name: Literal["check_model_has_tags"]
-
-    @property
-    def _resource_tags(self) -> list[str]:
-        return self._require_model().tags or []
-
-    @property
-    def _resource_display_name(self) -> str:
-        return get_clean_model_name(self._require_model().unique_id)
+    resource_tags = model.tags or []
+    display_name = get_clean_model_name(model.unique_id)
+    if criteria == "any":
+        if not any(tag in resource_tags for tag in tags):
+            fail(f"`{display_name}` does not have any of the required tags: {tags}.")
+    elif criteria == "all":
+        missing_tags = [tag for tag in tags if tag not in resource_tags]
+        if missing_tags:
+            fail(f"`{display_name}` is missing required tags: {missing_tags}.")
+    elif criteria == "one" and sum(tag in resource_tags for tag in tags) != 1:
+        fail(f"`{display_name}` must have exactly one of the required tags: {tags}.")

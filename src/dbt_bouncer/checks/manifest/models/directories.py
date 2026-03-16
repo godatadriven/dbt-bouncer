@@ -1,17 +1,15 @@
 """Checks related to model file locations, names, and directory structure."""
 
-import re
 from pathlib import Path
-from typing import Any, Literal
 
-from pydantic import ConfigDict, Field, PrivateAttr
-
-from dbt_bouncer.check_base import BaseCheck
-from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
+from dbt_bouncer.check_decorator import check, fail
 from dbt_bouncer.utils import clean_path_str, compile_pattern, get_clean_model_name
 
 
-class CheckModelDirectories(BaseCheck):
+@check
+def check_model_directories(
+    model, *, include: str, permitted_sub_directories: list[str]
+):
     """Only specified sub-directories are permitted.
 
     Parameters:
@@ -48,45 +46,26 @@ class CheckModelDirectories(BaseCheck):
         ```
 
     """
+    compiled_include = compile_pattern(include.strip().rstrip("/"))
+    clean_path = clean_path_str(model.original_file_path)
+    matched_path = compiled_include.match(clean_path)
+    if matched_path is None:
+        fail("matched_path is None")
+    path_after_match = clean_path[matched_path.end() + 1 :]
+    directory_to_check = Path(path_after_match).parts[0]
 
-    include: str
-    model: Any | None = Field(default=None)
-    name: Literal["check_model_directories"]
-    permitted_sub_directories: list[str]
-
-    _compiled_include: re.Pattern[str] = PrivateAttr()
-
-    def model_post_init(self, __context: object) -> None:
-        """Compile the regex pattern once at initialisation time."""
-        self._compiled_include = compile_pattern(self.include.strip().rstrip("/"))
-
-    def execute(self) -> None:
-        """Execute the check.
-
-        Raises:
-            DbtBouncerFailedCheckError: If model located in `./models` or invalid subdirectory.
-
-        """
-        model = self._require_model()
-        clean_path = clean_path_str(model.original_file_path)
-        matched_path = self._compiled_include.match(clean_path)
-        if matched_path is None:
-            raise DbtBouncerFailedCheckError("matched_path is None")
-        path_after_match = clean_path[matched_path.end() + 1 :]
-        directory_to_check = Path(path_after_match).parts[0]
-
-        if directory_to_check.replace(".sql", "") == model.name:
-            raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(model.unique_id)}` is not located in a valid sub-directory ({self.permitted_sub_directories})."
-            )
-        else:
-            if directory_to_check not in self.permitted_sub_directories:
-                raise DbtBouncerFailedCheckError(
-                    f"`{get_clean_model_name(model.unique_id)}` is located in the `{directory_to_check}` sub-directory, this is not a valid sub-directory ({self.permitted_sub_directories})."
-                )
+    if directory_to_check.replace(".sql", "") == model.name:
+        fail(
+            f"`{get_clean_model_name(model.unique_id)}` is not located in a valid sub-directory ({permitted_sub_directories})."
+        )
+    elif directory_to_check not in permitted_sub_directories:
+        fail(
+            f"`{get_clean_model_name(model.unique_id)}` is located in the `{directory_to_check}` sub-directory, this is not a valid sub-directory ({permitted_sub_directories})."
+        )
 
 
-class CheckModelFileName(BaseCheck):
+@check
+def check_model_file_name(model, *, file_name_pattern: str):
     r"""Models must have a file name that matches the supplied regex.
 
     Parameters:
@@ -112,33 +91,16 @@ class CheckModelFileName(BaseCheck):
         ```
 
     """
-
-    file_name_pattern: str
-    model: Any | None = Field(default=None)
-    name: Literal["check_model_file_name"]
-
-    _compiled_pattern: re.Pattern[str] = PrivateAttr()
-
-    def model_post_init(self, __context: object) -> None:
-        """Compile the regex pattern once at initialisation time."""
-        self._compiled_pattern = compile_pattern(self.file_name_pattern.strip())
-
-    def execute(self) -> None:
-        """Execute the check.
-
-        Raises:
-            DbtBouncerFailedCheckError: If file name does not match regex.
-
-        """
-        model = self._require_model()
-        file_name = Path(clean_path_str(model.original_file_path)).name
-        if self._compiled_pattern.match(file_name) is None:
-            raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(model.unique_id)}` is in a file that does not match the supplied regex `{self.file_name_pattern.strip()}`."
-            )
+    compiled = compile_pattern(file_name_pattern.strip())
+    file_name = Path(clean_path_str(model.original_file_path)).name
+    if compiled.match(file_name) is None:
+        fail(
+            f"`{get_clean_model_name(model.unique_id)}` is in a file that does not match the supplied regex `{file_name_pattern.strip()}`."
+        )
 
 
-class CheckModelPropertyFileLocation(BaseCheck):
+@check
+def check_model_property_file_location(model):
     """Model properties files must follow the guidance provided by dbt [here](https://docs.getdbt.com/best-practices/how-we-structure/1-guide-overview).
 
     Parameters:
@@ -158,59 +120,46 @@ class CheckModelPropertyFileLocation(BaseCheck):
         ```
 
     """
+    if not (
+        hasattr(model, "patch_path")
+        and model.patch_path
+        and clean_path_str(model.patch_path or "") is not None
+    ):
+        fail(f"`{get_clean_model_name(model.unique_id)}` is not documented.")
 
-    model: Any | None = Field(default=None)
-    name: Literal["check_model_property_file_location"]
+    original_path = Path(clean_path_str(model.original_file_path))
+    relevant_parts = original_path.parts[1:-1]
 
-    def execute(self) -> None:
-        """Execute the check.
+    mapped_parts = []
+    for part in relevant_parts:
+        if part == "staging":
+            mapped_parts.append("stg")
+        elif part == "intermediate":
+            mapped_parts.append("int")
+        elif part == "marts":
+            continue
+        else:
+            mapped_parts.append(part)
 
-        Raises:
-            DbtBouncerFailedCheckError: If property file location is incorrect.
+    expected_substr = "_".join(mapped_parts)
+    properties_yml_name = Path(clean_path_str(model.patch_path or "")).name
 
-        """
-        model = self._require_model()
-        if not (
-            hasattr(model, "patch_path")
-            and model.patch_path
-            and clean_path_str(model.patch_path or "") is not None
-        ):
-            raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(model.unique_id)}` is not documented."
-            )
-
-        original_path = Path(clean_path_str(model.original_file_path))
-        relevant_parts = original_path.parts[1:-1]
-
-        mapped_parts = []
-        for part in relevant_parts:
-            if part == "staging":
-                mapped_parts.append("stg")
-            elif part == "intermediate":
-                mapped_parts.append("int")
-            elif part == "marts":
-                continue
-            else:
-                mapped_parts.append(part)
-
-        expected_substr = "_".join(mapped_parts)
-        properties_yml_name = Path(clean_path_str(model.patch_path or "")).name
-
-        if not properties_yml_name.startswith("_"):
-            raise DbtBouncerFailedCheckError(
-                f"The properties file for `{get_clean_model_name(model.unique_id)}` (`{properties_yml_name}`) does not start with an underscore."
-            )
-        if expected_substr not in properties_yml_name:
-            raise DbtBouncerFailedCheckError(
-                f"The properties file for `{get_clean_model_name(model.unique_id)}` (`{properties_yml_name}`) does not contain the expected substring (`{expected_substr}`)."
-            )
-        if not properties_yml_name.endswith("__models.yml"):
-            raise DbtBouncerFailedCheckError(
-                f"The properties file for `{get_clean_model_name(model.unique_id)}` (`{properties_yml_name}`) does not end with `__models.yml`."
-            )
+    if not properties_yml_name.startswith("_"):
+        fail(
+            f"The properties file for `{get_clean_model_name(model.unique_id)}` (`{properties_yml_name}`) does not start with an underscore."
+        )
+    if expected_substr not in properties_yml_name:
+        fail(
+            f"The properties file for `{get_clean_model_name(model.unique_id)}` (`{properties_yml_name}`) does not contain the expected substring (`{expected_substr}`)."
+        )
+    if not properties_yml_name.endswith("__models.yml"):
+        fail(
+            f"The properties file for `{get_clean_model_name(model.unique_id)}` (`{properties_yml_name}`) does not end with `__models.yml`."
+        )
 
 
-class CheckModelSchemaName(BaseCheck):
+@check
+def check_model_schema_name(model, *, schema_name_pattern: str):
     """Models must have a schema name that matches the supplied regex.
 
     Note that most setups will use schema names in development that are prefixed, for example:
@@ -244,28 +193,8 @@ class CheckModelSchemaName(BaseCheck):
         ```
 
     """
-
-    model_config = ConfigDict(extra="forbid", protected_namespaces=())
-
-    model: Any | None = Field(default=None)
-    name: Literal["check_model_schema_name"]
-    schema_name_pattern: str
-
-    _compiled_pattern: re.Pattern[str] = PrivateAttr()
-
-    def model_post_init(self, __context: object) -> None:
-        """Compile the regex pattern once at initialisation time."""
-        self._compiled_pattern = compile_pattern(self.schema_name_pattern.strip())
-
-    def execute(self) -> None:
-        """Execute the check.
-
-        Raises:
-            DbtBouncerFailedCheckError: If schema name does not match regex.
-
-        """
-        model = self._require_model()
-        if self._compiled_pattern.match(str(model.schema_)) is None:
-            raise DbtBouncerFailedCheckError(
-                f"`{model.schema_}` does not match the supplied regex `{self.schema_name_pattern.strip()})`."
-            )
+    compiled = compile_pattern(schema_name_pattern.strip())
+    if compiled.match(str(model.schema_)) is None:
+        fail(
+            f"`{model.schema_}` does not match the supplied regex `{schema_name_pattern.strip()})`."
+        )

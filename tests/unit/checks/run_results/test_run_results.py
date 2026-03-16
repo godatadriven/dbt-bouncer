@@ -1,103 +1,40 @@
-from contextlib import nullcontext as does_not_raise
-
-import pytest
-
-from dbt_bouncer.artifact_parsers.parser import wrap_dict
-from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
-from dbt_bouncer.checks.run_results.check_run_results import (
-    CheckRunResultsMaxExecutionTime,
-    CheckRunResultsMaxGigabytesBilled,
-)
+from dbt_bouncer.testing import check_fails, check_passes
 
 
-@pytest.fixture
-def run_result(request):
-    default_run_result = {
-        "adapter_response": {"bytes_billed": 1},
-        "execution_time": 1,
-        "status": "success",
-        "thread_id": "Thread-1",
-        "timing": [],
-        "unique_id": "model.package_name.model_1",
-    }
-    return wrap_dict({**default_run_result, **getattr(request, "param", {})})
+class TestCheckRunResultsMaxGigabytesBilled:
+    def test_within_limit(self):
+        check_passes(
+            "check_run_results_max_gigabytes_billed",
+            run_result={},
+            max_gigabytes_billed=10,
+        )
+
+    def test_exceeds_limit(self):
+        check_fails(
+            "check_run_results_max_gigabytes_billed",
+            run_result={"adapter_response": {"bytes_billed": 100000000000}},
+            max_gigabytes_billed=10,
+        )
 
 
-_TEST_DATA_FOR_CHECK_RUN_RESULTS_MAX_GIGABYTES_BILLED = [
-    pytest.param(
-        10,
-        {},
-        does_not_raise(),
-        id="within_limit",
-    ),
-    pytest.param(
-        10,
-        {
-            "adapter_response": {"bytes_billed": 100000000000},
-        },
-        pytest.raises(DbtBouncerFailedCheckError),
-        id="exceeds_limit",
-    ),
-]
+class TestCheckRunResultsMaxExecutionTime:
+    def test_within_limit(self):
+        check_passes(
+            "check_run_results_max_execution_time",
+            run_result={},
+            max_execution_time_seconds=10,
+        )
 
+    def test_at_limit(self):
+        check_passes(
+            "check_run_results_max_execution_time",
+            run_result={"execution_time": 10},
+            max_execution_time_seconds=10,
+        )
 
-@pytest.mark.parametrize(
-    ("max_gigabytes_billed", "run_result", "expectation"),
-    _TEST_DATA_FOR_CHECK_RUN_RESULTS_MAX_GIGABYTES_BILLED,
-    indirect=["run_result"],
-)
-def test_check_run_results_max_gigabytes_billed(
-    max_gigabytes_billed,
-    run_result,
-    expectation,
-):
-    with expectation:
-        CheckRunResultsMaxGigabytesBilled(
-            max_gigabytes_billed=max_gigabytes_billed,
-            name="check_run_results_max_gigabytes_billed",
-            run_result=run_result,
-        ).execute()
-
-
-_TEST_DATA_FOR_CHECK_RUN_RESULTS_MAX_EXECUTION_TIME = [
-    pytest.param(
-        10,
-        {},
-        does_not_raise(),
-        id="within_limit",
-    ),
-    pytest.param(
-        10,
-        {
-            "execution_time": 10,
-        },
-        does_not_raise(),
-        id="at_limit",
-    ),
-    pytest.param(
-        10,
-        {
-            "execution_time": 100,
-        },
-        pytest.raises(DbtBouncerFailedCheckError),
-        id="exceeds_limit",
-    ),
-]
-
-
-@pytest.mark.parametrize(
-    ("max_execution_time_seconds", "run_result", "expectation"),
-    _TEST_DATA_FOR_CHECK_RUN_RESULTS_MAX_EXECUTION_TIME,
-    indirect=["run_result"],
-)
-def test_check_run_results_max_execution_time(
-    max_execution_time_seconds,
-    run_result,
-    expectation,
-):
-    with expectation:
-        CheckRunResultsMaxExecutionTime(
-            max_execution_time_seconds=max_execution_time_seconds,
-            name="check_run_results_max_execution_time",
-            run_result=run_result,
-        ).execute()
+    def test_exceeds_limit(self):
+        check_fails(
+            "check_run_results_max_execution_time",
+            run_result={"execution_time": 100},
+            max_execution_time_seconds=10,
+        )

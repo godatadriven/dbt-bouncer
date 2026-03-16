@@ -179,24 +179,97 @@ uv run pytest ./tests/unit/checks/catalog/test_columns.py::test_check_columns_ar
 
 ## Adding a new check
 
-To add a new check follow the below steps:
+The recommended way to add a check is with the **decorator API**. The `@check` decorator generates a `BaseCheck` subclass from a plain function. For checks that need complex Pydantic validation, you can also use the **class-based API** (see below).
 
-1. In `./src/dbt_bouncer/checks` choose the appropriate directory for your check. For example, if your check only requires the `manifest.json` then use the `manifest` directory, if your check requires the `catalog.json` then use the `catalog` directory.
-1. Within the chosen directory assess if a suitable file already exists. For example, if your check applies to a model then `manifest/check_models.py` is a suitable location.
-1. Within the chosen file, add a Pydantic model, this object must meet the following criteria:
+### Decorator API (recommended)
 
-    - Start with "Check".
-    - Inherit from `dbt_bouncer.check_base.BaseCheck`.
-    - Have a `name` attribute that is a string whose value is the snake case equivalent of the class name.
-    - A `default` value provided for optional input arguments and arguments that are received at execution time.
-    - Have a doc string that includes a description of the check, a list of possible input parameters and at least one example.
-    - A clear message in the event of a failure.
+The `@check` decorator infers everything from the function signature:
 
-1. After the check is added, add the check to `dbt-bouncer-example.yml` and run `dbt-bouncer --config-file dbt-bouncer-example.yml` to ensure the check succeeds.
-1. (Optional) If the dbt project located in `./dbt_project` needs to be updated then do so and also run `make build-artifacts` to generate the new test artifacts.
-1. Add at least one happy path and one unhappy path test to `./tests`. The appropriate test file will be the one matching the directory of the check. For example, if the check is in `./src/dbt_bouncer/checks/catalog/check_columns.py` then the test file will be `./tests/unit/checks/catalog/test_columns.py`.
-1. Run `make test` to ensure the tests pass.
-1. Open a PR 🎉!
+- **name** = the function name (used in YAML config)
+- **iterate_over** = the first positional parameter (e.g. `model`, `source`, `seed`), or omit for context-only checks
+- **params** = keyword-only arguments (after `*`) become user-configurable parameters
+- **ctx** is optional — only include it in the signature if the function actually uses it
+
+```python
+# src/dbt_bouncer/checks/manifest/models/naming.py
+from dbt_bouncer.check_decorator import check, fail
+
+@check
+def check_model_names(model, *, model_name_pattern: str):
+    """Model names must match the supplied regex."""
+    import re
+    if not re.match(model_name_pattern, str(model.name)):
+        fail(f"`{model.unique_id}` does not match pattern `{model_name_pattern}`.")
+```
+
+**Steps:**
+
+1. Choose the appropriate file in `./src/dbt_bouncer/checks/<category>/`.
+1. Add a function decorated with `@check`:
+    - The function name becomes the check name (snake_case, used in YAML config).
+    - The first positional parameter determines the resource type to iterate over (`model`, `source`, `seed`, etc.), or omit for context-only checks.
+    - Keyword-only arguments (after `*`) become user-configurable parameters.
+    - Add `ctx` as a parameter only if the function needs access to the `CheckContext`.
+    - Call `fail(message)` to signal a check failure.
+1. Add the check to `dbt-bouncer-example.yml` and run `dbt-bouncer --config-file dbt-bouncer-example.yml`.
+1. Write tests using the test helpers:
+
+```python
+# tests/unit/checks/manifest/models/test_naming.py
+from dbt_bouncer.testing import check_fails, check_passes
+
+def test_check_model_names_pass():
+    check_passes("check_model_names", model={"name": "stg_orders"}, model_name_pattern="^stg_")
+
+def test_check_model_names_fail():
+    check_fails("check_model_names", model={"name": "fct_orders"}, model_name_pattern="^stg_")
+```
+
+5. Run `make test` to ensure tests pass.
+6. Open a PR!
+
+### Class-based API
+
+Use this when you need complex Pydantic validation:
+
+1. In `./src/dbt_bouncer/checks` choose the appropriate directory for your check.
+1. Within the chosen file, add a Pydantic model inheriting from `BaseCheck`:
+    - Class name starts with "Check".
+    - Has a `name: Literal["check_..."]` field.
+    - Has an `execute()` method that raises `DbtBouncerFailedCheckError` on failure.
+    - Uses `_require_*()` methods to access resources.
+1. Add the check to `dbt-bouncer-example.yml` and validate.
+1. Write tests using `check_passes`/`check_fails` from `dbt_bouncer.testing`.
+1. Run `make test` and open a PR.
+
+### Writing tests
+
+The `dbt_bouncer.testing` module provides `check_passes` and `check_fails` helpers:
+
+```python
+from dbt_bouncer.testing import check_fails, check_passes
+
+# Resource keyword arguments (model={...}) are auto-merged with sensible defaults
+check_passes("check_model_names", model={"name": "stg_orders"}, model_name_pattern="^stg_")
+check_fails("check_model_names", model={"name": "fct_orders"}, model_name_pattern="^stg_")
+
+# For context-dependent checks, use ctx_* keyword arguments:
+check_passes("check_model_documentation_coverage",
+             min_model_documentation_coverage_pct=100,
+             ctx_models=[{"description": "desc", "name": "m1", "unique_id": "model.pkg.m1"}])
+```
+
+### Writing plugins (external packages)
+
+External packages can register checks via entry points:
+
+```toml
+# pyproject.toml of your plugin package
+[project.entry-points."dbt_bouncer.checks"]
+my_checks = "my_package.checks"
+```
+
+Your module can use the `@check` decorator or class-based checks. dbt-bouncer discovers them automatically via the entry point. Use `dbt_bouncer.testing` in your own test suite.
 
 ## AI Agents and Tools
 

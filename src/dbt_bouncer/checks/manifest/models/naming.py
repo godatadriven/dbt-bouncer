@@ -1,14 +1,11 @@
 """Checks related to model naming conventions."""
 
-from typing import Any, Literal
-
-from pydantic import ConfigDict, Field
-
-from dbt_bouncer.check_patterns import BaseNamePatternCheck
-from dbt_bouncer.utils import get_clean_model_name
+from dbt_bouncer.check_decorator import check, fail
+from dbt_bouncer.utils import compile_pattern, get_clean_model_name
 
 
-class CheckModelNames(BaseNamePatternCheck):
+@check
+def check_model_names(model, *, model_name_pattern: str):
     """Models must have a name that matches the supplied regex.
 
     Parameters:
@@ -36,21 +33,9 @@ class CheckModelNames(BaseNamePatternCheck):
         ```
 
     """
-
-    model_config = ConfigDict(extra="forbid", protected_namespaces=())
-
-    model: Any | None = Field(default=None)
-    model_name_pattern: str
-    name: Literal["check_model_names"]
-
-    @property
-    def _name_pattern(self) -> str:
-        return self.model_name_pattern
-
-    @property
-    def _resource_name(self) -> str:
-        return str(self._require_model().name)
-
-    @property
-    def _resource_display_name(self) -> str:
-        return get_clean_model_name(self._require_model().unique_id)
+    compiled = compile_pattern(model_name_pattern.strip())
+    if compiled.match(str(model.name)) is None:
+        display_name = get_clean_model_name(model.unique_id)
+        fail(
+            f"`{display_name}` does not match the supplied regex `{model_name_pattern.strip()}`."
+        )

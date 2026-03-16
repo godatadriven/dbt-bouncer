@@ -1,16 +1,13 @@
 """Checks related to model source code content and structure."""
 
 import re
-from typing import Any, Literal
 
-from pydantic import Field, PrivateAttr
-
-from dbt_bouncer.check_base import BaseCheck
-from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
+from dbt_bouncer.check_decorator import check, fail
 from dbt_bouncer.utils import compile_pattern, get_clean_model_name
 
 
-class CheckModelCodeDoesNotContainRegexpPattern(BaseCheck):
+@check
+def check_model_code_does_not_contain_regexp_pattern(model, *, regexp_pattern: str):
     """The raw code for a model must not match the specified regexp pattern.
 
     Parameters:
@@ -35,34 +32,15 @@ class CheckModelCodeDoesNotContainRegexpPattern(BaseCheck):
         ```
 
     """
-
-    model: Any | None = Field(default=None)
-    name: Literal["check_model_code_does_not_contain_regexp_pattern"]
-    regexp_pattern: str
-
-    _compiled_pattern: re.Pattern[str] = PrivateAttr()
-
-    def model_post_init(self, __context: object) -> None:
-        """Compile the regex pattern once at initialisation time."""
-        self._compiled_pattern = compile_pattern(
-            self.regexp_pattern.strip(), flags=re.DOTALL
+    compiled = compile_pattern(regexp_pattern.strip(), flags=re.DOTALL)
+    if compiled.match(str(model.raw_code)) is not None:
+        fail(
+            f"`{get_clean_model_name(model.unique_id)}` contains a banned string: `{regexp_pattern}`."
         )
 
-    def execute(self) -> None:
-        """Execute the check.
 
-        Raises:
-            DbtBouncerFailedCheckError: If code contains banned string.
-
-        """
-        model = self._require_model()
-        if self._compiled_pattern.match(str(model.raw_code)) is not None:
-            raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(model.unique_id)}` contains a banned string: `{self.regexp_pattern}`."
-            )
-
-
-class CheckModelHardCodedReferences(BaseCheck):
+@check
+def check_model_hard_coded_references(model):
     """A model must not contain hard-coded table references; use ref() or source() instead.
 
     Scans ``raw_code`` for patterns like ``FROM schema.table`` or
@@ -92,48 +70,21 @@ class CheckModelHardCodedReferences(BaseCheck):
         ```
 
     """
+    jinja_pattern = re.compile(r"\{[{%].*?[%}]\}", re.DOTALL)
+    hard_coded_ref_pattern = re.compile(r"\b(?:FROM|JOIN)\s+\w+\.\w+", re.IGNORECASE)
 
-    model: Any | None = Field(default=None)
-    name: Literal["check_model_hard_coded_references"]
-
-    _jinja_pattern: re.Pattern[str] = PrivateAttr()
-    _hard_coded_ref_pattern: re.Pattern[str] = PrivateAttr()
-
-    def model_post_init(self, __context: object) -> None:
-        """Compile regex patterns once at initialisation time."""
-        # Strip Jinja blocks ({{ ... }}, {% ... %}) before scanning for bare refs
-        object.__setattr__(
-            self,
-            "_jinja_pattern",
-            re.compile(r"\{[{%].*?[%}]\}", re.DOTALL),
-        )
-        # Match FROM or JOIN followed by a dotted identifier (schema.table)
-        # Only multi-part names (with a dot) are flagged; single-part CTE names are not
-        object.__setattr__(
-            self,
-            "_hard_coded_ref_pattern",
-            re.compile(r"\b(?:FROM|JOIN)\s+\w+\.\w+", re.IGNORECASE),
+    raw_code = model.raw_code or ""
+    cleaned = jinja_pattern.sub("", raw_code)
+    matches = hard_coded_ref_pattern.findall(cleaned)
+    if matches:
+        fail(
+            f"`{get_clean_model_name(model.unique_id)}` contains hard-coded table "
+            f"references: {matches}. Use `{{{{ ref(...) }}}}` or `{{{{ source(..., ...) }}}}` instead."
         )
 
-    def execute(self) -> None:
-        """Execute the check.
 
-        Raises:
-            DbtBouncerFailedCheckError: If the model contains hard-coded table references.
-
-        """
-        model = self._require_model()
-        raw_code = model.raw_code or ""
-        cleaned = self._jinja_pattern.sub("", raw_code)
-        matches = self._hard_coded_ref_pattern.findall(cleaned)
-        if matches:
-            raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(model.unique_id)}` contains hard-coded table "
-                f"references: {matches}. Use `{{{{ ref(...) }}}}` or `{{{{ source(..., ...) }}}}` instead."
-            )
-
-
-class CheckModelHasSemiColon(BaseCheck):
+@check
+def check_model_has_semi_colon(model):
     """Model may not end with a semi-colon (`;`).
 
     Receives:
@@ -154,26 +105,15 @@ class CheckModelHasSemiColon(BaseCheck):
         ```
 
     """
-
-    model: Any | None = Field(default=None)
-    name: Literal["check_model_has_semi_colon"]
-
-    def execute(self) -> None:
-        """Execute the check.
-
-        Raises:
-            DbtBouncerFailedCheckError: If model ends with a semi-colon.
-
-        """
-        model = self._require_model()
-        raw_code = (model.raw_code or "").strip()
-        if raw_code and raw_code[-1] == ";":
-            raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(model.unique_id)}` ends with a semi-colon, this is not permitted."
-            )
+    raw_code = (model.raw_code or "").strip()
+    if raw_code and raw_code[-1] == ";":
+        fail(
+            f"`{get_clean_model_name(model.unique_id)}` ends with a semi-colon, this is not permitted."
+        )
 
 
-class CheckModelMaxNumberOfLines(BaseCheck):
+@check
+def check_model_max_number_of_lines(model, *, max_number_of_lines: int = 100):
     """Models may not have more than the specified number of lines.
 
     Parameters:
@@ -200,22 +140,9 @@ class CheckModelMaxNumberOfLines(BaseCheck):
         ```
 
     """
+    actual_number_of_lines = (model.raw_code or "").count("\n") + 1
 
-    model: Any | None = Field(default=None)
-    name: Literal["check_model_max_number_of_lines"]
-    max_number_of_lines: int = Field(default=100)
-
-    def execute(self) -> None:
-        """Execute the check.
-
-        Raises:
-            DbtBouncerFailedCheckError: If max lines exceeded.
-
-        """
-        model = self._require_model()
-        actual_number_of_lines = (model.raw_code or "").count("\n") + 1
-
-        if actual_number_of_lines > self.max_number_of_lines:
-            raise DbtBouncerFailedCheckError(
-                f"`{get_clean_model_name(model.unique_id)}` has {actual_number_of_lines} lines, this is more than the maximum permitted number of lines ({self.max_number_of_lines})."
-            )
+    if actual_number_of_lines > max_number_of_lines:
+        fail(
+            f"`{get_clean_model_name(model.unique_id)}` has {actual_number_of_lines} lines, this is more than the maximum permitted number of lines ({max_number_of_lines})."
+        )
