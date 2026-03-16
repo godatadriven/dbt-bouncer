@@ -1,0 +1,8 @@
+version: 2
+
+snapshots:
+  - name: snapshot_orders
+    description: Snapshot of orders for tracking changes over time
+
+  - name: snapshot_orders_multiple_unique_keys
+    description: Snapshot of orders using multiple unique keys for tracking changes over time
