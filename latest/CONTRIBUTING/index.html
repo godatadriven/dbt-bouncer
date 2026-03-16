@@ -986,6 +986,56 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Adding a new check">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#decorator-api-recommended" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decorator API (recommended)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#class-based-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Class-based API
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#writing-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Writing tests
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#writing-plugins-external-packages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Writing plugins (external packages)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1199,29 +1249,87 @@
 <li>Append <code># ty: ignore</code> to the end of a line if you need to disable <code>ty</code> on that line, preferably with the specific rule to ignore such as <code># ty: ignore[invalid-argument-type]</code>.</li>
 </ul>
 <h2 id="adding-a-new-check">Adding a new check<a class="headerlink" href="#adding-a-new-check" title="Permanent link">#</a></h2>
-<p>To add a new check follow the below steps:</p>
-<ol>
-<li>In <code>./src/dbt_bouncer/checks</code> choose the appropriate directory for your check. For example, if your check only requires the <code>manifest.json</code> then use the <code>manifest</code> directory, if your check requires the <code>catalog.json</code> then use the <code>catalog</code> directory.</li>
-<li>Within the chosen directory assess if a suitable file already exists. For example, if your check applies to a model then <code>manifest/check_models.py</code> is a suitable location.</li>
-<li>
-<p>Within the chosen file, add a Pydantic model, this object must meet the following criteria:</p>
+<p>The recommended way to add a check is with the <strong>decorator API</strong>. The <code>@check</code> decorator generates a <code>BaseCheck</code> subclass from a plain function. For checks that need complex Pydantic validation, you can also use the <strong>class-based API</strong> (see below).</p>
+<h3 id="decorator-api-recommended">Decorator API (recommended)<a class="headerlink" href="#decorator-api-recommended" title="Permanent link">#</a></h3>
+<p>The <code>@check</code> decorator infers everything from the function signature:</p>
 <ul>
-<li>Start with "Check".</li>
-<li>Inherit from <code>dbt_bouncer.check_base.BaseCheck</code>.</li>
-<li>Have a <code>name</code> attribute that is a string whose value is the snake case equivalent of the class name.</li>
-<li>A <code>default</code> value provided for optional input arguments and arguments that are received at execution time.</li>
-<li>Have a doc string that includes a description of the check, a list of possible input parameters and at least one example.</li>
-<li>A clear message in the event of a failure.</li>
+<li><strong>name</strong> = the function name (used in YAML config)</li>
+<li><strong>iterate_over</strong> = the first positional parameter (e.g. <code>model</code>, <code>source</code>, <code>seed</code>), or omit for context-only checks</li>
+<li><strong>params</strong> = keyword-only arguments (after <code>*</code>) become user-configurable parameters</li>
+<li><strong>ctx</strong> is optional — only include it in the signature if the function actually uses it</li>
+</ul>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># src/dbt_bouncer/checks/manifest/models/naming.py</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">dbt_bouncer.check_decorator</span><span class="w"> </span><span class="kn">import</span> <span class="n">check</span><span class="p">,</span> <span class="n">fail</span>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="nd">@check</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="k">def</span><span class="w"> </span><span class="nf">check_model_names</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">model_name_pattern</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Model names must match the supplied regex.&quot;&quot;&quot;</span>
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>    <span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">model_name_pattern</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">)):</span>
+</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>        <span class="n">fail</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;`</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">unique_id</span><span class="si">}</span><span class="s2">` does not match pattern `</span><span class="si">{</span><span class="n">model_name_pattern</span><span class="si">}</span><span class="s2">`.&quot;</span><span class="p">)</span>
+</span></code></pre></div>
+<p><strong>Steps:</strong></p>
+<ol>
+<li>Choose the appropriate file in <code>./src/dbt_bouncer/checks/&lt;category&gt;/</code>.</li>
+<li>Add a function decorated with <code>@check</code>:<ul>
+<li>The function name becomes the check name (snake_case, used in YAML config).</li>
+<li>The first positional parameter determines the resource type to iterate over (<code>model</code>, <code>source</code>, <code>seed</code>, etc.), or omit for context-only checks.</li>
+<li>Keyword-only arguments (after <code>*</code>) become user-configurable parameters.</li>
+<li>Add <code>ctx</code> as a parameter only if the function needs access to the <code>CheckContext</code>.</li>
+<li>Call <code>fail(message)</code> to signal a check failure.</li>
 </ul>
 </li>
-<li>
-<p>After the check is added, add the check to <code>dbt-bouncer-example.yml</code> and run <code>dbt-bouncer --config-file dbt-bouncer-example.yml</code> to ensure the check succeeds.</p>
-</li>
-<li>(Optional) If the dbt project located in <code>./dbt_project</code> needs to be updated then do so and also run <code>make build-artifacts</code> to generate the new test artifacts.</li>
-<li>Add at least one happy path and one unhappy path test to <code>./tests</code>. The appropriate test file will be the one matching the directory of the check. For example, if the check is in <code>./src/dbt_bouncer/checks/catalog/check_columns.py</code> then the test file will be <code>./tests/unit/checks/catalog/test_columns.py</code>.</li>
-<li>Run <code>make test</code> to ensure the tests pass.</li>
-<li>Open a PR 🎉!</li>
+<li>Add the check to <code>dbt-bouncer-example.yml</code> and run <code>dbt-bouncer --config-file dbt-bouncer-example.yml</code>.</li>
+<li>Write tests using the test helpers:</li>
 </ol>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># tests/unit/checks/manifest/models/test_naming.py</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">dbt_bouncer.testing</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_fails</span><span class="p">,</span> <span class="n">check_passes</span>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="k">def</span><span class="w"> </span><span class="nf">test_check_model_names_pass</span><span class="p">():</span>
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>    <span class="n">check_passes</span><span class="p">(</span><span class="s2">&quot;check_model_names&quot;</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;stg_orders&quot;</span><span class="p">},</span> <span class="n">model_name_pattern</span><span class="o">=</span><span class="s2">&quot;^stg_&quot;</span><span class="p">)</span>
+</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>
+</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="k">def</span><span class="w"> </span><span class="nf">test_check_model_names_fail</span><span class="p">():</span>
+</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>    <span class="n">check_fails</span><span class="p">(</span><span class="s2">&quot;check_model_names&quot;</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;fct_orders&quot;</span><span class="p">},</span> <span class="n">model_name_pattern</span><span class="o">=</span><span class="s2">&quot;^stg_&quot;</span><span class="p">)</span>
+</span></code></pre></div>
+<ol>
+<li>Run <code>make test</code> to ensure tests pass.</li>
+<li>Open a PR!</li>
+</ol>
+<h3 id="class-based-api">Class-based API<a class="headerlink" href="#class-based-api" title="Permanent link">#</a></h3>
+<p>Use this when you need complex Pydantic validation:</p>
+<ol>
+<li>In <code>./src/dbt_bouncer/checks</code> choose the appropriate directory for your check.</li>
+<li>Within the chosen file, add a Pydantic model inheriting from <code>BaseCheck</code>:<ul>
+<li>Class name starts with "Check".</li>
+<li>Has a <code>name: Literal["check_..."]</code> field.</li>
+<li>Has an <code>execute()</code> method that raises <code>DbtBouncerFailedCheckError</code> on failure.</li>
+<li>Uses <code>_require_*()</code> methods to access resources.</li>
+</ul>
+</li>
+<li>Add the check to <code>dbt-bouncer-example.yml</code> and validate.</li>
+<li>Write tests using <code>check_passes</code>/<code>check_fails</code> from <code>dbt_bouncer.testing</code>.</li>
+<li>Run <code>make test</code> and open a PR.</li>
+</ol>
+<h3 id="writing-tests">Writing tests<a class="headerlink" href="#writing-tests" title="Permanent link">#</a></h3>
+<p>The <code>dbt_bouncer.testing</code> module provides <code>check_passes</code> and <code>check_fails</code> helpers:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">dbt_bouncer.testing</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_fails</span><span class="p">,</span> <span class="n">check_passes</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="c1"># Resource keyword arguments (model={...}) are auto-merged with sensible defaults</span>
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="n">check_passes</span><span class="p">(</span><span class="s2">&quot;check_model_names&quot;</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;stg_orders&quot;</span><span class="p">},</span> <span class="n">model_name_pattern</span><span class="o">=</span><span class="s2">&quot;^stg_&quot;</span><span class="p">)</span>
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="n">check_fails</span><span class="p">(</span><span class="s2">&quot;check_model_names&quot;</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;fct_orders&quot;</span><span class="p">},</span> <span class="n">model_name_pattern</span><span class="o">=</span><span class="s2">&quot;^stg_&quot;</span><span class="p">)</span>
+</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>
+</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="c1"># For context-dependent checks, use ctx_* keyword arguments:</span>
+</span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="n">check_passes</span><span class="p">(</span><span class="s2">&quot;check_model_documentation_coverage&quot;</span><span class="p">,</span>
+</span><span id="__span-9-9"><a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>             <span class="n">min_model_documentation_coverage_pct</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+</span><span id="__span-9-10"><a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>             <span class="n">ctx_models</span><span class="o">=</span><span class="p">[{</span><span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;desc&quot;</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;m1&quot;</span><span class="p">,</span> <span class="s2">&quot;unique_id&quot;</span><span class="p">:</span> <span class="s2">&quot;model.pkg.m1&quot;</span><span class="p">}])</span>
+</span></code></pre></div>
+<h3 id="writing-plugins-external-packages">Writing plugins (external packages)<a class="headerlink" href="#writing-plugins-external-packages" title="Permanent link">#</a></h3>
+<p>External packages can register checks via entry points:</p>
+<div class="language-toml highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="c1"># pyproject.toml of your plugin package</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="k">[project.entry-points.</span><span class="s2">&quot;dbt_bouncer.checks&quot;</span><span class="k">]</span>
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="n">my_checks</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;my_package.checks&quot;</span>
+</span></code></pre></div>
+<p>Your module can use the <code>@check</code> decorator or class-based checks. dbt-bouncer discovers them automatically via the entry point. Use <code>dbt_bouncer.testing</code> in your own test suite.</p>
 <h2 id="ai-agents-and-tools">AI Agents and Tools<a class="headerlink" href="#ai-agents-and-tools" title="Permanent link">#</a></h2>
 <p>This repository includes configuration for AI coding agents. The setup follows the <a href="https://agents.md">AGENTS.md standard</a>:</p>
 <ul>
@@ -1257,7 +1365,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="March 12, 2026 21:04:32 UTC">March 12, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="March 13, 2026 18:54:16 UTC">March 13, 2026</span>
   </span>
 
     
