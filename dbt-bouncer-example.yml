@@ -90,6 +90,8 @@ manifest_checks:
     access: protected
   - name: check_model_code_does_not_contain_regexp_pattern
     regexp_pattern: .*[i][f][n][u][l][l].*
+  - name: check_model_columns_have_relationship_tests
+    column_name_pattern: "_fk$"
   - name: check_model_columns_have_meta_keys
     include: ^models/marts
     keys:

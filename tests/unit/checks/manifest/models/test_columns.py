@@ -3,6 +3,232 @@ import pytest
 from dbt_bouncer.testing import check_fails, check_passes
 
 
+class TestCheckModelColumnsHaveRelationshipTests:
+    @pytest.mark.parametrize(
+        (
+            "column_name_pattern",
+            "target_column_pattern",
+            "target_model_pattern",
+            "model_override",
+            "ctx_tests",
+        ),
+        [
+            pytest.param(
+                "_fk$",
+                None,
+                None,
+                {
+                    "columns": {
+                        "user_fk": {"name": "user_fk"},
+                    },
+                },
+                [
+                    {
+                        "test_metadata": {
+                            "name": "relationships",
+                            "kwargs": {
+                                "column_name": "user_fk",
+                                "field": "user_pk",
+                                "to": "ref('dim_users')",
+                            },
+                        },
+                    },
+                ],
+                id="column_has_relationships_test",
+            ),
+            pytest.param(
+                "_fk$",
+                "_pk$",
+                None,
+                {
+                    "columns": {
+                        "user_fk": {"name": "user_fk"},
+                    },
+                },
+                [
+                    {
+                        "test_metadata": {
+                            "name": "relationships",
+                            "kwargs": {
+                                "column_name": "user_fk",
+                                "field": "user_pk",
+                                "to": "ref('dim_users')",
+                            },
+                        },
+                    },
+                ],
+                id="target_column_matches_pattern",
+            ),
+            pytest.param(
+                "_fk$",
+                "_pk$",
+                "^dim_",
+                {
+                    "columns": {
+                        "user_fk": {"name": "user_fk"},
+                    },
+                },
+                [
+                    {
+                        "test_metadata": {
+                            "name": "relationships",
+                            "kwargs": {
+                                "column_name": "user_fk",
+                                "field": "user_pk",
+                                "to": "ref('dim_users')",
+                            },
+                        },
+                    },
+                ],
+                id="target_model_matches_pattern",
+            ),
+            pytest.param(
+                "_fk$",
+                None,
+                None,
+                {
+                    "columns": {
+                        "user_id": {"name": "user_id"},
+                    },
+                },
+                [],
+                id="no_columns_match_pattern",
+            ),
+            pytest.param(
+                "_fk$",
+                None,
+                None,
+                {"columns": {}},
+                [],
+                id="no_columns",
+            ),
+        ],
+    )
+    def test_pass(
+        self,
+        column_name_pattern,
+        target_column_pattern,
+        target_model_pattern,
+        model_override,
+        ctx_tests,
+    ):
+        check_passes(
+            "check_model_columns_have_relationship_tests",
+            column_name_pattern=column_name_pattern,
+            target_column_pattern=target_column_pattern,
+            target_model_pattern=target_model_pattern,
+            model=model_override,
+            ctx_tests=ctx_tests,
+        )
+
+    @pytest.mark.parametrize(
+        (
+            "column_name_pattern",
+            "target_column_pattern",
+            "target_model_pattern",
+            "model_override",
+            "ctx_tests",
+        ),
+        [
+            pytest.param(
+                "_fk$",
+                None,
+                None,
+                {
+                    "columns": {
+                        "user_fk": {"name": "user_fk"},
+                    },
+                },
+                [],
+                id="no_relationships_test",
+            ),
+            pytest.param(
+                "_fk$",
+                None,
+                None,
+                {
+                    "columns": {
+                        "user_fk": {"name": "user_fk"},
+                    },
+                },
+                [
+                    {
+                        "test_metadata": {
+                            "name": "not_null",
+                            "kwargs": {
+                                "column_name": "user_fk",
+                            },
+                        },
+                    },
+                ],
+                id="has_test_but_not_relationships",
+            ),
+            pytest.param(
+                "_fk$",
+                "_pk$",
+                None,
+                {
+                    "columns": {
+                        "user_fk": {"name": "user_fk"},
+                    },
+                },
+                [
+                    {
+                        "test_metadata": {
+                            "name": "relationships",
+                            "kwargs": {
+                                "column_name": "user_fk",
+                                "field": "user_id",
+                                "to": "ref('dim_users')",
+                            },
+                        },
+                    },
+                ],
+                id="target_column_does_not_match_pattern",
+            ),
+            pytest.param(
+                "_fk$",
+                None,
+                "^dim_",
+                {
+                    "columns": {
+                        "user_fk": {"name": "user_fk"},
+                    },
+                },
+                [
+                    {
+                        "test_metadata": {
+                            "name": "relationships",
+                            "kwargs": {
+                                "column_name": "user_fk",
+                                "field": "user_pk",
+                                "to": "ref('stg_users')",
+                            },
+                        },
+                    },
+                ],
+                id="target_model_does_not_match_pattern",
+            ),
+        ],
+    )
+    def test_fail(
+        self,
+        column_name_pattern,
+        target_column_pattern,
+        target_model_pattern,
+        model_override,
+        ctx_tests,
+    ):
+        check_fails(
+            "check_model_columns_have_relationship_tests",
+            column_name_pattern=column_name_pattern,
+            target_column_pattern=target_column_pattern,
+            target_model_pattern=target_model_pattern,
+            model=model_override,
+            ctx_tests=ctx_tests,
+        )
+
+
 class TestCheckModelColumnsHaveMetaKeys:
     @pytest.mark.parametrize(
         ("keys", "model_override"),
