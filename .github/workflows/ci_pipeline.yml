@@ -50,6 +50,38 @@ jobs:
                 cat changed_files.txt
                 cat changed_files.txt | xargs uv run prek run --files
 
+    schema-check:
+        needs: [prek]
+        permissions:
+          contents: read
+        runs-on: ubuntu-24.04
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v6
+
+            - name: checkout-merge
+              uses: check-spelling/checkout-merge@v0.0.6
+
+            - name: Determine python version
+              id: python-version
+              run: |
+                  export PYTHON_VERSION=$(cat .python-version)
+                  echo "PYTHON_VERSION: $PYTHON_VERSION"
+                  echo "PYTHON_VERSION=$PYTHON_VERSION" >> $GITHUB_OUTPUT
+
+            - name: Setup Python
+              uses: ./.github/actions/setup_python_env
+              with:
+                python-version: ${{ steps.python-version.outputs.PYTHON_VERSION }}
+
+            - name: Verify schema.json is up to date
+              run: |
+                uv run python scripts/generate_schema.py
+                git diff --exit-code schema.json || {
+                  echo "::error::schema.json is out of date. Run 'make generate-schema' and commit the result."
+                  exit 1
+                }
+
     unit-tests:
         needs: [prek]
         runs-on: ${{ matrix.operating-system }}

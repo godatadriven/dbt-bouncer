@@ -22,6 +22,7 @@ make install
 | `prek run --all-files` | Run pre-commit hooks (**not** `pre-commit run`) |
 | `make build-and-run-dbt-bouncer` | End-to-end validation |
 | `make build-artifacts` | Regenerate test fixtures (dbt 1.9, 1.10, 1.11) |
+| `make generate-schema` | Regenerate `schema.json` from Pydantic models |
 | `make test-perf` | Performance benchmarks (bencher + hyperfine) |
 
 ## Architecture
@@ -98,6 +99,14 @@ def check_model_xxx(model, *, some_param: str):
 - Add `ctx` as a parameter only when you need access to other resources (e.g. models list, manifest)
 - **Parameter ordering must be `(resource, ctx, *, params)`** — resource first, `ctx` second. Putting `ctx` before the resource would cause `ctx` to be treated as the iterate_over target (since the decorator picks the first non-reserved positional param). For context-only checks (no resource), use `(ctx, *, params)`.
 - Call `fail()` to signal a check failure
+
+**After adding or modifying checks**, regenerate the JSON Schema so editor autocomplete stays in sync:
+
+```bash
+make generate-schema
+```
+
+CI will fail if `schema.json` is out of date.
 
 **Steps after writing:**
 
