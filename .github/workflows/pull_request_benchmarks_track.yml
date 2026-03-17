@@ -13,6 +13,7 @@ jobs:
   track_fork_pr_branch:
     if: github.event.workflow_run.conclusion == 'success'
     permissions:
+      checks: write
       pull-requests: write
     runs-on: ubuntu-24.04
     steps:
@@ -40,24 +41,23 @@ jobs:
             core.exportVariable("PR_BASE_SHA", prEvent.pull_request.base.sha);
             core.exportVariable("PR_NUMBER", prEvent.number);
 
-      - uses: bencherdev/bencher@v0.5.10
+      - uses: bencherdev/bencher@main
 
       - name: Track Benchmarks with Bencher
         run: |
           bencher run \
-            --adapter shell_hyperfine \
-            --branch "$PR_HEAD" \
-            --ci-number "$PR_NUMBER" \
-            --err \
-            --file "$BENCHMARK_RESULTS" \
-            --github-actions '${{ secrets.GITHUB_TOKEN }}' \
-            --hash "$PR_HEAD_SHA" \
             --project dbt-bouncer \
-            --start-point main \
+            --token '${{ secrets.BENCHER_API_TOKEN }}' \
+            --branch "$PR_HEAD" \
+            --hash "$PR_HEAD_SHA" \
+            --start-point "$PR_BASE" \
+            --start-point-hash "$PR_BASE_SHA" \
+            --start-point-clone-thresholds \
             --start-point-reset \
-            --testbed ubuntu-2204 \
-            --threshold-max-sample-size 16 \
-            --threshold-measure latency \
-            --threshold-test percentage \
-            --threshold-upper-boundary 0.1 \
-            --token '${{ secrets.BENCHER_API_TOKEN }}'
+            --testbed ubuntu-24.04 \
+            --err \
+            --adapter shell_hyperfine \
+            --format json \
+            --github-actions '${{ secrets.GITHUB_TOKEN }}' \
+            --ci-number "$PR_NUMBER" \
+            --file "$BENCHMARK_RESULTS"
