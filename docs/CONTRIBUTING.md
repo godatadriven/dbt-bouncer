@@ -235,9 +235,9 @@ def test_check_model_names_fail():
     check_fails("check_model_names", model={"name": "fct_orders"}, model_name_pattern="^stg_")
 ```
 
-5. Run `make generate-schema` to regenerate `schema.json` (CI will fail if it's out of date).
-6. Run `make test` to ensure tests pass.
-7. Open a PR!
+1. Run `make generate-schema` to regenerate `schema.json` (CI will fail if it's out of date).
+1. Run `make test` to ensure tests pass.
+1. Open a PR!
 
 ### Class-based API
 
