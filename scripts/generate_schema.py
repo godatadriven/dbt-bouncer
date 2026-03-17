@@ -65,6 +65,32 @@ def _strip_runtime_fields(schema: dict[str, Any]) -> None:
             definition.pop("required", None)
 
 
+def _sort_schema(schema: dict[str, Any]) -> dict[str, Any]:
+    """Sort schema for deterministic output across environments.
+
+    Check discovery order varies between Python versions and platforms, so we
+    sort ``$defs``, ``oneOf`` arrays, and discriminator mappings alphabetically.
+
+    Returns:
+        dict[str, Any]: The sorted schema.
+
+    """
+    # Sort $defs by key.
+    if "$defs" in schema:
+        schema["$defs"] = dict(sorted(schema["$defs"].items()))
+
+    # Sort oneOf arrays and discriminator mappings inside properties.
+    for prop in schema.get("properties", {}).values():
+        items = prop.get("items", {})
+        if "oneOf" in items:
+            items["oneOf"] = sorted(items["oneOf"], key=lambda x: x.get("$ref", ""))
+        disc = items.get("discriminator", {})
+        if "mapping" in disc:
+            disc["mapping"] = dict(sorted(disc["mapping"].items()))
+
+    return schema
+
+
 def main() -> None:
     """Build the dynamic DbtBouncerConf model and export its JSON Schema."""
     configure_console_logging(0)
@@ -88,6 +114,9 @@ def main() -> None:
 
     # Strip runtime resource fields that are not user-configurable.
     _strip_runtime_fields(schema)
+
+    # Sort for deterministic output across environments.
+    schema = _sort_schema(schema)
 
     # Add top-level schema metadata.
     schema["$schema"] = "https://json-schema.org/draft/2020-12/schema"

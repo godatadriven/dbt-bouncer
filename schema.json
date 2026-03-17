@@ -7192,10 +7192,10 @@
         },
         "oneOf": [
           {
-            "$ref": "#/$defs/CheckSeedColumnsAreAllDocumented"
+            "$ref": "#/$defs/CheckColumnDescriptionPopulated"
           },
           {
-            "$ref": "#/$defs/CheckSourceColumnsAreAllDocumented"
+            "$ref": "#/$defs/CheckColumnHasSpecifiedTest"
           },
           {
             "$ref": "#/$defs/CheckColumnNameCompliesToColumnType"
@@ -7204,16 +7204,16 @@
             "$ref": "#/$defs/CheckColumnNames"
           },
           {
-            "$ref": "#/$defs/CheckColumnHasSpecifiedTest"
-          },
-          {
-            "$ref": "#/$defs/CheckColumnDescriptionPopulated"
-          },
-          {
             "$ref": "#/$defs/CheckColumnsAreAllDocumented"
           },
           {
             "$ref": "#/$defs/CheckColumnsAreDocumentedInPublicModels"
+          },
+          {
+            "$ref": "#/$defs/CheckSeedColumnsAreAllDocumented"
+          },
+          {
+            "$ref": "#/$defs/CheckSourceColumnsAreAllDocumented"
           }
         ]
       },
@@ -7304,7 +7304,22 @@
         },
         "oneOf": [
           {
-            "$ref": "#/$defs/CheckProjectName"
+            "$ref": "#/$defs/CheckExposureBasedOnModel"
+          },
+          {
+            "$ref": "#/$defs/CheckExposureBasedOnNonPublicModels"
+          },
+          {
+            "$ref": "#/$defs/CheckExposureBasedOnView"
+          },
+          {
+            "$ref": "#/$defs/CheckLineagePermittedUpstreamModels"
+          },
+          {
+            "$ref": "#/$defs/CheckLineageSeedCannotBeUsed"
+          },
+          {
+            "$ref": "#/$defs/CheckLineageSourceCannotBeUsed"
           },
           {
             "$ref": "#/$defs/CheckMacroArgumentsDescriptionPopulated"
@@ -7325,6 +7340,120 @@
             "$ref": "#/$defs/CheckMacroPropertyFileLocation"
           },
           {
+            "$ref": "#/$defs/CheckModelAccess"
+          },
+          {
+            "$ref": "#/$defs/CheckModelCodeDoesNotContainRegexpPattern"
+          },
+          {
+            "$ref": "#/$defs/CheckModelColumnsHaveMetaKeys"
+          },
+          {
+            "$ref": "#/$defs/CheckModelColumnsHaveTypes"
+          },
+          {
+            "$ref": "#/$defs/CheckModelContractEnforcedForPublicModel"
+          },
+          {
+            "$ref": "#/$defs/CheckModelDependsOnMacros"
+          },
+          {
+            "$ref": "#/$defs/CheckModelDependsOnMultipleSources"
+          },
+          {
+            "$ref": "#/$defs/CheckModelDescriptionContainsRegexPattern"
+          },
+          {
+            "$ref": "#/$defs/CheckModelDescriptionPopulated"
+          },
+          {
+            "$ref": "#/$defs/CheckModelDirectories"
+          },
+          {
+            "$ref": "#/$defs/CheckModelDocumentationCoverage"
+          },
+          {
+            "$ref": "#/$defs/CheckModelDocumentedInSameDirectory"
+          },
+          {
+            "$ref": "#/$defs/CheckModelFileName"
+          },
+          {
+            "$ref": "#/$defs/CheckModelGrantPrivilege"
+          },
+          {
+            "$ref": "#/$defs/CheckModelGrantPrivilegeRequired"
+          },
+          {
+            "$ref": "#/$defs/CheckModelHardCodedReferences"
+          },
+          {
+            "$ref": "#/$defs/CheckModelHasConstraints"
+          },
+          {
+            "$ref": "#/$defs/CheckModelHasContractsEnforced"
+          },
+          {
+            "$ref": "#/$defs/CheckModelHasExposure"
+          },
+          {
+            "$ref": "#/$defs/CheckModelHasMetaKeys"
+          },
+          {
+            "$ref": "#/$defs/CheckModelHasNoUpstreamDependencies"
+          },
+          {
+            "$ref": "#/$defs/CheckModelHasSemiColon"
+          },
+          {
+            "$ref": "#/$defs/CheckModelHasTags"
+          },
+          {
+            "$ref": "#/$defs/CheckModelHasUniqueTest"
+          },
+          {
+            "$ref": "#/$defs/CheckModelHasUnitTests"
+          },
+          {
+            "$ref": "#/$defs/CheckModelLatestVersionSpecified"
+          },
+          {
+            "$ref": "#/$defs/CheckModelMaxChainedViews"
+          },
+          {
+            "$ref": "#/$defs/CheckModelMaxFanout"
+          },
+          {
+            "$ref": "#/$defs/CheckModelMaxNumberOfLines"
+          },
+          {
+            "$ref": "#/$defs/CheckModelMaxUpstreamDependencies"
+          },
+          {
+            "$ref": "#/$defs/CheckModelNames"
+          },
+          {
+            "$ref": "#/$defs/CheckModelNumberOfGrants"
+          },
+          {
+            "$ref": "#/$defs/CheckModelPropertyFileLocation"
+          },
+          {
+            "$ref": "#/$defs/CheckModelSchemaName"
+          },
+          {
+            "$ref": "#/$defs/CheckModelTestCoverage"
+          },
+          {
+            "$ref": "#/$defs/CheckModelVersionAllowed"
+          },
+          {
+            "$ref": "#/$defs/CheckModelVersionPinnedInRef"
+          },
+          {
+            "$ref": "#/$defs/CheckProjectName"
+          },
+          {
             "$ref": "#/$defs/CheckSeedColumnNames"
           },
           {
@@ -7340,19 +7469,7 @@
             "$ref": "#/$defs/CheckSeedNames"
           },
           {
-            "$ref": "#/$defs/CheckTestHasMetaKeys"
-          },
-          {
-            "$ref": "#/$defs/CheckTestHasTags"
-          },
-          {
-            "$ref": "#/$defs/CheckExposureBasedOnModel"
-          },
-          {
-            "$ref": "#/$defs/CheckExposureBasedOnNonPublicModels"
-          },
-          {
-            "$ref": "#/$defs/CheckExposureBasedOnView"
+            "$ref": "#/$defs/CheckSemanticModelBasedOnNonPublicModels"
           },
           {
             "$ref": "#/$defs/CheckSnapshotDescriptionPopulated"
@@ -7364,16 +7481,40 @@
             "$ref": "#/$defs/CheckSnapshotNames"
           },
           {
-            "$ref": "#/$defs/CheckSemanticModelBasedOnNonPublicModels"
+            "$ref": "#/$defs/CheckSourceDescriptionPopulated"
           },
           {
-            "$ref": "#/$defs/CheckLineagePermittedUpstreamModels"
+            "$ref": "#/$defs/CheckSourceFreshnessPopulated"
           },
           {
-            "$ref": "#/$defs/CheckLineageSeedCannotBeUsed"
+            "$ref": "#/$defs/CheckSourceHasMetaKeys"
           },
           {
-            "$ref": "#/$defs/CheckLineageSourceCannotBeUsed"
+            "$ref": "#/$defs/CheckSourceHasTags"
+          },
+          {
+            "$ref": "#/$defs/CheckSourceLoaderPopulated"
+          },
+          {
+            "$ref": "#/$defs/CheckSourceNames"
+          },
+          {
+            "$ref": "#/$defs/CheckSourceNotOrphaned"
+          },
+          {
+            "$ref": "#/$defs/CheckSourcePropertyFileLocation"
+          },
+          {
+            "$ref": "#/$defs/CheckSourceUsedByModelsInSameDirectory"
+          },
+          {
+            "$ref": "#/$defs/CheckSourceUsedByOnlyOneModel"
+          },
+          {
+            "$ref": "#/$defs/CheckTestHasMetaKeys"
+          },
+          {
+            "$ref": "#/$defs/CheckTestHasTags"
           },
           {
             "$ref": "#/$defs/CheckUnitTestCoverage"
@@ -7383,147 +7524,6 @@
           },
           {
             "$ref": "#/$defs/CheckUnitTestGivenFormats"
-          },
-          {
-            "$ref": "#/$defs/CheckModelHasTags"
-          },
-          {
-            "$ref": "#/$defs/CheckModelNames"
-          },
-          {
-            "$ref": "#/$defs/CheckModelHasUniqueTest"
-          },
-          {
-            "$ref": "#/$defs/CheckModelHasUnitTests"
-          },
-          {
-            "$ref": "#/$defs/CheckModelTestCoverage"
-          },
-          {
-            "$ref": "#/$defs/CheckModelAccess"
-          },
-          {
-            "$ref": "#/$defs/CheckModelContractEnforcedForPublicModel"
-          },
-          {
-            "$ref": "#/$defs/CheckModelGrantPrivilege"
-          },
-          {
-            "$ref": "#/$defs/CheckModelGrantPrivilegeRequired"
-          },
-          {
-            "$ref": "#/$defs/CheckModelHasContractsEnforced"
-          },
-          {
-            "$ref": "#/$defs/CheckModelNumberOfGrants"
-          },
-          {
-            "$ref": "#/$defs/CheckModelDescriptionContainsRegexPattern"
-          },
-          {
-            "$ref": "#/$defs/CheckModelDescriptionPopulated"
-          },
-          {
-            "$ref": "#/$defs/CheckModelDocumentationCoverage"
-          },
-          {
-            "$ref": "#/$defs/CheckModelDocumentedInSameDirectory"
-          },
-          {
-            "$ref": "#/$defs/CheckModelDirectories"
-          },
-          {
-            "$ref": "#/$defs/CheckModelFileName"
-          },
-          {
-            "$ref": "#/$defs/CheckModelPropertyFileLocation"
-          },
-          {
-            "$ref": "#/$defs/CheckModelSchemaName"
-          },
-          {
-            "$ref": "#/$defs/CheckModelColumnsHaveMetaKeys"
-          },
-          {
-            "$ref": "#/$defs/CheckModelColumnsHaveTypes"
-          },
-          {
-            "$ref": "#/$defs/CheckModelHasConstraints"
-          },
-          {
-            "$ref": "#/$defs/CheckModelDependsOnMacros"
-          },
-          {
-            "$ref": "#/$defs/CheckModelDependsOnMultipleSources"
-          },
-          {
-            "$ref": "#/$defs/CheckModelHasExposure"
-          },
-          {
-            "$ref": "#/$defs/CheckModelHasNoUpstreamDependencies"
-          },
-          {
-            "$ref": "#/$defs/CheckModelMaxChainedViews"
-          },
-          {
-            "$ref": "#/$defs/CheckModelMaxFanout"
-          },
-          {
-            "$ref": "#/$defs/CheckModelMaxUpstreamDependencies"
-          },
-          {
-            "$ref": "#/$defs/CheckModelLatestVersionSpecified"
-          },
-          {
-            "$ref": "#/$defs/CheckModelVersionAllowed"
-          },
-          {
-            "$ref": "#/$defs/CheckModelVersionPinnedInRef"
-          },
-          {
-            "$ref": "#/$defs/CheckModelHasMetaKeys"
-          },
-          {
-            "$ref": "#/$defs/CheckModelCodeDoesNotContainRegexpPattern"
-          },
-          {
-            "$ref": "#/$defs/CheckModelHardCodedReferences"
-          },
-          {
-            "$ref": "#/$defs/CheckModelHasSemiColon"
-          },
-          {
-            "$ref": "#/$defs/CheckModelMaxNumberOfLines"
-          },
-          {
-            "$ref": "#/$defs/CheckSourceHasTags"
-          },
-          {
-            "$ref": "#/$defs/CheckSourceFreshnessPopulated"
-          },
-          {
-            "$ref": "#/$defs/CheckSourceLoaderPopulated"
-          },
-          {
-            "$ref": "#/$defs/CheckSourceNames"
-          },
-          {
-            "$ref": "#/$defs/CheckSourceDescriptionPopulated"
-          },
-          {
-            "$ref": "#/$defs/CheckSourcePropertyFileLocation"
-          },
-          {
-            "$ref": "#/$defs/CheckSourceNotOrphaned"
-          },
-          {
-            "$ref": "#/$defs/CheckSourceUsedByModelsInSameDirectory"
-          },
-          {
-            "$ref": "#/$defs/CheckSourceUsedByOnlyOneModel"
-          },
-          {
-            "$ref": "#/$defs/CheckSourceHasMetaKeys"
           }
         ]
       },
