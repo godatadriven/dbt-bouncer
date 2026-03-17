@@ -162,22 +162,14 @@ jobs:
           - name: Install `dbt-bouncer`
             run: make install
 
-          - name: Install bencher
-            uses: bencherdev/bencher@v0.5.10
-
           - name: Install Hyperfine
             uses: taiki-e/install-action@v2
             with:
               tool: hyperfine@1.20
 
-          - name: Track base branch benchmarks with Bencher
+          - name: Run benchmarks
             run: |
-              bencher run \
-                --adapter shell_hyperfine \
-                --ci-on-the-fly \
-                --file benchmark_results.json \
-                --format json \
-                "hyperfine --export-json benchmark_results.json --runs 10 'uv run dbt-bouncer --config-file dbt-bouncer-example.yml'"
+              hyperfine --export-json benchmark_results.json --runs 10 'uv run dbt-bouncer --config-file dbt-bouncer-example.yml'
 
           - name: Upload Benchmark Results
             uses: actions/upload-artifact@v6
