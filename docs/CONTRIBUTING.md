@@ -147,6 +147,16 @@ make test
 make test-dev-container
 ```
 
+#### JSON Schema
+
+A JSON Schema is generated from the Pydantic config model and committed as `schema.json` at the repo root. After adding or modifying checks, regenerate it:
+
+```shell
+make generate-schema
+```
+
+CI will fail if `schema.json` is out of date. The schema enables editor autocomplete and validation for `dbt-bouncer.yml` files (see [Config file > Editor integration](./config_file.md#editor-integration)).
+
 #### Performance tests
 
 To test the performance on the `dbt-bouncer` CLI, we use [bencher](https://github.com/bencherdev/bencher) and [hyperfine](https://github.com/sharkdp/hyperfine). Provided both are installed, you can run performance tests via:
@@ -225,8 +235,9 @@ def test_check_model_names_fail():
     check_fails("check_model_names", model={"name": "fct_orders"}, model_name_pattern="^stg_")
 ```
 
-5. Run `make test` to ensure tests pass.
-6. Open a PR!
+5. Run `make generate-schema` to regenerate `schema.json` (CI will fail if it's out of date).
+6. Run `make test` to ensure tests pass.
+7. Open a PR!
 
 ### Class-based API
 

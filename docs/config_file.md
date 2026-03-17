@@ -55,6 +55,40 @@ model_name_pattern = "^stg_"
 
 For more example config files, see [here](https://github.com/godatadriven/dbt-bouncer/tree/main/tests/unit/config_files/valid). For a detailed description of how to use `dbt-bouncer` in a CI pipeline see [here](./faq.md#how-to-configure-dbt-bouncer-for-use-in-a-ci-pipeline).
 
+## Editor integration
+
+A [JSON Schema](https://json-schema.org/) is published for the `dbt-bouncer` config file format. When configured, your editor can provide autocomplete for check names and parameters, inline validation of typos and incorrect types, and hover documentation for each field.
+
+### VS Code
+
+Install the [YAML extension](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml) by Red Hat, then add the following to your VS Code settings (`.vscode/settings.json`):
+
+```json
+{
+  "yaml.schemas": {
+    "https://raw.githubusercontent.com/godatadriven/dbt-bouncer/main/schema.json": "dbt-bouncer.yml"
+  }
+}
+```
+
+### JetBrains (PyCharm, IntelliJ)
+
+JetBrains IDEs have built-in YAML schema support. Go to **Settings > Languages & Frameworks > Schemas and DTDs > JSON Schema Mappings**, then add a new mapping:
+
+- **Name:** dbt-bouncer
+- **Schema URL:** `https://raw.githubusercontent.com/godatadriven/dbt-bouncer/main/schema.json`
+- **File path pattern:** `dbt-bouncer.yml`
+
+### Neovim
+
+With [yaml-language-server](https://github.com/redhat-developer/yaml-language-server) configured via LSP, add a schema comment at the top of your config file:
+
+```yaml
+# yaml-language-server: $schema=https://raw.githubusercontent.com/godatadriven/dbt-bouncer/main/schema.json
+```
+
+Alternatively, configure the schema mapping in your LSP settings.
+
 ## Common arguments
 
 ### Description
