@@ -33,6 +33,9 @@ build-artifacts: ## Build dbt artifacts for testing
 	uv run dbt parse --profiles-dir ./dbt_project --project-dir ./dbt_project
 	uv run dbt docs generate --profiles-dir ./dbt_project --project-dir ./dbt_project
 
+generate-schema: ## Regenerate schema.json from Pydantic models
+	uv run python scripts/generate_schema.py
+
 install: ## Install dependencies
 	uv sync --extra=dev --extra=docs
 
