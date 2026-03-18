@@ -206,7 +206,15 @@ def lint_config_file(config_file_path: Path) -> list[dict[str, Any]]:
                 }
             )
         return issues
-    except Exception:
+    except Exception as e:
+        logging.warning(f"Unexpected error during config parsing: {e}")
+        issues.append(
+            {
+                "line": 1,
+                "message": f"Unexpected error during config parsing: {e}",
+                "severity": "error",
+            }
+        )
         return issues
 
     if not data:
