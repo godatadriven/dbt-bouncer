@@ -5,6 +5,9 @@ import re
 from dbt_bouncer.check_decorator import check, fail
 from dbt_bouncer.utils import compile_pattern, get_clean_model_name
 
+_JINJA_PATTERN = re.compile(r"\{[{%].*?[%}]\}", re.DOTALL)
+_HARD_CODED_REF_PATTERN = re.compile(r"\b(?:FROM|JOIN)\s+\w+\.\w+", re.IGNORECASE)
+
 
 @check
 def check_model_code_does_not_contain_regexp_pattern(model, *, regexp_pattern: str):
@@ -70,12 +73,9 @@ def check_model_hard_coded_references(model):
         ```
 
     """
-    jinja_pattern = re.compile(r"\{[{%].*?[%}]\}", re.DOTALL)
-    hard_coded_ref_pattern = re.compile(r"\b(?:FROM|JOIN)\s+\w+\.\w+", re.IGNORECASE)
-
     raw_code = model.raw_code or ""
-    cleaned = jinja_pattern.sub("", raw_code)
-    matches = hard_coded_ref_pattern.findall(cleaned)
+    cleaned = _JINJA_PATTERN.sub("", raw_code)
+    matches = _HARD_CODED_REF_PATTERN.findall(cleaned)
     if matches:
         fail(
             f"`{get_clean_model_name(model.unique_id)}` contains hard-coded table "
