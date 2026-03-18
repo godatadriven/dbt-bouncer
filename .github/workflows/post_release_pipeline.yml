@@ -57,7 +57,7 @@ jobs:
             matrix:
                 operating-system:
                   - ubuntu-24.04
-                  - windows-latest
+                  - windows-2025
                 python-version:
                     - '3.11'
                     - '3.12'
@@ -73,25 +73,25 @@ jobs:
                 python-version: ${{ matrix.python-version }}
 
             - name: Install `dbt-bouncer`
-              if: matrix.operating-system == 'windows-latest'
+              if: matrix.operating-system == 'windows-2025'
               run: |
                 $env:DBT_BOUNCER_VERSION = $("${{ github.ref }}" -Split "/")[2].TrimStart("v")
                 pip install "dbt-bouncer==$env:DBT_BOUNCER_VERSION"
 
             - name: Install `dbt-bouncer`
-              if: matrix.operating-system != 'windows-latest'
+              if: matrix.operating-system != 'windows-2025'
               run: pip install dbt-bouncer==$(echo "${{ github.ref }}" | cut -d "/" -f3)
 
             - name: Run `dbt-bouncer`
               run: dbt-bouncer --config-file dbt-bouncer-example.yml
 
             - name: Regenerate dbt artifacts and run `dbt-bouncer`
-              if: matrix.operating-system == 'windows-latest'
+              if: matrix.operating-system == 'windows-2025'
               run: |
                 $env:Path += ';C:\Users\runneradmin\.local\bin'
                 make build-and-run-dbt-bouncer
 
             - name: Regenerate dbt artifacts and run `dbt-bouncer`
-              if: matrix.operating-system != 'windows-latest'
+              if: matrix.operating-system != 'windows-2025'
               run: |
                 (r=3;while ! make build-and-run-dbt-bouncer ; do ((--r))||exit;done)
