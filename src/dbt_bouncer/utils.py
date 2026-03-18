@@ -242,7 +242,13 @@ def _load_custom_checks(
                     _extract_checks_from_module(
                         module, unique_module_name, check_objects
                     )
-            except Exception as e:
+            except (
+                AttributeError,
+                ImportError,
+                ModuleNotFoundError,
+                OSError,
+                SyntaxError,
+            ) as e:
                 logging.warning(
                     f"Failed to load custom check file `{check_file}`: {e}. "
                     "This file will be skipped."
@@ -304,7 +310,7 @@ def _load_entry_point_checks(check_objects: list[type["BaseCheck"]]) -> None:
                     f"{type(target).__name__}, expected a module, package, "
                     "or Check class. Skipping."
                 )
-        except Exception as e:
+        except (AttributeError, ImportError, ModuleNotFoundError) as e:
             logging.warning(
                 f"Failed to load entry point `{ep.name}`: {e}. "
                 "This plugin will be skipped."
