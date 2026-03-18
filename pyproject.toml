@@ -58,8 +58,8 @@ dev = [
   "pytest-xdist~=3.0",
   "pyupgrade~=3.0",
   "rumdl>=0.1.19",
-  "ruff~=0.0",
-  "shandy-sqlfmt[jinjafmt]~=0.0",
+  "ruff>=0.8,<1",
+  "shandy-sqlfmt[jinjafmt]>=0.7,<1",
   "tombi>=0.7.32",
   "ty>=0.0.7"
 ]
