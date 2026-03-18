@@ -435,6 +435,28 @@ def test_lint_config_file_yaml_syntax_error(tmp_path):
     assert issues[0]["severity"] == "error"
 
 
+def test_lint_config_file_unexpected_exception(monkeypatch, tmp_path):
+    """Test lint_config_file logs and reports unexpected exceptions instead of swallowing them."""
+    from dbt_bouncer.config_file_validator import lint_config_file
+
+    config_file = tmp_path / "dbt-bouncer.yml"
+    config_file.write_text("manifest_checks:\n  - name: check_model_has_description\n")
+
+    monkeypatch.setattr(
+        Path,
+        "read_text",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            PermissionError("access denied")
+        ),
+    )
+
+    issues = lint_config_file(config_file)
+    assert len(issues) == 1
+    assert "Unexpected error during config parsing" in issues[0]["message"]
+    assert "access denied" in issues[0]["message"]
+    assert issues[0]["severity"] == "error"
+
+
 def test_lint_config_file_not_list(tmp_path):
     """Test lint_config_file when check category is not a list."""
     from dbt_bouncer.config_file_validator import lint_config_file
