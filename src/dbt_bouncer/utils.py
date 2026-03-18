@@ -380,7 +380,7 @@ def _get_check_module_map_cached() -> dict[str, dict[str, str]]:
         dict[str, dict[str, str]]: The cached mapping.
 
     """
-    import json
+    import orjson
 
     from dbt_bouncer.version import version
 
@@ -389,15 +389,15 @@ def _get_check_module_map_cached() -> dict[str, dict[str, str]]:
 
     if cache_file.exists():
         try:
-            return json.loads(cache_file.read_text())
-        except (json.JSONDecodeError, OSError):
+            return orjson.loads(cache_file.read_bytes())
+        except (orjson.JSONDecodeError, OSError):
             pass  # Corrupted cache, rebuild
 
     mapping = _build_check_module_map()
 
     try:
         cache_dir.mkdir(parents=True, exist_ok=True)
-        cache_file.write_text(json.dumps(mapping))
+        cache_file.write_bytes(orjson.dumps(mapping))
     except OSError:
         pass  # Can't write cache (e.g. read-only filesystem), continue without it
 
