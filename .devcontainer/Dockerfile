@@ -24,7 +24,7 @@ RUN mkdir -p "${HOME}" && \
     chown -R appuser:appgroup "${HOME}" && \
     chmod 755 "${HOME}" # rwxr-xr-x for home directory
 
-COPY --from=ghcr.io/astral-sh/uv:0.9.18 /uv /uvx /bin/
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 ENV BENCHER_VERSION=0.5.10
 RUN curl --proto '=https' --tlsv1.2 -sSfL https://bencher.dev/download/install-cli.sh | sh
