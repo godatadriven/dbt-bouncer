@@ -26,6 +26,7 @@ RUN mkdir -p "${HOME}" && \
 
 COPY --from=ghcr.io/astral-sh/uv:0.9.18 /uv /uvx /bin/
 
+ENV BENCHER_VERSION=0.5.10
 RUN curl --proto '=https' --tlsv1.2 -sSfL https://bencher.dev/download/install-cli.sh | sh
 
 RUN curl -fsSL https://github.com/sharkdp/hyperfine/releases/download/v1.20.0/hyperfine_1.20.0_amd64.deb -o /tmp/hyperfine.deb && \
