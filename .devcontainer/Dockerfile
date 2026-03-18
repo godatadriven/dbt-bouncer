@@ -34,8 +34,7 @@ RUN curl -fsSL https://github.com/sharkdp/hyperfine/releases/download/v1.20.0/hy
     rm /tmp/hyperfine.deb
 
 # Set initial PATH, virtual env settings, and disable compfix for ZSH setup
-ENV BENCHER_VERSION=0.5.9 \
-    DBT_PROFILES_DIR="./dbt_project" \
+ENV DBT_PROFILES_DIR="./dbt_project" \
     DBT_PROJECT_DIR="./dbt_project" \
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
