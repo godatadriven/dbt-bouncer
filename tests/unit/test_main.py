@@ -1,4 +1,6 @@
 import json
+import re
+from functools import lru_cache
 from pathlib import Path, PurePath
 
 import pytest
@@ -7,6 +9,98 @@ from typer.testing import CliRunner
 
 from dbt_bouncer.main import app
 from dbt_bouncer.utils import get_check_objects
+
+# ---------------------------------------------------------------------------
+# Dynamic resource counts — reads dbt artifacts directly so that adding or
+# removing models in the test project doesn't require updating magic numbers.
+# ---------------------------------------------------------------------------
+
+_DBT_PROJECT_DIR = "dbt_project"
+
+
+@lru_cache(maxsize=1)
+def _load_manifest() -> dict:
+    with Path.open(Path(f"{_DBT_PROJECT_DIR}/target/manifest.json")) as f:
+        return json.load(f)
+
+
+@lru_cache(maxsize=1)
+def _project_name() -> str:
+    return _load_manifest()["metadata"]["project_name"]
+
+
+@lru_cache(maxsize=1)
+def _project_models() -> list[dict]:
+    """Return all manifest model nodes belonging to the dbt project.
+
+    Returns:
+        list[dict]: Model node dicts from the manifest.
+
+    """
+    m = _load_manifest()
+    pname = _project_name()
+    return [
+        v
+        for v in m["nodes"].values()
+        if v.get("resource_type") == "model" and v.get("package_name") == pname
+    ]
+
+
+def _count_models(
+    *,
+    materialization: str | None = None,
+    include: str | None = None,
+) -> int:
+    """Count project models, optionally filtered by materialization and path.
+
+    Returns:
+        int: Number of matching models.
+
+    """
+    models = _project_models()
+    if materialization:
+        models = [
+            m
+            for m in models
+            if m.get("config", {}).get("materialized") == materialization
+        ]
+    if include:
+        models = [
+            m for m in models if re.search(include, m.get("original_file_path", ""))
+        ]
+    return len(models)
+
+
+@lru_cache(maxsize=1)
+def _run_results_count() -> int:
+    with Path.open(Path(f"{_DBT_PROJECT_DIR}/target/run_results.json")) as f:
+        return len(json.load(f)["results"])
+
+
+@lru_cache(maxsize=1)
+def _catalog_checks_count(include_pattern: str) -> int:
+    """Count catalog nodes whose manifest path matches *include_pattern*.
+
+    Mirrors the parser's package filter: ``k.split(".")[-2] == project_name``
+    (see ``artifact_parsers/parser.py``).
+
+    Returns:
+        int: Number of matching catalog nodes.
+
+    """
+    m = _load_manifest()
+    with Path.open(Path(f"{_DBT_PROJECT_DIR}/target/catalog.json")) as f:
+        catalog = json.load(f)
+    pname = _project_name()
+    nodes_dict = m.get("nodes", {})
+    count = 0
+    for uid in catalog.get("nodes", {}):
+        if uid.split(".")[-2] != pname:
+            continue
+        mnode = nodes_dict.get(uid)
+        if mnode and re.search(include_pattern, mnode.get("original_file_path", "")):
+            count += 1
+    return count
 
 
 @pytest.mark.parametrize(
@@ -611,7 +705,7 @@ def test_cli_include(tmp_path):
                 "access": "protected",
                 "name": "check_model_access",
             },
-            12,
+            _count_models(),
         ),
         (
             {
@@ -619,7 +713,7 @@ def test_cli_include(tmp_path):
                 "materialization": "view",
                 "name": "check_model_access",
             },
-            4,
+            _count_models(materialization="view"),
         ),
         (
             {
@@ -627,7 +721,7 @@ def test_cli_include(tmp_path):
                 "materialization": "ephemeral",
                 "name": "check_model_access",
             },
-            2,
+            _count_models(materialization="ephemeral"),
         ),
         (
             {
@@ -636,7 +730,10 @@ def test_cli_include(tmp_path):
                 "materialization": "ephemeral",
                 "name": "check_model_access",
             },
-            2,
+            _count_models(
+                materialization="ephemeral",
+                include=r"^models/intermediate",
+            ),
         ),
         (
             {
@@ -645,7 +742,10 @@ def test_cli_include(tmp_path):
                 "materialization": "table",
                 "name": "check_model_access",
             },
-            0,
+            _count_models(
+                materialization="table",
+                include=r"^models/intermediate",
+            ),
         ),
     ],
 )
@@ -686,9 +786,9 @@ def test_cli_materialization(manifest_check, num_checks, tmp_path):
     assert len(coverage) == num_checks
 
 
-NUM_CATALOG_CHECKS = 1
-NUM_MANIFEST_CHECKS = 3
-NUM_RUN_RESULTS_CHECKS = 51
+NUM_CATALOG_CHECKS = _catalog_checks_count(r"^models/marts")
+NUM_MANIFEST_CHECKS = _count_models(include=r"^models/staging")
+NUM_RUN_RESULTS_CHECKS = _run_results_count()
 
 
 @pytest.mark.parametrize(

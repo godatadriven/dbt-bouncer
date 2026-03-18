@@ -1802,6 +1802,114 @@
       "title": "CheckModelColumnsHaveMetaKeys",
       "type": "object"
     },
+    "CheckModelColumnsHaveRelationshipTests": {
+      "additionalProperties": false,
+      "description": "Columns matching a regex pattern must have a `relationships` test, optionally validating the target column and model.\n\nParameters:\n    column_name_pattern (str): Regex pattern to match column names that require a relationships test.\n    target_column_pattern (str | None): Regex pattern the target column (`field`) of the relationships test must match. If not provided, any target column is accepted.\n    target_model_pattern (str | None): Regex pattern the target model of the relationships test must match. If not provided, any target model is accepted.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | None): Regex pattern to match the model path. Model paths that match the pattern will not be checked.\n    include (str | None): Regex pattern to match the model path. Only model paths that match the pattern will be checked.\n    materialization (Literal[\"ephemeral\", \"incremental\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_model_columns_have_relationship_tests\n          column_name_pattern: \"_fk$\"\n    ```\n    ```yaml\n    manifest_checks:\n        - name: check_model_columns_have_relationship_tests\n          column_name_pattern: \"_fk$\"\n          target_column_pattern: \"_pk$\"\n          target_model_pattern: \"^dim_|^fact_\"\n    ```",
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp to match which paths to exclude.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp to match which paths to include.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_model_columns_have_relationship_tests",
+          "default": "check_model_columns_have_relationship_tests",
+          "title": "Name",
+          "type": "string"
+        },
+        "column_name_pattern": {
+          "title": "Column Name Pattern",
+          "type": "string"
+        },
+        "target_column_pattern": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Target Column Pattern"
+        },
+        "target_model_pattern": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Target Model Pattern"
+        }
+      },
+      "required": [
+        "column_name_pattern"
+      ],
+      "title": "CheckModelColumnsHaveRelationshipTests",
+      "type": "object"
+    },
     "CheckModelColumnsHaveTypes": {
       "additionalProperties": false,
       "description": "Columns defined for models must have a `data_type` declared.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | None): Regex pattern to match the model path. Model paths that match the pattern will not be checked.\n    include (str | None): Regex pattern to match the model path. Only model paths that match the pattern will be checked.\n    materialization (Literal[\"ephemeral\", \"incremental\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_model_columns_have_types\n          include: ^models/marts\n    ```",
@@ -7240,6 +7348,7 @@
             "check_model_access": "#/$defs/CheckModelAccess",
             "check_model_code_does_not_contain_regexp_pattern": "#/$defs/CheckModelCodeDoesNotContainRegexpPattern",
             "check_model_columns_have_meta_keys": "#/$defs/CheckModelColumnsHaveMetaKeys",
+            "check_model_columns_have_relationship_tests": "#/$defs/CheckModelColumnsHaveRelationshipTests",
             "check_model_columns_have_types": "#/$defs/CheckModelColumnsHaveTypes",
             "check_model_contract_enforced_for_public_model": "#/$defs/CheckModelContractEnforcedForPublicModel",
             "check_model_depends_on_macros": "#/$defs/CheckModelDependsOnMacros",
@@ -7347,6 +7456,9 @@
           },
           {
             "$ref": "#/$defs/CheckModelColumnsHaveMetaKeys"
+          },
+          {
+            "$ref": "#/$defs/CheckModelColumnsHaveRelationshipTests"
           },
           {
             "$ref": "#/$defs/CheckModelColumnsHaveTypes"

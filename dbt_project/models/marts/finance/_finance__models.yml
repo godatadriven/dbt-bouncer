@@ -11,9 +11,73 @@ models:
         select: ['reporter', 'bi']
       meta:
         maturity: gold
-    latest_version: 2
+    latest_version: 3
 
     versions:
+    - v: 3
+      constraints:
+        - type: primary_key
+          columns: [customer_id_pk]
+      columns:
+        - name: customer_id_pk
+          data_type: bigint
+          description: This is a unique identifier for a customer
+          meta:
+            maturity: gold
+          tests:
+            - unique
+            - not_null
+
+        - name: first_name
+          data_type: string
+          description: Customer's first name. PII.
+          meta:
+            maturity: gold
+
+        - name: last_name
+          data_type: string
+          description: Customer's last name. PII.
+          meta:
+            maturity: gold
+
+        - name: new_column
+          data_type: string
+          description: New column to simulate a new version of this model
+          meta:
+            maturity: gold
+
+        - name: first_order_date
+          data_type: date
+          description: Date (UTC) of a customer's first order
+          meta:
+            maturity: gold
+
+        - name: most_recent_order_date
+          data_type: date
+          description: Date (UTC) of a customer's most recent order
+          meta:
+            maturity: gold
+
+        - name: number_of_orders
+          data_type: bigint
+          description: Count of the number of orders a customer has placed
+          meta:
+            maturity: gold
+
+        - name: is_recurring_customer
+          data_type: boolean
+          description: Boolean indicating whether a customer has placed more than five orders
+          meta:
+            maturity: gold
+          tests:
+            - not_null
+
+        - name: customer_lifetime_value
+          data_type: double
+          description: Sum of all payments a customer has made
+          meta:
+            maturity: gold
+
     - v: 2
       constraints:
         - type: primary_key
@@ -149,10 +213,10 @@ models:
         maturity: gold
     constraints:
       - type: primary_key
-        columns: [order_id]
+        columns: [order_id_pk]
 
     columns:
-      - name: order_id
+      - name: order_id_pk
         data_type: integer
         tests:
           - unique
@@ -161,7 +225,7 @@ models:
         meta:
           maturity: gold
 
-      - name: customer_id
+      - name: customer_id_fk
         data_type: integer
         description: Foreign key to the customers table
         meta:
@@ -170,7 +234,7 @@ models:
           - not_null
           - relationships:
               to: ref('customers')
-              field: customer_id
+              field: customer_id_pk
 
       - name: order_date
         data_type: date
