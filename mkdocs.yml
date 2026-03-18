@@ -88,7 +88,7 @@ plugins:
             - src/dbt_bouncer/checks
           options:
             docstring_style: google
-            filters: ["Check"]
+            filters: ["check_"]
             group_by_category: true
             heading_level: 1
             inherited_members: true
