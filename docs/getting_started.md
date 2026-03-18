@@ -155,14 +155,15 @@ In addition to the checks built into `dbt-bouncer`, the ability to add custom ch
 1. Create an empty directory and add a `custom_checks_dir` key to your config file. The value of this key should be the path to the directory you just created, relative to where the config file is located.
 1. In this directory create an empty `__init__.py` file.
 1. In this directory create a subdirectory named `catalog`, `manifest` or `run_results` depending on the type of artifact you want to check.
-1. In this subdirectory create a python file that defines a check. The check must meet the following criteria:
+1. In this subdirectory create a python file that defines a check using the `@check` decorator:
 
             * The function name must start with `check_`.
             * The function must be decorated with `@check` from `dbt_bouncer.check_decorator`.
-            * The first positional parameter determines the resource type (e.g. `model`, `source`, `exposure`).
-            * Use `fail()` from `dbt_bouncer.check_decorator` to signal a check failure.
-            * Have a doc string that includes a description of the check, a list of possible input parameters and at least one example.
-            * A clear message passed to `fail()` in the event of a failure.
+            * The first positional parameter determines the resource type to iterate over (e.g. `model`, `source`, `exposure`, `seed`).
+            * Keyword-only arguments (after `*`) become user-configurable parameters, with types inferred from type hints.
+            * Add `ctx` as a parameter only if the function needs access to the full check context (e.g. all models, all sources).
+            * Use `fail()` from `dbt_bouncer.check_decorator` to signal a check failure with a clear message.
+            * Include a docstring with a description of what the check does.
 
 1. In your config file, add the name of the check and any desired arguments.
 1. Run `dbt-bouncer`, your custom check will be executed.
@@ -186,30 +187,19 @@ An example:
 * Contents of `check_custom_to_me.py`:
 
     ```python
+    import re
+
     from dbt_bouncer.check_decorator import check, fail
 
 
     @check
-    def check_model_deprecation_date(model):
-        """Models cannot have a deprecation date in the past.
-
-        Receives:
-            model (ModelNode): The ModelNode object to check.
-
-        Other Parameters:
-            description (str | None): Description of what the check does.
-            exclude (str | None): Regex pattern to exclude model paths.
-            include (str | None): Regex pattern to include model paths.
-            severity (Literal["error", "warn"] | None): Severity level. Default: `error`.
-
-        Example(s):
-            ```yaml
-            manifest_checks:
-                - name: check_model_deprecation_date
-            ```
-        """
-        if model.deprecation_date is not None:
-            fail(f"`{model.name}` has a deprecation_date set.")
+    def check_model_naming_convention(model, *, model_name_pattern: str = "^(stg|int|fct|dim)_"):
+        """Model names must match the supplied regex."""
+        if not re.match(model_name_pattern, str(model.name)):
+            fail(
+                f"`{model.unique_id}` does not match the required pattern "
+                f"`{model_name_pattern}`."
+            )
     ```
 
 * Contents of `dbt-bouncer.yml`:
@@ -218,6 +208,9 @@ An example:
     custom_checks_dir: my_custom_checks
 
     manifest_checks:
-        - name: check_model_deprecation_date
-          include: ^models/staging/legacy_erp
+        - name: check_model_naming_convention
+          include: ^models/staging
+          model_name_pattern: ^stg_
     ```
+
+All custom checks automatically support the following parameters (no need to declare them): `description`, `exclude`, `include`, and `severity`.
