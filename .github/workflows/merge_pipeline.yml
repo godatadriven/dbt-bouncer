@@ -137,7 +137,7 @@
             matrix:
                 operating-system:
                   - ubuntu-24.04
-                  - windows-latest
+                  - windows-2025
                 python-version:
                     - '3.11'
                     - '3.12'
@@ -159,12 +159,12 @@
               run: dbt-bouncer --config-file dbt-bouncer-example.yml
 
             - name: Regenerate dbt artifacts and run `dbt-bouncer`
-              if: matrix.operating-system == 'windows-latest'
+              if: matrix.operating-system == 'windows-2025'
               run: |
                 $env:Path += ';C:\Users\runneradmin\.local\bin'
                 make build-and-run-dbt-bouncer
 
             - name: Regenerate dbt artifacts and run `dbt-bouncer`
-              if: matrix.operating-system != 'windows-latest'
+              if: matrix.operating-system != 'windows-2025'
               run: |
                 (r=3;while ! make build-and-run-dbt-bouncer ; do ((--r))||exit;done)
