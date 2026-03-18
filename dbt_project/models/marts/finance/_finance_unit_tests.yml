@@ -15,13 +15,44 @@ unit_tests:
           - {amount: 30, order_id: 3, payment_method: "coupon"}
     expect:
       rows:
-          - {amount: 10, order_id: 1, coupon_amount: 0, credit_card_amount: 10}
-          - {amount: 20, order_id: 2, coupon_amount: 0, credit_card_amount: 20}
-          - {amount: 30, order_id: 3, coupon_amount: 30, credit_card_amount: 0}
+          - {amount: 10, order_id_pk: 1, coupon_amount: 0, credit_card_amount: 10}
+          - {amount: 20, order_id_pk: 2, coupon_amount: 0, credit_card_amount: 20}
+          - {amount: 30, order_id_pk: 3, coupon_amount: 30, credit_card_amount: 0}
 
   - name: test_clv_logic
     description: Validate CLV logic
     model: customers
+    versions:
+      include:
+        - 3
+    given:
+      - input: ref('stg_customers')
+        format: sql
+        rows:
+          select 1 as customer_id, 'Anna' as first_name, 'Anderson' as last_name union all
+          select 2 as customer_id, 'Bob' as first_name, 'Bobbington' as last_name union all
+          select 3 as customer_id, 'Chrissi' as first_name, 'Christensen' as last_name
+      - input: ref('stg_orders')
+        rows:
+          - {customer_id: 1, order_date: '2022-01-01', order_id: 1}
+          - {customer_id: 1, order_date: '2022-01-02', order_id: 2}
+          - {customer_id: 2, order_date: '2022-01-02', order_id: 3}
+      - input: ref('stg_payments')
+        format: csv
+        fixture: stg_payments
+    expect:
+      rows:
+        - {customer_id_pk: 1, customer_lifetime_value: 150}
+        - {customer_id_pk: 2, customer_lifetime_value: 25}
+        - {customer_id_pk: 3, customer_lifetime_value: 0}
+
+  - name: test_clv_logic_historical
+    description: Validate CLV logic (historical)
+    model: customers
+    versions:
+      include:
+        - 1
+        - 2
     given:
       - input: ref('stg_customers')
         format: sql
