@@ -106,6 +106,16 @@ runs:
           echo "show-all-failures-param=--show-all-failures" >> $GITHUB_OUTPUT
         fi
 
+    - name: Assemble `send-pr-comment` parameter
+      id: assemble-send-pr-comment-param
+      shell: bash
+      run: >
+        if [[ "${{ inputs.send-pr-comment }}" = "true" ]]; then
+          echo "send-pr-comment-param=--create-pr-comment-file" >> $GITHUB_OUTPUT
+        else
+          echo "send-pr-comment-param=--no-create-pr-comment-file" >> $GITHUB_OUTPUT
+        fi
+
     - name: Assemble `verbose` parameter
       id: assemble-verbose-param
       shell: bash
@@ -129,7 +139,7 @@ runs:
           --volume "$GITHUB_WORKSPACE":/app \
           ghcr.io/godatadriven/dbt-bouncer:v0.0.0 \
           --config-file /app/${{ inputs.config-file }} \
-          --create-pr-comment-file ${{ inputs.send-pr-comment }} \
+          ${{ steps.assemble-send-pr-comment-param.outputs.send-pr-comment-param }} \
           ${{ steps.assemble-check-param.outputs.check-param }} ${{ steps.assemble-only-param.outputs.only-param }} ${{ steps.assemble-output-file-param.outputs.output-file-param }} ${{ steps.assemble-output-format-param.outputs.output-format-param }} ${{ steps.assemble-output-only-failures-param.outputs.output-only-failures-param }} ${{ steps.assemble-show-all-failures-param.outputs.show-all-failures-param }} ${{ steps.assemble-verbose-param.outputs.verbose-param }}
 
     - name: Send PR comment
