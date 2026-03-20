@@ -1,6 +1,6 @@
 [project]
 name = "dbt-bouncer"
-version = "0.0.0"
+version = "3.0.1"
 description = "Configure and enforce conventions for your dbt project."
 readme = "README.md"
 requires-python = ">=3.11,<3.15"
