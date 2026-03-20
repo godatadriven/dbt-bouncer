@@ -151,6 +151,27 @@ class CheckModelXxx(BaseCheck):
 - Shared fixtures in `conftest.py` files (session-scoped and per-directory)
 - Run: `make test-unit`
 
+## Releases
+
+### Release notes
+
+Release notes are used as the body for GitHub Releases. They are **not** committed to the repo. They are printed to console.
+
+Auto-generated changelog categories are configured in `.github/release.yml` (Bug Fixes, New Features, Performance, Refactoring, Documentation, CI, Dependencies).
+
+### Migration guides
+
+Migration guides for major versions live in `docs/migration/` (e.g. `docs/migration/v3.md`). These **are** committed to the repo.
+
+### Verification process
+
+When drafting release notes, verify every item against the previous release tag to confirm it represents a real user-facing change:
+
+1. Compare the last release tag against current main (`git show <tag>:<file>` vs current)
+2. Confirm features/flags were actually shipped in a prior release before listing them as "removed" — changes introduced and reverted between releases are not breaking changes
+3. Confirm dependency changes are real (e.g. a dep listed as "new" must not already exist in the prior release's `pyproject.toml`)
+4. Confirm bug fixes are still relevant (code that was fixed then later deleted is moot)
+
 ## Key Constraints
 
 - Use `prek run --all-files`, **not** `pre-commit run`
