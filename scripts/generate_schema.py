@@ -14,7 +14,7 @@ from typing import Any
 
 from pydantic.json_schema import GenerateJsonSchema
 
-from dbt_bouncer.logger import configure_console_logging
+from dbt_bouncer.reporting.logger import configure_console_logging
 
 SCHEMA_PATH = Path("schema.json")
 
