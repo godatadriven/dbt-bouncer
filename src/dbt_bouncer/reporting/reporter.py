@@ -12,7 +12,7 @@ from rich.panel import Panel
 from rich.table import Table
 
 from dbt_bouncer.enums import CheckOutcome, CheckSeverity
-from dbt_bouncer.formatters import _format_results
+from dbt_bouncer.reporting.formatters import _format_results
 from dbt_bouncer.utils import create_github_comment_file
 
 if TYPE_CHECKING:

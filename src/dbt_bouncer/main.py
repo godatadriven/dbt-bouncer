@@ -8,7 +8,7 @@ import typer
 from typer.main import get_command
 
 from dbt_bouncer.enums import ConfigFileName, OutputFormat
-from dbt_bouncer.logger import configure_console_logging
+from dbt_bouncer.reporting.logger import configure_console_logging
 from dbt_bouncer.version import version as get_version
 
 if TYPE_CHECKING:

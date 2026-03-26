@@ -4,8 +4,8 @@ import logging
 import pytest
 from typer.testing import CliRunner
 
-from dbt_bouncer.logger import JsonFormatter, configure_console_logging
 from dbt_bouncer.main import app
+from dbt_bouncer.reporting.logger import JsonFormatter, configure_console_logging
 
 
 def test_logging_debug_cli(caplog) -> None:
@@ -137,7 +137,7 @@ def test_default_format_is_custom_formatter() -> None:
 
         configure_console_logging(verbosity=0)
 
-        from dbt_bouncer.logger import CustomFormatter
+        from dbt_bouncer.reporting.logger import CustomFormatter
 
         root_logger = logging.getLogger("")
         handler = root_logger.handlers[-1]

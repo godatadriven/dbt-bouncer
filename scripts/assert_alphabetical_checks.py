@@ -2,7 +2,7 @@ import ast
 import logging
 from pathlib import Path
 
-from dbt_bouncer.logger import configure_console_logging
+from dbt_bouncer.reporting.logger import configure_console_logging
 
 
 def main():

@@ -1,9 +1,13 @@
 """Tests for the Reporter class."""
 
+from typing import TYPE_CHECKING, cast
 from unittest.mock import patch
 
 from dbt_bouncer.enums import CheckOutcome, CheckSeverity
-from dbt_bouncer.reporter import Reporter
+from dbt_bouncer.reporting.reporter import Reporter
+
+if TYPE_CHECKING:
+    from dbt_bouncer.runner import CheckToRun
 
 
 class _FakeCheck:
@@ -14,12 +18,15 @@ class _FakeCheck:
 
 def test_report_dry_run_returns_zero():
     """Dry run prints summary and returns exit code 0."""
-    checks = [
-        {
-            "check": _FakeCheck(),
-            "check_run_id": "check_model_access:0:model.my_model",
-            "severity": "error",
-        },
+    checks: list[CheckToRun] = [
+        cast(
+            "CheckToRun",
+            {
+                "check": _FakeCheck(),
+                "check_run_id": "check_model_access:0:model.my_model",
+                "severity": "error",
+            },
+        ),
     ]
     # Pass iterate cache as parameter -- no coupling to runner module
     iterate_cache = {_FakeCheck: frozenset({"model"})}
@@ -115,6 +122,6 @@ def test_report_results_creates_pr_comment_file():
         },
     ]
     reporter = Reporter(show_all_failures=False, create_pr_comment_file=True)
-    with patch("dbt_bouncer.reporter.create_github_comment_file") as mock_gh:
+    with patch("dbt_bouncer.reporting.reporter.create_github_comment_file") as mock_gh:
         reporter.report_results(results)
         mock_gh.assert_called_once()

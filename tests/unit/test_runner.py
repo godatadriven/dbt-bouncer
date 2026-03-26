@@ -9,8 +9,8 @@ from typer.main import get_command
 
 from dbt_bouncer.artifact_parsers.parser import wrap_dict
 from dbt_bouncer.context import BouncerContext
-from dbt_bouncer.logger import configure_console_logging
 from dbt_bouncer.main import app
+from dbt_bouncer.reporting.logger import configure_console_logging
 from dbt_bouncer.runner import _should_run_check, runner
 
 

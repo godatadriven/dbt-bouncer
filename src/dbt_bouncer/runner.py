@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any, NotRequired, TypedDict
 
 from dbt_bouncer.enums import ResourceType
 from dbt_bouncer.executor import Executor
-from dbt_bouncer.reporter import Reporter
+from dbt_bouncer.reporting.reporter import Reporter
 from dbt_bouncer.utils import get_nested_value, resource_in_path
 
 if TYPE_CHECKING:
