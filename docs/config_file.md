@@ -53,7 +53,7 @@ include = "^models/staging"
 model_name_pattern = "^stg_"
 ```
 
-For more example config files, see [here](https://github.com/godatadriven/dbt-bouncer/tree/main/tests/unit/config_files/valid). For a detailed description of how to use `dbt-bouncer` in a CI pipeline see [here](./faq.md#how-to-configure-dbt-bouncer-for-use-in-a-ci-pipeline).
+For more example config files, see [here](https://github.com/godatadriven/dbt-bouncer/tree/main/tests/unit/config_files/valid). A comprehensive TOML example is available [here](https://github.com/godatadriven/dbt-bouncer/blob/main/docs/dbt-bouncer-example.toml). For a detailed description of how to use `dbt-bouncer` in a CI pipeline see [here](./faq.md#how-to-configure-dbt-bouncer-for-use-in-a-ci-pipeline).
 
 ## Editor integration
 
