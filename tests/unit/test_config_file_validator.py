@@ -1,4 +1,5 @@
 import os
+import tomllib
 from contextlib import nullcontext as does_not_raise
 from pathlib import Path
 from typing import Any
@@ -369,6 +370,39 @@ valid_confs = [
 def test_validate_conf_valid(f, expectation):
     with Path.open(f, "r") as fp:
         conf = yaml.safe_load(fp)
+
+    ctx = typer.Context(
+        get_command(app),
+        obj={
+            "config_file_path": "",
+            "custom_checks_dir": None,
+        },
+    )
+
+    with ctx, expectation:
+        validate_conf(
+            check_categories=[x for x in conf if x.endswith("_checks")],
+            config_file_contents=conf,
+        )
+
+
+valid_toml_confs = [
+    (
+        f,
+        does_not_raise(),
+    )
+    for f in Path("./tests/unit/config_files/valid").glob("*.toml")
+]
+
+
+@pytest.mark.parametrize(
+    ("f", "expectation"),
+    valid_toml_confs,
+    ids=[f.stem for f, _ in valid_toml_confs],
+)
+def test_validate_conf_valid_toml(f, expectation):
+    with Path.open(f, "rb") as fp:
+        conf = tomllib.load(fp)
 
     ctx = typer.Context(
         get_command(app),
