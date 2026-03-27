@@ -1,0 +1,181 @@
+---
+name: Pull Request AI Review
+
+on:
+  workflow_run:
+    workflows: [CI pipeline]
+    types: [completed]
+
+env:
+    PR_EVENT: event.json
+
+jobs:
+  ai_review:
+    if: github.event.workflow_run.conclusion == 'success'
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: write
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Download PR Event
+        uses: dawidd6/action-download-artifact@v6
+        with:
+          name: ${{ env.PR_EVENT }}
+          run_id: ${{ github.event.workflow_run.id }}
+
+      - name: Export PR Event Data
+        uses: actions/github-script@v8
+        with:
+          script: |
+            let fs = require('fs');
+            let prEvent = JSON.parse(fs.readFileSync(process.env.PR_EVENT, {encoding: 'utf8'}));
+            core.exportVariable("PR_HEAD", prEvent.pull_request.head.ref);
+            core.exportVariable("PR_HEAD_SHA", prEvent.pull_request.head.sha);
+            core.exportVariable("PR_BASE", prEvent.pull_request.base.ref);
+            core.exportVariable("PR_BASE_SHA", prEvent.pull_request.base.sha);
+            core.exportVariable("PR_NUMBER", prEvent.number);
+            core.exportVariable("PR_CHANGED_FILES", prEvent.pull_request.changed_files);
+
+      - name: Checkout PR Head
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ env.PR_HEAD_SHA }}
+          fetch-depth: 0
+
+      - name: Analyse PR
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ secrets.PAT_GITHUB }}
+          claude_args: >-
+            --model claude-opus-4-6
+            --allowedTools 'Bash(git diff*),Bash(git log*),Bash(git show*),Read,Glob,Grep,Write'
+          prompt: |-
+            You are a senior Python engineer reviewing a PR for dbt-bouncer, a tool that
+            enforces conventions for dbt projects by running validation checks against dbt
+            artifacts. This PR changes ${{ env.PR_CHANGED_FILES }} files.
+
+            Analyse the full diff for this PR by running:
+              git diff origin/${{ env.PR_BASE }}...${{ env.PR_HEAD_SHA }}
+
+            For each file, determine what changed and WHY.
+
+            ## Review Criteria
+            Check for these issues and report them in the Review Findings section:
+            1. **Python Quality**: Type hints on function signatures, clean imports, no dead code, proper use of Pydantic models and `Field()`.
+            2. **Check Structure**: Proper use of `@check` decorator or `BaseCheck` subclass, correct `iterate_over_value` annotations, `fail()` or `DbtBouncerFailedCheckError` usage.
+            3. **Test Coverage**: Parametrised tests with happy + unhappy paths, proper fixture usage, edge cases covered.
+            4. **Security**: No hardcoded secrets, safe deserialization (no `yaml.unsafe_load`, no `pickle`), no command injection.
+            5. **Style**: ruff/ruff-format compliance, snake_case naming, alphabetical ordering of lists and config sections.
+            6. **Breaking Changes**: Config schema changes, removed/renamed checks, changed function signatures.
+            7. **Documentation**: Docstrings on public functions with Parameters/Returns sections, updated AGENTS.md if architecture changed.
+
+            ## Severity Levels
+            Use these severity levels for review findings:
+            - 🔴 **Issue** — bugs, security problems, missing tests on new checks, breaking changes without migration notes
+            - 🟡 **Suggestion** — performance improvements, optional tests, documentation gaps, style nits
+            - ✅ **All clear** — explicitly state when a category has no issues (proves it was checked)
+
+            ## Adaptive Collapsibility
+            If this PR changes 4 or more files, wrap the "File Changes" table in a `<details>` block:
+            ```
+            <details>
+            <summary>📄 File Changes (N files)</summary>
+            | File | Change | Description |
+            ...
+            </details>
+            ```
+            If fewer than 4 files, show the "File Changes" table expanded (no `<details>` wrapper).
+            For the "Review Findings" section: NEVER collapse it if it contains any 🔴 or 🟡 items —
+            those must always be immediately visible. Only wrap it in a `<details>` block if it
+            contains no issues (only ✅ items).
+
+            ## Output Format
+            You MUST write your analysis to the file `/tmp/ai-pr-review-comment.md` using the Write tool.
+            The file must start with the exact string `<!-- ai-pr-review-marker -->`.
+            Write the complete markdown to this file — do not output it to the conversation.
+            Use this template:
+            <!-- ai-pr-review-marker -->
+            ## 🔍 AI PR Review
+            > **One-sentence TL;DR of the PR's purpose and business value.**
+
+            **Type:** `feature` | `bugfix` | `refactor` | `docs` | `chore` | `test`
+
+            ### Summary
+            2-3 sentences explaining what changed and **why**. Focus on intent and business value,
+            not implementation details. Explain how files relate to each other.
+
+            ### File Changes
+            | File | Change | Description |
+            |------|--------|-------------|
+            | `path/to/file` | New/Modified/Deleted | One-line description of what changed in this file |
+
+            ### Review Findings
+            - 🔴 **Issue:** file:line — description
+            - 🟡 **Suggestion:** file:line — description
+            - ✅ No issues with [category]
+            (If no issues at all, write "✅ No issues found. Reviewed for Python quality, check structure, tests, security, style, breaking changes, and documentation.")
+            ---
+            *Generated by [Claude Code](https://github.com/anthropics/claude-code-action)*
+
+      - name: Post or update review comment
+        if: always()
+        env:
+          BASE_REF: ${{ env.PR_BASE }}
+          GH_TOKEN: ${{ secrets.PAT_GITHUB }}
+          HEAD_SHA: ${{ env.PR_HEAD_SHA }}
+        run: |-
+          COMMENT_FILE="/tmp/ai-pr-review-comment.md"
+
+          # --- Generate fallback if Claude didn't write the file ---
+          if [ ! -s "$COMMENT_FILE" ] || ! grep -q "ai-pr-review-marker" "$COMMENT_FILE"; then
+            DIFF_STAT=$(git diff "origin/${BASE_REF}...${HEAD_SHA}" --stat | tail -1)
+            {
+              echo "<!-- ai-pr-review-marker -->"
+              echo "## 🔍 AI PR Review"
+              echo ""
+              echo "> Auto-generated fallback — Claude analysis was not available."
+              echo ""
+              echo "**Type:** \`unknown\`"
+              echo ""
+              echo "### Summary"
+              echo "This PR modifies the following files:"
+              echo ""
+              echo "### File Changes"
+              echo "| File | Change | Description |"
+              echo "|------|--------|-------------|"
+              git diff "origin/${BASE_REF}...${HEAD_SHA}" --name-status | while IFS=$'\t' read -r status file; do
+                case "$status" in
+                  A) change="New" ;;
+                  M) change="Modified" ;;
+                  D) change="Deleted" ;;
+                  R*) change="Renamed" ;;
+                  *) change="$status" ;;
+                esac
+                echo "| \`${file}\` | ${change} | — |"
+              done
+              echo ""
+              echo "**Diff stats:** ${DIFF_STAT}"
+              echo ""
+              echo "---"
+              echo "*Generated by [Claude Code](https://github.com/anthropics/claude-code-action) (fallback)*"
+            } > "$COMMENT_FILE"
+          fi
+
+          # --- Upsert: update existing comment or create new one ---
+          MARKER="ai-pr-review-marker"
+          COMMENT_IDS=$(gh api "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" \
+            --jq "[.[] | select(.body | contains(\"${MARKER}\")) | .id]")
+          FIRST_ID=$(echo "$COMMENT_IDS" | jq -r 'first // empty')
+          REST_IDS=$(echo "$COMMENT_IDS" | jq -r '.[1:] | .[]')
+          if [ -n "$FIRST_ID" ]; then
+            gh api -X PATCH "repos/${GITHUB_REPOSITORY}/issues/comments/${FIRST_ID}" \
+              -f body="$(cat "$COMMENT_FILE")"
+            for CID in $REST_IDS; do
+              gh api -X DELETE "repos/${GITHUB_REPOSITORY}/issues/comments/${CID}" || true
+            done
+          else
+            gh pr comment "$PR_NUMBER" --body-file "$COMMENT_FILE"
+          fi
