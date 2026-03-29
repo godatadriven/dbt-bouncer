@@ -1,0 +1,66 @@
+---
+name: Issue AI Fix
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  analyse:
+    if: >-
+      !github.event.issue.pull_request
+      && contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)
+      && startsWith(github.event.comment.body, '/ai-fix')
+    permissions:
+      contents: read
+      issues: write
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: React to command
+        uses: actions/github-script@v8
+        with:
+          github-token: ${{ secrets.PAT_GITHUB }}
+          script: |
+            await github.rest.reactions.createForIssueComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: context.payload.comment.id,
+              content: 'eyes',
+            });
+
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Analyse issue
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ secrets.PAT_GITHUB }}
+          trigger_phrase: /ai-fix
+          claude_args: >-
+            --model claude-opus-4-6
+            --allowedTools 'Read,Glob,Grep,Bash(git log*),Bash(git show*)'
+          prompt: |-
+            You are a senior Python engineer analysing an issue for dbt-bouncer, a tool that
+            enforces conventions for dbt projects by running validation checks against dbt
+            artifacts.
+
+            Read the issue carefully. Explore the codebase to understand the relevant files and
+            architecture. Then propose a concrete implementation plan.
+
+            IMPORTANT: Start your response with the exact HTML comment `<!-- ai-issue-plan-marker -->`
+            on its own line. This marker is required for the /ai-approve phase to detect your plan.
+
+            Your plan MUST include:
+            1. **Root cause** (for bugs) or **Design** (for features) — what needs to change and why
+            2. **Files to modify** — exact file paths with a one-line description of each change
+            3. **Files to create** — any new files needed, with their purpose
+            4. **Test plan** — what tests to add or modify
+            5. **Risks** — anything that could go wrong or needs extra attention
+
+            Keep the plan concise and actionable. A developer should be able to implement it
+            without further clarification.
+
+            End your response with:
+            > Post `/ai-approve` to proceed with implementation.
