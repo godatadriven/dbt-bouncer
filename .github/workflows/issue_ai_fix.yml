@@ -66,3 +66,134 @@ jobs:
 
             End your response with:
             > Post `/ai-approve` to proceed with implementation.
+
+  implement:
+    if: >-
+      !github.event.issue.pull_request
+      && contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)
+      && startsWith(github.event.comment.body, '/ai-approve')
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      GH_TOKEN: ${{ secrets.PAT_GITHUB }}
+      ISSUE_NUMBER: ${{ github.event.issue.number }}
+    steps:
+      - name: Check plan exists and extract it
+        id: plan
+        uses: actions/github-script@v8
+        with:
+          github-token: ${{ secrets.PAT_GITHUB }}
+          script: |
+            const comments = await github.paginate(
+              github.rest.issues.listComments,
+              {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+              }
+            );
+            const planComment = comments.find(c =>
+              c.body.includes('<!-- ai-issue-plan-marker -->')
+            );
+            if (!planComment) {
+              core.setFailed('No plan comment found. Run /ai-fix first.');
+              return;
+            }
+            core.setOutput('plan_body', planComment.body);
+
+      - name: React to command
+        uses: actions/github-script@v8
+        with:
+          github-token: ${{ secrets.PAT_GITHUB }}
+          script: |
+            await github.rest.reactions.createForIssueComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: context.payload.comment.id,
+              content: 'rocket',
+            });
+
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Create branch
+        run: |
+          BRANCH="ai/issue-${ISSUE_NUMBER}"
+          git checkout -B "$BRANCH"
+          git push --force origin "$BRANCH"
+          echo "BRANCH=$BRANCH" >> "$GITHUB_ENV"
+
+      - name: Implement changes
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ secrets.PAT_GITHUB }}
+          claude_args: >-
+            --model claude-opus-4-6
+            --allowedTools 'Read,Glob,Grep,Write,Edit,Bash(git diff*),Bash(git log*),Bash(git show*),Bash(git add*),Bash(git commit*),Bash(git push*)'
+          prompt: |-
+            You are a senior Python engineer implementing a fix for dbt-bouncer, a tool that
+            enforces conventions for dbt projects by running validation checks against dbt
+            artifacts.
+
+            ## Issue #${{ github.event.issue.number }}: ${{ github.event.issue.title }}
+
+            ${{ github.event.issue.body }}
+
+            ## Implementation Plan
+
+            ${{ steps.plan.outputs.plan_body }}
+
+            ## Instructions
+
+            1. Implement the changes described in the plan above.
+            2. Follow existing code patterns and conventions in the repository.
+            3. Include tests for any new or changed functionality.
+            4. Commit your changes with descriptive commit messages.
+            5. Push your commits to the current branch.
+
+            Do NOT open a PR — that will be handled in a subsequent step.
+
+      - name: Open draft PR
+        run: |
+          # Check if there are commits beyond main
+          if git diff --quiet origin/main..."$BRANCH"; then
+            echo "No changes to open a PR for."
+            gh issue comment "$ISSUE_NUMBER" \
+              --body "<!-- ai-issue-implement-marker -->
+          **AI Implementation:** No changes were produced. The agent may have been unable to implement the plan. Please review the [workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})."
+            exit 0
+          fi
+
+          PR_URL=$(gh pr create \
+            --draft \
+            --head "$BRANCH" \
+            --base main \
+            --title "fix: address issue #${ISSUE_NUMBER}" \
+            --body "$(cat <<EOF
+          ## Summary
+
+          AI-generated implementation for #${ISSUE_NUMBER}.
+
+          Closes #${ISSUE_NUMBER}
+
+          ## Test Plan
+
+          - [ ] Review AI-generated changes
+          - [ ] Verify tests pass in CI
+          - [ ] Manual testing if applicable
+          EOF
+          )")
+
+          gh issue comment "$ISSUE_NUMBER" \
+            --body "<!-- ai-issue-implement-marker -->
+          **AI Implementation:** Draft PR created at ${PR_URL}
+
+          Please review the changes and mark the PR as ready when satisfied."
