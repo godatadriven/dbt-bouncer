@@ -54,12 +54,20 @@ def test_cli_happy_path(caplog, dbt_artifacts_dir, tmp_path):
 
     assert "Running dbt-bouncer (0.0.0)..." in caplog.text
 
-    # Verify the artifact summary table was logged exactly once. Individual artifact
-    # counts are validated implicitly by the checks themselves passing.
-    summary_count_artifacts = sum(
-        1 for record in caplog.messages if "manifest.json" in record and "│" in record
+    # Verify the artifact summary table was logged exactly once and contains
+    # at least one non-zero count (guards against a parser regression that
+    # silently produces empty artifact lists).
+    summary_records = [
+        record
+        for record in caplog.messages
+        if "manifest.json" in record and "│" in record
+    ]
+    assert len(summary_records) == 1
+    import re
+
+    assert re.search(r"│\s+[1-9]", summary_records[0]), (
+        "Artifact summary table contains no non-zero counts"
     )
-    assert summary_count_artifacts == 1
     assert result.exit_code == 0
 
 
