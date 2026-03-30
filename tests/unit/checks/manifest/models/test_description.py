@@ -168,6 +168,25 @@ class TestCheckModelDocumentationCoverage:
         )
 
 
+class TestCheckModelDocumentationCoverageInvalidParam:
+    @pytest.mark.parametrize(
+        "min_pct",
+        [
+            pytest.param(-1, id="negative"),
+            pytest.param(101, id="over_100"),
+        ],
+    )
+    def test_raises_value_error(self, min_pct):
+        from dbt_bouncer.testing import _run_check
+
+        with pytest.raises(ValueError, match="must be between 0 and 100"):
+            _run_check(
+                "check_model_documentation_coverage",
+                min_model_documentation_coverage_pct=min_pct,
+                ctx_models=[{}],
+            )
+
+
 class TestCheckModelDocumentedInSameDirectory:
     def test_pass(self):
         check_passes(

@@ -110,7 +110,12 @@ def check_exposure_based_on_view(
 
 @check
 def check_exposure_based_on_non_public_models(exposure, ctx):
-    """Exposures should be based on public models only."""
+    """Exposures should be based on public models only.
+
+    Receives:
+        exposure (ExposureNode): The ExposureNode object to check.
+
+    """
     models_by_id = (
         ctx.models_by_unique_id
         if ctx.models_by_unique_id

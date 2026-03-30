@@ -1,5 +1,6 @@
 """Re-usable functions for dbt-bouncer."""
 
+import hashlib
 import importlib
 import importlib.util
 import inspect
@@ -253,6 +254,7 @@ def _load_custom_checks(
                     f"Failed to load custom check file `{check_file}`: {e}. "
                     "This file will be skipped."
                 )
+                logging.debug("Custom check load traceback:", exc_info=True)
     else:
         logging.warning(
             f"Custom checks directory `{custom_checks_dir}` does not exist."
@@ -301,6 +303,7 @@ def _load_entry_point_checks(check_objects: list[type["BaseCheck"]]) -> None:
                                 f"Failed to import submodule `{modname}` "
                                 f"from entry point `{ep.name}`."
                             )
+                            logging.debug("Submodule import traceback:", exc_info=True)
                 else:
                     # Plain module — inspect directly
                     _extract_checks_from_module(target, target.__name__, check_objects)
@@ -315,6 +318,7 @@ def _load_entry_point_checks(check_objects: list[type["BaseCheck"]]) -> None:
                 f"Failed to load entry point `{ep.name}`: {e}. "
                 "This plugin will be skipped."
             )
+            logging.debug("Entry point load traceback:", exc_info=True)
 
 
 _CATEGORY_TO_SUBDIR: dict[str, str] = {
@@ -376,11 +380,53 @@ def _build_check_module_map() -> dict[str, dict[str, str]]:
     return mapping
 
 
-def _get_check_module_map_cached() -> dict[str, dict[str, str]]:
+def _compute_cache_fingerprint(
+    version_str: str, custom_checks_dir: Path | None = None
+) -> str:
+    """Compute a short hash incorporating the version, custom checks, and entry points.
+
+    The hash covers:
+    - The dbt-bouncer version string.
+    - Sorted relative paths **and modification times** of ``.py`` files in
+      *custom_checks_dir* (if provided).
+    - Sorted entry point names from the ``dbt_bouncer.checks`` group.
+
+    Returns:
+        str: An 8-character hex digest suitable for use in a cache filename.
+
+    """
+    h = hashlib.sha256(version_str.encode())
+
+    # Custom checks file paths and modification times
+    if custom_checks_dir is not None and custom_checks_dir.exists():
+        custom_py_files = sorted(
+            f for f in custom_checks_dir.glob("**/*.py") if f.is_file()
+        )
+        for f in custom_py_files:
+            h.update(str(f.relative_to(custom_checks_dir)).encode())
+            h.update(str(f.stat().st_mtime_ns).encode())
+
+    # Entry point names
+    ep_names = sorted(ep.name for ep in entry_points(group=_ENTRY_POINT_GROUP))
+    for name in ep_names:
+        h.update(name.encode())
+
+    return h.hexdigest()[:8]
+
+
+def _get_check_module_map_cached(
+    custom_checks_dir: Path | None = None,
+) -> dict[str, dict[str, str]]:
     """Get the check name -> module mapping, using disk cache.
 
-    The cache is keyed by the dbt-bouncer version and invalidated when the
-    version changes (e.g. after an upgrade that adds new checks).
+    The cache is keyed by the dbt-bouncer version, custom check file paths,
+    and installed entry point names. Changes to any of these invalidate the
+    cache.
+
+    Args:
+        custom_checks_dir: Optional path to a directory containing custom
+            checks. Included in the cache fingerprint so that adding or
+            removing custom check files triggers a rebuild.
 
     Returns:
         dict[str, dict[str, str]]: The cached mapping.
@@ -390,14 +436,16 @@ def _get_check_module_map_cached() -> dict[str, dict[str, str]]:
 
     from dbt_bouncer.version import version
 
+    ver = version()
+    fingerprint = _compute_cache_fingerprint(ver, custom_checks_dir)
     cache_dir = Path.home() / ".cache" / "dbt-bouncer"
-    cache_file = cache_dir / f"check_registry_{version()}.json"
+    cache_file = cache_dir / f"check_registry_{ver}_{fingerprint}.json"
 
     if cache_file.exists():
         try:
             return orjson.loads(cache_file.read_bytes())
         except (orjson.JSONDecodeError, OSError):
-            pass  # Corrupted cache, rebuild
+            logging.debug("Check registry cache corrupted, rebuilding.", exc_info=True)
 
     mapping = _build_check_module_map()
 
@@ -432,7 +480,7 @@ def get_check_objects_for_names(
         list[type[BaseCheck]]: List of check classes for the requested names.
 
     """
-    module_map = _get_check_module_map_cached()
+    module_map = _get_check_module_map_cached(custom_checks_dir)
 
     # Check if all requested names are in the cache
     missing = check_names - module_map.keys()
@@ -452,6 +500,7 @@ def get_check_objects_for_names(
             _extract_checks_from_module(module, module_name, check_objects)
         except ImportError:
             logging.warning(f"Failed to import check module: {module_name}")
+            logging.debug("Check module import traceback:", exc_info=True)
 
     # Also load custom checks and entry points
     if custom_checks_dir is not None:
@@ -539,6 +588,7 @@ def get_check_objects(
             _extract_checks_from_module(module, module_name, check_objects)
         except ImportError:
             logging.warning(f"Failed to import internal check module: {module_name}")
+            logging.debug("Import traceback:", exc_info=True)
 
     # 2. Load custom checks (if any)
     if custom_checks_dir is not None:

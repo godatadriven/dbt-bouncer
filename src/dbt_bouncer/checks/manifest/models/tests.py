@@ -142,6 +142,10 @@ def check_model_test_coverage(ctx, *, min_model_test_coverage_pct: float = 100):
     Parameters:
         min_model_test_coverage_pct (float): The minimum percentage of models that must have at least one test.
 
+    Receives:
+        models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.
+        tests (list[TestNode]): List of TestNode objects parsed from `manifest.json`.
+
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
@@ -154,6 +158,11 @@ def check_model_test_coverage(ctx, *, min_model_test_coverage_pct: float = 100):
         ```
 
     """
+    if min_model_test_coverage_pct < 0 or min_model_test_coverage_pct > 100:
+        raise ValueError(
+            f"`min_model_test_coverage_pct` must be between 0 and 100, got {min_model_test_coverage_pct}."
+        )
+
     num_models = len(ctx.models)
     # Build set of model IDs that have at least one test
     tested_model_ids = {

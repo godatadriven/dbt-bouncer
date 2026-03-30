@@ -103,7 +103,7 @@ def check_model_file_name(model, *, file_name_pattern: str):
 def check_model_property_file_location(model):
     """Model properties files must follow the guidance provided by dbt [here](https://docs.getdbt.com/best-practices/how-we-structure/1-guide-overview).
 
-    Parameters:
+    Receives:
         model (ModelNode): The ModelNode object to check.
 
     Other Parameters:

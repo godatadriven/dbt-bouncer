@@ -35,6 +35,11 @@ def check_run_results_max_execution_time(
         ```
 
     """
+    if max_execution_time_seconds <= 0:
+        raise ValueError(
+            f"`max_execution_time_seconds` must be positive, got {max_execution_time_seconds}."
+        )
+
     if run_result.execution_time > max_execution_time_seconds:
         fail(
             f"`{run_result.unique_id.split('.')[-1]}` has an execution time ({run_result.execution_time} greater than permitted ({max_execution_time_seconds}s)."
@@ -51,6 +56,8 @@ def check_run_results_max_gigabytes_billed(run_result, *, max_gigabytes_billed: 
 
     Parameters:
         max_gigabytes_billed (float): The maximum number of gigabytes billed.
+
+    Receives:
         run_result (RunResultEntry): The RunResultEntry object to check.
 
     Other Parameters:
@@ -71,6 +78,11 @@ def check_run_results_max_gigabytes_billed(run_result, *, max_gigabytes_billed: 
         ```
 
     """
+    if max_gigabytes_billed <= 0:
+        raise ValueError(
+            f"`max_gigabytes_billed` must be positive, got {max_gigabytes_billed}."
+        )
+
     try:
         gigabytes_billed = run_result.adapter_response["bytes_billed"] / (1000**3)
     except KeyError as e:

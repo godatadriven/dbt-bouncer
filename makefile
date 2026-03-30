@@ -12,24 +12,34 @@ build-and-run-dbt-bouncer: ## Run dbt deps, build, docs generate and run dbt-bou
 	uv run dbt docs generate
 	uv run dbt-bouncer --config-file ./dbt-bouncer-example.yml
 
-build-artifacts: ## Build dbt artifacts for testing
-	uvx --python "==$(PYTHON_INTERPRETER_CONSTRAINT)" --with 'dbt-duckdb~=1.9.0' --from 'dbt-core~=1.9.0' dbt parse --profiles-dir ./dbt_project --project-dir ./dbt_project
-	uvx --python "==$(PYTHON_INTERPRETER_CONSTRAINT)" --with 'dbt-duckdb~=1.9.0' --from 'dbt-core~=1.9.0' dbt docs generate --profiles-dir ./dbt_project --project-dir ./dbt_project
+# Each version-specific target uses --target-path to write to an isolated directory.
+# The version builds (19, 110, 111) can run in parallel: make -j4 build-artifacts
+# Note: parallel execution may cause conflicts if dbt acquires project-level locks
+# in ./dbt_project. If that happens, run without -j.
+build-artifacts: build-artifacts-19 build-artifacts-110 build-artifacts-111 build-artifacts-local ## Build dbt artifacts for testing
+
+build-artifacts-19: ## Build dbt 1.9 test artifacts
+	uvx --python "==$(PYTHON_INTERPRETER_CONSTRAINT)" --with 'dbt-duckdb~=1.9.0' --from 'dbt-core~=1.9.0' dbt parse --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_19
+	uvx --python "==$(PYTHON_INTERPRETER_CONSTRAINT)" --with 'dbt-duckdb~=1.9.0' --from 'dbt-core~=1.9.0' dbt docs generate --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_19
 	rm -r ./tests/fixtures/dbt_19/target || true
 	mkdir -p ./tests/fixtures/dbt_19/target
-	mv ./dbt_project/target/*.json ./tests/fixtures/dbt_19/target
-	uvx --python "==$(PYTHON_INTERPRETER_CONSTRAINT)" --with 'dbt-duckdb~=1.10.0' --from 'dbt-core~=1.10.0' dbt parse --profiles-dir ./dbt_project --project-dir ./dbt_project
-	uvx --python "==$(PYTHON_INTERPRETER_CONSTRAINT)" --with 'dbt-duckdb~=1.10.0' --from 'dbt-core~=1.10.0' dbt docs generate --profiles-dir ./dbt_project --project-dir ./dbt_project
+	mv ./dbt_project/target_19/*.json ./tests/fixtures/dbt_19/target
+	rm -r ./dbt_project/target_19
+
+build-artifacts-110: ## Build dbt 1.10 test artifacts
+	uvx --python "==$(PYTHON_INTERPRETER_CONSTRAINT)" --with 'dbt-duckdb~=1.10.0' --from 'dbt-core~=1.10.0' dbt parse --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_110
+	uvx --python "==$(PYTHON_INTERPRETER_CONSTRAINT)" --with 'dbt-duckdb~=1.10.0' --from 'dbt-core~=1.10.0' dbt docs generate --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_110
 	rm -r ./tests/fixtures/dbt_110/target || true
-	mkdir -p ./tests/fixtures/dbt_110/target
-	mv ./dbt_project/target ./tests/fixtures/dbt_110
+	mv ./dbt_project/target_110 ./tests/fixtures/dbt_110/target
+
+build-artifacts-111: ## Build dbt 1.11 test artifacts
 	# No dbt-duckdb==1.11 yet so sticking with dbt-duckdb==1.10
-	uvx --python "==$(PYTHON_INTERPRETER_CONSTRAINT)" --with 'dbt-duckdb~=1.10.0' --from 'dbt-core~=1.11.0' dbt parse --profiles-dir ./dbt_project --project-dir ./dbt_project
-	uvx --python "==$(PYTHON_INTERPRETER_CONSTRAINT)" --with 'dbt-duckdb~=1.10.0' --from 'dbt-core~=1.11.0' dbt docs generate --profiles-dir ./dbt_project --project-dir ./dbt_project
+	uvx --python "==$(PYTHON_INTERPRETER_CONSTRAINT)" --with 'dbt-duckdb~=1.10.0' --from 'dbt-core~=1.11.0' dbt parse --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_111
+	uvx --python "==$(PYTHON_INTERPRETER_CONSTRAINT)" --with 'dbt-duckdb~=1.10.0' --from 'dbt-core~=1.11.0' dbt docs generate --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_111
 	rm -r ./tests/fixtures/dbt_111/target || true
-	mkdir -p ./tests/fixtures/dbt_111/target
-	mv ./dbt_project/target ./tests/fixtures/dbt_111
-	make install
+	mv ./dbt_project/target_111 ./tests/fixtures/dbt_111/target
+
+build-artifacts-local: install ## Build local dbt test artifacts
 	uv run dbt parse --profiles-dir ./dbt_project --project-dir ./dbt_project
 	uv run dbt docs generate --profiles-dir ./dbt_project --project-dir ./dbt_project
 

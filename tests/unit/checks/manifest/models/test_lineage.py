@@ -388,6 +388,48 @@ class TestCheckModelMaxFanout:
         )
 
 
+class TestCheckModelMaxChainedViewsInvalidParam:
+    @pytest.mark.parametrize(
+        "max_chained_views",
+        [
+            pytest.param(0, id="zero"),
+            pytest.param(-1, id="negative"),
+        ],
+    )
+    def test_raises_value_error(self, max_chained_views):
+        from dbt_bouncer.testing import _run_check
+
+        with pytest.raises(ValueError, match="must be positive"):
+            _run_check(
+                "check_model_max_chained_views",
+                materializations_to_include=["ephemeral", "view"],
+                max_chained_views=max_chained_views,
+                model=_CHAINED_VIEWS_MODEL_0,
+                ctx_models=_CHAINED_VIEWS_MODELS_WITHIN_LIMIT,
+                ctx_manifest_obj={},
+            )
+
+
+class TestCheckModelMaxFanoutInvalidParam:
+    @pytest.mark.parametrize(
+        "max_downstream_models",
+        [
+            pytest.param(0, id="zero"),
+            pytest.param(-1, id="negative"),
+        ],
+    )
+    def test_raises_value_error(self, max_downstream_models):
+        from dbt_bouncer.testing import _run_check
+
+        with pytest.raises(ValueError, match="must be positive"):
+            _run_check(
+                "check_model_max_fanout",
+                max_downstream_models=max_downstream_models,
+                model={},
+                ctx_models=[{}],
+            )
+
+
 class TestCheckModelMaxUpstreamDependencies:
     @pytest.mark.parametrize(
         "model",
@@ -511,3 +553,58 @@ class TestCheckModelMaxUpstreamDependencies:
             max_upstream_sources=1,
             model=model,
         )
+
+
+class TestCheckModelMaxUpstreamDependenciesInvalidParam:
+    @pytest.mark.parametrize(
+        ("param_name", "kwargs"),
+        [
+            pytest.param(
+                "max_upstream_macros",
+                {
+                    "max_upstream_macros": 0,
+                    "max_upstream_models": 5,
+                    "max_upstream_sources": 1,
+                },
+                id="max_upstream_macros_zero",
+            ),
+            pytest.param(
+                "max_upstream_macros",
+                {
+                    "max_upstream_macros": -1,
+                    "max_upstream_models": 5,
+                    "max_upstream_sources": 1,
+                },
+                id="max_upstream_macros_negative",
+            ),
+            pytest.param(
+                "max_upstream_models",
+                {
+                    "max_upstream_macros": 5,
+                    "max_upstream_models": 0,
+                    "max_upstream_sources": 1,
+                },
+                id="max_upstream_models_zero",
+            ),
+            pytest.param(
+                "max_upstream_sources",
+                {
+                    "max_upstream_macros": 5,
+                    "max_upstream_models": 5,
+                    "max_upstream_sources": 0,
+                },
+                id="max_upstream_sources_zero",
+            ),
+        ],
+    )
+    def test_raises_value_error(self, param_name, kwargs):  # noqa: ARG002
+        from dbt_bouncer.testing import _run_check
+
+        with pytest.raises(ValueError, match="must be positive"):
+            _run_check(
+                "check_model_max_upstream_dependencies",
+                model={
+                    "depends_on": {"macros": [], "nodes": []},
+                },
+                **kwargs,
+            )

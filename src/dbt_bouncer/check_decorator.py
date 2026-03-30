@@ -181,6 +181,12 @@ def _build_check_class(fn: Callable[..., None]) -> type[BaseCheck]:
         setattr(caller_module, class_name, cls)
     else:
         # Fallback: use stack frame (e.g. when __module__ is not yet in sys.modules).
+        import logging
+
+        logging.debug(
+            f"Module {fn.__module__!r} not in sys.modules; "
+            f"injecting {class_name} via stack frame fallback."
+        )
         frame = inspect.stack()[1]
         frame.frame.f_globals[class_name] = cls
 

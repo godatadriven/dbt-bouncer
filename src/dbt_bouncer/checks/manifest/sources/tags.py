@@ -13,8 +13,10 @@ def check_source_has_tags(
 
     Parameters:
         criteria: (Literal["any", "all", "one"] | None): Whether the source must have any, all, or exactly one of the specified tags. Default: `all`.
-        source (SourceNode): The SourceNode object to check.
         tags (list[str]): List of tags to check for.
+
+    Receives:
+        source (SourceNode): The SourceNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.

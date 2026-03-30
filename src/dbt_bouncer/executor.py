@@ -37,28 +37,28 @@ class Executor:
         try:
             check["check"].execute()
             check["outcome"] = CheckOutcome.SUCCESS
-        except Exception as e:
-            if isinstance(e, DbtBouncerFailedCheckError):
-                failure_message = e.message
-            else:
-                failure_message_full = list(
-                    traceback.TracebackException.from_exception(e).format(),
-                )
-                failure_message = failure_message_full[-1].strip()
-
+        except DbtBouncerFailedCheckError as e:
+            failure_message = e.message
             if check["check"].description:
                 failure_message = f"{check['check'].description} - {failure_message}"
 
             logging.debug(f"Check {check['check_run_id']} failed: {failure_message}")
             check["outcome"] = CheckOutcome.FAILED
             check["failure_message"] = failure_message
+        except Exception as e:
+            failure_message_full = list(
+                traceback.TracebackException.from_exception(e).format(),
+            )
+            failure_message = failure_message_full[-1].strip()
+            logging.debug(
+                f"Check {check['check_run_id']} raised unexpected error:\n{''.join(failure_message_full)}"
+            )
 
-            # If a check encountered an issue, change severity to warn
-            if not isinstance(e, DbtBouncerFailedCheckError):
-                check["severity"] = CheckSeverity.WARN
-                check["failure_message"] = (
-                    f"`dbt-bouncer` encountered an error ({failure_message}), run with `-v` to see more details or report an issue at https://github.com/godatadriven/dbt-bouncer/issues."
-                )
+            check["outcome"] = CheckOutcome.FAILED
+            check["severity"] = CheckSeverity.WARN
+            check["failure_message"] = (
+                f"`dbt-bouncer` encountered an error ({failure_message}), run with `-v` to see more details or report an issue at https://github.com/godatadriven/dbt-bouncer/issues."
+            )
         return check
 
     def _execute_batch(self, batch: list[CheckToRun]) -> int:

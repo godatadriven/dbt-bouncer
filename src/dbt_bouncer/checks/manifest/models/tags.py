@@ -10,8 +10,10 @@ def check_model_has_tags(model, *, criteria: str = "all", tags: list[str]):
 
     Parameters:
         criteria: (Literal["any", "all", "one"] | None): Whether the model must have any, all, or exactly one of the specified tags. Default: `any`.
-        model (ModelNode): The ModelNode object to check.
         tags (list[str]): List of tags to check for.
+
+    Receives:
+        model (ModelNode): The ModelNode object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.

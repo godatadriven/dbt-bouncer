@@ -13,8 +13,24 @@ jobs:
     pypi-pause:
         runs-on: ubuntu-24.04
         steps:
-            # PyPi appears to be "slow" to register new packages, adding manual delay to account for this
-            - run: sleep 360
+            - name: Wait for PyPI package availability
+              run: |
+                VERSION=$(echo "${{ github.ref }}" | cut -d "/" -f3 | sed 's/^v//')
+                echo "Waiting for dbt-bouncer==$VERSION on PyPI..."
+                TIMEOUT=600
+                INTERVAL=30
+                ELAPSED=0
+                while [ $ELAPSED -lt $TIMEOUT ]; do
+                  if curl -sf -A "dbt-bouncer-release-pipeline" "https://pypi.org/pypi/dbt-bouncer/$VERSION/json" > /dev/null 2>&1; then
+                    echo "Package dbt-bouncer==$VERSION is available on PyPI."
+                    exit 0
+                  fi
+                  echo "Not yet available, retrying in ${INTERVAL}s... (${ELAPSED}s elapsed)"
+                  sleep $INTERVAL
+                  ELAPSED=$((ELAPSED + INTERVAL))
+                done
+                echo "Timed out waiting for dbt-bouncer==$VERSION on PyPI after ${TIMEOUT}s."
+                exit 1
 
     docker-tests:
         needs: [pypi-pause]
