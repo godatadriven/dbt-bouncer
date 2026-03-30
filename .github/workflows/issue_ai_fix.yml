@@ -42,7 +42,7 @@ jobs:
           trigger_phrase: /ai-fix
           claude_args: >-
             --model claude-opus-4-6
-            --allowedTools 'Read,Glob,Grep,Bash(git log*),Bash(git show*)'
+            --allowedTools 'Read,Glob,Grep,Write,Bash(git log*),Bash(git show*)'
           prompt: |-
             You are a senior Python engineer analysing an issue for dbt-bouncer, a tool that
             enforces conventions for dbt projects by running validation checks against dbt
@@ -50,9 +50,6 @@ jobs:
 
             Read the issue carefully. Explore the codebase to understand the relevant files and
             architecture. Then propose a concrete implementation plan.
-
-            IMPORTANT: Start your response with the exact HTML comment `<!-- ai-issue-plan-marker -->`
-            on its own line. This marker is required for the /ai-approve phase to detect your plan.
 
             Your plan MUST include:
             1. **Root cause** (for bugs) or **Design** (for features) — what needs to change and why
@@ -66,6 +63,46 @@ jobs:
 
             End your response with:
             > Post `/ai-approve` to proceed with implementation.
+
+            ## Output Format
+            You MUST write your analysis to the file `/tmp/ai-issue-plan.md` using the Write tool.
+            The file must start with the exact string `<!-- ai-issue-plan-marker -->`.
+            Write the complete markdown to this file — do not output it to the conversation.
+
+      - name: Post or update plan comment
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.PAT_GITHUB }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |-
+          COMMENT_FILE="/tmp/ai-issue-plan.md"
+
+          # --- Generate fallback if Claude didn't write the file ---
+          if [ ! -s "$COMMENT_FILE" ] || ! grep -q "ai-issue-plan-marker" "$COMMENT_FILE"; then
+            {
+              echo "<!-- ai-issue-plan-marker -->"
+              echo "## AI Issue Analysis"
+              echo ""
+              echo "> Auto-generated fallback — Claude analysis was not available."
+              echo "> Please review the [workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})."
+            } > "$COMMENT_FILE"
+          fi
+
+          # --- Upsert: update existing comment or create new one ---
+          MARKER="ai-issue-plan-marker"
+          COMMENT_IDS=$(gh api "repos/${GITHUB_REPOSITORY}/issues/${ISSUE_NUMBER}/comments" \
+            --jq "[.[] | select(.body | contains(\"${MARKER}\")) | .id]")
+          FIRST_ID=$(echo "$COMMENT_IDS" | jq -r 'first // empty')
+          REST_IDS=$(echo "$COMMENT_IDS" | jq -r '.[1:] | .[]')
+          if [ -n "$FIRST_ID" ]; then
+            gh api -X PATCH "repos/${GITHUB_REPOSITORY}/issues/comments/${FIRST_ID}" \
+              -f body="$(cat "$COMMENT_FILE")"
+            for CID in $REST_IDS; do
+              gh api -X DELETE "repos/${GITHUB_REPOSITORY}/issues/comments/${CID}" || true
+            done
+          else
+            gh issue comment "$ISSUE_NUMBER" --body-file "$COMMENT_FILE"
+          fi
 
   implement:
     if: >-
