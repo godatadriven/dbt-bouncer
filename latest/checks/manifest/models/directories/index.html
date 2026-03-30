@@ -2431,37 +2431,28 @@
 
       <p>Model properties files must follow the guidance provided by dbt <a href="https://docs.getdbt.com/best-practices/how-we-structure/1-guide-overview">here</a>.</p>
 
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>model</code>
-            </td>
-            <td>
-                  <code><span title="ModelNode">ModelNode</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The ModelNode object to check.</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
+<p><strong>Receives at execution time:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>model</code>        <td>
+              <code><span title="ModelNode">ModelNode</span></code>
+        </td>
+        <td>
+          <div class="doc-md-description">
+            <p>The ModelNode object to check.</p>
+          </div>
+        </td>
+      </tr>
+  </tbody>
+</table>
 <p><span class="doc-section-title">Other Parameters (passed via config file):</span></p>
 <table>
     <thead>
@@ -2596,7 +2587,7 @@
 </span><span id="__span-0-103"><a id="__codelineno-0-103" name="__codelineno-0-103"></a><span class="k">def</span><span class="w"> </span><span class="nf">check_model_property_file_location</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
 </span><span id="__span-0-104"><a id="__codelineno-0-104" name="__codelineno-0-104"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Model properties files must follow the guidance provided by dbt [here](https://docs.getdbt.com/best-practices/how-we-structure/1-guide-overview).</span>
 </span><span id="__span-0-105"><a id="__codelineno-0-105" name="__codelineno-0-105"></a>
-</span><span id="__span-0-106"><a id="__codelineno-0-106" name="__codelineno-0-106"></a><span class="sd">    Parameters:</span>
+</span><span id="__span-0-106"><a id="__codelineno-0-106" name="__codelineno-0-106"></a><span class="sd">    Receives:</span>
 </span><span id="__span-0-107"><a id="__codelineno-0-107" name="__codelineno-0-107"></a><span class="sd">        model (ModelNode): The ModelNode object to check.</span>
 </span><span id="__span-0-108"><a id="__codelineno-0-108" name="__codelineno-0-108"></a>
 </span><span id="__span-0-109"><a id="__codelineno-0-109" name="__codelineno-0-109"></a><span class="sd">    Other Parameters:</span>
