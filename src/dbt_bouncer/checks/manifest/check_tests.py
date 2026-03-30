@@ -9,6 +9,8 @@ def check_test_has_meta_keys(test, *, keys: NestedDict):
 
     Parameters:
         keys (NestedDict): A list (that may contain sub-lists) of required keys.
+
+    Receives:
         test (TestNode): The TestNode object to check.
 
     Other Parameters:

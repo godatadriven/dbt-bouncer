@@ -55,10 +55,7 @@ def get_check_types(
 
     return list[  # type: ignore[misc, return-value]
         Annotated[
-            Annotated[
-                reduce(operator.or_, filtered_classes),  # type: ignore
-                Field(discriminator="name"),
-            ],
+            reduce(operator.or_, filtered_classes),  # type: ignore
             Field(discriminator="name"),
         ]
     ]

@@ -111,6 +111,14 @@ def check_model_documentation_coverage(
         ```
 
     """
+    if (
+        min_model_documentation_coverage_pct < 0
+        or min_model_documentation_coverage_pct > 100
+    ):
+        raise ValueError(
+            f"`min_model_documentation_coverage_pct` must be between 0 and 100, got {min_model_documentation_coverage_pct}."
+        )
+
     num_models = len(ctx.models)
     models_with_description = []
     for model in ctx.models:

@@ -11,6 +11,8 @@ def check_model_has_meta_keys(model, *, keys: NestedDict):
 
     Parameters:
         keys (NestedDict): A list (that may contain sub-lists) of required keys.
+
+    Receives:
         model (ModelNode): The ModelNode object to check.
 
     Other Parameters:

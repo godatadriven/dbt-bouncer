@@ -68,7 +68,7 @@ def check_model_depends_on_macros(
 def check_model_depends_on_multiple_sources(model):
     """Models cannot reference more than one source.
 
-    Parameters:
+    Receives:
         model (ModelNode): The ModelNode object to check.
 
     Other Parameters:
@@ -204,6 +204,11 @@ def check_model_max_chained_views(
         ```
 
     """
+    if max_chained_views <= 0:
+        raise ValueError(
+            f"`max_chained_views` must be positive, got {max_chained_views}."
+        )
+
     manifest_obj = ctx.manifest_obj
 
     models_by_id = (
@@ -300,6 +305,11 @@ def check_model_max_fanout(model, ctx, *, max_downstream_models: int = 3):
         ```
 
     """
+    if max_downstream_models <= 0:
+        raise ValueError(
+            f"`max_downstream_models` must be positive, got {max_downstream_models}."
+        )
+
     num_downstream_models = sum(
         model.unique_id in (getattr(m.depends_on, "nodes", []) if m.depends_on else [])
         for m in ctx.models
@@ -344,6 +354,19 @@ def check_model_max_upstream_dependencies(
         ```
 
     """
+    if max_upstream_macros <= 0:
+        raise ValueError(
+            f"`max_upstream_macros` must be positive, got {max_upstream_macros}."
+        )
+    if max_upstream_models <= 0:
+        raise ValueError(
+            f"`max_upstream_models` must be positive, got {max_upstream_models}."
+        )
+    if max_upstream_sources <= 0:
+        raise ValueError(
+            f"`max_upstream_sources` must be positive, got {max_upstream_sources}."
+        )
+
     depends_on = model.depends_on
     if depends_on:
         num_upstream_macros = len(list(getattr(depends_on, "macros", []) or []))

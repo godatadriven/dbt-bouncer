@@ -7,7 +7,7 @@ from dbt_bouncer.check_decorator import check, fail
 def check_source_loader_populated(source):
     """Sources must have a populated loader.
 
-    Parameters:
+    Receives:
         source (SourceNode): The SourceNode object to check.
 
     Other Parameters:

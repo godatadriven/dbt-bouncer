@@ -36,6 +36,11 @@ def check_unit_test_coverage(
         ```
 
     """
+    if min_unit_test_coverage_pct < 0 or min_unit_test_coverage_pct > 100:
+        raise ValueError(
+            f"`min_unit_test_coverage_pct` must be between 0 and 100, got {min_unit_test_coverage_pct}."
+        )
+
     manifest_obj = ctx.manifest_obj
     if get_package_version_number(
         manifest_obj.manifest.metadata.dbt_version or "0.0.0"

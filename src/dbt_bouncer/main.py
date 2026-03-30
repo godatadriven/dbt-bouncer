@@ -119,8 +119,7 @@ def run_bouncer(
         int: Exit code (0 for success, 1 for failure).
 
     Raises:
-        AssertionError: If config_file_source is None.
-        RuntimeError: If other runtime errors occur.
+        RuntimeError: If runtime errors occur.
 
     """
     configure_console_logging(verbosity)
@@ -155,12 +154,9 @@ def run_bouncer(
         if config_file_source is None:
             config_file_source = "COMMANDLINE"
 
-    if config_file_source is None:
-        raise AssertionError("config_file_source cannot be None")
-
     config_file_path = get_config_file_path(
         config_file=config_file,
-        config_file_source=config_file_source,
+        config_file_source=config_file_source,  # ty: ignore[invalid-argument-type]
     )
     config_file_contents = load_config_file_contents(
         config_file_path, allow_default_config_file_creation=True

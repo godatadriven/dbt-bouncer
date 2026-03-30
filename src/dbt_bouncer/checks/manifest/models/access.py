@@ -197,6 +197,19 @@ def check_model_number_of_grants(
         ```
 
     """
+    if min_number_of_privileges < 0:
+        raise ValueError(
+            f"`min_number_of_privileges` must be non-negative, got {min_number_of_privileges}."
+        )
+    if max_number_of_privileges <= 0:
+        raise ValueError(
+            f"`max_number_of_privileges` must be positive, got {max_number_of_privileges}."
+        )
+    if min_number_of_privileges > max_number_of_privileges:
+        raise ValueError(
+            f"`min_number_of_privileges` ({min_number_of_privileges}) must not exceed `max_number_of_privileges` ({max_number_of_privileges})."
+        )
+
     config = model.config
     grants = config.grants if config else {}
     num_grants = len((grants or {}).keys())

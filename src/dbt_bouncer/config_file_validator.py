@@ -17,7 +17,7 @@ from dbt_bouncer.utils import compile_pattern, get_check_registry, load_config_f
 if TYPE_CHECKING:
     from dbt_bouncer.config_file_parser import DbtBouncerConfBase
 
-_rebuilt_classes: set[int] = set()
+_rebuilt_classes: set[str] = set()
 
 DEFAULT_DBT_BOUNCER_CONFIG = """manifest_checks:
   - name: check_model_directories
@@ -350,9 +350,10 @@ def validate_conf(
             custom_checks_dir=custom_checks_dir,
             check_categories=frozenset(check_categories),
         )
-    if id(DbtBouncerConf) not in _rebuilt_classes:
+    class_key = f"{DbtBouncerConf.__module__}.{DbtBouncerConf.__qualname__}"
+    if class_key not in _rebuilt_classes:
         DbtBouncerConf.model_rebuild(_types_namespace=_get_stub_namespace())
-        _rebuilt_classes.add(id(DbtBouncerConf))
+        _rebuilt_classes.add(class_key)
 
     try:
         return DbtBouncerConf(**config_file_contents)
