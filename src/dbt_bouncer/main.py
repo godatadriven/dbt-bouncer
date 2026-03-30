@@ -154,7 +154,12 @@ def run_bouncer(
         if config_file_source is None:
             config_file_source = "COMMANDLINE"
 
-    assert config_file_source is not None  # nosec B101
+    if (
+        config_file_source is None
+    ):  # pragma: no cover — unreachable; narrows type for the checker.
+        raise RuntimeError(
+            "config_file_source was not set by the config-file lookup logic."
+        )
     config_file_path = get_config_file_path(
         config_file=config_file,
         config_file_source=config_file_source,

@@ -78,9 +78,11 @@ def check_model_contract_enforced_for_public_model(model):
 def check_model_grant_privilege(model, *, privilege_pattern: str):
     """Model can have grant privileges that match the specified pattern.
 
+    Parameters:
+        privilege_pattern (str): Regex pattern to match the privilege.
+
     Receives:
         model (ModelNode): The ModelNode object to check.
-        privilege_pattern (str): Regex pattern to match the privilege.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -175,9 +177,11 @@ def check_model_number_of_grants(
 ):
     """Model can have the specified number of privileges.
 
-    Receives:
+    Parameters:
         max_number_of_privileges (int | None): Maximum number of privileges, inclusive.
         min_number_of_privileges (int | None): Minimum number of privileges, inclusive.
+
+    Receives:
         model (ModelNode): The ModelNode object to check.
 
     Other Parameters:

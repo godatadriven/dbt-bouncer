@@ -395,7 +395,7 @@ def _compute_cache_fingerprint(
         str: An 8-character hex digest suitable for use in a cache filename.
 
     """
-    h = hashlib.md5(version_str.encode())  # noqa: S324  # nosec B324
+    h = hashlib.sha256(version_str.encode())
 
     # Custom checks file paths and modification times
     if custom_checks_dir is not None and custom_checks_dir.exists():
