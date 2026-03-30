@@ -231,6 +231,25 @@ class TestCheckPythonModelCodeDoesNotContainRegexpPattern:
         )
 
 
+class TestCheckModelMaxNumberOfLinesInvalidParam:
+    @pytest.mark.parametrize(
+        "max_number_of_lines",
+        [
+            pytest.param(0, id="zero"),
+            pytest.param(-1, id="negative"),
+        ],
+    )
+    def test_raises_value_error(self, max_number_of_lines):
+        from dbt_bouncer.testing import _run_check
+
+        with pytest.raises(ValueError, match="must be positive"):
+            _run_check(
+                "check_model_max_number_of_lines",
+                max_number_of_lines=max_number_of_lines,
+                model={"raw_code": "select 1"},
+            )
+
+
 class TestCheckPythonModelMaxNumberOfLines:
     def test_pass(self):
         check_passes(

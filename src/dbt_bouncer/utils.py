@@ -387,7 +387,8 @@ def _compute_cache_fingerprint(
 
     The hash covers:
     - The dbt-bouncer version string.
-    - Sorted relative paths of ``.py`` files in *custom_checks_dir* (if provided).
+    - Sorted relative paths **and modification times** of ``.py`` files in
+      *custom_checks_dir* (if provided).
     - Sorted entry point names from the ``dbt_bouncer.checks`` group.
 
     Returns:
@@ -396,15 +397,14 @@ def _compute_cache_fingerprint(
     """
     h = hashlib.md5(version_str.encode())  # noqa: S324  # nosec B324
 
-    # Custom checks file paths
+    # Custom checks file paths and modification times
     if custom_checks_dir is not None and custom_checks_dir.exists():
         custom_py_files = sorted(
-            str(f.relative_to(custom_checks_dir))
-            for f in custom_checks_dir.glob("**/*.py")
-            if f.is_file()
+            f for f in custom_checks_dir.glob("**/*.py") if f.is_file()
         )
-        for p in custom_py_files:
-            h.update(p.encode())
+        for f in custom_py_files:
+            h.update(str(f.relative_to(custom_checks_dir)).encode())
+            h.update(str(f.stat().st_mtime_ns).encode())
 
     # Entry point names
     ep_names = sorted(ep.name for ep in entry_points(group=_ENTRY_POINT_GROUP))

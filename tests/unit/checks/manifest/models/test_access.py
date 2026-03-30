@@ -187,3 +187,23 @@ class TestCheckModelNumberOfGrants:
             min_number_of_privileges=min_n,
             model=model_override,
         )
+
+    @pytest.mark.parametrize(
+        ("max_n", "min_n", "match_pattern"),
+        [
+            pytest.param(1, -1, "must be non-negative", id="min_negative"),
+            pytest.param(0, 0, "must be positive", id="max_zero"),
+            pytest.param(1, -1, "must be non-negative", id="min_negative_valid_max"),
+            pytest.param(1, 2, "must not exceed", id="min_exceeds_max"),
+        ],
+    )
+    def test_raises_value_error_for_invalid_params(self, max_n, min_n, match_pattern):
+        from dbt_bouncer.testing import _run_check
+
+        with pytest.raises(ValueError, match=match_pattern):
+            _run_check(
+                "check_model_number_of_grants",
+                max_number_of_privileges=max_n,
+                min_number_of_privileges=min_n,
+                model={"config": {"grants": {"select": ["user1"]}}},
+            )

@@ -154,9 +154,10 @@ def run_bouncer(
         if config_file_source is None:
             config_file_source = "COMMANDLINE"
 
+    assert config_file_source is not None  # nosec B101
     config_file_path = get_config_file_path(
         config_file=config_file,
-        config_file_source=config_file_source,  # ty: ignore[invalid-argument-type]
+        config_file_source=config_file_source,
     )
     config_file_contents = load_config_file_contents(
         config_file_path, allow_default_config_file_creation=True
