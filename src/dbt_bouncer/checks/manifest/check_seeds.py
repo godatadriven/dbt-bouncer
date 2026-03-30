@@ -194,7 +194,7 @@ def check_seed_names(seed, *, seed_name_pattern: str):
         manifest_checks:
             - name: check_seed_names
               include: ^seeds
-              model_name_pattern: ^raw_
+              seed_name_pattern: ^raw_
         ```
 
     """
