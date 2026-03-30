@@ -48,6 +48,10 @@ jobs:
             enforces conventions for dbt projects by running validation checks against dbt
             artifacts.
 
+            ## Issue #${{ github.event.issue.number }}: ${{ github.event.issue.title }}
+
+            ${{ github.event.issue.body }}
+
             Read the issue carefully. Explore the codebase to understand the relevant files and
             architecture. Then propose a concrete implementation plan.
 
