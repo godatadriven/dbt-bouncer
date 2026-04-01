@@ -88,9 +88,12 @@
                   with:
                     python-version: ${{ steps.python-version.outputs.PYTHON_VERSION }}
 
-                - name: Install latest released dbt-fusion
-                  run: uv run pip install dbt-fusion -U
+                - name: Install dbt-fusion
+                  run: |
+                    export SHELL=/bin/bash
+                    curl -fsSL https://public.cdn.getdbt.com/fs/install/install.sh | sh -s -- --update
+                    echo "$HOME/.local/bin" >> $GITHUB_PATH
 
                 - name: Regenerate dbt artifacts and run `dbt-bouncer`
                   run: |
-                    (r=3;while ! make build-and-run-dbt-bouncer ; do ((--r))||exit;done)
+                    (r=3;while ! make build-and-run-dbt-bouncer-fusion ; do ((--r))||exit;done)

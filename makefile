@@ -12,6 +12,11 @@ build-and-run-dbt-bouncer: ## Run dbt deps, build, docs generate and run dbt-bou
 	uv run dbt docs generate
 	uv run dbt-bouncer --config-file ./dbt-bouncer-example.yml
 
+build-and-run-dbt-bouncer-fusion: ## Run dbt deps, parse with dbt Fusion and run manifest checks via dbt-bouncer
+	dbt deps
+	dbt parse
+	uv run dbt-bouncer --config-file ./dbt-bouncer-fusion-probe.yml
+
 # Each version-specific target uses --target-path to write to an isolated directory.
 # The version builds (110, 111) can run in parallel: make -j3 build-artifacts
 # Note: parallel execution may cause conflicts if dbt acquires project-level locks
