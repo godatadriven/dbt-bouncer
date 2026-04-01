@@ -13,18 +13,12 @@ build-and-run-dbt-bouncer: ## Run dbt deps, build, docs generate and run dbt-bou
 	uv run dbt-bouncer --config-file ./dbt-bouncer-example.yml
 
 # Each version-specific target uses --target-path to write to an isolated directory.
-# The version builds (19, 110, 111) can run in parallel: make -j4 build-artifacts
+# The version builds (110, 111) can run in parallel: make -j3 build-artifacts
 # Note: parallel execution may cause conflicts if dbt acquires project-level locks
 # in ./dbt_project. If that happens, run without -j.
-build-artifacts: build-artifacts-19 build-artifacts-110 build-artifacts-111 build-artifacts-local ## Build dbt artifacts for testing
-
-build-artifacts-19: ## Build dbt 1.9 test artifacts
-	uvx --python "==$(PYTHON_INTERPRETER_CONSTRAINT)" --with 'dbt-duckdb~=1.9.0' --from 'dbt-core~=1.9.0' dbt parse --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_19
-	uvx --python "==$(PYTHON_INTERPRETER_CONSTRAINT)" --with 'dbt-duckdb~=1.9.0' --from 'dbt-core~=1.9.0' dbt docs generate --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_19
-	rm -r ./tests/fixtures/dbt_19/target || true
-	mkdir -p ./tests/fixtures/dbt_19/target
-	mv ./dbt_project/target_19/*.json ./tests/fixtures/dbt_19/target
-	rm -r ./dbt_project/target_19
+# dbt 1.9 fixtures are frozen: the arguments: migration applied by dbt-autofix is
+# incompatible with dbt-core 1.9 (matching the pattern for dbt 1.7/1.8).
+build-artifacts: build-artifacts-110 build-artifacts-111 build-artifacts-local ## Build dbt artifacts for testing
 
 build-artifacts-110: ## Build dbt 1.10 test artifacts
 	uvx --python "==$(PYTHON_INTERPRETER_CONSTRAINT)" --with 'dbt-duckdb~=1.10.0' --from 'dbt-core~=1.10.0' dbt parse --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_110

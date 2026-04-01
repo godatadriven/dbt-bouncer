@@ -9,7 +9,7 @@ exposures:
       name: Anna Anderson
       email: anna.anderson@example.com
 
-  - name: Pulse queries
+  - name: pulse_queries
     type: notebook
     depends_on:
       - ref('customers')

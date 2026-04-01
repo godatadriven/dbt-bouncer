@@ -14,4 +14,5 @@ models:
       - name: payment_method
         tests:
           - accepted_values:
-              values: ['credit_card', 'coupon', 'bank_transfer', 'gift_card']
+              arguments:
+                values: ['credit_card', 'coupon', 'bank_transfer', 'gift_card']

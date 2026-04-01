@@ -12,28 +12,30 @@ sources:
     tables:
       - name: source_1
         description: This is the first source that doesn't exist.
-        meta:
-          contact:
-            email: anna@email.com
-            name:
-              first: Anna
-              last: Anderson
-            slack: |
-              @anna
-          maturity: high
-          owner: Anna
-        tags:
-          - example_tag
+        config:
+          tags:
+            - example_tag
+          meta:
+            contact:
+              email: anna@email.com
+              name:
+                first: Anna
+                last: Anderson
+              slack: |
+                @anna
+            maturity: high
+            owner: Anna
       - name: source_2
         description: This is the second source that doesn't exist.
-        meta:
-          contact:
-            email: annabelle@email.com
-            slack: |
-              @therealanna
-          owner: Annabelle
-        tags:
-          - example_tag
+        config:
+          tags:
+            - example_tag
+          meta:
+            contact:
+              email: annabelle@email.com
+              slack: |
+                @therealanna
+            owner: Annabelle
       - name: Non_Conforming_Name
         config:
           meta:
