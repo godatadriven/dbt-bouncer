@@ -13,9 +13,9 @@ sources:
       - name: customers
         description: This is actually a seed but we are abusing it so we have a realistic source we can use for development.
         config:
+          external_location: "read_csv('./dbt_project/seeds/raw_customers.csv')"
+          formatter: oldstyle
           meta:
-            external_location: "read_csv('./dbt_project/seeds/raw_customers.csv')"
-            formatter: oldstyle
             contact:
               email: chris@email.com
               slack: |
