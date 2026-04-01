@@ -3,6 +3,26 @@ version: 2
 snapshots:
   - name: snapshot_orders
     description: Snapshot of orders for tracking changes over time
+    relation: ref('raw_orders')
+    config:
+      database: "{{ 'dbt' if target.type == 'duckdb' else 'padraic-slattery-sndbx-o' }}"
+      schema: dbt_pslattery
+      strategy: timestamp
+      tags:
+        - payment
+      unique_key: id
+      updated_at: order_date
 
   - name: snapshot_orders_multiple_unique_keys
     description: Snapshot of orders using multiple unique keys for tracking changes over time
+    relation: ref('raw_orders')
+    config:
+      database: "{{ 'dbt' if target.type == 'duckdb' else 'padraic-slattery-sndbx-o' }}"
+      schema: dbt_pslattery
+      strategy: timestamp
+      tags:
+        - payment
+      unique_key:
+        - id
+        - order_date
+      updated_at: order_date
