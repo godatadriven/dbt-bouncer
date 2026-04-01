@@ -20,7 +20,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Download PR Event
-        uses: dawidd6/action-download-artifact@v6
+        uses: dawidd6/action-download-artifact@v19
         with:
           name: ${{ env.PR_EVENT }}
           run_id: ${{ github.event.workflow_run.id }}
