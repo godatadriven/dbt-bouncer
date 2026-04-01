@@ -1,6 +1,6 @@
 {% snapshot snapshot_orders_multiple_unique_keys %}
 
-{{
+    {{
         config(
             target_database=(
                 "dbt" if target.type == "duckdb" else "padraic-slattery-sndbx-o"
@@ -13,5 +13,6 @@
         )
     }}
 
-select *
-from {{ ref("raw_orders") }}{% endsnapshot %}
+    select *
+    from {{ ref("raw_orders") }}
+{% endsnapshot %}

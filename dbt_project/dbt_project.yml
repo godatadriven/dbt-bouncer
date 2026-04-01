@@ -10,8 +10,6 @@ test-paths: ["tests"]
 seed-paths: ["seeds"]
 macro-paths: ["macros"]
 snapshot-paths: ["snapshots"]
-
-target-path: "target"
 clean-targets:
   - "target"
   - "dbt_packages"
@@ -26,18 +24,20 @@ tests:
 models:
   dbt_bouncer_test_project:
     intermediate:
-      access: protected
-      schema: intermediate
+      +access: protected
+      +schema: intermediate
     marts:
-      access: public
-      materialized: table
-      schema: marts
+      +access: public
+      +materialized: table
+      +schema: marts
     staging:
-      access: protected
+      +access: protected
       crm:
-        schema: stg_crm
-        tags:
-            - crm
+        +schema: stg_crm
+        +tags:
+          - crm
       payments:
-        schema: stg_payments
+        +schema: stg_payments
   internal_package:
+flags:
+  require_generic_test_arguments_property: true

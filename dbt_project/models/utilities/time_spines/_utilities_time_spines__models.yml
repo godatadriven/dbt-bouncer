@@ -1,8 +1,6 @@
 models:
   - name: metricflow_time_spine
     description: Mandatory model for our semantic models.
-    meta:
-      maturity: experimental
     time_spine:
       standard_granularity_column: date_day
     columns:
@@ -11,3 +9,6 @@ models:
         tests:
           - not_null
           - unique
+    config:
+      meta:
+        maturity: experimental
