@@ -39,15 +39,12 @@ dbt-bouncer --config-file <PATH_TO_CONFIG_FILE> -v
 ```
 
 ```shell
-Running dbt-bouncer (X.X.X)...
-config_file=PosixPath('dbt-bouncer-example.yml')
-config_file_source='COMMANDLINE'
-Config file passed via command line: dbt-bouncer-example.yml
-Loading config from /home/user/dbt-bouncer-example.yml...
-Loading config from dbt-bouncer-example.yml...
-Loaded config from dbt-bouncer-example.yml...
-conf={'dbt_artifacts_dir': 'dbt_project/target', 'catalog_checks': [{'name': 'check_column_name_complies_to_column_type', 'column_name_pattern': '^is_.*', 'exclude': '^staging', 'types': ['BOOLEAN']}]}
-Validating conf...
+INFO: Running dbt-bouncer (0.0.0)...
+DEBUG: config_file=PosixPath('dbt-bouncer-example.yml')
+DEBUG: config_file_source='COMMANDLINE'
+DEBUG: Config file passed via command line: dbt-bouncer-example.yml
+DEBUG: Loading config from /home/user/dbt-bouncer/dbt-bouncer-example.yml...
+INFO: Loaded config from dbt-bouncer-example.yml...
 ```
 
 When parsing artifacts, `dbt-bouncer` displays a summary table of discovered resources:
@@ -74,7 +71,8 @@ When parsing artifacts, `dbt-bouncer` displays a summary table of discovered res
 ```
 
 !!! tip "Trade-offs"
-    **Best for:** quick one-off validation, local development, scripting.
+    **Best for:** manual runs, quick one-off validation, local development, scripting.
+
     **Watch out:** manual — easy to forget before committing or opening a PR.
 
 ---
@@ -88,7 +86,8 @@ uvx dbt-bouncer --config-file <PATH_TO_CONFIG_FILE>
 ```
 
 !!! tip "Trade-offs"
-    **Best for:** CI environments or machines without a persistent Python install.
+    **Best for:** environments or machines without a persistent Python install.
+
     **Watch out:** slightly slower than a local install due to ephemeral environment creation.
 
 ---
@@ -106,7 +105,7 @@ repos:
         args: ["--config-file", "<PATH_TO_CONFIG_FILE>"] # Optional
 ```
 
-Alternatively, use a local hook:
+Alternatively, use a local hook (requires `dbt-bouncer` to be available in your environment):
 
 ```yaml
 - repo: local
@@ -122,8 +121,9 @@ Alternatively, use a local hook:
 For full setup details see the [FAQ](./faq.md#how-to-set-up-dbt-bouncer-with-prekpre-commit).
 
 !!! tip "Trade-offs"
-    **Best for:** catching violations immediately during development, before code reaches CI.
-    **Watch out:** dbt artifacts must already exist — you need to run `dbt parse` (or another dbt command) before the hook can execute. This adds latency to every commit. The hook can also be bypassed with `git commit --no-verify`.
+    **Best for:** catching violations immediately during development, before code reaches is pushed to remote.
+
+    **Watch out:** dbt artifacts must already exist — you need to run `dbt parse` (or another dbt command), possibly in the prior hook, before this hook can execute. This adds latency to every commit. The hook can also be bypassed with `git commit --no-verify`.
 
 ---
 
@@ -168,6 +168,7 @@ We recommend pinning both a major and minor version number.
 
 !!! tip "Trade-offs"
     **Best for:** enforcing conventions on every PR regardless of local developer setup — cannot be bypassed by individual contributors. Supports automated PR comments with violation details.
+
     **Watch out:** slower feedback loop than local hooks; consumes CI minutes for every push.
 
 ---
@@ -185,6 +186,7 @@ docker run --rm \
 
 !!! tip "Trade-offs"
     **Best for:** fully isolated, reproducible runs; no Python installation required on the host.
+
     **Watch out:** requires Docker; slightly heavier startup than a native install.
 
 ---
@@ -206,4 +208,5 @@ exit_code = run_bouncer(
 
 !!! tip "Trade-offs"
     **Best for:** embedding `dbt-bouncer` into existing Python tooling, test suites, or custom orchestration.
+
     **Watch out:** requires Python knowledge; not suitable for teams without Python experience.
