@@ -74,6 +74,8 @@ nav:
       - Run Results: checks/run_results/check_run_results.md
   - CLI: cli.md
   - FAQ: faq.md
+  - Migration:
+    - v3: migration/v3.md
   - Contributing: CONTRIBUTING.md
   - Users: users.md
 
