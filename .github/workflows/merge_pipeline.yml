@@ -102,7 +102,7 @@
                 python-version: ${{ steps.python-version.outputs.PYTHON_VERSION }}
 
             - name: Set up Docker Buildx
-              uses: docker/setup-buildx-action@v3
+              uses: docker/setup-buildx-action@v4
 
             - name: Modify Dockerfile to use local dbt-bouncer version
               run: |

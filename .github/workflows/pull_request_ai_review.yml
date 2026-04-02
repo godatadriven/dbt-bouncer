@@ -20,7 +20,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Download PR Event
-        uses: dawidd6/action-download-artifact@v6
+        uses: dawidd6/action-download-artifact@v19
         with:
           name: ${{ env.PR_EVENT }}
           run_id: ${{ github.event.workflow_run.id }}
@@ -47,6 +47,7 @@ jobs:
       - name: Analyse PR
         uses: anthropics/claude-code-action@v1
         with:
+          allowed_bots: "dependabot"
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ secrets.PAT_GITHUB }}
           claude_args: >-
