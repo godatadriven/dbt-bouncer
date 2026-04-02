@@ -11,6 +11,10 @@
         <link rel="canonical" href="https://godatadriven.github.io/dbt-bouncer/latest/migration/v3/">
       
       
+        <link rel="prev" href="../../faq/">
+      
+      
+        <link rel="next" href="../../CONTRIBUTING/">
       
       
         
@@ -21,7 +25,7 @@
     
     
       
-        <title>Migrating to dbt-bouncer v3.0.0 - dbt-bouncer</title>
+        <title>v3 - dbt-bouncer</title>
       
     
     
@@ -127,7 +131,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Migrating to dbt-bouncer v3.0.0
+              v3
             
           </span>
         </div>
@@ -350,6 +354,30 @@
 
       </a>
     </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Migration
+
+        </a>
+      </li>
+    
   
 
       
@@ -639,6 +667,445 @@
   
 
       </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Migration
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Migration
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    v3
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    v3
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#who-needs-to-do-what" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Who needs to do what
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-changes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration changes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration changes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#your-config-files-still-work" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Your config files still work
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#config-validation-is-now-strict" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Config validation is now strict
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#new-dbt-bouncertoml-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        New: dbt-bouncer.toml support
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cli-changes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CLI changes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="CLI changes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#new-run-subcommand" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        New run subcommand
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#new-cli-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        New CLI features
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#click-typer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Click → Typer
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dependency-changes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dependency changes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Dependency changes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#removed-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Removed dependencies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#new-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        New dependencies
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#python-api-changes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Python API changes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Python API changes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#import-path-changes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Import path changes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#new-exports" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        New exports
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#module-structure-changes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Module structure changes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#migrating-custom-checks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Migrating custom checks
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Migrating custom checks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#v2x-class-based-checks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v2.x: Class-based checks
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#v300-decorator-based-checks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v3.0.0: Decorator-based checks
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#plugin-registration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Plugin registration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#testing-custom-checks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Testing custom checks
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#new-checks-in-v300" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        New checks in v3.0.0
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#new-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        New features
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getting-help" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Getting help
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
