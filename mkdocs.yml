@@ -16,7 +16,6 @@ extra_css:
 
 markdown_extensions:
   - admonition
-  - mkdocs-click
   - pymdownx.highlight:
       anchor_linenums: true
       line_spans: __span
