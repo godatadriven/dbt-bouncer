@@ -222,6 +222,52 @@ Specifies the location of the YAML configuration file to validate.
 dbt-bouncer validate --config-file config/checks.yml
 ```
 
+## init
+
+The `init` subcommand creates a `dbt-bouncer.yml` configuration file interactively:
+
+```bash
+dbt-bouncer init
+```
+
+It asks a series of questions and writes a starter configuration file based on your answers:
+
+- Where your dbt artifacts are located (default: `target`)
+- Whether to check that all models have descriptions
+- Whether to check that all models have a unique test
+- Whether to enforce naming conventions for staging models
+
+If a `dbt-bouncer.yml` file already exists, you will be prompted before it is overwritten.
+
+## list
+
+The `list` subcommand lists all available dbt-bouncer checks, grouped by category:
+
+```bash
+dbt-bouncer list
+```
+
+### Options
+
+#### `--output-format`
+
+**Type:** Choice
+**Options:** `text`, `json`
+**Default:** `text`
+**Required:** No
+
+Controls the output format. Use `json` for machine-readable output.
+
+**Examples:**
+
+```bash
+# List checks as human-readable text (default)
+dbt-bouncer list
+
+# List checks as JSON
+dbt-bouncer list --output-format json
+```
+
 ## Exit codes
 
 `dbt-bouncer` returns the following exit codes:
