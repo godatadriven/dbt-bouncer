@@ -265,13 +265,13 @@
   
   
     <li class="md-tabs__item">
-      <a href="../getting_started/" class="md-tabs__link">
+      <a href="../running_dbt_bouncer/" class="md-tabs__link">
         
   
   
     
   
-  Getting Started
+  Running dbt-bouncer
 
       </a>
     </li>
@@ -505,14 +505,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../getting_started/" class="md-nav__link">
+      <a href="../running_dbt_bouncer/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Getting Started
+    Running dbt-bouncer
   
 
     
@@ -840,6 +840,34 @@
       
     </span>
   </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-to-add-a-custom-check-to-dbt-bouncer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How to add a custom check to dbt-bouncer?
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How to add a custom check to dbt-bouncer?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1238,6 +1266,66 @@
 </span><span id="__span-17-15"><a id="__codelineno-17-15" name="__codelineno-17-15" href="#__codelineno-17-15"></a><span class="w">              </span><span class="nt">reason</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">We recommend documenting why these checks are being skipped.</span>
 </span></code></pre></div>
 <p>Similar can be done for other objects that support the <code>meta</code> value.</p>
+<h2 id="how-to-add-a-custom-check-to-dbt-bouncer">How to add a custom check to <code>dbt-bouncer</code>?<a class="headerlink" href="#how-to-add-a-custom-check-to-dbt-bouncer" title="Permanent link">#</a></h2>
+<p>In addition to the checks built into <code>dbt-bouncer</code>, you can write custom checks specific to your project's conventions. To add a custom check:</p>
+<ol>
+<li>Create an empty directory and add a <code>custom_checks_dir</code> key to your config file. The value should be the path to the directory, relative to the config file.</li>
+<li>In this directory create an empty <code>__init__.py</code> file.</li>
+<li>Create a subdirectory named <code>catalog</code>, <code>manifest</code>, or <code>run_results</code> depending on the artifact type you want to check.</li>
+<li>
+<p>In that subdirectory create a Python file that defines a check using the <code>@check</code> decorator:</p>
+<ul>
+<li>The function name must start with <code>check_</code>.</li>
+<li>The function must be decorated with <code>@check</code> from <code>dbt_bouncer.check_decorator</code>.</li>
+<li>The first positional parameter determines the resource type to iterate over (e.g. <code>model</code>, <code>source</code>, <code>exposure</code>, <code>seed</code>).</li>
+<li>Keyword-only arguments (after <code>*</code>) become user-configurable parameters, with types inferred from type hints.</li>
+<li>Add <code>ctx</code> as a parameter only if the function needs access to the full check context (e.g. all models, all sources).</li>
+<li>Use <code>fail()</code> from <code>dbt_bouncer.check_decorator</code> to signal a check failure with a clear message.</li>
+<li>Include a docstring describing what the check does.</li>
+</ul>
+</li>
+<li>
+<p>Add the check name and any desired arguments to your config file.</p>
+</li>
+<li>Run <code>dbt-bouncer</code> — your custom check will be executed.</li>
+</ol>
+<h3 id="example_1">Example<a class="headerlink" href="#example_1" title="Permanent link">#</a></h3>
+<p>Directory tree:</p>
+<div class="language-shell highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>.
+</span><span id="__span-18-2"><a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>├──<span class="w"> </span>dbt-bouncer.yml
+</span><span id="__span-18-3"><a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>├──<span class="w"> </span>dbt_project.yml
+</span><span id="__span-18-4"><a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>├──<span class="w"> </span>my_custom_checks
+</span><span id="__span-18-5"><a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a><span class="p">|</span><span class="w">   </span>├──<span class="w"> </span>__init__.py
+</span><span id="__span-18-6"><a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a><span class="p">|</span><span class="w">   </span>└──<span class="w"> </span>manifest
+</span><span id="__span-18-7"><a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a><span class="p">|</span><span class="w">       </span>└──<span class="w"> </span>check_custom_to_me.py
+</span><span id="__span-18-8"><a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a>└──<span class="w"> </span>target
+</span><span id="__span-18-9"><a id="__codelineno-18-9" name="__codelineno-18-9" href="#__codelineno-18-9"></a><span class="w">    </span>└──<span class="w"> </span>manifest.json
+</span></code></pre></div>
+<p>Contents of <code>check_custom_to_me.py</code>:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+</span><span id="__span-19-2"><a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>
+</span><span id="__span-19-3"><a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">dbt_bouncer.check_decorator</span><span class="w"> </span><span class="kn">import</span> <span class="n">check</span><span class="p">,</span> <span class="n">fail</span>
+</span><span id="__span-19-4"><a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a>
+</span><span id="__span-19-5"><a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a>
+</span><span id="__span-19-6"><a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a><span class="nd">@check</span>
+</span><span id="__span-19-7"><a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a><span class="k">def</span><span class="w"> </span><span class="nf">check_model_naming_convention</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">model_name_pattern</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;^(stg|int|fct|dim)_&quot;</span><span class="p">):</span>
+</span><span id="__span-19-8"><a id="__codelineno-19-8" name="__codelineno-19-8" href="#__codelineno-19-8"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Model names must match the supplied regex.&quot;&quot;&quot;</span>
+</span><span id="__span-19-9"><a id="__codelineno-19-9" name="__codelineno-19-9" href="#__codelineno-19-9"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">model_name_pattern</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">)):</span>
+</span><span id="__span-19-10"><a id="__codelineno-19-10" name="__codelineno-19-10" href="#__codelineno-19-10"></a>        <span class="n">fail</span><span class="p">(</span>
+</span><span id="__span-19-11"><a id="__codelineno-19-11" name="__codelineno-19-11" href="#__codelineno-19-11"></a>            <span class="sa">f</span><span class="s2">&quot;`</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">unique_id</span><span class="si">}</span><span class="s2">` does not match the required pattern &quot;</span>
+</span><span id="__span-19-12"><a id="__codelineno-19-12" name="__codelineno-19-12" href="#__codelineno-19-12"></a>            <span class="sa">f</span><span class="s2">&quot;`</span><span class="si">{</span><span class="n">model_name_pattern</span><span class="si">}</span><span class="s2">`.&quot;</span>
+</span><span id="__span-19-13"><a id="__codelineno-19-13" name="__codelineno-19-13" href="#__codelineno-19-13"></a>        <span class="p">)</span>
+</span></code></pre></div>
+<p>Contents of <code>dbt-bouncer.yml</code>:</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="nt">custom_checks_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_custom_checks</span>
+</span><span id="__span-20-2"><a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>
+</span><span id="__span-20-3"><a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a><span class="nt">manifest_checks</span><span class="p">:</span>
+</span><span id="__span-20-4"><a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_model_naming_convention</span>
+</span><span id="__span-20-5"><a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a><span class="w">      </span><span class="nt">include</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">^models/staging</span>
+</span><span id="__span-20-6"><a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a><span class="w">      </span><span class="nt">model_name_pattern</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">^stg_</span>
+</span></code></pre></div>
+<p>All custom checks automatically support the following parameters (no need to declare them): <code>description</code>, <code>exclude</code>, <code>include</code>, and <code>severity</code>.</p>
+<p>To contribute a new check back to <code>dbt-bouncer</code> itself, see <a href="../CONTRIBUTING/#adding-a-new-check">Contributing</a>.</p>
 
 
 
@@ -1258,7 +1346,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="February 24, 2026 14:19:57 UTC">February 24, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="April 2, 2026 08:37:46 UTC">April 2, 2026</span>
   </span>
 
     
