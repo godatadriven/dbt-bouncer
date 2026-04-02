@@ -4,15 +4,15 @@ from enum import StrEnum, auto
 class CheckOutcome(StrEnum):
     """Possible outcomes of a dbt-bouncer check execution."""
 
-    FAILED = "failed"
-    SUCCESS = "success"
+    FAILED = auto()
+    SUCCESS = auto()
 
 
 class CheckSeverity(StrEnum):
     """Severity levels for dbt-bouncer check results."""
 
-    ERROR = "error"
-    WARN = "warn"
+    ERROR = auto()
+    WARN = auto()
 
 
 class ConfigFileName(StrEnum):
@@ -26,10 +26,10 @@ class ConfigFileName(StrEnum):
 class Materialization(StrEnum):
     """dbt materialization strategies."""
 
-    EPHEMERAL = "ephemeral"
-    INCREMENTAL = "incremental"
-    TABLE = "table"
-    VIEW = "view"
+    EPHEMERAL = auto()
+    INCREMENTAL = auto()
+    TABLE = auto()
+    VIEW = auto()
 
 
 class OutputFormat(StrEnum):
