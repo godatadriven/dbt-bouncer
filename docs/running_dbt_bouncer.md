@@ -10,6 +10,8 @@
 
 1. Run `dbt-bouncer` to validate that your conventions are being maintained.
 
+---
+
 ### Installing with Python
 
 Install from [pypi.org](https://pypi.org/p/dbt-bouncer):
@@ -37,15 +39,12 @@ dbt-bouncer --config-file <PATH_TO_CONFIG_FILE> -v
 ```
 
 ```shell
-Running dbt-bouncer (X.X.X)...
-config_file=PosixPath('dbt-bouncer-example.yml')
-config_file_source='COMMANDLINE'
-Config file passed via command line: dbt-bouncer-example.yml
-Loading config from /home/pslattery/repos/dbt-bouncer/dbt-bouncer-example.yml...
-Loading config from dbt-bouncer-example.yml...
-Loaded config from dbt-bouncer-example.yml...
-conf={'dbt_artifacts_dir': 'dbt_project/target', 'catalog_checks': [{'name': 'check_column_name_complies_to_column_type', 'column_name_pattern': '^is_.*', 'exclude': '^staging', 'types': ['BOOLEAN']}]}
-Validating conf...
+INFO: Running dbt-bouncer (0.0.0)...
+DEBUG: config_file=PosixPath('dbt-bouncer-example.yml')
+DEBUG: config_file_source='COMMANDLINE'
+DEBUG: Config file passed via command line: dbt-bouncer-example.yml
+DEBUG: Loading config from /home/user/dbt-bouncer/dbt-bouncer-example.yml...
+INFO: Loaded config from dbt-bouncer-example.yml...
 ```
 
 When parsing artifacts, `dbt-bouncer` displays a summary table of discovered resources:
@@ -71,6 +70,13 @@ When parsing artifacts, `dbt-bouncer` displays a summary table of discovered res
 ╰──────────────────┴─────────────────┴───────╯
 ```
 
+!!! tip "Trade-offs"
+    **Best for:** manual runs, quick one-off validation, local development, scripting.
+
+    **Watch out:** manual — easy to forget before committing or opening a PR.
+
+---
+
 ### Running as an executable using [uv](https://github.com/astral-sh/uv)
 
 Run `dbt-bouncer` as a standalone Python executable using `uv`:
@@ -78,6 +84,48 @@ Run `dbt-bouncer` as a standalone Python executable using `uv`:
 ```shell
 uvx dbt-bouncer --config-file <PATH_TO_CONFIG_FILE>
 ```
+
+!!! tip "Trade-offs"
+    **Best for:** environments or machines without a persistent Python install.
+
+    **Watch out:** slightly slower than a local install due to ephemeral environment creation.
+
+---
+
+### Pre-commit hooks / prek
+
+`dbt-bouncer` ships an official [pre-commit](https://pre-commit.com/) hook that runs automatically before each commit. Add it to your `.pre-commit-config.yaml`:
+
+```yaml
+repos:
+  - repo: https://github.com/godatadriven/dbt-bouncer
+    rev: vX.X.X # Check https://github.com/godatadriven/dbt-bouncer/releases for the latest version
+    hooks:
+      - id: dbt-bouncer
+        args: ["--config-file", "<PATH_TO_CONFIG_FILE>"] # Optional
+```
+
+Alternatively, use a local hook (requires `dbt-bouncer` to be available in your environment):
+
+```yaml
+- repo: local
+  hooks:
+    - id: dbt-bouncer
+      name: dbt-bouncer
+      entry: dbt-bouncer # --config-file <PATH_TO_CONFIG_FILE>
+      language: system
+      pass_filenames: false
+      always_run: true
+```
+
+For full setup details see the [FAQ](./faq.md#how-to-set-up-dbt-bouncer-with-prekpre-commit).
+
+!!! tip "Trade-offs"
+    **Best for:** catching violations immediately during development, before code is pushed to remote.
+
+    **Watch out:** dbt artifacts must already exist — you need to run `dbt parse` (or another dbt command), possibly in the prior hook, before this hook can execute. This adds latency to every commit. The hook can also be bypassed with `git commit --no-verify`.
+
+---
 
 ### GitHub Actions
 
@@ -118,6 +166,13 @@ jobs:
 
 We recommend pinning both a major and minor version number.
 
+!!! tip "Trade-offs"
+    **Best for:** enforcing conventions on every PR regardless of local developer setup — cannot be bypassed by individual contributors. Supports automated PR comments with violation details.
+
+    **Watch out:** slower feedback loop than local hooks; consumes CI minutes for every push.
+
+---
+
 ### Docker
 
 Run `dbt-bouncer` via Docker:
@@ -128,6 +183,13 @@ docker run --rm \
     ghcr.io/godatadriven/dbt-bouncer:vX.X.X \
     --config-file /app/<PATH_TO_CONFIG_FILE>
 ```
+
+!!! tip "Trade-offs"
+    **Best for:** fully isolated, reproducible runs; no Python installation required on the host.
+
+    **Watch out:** requires Docker; slightly heavier startup than a native install.
+
+---
 
 ### Programmatic invocation
 
@@ -144,73 +206,7 @@ exit_code = run_bouncer(
 )
 ```
 
-## How to contribute a check to `dbt-bouncer`
+!!! tip "Trade-offs"
+    **Best for:** embedding `dbt-bouncer` into existing Python tooling, test suites, or custom orchestration.
 
-See [Adding a new check](./CONTRIBUTING.md#adding-a-new-check).
-
-## How to add a custom check to `dbt-bouncer`
-
-In addition to the checks built into `dbt-bouncer`, the ability to add custom checks is supported. This allows users to write checks that are specific to the conventions of their projects. To add a custom check:
-
-1. Create an empty directory and add a `custom_checks_dir` key to your config file. The value of this key should be the path to the directory you just created, relative to where the config file is located.
-1. In this directory create an empty `__init__.py` file.
-1. In this directory create a subdirectory named `catalog`, `manifest` or `run_results` depending on the type of artifact you want to check.
-1. In this subdirectory create a python file that defines a check using the `@check` decorator:
-
-            * The function name must start with `check_`.
-            * The function must be decorated with `@check` from `dbt_bouncer.check_decorator`.
-            * The first positional parameter determines the resource type to iterate over (e.g. `model`, `source`, `exposure`, `seed`).
-            * Keyword-only arguments (after `*`) become user-configurable parameters, with types inferred from type hints.
-            * Add `ctx` as a parameter only if the function needs access to the full check context (e.g. all models, all sources).
-            * Use `fail()` from `dbt_bouncer.check_decorator` to signal a check failure with a clear message.
-            * Include a docstring with a description of what the check does.
-
-1. In your config file, add the name of the check and any desired arguments.
-1. Run `dbt-bouncer`, your custom check will be executed.
-
-An example:
-
-* Directory tree:
-
-    ```shell
-    .
-    ├── dbt-bouncer.yml
-    ├── dbt_project.yml
-    ├── my_custom_checks
-    |   ├── __init__.py
-    |   └── manifest
-    |       └── check_custom_to_me.py
-    └── target
-        └── manifest.json
-    ```
-
-* Contents of `check_custom_to_me.py`:
-
-    ```python
-    import re
-
-    from dbt_bouncer.check_decorator import check, fail
-
-
-    @check
-    def check_model_naming_convention(model, *, model_name_pattern: str = "^(stg|int|fct|dim)_"):
-        """Model names must match the supplied regex."""
-        if not re.match(model_name_pattern, str(model.name)):
-            fail(
-                f"`{model.unique_id}` does not match the required pattern "
-                f"`{model_name_pattern}`."
-            )
-    ```
-
-* Contents of `dbt-bouncer.yml`:
-
-    ```yaml
-    custom_checks_dir: my_custom_checks
-
-    manifest_checks:
-        - name: check_model_naming_convention
-          include: ^models/staging
-          model_name_pattern: ^stg_
-    ```
-
-All custom checks automatically support the following parameters (no need to declare them): `description`, `exclude`, `include`, and `severity`.
+    **Watch out:** requires Python knowledge; not suitable for teams without Python experience.

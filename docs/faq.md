@@ -312,3 +312,72 @@ sources:
 ```
 
 Similar can be done for other objects that support the `meta` value.
+
+## How to add a custom check to `dbt-bouncer`?
+
+In addition to the checks built into `dbt-bouncer`, you can write custom checks specific to your project's conventions. To add a custom check:
+
+1. Create an empty directory and add a `custom_checks_dir` key to your config file. The value should be the path to the directory, relative to the config file.
+1. In this directory create an empty `__init__.py` file.
+1. Create a subdirectory named `catalog`, `manifest`, or `run_results` depending on the artifact type you want to check.
+1. In that subdirectory create a Python file that defines a check using the `@check` decorator:
+
+    - The function name must start with `check_`.
+    - The function must be decorated with `@check` from `dbt_bouncer.check_decorator`.
+    - The first positional parameter determines the resource type to iterate over (e.g. `model`, `source`, `exposure`, `seed`).
+    - Keyword-only arguments (after `*`) become user-configurable parameters, with types inferred from type hints.
+    - Add `ctx` as a parameter only if the function needs access to the full check context (e.g. all models, all sources).
+    - Use `fail()` from `dbt_bouncer.check_decorator` to signal a check failure with a clear message.
+    - Include a docstring describing what the check does.
+
+1. Add the check name and any desired arguments to your config file.
+1. Run `dbt-bouncer` — your custom check will be executed.
+
+### Example
+
+Directory tree:
+
+```shell
+.
+├── dbt-bouncer.yml
+├── dbt_project.yml
+├── my_custom_checks
+|   ├── __init__.py
+|   └── manifest
+|       └── check_custom_to_me.py
+└── target
+    └── manifest.json
+```
+
+Contents of `check_custom_to_me.py`:
+
+```python
+import re
+
+from dbt_bouncer.check_decorator import check, fail
+
+
+@check
+def check_model_naming_convention(model, *, model_name_pattern: str = "^(stg|int|fct|dim)_"):
+    """Model names must match the supplied regex."""
+    if not re.match(model_name_pattern, str(model.name)):
+        fail(
+            f"`{model.unique_id}` does not match the required pattern "
+            f"`{model_name_pattern}`."
+        )
+```
+
+Contents of `dbt-bouncer.yml`:
+
+```yaml
+custom_checks_dir: my_custom_checks
+
+manifest_checks:
+    - name: check_model_naming_convention
+      include: ^models/staging
+      model_name_pattern: ^stg_
+```
+
+All custom checks automatically support the following parameters (no need to declare them): `description`, `exclude`, `include`, and `severity`.
+
+To contribute a new check back to `dbt-bouncer` itself, see [Contributing](./CONTRIBUTING.md#adding-a-new-check).
