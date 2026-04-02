@@ -121,7 +121,7 @@ Alternatively, use a local hook (requires `dbt-bouncer` to be available in your 
 For full setup details see the [FAQ](./faq.md#how-to-set-up-dbt-bouncer-with-prekpre-commit).
 
 !!! tip "Trade-offs"
-    **Best for:** catching violations immediately during development, before code reaches is pushed to remote.
+    **Best for:** catching violations immediately during development, before code is pushed to remote.
 
     **Watch out:** dbt artifacts must already exist — you need to run `dbt parse` (or another dbt command), possibly in the prior hook, before this hook can execute. This adds latency to every commit. The hook can also be bypassed with `git commit --no-verify`.
 
