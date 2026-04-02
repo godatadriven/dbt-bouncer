@@ -2,14 +2,7 @@
 
 This page provides documentation for the `dbt-bouncer` CLI.
 
-::: mkdocs-click
-    :command: cli
-    :module: dbt_bouncer.main
-    :prog_name: dbt-bouncer
-    :show_hidden: False
-    :style: plain
-
-## Run command
+## run
 
 The `run` subcommand executes dbt-bouncer checks against your dbt project:
 
@@ -21,7 +14,171 @@ This is the primary command for running checks. For backwards compatibility, `db
 
 All the main CLI options (`--check`, `--only`, `--output-file`, etc.) work with both `dbt-bouncer run` and the legacy `dbt-bouncer` invocation.
 
-## Validate command
+### Options
+
+#### `--config-file`
+
+**Type:** Path
+**Default:** `dbt-bouncer.yml`
+**Required:** No
+
+Specifies the location of the YAML configuration file containing your dbt-bouncer checks.
+
+**Example:**
+
+```bash
+dbt-bouncer run --config-file config/checks.yml
+```
+
+#### `--dry-run`
+
+**Type:** Flag
+**Default:** False
+**Required:** No
+
+When passed, assembles the full check list as normal but prints a summary table showing the check name, resource type, and count for each check that would run — then exits with code 0 without executing any checks. Useful for previewing which checks are in scope before a full run.
+
+**Example:**
+
+```bash
+dbt-bouncer run --dry-run
+```
+
+Example output:
+
+```text
+╭─ Dry run — checks that would execute ─────────────────────╮
+│ Check name                     │ Resource type │ Count     │
+│ CheckModelNamePattern          │ model         │  1234     │
+│ CheckModelDescriptionPopulated │ model         │  1234     │
+│ CheckSourceDescriptionPopulated│ source        │    56     │
+╰────────────────────────────────────────────────────────────╯
+
+Dry run complete. 2524 check(s) would run.
+```
+
+#### `--check`
+
+**Type:** String (comma-separated)
+**Default:** Empty (runs all checks)
+**Required:** No
+
+Limits the checks run to specific check names. Multiple checks can be specified as a comma-separated list.
+
+**Examples:**
+
+```bash
+# Run a single check
+dbt-bouncer run --check check_model_has_unique_test
+
+# Run multiple checks
+dbt-bouncer run --check check_model_names,check_source_freshness_populated
+```
+
+#### `--only`
+
+**Type:** String (comma-separated)
+**Default:** Empty (runs all categories)
+**Required:** No
+
+Limits the checks run to specific categories. Multiple categories can be specified as a comma-separated list.
+
+**Examples:**
+
+```bash
+# Run only manifest checks
+dbt-bouncer run --only manifest_checks
+
+# Run catalog and manifest checks
+dbt-bouncer run --only catalog_checks,manifest_checks
+```
+
+#### `--output-file`
+
+**Type:** Path
+**Default:** None (outputs to stdout)
+**Required:** No
+
+Specifies the location where check metadata will be saved. If not provided, results are written to stdout.
+
+**Example:**
+
+```bash
+dbt-bouncer run --output-file results/check-results.json
+```
+
+#### `--output-format`
+
+**Type:** Choice
+**Options:** `csv`, `json`, `junit`, `sarif`, `tap`
+**Default:** `json`
+**Required:** No
+
+Specifies the format for the output file or stdout when no output file is specified.
+
+**Examples:**
+
+```bash
+# Output as JSON (default)
+dbt-bouncer run --output-format json
+
+# Output as JUnit XML for CI integration
+dbt-bouncer run --output-format junit --output-file results.xml
+
+# Output as SARIF for GitHub Code Scanning
+dbt-bouncer run --output-format sarif --output-file results.sarif
+```
+
+#### `--output-only-failures`
+
+**Type:** Flag
+**Default:** False
+**Required:** No
+
+When passed, only failures will be included in the output file. Successful checks are omitted.
+
+**Example:**
+
+```bash
+dbt-bouncer run --output-file results.json --output-only-failures
+```
+
+#### `--show-all-failures`
+
+**Type:** Flag
+**Default:** False
+**Required:** No
+
+When passed, all failures will be printed to the console, even if an output file is specified.
+
+**Example:**
+
+```bash
+dbt-bouncer run --show-all-failures
+```
+
+#### `-v, --verbosity`
+
+**Type:** Counter
+**Default:** 0
+**Required:** No
+
+Controls the verbosity of logging output. Can be specified multiple times to increase verbosity.
+
+**Examples:**
+
+```bash
+# Basic logging
+dbt-bouncer run -v
+
+# More verbose logging
+dbt-bouncer run -vv
+
+# Maximum verbosity
+dbt-bouncer run -vvv
+```
+
+## validate
 
 The `validate` subcommand checks your configuration file for common issues:
 
@@ -49,170 +206,20 @@ Found 2 issue(s) in config file:
   Line 3: YAML syntax error: ...
 ```
 
-## CLI Options
+### Options
 
-The following options are available for the `run` command (and the legacy `dbt-bouncer` invocation):
-
-### `--config-file`
+#### `--config-file`
 
 **Type:** Path
 **Default:** `dbt-bouncer.yml`
 **Required:** No
 
-Specifies the location of the YAML configuration file containing your dbt-bouncer checks.
+Specifies the location of the YAML configuration file to validate.
 
 **Example:**
 
 ```bash
-dbt-bouncer run --config-file config/checks.yml
-```
-
-### `--dry-run`
-
-**Type:** Flag
-**Default:** False
-**Required:** No
-
-When passed, assembles the full check list as normal but prints a summary table showing the check name, resource type, and count for each check that would run — then exits with code 0 without executing any checks. Useful for previewing which checks are in scope before a full run.
-
-**Example:**
-
-```bash
-dbt-bouncer run --dry-run
-```
-
-Example output:
-
-```text
-╭─ Dry run — checks that would execute ─────────────────────╮
-│ Check name                     │ Resource type │ Count     │
-│ CheckModelNamePattern          │ model         │  1234     │
-│ CheckModelDescriptionPopulated │ model         │  1234     │
-│ CheckSourceDescriptionPopulated│ source        │    56     │
-╰────────────────────────────────────────────────────────────╯
-
-Dry run complete. 2524 check(s) would run.
-```
-
-### `--check`
-
-**Type:** String (comma-separated)
-**Default:** Empty (runs all checks)
-**Required:** No
-
-Limits the checks run to specific check names. Multiple checks can be specified as a comma-separated list.
-
-**Examples:**
-
-```bash
-# Run a single check
-dbt-bouncer run --check check_model_has_unique_test
-
-# Run multiple checks
-dbt-bouncer run --check check_model_names,check_source_freshness_populated
-```
-
-### `--only`
-
-**Type:** String (comma-separated)
-**Default:** Empty (runs all categories)
-**Required:** No
-
-Limits the checks run to specific categories. Multiple categories can be specified as a comma-separated list.
-
-**Examples:**
-
-```bash
-# Run only manifest checks
-dbt-bouncer run --only manifest_checks
-
-# Run catalog and manifest checks
-dbt-bouncer run --only catalog_checks,manifest_checks
-```
-
-### `--output-file`
-
-**Type:** Path
-**Default:** None (outputs to stdout)
-**Required:** No
-
-Specifies the location where check metadata will be saved. If not provided, results are written to stdout.
-
-**Example:**
-
-```bash
-dbt-bouncer run --output-file results/check-results.json
-```
-
-### `--output-format`
-
-**Type:** Choice
-**Options:** `csv`, `json`, `junit`, `sarif`, `tap`
-**Default:** `json`
-**Required:** No
-
-Specifies the format for the output file or stdout when no output file is specified.
-
-**Examples:**
-
-```bash
-# Output as JSON (default)
-dbt-bouncer run --output-format json
-
-# Output as JUnit XML for CI integration
-dbt-bouncer run --output-format junit --output-file results.xml
-
-# Output as SARIF for GitHub Code Scanning
-dbt-bouncer run --output-format sarif --output-file results.sarif
-```
-
-### `--output-only-failures`
-
-**Type:** Flag
-**Default:** False
-**Required:** No
-
-When passed, only failures will be included in the output file. Successful checks are omitted.
-
-**Example:**
-
-```bash
-dbt-bouncer run --output-file results.json --output-only-failures
-```
-
-### `--show-all-failures`
-
-**Type:** Flag
-**Default:** False
-**Required:** No
-
-When passed, all failures will be printed to the console, even if an output file is specified.
-
-**Example:**
-
-```bash
-dbt-bouncer run --show-all-failures
-```
-
-### `-v, --verbosity`
-
-**Type:** Counter
-**Default:** 0
-**Required:** No
-
-Controls the verbosity of logging output. Can be specified multiple times to increase verbosity.
-
-**Examples:**
-
-```bash
-# Basic logging
-dbt-bouncer run -v
-
-# More verbose logging
-dbt-bouncer run -vv
-
-# Maximum verbosity
-dbt-bouncer run -vvv
+dbt-bouncer validate --config-file config/checks.yml
 ```
 
 ## Exit codes
