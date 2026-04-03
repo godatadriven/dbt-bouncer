@@ -67,25 +67,25 @@ All documentation can be found on `dbt-bouncer` [documentation website](https://
 1. Install `dbt-bouncer`:
 
     ```shell
-    pip install dbt-bouncer
+    uv add dbt-bouncer
     ```
 
 1. `dbt-bouncer` requires a `manifest.json` file. If not already present, run:
 
     ```shell
-    dbt parse
+    uv run dbt parse
     ```
 
 1. Create a `dbt-bouncer.yml` config file:
 
     ```shell
-    dbt-bouncer init
+    uv run dbt-bouncer init
     ```
 
 1. Run `dbt-bouncer`:
 
     ```text
-    $ dbt-bouncer run
+    $ uv run dbt-bouncer run
     Running dbt-bouncer (X.X.X)...
     Loaded config from dbt-bouncer-example.yml...
     Validating conf...
