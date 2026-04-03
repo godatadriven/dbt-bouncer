@@ -12,7 +12,7 @@ dbt-bouncer run --config-file dbt-bouncer.yml
 
 This is the primary command for running checks. For backwards compatibility, `dbt-bouncer` (without the `run` subcommand) still works and behaves identically.
 
-All the main CLI options (`--check`, `--only`, `--output-file`, etc.) work with both `dbt-bouncer run` and the legacy `dbt-bouncer` invocation.
+All the main CLI options (`--check`, `--only`, `--output-file`, etc.) work with both `dbt-bouncer run` and the legacy `dbt-bouncer` invocation. The `--dry-run` option is only available via `dbt-bouncer run --dry-run`.
 
 ### Options
 
