@@ -33,6 +33,12 @@ make install
   - `catalog/` — catalog checks (`columns/` subdirectory for column-level)
   - `manifest/` — manifest checks (`models/` has 11 files by concern: access, code, columns, description, directories, lineage, meta, naming, tags, tests, versioning; `sources/` similarly split)
   - `run_results/` — run results checks
+- `src/dbt_bouncer/cli/` — CLI subpackage, one subdirectory per subcommand:
+  - `init/` — interactive config file creation (`init`, `build_initial_config`, `write_config_file`)
+  - `list/` — list available checks (`list_checks`, `category_key`, `get_check_params`)
+  - `run/` — execute bouncer checks (`run`, `run_bouncer`, `_detect_config_file_source`, `_build_context`)
+  - `validate/` — lint config file (`validate`)
+- `src/dbt_bouncer/main.py` — Typer app setup, subcommand registration, backward-compatible `main_callback`
 - `src/dbt_bouncer/check_base.py` — `BaseCheck` (Pydantic model), used by class-based checks
 - `src/dbt_bouncer/check_decorator.py` — `@check` decorator and `fail()` helper (preferred API)
 - `src/dbt_bouncer/runner.py` — orchestrates check execution
