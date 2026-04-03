@@ -21,7 +21,7 @@ Regenerate test fixture files after making changes to the dbt project in `dbt_pr
 make build-artifacts
 ```
 
-This generates fixtures for dbt 1.9, 1.10, and 1.11 in `tests/fixtures/dbt_1X/target/` (manifest.json, catalog.json, run_results.json).
+This generates fixtures for dbt 1.10 and 1.11 in `tests/fixtures/dbt_1X/target/` (manifest.json, catalog.json, run_results.json). Note: dbt 1.9 fixtures are frozen and not regenerated.
 
 **Note:** The Makefile uses specific dbt-duckdb version pins. Do not modify the version pins in the Makefile without understanding the compatibility matrix.
 
@@ -30,7 +30,6 @@ This generates fixtures for dbt 1.9, 1.10, and 1.11 in `tests/fixtures/dbt_1X/ta
 Check that the generated files exist and are non-empty:
 
 ```bash
-ls -la tests/fixtures/dbt_19/target/
 ls -la tests/fixtures/dbt_110/target/
 ls -la tests/fixtures/dbt_111/target/
 ```

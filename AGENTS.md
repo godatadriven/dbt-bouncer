@@ -21,7 +21,7 @@ make install
 | `make test-integration` | Run integration tests only |
 | `prek run --all-files` | Run pre-commit hooks (**not** `pre-commit run`) |
 | `make build-and-run-dbt-bouncer` | End-to-end validation |
-| `make build-artifacts` | Regenerate test fixtures (dbt 1.9, 1.10, 1.11) |
+| `make build-artifacts` | Regenerate test fixtures (dbt 1.10, 1.11) |
 | `make generate-schema` | Regenerate `schema.json` from Pydantic models |
 | `make test-perf` | Performance benchmarks (bencher + hyperfine) |
 
