@@ -64,6 +64,12 @@ def main_callback(
             help="If passed then only failures will be included in the output file."
         ),
     ] = False,
+    dry_run: Annotated[
+        bool,
+        typer.Option(
+            help="Print which checks would run (name, resource type, count) without executing them.",
+        ),
+    ] = False,
     show_all_failures: Annotated[
         bool,
         typer.Option(
@@ -99,6 +105,7 @@ def main_callback(
             check=check,
             config_file=config_file,
             create_pr_comment_file=create_pr_comment_file,
+            dry_run=dry_run,
             only=only,
             output_file=output_file,
             output_format=output_format,
