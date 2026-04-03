@@ -1,5 +1,5 @@
 ---
-exclude: '^dist'
+exclude: '^dist' # exclude the dist/ directory where packaged distributables (like compiled .whl wheels and .tar.gz source distributions) are placed.
 repos:
     - repo: builtin
       hooks:
@@ -18,13 +18,13 @@ repos:
           - id: check-yaml
             args: [--unsafe]
           - id: debug-statements
-          - id: end-of-file-fixer
-            exclude: dbt_project/target/manifest.json,tests/fixtures/dbt_16/target/manifest.json,tests/fixtures/dbt_17/target/manifest.json,tests/fixtures/dbt_18/target/manifest.json
+
     - repo: https://github.com/streetsidesoftware/cspell-cli
       rev: v9.7.0
       hooks:
           - id: cspell
             files: ^(docs/|[^/]+\.md$)
+
     - repo: local
       hooks:
         - id: ruff
@@ -33,6 +33,7 @@ repos:
           language: system
           types_or: [python, pyi, jupyter]
           require_serial: true
+
     - repo: local
       hooks:
         - id: ruff-format
@@ -41,6 +42,7 @@ repos:
           language: system
           types_or: [python, pyi, jupyter]
           require_serial: true
+
     - repo: local
       hooks:
           - id: ty
@@ -51,6 +53,7 @@ repos:
             pass_filenames: false
             require_serial: true
             types_or: [python, pyi]
+
     - repo: local
       hooks:
           - id: alphabetical-checks
@@ -60,6 +63,7 @@ repos:
             name: alphabetical-checks
             require_serial: true
             types_or: [python, pyi]
+
     - repo: local
       hooks:
         - id: rumdl
@@ -68,6 +72,7 @@ repos:
           name: rumdl
           require_serial: true
           types_or: [markdown]
+
     - repo: local
       hooks:
         - id: sqlfmt
@@ -76,6 +81,7 @@ repos:
           name: sqlfmt
           require_serial: true
           types_or: [sql, jinja]
+
     - repo: local
       hooks:
         - id: tombi
@@ -84,6 +90,7 @@ repos:
           name: tombi
           require_serial: true
           types: [toml]
+
     - repo: local
       hooks:
         - id: pyupgrade
@@ -93,6 +100,7 @@ repos:
           pass_filenames: true
           require_serial: true
           types_or: [python, pyi]
+
     - repo: local
       hooks:
         - id: bandit

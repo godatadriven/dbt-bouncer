@@ -18,7 +18,7 @@
           contents: read
         runs-on: ubuntu-24.04
         steps:
-          - uses: actions/checkout@v6
+          - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
           - name: Setup Python
             uses: ./.github/actions/setup_python_env
@@ -27,10 +27,10 @@
             run: pip install git+https://github.com/godatadriven/dbt-bouncer.git@${{ github.sha }}
 
           - name: Install bencher
-            uses: bencherdev/bencher@v0.5.10
+            uses: bencherdev/bencher@8151077aa7b1bceaac11c4b308265417cae60e2b # v0.5.10
 
           - name: Install Hyperfine
-            uses: taiki-e/install-action@v2
+            uses: taiki-e/install-action@d858f8113943481093e02986a7586a4819a3bfd6 # v2
             with:
               tool: hyperfine@1.20
 
@@ -58,7 +58,7 @@
             contents: write
           runs-on: ubuntu-24.04
           steps:
-              - uses: actions/checkout@v6
+              - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
               - name: Fetch tags
                 run: git fetch --prune --unshallow --tags
@@ -87,7 +87,7 @@
         runs-on: ubuntu-24.04
         steps:
             - name: Checkout
-              uses: actions/checkout@v6
+              uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
             - name: Determine python version
               id: python-version
@@ -102,7 +102,7 @@
                 python-version: ${{ steps.python-version.outputs.PYTHON_VERSION }}
 
             - name: Set up Docker Buildx
-              uses: docker/setup-buildx-action@v4
+              uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4
 
             - name: Modify Dockerfile to use local dbt-bouncer version
               run: |
@@ -111,7 +111,7 @@
                 sed -i -E '/ENTRYPOINT/i\COPY . .' ./Dockerfile
 
             - name: Build image
-              uses: docker/build-push-action@v6
+              uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
               with:
                   build-args: PYTHON_VERSION=${{ steps.python-version.outputs.PYTHON_VERSION }}
                   cache-from: type=gha
@@ -145,7 +145,7 @@
                     - '3.14'
         steps:
             - name: Checkout
-              uses: actions/checkout@v6
+              uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
             - name: Setup Python
               uses: ./.github/actions/setup_python_env
