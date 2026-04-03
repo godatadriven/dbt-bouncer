@@ -155,7 +155,7 @@ A JSON Schema is generated from the Pydantic config model and committed as `sche
 make generate-schema
 ```
 
-CI will fail if `schema.json` is out of date. The schema enables editor autocomplete and validation for `dbt-bouncer.yml` files (see [Config file > Editor integration](./config_file.md#editor-integration)).
+CI will fail if `schema.json` is out of date. The schema enables editor autocomplete and validation for `dbt-bouncer.yml` files (see [Config file > Editor integration](./configuration.md#editor-integration)).
 
 #### Performance tests
 
