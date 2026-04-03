@@ -7,6 +7,7 @@ from typing import Annotated
 import typer
 
 from dbt_bouncer.cli import app
+from dbt_bouncer.cli.run.utils import _resolve_config_path
 from dbt_bouncer.enums import ConfigFileName
 from dbt_bouncer.reporting.logger import configure_console_logging
 
@@ -30,11 +31,7 @@ def validate(
     """
     configure_console_logging(verbosity=0)
 
-    config_path = (
-        Path(ConfigFileName.DBT_BOUNCER_YML)
-        if config_file is None
-        else Path(config_file)
-    )
+    config_path = _resolve_config_path(config_file)
 
     if not config_path.exists():
         raise RuntimeError(f"Config file not found: {config_path}")

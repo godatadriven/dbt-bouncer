@@ -15,6 +15,23 @@ if TYPE_CHECKING:
     from dbt_bouncer.context import BouncerContext
 
 
+def _resolve_config_path(config_file: PurePath | None) -> Path:
+    """Resolve the config file path, defaulting to ``dbt-bouncer.yml``.
+
+    Args:
+        config_file: Explicit path, or None to use the default.
+
+    Returns:
+        Path: The resolved config file path.
+
+    """
+    return (
+        Path(ConfigFileName.DBT_BOUNCER_YML)
+        if config_file is None
+        else Path(config_file)
+    )
+
+
 def _detect_config_file_source(config_file: Path | None) -> str:
     """Detect the source of the config file.
 
@@ -142,13 +159,9 @@ def run_bouncer(
         load_config_file_contents,
     )
 
-    if config_file is None:
-        config_file = Path(ConfigFileName.DBT_BOUNCER_YML)
-        if config_file_source is None:
-            config_file_source = "DEFAULT"
-    else:
-        if config_file_source is None:
-            config_file_source = "COMMANDLINE"
+    config_file = _resolve_config_path(config_file)
+    if config_file_source is None:
+        config_file_source = _detect_config_file_source(config_file)
 
     if (
         config_file_source is None
