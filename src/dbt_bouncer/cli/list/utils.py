@@ -4,6 +4,9 @@
 def category_key(check_class: type) -> str:
     """Return the display category name segment from the module path.
 
+    Args:
+        check_class: The check class whose module path is inspected.
+
     Returns:
         str: The category name segment.
 
@@ -45,6 +48,9 @@ base_fields = frozenset(
 
 def get_check_params(check_class: type) -> dict[str, str]:
     """Return configurable parameter names and their type annotations.
+
+    Args:
+        check_class: The check class whose model fields are inspected.
 
     Returns:
         dict[str, str]: Mapping of field name to type string.
