@@ -40,7 +40,7 @@ def init() -> None:
     config_path = Path(ConfigFileName.DBT_BOUNCER_YML)
     if config_path.exists():
         overwrite = typer.confirm(
-            f"\n[yellow]Warning:[/yellow] {config_path} already exists. Overwrite?",
+            f"\nWarning: {config_path} already exists. Overwrite?",
             default=False,
         )
         if not overwrite:
