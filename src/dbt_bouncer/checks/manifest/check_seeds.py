@@ -78,13 +78,11 @@ def check_seed_columns_have_types(seed):
 
 
 @check
-def check_seed_description_populated(
-    seed, *, min_description_length: int | None = None
-):
+def check_seed_description_populated(seed, *, min_description_length: int = 4):
     """Seeds must have a populated description.
 
     Parameters:
-        min_description_length (int | None): Minimum length required for the description to be considered populated.
+        min_description_length (int): Minimum length required for the description to be considered populated. Defaults to 4 characters.
 
     Receives:
         seed (SeedNode): The SeedNode object to check.
@@ -103,13 +101,11 @@ def check_seed_description_populated(
         ```yaml
         manifest_checks:
             - name: check_seed_description_populated
-              min_description_length: 25 # Setting a stricter requirement for description length
+              min_description_length: 25 # Setting a custom stricter requirement for description length
         ```
 
     """
-    if not is_description_populated(
-        seed.description or "", min_description_length or 4
-    ):
+    if not is_description_populated(seed.description or "", min_description_length):
         fail(
             f"`{get_clean_model_name(seed.unique_id)}` does not have a populated description."
         )
