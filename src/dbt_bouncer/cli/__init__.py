@@ -1,9 +1,11 @@
 """CLI commands for dbt-bouncer.
 
 The ``app`` Typer instance lives here so that each subcommand module can
-register itself with ``@app.command()`` at import time.  Subcommand
-functions are lazily re-exported via ``__getattr__`` to avoid pulling in
-heavy dependencies for lightweight operations like ``--version``.
+register itself with ``@app.command()`` at import time.
+
+``main.py`` eagerly imports each subcommand module to trigger
+registration, so ``__getattr__`` only fires for callers that import
+directly from this package (e.g. ``from dbt_bouncer.cli import init``).
 """
 
 import typer
