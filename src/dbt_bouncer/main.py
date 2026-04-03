@@ -13,6 +13,9 @@ import dbt_bouncer.cli.list  # noqa: F401 — triggers @app.command registration
 import dbt_bouncer.cli.validate  # noqa: F401 — triggers @app.command registration
 from dbt_bouncer.cli import app
 from dbt_bouncer.cli.run import run
+
+# Self-alias re-export so ``from dbt_bouncer.main import run_bouncer``
+# keeps working after the function moved to ``cli.run.utils``.
 from dbt_bouncer.cli.run.utils import (
     run_bouncer as run_bouncer,
 )
