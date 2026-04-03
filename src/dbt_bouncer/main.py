@@ -15,10 +15,10 @@ app = typer.Typer(
     context_settings={"help_option_names": ["-h", "--help"]},
 )
 
-app.command(name="run")(run)
 app.command(name="init")(init)
-app.command(name="validate")(validate)
 app.command(name="list")(list_checks)
+app.command(name="run")(run)
+app.command(name="validate")(validate)
 
 
 @app.callback(invoke_without_command=True)
