@@ -197,7 +197,7 @@ For a detailed description see [here](./faq.md#how-to-configure-dbt-bouncer-for-
 All checks accept a `severity` argument, valid values are:
 
 - `error`: If the check fails then `dbt-bouncer` will return a non-zero exit code.
-- `warn`: If the check fails then `dbt-bouncer` will return a non-zero exit code.
+- `warn`: If the check fails then `dbt-bouncer` will log a warning but return a zero exit code.
 
 `severity` can also be specified globally, this is useful when applying `dbt-bouncer` to a pre-existing dbt project. It allows you to run `dbt-bouncer`, identify the checks that fail and address the failures in your own time without receiving non-zero exit codes:
 
@@ -212,7 +212,7 @@ manifest_checks:
 
 !!! note
 
-    `severity` can be specified at both the check level and the global level. Should both levels be specified, then the **global** level is applied.
+    `severity` can be specified at both the check level and the global level. Should both levels be specified, then the **global** level is applied. Note: this differs from `include`/`exclude`, where the **check** level overrides the global level.
 
     ```yaml
     # No `severity` specified: check will have an `error` severity.
