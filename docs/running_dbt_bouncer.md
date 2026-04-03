@@ -197,7 +197,7 @@ docker run --rm \
 
 ```python
 from pathlib import Path
-from dbt_bouncer.main import run_bouncer
+from dbt_bouncer import run_bouncer
 
 exit_code = run_bouncer(
     config_file=Path("path/to/dbt-bouncer.yml"),
