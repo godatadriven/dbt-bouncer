@@ -17,9 +17,11 @@ from dbt_bouncer.utils import (
 def check_model_description_contains_regex_pattern(model, *, regexp_pattern: str):
     """Models must have a description that matches the provided pattern.
 
+    Parameters:
+        regexp_pattern (str): The regexp pattern that should match the model description.
+
     Receives:
         model (ModelNode): The ModelNode object to check.
-        regexp_pattern (str): The regexp pattern that should match the model description.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
@@ -32,7 +34,7 @@ def check_model_description_contains_regex_pattern(model, *, regexp_pattern: str
         ```yaml
         manifest_checks:
             - name: check_model_description_contains_regex_pattern
-            - regex_pattern: .*pattern_to_match.*
+              regexp_pattern: .*pattern_to_match.*
         ```
 
     """
