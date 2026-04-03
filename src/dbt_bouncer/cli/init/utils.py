@@ -1,3 +1,5 @@
+"""Utility functions for the init CLI subcommand."""
+
 from pathlib import Path
 
 from dbt_bouncer.enums import ConfigFileName

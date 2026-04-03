@@ -1,3 +1,6 @@
+"""Utility functions for the list CLI subcommand."""
+
+
 def category_key(check_class: type) -> str:
     """Return the display category name segment from the module path.
 
