@@ -1,11 +1,20 @@
 """CLI commands for dbt-bouncer.
 
-Subcommand functions are lazily imported to avoid pulling in heavy
-dependencies (rich, yaml, itertools, etc.) when only lightweight
-operations like ``--version`` are needed.
+The ``app`` Typer instance lives here so that each subcommand module can
+register itself with ``@app.command()`` at import time.  Subcommand
+functions are lazily re-exported via ``__getattr__`` to avoid pulling in
+heavy dependencies for lightweight operations like ``--version``.
 """
 
+import typer
+
+app = typer.Typer(
+    no_args_is_help=False,
+    context_settings={"help_option_names": ["-h", "--help"]},
+)
+
 __all__ = [  # noqa: F822
+    "app",
     "init",
     "list_checks",
     "run",

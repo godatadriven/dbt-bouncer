@@ -4,10 +4,12 @@ from pathlib import Path
 
 import typer
 
+from dbt_bouncer.cli import app
 from dbt_bouncer.cli.init.utils import build_initial_config, write_config_file
 from dbt_bouncer.enums import ConfigFileName
 
 
+@app.command(name="init")
 def init() -> None:
     """Create a dbt-bouncer.yml file interactively.
 

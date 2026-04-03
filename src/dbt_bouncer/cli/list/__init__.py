@@ -6,10 +6,12 @@ from typing import Annotated
 
 import typer
 
+from dbt_bouncer.cli import app
 from dbt_bouncer.cli.list.utils import category_key, get_check_params
 from dbt_bouncer.utils import get_check_objects
 
 
+@app.command(name="list")
 def list_checks(
     output_format: Annotated[
         str,

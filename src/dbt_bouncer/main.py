@@ -8,22 +8,13 @@ from typing import Annotated
 import typer
 from typer.main import get_command
 
-from dbt_bouncer.cli.init import init
-from dbt_bouncer.cli.list import list_checks
+import dbt_bouncer.cli.init  # noqa: F401 — triggers @app.command registration
+import dbt_bouncer.cli.list  # noqa: F401 — triggers @app.command registration
+import dbt_bouncer.cli.validate  # noqa: F401 — triggers @app.command registration
+from dbt_bouncer.cli import app
 from dbt_bouncer.cli.run import run
-from dbt_bouncer.cli.validate import validate
 from dbt_bouncer.enums import ConfigFileName, OutputFormat
 from dbt_bouncer.version import version as get_version
-
-app = typer.Typer(
-    no_args_is_help=False,
-    context_settings={"help_option_names": ["-h", "--help"]},
-)
-
-app.command(name="init")(init)
-app.command(name="list")(list_checks)
-app.command(name="run")(run)
-app.command(name="validate")(validate)
 
 
 @app.callback(invoke_without_command=True)

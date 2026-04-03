@@ -6,10 +6,12 @@ from typing import Annotated
 
 import typer
 
+from dbt_bouncer.cli import app
 from dbt_bouncer.enums import ConfigFileName
 from dbt_bouncer.reporting.logger import configure_console_logging
 
 
+@app.command(name="validate")
 def validate(
     config_file: Annotated[
         Path | None,

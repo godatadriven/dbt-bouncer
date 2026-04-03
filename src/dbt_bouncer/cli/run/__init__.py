@@ -5,10 +5,12 @@ from typing import Annotated
 
 import typer
 
+from dbt_bouncer.cli import app
 from dbt_bouncer.cli.run.utils import _detect_config_file_source, run_bouncer
 from dbt_bouncer.enums import ConfigFileName, OutputFormat
 
 
+@app.command(name="run")
 def run(
     config_file: Annotated[
         Path | None,
