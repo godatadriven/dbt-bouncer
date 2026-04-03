@@ -6,7 +6,7 @@ from typing import Annotated
 import typer
 
 from dbt_bouncer.cli import app
-from dbt_bouncer.cli.run.utils import _detect_config_file_source, run_bouncer
+from dbt_bouncer.cli.run.utils import detect_config_file_source, run_bouncer
 from dbt_bouncer.enums import ConfigFileName, OutputFormat
 
 
@@ -104,7 +104,7 @@ def run(
         Exit: If an invalid output format is provided or the checks fail.
 
     """
-    config_file_source = _detect_config_file_source(config_file)
+    config_file_source = detect_config_file_source(config_file)
 
     exit_code = run_bouncer(
         check=check,

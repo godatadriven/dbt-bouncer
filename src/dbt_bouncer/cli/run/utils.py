@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from dbt_bouncer.context import BouncerContext
 
 
-def _detect_config_file_source(config_file: Path | None) -> str:
+def detect_config_file_source(config_file: Path | None) -> str:
     """Detect the source of the config file.
 
     Args:
@@ -145,7 +145,7 @@ def run_bouncer(
 
     config_file = resolve_config_path(config_file)
     if config_file_source is None:
-        config_file_source = _detect_config_file_source(config_file)
+        config_file_source = detect_config_file_source(config_file)
 
     if (
         config_file_source is None

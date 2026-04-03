@@ -6,39 +6,38 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from dbt_bouncer.cli.run.utils import _build_context, _detect_config_file_source
+from dbt_bouncer.cli.run.utils import _build_context, detect_config_file_source
 from dbt_bouncer.enums import ConfigFileName
 
 
 class TestDetectConfigFileSource:
-    """Tests for _detect_config_file_source."""
+    """Tests for detect_config_file_source."""
 
     def test_none_returns_default(self):
         """None config_file should return DEFAULT."""
-        assert _detect_config_file_source(None) == "DEFAULT"
+        assert detect_config_file_source(None) == "DEFAULT"
 
     def test_default_yml_returns_default(self):
         """The default YML path should return DEFAULT."""
         assert (
-            _detect_config_file_source(Path(ConfigFileName.DBT_BOUNCER_YML))
-            == "DEFAULT"
+            detect_config_file_source(Path(ConfigFileName.DBT_BOUNCER_YML)) == "DEFAULT"
         )
 
     def test_default_toml_returns_default(self):
         """The default TOML path should return DEFAULT."""
         assert (
-            _detect_config_file_source(Path(ConfigFileName.DBT_BOUNCER_TOML))
+            detect_config_file_source(Path(ConfigFileName.DBT_BOUNCER_TOML))
             == "DEFAULT"
         )
 
     def test_custom_path_returns_commandline(self):
         """A non-default path should return COMMANDLINE."""
-        assert _detect_config_file_source(Path("custom-bouncer.yml")) == "COMMANDLINE"
+        assert detect_config_file_source(Path("custom-bouncer.yml")) == "COMMANDLINE"
 
     def test_nested_custom_path_returns_commandline(self):
         """A nested custom path should return COMMANDLINE."""
         assert (
-            _detect_config_file_source(Path("config/my-bouncer.toml")) == "COMMANDLINE"
+            detect_config_file_source(Path("config/my-bouncer.toml")) == "COMMANDLINE"
         )
 
     @pytest.mark.parametrize(
@@ -53,7 +52,7 @@ class TestDetectConfigFileSource:
     )
     def test_parametrized(self, config_file: Path | None, expected: str):
         """Parametrized coverage of all branches."""
-        assert _detect_config_file_source(config_file) == expected
+        assert detect_config_file_source(config_file) == expected
 
 
 class TestBuildContext:
