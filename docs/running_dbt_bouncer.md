@@ -6,7 +6,7 @@
     * `dbt docs generate` to generate a `catalog.json` artifact (necessary if you are using catalog checks).
     * `dbt run` (or any other command that implies it e.g. `dbt build`) to generate a `run_results.json` artifact (necessary if you are using run results checks).
 
-1. Create a config file (`dbt-bouncer.yml`, `dbt-bouncer.toml`, or a `[tool.dbt-bouncer]` section in `pyproject.toml`), details [here](./config_file.md). Alternatively, you can run `dbt-bouncer init` to generate a basic configuration file.
+1. Create a config file (`dbt-bouncer.yml`, `dbt-bouncer.toml`, or a `[tool.dbt-bouncer]` section in `pyproject.toml`), details [here](./configuration.md). Alternatively, you can run `dbt-bouncer init` to generate a basic configuration file.
 
 1. Run `dbt-bouncer` to validate that your conventions are being maintained.
 
