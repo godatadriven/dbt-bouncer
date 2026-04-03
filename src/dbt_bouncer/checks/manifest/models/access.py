@@ -115,9 +115,11 @@ def check_model_grant_privilege(model, *, privilege_pattern: str):
 def check_model_grant_privilege_required(model, *, privilege: str):
     """Model must have the specified grant privilege.
 
+    Parameters:
+        privilege (str): The privilege that is required.
+
     Receives:
         model (ModelNode): The ModelNode object to check.
-        privilege (str): The privilege that is required.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
