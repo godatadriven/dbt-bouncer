@@ -8,7 +8,10 @@ from typing import Annotated
 import typer
 from typer.main import get_command
 
-from dbt_bouncer.cli import init, list_checks, run, validate
+from dbt_bouncer.cli.init import init
+from dbt_bouncer.cli.list import list_checks
+from dbt_bouncer.cli.run import run
+from dbt_bouncer.cli.validate import validate
 from dbt_bouncer.enums import ConfigFileName, OutputFormat
 from dbt_bouncer.version import version as get_version
 
