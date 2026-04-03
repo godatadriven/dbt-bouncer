@@ -18,6 +18,9 @@ if TYPE_CHECKING:
 def _detect_config_file_source(config_file: Path | None) -> str:
     """Detect the source of the config file.
 
+    Args:
+        config_file: Path to the config file, or None for the default.
+
     Returns:
         str: 'COMMANDLINE' if a non-default config file was provided, else 'DEFAULT'.
 
