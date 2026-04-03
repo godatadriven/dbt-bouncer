@@ -1,5 +1,6 @@
 """Package for `dbt-bouncer`."""
 
+from dbt_bouncer.cli.run.utils import run_bouncer
 from dbt_bouncer.enums import (
     CheckOutcome,
     CheckSeverity,
@@ -7,7 +8,6 @@ from dbt_bouncer.enums import (
     Materialization,
     ResourceType,
 )
-from dbt_bouncer.main import run_bouncer
 
 __all__ = [
     "CheckOutcome",
