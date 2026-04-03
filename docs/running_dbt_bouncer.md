@@ -209,7 +209,7 @@ exit_code = run_bouncer(
     output_only_failures=False,  # optional, only include failures in output
     show_all_failures=False,  # optional, print all failures to console
     verbosity=0,  # optional, increase for more detailed output
-)
+)  # additional internal parameters omitted
 ```
 
 !!! tip "Trade-offs"
