@@ -1,6 +1,7 @@
 `dbt-bouncer` runs checks against artifacts from dbt. These checks fall into three categories:
 
 - Catalog checks:
+      - [Catalog Seeds](./catalog/check_catalog_seeds.md)
       - [Catalog Sources](./catalog/check_catalog_sources.md)
       - Columns
           - [Description](./catalog/columns/description.md)
