@@ -39,12 +39,12 @@ def check_column_description_populated(
 
     Example(s):
         ```yaml
-        manifest_checks:
+        catalog_checks:
             - name: check_column_description_populated
               include: ^models/marts
         ```
         ```yaml
-        manifest_checks:
+        catalog_checks:
             - name: check_column_description_populated
               min_description_length: 25 # Setting a stricter requirement for description length
         ```
