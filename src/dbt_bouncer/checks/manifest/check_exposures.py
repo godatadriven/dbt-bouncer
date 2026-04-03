@@ -115,6 +115,18 @@ def check_exposure_based_on_non_public_models(exposure, ctx):
     Receives:
         exposure (ExposureNode): The ExposureNode object to check.
 
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the exposure path (i.e the .yml file where the exposure is configured). Exposure paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the exposure path (i.e the .yml file where the exposure is configured). Only exposure paths that match the pattern will be checked.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_exposure_based_on_non_public_models
+        ```
+
     """
     models_by_id = (
         ctx.models_by_unique_id
