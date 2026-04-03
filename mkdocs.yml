@@ -30,7 +30,7 @@ markdown_extensions:
 nav:
   - Home: index.md
   - Running dbt-bouncer: running_dbt_bouncer.md
-  - Config File: config_file.md
+  - Configuration: configuration.md
   - Checks:
     - Checks: checks/index.md
     - Catalog:
