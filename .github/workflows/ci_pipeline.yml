@@ -246,7 +246,7 @@ jobs:
               run: |
                 docker run --rm \
                   --volume "$PWD":/app \
-                  ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:ci \
+                  "${REGISTRY}/${IMAGE_NAME}:ci" \
                   --config-file /app/dbt-bouncer-example.yml
 
     mkdocs-build:
