@@ -1,3 +1,5 @@
+"""dbt-bouncer CLI application entrypoint."""
+
 from __future__ import annotations
 
 from pathlib import Path
