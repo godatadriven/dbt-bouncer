@@ -26,7 +26,9 @@ from dbt_bouncer.utils import is_description_populated
 class BaseCheck(BaseModel):
     """Base class for all checks."""
 
-    model_config = ConfigDict(arbitrary_types_allowed=True, extra="forbid")
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True, defer_build=True, extra="forbid"
+    )
 
     description: str | None = Field(
         default=None,
