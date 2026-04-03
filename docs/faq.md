@@ -164,7 +164,7 @@ A monorepo may consist of one directory with a dbt project and other directories
     └── package.json
 ```
 
-To ease configuration you can use `exclude` or `include` at the global level (see [Config File](./config_file.md) for more details). For the above example `dbt-bouncer.yml` could be configured as:
+To ease configuration you can use `exclude` or `include` at the global level (see [Config File](./configuration.md) for more details). For the above example `dbt-bouncer.yml` could be configured as:
 
 ```yaml
 dbt_artifacts_dir: dbt-project/target
