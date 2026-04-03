@@ -107,6 +107,7 @@ def test_with_context():
 ## 6. Verify
 
 ```bash
+make generate-schema
 make test-unit
 prek run --all-files
 ```
