@@ -6,10 +6,7 @@ from typing import Annotated
 import typer
 from typer.main import get_command
 
-from dbt_bouncer.cli.init import init
-from dbt_bouncer.cli.list import list_checks
-from dbt_bouncer.cli.run import run
-from dbt_bouncer.cli.validate import validate
+from dbt_bouncer.cli import init, list_checks, run, validate
 from dbt_bouncer.enums import ConfigFileName, OutputFormat
 from dbt_bouncer.version import version as get_version
 
@@ -18,9 +15,9 @@ app = typer.Typer(
     context_settings={"help_option_names": ["-h", "--help"]},
 )
 
-app.command()(run)
-app.command()(init)
-app.command()(validate)
+app.command(name="run")(run)
+app.command(name="init")(init)
+app.command(name="validate")(validate)
 app.command(name="list")(list_checks)
 
 
