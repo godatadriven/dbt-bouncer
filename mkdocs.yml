@@ -34,6 +34,7 @@ nav:
   - Checks:
     - Checks: checks/index.md
     - Catalog:
+      - Catalog Seeds: checks/catalog/check_catalog_seeds.md
       - Catalog Sources: checks/catalog/check_catalog_sources.md
       - Columns:
           - checks/catalog/columns/description.md
