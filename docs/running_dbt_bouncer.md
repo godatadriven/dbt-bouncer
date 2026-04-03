@@ -201,9 +201,15 @@ from dbt_bouncer.main import run_bouncer
 
 exit_code = run_bouncer(
     config_file=Path("path/to/dbt-bouncer.yml"),
+    check="",  # optional, comma-separated check names to run
+    dry_run=False,  # optional, print which checks would run without executing
+    only="",  # optional, comma-separated categories e.g. "manifest_checks"
     output_file=Path("results.json"),  # optional
-    output_format="json",  # optional, one of: "csv", "json", "junit", "sarif", "tap". Defaults to "json"
-)
+    output_format="json",  # optional, one of: "csv", "json", "junit", "sarif", "tap"
+    output_only_failures=False,  # optional, only include failures in output
+    show_all_failures=False,  # optional, print all failures to console
+    verbosity=0,  # optional, increase for more detailed output
+)  # additional internal parameters omitted
 ```
 
 !!! tip "Trade-offs"
