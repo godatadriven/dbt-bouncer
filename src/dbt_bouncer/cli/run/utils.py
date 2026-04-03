@@ -6,6 +6,7 @@ import logging
 from pathlib import Path, PurePath
 from typing import TYPE_CHECKING
 
+from dbt_bouncer.cli.utils import resolve_config_path
 from dbt_bouncer.enums import ConfigFileName, OutputFormat
 from dbt_bouncer.reporting.logger import configure_console_logging
 from dbt_bouncer.version import version as get_version
@@ -13,23 +14,6 @@ from dbt_bouncer.version import version as get_version
 if TYPE_CHECKING:
     from dbt_bouncer.config_file_parser import DbtBouncerConfBase
     from dbt_bouncer.context import BouncerContext
-
-
-def _resolve_config_path(config_file: PurePath | None) -> Path:
-    """Resolve the config file path, defaulting to ``dbt-bouncer.yml``.
-
-    Args:
-        config_file: Explicit path, or None to use the default.
-
-    Returns:
-        Path: The resolved config file path.
-
-    """
-    return (
-        Path(ConfigFileName.DBT_BOUNCER_YML)
-        if config_file is None
-        else Path(config_file)
-    )
 
 
 def _detect_config_file_source(config_file: Path | None) -> str:
@@ -159,7 +143,7 @@ def run_bouncer(
         load_config_file_contents,
     )
 
-    config_file = _resolve_config_path(config_file)
+    config_file = resolve_config_path(config_file)
     if config_file_source is None:
         config_file_source = _detect_config_file_source(config_file)
 
