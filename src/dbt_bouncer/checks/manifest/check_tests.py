@@ -42,7 +42,7 @@ def check_test_has_tags(test, *, criteria: str = "all", tags: list[str]):
     """Data tests must have the specified tags.
 
     Parameters:
-        criteria (Literal["any", "all", "one"] | None): Whether the test must have any, all, or exactly one of the specified tags. Default: `any`.
+        criteria (Literal["any", "all", "one"] | None): Whether the test must have any, all, or exactly one of the specified tags. Default: `all`.
         tags (list[str]): List of tags to check for.
 
     Receives:
