@@ -8,31 +8,31 @@
       
       
       
-        <link rel="canonical" href="https://godatadriven.github.io/dbt-bouncer/latest/checks/manifest/sources/freshness/">
+        <link rel="canonical" href="https://godatadriven.github.io/dbt-bouncer/latest/checks/catalog/check_catalog_seeds/">
       
       
-        <link rel="prev" href="../directories/">
+        <link rel="prev" href="../../">
       
       
-        <link rel="next" href="../lineage/">
+        <link rel="next" href="../check_catalog_sources/">
       
       
         
       
       
-      <link rel="icon" href="../../../../assets/logo.svg">
+      <link rel="icon" href="../../../assets/logo.svg">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
     
     
       
-        <title>Freshness - dbt-bouncer</title>
+        <title>Catalog Seeds - dbt-bouncer</title>
       
     
     
-      <link rel="stylesheet" href="../../../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
       
         
-        <link rel="stylesheet" href="../../../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -51,11 +51,11 @@
       
     
     
-      <link rel="stylesheet" href="../../../../assets/_mkdocstrings.css">
+      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
     
-      <link rel="stylesheet" href="../../../../stylesheets/extra.css">
+      <link rel="stylesheet" href="../../../stylesheets/extra.css">
     
-    <script>__md_scope=new URL("../../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -80,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#freshness" class="md-skip">
+        <a href="#catalog-checks-catalog-seeds" class="md-skip">
           Skip to content
         </a>
       
@@ -95,12 +95,12 @@
             <div class="md-banner__inner md-grid md-typeset">
               
   You're not viewing the latest stable version of dbt-bouncer.
-  <a href="../../../../..">
+  <a href="../../../..">
     <strong>Click here to go to stable.</strong>
   </a>
 
             </div>
-            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../../../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
           </aside>
         
       </div>
@@ -112,9 +112,9 @@
 
 <header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../../../.." title="dbt-bouncer" class="md-header__button md-logo" aria-label="dbt-bouncer" data-md-component="logo">
+    <a href="../../.." title="dbt-bouncer" class="md-header__button md-logo" aria-label="dbt-bouncer" data-md-component="logo">
       
-  <img src="../../../../assets/logo.svg" alt="logo">
+  <img src="../../../assets/logo.svg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -131,7 +131,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Freshness
+              Catalog Seeds
             
           </span>
         </div>
@@ -246,7 +246,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../../.." class="md-tabs__link">
+      <a href="../../.." class="md-tabs__link">
         
   
   
@@ -265,7 +265,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../../../running_dbt_bouncer/" class="md-tabs__link">
+      <a href="../../../running_dbt_bouncer/" class="md-tabs__link">
         
   
   
@@ -284,7 +284,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../../../config_file/" class="md-tabs__link">
+      <a href="../../../config_file/" class="md-tabs__link">
         
   
   
@@ -307,7 +307,7 @@
     
     
       <li class="md-tabs__item md-tabs__item--active">
-        <a href="../../../" class="md-tabs__link">
+        <a href="../../" class="md-tabs__link">
           
   
   
@@ -327,7 +327,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../../../cli/" class="md-tabs__link">
+      <a href="../../../cli/" class="md-tabs__link">
         
   
   
@@ -346,7 +346,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../../../faq/" class="md-tabs__link">
+      <a href="../../../faq/" class="md-tabs__link">
         
   
   
@@ -367,7 +367,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../../migration/v3/" class="md-tabs__link">
+        <a href="../../../migration/v3/" class="md-tabs__link">
           
   
   
@@ -387,7 +387,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../../../CONTRIBUTING/" class="md-tabs__link">
+      <a href="../../../CONTRIBUTING/" class="md-tabs__link">
         
   
   
@@ -406,7 +406,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../../../users/" class="md-tabs__link">
+      <a href="../../../users/" class="md-tabs__link">
         
   
   
@@ -449,9 +449,9 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../../../.." title="dbt-bouncer" class="md-nav__button md-logo" aria-label="dbt-bouncer" data-md-component="logo">
+    <a href="../../.." title="dbt-bouncer" class="md-nav__button md-logo" aria-label="dbt-bouncer" data-md-component="logo">
       
-  <img src="../../../../assets/logo.svg" alt="logo">
+  <img src="../../../assets/logo.svg" alt="logo">
 
     </a>
     dbt-bouncer
@@ -478,7 +478,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../.." class="md-nav__link">
+      <a href="../../.." class="md-nav__link">
         
   
   
@@ -505,7 +505,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../running_dbt_bouncer/" class="md-nav__link">
+      <a href="../../../running_dbt_bouncer/" class="md-nav__link">
         
   
   
@@ -532,7 +532,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../config_file/" class="md-nav__link">
+      <a href="../../../config_file/" class="md-nav__link">
         
   
   
@@ -595,7 +595,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../../" class="md-nav__link ">
+            <a href="../../" class="md-nav__link ">
               
   
   
@@ -636,8 +636,10 @@
                 
   
   
+    
   
   
+  
     
     
       
@@ -661,13 +663,11 @@
     
       
     
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-          
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_2" checked>
         
           
           <label class="md-nav__link" for="__nav_4_2" id="__nav_4_2_label" tabindex="">
@@ -688,7 +688,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_4_2">
             <span class="md-nav__icon md-icon"></span>
             
@@ -703,10 +703,19 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../../catalog/check_catalog_seeds/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -722,6 +731,7 @@
   
 
       </a>
+      
     </li>
   
 
@@ -734,7 +744,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../catalog/check_catalog_sources/" class="md-nav__link">
+      <a href="../check_catalog_sources/" class="md-nav__link">
         
   
   
@@ -790,7 +800,7 @@
   
   
   
-    <a href="../../../catalog/columns/description/" class="md-nav__link">
+    <a href="../columns/description/" class="md-nav__link">
       
   
   
@@ -829,8 +839,6 @@
                 
   
   
-    
-  
   
   
     
@@ -872,11 +880,13 @@
     
       
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3" checked>
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_3" >
         
           
           <label class="md-nav__link" for="__nav_4_3" id="__nav_4_3_label" tabindex="">
@@ -897,7 +907,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_4_3">
             <span class="md-nav__icon md-icon"></span>
             
@@ -915,7 +925,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../check_exposures/" class="md-nav__link">
+      <a href="../../manifest/check_exposures/" class="md-nav__link">
         
   
   
@@ -943,7 +953,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../check_lineage/" class="md-nav__link">
+      <a href="../../manifest/check_lineage/" class="md-nav__link">
         
   
   
@@ -971,7 +981,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../check_macros/" class="md-nav__link">
+      <a href="../../manifest/check_macros/" class="md-nav__link">
         
   
   
@@ -999,7 +1009,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../check_metadata/" class="md-nav__link">
+      <a href="../../manifest/check_metadata/" class="md-nav__link">
         
   
   
@@ -1071,7 +1081,7 @@
   
   
   
-    <a href="../../models/access/" class="md-nav__link">
+    <a href="../../manifest/models/access/" class="md-nav__link">
       
   
   
@@ -1105,7 +1115,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../check_seeds/" class="md-nav__link">
+      <a href="../../manifest/check_seeds/" class="md-nav__link">
         
   
   
@@ -1133,7 +1143,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../check_semantic_models/" class="md-nav__link">
+      <a href="../../manifest/check_semantic_models/" class="md-nav__link">
         
   
   
@@ -1161,7 +1171,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../check_snapshots/" class="md-nav__link">
+      <a href="../../manifest/check_snapshots/" class="md-nav__link">
         
   
   
@@ -1186,49 +1196,49 @@
                 
   
   
+  
+  
     
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
   
   
   
-    
-    
+    <a href="../../manifest/sources/description/" class="md-nav__link">
       
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-        
-      
-    
-    
-      
-    
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3_9" checked>
-        
-          
-          <label class="md-nav__link" for="__nav_4_3_9" id="__nav_4_3_9_label" tabindex="0">
-            
   
   
   <span class="md-ellipsis">
@@ -1242,108 +1252,12 @@
   
   
 
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_3_9_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_4_3_9">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Sources
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../description/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Description
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../directories/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Directories
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-    
-  
-  
-  
-    <li class="md-nav__item md-nav__item--active">
       
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+        <span class="md-nav__icon md-icon"></span>
       
-      
-        
-      
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Freshness
+    </a>
   
 
-    
-  </span>
-  
-  
-
-      </a>
       
     </li>
   
@@ -1357,155 +1271,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../lineage/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Lineage
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../loader/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Loader
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../meta/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Meta
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../naming/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Naming
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../tags/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Tags
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../check_tests/" class="md-nav__link">
+      <a href="../../manifest/check_tests/" class="md-nav__link">
         
   
   
@@ -1533,7 +1299,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../check_unit_tests/" class="md-nav__link">
+      <a href="../../manifest/check_unit_tests/" class="md-nav__link">
         
   
   
@@ -1632,7 +1398,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../run_results/check_run_results/" class="md-nav__link">
+      <a href="../../run_results/check_run_results/" class="md-nav__link">
         
   
   
@@ -1675,7 +1441,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../cli/" class="md-nav__link">
+      <a href="../../../cli/" class="md-nav__link">
         
   
   
@@ -1702,7 +1468,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../faq/" class="md-nav__link">
+      <a href="../../../faq/" class="md-nav__link">
         
   
   
@@ -1753,7 +1519,7 @@
   
   
   
-    <a href="../../../../migration/v3/" class="md-nav__link">
+    <a href="../../../migration/v3/" class="md-nav__link">
       
   
   
@@ -1786,7 +1552,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../CONTRIBUTING/" class="md-nav__link">
+      <a href="../../../CONTRIBUTING/" class="md-nav__link">
         
   
   
@@ -1813,7 +1579,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../users/" class="md-nav__link">
+      <a href="../../../users/" class="md-nav__link">
         
   
   
@@ -1850,7 +1616,7 @@
 
 
   
-    <a href="https://github.com/godatadriven/dbt-bouncer/docs/checks/manifest/sources/freshness.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/godatadriven/dbt-bouncer/docs/checks/catalog/check_catalog_seeds.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75z"/></svg>
     </a>
@@ -1858,10 +1624,10 @@
   
 
 
-<h1 id="freshness">Freshness<a class="headerlink" href="#freshness" title="Permanent link">#</a></h1>
+<h1 id="catalog-checks-catalog-seeds">Catalog Checks: Catalog Seeds<a class="headerlink" href="#catalog-checks-catalog-seeds" title="Permanent link">#</a></h1>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The below checks require <code>manifest.json</code> to be present.</p>
+<p>The below checks require both <code>catalog.json</code> and <code>manifest.json</code> to be present.</p>
 </div>
 
 
@@ -1871,8 +1637,6 @@
 
 
     <div class="doc doc-contents first">
-
-      <p>Checks related to source freshness.</p>
 
 
 
@@ -1895,10 +1659,10 @@
       </thead>
       <tbody>
             <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="check_source_freshness_populated (manifest.sources.freshness.check_source_freshness_populated)" href="#manifest.sources.freshness.check_source_freshness_populated">check_source_freshness_populated</a></code></td>
+              <td><code><a class="autorefs autorefs-internal" title="check_seed_columns_are_all_documented (catalog.check_catalog_seeds.check_seed_columns_are_all_documented)" href="#catalog.check_catalog_seeds.check_seed_columns_are_all_documented">check_seed_columns_are_all_documented</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Sources must have a populated freshness.</p>
+                  <p>All columns in a seed CSV file should be included in the seed's properties file, i.e. <code>.yml</code> file.</p>
                 </div>
               </td>
             </tr>
@@ -1923,15 +1687,19 @@
 <div class="doc doc-object doc-function">
 
 
-<h1 id="manifest.sources.freshness.check_source_freshness_populated" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">check_source_freshness_populated</span></code>
+<h1 id="catalog.check_catalog_seeds.check_seed_columns_are_all_documented" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">check_seed_columns_are_all_documented</span></code>
 
-<a href="#manifest.sources.freshness.check_source_freshness_populated" class="headerlink" title="Permanent link">#</a></h1>
+<a href="#catalog.check_catalog_seeds.check_seed_columns_are_all_documented" class="headerlink" title="Permanent link">#</a></h1>
 
 
     <div class="doc doc-contents ">
 
-      <p>Sources must have a populated freshness.</p>
+      <p>All columns in a seed CSV file should be included in the seed's properties file, i.e. <code>.yml</code> file.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This check is only supported for dbt 1.9.0 and above.</p>
+</div>
 
 <p><strong>Receives at execution time:</strong></p>
 <table>
@@ -1944,12 +1712,32 @@
   </thead>
   <tbody>
       <tr>
-        <td><code>source</code>        <td>
-              <code><span title="SourceNode">SourceNode</span></code>
+        <td><code>catalog_node</code>        <td>
+              <code><span title="CatalogNodeEntry">CatalogNodeEntry</span></code>
         </td>
         <td>
           <div class="doc-md-description">
-            <p>The SourceNode object to check.</p>
+            <p>The CatalogNodeEntry object to check.</p>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td><code>manifest_obj</code>        <td>
+              <code><span title="ManifestObject">ManifestObject</span></code>
+        </td>
+        <td>
+          <div class="doc-md-description">
+            <p>The ManifestObject object parsed from <code>manifest.json</code>.</p>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td><code>seeds</code>        <td>
+              <code><span title="list">list</span>[<span title="SeedNode">SeedNode</span>]</code>
+        </td>
+        <td>
+          <div class="doc-md-description">
+            <p>List of SeedNode objects parsed from <code>manifest.json</code>.</p>
           </div>
         </td>
       </tr>
@@ -1983,7 +1771,7 @@
         </td>
         <td>
             <div class="doc-md-description">
-            <p>Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.</p>
+            <p>Regex pattern to match the seed path. Seed paths that match the pattern will not be checked.</p>
             </div>
         </td>
         </tr>
@@ -1994,7 +1782,7 @@
         </td>
         <td>
             <div class="doc-md-description">
-            <p>Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.</p>
+            <p>Regex pattern to match the seed path. Only seed paths that match the pattern will be checked.</p>
             </div>
         </td>
         </tr>
@@ -2011,14 +1799,15 @@
         </tr>
     </tbody>
 </table>      <p>Example(s):
-    <div class="language-yaml highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">manifest_checks</span><span class="p">:</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_source_freshness_populated</span>
+    <div class="language-yaml highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">catalog_checks</span><span class="p">:</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_seed_columns_are_all_documented</span>
 </span></code></pre></div></p>
 
 
             <details class="mkdocstrings-source">
-              <summary>Source code in <code>src/dbt_bouncer/checks/manifest/sources/freshness.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-6"> 6</a></span>
+              <summary>Source code in <code>src/dbt_bouncer/checks/catalog/check_catalog_seeds.py</code></summary>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-0-6"> 6</a></span>
 <span class="normal"><a href="#__codelineno-0-7"> 7</a></span>
 <span class="normal"><a href="#__codelineno-0-8"> 8</a></span>
 <span class="normal"><a href="#__codelineno-0-9"> 9</a></span>
@@ -2056,45 +1845,50 @@
 <span class="normal"><a href="#__codelineno-0-41">41</a></span>
 <span class="normal"><a href="#__codelineno-0-42">42</a></span>
 <span class="normal"><a href="#__codelineno-0-43">43</a></span>
-<span class="normal"><a href="#__codelineno-0-44">44</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6"></a><span class="nd">@check</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7"></a><span class="k">def</span><span class="w"> </span><span class="nf">check_source_freshness_populated</span><span class="p">(</span><span class="n">source</span><span class="p">):</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Sources must have a populated freshness.</span>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9"></a>
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10"></a><span class="sd">    Receives:</span>
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11"></a><span class="sd">        source (SourceNode): The SourceNode object to check.</span>
+<span class="normal"><a href="#__codelineno-0-44">44</a></span>
+<span class="normal"><a href="#__codelineno-0-45">45</a></span>
+<span class="normal"><a href="#__codelineno-0-46">46</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5"></a><span class="nd">@check</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6"></a><span class="k">def</span><span class="w"> </span><span class="nf">check_seed_columns_are_all_documented</span><span class="p">(</span><span class="n">catalog_node</span><span class="p">,</span> <span class="n">ctx</span><span class="p">):</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;All columns in a seed CSV file should be included in the seed&#39;s properties file, i.e. `.yml` file.</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8"></a>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9"></a><span class="sd">    !!! warning</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10"></a>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11"></a><span class="sd">        This check is only supported for dbt 1.9.0 and above.</span>
 </span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12"></a>
-</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13"></a><span class="sd">    Other Parameters:</span>
-</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14"></a><span class="sd">        description (str | None): Description of what the check does and why it is implemented.</span>
-</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15"></a><span class="sd">        exclude (str | None): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.</span>
-</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16"></a><span class="sd">        include (str | None): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.</span>
-</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17"></a><span class="sd">        severity (Literal[&quot;error&quot;, &quot;warn&quot;] | None): Severity level of the check. Default: `error`.</span>
-</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18"></a>
-</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19"></a><span class="sd">    Example(s):</span>
-</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20"></a><span class="sd">        ```yaml</span>
-</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21"></a><span class="sd">        manifest_checks:</span>
-</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22"></a><span class="sd">            - name: check_source_freshness_populated</span>
-</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23"></a><span class="sd">        ```</span>
-</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24"></a>
-</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25"></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26"></a>    <span class="n">display</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">source</span><span class="o">.</span><span class="n">source_name</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">source</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27"></a>    <span class="n">error_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;`</span><span class="si">{</span><span class="n">display</span><span class="si">}</span><span class="s2">` does not have a populated freshness.&quot;</span>
-</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28"></a>
-</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29"></a>    <span class="k">if</span> <span class="n">source</span><span class="o">.</span><span class="n">freshness</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30"></a>        <span class="n">fail</span><span class="p">(</span><span class="n">error_msg</span><span class="p">)</span>
-</span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31"></a>
-</span><span id="__span-0-32"><a id="__codelineno-0-32" name="__codelineno-0-32"></a>    <span class="n">has_error_after</span> <span class="o">=</span> <span class="p">(</span>
-</span><span id="__span-0-33"><a id="__codelineno-0-33" name="__codelineno-0-33"></a>        <span class="n">source</span><span class="o">.</span><span class="n">freshness</span><span class="o">.</span><span class="n">error_after</span>
-</span><span id="__span-0-34"><a id="__codelineno-0-34" name="__codelineno-0-34"></a>        <span class="ow">and</span> <span class="n">source</span><span class="o">.</span><span class="n">freshness</span><span class="o">.</span><span class="n">error_after</span><span class="o">.</span><span class="n">count</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-</span><span id="__span-0-35"><a id="__codelineno-0-35" name="__codelineno-0-35"></a>        <span class="ow">and</span> <span class="n">source</span><span class="o">.</span><span class="n">freshness</span><span class="o">.</span><span class="n">error_after</span><span class="o">.</span><span class="n">period</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-</span><span id="__span-0-36"><a id="__codelineno-0-36" name="__codelineno-0-36"></a>    <span class="p">)</span>
-</span><span id="__span-0-37"><a id="__codelineno-0-37" name="__codelineno-0-37"></a>    <span class="n">has_warn_after</span> <span class="o">=</span> <span class="p">(</span>
-</span><span id="__span-0-38"><a id="__codelineno-0-38" name="__codelineno-0-38"></a>        <span class="n">source</span><span class="o">.</span><span class="n">freshness</span><span class="o">.</span><span class="n">warn_after</span>
-</span><span id="__span-0-39"><a id="__codelineno-0-39" name="__codelineno-0-39"></a>        <span class="ow">and</span> <span class="n">source</span><span class="o">.</span><span class="n">freshness</span><span class="o">.</span><span class="n">warn_after</span><span class="o">.</span><span class="n">count</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-</span><span id="__span-0-40"><a id="__codelineno-0-40" name="__codelineno-0-40"></a>        <span class="ow">and</span> <span class="n">source</span><span class="o">.</span><span class="n">freshness</span><span class="o">.</span><span class="n">warn_after</span><span class="o">.</span><span class="n">period</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-</span><span id="__span-0-41"><a id="__codelineno-0-41" name="__codelineno-0-41"></a>    <span class="p">)</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13"></a><span class="sd">    Receives:</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14"></a><span class="sd">        catalog_node (CatalogNodeEntry): The CatalogNodeEntry object to check.</span>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15"></a><span class="sd">        manifest_obj (ManifestObject): The ManifestObject object parsed from `manifest.json`.</span>
+</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16"></a><span class="sd">        seeds (list[SeedNode]): List of SeedNode objects parsed from `manifest.json`.</span>
+</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17"></a>
+</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18"></a><span class="sd">    Other Parameters:</span>
+</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19"></a><span class="sd">        description (str | None): Description of what the check does and why it is implemented.</span>
+</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20"></a><span class="sd">        exclude (str | None): Regex pattern to match the seed path. Seed paths that match the pattern will not be checked.</span>
+</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21"></a><span class="sd">        include (str | None): Regex pattern to match the seed path. Only seed paths that match the pattern will be checked.</span>
+</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22"></a><span class="sd">        severity (Literal[&quot;error&quot;, &quot;warn&quot;] | None): Severity level of the check. Default: `error`.</span>
+</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23"></a>
+</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24"></a><span class="sd">    Example(s):</span>
+</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25"></a><span class="sd">        ```yaml</span>
+</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26"></a><span class="sd">        catalog_checks:</span>
+</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27"></a><span class="sd">            - name: check_seed_columns_are_all_documented</span>
+</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28"></a><span class="sd">        ```</span>
+</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29"></a>
+</span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30"></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31"></a>    <span class="k">if</span> <span class="n">catalog_node</span><span class="o">.</span><span class="n">unique_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">catalog_node</span><span class="o">.</span><span class="n">unique_id</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span>
+</span><span id="__span-0-32"><a id="__codelineno-0-32" name="__codelineno-0-32"></a>        <span class="s2">&quot;seed.&quot;</span>
+</span><span id="__span-0-33"><a id="__codelineno-0-33" name="__codelineno-0-33"></a>    <span class="p">):</span>
+</span><span id="__span-0-34"><a id="__codelineno-0-34" name="__codelineno-0-34"></a>        <span class="n">seed</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">ctx</span><span class="o">.</span><span class="n">seeds</span> <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">unique_id</span> <span class="o">==</span> <span class="n">catalog_node</span><span class="o">.</span><span class="n">unique_id</span><span class="p">)</span>
+</span><span id="__span-0-35"><a id="__codelineno-0-35" name="__codelineno-0-35"></a>
+</span><span id="__span-0-36"><a id="__codelineno-0-36" name="__codelineno-0-36"></a>        <span class="n">seed_columns</span> <span class="o">=</span> <span class="n">seed</span><span class="o">.</span><span class="n">columns</span> <span class="ow">or</span> <span class="p">{}</span>
+</span><span id="__span-0-37"><a id="__codelineno-0-37" name="__codelineno-0-37"></a>        <span class="n">undocumented_columns</span> <span class="o">=</span> <span class="p">[</span>
+</span><span id="__span-0-38"><a id="__codelineno-0-38" name="__codelineno-0-38"></a>            <span class="n">v</span><span class="o">.</span><span class="n">name</span>
+</span><span id="__span-0-39"><a id="__codelineno-0-39" name="__codelineno-0-39"></a>            <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">catalog_node</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+</span><span id="__span-0-40"><a id="__codelineno-0-40" name="__codelineno-0-40"></a>            <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seed_columns</span>
+</span><span id="__span-0-41"><a id="__codelineno-0-41" name="__codelineno-0-41"></a>        <span class="p">]</span>
 </span><span id="__span-0-42"><a id="__codelineno-0-42" name="__codelineno-0-42"></a>
-</span><span id="__span-0-43"><a id="__codelineno-0-43" name="__codelineno-0-43"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">has_error_after</span> <span class="ow">or</span> <span class="n">has_warn_after</span><span class="p">):</span>
-</span><span id="__span-0-44"><a id="__codelineno-0-44" name="__codelineno-0-44"></a>        <span class="n">fail</span><span class="p">(</span><span class="n">error_msg</span><span class="p">)</span>
+</span><span id="__span-0-43"><a id="__codelineno-0-43" name="__codelineno-0-43"></a>        <span class="k">if</span> <span class="n">undocumented_columns</span><span class="p">:</span>
+</span><span id="__span-0-44"><a id="__codelineno-0-44" name="__codelineno-0-44"></a>            <span class="n">fail</span><span class="p">(</span>
+</span><span id="__span-0-45"><a id="__codelineno-0-45" name="__codelineno-0-45"></a>                <span class="sa">f</span><span class="s2">&quot;`</span><span class="si">{</span><span class="n">get_clean_model_name</span><span class="p">(</span><span class="n">seed</span><span class="o">.</span><span class="n">unique_id</span><span class="p">)</span><span class="si">}</span><span class="s2">` has columns that are not included in the seed properties file: </span><span class="si">{</span><span class="n">undocumented_columns</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span id="__span-0-46"><a id="__codelineno-0-46" name="__codelineno-0-46"></a>            <span class="p">)</span>
 </span></code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -2128,7 +1922,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="March 6, 2026 13:37:24 UTC">March 6, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="April 3, 2026 07:33:05 UTC">April 3, 2026</span>
   </span>
 
     
@@ -2186,10 +1980,10 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../../../..", "features": ["content.action.edit", "content.code.annotate", "content.code.copy", "navigation.expand", "navigation.indexes", "navigation.instant", "navigation.instant.progress", "navigation.prune", "navigation.sections", "navigation.tabs", "navigation.tabs.sticky", "navigation.tracking", "navigation.top", "toc.follow", "toc.integrate"], "search": "../../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "canonical_version": "stable", "default": "stable", "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["content.action.edit", "content.code.annotate", "content.code.copy", "navigation.expand", "navigation.indexes", "navigation.instant", "navigation.instant.progress", "navigation.prune", "navigation.sections", "navigation.tabs", "navigation.tabs.sticky", "navigation.tracking", "navigation.top", "toc.follow", "toc.integrate"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "canonical_version": "stable", "default": "stable", "provider": "mike"}}</script>
     
     
-      <script src="../../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
     
   </body>
