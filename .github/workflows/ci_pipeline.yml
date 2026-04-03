@@ -25,12 +25,12 @@ jobs:
         runs-on: ubuntu-24.04
         steps:
             - name: Checkout
-              uses: actions/checkout@v6
+              uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
               with:
                 fetch-depth: "0"
 
             - name: checkout-merge
-              uses: check-spelling/checkout-merge@v0.0.6
+              uses: check-spelling/checkout-merge@29407b1b8660c562313ed65c81feab3e3255c03c # v0.0.6
 
             - name: Determine python version
               id: python-version
@@ -57,10 +57,10 @@ jobs:
         runs-on: ubuntu-24.04
         steps:
             - name: Checkout
-              uses: actions/checkout@v6
+              uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
             - name: checkout-merge
-              uses: check-spelling/checkout-merge@v0.0.6
+              uses: check-spelling/checkout-merge@29407b1b8660c562313ed65c81feab3e3255c03c # v0.0.6
 
             - name: Determine python version
               id: python-version
@@ -103,11 +103,11 @@ jobs:
                     - '3.13'
                     - '3.14'
         steps:
-            - uses: actions/checkout@v6
+            - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
             - name: checkout-merge
               if: matrix.operating-system != 'windows-2025'
-              uses: check-spelling/checkout-merge@v0.0.6
+              uses: check-spelling/checkout-merge@29407b1b8660c562313ed65c81feab3e3255c03c # v0.0.6
 
             - name: Setup Python
               uses: ./.github/actions/setup_python_env
@@ -154,7 +154,7 @@ jobs:
           contents: read
         runs-on: ubuntu-24.04
         steps:
-          - uses: actions/checkout@v6
+          - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
           - name: Setup Python
             uses: ./.github/actions/setup_python_env
@@ -163,7 +163,7 @@ jobs:
             run: make install
 
           - name: Install Hyperfine
-            uses: taiki-e/install-action@v2
+            uses: taiki-e/install-action@d858f8113943481093e02986a7586a4819a3bfd6 # v2
             with:
               tool: hyperfine@1.20
 
@@ -172,13 +172,13 @@ jobs:
               hyperfine --export-json benchmark_results.json --runs 10 'uv run dbt-bouncer --config-file dbt-bouncer-example.yml'
 
           - name: Upload Benchmark Results
-            uses: actions/upload-artifact@v7
+            uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7
             with:
               name: benchmark_results.json
               path: ./benchmark_results.json
 
           - name: Upload GitHub Pull Request Event
-            uses: actions/upload-artifact@v7
+            uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7
             with:
               name: event.json
               path: ${{ github.event_path }}
@@ -187,10 +187,10 @@ jobs:
       needs: [prek]
       runs-on: ubuntu-24.04
       steps:
-        - uses: actions/checkout@v6
+        - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
         - name: Build container and run tests
-          uses: devcontainers/ci@v0.3
+          uses: devcontainers/ci@8bf61b26e9c3a98f69cb6ce2f88d24ff59b785c6 # v0.3
           with:
             runCmd: |
               set -eou
@@ -205,10 +205,10 @@ jobs:
         runs-on: ubuntu-24.04
         steps:
             - name: Checkout
-              uses: actions/checkout@v6
+              uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
             - name: checkout-merge
-              uses: check-spelling/checkout-merge@v0.0.6
+              uses: check-spelling/checkout-merge@29407b1b8660c562313ed65c81feab3e3255c03c # v0.0.6
 
             - name: Determine python version
               id: python-version
@@ -223,7 +223,7 @@ jobs:
                 python-version: ${{ steps.python-version.outputs.PYTHON_VERSION }}
 
             - name: Set up Docker Buildx
-              uses: docker/setup-buildx-action@v4
+              uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4
 
             - name: Modify Dockerfile to use local dbt-bouncer version
               run: |
@@ -232,7 +232,7 @@ jobs:
                 sed -i -E '/ENTRYPOINT/i\COPY . .' ./Dockerfile
 
             - name: Build image
-              uses: docker/build-push-action@v6
+              uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
               with:
                   build-args: PYTHON_VERSION=${{ steps.python-version.outputs.PYTHON_VERSION }}
                   cache-from: type=gha
@@ -256,10 +256,10 @@ jobs:
       runs-on: ubuntu-24.04
       steps:
           - name: Checkout
-            uses: actions/checkout@v6
+            uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
           - name: checkout-merge
-            uses: check-spelling/checkout-merge@v0.0.6
+            uses: check-spelling/checkout-merge@29407b1b8660c562313ed65c81feab3e3255c03c # v0.0.6
 
           - name: Determine python version
             id: python-version

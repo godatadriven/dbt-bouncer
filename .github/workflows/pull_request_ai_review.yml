@@ -20,13 +20,13 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Download PR Event
-        uses: dawidd6/action-download-artifact@v19
+        uses: dawidd6/action-download-artifact@8a338493df3d275e4a7a63bcff3b8fe97e51a927 # v19
         with:
           name: ${{ env.PR_EVENT }}
           run_id: ${{ github.event.workflow_run.id }}
 
       - name: Export PR Event Data
-        uses: actions/github-script@v8
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
         with:
           script: |
             let fs = require('fs');
@@ -39,13 +39,13 @@ jobs:
             core.exportVariable("PR_CHANGED_FILES", prEvent.pull_request.changed_files);
 
       - name: Checkout PR Head
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           ref: ${{ env.PR_HEAD_SHA }}
           fetch-depth: 0
 
       - name: Analyse PR
-        uses: anthropics/claude-code-action@v1
+        uses: anthropics/claude-code-action@2f6ae6dec5e61533cbcb273c336448960b2c6a06 # v1
         with:
           allowed_bots: "dependabot"
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
