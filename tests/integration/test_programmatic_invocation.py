@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 import yaml
 
-from dbt_bouncer.main import run_bouncer
+from dbt_bouncer.cli.run.utils import run_bouncer
 
 
 def test_programmatic_happy_path(tmp_path):

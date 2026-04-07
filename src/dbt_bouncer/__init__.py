@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from dbt_bouncer.cli.run.utils import run_bouncer
     from dbt_bouncer.enums import (
         CheckOutcome,
         CheckSeverity,
@@ -12,7 +13,6 @@ if TYPE_CHECKING:
         Materialization,
         ResourceType,
     )
-    from dbt_bouncer.main import run_bouncer
 
 __all__ = [
     "CheckOutcome",
@@ -40,7 +40,7 @@ def __getattr__(name: str) -> object:
 
         return getattr(enums, name)
     if name == "run_bouncer":
-        from dbt_bouncer.main import run_bouncer
+        from dbt_bouncer.cli.run.utils import run_bouncer
 
         return run_bouncer
     msg = f"module 'dbt_bouncer' has no attribute {name}"
