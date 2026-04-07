@@ -110,7 +110,13 @@ def build_checks_payload(
 
 
 def print_text_checks(checks_payload: dict[str, list[CheckDict]]) -> None:
-    """Print checks in text format."""
+    """Print checks in text format.
+
+    Args:
+        checks_payload: Checks grouped by category label, as returned by
+            :func:`build_checks_payload`.
+
+    """
     for label, checks in checks_payload.items():
         typer.echo(f"{label}:")
         for check in checks:
