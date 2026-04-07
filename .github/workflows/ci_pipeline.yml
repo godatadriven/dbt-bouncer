@@ -28,6 +28,7 @@ jobs:
               uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
               with:
                 fetch-depth: "0"
+                persist-credentials: false
 
             - name: checkout-merge
               uses: check-spelling/checkout-merge@29407b1b8660c562313ed65c81feab3e3255c03c # v0.0.6
@@ -58,6 +59,8 @@ jobs:
         steps:
             - name: Checkout
               uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+              with:
+                persist-credentials: false
 
             - name: checkout-merge
               uses: check-spelling/checkout-merge@29407b1b8660c562313ed65c81feab3e3255c03c # v0.0.6
@@ -104,6 +107,8 @@ jobs:
                     - '3.14'
         steps:
             - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+              with:
+                persist-credentials: false
 
             - name: checkout-merge
               if: matrix.operating-system != 'windows-2025'
@@ -155,6 +160,8 @@ jobs:
         runs-on: ubuntu-24.04
         steps:
           - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+            with:
+              persist-credentials: false
 
           - name: Setup Python
             uses: ./.github/actions/setup_python_env
@@ -188,6 +195,8 @@ jobs:
       runs-on: ubuntu-24.04
       steps:
         - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+          with:
+            persist-credentials: false
 
         - name: Build container and run tests
           uses: devcontainers/ci@8bf61b26e9c3a98f69cb6ce2f88d24ff59b785c6 # v0.3
@@ -206,6 +215,8 @@ jobs:
         steps:
             - name: Checkout
               uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+              with:
+                persist-credentials: false
 
             - name: checkout-merge
               uses: check-spelling/checkout-merge@29407b1b8660c562313ed65c81feab3e3255c03c # v0.0.6
@@ -257,6 +268,8 @@ jobs:
       steps:
           - name: Checkout
             uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+            with:
+              persist-credentials: false
 
           - name: checkout-merge
             uses: check-spelling/checkout-merge@29407b1b8660c562313ed65c81feab3e3255c03c # v0.0.6

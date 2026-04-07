@@ -33,6 +33,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           ref: main
+          persist-credentials: false
 
       - name: Analyse issue
         uses: anthropics/claude-code-action@2f6ae6dec5e61533cbcb273c336448960b2c6a06 # v1
