@@ -1,5 +1,10 @@
 """Utility functions for the list CLI subcommand."""
 
+import itertools
+from typing import TypedDict
+
+import typer
+
 
 def category_key(check_class: type) -> str:
     """Return the display category name segment from the module path.
@@ -64,3 +69,65 @@ def get_check_params(check_class: type) -> dict[str, str]:
         type_str = getattr(annotation, "__name__", None) or str(annotation)
         params[field_name] = type_str
     return params
+
+
+class CheckDict(TypedDict):
+    """Dictionary representing a check."""
+
+    description: str
+    name: str
+    parameters: dict[str, str]
+
+
+def build_checks_payload(
+    checks: list[type], category_labels: dict[str, str]
+) -> dict[str, list[CheckDict]]:
+    """Build the checks payload grouped by category.
+
+    Args:
+        checks: List of check classes.
+        category_labels: Mapping from category to category label.
+
+    Returns:
+        The checks payload grouped by category.
+
+    """
+    result: dict[str, list[CheckDict]] = {}
+    for category, group in itertools.groupby(checks, key=category_key):
+        label = category_labels.get(category, category)
+        result[label] = []
+        for check_class in group:
+            docstring = (check_class.__doc__ or "").strip()
+            description = docstring.splitlines()[0] if docstring else ""
+            result[label].append(
+                {
+                    "description": description,
+                    "name": check_class.__name__,
+                    "parameters": get_check_params(check_class),
+                }
+            )
+    return result
+
+
+def print_text_checks(checks_payload: dict[str, list[CheckDict]]) -> None:
+    """Print checks in text format.
+
+    Args:
+        checks_payload: Checks grouped by category label, as returned by
+            :func:`build_checks_payload`.
+
+    """
+    for label, checks in checks_payload.items():
+        typer.echo(f"{label}:")
+        for check in checks:
+            params = check["parameters"]
+            params_text = (
+                "\n".join(
+                    f"        {name}: {type_str}" for name, type_str in params.items()
+                )
+                if params
+                else "        (none)"
+            )
+            typer.echo(
+                f"  {check['name']}:\n      {check['description']}\n      Parameters:\n{params_text}\n"
+            )

@@ -47,6 +47,13 @@ class OutputFormat(StrEnum):
         return list(cls)
 
 
+class OutputFormatCLI(StrEnum):
+    """Supported output formats for CLI list command."""
+
+    JSON = auto()
+    TEXT = auto()
+
+
 class ResourceType(StrEnum):
     """dbt resource types supported by dbt-bouncer."""
 
