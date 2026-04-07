@@ -207,7 +207,7 @@ class TestCheckMacroMaxNumberOfLinesInvalidParam:
     def test_raises_value_error(self, max_number_of_lines):
         from dbt_bouncer.testing import _run_check
 
-        with pytest.raises(ValueError, match="must be positive"):
+        with pytest.raises(ValueError, match="greater than 0"):
             _run_check(
                 "check_macro_max_number_of_lines",
                 macro={"macro_sql": "select 1"},

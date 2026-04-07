@@ -1,5 +1,9 @@
 """Checks related to model access controls and contract enforcement."""
 
+from typing import Annotated
+
+from pydantic import Field
+
 from dbt_bouncer.check_decorator import check, fail
 from dbt_bouncer.utils import compile_pattern, get_clean_model_name
 
@@ -175,7 +179,10 @@ def check_model_has_contracts_enforced(model):
 
 @check
 def check_model_number_of_grants(
-    model, *, max_number_of_privileges: int = 100, min_number_of_privileges: int = 0
+    model,
+    *,
+    max_number_of_privileges: Annotated[int, Field(gt=0)] = 100,
+    min_number_of_privileges: Annotated[int, Field(ge=0)] = 0,
 ):
     """Model can have the specified number of privileges.
 
@@ -203,14 +210,6 @@ def check_model_number_of_grants(
         ```
 
     """
-    if min_number_of_privileges < 0:
-        raise ValueError(
-            f"`min_number_of_privileges` must be non-negative, got {min_number_of_privileges}."
-        )
-    if max_number_of_privileges <= 0:
-        raise ValueError(
-            f"`max_number_of_privileges` must be positive, got {max_number_of_privileges}."
-        )
     if min_number_of_privileges > max_number_of_privileges:
         raise ValueError(
             f"`min_number_of_privileges` ({min_number_of_privileges}) must not exceed `max_number_of_privileges` ({max_number_of_privileges})."

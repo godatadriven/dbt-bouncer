@@ -1,9 +1,10 @@
 import re
 from pathlib import Path
-from typing import ClassVar
+from typing import Annotated, ClassVar
 
 from jinja2 import Environment, nodes
 from jinja2_simple_tags import StandaloneTag
+from pydantic import Field
 
 from dbt_bouncer.check_decorator import check, fail
 from dbt_bouncer.utils import clean_path_str, compile_pattern, is_description_populated
@@ -15,7 +16,7 @@ class TagExtension(StandaloneTag):
 
 @check
 def check_macro_arguments_description_populated(
-    macro, *, min_description_length: int | None = None
+    macro, *, min_description_length: Annotated[int, Field(gt=0)] | None = None
 ):
     """Macro arguments must have a populated description.
 
@@ -131,7 +132,7 @@ def check_macro_code_does_not_contain_regexp_pattern(macro, *, regexp_pattern: s
 
 @check
 def check_macro_description_populated(
-    macro, *, min_description_length: int | None = None
+    macro, *, min_description_length: Annotated[int, Field(gt=0)] | None = None
 ):
     """Macros must have a populated description.
 
@@ -167,7 +168,9 @@ def check_macro_description_populated(
 
 
 @check
-def check_macro_max_number_of_lines(macro, *, max_number_of_lines: int = 100):
+def check_macro_max_number_of_lines(
+    macro, *, max_number_of_lines: Annotated[int, Field(gt=0)] = 100
+):
     """Macros may not have more than the specified number of lines.
 
     Parameters:
@@ -194,11 +197,6 @@ def check_macro_max_number_of_lines(macro, *, max_number_of_lines: int = 100):
         ```
 
     """
-    if max_number_of_lines <= 0:
-        raise ValueError(
-            f"`max_number_of_lines` must be positive, got {max_number_of_lines}."
-        )
-
     actual_number_of_lines = macro.macro_sql.count("\n") + 1
 
     if actual_number_of_lines > max_number_of_lines:

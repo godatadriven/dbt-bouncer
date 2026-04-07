@@ -1,6 +1,9 @@
 """Checks related to model test coverage and test configuration."""
 
 import logging
+from typing import Annotated
+
+from pydantic import Field
 
 from dbt_bouncer.check_decorator import check, fail
 from dbt_bouncer.utils import get_clean_model_name, get_package_version_number
@@ -76,7 +79,9 @@ def check_model_has_unique_test(
 
 
 @check
-def check_model_has_unit_tests(model, ctx, *, min_number_of_unit_tests: int = 1):
+def check_model_has_unit_tests(
+    model, ctx, *, min_number_of_unit_tests: Annotated[int, Field(gt=0)] = 1
+):
     """Models must have more than the specified number of unit tests.
 
     Parameters:
@@ -158,9 +163,13 @@ def check_model_test_coverage(ctx, *, min_model_test_coverage_pct: float = 100):
         ```
 
     """
-    if min_model_test_coverage_pct < 0 or min_model_test_coverage_pct > 100:
+    if min_model_test_coverage_pct < 0:
         raise ValueError(
-            f"`min_model_test_coverage_pct` must be between 0 and 100, got {min_model_test_coverage_pct}."
+            f"`min_model_test_coverage_pct` must be greater than or equal to 0, got {min_model_test_coverage_pct}."
+        )
+    if min_model_test_coverage_pct > 100:
+        raise ValueError(
+            f"`min_model_test_coverage_pct` must be less than or equal to 100, got {min_model_test_coverage_pct}."
         )
 
     num_models = len(ctx.models)

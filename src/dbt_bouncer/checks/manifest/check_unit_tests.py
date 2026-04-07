@@ -1,6 +1,9 @@
 """Checks related to unit test coverage and formats."""
 
 import logging
+from typing import Annotated
+
+from pydantic import Field
 
 from dbt_bouncer.check_decorator import check, fail
 from dbt_bouncer.utils import get_package_version_number, object_in_path
@@ -8,7 +11,10 @@ from dbt_bouncer.utils import get_package_version_number, object_in_path
 
 @check
 def check_unit_test_coverage(
-    ctx, *, include: str | None = None, min_unit_test_coverage_pct: int = 100
+    ctx,
+    *,
+    include: str | None = None,
+    min_unit_test_coverage_pct: Annotated[int, Field(ge=0, le=100)] = 100,
 ):
     """Set the minimum percentage of models that have a unit test.
 
@@ -36,11 +42,6 @@ def check_unit_test_coverage(
         ```
 
     """
-    if min_unit_test_coverage_pct < 0 or min_unit_test_coverage_pct > 100:
-        raise ValueError(
-            f"`min_unit_test_coverage_pct` must be between 0 and 100, got {min_unit_test_coverage_pct}."
-        )
-
     manifest_obj = ctx.manifest_obj
     if get_package_version_number(
         manifest_obj.manifest.metadata.dbt_version or "0.0.0"

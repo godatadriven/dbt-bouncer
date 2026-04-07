@@ -76,6 +76,7 @@
         "min_description_length": {
           "anyOf": [
             {
+              "exclusiveMinimum": 0,
               "type": "integer"
             },
             {
@@ -538,6 +539,7 @@
         "min_description_length": {
           "anyOf": [
             {
+              "exclusiveMinimum": 0,
               "type": "integer"
             },
             {
@@ -626,11 +628,13 @@
         },
         "maximum_number_of_models": {
           "default": 100,
+          "exclusiveMinimum": 0,
           "title": "Maximum Number Of Models",
           "type": "integer"
         },
         "minimum_number_of_models": {
           "default": 1,
+          "exclusiveMinimum": 0,
           "title": "Minimum Number Of Models",
           "type": "integer"
         }
@@ -1129,6 +1133,7 @@
         "min_description_length": {
           "anyOf": [
             {
+              "exclusiveMinimum": 0,
               "type": "integer"
             },
             {
@@ -1302,6 +1307,7 @@
         "min_description_length": {
           "anyOf": [
             {
+              "exclusiveMinimum": 0,
               "type": "integer"
             },
             {
@@ -1390,6 +1396,7 @@
         },
         "max_number_of_lines": {
           "default": 100,
+          "exclusiveMinimum": 0,
           "title": "Max Number Of Lines",
           "type": "integer"
         }
@@ -2393,6 +2400,7 @@
         "min_description_length": {
           "anyOf": [
             {
+              "exclusiveMinimum": 0,
               "type": "integer"
             },
             {
@@ -2560,6 +2568,8 @@
         },
         "min_model_documentation_coverage_pct": {
           "default": 100,
+          "maximum": 100,
+          "minimum": 0,
           "title": "Min Model Documentation Coverage Pct",
           "type": "integer"
         }
@@ -3714,6 +3724,7 @@
         },
         "min_number_of_unit_tests": {
           "default": 1,
+          "exclusiveMinimum": 0,
           "title": "Min Number Of Unit Tests",
           "type": "integer"
         }
@@ -3884,6 +3895,7 @@
         },
         "max_chained_views": {
           "default": 3,
+          "exclusiveMinimum": 0,
           "title": "Max Chained Views",
           "type": "integer"
         },
@@ -3978,6 +3990,7 @@
         },
         "max_downstream_models": {
           "default": 3,
+          "exclusiveMinimum": 0,
           "title": "Max Downstream Models",
           "type": "integer"
         }
@@ -4142,16 +4155,19 @@
         },
         "max_upstream_macros": {
           "default": 5,
+          "exclusiveMinimum": 0,
           "title": "Max Upstream Macros",
           "type": "integer"
         },
         "max_upstream_models": {
           "default": 5,
+          "exclusiveMinimum": 0,
           "title": "Max Upstream Models",
           "type": "integer"
         },
         "max_upstream_sources": {
           "default": 1,
+          "exclusiveMinimum": 0,
           "title": "Max Upstream Sources",
           "type": "integer"
         }
@@ -4318,11 +4334,13 @@
         },
         "max_number_of_privileges": {
           "default": 100,
+          "exclusiveMinimum": 0,
           "title": "Max Number Of Privileges",
           "type": "integer"
         },
         "min_number_of_privileges": {
           "default": 0,
+          "minimum": 0,
           "title": "Min Number Of Privileges",
           "type": "integer"
         }
@@ -5312,6 +5330,7 @@
         "min_description_length": {
           "anyOf": [
             {
+              "exclusiveMinimum": 0,
               "type": "integer"
             },
             {
@@ -5400,6 +5419,7 @@
         },
         "min_number_of_unit_tests": {
           "default": 1,
+          "exclusiveMinimum": 0,
           "title": "Min Number Of Unit Tests",
           "type": "integer"
         }
@@ -5653,6 +5673,7 @@
         "min_description_length": {
           "anyOf": [
             {
+              "exclusiveMinimum": 0,
               "type": "integer"
             },
             {
@@ -5995,6 +6016,7 @@
         "min_description_length": {
           "anyOf": [
             {
+              "exclusiveMinimum": 0,
               "type": "integer"
             },
             {
@@ -6983,6 +7005,8 @@
         },
         "min_unit_test_coverage_pct": {
           "default": 100,
+          "maximum": 100,
+          "minimum": 0,
           "title": "Min Unit Test Coverage Pct",
           "type": "integer"
         }

@@ -1,6 +1,8 @@
 """Checks related to column descriptions and documentation coverage."""
 
-from typing import Any
+from typing import Annotated, Any
+
+from pydantic import Field
 
 from dbt_bouncer.check_decorator import check, fail
 from dbt_bouncer.utils import is_description_populated
@@ -19,7 +21,10 @@ def _is_catalog_node_a_model(catalog_node: Any, models: list[Any]) -> bool:
 
 @check
 def check_column_description_populated(
-    catalog_node, ctx, *, min_description_length: int | None = None
+    catalog_node,
+    ctx,
+    *,
+    min_description_length: Annotated[int, Field(gt=0)] | None = None,
 ):
     """Columns must have a populated description.
 
@@ -127,7 +132,10 @@ def check_columns_are_all_documented(
 
 @check
 def check_columns_are_documented_in_public_models(
-    catalog_node, ctx, *, min_description_length: int | None = None
+    catalog_node,
+    ctx,
+    *,
+    min_description_length: Annotated[int, Field(gt=0)] | None = None,
 ):
     """Columns should have a populated description in public models.
 

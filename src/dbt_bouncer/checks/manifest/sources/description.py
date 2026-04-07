@@ -1,12 +1,16 @@
 """Checks related to source descriptions."""
 
+from typing import Annotated
+
+from pydantic import Field
+
 from dbt_bouncer.check_decorator import check, fail
 from dbt_bouncer.utils import is_description_populated
 
 
 @check
 def check_source_description_populated(
-    source, *, min_description_length: int | None = None
+    source, *, min_description_length: Annotated[int, Field(gt=0)] | None = None
 ):
     """Sources must have a populated description.
 

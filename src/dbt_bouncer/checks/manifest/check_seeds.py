@@ -1,4 +1,7 @@
 import logging
+from typing import Annotated
+
+from pydantic import Field
 
 from dbt_bouncer.check_decorator import check, fail
 from dbt_bouncer.utils import (
@@ -79,7 +82,7 @@ def check_seed_columns_have_types(seed):
 
 @check
 def check_seed_description_populated(
-    seed, *, min_description_length: int | None = None
+    seed, *, min_description_length: Annotated[int, Field(gt=0)] | None = None
 ):
     """Seeds must have a populated description.
 
@@ -116,7 +119,9 @@ def check_seed_description_populated(
 
 
 @check
-def check_seed_has_unit_tests(seed, ctx, *, min_number_of_unit_tests: int = 1):
+def check_seed_has_unit_tests(
+    seed, ctx, *, min_number_of_unit_tests: Annotated[int, Field(gt=0)] = 1
+):
     """Seeds must have more than the specified number of unit tests.
 
     Parameters:
