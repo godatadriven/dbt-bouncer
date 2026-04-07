@@ -163,9 +163,13 @@ def check_model_test_coverage(ctx, *, min_model_test_coverage_pct: float = 100):
         ```
 
     """
-    if min_model_test_coverage_pct < 0 or min_model_test_coverage_pct > 100:
+    if min_model_test_coverage_pct < 0:
         raise ValueError(
-            f"`min_model_test_coverage_pct` must be between 0 and 100, got {min_model_test_coverage_pct}."
+            f"`min_model_test_coverage_pct` must be greater than or equal to 0, got {min_model_test_coverage_pct}."
+        )
+    if min_model_test_coverage_pct > 100:
+        raise ValueError(
+            f"`min_model_test_coverage_pct` must be less than or equal to 100, got {min_model_test_coverage_pct}."
         )
 
     num_models = len(ctx.models)

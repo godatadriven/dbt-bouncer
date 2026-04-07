@@ -143,7 +143,7 @@ def check_model_max_number_of_lines(model, *, max_number_of_lines: int = 100):
     """
     if max_number_of_lines <= 0:
         raise ValueError(
-            f"`max_number_of_lines` must be positive, got {max_number_of_lines}."
+            f"`max_number_of_lines` must be greater than 0, got {max_number_of_lines}."
         )
 
     actual_number_of_lines = (model.raw_code or "").count("\n") + 1
