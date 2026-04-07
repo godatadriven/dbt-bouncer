@@ -118,16 +118,16 @@ def test_check_unit_test_coverage(
 
 class TestCheckUnitTestCoverageInvalidParam:
     @pytest.mark.parametrize(
-        "min_pct",
+        ("min_pct", "match_pattern"),
         [
-            pytest.param(-1, id="negative"),
-            pytest.param(101, id="over_100"),
+            pytest.param(-1, "greater than or equal to 0", id="negative"),
+            pytest.param(101, "less than or equal to 100", id="over_100"),
         ],
     )
-    def test_raises_value_error(self, min_pct):
+    def test_raises_value_error(self, min_pct, match_pattern):
         from dbt_bouncer.testing import _run_check
 
-        with pytest.raises(ValueError, match="must be between 0 and 100"):
+        with pytest.raises(ValueError, match=match_pattern):
             _run_check(
                 "check_unit_test_coverage",
                 include="^models/staging",

@@ -399,7 +399,7 @@ class TestCheckModelMaxChainedViewsInvalidParam:
     def test_raises_value_error(self, max_chained_views):
         from dbt_bouncer.testing import _run_check
 
-        with pytest.raises(ValueError, match="must be positive"):
+        with pytest.raises(ValueError, match="greater than 0"):
             _run_check(
                 "check_model_max_chained_views",
                 materializations_to_include=["ephemeral", "view"],
@@ -421,7 +421,7 @@ class TestCheckModelMaxFanoutInvalidParam:
     def test_raises_value_error(self, max_downstream_models):
         from dbt_bouncer.testing import _run_check
 
-        with pytest.raises(ValueError, match="must be positive"):
+        with pytest.raises(ValueError, match="greater than 0"):
             _run_check(
                 "check_model_max_fanout",
                 max_downstream_models=max_downstream_models,
@@ -600,7 +600,7 @@ class TestCheckModelMaxUpstreamDependenciesInvalidParam:
     def test_raises_value_error(self, param_name, kwargs):  # noqa: ARG002
         from dbt_bouncer.testing import _run_check
 
-        with pytest.raises(ValueError, match="must be positive"):
+        with pytest.raises(ValueError, match="greater than 0"):
             _run_check(
                 "check_model_max_upstream_dependencies",
                 model={

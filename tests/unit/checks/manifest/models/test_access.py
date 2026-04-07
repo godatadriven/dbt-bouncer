@@ -191,9 +191,11 @@ class TestCheckModelNumberOfGrants:
     @pytest.mark.parametrize(
         ("max_n", "min_n", "match_pattern"),
         [
-            pytest.param(1, -1, "must be non-negative", id="min_negative"),
-            pytest.param(0, 0, "must be positive", id="max_zero"),
-            pytest.param(1, -1, "must be non-negative", id="min_negative_valid_max"),
+            pytest.param(1, -1, "greater than or equal to 0", id="min_negative"),
+            pytest.param(0, 0, "greater than 0", id="max_zero"),
+            pytest.param(
+                1, -1, "greater than or equal to 0", id="min_negative_valid_max"
+            ),
             pytest.param(1, 2, "must not exceed", id="min_exceeds_max"),
         ],
     )
