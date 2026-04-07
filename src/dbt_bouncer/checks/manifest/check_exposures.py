@@ -1,9 +1,16 @@
+from typing import Annotated
+
+from pydantic import Field
+
 from dbt_bouncer.check_decorator import check, fail
 
 
 @check
 def check_exposure_based_on_model(
-    exposure, *, maximum_number_of_models: int = 100, minimum_number_of_models: int = 1
+    exposure,
+    *,
+    maximum_number_of_models: Annotated[int, Field(gt=0)] = 100,
+    minimum_number_of_models: Annotated[int, Field(gt=0)] = 1,
 ):
     """Exposures should depend on a model.
 

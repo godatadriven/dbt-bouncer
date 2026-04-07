@@ -1,3 +1,7 @@
+from typing import Annotated
+
+from pydantic import Field
+
 from dbt_bouncer.check_decorator import check, fail
 from dbt_bouncer.utils import (
     compile_pattern,
@@ -8,7 +12,7 @@ from dbt_bouncer.utils import (
 
 @check
 def check_snapshot_description_populated(
-    snapshot, *, min_description_length: int | None = None
+    snapshot, *, min_description_length: Annotated[int, Field(gt=0)] | None = None
 ):
     """Snapshots must have a populated description.
 

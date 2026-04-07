@@ -1,5 +1,9 @@
 """Checks related to model upstream dependencies and lineage."""
 
+from typing import Annotated
+
+from pydantic import Field
+
 from dbt_bouncer.check_decorator import check, fail
 from dbt_bouncer.utils import get_clean_model_name
 
@@ -168,7 +172,7 @@ def check_model_max_chained_views(
     ctx,
     *,
     materializations_to_include: list[str] = ["ephemeral", "view"],  # noqa: B006
-    max_chained_views: int = 3,
+    max_chained_views: Annotated[int, Field(gt=0)] = 3,
     package_name: str | None = None,
 ):
     """Models cannot have more than the specified number of upstream dependents that are not tables.
@@ -204,11 +208,6 @@ def check_model_max_chained_views(
         ```
 
     """
-    if max_chained_views <= 0:
-        raise ValueError(
-            f"`max_chained_views` must be positive, got {max_chained_views}."
-        )
-
     manifest_obj = ctx.manifest_obj
 
     models_by_id = (
@@ -280,7 +279,9 @@ def check_model_max_chained_views(
 
 
 @check
-def check_model_max_fanout(model, ctx, *, max_downstream_models: int = 3):
+def check_model_max_fanout(
+    model, ctx, *, max_downstream_models: Annotated[int, Field(gt=0)] = 3
+):
     """Models cannot have more than the specified number of downstream models.
 
     Parameters:
@@ -305,11 +306,6 @@ def check_model_max_fanout(model, ctx, *, max_downstream_models: int = 3):
         ```
 
     """
-    if max_downstream_models <= 0:
-        raise ValueError(
-            f"`max_downstream_models` must be positive, got {max_downstream_models}."
-        )
-
     num_downstream_models = sum(
         model.unique_id in (getattr(m.depends_on, "nodes", []) if m.depends_on else [])
         for m in ctx.models
@@ -325,9 +321,9 @@ def check_model_max_fanout(model, ctx, *, max_downstream_models: int = 3):
 def check_model_max_upstream_dependencies(
     model,
     *,
-    max_upstream_macros: int = 5,
-    max_upstream_models: int = 5,
-    max_upstream_sources: int = 1,
+    max_upstream_macros: Annotated[int, Field(gt=0)] = 5,
+    max_upstream_models: Annotated[int, Field(gt=0)] = 5,
+    max_upstream_sources: Annotated[int, Field(gt=0)] = 1,
 ):
     """Limit the number of upstream dependencies a model has.
 
@@ -354,19 +350,6 @@ def check_model_max_upstream_dependencies(
         ```
 
     """
-    if max_upstream_macros <= 0:
-        raise ValueError(
-            f"`max_upstream_macros` must be positive, got {max_upstream_macros}."
-        )
-    if max_upstream_models <= 0:
-        raise ValueError(
-            f"`max_upstream_models` must be positive, got {max_upstream_models}."
-        )
-    if max_upstream_sources <= 0:
-        raise ValueError(
-            f"`max_upstream_sources` must be positive, got {max_upstream_sources}."
-        )
-
     depends_on = model.depends_on
     if depends_on:
         num_upstream_macros = len(list(getattr(depends_on, "macros", []) or []))
