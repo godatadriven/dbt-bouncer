@@ -99,30 +99,34 @@
                 run: |
                   git config --global user.email "bot@github.com"
                   git config --global user.name "github-actions[bot]"
-                  git checkout -b branch-v${{ steps.version.outputs.version }}
+                  git checkout -b branch-v${STEPS_VERSION_OUTPUTS_VERSION}
                   git add -A
-                  git commit -m "Bumping version to v${{ steps.version.outputs.version }}"
+                  git commit -m "Bumping version to v${STEPS_VERSION_OUTPUTS_VERSION}"
 
                   # Tag and push X.X.X
                   git tag -f \
-                    -a v${{ steps.version.outputs.version }} \
-                    -m "v${{ steps.version.outputs.version }}"
-                  git push -f origin "v${{ steps.version.outputs.version }}"
+                    -a v${STEPS_VERSION_OUTPUTS_VERSION} \
+                    -m "v${STEPS_VERSION_OUTPUTS_VERSION}"
+                  git push -f origin "v${STEPS_VERSION_OUTPUTS_VERSION}"
 
                   # Tag and push X.X
                   git tag -f \
-                    -a v${{ steps.version.outputs.major }}.${{ steps.version.outputs.minor }} \
-                    -m "v${{ steps.version.outputs.major }}.${{ steps.version.outputs.minor }}"
-                  git push -f origin "v${{ steps.version.outputs.major }}.${{ steps.version.outputs.minor }}"
+                    -a v${STEPS_VERSION_OUTPUTS_MAJOR}.${STEPS_VERSION_OUTPUTS_MINOR} \
+                    -m "v${STEPS_VERSION_OUTPUTS_MAJOR}.${STEPS_VERSION_OUTPUTS_MINOR}"
+                  git push -f origin "v${STEPS_VERSION_OUTPUTS_MAJOR}.${STEPS_VERSION_OUTPUTS_MINOR}"
 
                   # Tag and push X.X.X
                   git tag -f \
-                    -a v${{ steps.version.outputs.major }} \
-                    -m "v${{ steps.version.outputs.major }}"
-                  git push -f origin "v${{ steps.version.outputs.major }}"
+                    -a v${STEPS_VERSION_OUTPUTS_MAJOR} \
+                    -m "v${STEPS_VERSION_OUTPUTS_MAJOR}"
+                  git push -f origin "v${STEPS_VERSION_OUTPUTS_MAJOR}"
 
                   # Tag and push branch
-                  git push -f origin "branch-v${{ steps.version.outputs.version }}"
+                  git push -f origin "branch-v${STEPS_VERSION_OUTPUTS_VERSION}"
+                env:
+                  STEPS_VERSION_OUTPUTS_VERSION: ${{ steps.version.outputs.version }}
+                  STEPS_VERSION_OUTPUTS_MAJOR: ${{ steps.version.outputs.major }}
+                  STEPS_VERSION_OUTPUTS_MINOR: ${{ steps.version.outputs.minor }}
 
               - name: Extract metadata (tags, labels) for Docker
                 id: meta
@@ -168,15 +172,16 @@
               - name: Create release
                 env:
                     GH_TOKEN: ${{ secrets.PAT_GITHUB }}
+                    STEPS_VERSION_OUTPUTS_VERSION: ${{ steps.version.outputs.version }}
                 run: |
                     export LAST_RELEASE=$(gh release list --repo ${{ github.repository }} --order desc --json name --limit 1 | jq -r '.[0].name')
                     echo $LAST_RELEASE
-                    gh release create v${{ steps.version.outputs.version }} \
+                    gh release create v${STEPS_VERSION_OUTPUTS_VERSION} \
                         --generate-notes \
                         --repo ${{ github.repository }} \
                         --notes-start-tag $LAST_RELEASE \
-                        --target branch-v${{ steps.version.outputs.version }} \
-                        --title 'v${{ steps.version.outputs.version }}' \
+                        --target branch-v${STEPS_VERSION_OUTPUTS_VERSION} \
+                        --title 'v${STEPS_VERSION_OUTPUTS_VERSION}' \
                         $PRERELEASE \
                         --verify-tag
 
@@ -185,5 +190,7 @@
 
               - name: Deploy docs website
                 run: |
-                  uv run mike deploy --push --update-aliases v${{ steps.version.outputs.version }} stable
+                  uv run mike deploy --push --update-aliases v${STEPS_VERSION_OUTPUTS_VERSION} stable
                   uv run mike set-default --push stable
+                env:
+                  STEPS_VERSION_OUTPUTS_VERSION: ${{ steps.version.outputs.version }}

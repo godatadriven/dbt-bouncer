@@ -43,6 +43,7 @@ jobs:
         with:
           ref: ${{ env.PR_HEAD_SHA }}
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Analyse PR
         uses: anthropics/claude-code-action@2f6ae6dec5e61533cbcb273c336448960b2c6a06 # v1

@@ -15,7 +15,7 @@ jobs:
         steps:
             - name: Wait for PyPI package availability
               run: |
-                VERSION=$(echo "${{ github.ref }}" | cut -d "/" -f3 | sed 's/^v//')
+                VERSION=$(echo "${GITHUB_REF}" | cut -d "/" -f3 | sed 's/^v//')
                 echo "Waiting for dbt-bouncer==$VERSION on PyPI..."
                 TIMEOUT=600
                 INTERVAL=30
@@ -40,12 +40,14 @@ jobs:
         steps:
             - name: Checkout
               uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+              with:
+                persist-credentials: false
 
             - name: Run Docker test
               run: |
                 docker run --rm \
                   --volume "$PWD":/app \
-                  ghcr.io/godatadriven/dbt-bouncer:$(echo "${{ github.ref }}" | cut -d "/" -f3) \
+                  ghcr.io/godatadriven/dbt-bouncer:$(echo "${GITHUB_REF}" | cut -d "/" -f3) \
                   --config-file /app/dbt-bouncer-example.yml
 
     github-action-test:
@@ -55,7 +57,7 @@ jobs:
         runs-on: ubuntu-24.04
         steps:
             - name: Checkout
-              run: git clone https://github.com/godatadriven/dbt-bouncer.git --branch $(echo "${{ github.ref }}" | cut -d "/" -f3) --depth 1
+              run: git clone https://github.com/godatadriven/dbt-bouncer.git --branch $(echo "${GITHUB_REF}" | cut -d "/" -f3) --depth 1
 
             - name: Run `dbt-bouncer`
               uses: ./dbt-bouncer
@@ -82,6 +84,8 @@ jobs:
         steps:
             - name: Checkout
               uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+              with:
+                persist-credentials: false
 
             - name: Setup Python
               uses: ./.github/actions/setup_python_env
