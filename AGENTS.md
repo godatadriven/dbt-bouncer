@@ -35,7 +35,7 @@ make install
   - `run_results/` — run results checks
 - `src/dbt_bouncer/cli/` — CLI subpackage, one subdirectory per subcommand:
   - `init/` — interactive config file creation (`init`, `build_initial_config`, `write_config_file`)
-  - `list/` — list available checks (`list_checks`, `category_key`, `get_check_params`)
+  - `list/` — list available checks (`list_checks`, `build_checks_payload`, `category_key`, `get_check_params`, `print_text_checks`)
   - `run/` — execute bouncer checks (`run`, `run_bouncer`, `_detect_config_file_source`, `_build_context`)
   - `validate/` — lint config file (`validate`)
 - `src/dbt_bouncer/main.py` — Typer app setup, subcommand registration, backward-compatible `main_callback`
