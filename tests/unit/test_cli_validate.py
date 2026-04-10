@@ -92,3 +92,38 @@ class TestValidateCommand:
         result = runner.invoke(app, ["validate"])
 
         assert result.exit_code != 0
+
+    def test_valid_config_outputs_success_message(self, tmp_path, monkeypatch):
+        """A valid config prints a success message."""
+        monkeypatch.chdir(tmp_path)
+        _write_yaml(
+            tmp_path / "dbt-bouncer.yml",
+            {"manifest_checks": [{"name": "check_model_description_populated"}]},
+        )
+
+        result = runner.invoke(app, ["validate"])
+
+        assert "Configuration file is valid!" in result.output
+
+    def test_invalid_config_outputs_issue_count(self, tmp_path, monkeypatch):
+        """An invalid config prints the number of issues found."""
+        monkeypatch.chdir(tmp_path)
+        config_file = tmp_path / "dbt-bouncer.yml"
+        config_file.write_text("manifest_checks: not-a-list\n")
+
+        result = runner.invoke(app, ["validate"])
+
+        assert "Found" in result.output
+        assert "issue(s) in config file:" in result.output
+
+    def test_invalid_config_outputs_line_numbers(self, tmp_path, monkeypatch):
+        """An invalid config prints line numbers for each issue."""
+        monkeypatch.chdir(tmp_path)
+        _write_yaml(
+            tmp_path / "dbt-bouncer.yml",
+            {"manifest_checks": [{"description": "no name here"}]},
+        )
+
+        result = runner.invoke(app, ["validate"])
+
+        assert "Line" in result.output
