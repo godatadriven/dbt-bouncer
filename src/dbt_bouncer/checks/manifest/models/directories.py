@@ -12,6 +12,10 @@ def check_model_directories(
 ):
     """Only specified sub-directories are permitted.
 
+    !!! info "Rationale"
+
+        A well-structured dbt project organises models into predictable directories (e.g. `staging`, `intermediate`, `marts`). Enforcing permitted sub-directories prevents ad-hoc folders from proliferating, making the project layout consistent and navigable for all contributors.
+
     Parameters:
         include (str): Regex pattern to the directory to check.
         permitted_sub_directories (list[str]): List of permitted sub-directories.
@@ -68,6 +72,10 @@ def check_model_directories(
 def check_model_file_name(model, *, file_name_pattern: str):
     r"""Models must have a file name that matches the supplied regex.
 
+    !!! info "Rationale"
+
+        Consistent file naming conventions (e.g. including a version suffix for mart models) make it easy to identify a model's purpose and layer at a glance. Enforcing naming patterns in CI prevents deviations that accumulate over time and make the project harder to navigate.
+
     Parameters:
         file_name_pattern (str): Regexp the file name must match. Please account for the `.sql` extension.
 
@@ -102,6 +110,10 @@ def check_model_file_name(model, *, file_name_pattern: str):
 @check
 def check_model_property_file_location(model):
     """Model properties files must follow the guidance provided by dbt [here](https://docs.getdbt.com/best-practices/how-we-structure/1-guide-overview).
+
+    !!! info "Rationale"
+
+        dbt's official guidance recommends a specific naming and placement convention for YAML property files (e.g. `_staging__models.yml`). Following this convention ensures that property files are easy to locate, clearly scoped, and consistent with the broader dbt community's expectations.
 
     Receives:
         model (ModelNode): The ModelNode object to check.
@@ -161,6 +173,10 @@ def check_model_property_file_location(model):
 @check
 def check_model_schema_name(model, *, schema_name_pattern: str):
     """Models must have a schema name that matches the supplied regex.
+
+    !!! info "Rationale"
+
+        Consistent schema naming (e.g. `stg_payments` for staging models or `intermediate` for intermediate ones) makes it clear where a model lives in the transformation pipeline without inspecting its SQL. This also prevents models from landing in unexpected schemas in production due to misconfigured `dbt_project.yml` settings.
 
     Note that most setups will use schema names in development that are prefixed, for example:
         * dbt_jdoe_stg_payments
