@@ -16,6 +16,10 @@ from dbt_bouncer.utils import (
 def check_seed_column_names(seed, *, seed_column_name_pattern: str):
     """Seed columns must have names that match the supplied regex.
 
+    !!! info "Rationale"
+
+        Seeds are loaded directly into the warehouse from CSV files, and their column names become part of the project's data contract. Inconsistent casing or naming conventions (e.g. mixing camelCase and snake_case) causes friction when joining seed data with other models and makes the project harder to maintain. Enforcing a naming pattern keeps seed columns consistent with the rest of the project.
+
     Parameters:
         seed_column_name_pattern (str): Regexp the column name must match.
 
@@ -54,6 +58,10 @@ def check_seed_column_names(seed, *, seed_column_name_pattern: str):
 def check_seed_columns_have_types(seed):
     """Columns defined for seeds must have a `data_type` declared.
 
+    !!! info "Rationale"
+
+        Without explicit `data_type` declarations, dbt seeds rely on the warehouse to infer column types from the CSV data, which can lead to unexpected type coercions (e.g. numeric IDs loaded as strings, dates loaded as text). Declaring types explicitly ensures the seed loads with the expected schema and prevents subtle data quality issues downstream.
+
     Receives:
         seed (SeedNode): The SeedNode object to check.
 
@@ -85,6 +93,10 @@ def check_seed_description_populated(
     seed, *, min_description_length: Annotated[int, Field(gt=0)] | None = None
 ):
     """Seeds must have a populated description.
+
+    !!! info "Rationale"
+
+        Seeds represent static reference or lookup data that is loaded into the warehouse from version-controlled CSV files. Without descriptions, it is unclear what a seed contains, why it exists, and when it was last validated — making it difficult for new team members to assess whether data they find in the warehouse is the right dataset to use.
 
     Parameters:
         min_description_length (int | None): Minimum length required for the description to be considered populated.
@@ -123,6 +135,10 @@ def check_seed_has_unit_tests(
     seed, ctx, *, min_number_of_unit_tests: Annotated[int, Field(gt=0)] = 1
 ):
     """Seeds must have more than the specified number of unit tests.
+
+    !!! info "Rationale"
+
+        Seeds contain static data that is loaded directly into the warehouse, and their transformations (via the `ref()` function in downstream models) need to be verifiable. Unit tests on seeds validate that the downstream logic correctly handles the reference data — catching issues like missing mappings, unexpected nulls, or edge-case values before they reach production.
 
     Parameters:
         min_number_of_unit_tests (int | None): The minimum number of unit tests that a seed must have.
@@ -181,6 +197,10 @@ def check_seed_has_unit_tests(
 @check
 def check_seed_names(seed, *, seed_name_pattern: str):
     """Seed must have a name that matches the supplied regex.
+
+    !!! info "Rationale"
+
+        Seed naming conventions help analysts and engineers quickly identify reference data in the warehouse and distinguish seeds from models or sources. A consistent prefix or pattern (e.g. `ref_` or `raw_`) makes it clear what type of data an object contains and prevents naming collisions between seeds and other resources in the project.
 
     Parameters:
         seed_name_pattern (str): Regexp the seed name must match.

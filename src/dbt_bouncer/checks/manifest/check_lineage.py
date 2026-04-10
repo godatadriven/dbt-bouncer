@@ -8,6 +8,10 @@ def check_lineage_permitted_upstream_models(
 ):
     """Upstream models must have a path that matches the provided `upstream_path_pattern`.
 
+    !!! info "Rationale"
+
+        A well-structured dbt project enforces clear layer boundaries — e.g. staging models only reference sources, intermediate models only reference staging or other intermediates, and marts only reference intermediates. Without this check, developers can inadvertently create cross-layer dependencies (a mart model directly referencing a staging model) that erode the project's modularity and make refactoring risky.
+
     Parameters:
         upstream_path_pattern (str): Regexp pattern to match the upstream model(s) path.
 
@@ -70,6 +74,10 @@ def check_lineage_permitted_upstream_models(
 def check_lineage_seed_cannot_be_used(model):
     """Seed cannot be referenced in models with a path that matches the specified `include` config.
 
+    !!! info "Rationale"
+
+        Seeds are designed for small, static reference data (e.g. country codes, status mappings). Referencing seeds in intermediate or mart layers can indicate that data which should come from a source or staging model is instead being managed as a CSV file, making it harder to audit, version, and scale.
+
     Receives:
         model (ModelNode): The ModelNode object to check.
 
@@ -100,6 +108,10 @@ def check_lineage_seed_cannot_be_used(model):
 @check
 def check_lineage_source_cannot_be_used(model):
     """Sources cannot be referenced in models with a path that matches the specified `include` config.
+
+    !!! info "Rationale"
+
+        In a well-layered dbt project, raw sources should only be referenced from staging models. Allowing intermediate or mart models to query sources directly bypasses the staging layer, leads to duplicated transformation logic, and makes it harder to swap or rename sources without cascading changes across the project.
 
     Receives:
         model (ModelNode): The ModelNode object to check.

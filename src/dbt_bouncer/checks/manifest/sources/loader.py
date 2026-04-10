@@ -7,6 +7,10 @@ from dbt_bouncer.check_decorator import check, fail
 def check_source_loader_populated(source):
     """Sources must have a populated loader.
 
+    !!! info "Rationale"
+
+        The `loader` field documents which tool or pipeline is responsible for bringing data into the warehouse (e.g. Fivetran, Airbyte, a custom ETL script). Without it, there is no traceable link between a dbt source and the upstream process that feeds it, making it difficult to investigate data quality issues, coordinate with data engineering teams, or assess the impact of changes to the ingestion layer. Requiring a populated loader turns each source into a self-documenting artifact that points clearly to its origin.
+
     Receives:
         source (SourceNode): The SourceNode object to check.
 

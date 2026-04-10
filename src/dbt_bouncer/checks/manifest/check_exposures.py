@@ -14,6 +14,10 @@ def check_exposure_based_on_model(
 ):
     """Exposures should depend on a model.
 
+    !!! info "Rationale"
+
+        Exposures document downstream consumers of dbt models — dashboards, ML models, and APIs. If an exposure references no models (or too many), it signals that the lineage metadata is incomplete or incorrect. Enforcing a model count range ensures each exposure is meaningfully connected to the data layer it represents, keeping documentation trustworthy.
+
     Parameters:
         maximum_number_of_models (int | None): The maximum number of models an exposure can depend on, defaults to 100.
         minimum_number_of_models (int | None): The minimum number of models an exposure can depend on, defaults to 1.
@@ -63,6 +67,10 @@ def check_exposure_based_on_view(
     materializations_to_include: list[str] = ["ephemeral", "view"],  # noqa: B006
 ):
     """Exposures should not be based on views.
+
+    !!! info "Rationale"
+
+        Views and ephemeral models recompute their SQL every time they are queried. When a BI tool or downstream application queries an exposure built on a view, it triggers a full recomputation on every refresh, which can be slow and expensive at scale. Exposures should sit on top of materialised tables to ensure consistent, performant query times for end users.
 
     Parameters:
         materializations_to_include (list[str] | None): List of materializations to include in the check.
@@ -118,6 +126,10 @@ def check_exposure_based_on_view(
 @check
 def check_exposure_based_on_non_public_models(exposure, ctx):
     """Exposures should be based on public models only.
+
+    !!! info "Rationale"
+
+        Public access in dbt signals that a model is stable, well-tested, and safe to depend on externally. Exposures that reference protected or private models create implicit dependencies on implementation details that may change without warning, increasing the risk of broken dashboards or pipelines when internal models are refactored.
 
     Receives:
         exposure (ExposureNode): The ExposureNode object to check.

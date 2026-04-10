@@ -8,6 +8,10 @@ from dbt_bouncer.utils import compile_pattern
 def check_source_names(source, *, source_name_pattern: str):
     """Sources must have a name that matches the supplied regex.
 
+    !!! info "Rationale"
+
+        Source names appear throughout the dbt project in `{{ source() }}` calls, documentation, and lineage graphs. Inconsistent naming (mixed case, spaces, non-standard characters) makes sources harder to reference and distinguish at a glance, and can cause subtle errors when names are used in downstream string processing or data catalogue integrations. Enforcing a naming pattern ensures all sources share a predictable, readable format from the moment they are registered in the project.
+
     Parameters:
         source_name_pattern (str): Regexp the source name must match.
 

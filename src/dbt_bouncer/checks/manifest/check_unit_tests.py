@@ -18,6 +18,10 @@ def check_unit_test_coverage(
 ):
     """Set the minimum percentage of models that have a unit test.
 
+    !!! info "Rationale"
+
+        Unit tests validate that a model's SQL logic produces the correct output for a given set of inputs, independently of live data. Tracking coverage across the project ensures that critical business logic is not left untested, which reduces the risk of silent regressions when models are refactored or when source data shapes change unexpectedly.
+
     !!! warning
 
         This check is only supported for dbt 1.8.0 and above.
@@ -82,6 +86,10 @@ def check_unit_test_expect_format(
 ):
     """Unit tests can only use the specified formats.
 
+    !!! info "Rationale"
+
+        dbt unit tests support multiple `expect` formats — `csv`, `dict`, and `sql` — each with different trade-offs in readability, portability, and maintenance overhead. Restricting permitted formats enforces a project-wide standard that keeps unit tests consistent and readable, and avoids formats that may be harder for the team to maintain (e.g. raw SQL expectations that are difficult to diff).
+
     !!! warning
 
         This check is only supported for dbt 1.8.0 and above.
@@ -142,6 +150,10 @@ def check_unit_test_given_formats(
     permitted_formats: list[str] = ["csv", "dict", "sql"],  # noqa: B006
 ):
     """Unit tests can only use the specified formats.
+
+    !!! info "Rationale"
+
+        The `given` section of a dbt unit test defines the mock input data for the test. Standardising the format across all `given` inputs (e.g. requiring `csv` for human-readable diffs in code review) keeps tests consistent and ensures that engineers reviewing test changes can quickly assess whether the input data is correct without needing to parse unfamiliar formats.
 
     !!! warning
 

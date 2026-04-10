@@ -8,6 +8,10 @@ from dbt_bouncer.utils import compile_pattern
 def check_model_latest_version_specified(model):
     """Check that the `latest_version` attribute of the model is set.
 
+    !!! info "Rationale"
+
+        The `latest_version` attribute tells dbt which version of a model downstream consumers should default to when using `ref('model_name')` without specifying a version. Without it, dbt cannot resolve unversioned references, and consumers may inadvertently pin to an older version. Enforcing this attribute ensures the model versioning contract is fully specified.
+
     Receives:
         model (ModelNode): The ModelNode object to check.
 
@@ -33,6 +37,10 @@ def check_model_latest_version_specified(model):
 @check
 def check_model_version_allowed(model, *, version_pattern: str):
     r"""Check that the version of the model matches the supplied regex pattern.
+
+    !!! info "Rationale"
+
+        Teams that use model versioning often enforce a convention for version identifiers — for example, numeric-only versions or semantic version strings. This check validates that version values conform to the team's chosen scheme, preventing arbitrary or malformed version strings from being introduced.
 
     Parameters:
         version_pattern (str): Regexp the version must match.
@@ -70,6 +78,10 @@ def check_model_version_allowed(model, *, version_pattern: str):
 @check
 def check_model_version_pinned_in_ref(model, ctx):
     """Check that the version of the model is always specified in downstream nodes.
+
+    !!! info "Rationale"
+
+        When a versioned model is referenced without specifying a version, dbt resolves it to the `latest_version`, meaning a version bump can silently redirect all downstream consumers. Requiring explicit version pins in `ref()` calls ensures that version upgrades are a deliberate, reviewed change rather than an implicit one.
 
     Receives:
         manifest_obj (ManifestObject): The ManifestObject object parsed from `manifest.json`.

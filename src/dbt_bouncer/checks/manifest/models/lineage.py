@@ -14,6 +14,10 @@ def check_model_depends_on_macros(
 ):
     """Models must depend on the specified macros.
 
+    !!! info "Rationale"
+
+        Some teams mandate that certain model types always use shared macros for consistency — for example, requiring all incremental models to call `dbt.is_incremental()`. This check enforces those conventions, preventing models from re-implementing logic that is already standardised in a shared macro.
+
     Parameters:
         criteria: (Literal["any", "all", "one"] | None): Whether the model must depend on any, all, or exactly one of the specified macros. Default: `any`.
         required_macros: (list[str]): List of macros the model must depend on. All macros must specify a namespace, e.g. `dbt.is_incremental`.
@@ -72,6 +76,10 @@ def check_model_depends_on_macros(
 def check_model_depends_on_multiple_sources(model):
     """Models cannot reference more than one source.
 
+    !!! info "Rationale"
+
+        A model that references multiple sources often signals that raw-layer joins are being performed too early, making the model harder to test, debug, and reuse. Enforcing single-source staging models encourages a clean DAG where each staging model maps 1:1 to a source table, and joins happen in downstream intermediate or mart models.
+
     Receives:
         model (ModelNode): The ModelNode object to check.
 
@@ -102,6 +110,10 @@ def check_model_depends_on_multiple_sources(model):
 @check
 def check_model_has_exposure(model, ctx):
     """Models must have an exposure.
+
+    !!! info "Rationale"
+
+        Exposures declare how dbt models are consumed by downstream tools such as dashboards, ML pipelines, or applications. Requiring mart models to be referenced in at least one exposure ensures that every curated output has a known consumer, making it easier to assess the impact of changes and avoid maintaining unused models.
 
     Receives:
         exposures (list[ExposureNode]):  List of ExposureNode objects parsed from `manifest.json`.
@@ -138,6 +150,10 @@ def check_model_has_exposure(model, ctx):
 @check
 def check_model_has_no_upstream_dependencies(model):
     """Identify if models have no upstream dependencies as this likely indicates hard-coded tables references.
+
+    !!! info "Rationale"
+
+        A model with zero upstream dependencies is almost certainly using hard-coded table references (`FROM schema.table`) instead of `ref()` or `source()`. This breaks dbt's dependency graph, meaning the model won't run in the correct order, won't appear in lineage, and won't benefit from environment-aware compilation.
 
     Receives:
         model (ModelNode): The ModelNode object to check.
@@ -176,6 +192,10 @@ def check_model_max_chained_views(
     package_name: str | None = None,
 ):
     """Models cannot have more than the specified number of upstream dependents that are not tables.
+
+    !!! info "Rationale"
+
+        Long chains of views and ephemeral models force the data warehouse to execute deeply nested queries at read time, which degrades query performance and can hit platform-specific nesting limits. Capping chained views encourages materialising intermediate results, trading a small amount of storage for significantly faster query execution.
 
     Parameters:
         materializations_to_include (list[str] | None): List of materializations to include in the check.
@@ -284,6 +304,10 @@ def check_model_max_fanout(
 ):
     """Models cannot have more than the specified number of downstream models.
 
+    !!! info "Rationale"
+
+        A model with many direct downstream dependents becomes a high-impact change point — any modification to it requires testing and potentially breaking many consumers. Capping fanout encourages breaking widely-shared logic into more focused intermediate models, reducing the blast radius of changes.
+
     Parameters:
         max_downstream_models (int | None): The maximum number of permitted downstream models.
 
@@ -326,6 +350,10 @@ def check_model_max_upstream_dependencies(
     max_upstream_sources: Annotated[int, Field(gt=0)] = 1,
 ):
     """Limit the number of upstream dependencies a model has.
+
+    !!! info "Rationale"
+
+        A model that depends on too many upstream models, sources, or macros is likely doing too much in one place. Limiting upstream dependencies encourages splitting large transformations into smaller, testable units, which improves build times, reduces coupling, and makes the DAG easier to reason about.
 
     Parameters:
         max_upstream_macros (int | None): The maximum number of permitted upstream macros.

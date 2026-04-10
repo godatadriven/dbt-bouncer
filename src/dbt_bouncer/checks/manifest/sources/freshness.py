@@ -7,6 +7,10 @@ from dbt_bouncer.check_decorator import check, fail
 def check_source_freshness_populated(source):
     """Sources must have a populated freshness.
 
+    !!! info "Rationale"
+
+        Source freshness configuration enables `dbt source freshness` to detect when upstream data stops arriving. Without it, stale data silently propagates through downstream models, and dashboards display outdated numbers without any warning. Requiring freshness definitions ensures that every source has an explicit SLA, enabling proactive alerting before business users notice a problem.
+
     Receives:
         source (SourceNode): The SourceNode object to check.
 

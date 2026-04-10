@@ -5,6 +5,10 @@ from dbt_bouncer.check_decorator import check, fail
 def check_semantic_model_based_on_non_public_models(semantic_model, ctx):
     """Semantic models should be based on public models only.
 
+    !!! info "Rationale"
+
+        Semantic models define the business-level metrics and dimensions that power tools like dbt's MetricFlow. If a semantic model references a protected or private model, it creates a hidden dependency on implementation details that can break when the underlying model is refactored. Basing semantic models on public models ensures they depend on a stable, intentionally-exposed interface.
+
     Receives:
         models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.
         semantic_model (SemanticModelNode): The SemanticModelNode object to check.

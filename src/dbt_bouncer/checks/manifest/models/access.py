@@ -12,6 +12,10 @@ from dbt_bouncer.utils import compile_pattern, get_clean_model_name
 def check_model_access(model, *, access: str):
     """Models must have the specified access attribute. Requires dbt 1.7+.
 
+    !!! info "Rationale"
+
+        Access controls determine which models can be referenced across dbt projects and packages. Enforcing access levels ensures that staging models remain internal (`protected`), while only curated mart models are exposed as `public` — preventing downstream consumers from depending on unstable intermediate transformations.
+
     Parameters:
         access (Literal["private", "protected", "public"]): The access level to check for.
 
@@ -51,6 +55,10 @@ def check_model_access(model, *, access: str):
 def check_model_contract_enforced_for_public_model(model):
     """Public models must have contracts enforced.
 
+    !!! info "Rationale"
+
+        Public models form the API surface of your dbt project. Without enforced contracts, column additions, removals, or type changes can silently break downstream consumers. This check ensures that every public model guarantees its schema, catching breaking changes at build time rather than in production.
+
     Receives:
         model (ModelNode): The ModelNode object to check.
 
@@ -81,6 +89,10 @@ def check_model_contract_enforced_for_public_model(model):
 @check
 def check_model_grant_privilege(model, *, privilege_pattern: str):
     """Model can have grant privileges that match the specified pattern.
+
+    !!! info "Rationale"
+
+        Uncontrolled grant names can lead to excessive or incorrectly named privileges being applied to models, making it difficult to audit who has access to what. Enforcing a naming pattern for grants ensures consistency and makes security reviews straightforward.
 
     Parameters:
         privilege_pattern (str): Regex pattern to match the privilege.
@@ -119,6 +131,10 @@ def check_model_grant_privilege(model, *, privilege_pattern: str):
 def check_model_grant_privilege_required(model, *, privilege: str):
     """Model must have the specified grant privilege.
 
+    !!! info "Rationale"
+
+        Mart models often need to be readable by BI tools or downstream consumers. Requiring a specific grant privilege (e.g. `select`) ensures that access is explicitly configured and not left to database defaults, which may vary across environments.
+
     Parameters:
         privilege (str): The privilege that is required.
 
@@ -153,6 +169,10 @@ def check_model_grant_privilege_required(model, *, privilege: str):
 def check_model_has_contracts_enforced(model):
     """Model must have contracts enforced.
 
+    !!! info "Rationale"
+
+        Enforced contracts guarantee that a model's output schema — column names and types — is validated at build time. Without this, schema changes can silently break downstream consumers. Applying this check to a specific set of models (e.g. marts) provides a schema stability guarantee for those critical outputs.
+
     Receives:
         model (ModelNode): The ModelNode object to check.
 
@@ -185,6 +205,10 @@ def check_model_number_of_grants(
     min_number_of_privileges: Annotated[int, Field(ge=0)] = 0,
 ):
     """Model can have the specified number of privileges.
+
+    !!! info "Rationale"
+
+        An unexpectedly large number of grants on a model may indicate privilege creep, where access has accumulated over time without a systematic review. Bounding the number of grants encourages a deliberate access-control strategy and makes security audits easier.
 
     Parameters:
         max_number_of_privileges (int | None): Maximum number of privileges, inclusive.

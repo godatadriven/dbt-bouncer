@@ -13,6 +13,10 @@ _HARD_CODED_REF_PATTERN = re.compile(r"\b(?:FROM|JOIN)\s+\w+\.\w+", re.IGNORECAS
 def check_model_code_does_not_contain_regexp_pattern(model, *, regexp_pattern: str):
     """The raw code for a model must not match the specified regexp pattern.
 
+    !!! info "Rationale"
+
+        Teams often adopt coding standards that forbid certain SQL patterns — for example, using `ifnull` instead of `coalesce`, or using deprecated functions. This check allows those standards to be enforced automatically at CI time, preventing non-compliant code from reaching production.
+
     Parameters:
         regexp_pattern (str): The regexp pattern that should not be matched by the model code.
 
@@ -51,6 +55,10 @@ def check_model_hard_coded_references(model):
     Hard-coded references bypass the dbt DAG, break lineage, and are
     environment-specific.
 
+    !!! info "Rationale"
+
+        Hard-coded table references bypass dbt's dependency graph, break lineage tracking, and are environment-specific — a reference that works in production will silently read the wrong data in development. Using `ref()` or `source()` ensures models run in the correct order, compile to the right environment, and appear correctly in lineage tools.
+
     !!! warning
 
         This check is not foolproof and will not catch all hard-coded table
@@ -87,6 +95,10 @@ def check_model_hard_coded_references(model):
 def check_model_has_semi_colon(model):
     """Model may not end with a semi-colon (`;`).
 
+    !!! info "Rationale"
+
+        dbt automatically wraps model SQL before executing it, so a trailing semi-colon can cause syntax errors in certain warehouse adapters. This check catches the mistake at lint time, preventing obscure build failures that can be hard to diagnose in CI.
+
     Receives:
         model (ModelNode): The ModelNode object to check.
 
@@ -115,6 +127,10 @@ def check_model_has_semi_colon(model):
 @check
 def check_model_max_number_of_lines(model, *, max_number_of_lines: int = 100):
     """Models may not have more than the specified number of lines.
+
+    !!! info "Rationale"
+
+        Very long SQL files are a code smell that often indicates a model is doing too much — mixing staging, joining, and aggregating in a single file. Capping line counts encourages splitting large transformations into smaller, focused models that are easier to test, understand, and reuse.
 
     Parameters:
         max_number_of_lines (int): The maximum number of permitted lines.

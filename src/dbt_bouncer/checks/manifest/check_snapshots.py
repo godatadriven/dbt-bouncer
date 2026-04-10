@@ -16,6 +16,10 @@ def check_snapshot_description_populated(
 ):
     """Snapshots must have a populated description.
 
+    !!! info "Rationale"
+
+        Snapshots capture slowly-changing dimension (SCD) history and represent some of the most business-critical data in a dbt project. Without descriptions, it is unclear what entity a snapshot tracks, what the key fields represent, or how frequently it is refreshed — information that is essential for analysts interpreting historical data and for engineers maintaining the snapshot strategy.
+
     Parameters:
         min_description_length (int | None): Minimum length required for the description to be considered populated.
 
@@ -51,6 +55,10 @@ def check_snapshot_description_populated(
 @check
 def check_snapshot_has_tags(snapshot, *, criteria: str = "all", tags: list[str]):
     """Snapshots must have the specified tags.
+
+    !!! info "Rationale"
+
+        Tags on snapshots enable selective execution (e.g. `dbt snapshot --select tag:nightly`) and make it possible to apply governance policies to specific groups of snapshots. Without enforced tagging, snapshots can be inadvertently skipped in scheduled runs or included in the wrong execution contexts, leading to stale historical data.
 
     Parameters:
         criteria: (Literal["any", "all", "one"] | None): Whether the snapshot must have any, all, or exactly one of the specified tags. Default: `all`.
@@ -90,6 +98,10 @@ def check_snapshot_has_tags(snapshot, *, criteria: str = "all", tags: list[str])
 @check
 def check_snapshot_names(snapshot, *, snapshot_name_pattern: str):
     """Snapshots must have a name that matches the supplied regex.
+
+    !!! info "Rationale"
+
+        A consistent naming convention for snapshots (e.g. a domain prefix like `erp_` or a suffix like `_snapshot`) makes it immediately obvious in the warehouse that a table is a point-in-time history capture rather than a regular dimension or fact. Without naming conventions, snapshots can be confused with other tables, leading to incorrect use or accidental truncation.
 
     Parameters:
         snapshot_name_pattern (str): Regexp the snapshot name must match.

@@ -9,6 +9,10 @@ def check_run_results_max_execution_time(
 ):
     """Each result can take a maximum duration (seconds).
 
+    !!! info "Rationale"
+
+        Model execution times can creep up gradually as data volumes grow or queries become more complex. Without an explicit threshold, a model that once ran in 10 seconds can silently grow to 10 minutes, eventually causing pipeline timeouts or SLA breaches. This check acts as a performance guardrail, catching regressions early so teams can investigate and optimise before they impact production schedules.
+
     Parameters:
         max_execution_time_seconds (float): The maximum execution time (seconds) allowed for a node.
 
@@ -49,6 +53,10 @@ def check_run_results_max_execution_time(
 @check
 def check_run_results_max_gigabytes_billed(run_result, *, max_gigabytes_billed: float):
     """Each result can have a maximum number of gigabytes billed.
+
+    !!! info "Rationale"
+
+        BigQuery charges are based on the volume of data scanned per query, so a poorly optimised model or an accidental full-table scan can generate unexpectedly large bills. Without an explicit cap, a single expensive run can blow through a project's monthly data budget before anyone notices. This check provides a cost guardrail that fails a CI run or pipeline job if any model scans more data than permitted, prompting investigation and optimisation before the bill arrives.
 
     !!! note
 

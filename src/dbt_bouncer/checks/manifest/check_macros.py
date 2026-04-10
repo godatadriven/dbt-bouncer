@@ -20,6 +20,10 @@ def check_macro_arguments_description_populated(
 ):
     """Macro arguments must have a populated description.
 
+    !!! info "Rationale"
+
+        Macros are reusable across the entire dbt project, yet their arguments are often poorly documented. Without argument descriptions, developers must read the macro's Jinja source to understand what each parameter does, which slows adoption and increases the risk of misuse — especially for macros shared across teams or packages.
+
     Parameters:
         min_description_length (int | None): Minimum length required for the description to be considered populated.
 
@@ -102,6 +106,10 @@ def check_macro_arguments_description_populated(
 def check_macro_code_does_not_contain_regexp_pattern(macro, *, regexp_pattern: str):
     """The raw code for a macro must not match the specified regexp pattern.
 
+    !!! info "Rationale"
+
+        Teams often settle on preferred SQL patterns — using `COALESCE` instead of `IFNULL`, or avoiding hardcoded warehouse-specific functions — but these conventions are easy to forget in macros that are written less frequently than models. This check provides a lightweight way to enforce banned patterns and flag code that uses deprecated or non-portable SQL constructs before they propagate across the project.
+
     Parameters:
         regexp_pattern (str): The regexp pattern that should not be matched by the macro code.
 
@@ -135,6 +143,10 @@ def check_macro_description_populated(
     macro, *, min_description_length: Annotated[int, Field(gt=0)] | None = None
 ):
     """Macros must have a populated description.
+
+    !!! info "Rationale"
+
+        Macros are reusable Jinja functions that can be called throughout a dbt project, but unlike models they are not rendered into the dbt documentation site unless explicitly described. Without a description, engineers must read the macro source to understand its purpose and usage, slowing onboarding and increasing the risk of misuse or duplication.
 
     Parameters:
         min_description_length (int | None): Minimum length required for the description to be considered populated.
@@ -172,6 +184,10 @@ def check_macro_max_number_of_lines(
     macro, *, max_number_of_lines: Annotated[int, Field(gt=0)] = 100
 ):
     """Macros may not have more than the specified number of lines.
+
+    !!! info "Rationale"
+
+        Long macros are a code smell — they are harder to test, document, and review. Keeping macros concise encourages single-responsibility design and makes it easier to spot logic errors. Teams that enforce a line limit are nudged to decompose complex macros into smaller, composable units that are individually testable.
 
     Parameters:
         max_number_of_lines (int): The maximum number of permitted lines.
@@ -211,6 +227,10 @@ def check_macro_name_matches_file_name(macro):
 
     Generic tests are also macros, however to document these tests the "name" value must be preceded with "test_".
 
+    !!! info "Rationale"
+
+        When a macro name does not match its file name, developers searching the codebase for a macro by name will land in the wrong file, wasting time and creating confusion. Enforcing consistent naming makes macros immediately locatable by file path and helps static analysis tools resolve macro references reliably.
+
     Receives:
         macro (Macros): The Macros object to check.
 
@@ -243,6 +263,10 @@ def check_macro_name_matches_file_name(macro):
 @check
 def check_macro_property_file_location(macro):
     """Macro properties files must follow the guidance provided by dbt [here](https://docs.getdbt.com/best-practices/how-we-structure/5-the-rest-of-the-project#how-we-use-the-other-folders).
+
+    !!! info "Rationale"
+
+        dbt's official project structure guidance recommends placing macro property files in predictable, consistently named YAML files alongside the macros they describe. Projects that scatter `.yml` files arbitrarily make it harder to locate documentation, run automated checks, and onboard new engineers. Enforcing the standard naming convention keeps the project structure navigable and aligned with community best practices.
 
     Receives:
         macro (Macros): The Macros object to check.
