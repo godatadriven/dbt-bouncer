@@ -14,9 +14,9 @@ jobs:
     autoupdate:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
-            - uses: actions/setup-python@v5
+            - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
               with:
                   python-version: "3.12"
 
@@ -24,10 +24,17 @@ jobs:
 
             - run: pre-commit autoupdate
 
-            - uses: peter-evans/create-pull-request@v7
+            - name: Check for changes
+              id: diff
+              run: |
+                  git diff --exit-code && echo "changed=false" >> "$GITHUB_OUTPUT" || echo "changed=true" >> "$GITHUB_OUTPUT"
+
+            - uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7
+              if: steps.diff.outputs.changed == 'true'
               with:
                   branch: build/pre-commit-autoupdate
                   commit-message: "build: pre-commit autoupdate"
+                  labels: dependencies
                   title: "build: pre-commit autoupdate"
                   body: |
                       Automated pre-commit hook version updates via `pre-commit autoupdate`.
