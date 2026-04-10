@@ -109,6 +109,10 @@ def check_lineage_seed_cannot_be_used(model):
 def check_lineage_source_cannot_be_used(model):
     """Sources cannot be referenced in models with a path that matches the specified `include` config.
 
+    !!! info "Rationale"
+
+        In a well-layered dbt project, raw sources should only be referenced from staging models. Allowing intermediate or mart models to query sources directly bypasses the staging layer, leads to duplicated transformation logic, and makes it harder to swap or rename sources without cascading changes across the project.
+
     Receives:
         model (ModelNode): The ModelNode object to check.
 

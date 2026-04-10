@@ -5,6 +5,10 @@ from dbt_bouncer.check_decorator import check, fail
 def check_source_columns_are_all_documented(catalog_source, ctx):
     """All columns in a source should be included in the source's properties file, i.e. `.yml` file.
 
+    !!! info "Rationale"
+
+        Source tables are the entry point for raw data into a dbt project. When a column exists in the database but is absent from the source properties file, it cannot have a description, a freshness check, or a data test applied to it. Over time, undocumented columns accumulate silently, making it harder to understand what data is available and creating blind spots in data quality monitoring. This check enforces full column coverage so that every raw field is explicitly acknowledged and can be tested or documented.
+
     Receives:
         catalog_source (CatalogNodeEntry): The CatalogNodeEntry object to check.
         sources (list[SourceNode]): List of SourceNode objects parsed from `catalog.json`.
