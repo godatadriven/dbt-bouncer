@@ -346,9 +346,10 @@ def _build_check_module_map() -> dict[str, dict[str, str]]:
 
     for check_file in (f for f in checks_dir.glob("**/*.py") if f.is_file()):
         index = check_file.parts.index("checks")
-        module_name = ".".join(
+        raw_module_name = ".".join(
             ["dbt_bouncer", "checks", *check_file.parts[index + 1 :]]
         )[:-3]
+        module_name = raw_module_name.removesuffix(".__init__")
 
         # Determine category from path
         relative_parts = check_file.relative_to(checks_dir).parts
@@ -580,9 +581,10 @@ def get_check_objects(
         check_files = [f for f in checks_dir.glob("**/*.py") if f.is_file()]
     for check_file in check_files:
         index = check_file.parts.index("checks")
-        module_name = ".".join(
+        raw_module_name = ".".join(
             ["dbt_bouncer", "checks"] + list(check_file.parts[index + 1 :])  # noqa: RUF005
         )[:-3]  # Remove .py suffix
+        module_name = raw_module_name.removesuffix(".__init__")
         try:
             module = importlib.import_module(module_name)
             _extract_checks_from_module(module, module_name, check_objects)
