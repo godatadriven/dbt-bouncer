@@ -1,10 +1,10 @@
 """Validate command package."""
 
-import logging
 from pathlib import Path
 from typing import Annotated
 
 import typer
+from rich.console import Console
 
 from dbt_bouncer.cli import app
 from dbt_bouncer.cli.utils import resolve_config_path
@@ -25,10 +25,12 @@ def validate(
     reporting line numbers for any issues found.
 
     Raises:
-        Exit: If the config file is valid or if issues are found.
+        Exit: With code 0 if the config file is valid or with code 1 if issues are found.
         RuntimeError: If the config file is not found.
 
     """
+    console = Console()
+
     configure_console_logging(verbosity=0)
 
     config_path = resolve_config_path(config_file)
@@ -41,10 +43,10 @@ def validate(
     issues = lint_config_file(config_path)
 
     if not issues:
-        logging.info("Config file is valid!")
+        console.print("[bold green]Configuration file is valid![/bold green] ✅")
         raise typer.Exit(0)
     else:
-        logging.error(f"Found {len(issues)} issue(s) in config file:")
+        console.print(f"Found {len(issues)} issue(s) in config file:")
         for issue in issues:
-            logging.error(f"  Line {issue['line']}: {issue['message']}")
+            console.print(f"  Line {issue['line']}: {issue['message']}")
         raise typer.Exit(1)
