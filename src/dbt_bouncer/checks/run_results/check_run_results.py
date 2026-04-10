@@ -9,6 +9,10 @@ def check_run_results_max_execution_time(
 ):
     """Each result can take a maximum duration (seconds).
 
+    !!! info "Rationale"
+
+        Model execution times can creep up gradually as data volumes grow or queries become more complex. Without an explicit threshold, a model that once ran in 10 seconds can silently grow to 10 minutes, eventually causing pipeline timeouts or SLA breaches. This check acts as a performance guardrail, catching regressions early so teams can investigate and optimise before they impact production schedules.
+
     Parameters:
         max_execution_time_seconds (float): The maximum execution time (seconds) allowed for a node.
 
