@@ -53,6 +53,10 @@ def check_model_description_populated(
 ):
     """Models must have a populated description.
 
+    !!! info "Rationale"
+
+        Descriptions are the primary way data consumers discover what a model represents and how to use it. Without them, analysts waste time reverse-engineering SQL logic or asking the data team. This check ensures every model is self-documenting, which is critical for onboarding, data catalogues, and self-service analytics.
+
     Parameters:
         min_description_length (int | None): Minimum length required for the description to be considered populated.
 
@@ -137,6 +141,10 @@ def check_model_documentation_coverage(
 @check
 def check_model_documented_in_same_directory(model):
     """Models must be documented in the same directory where they are defined (i.e. `.yml` and `.sql` files are in the same directory).
+
+    !!! info "Rationale"
+
+        Co-locating a model's SQL file and its YAML documentation makes the project easier to navigate. When documentation lives in a different directory, contributors may miss it during code review or forget to update it when changing the model. Keeping both files together reinforces the habit of treating documentation as part of the model definition.
 
     Receives:
         model (ModelNode): The ModelNode object to check.
