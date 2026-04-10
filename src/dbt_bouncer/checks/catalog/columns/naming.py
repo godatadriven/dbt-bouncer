@@ -28,6 +28,10 @@ def check_column_name_complies_to_column_type(
 ):
     """Columns with the specified regexp naming pattern must have data types that comply to the specified regexp pattern or list of data types.
 
+    !!! info "Rationale"
+
+        Naming conventions that encode data types (e.g. `is_` prefix for booleans, `_date` suffix for dates, `_id` suffix for integers) are a common and effective way to make schemas self-describing. Without enforcement, these conventions drift over time: a column named `is_active` might be stored as an integer in one model and a boolean in another, causing silent cast errors downstream. This check ties naming patterns to data types, catching mismatches at CI time rather than in production queries.
+
     Note: One of `type_pattern` or `types` must be specified.
 
     Raises:
@@ -126,6 +130,10 @@ def check_column_name_complies_to_column_type(
 @check
 def check_column_names(catalog_node, ctx, *, column_name_pattern: str):
     """Columns must have a name that matches the supplied regex.
+
+    !!! info "Rationale"
+
+        Consistent column naming is the foundation of a readable and maintainable dbt project. Inconsistent casing, abbreviations, or special characters make SQL harder to write, cause join errors, and confuse data consumers who query the warehouse directly. A single enforced naming pattern (e.g. `^[a-z_]*$` for snake_case) eliminates an entire class of stylistic bugs and ensures that columns look the same whether viewed in dbt docs, a BI tool, or a raw SQL editor.
 
     Parameters:
         column_name_pattern (str): Regexp the column name must match.
