@@ -7,6 +7,10 @@ from dbt_bouncer.utils import find_missing_meta_keys
 def check_test_has_meta_keys(test, *, keys: NestedDict):
     """The `meta` config for data tests must have the specified keys.
 
+    !!! info "Rationale"
+
+        The `meta` field on data tests is a flexible store for operational metadata such as ownership, severity context, or ticket references. Enforcing required keys ensures that every test carries the information needed to triage failures quickly — for example, knowing which team owns a failing test or what SLA it is tied to — without relying on tribal knowledge or documentation that falls out of sync.
+
     Parameters:
         keys (NestedDict): A list (that may contain sub-lists) of required keys.
 

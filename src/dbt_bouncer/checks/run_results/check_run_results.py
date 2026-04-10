@@ -54,6 +54,10 @@ def check_run_results_max_execution_time(
 def check_run_results_max_gigabytes_billed(run_result, *, max_gigabytes_billed: float):
     """Each result can have a maximum number of gigabytes billed.
 
+    !!! info "Rationale"
+
+        BigQuery charges are based on the volume of data scanned per query, so a poorly optimised model or an accidental full-table scan can generate unexpectedly large bills. Without an explicit cap, a single expensive run can blow through a project's monthly data budget before anyone notices. This check provides a cost guardrail that fails a CI run or pipeline job if any model scans more data than permitted, prompting investigation and optimisation before the bill arrives.
+
     !!! note
 
         Note that this check only works for the `dbt-bigquery` adapter.
