@@ -45,6 +45,9 @@ jobs:
               with:
                 python-version: ${{ steps.python-version.outputs.PYTHON_VERSION }}
 
+            - name: Validate pre-commit hooks manifest
+              run: uv run prek validate-manifest
+
             - name: Run prek
               run: |
                 git diff --name-status origin/main..HEAD > changed_files.txt
