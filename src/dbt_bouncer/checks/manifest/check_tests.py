@@ -41,6 +41,10 @@ def check_test_has_meta_keys(test, *, keys: NestedDict):
 def check_test_has_tags(test, *, criteria: str = "all", tags: list[str]):
     """Data tests must have the specified tags.
 
+    !!! info "Rationale"
+
+        Tags allow teams to organise tests into logical groups (e.g. `critical`, `nightly`, `schema-only`) and run subsets selectively with `dbt test --select tag:critical`. Without enforced tagging, it becomes difficult to prioritise test failures, run fast CI checks, or set up tiered alerting based on test severity.
+
     Parameters:
         criteria (Literal["any", "all", "one"] | None): Whether the test must have any, all, or exactly one of the specified tags. Default: `all`.
         tags (list[str]): List of tags to check for.
