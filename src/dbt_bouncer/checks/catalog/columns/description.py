@@ -88,6 +88,10 @@ def check_columns_are_all_documented(
 ):
     """All columns in a model should be included in the model's properties file, i.e. `.yml` file.
 
+    !!! info "Rationale"
+
+        When a column exists in the database but is missing from the model's properties file, it cannot receive a description, a data test, or a constraint. These invisible columns accumulate over time as schemas evolve, creating gaps in data quality coverage and making it harder for consumers to discover what data is available. This check ensures the properties file stays in sync with the actual schema, giving teams a complete and testable view of every model.
+
     Receives:
         case_sensitive (bool | None): Whether the column names are case sensitive or not. Necessary for adapters like `dbt-snowflake` where the column in `catalog.json` is uppercase but the column in `manifest.json` can be lowercase. Defaults to `false` for `dbt-snowflake`, otherwise `true`.
         catalog_node (CatalogNodeEntry): The CatalogNodeEntry object to check.
@@ -142,6 +146,10 @@ def check_columns_are_documented_in_public_models(
     min_description_length: Annotated[int, Field(gt=0)] | None = None,
 ):
     """Columns should have a populated description in public models.
+
+    !!! info "Rationale"
+
+        Public models form the stable, documented API of a dbt project — they are the models that external consumers, BI tools, and other projects are expected to query directly. Undocumented columns in a public model undermine this contract: consumers cannot tell what a field means, which ID to join on, or whether a flag is nullable. Requiring column descriptions on public models ensures the published interface is self-explanatory and trustworthy, which is especially important as teams scale and data catalogues surface model metadata automatically.
 
     Receives:
         catalog_node (CatalogNodeEntry): The CatalogNodeEntry object to check.
