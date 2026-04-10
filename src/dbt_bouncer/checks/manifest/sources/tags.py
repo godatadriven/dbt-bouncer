@@ -11,6 +11,10 @@ def check_source_has_tags(
 ):
     """Sources must have the specified tags.
 
+    !!! info "Rationale"
+
+        Tags are the primary mechanism for grouping dbt nodes into logical categories — domain areas, sensitivity levels, scheduling tiers, or compliance scopes. When sources are missing required tags, they fall outside automated workflows that rely on tag-based selection (e.g. `dbt build --select tag:pii` or scheduled refreshes filtered by domain). This check ensures that every source is tagged correctly at registration time, preventing ungrouped sources from slipping through governance and operational processes.
+
     Parameters:
         criteria: (Literal["any", "all", "one"] | None): Whether the source must have any, all, or exactly one of the specified tags. Default: `all`.
         tags (list[str]): List of tags to check for.
