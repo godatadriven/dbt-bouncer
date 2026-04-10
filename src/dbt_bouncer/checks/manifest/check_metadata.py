@@ -8,6 +8,10 @@ def check_project_name(
 ):
     """Enforce that the name of the dbt project matches a supplied regex. Generally used to enforce that project names conform to something like  `company_<DOMAIN>`.
 
+    !!! info "Rationale"
+
+        In organisations running multiple dbt projects, consistent project naming makes it easy to identify which team or domain owns a project, automate governance policies, and set up CI/CD pipelines that apply different rules to different project types. Without a naming convention, projects can accumulate with arbitrary names that make ownership and purpose ambiguous.
+
     Parameters:
         project_name_pattern (str): Regex pattern to match the project name.
 
