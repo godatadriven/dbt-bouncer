@@ -46,7 +46,9 @@ def validate(
         console.print("[bold green]Configuration file is valid![/bold green] ✅")
         raise typer.Exit(0)
     else:
-        console.print(f"Found {len(issues)} issue(s) in config file:")
+        console.print(
+            f"[bold red]Found {len(issues)} issue(s) in config file:[/bold red]"
+        )
         for issue in issues:
-            console.print(f"  Line {issue['line']}: {issue['message']}")
+            console.print(f"[red]  Line {issue['line']}: {issue['message']}[/red]")
         raise typer.Exit(1)
