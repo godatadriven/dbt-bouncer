@@ -11,7 +11,7 @@ import typer
 import yaml
 from pydantic import ValidationError
 
-from dbt_bouncer.enums import ConfigFileName
+from dbt_bouncer.enums import ConfigFileName, ConfigFileSource
 from dbt_bouncer.utils import compile_pattern, get_check_registry, load_config_from_yaml
 
 if TYPE_CHECKING:
@@ -34,7 +34,7 @@ DEFAULT_DBT_BOUNCER_CONFIG = """manifest_checks:
 
 def get_config_file_path(
     config_file: PurePath,
-    config_file_source: str,
+    config_file_source: ConfigFileSource,
 ) -> PurePath:
     """Get the path to the config file for dbt-bouncer. This is fetched from (in order):
 
@@ -54,7 +54,7 @@ def get_config_file_path(
     logging.debug(f"{config_file=}")
     logging.debug(f"{config_file_source=}")
 
-    if config_file_source == "COMMANDLINE":
+    if config_file_source == ConfigFileSource.COMMANDLINE:
         logging.debug(f"Config file passed via command line: {config_file}")
         config_file_path = Path(config_file)
         if not config_file_path.exists():
@@ -67,7 +67,7 @@ def get_config_file_path(
         )
         return Path(config_file_path_via_env_var)
 
-    if config_file_source == "DEFAULT":
+    if config_file_source == ConfigFileSource.DEFAULT:
         logging.debug(f"Using default value for config file: {config_file}")
         config_file_path = Path.cwd() / config_file
         if config_file_path.exists():

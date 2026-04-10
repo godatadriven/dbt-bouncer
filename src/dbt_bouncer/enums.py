@@ -23,6 +23,13 @@ class ConfigFileName(StrEnum):
     PYPROJECT_TOML = "pyproject.toml"
 
 
+class ConfigFileSource(StrEnum):
+    """Config file names recognised by dbt-bouncer."""
+
+    COMMANDLINE = auto()
+    DEFAULT = auto()
+
+
 class Materialization(StrEnum):
     """dbt materialization strategies."""
 

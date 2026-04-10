@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from dbt_bouncer.cli.run.utils import _build_context, detect_config_file_source
-from dbt_bouncer.enums import ConfigFileName
+from dbt_bouncer.enums import ConfigFileName, ConfigFileSource
 
 
 class TestDetectConfigFileSource:
@@ -15,42 +15,47 @@ class TestDetectConfigFileSource:
 
     def test_none_returns_default(self):
         """None config_file should return DEFAULT."""
-        assert detect_config_file_source(None) == "DEFAULT"
+        assert detect_config_file_source(None) == ConfigFileSource.DEFAULT
 
     def test_default_yml_returns_default(self):
         """The default YML path should return DEFAULT."""
         assert (
-            detect_config_file_source(Path(ConfigFileName.DBT_BOUNCER_YML)) == "DEFAULT"
+            detect_config_file_source(Path(ConfigFileName.DBT_BOUNCER_YML))
+            == ConfigFileSource.DEFAULT
         )
 
     def test_default_toml_returns_default(self):
         """The default TOML path should return DEFAULT."""
         assert (
             detect_config_file_source(Path(ConfigFileName.DBT_BOUNCER_TOML))
-            == "DEFAULT"
+            == ConfigFileSource.DEFAULT
         )
 
     def test_custom_path_returns_commandline(self):
         """A non-default path should return COMMANDLINE."""
-        assert detect_config_file_source(Path("custom-bouncer.yml")) == "COMMANDLINE"
+        assert (
+            detect_config_file_source(Path("custom-bouncer.yml"))
+            == ConfigFileSource.COMMANDLINE
+        )
 
     def test_nested_custom_path_returns_commandline(self):
         """A nested custom path should return COMMANDLINE."""
         assert (
-            detect_config_file_source(Path("config/my-bouncer.toml")) == "COMMANDLINE"
+            detect_config_file_source(Path("config/my-bouncer.toml"))
+            == ConfigFileSource.COMMANDLINE
         )
 
     @pytest.mark.parametrize(
         ("config_file", "expected"),
         [
-            (Path("dbt-bouncer.yml"), "DEFAULT"),
-            (Path("dbt-bouncer.toml"), "DEFAULT"),
-            (Path("my-config.yml"), "COMMANDLINE"),
-            (None, "DEFAULT"),
+            (Path("dbt-bouncer.yml"), ConfigFileSource.DEFAULT),
+            (Path("dbt-bouncer.toml"), ConfigFileSource.DEFAULT),
+            (Path("my-config.yml"), ConfigFileSource.COMMANDLINE),
+            (None, ConfigFileSource.DEFAULT),
         ],
         ids=["default-yml", "default-toml", "custom", "none"],
     )
-    def test_parametrized(self, config_file: Path | None, expected: str):
+    def test_parametrized(self, config_file: Path | None, expected: ConfigFileSource):
         """Parametrized coverage of all branches."""
         assert detect_config_file_source(config_file) == expected
 

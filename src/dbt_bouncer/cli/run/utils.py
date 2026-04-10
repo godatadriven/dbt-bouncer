@@ -7,7 +7,7 @@ from pathlib import Path, PurePath
 from typing import TYPE_CHECKING
 
 from dbt_bouncer.cli.utils import resolve_config_path
-from dbt_bouncer.enums import ConfigFileName, OutputFormat
+from dbt_bouncer.enums import ConfigFileName, ConfigFileSource, OutputFormat
 from dbt_bouncer.reporting.logger import configure_console_logging
 from dbt_bouncer.version import version as get_version
 
@@ -16,22 +16,22 @@ if TYPE_CHECKING:
     from dbt_bouncer.context import BouncerContext
 
 
-def detect_config_file_source(config_file: Path | None) -> str:
+def detect_config_file_source(config_file: Path | None) -> ConfigFileSource:
     """Detect the source of the config file.
 
     Args:
         config_file: Path to the config file, or None for the default.
 
     Returns:
-        str: 'COMMANDLINE' if a non-default config file was provided, else 'DEFAULT'.
+        ConfigFileSource: 'COMMANDLINE' if a non-default config file was provided, else 'DEFAULT'.
 
     """
     return (
-        "COMMANDLINE"
+        ConfigFileSource.COMMANDLINE
         if config_file is not None
         and config_file != Path(ConfigFileName.DBT_BOUNCER_YML)
         and config_file != Path(ConfigFileName.DBT_BOUNCER_TOML)
-        else "DEFAULT"
+        else ConfigFileSource.DEFAULT
     )
 
 
@@ -95,7 +95,7 @@ def run_bouncer(
     output_only_failures: bool = False,
     show_all_failures: bool = False,
     verbosity: int = 0,
-    config_file_source: str | None = None,
+    config_file_source: ConfigFileSource | None = None,
 ) -> int:
     """Programmatic entrypoint for dbt-bouncer.
 
@@ -110,7 +110,7 @@ def run_bouncer(
         output_only_failures: Only failures will be included in the output file.
         show_all_failures: All failures will be printed to the console.
         verbosity: Verbosity level.
-        config_file_source: Source of the config file ("COMMANDLINE", "DEFAULT", etc.).
+        config_file_source: Source of the config file.
 
     Returns:
         int: Exit code (0 for success, 1 for failure).

@@ -17,6 +17,7 @@ from dbt_bouncer.config_file_validator import (
     load_config_file_contents,
     validate_conf,
 )
+from dbt_bouncer.enums import ConfigFileSource
 from dbt_bouncer.main import app
 
 
@@ -25,7 +26,7 @@ def test_get_file_config_path_commandline(tmp_path):
     config_file.write_text("test: 1")
     config_file_path = get_config_file_path(
         config_file=str(config_file),
-        config_file_source="COMMANDLINE",
+        config_file_source=ConfigFileSource.COMMANDLINE,
     )
 
     assert config_file_path.replace("\\", "/") == config_file.as_posix().replace(
@@ -38,7 +39,7 @@ def test_get_file_config_path_default(tmp_path):
     config_file.write_text("test: 1")
     config_file_path = get_config_file_path(
         config_file=str(config_file),
-        config_file_source="DEFAULT",
+        config_file_source=ConfigFileSource.DEFAULT,
     )
     assert config_file_path == config_file
 
@@ -53,7 +54,7 @@ def test_get_file_config_path_env_var(tmp_path):
 
         config_file_path = get_config_file_path(
             config_file=str(config_file),
-            config_file_source="DEFAULT",
+            config_file_source=ConfigFileSource.DEFAULT,
         )
 
     assert config_file_path == Path(custom_config_file_path)
@@ -98,7 +99,7 @@ def test_get_file_config_path_pyproject_toml(monkeypatch, tmp_path):
 
     config_file_path = get_config_file_path(
         config_file="dbt_bouncer.yml",
-        config_file_source="DEFAULT",
+        config_file_source=ConfigFileSource.DEFAULT,
     )
 
     assert config_file_path == pyproject_file
@@ -113,7 +114,7 @@ def test_get_file_config_path_pyproject_toml_recursive(monkeypatch, tmp_path):
 
     config_file_path = get_config_file_path(
         config_file="dbt_bouncer.yml",
-        config_file_source="DEFAULT",
+        config_file_source=ConfigFileSource.DEFAULT,
     )
     assert config_file_path == pyproject_file
 
@@ -126,7 +127,7 @@ def test_get_file_config_path_dbt_bouncer_toml(monkeypatch, tmp_path):
 
     config_file_path = get_config_file_path(
         config_file="dbt_bouncer.yml",
-        config_file_source="DEFAULT",
+        config_file_source=ConfigFileSource.DEFAULT,
     )
 
     assert config_file_path == toml_file
@@ -143,7 +144,7 @@ def test_get_file_config_path_yml_preferred_over_toml(monkeypatch, tmp_path):
 
     config_file_path = get_config_file_path(
         config_file=str(yml_file),
-        config_file_source="DEFAULT",
+        config_file_source=ConfigFileSource.DEFAULT,
     )
 
     assert config_file_path == yml_file
