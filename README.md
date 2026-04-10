@@ -38,7 +38,7 @@
     <img alt="Docker Supported" src="https://img.shields.io/badge/Docker%20-Supported-0db7ed?logo=docker">
   </a>
   <a>
-    <img alt="GitHub Supported" src="https://img.shields.io/badge/GitHub%20-Supported-333?logo=github">
+    <img alt="GitHub Actions Supported" src="https://img.shields.io/badge/GitHub%20-Supported-333?logo=github">
   </a>
 </div>
 
