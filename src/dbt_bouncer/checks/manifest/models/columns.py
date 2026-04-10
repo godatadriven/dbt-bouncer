@@ -19,6 +19,10 @@ def check_model_columns_have_relationship_tests(
 ):
     """Columns matching a regex pattern must have a `relationships` test, optionally validating the target column and model.
 
+    !!! info "Rationale"
+
+        Foreign-key columns that are never validated with a `relationships` test can silently contain orphaned IDs, leading to incorrect join results and data quality issues that are hard to trace. This check ensures that columns following a naming convention (e.g. `_fk`) are always backed by a referential integrity test.
+
     Parameters:
         column_name_pattern (str): Regex pattern to match column names that require a relationships test.
         target_column_pattern (str | None): Regex pattern the target column (`field`) of the relationships test must match. If not provided, any target column is accepted.
@@ -117,6 +121,10 @@ def check_model_columns_have_relationship_tests(
 def check_model_columns_have_meta_keys(model, *, keys: NestedDict):
     """Columns defined for models must have the specified keys in the `meta` config.
 
+    !!! info "Rationale"
+
+        Column-level metadata such as `owner` or `pii` flags is essential for data governance, access control, and cataloguing. Without enforcement, metadata is applied inconsistently, making it difficult to identify sensitive columns or assign accountability across a large project.
+
     Parameters:
         keys (NestedDict): A list (that may contain sub-lists) of required keys.
 
@@ -158,6 +166,10 @@ def check_model_columns_have_meta_keys(model, *, keys: NestedDict):
 def check_model_columns_have_types(model):
     """Columns defined for models must have a `data_type` declared.
 
+    !!! info "Rationale"
+
+        Declaring column data types is a prerequisite for enforced dbt contracts and enables downstream consumers to understand the expected format of each field without querying the warehouse. It also prevents type-mismatch errors in tools that consume the schema at build time.
+
     Receives:
         model (ModelNode): The ModelNode object to check.
 
@@ -189,6 +201,10 @@ def check_model_columns_have_types(model):
 @check
 def check_model_has_constraints(model, *, required_constraint_types: list[str]):
     """Table and incremental models must have the specified constraint types defined.
+
+    !!! info "Rationale"
+
+        Database constraints such as `primary_key` and `not_null` enforce data integrity at the warehouse level, providing a safety net that goes beyond dbt tests. Requiring them on materialised models ensures that quality guarantees survive even when dbt tests are skipped or not run on every refresh.
 
     Parameters:
         required_constraint_types (list[Literal["check", "custom", "foreign_key", "not_null", "primary_key", "unique"]]): List of constraint types that must be present on the model.
