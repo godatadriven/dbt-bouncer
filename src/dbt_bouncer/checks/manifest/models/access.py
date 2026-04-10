@@ -12,6 +12,10 @@ from dbt_bouncer.utils import compile_pattern, get_clean_model_name
 def check_model_access(model, *, access: str):
     """Models must have the specified access attribute. Requires dbt 1.7+.
 
+    !!! info "Rationale"
+
+        Access controls determine which models can be referenced across dbt projects and packages. Enforcing access levels ensures that staging models remain internal (`protected`), while only curated mart models are exposed as `public` — preventing downstream consumers from depending on unstable intermediate transformations.
+
     Parameters:
         access (Literal["private", "protected", "public"]): The access level to check for.
 
@@ -50,6 +54,10 @@ def check_model_access(model, *, access: str):
 @check
 def check_model_contract_enforced_for_public_model(model):
     """Public models must have contracts enforced.
+
+    !!! info "Rationale"
+
+        Public models form the API surface of your dbt project. Without enforced contracts, column additions, removals, or type changes can silently break downstream consumers. This check ensures that every public model guarantees its schema, catching breaking changes at build time rather than in production.
 
     Receives:
         model (ModelNode): The ModelNode object to check.
