@@ -22,6 +22,10 @@ def check_model_has_unique_test(
 ):
     """Models must have a test for uniqueness of a column.
 
+    !!! info "Rationale"
+
+        A uniqueness test is the most fundamental data quality check — it ensures that the primary key or identifier column of a model does not contain duplicates, which would cause incorrect counts and fan-out in downstream joins. This check enforces that no model reaches production without at least one uniqueness assertion.
+
     Parameters:
         accepted_uniqueness_tests (list[str] | None): List of tests that are accepted as uniqueness tests.
 
@@ -84,6 +88,10 @@ def check_model_has_unit_tests(
 ):
     """Models must have more than the specified number of unit tests.
 
+    !!! info "Rationale"
+
+        Unit tests validate a model's transformation logic with controlled, mock inputs rather than real warehouse data. Requiring them on critical models (e.g. marts) ensures that complex SQL logic is verified independently of data volume or state, catching regressions before they affect downstream consumers.
+
     Parameters:
         min_number_of_unit_tests (int | None): The minimum number of unit tests that a model must have.
 
@@ -143,6 +151,10 @@ def check_model_has_unit_tests(
 @check
 def check_model_test_coverage(ctx, *, min_model_test_coverage_pct: float = 100):
     """Set the minimum percentage of models that have at least one test.
+
+    !!! info "Rationale"
+
+        Rather than requiring every model to be tested immediately, this check lets teams set a realistic coverage target and enforce it progressively. It prevents test coverage from silently declining as new, untested models are added to the project, creating a ratchet towards comprehensive testing.
 
     Parameters:
         min_model_test_coverage_pct (float): The minimum percentage of models that must have at least one test.
