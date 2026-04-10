@@ -20,6 +20,10 @@ def check_macro_arguments_description_populated(
 ):
     """Macro arguments must have a populated description.
 
+    !!! info "Rationale"
+
+        Macros are reusable across the entire dbt project, yet their arguments are often poorly documented. Without argument descriptions, developers must read the macro's Jinja source to understand what each parameter does, which slows adoption and increases the risk of misuse — especially for macros shared across teams or packages.
+
     Parameters:
         min_description_length (int | None): Minimum length required for the description to be considered populated.
 
