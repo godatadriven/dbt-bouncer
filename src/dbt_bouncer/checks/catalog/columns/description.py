@@ -28,6 +28,10 @@ def check_column_description_populated(
 ):
     """Columns must have a populated description.
 
+    !!! info "Rationale"
+
+        Column-level documentation is where data consumers spend most of their time: understanding what `is_active` means, whether `amount` is in cents or pounds, or which ID to join on. Without column descriptions, analysts guess, make mistakes, and create conflicting metrics. This check ensures every column is explained, which is especially valuable for data catalogues and BI tool integrations that surface these descriptions automatically.
+
     Parameters:
         min_description_length (int | None): Minimum length required for the description to be considered populated.
 
