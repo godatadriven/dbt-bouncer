@@ -22,9 +22,11 @@ runs:
     - name: Resolve Python version
       id: resolve-version
       shell: bash
+      env:
+        INPUT_VERSION: ${{ inputs.python-version }}
       run: |
-        if [ -n "${{ inputs.python-version }}" ]; then
-          VERSION="${{ inputs.python-version }}"
+        if [ -n "$INPUT_VERSION" ]; then
+          VERSION="$INPUT_VERSION"
         else
           VERSION=$(cat .python-version)
         fi
