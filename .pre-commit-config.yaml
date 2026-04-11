@@ -19,6 +19,11 @@ repos:
             args: [--unsafe]
           - id: debug-statements
 
+    - repo: https://github.com/astral-sh/uv-pre-commit
+      rev: 0.11.6
+      hooks:
+        - id: uv-lock
+
     - repo: https://github.com/streetsidesoftware/cspell-cli
       rev: v10.0.0
       hooks:
