@@ -18,12 +18,8 @@ jobs:
 
             - name: Setup Python
               uses: ./.github/actions/setup_python_env
-              with:
-                install-python-deps: 'false'
 
-            - run: pip install pre-commit
-
-            - run: pre-commit autoupdate
+            - run: prek auto-update
 
             - name: Check for changes
               id: diff
