@@ -16,9 +16,16 @@ jobs:
         steps:
             - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
+            - name: Determine python version
+              id: python-version
+              run: |
+                  export PYTHON_VERSION=$(cat .python-version)
+                  echo "PYTHON_VERSION: $PYTHON_VERSION"
+                  echo "PYTHON_VERSION=$PYTHON_VERSION" >> "$GITHUB_OUTPUT"
+
             - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
               with:
-                  python-version: "3.12"
+                  python-version: ${{ steps.python-version.outputs.PYTHON_VERSION }}
 
             - run: pip install pre-commit
 
