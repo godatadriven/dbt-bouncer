@@ -33,6 +33,11 @@ jobs:
             - name: checkout-merge
               uses: check-spelling/checkout-merge@29407b1b8660c562313ed65c81feab3e3255c03c # v0.0.6
 
+            - name: Setup Node.js
+              uses: actions/setup-node@49933ea5288caeca8642195f882660b323c62e38 # v4
+              with:
+                node-version: "22"
+
             - name: Setup Python
               uses: ./.github/actions/setup_python_env
 
