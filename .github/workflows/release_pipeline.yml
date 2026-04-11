@@ -42,18 +42,11 @@
               - name: Fetch tags
                 run: git fetch --prune --unshallow --tags
 
-              - name: Determine python version
-                id: python-version
-                run: |
-                    export PYTHON_VERSION=$(cat .python-version)
-                    echo "PYTHON_VERSION: $PYTHON_VERSION"
-                    echo "PYTHON_VERSION=$PYTHON_VERSION" >> $GITHUB_OUTPUT
-
               - name: Setup Python
+                id: setup-python
                 uses: ./.github/actions/setup_python_env
                 with:
                   install-python-deps: 'false'
-                  python-version: ${{ steps.python-version.outputs.PYTHON_VERSION }}
 
               - name: Set latest version
                 run: uv version $(git tag --sort version:refname | tail -n 1)
@@ -153,7 +146,7 @@
                 id: push
                 uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
                 with:
-                    build-args: PYTHON_VERSION=${{ steps.python-version.outputs.PYTHON_VERSION }}
+                    build-args: PYTHON_VERSION=${{ steps.setup-python.outputs.python-version }}
                     cache-from: type=gha
                     cache-to: type=gha,mode=max
                     context: .

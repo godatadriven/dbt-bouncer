@@ -21,17 +21,8 @@
                   with:
                     persist-credentials: false
 
-                - name: Determine python version
-                  id: python-version
-                  run: |
-                      export PYTHON_VERSION=$(cat .python-version)
-                      echo "PYTHON_VERSION: $PYTHON_VERSION"
-                      echo "PYTHON_VERSION=$PYTHON_VERSION" >> $GITHUB_OUTPUT
-
                 - name: Setup Python
                   uses: ./.github/actions/setup_python_env
-                  with:
-                    python-version: ${{ steps.python-version.outputs.PYTHON_VERSION }}
 
                 - name: Trigger dbt Cloud job and download artifacts
                   run: ./scripts/get_dbt_cloud_artifacts.sh
@@ -53,17 +44,8 @@
                   with:
                     persist-credentials: false
 
-                - name: Determine python version
-                  id: python-version
-                  run: |
-                      export PYTHON_VERSION=$(cat .python-version)
-                      echo "PYTHON_VERSION: $PYTHON_VERSION"
-                      echo "PYTHON_VERSION=$PYTHON_VERSION" >> $GITHUB_OUTPUT
-
                 - name: Setup Python
                   uses: ./.github/actions/setup_python_env
-                  with:
-                    python-version: ${{ steps.python-version.outputs.PYTHON_VERSION }}
 
                 - name: Install latest released dbt-core
                   run: uv run pip install dbt-core -U
