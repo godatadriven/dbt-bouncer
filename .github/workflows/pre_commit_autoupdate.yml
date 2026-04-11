@@ -18,10 +18,6 @@ jobs:
 
             - name: Setup Python
               uses: ./.github/actions/setup_python_env
-              with:
-                install-python-deps: 'false'
-
-            - run: pip install prek
 
             - run: prek auto-update
 
