@@ -36,6 +36,9 @@ jobs:
             - name: Setup Python
               uses: ./.github/actions/setup_python_env
 
+            - name: Validate pre-commit hooks manifest
+              run: uv run prek validate-manifest
+
             - name: Run prek
               run: |
                 git diff --name-status origin/main..HEAD > changed_files.txt
