@@ -178,6 +178,13 @@ When drafting release notes, verify every item against the previous release tag 
 3. Confirm dependency changes are real (e.g. a dep listed as "new" must not already exist in the prior release's `pyproject.toml`)
 4. Confirm bug fixes are still relevant (code that was fixed then later deleted is moot)
 
+## CI & Workflows
+
+- After CI succeeds on a PR, an AI review workflow (`pull_request_ai_review.yml`) runs automatically and posts a review comment. Check this comment for feedback and action any suggestions before merging.
+- In GitHub Actions workflows, always pin actions to full SHA commits with a version comment, e.g. `uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4`.
+- Use `/build-artifacts` to regenerate test fixtures after dbt_project changes.
+- Use `/new-check` to scaffold a new check class with tests.
+
 ## Key Constraints
 
 - Use `prek run --all-files`, **not** `pre-commit run`
