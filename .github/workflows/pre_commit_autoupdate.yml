@@ -21,9 +21,9 @@ jobs:
               with:
                 install-python-deps: 'false'
 
-            - run: pip install pre-commit
+            - run: pip install prek
 
-            - run: pre-commit autoupdate
+            - run: prek auto-update
 
             - name: Check for changes
               id: diff
