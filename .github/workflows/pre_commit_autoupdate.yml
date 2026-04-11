@@ -41,6 +41,7 @@ jobs:
               with:
                   branch: build/pre-commit-autoupdate
                   commit-message: "build: pre-commit autoupdate"
+                  delete-branch: true
                   labels: dependencies
                   title: "build: pre-commit autoupdate"
                   body: |
