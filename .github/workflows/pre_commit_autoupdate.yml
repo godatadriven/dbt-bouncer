@@ -19,7 +19,7 @@ jobs:
             - name: Setup Python
               uses: ./.github/actions/setup_python_env
 
-            - run: prek auto-update
+            - run: uv run prek auto-update
 
             - name: Check for changes
               id: diff
