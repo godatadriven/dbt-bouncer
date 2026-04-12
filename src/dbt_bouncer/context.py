@@ -29,7 +29,7 @@ from dbt_bouncer.artifact_types import (  # noqa: TC001 - needed at runtime for 
     TestWrapper,
     UnitTestNode,
 )
-from dbt_bouncer.config_file_parser import (
+from dbt_bouncer.configuration_file.parser import (
     DbtBouncerConfBase,  # noqa: TC001 - needed at runtime for Pydantic model_rebuild
 )
 

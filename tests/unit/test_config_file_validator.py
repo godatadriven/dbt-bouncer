@@ -11,7 +11,7 @@ import yaml
 from pydantic import PydanticUserError
 from typer.main import get_command
 
-from dbt_bouncer.config_file_validator import (
+from dbt_bouncer.configuration_file.validator import (
     _get_stub_namespace,
     get_config_file_path,
     load_config_file_contents,
@@ -422,7 +422,7 @@ def test_validate_conf_valid_toml(f, expectation):
 
 def test_lint_config_file_valid(tmp_path):
     """Test lint_config_file with a valid config."""
-    from dbt_bouncer.config_file_validator import lint_config_file
+    from dbt_bouncer.configuration_file.validator import lint_config_file
 
     config = {
         "manifest_checks": [
@@ -439,7 +439,7 @@ def test_lint_config_file_valid(tmp_path):
 
 def test_lint_config_file_missing_name(tmp_path):
     """Test lint_config_file with missing name field."""
-    from dbt_bouncer.config_file_validator import lint_config_file
+    from dbt_bouncer.configuration_file.validator import lint_config_file
 
     config = {
         "manifest_checks": [
@@ -458,7 +458,7 @@ def test_lint_config_file_missing_name(tmp_path):
 
 def test_lint_config_file_yaml_syntax_error(tmp_path):
     """Test lint_config_file with YAML syntax error."""
-    from dbt_bouncer.config_file_validator import lint_config_file
+    from dbt_bouncer.configuration_file.validator import lint_config_file
 
     config_file = tmp_path / "dbt-bouncer.yml"
     with Path.open(config_file, "w") as f:
@@ -472,7 +472,7 @@ def test_lint_config_file_yaml_syntax_error(tmp_path):
 
 def test_lint_config_file_unexpected_exception(monkeypatch, tmp_path):
     """Test lint_config_file logs and reports unexpected exceptions instead of swallowing them."""
-    from dbt_bouncer.config_file_validator import lint_config_file
+    from dbt_bouncer.configuration_file.validator import lint_config_file
 
     config_file = tmp_path / "dbt-bouncer.yml"
     config_file.write_text("manifest_checks:\n  - name: check_model_has_description\n")
@@ -494,7 +494,7 @@ def test_lint_config_file_unexpected_exception(monkeypatch, tmp_path):
 
 def test_lint_config_file_not_list(tmp_path):
     """Test lint_config_file when check category is not a list."""
-    from dbt_bouncer.config_file_validator import lint_config_file
+    from dbt_bouncer.configuration_file.validator import lint_config_file
 
     config = {
         "manifest_checks": "not a list",
@@ -510,7 +510,7 @@ def test_lint_config_file_not_list(tmp_path):
 
 def test_lint_config_file_empty(tmp_path):
     """Test lint_config_file with empty config."""
-    from dbt_bouncer.config_file_validator import lint_config_file
+    from dbt_bouncer.configuration_file.validator import lint_config_file
 
     config_file = tmp_path / "dbt-bouncer.yml"
     config_file.write_text("")
@@ -522,7 +522,7 @@ def test_lint_config_file_empty(tmp_path):
 
 def test_lint_config_file_not_yaml(tmp_path):
     """Test lint_config_file with non-YAML file."""
-    from dbt_bouncer.config_file_validator import lint_config_file
+    from dbt_bouncer.configuration_file.validator import lint_config_file
 
     config_file = tmp_path / "dbt-bouncer.txt"
     config_file.write_text("not yaml")
@@ -533,7 +533,7 @@ def test_lint_config_file_not_yaml(tmp_path):
 
 def test_lint_config_file_multiple_issues(tmp_path):
     """Test lint_config_file with multiple issues."""
-    from dbt_bouncer.config_file_validator import lint_config_file
+    from dbt_bouncer.configuration_file.validator import lint_config_file
 
     config = {
         "manifest_checks": [

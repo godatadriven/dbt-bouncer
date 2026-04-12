@@ -25,7 +25,7 @@ def test_runner_coverage(caplog, tmp_path):
     )
 
     with ctx:
-        from dbt_bouncer.config_file_parser import (  # noqa: N812
+        from dbt_bouncer.configuration_file.parser import (  # noqa: N812
             create_bouncer_conf_class as DbtBouncerConf,
         )
 
@@ -148,7 +148,7 @@ def test_runner_failure():
     )
 
     with ctx:
-        from dbt_bouncer.config_file_parser import (  # noqa: N812
+        from dbt_bouncer.configuration_file.parser import (  # noqa: N812
             create_bouncer_conf_class as DbtBouncerConf,
         )
 
@@ -264,7 +264,7 @@ def test_runner_skip(tmp_path):
     )
 
     with ctx:
-        from dbt_bouncer.config_file_parser import (  # noqa: N812
+        from dbt_bouncer.configuration_file.parser import (  # noqa: N812
             create_bouncer_conf_class as DbtBouncerConf,
         )
 
@@ -424,7 +424,7 @@ def test_runner_success():
     )
 
     with ctx:
-        from dbt_bouncer.config_file_parser import (  # noqa: N812
+        from dbt_bouncer.configuration_file.parser import (  # noqa: N812
             create_bouncer_conf_class as DbtBouncerConf,
         )
 
@@ -531,7 +531,7 @@ def test_runner_success():
 
 def test_runner_windows(caplog, tmp_path):
     configure_console_logging(verbosity=0)
-    from dbt_bouncer.config_file_parser import (  # noqa: N812
+    from dbt_bouncer.configuration_file.parser import (  # noqa: N812
         create_bouncer_conf_class as DbtBouncerConf,
     )
 
@@ -656,7 +656,7 @@ def test_runner_check_id(tmp_path):
     )
 
     with ctx:
-        from dbt_bouncer.config_file_parser import (  # noqa: N812
+        from dbt_bouncer.configuration_file.parser import (  # noqa: N812
             create_bouncer_conf_class as DbtBouncerConf,
         )
 
@@ -821,7 +821,7 @@ def test_runner_output_only_failures(output_only_failures, num_checks, tmp_path)
     )
 
     with ctx:
-        from dbt_bouncer.config_file_parser import (  # noqa: N812
+        from dbt_bouncer.configuration_file.parser import (  # noqa: N812
             create_bouncer_conf_class as DbtBouncerConf,
         )
 
@@ -981,7 +981,7 @@ def test_runner_skip_catalog_check(tmp_path):
     )
 
     with ctx:
-        from dbt_bouncer.config_file_parser import (  # noqa: N812
+        from dbt_bouncer.configuration_file.parser import (  # noqa: N812
             create_bouncer_conf_class as DbtBouncerConf,
         )
 
