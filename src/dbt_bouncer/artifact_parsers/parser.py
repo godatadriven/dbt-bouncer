@@ -19,7 +19,7 @@ from dbt_bouncer.utils import clean_path_str, get_package_version_number
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from dbt_bouncer.config_file_parser import DbtBouncerConfBase
+    from dbt_bouncer.configuration_file.parser import DbtBouncerConfBase
 
 
 class ProxyStr(str):
