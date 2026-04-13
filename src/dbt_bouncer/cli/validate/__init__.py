@@ -38,7 +38,7 @@ def validate(
     if not config_path.exists():
         raise RuntimeError(f"Config file not found: {config_path}")
 
-    from dbt_bouncer.config_file_validator import lint_config_file
+    from dbt_bouncer.configuration_file.validator import lint_config_file
 
     issues = lint_config_file(config_path)
 

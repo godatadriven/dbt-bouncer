@@ -12,7 +12,7 @@ from dbt_bouncer.reporting.logger import configure_console_logging
 from dbt_bouncer.version import version as get_version
 
 if TYPE_CHECKING:
-    from dbt_bouncer.config_file_parser import DbtBouncerConfBase
+    from dbt_bouncer.configuration_file.parser import DbtBouncerConfBase
     from dbt_bouncer.context import BouncerContext
 
 
@@ -138,7 +138,7 @@ def run_bouncer(
     check_names: set[str] = {x.strip() for x in check.strip().split(",") if x.strip()}
 
     # Using local imports to speed up CLI startup
-    from dbt_bouncer.config_file_validator import (
+    from dbt_bouncer.configuration_file.validator import (
         get_config_file_path,
         load_config_file_contents,
     )
@@ -189,7 +189,7 @@ def run_bouncer(
             config_file_path.parent / config_file_contents["custom_checks_dir"]
         )
 
-    from dbt_bouncer.config_file_validator import validate_conf
+    from dbt_bouncer.configuration_file.validator import validate_conf
 
     bouncer_config = validate_conf(
         check_categories=check_categories,

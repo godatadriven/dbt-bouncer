@@ -15,7 +15,7 @@ from dbt_bouncer.enums import ConfigFileName, ConfigFileSource
 from dbt_bouncer.utils import compile_pattern, get_check_registry, load_config_from_yaml
 
 if TYPE_CHECKING:
-    from dbt_bouncer.config_file_parser import DbtBouncerConfBase
+    from dbt_bouncer.configuration_file.parser import DbtBouncerConfBase
 
 _rebuilt_classes: set[str] = set()
 
@@ -323,7 +323,7 @@ def validate_conf(
 
     if configured_check_names:
         # Fast path: import only modules containing the configured checks.
-        from dbt_bouncer.config_file_parser import _create_conf_class
+        from dbt_bouncer.configuration_file.parser import _create_conf_class
         from dbt_bouncer.utils import get_check_objects_for_names
 
         check_objects = get_check_objects_for_names(
@@ -344,7 +344,7 @@ def validate_conf(
         if "run_results_checks" in check_categories:
             import dbt_bouncer.checks.run_results  # noqa: F401
 
-        from dbt_bouncer.config_file_parser import create_bouncer_conf_class
+        from dbt_bouncer.configuration_file.parser import create_bouncer_conf_class
 
         DbtBouncerConf = create_bouncer_conf_class(  # noqa: N806
             custom_checks_dir=custom_checks_dir,
