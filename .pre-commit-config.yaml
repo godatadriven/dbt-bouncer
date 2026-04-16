@@ -66,6 +66,16 @@ repos:
 
     - repo: local
       hooks:
+          - id: schema-check
+            entry: bash -c 'uv run python scripts/generate_schema.py && git diff --exit-code schema.json || { echo "schema.json is out of date. Run \"make generate-schema\" and commit the result."; exit 1; }'
+            files: ^schema\.json$|^scripts/generate_schema\.py$|^src/dbt_bouncer/checks/|^src/dbt_bouncer/configuration_file/
+            language: system
+            name: schema-check
+            pass_filenames: false
+            require_serial: true
+
+    - repo: local
+      hooks:
         - id: rumdl
           entry: uv run rumdl check --fix
           language: system
