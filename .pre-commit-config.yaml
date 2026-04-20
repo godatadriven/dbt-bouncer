@@ -119,3 +119,13 @@ repos:
           name: bandit
           pass_filenames: false
           require_serial: true
+
+    - repo: local
+      hooks:
+        - id: uv-lock
+          entry: uv lock --locked
+          files: ^pyproject\.toml$|^uv\.lock$
+          language: system
+          name: uv-lock
+          pass_filenames: false
+          require_serial: true
