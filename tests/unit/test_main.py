@@ -192,7 +192,7 @@ from typing import Any, Literal
 
 from pydantic import Field
 
-from dbt_bouncer.check_base import BaseCheck
+from dbt_bouncer.check_framework.base import BaseCheck
 
 
 class CheckMyCustomCheck(BaseCheck):

@@ -6,7 +6,7 @@ from jinja2 import Environment, nodes
 from jinja2_simple_tags import StandaloneTag
 from pydantic import Field
 
-from dbt_bouncer.check_decorator import check, fail
+from dbt_bouncer.check_framework.decorator import check, fail
 from dbt_bouncer.utils import clean_path_str, compile_pattern, is_description_populated
 
 

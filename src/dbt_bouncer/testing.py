@@ -27,8 +27,8 @@ from typing import Any
 import pytest
 
 from dbt_bouncer.artifact_parsers.parser import wrap_dict
-from dbt_bouncer.check_context import CheckContext
-from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
+from dbt_bouncer.check_framework.context import CheckContext
+from dbt_bouncer.check_framework.exceptions import DbtBouncerFailedCheckError
 
 # ---------------------------------------------------------------------------
 # Default resource factories

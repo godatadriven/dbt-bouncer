@@ -2,9 +2,9 @@
 
 import pytest
 
-from dbt_bouncer.check_base import BaseCheck
-from dbt_bouncer.check_decorator import check, fail
-from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
+from dbt_bouncer.check_framework.base import BaseCheck
+from dbt_bouncer.check_framework.decorator import check, fail
+from dbt_bouncer.check_framework.exceptions import DbtBouncerFailedCheckError
 
 # --- Decorator-defined checks for testing ---
 
@@ -135,7 +135,7 @@ class TestCheckDecoratorExecution:
 
     def test_context_only_check_with_models(self):
         from dbt_bouncer.artifact_parsers.parser import wrap_dict
-        from dbt_bouncer.check_context import CheckContext
+        from dbt_bouncer.check_framework.context import CheckContext
 
         ctx = CheckContext(models=[wrap_dict({"name": "m1"})])
         instance = CheckDecoratorContextOnly(name="check_decorator_context_only")
@@ -143,7 +143,7 @@ class TestCheckDecoratorExecution:
         instance.execute()
 
     def test_context_only_check_without_models(self):
-        from dbt_bouncer.check_context import CheckContext
+        from dbt_bouncer.check_framework.context import CheckContext
 
         ctx = CheckContext(models=[])
         instance = CheckDecoratorContextOnly(name="check_decorator_context_only")
@@ -160,7 +160,7 @@ class TestCheckDecoratorExecution:
 
     def test_resource_and_ctx_check_passes(self):
         from dbt_bouncer.artifact_parsers.parser import wrap_dict
-        from dbt_bouncer.check_context import CheckContext
+        from dbt_bouncer.check_framework.context import CheckContext
 
         model = wrap_dict({"name": "stg_orders", "unique_id": "model.pkg.stg_orders"})
         ctx = CheckContext(models=[model])

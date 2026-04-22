@@ -23,7 +23,7 @@ def _rebuild_all_check_models():
     Since we no longer use Pydantic artifact types, this only needs to
     rebuild check classes and the bouncer conf/context with Any stubs.
     """
-    from dbt_bouncer.checks.common import NestedDict
+    from dbt_bouncer.check_framework.exceptions import NestedDict
 
     types_namespace = {
         "NestedDict": NestedDict,

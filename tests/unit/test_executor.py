@@ -19,7 +19,7 @@ class _FailingCheck:
     description = None
 
     def execute(self):
-        from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
+        from dbt_bouncer.check_framework.exceptions import DbtBouncerFailedCheckError
 
         raise DbtBouncerFailedCheckError("Model access should be private")
 

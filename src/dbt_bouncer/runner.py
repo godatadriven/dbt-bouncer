@@ -146,7 +146,7 @@ def runner(
         "unit_tests": ctx.unit_tests,
     }
 
-    from dbt_bouncer.check_context import CheckContext
+    from dbt_bouncer.check_framework.context import CheckContext
 
     check_ctx = CheckContext(
         catalog_nodes=ctx.catalog_nodes,
