@@ -7,7 +7,7 @@ def test_init_command_creates_file(tmp_path, monkeypatch):
     """Test init with all default values (pressing Enter for all prompts)."""
     monkeypatch.chdir(tmp_path)
     runner = CliRunner()
-    # 3 prompts (artifacts dir, check descriptions, check unique tests, check naming)
+    # 4 prompts: artifacts dir, check descriptions, check unique tests, check naming
     result = runner.invoke(app, ["init"], input="\n\n\n\n")
 
     assert result.exit_code == 0
@@ -23,7 +23,7 @@ def test_init_command_fails_if_file_exists(tmp_path, monkeypatch):
     config_file.touch()
 
     runner = CliRunner()
-    # 3 prompts + 'n' to decline overwrite
+    # 4 prompts + 'n' to decline overwrite
     result = runner.invoke(app, ["init"], input="\n\n\n\nn\n")
 
     assert result.exit_code == 1  # Aborted
@@ -37,7 +37,7 @@ def test_init_command_overwrites_if_confirmed(tmp_path, monkeypatch):
     config_file.write_text("old content")
 
     runner = CliRunner()
-    # 3 prompts + 'y' to confirm overwrite
+    # 4 prompts + 'y' to confirm overwrite
     result = runner.invoke(app, ["init"], input="\n\n\n\ny\n")
 
     assert result.exit_code == 0
