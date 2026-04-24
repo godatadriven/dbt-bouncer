@@ -18,10 +18,6 @@ from dbt_bouncer.artifact_types import (  # noqa: TC001 - needed at runtime for 
     TestNode,
     UnitTestNode,
 )
-
-# Imported from check_framework.exceptions (not checks.common) to avoid a
-# circular dependency: checks.common previously depended on this module's
-# sibling, creating an import cycle that the check_framework package resolves.
 from dbt_bouncer.check_framework.exceptions import DbtBouncerFailedCheckError
 from dbt_bouncer.enums import CheckSeverity, Materialization
 from dbt_bouncer.utils import is_description_populated
