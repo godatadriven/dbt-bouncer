@@ -1,7 +1,7 @@
 """Utility functions for the init CLI subcommand."""
 
 from pathlib import Path
-from typing import NamedTuple
+from typing import Any, NamedTuple
 
 from dbt_bouncer.enums import ConfigFileName
 
@@ -9,7 +9,7 @@ from dbt_bouncer.enums import ConfigFileName
 class InitConfig(NamedTuple):
     """Result of building an initial dbt-bouncer configuration."""
 
-    config: dict
+    config: dict[str, Any]
     checks_count: int
 
 
@@ -67,7 +67,7 @@ def build_initial_config(
     return InitConfig(config=config_dict, checks_count=len(manifest_checks))
 
 
-def write_config_file(config_dict: dict) -> Path:
+def write_config_file(config_dict: dict[str, Any]) -> Path:
     """Write the configuration dictionary to a file.
 
     Args:
@@ -79,7 +79,7 @@ def write_config_file(config_dict: dict) -> Path:
     """
     import yaml
 
-    dumper = getattr(yaml, "CSafeDumper", yaml.SafeDumper)
+    dumper: type[yaml.BaseDumper] = getattr(yaml, "CSafeDumper", yaml.SafeDumper)  # type: ignore[assignment]
     config_path = Path(ConfigFileName.DBT_BOUNCER_YML)
 
     with config_path.open("w") as f:
