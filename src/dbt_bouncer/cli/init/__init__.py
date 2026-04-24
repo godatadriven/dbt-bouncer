@@ -38,9 +38,9 @@ def init() -> None:
         "Check naming conventions for staging models?", default=True
     )
 
-    output_path = Path(ConfigFileName.DBT_BOUNCER_YML)
-    if output_path.exists():
-        console.print(f"\n[yellow]Warning:[/yellow] {output_path} already exists.")
+    config_path = Path(ConfigFileName.DBT_BOUNCER_YML)
+    if config_path.exists():
+        console.print(f"\n[yellow]Warning:[/yellow] {config_path} already exists.")
         overwrite = typer.confirm(
             "Overwrite?",
             default=False,
@@ -62,7 +62,7 @@ def init() -> None:
             "\n[yellow]Warning:[/yellow] No checks selected. Your config will be empty."
         )
 
-    config_path = write_config_file(config_dict=result.config)
+    write_config_file(config_dict=result.config)
 
     console.print(f"\n[bold green][OK] Created {config_path}[/bold green]")
     console.print(
