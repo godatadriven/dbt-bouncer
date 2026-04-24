@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING, Any
 from rich.console import Console
 from rich.progress import BarColumn, Progress, TaskProgressColumn, TextColumn
 
-from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
+from dbt_bouncer.check_framework.exceptions import DbtBouncerFailedCheckError
 from dbt_bouncer.enums import CheckOutcome, CheckSeverity
 
 if TYPE_CHECKING:

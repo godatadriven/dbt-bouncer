@@ -552,7 +552,7 @@ def test_lint_config_file_multiple_issues(tmp_path):
 
 def test_get_stub_namespace_nested_dict_is_real_class():
     """NestedDict must be the real class, not Any — it is used in config fields."""
-    from dbt_bouncer.checks.common import NestedDict
+    from dbt_bouncer.check_framework.exceptions import NestedDict
 
     ns = _get_stub_namespace()
     assert ns["NestedDict"] is NestedDict

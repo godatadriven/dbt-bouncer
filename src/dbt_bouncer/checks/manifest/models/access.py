@@ -4,7 +4,7 @@ from typing import Annotated
 
 from pydantic import Field
 
-from dbt_bouncer.check_decorator import check, fail
+from dbt_bouncer.check_framework.decorator import check, fail
 from dbt_bouncer.utils import compile_pattern, get_clean_model_name
 
 

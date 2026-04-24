@@ -99,7 +99,7 @@ def main() -> None:
     import dbt_bouncer.checks.catalog  # noqa: F401
     import dbt_bouncer.checks.manifest  # noqa: F401
     import dbt_bouncer.checks.run_results  # noqa: F401
-    from dbt_bouncer.checks.common import NestedDict
+    from dbt_bouncer.check_framework.exceptions import NestedDict
     from dbt_bouncer.configuration_file.parser import create_bouncer_conf_class
 
     logging.info("Building DbtBouncerConf model with all checks...")

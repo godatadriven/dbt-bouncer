@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from dbt_bouncer.check_base import BaseCheck
+from dbt_bouncer.check_framework.base import BaseCheck
 from dbt_bouncer.utils import (
     _ESCAPED_SEPARATOR,
     _SEPARATOR,

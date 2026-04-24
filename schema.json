@@ -7221,6 +7221,7 @@
           "type": "string"
         }
       ],
+      "description": "A dictionary that can contain nested dictionaries or lists.",
       "title": "NestedDict"
     }
   },

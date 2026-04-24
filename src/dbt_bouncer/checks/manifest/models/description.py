@@ -6,7 +6,7 @@ from typing import Annotated, Any, cast
 
 from pydantic import Field
 
-from dbt_bouncer.check_decorator import check, fail
+from dbt_bouncer.check_framework.decorator import check, fail
 from dbt_bouncer.utils import (
     clean_path_str,
     compile_pattern,

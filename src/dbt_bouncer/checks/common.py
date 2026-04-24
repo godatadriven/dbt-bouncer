@@ -1,28 +1,23 @@
-from pydantic import RootModel
+"""Backward-compatibility shim — canonical location is ``check_framework.exceptions``.
 
+.. deprecated::
+    Import from ``dbt_bouncer.check_framework.exceptions`` instead.
+    This module will be removed in a future major release.
+"""
 
-class DbtBouncerFailedCheckError(Exception):
-    """A custom exception class for failing dbt-bouncer checks."""
+import warnings
 
-    def __init__(self, message: str):
-        """Initialize the DbtBouncerFailedCheck exception.
+from dbt_bouncer.check_framework.exceptions import (
+    DbtBouncerFailedCheckError,
+    NestedDict,
+)
 
-        Args:
-            message (str): The exception message.
+__all__ = ["DbtBouncerFailedCheckError", "NestedDict"]
 
-        """
-        self.message = message
-        super().__init__(self.message)
-
-    def __str__(self) -> str:
-        """Return the string representation of the exception.
-
-        Returns:
-            str: The exception message.
-
-        """
-        return self.message
-
-
-class NestedDict(RootModel):
-    root: dict[str, "NestedDict"] | list["NestedDict"] | str
+warnings.warn(
+    "Importing from 'dbt_bouncer.checks.common' is deprecated. "
+    "Use 'from dbt_bouncer.check_framework.exceptions import ...' instead. "
+    "This shim will be removed in a future major release.",
+    DeprecationWarning,
+    stacklevel=2,
+)

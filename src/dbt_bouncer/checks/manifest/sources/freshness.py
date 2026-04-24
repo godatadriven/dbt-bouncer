@@ -1,6 +1,6 @@
 """Checks related to source freshness."""
 
-from dbt_bouncer.check_decorator import check, fail
+from dbt_bouncer.check_framework.decorator import check, fail
 
 
 @check

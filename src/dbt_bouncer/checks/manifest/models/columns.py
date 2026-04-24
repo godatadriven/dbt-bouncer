@@ -2,8 +2,8 @@
 
 import re
 
-from dbt_bouncer.check_decorator import check, fail
-from dbt_bouncer.checks.common import NestedDict
+from dbt_bouncer.check_framework.decorator import check, fail
+from dbt_bouncer.check_framework.exceptions import NestedDict
 from dbt_bouncer.enums import Materialization
 from dbt_bouncer.utils import find_missing_meta_keys, get_clean_model_name
 

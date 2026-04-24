@@ -293,7 +293,7 @@ def _get_stub_namespace() -> dict[str, Any]:
         dict[str, Any]: Namespace mapping type names for ``model_rebuild()``.
 
     """
-    from dbt_bouncer.checks.common import NestedDict
+    from dbt_bouncer.check_framework.exceptions import NestedDict
 
     return {"NestedDict": NestedDict}
 

@@ -4,7 +4,7 @@ from typing import ClassVar, Literal
 
 from pydantic import Field
 
-from dbt_bouncer.check_base import BaseCheck
+from dbt_bouncer.check_framework.base import BaseCheck
 from dbt_bouncer.cli.list.utils import (
     build_checks_payload,
     category_key,

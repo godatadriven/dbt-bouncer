@@ -21,7 +21,7 @@ from packaging.version import Version as PyPIVersion
 from semver import Version
 
 if TYPE_CHECKING:
-    from dbt_bouncer.check_base import BaseCheck
+    from dbt_bouncer.check_framework.base import BaseCheck
 
 
 def clean_path_str(path: str) -> str:

@@ -5,7 +5,7 @@ from typing import Annotated
 
 from pydantic import Field
 
-from dbt_bouncer.check_decorator import check, fail
+from dbt_bouncer.check_framework.decorator import check, fail
 from dbt_bouncer.utils import get_package_version_number, object_in_path
 
 

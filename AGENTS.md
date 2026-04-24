@@ -39,8 +39,12 @@ make install
   - `run/` — execute bouncer checks (`run`, `run_bouncer`, `_detect_config_file_source`, `_build_context`)
   - `validate/` — lint config file (`validate`)
 - `src/dbt_bouncer/main.py` — Typer app setup, subcommand registration, backward-compatible `main_callback`
-- `src/dbt_bouncer/check_base.py` — `BaseCheck` (Pydantic model), used by class-based checks
-- `src/dbt_bouncer/check_decorator.py` — `@check` decorator and `fail()` helper (preferred API)
+- `src/dbt_bouncer/check_framework/` — core check infrastructure package:
+  - `base.py` — `BaseCheck` (Pydantic model), used by class-based checks
+  - `context.py` — `CheckContext` dataclass for execution context
+  - `decorator.py` — `@check` decorator and `fail()` helper (preferred API)
+  - `exceptions.py` — `DbtBouncerFailedCheckError` and `NestedDict`
+  - `patterns.py` — abstract check pattern ABCs
 - `src/dbt_bouncer/runner.py` — orchestrates check execution
 - `src/dbt_bouncer/executor.py` — parallel execution with `ThreadPoolExecutor`
 - `tests/` — mirrors `src/` structure; fixtures in `tests/fixtures/`
@@ -65,7 +69,7 @@ Checks are written using the `@check` decorator (preferred) or as class-based `B
 **Template (decorator API — preferred):**
 
 ```python
-from dbt_bouncer.check_decorator import check, fail
+from dbt_bouncer.check_framework.decorator import check, fail
 
 
 @check
@@ -130,8 +134,8 @@ from typing import Any, Literal
 
 from pydantic import Field
 
-from dbt_bouncer.check_base import BaseCheck
-from dbt_bouncer.checks.common import DbtBouncerFailedCheckError
+from dbt_bouncer.check_framework.base import BaseCheck
+from dbt_bouncer.check_framework.exceptions import DbtBouncerFailedCheckError
 
 
 class CheckModelXxx(BaseCheck):

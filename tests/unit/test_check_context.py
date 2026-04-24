@@ -6,8 +6,8 @@ from unittest.mock import MagicMock
 import pytest
 from pydantic import Field
 
-from dbt_bouncer.check_base import BaseCheck
-from dbt_bouncer.check_context import CheckContext
+from dbt_bouncer.check_framework.base import BaseCheck
+from dbt_bouncer.check_framework.context import CheckContext
 
 
 def test_check_context_creation():
