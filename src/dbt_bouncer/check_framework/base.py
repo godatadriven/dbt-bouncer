@@ -1,3 +1,5 @@
+"""Base check model that all dbt-bouncer checks inherit from."""
+
 from __future__ import annotations
 
 from typing import Any, ClassVar

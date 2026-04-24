@@ -8,11 +8,9 @@ values (display name, accessor, etc.).
 from __future__ import annotations
 
 import logging
+import re  # noqa: TC003 — used in PrivateAttr annotation; unconditional to avoid breakage if PEP 563 is removed
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, Literal
-
-if TYPE_CHECKING:
-    import re
+from typing import Any, Literal
 
 from pydantic import Field, PrivateAttr
 
