@@ -79,7 +79,9 @@ def write_config_file(config_dict: dict[str, Any]) -> Path:
     """
     import yaml
 
-    dumper: type[yaml.BaseDumper] = getattr(yaml, "CSafeDumper", yaml.SafeDumper)  # type: ignore[assignment]
+    dumper: type[yaml.SafeDumper] = (
+        yaml.CSafeDumper if hasattr(yaml, "CSafeDumper") else yaml.SafeDumper
+    )
     config_path = Path(ConfigFileName.DBT_BOUNCER_YML)
 
     with config_path.open("w") as f:
