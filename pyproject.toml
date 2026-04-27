@@ -7,12 +7,7 @@ requires-python = ">=3.11,<3.15"
 license = "MIT"
 authors = [{ name = "Padraic Slattery", email = "pgoslatara@gmail.com" }]
 maintainers = [{ name = "Padraic Slattery", email = "pgoslatara@gmail.com" }]
-keywords = [
-  "CI/CD",
-  "cli",
-  "dbt",
-  "python",
-]
+keywords = ["CI/CD", "cli", "dbt", "python"]
 classifiers = [
   "Programming Language :: Python",
   "Programming Language :: Python :: 3",
@@ -61,7 +56,7 @@ dev = [
   "ruff>=0.8,<1",
   "shandy-sqlfmt[jinjafmt]>=0.7,<1",
   "tombi>=0.7.32",
-  "ty>=0.0.7"
+  "ty>=0.0.7",
 ]
 docs = [
   "mike~=2.0",
@@ -70,13 +65,11 @@ docs = [
   "mkdocs-click~=0.0",
   "mkdocs-git-revision-date-localized-plugin~=1.0",
   "mkdocs-material~=9.0",
-  "pymdown-extensions~=10.0"
+  "pymdown-extensions~=10.0",
 ]
 
 [tool.coverage.report]
-exclude_lines = [
-  "if TYPE_CHECKING:",
-]
+exclude_lines = ["if TYPE_CHECKING:"]
 
 [tool.dbt-bouncer]
 dbt_artifacts_dir = "dbt_project/target"
@@ -118,7 +111,7 @@ exclude = [
   "site-packages",
   "venv",
 ]
-line-length = 88
+line-length = 120
 indent-width = 4
 target-version = "py311"
 
@@ -134,7 +127,7 @@ ignore = [
   "E501",
   "G004",
   "LOG015",
-  "S101"
+  "S101",
 ]
 preview = true
 select = [
@@ -162,7 +155,7 @@ select = [
   "T20",
   "TCH",
   "TID",
-  "W"
+  "W",
 ]
 unfixable = ["B"]
 
@@ -189,13 +182,7 @@ disable = [
   "MD046",  # Code block style
   "MD059",  # Link text
 ]
-exclude = [
-  ".git",
-  ".github",
-  ".venv",
-  "LICENSE.md",
-  "docs/plans",
-]
+exclude = [".git", ".github", ".venv", "LICENSE.md", "docs/plans"]
 MD007.indent = 4
 respect_gitignore = true
 
