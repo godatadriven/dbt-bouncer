@@ -16,37 +16,21 @@ import base64
 import re
 from pathlib import Path
 
+from _constants import (
+    ACCENT_BAR_HEIGHT,
+    HEIGHT,
+    LOGO_SIZE,
+    TAGLINE,
+    THEMES,
+    URL_TEXT,
+    VARIANTS,
+    WIDTH,
+    get_layout,
+)
+
 SCRIPT_DIR = Path(__file__).resolve().parent
 BRAND_DIR = SCRIPT_DIR.parent
 LOGO_PATH = BRAND_DIR.parent / "logo.svg"
-
-TAGLINE = "Configure and enforce conventions for your dbt project"
-URL = "godatadriven.github.io/dbt-bouncer"
-
-THEMES = {
-    "light": {
-        "bg": "#ffffff",
-        "text": "#1a1a2e",
-        "muted": "#555566",
-        "accent": "#ff694a",
-    },
-    "dark": {
-        "bg": "#1a1a2e",
-        "text": "#ffffff",
-        "muted": "#aaaacc",
-        "accent": "#ff694a",
-    },
-}
-
-VARIANTS = {
-    "name": {"lines": []},
-    "tagline": {"lines": ["tagline"]},
-    "full": {"lines": ["tagline", "url"]},
-}
-
-WIDTH, HEIGHT = 1200, 630
-LOGO_SIZE = 220
-ACCENT_BAR_HEIGHT = 6
 
 
 def prepare_logo_b64(bg_colour: str) -> str:
@@ -59,26 +43,6 @@ def prepare_logo_b64(bg_colour: str) -> str:
         count=1,
     )
     return base64.b64encode(svg.encode()).decode()
-
-
-def get_layout(variant_name: str) -> dict:
-    """Calculate vertical positions for a given variant."""
-    lines = VARIANTS[variant_name]["lines"]
-    if not lines:
-        logo_y = 120
-        name_y = logo_y + LOGO_SIZE + 65
-    elif len(lines) == 1:
-        logo_y = 90
-        name_y = logo_y + LOGO_SIZE + 60
-    else:
-        logo_y = 70
-        name_y = logo_y + LOGO_SIZE + 55
-    return {
-        "logo_y": logo_y,
-        "name_y": name_y,
-        "tagline_y": name_y + 50,
-        "url_y": name_y + 95,
-    }
 
 
 def build_svg(theme_name: str, variant_name: str, logo_b64: str) -> str:
@@ -104,7 +68,7 @@ def build_svg(theme_name: str, variant_name: str, logo_b64: str) -> str:
         text_elements.append(
             f'  <text x="{WIDTH // 2}" y="{layout["url_y"]}" '
             f'font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="normal" '
-            f'fill="{theme["muted"]}" text-anchor="middle">{URL}</text>'
+            f'fill="{theme["muted"]}" text-anchor="middle">{URL_TEXT}</text>'
         )
 
     return f"""<?xml version="1.0" encoding="UTF-8"?>

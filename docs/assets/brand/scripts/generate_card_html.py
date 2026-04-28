@@ -1,4 +1,4 @@
-"""Generate HTML pages used by render_pngs.sh for Playwright/Chrome rendering.
+"""Generate HTML pages used by render_pngs.py for Playwright rendering.
 
 These HTML pages reference the logo SVG via a local HTTP server (port 8766)
 and produce pixel-perfect renders when screenshotted by a headless browser.
@@ -6,60 +6,25 @@ and produce pixel-perfect renders when screenshotted by a headless browser.
 Usage:
     python generate_card_html.py
 
-Called automatically by render_pngs.sh.
+Called automatically by render_pngs.py.
 """
 
 from pathlib import Path
 
+from _constants import (
+    ACCENT_BAR_HEIGHT,
+    HEIGHT,
+    LOGO_SIZE,
+    TAGLINE,
+    THEMES,
+    URL_TEXT,
+    VARIANTS,
+    WIDTH,
+    get_layout,
+)
+
 SCRIPT_DIR = Path(__file__).resolve().parent
 HTML_DIR = SCRIPT_DIR / "html"
-
-TAGLINE = "Configure and enforce conventions for your dbt project"
-URL_TEXT = "godatadriven.github.io/dbt-bouncer"
-
-THEMES = {
-    "light": {
-        "bg": "#ffffff",
-        "text": "#1a1a2e",
-        "muted": "#555566",
-        "accent": "#ff694a",
-    },
-    "dark": {
-        "bg": "#1a1a2e",
-        "text": "#ffffff",
-        "muted": "#aaaacc",
-        "accent": "#ff694a",
-    },
-}
-
-VARIANTS = {
-    "name": {"lines": []},
-    "tagline": {"lines": ["tagline"]},
-    "full": {"lines": ["tagline", "url"]},
-}
-
-WIDTH, HEIGHT = 1200, 630
-LOGO_SIZE = 220
-ACCENT_BAR_HEIGHT = 6
-
-
-def get_layout(variant_name: str) -> dict:
-    lines = VARIANTS[variant_name]["lines"]
-    if not lines:
-        logo_y = 120
-        name_y = logo_y + LOGO_SIZE + 65
-    elif len(lines) == 1:
-        logo_y = 90
-        name_y = logo_y + LOGO_SIZE + 60
-    else:
-        logo_y = 70
-        name_y = logo_y + LOGO_SIZE + 55
-    return {
-        "logo_y": logo_y,
-        "name_y": name_y,
-        "tagline_y": name_y + 50,
-        "url_y": name_y + 95,
-    }
 
 
 def build_card_html(theme_name: str, variant_name: str) -> str:

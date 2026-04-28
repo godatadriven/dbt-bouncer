@@ -17,7 +17,7 @@ import http.server
 import subprocess
 import sys
 import threading
-import time
+import urllib.request
 from pathlib import Path
 
 from playwright.sync_api import sync_playwright
@@ -44,10 +44,24 @@ def _make_handler(directory: Path) -> type:
 
 
 def _start_server(directory: Path, port: int) -> http.server.HTTPServer:
-    server = http.server.HTTPServer(("", port), _make_handler(directory))
+    server = http.server.HTTPServer(("127.0.0.1", port), _make_handler(directory))
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
     return server
+
+
+def _wait_for_server(port: int, *, retries: int = 20, delay: float = 0.25) -> None:
+    """Block until the HTTP server on *port* is accepting connections."""
+    for _ in range(retries):
+        try:
+            urllib.request.urlopen(f"http://127.0.0.1:{port}/", timeout=1)
+            return
+        except OSError:
+            import time
+
+            time.sleep(delay)
+    msg = f"Server on port {port} did not become ready"
+    raise RuntimeError(msg)
 
 
 def main() -> None:
@@ -58,11 +72,12 @@ def main() -> None:
         [sys.executable, str(SCRIPT_DIR / "generate_card_html.py")], check=True
     )
 
-    # Start HTTP servers
+    # Start HTTP servers and wait until they accept connections
     print("Starting HTTP servers...")
     assets_server = _start_server(ASSETS_DIR, ASSETS_PORT)
     html_server = _start_server(html_dir, HTML_PORT)
-    time.sleep(1)
+    _wait_for_server(ASSETS_PORT)
+    _wait_for_server(HTML_PORT)
 
     try:
         with sync_playwright() as p:
@@ -73,7 +88,7 @@ def main() -> None:
             for html_file in sorted(html_dir.glob("social-card-*.html")):
                 name = html_file.stem
                 page = browser.new_page(viewport={"width": 1200, "height": 630})
-                page.goto(f"http://localhost:{HTML_PORT}/{html_file.name}")
+                page.goto(f"http://127.0.0.1:{HTML_PORT}/{html_file.name}")
                 page.screenshot(path=str(BRAND_DIR / f"{name}.png"))
                 page.close()
                 print(f"  Created {name}.png")
@@ -84,7 +99,7 @@ def main() -> None:
                 name = html_file.stem
                 size = int(name.rsplit("-", 1)[-1])
                 page = browser.new_page(viewport={"width": size, "height": size})
-                page.goto(f"http://localhost:{HTML_PORT}/{html_file.name}")
+                page.goto(f"http://127.0.0.1:{HTML_PORT}/{html_file.name}")
                 page.screenshot(path=str(BRAND_DIR / f"{name}.png"))
                 page.close()
                 print(f"  Created {name}.png")
