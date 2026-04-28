@@ -1,14 +1,16 @@
 """Generate HTML pages used by render_pngs.py for Playwright rendering.
 
-These HTML pages reference the logo SVG via a local HTTP server (port 8766)
-and produce pixel-perfect renders when screenshotted by a headless browser.
+These HTML pages reference the logo SVG via a local HTTP server and produce
+pixel-perfect renders when screenshotted by a headless browser.
 
 Usage:
-    python generate_card_html.py
+    python generate_card_html.py [ASSETS_PORT]
 
-Called automatically by render_pngs.py.
+Called automatically by render_pngs.py, which passes the dynamically
+assigned assets server port. Defaults to 8766 when run standalone.
 """
 
+import sys
 from pathlib import Path
 
 from _constants import (
@@ -27,7 +29,7 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 HTML_DIR = SCRIPT_DIR / "html"
 
 
-def build_card_html(theme_name: str, variant_name: str) -> str:
+def build_card_html(theme_name: str, variant_name: str, assets_port: int) -> str:
     theme = THEMES[theme_name]
     variant = VARIANTS[variant_name]
     layout = get_layout(variant_name)
@@ -65,7 +67,7 @@ def build_card_html(theme_name: str, variant_name: str) -> str:
 </head>
 <body>
   <div class="card">
-    <img class="logo" src="http://localhost:8766/logo.svg" />
+    <img class="logo" src="http://127.0.0.1:{assets_port}/logo.svg" />
     {"".join(text_html)}
     <div class="accent"></div>
   </div>
@@ -82,20 +84,23 @@ def build_logo_html(logo_src: str, size: int) -> str:
 
 
 def main() -> None:
+    assets_port = int(sys.argv[1]) if len(sys.argv) > 1 else 8766
+
     HTML_DIR.mkdir(exist_ok=True)
 
     # Social card HTML pages
     for theme_name in THEMES:
         for variant_name in VARIANTS:
-            html = build_card_html(theme_name, variant_name)
+            html = build_card_html(theme_name, variant_name, assets_port)
             filename = f"social-card-{theme_name}-{variant_name}.html"
             (HTML_DIR / filename).write_text(html)
             print(f"Created {filename}")
 
     # Logo PNG HTML pages
+    base_url = f"http://127.0.0.1:{assets_port}"
     logos = [
-        ("logo", "http://localhost:8766/logo.svg"),
-        ("logo-icon-only", "http://localhost:8766/brand/logo-icon-only.svg"),
+        ("logo", f"{base_url}/logo.svg"),
+        ("logo-icon-only", f"{base_url}/brand/logo-icon-only.svg"),
     ]
     sizes = [512, 256, 128]
     for name, src in logos:

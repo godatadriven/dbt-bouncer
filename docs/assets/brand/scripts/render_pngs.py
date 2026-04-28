@@ -17,6 +17,7 @@ import http.server
 import subprocess
 import sys
 import threading
+import time
 import urllib.request
 from pathlib import Path
 
@@ -25,9 +26,6 @@ from playwright.sync_api import sync_playwright
 SCRIPT_DIR = Path(__file__).resolve().parent
 BRAND_DIR = SCRIPT_DIR.parent
 ASSETS_DIR = BRAND_DIR.parent  # docs/assets/
-
-ASSETS_PORT = 8766
-HTML_PORT = 8767
 
 
 def _make_handler(directory: Path) -> type:
@@ -43,8 +41,9 @@ def _make_handler(directory: Path) -> type:
     return _Handler
 
 
-def _start_server(directory: Path, port: int) -> http.server.HTTPServer:
-    server = http.server.HTTPServer(("127.0.0.1", port), _make_handler(directory))
+def _start_server(directory: Path) -> http.server.HTTPServer:
+    """Start a background HTTP server on a free port, return the server."""
+    server = http.server.HTTPServer(("127.0.0.1", 0), _make_handler(directory))
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
     return server
@@ -57,27 +56,36 @@ def _wait_for_server(port: int, *, retries: int = 20, delay: float = 0.25) -> No
             urllib.request.urlopen(f"http://127.0.0.1:{port}/", timeout=1)
             return
         except OSError:
-            import time
-
             time.sleep(delay)
     msg = f"Server on port {port} did not become ready"
     raise RuntimeError(msg)
 
 
 def main() -> None:
-    # Generate HTML templates
     html_dir = SCRIPT_DIR / "html"
     html_dir.mkdir(exist_ok=True)
+
+    # Start asset server first so we know the port for HTML generation
+    print("Starting HTTP servers...")
+    assets_server = _start_server(ASSETS_DIR)
+    assets_port = assets_server.server_address[1]
+    _wait_for_server(assets_port)
+
+    # Generate HTML templates with the actual assets port
     subprocess.run(
-        [sys.executable, str(SCRIPT_DIR / "generate_card_html.py")], check=True
+        [
+            sys.executable,
+            str(SCRIPT_DIR / "generate_card_html.py"),
+            str(assets_port),
+        ],
+        check=True,
     )
 
-    # Start HTTP servers and wait until they accept connections
-    print("Starting HTTP servers...")
-    assets_server = _start_server(ASSETS_DIR, ASSETS_PORT)
-    html_server = _start_server(html_dir, HTML_PORT)
-    _wait_for_server(ASSETS_PORT)
-    _wait_for_server(HTML_PORT)
+    # Start HTML server
+    html_server = _start_server(html_dir)
+    html_port = html_server.server_address[1]
+    _wait_for_server(html_port)
+    print(f"  Assets server on port {assets_port}, HTML server on port {html_port}")
 
     try:
         with sync_playwright() as p:
@@ -88,7 +96,7 @@ def main() -> None:
             for html_file in sorted(html_dir.glob("social-card-*.html")):
                 name = html_file.stem
                 page = browser.new_page(viewport={"width": 1200, "height": 630})
-                page.goto(f"http://127.0.0.1:{HTML_PORT}/{html_file.name}")
+                page.goto(f"http://127.0.0.1:{html_port}/{html_file.name}")
                 page.screenshot(path=str(BRAND_DIR / f"{name}.png"))
                 page.close()
                 print(f"  Created {name}.png")
@@ -99,7 +107,7 @@ def main() -> None:
                 name = html_file.stem
                 size = int(name.rsplit("-", 1)[-1])
                 page = browser.new_page(viewport={"width": size, "height": size})
-                page.goto(f"http://127.0.0.1:{HTML_PORT}/{html_file.name}")
+                page.goto(f"http://127.0.0.1:{html_port}/{html_file.name}")
                 page.screenshot(path=str(BRAND_DIR / f"{name}.png"))
                 page.close()
                 print(f"  Created {name}.png")
