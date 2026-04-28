@@ -170,6 +170,15 @@ unfixable = ["B"]
 "__init__.py" = ["E402"]
 "src/dbt_bouncer/checks/*" = ["ARG001", "D101", "D401", "D417", "DOC501"]
 "src/dbt_bouncer/parsers.py" = ["TCH002"]
+"docs/assets/brand/scripts/*" = [
+  "D103",
+  "DOC201",
+  "DOC501",
+  "S310",
+  "S404",
+  "S603",
+  "T201",
+]
 "tests/*" = ["D100", "D101", "D102", "D103", "D104", "E402"]
 
 [tool.ruff.format]
