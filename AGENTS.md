@@ -189,6 +189,13 @@ When drafting release notes, verify every item against the previous release tag 
 - Use `/build-artifacts` to regenerate test fixtures after dbt_project changes.
 - Use `/new-check` to scaffold a new check class with tests.
 
+## Brand Assets
+
+- Brand colour: `#ff694a`
+- Logo: `docs/assets/logo.svg`
+- Social cards and brand assets: `docs/assets/brand/`
+- See `docs/assets/brand/README.md` for usage guidelines and available variants
+
 ## Key Constraints
 
 - Use `prek run --all-files`, **not** `pre-commit run`
