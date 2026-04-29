@@ -1,5 +1,5 @@
 import json
-from pathlib import Path, PurePath
+from pathlib import Path
 
 import pytest
 import yaml
@@ -7,7 +7,6 @@ from typer.testing import CliRunner
 
 from dbt_bouncer.artifact_parsers.parser import wrap_dict
 from dbt_bouncer.main import app
-from dbt_bouncer.utils import clean_path_str
 
 artifact_paths = [f.__str__() for f in Path("./tests/fixtures").iterdir()]
 
@@ -24,7 +23,7 @@ def test_cli_happy_path(caplog, dbt_artifacts_dir, tmp_path):
     config_file = Path(tmp_path / "dbt-bouncer-example.yml")
 
     # These checks doesn't work with dbt-core < 1.9
-    if clean_path_str(dbt_artifacts_dir).split("/")[-1] in ["dbt_17", "dbt_18"]:
+    if Path(dbt_artifacts_dir).as_posix().split("/")[-1] in ["dbt_17", "dbt_18"]:
         for item in bouncer_config["catalog_checks"]:
             if item["name"] in ["check_seed_columns_are_all_documented"]:
                 bouncer_config["catalog_checks"].remove(item)
@@ -37,7 +36,7 @@ def test_cli_happy_path(caplog, dbt_artifacts_dir, tmp_path):
                 bouncer_config["manifest_checks"].remove(item)
 
     # Due to non-backwards compatible dbt-fusion changes, this check doesn't work with dbt-core < 1.10
-    if clean_path_str(dbt_artifacts_dir).split("/")[-1] in [
+    if Path(dbt_artifacts_dir).as_posix().split("/")[-1] in [
         "dbt_17",
         "dbt_18",
         "dbt_19",
@@ -50,7 +49,7 @@ def test_cli_happy_path(caplog, dbt_artifacts_dir, tmp_path):
         yaml.dump(bouncer_config, f)
 
     runner = CliRunner()
-    result = runner.invoke(app, f"--config-file {PurePath(config_file).as_posix()}")
+    result = runner.invoke(app, f"--config-file {Path(config_file).as_posix()}")
 
     assert "Running dbt-bouncer (0.0.0)..." in caplog.text
 

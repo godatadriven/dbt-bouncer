@@ -3,7 +3,7 @@
 from pathlib import Path
 
 from dbt_bouncer.check_framework.decorator import check, fail
-from dbt_bouncer.utils import clean_path_str, compile_pattern, get_clean_model_name
+from dbt_bouncer.utils import compile_pattern, get_clean_model_name
 
 
 @check
@@ -51,7 +51,9 @@ def check_model_directories(
 
     """
     compiled_include = compile_pattern(include.strip().rstrip("/"))
-    clean_path = clean_path_str(model.original_file_path)
+    clean_path = (
+        Path(model.original_file_path).as_posix() if model.original_file_path else ""
+    )
     matched_path = compiled_include.match(clean_path)
     if matched_path is None:
         fail("matched_path is None")
@@ -100,7 +102,9 @@ def check_model_file_name(model, *, file_name_pattern: str):
 
     """
     compiled = compile_pattern(file_name_pattern.strip())
-    file_name = Path(clean_path_str(model.original_file_path)).name
+    file_name = Path(
+        Path(model.original_file_path).as_posix() if model.original_file_path else ""
+    ).name
     if compiled.match(file_name) is None:
         fail(
             f"`{get_clean_model_name(model.unique_id)}` is in a file that does not match the supplied regex `{file_name_pattern.strip()}`."
@@ -135,11 +139,14 @@ def check_model_property_file_location(model):
     if not (
         hasattr(model, "patch_path")
         and model.patch_path
-        and clean_path_str(model.patch_path or "") is not None
+        and (Path(model.patch_path or "").as_posix() if model.patch_path or "" else "")
+        is not None
     ):
         fail(f"`{get_clean_model_name(model.unique_id)}` is not documented.")
 
-    original_path = Path(clean_path_str(model.original_file_path))
+    original_path = Path(
+        Path(model.original_file_path).as_posix() if model.original_file_path else ""
+    )
     relevant_parts = original_path.parts[1:-1]
 
     mapped_parts = []
@@ -154,7 +161,9 @@ def check_model_property_file_location(model):
             mapped_parts.append(part)
 
     expected_substr = "_".join(mapped_parts)
-    properties_yml_name = Path(clean_path_str(model.patch_path or "")).name
+    properties_yml_name = Path(
+        Path(model.patch_path or "").as_posix() if model.patch_path or "" else ""
+    ).name
 
     if not properties_yml_name.startswith("_"):
         fail(

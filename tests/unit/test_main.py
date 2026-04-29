@@ -1,7 +1,7 @@
 import json
 import re
 from functools import lru_cache
-from pathlib import Path, PurePath
+from pathlib import Path
 
 import pytest
 import yaml
@@ -216,7 +216,7 @@ class CheckMyCustomCheck(BaseCheck):
     runner = CliRunner()
     result = runner.invoke(
         app,
-        ["--config-file", PurePath("dbt-bouncer.yml").as_posix()],
+        ["--config-file", Path("dbt-bouncer.yml").as_posix()],
     )
 
     assert len([r for r in caplog.messages if r.find("custom_checks_dir=") >= 0]) >= 1

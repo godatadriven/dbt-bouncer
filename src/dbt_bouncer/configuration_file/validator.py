@@ -3,7 +3,7 @@ import os
 import re
 import tomllib
 from collections.abc import Mapping
-from pathlib import Path, PurePath
+from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import jellyfish
@@ -33,9 +33,9 @@ DEFAULT_DBT_BOUNCER_CONFIG = """manifest_checks:
 
 
 def get_config_file_path(
-    config_file: PurePath,
+    config_file: Path,
     config_file_source: ConfigFileSource,
-) -> PurePath:
+) -> Path:
     """Get the path to the config file for dbt-bouncer. This is fetched from (in order):
 
     1. The file passed via the `--config-file` CLI flag.
@@ -45,7 +45,7 @@ def get_config_file_path(
     5. A `[tool.dbt-bouncer]` section in `pyproject.toml` (in current working directory or parent directories).
 
     Returns:
-        PurePath: Config file for dbt-bouncer.
+        Path: Config file for dbt-bouncer.
 
     Raises:
         RuntimeError: If no config file is found.
@@ -103,7 +103,7 @@ def get_config_file_path(
 
 
 def load_config_file_contents(
-    config_file_path: PurePath,
+    config_file_path: Path,
     allow_default_config_file_creation: bool | None = None,
 ) -> Mapping[str, Any]:
     """Load the contents of the config file.

@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-from pathlib import Path, PurePath
+from pathlib import Path
 
 from dbt_bouncer.enums import ConfigFileName
 
 
-def resolve_config_path(config_file: PurePath | None) -> Path:
+def resolve_config_path(config_file: Path | None) -> Path:
     """Resolve the config file path, defaulting to ``dbt-bouncer.yml``.
 
     Args:

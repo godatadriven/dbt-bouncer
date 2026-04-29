@@ -3,7 +3,6 @@
 from pathlib import Path
 
 from dbt_bouncer.check_framework.decorator import check, fail
-from dbt_bouncer.utils import clean_path_str
 
 
 @check
@@ -30,7 +29,9 @@ def check_source_property_file_location(source):
         ```
 
     """
-    original_path = Path(clean_path_str(source.original_file_path))
+    original_path = Path(
+        Path(source.original_file_path).as_posix() if source.original_file_path else ""
+    )
 
     if (
         len(original_path.parts) > 2

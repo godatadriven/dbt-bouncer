@@ -8,7 +8,6 @@ from pydantic import Field
 
 from dbt_bouncer.check_framework.decorator import check, fail
 from dbt_bouncer.utils import (
-    clean_path_str,
     compile_pattern,
     get_clean_model_name,
     is_description_populated,
@@ -172,16 +171,21 @@ def check_model_documented_in_same_directory(model):
 
     """
     model = cast("Any", model)
-    model_sql_path = Path(clean_path_str(model.original_file_path))
+    model_sql_path = Path(
+        Path(model.original_file_path).as_posix() if model.original_file_path else ""
+    )
     model_sql_dir = model_sql_path.parent.parts
 
     if not (
         hasattr(model, "patch_path")
-        and clean_path_str(model.patch_path or "") is not None
+        and (Path(model.patch_path or "").as_posix() if model.patch_path or "" else "")
+        is not None
     ):
         fail(f"`{get_clean_model_name(model.unique_id)}` is not documented.")
 
-    patch_path_str = clean_path_str(model.patch_path or "")
+    patch_path_str = (
+        Path(model.patch_path or "").as_posix() if model.patch_path or "" else ""
+    )
     start_idx = patch_path_str.find("models")
     if start_idx != -1:
         patch_path_str = patch_path_str[start_idx:]

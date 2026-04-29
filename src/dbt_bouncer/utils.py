@@ -24,16 +24,6 @@ if TYPE_CHECKING:
     from dbt_bouncer.check_framework.base import BaseCheck
 
 
-def clean_path_str(path: str) -> str:
-    """Clean a path string by replacing double backslashes with a forward slash.
-
-    Returns:
-        str: Cleaned path string.
-
-    """
-    return path.replace("\\", "/") if path is not None else ""
-
-
 def create_github_comment_file(
     failed_checks: list[list[str]], show_all_failures: bool
 ) -> None:
@@ -770,5 +760,8 @@ def object_in_path(include_pattern: str | None, path: str) -> bool:
     if include_pattern is None:
         return True
     return (
-        compile_pattern(include_pattern.strip()).match(clean_path_str(path)) is not None
+        compile_pattern(include_pattern.strip()).match(
+            Path(path).as_posix() if path else ""
+        )
+        is not None
     )
