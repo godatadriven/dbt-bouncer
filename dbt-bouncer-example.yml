@@ -155,6 +155,8 @@ manifest_checks:
     tags:
       - crm
   - name: check_model_has_unique_test
+  - name: check_model_is_orphaned
+    exclude: ^models/(utilities|intermediate|marts/finance/customers_v[12]\.sql)
   - name: check_model_max_chained_views
   - name: check_model_max_fanout
     max_downstream_models: 5
@@ -259,7 +261,6 @@ manifest_checks:
       [0-9]\d*
   - name: check_model_version_pinned_in_ref
     include: ^models/marts
-
 
 run_results_checks:
   # Not a good idea, here for demonstration purposes only

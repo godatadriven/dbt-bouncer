@@ -401,3 +401,87 @@ def check_model_max_upstream_dependencies(
         fail(
             f"`{get_clean_model_name(model.unique_id)}` has {num_upstream_sources} upstream sources, which is more than the permitted maximum of {max_upstream_sources}."
         )
+
+
+@check
+def check_model_is_orphaned(model, ctx):
+    """Models must be referenced by at least one downstream model, exposure, or metric.
+
+    !!! info "Rationale"
+
+        A model that is not referenced by anything downstream is consuming compute resources but its output is never used. Identifying such models helps clean up the DAG, identifies dead code, and saves warehouse compute costs.
+
+    Receives:
+        exposures (list[ExposureNode]): List of ExposureNode objects parsed from `manifest.json`.
+        model (ModelNode): The ModelNode object to check.
+        models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the model path. Model paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the model path. Only model paths that match the pattern will be checked.
+        materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_model_is_orphaned
+        ```
+
+    """
+    is_referenced = False
+
+    # Check if any model depends on this model
+    for other_model in ctx.models:
+        if (
+            getattr(other_model, "depends_on", None)
+            and getattr(other_model.depends_on, "nodes", None)
+            and model.unique_id in other_model.depends_on.nodes
+        ):
+            is_referenced = True
+            break
+
+    # Check if any exposure depends on this model
+    if not is_referenced:
+        for exposure in ctx.exposures:
+            if (
+                getattr(exposure, "depends_on", None)
+                and getattr(exposure.depends_on, "nodes", None)
+                and model.unique_id in exposure.depends_on.nodes
+            ):
+                is_referenced = True
+                break
+
+    # Check if any metric depends on this model
+    if not is_referenced:
+        metrics = getattr(ctx.manifest_obj.manifest, "metrics", {})
+        for metric in metrics.values():
+            if (
+                getattr(metric, "depends_on", None)
+                and getattr(metric.depends_on, "nodes", None)
+                and model.unique_id in metric.depends_on.nodes
+            ):
+                is_referenced = True
+                break
+
+    # Check if any semantic_model depends on this model
+    if not is_referenced:
+        for semantic_model in ctx.semantic_models:
+            if getattr(semantic_model, "model", None) and (
+                model.unique_id == semantic_model.node_relation.relation_name
+            ):  # In dbt semantic models, relation_name often holds the model id
+                # Actually we can just check depends_on
+                pass
+            if (
+                getattr(semantic_model, "depends_on", None)
+                and getattr(semantic_model.depends_on, "nodes", None)
+                and model.unique_id in semantic_model.depends_on.nodes
+            ):
+                is_referenced = True
+                break
+
+    if not is_referenced:
+        fail(
+            f"`{get_clean_model_name(model.unique_id)}` has no downstream dependencies (no models, exposures, or metrics reference it)."
+        )
