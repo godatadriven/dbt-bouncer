@@ -9,16 +9,15 @@ from __future__ import annotations
 
 import io
 import logging
+from pathlib import Path
 from types import SimpleNamespace
 from typing import TYPE_CHECKING, Any, NamedTuple
 
 import orjson
 
-from dbt_bouncer.utils import clean_path_str, get_package_version_number
+from dbt_bouncer.utils import get_package_version_number
 
 if TYPE_CHECKING:
-    from pathlib import Path
-
     from dbt_bouncer.configuration_file.parser import DbtBouncerConfBase
 
 
@@ -248,7 +247,8 @@ def parse_dbt_artifacts(
     for k, v in manifest_dict.get("nodes", {}).items():
         if v.get("package_name") != target_package:
             continue
-        ofp = clean_path_str(v.get("original_file_path", ""))
+        p = v.get("original_file_path", "")
+        ofp = Path(p).as_posix() if p else ""
         match v.get("resource_type"):
             case "model":
                 project_models.append(
@@ -278,7 +278,9 @@ def parse_dbt_artifacts(
     project_semantic_models: list[SimpleNamespace] = [
         _make_wrapper(
             unique_id=k,
-            original_file_path=clean_path_str(v.get("original_file_path", "")),
+            original_file_path=Path(v.get("original_file_path", "")).as_posix()
+            if v.get("original_file_path", "")
+            else "",
             semantic_model=DictProxy(v),
         )
         for k, v in manifest_dict.get("semantic_models", {}).items()
@@ -288,7 +290,9 @@ def parse_dbt_artifacts(
     project_sources: list[SimpleNamespace] = [
         _make_wrapper(
             unique_id=k,
-            original_file_path=clean_path_str(v.get("original_file_path", "")),
+            original_file_path=Path(v.get("original_file_path", "")).as_posix()
+            if v.get("original_file_path", "")
+            else "",
             source=DictProxy(v),
         )
         for k, v in manifest_dict.get("sources", {}).items()
@@ -321,8 +325,8 @@ def parse_dbt_artifacts(
         project_catalog_nodes: list[SimpleNamespace] = [
             _make_wrapper(
                 unique_id=k,
-                original_file_path=clean_path_str(nodes_dict[k]["original_file_path"])
-                if k in nodes_dict
+                original_file_path=Path(nodes_dict[k]["original_file_path"]).as_posix()
+                if k in nodes_dict and nodes_dict[k].get("original_file_path")
                 else "",
                 catalog_node=DictProxy(v),
             )
@@ -332,8 +336,10 @@ def parse_dbt_artifacts(
         project_catalog_sources: list[SimpleNamespace] = [
             _make_wrapper(
                 unique_id=k,
-                original_file_path=clean_path_str(sources_dict[k]["original_file_path"])
-                if k in sources_dict
+                original_file_path=Path(
+                    sources_dict[k]["original_file_path"]
+                ).as_posix()
+                if k in sources_dict and sources_dict[k].get("original_file_path")
                 else "",
                 catalog_source=DictProxy(v),
             )
@@ -365,11 +371,14 @@ def parse_dbt_artifacts(
                 continue
             # Resolve original_file_path from manifest
             if uid in nodes_dict:
-                ofp = clean_path_str(nodes_dict[uid].get("original_file_path", ""))
+                p = nodes_dict[uid].get("original_file_path", "")
+                ofp = Path(p).as_posix() if p else ""
             elif uid.startswith("exposure.") and uid in exposures_dict:
-                ofp = clean_path_str(exposures_dict[uid].get("original_file_path", ""))
+                p = exposures_dict[uid].get("original_file_path", "")
+                ofp = Path(p).as_posix() if p else ""
             elif uid in unit_tests_dict:
-                ofp = clean_path_str(unit_tests_dict[uid].get("original_file_path", ""))
+                p = unit_tests_dict[uid].get("original_file_path", "")
+                ofp = Path(p).as_posix() if p else ""
             else:
                 ofp = ""
             project_run_results.append(

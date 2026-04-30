@@ -7,7 +7,7 @@ from jinja2_simple_tags import StandaloneTag
 from pydantic import Field
 
 from dbt_bouncer.check_framework.decorator import check, fail
-from dbt_bouncer.utils import clean_path_str, compile_pattern, is_description_populated
+from dbt_bouncer.utils import compile_pattern, is_description_populated
 
 
 class TagExtension(StandaloneTag):
@@ -247,7 +247,9 @@ def check_macro_name_matches_file_name(macro):
         ```
 
     """
-    file_path = Path(clean_path_str(macro.original_file_path))
+    file_path = Path(
+        Path(macro.original_file_path).as_posix() if macro.original_file_path else ""
+    )
     file_stem = file_path.stem
 
     if macro.name.startswith("test_"):
@@ -284,7 +286,9 @@ def check_macro_property_file_location(macro):
         ```
 
     """
-    original_path = Path(clean_path_str(macro.original_file_path))
+    original_path = Path(
+        Path(macro.original_file_path).as_posix() if macro.original_file_path else ""
+    )
 
     # Logic matches previous manual splitting:
     # If path is `macros/utils/file.sql`, we want `_utils`.
@@ -294,7 +298,7 @@ def check_macro_property_file_location(macro):
 
     if macro.patch_path is None:
         fail(f"Macro `{macro.name}` is not defined in a `.yml` properties file.")
-    clean_patch_path = clean_path_str(macro.patch_path)
+    clean_patch_path = Path(macro.patch_path).as_posix() if macro.patch_path else ""
     if clean_patch_path is None:
         fail(f"Macro `{macro.name}` has an invalid patch path.")
 

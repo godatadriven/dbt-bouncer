@@ -1,5 +1,7 @@
+from pathlib import Path
+
 from dbt_bouncer.check_framework.decorator import check, fail
-from dbt_bouncer.utils import clean_path_str, compile_pattern, get_clean_model_name
+from dbt_bouncer.utils import compile_pattern, get_clean_model_name
 
 
 @check
@@ -60,7 +62,9 @@ def check_lineage_permitted_upstream_models(
         for upstream_model in upstream_models
         if upstream_model in models_by_id
         and compiled_upstream_path_pattern.match(
-            clean_path_str(models_by_id[upstream_model].original_file_path)
+            Path(models_by_id[upstream_model].original_file_path).as_posix()
+            if models_by_id[upstream_model].original_file_path
+            else ""
         )
         is None
     ]

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from pathlib import Path, PurePath
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from dbt_bouncer.cli.utils import resolve_config_path
@@ -85,7 +85,7 @@ def _build_context(
 
 
 def run_bouncer(
-    config_file: PurePath | None = None,
+    config_file: Path | None = None,
     check: str = "",
     create_pr_comment_file: bool = False,
     dry_run: bool = False,
