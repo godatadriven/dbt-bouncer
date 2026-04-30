@@ -608,3 +608,76 @@ class TestCheckModelMaxUpstreamDependenciesInvalidParam:
                 },
                 **kwargs,
             )
+
+
+class TestCheckModelIsOrphaned:
+    def test_passes_model_dependency(self):
+        from dbt_bouncer.testing import check_passes
+
+        check_passes(
+            "check_model_is_orphaned",
+            model={"unique_id": "model.package_name.model_1"},
+            ctx_models=[
+                {
+                    "unique_id": "model.package_name.model_2",
+                    "depends_on": {"nodes": ["model.package_name.model_1"]},
+                }
+            ],
+        )
+
+    def test_passes_exposure_dependency(self):
+        from dbt_bouncer.testing import check_passes
+
+        check_passes(
+            "check_model_is_orphaned",
+            model={"unique_id": "model.package_name.model_1"},
+            ctx_exposures=[
+                {
+                    "unique_id": "exposure.package_name.exposure_1",
+                    "depends_on": {"nodes": ["model.package_name.model_1"]},
+                }
+            ],
+        )
+
+    def test_passes_metric_dependency(self):
+        from dbt_bouncer.testing import check_passes
+
+        check_passes(
+            "check_model_is_orphaned",
+            model={"unique_id": "model.package_name.model_1"},
+            ctx_manifest_obj={
+                "metrics": {
+                    "metric_1": {
+                        "depends_on": {"nodes": ["model.package_name.model_1"]},
+                    }
+                }
+            },
+        )
+
+    def test_passes_semantic_model_dependency(self):
+        from dbt_bouncer.testing import check_passes
+
+        check_passes(
+            "check_model_is_orphaned",
+            model={"unique_id": "model.package_name.model_1"},
+            ctx_semantic_models=[
+                {
+                    "unique_id": "semantic_model.package_name.semantic_model_1",
+                    "depends_on": {"nodes": ["model.package_name.model_1"]},
+                }
+            ],
+        )
+
+    def test_fails_orphaned(self):
+        from dbt_bouncer.testing import check_fails
+
+        check_fails(
+            "check_model_is_orphaned",
+            model={"unique_id": "model.package_name.model_1"},
+            ctx_models=[
+                {
+                    "unique_id": "model.package_name.model_2",
+                    "depends_on": {"nodes": ["model.package_name.model_3"]},
+                }
+            ],
+        )
