@@ -46,6 +46,12 @@ def test_cli_happy_path(caplog, dbt_artifacts_dir, tmp_path):
             if item["name"] == "check_source_freshness_populated":
                 bouncer_config["manifest_checks"].remove(item)
 
+    # The test fixtures contain unused macros (e.g. generate_schema_name override)
+    # which correctly fail the check_macro_is_unused check.
+    for item in bouncer_config["manifest_checks"][:]:
+        if item["name"] == "check_macro_is_unused":
+            bouncer_config["manifest_checks"].remove(item)
+
     with config_file.open("w") as f:
         yaml.dump(bouncer_config, f)
 
