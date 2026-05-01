@@ -26,7 +26,7 @@ dependencies = [
   "jellyfish (>=1,<2)",
   "jinja2-simple-tags (<1)",
   "jinja2 (>=3,<4)",
-  "junitparser (>=2,<5)",
+  "junitparser (>=2,<6)",
   "orjson (>=3,<4)",
   "packaging (<27)",
   "pydantic (>=2,<3)",
