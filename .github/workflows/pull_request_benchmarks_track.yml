@@ -18,13 +18,13 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Download Benchmark Results
-        uses: dawidd6/action-download-artifact@8a338493df3d275e4a7a63bcff3b8fe97e51a927 # v19
+        uses: dawidd6/action-download-artifact@8305c0f1062bb0d184d09ef4493ecb9288447732 # v20
         with:
           name: ${{ env.BENCHMARK_RESULTS }}
           run_id: ${{ github.event.workflow_run.id }}
 
       - name: Download PR Event
-        uses: dawidd6/action-download-artifact@8a338493df3d275e4a7a63bcff3b8fe97e51a927 # v19
+        uses: dawidd6/action-download-artifact@8305c0f1062bb0d184d09ef4493ecb9288447732 # v20
         with:
           name: ${{ env.PR_EVENT }}
           run_id: ${{ github.event.workflow_run.id }}
