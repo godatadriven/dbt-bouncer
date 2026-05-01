@@ -29,54 +29,54 @@ markdown_extensions:
 
 nav:
   - Home: index.md
-  - Running dbt-bouncer: running_dbt_bouncer.md
+  - Getting started: getting_started.md
   - Configuration: configuration.md
   - Checks:
-    - Checks: checks/index.md
-    - Catalog:
-      - Catalog Seeds: checks/catalog/check_catalog_seeds.md
-      - Catalog Sources: checks/catalog/check_catalog_sources.md
-      - Columns:
-          - checks/catalog/columns/description.md
-          - checks/catalog/columns/naming.md
-          - checks/catalog/columns/tests.md
-    - Manifest:
-      - Exposures: checks/manifest/check_exposures.md
-      - Lineage: checks/manifest/check_lineage.md
-      - Macros: checks/manifest/check_macros.md
-      - Metadata: checks/manifest/check_metadata.md
-      - Models:
-          - checks/manifest/models/access.md
-          - checks/manifest/models/code.md
-          - checks/manifest/models/columns.md
-          - checks/manifest/models/description.md
-          - checks/manifest/models/directories.md
-          - checks/manifest/models/lineage.md
-          - checks/manifest/models/meta.md
-          - checks/manifest/models/naming.md
-          - checks/manifest/models/tags.md
-          - checks/manifest/models/tests.md
-          - checks/manifest/models/versioning.md
-      - Seeds: checks/manifest/check_seeds.md
-      - Semantic Models: checks/manifest/check_semantic_models.md
-      - Snapshots: checks/manifest/check_snapshots.md
-      - Sources:
-          - checks/manifest/sources/description.md
-          - checks/manifest/sources/directories.md
-          - checks/manifest/sources/freshness.md
-          - checks/manifest/sources/lineage.md
-          - checks/manifest/sources/loader.md
-          - checks/manifest/sources/meta.md
-          - checks/manifest/sources/naming.md
-          - checks/manifest/sources/tags.md
-      - Tests: checks/manifest/check_tests.md
-      - Unit Tests: checks/manifest/check_unit_tests.md
-    - Run Results:
-      - Run Results: checks/run_results/check_run_results.md
+      - Checks: checks/index.md
+      - Catalog:
+          - Catalog Seeds: checks/catalog/check_catalog_seeds.md
+          - Catalog Sources: checks/catalog/check_catalog_sources.md
+          - Columns:
+              - checks/catalog/columns/description.md
+              - checks/catalog/columns/naming.md
+              - checks/catalog/columns/tests.md
+      - Manifest:
+          - Exposures: checks/manifest/check_exposures.md
+          - Lineage: checks/manifest/check_lineage.md
+          - Macros: checks/manifest/check_macros.md
+          - Metadata: checks/manifest/check_metadata.md
+          - Models:
+              - checks/manifest/models/access.md
+              - checks/manifest/models/code.md
+              - checks/manifest/models/columns.md
+              - checks/manifest/models/description.md
+              - checks/manifest/models/directories.md
+              - checks/manifest/models/lineage.md
+              - checks/manifest/models/meta.md
+              - checks/manifest/models/naming.md
+              - checks/manifest/models/tags.md
+              - checks/manifest/models/tests.md
+              - checks/manifest/models/versioning.md
+          - Seeds: checks/manifest/check_seeds.md
+          - Semantic Models: checks/manifest/check_semantic_models.md
+          - Snapshots: checks/manifest/check_snapshots.md
+          - Sources:
+              - checks/manifest/sources/description.md
+              - checks/manifest/sources/directories.md
+              - checks/manifest/sources/freshness.md
+              - checks/manifest/sources/lineage.md
+              - checks/manifest/sources/loader.md
+              - checks/manifest/sources/meta.md
+              - checks/manifest/sources/naming.md
+              - checks/manifest/sources/tags.md
+          - Tests: checks/manifest/check_tests.md
+          - Unit Tests: checks/manifest/check_unit_tests.md
+      - Run Results:
+          - Run Results: checks/run_results/check_run_results.md
   - CLI: cli.md
   - FAQ: faq.md
   - Migration:
-    - v3: migration/v3.md
+      - v3: migration/v3.md
   - Brand: brand.md
   - Contributing: CONTRIBUTING.md
   - Users: users.md
