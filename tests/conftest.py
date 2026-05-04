@@ -48,15 +48,17 @@ def _rebuild_all_check_models():
 def _clear_module_caches():
     """Clear module-level memoization caches between tests.
 
-    _CLASS_ITERATE_CACHE (runner.py) is a pure derivation of class structure.
-    Clearing it between tests prevents state leaking across test boundaries
-    when class annotations are patched or models are rebuilt with different
-    namespaces.
+    Clearing these between tests prevents state leaking across test boundaries
+    when class annotations are patched, models are rebuilt with different
+    namespaces, or Python reuses object addresses after garbage collection.
     """
     from dbt_bouncer import runner
+    from dbt_bouncer.checks.manifest import check_macros
 
+    check_macros._USED_MACROS_CACHE.clear()
     runner._CLASS_ITERATE_CACHE.clear()
     yield
+    check_macros._USED_MACROS_CACHE.clear()
     runner._CLASS_ITERATE_CACHE.clear()
 
 
