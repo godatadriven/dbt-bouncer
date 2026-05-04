@@ -174,7 +174,7 @@
                         --repo ${{ github.repository }} \
                         --notes-start-tag $LAST_RELEASE \
                         --target branch-v${STEPS_VERSION_OUTPUTS_VERSION} \
-                        --title 'v${STEPS_VERSION_OUTPUTS_VERSION}' \
+                        --title "v${STEPS_VERSION_OUTPUTS_VERSION}" \
                         $PRERELEASE \
                         --verify-tag
 
