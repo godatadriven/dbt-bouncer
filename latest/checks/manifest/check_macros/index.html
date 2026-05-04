@@ -1758,6 +1758,14 @@
                 </div>
               </td>
             </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="check_macro_is_used (manifest.check_macros.check_macro_is_used)" href="#manifest.check_macros.check_macro_is_used">check_macro_is_used</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Macros must be invoked by at least one other resource.</p>
+                </div>
+              </td>
+            </tr>
       </tbody>
     </table>
 
@@ -3153,6 +3161,183 @@
 </span><span id="__span-0-322"><a id="__codelineno-0-322" name="__codelineno-0-322"></a>            <span class="n">fail</span><span class="p">(</span>
 </span><span id="__span-0-323"><a id="__codelineno-0-323" name="__codelineno-0-323"></a>                <span class="sa">f</span><span class="s2">&quot;The properties file for `</span><span class="si">{</span><span class="n">macro</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">` (`</span><span class="si">{</span><span class="n">properties_yml_name</span><span class="si">}</span><span class="s2">`) does not end with `__macros.yml`.&quot;</span>
 </span><span id="__span-0-324"><a id="__codelineno-0-324" name="__codelineno-0-324"></a>            <span class="p">)</span>
+</span></code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h1 id="manifest.check_macros.check_macro_is_used" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">check_macro_is_used</span></code>
+
+<a href="#manifest.check_macros.check_macro_is_used" class="headerlink" title="Permanent link">#</a></h1>
+
+
+    <div class="doc doc-contents ">
+
+      <p>Macros must be invoked by at least one other resource.</p>
+<div class="admonition info">
+<p class="admonition-title">Rationale</p>
+<p>Similar to orphaned models, macros are often written for a specific purpose and later abandoned, leaving behind technical debt and confusion. This check parses the manifest to find macros that are defined in the project but are never actually invoked by any model, test, or other macro. Keeps the macro directory lean and reduces the cognitive load for developers trying to understand the codebase.</p>
+</div>
+
+<p><strong>Receives at execution time:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>macro</code>        <td>
+              <code><span title="Macros">Macros</span></code>
+        </td>
+        <td>
+          <div class="doc-md-description">
+            <p>The Macros object to check.</p>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td><code>ctx</code>        <td>
+              <code><span title="CheckContext">CheckContext</span></code>
+        </td>
+        <td>
+          <div class="doc-md-description">
+            <p>The check context containing the manifest.</p>
+          </div>
+        </td>
+      </tr>
+  </tbody>
+</table>
+<p><span class="doc-section-title">Other Parameters (passed via config file):</span></p>
+<table>
+    <thead>
+    <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+    </tr>
+    </thead>
+    <tbody>
+        <tr class="doc-section-item">
+        <td><code>description</code></td>
+        <td>
+                <code><span title="str">str</span> | None</code>
+        </td>
+        <td>
+            <div class="doc-md-description">
+            <p>Description of what the check does and why it is implemented.</p>
+            </div>
+        </td>
+        </tr>
+        <tr class="doc-section-item">
+        <td><code>exclude</code></td>
+        <td>
+                <code><span title="str">str</span> | None</code>
+        </td>
+        <td>
+            <div class="doc-md-description">
+            <p>Regex pattern to match the macro path. Macro paths that match the pattern will not be checked.</p>
+            </div>
+        </td>
+        </tr>
+        <tr class="doc-section-item">
+        <td><code>include</code></td>
+        <td>
+                <code><span title="str">str</span> | None</code>
+        </td>
+        <td>
+            <div class="doc-md-description">
+            <p>Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.</p>
+            </div>
+        </td>
+        </tr>
+        <tr class="doc-section-item">
+        <td><code>severity</code></td>
+        <td>
+                <code><span title="Literal">Literal</span>[<span title="error">error</span>, <span title="warn">warn</span>] | None</code>
+        </td>
+        <td>
+            <div class="doc-md-description">
+            <p>Severity level of the check. Default: <code>error</code>.</p>
+            </div>
+        </td>
+        </tr>
+    </tbody>
+</table>      <p>Example(s):
+    <div class="language-yaml highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">manifest_checks</span><span class="p">:</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_macro_is_used</span>
+</span></code></pre></div></p>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src/dbt_bouncer/checks/manifest/check_macros.py</code></summary>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-372">372</a></span>
+<span class="normal"><a href="#__codelineno-0-373">373</a></span>
+<span class="normal"><a href="#__codelineno-0-374">374</a></span>
+<span class="normal"><a href="#__codelineno-0-375">375</a></span>
+<span class="normal"><a href="#__codelineno-0-376">376</a></span>
+<span class="normal"><a href="#__codelineno-0-377">377</a></span>
+<span class="normal"><a href="#__codelineno-0-378">378</a></span>
+<span class="normal"><a href="#__codelineno-0-379">379</a></span>
+<span class="normal"><a href="#__codelineno-0-380">380</a></span>
+<span class="normal"><a href="#__codelineno-0-381">381</a></span>
+<span class="normal"><a href="#__codelineno-0-382">382</a></span>
+<span class="normal"><a href="#__codelineno-0-383">383</a></span>
+<span class="normal"><a href="#__codelineno-0-384">384</a></span>
+<span class="normal"><a href="#__codelineno-0-385">385</a></span>
+<span class="normal"><a href="#__codelineno-0-386">386</a></span>
+<span class="normal"><a href="#__codelineno-0-387">387</a></span>
+<span class="normal"><a href="#__codelineno-0-388">388</a></span>
+<span class="normal"><a href="#__codelineno-0-389">389</a></span>
+<span class="normal"><a href="#__codelineno-0-390">390</a></span>
+<span class="normal"><a href="#__codelineno-0-391">391</a></span>
+<span class="normal"><a href="#__codelineno-0-392">392</a></span>
+<span class="normal"><a href="#__codelineno-0-393">393</a></span>
+<span class="normal"><a href="#__codelineno-0-394">394</a></span>
+<span class="normal"><a href="#__codelineno-0-395">395</a></span>
+<span class="normal"><a href="#__codelineno-0-396">396</a></span>
+<span class="normal"><a href="#__codelineno-0-397">397</a></span>
+<span class="normal"><a href="#__codelineno-0-398">398</a></span>
+<span class="normal"><a href="#__codelineno-0-399">399</a></span>
+<span class="normal"><a href="#__codelineno-0-400">400</a></span>
+<span class="normal"><a href="#__codelineno-0-401">401</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-372"><a id="__codelineno-0-372" name="__codelineno-0-372"></a><span class="nd">@check</span>
+</span><span id="__span-0-373"><a id="__codelineno-0-373" name="__codelineno-0-373"></a><span class="k">def</span><span class="w"> </span><span class="nf">check_macro_is_used</span><span class="p">(</span><span class="n">macro</span><span class="p">,</span> <span class="n">ctx</span><span class="p">):</span>
+</span><span id="__span-0-374"><a id="__codelineno-0-374" name="__codelineno-0-374"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Macros must be invoked by at least one other resource.</span>
+</span><span id="__span-0-375"><a id="__codelineno-0-375" name="__codelineno-0-375"></a>
+</span><span id="__span-0-376"><a id="__codelineno-0-376" name="__codelineno-0-376"></a><span class="sd">    !!! info &quot;Rationale&quot;</span>
+</span><span id="__span-0-377"><a id="__codelineno-0-377" name="__codelineno-0-377"></a>
+</span><span id="__span-0-378"><a id="__codelineno-0-378" name="__codelineno-0-378"></a><span class="sd">        Similar to orphaned models, macros are often written for a specific purpose and later abandoned, leaving behind technical debt and confusion. This check parses the manifest to find macros that are defined in the project but are never actually invoked by any model, test, or other macro. Keeps the macro directory lean and reduces the cognitive load for developers trying to understand the codebase.</span>
+</span><span id="__span-0-379"><a id="__codelineno-0-379" name="__codelineno-0-379"></a>
+</span><span id="__span-0-380"><a id="__codelineno-0-380" name="__codelineno-0-380"></a><span class="sd">    Receives:</span>
+</span><span id="__span-0-381"><a id="__codelineno-0-381" name="__codelineno-0-381"></a><span class="sd">        macro (Macros): The Macros object to check.</span>
+</span><span id="__span-0-382"><a id="__codelineno-0-382" name="__codelineno-0-382"></a><span class="sd">        ctx (CheckContext): The check context containing the manifest.</span>
+</span><span id="__span-0-383"><a id="__codelineno-0-383" name="__codelineno-0-383"></a>
+</span><span id="__span-0-384"><a id="__codelineno-0-384" name="__codelineno-0-384"></a><span class="sd">    Other Parameters:</span>
+</span><span id="__span-0-385"><a id="__codelineno-0-385" name="__codelineno-0-385"></a><span class="sd">        description (str | None): Description of what the check does and why it is implemented.</span>
+</span><span id="__span-0-386"><a id="__codelineno-0-386" name="__codelineno-0-386"></a><span class="sd">        exclude (str | None): Regex pattern to match the macro path. Macro paths that match the pattern will not be checked.</span>
+</span><span id="__span-0-387"><a id="__codelineno-0-387" name="__codelineno-0-387"></a><span class="sd">        include (str | None): Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.</span>
+</span><span id="__span-0-388"><a id="__codelineno-0-388" name="__codelineno-0-388"></a><span class="sd">        severity (Literal[&quot;error&quot;, &quot;warn&quot;] | None): Severity level of the check. Default: `error`.</span>
+</span><span id="__span-0-389"><a id="__codelineno-0-389" name="__codelineno-0-389"></a>
+</span><span id="__span-0-390"><a id="__codelineno-0-390" name="__codelineno-0-390"></a><span class="sd">    Example(s):</span>
+</span><span id="__span-0-391"><a id="__codelineno-0-391" name="__codelineno-0-391"></a><span class="sd">        ```yaml</span>
+</span><span id="__span-0-392"><a id="__codelineno-0-392" name="__codelineno-0-392"></a><span class="sd">        manifest_checks:</span>
+</span><span id="__span-0-393"><a id="__codelineno-0-393" name="__codelineno-0-393"></a><span class="sd">            - name: check_macro_is_used</span>
+</span><span id="__span-0-394"><a id="__codelineno-0-394" name="__codelineno-0-394"></a><span class="sd">        ```</span>
+</span><span id="__span-0-395"><a id="__codelineno-0-395" name="__codelineno-0-395"></a>
+</span><span id="__span-0-396"><a id="__codelineno-0-396" name="__codelineno-0-396"></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="__span-0-397"><a id="__codelineno-0-397" name="__codelineno-0-397"></a>    <span class="n">used_macros</span> <span class="o">=</span> <span class="n">_get_used_macros</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">manifest_obj</span><span class="p">)</span>
+</span><span id="__span-0-398"><a id="__codelineno-0-398" name="__codelineno-0-398"></a>    <span class="k">if</span> <span class="n">macro</span><span class="o">.</span><span class="n">unique_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">used_macros</span><span class="p">:</span>
+</span><span id="__span-0-399"><a id="__codelineno-0-399" name="__codelineno-0-399"></a>        <span class="n">fail</span><span class="p">(</span>
+</span><span id="__span-0-400"><a id="__codelineno-0-400" name="__codelineno-0-400"></a>            <span class="sa">f</span><span class="s2">&quot;Macro `</span><span class="si">{</span><span class="n">macro</span><span class="o">.</span><span class="n">unique_id</span><span class="si">}</span><span class="s2">` is not invoked by any model, test, or other macro.&quot;</span>
+</span><span id="__span-0-401"><a id="__codelineno-0-401" name="__codelineno-0-401"></a>        <span class="p">)</span>
 </span></code></pre></div></td></tr></table></div>
             </details>
     </div>
