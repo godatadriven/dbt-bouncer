@@ -346,7 +346,7 @@ wheels = [
 
 [[package]]
 name = "dbt-bouncer"
-version = "0.0.0"
+version = "3.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "jellyfish" },
@@ -413,7 +413,7 @@ requires-dist = [
     { name = "pytest-xdist", marker = "extra == 'dev'", specifier = "~=3.0" },
     { name = "pyupgrade", marker = "extra == 'dev'", specifier = "~=3.0" },
     { name = "pyyaml", specifier = "<7" },
-    { name = "rich", specifier = ">=13,<15" },
+    { name = "rich", specifier = ">=13,<16" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.8,<1" },
     { name = "rumdl", marker = "extra == 'dev'", specifier = ">=0.1.19" },
     { name = "semver", specifier = "<4" },
