@@ -73,6 +73,7 @@ jobs:
             5. **Style**: ruff/ruff-format compliance, snake_case naming, alphabetical ordering of lists and config sections.
             6. **Breaking Changes**: Config schema changes, removed/renamed checks, changed function signatures.
             7. **Documentation**: Docstrings on public functions with Parameters/Returns sections, updated AGENTS.md if architecture changed.
+            8. **Cross-file version consistency**: When a PR bumps a version-pinned tool (e.g. `bencherdev/bencher` in workflow files), grep the entire repo for the OLD version string to find other references (Dockerfiles, env vars, docs). Flag any stale occurrences as 🔴 **Issue**.
 
             ## Severity Levels
             Use these severity levels for review findings:
