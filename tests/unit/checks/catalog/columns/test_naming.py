@@ -149,6 +149,139 @@ class TestCheckColumnNameCompliesToColumnType:
             )
 
 
+class TestCheckColumnTypeCompliesToColumnName:
+    def test_valid_boolean_with_is_prefix(self):
+        check_passes(
+            "check_column_type_complies_to_column_name",
+            catalog_node={
+                "columns": {
+                    "is_active": {
+                        "index": 1,
+                        "name": "is_active",
+                        "type": "BOOLEAN",
+                    },
+                },
+            },
+            column_name_pattern="^(is|has)_.*",
+            type_pattern=None,
+            types=["BOOLEAN"],
+        )
+
+    def test_valid_mixed_types(self):
+        check_passes(
+            "check_column_type_complies_to_column_name",
+            catalog_node={
+                "columns": {
+                    "is_active": {
+                        "index": 1,
+                        "name": "is_active",
+                        "type": "BOOLEAN",
+                    },
+                    "has_email": {
+                        "index": 2,
+                        "name": "has_email",
+                        "type": "BOOLEAN",
+                    },
+                    "user_name": {
+                        "index": 3,
+                        "name": "user_name",
+                        "type": "VARCHAR",
+                    },
+                },
+            },
+            column_name_pattern="^(is|has)_.*",
+            type_pattern=None,
+            types=["BOOLEAN"],
+        )
+
+    def test_valid_type_pattern(self):
+        check_passes(
+            "check_column_type_complies_to_column_name",
+            catalog_node={
+                "columns": {
+                    "created_date": {
+                        "index": 1,
+                        "name": "created_date",
+                        "type": "DATE",
+                    },
+                },
+            },
+            column_name_pattern=".*_date$",
+            type_pattern="^DATE",
+            types=None,
+        )
+
+    def test_invalid_boolean_missing_prefix(self):
+        check_fails(
+            "check_column_type_complies_to_column_name",
+            catalog_node={
+                "columns": {
+                    "active": {
+                        "index": 1,
+                        "name": "active",
+                        "type": "BOOLEAN",
+                    },
+                },
+            },
+            column_name_pattern="^(is|has)_.*",
+            type_pattern=None,
+            types=["BOOLEAN"],
+        )
+
+    def test_invalid_type_pattern(self):
+        check_fails(
+            "check_column_type_complies_to_column_name",
+            catalog_node={
+                "columns": {
+                    "my_struct": {
+                        "index": 1,
+                        "name": "my_struct",
+                        "type": "STRUCT",
+                    },
+                },
+            },
+            column_name_pattern="^struct_.*",
+            type_pattern="^STRUCT",
+            types=None,
+        )
+
+    def test_missing_pattern_and_types(self):
+        with pytest.raises(ValueError, match=r"type_pattern.*types.*must be supplied"):
+            check_passes(
+                "check_column_type_complies_to_column_name",
+                catalog_node={
+                    "columns": {
+                        "is_active": {
+                            "index": 1,
+                            "name": "is_active",
+                            "type": "BOOLEAN",
+                        },
+                    },
+                },
+                column_name_pattern="^(is|has)_.*",
+                type_pattern=None,
+                types=None,
+            )
+
+    def test_both_pattern_and_types(self):
+        with pytest.raises(ValueError, match=r"Only one of.*type_pattern.*types"):
+            check_passes(
+                "check_column_type_complies_to_column_name",
+                catalog_node={
+                    "columns": {
+                        "is_active": {
+                            "index": 1,
+                            "name": "is_active",
+                            "type": "BOOLEAN",
+                        },
+                    },
+                },
+                column_name_pattern="^(is|has)_.*",
+                type_pattern="^BOOL",
+                types=["BOOLEAN"],
+            )
+
+
 class TestCheckColumnNames:
     def test_valid_name(self):
         check_passes(

@@ -30,6 +30,10 @@ catalog_checks:
   - name: check_column_name_complies_to_column_type
     column_name_pattern: ^[a-z_]*$
     type_pattern: ^(?!STRUCT) # No STRUCT data types allowed
+  - name: check_column_type_complies_to_column_name
+    column_name_pattern: ^(is|has)_.*
+    types:
+      - BOOLEAN
   - name: check_column_names
     column_name_pattern: >
       [a-z_]*
