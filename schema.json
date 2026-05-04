@@ -374,6 +374,117 @@
       "title": "CheckColumnNames",
       "type": "object"
     },
+    "CheckColumnTypeCompliesToColumnName": {
+      "additionalProperties": false,
+      "description": "Columns with the specified data type must have names that comply to the specified regexp pattern.\n\n!!! info \"Rationale\"\n\n    This is the reverse of `check_column_name_complies_to_column_type`. While that check ensures columns with a given naming pattern have the correct data type, this check ensures columns with a given data type follow the correct naming convention. For example, you may want all `BOOLEAN` columns to start with `is_` or `has_`, or all `DATE` columns to end with `_date`. Enforcing this direction catches columns that have the right type but the wrong name \u2014 a gap the other check cannot cover.\n\nNote: One of `type_pattern` or `types` must be specified.\n\nRaises:\n    ValueError: If neither or both of type_pattern/types are supplied.\n\nParameters:\n    column_name_pattern (str): Regex pattern that column names must match.\n    type_pattern (str | None): Regex pattern to match the data types.\n    types (list[str] | None): List of data types to check.\n\nReceives:\n    catalog_node (CatalogNodeEntry): The CatalogNodeEntry object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | None): Regex pattern to match the model path. Model paths that match the pattern will not be checked.\n    include (str | None): Regex pattern to match the model path. Only model paths that match the pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    catalog_checks:\n        # BOOLEAN columns must start with \"is_\" or \"has_\"\n        - name: check_column_type_complies_to_column_name\n          column_name_pattern: ^(is|has)_.*\n          types:\n            - BOOLEAN\n    ```\n    ```yaml\n    catalog_checks:\n        # DATE columns must end with \"_date\"\n        - name: check_column_type_complies_to_column_name\n          column_name_pattern: .*_date$\n          types:\n            - DATE\n    ```\n    ```yaml\n    catalog_checks:\n        # Integer-like columns must end with \"_id\" or \"_count\"\n        - name: check_column_type_complies_to_column_name\n          column_name_pattern: .*((_id)|(_count))$\n          types:\n            - BIGINT\n            - INTEGER\n    ```",
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp to match which paths to exclude.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp to match which paths to include.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_column_type_complies_to_column_name",
+          "default": "check_column_type_complies_to_column_name",
+          "title": "Name",
+          "type": "string"
+        },
+        "column_name_pattern": {
+          "title": "Column Name Pattern",
+          "type": "string"
+        },
+        "type_pattern": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Type Pattern"
+        },
+        "types": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Types"
+        }
+      },
+      "required": [
+        "column_name_pattern"
+      ],
+      "title": "CheckColumnTypeCompliesToColumnName",
+      "type": "object"
+    },
     "CheckColumnsAreAllDocumented": {
       "additionalProperties": false,
       "description": "All columns in a model should be included in the model's properties file, i.e. `.yml` file.\n\n!!! info \"Rationale\"\n\n    When a column exists in the database but is missing from the model's properties file, it cannot receive a description, a data test, or a constraint. These invisible columns accumulate over time as schemas evolve, creating gaps in data quality coverage and making it harder for consumers to discover what data is available. This check ensures the properties file stays in sync with the actual schema, giving teams a complete and testable view of every model.\n\nReceives:\n    case_sensitive (bool | None): Whether the column names are case sensitive or not. Necessary for adapters like `dbt-snowflake` where the column in `catalog.json` is uppercase but the column in `manifest.json` can be lowercase. Defaults to `false` for `dbt-snowflake`, otherwise `true`.\n    catalog_node (CatalogNodeEntry): The CatalogNodeEntry object to check.\n    manifest_obj (ManifestObject): The ManifestObject object parsed from `manifest.json`.\n    models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | None): Regex pattern to match the model path. Model paths that match the pattern will not be checked.\n    include (str | None): Regex pattern to match the model path. Only model paths that match the pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    catalog_checks:\n        - name: check_columns_are_all_documented\n    ```",
@@ -7393,6 +7504,7 @@
             "check_column_has_specified_test": "#/$defs/CheckColumnHasSpecifiedTest",
             "check_column_name_complies_to_column_type": "#/$defs/CheckColumnNameCompliesToColumnType",
             "check_column_names": "#/$defs/CheckColumnNames",
+            "check_column_type_complies_to_column_name": "#/$defs/CheckColumnTypeCompliesToColumnName",
             "check_columns_are_all_documented": "#/$defs/CheckColumnsAreAllDocumented",
             "check_columns_are_documented_in_public_models": "#/$defs/CheckColumnsAreDocumentedInPublicModels",
             "check_seed_columns_are_all_documented": "#/$defs/CheckSeedColumnsAreAllDocumented",
@@ -7412,6 +7524,9 @@
           },
           {
             "$ref": "#/$defs/CheckColumnNames"
+          },
+          {
+            "$ref": "#/$defs/CheckColumnTypeCompliesToColumnName"
           },
           {
             "$ref": "#/$defs/CheckColumnsAreAllDocumented"
