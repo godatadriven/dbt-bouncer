@@ -1,6 +1,6 @@
 import re
 from pathlib import Path
-from typing import Annotated, ClassVar
+from typing import Annotated, Any, ClassVar
 
 from jinja2 import Environment, nodes
 from jinja2_simple_tags import StandaloneTag
@@ -324,10 +324,13 @@ def check_macro_property_file_location(macro):
             )
 
 
+# Cache keyed by id(manifest_obj). Safe within a single bouncer run because the
+# manifest object is long-lived; id reuse after GC is theoretically possible but
+# not a practical concern here.
 _USED_MACROS_CACHE: dict[int, set[str]] = {}
 
 
-def _get_used_macros(manifest_obj) -> set[str]:
+def _get_used_macros(manifest_obj: Any) -> set[str]:
     obj_id = id(manifest_obj)
     if obj_id not in _USED_MACROS_CACHE:
         used_macros = set()
@@ -367,7 +370,7 @@ def _get_used_macros(manifest_obj) -> set[str]:
 
 
 @check
-def check_macro_is_unused(macro, ctx):
+def check_macro_is_used(macro, ctx):
     """Macros must be invoked by at least one other resource.
 
     !!! info "Rationale"
@@ -387,7 +390,7 @@ def check_macro_is_unused(macro, ctx):
     Example(s):
         ```yaml
         manifest_checks:
-            - name: check_macro_is_unused
+            - name: check_macro_is_used
         ```
 
     """

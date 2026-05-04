@@ -350,6 +350,34 @@ def test_check_macro_property_file_location(macro_overrides, check_fn):
             id="used_by_macro",
         ),
         pytest.param(
+            {
+                "name": "generate_schema_name",
+                "unique_id": "macro.my_project.generate_schema_name",
+                "depends_on": {"macros": ["macro.dbt.default__generate_schema_name"]},
+            },
+            {
+                "macros": {
+                    "macro.dbt.generate_schema_name": {
+                        "name": "generate_schema_name",
+                        "package_name": "dbt",
+                        "depends_on": {
+                            "macros": ["macro.dbt.default__generate_schema_name"]
+                        },
+                    },
+                    "macro.my_project.generate_schema_name": {
+                        "name": "generate_schema_name",
+                        "package_name": "my_project",
+                        "unique_id": "macro.my_project.generate_schema_name",
+                        "depends_on": {
+                            "macros": ["macro.dbt.default__generate_schema_name"]
+                        },
+                    },
+                }
+            },
+            check_passes,
+            id="overrides_dbt_builtin",
+        ),
+        pytest.param(
             {"unique_id": "macro.package_name.macro_1"},
             {"nodes": {"model.package_name.model_1": {"depends_on": {"macros": []}}}},
             check_fails,
@@ -357,9 +385,9 @@ def test_check_macro_property_file_location(macro_overrides, check_fn):
         ),
     ],
 )
-def test_check_macro_is_unused(macro_overrides, ctx_overrides, check_fn):
+def test_check_macro_is_used(macro_overrides, ctx_overrides, check_fn):
     check_fn(
-        "check_macro_is_unused",
+        "check_macro_is_used",
         macro=macro_overrides,
         ctx_manifest_obj=ctx_overrides,
     )
