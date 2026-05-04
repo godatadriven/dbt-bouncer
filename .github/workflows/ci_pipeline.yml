@@ -169,13 +169,13 @@ jobs:
               hyperfine --export-json benchmark_results.json --runs 10 'uv run dbt-bouncer --config-file dbt-bouncer-example.yml'
 
           - name: Upload Benchmark Results
-            uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7
+            uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
             with:
               name: benchmark_results.json
               path: ./benchmark_results.json
 
           - name: Upload GitHub Pull Request Event
-            uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7
+            uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
             with:
               name: event.json
               path: ${{ github.event_path }}
@@ -189,7 +189,7 @@ jobs:
             persist-credentials: false
 
         - name: Build container and run tests
-          uses: devcontainers/ci@8bf61b26e9c3a98f69cb6ce2f88d24ff59b785c6 # v0.3
+          uses: devcontainers/ci@b63b30de439b47a52267f241112c5b453b673db5 # v0.3
           with:
             runCmd: |
               set -eou

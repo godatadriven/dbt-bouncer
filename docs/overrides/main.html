@@ -1,5 +1,13 @@
 {% extends "base.html" %}
 
+{% block extrahead %}
+  <meta property="og:image" content="{{ config.site_url }}assets/brand/social-card-light-tagline.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="{{ config.site_url }}assets/brand/social-card-light-tagline.png" />
+{% endblock %}
+
 {% block outdated %}
   You're not viewing the latest stable version of dbt-bouncer.
   <a href="{{ '../' ~ base_url }}">

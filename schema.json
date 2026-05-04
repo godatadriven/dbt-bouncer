@@ -1321,6 +1321,83 @@
       "title": "CheckMacroDescriptionPopulated",
       "type": "object"
     },
+    "CheckMacroIsUsed": {
+      "additionalProperties": false,
+      "description": "Macros must be invoked by at least one other resource.\n\n!!! info \"Rationale\"\n\n    Similar to orphaned models, macros are often written for a specific purpose and later abandoned, leaving behind technical debt and confusion. This check parses the manifest to find macros that are defined in the project but are never actually invoked by any model, test, or other macro. Keeps the macro directory lean and reduces the cognitive load for developers trying to understand the codebase.\n\nReceives:\n    macro (Macros): The Macros object to check.\n    ctx (CheckContext): The check context containing the manifest.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | None): Regex pattern to match the macro path. Macro paths that match the pattern will not be checked.\n    include (str | None): Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_macro_is_used\n    ```",
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp to match which paths to exclude.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp to match which paths to include.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_macro_is_used",
+          "default": "check_macro_is_used",
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "title": "CheckMacroIsUsed",
+      "type": "object"
+    },
     "CheckMacroMaxNumberOfLines": {
       "additionalProperties": false,
       "description": "Macros may not have more than the specified number of lines.\n\n!!! info \"Rationale\"\n\n    Long macros are a code smell \u2014 they are harder to test, document, and review. Keeping macros concise encourages single-responsibility design and makes it easier to spot logic errors. Teams that enforce a line limit are nudged to decompose complex macros into smaller, composable units that are individually testable.\n\nParameters:\n    max_number_of_lines (int): The maximum number of permitted lines.\n\nReceives:\n    macro (Macros): The Macros object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | None): Regex pattern to match the macro path. Macro paths that match the pattern will not be checked.\n    include (str | None): Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_macro_max_number_of_lines\n    ```\n    ```yaml\n    manifest_checks:\n        - name: check_macro_max_number_of_lines\n          max_number_of_lines: 100\n    ```",
@@ -7367,6 +7444,7 @@
             "check_macro_arguments_description_populated": "#/$defs/CheckMacroArgumentsDescriptionPopulated",
             "check_macro_code_does_not_contain_regexp_pattern": "#/$defs/CheckMacroCodeDoesNotContainRegexpPattern",
             "check_macro_description_populated": "#/$defs/CheckMacroDescriptionPopulated",
+            "check_macro_is_used": "#/$defs/CheckMacroIsUsed",
             "check_macro_max_number_of_lines": "#/$defs/CheckMacroMaxNumberOfLines",
             "check_macro_name_matches_file_name": "#/$defs/CheckMacroNameMatchesFileName",
             "check_macro_property_file_location": "#/$defs/CheckMacroPropertyFileLocation",
@@ -7463,6 +7541,9 @@
           },
           {
             "$ref": "#/$defs/CheckMacroDescriptionPopulated"
+          },
+          {
+            "$ref": "#/$defs/CheckMacroIsUsed"
           },
           {
             "$ref": "#/$defs/CheckMacroMaxNumberOfLines"
