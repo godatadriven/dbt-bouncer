@@ -396,7 +396,7 @@ requires-dist = [
     { name = "jellyfish", specifier = ">=1,<2" },
     { name = "jinja2", specifier = ">=3,<4" },
     { name = "jinja2-simple-tags", specifier = "<1" },
-    { name = "junitparser", specifier = ">=2,<5" },
+    { name = "junitparser", specifier = ">=2,<6" },
     { name = "mike", marker = "extra == 'docs'", specifier = "~=2.0" },
     { name = "mkdocs", marker = "extra == 'docs'", specifier = "~=1.0" },
     { name = "mkdocs-click", marker = "extra == 'docs'", specifier = "~=0.0" },
