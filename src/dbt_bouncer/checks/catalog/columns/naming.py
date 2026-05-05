@@ -97,7 +97,7 @@ def check_column_name_complies_to_column_type(
 
         if non_complying_columns:
             fail(
-                f"`{str(catalog_node.unique_id).split('.')[-1]}` has columns that don't comply with the specified data type regexp pattern (`{column_name_pattern}`): {non_complying_columns}"
+                f"`{str(catalog_node.unique_id).split('.')[-1]}` has columns matching `{column_name_pattern}` whose data type does not match `{type_pattern}`: {non_complying_columns}"
             )
 
     elif types:
