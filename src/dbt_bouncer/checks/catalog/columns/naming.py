@@ -54,7 +54,7 @@ def check_column_name_complies_to_column_type(
     Example(s):
         ```yaml
         catalog_checks:
-            # DATE columns must end with "_date"
+            # Columns whose names end with "_date" must be of type DATE.
             - name: check_column_name_complies_to_column_type
               column_name_pattern: .*_date$
               types:
@@ -62,7 +62,7 @@ def check_column_name_complies_to_column_type(
         ```
         ```yaml
         catalog_checks:
-            # BOOLEAN columns must start with "is_"
+            # Columns whose names start with "is_" must be of type BOOLEAN.
             - name: check_column_name_complies_to_column_type
               column_name_pattern: ^is_.*
               types:
@@ -70,20 +70,7 @@ def check_column_name_complies_to_column_type(
         ```
         ```yaml
         catalog_checks:
-            # Columns of all types must consist of lowercase letters and underscores. Note that the specified types depend on the underlying database.
-            - name: check_column_name_complies_to_column_type
-              column_name_pattern: ^[a-z_]*$
-              types:
-                - BIGINT
-                - BOOLEAN
-                - DATE
-                - DOUBLE
-                - INTEGER
-                - VARCHAR
-        ```
-        ```yaml
-        catalog_checks:
-            # No STRUCT data types permitted.
+            # Snake-case columns must not be a STRUCT type.
             - name: check_column_name_complies_to_column_type
               column_name_pattern: ^[a-z_]*$
               type_pattern: ^(?!STRUCT)
@@ -110,20 +97,20 @@ def check_column_name_complies_to_column_type(
 
         if non_complying_columns:
             fail(
-                f"`{str(catalog_node.unique_id).split('.')[-1]}` has columns that don't comply with the specified data type regexp pattern (`{column_name_pattern}`): {non_complying_columns}"
+                f"`{str(catalog_node.unique_id).split('.')[-1]}` has columns matching `{column_name_pattern}` whose data type does not match `{type_pattern}`: {non_complying_columns}"
             )
 
     elif types:
         non_complying_columns = [
             v.name
             for _, v in catalog_node.columns.items()
-            if v.type in types
-            and compiled_column_name_pattern.match(str(v.name)) is None
+            if v.type not in types
+            and compiled_column_name_pattern.match(str(v.name)) is not None
         ]
 
         if non_complying_columns:
             fail(
-                f"`{str(catalog_node.unique_id).split('.')[-1]}` has columns that don't comply with the specified regexp pattern (`{column_name_pattern}`): {non_complying_columns}"
+                f"`{str(catalog_node.unique_id).split('.')[-1]}` has columns matching `{column_name_pattern}` whose data type is not in {types}: {non_complying_columns}"
             )
 
 

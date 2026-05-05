@@ -75,21 +75,71 @@ class TestCheckColumnNameCompliesToColumnType:
             types=None,
         )
 
-    def test_invalid_name(self):
+    def test_invalid_name_matches_pattern_but_wrong_type(self):
+        # Column name ends with `_date` (matches pattern) but the type is
+        # VARCHAR (not in `types`), so the rule "name → type" is violated.
         check_fails(
             "check_column_name_complies_to_column_type",
             catalog_node={
                 "columns": {
-                    "col_1": {
+                    "created_date": {
                         "index": 1,
-                        "name": "col_1",
-                        "type": "DATE",
+                        "name": "created_date",
+                        "type": "VARCHAR",
                     },
                 },
             },
             column_name_pattern=".*_date$",
             type_pattern=None,
             types=["DATE"],
+        )
+
+    def test_valid_name_does_not_match_pattern(self):
+        # A column whose name does not match the pattern is not constrained
+        # by this check — its type is irrelevant.
+        check_passes(
+            "check_column_name_complies_to_column_type",
+            catalog_node={
+                "columns": {
+                    "active": {
+                        "index": 1,
+                        "name": "active",
+                        "type": "BOOLEAN",
+                    },
+                },
+            },
+            column_name_pattern="^is_.*",
+            type_pattern=None,
+            types=["BOOLEAN"],
+        )
+
+    def test_differs_from_reverse_check_with_types(self):
+        # Sanity: with the same fixture, the two checks must produce different
+        # results. A BOOLEAN column named `active` violates the type→name rule
+        # ("BOOLEANs must start with `is_`") but not the name→type rule
+        # ("`is_*` columns must be BOOLEAN"), since its name is not `is_*`.
+        catalog_node = {
+            "columns": {
+                "active": {
+                    "index": 1,
+                    "name": "active",
+                    "type": "BOOLEAN",
+                },
+            },
+        }
+        check_passes(
+            "check_column_name_complies_to_column_type",
+            catalog_node=catalog_node,
+            column_name_pattern="^is_.*",
+            type_pattern=None,
+            types=["BOOLEAN"],
+        )
+        check_fails(
+            "check_column_type_complies_to_column_name",
+            catalog_node=catalog_node,
+            column_name_pattern="^is_.*",
+            type_pattern=None,
+            types=["BOOLEAN"],
         )
 
     def test_missing_pattern_and_types(self):
