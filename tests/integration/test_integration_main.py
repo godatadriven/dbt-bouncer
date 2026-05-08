@@ -54,18 +54,16 @@ def test_cli_happy_path(caplog, dbt_artifacts_dir, tmp_path):
 
     assert "Running dbt-bouncer (0.0.0)..." in caplog.text
 
-    # Verify the artifact summary table was logged exactly once and contains
+    # Verify the artifact summary table is printed exactly once and contains
     # at least one non-zero count (guards against a parser regression that
-    # silently produces empty artifact lists).
-    summary_records = [
-        record
-        for record in caplog.messages
-        if "manifest.json" in record and "│" in record
-    ]
-    assert len(summary_records) == 1
+    # silently produces empty artifact lists). The table is printed directly
+    # via Rich Console rather than logged, so we look at result.output.
+    # Rich falls back to ASCII separators on legacy Windows consoles, so
+    # accept either "│" or "|".
+    assert result.output.count("manifest.json") == 1
     import re
 
-    assert re.search(r"│\s+[1-9]", summary_records[0]), (
+    assert re.search(r"[│|]\s+[1-9]", result.output), (
         "Artifact summary table contains no non-zero counts"
     )
     assert result.exit_code == 0
