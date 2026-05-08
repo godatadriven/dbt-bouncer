@@ -7,8 +7,6 @@ and dict/list operations.
 
 from __future__ import annotations
 
-import io
-import logging
 from types import SimpleNamespace
 from typing import TYPE_CHECKING, Any, NamedTuple
 
@@ -472,9 +470,4 @@ def _log_artifact_summary(
     ):
         table.add_row("run_results.json", "Results", str(len(project_run_results)))
 
-    string_io = io.StringIO()
-    console = Console(file=string_io, force_terminal=False)
-    console.print(table)
-    table_str = string_io.getvalue().rstrip()
-
-    logging.info(f"\n{table_str}")
+    Console().print(table)

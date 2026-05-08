@@ -1,6 +1,5 @@
 """Unit tests for artifact parsing module."""
 
-import logging
 import re
 from pathlib import Path
 from unittest.mock import MagicMock
@@ -8,10 +7,8 @@ from unittest.mock import MagicMock
 from dbt_bouncer.artifact_parsers.parser import parse_dbt_artifacts
 
 
-def test_parse_manifest_artifact_table_output(caplog):
+def test_parse_manifest_artifact_table_output(capsys):
     """Test that parse_dbt_artifacts outputs a table format."""
-    caplog.set_level(logging.INFO)
-
     # Load a test manifest
     dbt_artifacts_dir = Path("tests/fixtures/dbt_111/target")
     bouncer_config = MagicMock()
@@ -19,32 +16,30 @@ def test_parse_manifest_artifact_table_output(caplog):
     bouncer_config.catalog_checks = []
     bouncer_config.run_results_checks = []
 
-    # Parse all artifacts (this will trigger the logging in parser.py)
+    # Parse all artifacts (this will trigger the table print in parser.py)
     parse_dbt_artifacts(bouncer_config, dbt_artifacts_dir)
 
-    # Check that the log contains the table header
-    assert any("Category" in record for record in caplog.messages)
-    assert any("Count" in record for record in caplog.messages)
+    out = capsys.readouterr().out
 
-    # Check that the log contains expected categories
-    manifest_log = next(
-        record for record in caplog.messages if "Parsed artifacts" in record
-    )
-    assert "Exposures" in manifest_log
-    assert "Macros" in manifest_log
-    assert "Nodes" in manifest_log
-    assert "Seeds" in manifest_log
-    assert "Semantic Models" in manifest_log
-    assert "Snapshots" in manifest_log
-    assert "Sources" in manifest_log
-    assert "Tests" in manifest_log
-    assert "Unit Tests" in manifest_log
+    # Check that the output contains the table header and title
+    assert "Parsed artifacts" in out
+    assert "Category" in out
+    assert "Count" in out
+
+    # Check that the output contains expected categories
+    assert "Exposures" in out
+    assert "Macros" in out
+    assert "Nodes" in out
+    assert "Seeds" in out
+    assert "Semantic Models" in out
+    assert "Snapshots" in out
+    assert "Sources" in out
+    assert "Tests" in out
+    assert "Unit Tests" in out
 
 
-def test_parse_manifest_artifact_table_format(caplog):
+def test_parse_manifest_artifact_table_format(capsys):
     """Test that the table format is properly structured."""
-    caplog.set_level(logging.INFO)
-
     # Load a test manifest
     dbt_artifacts_dir = Path("tests/fixtures/dbt_111/target")
     bouncer_config = MagicMock()
@@ -55,19 +50,17 @@ def test_parse_manifest_artifact_table_format(caplog):
     # Parse all artifacts
     parse_dbt_artifacts(bouncer_config, dbt_artifacts_dir)
 
-    # Get the manifest log message
-    manifest_log = next(
-        record for record in caplog.messages if "Parsed artifacts" in record
-    )
+    out = capsys.readouterr().out
 
-    # Check that it contains table separators
-    assert "---" in manifest_log or "━" in manifest_log or "─" in manifest_log
+    # Check that it contains table separators (Unicode or ASCII fallback)
+    assert "---" in out or "━" in out or "─" in out
 
-    # Check that counts are present and numeric
-    # Extract all lines that look like "│ Category        │ Count │"
+    # Check that counts are present and numeric. Rich may render the column
+    # separator as either "│" (Unicode) or "|" (ASCII fallback on legacy
+    # Windows consoles), so accept either.
     category_lines = re.findall(
-        r"(Exposures|Macros|Nodes|Seeds|Semantic Models|Snapshots|Sources|Tests|Unit Tests).*?│\s+(\d+)",
-        manifest_log,
+        r"(Exposures|Macros|Nodes|Seeds|Semantic Models|Snapshots|Sources|Tests|Unit Tests).*?[│|]\s+(\d+)",
+        out,
     )
     assert len(category_lines) == 9, (
         f"Expected 9 categories, found {len(category_lines)}"
