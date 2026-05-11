@@ -48,3 +48,27 @@ class TestCheckSourcePropertyFileLocation:
                 "tags": ["tag_1"],
             },
         )
+
+
+class TestCheckSourceFileName:
+    def test_pass(self):
+        check_passes(
+            "check_source_file_name",
+            source={
+                "name": "my_source",
+                "original_file_path": "models/staging/crm/_crm__sources.yml",
+                "source_name": "crm",
+            },
+            file_name_pattern="^.*__sources.yml$",
+        )
+
+    def test_fail(self):
+        check_fails(
+            "check_source_file_name",
+            source={
+                "name": "my_source",
+                "original_file_path": "models/staging/crm/crm.yml",
+                "source_name": "crm",
+            },
+            file_name_pattern="^.*__sources.yml$",
+        )

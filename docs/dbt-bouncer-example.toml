@@ -356,6 +356,10 @@ name = "check_source_names"
 source_name_pattern = "^[a-z0-9_]*$"
 
 [[manifest_checks]]
+name = "check_source_file_name"
+file_name_pattern = "^_.*__sources\\.yml$"
+
+[[manifest_checks]]
 name = "check_source_not_orphaned"
 include = "^models/staging/crm"
 
