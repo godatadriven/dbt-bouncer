@@ -6218,6 +6218,90 @@
       "title": "CheckSourceDescriptionPopulated",
       "type": "object"
     },
+    "CheckSourceFileName": {
+      "additionalProperties": false,
+      "description": "Sources must have a file name that matches the supplied regex.\n\n!!! info \"Rationale\"\n\n    Consistent file naming conventions (e.g. `_stripe__sources.yml`) make it easy to identify a source's purpose at a glance. Enforcing naming patterns in CI prevents deviations that accumulate over time and make the project harder to navigate.\n\nParameters:\n    file_name_pattern (str): Regexp the file name must match. Please account for the `.yml` extension.\n\nReceives:\n    source (SourceNode): The SourceNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | None): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.\n    include (str | None): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_source_file_name\n          description: Sources must have a file name that starts with an underscore and ends with `__sources.yml`.\n          file_name_pattern: ^_.*__sources\\.yml$\n    ```",
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp to match which paths to exclude.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp to match which paths to include.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_source_file_name",
+          "default": "check_source_file_name",
+          "title": "Name",
+          "type": "string"
+        },
+        "file_name_pattern": {
+          "title": "File Name Pattern",
+          "type": "string"
+        }
+      },
+      "required": [
+        "file_name_pattern"
+      ],
+      "title": "CheckSourceFileName",
+      "type": "object"
+    },
     "CheckSourceFreshnessPopulated": {
       "additionalProperties": false,
       "description": "Sources must have a populated freshness.\n\n!!! info \"Rationale\"\n\n    Source freshness configuration enables `dbt source freshness` to detect when upstream data stops arriving. Without it, stale data silently propagates through downstream models, and dashboards display outdated numbers without any warning. Requiring freshness definitions ensures that every source has an explicit SLA, enabling proactive alerting before business users notice a problem.\n\nReceives:\n    source (SourceNode): The SourceNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | None): Regex pattern to match the source path (i.e the .yml file where the source is configured). Source paths that match the pattern will not be checked.\n    include (str | None): Regex pattern to match the source path (i.e the .yml file where the source is configured). Only source paths that match the pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_source_freshness_populated\n    ```",
@@ -7612,6 +7696,7 @@
             "check_snapshot_has_tags": "#/$defs/CheckSnapshotHasTags",
             "check_snapshot_names": "#/$defs/CheckSnapshotNames",
             "check_source_description_populated": "#/$defs/CheckSourceDescriptionPopulated",
+            "check_source_file_name": "#/$defs/CheckSourceFileName",
             "check_source_freshness_populated": "#/$defs/CheckSourceFreshnessPopulated",
             "check_source_has_meta_keys": "#/$defs/CheckSourceHasMetaKeys",
             "check_source_has_tags": "#/$defs/CheckSourceHasTags",
@@ -7815,6 +7900,9 @@
           },
           {
             "$ref": "#/$defs/CheckSourceDescriptionPopulated"
+          },
+          {
+            "$ref": "#/$defs/CheckSourceFileName"
           },
           {
             "$ref": "#/$defs/CheckSourceFreshnessPopulated"
