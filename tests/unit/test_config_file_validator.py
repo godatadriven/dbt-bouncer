@@ -696,3 +696,92 @@ def test_validate_conf_invalid_cache_falls_back_to_cold_path(isolated_cache_dir)
 
     assert len(bouncer_config.manifest_checks) == 1
     assert bouncer_config.manifest_checks[0].name == "check_model_has_unique_test"
+
+
+CUSTOM_CHECK_SOURCE = '''\
+"""Trivial custom check used to exercise the conf cache + custom_checks_dir path."""
+
+from typing import Literal
+
+from dbt_bouncer.check_framework.base import BaseCheck
+
+
+class CheckCustomNoop(BaseCheck):
+    """No-op check for tests."""
+
+    name: Literal["check_custom_noop"]
+    model: object = None
+
+    def execute(self) -> None:  # pragma: no cover - never executed in cache tests
+        """Do nothing."""
+'''
+
+
+def _write_custom_checks_dir(root: "Path") -> "Path":
+    """Materialise a minimal valid custom checks directory under ``root``.
+
+    Returns:
+        Path: The directory containing the custom check.
+
+    """
+    custom_dir = root / "custom_checks"
+    (custom_dir / "manifest").mkdir(parents=True, exist_ok=True)
+    (custom_dir / "manifest" / "check_custom_noop.py").write_text(CUSTOM_CHECK_SOURCE)
+    return custom_dir
+
+
+def test_validate_conf_warm_path_with_custom_checks_dir(isolated_cache_dir, tmp_path):  # noqa: ARG001
+    """Cold + warm runs against a custom_checks_dir must agree.
+
+    Exercises both ``compute_conf_cache_key``'s custom-dir mtime hashing and
+    the cached-class lookup for non-``dbt_bouncer.checks.*`` modules.
+    """
+    custom_dir = _write_custom_checks_dir(tmp_path)
+    config = {"manifest_checks": [{"name": "check_custom_noop"}]}
+
+    ctx = typer.Context(
+        get_command(app),
+        obj={"config_file_path": "", "custom_checks_dir": str(custom_dir)},
+    )
+    with ctx:
+        cold = validate_conf(
+            check_categories=["manifest_checks"],
+            config_file_contents=dict(config),
+            custom_checks_dir=custom_dir,
+        )
+        warm = validate_conf(
+            check_categories=["manifest_checks"],
+            config_file_contents=dict(config),
+            custom_checks_dir=custom_dir,
+        )
+
+    assert len(cold.manifest_checks) == 1
+    assert len(warm.manifest_checks) == 1
+    assert (
+        type(warm.manifest_checks[0]).__qualname__
+        == type(cold.manifest_checks[0]).__qualname__
+        == "CheckCustomNoop"
+    )
+    assert warm.manifest_checks[0].name == cold.manifest_checks[0].name
+
+
+def test_compute_conf_cache_key_includes_custom_checks_dir(tmp_path):
+    """Editing a file under custom_checks_dir must invalidate the conf cache key."""
+    import os
+    import time
+
+    from dbt_bouncer.utils import compute_conf_cache_key
+
+    custom_dir = _write_custom_checks_dir(tmp_path)
+    config = {"manifest_checks": [{"name": "check_custom_noop"}]}
+
+    key_before = compute_conf_cache_key(
+        "0.0.0", config, ["manifest_checks"], custom_checks_dir=custom_dir
+    )
+    target = custom_dir / "manifest" / "check_custom_noop.py"
+    os.utime(target, (time.time(), time.time() + 5))
+    key_after = compute_conf_cache_key(
+        "0.0.0", config, ["manifest_checks"], custom_checks_dir=custom_dir
+    )
+
+    assert key_before != key_after
