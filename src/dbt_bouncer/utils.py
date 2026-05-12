@@ -460,6 +460,11 @@ def compute_conf_cache_key(
     contents, the configured categories, or env vars that feed into Pydantic
     ``default_factory`` callables on ``DbtBouncerConfBase``.
 
+    Today the only such env var is ``DBT_PROJECT_DIR`` (read by
+    ``DbtBouncerConfBase.dbt_artifacts_dir``'s ``default_factory``). If a new
+    base field gains an env-var-driven default, add it to the hash below or
+    cached results will silently diverge from a fresh validation.
+
     Returns:
         str: 16-character hex digest used to name the cache file.
 

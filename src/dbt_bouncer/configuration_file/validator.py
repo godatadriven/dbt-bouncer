@@ -3,6 +3,7 @@ import os
 import re
 import tomllib
 from collections.abc import Mapping
+from functools import lru_cache
 from pathlib import Path, PurePath
 from typing import TYPE_CHECKING, Any
 
@@ -23,13 +24,16 @@ _rebuilt_classes: set[str] = set()
 _CHECK_CATEGORIES = ("catalog_checks", "manifest_checks", "run_results_checks")
 
 
+@lru_cache(maxsize=1)
 def _base_field_names() -> tuple[str, ...]:
     """Return the names of the cacheable scalar fields on ``DbtBouncerConfBase``.
 
     Derived from ``DbtBouncerConfBase.model_fields`` minus the three check
     categories (which are dynamic and handled separately). Computing this on
     demand means any new base field is picked up by the cache automatically —
-    no hand-maintained tuple to drift out of sync.
+    no hand-maintained tuple to drift out of sync. Cached for the lifetime of
+    the interpreter (the base model doesn't change at runtime), mirroring the
+    pattern used by ``_internal_checks_digest`` in ``utils.py``.
 
     Returns:
         tuple[str, ...]: Sorted field names to persist in the cache payload.
