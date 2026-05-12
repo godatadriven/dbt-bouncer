@@ -161,7 +161,10 @@ cython_debug/
 
 .claude/*
 !.claude/settings.json
-!.claude/skills/
+!.claude/skills
+
+.agents/*
+!.agents/skills/
 *.ipynb
 benchmark_results.json
 changed_files.txt

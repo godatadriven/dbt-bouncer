@@ -289,7 +289,7 @@ This repository includes configuration for AI coding agents. The setup follows t
 - **`AGENTS.md`** — tool-agnostic project instructions (setup, architecture, check authoring, testing, constraints). This is the single source of truth for all AI tools.
 - **`CLAUDE.md`** — Claude Code-specific configuration. References `AGENTS.md` and adds Claude-specific hooks and skills.
 - **`.claude/settings.json`** — runs pre-commit hooks (`prek run --all-files`) automatically on Stop events.
-- **`.claude/skills/`** — reusable skill files:
+- **`.agents/skills/`** (symlinked to **`.claude/skills/`**) — reusable skill files:
   - `/new-check` — scaffolds a new check class with tests
   - `/build-artifacts` — regenerates test fixtures after `dbt_project/` changes
 
