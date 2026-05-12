@@ -196,7 +196,7 @@ def run_bouncer(
         config_file_contents=dict(config_file_contents),
         custom_checks_dir=Path(custom_checks_dir) if custom_checks_dir else None,
     )
-    logging.debug(f"{bouncer_config=}")
+    logging.debug("bouncer_config=%r", bouncer_config)
 
     for category in check_categories:
         if category in only_parsed:
@@ -233,7 +233,7 @@ def run_bouncer(
                 [c for c in getattr(bouncer_config, category) if c.name in check_names],
             )
 
-    logging.debug(f"{bouncer_config=}")
+    logging.debug("bouncer_config=%r", bouncer_config)
 
     dbt_artifacts_dir = Path(
         config_file_path.parent / (bouncer_config.dbt_artifacts_dir or "target")
