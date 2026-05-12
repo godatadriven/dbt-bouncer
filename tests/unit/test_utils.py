@@ -548,3 +548,49 @@ def test_get_check_objects_deduplicates():
     get_check_objects.cache_clear()
     count = sum(1 for cls in results if cls is CheckEntryPointFake)
     assert count == 1
+
+
+def test_compute_cache_fingerprint_changes_when_internal_checks_change():
+    """Touching a file under the packaged ``checks/`` directory must change the fingerprint.
+
+    Regression: previously the fingerprint only covered version, custom-checks
+    dir, and entry points. In editable installs the version is "0.0.0", so
+    adding a new internal check left the disk cache stale forever and forced
+    the slow full-scan fallback on every run.
+    """
+    import os
+    import time
+    from pathlib import Path
+
+    from dbt_bouncer.utils import _compute_cache_fingerprint
+
+    checks_dir = Path("src/dbt_bouncer/checks")
+    sentinel = next(f for f in checks_dir.glob("**/*.py") if f.is_file())
+    original_mtime = sentinel.stat().st_mtime
+
+    try:
+        fp_before = _compute_cache_fingerprint("0.0.0")
+        os.utime(sentinel, (time.time(), time.time() + 5))
+        fp_after = _compute_cache_fingerprint("0.0.0")
+        assert fp_before != fp_after
+    finally:
+        os.utime(sentinel, (original_mtime, original_mtime))
+
+
+def test_prune_stale_cache_files_keeps_only_active(tmp_path):
+    """Writing a cache file deletes any sibling ``check_registry_*.json`` files."""
+    from dbt_bouncer.utils import _prune_stale_cache_files
+
+    stale_a = tmp_path / "check_registry_0.0.0_aaaaaaaa.json"
+    stale_b = tmp_path / "check_registry_1.2.3_bbbbbbbb.json"
+    keep = tmp_path / "check_registry_0.0.0_cccccccc.json"
+    unrelated = tmp_path / "other_file.json"
+    for f in (stale_a, stale_b, keep, unrelated):
+        f.write_bytes(b"{}")
+
+    _prune_stale_cache_files(tmp_path, keep=keep)
+
+    assert keep.exists()
+    assert unrelated.exists()
+    assert not stale_a.exists()
+    assert not stale_b.exists()
