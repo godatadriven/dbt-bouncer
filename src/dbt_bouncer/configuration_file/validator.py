@@ -15,9 +15,22 @@ from dbt_bouncer.enums import ConfigFileName, ConfigFileSource
 from dbt_bouncer.utils import compile_pattern, get_check_registry, load_config_from_yaml
 
 if TYPE_CHECKING:
+    from dbt_bouncer.check_framework.base import BaseCheck
     from dbt_bouncer.configuration_file.parser import DbtBouncerConfBase
 
 _rebuilt_classes: set[str] = set()
+
+# Field names on DbtBouncerConfBase that we cache. The three ``_checks``
+# categories are added dynamically and handled separately.
+_BASE_FIELD_NAMES = (
+    "custom_checks_dir",
+    "dbt_artifacts_dir",
+    "exclude",
+    "include",
+    "package_name",
+    "severity",
+)
+_CHECK_CATEGORIES = ("catalog_checks", "manifest_checks", "run_results_checks")
 
 DEFAULT_DBT_BOUNCER_CONFIG = """manifest_checks:
   - name: check_model_directories
@@ -298,6 +311,213 @@ def _get_stub_namespace() -> dict[str, Any]:
     return {"NestedDict": NestedDict}
 
 
+_CONF_CACHE_FORMAT_VERSION = 1
+
+
+def _get_lite_conf_class() -> type["DbtBouncerConfBase"]:
+    """Return a lightweight Pydantic subclass of ``DbtBouncerConfBase``.
+
+    The warm cache path skips the expensive discriminated-union model build by
+    rehydrating already-validated check instances into a class whose category
+    fields are typed as ``list[Any]``. Constructing this class is a sub-millisecond
+    operation versus ~70ms for the full discriminated-union variant.
+
+    Cached on the function object since the class is interpreter-wide and immutable.
+
+    Returns:
+        type[DbtBouncerConfBase]: A subclass with three ``list[Any]`` category fields.
+
+    """
+    cached = getattr(_get_lite_conf_class, "_cls", None)
+    if cached is not None:
+        return cached
+
+    from pydantic import Field, create_model
+
+    from dbt_bouncer.configuration_file.parser import DbtBouncerConfBase
+
+    cls = create_model(
+        "DbtBouncerConfLite",
+        __base__=DbtBouncerConfBase,
+        catalog_checks=(list[Any], Field(default=[])),
+        manifest_checks=(list[Any], Field(default=[])),
+        run_results_checks=(list[Any], Field(default=[])),
+    )
+    _get_lite_conf_class._cls = cls  # type: ignore[attr-defined]
+    return cls
+
+
+def _conf_cache_enabled() -> bool:
+    """Whether the validated-conf disk cache is active.
+
+    Disabled when the ``DBT_BOUNCER_DISABLE_CONF_CACHE`` env var is set to a
+    truthy value. Useful for tests that monkeypatch check classes or environment
+    state in ways the cache key cannot capture.
+
+    Returns:
+        bool: ``True`` if caching should run.
+
+    """
+    return os.environ.get("DBT_BOUNCER_DISABLE_CONF_CACHE", "").lower() not in (
+        "1",
+        "true",
+        "yes",
+    )
+
+
+def _resolve_check_class(module_name: str, qualname: str) -> "type[BaseCheck] | None":
+    """Resolve a check class from its module + qualname pair.
+
+    Restricts imports to dbt-bouncer's own check namespace plus modules already
+    present in ``sys.modules`` so a corrupted cache cannot pull in arbitrary
+    third-party code at load time. ``get_check_objects_for_names`` is expected
+    to have already imported custom and entry-point check modules before this
+    is called.
+
+    Returns:
+        The check class, or ``None`` if it cannot be resolved.
+
+    """
+    import importlib
+    import sys
+
+    from dbt_bouncer.check_framework.base import BaseCheck
+
+    allowed = (
+        module_name.startswith("dbt_bouncer.checks.") or module_name in sys.modules
+    )
+    if not allowed:
+        return None
+
+    try:
+        module = importlib.import_module(module_name)
+    except ImportError:
+        return None
+    cls = getattr(module, qualname, None)
+    if not (isinstance(cls, type) and issubclass(cls, BaseCheck)):
+        return None
+    return cls
+
+
+def _load_cached_conf(
+    cache_path: Path,
+    configured_check_names: set[str],
+    custom_checks_dir: Path | None,
+) -> "DbtBouncerConfBase | None":
+    """Try to load a cached, validated bouncer-config from disk.
+
+    Imports the check modules referenced by ``configured_check_names`` first so
+    every cached check class can be resolved. Cached check instances are
+    rebuilt via ``model_construct`` (no field validation) because the cached
+    payload was the output of a prior successful Pydantic validation pass.
+
+    Returns:
+        The cached config, or ``None`` if the cache is missing, corrupt, or
+        references a class that can't be resolved.
+
+    """
+    if not cache_path.exists():
+        return None
+
+    import orjson
+
+    try:
+        raw = cache_path.read_bytes()
+    except OSError:
+        return None
+
+    try:
+        payload = orjson.loads(raw)
+    except orjson.JSONDecodeError:
+        logging.debug("Conf cache unreadable, rebuilding.", exc_info=True)
+        return None
+
+    if payload.get("v") != _CONF_CACHE_FORMAT_VERSION:
+        return None
+
+    # Importing the check modules ensures the classes referenced by the
+    # cache payload are available and that any custom or entry-point checks
+    # are also loaded before _resolve_check_class is called.
+    if configured_check_names:
+        from dbt_bouncer.utils import get_check_objects_for_names
+
+        get_check_objects_for_names(
+            frozenset(configured_check_names),
+            custom_checks_dir=custom_checks_dir,
+        )
+
+    base_fields = payload.get("base", {})
+    checks_by_cat = payload.get("checks", {})
+
+    materialised: dict[str, Any] = dict(base_fields)
+    for cat, items in checks_by_cat.items():
+        out: list[Any] = []
+        for item in items:
+            cls = _resolve_check_class(item["_module"], item["_qualname"])
+            if cls is None:
+                logging.debug(
+                    "Conf cache references unresolved check class %s.%s; rebuilding.",
+                    item["_module"],
+                    item["_qualname"],
+                )
+                return None
+            out.append(cls.model_construct(**item["data"]))
+        materialised[cat] = out
+
+    return _get_lite_conf_class().model_construct(**materialised)
+
+
+def _write_cached_conf(cache_path: Path, bouncer_config: "DbtBouncerConfBase") -> None:
+    """Serialise the relevant fields of ``bouncer_config`` to ``cache_path``.
+
+    The dynamic ``DbtBouncerConf`` subclass produced by ``create_model`` can't
+    survive a process restart, so this writes a JSON payload containing the
+    base field values and, per check, its source module + class qualname plus
+    the dict produced by ``model_dump()``. Reload happens via
+    ``cls.model_construct(**data)`` which restores the typed instance without
+    re-running validation.
+    """
+    import orjson
+
+    base_fields = {
+        name: getattr(bouncer_config, name, None) for name in _BASE_FIELD_NAMES
+    }
+
+    checks_by_cat: dict[str, list[dict[str, Any]]] = {}
+    for cat in _CHECK_CATEGORIES:
+        items: list[dict[str, Any]] = []
+        for check in getattr(bouncer_config, cat, []) or []:
+            cls = type(check)
+            items.append(
+                {
+                    "_module": cls.__module__,
+                    "_qualname": cls.__qualname__,
+                    "data": check.model_dump(mode="json"),
+                }
+            )
+        checks_by_cat[cat] = items
+
+    payload = {
+        "v": _CONF_CACHE_FORMAT_VERSION,
+        "base": base_fields,
+        "checks": checks_by_cat,
+    }
+
+    try:
+        blob = orjson.dumps(payload)
+    except (TypeError, orjson.JSONEncodeError):
+        logging.debug("Conf cache write failed during serialisation.", exc_info=True)
+        return
+
+    try:
+        cache_path.parent.mkdir(parents=True, exist_ok=True)
+        tmp = cache_path.with_suffix(cache_path.suffix + ".tmp")
+        tmp.write_bytes(blob)
+        Path(tmp).replace(cache_path)
+    except OSError:
+        logging.debug("Conf cache write failed.", exc_info=True)
+
+
 def validate_conf(
     check_categories,  #: list[Literal["catalog_checks"], Literal["manifest_checks"], Literal["run_results_checks"]],
     config_file_contents: dict[str, Any],
@@ -320,6 +540,26 @@ def validate_conf(
         for entry in config_file_contents.get(cat, []):
             if isinstance(entry, dict) and "name" in entry:
                 configured_check_names.add(entry["name"])
+
+    cache_path: Path | None = None
+    if _conf_cache_enabled():
+        from dbt_bouncer.utils import compute_conf_cache_key, get_cache_dir
+        from dbt_bouncer.version import version
+
+        ver = version()
+        cache_key = compute_conf_cache_key(
+            ver,
+            config_file_contents,
+            list(check_categories),
+            custom_checks_dir=custom_checks_dir,
+        )
+        cache_path = get_cache_dir() / f"conf_{ver}_{cache_key}.json"
+        cached = _load_cached_conf(
+            cache_path, configured_check_names, custom_checks_dir
+        )
+        if cached is not None:
+            logging.debug("Loaded validated conf from cache: %s", cache_path)
+            return cached
 
     if configured_check_names:
         # Fast path: import only modules containing the configured checks.
@@ -356,7 +596,7 @@ def validate_conf(
         _rebuilt_classes.add(class_key)
 
     try:
-        return DbtBouncerConf(**config_file_contents)
+        bouncer_config = DbtBouncerConf(**config_file_contents)
     except ValidationError as e:
         accepted_names = list(get_check_registry(custom_checks_dir).keys())
         error_message: list[str] = []
@@ -382,3 +622,8 @@ def validate_conf(
                 )
 
         raise RuntimeError("\n".join(error_message)) from e
+
+    if cache_path is not None:
+        _write_cached_conf(cache_path, bouncer_config)
+
+    return bouncer_config

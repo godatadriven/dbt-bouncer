@@ -589,3 +589,110 @@ def test_validate_conf_with_stub_namespace(monkeypatch):
         )
 
     assert bouncer_config.dbt_artifacts_dir == "./target"
+
+
+@pytest.fixture
+def isolated_cache_dir(tmp_path, monkeypatch):
+    """Point the validated-conf cache at a temp directory for the test.
+
+    Returns:
+        Path: The temp directory used as the cache root.
+
+    """
+    import dbt_bouncer.utils as utils_mod
+
+    monkeypatch.setattr(utils_mod, "get_cache_dir", lambda: tmp_path)
+    monkeypatch.delenv("DBT_BOUNCER_DISABLE_CONF_CACHE", raising=False)
+    return tmp_path
+
+
+def test_validate_conf_writes_cache_file_on_cold_path(isolated_cache_dir):
+    """First validate_conf call writes a JSON cache file for the resolved conf."""
+    ctx = typer.Context(
+        get_command(app),
+        obj={"config_file_path": "", "custom_checks_dir": None},
+    )
+    config = {"manifest_checks": [{"name": "check_model_has_unique_test"}]}
+    with ctx:
+        validate_conf(
+            check_categories=["manifest_checks"],
+            config_file_contents=config,
+        )
+
+    assert len(list(isolated_cache_dir.glob("conf_*.json"))) == 1
+
+
+def test_validate_conf_warm_path_matches_cold(isolated_cache_dir):  # noqa: ARG001
+    """A warm validate_conf returns a config equivalent to the cold-path one."""
+    config = {
+        "manifest_checks": [
+            {"name": "check_model_has_unique_test"},
+            {"name": "check_exposure_based_on_view"},
+        ]
+    }
+    ctx = typer.Context(
+        get_command(app),
+        obj={"config_file_path": "", "custom_checks_dir": None},
+    )
+    with ctx:
+        cold = validate_conf(
+            check_categories=["manifest_checks"],
+            config_file_contents=dict(config),
+        )
+        warm = validate_conf(
+            check_categories=["manifest_checks"],
+            config_file_contents=dict(config),
+        )
+
+    assert [type(c).__qualname__ for c in warm.manifest_checks] == [
+        type(c).__qualname__ for c in cold.manifest_checks
+    ]
+    assert [c.name for c in warm.manifest_checks] == [
+        c.name for c in cold.manifest_checks
+    ]
+    assert warm.dbt_artifacts_dir == cold.dbt_artifacts_dir
+
+
+def test_validate_conf_disable_env_var_skips_cache(isolated_cache_dir, monkeypatch):
+    """DBT_BOUNCER_DISABLE_CONF_CACHE=1 must skip both read and write paths."""
+    monkeypatch.setenv("DBT_BOUNCER_DISABLE_CONF_CACHE", "1")
+    ctx = typer.Context(
+        get_command(app),
+        obj={"config_file_path": "", "custom_checks_dir": None},
+    )
+    with ctx:
+        validate_conf(
+            check_categories=["manifest_checks"],
+            config_file_contents={
+                "manifest_checks": [{"name": "check_model_has_unique_test"}]
+            },
+        )
+
+    assert list(isolated_cache_dir.glob("conf_*.json")) == []
+
+
+def test_validate_conf_invalid_cache_falls_back_to_cold_path(isolated_cache_dir):
+    """A corrupt or wrong-version cache file is ignored, not raised."""
+    import orjson
+
+    from dbt_bouncer.utils import compute_conf_cache_key
+    from dbt_bouncer.version import version
+
+    config = {"manifest_checks": [{"name": "check_model_has_unique_test"}]}
+    ver = version()
+    key = compute_conf_cache_key(ver, config, ["manifest_checks"])
+    cache_file = isolated_cache_dir / f"conf_{ver}_{key}.json"
+    cache_file.write_bytes(orjson.dumps({"v": 999, "garbage": True}))
+
+    ctx = typer.Context(
+        get_command(app),
+        obj={"config_file_path": "", "custom_checks_dir": None},
+    )
+    with ctx:
+        bouncer_config = validate_conf(
+            check_categories=["manifest_checks"],
+            config_file_contents=dict(config),
+        )
+
+    assert len(bouncer_config.manifest_checks) == 1
+    assert bouncer_config.manifest_checks[0].name == "check_model_has_unique_test"

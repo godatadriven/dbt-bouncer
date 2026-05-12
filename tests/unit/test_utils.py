@@ -562,19 +562,22 @@ def test_compute_cache_fingerprint_changes_when_internal_checks_change():
     import time
     from pathlib import Path
 
-    from dbt_bouncer.utils import _compute_cache_fingerprint
+    from dbt_bouncer.utils import _compute_cache_fingerprint, _internal_checks_digest
 
     checks_dir = Path("src/dbt_bouncer/checks")
     sentinel = next(f for f in checks_dir.glob("**/*.py") if f.is_file())
     original_mtime = sentinel.stat().st_mtime
 
     try:
+        _internal_checks_digest.cache_clear()
         fp_before = _compute_cache_fingerprint("0.0.0")
         os.utime(sentinel, (time.time(), time.time() + 5))
+        _internal_checks_digest.cache_clear()
         fp_after = _compute_cache_fingerprint("0.0.0")
         assert fp_before != fp_after
     finally:
         os.utime(sentinel, (original_mtime, original_mtime))
+        _internal_checks_digest.cache_clear()
 
 
 def test_prune_stale_cache_files_keeps_only_active(tmp_path):

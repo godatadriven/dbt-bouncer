@@ -395,6 +395,24 @@ def _hash_py_tree(h: "hashlib._Hash", root: Path) -> None:
         h.update(str(f.stat().st_mtime_ns).encode())
 
 
+@lru_cache(maxsize=1)
+def _internal_checks_digest() -> bytes:
+    """Return a digest of the packaged ``checks/`` tree.
+
+    Cached for the lifetime of the interpreter — internal check files do not
+    change during a single dbt-bouncer invocation, so this avoids re-globbing
+    the tree on every cache-key computation. Tests that simulate edits to the
+    tree must call ``_internal_checks_digest.cache_clear()`` between runs.
+
+    Returns:
+        bytes: The 32-byte SHA-256 digest of the tree.
+
+    """
+    h = hashlib.sha256()
+    _hash_py_tree(h, Path(__file__).parent / "checks")
+    return h.digest()
+
+
 def _compute_cache_fingerprint(
     version_str: str, custom_checks_dir: Path | None = None
 ) -> str:
@@ -416,7 +434,7 @@ def _compute_cache_fingerprint(
     """
     h = hashlib.sha256(version_str.encode())
 
-    _hash_py_tree(h, Path(__file__).parent / "checks")
+    h.update(_internal_checks_digest())
 
     if custom_checks_dir is not None and custom_checks_dir.exists():
         _hash_py_tree(h, custom_checks_dir)
@@ -426,6 +444,57 @@ def _compute_cache_fingerprint(
         h.update(name.encode())
 
     return h.hexdigest()[:8]
+
+
+def compute_conf_cache_key(
+    version_str: str,
+    config_file_contents: Mapping[str, Any],
+    check_categories: list[str],
+    custom_checks_dir: Path | None = None,
+) -> str:
+    """Compute a hash key for the validated bouncer-config cache.
+
+    The key invalidates whenever something that could influence the resulting
+    ``DbtBouncerConfBase`` instance changes: the package version, packaged
+    check files, custom-check files, installed entry points, the raw config
+    contents, the configured categories, or env vars that feed into Pydantic
+    ``default_factory`` callables on ``DbtBouncerConfBase``.
+
+    Returns:
+        str: 16-character hex digest used to name the cache file.
+
+    """
+    import orjson
+
+    h = hashlib.sha256(version_str.encode())
+
+    h.update(_internal_checks_digest())
+
+    if custom_checks_dir is not None and custom_checks_dir.exists():
+        _hash_py_tree(h, custom_checks_dir)
+
+    for name in sorted(ep.name for ep in entry_points(group=_ENTRY_POINT_GROUP)):
+        h.update(name.encode())
+
+    h.update(orjson.dumps(config_file_contents, option=orjson.OPT_SORT_KEYS))
+
+    for cat in sorted(check_categories):
+        h.update(cat.encode())
+
+    # DBT_PROJECT_DIR feeds DbtBouncerConfBase.dbt_artifacts_dir default_factory.
+    h.update((os.environ.get("DBT_PROJECT_DIR") or "").encode())
+
+    return h.hexdigest()[:16]
+
+
+def get_cache_dir() -> Path:
+    """Return the on-disk cache directory used by dbt-bouncer.
+
+    Returns:
+        Path: ``~/.cache/dbt-bouncer/``.
+
+    """
+    return Path.home() / ".cache" / "dbt-bouncer"
 
 
 def _get_check_module_map_cached(
@@ -452,7 +521,7 @@ def _get_check_module_map_cached(
 
     ver = version()
     fingerprint = _compute_cache_fingerprint(ver, custom_checks_dir)
-    cache_dir = Path.home() / ".cache" / "dbt-bouncer"
+    cache_dir = get_cache_dir()
     cache_file = cache_dir / f"check_registry_{ver}_{fingerprint}.json"
 
     if cache_file.exists():
