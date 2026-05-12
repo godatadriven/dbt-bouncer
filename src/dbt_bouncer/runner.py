@@ -184,6 +184,25 @@ def runner(
     for check_category in ctx.check_categories:
         list_of_check_configs.extend(getattr(ctx.bouncer_config, check_category))
 
+    # Per-iterate_value cache of (resource, skip_checks_for_resource) tuples.
+    # The skip_checks meta depends only on the resource, so computing it once
+    # per resource (instead of once per (check, resource) pair) is a big win
+    # when the config has many checks targeting the same resource type.
+    resources_with_meta: dict[str, list[tuple[Any, list[str]]]] = {}
+
+    def _resources_for(iterate_value: str) -> list[tuple[Any, list[str]]]:
+        cached = resources_with_meta.get(iterate_value)
+        if cached is not None:
+            return cached
+        out: list[tuple[Any, list[str]]] = []
+        for resource in resource_map[f"{iterate_value}s"]:
+            d = _get_resource_meta(resource, iterate_value, meta_by_unique_id)
+            out.append(
+                (resource, get_nested_value(d, ["dbt-bouncer", "skip_checks"], []))
+            )
+        resources_with_meta[iterate_value] = out
+        return out
+
     checks_to_run: list[CheckToRun] = []
     for check in sorted(list_of_check_configs, key=operator.attrgetter("index")):
         cls = check.__class__
@@ -200,26 +219,25 @@ def runner(
         iterate_over_value = _CLASS_ITERATE_CACHE[cls]
         if len(iterate_over_value) == 1:
             iterate_value = next(iter(iterate_over_value))
-            for i in resource_map[f"{iterate_value}s"]:
+            for i, meta_config in _resources_for(iterate_value):
+                # Filter first against the original check — _should_run_check
+                # only reads include/exclude/materialization/name, none of
+                # which need a copy. Deep-copying upfront would do 500k+
+                # wasted copies on a typical real-world config.
+                if not _should_run_check(check, i, iterate_over_value, meta_config):
+                    continue
                 check_i = check.model_copy(deep=True)
-                d = _get_resource_meta(i, iterate_value, meta_by_unique_id)
-                meta_config = get_nested_value(
-                    d,
-                    ["dbt-bouncer", "skip_checks"],
-                    [],
-                )
-                if _should_run_check(check_i, i, iterate_over_value, meta_config):
-                    check_run_id = _build_check_run_id(check_i, i, iterate_value)
-                    check_i.set_resource(i, iterate_value)
-                    check_i.set_context(check_ctx)
+                check_run_id = _build_check_run_id(check_i, i, iterate_value)
+                check_i.set_resource(i, iterate_value)
+                check_i.set_context(check_ctx)
 
-                    checks_to_run.append(
-                        {
-                            "check": check_i,
-                            "check_run_id": check_run_id,
-                            "severity": check_i.severity,
-                        },
-                    )
+                checks_to_run.append(
+                    {
+                        "check": check_i,
+                        "check_run_id": check_run_id,
+                        "severity": check_i.severity,
+                    },
+                )
         elif len(iterate_over_value) > 1:
             raise RuntimeError(
                 f"Check {check.name} has multiple iterate_over_value values: {iterate_over_value}",
