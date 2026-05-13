@@ -59,8 +59,9 @@ test-dev-container: ## Run tests in the dev container
 test-integration: ## Run integration tests
 	uv run pytest \
 		-c ./tests \
-		--junitxml=coverage.xml \
+		--junitxml=junit.xml \
 		--cov-report=term-missing:skip-covered \
+		--cov-report=xml \
 		--cov=src/dbt_bouncer/ \
 		--numprocesses 5 \
 		./tests/integration \
@@ -77,8 +78,9 @@ test-perf: ## Run performance tests
 test-unit: ## Run unit tests
 	uv run pytest \
 		-c ./tests \
-		--junitxml=coverage.xml \
+		--junitxml=junit.xml \
 		--cov-report=term-missing:skip-covered \
+		--cov-report=xml \
 		--cov=src/dbt_bouncer/ \
 		--numprocesses 5 \
 		./tests/unit

@@ -10,8 +10,10 @@ tmp/
 .coverage*
 .env
 benchmark_results.json
+coverage.svg
 coverage.xml
 dbt.duckdb
+junit.xml
 pytest-coverage.txt
 results.json
 *.ipynb

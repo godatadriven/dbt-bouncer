@@ -115,18 +115,7 @@ jobs:
 
             - name: Run pytest (unit tests)
               if: matrix.operating-system != 'windows-2025'
-              run: make test-unit | tee uv pytest-coverage.txt && exit ${PIPESTATUS[0]}
-
-            # TODO: Fix permissions issue
-            # - name: Pytest coverage comment
-            #   if: matrix.python-version == '3.11' && matrix.operating-system != 'windows-2025'
-            #   uses: MishaKav/pytest-coverage-comment@main
-            #   with:
-            #       github-token: ${{ github.token }}
-            #       pytest-coverage-path: ./pytest-coverage.txt
-            #       title: Coverage Report
-            #       badge-title: Coverage
-            #       junitxml-path: ./coverage.xml
+              run: make test-unit
 
             - name: Run pytest (integration tests)
               if: matrix.operating-system != 'windows-2025'
