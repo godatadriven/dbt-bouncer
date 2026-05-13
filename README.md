@@ -16,7 +16,7 @@
   <a>
     <img src="https://img.shields.io/badge/License-MIT-yellow.svg">
   </a>
-  <a>
+  <a href="https://github.com/godatadriven/dbt-bouncer/actions/workflows/merge_pipeline.yml">
     <img alt="coverage" src="https://raw.githubusercontent.com/godatadriven/dbt-bouncer/badges/coverage.svg">
   </a>
   <a>
