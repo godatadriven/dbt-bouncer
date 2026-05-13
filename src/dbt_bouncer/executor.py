@@ -83,6 +83,7 @@ class Executor:
 
         """
         if not checks_to_run:
+            logging.info("No checks to run.")
             return []
 
         logging.info(f"Assembled {len(checks_to_run)} checks, running...")
