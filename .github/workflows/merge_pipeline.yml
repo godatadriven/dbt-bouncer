@@ -55,6 +55,50 @@
                 --file results.json \
                 "hyperfine --export-json results.json --runs 10 'dbt-bouncer --config-file dbt-bouncer-example.yml'"
 
+      coverage-badge:
+          permissions:
+            contents: write
+          runs-on: ubuntu-24.04
+          steps:
+              - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+                with:
+                  persist-credentials: true
+
+              - name: Setup Python
+                uses: ./.github/actions/setup_python_env
+
+              - name: Run unit tests with coverage
+                run: make test-unit
+
+              - name: Generate coverage badge
+                run: |
+                  uv run --with genbadge[coverage] genbadge coverage \
+                    --input-file coverage.xml \
+                    --output-file coverage.svg
+
+              - name: Publish badge to badges branch
+                run: |
+                  set -euo pipefail
+                  cp coverage.svg /tmp/coverage.svg
+                  git config user.email "github-actions[bot]@users.noreply.github.com"
+                  git config user.name "github-actions[bot]"
+                  if git ls-remote --exit-code --heads origin badges >/dev/null 2>&1; then
+                      git fetch origin badges:badges
+                      git worktree add /tmp/badges badges
+                  else
+                      git worktree add --orphan -b badges /tmp/badges
+                  fi
+                  (cd /tmp/badges && git rm -rf . >/dev/null 2>&1 || true)
+                  cp /tmp/coverage.svg /tmp/badges/coverage.svg
+                  cd /tmp/badges
+                  git add coverage.svg
+                  if git diff --cached --quiet; then
+                      echo "Badge unchanged, skipping push."
+                  else
+                      git commit -m "ci: update coverage badge"
+                      git push origin badges
+                  fi
+
       deploy-docs:
           permissions:
             contents: write

@@ -17,6 +17,9 @@
     <img src="https://img.shields.io/badge/License-MIT-yellow.svg">
   </a>
   <a>
+    <img alt="coverage" src="https://raw.githubusercontent.com/godatadriven/dbt-bouncer/badges/coverage.svg">
+  </a>
+  <a>
     <img alt="security: bandit" href="https://github.com/PyCQA/bandit" src="https://img.shields.io/badge/security-bandit-yellow.svg">
   </a>
   <a>
