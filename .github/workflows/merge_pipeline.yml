@@ -88,7 +88,6 @@
                   else
                       git worktree add --orphan -b badges /tmp/badges
                   fi
-                  (cd /tmp/badges && git rm -rf . >/dev/null 2>&1 || true)
                   cp /tmp/coverage.svg /tmp/badges/coverage.svg
                   cd /tmp/badges
                   git add coverage.svg

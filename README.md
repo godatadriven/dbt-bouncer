@@ -19,8 +19,8 @@
   <a href="https://github.com/godatadriven/dbt-bouncer/actions/workflows/merge_pipeline.yml">
     <img alt="coverage" src="https://raw.githubusercontent.com/godatadriven/dbt-bouncer/badges/coverage.svg">
   </a>
-  <a>
-    <img alt="security: bandit" href="https://github.com/PyCQA/bandit" src="https://img.shields.io/badge/security-bandit-yellow.svg">
+  <a href="https://github.com/PyCQA/bandit">
+    <img alt="security: bandit" src="https://img.shields.io/badge/security-bandit-yellow.svg">
   </a>
   <a>
     <img src="https://img.shields.io/github/last-commit/godatadriven/dbt-bouncer/main">
