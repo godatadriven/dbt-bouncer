@@ -58,10 +58,15 @@
       coverage-badge:
           permissions:
             contents: write
+          # Serialise concurrent main pushes to avoid racing pushes to the badges branch.
+          concurrency:
+            group: coverage-badge
+            cancel-in-progress: true
           runs-on: ubuntu-24.04
           steps:
               - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
                 with:
+                  # Required for `git push` to the badges branch below.
                   persist-credentials: true
 
               - name: Setup Python
