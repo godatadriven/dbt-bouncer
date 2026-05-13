@@ -396,9 +396,11 @@ def _load_cached_conf(
     nothing outside that vouched-for set is reachable, so a corrupted cache
     file cannot pull in arbitrary modules.
 
-    Cached check instances are rebuilt via ``model_construct`` (no field
-    validation) because the cached payload was the output of a prior
-    successful Pydantic validation pass.
+    Cached check instances are rebuilt via ``model_validate`` so that
+    ``RootModel`` fields (e.g. ``NestedDict``) are re-coerced from their
+    JSON-mode dumps back into typed Pydantic instances. ``model_construct``
+    would skip that coercion and leave such fields as raw primitives, which
+    breaks any check that calls ``.model_dump()`` on them at runtime.
 
     Returns:
         The cached config, or ``None`` if the cache is missing, corrupt, or
@@ -452,7 +454,7 @@ def _load_cached_conf(
                     item["_qualname"],
                 )
                 return None
-            out.append(cls.model_construct(**item["data"]))
+            out.append(cls.model_validate(item["data"]))
         materialised[cat] = out
 
     return _get_lite_conf_class().model_construct(**materialised)
