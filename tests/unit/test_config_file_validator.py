@@ -653,6 +653,39 @@ def test_validate_conf_warm_path_matches_cold(isolated_cache_dir):  # noqa: ARG0
     assert warm.dbt_artifacts_dir == cold.dbt_artifacts_dir
 
 
+def test_validate_conf_warm_path_rehydrates_nested_dict_field(isolated_cache_dir):  # noqa: ARG001
+    """Warm-cache load must re-coerce RootModel fields (e.g. NestedDict).
+
+    Regression: a previous implementation used ``model_construct`` on the warm
+    path, which left ``keys`` as a raw ``list`` after JSON round-tripping and
+    broke any check that called ``.model_dump()`` on it.
+    """
+    from dbt_bouncer.check_framework.exceptions import NestedDict
+
+    config = {
+        "manifest_checks": [
+            {"name": "check_model_has_meta_keys", "keys": ["maturity", "owner"]},
+        ]
+    }
+    ctx = typer.Context(
+        get_command(app),
+        obj={"config_file_path": "", "custom_checks_dir": None},
+    )
+    with ctx:
+        validate_conf(  # cold path: populates the cache
+            check_categories=["manifest_checks"],
+            config_file_contents=dict(config),
+        )
+        warm = validate_conf(
+            check_categories=["manifest_checks"],
+            config_file_contents=dict(config),
+        )
+
+    keys = warm.manifest_checks[0].keys
+    assert isinstance(keys, NestedDict)
+    assert keys.model_dump() == ["maturity", "owner"]
+
+
 def test_validate_conf_disable_env_var_skips_cache(isolated_cache_dir, monkeypatch):
     """DBT_BOUNCER_DISABLE_CONF_CACHE=1 must skip both read and write paths."""
     monkeypatch.setenv("DBT_BOUNCER_DISABLE_CONF_CACHE", "1")
