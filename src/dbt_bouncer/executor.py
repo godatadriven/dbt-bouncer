@@ -96,10 +96,11 @@ class Executor:
         for check in checks_to_run:
             batches[check["check"].__class__.__name__].append(check)
 
-        batches_to_run: list[list[CheckToRun]] = []
-        for batch in batches.values():
-            for i in range(0, max(len(batch), 1), _MAX_BATCH_SIZE):
-                batches_to_run.append(batch[i : i + _MAX_BATCH_SIZE])
+        batches_to_run: list[list[CheckToRun]] = [
+            batch[i : i + _MAX_BATCH_SIZE]
+            for batch in batches.values()
+            for i in range(0, len(batch), _MAX_BATCH_SIZE)
+        ]
 
         console = Console()
         progress_lock = threading.Lock()
