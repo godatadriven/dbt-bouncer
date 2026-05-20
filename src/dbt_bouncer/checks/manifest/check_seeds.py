@@ -131,6 +131,72 @@ def check_seed_description_populated(
 
 
 @check
+def check_seed_file_size(seed, *, max_size_mb: Annotated[float, Field(gt=0.0)]):
+    """Seed files must not exceed the specified maximum size in megabytes.
+
+    !!! info "Rationale"
+
+        Seeds represent static reference data stored as CSV files within the repository. Larger seeds can significantly increase git repository size, slow down dbt parsing and compilation, and lead to poor performance and warehouse cost bloat when loaded. Larger datasets should be stored in the data lake or warehouse and referenced as dbt sources instead of seeds.
+
+    Parameters:
+        max_size_mb (float): Maximum size allowed for the seed file in megabytes.
+
+    Receives:
+        seed (SeedNode): The SeedNode object to check.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | None): Regex pattern to match the seed path. Seed paths that match the pattern will not be checked.
+        include (str | None): Regex pattern to match the seed path. Only seed paths that match the pattern will be checked.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_seed_file_size
+              max_size_mb: 5.0
+        ```
+
+    """
+    import os
+    from pathlib import Path
+
+    # Determine seed file path relative to dbt project root.
+    # seed.root_path (from the manifest) is the most reliable indicator of
+    # where the dbt project lives; fall back to DBT_PROJECT_DIR then cwd.
+    root_path = getattr(seed, "root_path", None)
+    if root_path:
+        project_dir = Path(root_path).resolve()
+    else:
+        dbt_project_dir = os.getenv("DBT_PROJECT_DIR")
+        project_dir = Path(dbt_project_dir).resolve() if dbt_project_dir else Path.cwd()
+
+    # Path relative to dbt project directory
+    file_path = project_dir / seed.original_file_path
+
+    if not file_path.exists():
+        fail(
+            f"`{get_clean_model_name(seed.unique_id)}` failed: seed file `{seed.original_file_path}` does not exist."
+        )
+
+    # File size in bytes
+    try:
+        size_bytes = file_path.stat().st_size
+    except OSError as e:
+        fail(
+            f"`{get_clean_model_name(seed.unique_id)}` failed: could not read size of `{seed.original_file_path}`: {e}"
+        )
+
+    # Convert to Megabytes (1 MB = 1024 * 1024 bytes)
+    size_mb = size_bytes / (1024 * 1024)
+
+    if size_mb > max_size_mb:
+        fail(
+            f"`{get_clean_model_name(seed.unique_id)}` has a file size of {size_mb:.2f} MB, which exceeds the maximum allowed size of {max_size_mb} MB."
+        )
+
+
+@check
 def check_seed_has_unit_tests(
     seed, ctx, *, min_number_of_unit_tests: Annotated[int, Field(gt=0)] = 1
 ):

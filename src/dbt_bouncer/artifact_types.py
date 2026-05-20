@@ -190,6 +190,7 @@ class SeedNode(Protocol):
     columns: dict[str, ColumnInfo]
     description: str
     name: str
+    original_file_path: str
     unique_id: str
 
 

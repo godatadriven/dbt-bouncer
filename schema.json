@@ -5532,6 +5532,91 @@
       "title": "CheckSeedDescriptionPopulated",
       "type": "object"
     },
+    "CheckSeedFileSize": {
+      "additionalProperties": false,
+      "description": "Seed files must not exceed the specified maximum size in megabytes.\n\n!!! info \"Rationale\"\n\n    Seeds represent static reference data stored as CSV files within the repository. Larger seeds can significantly increase git repository size, slow down dbt parsing and compilation, and lead to poor performance and warehouse cost bloat when loaded. Larger datasets should be stored in the data lake or warehouse and referenced as dbt sources instead of seeds.\n\nParameters:\n    max_size_mb (float): Maximum size allowed for the seed file in megabytes.\n\nReceives:\n    seed (SeedNode): The SeedNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | None): Regex pattern to match the seed path. Seed paths that match the pattern will not be checked.\n    include (str | None): Regex pattern to match the seed path. Only seed paths that match the pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_seed_file_size\n          max_size_mb: 5.0\n    ```",
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp to match which paths to exclude.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp to match which paths to include.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_seed_file_size",
+          "default": "check_seed_file_size",
+          "title": "Name",
+          "type": "string"
+        },
+        "max_size_mb": {
+          "exclusiveMinimum": 0.0,
+          "title": "Max Size Mb",
+          "type": "number"
+        }
+      },
+      "required": [
+        "max_size_mb"
+      ],
+      "title": "CheckSeedFileSize",
+      "type": "object"
+    },
     "CheckSeedHasUnitTests": {
       "additionalProperties": false,
       "description": "Seeds must have more than the specified number of unit tests.\n\n!!! info \"Rationale\"\n\n    Seeds contain static data that is loaded directly into the warehouse, and their transformations (via the `ref()` function in downstream models) need to be verifiable. Unit tests on seeds validate that the downstream logic correctly handles the reference data \u2014 catching issues like missing mappings, unexpected nulls, or edge-case values before they reach production.\n\nParameters:\n    min_number_of_unit_tests (int | None): The minimum number of unit tests that a seed must have.\n\nReceives:\n    manifest_obj (ManifestObject): The ManifestObject object parsed from `manifest.json`.\n    seed (SeedNode): The SeedNode object to check.\n    unit_tests (list[UnitTests]): List of UnitTests objects parsed from `manifest.json`.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | None): Regex pattern to match the seed path. Seed paths that match the pattern will not be checked.\n    include (str | None): Regex pattern to match the seed path. Only seed paths that match the pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\n!!! warning\n\n    This check is only supported for dbt 1.8.0 and above.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_seed_has_unit_tests\n          include: ^seeds/core\n    ```\n    ```yaml\n    manifest_checks:\n        - name: check_seed_has_unit_tests\n          min_number_of_unit_tests: 2\n    ```",
@@ -7689,6 +7774,7 @@
             "check_seed_column_names": "#/$defs/CheckSeedColumnNames",
             "check_seed_columns_have_types": "#/$defs/CheckSeedColumnsHaveTypes",
             "check_seed_description_populated": "#/$defs/CheckSeedDescriptionPopulated",
+            "check_seed_file_size": "#/$defs/CheckSeedFileSize",
             "check_seed_has_unit_tests": "#/$defs/CheckSeedHasUnitTests",
             "check_seed_names": "#/$defs/CheckSeedNames",
             "check_semantic_model_based_on_non_public_models": "#/$defs/CheckSemanticModelBasedOnNonPublicModels",
@@ -7879,6 +7965,9 @@
           },
           {
             "$ref": "#/$defs/CheckSeedDescriptionPopulated"
+          },
+          {
+            "$ref": "#/$defs/CheckSeedFileSize"
           },
           {
             "$ref": "#/$defs/CheckSeedHasUnitTests"

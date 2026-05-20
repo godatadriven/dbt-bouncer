@@ -197,6 +197,8 @@ manifest_checks:
     seed_column_name_pattern: ^[a-z_]*$
   - name: check_seed_columns_have_types
   - name: check_seed_description_populated
+  - name: check_seed_file_size
+    max_size_mb: 10.0
   # - name: check_seed_has_unit_tests
   - name: check_seed_names
     include: ^seeds

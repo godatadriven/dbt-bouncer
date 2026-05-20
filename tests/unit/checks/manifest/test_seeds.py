@@ -248,3 +248,95 @@ def test_check_seed_names(seed_overrides, seed_name_pattern, check_fn):
         seed=seed_overrides,
         seed_name_pattern=seed_name_pattern,
     )
+
+
+def test_check_seed_file_size(monkeypatch):
+    from os import stat_result
+    from pathlib import Path
+
+    def _make_stat(size_bytes):
+        """Return a function that mocks Path.stat() to return a given size.
+
+        Returns:
+            Callable: A function suitable for monkeypatching Path.stat.
+
+        """
+
+        def _stat(_self):
+            return stat_result((0, 0, 0, 0, 0, 0, size_bytes, 0, 0, 0))
+
+        return _stat
+
+    # Mock exists to always return True for the expected seed path
+    monkeypatch.setattr(Path, "exists", lambda _self: True)
+
+    # 1. Test happy path (size under limit)
+    monkeypatch.setattr(Path, "stat", _make_stat(1024 * 1024))  # 1 MB
+    check_passes(
+        "check_seed_file_size",
+        seed={
+            "alias": "raw_customers",
+            "name": "raw_customers",
+            "original_file_path": "seeds/raw_customers.csv",
+            "unique_id": "seed.package_name.raw_customers",
+        },
+        max_size_mb=2.0,
+    )
+
+    # 2. Test unhappy path (size over limit)
+    monkeypatch.setattr(Path, "stat", _make_stat(3 * 1024 * 1024))  # 3 MB
+    check_fails(
+        "check_seed_file_size",
+        seed={
+            "alias": "raw_customers",
+            "name": "raw_customers",
+            "original_file_path": "seeds/raw_customers.csv",
+            "unique_id": "seed.package_name.raw_customers",
+        },
+        max_size_mb=2.0,
+    )
+
+    # 3. Test unhappy path (seed file does not exist)
+    monkeypatch.setattr(Path, "exists", lambda _self: False)
+    check_fails(
+        "check_seed_file_size",
+        seed={
+            "alias": "raw_customers",
+            "name": "raw_customers",
+            "original_file_path": "seeds/raw_customers.csv",
+            "unique_id": "seed.package_name.raw_customers",
+        },
+        max_size_mb=2.0,
+    )
+
+    # 4. Test OSError during stat
+    monkeypatch.setattr(Path, "exists", lambda _self: True)
+
+    def _stat_error(_self):
+        raise OSError("Permission denied")
+
+    monkeypatch.setattr(Path, "stat", _stat_error)
+    check_fails(
+        "check_seed_file_size",
+        seed={
+            "alias": "raw_customers",
+            "name": "raw_customers",
+            "original_file_path": "seeds/raw_customers.csv",
+            "unique_id": "seed.package_name.raw_customers",
+        },
+        max_size_mb=2.0,
+    )
+
+    # 5. Test with root_path from manifest (e.g. subdirectory dbt project)
+    monkeypatch.setattr(Path, "stat", _make_stat(1024 * 1024))  # 1 MB
+    check_passes(
+        "check_seed_file_size",
+        seed={
+            "alias": "raw_customers",
+            "name": "raw_customers",
+            "original_file_path": "seeds/raw_customers.csv",
+            "root_path": "/some/project/dir",
+            "unique_id": "seed.package_name.raw_customers",
+        },
+        max_size_mb=2.0,
+    )
