@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import pytest
 
 from dbt_bouncer.testing import check_fails, check_passes
@@ -391,3 +393,91 @@ def test_check_macro_is_used(macro_overrides, ctx_overrides, check_fn):
         macro=macro_overrides,
         ctx_manifest_obj=ctx_overrides,
     )
+
+
+@patch("dbt_bouncer.checks.manifest.check_macros._get_dbt_project_strings")
+def test_check_macro_is_used_in_project_yml(mock_get_strings):
+    # Case 1: Macro is used in dbt_project.yml (unprefixed)
+    mock_get_strings.return_value = [
+        "{{ apply_snowflake_tags() if target.name in ['dev_medallion'] }}"
+    ]
+    check_passes(
+        "check_macro_is_used",
+        macro={
+            "name": "apply_snowflake_tags",
+            "package_name": "dwh",
+            "unique_id": "macro.dwh.apply_snowflake_tags",
+        },
+        ctx_manifest_obj={"nodes": {}},
+    )
+
+    # Case 2: Macro is used in dbt_project.yml (prefixed)
+    mock_get_strings.return_value = ["{{ dbt_artifacts.upload_results(results) }}"]
+    check_passes(
+        "check_macro_is_used",
+        macro={
+            "name": "upload_results",
+            "package_name": "dbt_artifacts",
+            "unique_id": "macro.dbt_artifacts.upload_results",
+        },
+        ctx_manifest_obj={"nodes": {}},
+    )
+
+    # Case 3: Macro is NOT used in dbt_project.yml but in Jinja comment or not at all
+    mock_get_strings.return_value = ["{{ other_macro() }}"]
+    check_fails(
+        "check_macro_is_used",
+        macro={
+            "name": "upload_results",
+            "package_name": "dbt_artifacts",
+            "unique_id": "macro.dbt_artifacts.upload_results",
+        },
+        ctx_manifest_obj={"nodes": {}},
+    )
+
+
+def test_dbt_project_yml_parsing(tmp_path, monkeypatch):
+    # Create a mock dbt_project.yml
+    project_yml = tmp_path / "dbt_project.yml"
+    project_yml.write_text(
+        """
+name: dwh
+on-run-start:
+  - "{{ exceptions.raise_compiler_error('dbt flag.EMPTY is not allowed') }}"
+on-run-end:
+  - "{{ dbt_artifacts.upload_results(results) }}"
+models:
+  +post-hook: " {{ apply_snowflake_tags() }}"
+""",
+        encoding="utf-8",
+    )
+
+    # Set DBT_PROJECT_DIR to tmp_path
+    monkeypatch.setenv("DBT_PROJECT_DIR", str(tmp_path))
+
+    # Reset cache to force reload
+    from dbt_bouncer.checks.manifest import check_macros
+
+    check_macros._DBT_PROJECT_STRINGS_CACHE = None
+
+    # Test _find_dbt_project_yml
+    found_path = check_macros._find_dbt_project_yml()
+    assert found_path == project_yml
+
+    # Test _get_dbt_project_strings
+    strings = check_macros._get_dbt_project_strings()
+    assert "dwh" in strings
+    assert "{{ dbt_artifacts.upload_results(results) }}" in strings
+
+    # Test _check_if_macro_used_in_project_yml
+    # Case 1: macro in project yml (unprefixed)
+    macro_1 = {"name": "apply_snowflake_tags", "package_name": "dwh"}
+    assert check_macros._check_if_macro_used_in_project_yml(macro_1) is True
+
+    # Case 2: macro in project yml (prefixed)
+    macro_2 = {"name": "upload_results", "package_name": "dbt_artifacts"}
+    assert check_macros._check_if_macro_used_in_project_yml(macro_2) is True
+
+    # Case 3: macro not in project yml
+    macro_3 = {"name": "unused_macro", "package_name": "dwh"}
+    assert check_macros._check_if_macro_used_in_project_yml(macro_3) is False
