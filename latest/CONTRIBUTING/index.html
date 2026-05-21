@@ -21,18 +21,23 @@
       
       
       <link rel="icon" href="../assets/logo.svg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+      <meta name="generator" content="zensical-0.0.43">
     
     
       
-        <title>Contributing - dbt-bouncer</title>
+        <title>Contributing to dbt-bouncer - dbt-bouncer</title>
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
       
         
-        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      <link rel="stylesheet" href="../assets/stylesheets/classic/main.a2001754.min.css">
+      
+        
+          
+        
+        <link rel="stylesheet" href="../assets/stylesheets/classic/palette.7dc9a0ad.min.css">
       
       
 
@@ -46,16 +51,14 @@
         
         
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,500,500i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback">
         <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
       
     
     
-      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
-    
       <link rel="stylesheet" href="../stylesheets/extra.css">
     
-    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("..",location),__md_scope.pathname.endsWith("/")||(__md_scope=new URL(__md_scope.pathname+"/",location)),__md_hash=e=>[...e].reduce(((e,t)=>(e<<5)-e+t.charCodeAt(0)),0),__md_get=(e,t=localStorage,_=__md_scope)=>JSON.parse(t.getItem(_.pathname+"."+e)),__md_set=(e,t,_=localStorage,a=__md_scope)=>{try{_.setItem(a.pathname+"."+e,JSON.stringify(t))}catch(e){}},document.documentElement.setAttribute("data-platform",navigator.platform)</script>
     
       
 
@@ -82,7 +85,7 @@
     
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
-    <label class="md-overlay" for="__drawer"></label>
+    <label class="md-overlay" for="__drawer" aria-label="Navigation"></label>
     <div data-md-component="skip">
       
         
@@ -118,12 +121,12 @@
 
 <header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href=".." title="dbt-bouncer" class="md-header__button md-logo" aria-label="dbt-bouncer" data-md-component="logo">
+    <a href="./.." title="dbt-bouncer" class="md-header__button md-logo" aria-label="dbt-bouncer" data-md-component="logo">
       
-  <img src="../assets/logo.svg" alt="logo">
+  <img src="../assets/logo.svg" alt="dbt-bouncer">
 
     </a>
-    <label class="md-header__button md-icon" for="__drawer">
+    <label class="md-header__button md-icon" for="__drawer" aria-label="Navigation">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
     </label>
@@ -137,7 +140,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Contributing
+              Contributing to dbt-bouncer
             
           </span>
         </div>
@@ -187,57 +190,30 @@
     
       
       
-        <label class="md-header__button md-icon" for="__search">
+        <label class="md-header__button md-icon" for="__search" aria-label="Search">
           
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
         </label>
-        <div class="md-search" data-md-component="search" role="dialog">
-  <label class="md-search__overlay" for="__search"></label>
-  <div class="md-search__inner" role="search">
-    <form class="md-search__form" name="search">
-      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
-      <label class="md-search__icon md-icon" for="__search">
-        
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
-        
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
-      </label>
-      <nav class="md-search__options" aria-label="Search">
-        
-        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
-          
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-        </button>
-      </nav>
-      
-    </form>
-    <div class="md-search__output">
-      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
-        <div class="md-search-result" data-md-component="search-result">
-          <div class="md-search-result__meta">
-            Initializing search
-          </div>
-          <ol class="md-search-result__list" role="presentation"></ol>
-        </div>
-      </div>
-    </div>
-  </div>
+        <div class="md-search" data-md-component="search" role="dialog" aria-label="Search">
+  <button type="button" class="md-search__button">
+    Search
+  </button>
 </div>
       
     
-    
-      <div class="md-header__source">
+    <div class="md-header__source">
+      
         <a href="https://github.com/godatadriven/dbt-bouncer" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2026 Fonticons, Inc.--><path fill="currentColor" d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
   </div>
   <div class="md-source__repository">
     godatadriven/dbt-bouncer
   </div>
 </a>
-      </div>
-    
+      
+    </div>
   </nav>
   
     
@@ -252,11 +228,8 @@
   
   
     <li class="md-tabs__item">
-      <a href=".." class="md-tabs__link">
+      <a href="./.." class="md-tabs__link">
         
-  
-  
-    
   
   Home
 
@@ -274,9 +247,6 @@
       <a href="../getting_started/" class="md-tabs__link">
         
   
-  
-    
-  
   Getting started
 
       </a>
@@ -293,9 +263,6 @@
       <a href="../configuration/" class="md-tabs__link">
         
   
-  
-    
-  
   Configuration
 
       </a>
@@ -309,13 +276,25 @@
   
   
     
+      
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
     
       <li class="md-tabs__item">
         <a href="../checks/" class="md-tabs__link">
           
-  
-  
-    
   
   Checks
 
@@ -334,9 +313,6 @@
       <a href="../cli/" class="md-tabs__link">
         
   
-  
-    
-  
   CLI
 
       </a>
@@ -353,9 +329,6 @@
       <a href="../faq/" class="md-tabs__link">
         
   
-  
-    
-  
   FAQ
 
       </a>
@@ -369,13 +342,17 @@
   
   
     
+      
+      
+        
+      
+    
+    
+    
     
       <li class="md-tabs__item">
         <a href="../migration/v3/" class="md-tabs__link">
           
-  
-  
-    
   
   Migration
 
@@ -394,9 +371,6 @@
       <a href="../brand/" class="md-tabs__link">
         
   
-  
-    
-  
   Brand
 
       </a>
@@ -412,11 +386,8 @@
   
   
     <li class="md-tabs__item md-tabs__item--active">
-      <a href="./" class="md-tabs__link">
+      <a href="././" class="md-tabs__link">
         
-  
-  
-    
   
   Contributing
 
@@ -433,9 +404,6 @@
     <li class="md-tabs__item">
       <a href="../users/" class="md-tabs__link">
         
-  
-  
-    
   
   Users
 
@@ -474,9 +442,9 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href=".." title="dbt-bouncer" class="md-nav__button md-logo" aria-label="dbt-bouncer" data-md-component="logo">
+    <a href="./.." title="dbt-bouncer" class="md-nav__button md-logo" aria-label="dbt-bouncer" data-md-component="logo">
       
-  <img src="../assets/logo.svg" alt="logo">
+  <img src="../assets/logo.svg" alt="dbt-bouncer">
 
     </a>
     dbt-bouncer
@@ -486,7 +454,7 @@
       <a href="https://github.com/godatadriven/dbt-bouncer" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2026 Fonticons, Inc.--><path fill="currentColor" d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
   </div>
   <div class="md-source__repository">
     godatadriven/dbt-bouncer
@@ -503,15 +471,14 @@
   
   
     <li class="md-nav__item">
-      <a href=".." class="md-nav__link">
+      <a href="./.." class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Home
-  
+  Home
 
     
   </span>
@@ -537,8 +504,7 @@
   <span class="md-ellipsis">
     
   
-    Getting started
-  
+  Getting started
 
     
   </span>
@@ -564,8 +530,7 @@
   <span class="md-ellipsis">
     
   
-    Configuration
-  
+  Configuration
 
     
   </span>
@@ -623,8 +588,7 @@
   <span class="md-ellipsis">
     
   
-    Checks
-  
+  Checks
 
     
   </span>
@@ -656,8 +620,7 @@
   <span class="md-ellipsis">
     
   
-    CLI
-  
+  CLI
 
     
   </span>
@@ -683,8 +646,7 @@
   <span class="md-ellipsis">
     
   
-    FAQ
-  
+  FAQ
 
     
   </span>
@@ -734,8 +696,7 @@
   <span class="md-ellipsis">
     
   
-    Migration
-  
+  Migration
 
     
   </span>
@@ -767,8 +728,7 @@
   <span class="md-ellipsis">
     
   
-    Brand
-  
+  Brand
 
     
   </span>
@@ -790,7 +750,9 @@
   
     <li class="md-nav__item md-nav__item--active">
       
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+        <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
       
       
         
@@ -803,8 +765,7 @@
   <span class="md-ellipsis">
     
   
-    Contributing
-  
+  Contributing
 
     
   </span>
@@ -814,15 +775,14 @@
           <span class="md-nav__icon md-icon"></span>
         </label>
       
-      <a href="./" class="md-nav__link md-nav__link--active">
+      <a href="././" class="md-nav__link md-nav__link--active">
         
   
   
   <span class="md-ellipsis">
     
   
-    Contributing
-  
+  Contributing
 
     
   </span>
@@ -833,7 +793,8 @@
       
         
 
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
   
   
   
@@ -842,16 +803,16 @@
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
-      Table of contents
+      On this page
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
   <a href="#about-this-document" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         About this document
-      
+      </span>
     </span>
   </a>
   
@@ -861,9 +822,9 @@
           <li class="md-nav__item">
   <a href="#note" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Note
-      
+      </span>
     </span>
   </a>
   
@@ -877,9 +838,9 @@
         <li class="md-nav__item">
   <a href="#getting-the-code" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Getting the code
-      
+      </span>
     </span>
   </a>
   
@@ -889,9 +850,9 @@
           <li class="md-nav__item">
   <a href="#installing-git" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Installing git
-      
+      </span>
     </span>
   </a>
   
@@ -900,9 +861,9 @@
           <li class="md-nav__item">
   <a href="#contributors" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Contributors
-      
+      </span>
     </span>
   </a>
   
@@ -916,9 +877,9 @@
         <li class="md-nav__item">
   <a href="#setting-up-an-environment" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Setting up an environment
-      
+      </span>
     </span>
   </a>
   
@@ -928,9 +889,9 @@
           <li class="md-nav__item">
   <a href="#tools" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Tools
-      
+      </span>
     </span>
   </a>
   
@@ -940,9 +901,9 @@
           <li class="md-nav__item">
   <a href="#virtual-environments" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Virtual environments
-      
+      </span>
     </span>
   </a>
   
@@ -951,9 +912,9 @@
           <li class="md-nav__item">
   <a href="#setting-environment-variables" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Setting environment variables
-      
+      </span>
     </span>
   </a>
   
@@ -972,9 +933,9 @@
         <li class="md-nav__item">
   <a href="#running-dbt-bouncer-in-development" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        Running dbt-bouncer in development
-      
+      <span class="md-typeset">
+        Running <code>dbt-bouncer</code> in development
+      </span>
     </span>
   </a>
   
@@ -984,9 +945,9 @@
           <li class="md-nav__item">
   <a href="#installation" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Installation
-      
+      </span>
     </span>
   </a>
   
@@ -995,9 +956,9 @@
           <li class="md-nav__item">
   <a href="#running-dbt-bouncer" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        Running dbt-bouncer
-      
+      <span class="md-typeset">
+        Running <code>dbt-bouncer</code>
+      </span>
     </span>
   </a>
   
@@ -1011,9 +972,9 @@
         <li class="md-nav__item">
   <a href="#testing" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Testing
-      
+      </span>
     </span>
   </a>
   
@@ -1023,9 +984,9 @@
           <li class="md-nav__item">
   <a href="#notice" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Notice
-      
+      </span>
     </span>
   </a>
   
@@ -1034,9 +995,9 @@
           <li class="md-nav__item">
   <a href="#test-commands" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Test commands
-      
+      </span>
     </span>
   </a>
   
@@ -1046,9 +1007,9 @@
           <li class="md-nav__item">
   <a href="#makefile" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        makefile
-      
+      <span class="md-typeset">
+        <code>makefile</code>
+      </span>
     </span>
   </a>
   
@@ -1057,9 +1018,9 @@
           <li class="md-nav__item">
   <a href="#json-schema" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         JSON Schema
-      
+      </span>
     </span>
   </a>
   
@@ -1068,9 +1029,9 @@
           <li class="md-nav__item">
   <a href="#performance-tests" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Performance tests
-      
+      </span>
     </span>
   </a>
   
@@ -1079,9 +1040,9 @@
           <li class="md-nav__item">
   <a href="#prek" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        prek
-      
+      <span class="md-typeset">
+        <code>prek</code>
+      </span>
     </span>
   </a>
   
@@ -1090,9 +1051,9 @@
           <li class="md-nav__item">
   <a href="#pytest" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        pytest
-      
+      <span class="md-typeset">
+        <code>pytest</code>
+      </span>
     </span>
   </a>
   
@@ -1106,9 +1067,9 @@
           <li class="md-nav__item">
   <a href="#assorted-development-tips" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Assorted development tips
-      
+      </span>
     </span>
   </a>
   
@@ -1122,9 +1083,9 @@
         <li class="md-nav__item">
   <a href="#adding-a-new-check" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Adding a new check
-      
+      </span>
     </span>
   </a>
   
@@ -1134,9 +1095,9 @@
           <li class="md-nav__item">
   <a href="#decorator-api-recommended" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Decorator API (recommended)
-      
+      </span>
     </span>
   </a>
   
@@ -1145,9 +1106,9 @@
           <li class="md-nav__item">
   <a href="#class-based-api" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Class-based API
-      
+      </span>
     </span>
   </a>
   
@@ -1156,9 +1117,9 @@
           <li class="md-nav__item">
   <a href="#writing-tests" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Writing tests
-      
+      </span>
     </span>
   </a>
   
@@ -1167,9 +1128,70 @@
           <li class="md-nav__item">
   <a href="#writing-plugins-external-packages" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Writing plugins (external packages)
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
       
+        <li class="md-nav__item">
+  <a href="#documentation-site" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Documentation site
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Documentation site">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#installing-docs-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Installing docs dependencies
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#previewing-locally" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Previewing locally
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#building-the-static-site" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Building the static site
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#versioned-deploys-mike" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Versioned deploys (<code>mike</code>)
+      </span>
     </span>
   </a>
   
@@ -1183,9 +1205,9 @@
         <li class="md-nav__item">
   <a href="#ai-agents-and-tools" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         AI Agents and Tools
-      
+      </span>
     </span>
   </a>
   
@@ -1194,9 +1216,9 @@
         <li class="md-nav__item">
   <a href="#submitting-a-pull-request" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Submitting a Pull Request
-      
+      </span>
     </span>
   </a>
   
@@ -1224,8 +1246,7 @@
   <span class="md-ellipsis">
     
   
-    Users
-  
+  Users
 
     
   </span>
@@ -1251,10 +1272,8 @@
               <article class="md-content__inner md-typeset">
                 
                   
-
-
   
-    <a href="https://github.com/godatadriven/dbt-bouncer/docs/CONTRIBUTING.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/godatadriven/dbt-bouncer/edit/main/docs/CONTRIBUTING.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75z"/></svg>
     </a>
@@ -1373,7 +1392,7 @@
 <p>A JSON Schema is generated from the Pydantic config model and committed as <code>schema.json</code> at the repo root. After adding or modifying checks, regenerate it:</p>
 <div class="language-shell highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>make<span class="w"> </span>generate-schema
 </span></code></pre></div>
-<p>CI will fail if <code>schema.json</code> is out of date. The schema enables editor autocomplete and validation for <code>dbt-bouncer.yml</code> files (see <a href="../configuration/#editor-integration">Config file &gt; Editor integration</a>).</p>
+<p>CI will fail if <code>schema.json</code> is out of date. The schema enables editor autocomplete and validation for <code>dbt-bouncer.yml</code> files (see <a href=".././configuration/#editor-integration">Config file &gt; Editor integration</a>).</p>
 <h4 id="performance-tests">Performance tests<a class="headerlink" href="#performance-tests" title="Permanent link">#</a></h4>
 <p>To test the performance on the <code>dbt-bouncer</code> CLI, we use <a href="https://github.com/bencherdev/bencher">bencher</a> and <a href="https://github.com/sharkdp/hyperfine">hyperfine</a>. Provided both are installed, you can run performance tests via:</p>
 <div class="language-shell highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>make<span class="w"> </span>test-perf
@@ -1478,6 +1497,24 @@
 </span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="n">my_checks</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;my_package.checks&quot;</span>
 </span></code></pre></div>
 <p>Your module can use the <code>@check</code> decorator or class-based checks. dbt-bouncer discovers them automatically via the entry point. Use <code>dbt_bouncer.testing</code> in your own test suite.</p>
+<h2 id="documentation-site">Documentation site<a class="headerlink" href="#documentation-site" title="Permanent link">#</a></h2>
+<p>The documentation at <a href="https://godatadriven.github.io/dbt-bouncer/">godatadriven.github.io/dbt-bouncer</a> is built with <a href="https://zensical.org/">Zensical</a> (the successor to Material for MkDocs by the same team). Zensical reads the existing <code>mkdocs.yml</code> at the repo root, and the docs source lives in <code>docs/</code>.</p>
+<h3 id="installing-docs-dependencies">Installing docs dependencies<a class="headerlink" href="#installing-docs-dependencies" title="Permanent link">#</a></h3>
+<p>The docs tooling is in the <code>docs</code> optional dependency group. From the repo root:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>uv<span class="w"> </span>sync<span class="w"> </span>--extra<span class="o">=</span>docs
+</span></code></pre></div>
+<h3 id="previewing-locally">Previewing locally<a class="headerlink" href="#previewing-locally" title="Permanent link">#</a></h3>
+<p>Run the dev server and open <a href="http://localhost:8000/dbt-bouncer/">http://localhost:8000/dbt-bouncer/</a>:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>uv<span class="w"> </span>run<span class="w"> </span>zensical<span class="w"> </span>serve
+</span></code></pre></div>
+<p>The server rebuilds on file changes — edit any file under <code>docs/</code> (or the Python docstrings rendered via <code>mkdocstrings</code>) and refresh the browser.</p>
+<h3 id="building-the-static-site">Building the static site<a class="headerlink" href="#building-the-static-site" title="Permanent link">#</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>uv<span class="w"> </span>run<span class="w"> </span>zensical<span class="w"> </span>build
+</span></code></pre></div>
+<p>Output is written to <code>site/</code> (git-ignored). The same command runs in CI on every pull request.</p>
+<h3 id="versioned-deploys-mike">Versioned deploys (<code>mike</code>)<a class="headerlink" href="#versioned-deploys-mike" title="Permanent link">#</a></h3>
+<p>Production deploys use <a href="https://github.com/squidfunk/mike"><code>mike</code></a> (the Zensical-compatible fork) to publish versioned docs to the <code>gh-pages</code> branch. Maintainers do not need to run <code>mike</code> locally; the <code>merge_pipeline</code> and <code>release_pipeline</code> GitHub Actions workflows handle it automatically.</p>
+<p>The <code>mike</code> dependency in <code>pyproject.toml</code> is pinned to a specific commit of the <code>squidfunk/mike</code> fork because it is not published on PyPI and therefore bypasses PyPI integrity checks. Re-evaluate this pin (and swap back to <code>mike~=2.0</code> from PyPI) once <a href="https://github.com/zensical/backlog">Zensical ships native versioning support</a>.</p>
 <h2 id="ai-agents-and-tools">AI Agents and Tools<a class="headerlink" href="#ai-agents-and-tools" title="Permanent link">#</a></h2>
 <p>This repository includes configuration for AI coding agents. The setup follows the <a href="https://agents.md">AGENTS.md standard</a>:</p>
 <ul>
@@ -1500,27 +1537,8 @@
 
 
 
-  
-    
-  
-  
 
 
-  <aside class="md-source-file">
-    
-      
-  <span class="md-source-file__fact">
-    <span class="md-icon" title="Last update">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
-    </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="May 1, 2026 06:25:36 UTC">May 1, 2026</span>
-  </span>
-
-    
-    
-    
-    
-  </aside>
 
 
 
@@ -1550,8 +1568,8 @@
   
   
     Made with
-    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
-      Material for MkDocs
+    <a href="https://zensical.org/" target="_blank" rel="noopener">
+      Zensical
     </a>
   
 </div>
@@ -1571,10 +1589,10 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["content.action.edit", "content.code.annotate", "content.code.copy", "navigation.expand", "navigation.indexes", "navigation.instant", "navigation.instant.progress", "navigation.prune", "navigation.sections", "navigation.tabs", "navigation.tabs.sticky", "navigation.tracking", "navigation.top", "toc.follow", "toc.integrate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "canonical_version": "stable", "default": "stable", "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate":null,"base":"..","features":["content.action.edit","content.code.annotate","content.code.copy","navigation.expand","navigation.indexes","navigation.instant","navigation.instant.progress","navigation.prune","navigation.sections","navigation.tabs","navigation.tabs.sticky","navigation.tracking","navigation.top","toc.follow","toc.integrate"],"search":"../assets/javascripts/workers/search.e2d2d235.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"alias":true,"canonical_version":"stable","default":"stable","provider":"mike"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../assets/javascripts/bundle.6e5f0216.min.js"></script>
       
     
   </body>
