@@ -69,10 +69,10 @@ docs = [
   # swap back to `mike~=2.0` once Zensical ships native versioning support.
   # TODO: Re-add `mkdocs-git-revision-date-localized-plugin` once Zensical
   # supports it. Tracking: https://github.com/zensical/backlog/issues/18
-  "mike @ git+https://github.com/squidfunk/mike.git",
+  "mike @ git+https://github.com/squidfunk/mike.git@2d4ad799442f4592db8ad53b179bfb33db8c69ac",
   "mkdocstrings-python<3",
   "pymdown-extensions~=10.0",
-  "zensical"
+  "zensical~=0.0"
 ]
 
 [tool.coverage.report]

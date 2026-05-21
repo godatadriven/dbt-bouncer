@@ -380,7 +380,7 @@ requires-dist = [
     { name = "jinja2", specifier = ">=3,<4" },
     { name = "jinja2-simple-tags", specifier = "<1" },
     { name = "junitparser", specifier = ">=2,<6" },
-    { name = "mike", marker = "extra == 'docs'", git = "https://github.com/squidfunk/mike.git" },
+    { name = "mike", marker = "extra == 'docs'", git = "https://github.com/squidfunk/mike.git?rev=2d4ad799442f4592db8ad53b179bfb33db8c69ac" },
     { name = "mkdocstrings-python", marker = "extra == 'docs'", specifier = "<3" },
     { name = "orjson", specifier = ">=3,<4" },
     { name = "packaging", specifier = "<27" },
@@ -400,7 +400,7 @@ requires-dist = [
     { name = "tombi", marker = "extra == 'dev'", specifier = ">=0.7.32" },
     { name = "ty", marker = "extra == 'dev'", specifier = ">=0.0.7" },
     { name = "typer", specifier = ">=0.12,<1" },
-    { name = "zensical", marker = "extra == 'docs'" },
+    { name = "zensical", marker = "extra == 'docs'", specifier = "~=0.0" },
 ]
 provides-extras = ["dev", "docs"]
 
@@ -918,7 +918,7 @@ wheels = [
 [[package]]
 name = "mike"
 version = "2.2.0+zensical.0.1.0"
-source = { git = "https://github.com/squidfunk/mike.git#2d4ad799442f4592db8ad53b179bfb33db8c69ac" }
+source = { git = "https://github.com/squidfunk/mike.git?rev=2d4ad799442f4592db8ad53b179bfb33db8c69ac#2d4ad799442f4592db8ad53b179bfb33db8c69ac" }
 dependencies = [
     { name = "jinja2" },
     { name = "pyparsing" },
