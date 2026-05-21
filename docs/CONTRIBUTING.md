@@ -316,6 +316,8 @@ Output is written to `site/` (git-ignored). The same command runs in CI on every
 
 Production deploys use [`mike`](https://github.com/squidfunk/mike) (the Zensical-compatible fork) to publish versioned docs to the `gh-pages` branch. Maintainers do not need to run `mike` locally; the `merge_pipeline` and `release_pipeline` GitHub Actions workflows handle it automatically.
 
+The `mike` dependency in `pyproject.toml` is pinned to a specific commit of the `squidfunk/mike` fork because it is not published on PyPI and therefore bypasses PyPI integrity checks. Re-evaluate this pin (and swap back to `mike~=2.0` from PyPI) once [Zensical ships native versioning support](https://github.com/zensical/backlog).
+
 ## AI Agents and Tools
 
 This repository includes configuration for AI coding agents. The setup follows the [AGENTS.md standard](https://agents.md):
