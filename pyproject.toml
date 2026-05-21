@@ -65,14 +65,14 @@ dev = [
 ]
 docs = [
   # Zensical replaces mkdocs + mkdocs-material; it natively reads mkdocs.yml.
-  # `squidfunk/mike` is the Zensical-compatible fork of `mike` (not on PyPI);
+  # `squidfunk/mike` is the Zensical-compatible fork of `mike` (not on PyPI).
+  # Pinned to commit 2d4ad79 (2026-04-17, version 2.2.0+zensical.0.1.0);
   # swap back to `mike~=2.0` once Zensical ships native versioning support.
-  # TODO: Re-add `mkdocs-git-revision-date-localized-plugin` once Zensical
-  # supports it. Tracking: https://github.com/zensical/backlog/issues/18
   "mike @ git+https://github.com/squidfunk/mike.git@2d4ad799442f4592db8ad53b179bfb33db8c69ac",
   "mkdocstrings-python<3",
   "pymdown-extensions~=10.0",
-  "zensical~=0.0"
+  # Zensical is pre-1.0; constrain to the patch series to avoid surprise breakage.
+  "zensical~=0.0.43"
 ]
 
 [tool.coverage.report]

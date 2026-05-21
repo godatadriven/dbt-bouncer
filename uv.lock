@@ -400,7 +400,7 @@ requires-dist = [
     { name = "tombi", marker = "extra == 'dev'", specifier = ">=0.7.32" },
     { name = "ty", marker = "extra == 'dev'", specifier = ">=0.0.7" },
     { name = "typer", specifier = ">=0.12,<1" },
-    { name = "zensical", marker = "extra == 'docs'", specifier = "~=0.0" },
+    { name = "zensical", marker = "extra == 'docs'", specifier = "~=0.0.43" },
 ]
 provides-extras = ["dev", "docs"]
 
