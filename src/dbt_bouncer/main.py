@@ -6,7 +6,6 @@ from pathlib import Path
 from typing import Annotated
 
 import typer
-from typer.main import get_command
 
 import dbt_bouncer.cli.init  # noqa: F401 — triggers @app.command registration
 import dbt_bouncer.cli.list  # noqa: F401 — triggers @app.command registration
@@ -115,7 +114,3 @@ def main_callback(
             show_all_failures=show_all_failures,
             verbosity=verbosity,
         )
-
-
-# For mkdocs-click compatibility - export the underlying Click command
-cli = get_command(app)

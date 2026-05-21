@@ -282,6 +282,40 @@ my_checks = "my_package.checks"
 
 Your module can use the `@check` decorator or class-based checks. dbt-bouncer discovers them automatically via the entry point. Use `dbt_bouncer.testing` in your own test suite.
 
+## Documentation site
+
+The documentation at [godatadriven.github.io/dbt-bouncer](https://godatadriven.github.io/dbt-bouncer/) is built with [Zensical](https://zensical.org/) (the successor to Material for MkDocs by the same team). Zensical reads the existing `mkdocs.yml` at the repo root, and the docs source lives in `docs/`.
+
+### Installing docs dependencies
+
+The docs tooling is in the `docs` optional dependency group. From the repo root:
+
+```bash
+uv sync --extra=docs
+```
+
+### Previewing locally
+
+Run the dev server and open [http://localhost:8000/dbt-bouncer/](http://localhost:8000/dbt-bouncer/):
+
+```bash
+uv run zensical serve
+```
+
+The server rebuilds on file changes — edit any file under `docs/` (or the Python docstrings rendered via `mkdocstrings`) and refresh the browser.
+
+### Building the static site
+
+```bash
+uv run zensical build
+```
+
+Output is written to `site/` (git-ignored). The same command runs in CI on every pull request.
+
+### Versioned deploys (`mike`)
+
+Production deploys use [`mike`](https://github.com/squidfunk/mike) (the Zensical-compatible fork) to publish versioned docs to the `gh-pages` branch. Maintainers do not need to run `mike` locally; the `merge_pipeline` and `release_pipeline` GitHub Actions workflows handle it automatically.
+
 ## AI Agents and Tools
 
 This repository includes configuration for AI coding agents. The setup follows the [AGENTS.md standard](https://agents.md):

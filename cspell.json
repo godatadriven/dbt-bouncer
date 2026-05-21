@@ -24,6 +24,7 @@
     "Loterij",
     "mispositions",
     "mkdocs",
+    "mkdocstrings",
     "modle",
     "Nationale",
     "orjson",
@@ -50,7 +51,9 @@
     "virtualenv",
     "virtualenvs",
     "xlink",
-    "Xebia"
+    "Xebia",
+    "Zensical",
+    "zensical"
   ],
   "ignorePaths": [
     "dist",

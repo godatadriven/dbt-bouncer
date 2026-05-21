@@ -1,3 +1,7 @@
+---
+title: Home
+---
+
 <p align="center">
   <img src="https://github.com/godatadriven/dbt-bouncer/raw/main/docs/assets/logo.svg" alt="dbt-bouncer logo" width="500"/>
 </p>
