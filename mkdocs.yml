@@ -1,4 +1,4 @@
-edit_uri: docs/
+edit_uri: edit/main/docs/
 repo_name: godatadriven/dbt-bouncer
 repo_url: https://github.com/godatadriven/dbt-bouncer
 site_name: dbt-bouncer
@@ -82,7 +82,8 @@ nav:
   - Users: users.md
 
 plugins:
-  - git-revision-date-localized
+  # TODO: Re-enable `git-revision-date-localized` once Zensical supports it.
+  # Tracking: https://github.com/zensical/backlog/issues/18
   - mkdocstrings:
       custom_templates: docs/templates
       handlers:
@@ -132,6 +133,10 @@ theme:
     view: material/eye
   logo: assets/logo.svg
   name: material
+  # Zensical defaults to the `modern` variant (translucent white header).
+  # `classic` preserves the Material for MkDocs look — solid orange header
+  # driven by `--md-primary-fg-color` in docs/stylesheets/extra.css.
+  variant: classic
   palette:
     - media: "(prefers-color-scheme)"
       primary: custom

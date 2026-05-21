@@ -231,7 +231,7 @@ jobs:
                   "${REGISTRY}/${IMAGE_NAME}:ci" \
                   --config-file /app/dbt-bouncer-example.yml
 
-    mkdocs-build:
+    docs-build:
       needs: [prek]
       permissions:
         contents: read
@@ -249,4 +249,4 @@ jobs:
             uses: ./.github/actions/setup_python_env
 
           - name: Build docs website
-            run: uv run mkdocs build
+            run: uv run zensical build

@@ -1,6 +1,7 @@
 {
   "version": "0.2",
   "language": "en-GB",
+  "_notes": "The `mkdocs` entry below is kept intentionally — it still appears in mkdocs.yml, pyproject.toml comments, and CONTRIBUTING.md after the Zensical migration.",
   "words": [
     "Aurai",
     "conftest",
@@ -24,6 +25,7 @@
     "Loterij",
     "mispositions",
     "mkdocs",
+    "mkdocstrings",
     "modle",
     "Nationale",
     "orjson",
@@ -39,6 +41,7 @@
     "sarif",
     "SARIF",
     "screenshotted",
+    "squidfunk",
     "subclassing",
     "svgs",
     "Tiqets",
@@ -50,7 +53,9 @@
     "virtualenv",
     "virtualenvs",
     "xlink",
-    "Xebia"
+    "Xebia",
+    "Zensical",
+    "zensical"
   ],
   "ignorePaths": [
     "dist",
