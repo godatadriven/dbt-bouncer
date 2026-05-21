@@ -1,3 +1,4 @@
+import os
 import re
 from pathlib import Path
 from typing import Annotated, Any, ClassVar
@@ -395,7 +396,119 @@ def check_macro_is_used(macro, ctx):
 
     """
     used_macros = _get_used_macros(ctx.manifest_obj)
-    if macro.unique_id not in used_macros:
+    if macro.unique_id not in used_macros and not _check_if_macro_used_in_project_yml(
+        macro
+    ):
         fail(
             f"Macro `{macro.unique_id}` is not invoked by any model, test, or other macro."
         )
+
+
+_DBT_PROJECT_STRINGS_CACHE: list[str] | None = None
+
+
+def _find_dbt_project_yml() -> Path | None:
+    # 1. Check DBT_PROJECT_DIR env var
+    dbt_project_dir = os.getenv("DBT_PROJECT_DIR")
+    if dbt_project_dir:
+        path = Path(dbt_project_dir) / "dbt_project.yml"
+        if path.exists():
+            return path
+    # 2. Check current working directory
+    path = Path("dbt_project.yml")
+    if path.exists():
+        return path
+    # 3. Check parent directories of the current directory (up to 4 levels)
+    curr = Path().resolve()
+    for _ in range(4):
+        path = curr / "dbt_project.yml"
+        if path.exists():
+            return path
+        if curr.parent == curr:
+            break
+        curr = curr.parent
+    return None
+
+
+def _extract_strings(data: Any) -> list[str]:
+    strings = []
+    if isinstance(data, dict):
+        for k, v in data.items():
+            if isinstance(k, str):
+                strings.append(k)
+            strings.extend(_extract_strings(v))
+    elif isinstance(data, list):
+        for item in data:
+            strings.extend(_extract_strings(item))
+    elif isinstance(data, str):
+        strings.append(data)
+    return strings
+
+
+def _get_dbt_project_strings() -> list[str]:
+    global _DBT_PROJECT_STRINGS_CACHE
+    if _DBT_PROJECT_STRINGS_CACHE is not None:
+        return _DBT_PROJECT_STRINGS_CACHE
+
+    _DBT_PROJECT_STRINGS_CACHE = []
+    yml_path = _find_dbt_project_yml()
+    if yml_path and yml_path.exists():
+        try:
+            import yaml
+
+            with Path(yml_path).open("r", encoding="utf-8") as f:
+                data = yaml.safe_load(f)
+            if data:
+                _DBT_PROJECT_STRINGS_CACHE = _extract_strings(data)
+        except Exception:  # noqa: S110 # nosec
+            # Fallback to empty if there's any parsing issue
+            pass
+    return _DBT_PROJECT_STRINGS_CACHE
+
+
+def _check_if_macro_used_in_project_yml(macro: Any) -> bool:
+    project_strings = _get_dbt_project_strings()
+    if not project_strings:
+        return False
+
+    # Extract all Jinja blocks from the project strings
+    # Match {{ ... }} or {% ... %}
+    jinja_pattern = re.compile(r"\{\{(.*?)\}\}|\{%(.*?)%\}", re.DOTALL)
+
+    macro_name = getattr(macro, "name", None) or (
+        macro.get("name") if hasattr(macro, "get") else None
+    )
+    package_name = getattr(macro, "package_name", None) or (
+        macro.get("package_name") if hasattr(macro, "get") else None
+    )
+
+    if not macro_name:
+        unique_id = getattr(macro, "unique_id", None) or (
+            macro.get("unique_id") if hasattr(macro, "get") else None
+        )
+        if unique_id and unique_id.startswith("macro."):
+            parts = unique_id.split(".")
+            if len(parts) >= 3:
+                package_name = parts[-2]
+                macro_name = parts[-1]
+
+    if not macro_name:
+        return False
+
+    escaped_macro_name = re.escape(macro_name)
+    if package_name:
+        escaped_package_name = re.escape(package_name)
+        pattern_str = rf"\b(?:{escaped_package_name}\.)?{escaped_macro_name}\b"
+    else:
+        pattern_str = rf"\b{escaped_macro_name}\b"
+
+    pattern = re.compile(pattern_str)
+
+    for val in project_strings:
+        for match in jinja_pattern.finditer(val):
+            # Combined captured content from both groups
+            block_content = match.group(1) or match.group(2) or ""
+            if pattern.search(block_content):
+                return True
+
+    return False
