@@ -866,6 +866,14 @@ def compile_pattern(pattern: str, flags: int = 0) -> re.Pattern[str]:
         raise re.error(f"Invalid regex pattern '{pattern}': {e}") from e
 
 
+try:
+    from dbt_bouncer._dbt_bouncer import (  # ty: ignore
+        object_in_path as rust_object_in_path,
+    )
+except ImportError:
+    rust_object_in_path = None
+
+
 def object_in_path(include_pattern: str | None, path: str) -> bool:
     """Determine if an object is included in the specified path pattern.
 
@@ -875,6 +883,9 @@ def object_in_path(include_pattern: str | None, path: str) -> bool:
         bool: True if the object is included in the path pattern, False otherwise.
 
     """
+    if rust_object_in_path is not None:
+        return rust_object_in_path(include_pattern, path)
+
     if include_pattern is None:
         return True
     return (
