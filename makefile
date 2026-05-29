@@ -41,7 +41,7 @@ generate-schema: ## Regenerate schema.json from Pydantic models
 	uv run python scripts/generate_schema.py
 
 install: ## Install dependencies
-	uv sync --extra=dev --extra=docs
+	uv sync --extra=dev --group=docs
 
 test: ## Run all tests
 	$(MAKE) test-unit
