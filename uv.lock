@@ -364,6 +364,8 @@ dev = [
     { name = "tombi" },
     { name = "ty" },
 ]
+
+[package.dev-dependencies]
 docs = [
     { name = "mike" },
     { name = "mkdocstrings-python" },
@@ -380,13 +382,10 @@ requires-dist = [
     { name = "jinja2", specifier = ">=3,<4" },
     { name = "jinja2-simple-tags", specifier = "<1" },
     { name = "junitparser", specifier = ">=2,<6" },
-    { name = "mike", marker = "extra == 'docs'", git = "https://github.com/squidfunk/mike.git?rev=2d4ad799442f4592db8ad53b179bfb33db8c69ac" },
-    { name = "mkdocstrings-python", marker = "extra == 'docs'", specifier = "<3" },
     { name = "orjson", specifier = ">=3,<4" },
     { name = "packaging", specifier = "<27" },
     { name = "prek", marker = "extra == 'dev'", specifier = ">=0.1,<1" },
     { name = "pydantic", specifier = ">=2,<3" },
-    { name = "pymdown-extensions", marker = "extra == 'docs'", specifier = "~=10.0" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8,<10" },
     { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=5,<8" },
     { name = "pytest-xdist", marker = "extra == 'dev'", specifier = "~=3.0" },
@@ -400,9 +399,16 @@ requires-dist = [
     { name = "tombi", marker = "extra == 'dev'", specifier = ">=0.7.32" },
     { name = "ty", marker = "extra == 'dev'", specifier = ">=0.0.7" },
     { name = "typer", specifier = ">=0.12,<1" },
-    { name = "zensical", marker = "extra == 'docs'", specifier = "~=0.0.43" },
 ]
-provides-extras = ["dev", "docs"]
+provides-extras = ["dev"]
+
+[package.metadata.requires-dev]
+docs = [
+    { name = "mike", git = "https://github.com/squidfunk/mike.git?rev=2d4ad799442f4592db8ad53b179bfb33db8c69ac" },
+    { name = "mkdocstrings-python", specifier = "<3" },
+    { name = "pymdown-extensions", specifier = "~=10.0" },
+    { name = "zensical", specifier = "~=0.0.43" },
+]
 
 [[package]]
 name = "dbt-common"

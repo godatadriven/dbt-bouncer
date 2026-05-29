@@ -63,6 +63,12 @@ dev = [
   "tombi>=0.7.32",
   "ty>=0.0.7"
 ]
+
+# PEP 735 dev-only groups (not published in wheel metadata).
+# `docs` lives here because PyPI rejects direct URL deps in published projects;
+# moving it out of [project.optional-dependencies] keeps the `mike` git fork usable
+# locally and in CI while keeping uploads valid.
+[dependency-groups]
 docs = [
   # Zensical replaces mkdocs + mkdocs-material; it natively reads mkdocs.yml.
   # `squidfunk/mike` is the Zensical-compatible fork of `mike` (not on PyPI).

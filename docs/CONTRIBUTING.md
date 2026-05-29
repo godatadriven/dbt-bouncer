@@ -288,10 +288,10 @@ The documentation at [godatadriven.github.io/dbt-bouncer](https://godatadriven.g
 
 ### Installing docs dependencies
 
-The docs tooling is in the `docs` optional dependency group. From the repo root:
+The docs tooling is in the `docs` PEP 735 dependency group. From the repo root:
 
 ```bash
-uv sync --extra=docs
+uv sync --group=docs
 ```
 
 ### Previewing locally
