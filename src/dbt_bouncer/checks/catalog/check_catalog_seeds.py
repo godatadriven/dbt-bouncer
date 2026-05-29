@@ -3,27 +3,26 @@ from typing import Any
 from dbt_bouncer.check_framework.decorator import check, fail
 from dbt_bouncer.utils import get_clean_model_name
 
-# Adapter-specific catalog stat keys. The first match wins per resource.
-# Verified from each adapter's source:
-#   - Snowflake (include/snowflake/macros/catalog.sql):            ``row_count``, ``bytes``
-#   - BigQuery  (include/bigquery/macros/catalog/catalog.sql):     ``num_rows``,  ``num_bytes``
-#   - Redshift  (include/redshift/macros/catalog/catalog.sql):     ``rows``,      ``size``
-#   - Databricks/Spark (dbt-spark `DatabricksColumn.convert_table_stats`,
-#     parsed from ``DESCRIBE TABLE EXTENDED`` output of the form
-#     ``"<bytes> bytes, <rows> rows"``):                           ``rows``,      ``bytes``
-# dbt-postgres and dbt-duckdb emit no row/byte stats, so this check raises
-# ``RuntimeError`` on those adapters.
-_ROW_COUNT_STAT_KEYS = ("row_count", "num_rows", "rows")
-_BYTE_COUNT_STAT_KEYS = ("bytes", "num_bytes", "size")
+# The default stat-key fallback lists below were verified from each adapter's source:
+#   - Snowflake (include/snowflake/macros/catalog.sql):           ``row_count``, ``bytes``
+#   - BigQuery  (include/bigquery/macros/catalog/catalog.sql):    ``num_rows``,  ``num_bytes``
+#   - Redshift  (include/redshift/macros/catalog/catalog.sql):    ``rows``,      ``size``
+#   - Databricks/Spark (dbt-spark `convert_table_stats`, parsed
+#     from ``DESCRIBE TABLE EXTENDED`` output of the form
+#     ``"<bytes> bytes, <rows> rows"``):                          ``rows``,      ``bytes``
+# For any other adapter (Athena, Fabric, Trino, ClickHouse, Synapse, DuckDB,
+# Postgres, and assorted community adapters), users can supply the relevant
+# key(s) via the ``row_stat_keys`` / ``byte_stat_keys`` check params.
 
 
-def _extract_stat_value(catalog_node: Any, stat_keys: tuple[str, ...]) -> int | None:
+def _extract_stat_value(catalog_node: Any, stat_keys: list[str]) -> int | None:
     """Return the first numeric stat value found on ``catalog_node`` for any of ``stat_keys``.
 
     Returns:
         int | None: The matched stat value coerced to ``int``, or ``None`` when stats
         are absent or none of the supplied keys are present with a numeric value
-        (signalling that the active adapter does not expose this stat).
+        (signalling that the active adapter does not expose this stat under any
+        of the configured keys).
 
     """
     stats = catalog_node.stats
@@ -92,7 +91,12 @@ def check_seed_columns_are_all_documented(catalog_node, ctx):
 
 
 @check
-def check_seed_max_bytes(catalog_node, *, max_bytes: int):
+def check_seed_max_bytes(
+    catalog_node,
+    *,
+    max_bytes: int,
+    byte_stat_keys: list[str] = ["bytes", "num_bytes", "size"],  # noqa: B006
+):
     """Each seed must not exceed the given size in bytes.
 
     !!! info "Rationale"
@@ -101,10 +105,13 @@ def check_seed_max_bytes(catalog_node, *, max_bytes: int):
 
     !!! note
 
-        Seed size is read from the catalog's per-relation stats, which are populated by the warehouse adapter. Only the following adapters are known to emit byte stats: `dbt-snowflake` (`bytes`), `dbt-bigquery` (`num_bytes`), `dbt-redshift` (`size`), `dbt-databricks`/`dbt-spark` (`bytes`, parsed from `DESCRIBE TABLE EXTENDED`). Adapters that do not emit byte stats (for example `dbt-duckdb`, `dbt-postgres`) will cause this check to raise a `RuntimeError`.
+        Seed size is read from the catalog's per-relation stats, which are populated by the warehouse adapter. The default `byte_stat_keys` cover the adapters whose source has been verified: `dbt-snowflake` (`bytes`), `dbt-bigquery` (`num_bytes`), `dbt-redshift` (`size`), and `dbt-databricks`/`dbt-spark` (`bytes`, parsed from `DESCRIBE TABLE EXTENDED`). The first key found on the catalog node wins.
+
+        For any other adapter — e.g. `dbt-athena`, `dbt-fabric`, `dbt-trino`, `dbt-clickhouse`, `dbt-synapse`, `dbt-singlestore`, `dbt-vertica`, etc. — inspect the relevant entry in `catalog.json` to find which key (if any) holds the byte count, then supply it via `byte_stat_keys`. If the adapter emits no byte stats at all the check will raise a `RuntimeError`.
 
     Parameters:
         max_bytes (int): The maximum number of bytes permitted for a seed.
+        byte_stat_keys (list[str]): Ordered list of stat keys under `stats.<key>.value` to try when extracting the seed's byte count. Defaults to `["bytes", "num_bytes", "size"]`, which covers the verified adapters. Override to support additional adapters.
 
     Receives:
         catalog_node (CatalogNodeEntry): The CatalogNodeEntry object to check.
@@ -116,13 +123,21 @@ def check_seed_max_bytes(catalog_node, *, max_bytes: int):
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Raises:
-        RuntimeError: If the active adapter does not expose a byte-count stat in the catalog.
+        RuntimeError: If the active adapter does not expose any of `byte_stat_keys` in the catalog.
 
     Example(s):
         ```yaml
         catalog_checks:
             - name: check_seed_max_bytes
               max_bytes: 1048576
+        ```
+        ```yaml
+        # Overriding the keys for a hypothetical adapter that exposes ``size_bytes``.
+        catalog_checks:
+            - name: check_seed_max_bytes
+              max_bytes: 1048576
+              byte_stat_keys:
+                - size_bytes
         ```
 
     """
@@ -131,15 +146,16 @@ def check_seed_max_bytes(catalog_node, *, max_bytes: int):
 
     if max_bytes <= 0:
         raise ValueError(f"`max_bytes` must be positive, got {max_bytes}.")
+    if not byte_stat_keys:
+        raise ValueError("`byte_stat_keys` must not be empty.")
 
-    bytes_used = _extract_stat_value(catalog_node, _BYTE_COUNT_STAT_KEYS)
+    bytes_used = _extract_stat_value(catalog_node, byte_stat_keys)
     if bytes_used is None:
         raise RuntimeError(
             f"`{get_clean_model_name(catalog_node.unique_id)}` does not expose any of "
-            f"{list(_BYTE_COUNT_STAT_KEYS)} in catalog stats. The active adapter does "
-            "not appear to emit byte-count stats; this check is only supported for "
-            "adapters such as `dbt-snowflake`, `dbt-bigquery`, `dbt-redshift`, "
-            "and `dbt-databricks`/`dbt-spark`."
+            f"{list(byte_stat_keys)} in catalog stats. If your adapter emits byte "
+            "stats under a different key, set `byte_stat_keys` accordingly. If it "
+            "emits no byte stats at all, this check is not supported for that adapter."
         )
 
     if bytes_used > max_bytes:
@@ -150,7 +166,12 @@ def check_seed_max_bytes(catalog_node, *, max_bytes: int):
 
 
 @check
-def check_seed_max_row_count(catalog_node, *, max_row_count: int):
+def check_seed_max_row_count(
+    catalog_node,
+    *,
+    max_row_count: int,
+    row_stat_keys: list[str] = ["row_count", "num_rows", "rows"],  # noqa: B006
+):
     """Each seed must not contain more than the given number of rows.
 
     !!! info "Rationale"
@@ -159,10 +180,13 @@ def check_seed_max_row_count(catalog_node, *, max_row_count: int):
 
     !!! note
 
-        Row count is read from the catalog's per-relation stats, which are populated by the warehouse adapter. Only the following adapters are known to emit row count stats: `dbt-snowflake` (`row_count`), `dbt-bigquery` (`num_rows`), `dbt-redshift` (`rows`), `dbt-databricks`/`dbt-spark` (`rows`, parsed from `DESCRIBE TABLE EXTENDED`). Adapters that do not emit row count stats (for example `dbt-duckdb`, `dbt-postgres`) will cause this check to raise a `RuntimeError`.
+        Row count is read from the catalog's per-relation stats, which are populated by the warehouse adapter. The default `row_stat_keys` cover the adapters whose source has been verified: `dbt-snowflake` (`row_count`), `dbt-bigquery` (`num_rows`), `dbt-redshift` (`rows`), and `dbt-databricks`/`dbt-spark` (`rows`, parsed from `DESCRIBE TABLE EXTENDED`). The first key found on the catalog node wins.
+
+        For any other adapter — e.g. `dbt-athena`, `dbt-fabric`, `dbt-trino`, `dbt-clickhouse`, `dbt-synapse`, `dbt-singlestore`, `dbt-vertica`, etc. — inspect the relevant entry in `catalog.json` to find which key (if any) holds the row count, then supply it via `row_stat_keys`. If the adapter emits no row stats at all the check will raise a `RuntimeError`.
 
     Parameters:
         max_row_count (int): The maximum number of rows permitted for a seed.
+        row_stat_keys (list[str]): Ordered list of stat keys under `stats.<key>.value` to try when extracting the seed's row count. Defaults to `["row_count", "num_rows", "rows"]`, which covers the verified adapters. Override to support additional adapters.
 
     Receives:
         catalog_node (CatalogNodeEntry): The CatalogNodeEntry object to check.
@@ -174,13 +198,21 @@ def check_seed_max_row_count(catalog_node, *, max_row_count: int):
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Raises:
-        RuntimeError: If the active adapter does not expose a row-count stat in the catalog.
+        RuntimeError: If the active adapter does not expose any of `row_stat_keys` in the catalog.
 
     Example(s):
         ```yaml
         catalog_checks:
             - name: check_seed_max_row_count
               max_row_count: 1000
+        ```
+        ```yaml
+        # Overriding the keys for a hypothetical adapter that exposes ``record_count``.
+        catalog_checks:
+            - name: check_seed_max_row_count
+              max_row_count: 1000
+              row_stat_keys:
+                - record_count
         ```
 
     """
@@ -189,15 +221,16 @@ def check_seed_max_row_count(catalog_node, *, max_row_count: int):
 
     if max_row_count <= 0:
         raise ValueError(f"`max_row_count` must be positive, got {max_row_count}.")
+    if not row_stat_keys:
+        raise ValueError("`row_stat_keys` must not be empty.")
 
-    row_count = _extract_stat_value(catalog_node, _ROW_COUNT_STAT_KEYS)
+    row_count = _extract_stat_value(catalog_node, row_stat_keys)
     if row_count is None:
         raise RuntimeError(
             f"`{get_clean_model_name(catalog_node.unique_id)}` does not expose any of "
-            f"{list(_ROW_COUNT_STAT_KEYS)} in catalog stats. The active adapter does "
-            "not appear to emit row count stats; this check is only supported for "
-            "adapters such as `dbt-snowflake`, `dbt-bigquery`, `dbt-redshift`, "
-            "and `dbt-databricks`/`dbt-spark`."
+            f"{list(row_stat_keys)} in catalog stats. If your adapter emits row "
+            "stats under a different key, set `row_stat_keys` accordingly. If it "
+            "emits no row stats at all, this check is not supported for that adapter."
         )
 
     if row_count > max_row_count:

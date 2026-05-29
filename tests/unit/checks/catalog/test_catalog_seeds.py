@@ -125,6 +125,42 @@ class TestCheckSeedMaxBytes:
                 max_bytes=0,
             )
 
+    def test_empty_byte_stat_keys_raises_value_error(self):
+        with pytest.raises(ValueError, match="must not be empty"):
+            check_passes(
+                "check_seed_max_bytes",
+                catalog_node=_seed_catalog_node(_byte_stat(100)),
+                max_bytes=1024,
+                byte_stat_keys=[],
+            )
+
+    def test_custom_byte_stat_key_pass(self):
+        # Long-tail adapter that exposes ``size_bytes`` instead of any default key.
+        check_passes(
+            "check_seed_max_bytes",
+            catalog_node=_seed_catalog_node(_byte_stat(500, key="size_bytes")),
+            max_bytes=1024,
+            byte_stat_keys=["size_bytes"],
+        )
+
+    def test_custom_byte_stat_key_fail(self):
+        check_fails(
+            "check_seed_max_bytes",
+            catalog_node=_seed_catalog_node(_byte_stat(2048, key="size_bytes")),
+            max_bytes=1024,
+            byte_stat_keys=["size_bytes"],
+        )
+
+    def test_default_keys_no_longer_match_when_user_narrows(self):
+        # Stat is under a default key, but user has narrowed to a single non-matching key.
+        with pytest.raises(RuntimeError, match=r"\['size_bytes'\]"):
+            check_passes(
+                "check_seed_max_bytes",
+                catalog_node=_seed_catalog_node(_byte_stat(100, key="bytes")),
+                max_bytes=1024,
+                byte_stat_keys=["size_bytes"],
+            )
+
 
 class TestCheckSeedMaxRowCount:
     @pytest.mark.parametrize("stat_key", ["row_count", "num_rows", "rows"])
@@ -184,6 +220,41 @@ class TestCheckSeedMaxRowCount:
                 "check_seed_max_row_count",
                 catalog_node=_seed_catalog_node(_row_stat(10)),
                 max_row_count=-1,
+            )
+
+    def test_empty_row_stat_keys_raises_value_error(self):
+        with pytest.raises(ValueError, match="must not be empty"):
+            check_passes(
+                "check_seed_max_row_count",
+                catalog_node=_seed_catalog_node(_row_stat(10)),
+                max_row_count=100,
+                row_stat_keys=[],
+            )
+
+    def test_custom_row_stat_key_pass(self):
+        # Long-tail adapter that exposes ``record_count`` instead of any default key.
+        check_passes(
+            "check_seed_max_row_count",
+            catalog_node=_seed_catalog_node(_row_stat(50, key="record_count")),
+            max_row_count=100,
+            row_stat_keys=["record_count"],
+        )
+
+    def test_custom_row_stat_key_fail(self):
+        check_fails(
+            "check_seed_max_row_count",
+            catalog_node=_seed_catalog_node(_row_stat(200, key="record_count")),
+            max_row_count=100,
+            row_stat_keys=["record_count"],
+        )
+
+    def test_default_keys_no_longer_match_when_user_narrows(self):
+        with pytest.raises(RuntimeError, match=r"\['record_count'\]"):
+            check_passes(
+                "check_seed_max_row_count",
+                catalog_node=_seed_catalog_node(_row_stat(10, key="row_count")),
+                max_row_count=100,
+                row_stat_keys=["record_count"],
             )
 
 
