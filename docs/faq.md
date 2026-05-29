@@ -43,7 +43,7 @@ jobs:
             pull-requests: write
         steps:
           - name: Checkout
-            uses: actions/checkout@v4
+            uses: actions/checkout@v6
 
           - name: Download dbt artifacts
             uses: pgoslatara/dbt-cloud-download-artifacts-action@v1
