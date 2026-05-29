@@ -73,7 +73,7 @@ RUN curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh | sh && \
 
 # Install Python dependencies as the non-root user
 RUN UV_VENV_OVERWRITE=1 uv venv --python /usr/local/bin/python && \
-    uv sync --extra=dev --extra=docs && \
+    uv sync --extra=dev --group=docs && \
     uv run prek install && \
     uv run prek install --install-hooks
 
