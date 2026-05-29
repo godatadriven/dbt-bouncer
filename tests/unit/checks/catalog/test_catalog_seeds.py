@@ -1,4 +1,190 @@
+import pytest
+
 from dbt_bouncer.testing import check_fails, check_passes
+
+
+def _seed_catalog_node(stats: dict) -> dict:
+    """Build a minimal catalog node dict for a seed with the given stats.
+
+    Returns:
+        dict: A catalog node dict suitable for passing to ``check_passes`` /
+        ``check_fails`` as the ``catalog_node`` override.
+
+    """
+    return {
+        "stats": stats,
+        "unique_id": "seed.package_name.raw_customers",
+    }
+
+
+def _row_stat(value: int, key: str = "row_count") -> dict:
+    """Build a stats dict containing a row-count stat under ``key``.
+
+    Returns:
+        dict: A ``stats`` block with ``has_stats=True`` and the row count value.
+
+    """
+    return {
+        "has_stats": {
+            "id": "has_stats",
+            "include": False,
+            "label": "Has Stats?",
+            "value": True,
+        },
+        key: {
+            "id": key,
+            "include": True,
+            "label": "Row Count",
+            "value": value,
+        },
+    }
+
+
+def _byte_stat(value: int, key: str = "bytes") -> dict:
+    """Build a stats dict containing a byte-count stat under ``key``.
+
+    Returns:
+        dict: A ``stats`` block with ``has_stats=True`` and the byte count value.
+
+    """
+    return {
+        "has_stats": {
+            "id": "has_stats",
+            "include": False,
+            "label": "Has Stats?",
+            "value": True,
+        },
+        key: {
+            "id": key,
+            "include": True,
+            "label": "Approximate Size",
+            "value": value,
+        },
+    }
+
+
+class TestCheckSeedMaxBytes:
+    @pytest.mark.parametrize("stat_key", ["bytes", "num_bytes", "size"])
+    def test_pass_under_limit(self, stat_key):
+        check_passes(
+            "check_seed_max_bytes",
+            catalog_node=_seed_catalog_node(_byte_stat(500, key=stat_key)),
+            max_bytes=1024,
+        )
+
+    @pytest.mark.parametrize("stat_key", ["bytes", "num_bytes", "size"])
+    def test_fail_over_limit(self, stat_key):
+        check_fails(
+            "check_seed_max_bytes",
+            catalog_node=_seed_catalog_node(_byte_stat(2048, key=stat_key)),
+            max_bytes=1024,
+        )
+
+    def test_non_seed_catalog_node_is_skipped(self):
+        # A model catalog node with no byte stat must not raise.
+        check_passes(
+            "check_seed_max_bytes",
+            catalog_node={
+                "stats": {},
+                "unique_id": "model.package_name.model_1",
+            },
+            max_bytes=1024,
+        )
+
+    def test_missing_stats_raises_runtime_error(self):
+        with pytest.raises(RuntimeError, match="does not expose"):
+            check_passes(
+                "check_seed_max_bytes",
+                catalog_node=_seed_catalog_node({}),
+                max_bytes=1024,
+            )
+
+    def test_has_stats_false_raises_runtime_error(self):
+        # DuckDB-style: ``has_stats`` present and false, no other keys.
+        with pytest.raises(RuntimeError, match="does not expose"):
+            check_passes(
+                "check_seed_max_bytes",
+                catalog_node=_seed_catalog_node(
+                    {
+                        "has_stats": {
+                            "id": "has_stats",
+                            "include": False,
+                            "label": "Has Stats?",
+                            "value": False,
+                        }
+                    }
+                ),
+                max_bytes=1024,
+            )
+
+    def test_invalid_max_bytes_raises_value_error(self):
+        with pytest.raises(ValueError, match="must be positive"):
+            check_passes(
+                "check_seed_max_bytes",
+                catalog_node=_seed_catalog_node(_byte_stat(100)),
+                max_bytes=0,
+            )
+
+
+class TestCheckSeedMaxRowCount:
+    @pytest.mark.parametrize("stat_key", ["row_count", "num_rows", "rows"])
+    def test_pass_under_limit(self, stat_key):
+        check_passes(
+            "check_seed_max_row_count",
+            catalog_node=_seed_catalog_node(_row_stat(50, key=stat_key)),
+            max_row_count=100,
+        )
+
+    @pytest.mark.parametrize("stat_key", ["row_count", "num_rows", "rows"])
+    def test_fail_over_limit(self, stat_key):
+        check_fails(
+            "check_seed_max_row_count",
+            catalog_node=_seed_catalog_node(_row_stat(200, key=stat_key)),
+            max_row_count=100,
+        )
+
+    def test_non_seed_catalog_node_is_skipped(self):
+        check_passes(
+            "check_seed_max_row_count",
+            catalog_node={
+                "stats": {},
+                "unique_id": "model.package_name.model_1",
+            },
+            max_row_count=100,
+        )
+
+    def test_missing_stats_raises_runtime_error(self):
+        with pytest.raises(RuntimeError, match="does not expose"):
+            check_passes(
+                "check_seed_max_row_count",
+                catalog_node=_seed_catalog_node({}),
+                max_row_count=100,
+            )
+
+    def test_has_stats_false_raises_runtime_error(self):
+        with pytest.raises(RuntimeError, match="does not expose"):
+            check_passes(
+                "check_seed_max_row_count",
+                catalog_node=_seed_catalog_node(
+                    {
+                        "has_stats": {
+                            "id": "has_stats",
+                            "include": False,
+                            "label": "Has Stats?",
+                            "value": False,
+                        }
+                    }
+                ),
+                max_row_count=100,
+            )
+
+    def test_invalid_max_row_count_raises_value_error(self):
+        with pytest.raises(ValueError, match="must be positive"):
+            check_passes(
+                "check_seed_max_row_count",
+                catalog_node=_seed_catalog_node(_row_stat(10)),
+                max_row_count=-1,
+            )
 
 
 class TestCheckSeedColumnsAreAllDocumented:
