@@ -30,8 +30,10 @@ def _extract_stat_value(catalog_node: Any, stat_keys: list[str]) -> int | None:
         return None
     # ``has_stats`` is the dbt convention for adapters that emit no stats at all (e.g. DuckDB).
     # Access via getattr so the DictProxy's lazy wrapping returns a proxy whose ``.value`` works.
+    # Use truthy comparison rather than ``is False`` so that any falsy adapter-side
+    # representation (``0``, empty string, etc.) is also treated as "no stats".
     has_stats_entry = getattr(stats, "has_stats", None)
-    if has_stats_entry is not None and has_stats_entry.value is False:
+    if has_stats_entry is not None and not has_stats_entry.value:
         return None
     for key in stat_keys:
         if key not in stats:

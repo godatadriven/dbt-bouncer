@@ -107,6 +107,18 @@ class TestCheckSeedMaxBytes:
                 max_bytes=1024,
             )
 
+    def test_null_stats_raises_runtime_error(self):
+        # Adapter where the ``stats`` field is serialised as ``null`` rather than ``{}``.
+        with pytest.raises(RuntimeError, match="does not expose"):
+            check_passes(
+                "check_seed_max_bytes",
+                catalog_node={
+                    "stats": None,
+                    "unique_id": "seed.package_name.raw_customers",
+                },
+                max_bytes=1024,
+            )
+
     def test_has_stats_false_raises_runtime_error(self):
         # DuckDB-style: ``has_stats`` present and false, no other keys.
         with pytest.raises(RuntimeError, match="does not expose"):
@@ -210,6 +222,17 @@ class TestCheckSeedMaxRowCount:
             check_passes(
                 "check_seed_max_row_count",
                 catalog_node=_seed_catalog_node({}),
+                max_row_count=100,
+            )
+
+    def test_null_stats_raises_runtime_error(self):
+        with pytest.raises(RuntimeError, match="does not expose"):
+            check_passes(
+                "check_seed_max_row_count",
+                catalog_node={
+                    "stats": None,
+                    "unique_id": "seed.package_name.raw_customers",
+                },
                 max_row_count=100,
             )
 
