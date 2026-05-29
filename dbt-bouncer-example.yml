@@ -44,6 +44,14 @@ catalog_checks:
     include: ^models/marts
   - name: check_columns_are_documented_in_public_models
   - name: check_seed_columns_are_all_documented
+  # check_seed_max_bytes and check_seed_max_row_count require an adapter that
+  # populates row/byte stats in catalog.json (e.g. Snowflake, BigQuery, Redshift,
+  # Databricks). DuckDB (used in this example project) does not, so these
+  # entries are commented out.
+  # - name: check_seed_max_bytes
+  #   max_bytes: 1048576
+  # - name: check_seed_max_row_count
+  #   max_row_count: 1000
   - name: check_source_columns_are_all_documented
     exclude: ^models/staging/crm # Not a good idea, here for demonstration purposes only
 
