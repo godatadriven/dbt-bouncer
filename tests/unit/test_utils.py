@@ -597,3 +597,60 @@ def test_prune_stale_cache_files_keeps_only_active(tmp_path):
     assert unrelated.exists()
     assert not stale_a.exists()
     assert not stale_b.exists()
+
+
+def python_object_in_path(include_pattern: str | None, path: str) -> bool:
+    """Pure-Python implementation of path matching helper.
+
+    Returns:
+        bool: True if path matches, False otherwise.
+
+    """
+    from dbt_bouncer.utils import clean_path_str, compile_pattern
+
+    if include_pattern is None:
+        return True
+    return (
+        compile_pattern(include_pattern.strip()).match(clean_path_str(path)) is not None
+    )
+
+
+def test_object_in_path_speed_comparison():
+    """Verify that the Rust object_in_path is significantly faster than Python."""
+    import time
+
+    from dbt_bouncer.utils import object_in_path, rust_object_in_path
+
+    if rust_object_in_path is None:
+        pytest.skip("Rust extension _dbt_bouncer is not compiled/available.")
+
+    pattern = "^staging"
+    path = "staging/my_very_long_model_name_to_benchmark_path_cleaning.sql"
+
+    # Warmup both caches
+    for _ in range(100):
+        object_in_path(pattern, path)
+        python_object_in_path(pattern, path)
+
+    # Benchmark Python
+    start_py = time.perf_counter()
+    for _ in range(10_000):
+        python_object_in_path(pattern, path)
+    duration_py = time.perf_counter() - start_py
+
+    # Benchmark Rust
+    start_rust = time.perf_counter()
+    for _ in range(10_000):
+        object_in_path(pattern, path)
+    duration_rust = time.perf_counter() - start_rust
+
+    print(f"\n[BENCHMARK] Python: {duration_py:.4f}s, Rust: {duration_rust:.4f}s")  # noqa: T201
+    print(f"[BENCHMARK] Rust is {duration_py / duration_rust:.2f}x faster!")  # noqa: T201
+
+    # Verify exact equivalence
+    assert object_in_path(pattern, path) == python_object_in_path(pattern, path)
+    assert object_in_path(None, path) == python_object_in_path(None, path)
+    assert object_in_path("^other", path) == python_object_in_path("^other", path)
+
+    # Ensure Rust is faster than Python
+    assert duration_rust < duration_py
