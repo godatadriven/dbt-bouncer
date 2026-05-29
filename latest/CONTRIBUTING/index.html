@@ -1500,8 +1500,8 @@
 <h2 id="documentation-site">Documentation site<a class="headerlink" href="#documentation-site" title="Permanent link">#</a></h2>
 <p>The documentation at <a href="https://godatadriven.github.io/dbt-bouncer/">godatadriven.github.io/dbt-bouncer</a> is built with <a href="https://zensical.org/">Zensical</a> (the successor to Material for MkDocs by the same team). Zensical reads the existing <code>mkdocs.yml</code> at the repo root, and the docs source lives in <code>docs/</code>.</p>
 <h3 id="installing-docs-dependencies">Installing docs dependencies<a class="headerlink" href="#installing-docs-dependencies" title="Permanent link">#</a></h3>
-<p>The docs tooling is in the <code>docs</code> optional dependency group. From the repo root:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>uv<span class="w"> </span>sync<span class="w"> </span>--extra<span class="o">=</span>docs
+<p>The docs tooling is in the <code>docs</code> PEP 735 dependency group. From the repo root:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>uv<span class="w"> </span>sync<span class="w"> </span>--group<span class="o">=</span>docs
 </span></code></pre></div>
 <h3 id="previewing-locally">Previewing locally<a class="headerlink" href="#previewing-locally" title="Permanent link">#</a></h3>
 <p>Run the dev server and open <a href="http://localhost:8000/dbt-bouncer/">http://localhost:8000/dbt-bouncer/</a>:</p>
