@@ -4,10 +4,13 @@ from dbt_bouncer.check_framework.decorator import check, fail
 from dbt_bouncer.utils import get_clean_model_name
 
 # Adapter-specific catalog stat keys. The first match wins per resource.
-# Snowflake/Databricks/Redshift use ``row_count``; BigQuery uses ``num_rows``;
-# Postgres-style adapters use ``rows``.
+# Verified from each adapter's catalog macro:
+#   - Snowflake (catalog.sql):           ``row_count``, ``bytes``
+#   - BigQuery (catalog/catalog.sql):    ``num_rows``, ``num_bytes``
+#   - Redshift (catalog/catalog.sql):    ``rows``, ``size``
+# dbt-databricks emits only ``last_modified``; dbt-postgres and dbt-duckdb emit
+# neither, so this check raises ``RuntimeError`` on those adapters.
 _ROW_COUNT_STAT_KEYS = ("row_count", "num_rows", "rows")
-# Snowflake uses ``bytes``; BigQuery uses ``num_bytes``; Redshift uses ``size``.
 _BYTE_COUNT_STAT_KEYS = ("bytes", "num_bytes", "size")
 
 
@@ -95,7 +98,7 @@ def check_seed_max_bytes(catalog_node, *, max_bytes: int):
 
     !!! note
 
-        Seed size is read from the catalog's per-relation stats, which are populated by the warehouse adapter. Only the following adapters are known to emit byte stats: `dbt-snowflake` (`bytes`), `dbt-bigquery` (`num_bytes`), `dbt-redshift` (`size`). Adapters that do not emit byte stats (for example `dbt-duckdb`, `dbt-postgres`) will cause this check to raise a `RuntimeError`.
+        Seed size is read from the catalog's per-relation stats, which are populated by the warehouse adapter. Only the following adapters are known to emit byte stats: `dbt-snowflake` (`bytes`), `dbt-bigquery` (`num_bytes`), `dbt-redshift` (`size`). Adapters that do not emit byte stats (for example `dbt-databricks`, `dbt-duckdb`, `dbt-postgres`) will cause this check to raise a `RuntimeError`.
 
     Parameters:
         max_bytes (int): The maximum number of bytes permitted for a seed.
@@ -152,7 +155,7 @@ def check_seed_max_row_count(catalog_node, *, max_row_count: int):
 
     !!! note
 
-        Row count is read from the catalog's per-relation stats, which are populated by the warehouse adapter. Only the following adapters are known to emit row count stats: `dbt-snowflake`/`dbt-databricks` (`row_count`), `dbt-bigquery` (`num_rows`), `dbt-redshift` (`rows`). Adapters that do not emit row count stats (for example `dbt-duckdb`, `dbt-postgres`) will cause this check to raise a `RuntimeError`.
+        Row count is read from the catalog's per-relation stats, which are populated by the warehouse adapter. Only the following adapters are known to emit row count stats: `dbt-snowflake` (`row_count`), `dbt-bigquery` (`num_rows`), `dbt-redshift` (`rows`). Adapters that do not emit row count stats (for example `dbt-databricks`, `dbt-duckdb`, `dbt-postgres`) will cause this check to raise a `RuntimeError`.
 
     Parameters:
         max_row_count (int): The maximum number of rows permitted for a seed.
@@ -189,8 +192,7 @@ def check_seed_max_row_count(catalog_node, *, max_row_count: int):
             f"`{get_clean_model_name(catalog_node.unique_id)}` does not expose any of "
             f"{list(_ROW_COUNT_STAT_KEYS)} in catalog stats. The active adapter does "
             "not appear to emit row count stats; this check is only supported for "
-            "adapters such as `dbt-snowflake`, `dbt-bigquery`, `dbt-redshift`, and "
-            "`dbt-databricks`."
+            "adapters such as `dbt-snowflake`, `dbt-bigquery`, and `dbt-redshift`."
         )
 
     if row_count > max_row_count:
