@@ -410,11 +410,16 @@ def _construct_cached_check(
 
     """
     rm_fields = _root_model_fields(cls)
-    if rm_fields:
-        for fname, rm_cls in rm_fields:
-            value = data.get(fname)
-            if value is not None and not isinstance(value, rm_cls):
-                data[fname] = rm_cls.model_validate(value)
+    if not rm_fields:
+        return cls.model_construct(**data)
+
+    # Shallow-copy before mutating: the caller's dict (``item["data"]`` in the
+    # cache payload) is not ours to modify in place.
+    data = {**data}
+    for fname, rm_cls in rm_fields:
+        value = data.get(fname)
+        if value is not None and not isinstance(value, rm_cls):
+            data[fname] = rm_cls.model_validate(value)
 
     return cls.model_construct(**data)
 

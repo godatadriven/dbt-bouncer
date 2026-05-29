@@ -725,6 +725,24 @@ def test_construct_cached_check_rewraps_nested_dict_field():
     assert instance.keys.model_dump() == ["maturity"]
 
 
+def test_construct_cached_check_does_not_mutate_input():
+    """The ``data`` dict passed in must not be mutated.
+
+    The caller (``_load_cached_conf``) hands us ``item["data"]`` from the
+    deserialised cache payload. Mutating it would surprise any future caller
+    that expects ``item["data"]`` to remain raw JSON values.
+    """
+    from dbt_bouncer.checks.manifest.models.meta import CheckModelHasMetaKeys
+    from dbt_bouncer.configuration_file.validator import _construct_cached_check
+
+    original = {"name": "check_model_has_meta_keys", "keys": ["maturity"]}
+    snapshot = {"name": original["name"], "keys": list(original["keys"])}
+
+    _construct_cached_check(CheckModelHasMetaKeys, original)
+
+    assert original == snapshot
+
+
 def test_validate_conf_disable_env_var_skips_cache(isolated_cache_dir, monkeypatch):
     """DBT_BOUNCER_DISABLE_CONF_CACHE=1 must skip both read and write paths."""
     monkeypatch.setenv("DBT_BOUNCER_DISABLE_CONF_CACHE", "1")
