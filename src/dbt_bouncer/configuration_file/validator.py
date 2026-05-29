@@ -2,6 +2,8 @@ import logging
 import os
 import re
 import tomllib
+import types
+import typing
 from collections.abc import Mapping
 from functools import lru_cache
 from pathlib import Path, PurePath
@@ -10,7 +12,7 @@ from typing import TYPE_CHECKING, Any
 import jellyfish
 import typer
 import yaml
-from pydantic import ValidationError
+from pydantic import RootModel, ValidationError
 
 from dbt_bouncer.enums import ConfigFileName, ConfigFileSource
 from dbt_bouncer.utils import compile_pattern, get_check_registry, load_config_from_yaml
@@ -331,6 +333,96 @@ def _get_stub_namespace() -> dict[str, Any]:
 
 _CONF_CACHE_FORMAT_VERSION = 1
 
+_root_model_fields_cache: dict[type, tuple[tuple[str, type[RootModel]], ...]] = {}
+
+
+def _find_root_model_in_annotation(annotation: Any) -> type[RootModel] | None:
+    """Walk ``annotation`` and return the first ``RootModel`` subclass found.
+
+    Handles plain types, ``X | None`` (PEP 604 union) and ``Optional[X]`` /
+    ``Union[X, ...]``. Used to identify check fields whose JSON-mode dump must
+    be re-coerced into a typed Pydantic instance after ``model_construct``.
+
+    Returns:
+        type[RootModel] | None: The RootModel subclass, or ``None`` if the
+        annotation does not contain one.
+
+    """
+    if isinstance(annotation, type) and issubclass(annotation, RootModel):
+        return annotation
+
+    if typing.get_origin(annotation) in (typing.Union, types.UnionType):
+        for arg in typing.get_args(annotation):
+            found = _find_root_model_in_annotation(arg)
+            if found is not None:
+                return found
+
+    return None
+
+
+def _root_model_fields(
+    cls: type["BaseCheck"],
+) -> tuple[tuple[str, type[RootModel]], ...]:
+    """Return the ``(field_name, RootModel_subclass)`` pairs for ``cls``.
+
+    Cached per class — model_fields are immutable after class creation, so the
+    lookup only runs once even when the cache contains many entries of the
+    same check type.
+
+    Returns:
+        tuple[tuple[str, type[RootModel]], ...]: Pairs to re-coerce after
+        ``cls.model_construct``.
+
+    """
+    cached = _root_model_fields_cache.get(cls)
+    if cached is not None:
+        return cached
+
+    pairs: list[tuple[str, type[RootModel]]] = []
+    for name, field in cls.model_fields.items():
+        rm = _find_root_model_in_annotation(field.annotation)
+        if rm is not None:
+            pairs.append((name, rm))
+    result = tuple(pairs)
+    _root_model_fields_cache[cls] = result
+    return result
+
+
+def _construct_cached_check(
+    cls: type["BaseCheck"], data: dict[str, Any]
+) -> "BaseCheck":
+    """Rebuild a cached check instance without triggering Pydantic schema generation.
+
+    ``cls.model_validate`` would lazily build the discriminated-union schema for
+    the check class (~2-3ms per class, 200ms+ total on a real config). We can
+    skip that work because the data was already validated on the cold path —
+    the cache only stores ``model_dump(mode="json")`` output of a valid
+    instance.
+
+    The one wrinkle is that ``model_construct`` does not coerce primitives
+    back into ``RootModel`` instances. Check fields typed as ``NestedDict``
+    are JSON-dumped as raw lists/dicts/strings, so we re-wrap them manually
+    before construction. ``StrEnum`` fields (``severity``, ``materialization``)
+    compare equal to their raw strings, so they need no coercion.
+
+    Returns:
+        BaseCheck: The reconstructed check instance.
+
+    """
+    rm_fields = _root_model_fields(cls)
+    if not rm_fields:
+        return cls.model_construct(**data)
+
+    # Shallow-copy before mutating: the caller's dict (``item["data"]`` in the
+    # cache payload) is not ours to modify in place.
+    data = {**data}
+    for fname, rm_cls in rm_fields:
+        value = data.get(fname)
+        if value is not None and not isinstance(value, rm_cls):
+            data[fname] = rm_cls.model_validate(value)
+
+    return cls.model_construct(**data)
+
 
 def _get_lite_conf_class() -> type["DbtBouncerConfBase"]:
     """Return a lightweight Pydantic subclass of ``DbtBouncerConfBase``.
@@ -396,11 +488,14 @@ def _load_cached_conf(
     nothing outside that vouched-for set is reachable, so a corrupted cache
     file cannot pull in arbitrary modules.
 
-    Cached check instances are rebuilt via ``model_validate`` so that
-    ``RootModel`` fields (e.g. ``NestedDict``) are re-coerced from their
-    JSON-mode dumps back into typed Pydantic instances. ``model_construct``
-    would skip that coercion and leave such fields as raw primitives, which
-    breaks any check that calls ``.model_dump()`` on them at runtime.
+    Cached check instances are rebuilt via ``cls.model_construct`` to skip
+    the lazy Pydantic schema generation that ``model_validate`` triggers
+    (~2-3ms per class, dominating the warm-load cost on real configs). The
+    only fields that need explicit re-coercion are ``RootModel`` subclasses
+    (e.g. ``NestedDict``) which JSON-dump to primitives; those are wrapped
+    back into typed instances by ``_construct_cached_check`` before
+    construction. ``StrEnum`` fields compare equal to their raw string forms,
+    so they need no coercion.
 
     Returns:
         The cached config, or ``None`` if the cache is missing, corrupt, or
@@ -454,7 +549,7 @@ def _load_cached_conf(
                     item["_qualname"],
                 )
                 return None
-            out.append(cls.model_validate(item["data"]))
+            out.append(_construct_cached_check(cls, item["data"]))
         materialised[cat] = out
 
     return _get_lite_conf_class().model_construct(**materialised)

@@ -656,9 +656,11 @@ def test_validate_conf_warm_path_matches_cold(isolated_cache_dir):  # noqa: ARG0
 def test_validate_conf_warm_path_rehydrates_nested_dict_field(isolated_cache_dir):  # noqa: ARG001
     """Warm-cache load must re-coerce RootModel fields (e.g. NestedDict).
 
-    Regression: a previous implementation used ``model_construct`` on the warm
-    path, which left ``keys`` as a raw ``list`` after JSON round-tripping and
-    broke any check that called ``.model_dump()`` on it.
+    The warm path uses ``model_construct`` to skip Pydantic's lazy schema
+    generation (~2-3ms per check class), then explicitly wraps RootModel
+    fields back into typed instances. Without that wrap step, ``keys`` would
+    remain a raw ``list`` after JSON round-tripping and break any check that
+    called ``.model_dump()`` on it.
     """
     from dbt_bouncer.check_framework.exceptions import NestedDict
 
@@ -684,6 +686,61 @@ def test_validate_conf_warm_path_rehydrates_nested_dict_field(isolated_cache_dir
     keys = warm.manifest_checks[0].keys
     assert isinstance(keys, NestedDict)
     assert keys.model_dump() == ["maturity", "owner"]
+
+
+def test_construct_cached_check_does_not_call_model_validate(monkeypatch):
+    """``_construct_cached_check`` must not call ``cls.model_validate``.
+
+    This is the perf guarantee the warm cache load depends on:
+    ``model_validate`` triggers Pydantic schema generation (~2-3ms per check
+    class) which dominated warm-load cost before this optimisation. Failing
+    this test means the warm path has regressed.
+    """
+    from dbt_bouncer.checks.manifest.models.code import CheckModelMaxNumberOfLines
+    from dbt_bouncer.configuration_file.validator import _construct_cached_check
+
+    def boom(*_args, **_kwargs):
+        raise AssertionError("model_validate must not be called on the warm path")
+
+    monkeypatch.setattr(CheckModelMaxNumberOfLines, "model_validate", boom)
+
+    instance = _construct_cached_check(
+        CheckModelMaxNumberOfLines, {"name": "check_model_max_number_of_lines"}
+    )
+    assert instance.name == "check_model_max_number_of_lines"
+
+
+def test_construct_cached_check_rewraps_nested_dict_field():
+    """RootModel-typed fields must be re-wrapped after ``model_construct``."""
+    from dbt_bouncer.check_framework.exceptions import NestedDict
+    from dbt_bouncer.checks.manifest.models.meta import CheckModelHasMetaKeys
+    from dbt_bouncer.configuration_file.validator import _construct_cached_check
+
+    instance = _construct_cached_check(
+        CheckModelHasMetaKeys,
+        {"name": "check_model_has_meta_keys", "keys": ["maturity"]},
+    )
+
+    assert isinstance(instance.keys, NestedDict)
+    assert instance.keys.model_dump() == ["maturity"]
+
+
+def test_construct_cached_check_does_not_mutate_input():
+    """The ``data`` dict passed in must not be mutated.
+
+    The caller (``_load_cached_conf``) hands us ``item["data"]`` from the
+    deserialised cache payload. Mutating it would surprise any future caller
+    that expects ``item["data"]`` to remain raw JSON values.
+    """
+    from dbt_bouncer.checks.manifest.models.meta import CheckModelHasMetaKeys
+    from dbt_bouncer.configuration_file.validator import _construct_cached_check
+
+    original = {"name": "check_model_has_meta_keys", "keys": ["maturity"]}
+    snapshot = {"name": original["name"], "keys": list(original["keys"])}
+
+    _construct_cached_check(CheckModelHasMetaKeys, original)
+
+    assert original == snapshot
 
 
 def test_validate_conf_disable_env_var_skips_cache(isolated_cache_dir, monkeypatch):
