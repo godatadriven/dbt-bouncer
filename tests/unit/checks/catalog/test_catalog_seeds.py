@@ -80,6 +80,14 @@ class TestCheckSeedMaxBytes:
             max_bytes=1024,
         )
 
+    def test_pass_at_exact_limit(self):
+        # The check uses strict ``>`` so a seed exactly at the limit passes.
+        check_passes(
+            "check_seed_max_bytes",
+            catalog_node=_seed_catalog_node(_byte_stat(1024)),
+            max_bytes=1024,
+        )
+
     def test_non_seed_catalog_node_is_skipped(self):
         # A model catalog node with no byte stat must not raise.
         check_passes(
@@ -176,6 +184,14 @@ class TestCheckSeedMaxRowCount:
         check_fails(
             "check_seed_max_row_count",
             catalog_node=_seed_catalog_node(_row_stat(200, key=stat_key)),
+            max_row_count=100,
+        )
+
+    def test_pass_at_exact_limit(self):
+        # The check uses strict ``>`` so a seed exactly at the limit passes.
+        check_passes(
+            "check_seed_max_row_count",
+            catalog_node=_seed_catalog_node(_row_stat(100)),
             max_row_count=100,
         )
 
