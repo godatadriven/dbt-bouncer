@@ -19,12 +19,12 @@ jobs:
           persist-credentials: false
 
       - id: label-by-branch
-        uses: actions/labeler@634933edcd8ababfe52f92936142cc22ac488b1b # v6
+        uses: actions/labeler@f27b608878404679385c85cfa523b85ccb86e213 # v6
         with:
           configuration-path: '.github/labels/branch_pass.yml'
 
       - id: label-by-files
-        uses: actions/labeler@634933edcd8ababfe52f92936142cc22ac488b1b # v6
+        uses: actions/labeler@f27b608878404679385c85cfa523b85ccb86e213 # v6
         with:
           configuration-path: '.github/labels/files_pass.yml'
 
@@ -38,6 +38,6 @@ jobs:
             !contains(steps.label-by-branch.outputs.all-labels, 'refactor') &&
             !contains(steps.label-by-branch.outputs.all-labels, 'ci')
           }}
-        uses: actions/labeler@634933edcd8ababfe52f92936142cc22ac488b1b # v6
+        uses: actions/labeler@f27b608878404679385c85cfa523b85ccb86e213 # v6
         with:
           configuration-path: '.github/labels/default_pass.yml'
