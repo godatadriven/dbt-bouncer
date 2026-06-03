@@ -31,7 +31,7 @@ jobs:
                 persist-credentials: false
 
             - name: checkout-merge
-              uses: check-spelling/checkout-merge@29407b1b8660c562313ed65c81feab3e3255c03c # v0.0.6
+              uses: check-spelling/checkout-merge@c9cfe4b33a6ceb6c13136887a6fd3a3ed6443f28 # v0.0.8
 
             - name: Setup Node.js
               uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
@@ -62,7 +62,7 @@ jobs:
                 persist-credentials: false
 
             - name: checkout-merge
-              uses: check-spelling/checkout-merge@29407b1b8660c562313ed65c81feab3e3255c03c # v0.0.6
+              uses: check-spelling/checkout-merge@c9cfe4b33a6ceb6c13136887a6fd3a3ed6443f28 # v0.0.8
 
             - name: Setup Python
               uses: ./.github/actions/setup_python_env
@@ -102,7 +102,7 @@ jobs:
 
             - name: checkout-merge
               if: matrix.operating-system != 'windows-2025'
-              uses: check-spelling/checkout-merge@29407b1b8660c562313ed65c81feab3e3255c03c # v0.0.6
+              uses: check-spelling/checkout-merge@c9cfe4b33a6ceb6c13136887a6fd3a3ed6443f28 # v0.0.8
 
             - name: Setup Python
               uses: ./.github/actions/setup_python_env
@@ -198,7 +198,7 @@ jobs:
                 persist-credentials: false
 
             - name: checkout-merge
-              uses: check-spelling/checkout-merge@29407b1b8660c562313ed65c81feab3e3255c03c # v0.0.6
+              uses: check-spelling/checkout-merge@c9cfe4b33a6ceb6c13136887a6fd3a3ed6443f28 # v0.0.8
 
             - name: Setup Python
               id: setup-python
@@ -243,7 +243,7 @@ jobs:
               persist-credentials: false
 
           - name: checkout-merge
-            uses: check-spelling/checkout-merge@29407b1b8660c562313ed65c81feab3e3255c03c # v0.0.6
+            uses: check-spelling/checkout-merge@c9cfe4b33a6ceb6c13136887a6fd3a3ed6443f28 # v0.0.8
 
           - name: Setup Python
             uses: ./.github/actions/setup_python_env
