@@ -178,9 +178,15 @@ pytest-coverage.txt
 results.json
 
 dbt_project/dbt_packages
+dbt_project/dbt_project/
 dbt_project/logs
 dbt_project/target/compiled
+dbt_project/target/data
+dbt_project/target/ephemeral
+dbt_project/target/generic_tests
 dbt_project/target/run
+dbt_project/target/schemas
+dbt_project/target/snapshots
 dbt_project/target/graph_summary.json
 dbt_project/target/graph.gpickle
 dbt_project/target/index.html
