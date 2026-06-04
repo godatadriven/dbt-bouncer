@@ -7,7 +7,9 @@ seeds:
       - name: id
         data_type: integer
       - name: first_name
+        data_type: character varying(256)
       - name: last_name
+        data_type: character varying(256)
 
   - name: raw_orders
     description: Raw order data
@@ -19,6 +21,7 @@ seeds:
       - name: order_date
         data_type: date
       - name: status
+        data_type: character varying(256)
 
   - name: raw_payments
     description: Raw payment data
@@ -28,5 +31,6 @@ seeds:
       - name: order_id
         data_type: integer
       - name: payment_method
+        data_type: character varying(256)
       - name: amount
         data_type: integer
