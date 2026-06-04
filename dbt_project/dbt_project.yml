@@ -38,6 +38,7 @@ models:
           - crm
       payments:
         +schema: stg_payments
-  internal_package:
+  +internal_package:
+    +materialized: table
 flags:
   require_generic_test_arguments_property: true
