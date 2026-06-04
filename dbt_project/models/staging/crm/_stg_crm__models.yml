@@ -27,3 +27,14 @@ models:
           - accepted_values:
               arguments:
                 values: ['placed', 'shipped', 'completed', 'return_pending', 'returned']
+
+  - name: stg_raw_orders_for_snapshot
+    description: Ephemeral wrapper around raw_orders that casts order_date to TIMESTAMP so it can be used as the snapshot updated_at column (Fusion requires snapshot timestamp columns to be datetime, not date).
+    config:
+      meta:
+        maturity: gold
+    columns:
+      - name: id
+        tests:
+          - unique
+          - not_null
