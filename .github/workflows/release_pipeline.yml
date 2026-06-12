@@ -74,7 +74,6 @@
               - name: Re-install dbt-bouncer
                 run: make install
 
-              # Gate all irreversible publish steps on a passing test suite.
               - name: Run unit tests
                 run: make test-unit
 
@@ -92,18 +91,9 @@
                     echo "PRERELEASE: $PRERELEASE"
                     echo PRERELEASE=$PRERELEASE >> "$GITHUB_ENV"
 
-              # PyPI is published first: it is the canonical artifact (the
-              # Docker image installs dbt-bouncer from PyPI at runtime) and
-              # the only step that cannot be re-pointed afterwards. Tags,
-              # images, the GitHub release and docs all follow, and every
-              # later step is idempotent so a partial failure can be
-              # recovered by re-running the workflow.
               - name: Build whl
                 run: uv build --out-dir dist_pypi
 
-              # skip-existing makes re-runs skip the upload when this version's
-              # filename is already on PyPI (an already-published version is
-              # never replaced — re-publishing requires a new version bump).
               - name: Publish package distributions to PyPI
                 uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e # release/v1
                 with:
@@ -118,11 +108,7 @@
                   git add -A
                   git commit -m "Bumping version to v${STEPS_VERSION_OUTPUTS_VERSION}"
 
-                  # Tag and push X.X.X — skipped if it already exists on the
-                  # remote (a re-run after a partial failure) so a published
-                  # version tag is never moved to a new commit. The alias
-                  # tags below are intentionally mutable and always
-                  # (re-)pushed.
+                  # Tag and push X.X.X
                   if git ls-remote --exit-code --tags origin "refs/tags/v${STEPS_VERSION_OUTPUTS_VERSION}" > /dev/null; then
                     echo "Tag v${STEPS_VERSION_OUTPUTS_VERSION} already exists on origin, not re-tagging."
                   else
