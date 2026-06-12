@@ -1933,11 +1933,11 @@
                 <code>criteria</code>
             </td>
             <td>
-                  <code><span title="typing.Literal">Literal</span>[&#39;any&#39;, &#39;all&#39;, &#39;one&#39;]</code>
+                  <code><span title="typing.Literal">Literal</span>[&#39;any&#39;, &#39;all&#39;, &#39;one&#39;] | None</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>(Literal["any", "all", "one"] | None): Whether the source must have any, all, or exactly one of the specified tags. Default: <code>all</code>.</p>
+                <p>Whether the source must have any, all, or exactly one of the specified tags. Default: <code>all</code>.</p>
               </div>
             </td>
             <td>
@@ -2106,7 +2106,7 @@
 </span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16"></a><span class="sd">        Tags are the primary mechanism for grouping dbt nodes into logical categories — domain areas, sensitivity levels, scheduling tiers, or compliance scopes. When sources are missing required tags, they fall outside automated workflows that rely on tag-based selection (e.g. `dbt build --select tag:pii` or scheduled refreshes filtered by domain). This check ensures that every source is tagged correctly at registration time, preventing ungrouped sources from slipping through governance and operational processes.</span>
 </span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17"></a>
 </span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18"></a><span class="sd">    Parameters:</span>
-</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19"></a><span class="sd">        criteria: (Literal[&quot;any&quot;, &quot;all&quot;, &quot;one&quot;] | None): Whether the source must have any, all, or exactly one of the specified tags. Default: `all`.</span>
+</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19"></a><span class="sd">        criteria (Literal[&quot;any&quot;, &quot;all&quot;, &quot;one&quot;] | None): Whether the source must have any, all, or exactly one of the specified tags. Default: `all`.</span>
 </span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20"></a><span class="sd">        tags (list[str]): List of tags to check for.</span>
 </span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21"></a>
 </span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22"></a><span class="sd">    Receives:</span>
