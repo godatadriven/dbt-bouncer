@@ -354,6 +354,34 @@ def test_validate_conf_incorrect_names():
     )
 
 
+def test_validate_conf_invalid_parameter_type():
+    """A wrong parameter type surfaces Pydantic's detail rather than an empty error."""
+    ctx = typer.Context(
+        get_command(app),
+        obj={
+            "config_file_path": "",
+            "custom_checks_dir": None,
+        },
+    )
+
+    with ctx, pytest.raises(RuntimeError) as excinfo:
+        validate_conf(
+            check_categories=["manifest_checks"],
+            config_file_contents={
+                "manifest_checks": [
+                    {
+                        "name": "check_model_names",
+                        "model_name_pattern": ["not-a-string"],
+                    }
+                ]
+            },
+        )
+
+    message = str(excinfo.value)
+    assert message != ""
+    assert "model_name_pattern" in message
+
+
 valid_confs = [
     (
         f,
