@@ -153,7 +153,8 @@ jobs:
             );
             // Only trust plan comments from collaborators — anyone can post a
             // comment containing the marker, and this job pushes code based
-            // on the plan it extracts.
+            // on the plan it extracts. author_association values are
+            // uppercase by GitHub API contract.
             const TRUSTED = ['OWNER', 'MEMBER', 'COLLABORATOR'];
             const planComment = comments.find(c =>
               c.body.includes('<!-- ai-issue-plan-marker -->')
