@@ -101,6 +101,9 @@
               - name: Build whl
                 run: uv build --out-dir dist_pypi
 
+              # skip-existing makes re-runs skip the upload when this version's
+              # filename is already on PyPI (an already-published version is
+              # never replaced — re-publishing requires a new version bump).
               - name: Publish package distributions to PyPI
                 uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e # release/v1
                 with:
@@ -123,10 +126,10 @@
                   if git ls-remote --exit-code --tags origin "refs/tags/v${STEPS_VERSION_OUTPUTS_VERSION}" > /dev/null; then
                     echo "Tag v${STEPS_VERSION_OUTPUTS_VERSION} already exists on origin, not re-tagging."
                   else
-                    git tag -f \
+                    git tag \
                       -a v${STEPS_VERSION_OUTPUTS_VERSION} \
                       -m "v${STEPS_VERSION_OUTPUTS_VERSION}"
-                    git push -f origin "v${STEPS_VERSION_OUTPUTS_VERSION}"
+                    git push origin "v${STEPS_VERSION_OUTPUTS_VERSION}"
                   fi
 
                   # Tag and push X.X
