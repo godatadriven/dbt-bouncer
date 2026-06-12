@@ -108,3 +108,13 @@ def test_check_test_has_tags(tags, criteria, test_overrides, check_fn):
         tags=tags,
         test=test_overrides,
     )
+
+
+def test_check_test_has_tags_invalid_criteria():
+    with pytest.raises(ValueError, match="'any', 'all' or 'one'"):
+        check_passes(
+            "check_test_has_tags",
+            criteria="alll",
+            tags=["critical"],
+            test={"tags": ["critical"]},
+        )

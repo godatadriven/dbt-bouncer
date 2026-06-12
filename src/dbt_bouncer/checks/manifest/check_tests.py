@@ -1,3 +1,5 @@
+from typing import Literal
+
 from dbt_bouncer.check_framework.decorator import check, fail
 from dbt_bouncer.check_framework.exceptions import NestedDict
 from dbt_bouncer.utils import find_missing_meta_keys
@@ -42,7 +44,9 @@ def check_test_has_meta_keys(test, *, keys: NestedDict):
 
 
 @check
-def check_test_has_tags(test, *, criteria: str = "all", tags: list[str]):
+def check_test_has_tags(
+    test, *, criteria: Literal["any", "all", "one"] = "all", tags: list[str]
+):
     """Data tests must have the specified tags.
 
     !!! info "Rationale"

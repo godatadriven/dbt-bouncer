@@ -116,6 +116,16 @@ def test_check_snapshot_has_tags(snapshot_overrides, tags, criteria, check_fn):
     )
 
 
+def test_check_snapshot_has_tags_invalid_criteria():
+    with pytest.raises(ValueError, match="'any', 'all' or 'one'"):
+        check_passes(
+            "check_snapshot_has_tags",
+            snapshot={**_SNAPSHOT_BASE, "tags": ["tag_1"]},
+            tags=["tag_1"],
+            criteria="alll",
+        )
+
+
 @pytest.mark.parametrize(
     ("snapshot_overrides", "check_fn"),
     [

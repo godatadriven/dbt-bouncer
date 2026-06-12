@@ -97,6 +97,17 @@ class TestCheckModelDependsOnMacros:
         )
 
 
+class TestCheckModelDependsOnMacrosInvalidParam:
+    def test_invalid_criteria_rejected(self):
+        with pytest.raises(ValueError, match="'any', 'all' or 'one'"):
+            check_passes(
+                "check_model_depends_on_macros",
+                model={},
+                required_macros=["dbt.is_incremental"],
+                criteria="alll",
+            )
+
+
 class TestCheckModelDependsOnMultipleSources:
     def test_passes(self):
         check_passes(

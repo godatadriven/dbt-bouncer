@@ -1,6 +1,6 @@
 """Checks related to model upstream dependencies and lineage."""
 
-from typing import Annotated
+from typing import Annotated, Literal
 
 from pydantic import Field
 
@@ -10,7 +10,10 @@ from dbt_bouncer.utils import get_clean_model_name
 
 @check
 def check_model_depends_on_macros(
-    model, *, criteria: str = "all", required_macros: list[str]
+    model,
+    *,
+    criteria: Literal["any", "all", "one"] = "all",
+    required_macros: list[str],
 ):
     """Models must depend on the specified macros.
 
@@ -19,8 +22,8 @@ def check_model_depends_on_macros(
         Some teams mandate that certain model types always use shared macros for consistency — for example, requiring all incremental models to call `dbt.is_incremental()`. This check enforces those conventions, preventing models from re-implementing logic that is already standardised in a shared macro.
 
     Parameters:
-        criteria: (Literal["any", "all", "one"] | None): Whether the model must depend on any, all, or exactly one of the specified macros. Default: `any`.
-        required_macros: (list[str]): List of macros the model must depend on. All macros must specify a namespace, e.g. `dbt.is_incremental`.
+        criteria (Literal["any", "all", "one"] | None): Whether the model must depend on any, all, or exactly one of the specified macros. Default: `all`.
+        required_macros (list[str]): List of macros the model must depend on. All macros must specify a namespace, e.g. `dbt.is_incremental`.
 
     Receives:
         model (ModelNode): The ModelNode object to check.
