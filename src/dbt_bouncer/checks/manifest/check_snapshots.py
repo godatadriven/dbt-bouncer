@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Literal
 
 from pydantic import Field
 
@@ -53,7 +53,9 @@ def check_snapshot_description_populated(
 
 
 @check
-def check_snapshot_has_tags(snapshot, *, criteria: str = "all", tags: list[str]):
+def check_snapshot_has_tags(
+    snapshot, *, criteria: Literal["any", "all", "one"] = "all", tags: list[str]
+):
     """Snapshots must have the specified tags.
 
     !!! info "Rationale"
@@ -61,7 +63,7 @@ def check_snapshot_has_tags(snapshot, *, criteria: str = "all", tags: list[str])
         Tags on snapshots enable selective execution (e.g. `dbt snapshot --select tag:nightly`) and make it possible to apply governance policies to specific groups of snapshots. Without enforced tagging, snapshots can be inadvertently skipped in scheduled runs or included in the wrong execution contexts, leading to stale historical data.
 
     Parameters:
-        criteria: (Literal["any", "all", "one"] | None): Whether the snapshot must have any, all, or exactly one of the specified tags. Default: `all`.
+        criteria (Literal["any", "all", "one"] | None): Whether the snapshot must have any, all, or exactly one of the specified tags. Default: `all`.
         tags (list[str]): List of tags to check for.
 
     Receives:

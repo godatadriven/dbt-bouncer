@@ -415,7 +415,9 @@ class CheckEntryPointFake(BaseCheck):
         """No-op execute for testing."""
 
 
-def _make_fake_ep(name: str, target: object) -> MagicMock:
+def _make_fake_ep(
+    name: str, target: object, module: str = "fake_plugin.checks"
+) -> MagicMock:
     """Create a fake entry point that loads to the given target.
 
     Returns:
@@ -424,6 +426,7 @@ def _make_fake_ep(name: str, target: object) -> MagicMock:
     """
     ep = MagicMock()
     ep.name = name
+    ep.module = module
     ep.load.return_value = target
     return ep
 
@@ -459,6 +462,24 @@ def test_load_entry_point_checks_discovers_single_class():
         _load_entry_point_checks(check_objects)
 
     assert CheckEntryPointFake in check_objects
+
+
+def test_load_entry_point_checks_skips_internal_entry_points():
+    """The package's own registrations are skipped without being loaded."""
+    from dbt_bouncer.utils import _load_entry_point_checks
+
+    eps = [
+        _make_fake_ep("catalog", None, module="dbt_bouncer.checks.catalog"),
+        _make_fake_ep("manifest", None, module="dbt_bouncer.checks.manifest"),
+        _make_fake_ep("run_results", None, module="dbt_bouncer.checks.run_results"),
+    ]
+    check_objects: list[type[BaseCheck]] = []
+    with patch("dbt_bouncer.utils.entry_points", return_value=eps):
+        _load_entry_point_checks(check_objects)
+
+    for ep in eps:
+        ep.load.assert_not_called()
+    assert check_objects == []
 
 
 def test_load_entry_point_checks_handles_import_error():

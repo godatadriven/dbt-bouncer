@@ -699,14 +699,20 @@ def validate_conf(
                 incorrect_name = error["msg"][
                     error["msg"].find("tag") + 5 : error["msg"].find("found using") - 2
                 ]
-                min_dist = 100
-                for name in accepted_names:
-                    dist = jellyfish.levenshtein_distance(name, incorrect_name)
-                    if dist < min_dist:
-                        min_dist = dist
-                        min_name = name
+                min_name = min(
+                    accepted_names,
+                    key=lambda name,
+                    target=incorrect_name: jellyfish.levenshtein_distance(name, target),
+                    default=None,
+                )
+                suggestion = f" Did you mean '{min_name}'?" if min_name else ""
                 error_message.append(
-                    f"{len(error_message) + 1}. Check '{incorrect_name}' does not match any of the expected checks. Did you mean '{min_name}'?"
+                    f"{len(error_message) + 1}. Check '{incorrect_name}' does not match any of the expected checks.{suggestion}"
+                )
+            else:
+                location = " -> ".join(str(loc) for loc in error["loc"])
+                error_message.append(
+                    f"{len(error_message) + 1}. {location}: {error['msg']}"
                 )
 
         raise RuntimeError("\n".join(error_message)) from e
