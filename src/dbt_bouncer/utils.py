@@ -17,11 +17,9 @@ from importlib.metadata import entry_points
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-import yaml
-from packaging.version import Version as PyPIVersion
-from semver import Version
-
 if TYPE_CHECKING:
+    from semver import Version
+
     from dbt_bouncer.check_framework.base import BaseCheck
 
 
@@ -771,7 +769,8 @@ def get_clean_model_name(unique_id: str) -> str:
     return "_".join(unique_id.split(".")[2:])
 
 
-def get_package_version_number(version_string: str) -> Version:
+@lru_cache
+def get_package_version_number(version_string: str) -> "Version":
     """Dbt Cloud no longer uses version numbers that comply with semantic versioning, e.g. "2024.11.06+2a3d725".
     This function is used to convert the version number to a version object that can be used to compare versions.
 
@@ -782,6 +781,9 @@ def get_package_version_number(version_string: str) -> Version:
             Version: The version object.
 
     """  # noqa: D205
+    from packaging.version import Version as PyPIVersion
+    from semver import Version
+
     p = PyPIVersion(version_string)
 
     return Version(*p.release)
@@ -823,6 +825,8 @@ def load_config_from_yaml(config_file: Path) -> Mapping[str, Any]:
         not config_path.exists()
     ):  # Shouldn't be needed as click should have already checked this
         raise FileNotFoundError(f"No config file found at {config_path}.")
+
+    import yaml
 
     with Path.open(config_path, "r") as f:
         conf = yaml.load(f, Loader=yaml.CSafeLoader)  # type: ignore[possibly-missing-attribute]
