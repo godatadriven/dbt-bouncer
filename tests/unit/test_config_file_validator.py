@@ -378,8 +378,10 @@ def test_validate_conf_invalid_parameter_type():
         )
 
     message = str(excinfo.value)
-    assert message != ""
+    assert message.startswith("1. ")
+    assert "manifest_checks" in message
     assert "model_name_pattern" in message
+    assert "Input should be a valid string" in message
 
 
 valid_confs = [
