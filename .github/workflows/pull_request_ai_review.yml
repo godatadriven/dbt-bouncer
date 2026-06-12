@@ -6,12 +6,9 @@ on:
     workflows: [CI pipeline]
     types: [completed]
 
-env:
-    PR_EVENT: event.json
-
 jobs:
   ai_review:
-    if: github.event.workflow_run.conclusion == 'success'
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'pull_request'
     permissions:
       contents: read
       id-token: write
@@ -19,24 +16,35 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
-      - name: Download PR Event
-        uses: dawidd6/action-download-artifact@b6e2e70617bc3265edd6dab6c906732b2f1ae151 # v21
-        with:
-          name: ${{ env.PR_EVENT }}
-          run_id: ${{ github.event.workflow_run.id }}
-
       - name: Export PR Event Data
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
         with:
           script: |
-            let fs = require('fs');
-            let prEvent = JSON.parse(fs.readFileSync(process.env.PR_EVENT, {encoding: 'utf8'}));
-            core.exportVariable("PR_HEAD", prEvent.pull_request.head.ref);
-            core.exportVariable("PR_HEAD_SHA", prEvent.pull_request.head.sha);
-            core.exportVariable("PR_BASE", prEvent.pull_request.base.ref);
-            core.exportVariable("PR_BASE_SHA", prEvent.pull_request.base.sha);
-            core.exportVariable("PR_NUMBER", prEvent.number);
-            core.exportVariable("PR_CHANGED_FILES", prEvent.pull_request.changed_files);
+            // Derive PR metadata from the trusted workflow_run payload — an
+            // artifact uploaded by the untrusted PR run could be forged to
+            // point this privileged workflow at an arbitrary PR/SHA.
+            const headSha = context.payload.workflow_run.head_sha;
+            const { data: prs } = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: headSha,
+            });
+            const prRef = prs.find((pr) => pr.head.sha === headSha);
+            if (!prRef) {
+              core.setFailed(`No pull request found with head SHA ${headSha}; it may have been updated since the CI run.`);
+              return;
+            }
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prRef.number,
+            });
+            core.exportVariable("PR_HEAD", pr.head.ref);
+            core.exportVariable("PR_HEAD_SHA", headSha);
+            core.exportVariable("PR_BASE", pr.base.ref);
+            core.exportVariable("PR_BASE_SHA", pr.base.sha);
+            core.exportVariable("PR_NUMBER", pr.number);
+            core.exportVariable("PR_CHANGED_FILES", pr.changed_files);
 
       - name: Checkout PR Head
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
