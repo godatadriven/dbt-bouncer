@@ -283,6 +283,15 @@ def _load_entry_point_checks(check_objects: list[type["BaseCheck"]]) -> None:
     """
     eps = entry_points(group=_ENTRY_POINT_GROUP)
     for ep in eps:
+        # dbt-bouncer registers its own check packages in this group; loading
+        # them here would import every internal check module, defeating the
+        # targeted-import fast path. Internal checks are discovered via the
+        # filesystem scan / module map instead.
+        if ep.module == "dbt_bouncer.checks" or ep.module.startswith(
+            "dbt_bouncer.checks."
+        ):
+            logging.debug(f"Skipping internal entry point `{ep.name}`.")
+            continue
         try:
             target = ep.load()
 
