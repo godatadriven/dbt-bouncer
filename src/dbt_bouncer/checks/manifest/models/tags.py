@@ -1,11 +1,15 @@
 """Checks related to model tags."""
 
+from typing import Literal
+
 from dbt_bouncer.check_framework.decorator import check, fail
 from dbt_bouncer.utils import get_clean_model_name
 
 
 @check
-def check_model_has_tags(model, *, criteria: str = "all", tags: list[str]):
+def check_model_has_tags(
+    model, *, criteria: Literal["any", "all", "one"] = "all", tags: list[str]
+):
     """Models must have the specified tags.
 
     !!! info "Rationale"
@@ -13,7 +17,7 @@ def check_model_has_tags(model, *, criteria: str = "all", tags: list[str]):
         Tags are used to group models for selective execution (e.g. `dbt run --select tag:daily`), documentation filtering, and governance tracking. Requiring models in specific directories to carry certain tags ensures that scheduling and operational workflows that depend on those tags remain reliable as the project evolves.
 
     Parameters:
-        criteria: (Literal["any", "all", "one"] | None): Whether the model must have any, all, or exactly one of the specified tags. Default: `any`.
+        criteria (Literal["any", "all", "one"] | None): Whether the model must have any, all, or exactly one of the specified tags. Default: `all`.
         tags (list[str]): List of tags to check for.
 
     Receives:

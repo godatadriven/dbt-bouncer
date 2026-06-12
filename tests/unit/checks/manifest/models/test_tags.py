@@ -67,3 +67,14 @@ class TestCheckModelHasTags:
     )
     def test_fails(self, tags, criteria, model):
         check_fails("check_model_has_tags", model=model, tags=tags, criteria=criteria)
+
+
+class TestCheckModelHasTagsInvalidParam:
+    def test_invalid_criteria_rejected(self):
+        with pytest.raises(ValueError, match="'any', 'all' or 'one'"):
+            check_passes(
+                "check_model_has_tags",
+                model={"tags": ["tag_1"]},
+                tags=["tag_1"],
+                criteria="alll",
+            )
