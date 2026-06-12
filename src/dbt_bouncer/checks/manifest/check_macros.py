@@ -1,17 +1,41 @@
 import re
+from functools import lru_cache
 from pathlib import Path
-from typing import Annotated, Any, ClassVar
+from typing import TYPE_CHECKING, Annotated, Any, ClassVar
 
-from jinja2 import Environment, nodes
-from jinja2_simple_tags import StandaloneTag
 from pydantic import Field
 
 from dbt_bouncer.check_framework.decorator import check, fail
 from dbt_bouncer.utils import clean_path_str, compile_pattern, is_description_populated
 
+if TYPE_CHECKING:
+    from jinja2 import Environment
 
-class TagExtension(StandaloneTag):
-    tags: ClassVar = {"do", "endmaterialization", "endtest", "materialization", "test"}
+
+@lru_cache(maxsize=1)
+def _get_jinja_environment() -> "Environment":
+    """Build the Jinja environment used to parse macro source.
+
+    Deferred and cached: jinja2 adds ~25ms to import time but is only needed
+    by `check_macro_arguments_description_populated`.
+
+    Returns:
+        Environment: A Jinja environment that tolerates dbt's custom tags.
+
+    """
+    from jinja2 import Environment
+    from jinja2_simple_tags import StandaloneTag
+
+    class TagExtension(StandaloneTag):
+        tags: ClassVar = {
+            "do",
+            "endmaterialization",
+            "endtest",
+            "materialization",
+            "test",
+        }
+
+    return Environment(autoescape=True, extensions=[TagExtension])
 
 
 @check
@@ -54,7 +78,9 @@ def check_macro_arguments_description_populated(
         ```
 
     """
-    environment = Environment(autoescape=True, extensions=[TagExtension])
+    from jinja2 import nodes
+
+    environment = _get_jinja_environment()
     ast = environment.parse(macro.macro_sql)
 
     if hasattr(ast.body[0], "args"):
