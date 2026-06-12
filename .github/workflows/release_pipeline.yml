@@ -115,11 +115,19 @@
                   git add -A
                   git commit -m "Bumping version to v${STEPS_VERSION_OUTPUTS_VERSION}"
 
-                  # Tag and push X.X.X
-                  git tag -f \
-                    -a v${STEPS_VERSION_OUTPUTS_VERSION} \
-                    -m "v${STEPS_VERSION_OUTPUTS_VERSION}"
-                  git push -f origin "v${STEPS_VERSION_OUTPUTS_VERSION}"
+                  # Tag and push X.X.X — skipped if it already exists on the
+                  # remote (a re-run after a partial failure) so a published
+                  # version tag is never moved to a new commit. The alias
+                  # tags below are intentionally mutable and always
+                  # (re-)pushed.
+                  if git ls-remote --exit-code --tags origin "refs/tags/v${STEPS_VERSION_OUTPUTS_VERSION}" > /dev/null; then
+                    echo "Tag v${STEPS_VERSION_OUTPUTS_VERSION} already exists on origin, not re-tagging."
+                  else
+                    git tag -f \
+                      -a v${STEPS_VERSION_OUTPUTS_VERSION} \
+                      -m "v${STEPS_VERSION_OUTPUTS_VERSION}"
+                    git push -f origin "v${STEPS_VERSION_OUTPUTS_VERSION}"
+                  fi
 
                   # Tag and push X.X
                   git tag -f \
