@@ -37,8 +37,7 @@ build-artifacts-20: ## Build dbt 2.0 (Fusion) test artifacts
 	mv ./dbt_project/target_20 ./tests/fixtures/dbt_20/target
 
 build-artifacts-local: install ## Build local dbt test artifacts
-	uv run dbt parse --profiles-dir ./dbt_project --project-dir ./dbt_project
-	uv run dbt docs generate --profiles-dir ./dbt_project --project-dir ./dbt_project
+	uv run dbt compile --write-catalog --profiles-dir ./dbt_project --project-dir ./dbt_project
 
 generate-schema: ## Regenerate schema.json from Pydantic models
 	uv run python scripts/generate_schema.py
