@@ -202,6 +202,15 @@ models:
 
   - name: orders
     description: This table has basic information about orders, as well as some derived facts based on payments
+    semantic_model:
+      enabled: true
+    agg_time_dimension: order_date
+    metrics:
+      - name: total_order_amount
+        description: The total amount of all orders.
+        type: simple
+        agg: sum
+        expr: amount
     config:
       contract:
         enforced: true
@@ -222,6 +231,9 @@ models:
           - unique
           - not_null
         description: This is a unique identifier for an order
+        entity:
+          type: primary
+          name: order
         config:
           meta:
             maturity: gold
@@ -240,6 +252,9 @@ models:
       - name: order_date
         data_type: date
         description: Date (UTC) that the order was placed
+        granularity: day
+        dimension:
+          type: time
         config:
           meta:
             maturity: gold
