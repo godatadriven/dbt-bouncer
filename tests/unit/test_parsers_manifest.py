@@ -4,13 +4,19 @@ import re
 from pathlib import Path
 from unittest.mock import MagicMock
 
+import pytest
+
 from dbt_bouncer.artifact_parsers.parser import parse_dbt_artifacts
 
 
-def test_parse_manifest_artifact_table_output(capsys):
+@pytest.fixture(params=["dbt_112", "dbt_20"], ids=["dbt_core_112", "dbt_20"])
+def dbt_artifacts_dir(request) -> Path:
+    return Path(f"tests/fixtures/{request.param}/target")
+
+
+def test_parse_manifest_artifact_table_output(capsys, dbt_artifacts_dir):
     """Test that parse_dbt_artifacts outputs a table format."""
     # Load a test manifest
-    dbt_artifacts_dir = Path("tests/fixtures/dbt_111/target")
     bouncer_config = MagicMock()
     bouncer_config.package_name = "dbt_bouncer_test_project"
     bouncer_config.catalog_checks = []
@@ -38,10 +44,9 @@ def test_parse_manifest_artifact_table_output(capsys):
     assert "Unit Tests" in out
 
 
-def test_parse_manifest_artifact_table_format(capsys):
+def test_parse_manifest_artifact_table_format(capsys, dbt_artifacts_dir):
     """Test that the table format is properly structured."""
     # Load a test manifest
-    dbt_artifacts_dir = Path("tests/fixtures/dbt_111/target")
     bouncer_config = MagicMock()
     bouncer_config.package_name = "dbt_bouncer_test_project"
     bouncer_config.catalog_checks = []
