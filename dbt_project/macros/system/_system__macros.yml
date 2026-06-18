@@ -1,6 +1,12 @@
 version: 2
 
 macros:
+  - name: dbt_version_at_least
+    description: Return true when the running dbt version is at least the given major.minor target.
+    arguments:
+      - name: target
+        description: The minimum dbt version to compare against, as a 'major.minor' string.
+
   - name: generate_schema_name
     description: |
       A macro that uses the DBT_DATASET env var only when using the dev target. On the stg and prd targets this env var is not used. This ensures that systems that read from the stg and prd BigQuery instances can use the same dataset and table names, they only need to vary the GCP project id.
