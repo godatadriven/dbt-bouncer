@@ -1,6 +1,16 @@
 version: 2
 
 macros:
+  - name: apply_grants
+    description: Override of dbt's apply_grants that skips grant application on dbt 2.0 (Fusion), where the bundled macro is incompatible with the duckdb adapter.
+    arguments:
+      - name: relation
+        description: The relation to which grants would be applied.
+      - name: grant_config
+        description: The resolved grants configuration for the relation.
+      - name: should_revoke
+        description: Whether existing grants should be revoked before applying.
+
   - name: dbt_version_at_least
     description: Return true when the running dbt version is at least the given major.minor target.
     arguments:
