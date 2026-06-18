@@ -430,14 +430,14 @@ wheels = [
 
 [[package]]
 name = "dbt-core"
-version = "2.0.0a1"
+version = "2.0.0a2"
 source = { registry = "https://pypi.org/simple" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/14/00/ab67145bcfb7ac433358dc8747a41cff8613ad8ad0c770e648bed862f7ea/dbt_core-2.0.0a1-py3-none-macosx_10_12_x86_64.whl", hash = "sha256:4e21f6bb35314af115704b1cb81bee33ad36087ec1db7b2c39dacfaa27bb2bef", size = 48081724, upload-time = "2026-06-01T05:05:20.925Z" },
-    { url = "https://files.pythonhosted.org/packages/b1/31/ad986f597d2b14e97ce492865913d4b808cd04530eda28f4d72687041ea8/dbt_core-2.0.0a1-py3-none-macosx_11_0_arm64.whl", hash = "sha256:824eb4f08a86e2b1368f846c58f6fe460dc62e90f228234a876a78b5da372b93", size = 43557182, upload-time = "2026-06-01T05:05:23.967Z" },
-    { url = "https://files.pythonhosted.org/packages/a2/09/98c49997eed89f19ac3316a394d69a332b9eb55ec06d8fc0cc7c3e48531f/dbt_core-2.0.0a1-py3-none-manylinux_2_28_aarch64.whl", hash = "sha256:10c0b7fa85f0e329b68d853b8d95c160c8bd185e151e528244abf7ec55e240c9", size = 44516596, upload-time = "2026-06-01T05:05:26.883Z" },
-    { url = "https://files.pythonhosted.org/packages/06/02/983e8f593a1a5e656914860807c063ee75b38f9d07c7bcc3cdf93a9290d6/dbt_core-2.0.0a1-py3-none-manylinux_2_28_x86_64.whl", hash = "sha256:cc2b98a0631cf7f1d43683d08fe0e096824b3ffe7aef82b0a474d0ff1f703c9e", size = 48403958, upload-time = "2026-06-01T05:05:29.295Z" },
-    { url = "https://files.pythonhosted.org/packages/00/bd/7b57a7d4899b0ec798070c9aa368670f21a40b2be64f620f5f6c5ae24140/dbt_core-2.0.0a1-py3-none-win_amd64.whl", hash = "sha256:0a6d03060c1c038fd989f6befa6687767ff47d1144ce8086691be690bf078328", size = 53928063, upload-time = "2026-06-01T05:05:32.028Z" },
+    { url = "https://files.pythonhosted.org/packages/0e/ee/1df3e93e6f1612ecccee7b80f5476adda736b584839eab1eb7dbe910a722/dbt_core-2.0.0a2-py3-none-macosx_10_12_x86_64.whl", hash = "sha256:6d2132f5ebe9c22a27168cc66d3046168816e261f45de7db0121b0abd35d747b", size = 48403684, upload-time = "2026-06-18T13:30:49.702Z" },
+    { url = "https://files.pythonhosted.org/packages/f1/2e/40b95279d069320b225426a95910562c8975fe5764406f5be3ce0877ee16/dbt_core-2.0.0a2-py3-none-macosx_11_0_arm64.whl", hash = "sha256:6497ea300dffed9fee889dc4dd13d0028984290158410405379ead83634e2ff3", size = 43801313, upload-time = "2026-06-18T13:30:52.806Z" },
+    { url = "https://files.pythonhosted.org/packages/02/17/c5617a8c137a4b2d40960ffd950187d80ba932d6b3d464d7b9bf1f469030/dbt_core-2.0.0a2-py3-none-manylinux_2_28_aarch64.whl", hash = "sha256:3f4a58fbccb0ec979676e62b0d079cdd67a215e3f62557265f106d4685861912", size = 44756117, upload-time = "2026-06-18T13:30:55.645Z" },
+    { url = "https://files.pythonhosted.org/packages/b4/6f/ad85e89de8c54ddc4a0f00eefaaf93f034c889a41fe53e139959875d4d11/dbt_core-2.0.0a2-py3-none-manylinux_2_28_x86_64.whl", hash = "sha256:6b44673e457e81028bc222e3128e10afdaabc81d95c5f95c7a9ee21cb3ad9eec", size = 48670566, upload-time = "2026-06-18T13:30:58.391Z" },
+    { url = "https://files.pythonhosted.org/packages/a9/7f/c7346db818bc75ee62e89a5f063355739a65177fa313170527cde0fefd03/dbt_core-2.0.0a2-py3-none-win_amd64.whl", hash = "sha256:b9d95a05f0749da2f52ac50c640d97d7708eed7c2a914454a6575dfdb42d0394", size = 54283829, upload-time = "2026-06-18T13:31:01.454Z" },
 ]
 
 [[package]]

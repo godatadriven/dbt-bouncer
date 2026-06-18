@@ -6,10 +6,13 @@ help: ## Display help
 	@awk 'BEGIN {FS = ":.*##"; printf "Usage:\n  make \033[36m<target>\033[0m\n\nTargets:\n"} /^[a-zA-Z0-9_-]+:.*?##/ { printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
 
 # On GitHub the `dbt build` command often returns "leaked semaphores" errors.
-build-and-run-dbt-bouncer: ## Run dbt deps, build, docs generate and run dbt-bouncer
-	uv run dbt deps
-	uv run dbt build
-	uv run dbt docs generate
+# dbt 2.0 drops `dbt docs generate`; use compile --write-catalog first (produces
+# catalog.json), then build (produces manifest.json + run_results.json without
+# clobbering the catalog). Explicit --profiles-dir/--project-dir for CI correctness.
+build-and-run-dbt-bouncer: ## Run dbt deps, compile --write-catalog, build and run dbt-bouncer
+	uv run dbt deps --profiles-dir ./dbt_project --project-dir ./dbt_project
+	uv run dbt compile --write-catalog --profiles-dir ./dbt_project --project-dir ./dbt_project
+	uv run dbt build --profiles-dir ./dbt_project --project-dir ./dbt_project
 	uv run dbt-bouncer --config-file ./dbt-bouncer-example.yml
 
 # Each version-specific target uses --target-path to write to an isolated directory.

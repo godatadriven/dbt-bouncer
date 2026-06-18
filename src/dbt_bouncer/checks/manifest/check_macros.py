@@ -375,9 +375,16 @@ def _get_used_macros(manifest_obj: Any) -> set[str]:
                 if hasattr(item, "depends_on") and hasattr(item.depends_on, "macros"):
                     used_macros.update(item.depends_on.macros)
 
-        # Add macros that override default dbt macros (identifiable via the depends_on key-value pair)
+        # Add macros that override default dbt macros.
+        # dbt <2.0: the dispatcher macro (macro.dbt.<name>) lists
+        #   macro.dbt.default__<name> in its depends_on.macros.
+        # dbt 2.0+: depends_on is empty for all dbt package macros, so
+        #   fall back to name-matching — any macro in the dbt package that
+        #   shares its name with a project macro is an overridable dispatcher.
         overridable_dbt_macros = set()
         macros_collection = getattr(manifest_data, "macros", {})
+
+        # dbt <2.0 heuristic: dispatcher macro references default__ variant
         for item in macros_collection.values():
             if (
                 getattr(item, "package_name", "") == "dbt"
@@ -386,6 +393,14 @@ def _get_used_macros(manifest_obj: Any) -> set[str]:
                 and f"macro.dbt.default__{item.name}" in item.depends_on.macros
             ):
                 overridable_dbt_macros.add(item.name)
+
+        # dbt 2.0 fallback: any dbt-package macro name is a potential dispatcher
+        dbt_macro_names = {
+            getattr(item, "name", "")
+            for item in macros_collection.values()
+            if getattr(item, "package_name", "") == "dbt"
+        }
+        overridable_dbt_macros |= dbt_macro_names
 
         for item in macros_collection.values():
             if item.name in overridable_dbt_macros:
