@@ -4,6 +4,7 @@ models:
   - name: py_order_stats
     description: Python model example for testing Python model support in dbt-bouncer.
     config:
+      enabled: "{{ (dbt_version.split('.')[0] | int) < 2 }}"
       meta:
         maturity: gold
     columns:
