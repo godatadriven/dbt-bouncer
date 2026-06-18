@@ -18,7 +18,7 @@ build-and-run-dbt-bouncer: ## Run dbt deps, build, docs generate and run dbt-bou
 # in ./dbt_project. If that happens, run without -j.
 # dbt 1.9 fixtures are frozen: the arguments: migration applied by dbt-autofix is
 # incompatible with dbt-core 1.9 (matching the pattern for dbt 1.7/1.8).
-build-artifacts: build-artifacts-110 build-artifacts-111 build-artifacts-112 build-artifacts-local ## Build dbt artifacts for testing
+build-artifacts: build-artifacts-112 build-artifacts-20 build-artifacts-local ## Build dbt artifacts for testing
 
 build-artifacts-110: ## Build dbt 1.10 test artifacts
 	uvx --python "==$(PYTHON_INTERPRETER_CONSTRAINT)" --with 'dbt-duckdb~=1.10.0' --from 'dbt-core~=1.10.0' dbt parse --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_110
@@ -40,6 +40,13 @@ build-artifacts-112: ## Build dbt 1.12 test artifacts
 	uvx --python "==$(PYTHON_INTERPRETER_CONSTRAINT)" --prerelease=allow --with 'dbt-duckdb~=1.10.0' --from 'dbt-core>=1.12.0b1,<1.13' dbt docs generate --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_112
 	rm -r ./tests/fixtures/dbt_112/target || true
 	mv ./dbt_project/target_112 ./tests/fixtures/dbt_112/target
+
+build-artifacts-20: ## Build dbt 2.0 (Fusion) test artifacts
+	# dbt 2.0 deprecates `dbt docs generate`; use `dbt compile --write-catalog` instead.
+	uvx --python "==$(PYTHON_INTERPRETER_CONSTRAINT)" --prerelease=allow --with 'dbt-duckdb~=1.10.0' --from 'dbt-core>=2.0.0a1,<3' dbt compile --write-catalog --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_20
+	rm -r ./tests/fixtures/dbt_20/target || true
+	mkdir -p ./tests/fixtures/dbt_20
+	mv ./dbt_project/target_20 ./tests/fixtures/dbt_20/target
 
 build-artifacts-local: install ## Build local dbt test artifacts
 	uv run dbt parse --profiles-dir ./dbt_project --project-dir ./dbt_project
