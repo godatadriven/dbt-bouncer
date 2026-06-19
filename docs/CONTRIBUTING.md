@@ -115,7 +115,7 @@ Once you're able to manually test that your code change is working as expected, 
 
 - Your code changes do not unexpectedly break other established functionality
 - Your code changes can handle all known edge cases
-- The functionality you're adding will _keep_ working in the future
+- The functionality you're adding will *keep* working in the future
 
 ### Notice
 
@@ -202,7 +202,7 @@ The `@check` decorator infers everything from the function signature:
 
 ```python
 # src/dbt_bouncer/checks/manifest/models/naming.py
-from dbt_bouncer.check_decorator import check, fail
+from dbt_bouncer.check_framework.decorator import check, fail
 
 @check
 def check_model_names(model, *, model_name_pattern: str):
@@ -239,14 +239,15 @@ def test_check_model_names_fail():
 1. Run `make test` to ensure tests pass.
 1. Open a PR!
 
-### Class-based API
+### Class-based API (legacy)
 
-Use this when you need complex Pydantic validation:
+The class-based API is a legacy escape hatch for checks that need complex Pydantic validation. Prefer the decorator API above for new checks — all built-in checks use it, and the test helpers are designed around it.
 
 1. In `./src/dbt_bouncer/checks` choose the appropriate directory for your check.
 1. Within the chosen file, add a Pydantic model inheriting from `BaseCheck`:
     - Class name starts with "Check".
     - Has a `name: Literal["check_..."]` field.
+    - **Re-declares the resource field it iterates over**, e.g. `model: Any = Field(default=None)`. The runner infers the iterated resource from the subclass's *own* annotations, which are **not** inherited from `BaseCheck`. Declaring the `_require_*()` accessor alone is not sufficient — without the field annotation the check never runs against any resource. Use `Any` (not the strict artifact type) so the test helpers, which build resources as plain dicts, can instantiate the check.
     - Has an `execute()` method that raises `DbtBouncerFailedCheckError` on failure.
     - Uses `_require_*()` methods to access resources.
 1. Add the check to `dbt-bouncer-example.yml` and validate.
@@ -268,6 +269,12 @@ check_fails("check_model_names", model={"name": "fct_orders"}, model_name_patter
 check_passes("check_model_documentation_coverage",
              min_model_documentation_coverage_pct=100,
              ctx_models=[{"description": "desc", "name": "m1", "unique_id": "model.pkg.m1"}])
+
+# To test a check living in a custom_checks_dir (not an installed plugin),
+# pass the directory so the helpers can resolve the check name:
+check_passes("check_my_custom_check",
+             custom_checks_dir="path/to/custom_checks",
+             model={"name": "my_model"})
 ```
 
 ### Writing plugins (external packages)

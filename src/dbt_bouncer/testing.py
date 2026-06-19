@@ -21,6 +21,7 @@ specified.
 
 from __future__ import annotations
 
+from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
 
@@ -306,11 +307,14 @@ _PLURAL_TO_SINGULAR: dict[str, str] = {
 # ---------------------------------------------------------------------------
 
 
-def _get_check_class(name: str) -> type:
+def _get_check_class(name: str, custom_checks_dir: Path | None = None) -> type:
     """Look up a check class by its config name.
 
     Args:
         name: The check name (e.g. ``"check_model_names"``).
+        custom_checks_dir: Optional directory of custom checks to include in
+            the registry, mirroring the ``custom_checks_dir`` config option.
+            Required to test checks that are not installed via an entry point.
 
     Returns:
         The check class.
@@ -321,7 +325,7 @@ def _get_check_class(name: str) -> type:
     """
     from dbt_bouncer.utils import get_check_registry
 
-    registry = get_check_registry()
+    registry = get_check_registry(custom_checks_dir)
     if name not in registry:
         available = sorted(registry.keys())
         raise KeyError(
@@ -420,7 +424,12 @@ def _build_check_context(**kwargs: Any) -> CheckContext:
     return CheckContext(**ctx_kwargs)
 
 
-def _run_check(name: str, **kwargs: Any) -> None:
+def _run_check(
+    name: str,
+    *,
+    custom_checks_dir: Path | str | None = None,
+    **kwargs: Any,
+) -> None:
     """Instantiate and execute a check.
 
     Resource kwargs (model, source, etc.) are auto-wrapped from dicts.
@@ -429,10 +438,15 @@ def _run_check(name: str, **kwargs: Any) -> None:
 
     Args:
         name: The check config name.
+        custom_checks_dir: Optional directory of custom checks to include when
+            resolving ``name``. Required to test checks that are not installed
+            via an entry point.
         **kwargs: Resource overrides, context overrides, and check parameters.
 
     """
-    cls = _get_check_class(name)
+    cls = _get_check_class(
+        name, Path(custom_checks_dir) if custom_checks_dir is not None else None
+    )
 
     # Separate kwargs into resources, context, and params.
     resource_kwargs: dict[str, Any] = {}
@@ -464,11 +478,19 @@ def _run_check(name: str, **kwargs: Any) -> None:
 # ---------------------------------------------------------------------------
 
 
-def check_passes(name: str, **kwargs: Any) -> None:
+def check_passes(
+    name: str,
+    *,
+    custom_checks_dir: Path | str | None = None,
+    **kwargs: Any,
+) -> None:
     """Assert that a check passes (does not raise).
 
     Args:
         name: The check config name (e.g. ``"check_model_names"``).
+        custom_checks_dir: Optional directory of custom checks, mirroring the
+            ``custom_checks_dir`` config option. Set this to test a custom
+            check that is not installed via an entry point.
         **kwargs: Resource overrides (``model={...}``), context overrides
             (``ctx_models=[{...}]``), and check parameters
             (``model_name_pattern="^stg_"``).
@@ -481,16 +503,24 @@ def check_passes(name: str, **kwargs: Any) -> None:
 
     """
     try:
-        _run_check(name, **kwargs)
+        _run_check(name, custom_checks_dir=custom_checks_dir, **kwargs)
     except DbtBouncerFailedCheckError as exc:
         pytest.fail(f"Check {name!r} unexpectedly failed: {exc}")
 
 
-def check_fails(name: str, **kwargs: Any) -> None:
+def check_fails(
+    name: str,
+    *,
+    custom_checks_dir: Path | str | None = None,
+    **kwargs: Any,
+) -> None:
     """Assert that a check fails with ``DbtBouncerFailedCheckError``.
 
     Args:
         name: The check config name (e.g. ``"check_model_names"``).
+        custom_checks_dir: Optional directory of custom checks, mirroring the
+            ``custom_checks_dir`` config option. Set this to test a custom
+            check that is not installed via an entry point.
         **kwargs: Resource overrides, context overrides, and check parameters.
 
     Example::
@@ -501,7 +531,7 @@ def check_fails(name: str, **kwargs: Any) -> None:
 
     """
     try:
-        _run_check(name, **kwargs)
+        _run_check(name, custom_checks_dir=custom_checks_dir, **kwargs)
     except DbtBouncerFailedCheckError:
         return  # Expected failure.
 
