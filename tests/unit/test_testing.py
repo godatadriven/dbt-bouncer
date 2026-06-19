@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import pytest
 
 from dbt_bouncer.testing import (
@@ -12,6 +14,10 @@ from dbt_bouncer.testing import (
     check_fails,
     check_passes,
 )
+from dbt_bouncer.utils import get_check_objects, get_check_registry
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 class TestBuildResource:
@@ -153,3 +159,69 @@ class TestUnknownCheck:
     def test_raises_key_error(self):
         with pytest.raises(KeyError, match="Unknown check name"):
             check_passes("nonexistent_check_name")
+
+
+def _write_custom_check(custom_checks_dir: Path) -> None:
+    """Write a decorator-based custom check into ``custom_checks_dir``."""
+    (custom_checks_dir / "manifest").mkdir(parents=True)
+    (custom_checks_dir / "manifest" / "check_custom.py").write_text(
+        """
+from dbt_bouncer.check_framework.decorator import check, fail
+
+
+@check
+def check_model_name_is_my_model(model):
+    \"\"\"Model must be named my_model.\"\"\"
+    if model.name != "my_model":
+        fail(f"`{model.name}` is not `my_model`.")
+"""
+    )
+
+
+class TestCustomChecksDir:
+    """``custom_checks_dir`` resolves checks not installed via an entry point.
+
+    This lets contributors test a custom check without monkeypatching the
+    registry.
+    """
+
+    @pytest.fixture(autouse=True)
+    def _clear_check_registry_cache(self):
+        """Clear the lru_caches so custom checks don't leak between tests."""
+        get_check_objects.cache_clear()
+        get_check_registry.cache_clear()
+        yield
+        get_check_objects.cache_clear()
+        get_check_registry.cache_clear()
+
+    def test_custom_check_passes(self, tmp_path):
+        _write_custom_check(tmp_path)
+        check_passes(
+            "check_model_name_is_my_model",
+            custom_checks_dir=tmp_path,
+            model={"name": "my_model"},
+        )
+
+    def test_custom_check_fails(self, tmp_path):
+        _write_custom_check(tmp_path)
+        check_fails(
+            "check_model_name_is_my_model",
+            custom_checks_dir=tmp_path,
+            model={"name": "not_my_model"},
+        )
+
+    def test_custom_check_accepts_str_path(self, tmp_path):
+        _write_custom_check(tmp_path)
+        check_passes(
+            "check_model_name_is_my_model",
+            custom_checks_dir=str(tmp_path),
+            model={"name": "my_model"},
+        )
+
+    def test_custom_check_not_found_without_dir(self, tmp_path):
+        _write_custom_check(tmp_path)
+        with pytest.raises(KeyError, match="Unknown check name"):
+            check_passes(
+                "check_model_name_is_my_model",
+                model={"name": "my_model"},
+            )

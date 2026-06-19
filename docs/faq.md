@@ -323,11 +323,11 @@ In addition to the checks built into `dbt-bouncer`, you can write custom checks 
 1. In that subdirectory create a Python file that defines a check using the `@check` decorator:
 
     - The function name must start with `check_`.
-    - The function must be decorated with `@check` from `dbt_bouncer.check_decorator`.
+    - The function must be decorated with `@check` from `dbt_bouncer.check_framework.decorator`.
     - The first positional parameter determines the resource type to iterate over (e.g. `model`, `source`, `exposure`, `seed`).
     - Keyword-only arguments (after `*`) become user-configurable parameters, with types inferred from type hints.
     - Add `ctx` as a parameter only if the function needs access to the full check context (e.g. all models, all sources).
-    - Use `fail()` from `dbt_bouncer.check_decorator` to signal a check failure with a clear message.
+    - Use `fail()` from `dbt_bouncer.check_framework.decorator` to signal a check failure with a clear message.
     - Include a docstring describing what the check does.
 
 1. Add the check name and any desired arguments to your config file.
@@ -354,7 +354,7 @@ Contents of `check_custom_to_me.py`:
 ```python
 import re
 
-from dbt_bouncer.check_decorator import check, fail
+from dbt_bouncer.check_framework.decorator import check, fail
 
 
 @check
