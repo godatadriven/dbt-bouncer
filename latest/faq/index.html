@@ -1286,11 +1286,11 @@
 <p>In that subdirectory create a Python file that defines a check using the <code>@check</code> decorator:</p>
 <ul>
 <li>The function name must start with <code>check_</code>.</li>
-<li>The function must be decorated with <code>@check</code> from <code>dbt_bouncer.check_decorator</code>.</li>
+<li>The function must be decorated with <code>@check</code> from <code>dbt_bouncer.check_framework.decorator</code>.</li>
 <li>The first positional parameter determines the resource type to iterate over (e.g. <code>model</code>, <code>source</code>, <code>exposure</code>, <code>seed</code>).</li>
 <li>Keyword-only arguments (after <code>*</code>) become user-configurable parameters, with types inferred from type hints.</li>
 <li>Add <code>ctx</code> as a parameter only if the function needs access to the full check context (e.g. all models, all sources).</li>
-<li>Use <code>fail()</code> from <code>dbt_bouncer.check_decorator</code> to signal a check failure with a clear message.</li>
+<li>Use <code>fail()</code> from <code>dbt_bouncer.check_framework.decorator</code> to signal a check failure with a clear message.</li>
 <li>Include a docstring describing what the check does.</li>
 </ul>
 </li>
@@ -1314,7 +1314,7 @@
 <p>Contents of <code>check_custom_to_me.py</code>:</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
 </span><span id="__span-19-2"><a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>
-</span><span id="__span-19-3"><a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">dbt_bouncer.check_decorator</span><span class="w"> </span><span class="kn">import</span> <span class="n">check</span><span class="p">,</span> <span class="n">fail</span>
+</span><span id="__span-19-3"><a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">dbt_bouncer.check_framework.decorator</span><span class="w"> </span><span class="kn">import</span> <span class="n">check</span><span class="p">,</span> <span class="n">fail</span>
 </span><span id="__span-19-4"><a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a>
 </span><span id="__span-19-5"><a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a>
 </span><span id="__span-19-6"><a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a><span class="nd">@check</span>

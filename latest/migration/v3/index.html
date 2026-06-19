@@ -1042,6 +1042,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#class-based-checks-legacy" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Class-based checks (legacy)
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1391,7 +1402,8 @@
 </span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>            <span class="p">)</span>
 </span></code></pre></div>
 <h3 id="v300-decorator-based-checks">v3.0.0: Decorator-based checks<a class="headerlink" href="#v300-decorator-based-checks" title="Permanent link">#</a></h3>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">dbt_bouncer.check_decorator</span><span class="w"> </span><span class="kn">import</span> <span class="n">check</span><span class="p">,</span> <span class="n">fail</span>
+<p>The decorator API is the recommended way to write custom checks in v3. Class-based checks (subclassing <code>BaseCheck</code>) still work as a legacy escape hatch for cases that need complex Pydantic validation, but they are not the encouraged path — see <a href="#class-based-checks-legacy">class-based gotchas</a> below.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">dbt_bouncer.check_framework.decorator</span><span class="w"> </span><span class="kn">import</span> <span class="n">check</span><span class="p">,</span> <span class="n">fail</span>
 </span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
 </span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="nd">@check</span>
 </span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="k">def</span><span class="w"> </span><span class="nf">check_model_access</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">access</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
@@ -1417,22 +1429,37 @@
 </span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="n">my_checks</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;my_package.checks&quot;</span>
 </span></code></pre></div>
 <h3 id="testing-custom-checks">Testing custom checks<a class="headerlink" href="#testing-custom-checks" title="Permanent link">#</a></h3>
+<p>The <code>check_passes</code> / <code>check_fails</code> helpers take the check <strong>name as a string</strong> (its config name), followed by resource overrides and parameters as keyword arguments:</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">dbt_bouncer.testing</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_fails</span><span class="p">,</span> <span class="n">check_passes</span>
 </span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>
 </span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="k">def</span><span class="w"> </span><span class="nf">test_check_model_access_pass</span><span class="p">():</span>
 </span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>    <span class="n">check_passes</span><span class="p">(</span>
-</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>        <span class="n">check_model_access</span><span class="p">,</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>        <span class="s2">&quot;check_model_access&quot;</span><span class="p">,</span>
 </span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>        <span class="n">model</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;my_model&quot;</span><span class="p">,</span> <span class="s2">&quot;access&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;private&quot;</span><span class="p">}},</span>
 </span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>        <span class="n">access</span><span class="o">=</span><span class="s2">&quot;private&quot;</span><span class="p">,</span>
 </span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>    <span class="p">)</span>
 </span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>
 </span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="k">def</span><span class="w"> </span><span class="nf">test_check_model_access_fail</span><span class="p">():</span>
 </span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>    <span class="n">check_fails</span><span class="p">(</span>
-</span><span id="__span-7-12"><a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a>        <span class="n">check_model_access</span><span class="p">,</span>
+</span><span id="__span-7-12"><a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a>        <span class="s2">&quot;check_model_access&quot;</span><span class="p">,</span>
 </span><span id="__span-7-13"><a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a>        <span class="n">model</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;my_model&quot;</span><span class="p">,</span> <span class="s2">&quot;access&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;public&quot;</span><span class="p">}},</span>
 </span><span id="__span-7-14"><a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a>        <span class="n">access</span><span class="o">=</span><span class="s2">&quot;private&quot;</span><span class="p">,</span>
 </span><span id="__span-7-15"><a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a>    <span class="p">)</span>
 </span></code></pre></div>
+<p>If your custom check lives in a <code>custom_checks_dir</code> rather than an installed plugin package, pass that directory so the helpers can find it — otherwise the check name will not resolve and you would have to monkeypatch the registry:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">test_my_custom_check_pass</span><span class="p">():</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>    <span class="n">check_passes</span><span class="p">(</span>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>        <span class="s2">&quot;check_my_custom_check&quot;</span><span class="p">,</span>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>        <span class="n">custom_checks_dir</span><span class="o">=</span><span class="s2">&quot;path/to/custom_checks&quot;</span><span class="p">,</span>
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>        <span class="n">model</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;my_model&quot;</span><span class="p">},</span>
+</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>    <span class="p">)</span>
+</span></code></pre></div>
+<h3 id="class-based-checks-legacy">Class-based checks (legacy)<a class="headerlink" href="#class-based-checks-legacy" title="Permanent link">#</a></h3>
+<p>Class-based checks remain supported but are a legacy escape hatch — prefer the decorator API above. If you do subclass <code>BaseCheck</code>, two things commonly trip people up:</p>
+<ul>
+<li><strong>Re-declare the resource field on your subclass.</strong> The runner infers which resource a class-based check iterates over from the subclass's <em>own</em> annotations (<code>__annotations__</code>), which Python does <strong>not</strong> inherit from <code>BaseCheck</code>. Calling <code>self._require_model()</code> is not enough — you must also declare the field, e.g. <code>model: Any = Field(default=None)</code>. Without it the check never iterates over any resource.</li>
+<li><strong>Use <code>Any</code> for the resource field when testing with the helpers.</strong> The test helpers build resources as lightweight dicts; declaring the field as the strict artifact type (e.g. <code>ModelNode</code>) makes Pydantic reject those dicts during instantiation. Declaring <code>model: Any</code> (as the <code>@check</code> decorator does internally) avoids this.</li>
+</ul>
 <h2 id="new-checks-in-v300">New checks in v3.0.0<a class="headerlink" href="#new-checks-in-v300" title="Permanent link">#</a></h2>
 <p>The following checks are new in this release:</p>
 <ul>

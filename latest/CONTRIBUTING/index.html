@@ -1104,10 +1104,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#class-based-api" class="md-nav__link">
+  <a href="#class-based-api-legacy" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
-        Class-based API
+        Class-based API (legacy)
       </span>
     </span>
   </a>
@@ -1425,7 +1425,7 @@
 <li><strong>ctx</strong> is optional — only include it in the signature if the function actually uses it</li>
 </ul>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># src/dbt_bouncer/checks/manifest/models/naming.py</span>
-</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">dbt_bouncer.check_decorator</span><span class="w"> </span><span class="kn">import</span> <span class="n">check</span><span class="p">,</span> <span class="n">fail</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">dbt_bouncer.check_framework.decorator</span><span class="w"> </span><span class="kn">import</span> <span class="n">check</span><span class="p">,</span> <span class="n">fail</span>
 </span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>
 </span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="nd">@check</span>
 </span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="k">def</span><span class="w"> </span><span class="nf">check_model_names</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">model_name_pattern</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
@@ -1462,13 +1462,14 @@
 <li>Run <code>make test</code> to ensure tests pass.</li>
 <li>Open a PR!</li>
 </ol>
-<h3 id="class-based-api">Class-based API<a class="headerlink" href="#class-based-api" title="Permanent link">#</a></h3>
-<p>Use this when you need complex Pydantic validation:</p>
+<h3 id="class-based-api-legacy">Class-based API (legacy)<a class="headerlink" href="#class-based-api-legacy" title="Permanent link">#</a></h3>
+<p>The class-based API is a legacy escape hatch for checks that need complex Pydantic validation. Prefer the decorator API above for new checks — all built-in checks use it, and the test helpers are designed around it.</p>
 <ol>
 <li>In <code>./src/dbt_bouncer/checks</code> choose the appropriate directory for your check.</li>
 <li>Within the chosen file, add a Pydantic model inheriting from <code>BaseCheck</code>:<ul>
 <li>Class name starts with "Check".</li>
 <li>Has a <code>name: Literal["check_..."]</code> field.</li>
+<li><strong>Re-declares the resource field it iterates over</strong>, e.g. <code>model: Any = Field(default=None)</code>. The runner infers the iterated resource from the subclass's <em>own</em> annotations, which are <strong>not</strong> inherited from <code>BaseCheck</code>. Declaring the <code>_require_*()</code> accessor alone is not sufficient — without the field annotation the check never runs against any resource. Use <code>Any</code> (not the strict artifact type) so the test helpers, which build resources as plain dicts, can instantiate the check.</li>
 <li>Has an <code>execute()</code> method that raises <code>DbtBouncerFailedCheckError</code> on failure.</li>
 <li>Uses <code>_require_*()</code> methods to access resources.</li>
 </ul>
@@ -1489,6 +1490,12 @@
 </span><span id="__span-10-8"><a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a><span class="n">check_passes</span><span class="p">(</span><span class="s2">&quot;check_model_documentation_coverage&quot;</span><span class="p">,</span>
 </span><span id="__span-10-9"><a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a>             <span class="n">min_model_documentation_coverage_pct</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
 </span><span id="__span-10-10"><a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a>             <span class="n">ctx_models</span><span class="o">=</span><span class="p">[{</span><span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;desc&quot;</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;m1&quot;</span><span class="p">,</span> <span class="s2">&quot;unique_id&quot;</span><span class="p">:</span> <span class="s2">&quot;model.pkg.m1&quot;</span><span class="p">}])</span>
+</span><span id="__span-10-11"><a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a>
+</span><span id="__span-10-12"><a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a><span class="c1"># To test a check living in a custom_checks_dir (not an installed plugin),</span>
+</span><span id="__span-10-13"><a id="__codelineno-10-13" name="__codelineno-10-13" href="#__codelineno-10-13"></a><span class="c1"># pass the directory so the helpers can resolve the check name:</span>
+</span><span id="__span-10-14"><a id="__codelineno-10-14" name="__codelineno-10-14" href="#__codelineno-10-14"></a><span class="n">check_passes</span><span class="p">(</span><span class="s2">&quot;check_my_custom_check&quot;</span><span class="p">,</span>
+</span><span id="__span-10-15"><a id="__codelineno-10-15" name="__codelineno-10-15" href="#__codelineno-10-15"></a>             <span class="n">custom_checks_dir</span><span class="o">=</span><span class="s2">&quot;path/to/custom_checks&quot;</span><span class="p">,</span>
+</span><span id="__span-10-16"><a id="__codelineno-10-16" name="__codelineno-10-16" href="#__codelineno-10-16"></a>             <span class="n">model</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;my_model&quot;</span><span class="p">})</span>
 </span></code></pre></div>
 <h3 id="writing-plugins-external-packages">Writing plugins (external packages)<a class="headerlink" href="#writing-plugins-external-packages" title="Permanent link">#</a></h3>
 <p>External packages can register checks via entry points:</p>
