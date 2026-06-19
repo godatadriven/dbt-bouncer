@@ -14,7 +14,7 @@ from dbt_bouncer.testing import (
     check_fails,
     check_passes,
 )
-from dbt_bouncer.utils import get_check_objects
+from dbt_bouncer.utils import get_check_objects, get_check_registry
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -187,10 +187,12 @@ class TestCustomChecksDir:
 
     @pytest.fixture(autouse=True)
     def _clear_check_registry_cache(self):
-        """Clear the lru_cache so custom checks don't leak between tests."""
+        """Clear the lru_caches so custom checks don't leak between tests."""
         get_check_objects.cache_clear()
+        get_check_registry.cache_clear()
         yield
         get_check_objects.cache_clear()
+        get_check_registry.cache_clear()
 
     def test_custom_check_passes(self, tmp_path):
         _write_custom_check(tmp_path)
