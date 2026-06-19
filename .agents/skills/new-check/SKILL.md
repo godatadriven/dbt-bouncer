@@ -18,7 +18,7 @@ Follow these steps to add a new check to dbt-bouncer.
 Use the `@check` decorator (bare, no arguments). Everything is inferred from the function signature:
 
 ```python
-from dbt_bouncer.check_decorator import check, fail
+from dbt_bouncer.check_framework.decorator import check, fail
 
 @check
 def check_model_xxx(model):

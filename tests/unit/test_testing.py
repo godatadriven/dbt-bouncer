@@ -185,8 +185,14 @@ class TestCustomChecksDir:
     registry.
     """
 
-    def test_custom_check_passes(self, tmp_path):
+    @pytest.fixture(autouse=True)
+    def _clear_check_registry_cache(self):
+        """Clear the lru_cache so custom checks don't leak between tests."""
         get_check_objects.cache_clear()
+        yield
+        get_check_objects.cache_clear()
+
+    def test_custom_check_passes(self, tmp_path):
         _write_custom_check(tmp_path)
         check_passes(
             "check_model_name_is_my_model",
@@ -195,7 +201,6 @@ class TestCustomChecksDir:
         )
 
     def test_custom_check_fails(self, tmp_path):
-        get_check_objects.cache_clear()
         _write_custom_check(tmp_path)
         check_fails(
             "check_model_name_is_my_model",
@@ -204,7 +209,6 @@ class TestCustomChecksDir:
         )
 
     def test_custom_check_accepts_str_path(self, tmp_path):
-        get_check_objects.cache_clear()
         _write_custom_check(tmp_path)
         check_passes(
             "check_model_name_is_my_model",
@@ -213,7 +217,6 @@ class TestCustomChecksDir:
         )
 
     def test_custom_check_not_found_without_dir(self, tmp_path):
-        get_check_objects.cache_clear()
         _write_custom_check(tmp_path)
         with pytest.raises(KeyError, match="Unknown check name"):
             check_passes(
