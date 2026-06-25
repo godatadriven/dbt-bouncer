@@ -15,8 +15,8 @@ def check_semantic_model_based_on_non_public_models(semantic_model, ctx):
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
-        exclude (str | None): Regex pattern to match the semantic model path (i.e the .yml file where the semantic model is configured). Semantic model paths that match the pattern will not be checked.
-        include (str | None): Regex pattern to match the semantic model path (i.e the .yml file where the semantic model is configured). Only semantic model paths that match the pattern will be checked.
+        exclude (str | list[str] | None): Regex pattern(s) to match the semantic model path (i.e the .yml file where the semantic model is configured). Semantic model paths that match any pattern will not be checked.
+        include (str | list[str] | None): Regex pattern(s) to match the semantic model path (i.e the .yml file where the semantic model is configured). Only semantic model paths that match any pattern will be checked.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Example(s):

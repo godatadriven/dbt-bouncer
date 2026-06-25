@@ -28,8 +28,8 @@ def check_seed_column_names(seed, *, seed_column_name_pattern: str):
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
-        exclude (str | None): Regex pattern to match the seed path. Seed paths that match the pattern will not be checked.
-        include (str | None): Regex pattern to match the seed path. Only seed paths that match the pattern will be checked.
+        exclude (str | list[str] | None): Regex pattern(s) to match the seed path. Seed paths that match any pattern will not be checked.
+        include (str | list[str] | None): Regex pattern(s) to match the seed path. Only seed paths that match any pattern will be checked.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Example(s):
@@ -67,8 +67,8 @@ def check_seed_columns_have_types(seed):
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
-        exclude (str | None): Regex pattern to match the seed path. Seed paths that match the pattern will not be checked.
-        include (str | None): Regex pattern to match the seed path. Only seed paths that match the pattern will be checked.
+        exclude (str | list[str] | None): Regex pattern(s) to match the seed path. Seed paths that match any pattern will not be checked.
+        include (str | list[str] | None): Regex pattern(s) to match the seed path. Only seed paths that match any pattern will be checked.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Example(s):
@@ -106,8 +106,8 @@ def check_seed_description_populated(
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
-        exclude (str | None): Regex pattern to match the seed path. Seed paths that match the pattern will not be checked.
-        include (str | None): Regex pattern to match the seed path. Only seed paths that match the pattern will be checked.
+        exclude (str | list[str] | None): Regex pattern(s) to match the seed path. Seed paths that match any pattern will not be checked.
+        include (str | list[str] | None): Regex pattern(s) to match the seed path. Only seed paths that match any pattern will be checked.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Example(s):
@@ -150,8 +150,8 @@ def check_seed_has_unit_tests(
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
-        exclude (str | None): Regex pattern to match the seed path. Seed paths that match the pattern will not be checked.
-        include (str | None): Regex pattern to match the seed path. Only seed paths that match the pattern will be checked.
+        exclude (str | list[str] | None): Regex pattern(s) to match the seed path. Seed paths that match any pattern will not be checked.
+        include (str | list[str] | None): Regex pattern(s) to match the seed path. Only seed paths that match any pattern will be checked.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     !!! warning
@@ -210,8 +210,8 @@ def check_seed_names(seed, *, seed_name_pattern: str):
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
-        exclude (str | None): Regex pattern to match the seed path. Seed paths that match the pattern will not be checked.
-        include (str | None): Regex pattern to match the seed path. Only seed paths that match the pattern will be checked.
+        exclude (str | list[str] | None): Regex pattern(s) to match the seed path. Seed paths that match any pattern will not be checked.
+        include (str | list[str] | None): Regex pattern(s) to match the seed path. Only seed paths that match any pattern will be checked.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Example(s):

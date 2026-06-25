@@ -56,8 +56,8 @@ def check_macro_arguments_description_populated(
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
-        exclude (str | None): Regex pattern to match the macro path. Macro paths that match the pattern will not be checked.
-        include (str | None): Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
+        exclude (str | list[str] | None): Regex pattern(s) to match the macro path. Macro paths that match any pattern will not be checked.
+        include (str | list[str] | None): Regex pattern(s) to match the macro path. Only macro paths that match any pattern will be checked.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Example(s):
@@ -144,8 +144,8 @@ def check_macro_code_does_not_contain_regexp_pattern(macro, *, regexp_pattern: s
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
-        exclude (str | None): Regex pattern to match the macro path. Macro paths that match the pattern will not be checked.
-        include (str | None): Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
+        exclude (str | list[str] | None): Regex pattern(s) to match the macro path. Macro paths that match any pattern will not be checked.
+        include (str | list[str] | None): Regex pattern(s) to match the macro path. Only macro paths that match any pattern will be checked.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Example(s):
@@ -182,8 +182,8 @@ def check_macro_description_populated(
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
-        exclude (str | None): Regex pattern to match the macro path. Macro paths that match the pattern will not be checked.
-        include (str | None): Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
+        exclude (str | list[str] | None): Regex pattern(s) to match the macro path. Macro paths that match any pattern will not be checked.
+        include (str | list[str] | None): Regex pattern(s) to match the macro path. Only macro paths that match any pattern will be checked.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Example(s):
@@ -223,8 +223,8 @@ def check_macro_max_number_of_lines(
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
-        exclude (str | None): Regex pattern to match the macro path. Macro paths that match the pattern will not be checked.
-        include (str | None): Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
+        exclude (str | list[str] | None): Regex pattern(s) to match the macro path. Macro paths that match any pattern will not be checked.
+        include (str | list[str] | None): Regex pattern(s) to match the macro path. Only macro paths that match any pattern will be checked.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Example(s):
@@ -262,8 +262,8 @@ def check_macro_name_matches_file_name(macro):
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
-        exclude (str | None): Regex pattern to match the macro path. Macro paths that match the pattern will not be checked.
-        include (str | None): Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
+        exclude (str | list[str] | None): Regex pattern(s) to match the macro path. Macro paths that match any pattern will not be checked.
+        include (str | list[str] | None): Regex pattern(s) to match the macro path. Only macro paths that match any pattern will be checked.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Example(s):
@@ -299,8 +299,8 @@ def check_macro_property_file_location(macro):
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
-        exclude (str | None): Regex pattern to match the macro path. Macro paths that match the pattern will not be checked.
-        include (str | None): Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
+        exclude (str | list[str] | None): Regex pattern(s) to match the macro path. Macro paths that match any pattern will not be checked.
+        include (str | list[str] | None): Regex pattern(s) to match the macro path. Only macro paths that match any pattern will be checked.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Example(s):
@@ -409,8 +409,8 @@ def check_macro_is_used(macro, ctx):
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
-        exclude (str | None): Regex pattern to match the macro path. Macro paths that match the pattern will not be checked.
-        include (str | None): Regex pattern to match the macro path. Only macro paths that match the pattern will be checked.
+        exclude (str | list[str] | None): Regex pattern(s) to match the macro path. Macro paths that match any pattern will not be checked.
+        include (str | list[str] | None): Regex pattern(s) to match the macro path. Only macro paths that match any pattern will be checked.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Example(s):

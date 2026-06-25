@@ -120,8 +120,22 @@ Done. SUCCESS=462 WARN=0 ERROR=1
 
 Most (but not all) checks accept the following optional arguments:
 
-- `exclude`: Regexp to match which original file paths to exclude.
-- `include`: Regexp to match which original file paths to include.
+- `exclude`: Regexp (or list of regexps) to match which original file paths to exclude.
+- `include`: Regexp (or list of regexps) to match which original file paths to include.
+
+Both arguments accept either a single pattern or a list of patterns. When a list is supplied, a path is considered a match if it matches **any** pattern in the list (OR semantics). For example:
+
+```yaml
+manifest_checks:
+  - name: check_model_names
+    # Run the check on models in either the staging or intermediate directories
+    include:
+      - ^models/staging
+      - ^models/intermediate
+    model_name_pattern: ^(stg|int)_
+```
+
+An empty list (`[]`) is treated the same as omitting the argument: no filtering is applied.
 
 Example per resource type:
 

@@ -36,13 +36,13 @@ class BaseCheck(BaseModel):
         default=None,
         description="Description of what the check does and why it is implemented.",
     )
-    exclude: str | None = Field(
+    exclude: str | list[str] | None = Field(
         default=None,
-        description="Regexp to match which paths to exclude.",
+        description="Regexp(s) to match which paths to exclude. A list matches if any pattern matches.",
     )
-    include: str | None = Field(
+    include: str | list[str] | None = Field(
         default=None,
-        description="Regexp to match which paths to include.",
+        description="Regexp(s) to match which paths to include. A list matches if any pattern matches.",
     )
     index: int | None = Field(
         default=None,
