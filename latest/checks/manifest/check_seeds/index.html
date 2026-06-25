@@ -1798,22 +1798,22 @@
         <tr class="doc-section-item">
         <td><code>exclude</code></td>
         <td>
-                <code><span title="str">str</span> | None</code>
+                <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
         </td>
         <td>
             <div class="doc-md-description">
-            <p>Regex pattern to match the seed path. Seed paths that match the pattern will not be checked.</p>
+            <p>Regex pattern(s) to match the seed path. Seed paths that match any pattern will not be checked.</p>
             </div>
         </td>
         </tr>
         <tr class="doc-section-item">
         <td><code>include</code></td>
         <td>
-                <code><span title="str">str</span> | None</code>
+                <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
         </td>
         <td>
             <div class="doc-md-description">
-            <p>Regex pattern to match the seed path. Only seed paths that match the pattern will be checked.</p>
+            <p>Regex pattern(s) to match the seed path. Only seed paths that match any pattern will be checked.</p>
             </div>
         </td>
         </tr>
@@ -1893,8 +1893,8 @@
 </span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28"></a>
 </span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29"></a><span class="sd">    Other Parameters:</span>
 </span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30"></a><span class="sd">        description (str | None): Description of what the check does and why it is implemented.</span>
-</span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31"></a><span class="sd">        exclude (str | None): Regex pattern to match the seed path. Seed paths that match the pattern will not be checked.</span>
-</span><span id="__span-0-32"><a id="__codelineno-0-32" name="__codelineno-0-32"></a><span class="sd">        include (str | None): Regex pattern to match the seed path. Only seed paths that match the pattern will be checked.</span>
+</span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31"></a><span class="sd">        exclude (str | list[str] | None): Regex pattern(s) to match the seed path. Seed paths that match any pattern will not be checked.</span>
+</span><span id="__span-0-32"><a id="__codelineno-0-32" name="__codelineno-0-32"></a><span class="sd">        include (str | list[str] | None): Regex pattern(s) to match the seed path. Only seed paths that match any pattern will be checked.</span>
 </span><span id="__span-0-33"><a id="__codelineno-0-33" name="__codelineno-0-33"></a><span class="sd">        severity (Literal[&quot;error&quot;, &quot;warn&quot;] | None): Severity level of the check. Default: `error`.</span>
 </span><span id="__span-0-34"><a id="__codelineno-0-34" name="__codelineno-0-34"></a>
 </span><span id="__span-0-35"><a id="__codelineno-0-35" name="__codelineno-0-35"></a><span class="sd">    Example(s):</span>
@@ -1986,22 +1986,22 @@
         <tr class="doc-section-item">
         <td><code>exclude</code></td>
         <td>
-                <code><span title="str">str</span> | None</code>
+                <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
         </td>
         <td>
             <div class="doc-md-description">
-            <p>Regex pattern to match the seed path. Seed paths that match the pattern will not be checked.</p>
+            <p>Regex pattern(s) to match the seed path. Seed paths that match any pattern will not be checked.</p>
             </div>
         </td>
         </tr>
         <tr class="doc-section-item">
         <td><code>include</code></td>
         <td>
-                <code><span title="str">str</span> | None</code>
+                <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
         </td>
         <td>
             <div class="doc-md-description">
-            <p>Regex pattern to match the seed path. Only seed paths that match the pattern will be checked.</p>
+            <p>Regex pattern(s) to match the seed path. Only seed paths that match any pattern will be checked.</p>
             </div>
         </td>
         </tr>
@@ -2069,8 +2069,8 @@
 </span><span id="__span-0-67"><a id="__codelineno-0-67" name="__codelineno-0-67"></a>
 </span><span id="__span-0-68"><a id="__codelineno-0-68" name="__codelineno-0-68"></a><span class="sd">    Other Parameters:</span>
 </span><span id="__span-0-69"><a id="__codelineno-0-69" name="__codelineno-0-69"></a><span class="sd">        description (str | None): Description of what the check does and why it is implemented.</span>
-</span><span id="__span-0-70"><a id="__codelineno-0-70" name="__codelineno-0-70"></a><span class="sd">        exclude (str | None): Regex pattern to match the seed path. Seed paths that match the pattern will not be checked.</span>
-</span><span id="__span-0-71"><a id="__codelineno-0-71" name="__codelineno-0-71"></a><span class="sd">        include (str | None): Regex pattern to match the seed path. Only seed paths that match the pattern will be checked.</span>
+</span><span id="__span-0-70"><a id="__codelineno-0-70" name="__codelineno-0-70"></a><span class="sd">        exclude (str | list[str] | None): Regex pattern(s) to match the seed path. Seed paths that match any pattern will not be checked.</span>
+</span><span id="__span-0-71"><a id="__codelineno-0-71" name="__codelineno-0-71"></a><span class="sd">        include (str | list[str] | None): Regex pattern(s) to match the seed path. Only seed paths that match any pattern will be checked.</span>
 </span><span id="__span-0-72"><a id="__codelineno-0-72" name="__codelineno-0-72"></a><span class="sd">        severity (Literal[&quot;error&quot;, &quot;warn&quot;] | None): Severity level of the check. Default: `error`.</span>
 </span><span id="__span-0-73"><a id="__codelineno-0-73" name="__codelineno-0-73"></a>
 </span><span id="__span-0-74"><a id="__codelineno-0-74" name="__codelineno-0-74"></a><span class="sd">    Example(s):</span>
@@ -2188,22 +2188,22 @@
         <tr class="doc-section-item">
         <td><code>exclude</code></td>
         <td>
-                <code><span title="str">str</span> | None</code>
+                <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
         </td>
         <td>
             <div class="doc-md-description">
-            <p>Regex pattern to match the seed path. Seed paths that match the pattern will not be checked.</p>
+            <p>Regex pattern(s) to match the seed path. Seed paths that match any pattern will not be checked.</p>
             </div>
         </td>
         </tr>
         <tr class="doc-section-item">
         <td><code>include</code></td>
         <td>
-                <code><span title="str">str</span> | None</code>
+                <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
         </td>
         <td>
             <div class="doc-md-description">
-            <p>Regex pattern to match the seed path. Only seed paths that match the pattern will be checked.</p>
+            <p>Regex pattern(s) to match the seed path. Only seed paths that match any pattern will be checked.</p>
             </div>
         </td>
         </tr>
@@ -2288,8 +2288,8 @@
 </span><span id="__span-0-106"><a id="__codelineno-0-106" name="__codelineno-0-106"></a>
 </span><span id="__span-0-107"><a id="__codelineno-0-107" name="__codelineno-0-107"></a><span class="sd">    Other Parameters:</span>
 </span><span id="__span-0-108"><a id="__codelineno-0-108" name="__codelineno-0-108"></a><span class="sd">        description (str | None): Description of what the check does and why it is implemented.</span>
-</span><span id="__span-0-109"><a id="__codelineno-0-109" name="__codelineno-0-109"></a><span class="sd">        exclude (str | None): Regex pattern to match the seed path. Seed paths that match the pattern will not be checked.</span>
-</span><span id="__span-0-110"><a id="__codelineno-0-110" name="__codelineno-0-110"></a><span class="sd">        include (str | None): Regex pattern to match the seed path. Only seed paths that match the pattern will be checked.</span>
+</span><span id="__span-0-109"><a id="__codelineno-0-109" name="__codelineno-0-109"></a><span class="sd">        exclude (str | list[str] | None): Regex pattern(s) to match the seed path. Seed paths that match any pattern will not be checked.</span>
+</span><span id="__span-0-110"><a id="__codelineno-0-110" name="__codelineno-0-110"></a><span class="sd">        include (str | list[str] | None): Regex pattern(s) to match the seed path. Only seed paths that match any pattern will be checked.</span>
 </span><span id="__span-0-111"><a id="__codelineno-0-111" name="__codelineno-0-111"></a><span class="sd">        severity (Literal[&quot;error&quot;, &quot;warn&quot;] | None): Severity level of the check. Default: `error`.</span>
 </span><span id="__span-0-112"><a id="__codelineno-0-112" name="__codelineno-0-112"></a>
 </span><span id="__span-0-113"><a id="__codelineno-0-113" name="__codelineno-0-113"></a><span class="sd">    Example(s):</span>
@@ -2430,22 +2430,22 @@
         <tr class="doc-section-item">
         <td><code>exclude</code></td>
         <td>
-                <code><span title="str">str</span> | None</code>
+                <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
         </td>
         <td>
             <div class="doc-md-description">
-            <p>Regex pattern to match the seed path. Seed paths that match the pattern will not be checked.</p>
+            <p>Regex pattern(s) to match the seed path. Seed paths that match any pattern will not be checked.</p>
             </div>
         </td>
         </tr>
         <tr class="doc-section-item">
         <td><code>include</code></td>
         <td>
-                <code><span title="str">str</span> | None</code>
+                <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
         </td>
         <td>
             <div class="doc-md-description">
-            <p>Regex pattern to match the seed path. Only seed paths that match the pattern will be checked.</p>
+            <p>Regex pattern(s) to match the seed path. Only seed paths that match any pattern will be checked.</p>
             </div>
         </td>
         </tr>
@@ -2559,8 +2559,8 @@
 </span><span id="__span-0-150"><a id="__codelineno-0-150" name="__codelineno-0-150"></a>
 </span><span id="__span-0-151"><a id="__codelineno-0-151" name="__codelineno-0-151"></a><span class="sd">    Other Parameters:</span>
 </span><span id="__span-0-152"><a id="__codelineno-0-152" name="__codelineno-0-152"></a><span class="sd">        description (str | None): Description of what the check does and why it is implemented.</span>
-</span><span id="__span-0-153"><a id="__codelineno-0-153" name="__codelineno-0-153"></a><span class="sd">        exclude (str | None): Regex pattern to match the seed path. Seed paths that match the pattern will not be checked.</span>
-</span><span id="__span-0-154"><a id="__codelineno-0-154" name="__codelineno-0-154"></a><span class="sd">        include (str | None): Regex pattern to match the seed path. Only seed paths that match the pattern will be checked.</span>
+</span><span id="__span-0-153"><a id="__codelineno-0-153" name="__codelineno-0-153"></a><span class="sd">        exclude (str | list[str] | None): Regex pattern(s) to match the seed path. Seed paths that match any pattern will not be checked.</span>
+</span><span id="__span-0-154"><a id="__codelineno-0-154" name="__codelineno-0-154"></a><span class="sd">        include (str | list[str] | None): Regex pattern(s) to match the seed path. Only seed paths that match any pattern will be checked.</span>
 </span><span id="__span-0-155"><a id="__codelineno-0-155" name="__codelineno-0-155"></a><span class="sd">        severity (Literal[&quot;error&quot;, &quot;warn&quot;] | None): Severity level of the check. Default: `error`.</span>
 </span><span id="__span-0-156"><a id="__codelineno-0-156" name="__codelineno-0-156"></a>
 </span><span id="__span-0-157"><a id="__codelineno-0-157" name="__codelineno-0-157"></a><span class="sd">    !!! warning</span>
@@ -2701,22 +2701,22 @@
         <tr class="doc-section-item">
         <td><code>exclude</code></td>
         <td>
-                <code><span title="str">str</span> | None</code>
+                <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
         </td>
         <td>
             <div class="doc-md-description">
-            <p>Regex pattern to match the seed path. Seed paths that match the pattern will not be checked.</p>
+            <p>Regex pattern(s) to match the seed path. Seed paths that match any pattern will not be checked.</p>
             </div>
         </td>
         </tr>
         <tr class="doc-section-item">
         <td><code>include</code></td>
         <td>
-                <code><span title="str">str</span> | None</code>
+                <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
         </td>
         <td>
             <div class="doc-md-description">
-            <p>Regex pattern to match the seed path. Only seed paths that match the pattern will be checked.</p>
+            <p>Regex pattern(s) to match the seed path. Only seed paths that match any pattern will be checked.</p>
             </div>
         </td>
         </tr>
@@ -2791,8 +2791,8 @@
 </span><span id="__span-0-210"><a id="__codelineno-0-210" name="__codelineno-0-210"></a>
 </span><span id="__span-0-211"><a id="__codelineno-0-211" name="__codelineno-0-211"></a><span class="sd">    Other Parameters:</span>
 </span><span id="__span-0-212"><a id="__codelineno-0-212" name="__codelineno-0-212"></a><span class="sd">        description (str | None): Description of what the check does and why it is implemented.</span>
-</span><span id="__span-0-213"><a id="__codelineno-0-213" name="__codelineno-0-213"></a><span class="sd">        exclude (str | None): Regex pattern to match the seed path. Seed paths that match the pattern will not be checked.</span>
-</span><span id="__span-0-214"><a id="__codelineno-0-214" name="__codelineno-0-214"></a><span class="sd">        include (str | None): Regex pattern to match the seed path. Only seed paths that match the pattern will be checked.</span>
+</span><span id="__span-0-213"><a id="__codelineno-0-213" name="__codelineno-0-213"></a><span class="sd">        exclude (str | list[str] | None): Regex pattern(s) to match the seed path. Seed paths that match any pattern will not be checked.</span>
+</span><span id="__span-0-214"><a id="__codelineno-0-214" name="__codelineno-0-214"></a><span class="sd">        include (str | list[str] | None): Regex pattern(s) to match the seed path. Only seed paths that match any pattern will be checked.</span>
 </span><span id="__span-0-215"><a id="__codelineno-0-215" name="__codelineno-0-215"></a><span class="sd">        severity (Literal[&quot;error&quot;, &quot;warn&quot;] | None): Severity level of the check. Default: `error`.</span>
 </span><span id="__span-0-216"><a id="__codelineno-0-216" name="__codelineno-0-216"></a>
 </span><span id="__span-0-217"><a id="__codelineno-0-217" name="__codelineno-0-217"></a><span class="sd">    Example(s):</span>

@@ -1907,22 +1907,22 @@
         <tr class="doc-section-item">
         <td><code>exclude</code></td>
         <td>
-                <code><span title="str">str</span> | None</code>
+                <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
         </td>
         <td>
             <div class="doc-md-description">
-            <p>Regex pattern to match the model path. Model paths that match the pattern will not be checked.</p>
+            <p>Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.</p>
             </div>
         </td>
         </tr>
         <tr class="doc-section-item">
         <td><code>include</code></td>
         <td>
-                <code><span title="str">str</span> | None</code>
+                <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
         </td>
         <td>
             <div class="doc-md-description">
-            <p>Regex pattern to match the model path. Only model paths that match the pattern will be checked.</p>
+            <p>Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.</p>
             </div>
         </td>
         </tr>
@@ -2085,8 +2085,8 @@
 </span><span id="__span-0-47"><a id="__codelineno-0-47" name="__codelineno-0-47"></a>
 </span><span id="__span-0-48"><a id="__codelineno-0-48" name="__codelineno-0-48"></a><span class="sd">    Other Parameters:</span>
 </span><span id="__span-0-49"><a id="__codelineno-0-49" name="__codelineno-0-49"></a><span class="sd">        description (str | None): Description of what the check does and why it is implemented.</span>
-</span><span id="__span-0-50"><a id="__codelineno-0-50" name="__codelineno-0-50"></a><span class="sd">        exclude (str | None): Regex pattern to match the model path. Model paths that match the pattern will not be checked.</span>
-</span><span id="__span-0-51"><a id="__codelineno-0-51" name="__codelineno-0-51"></a><span class="sd">        include (str | None): Regex pattern to match the model path. Only model paths that match the pattern will be checked.</span>
+</span><span id="__span-0-50"><a id="__codelineno-0-50" name="__codelineno-0-50"></a><span class="sd">        exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.</span>
+</span><span id="__span-0-51"><a id="__codelineno-0-51" name="__codelineno-0-51"></a><span class="sd">        include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.</span>
 </span><span id="__span-0-52"><a id="__codelineno-0-52" name="__codelineno-0-52"></a><span class="sd">        severity (Literal[&quot;error&quot;, &quot;warn&quot;] | None): Severity level of the check. Default: `error`.</span>
 </span><span id="__span-0-53"><a id="__codelineno-0-53" name="__codelineno-0-53"></a>
 </span><span id="__span-0-54"><a id="__codelineno-0-54" name="__codelineno-0-54"></a><span class="sd">    Example(s):</span>
@@ -2283,22 +2283,22 @@
         <tr class="doc-section-item">
         <td><code>exclude</code></td>
         <td>
-                <code><span title="str">str</span> | None</code>
+                <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
         </td>
         <td>
             <div class="doc-md-description">
-            <p>Regex pattern to match the model path. Model paths that match the pattern will not be checked.</p>
+            <p>Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.</p>
             </div>
         </td>
         </tr>
         <tr class="doc-section-item">
         <td><code>include</code></td>
         <td>
-                <code><span title="str">str</span> | None</code>
+                <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
         </td>
         <td>
             <div class="doc-md-description">
-            <p>Regex pattern to match the model path. Only model paths that match the pattern will be checked.</p>
+            <p>Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.</p>
             </div>
         </td>
         </tr>
@@ -2465,8 +2465,8 @@
 </span><span id="__span-0-143"><a id="__codelineno-0-143" name="__codelineno-0-143"></a>
 </span><span id="__span-0-144"><a id="__codelineno-0-144" name="__codelineno-0-144"></a><span class="sd">    Other Parameters:</span>
 </span><span id="__span-0-145"><a id="__codelineno-0-145" name="__codelineno-0-145"></a><span class="sd">        description (str | None): Description of what the check does and why it is implemented.</span>
-</span><span id="__span-0-146"><a id="__codelineno-0-146" name="__codelineno-0-146"></a><span class="sd">        exclude (str | None): Regex pattern to match the model path. Model paths that match the pattern will not be checked.</span>
-</span><span id="__span-0-147"><a id="__codelineno-0-147" name="__codelineno-0-147"></a><span class="sd">        include (str | None): Regex pattern to match the model path. Only model paths that match the pattern will be checked.</span>
+</span><span id="__span-0-146"><a id="__codelineno-0-146" name="__codelineno-0-146"></a><span class="sd">        exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.</span>
+</span><span id="__span-0-147"><a id="__codelineno-0-147" name="__codelineno-0-147"></a><span class="sd">        include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.</span>
 </span><span id="__span-0-148"><a id="__codelineno-0-148" name="__codelineno-0-148"></a><span class="sd">        severity (Literal[&quot;error&quot;, &quot;warn&quot;] | None): Severity level of the check. Default: `error`.</span>
 </span><span id="__span-0-149"><a id="__codelineno-0-149" name="__codelineno-0-149"></a>
 </span><span id="__span-0-150"><a id="__codelineno-0-150" name="__codelineno-0-150"></a><span class="sd">    Example(s):</span>
@@ -2632,22 +2632,22 @@
         <tr class="doc-section-item">
         <td><code>exclude</code></td>
         <td>
-                <code><span title="str">str</span> | None</code>
+                <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
         </td>
         <td>
             <div class="doc-md-description">
-            <p>Regex pattern to match the model path. Model paths that match the pattern will not be checked.</p>
+            <p>Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.</p>
             </div>
         </td>
         </tr>
         <tr class="doc-section-item">
         <td><code>include</code></td>
         <td>
-                <code><span title="str">str</span> | None</code>
+                <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
         </td>
         <td>
             <div class="doc-md-description">
-            <p>Regex pattern to match the model path. Only model paths that match the pattern will be checked.</p>
+            <p>Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.</p>
             </div>
         </td>
         </tr>
@@ -2739,8 +2739,8 @@
 </span><span id="__span-0-228"><a id="__codelineno-0-228" name="__codelineno-0-228"></a>
 </span><span id="__span-0-229"><a id="__codelineno-0-229" name="__codelineno-0-229"></a><span class="sd">    Other Parameters:</span>
 </span><span id="__span-0-230"><a id="__codelineno-0-230" name="__codelineno-0-230"></a><span class="sd">        description (str | None): Description of what the check does and why it is implemented.</span>
-</span><span id="__span-0-231"><a id="__codelineno-0-231" name="__codelineno-0-231"></a><span class="sd">        exclude (str | None): Regex pattern to match the model path. Model paths that match the pattern will not be checked.</span>
-</span><span id="__span-0-232"><a id="__codelineno-0-232" name="__codelineno-0-232"></a><span class="sd">        include (str | None): Regex pattern to match the model path. Only model paths that match the pattern will be checked.</span>
+</span><span id="__span-0-231"><a id="__codelineno-0-231" name="__codelineno-0-231"></a><span class="sd">        exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.</span>
+</span><span id="__span-0-232"><a id="__codelineno-0-232" name="__codelineno-0-232"></a><span class="sd">        include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.</span>
 </span><span id="__span-0-233"><a id="__codelineno-0-233" name="__codelineno-0-233"></a><span class="sd">        materialization (Literal[&quot;ephemeral&quot;, &quot;incremental&quot;, &quot;table&quot;, &quot;view&quot;] | None): Limit check to models with the specified materialization.</span>
 </span><span id="__span-0-234"><a id="__codelineno-0-234" name="__codelineno-0-234"></a><span class="sd">        severity (Literal[&quot;error&quot;, &quot;warn&quot;] | None): Severity level of the check. Default: `error`.</span>
 </span><span id="__span-0-235"><a id="__codelineno-0-235" name="__codelineno-0-235"></a>
