@@ -247,6 +247,14 @@ def test_make_markdown_table(data_in, data_out):
         (None, "staging/model_1.sql", True),
         ("^staging", "model_1.sql", False),
         ("^staging", "intermediate/model_1.sql", False),
+        # A list of patterns matches if ANY pattern matches (OR semantics).
+        (["^staging", "^intermediate"], "staging/model_1.sql", True),
+        (["^staging", "^intermediate"], "intermediate/model_1.sql", True),
+        (["^staging", "^intermediate"], "marts/model_1.sql", False),
+        (["^staging"], "staging/model_1.sql", True),
+        (["^staging"], "marts/model_1.sql", False),
+        # An empty list is treated as no filter (matches everything).
+        ([], "staging/model_1.sql", True),
     ],
 )
 def test_object_in_path(include_pattern, path, output):

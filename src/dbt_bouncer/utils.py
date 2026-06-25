@@ -103,10 +103,11 @@ def resource_in_path(check: "BaseCheck", resource: Any) -> bool:
     """
     if not object_in_path(check.include, resource.original_file_path):
         return False
-    return not (
-        check.exclude is not None
-        and object_in_path(check.exclude, resource.original_file_path)
-    )
+    # An empty list (or None) means "no exclude filter"; object_in_path treats
+    # both as a match, so guard here to avoid excluding every resource.
+    if check.exclude is None or check.exclude == []:
+        return True
+    return not object_in_path(check.exclude, resource.original_file_path)
 
 
 def find_missing_meta_keys(meta_config, required_keys) -> list[str]:
@@ -879,17 +880,26 @@ def compile_pattern(pattern: str, flags: int = 0) -> re.Pattern[str]:
         raise re.error(f"Invalid regex pattern '{pattern}': {e}") from e
 
 
-def object_in_path(include_pattern: str | None, path: str) -> bool:
-    """Determine if an object is included in the specified path pattern.
+def object_in_path(include_pattern: str | list[str] | None, path: str) -> bool:
+    """Determine if an object is included in the specified path pattern(s).
 
-    If no pattern is specified then all objects are included.
+    If no pattern is specified (``None`` or an empty list) then all objects are
+    included. When a list of patterns is given, the object is considered a match
+    if it matches ANY of the patterns (OR semantics).
 
     Returns:
-        bool: True if the object is included in the path pattern, False otherwise.
+        bool: True if the object is included in the path pattern(s), False otherwise.
 
     """
     if include_pattern is None:
         return True
-    return (
-        compile_pattern(include_pattern.strip()).match(clean_path_str(path)) is not None
+    patterns = (
+        [include_pattern] if isinstance(include_pattern, str) else include_pattern
+    )
+    if not patterns:  # An empty list is treated as no filter.
+        return True
+    cleaned_path = clean_path_str(path)
+    return any(
+        compile_pattern(pattern.strip()).match(cleaned_path) is not None
+        for pattern in patterns
     )

@@ -1215,6 +1215,62 @@ def test_should_run_check_exclude_pattern_matches():
     assert resource_in_path(check, resource) is False
 
 
+def test_should_run_check_exclude_list_pattern_matches():
+    """Test that a list of exclude patterns matches if any pattern matches."""
+    from dbt_bouncer.utils import resource_in_path
+
+    check = MagicMock()
+    check.include = None
+    check.exclude = ["^seeds", ".*_tmp.*"]
+
+    resource = MagicMock()
+    resource.original_file_path = "models/staging/stg_orders_tmp.sql"
+
+    assert resource_in_path(check, resource) is False
+
+
+def test_should_run_check_exclude_list_pattern_no_match():
+    """Test that a check runs when no exclude pattern in the list matches."""
+    from dbt_bouncer.utils import resource_in_path
+
+    check = MagicMock()
+    check.include = None
+    check.exclude = ["^seeds", "^macros"]
+
+    resource = MagicMock()
+    resource.original_file_path = "models/staging/stg_orders.sql"
+
+    assert resource_in_path(check, resource) is True
+
+
+def test_should_run_check_include_list_pattern_matches():
+    """Test that a list of include patterns matches if any pattern matches."""
+    from dbt_bouncer.utils import resource_in_path
+
+    check = MagicMock()
+    check.include = ["^models/marts", "^models/staging"]
+    check.exclude = None
+
+    resource = MagicMock()
+    resource.original_file_path = "models/staging/stg_orders.sql"
+
+    assert resource_in_path(check, resource) is True
+
+
+def test_should_run_check_empty_exclude_list_runs_check():
+    """Test that an empty exclude list is treated as no filter (check runs)."""
+    from dbt_bouncer.utils import resource_in_path
+
+    check = MagicMock()
+    check.include = None
+    check.exclude = []
+
+    resource = MagicMock()
+    resource.original_file_path = "models/staging/stg_orders.sql"
+
+    assert resource_in_path(check, resource) is True
+
+
 def test_should_run_check_materialization_mismatch():
     """Test that check doesn't run when materialization doesn't match."""
     check = MagicMock()
