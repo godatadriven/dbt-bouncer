@@ -6,6 +6,7 @@ from typer.testing import CliRunner
 
 from dbt_bouncer.main import app
 from dbt_bouncer.reporting.logger import JsonFormatter, configure_console_logging
+from dbt_bouncer.version import version
 
 
 def test_logging_debug_cli(caplog) -> None:
@@ -14,7 +15,7 @@ def test_logging_debug_cli(caplog) -> None:
         app,
         ["--config-file", "dbt-bouncer-example.yml", "-v"],
     )
-    assert "Running dbt-bouncer (0.0.0)..." in caplog.text
+    assert f"Running dbt-bouncer ({version()})..." in caplog.text
     assert len([r for r in caplog.messages if r.find("Loading config from") >= 0]) >= 1
 
 
@@ -27,7 +28,7 @@ def test_logging_debug_env_var(caplog) -> None:
             app,
             ["--config-file", "dbt-bouncer-example.yml"],
         )
-        assert "Running dbt-bouncer (0.0.0)..." in caplog.text
+        assert f"Running dbt-bouncer ({version()})..." in caplog.text
         assert (
             len([r for r in caplog.messages if r.find("Loading config from") >= 0]) >= 1
         )
@@ -39,7 +40,7 @@ def test_logging_info(caplog) -> None:
         app,
         ["--config-file", "dbt-bouncer-example.yml"],
     )
-    assert "Running dbt-bouncer (0.0.0)..." in caplog.text
+    assert f"Running dbt-bouncer ({version()})..." in caplog.text
 
 
 def test_no_duplicate_handlers() -> None:
