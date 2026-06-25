@@ -1271,6 +1271,20 @@ def test_should_run_check_empty_exclude_list_runs_check():
     assert resource_in_path(check, resource) is True
 
 
+def test_should_run_check_empty_include_list_runs_check():
+    """Test that an empty include list is treated as no filter (check runs)."""
+    from dbt_bouncer.utils import resource_in_path
+
+    check = MagicMock()
+    check.include = []
+    check.exclude = None
+
+    resource = MagicMock()
+    resource.original_file_path = "models/staging/stg_orders.sql"
+
+    assert resource_in_path(check, resource) is True
+
+
 def test_should_run_check_materialization_mismatch():
     """Test that check doesn't run when materialization doesn't match."""
     check = MagicMock()
