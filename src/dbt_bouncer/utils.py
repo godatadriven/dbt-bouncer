@@ -103,11 +103,7 @@ def resource_in_path(check: "BaseCheck", resource: Any) -> bool:
     """
     if not object_in_path(check.include, resource.original_file_path):
         return False
-    # An empty list (or None) means "no exclude filter"; object_in_path treats
-    # both as a match, so guard here to avoid excluding every resource.
-    if check.exclude is None or check.exclude == []:
-        return True
-    return not object_in_path(check.exclude, resource.original_file_path)
+    return not object_excluded_by_path(check.exclude, resource.original_file_path)
 
 
 def find_missing_meta_keys(meta_config, required_keys) -> list[str]:
@@ -903,3 +899,20 @@ def object_in_path(include_pattern: str | list[str] | None, path: str) -> bool:
         compile_pattern(pattern.strip()).match(cleaned_path) is not None
         for pattern in patterns
     )
+
+
+def object_excluded_by_path(exclude_pattern: str | list[str] | None, path: str) -> bool:
+    """Determine whether a path is excluded by the given pattern(s).
+
+    This is the exclude-side counterpart to ``object_in_path``. The semantics of
+    an absent filter are deliberately inverted: where ``object_in_path`` treats
+    ``None`` or an empty list as "match everything", here an absent exclude
+    filter (``None`` or an empty list) excludes nothing.
+
+    Returns:
+        bool: True if the path matches any exclude pattern, False otherwise.
+
+    """
+    if exclude_pattern is None or exclude_pattern == []:
+        return False
+    return object_in_path(exclude_pattern, path)

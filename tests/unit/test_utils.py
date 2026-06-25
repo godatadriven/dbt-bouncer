@@ -15,6 +15,7 @@ from dbt_bouncer.utils import (
     get_clean_model_name,
     get_package_version_number,
     make_markdown_table,
+    object_excluded_by_path,
     object_in_path,
 )
 
@@ -259,6 +260,25 @@ def test_make_markdown_table(data_in, data_out):
 )
 def test_object_in_path(include_pattern, path, output):
     assert object_in_path(include_pattern, path) == output
+
+
+@pytest.mark.parametrize(
+    ("exclude_pattern", "path", "output"),
+    [
+        # A matching pattern excludes the path.
+        ("^staging", "staging/model_1.sql", True),
+        (["^staging", "^intermediate"], "intermediate/model_1.sql", True),
+        # A non-matching pattern does not exclude the path.
+        ("^staging", "marts/model_1.sql", False),
+        (["^staging", "^intermediate"], "marts/model_1.sql", False),
+        # No exclude filter (None or empty list) excludes nothing -- this is the
+        # key asymmetry with object_in_path, where None/empty means "match all".
+        (None, "staging/model_1.sql", False),
+        ([], "staging/model_1.sql", False),
+    ],
+)
+def test_object_excluded_by_path(exclude_pattern, path, output):
+    assert object_excluded_by_path(exclude_pattern, path) == output
 
 
 # --- Tests for _extract_checks_from_module ---
