@@ -50,7 +50,7 @@ run_results = "dbt_bouncer.checks.run_results"
 [project.optional-dependencies]
 dev = [
   "bandit~=1.0",
-  "dbt-core>=1.12.0b1,<2",
+  "dbt-core>=2.0.0a1,<3",
   "dbt-duckdb~=1.0",
   "prek>=0.1,<1",
   "pytest>=8,<10",
@@ -218,3 +218,4 @@ respect_gitignore = true
 
 [tool.uv]
 package = true
+prerelease = "allow"

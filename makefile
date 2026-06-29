@@ -6,32 +6,20 @@ help: ## Display help
 	@awk 'BEGIN {FS = ":.*##"; printf "Usage:\n  make \033[36m<target>\033[0m\n\nTargets:\n"} /^[a-zA-Z0-9_-]+:.*?##/ { printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
 
 # On GitHub the `dbt build` command often returns "leaked semaphores" errors.
-build-and-run-dbt-bouncer: ## Run dbt deps, build, docs generate and run dbt-bouncer
-	uv run dbt deps
-	uv run dbt build
-	uv run dbt docs generate
+# dbt 2.0 drops `dbt docs generate`; use compile --write-catalog first (produces
+# catalog.json), then build (produces manifest.json + run_results.json without
+# clobbering the catalog). Explicit --profiles-dir/--project-dir for CI correctness.
+build-and-run-dbt-bouncer: ## Run dbt deps, compile --write-catalog, build and run dbt-bouncer
+	uv run dbt deps --profiles-dir ./dbt_project --project-dir ./dbt_project
+	uv run dbt compile --write-catalog --profiles-dir ./dbt_project --project-dir ./dbt_project
+	uv run dbt build --profiles-dir ./dbt_project --project-dir ./dbt_project
 	uv run dbt-bouncer --config-file ./dbt-bouncer-example.yml
 
 # Each version-specific target uses --target-path to write to an isolated directory.
-# The version builds (110, 111, 112) can run in parallel: make -j4 build-artifacts
-# Note: parallel execution may cause conflicts if dbt acquires project-level locks
-# in ./dbt_project. If that happens, run without -j.
-# dbt 1.9 fixtures are frozen: the arguments: migration applied by dbt-autofix is
-# incompatible with dbt-core 1.9 (matching the pattern for dbt 1.7/1.8).
-build-artifacts: build-artifacts-110 build-artifacts-111 build-artifacts-112 build-artifacts-local ## Build dbt artifacts for testing
-
-build-artifacts-110: ## Build dbt 1.10 test artifacts
-	uvx --python "==$(PYTHON_INTERPRETER_CONSTRAINT)" --with 'dbt-duckdb~=1.10.0' --from 'dbt-core~=1.10.0' dbt parse --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_110
-	uvx --python "==$(PYTHON_INTERPRETER_CONSTRAINT)" --with 'dbt-duckdb~=1.10.0' --from 'dbt-core~=1.10.0' dbt docs generate --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_110
-	rm -r ./tests/fixtures/dbt_110/target || true
-	mv ./dbt_project/target_110 ./tests/fixtures/dbt_110/target
-
-build-artifacts-111: ## Build dbt 1.11 test artifacts
-	# No dbt-duckdb==1.11 yet so sticking with dbt-duckdb==1.10
-	uvx --python "==$(PYTHON_INTERPRETER_CONSTRAINT)" --with 'dbt-duckdb~=1.10.0' --from 'dbt-core~=1.11.0' dbt parse --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_111
-	uvx --python "==$(PYTHON_INTERPRETER_CONSTRAINT)" --with 'dbt-duckdb~=1.10.0' --from 'dbt-core~=1.11.0' dbt docs generate --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_111
-	rm -r ./tests/fixtures/dbt_111/target || true
-	mv ./dbt_project/target_111 ./tests/fixtures/dbt_111/target
+# dbt 1.7–1.11 fixtures are frozen: their committed fixtures stay for backward-compat
+# parsing coverage but are no longer rebuilt (matching the pattern for dbt 1.7/1.8/1.9).
+# Only dbt 1.12 and 2.0 are actively rebuilt.
+build-artifacts: build-artifacts-112 build-artifacts-20 build-artifacts-local ## Build dbt artifacts for testing
 
 build-artifacts-112: ## Build dbt 1.12 test artifacts
 	# No dbt-duckdb==1.12 yet so sticking with dbt-duckdb==1.10
@@ -41,9 +29,15 @@ build-artifacts-112: ## Build dbt 1.12 test artifacts
 	rm -r ./tests/fixtures/dbt_112/target || true
 	mv ./dbt_project/target_112 ./tests/fixtures/dbt_112/target
 
+build-artifacts-20: ## Build dbt 2.0 (Fusion) test artifacts
+	# dbt 2.0 deprecates `dbt docs generate`; use `dbt compile --write-catalog` instead.
+	uvx --python "==$(PYTHON_INTERPRETER_CONSTRAINT)" --prerelease=allow --with 'dbt-duckdb~=1.10.0' --from 'dbt-core>=2.0.0a1,<3' dbt compile --write-catalog --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_20
+	rm -r ./tests/fixtures/dbt_20/target || true
+	mkdir -p ./tests/fixtures/dbt_20
+	mv ./dbt_project/target_20 ./tests/fixtures/dbt_20/target
+
 build-artifacts-local: install ## Build local dbt test artifacts
-	uv run dbt parse --profiles-dir ./dbt_project --project-dir ./dbt_project
-	uv run dbt docs generate --profiles-dir ./dbt_project --project-dir ./dbt_project
+	uv run dbt compile --write-catalog --profiles-dir ./dbt_project --project-dir ./dbt_project
 
 generate-schema: ## Regenerate schema.json from Pydantic models
 	uv run python scripts/generate_schema.py

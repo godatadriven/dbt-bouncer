@@ -225,6 +225,23 @@ jobs:
                   "${REGISTRY}/${IMAGE_NAME}:ci" \
                   --config-file /app/dbt-bouncer-example.yml
 
+    e2e-dbt-20:
+        needs: [prek]
+        permissions:
+          contents: read
+        runs-on: ubuntu-24.04
+        steps:
+            - name: Checkout
+              uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+              with:
+                persist-credentials: false
+
+            - name: Setup Python
+              uses: ./.github/actions/setup_python_env
+
+            - name: Build dbt 2.0 artifacts and run dbt-bouncer
+              run: make build-and-run-dbt-bouncer
+
     docs-build:
       needs: [prek]
       permissions:

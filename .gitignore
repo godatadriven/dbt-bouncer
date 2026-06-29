@@ -244,6 +244,7 @@ tests/fixtures/dbt_112/target/compiled/
 tests/fixtures/dbt_112/target/index.html
 tests/fixtures/dbt_112/target/graph_summary.json
 tests/fixtures/dbt_112/target/graph.gpickle
+tests/fixtures/dbt_112/target/osi_document.json
 tests/fixtures/dbt_112/target/partial_parse.msgpack
 tests/fixtures/dbt_112/target/perf_info.json
 tests/fixtures/dbt_112/target/semantic_manifest.json
