@@ -75,6 +75,39 @@ from dbt_bouncer.testing import check_fails, check_passes
             check_fails,
             id="missing_argument_in_config",
         ),
+        pytest.param(
+            {
+                "arguments": [
+                    {"name": "model", "description": "The model under test."},
+                    {"name": "column_name", "description": "The column to check."},
+                    {"name": "list_values", "description": "Allowed values."},
+                ],
+                # Test macro whose body is a single macro call: the `{% set %}`
+                # statement parses to a `jinja2.nodes.Assign` that has no `.nodes`
+                # attribute (see issue #927).
+                "macro_sql": '{% test expect_valid_length(model, column_name, list_values) %}\n{%- set expression = column_name ~ " in (" ~ list_values | join(\',\') ~ ")" -%}\n{{ dbt_expectations.expression_is_true(model, expression=expression) }}\n{% endtest %}',
+                "name": "test_expect_valid_length",
+                "original_file_path": "macros/expect_valid_length.sql",
+                "unique_id": "macro.package_name.test_expect_valid_length",
+            },
+            check_passes,
+            id="test_macro_with_set_statement",
+        ),
+        pytest.param(
+            {
+                "arguments": [
+                    {"name": "model", "description": "The model under test."},
+                    {"name": "column_name", "description": ""},
+                    {"name": "list_values", "description": "Allowed values."},
+                ],
+                "macro_sql": '{% test expect_valid_length(model, column_name, list_values) %}\n{%- set expression = column_name ~ " in (" ~ list_values | join(\',\') ~ ")" -%}\n{{ dbt_expectations.expression_is_true(model, expression=expression) }}\n{% endtest %}',
+                "name": "test_expect_valid_length",
+                "original_file_path": "macros/expect_valid_length.sql",
+                "unique_id": "macro.package_name.test_expect_valid_length",
+            },
+            check_fails,
+            id="test_macro_with_set_statement_missing_description",
+        ),
     ],
 )
 def test_check_macro_arguments_description_populated(macro_overrides, check_fn):

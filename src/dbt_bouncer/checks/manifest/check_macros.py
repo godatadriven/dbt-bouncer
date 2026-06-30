@@ -95,16 +95,19 @@ def check_macro_arguments_description_populated(
             # Materializations don't have arguments
             macro_arguments = []
         else:
-            # Macro is a test
-            test_macro = next(
-                x
-                for x in ast.body
-                if not isinstance(x.nodes[0], nodes.Call)  # type: ignore[attr-defined]
-            )
+            # Macro is a test. Extract the argument names from the test
+            # signature (`{% test name(arg_1, arg_2, ...) %}`) rather than
+            # walking the macro body. Walking the body is fragile: it breaks
+            # for tests whose body is a single macro call or contains a
+            # `{% set %}` statement, which parses to a `jinja2.nodes.Assign`
+            # node with no `.nodes` attribute (see issue #927).
+            signature_call = ast.body[0].nodes[0]  # type: ignore[attr-defined]
+            # With autoescape enabled the signature is wrapped in an
+            # `escape(...)` call; unwrap it to reach the test's own call node.
+            if signature_call.args and isinstance(signature_call.args[0], nodes.Call):
+                signature_call = signature_call.args[0]
             macro_arguments = [
-                x.name
-                for x in test_macro.nodes  # type: ignore[attr-defined]
-                if isinstance(x, nodes.Name)
+                a.name for a in signature_call.args if isinstance(a, nodes.Name)
             ]
 
     # macro_arguments: List of args parsed from macro SQL
