@@ -2082,6 +2082,37 @@
 <p>When a column exists in the database but is missing from the model's properties file, it cannot receive a description, a data test, or a constraint. These invisible columns accumulate over time as schemas evolve, creating gaps in data quality coverage and making it harder for consumers to discover what data is available. This check ensures the properties file stays in sync with the actual schema, giving teams a complete and testable view of every model.</p>
 </div>
 
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>case_sensitive</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Whether the column names are case sensitive or not. Necessary for adapters like <code>dbt-snowflake</code> where the column in <code>catalog.json</code> is uppercase but the column in <code>manifest.json</code> can be lowercase. Defaults to <code>false</code> for <code>dbt-snowflake</code>, otherwise <code>true</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>True</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
 <p><strong>Receives at execution time:</strong></p>
 <table>
   <thead>
@@ -2092,16 +2123,6 @@
     </tr>
   </thead>
   <tbody>
-      <tr>
-        <td><code>case_sensitive</code>        <td>
-              <code><span title="bool">bool</span> | None</code>
-        </td>
-        <td>
-          <div class="doc-md-description">
-            <p>Whether the column names are case sensitive or not. Necessary for adapters like <code>dbt-snowflake</code> where the column in <code>catalog.json</code> is uppercase but the column in <code>manifest.json</code> can be lowercase. Defaults to <code>false</code> for <code>dbt-snowflake</code>, otherwise <code>true</code>.</p>
-          </div>
-        </td>
-      </tr>
       <tr>
         <td><code>catalog_node</code>        <td>
               <code><span title="CatalogNodeEntry">CatalogNodeEntry</span></code>
@@ -2251,17 +2272,17 @@
 <span class="normal"><a href="#__codelineno-0-136">136</a></span>
 <span class="normal"><a href="#__codelineno-0-137">137</a></span>
 <span class="normal"><a href="#__codelineno-0-138">138</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-85"><a id="__codelineno-0-85" name="__codelineno-0-85"></a><span class="nd">@check</span>
-</span><span id="__span-0-86"><a id="__codelineno-0-86" name="__codelineno-0-86"></a><span class="k">def</span><span class="w"> </span><span class="nf">check_columns_are_all_documented</span><span class="p">(</span>
-</span><span id="__span-0-87"><a id="__codelineno-0-87" name="__codelineno-0-87"></a>    <span class="n">catalog_node</span><span class="p">,</span> <span class="n">ctx</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">case_sensitive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">True</span>
-</span><span id="__span-0-88"><a id="__codelineno-0-88" name="__codelineno-0-88"></a><span class="p">):</span>
-</span><span id="__span-0-89"><a id="__codelineno-0-89" name="__codelineno-0-89"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;All columns in a model should be included in the model&#39;s properties file, i.e. `.yml` file.</span>
+</span><span id="__span-0-86"><a id="__codelineno-0-86" name="__codelineno-0-86"></a><span class="k">def</span><span class="w"> </span><span class="nf">check_columns_are_all_documented</span><span class="p">(</span><span class="n">catalog_node</span><span class="p">,</span> <span class="n">ctx</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">case_sensitive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+</span><span id="__span-0-87"><a id="__codelineno-0-87" name="__codelineno-0-87"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;All columns in a model should be included in the model&#39;s properties file, i.e. `.yml` file.</span>
+</span><span id="__span-0-88"><a id="__codelineno-0-88" name="__codelineno-0-88"></a>
+</span><span id="__span-0-89"><a id="__codelineno-0-89" name="__codelineno-0-89"></a><span class="sd">    !!! info &quot;Rationale&quot;</span>
 </span><span id="__span-0-90"><a id="__codelineno-0-90" name="__codelineno-0-90"></a>
-</span><span id="__span-0-91"><a id="__codelineno-0-91" name="__codelineno-0-91"></a><span class="sd">    !!! info &quot;Rationale&quot;</span>
+</span><span id="__span-0-91"><a id="__codelineno-0-91" name="__codelineno-0-91"></a><span class="sd">        When a column exists in the database but is missing from the model&#39;s properties file, it cannot receive a description, a data test, or a constraint. These invisible columns accumulate over time as schemas evolve, creating gaps in data quality coverage and making it harder for consumers to discover what data is available. This check ensures the properties file stays in sync with the actual schema, giving teams a complete and testable view of every model.</span>
 </span><span id="__span-0-92"><a id="__codelineno-0-92" name="__codelineno-0-92"></a>
-</span><span id="__span-0-93"><a id="__codelineno-0-93" name="__codelineno-0-93"></a><span class="sd">        When a column exists in the database but is missing from the model&#39;s properties file, it cannot receive a description, a data test, or a constraint. These invisible columns accumulate over time as schemas evolve, creating gaps in data quality coverage and making it harder for consumers to discover what data is available. This check ensures the properties file stays in sync with the actual schema, giving teams a complete and testable view of every model.</span>
-</span><span id="__span-0-94"><a id="__codelineno-0-94" name="__codelineno-0-94"></a>
-</span><span id="__span-0-95"><a id="__codelineno-0-95" name="__codelineno-0-95"></a><span class="sd">    Receives:</span>
-</span><span id="__span-0-96"><a id="__codelineno-0-96" name="__codelineno-0-96"></a><span class="sd">        case_sensitive (bool | None): Whether the column names are case sensitive or not. Necessary for adapters like `dbt-snowflake` where the column in `catalog.json` is uppercase but the column in `manifest.json` can be lowercase. Defaults to `false` for `dbt-snowflake`, otherwise `true`.</span>
+</span><span id="__span-0-93"><a id="__codelineno-0-93" name="__codelineno-0-93"></a><span class="sd">    Parameters:</span>
+</span><span id="__span-0-94"><a id="__codelineno-0-94" name="__codelineno-0-94"></a><span class="sd">        case_sensitive (bool): Whether the column names are case sensitive or not. Necessary for adapters like `dbt-snowflake` where the column in `catalog.json` is uppercase but the column in `manifest.json` can be lowercase. Defaults to `false` for `dbt-snowflake`, otherwise `true`.</span>
+</span><span id="__span-0-95"><a id="__codelineno-0-95" name="__codelineno-0-95"></a>
+</span><span id="__span-0-96"><a id="__codelineno-0-96" name="__codelineno-0-96"></a><span class="sd">    Receives:</span>
 </span><span id="__span-0-97"><a id="__codelineno-0-97" name="__codelineno-0-97"></a><span class="sd">        catalog_node (CatalogNodeEntry): The CatalogNodeEntry object to check.</span>
 </span><span id="__span-0-98"><a id="__codelineno-0-98" name="__codelineno-0-98"></a><span class="sd">        manifest_obj (ManifestObject): The ManifestObject object parsed from `manifest.json`.</span>
 </span><span id="__span-0-99"><a id="__codelineno-0-99" name="__codelineno-0-99"></a><span class="sd">        models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.</span>
