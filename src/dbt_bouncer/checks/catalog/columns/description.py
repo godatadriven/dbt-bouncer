@@ -83,17 +83,17 @@ def check_column_description_populated(
 
 
 @check
-def check_columns_are_all_documented(
-    catalog_node, ctx, *, case_sensitive: bool | None = True
-):
+def check_columns_are_all_documented(catalog_node, ctx, *, case_sensitive: bool = True):
     """All columns in a model should be included in the model's properties file, i.e. `.yml` file.
 
     !!! info "Rationale"
 
         When a column exists in the database but is missing from the model's properties file, it cannot receive a description, a data test, or a constraint. These invisible columns accumulate over time as schemas evolve, creating gaps in data quality coverage and making it harder for consumers to discover what data is available. This check ensures the properties file stays in sync with the actual schema, giving teams a complete and testable view of every model.
 
+    Parameters:
+        case_sensitive (bool): Whether the column names are case sensitive or not. Necessary for adapters like `dbt-snowflake` where the column in `catalog.json` is uppercase but the column in `manifest.json` can be lowercase. Defaults to `false` for `dbt-snowflake`, otherwise `true`.
+
     Receives:
-        case_sensitive (bool | None): Whether the column names are case sensitive or not. Necessary for adapters like `dbt-snowflake` where the column in `catalog.json` is uppercase but the column in `manifest.json` can be lowercase. Defaults to `false` for `dbt-snowflake`, otherwise `true`.
         catalog_node (CatalogNodeEntry): The CatalogNodeEntry object to check.
         manifest_obj (ManifestObject): The ManifestObject object parsed from `manifest.json`.
         models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.

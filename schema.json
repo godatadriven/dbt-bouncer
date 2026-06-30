@@ -104,7 +104,7 @@
     },
     "CheckColumnHasSpecifiedTest": {
       "additionalProperties": false,
-      "description": "Columns that match the specified regexp pattern must have a specified test.\n\n!!! info \"Rationale\"\n\n    Naming conventions communicate expectations: a column named `is_active` implies it is boolean and never null; a column ending in `_id` implies it is a valid foreign key. Without enforcement, these implicit contracts go untested, and referential integrity issues or null values can silently corrupt downstream aggregations. This check bridges naming conventions and data quality by automatically requiring specific tests on columns that match a pattern, eliminating the manual overhead of reviewing every column individually.\n\nParameters:\n    column_name_pattern (str): Regex pattern to match the column name.\n    test_name (str): Name of the test to check for.\n\nReceives:\n    case_sensitive (bool | None): Whether the column names are case sensitive or not. Necessary for adapters like `dbt-snowflake` where the column in `catalog.json` is uppercase but the column in `manifest.json` can be lowercase. Defaults to `false` for `dbt-snowflake`, otherwise `true`.\n    catalog_node (CatalogNodeEntry): The CatalogNodeEntry object to check.\n    manifest_obj (ManifestObject): The ManifestObject object parsed from `manifest.json`.\n    tests (list[TestNode]): List of TestNode objects parsed from `manifest.json`.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    catalog_checks:\n        - name: check_column_has_specified_test\n          column_name_pattern: ^is_.*\n          test_name: not_null\n    ```",
+      "description": "Columns that match the specified regexp pattern must have a specified test.\n\n!!! info \"Rationale\"\n\n    Naming conventions communicate expectations: a column named `is_active` implies it is boolean and never null; a column ending in `_id` implies it is a valid foreign key. Without enforcement, these implicit contracts go untested, and referential integrity issues or null values can silently corrupt downstream aggregations. This check bridges naming conventions and data quality by automatically requiring specific tests on columns that match a pattern, eliminating the manual overhead of reviewing every column individually.\n\nParameters:\n    case_sensitive (bool): Whether the column names are case sensitive or not. Necessary for adapters like `dbt-snowflake` where the column in `catalog.json` is uppercase but the column in `manifest.json` can be lowercase. Defaults to `false` for `dbt-snowflake`, otherwise `true`.\n    column_name_pattern (str): Regex pattern to match the column name.\n    test_name (str): Name of the test to check for.\n\nReceives:\n    catalog_node (CatalogNodeEntry): The CatalogNodeEntry object to check.\n    manifest_obj (ManifestObject): The ManifestObject object parsed from `manifest.json`.\n    tests (list[TestNode]): List of TestNode objects parsed from `manifest.json`.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    catalog_checks:\n        - name: check_column_has_specified_test\n          column_name_pattern: ^is_.*\n          test_name: not_null\n    ```",
       "properties": {
         "description": {
           "anyOf": [
@@ -196,16 +196,9 @@
           "type": "string"
         },
         "case_sensitive": {
-          "anyOf": [
-            {
-              "type": "boolean"
-            },
-            {
-              "type": "null"
-            }
-          ],
           "default": true,
-          "title": "Case Sensitive"
+          "title": "Case Sensitive",
+          "type": "boolean"
         }
       },
       "required": [
@@ -559,7 +552,7 @@
     },
     "CheckColumnsAreAllDocumented": {
       "additionalProperties": false,
-      "description": "All columns in a model should be included in the model's properties file, i.e. `.yml` file.\n\n!!! info \"Rationale\"\n\n    When a column exists in the database but is missing from the model's properties file, it cannot receive a description, a data test, or a constraint. These invisible columns accumulate over time as schemas evolve, creating gaps in data quality coverage and making it harder for consumers to discover what data is available. This check ensures the properties file stays in sync with the actual schema, giving teams a complete and testable view of every model.\n\nReceives:\n    case_sensitive (bool | None): Whether the column names are case sensitive or not. Necessary for adapters like `dbt-snowflake` where the column in `catalog.json` is uppercase but the column in `manifest.json` can be lowercase. Defaults to `false` for `dbt-snowflake`, otherwise `true`.\n    catalog_node (CatalogNodeEntry): The CatalogNodeEntry object to check.\n    manifest_obj (ManifestObject): The ManifestObject object parsed from `manifest.json`.\n    models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    catalog_checks:\n        - name: check_columns_are_all_documented\n    ```",
+      "description": "All columns in a model should be included in the model's properties file, i.e. `.yml` file.\n\n!!! info \"Rationale\"\n\n    When a column exists in the database but is missing from the model's properties file, it cannot receive a description, a data test, or a constraint. These invisible columns accumulate over time as schemas evolve, creating gaps in data quality coverage and making it harder for consumers to discover what data is available. This check ensures the properties file stays in sync with the actual schema, giving teams a complete and testable view of every model.\n\nParameters:\n    case_sensitive (bool): Whether the column names are case sensitive or not. Necessary for adapters like `dbt-snowflake` where the column in `catalog.json` is uppercase but the column in `manifest.json` can be lowercase. Defaults to `false` for `dbt-snowflake`, otherwise `true`.\n\nReceives:\n    catalog_node (CatalogNodeEntry): The CatalogNodeEntry object to check.\n    manifest_obj (ManifestObject): The ManifestObject object parsed from `manifest.json`.\n    models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    catalog_checks:\n        - name: check_columns_are_all_documented\n    ```",
       "properties": {
         "description": {
           "anyOf": [
@@ -643,16 +636,9 @@
           "type": "string"
         },
         "case_sensitive": {
-          "anyOf": [
-            {
-              "type": "boolean"
-            },
-            {
-              "type": "null"
-            }
-          ],
           "default": true,
-          "title": "Case Sensitive"
+          "title": "Case Sensitive",
+          "type": "boolean"
         }
       },
       "title": "CheckColumnsAreAllDocumented",

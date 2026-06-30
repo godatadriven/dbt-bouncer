@@ -13,7 +13,7 @@ def check_column_has_specified_test(
     *,
     column_name_pattern: str,
     test_name: str,
-    case_sensitive: bool | None = True,
+    case_sensitive: bool = True,
 ):
     """Columns that match the specified regexp pattern must have a specified test.
 
@@ -22,11 +22,11 @@ def check_column_has_specified_test(
         Naming conventions communicate expectations: a column named `is_active` implies it is boolean and never null; a column ending in `_id` implies it is a valid foreign key. Without enforcement, these implicit contracts go untested, and referential integrity issues or null values can silently corrupt downstream aggregations. This check bridges naming conventions and data quality by automatically requiring specific tests on columns that match a pattern, eliminating the manual overhead of reviewing every column individually.
 
     Parameters:
+        case_sensitive (bool): Whether the column names are case sensitive or not. Necessary for adapters like `dbt-snowflake` where the column in `catalog.json` is uppercase but the column in `manifest.json` can be lowercase. Defaults to `false` for `dbt-snowflake`, otherwise `true`.
         column_name_pattern (str): Regex pattern to match the column name.
         test_name (str): Name of the test to check for.
 
     Receives:
-        case_sensitive (bool | None): Whether the column names are case sensitive or not. Necessary for adapters like `dbt-snowflake` where the column in `catalog.json` is uppercase but the column in `manifest.json` can be lowercase. Defaults to `false` for `dbt-snowflake`, otherwise `true`.
         catalog_node (CatalogNodeEntry): The CatalogNodeEntry object to check.
         manifest_obj (ManifestObject): The ManifestObject object parsed from `manifest.json`.
         tests (list[TestNode]): List of TestNode objects parsed from `manifest.json`.
