@@ -1,5 +1,7 @@
 """Checks related to column tests."""
 
+import re
+
 from dbt_bouncer.check_framework.decorator import check, fail
 from dbt_bouncer.utils import compile_pattern
 
@@ -47,7 +49,13 @@ def check_column_has_specified_test(
     if ctx.manifest_obj.manifest.metadata.adapter_type in ["snowflake"]:
         case_sensitive = False
 
-    compiled_column_name_pattern = compile_pattern(column_name_pattern.strip())
+    # When matching is case-insensitive the catalog name is upper-cased (e.g.
+    # Snowflake) while patterns are conventionally written lowercase, so the regex
+    # must ignore case too — otherwise the column silently falls out of scope.
+    pattern_flags = 0 if case_sensitive else re.IGNORECASE
+    compiled_column_name_pattern = compile_pattern(
+        column_name_pattern.strip(), pattern_flags
+    )
     columns_to_check = [
         v.name
         for _, v in catalog_node.columns.items()

@@ -109,3 +109,25 @@ class TestCheckColumnHasSpecifiedTest:
             test_name="unique",
             ctx_tests=[{}],
         )
+
+    def test_lowercase_pattern_matches_upper_catalog_column_snowflake(self):
+        # On Snowflake an upper-cased catalog column (`IS_ACTIVE`) must still be
+        # selected by a conventionally lowercase pattern (`^is_.*`), otherwise the
+        # column silently falls out of scope and the check passes vacuously rather
+        # than flagging the missing test.
+        check_fails(
+            "check_column_has_specified_test",
+            catalog_node={
+                "columns": {
+                    "IS_ACTIVE": {
+                        "index": 1,
+                        "name": "IS_ACTIVE",
+                        "type": "BOOLEAN",
+                    },
+                },
+            },
+            column_name_pattern="^is_.*",
+            test_name="not_null",
+            ctx_tests=[{}],
+            ctx_manifest_obj={"metadata": {"adapter_type": "snowflake"}},
+        )
