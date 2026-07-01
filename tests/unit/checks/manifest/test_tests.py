@@ -118,3 +118,70 @@ def test_check_test_has_tags_invalid_criteria():
             tags=["critical"],
             test={"tags": ["critical"]},
         )
+
+
+@pytest.mark.parametrize(
+    ("regexp_pattern", "test_overrides", "check_fn"),
+    [
+        pytest.param(
+            None,
+            {"config": {"where": "created_at >= '1970-01-01'"}},
+            check_passes,
+            id="where_present_no_pattern",
+        ),
+        pytest.param(
+            None,
+            {"config": {"where": "{{ partition_filter() }} >= 7"}},
+            check_passes,
+            id="where_jinja_present_no_pattern",
+        ),
+        pytest.param(
+            None,
+            {"config": {"where": None}},
+            check_fails,
+            id="where_none",
+        ),
+        pytest.param(
+            None,
+            {"config": {"where": "   "}},
+            check_fails,
+            id="where_blank",
+        ),
+        pytest.param(
+            None,
+            {"config": {}},
+            check_fails,
+            id="where_missing_from_config",
+        ),
+        pytest.param(
+            None,
+            {},
+            check_fails,
+            id="config_missing",
+        ),
+        pytest.param(
+            ".*partition_filter.*",
+            {"config": {"where": "{{ partition_filter() }} >= 7"}},
+            check_passes,
+            id="where_matches_pattern",
+        ),
+        pytest.param(
+            ".*partition_filter.*",
+            {"config": {"where": "created_at >= '1970-01-01'"}},
+            check_fails,
+            id="where_does_not_match_pattern",
+        ),
+        pytest.param(
+            ".*partition_filter.*",
+            {"config": {"where": None}},
+            check_fails,
+            id="where_none_with_pattern",
+        ),
+    ],
+)
+def test_check_test_has_where_config(regexp_pattern, test_overrides, check_fn):
+    check_fn(
+        "check_test_has_where_config",
+        regexp_pattern=regexp_pattern,
+        test=test_overrides,
+    )
