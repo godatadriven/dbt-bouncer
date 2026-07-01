@@ -105,7 +105,7 @@ def check_test_has_where_config(test, *, regexp_pattern: str | None = None):
         The `where` config is read from the manifest as the **raw Jinja source**, not the compiled SQL. For example, a value of `{{ partition_filter() }} >= 7` is matched exactly as written — dbt-bouncer does not render it, so the environment-specific compiled output (e.g. a 7-day window versus a 1970 epoch window) is never evaluated. Write `regexp_pattern` against the Jinja expression, not the rendered result.
 
     Parameters:
-        regexp_pattern (str | None): If provided, the `where` config must match this regex pattern. Default: `None` (only presence is checked).
+        regexp_pattern (str | None): If provided, the `where` config must match this regex pattern. The pattern is anchored at the start of the string (`re.match`), so use `.*foo.*` to match anywhere. Default: `None` (only presence is checked).
 
     Receives:
         test (TestNode): The TestNode object to check.
