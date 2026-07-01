@@ -257,6 +257,8 @@ manifest_checks:
     include: ^models/marts
     tags:
       - critical
+  - name: check_test_has_where_config
+    include: ^tests/
 
   # Unit tests
   - name: check_unit_test_coverage
