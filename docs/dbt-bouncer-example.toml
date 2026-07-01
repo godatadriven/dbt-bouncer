@@ -386,7 +386,7 @@ tags = ["critical"]
 
 [[manifest_checks]]
 name = "check_test_has_where_config"
-include = "^tests/"
+include = "^models/intermediate/test_cases"
 
 # Manifest checks: Unit tests
 

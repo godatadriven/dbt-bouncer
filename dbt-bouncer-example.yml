@@ -258,7 +258,7 @@ manifest_checks:
     tags:
       - critical
   - name: check_test_has_where_config
-    include: ^tests/
+    include: ^models/intermediate/test_cases
 
   # Unit tests
   - name: check_unit_test_coverage

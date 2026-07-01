@@ -1,5 +1,10 @@
 version: 2
 
+# The data tests in this file set a `where` config to demonstrate
+# `check_test_has_where_config`. In a real project this is typically a
+# recent-window partition filter (e.g. `{{ partition_filter() }} >= 7`) that
+# bounds how many rows each test scans; here `id is not null` is a valid,
+# always-true placeholder that does not depend on a warehouse-specific macro.
 models:
   - name: int_exclude_via_meta_config
     config:
@@ -12,7 +17,9 @@ models:
     columns:
       - name: id
         tests:
-          - unique
+          - unique:
+              config:
+                where: id is not null
 
   - name: int_incremental
     config:
@@ -22,5 +29,9 @@ models:
     columns:
       - name: id
         tests:
-          - not_null
-          - unique
+          - not_null:
+              config:
+                where: id is not null
+          - unique:
+              config:
+                where: id is not null

@@ -1,4 +1,4 @@
-{{ config(meta={"owner": "analytics-team"}, where="1 = 1") }}
+{{ config(meta={"owner": "analytics-team"}) }}
 
 select *
 from (select 1 as id)

@@ -40,7 +40,7 @@ def test_cli_happy_path(caplog, dbt_artifacts_dir, tmp_path):
     #   - check_source_freshness_populated: non-backwards-compatible dbt-fusion
     #     changes mean it requires dbt-core >= 1.10.
     #   - check_test_has_where_config: the `where` config was added to the
-    #     singular test fixture after these versions were frozen, so none of
+    #     test_cases data tests after these versions were frozen, so none of
     #     their tests carry a `where` config for the check to pass against.
     if clean_path_str(dbt_artifacts_dir).split("/")[-1] in [
         "dbt_17",
