@@ -24,6 +24,13 @@ class TestDetectConfigFileSource:
             == ConfigFileSource.DEFAULT
         )
 
+    def test_default_yaml_returns_default(self):
+        """The default YAML path should return DEFAULT."""
+        assert (
+            detect_config_file_source(Path(ConfigFileName.DBT_BOUNCER_YAML))
+            == ConfigFileSource.DEFAULT
+        )
+
     def test_default_toml_returns_default(self):
         """The default TOML path should return DEFAULT."""
         assert (
@@ -49,11 +56,12 @@ class TestDetectConfigFileSource:
         ("config_file", "expected"),
         [
             (Path("dbt-bouncer.yml"), ConfigFileSource.DEFAULT),
+            (Path("dbt-bouncer.yaml"), ConfigFileSource.DEFAULT),
             (Path("dbt-bouncer.toml"), ConfigFileSource.DEFAULT),
             (Path("my-config.yml"), ConfigFileSource.COMMANDLINE),
             (None, ConfigFileSource.DEFAULT),
         ],
-        ids=["default-yml", "default-toml", "custom", "none"],
+        ids=["default-yml", "default-yaml", "default-toml", "custom", "none"],
     )
     def test_parametrized(self, config_file: Path | None, expected: ConfigFileSource):
         """Parametrized coverage of all branches."""

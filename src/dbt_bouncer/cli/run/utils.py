@@ -30,6 +30,7 @@ def detect_config_file_source(config_file: Path | None) -> ConfigFileSource:
         ConfigFileSource.COMMANDLINE
         if config_file is not None
         and config_file != Path(ConfigFileName.DBT_BOUNCER_YML)
+        and config_file != Path(ConfigFileName.DBT_BOUNCER_YAML)
         and config_file != Path(ConfigFileName.DBT_BOUNCER_TOML)
         else ConfigFileSource.DEFAULT
     )
