@@ -74,8 +74,9 @@ def get_config_file_path(
     1. The file passed via the `--config-file` CLI flag.
     2. The file passed via the `DBT_BOUNCER_CONFIG_FILE` environment variable.
     3. A file named `dbt-bouncer.yml` in the current working directory.
-    4. A file named `dbt-bouncer.toml` in the current working directory.
-    5. A `[tool.dbt-bouncer]` section in `pyproject.toml` (in current working directory or parent directories).
+    4. A file named `dbt-bouncer.yaml` in the current working directory.
+    5. A file named `dbt-bouncer.toml` in the current working directory.
+    6. A `[tool.dbt-bouncer]` section in `pyproject.toml` (in current working directory or parent directories).
 
     Returns:
         PurePath: Config file for dbt-bouncer.
@@ -106,6 +107,13 @@ def get_config_file_path(
         if config_file_path.exists():
             return config_file_path
 
+    # Check for dbt-bouncer.yaml in the current working directory. The `.yml`
+    # default is preferred (checked above), so `.yaml` acts as a fallback.
+    yaml_config_path = Path.cwd() / ConfigFileName.DBT_BOUNCER_YAML
+    if yaml_config_path.exists():
+        logging.debug(f"Found dbt-bouncer.yaml: {yaml_config_path}")
+        return yaml_config_path
+
     # Check for dbt-bouncer.toml in the current working directory
     toml_config_path = Path.cwd() / ConfigFileName.DBT_BOUNCER_TOML
     if toml_config_path.exists():
@@ -129,7 +137,7 @@ def get_config_file_path(
         if pyproject_toml_dir is None:
             logging.debug("No pyproject.toml found.")
             raise RuntimeError(
-                "No config file found. Please provide a `dbt-bouncer.yml`, `dbt-bouncer.toml`, or a `pyproject.toml` with a `[tool.dbt-bouncer]` section. Alternatively, pass the path via the `--config-file` flag.",
+                "No config file found. Please provide a `dbt-bouncer.yml`, `dbt-bouncer.yaml`, `dbt-bouncer.toml`, or a `pyproject.toml` with a `[tool.dbt-bouncer]` section. Alternatively, pass the path via the `--config-file` flag.",
             )
 
     return pyproject_toml_dir / ConfigFileName.PYPROJECT_TOML

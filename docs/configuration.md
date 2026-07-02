@@ -6,6 +6,7 @@ The following options are available, in order of priority:
 1. A file passed via the `--config-file` CLI flag.
 1. A file path passed via the `DBT_BOUNCER_CONFIG_FILE` environment variable.
 1. A file named `dbt-bouncer.yml` in the current working directory.
+1. A file named `dbt-bouncer.yaml` in the current working directory.
 1. A file named `dbt-bouncer.toml` in the current working directory.
 1. A `[tool.dbt-bouncer]` section in `pyproject.toml`.
 
@@ -66,7 +67,7 @@ Install the [YAML extension](https://marketplace.visualstudio.com/items?itemName
 ```json
 {
   "yaml.schemas": {
-    "https://raw.githubusercontent.com/godatadriven/dbt-bouncer/main/schema.json": "dbt-bouncer.yml"
+    "https://raw.githubusercontent.com/godatadriven/dbt-bouncer/main/schema.json": ["dbt-bouncer.yml", "dbt-bouncer.yaml"]
   }
 }
 ```
@@ -77,7 +78,7 @@ JetBrains IDEs have built-in YAML schema support. Go to **Settings > Languages &
 
 - **Name:** dbt-bouncer
 - **Schema URL:** `https://raw.githubusercontent.com/godatadriven/dbt-bouncer/main/schema.json`
-- **File path pattern:** `dbt-bouncer.yml`
+- **File path pattern:** `dbt-bouncer.y*ml` (matches both `dbt-bouncer.yml` and `dbt-bouncer.yaml`)
 
 ### Neovim
 

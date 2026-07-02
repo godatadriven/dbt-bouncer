@@ -150,6 +150,55 @@ def test_get_file_config_path_yml_preferred_over_toml(monkeypatch, tmp_path):
     assert config_file_path == yml_file
 
 
+def test_get_file_config_path_dbt_bouncer_yaml(monkeypatch, tmp_path):
+    """A `dbt-bouncer.yaml` file in the cwd should be auto-discovered."""
+    monkeypatch.chdir(tmp_path)
+
+    yaml_file = tmp_path / "dbt-bouncer.yaml"
+    yaml_file.write_text("manifest_checks: []")
+
+    config_file_path = get_config_file_path(
+        config_file="dbt-bouncer.yml",
+        config_file_source=ConfigFileSource.DEFAULT,
+    )
+
+    assert config_file_path == yaml_file
+
+
+def test_get_file_config_path_yml_preferred_over_yaml(monkeypatch, tmp_path):
+    """dbt-bouncer.yml should take priority over dbt-bouncer.yaml."""
+    monkeypatch.chdir(tmp_path)
+
+    yml_file = tmp_path / "dbt-bouncer.yml"
+    yml_file.write_text("manifest_checks: []")
+    yaml_file = tmp_path / "dbt-bouncer.yaml"
+    yaml_file.write_text("manifest_checks: []")
+
+    config_file_path = get_config_file_path(
+        config_file="dbt-bouncer.yml",
+        config_file_source=ConfigFileSource.DEFAULT,
+    )
+
+    assert config_file_path == yml_file
+
+
+def test_get_file_config_path_yaml_preferred_over_toml(monkeypatch, tmp_path):
+    """dbt-bouncer.yaml should take priority over dbt-bouncer.toml."""
+    monkeypatch.chdir(tmp_path)
+
+    yaml_file = tmp_path / "dbt-bouncer.yaml"
+    yaml_file.write_text("manifest_checks: []")
+    toml_file = tmp_path / "dbt-bouncer.toml"
+    toml_file.write_text(DBT_BOUNCER_TOML_SAMPLE_CONFIG)
+
+    config_file_path = get_config_file_path(
+        config_file="dbt-bouncer.yml",
+        config_file_source=ConfigFileSource.DEFAULT,
+    )
+
+    assert config_file_path == yaml_file
+
+
 def test_load_config_file_contents_dbt_bouncer_toml(tmp_path):
     toml_file = tmp_path / "dbt-bouncer.toml"
     toml_file.write_text(DBT_BOUNCER_TOML_SAMPLE_CONFIG)
