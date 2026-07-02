@@ -17,6 +17,19 @@ The dbt-bouncer logo is available in two variants:
 
 Both are available as SVG (editable) and PNG (128, 256, 512px).
 
+## Editor Icons
+
+The bouncer icon is available in popular editor icon themes, so `dbt-bouncer` config files (`dbt-bouncer.yml`, `dbt-bouncer.yaml`, `dbt-bouncer.toml`) are shown with the logo:
+
+<p align="center">
+  <img src="https://github.com/godatadriven/dbt-bouncer/raw/main/docs/assets/brand/editor-icons/vscode-icons.svg" alt="dbt-bouncer icon — vscode-icons" width="100"/>
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="https://github.com/godatadriven/dbt-bouncer/raw/main/docs/assets/brand/editor-icons/material-icon-theme.svg" alt="dbt-bouncer icon — Material Icon Theme" width="100"/>
+</p>
+
+- **[vscode-icons](https://github.com/vscode-icons/vscode-icons/pull/4145)** (left): uses the brand colours
+- **[Material Icon Theme](https://github.com/material-extensions/vscode-material-icon-theme/pull/3517)** (right): recoloured to the Material Design palette, as required by that theme's contribution rules
+
 ## Social Cards
 
 Social cards are available in **light** and **dark** variants, at 1200x630px (standard Open Graph / LinkedIn / Twitter size).
