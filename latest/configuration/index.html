@@ -982,6 +982,7 @@ The following options are available, in order of priority:</p>
 <li>A file passed via the <code>--config-file</code> CLI flag.</li>
 <li>A file path passed via the <code>DBT_BOUNCER_CONFIG_FILE</code> environment variable.</li>
 <li>A file named <code>dbt-bouncer.yml</code> in the current working directory.</li>
+<li>A file named <code>dbt-bouncer.yaml</code> in the current working directory.</li>
 <li>A file named <code>dbt-bouncer.toml</code> in the current working directory.</li>
 <li>A <code>[tool.dbt-bouncer]</code> section in <code>pyproject.toml</code>.</li>
 </ol>
@@ -1027,7 +1028,7 @@ The following options are available, in order of priority:</p>
 <p>Install the <a href="https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml">YAML extension</a> by Red Hat, then add the following to your VS Code settings (<code>.vscode/settings.json</code>):</p>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="p">{</span>
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="nt">&quot;yaml.schemas&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">    </span><span class="nt">&quot;https://raw.githubusercontent.com/godatadriven/dbt-bouncer/main/schema.json&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dbt-bouncer.yml&quot;</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">    </span><span class="nt">&quot;https://raw.githubusercontent.com/godatadriven/dbt-bouncer/main/schema.json&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;dbt-bouncer.yml&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;dbt-bouncer.yaml&quot;</span><span class="p">]</span>
 </span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">  </span><span class="p">}</span>
 </span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="p">}</span>
 </span></code></pre></div>
@@ -1036,7 +1037,7 @@ The following options are available, in order of priority:</p>
 <ul>
 <li><strong>Name:</strong> dbt-bouncer</li>
 <li><strong>Schema URL:</strong> <code>https://raw.githubusercontent.com/godatadriven/dbt-bouncer/main/schema.json</code></li>
-<li><strong>File path pattern:</strong> <code>dbt-bouncer.yml</code></li>
+<li><strong>File path pattern:</strong> <code>dbt-bouncer.y*ml</code> (matches both <code>dbt-bouncer.yml</code> and <code>dbt-bouncer.yaml</code>)</li>
 </ul>
 <h3 id="neovim">Neovim<a class="headerlink" href="#neovim" title="Permanent link">#</a></h3>
 <p>With <a href="https://github.com/redhat-developer/yaml-language-server">yaml-language-server</a> configured via LSP, add a schema comment at the top of your config file:</p>
