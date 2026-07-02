@@ -18,7 +18,7 @@
           contents: read
         runs-on: ubuntu-24.04
         steps:
-          - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6
+          - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
             with:
               persist-credentials: false
 
@@ -64,7 +64,7 @@
             cancel-in-progress: true
           runs-on: ubuntu-24.04
           steps:
-              - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6
+              - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
                 with:
                   # Required for `git push` to the badges branch below.
                   persist-credentials: true
@@ -108,7 +108,7 @@
             contents: write
           runs-on: ubuntu-24.04
           steps:
-              - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6
+              - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
 
               - name: Fetch tags
                 run: git fetch --prune --unshallow --tags
@@ -128,7 +128,7 @@
         runs-on: ubuntu-24.04
         steps:
             - name: Checkout
-              uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6
+              uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
               with:
                 persist-credentials: false
 
@@ -180,7 +180,7 @@
                     - '3.14'
         steps:
             - name: Checkout
-              uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6
+              uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
               with:
                 persist-credentials: false
 

@@ -47,7 +47,7 @@ jobs:
             core.exportVariable("PR_CHANGED_FILES", pr.changed_files);
 
       - name: Checkout PR Head
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
         with:
           ref: ${{ env.PR_HEAD_SHA }}
           fetch-depth: 0

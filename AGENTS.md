@@ -185,7 +185,7 @@ When drafting release notes, verify every item against the previous release tag 
 ## CI & Workflows
 
 - After CI succeeds on a PR, an AI review workflow (`pull_request_ai_review.yml`) runs automatically and posts a review comment. Check this comment for feedback and action any suggestions before merging.
-- In GitHub Actions workflows, always pin actions to full SHA commits with a version comment, e.g. `uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6`.
+- In GitHub Actions workflows, always pin actions to full SHA commits with a version comment, e.g. `uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7`.
 - Use `/build-artifacts` to regenerate test fixtures after dbt_project changes.
 - Use `/new-check` to scaffold a new check class with tests.
 
