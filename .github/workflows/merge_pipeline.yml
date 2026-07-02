@@ -32,7 +32,7 @@
             uses: bencherdev/bencher@50fb1e138651a46d2fb704fab1adab38c181552e # v0.6.6
 
           - name: Install Hyperfine
-            uses: taiki-e/install-action@65851e10cd6c377f11a60e600abc07cb08643468 # v2
+            uses: taiki-e/install-action@b8cecb83565409bcc297b2df6e77f030b2a468d5 # v2
             with:
               tool: hyperfine@1.20
 
