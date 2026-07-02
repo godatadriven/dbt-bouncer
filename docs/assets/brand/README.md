@@ -36,6 +36,22 @@ Six standalone social cards (3 text variants x 2 colour schemes), each in SVG + 
 
 All cards are **1200x630px** (standard Open Graph / LinkedIn / Twitter size).
 
+## Editor / IDE Icons
+
+Icons contributed to editor icon themes so that `dbt-bouncer` config files
+(`dbt-bouncer.yml`, `dbt-bouncer.yaml`, `dbt-bouncer.toml`) show the bouncer logo.
+These are compact, hand-optimised renderings of the icon-only logo.
+
+| Asset | Path | Palette | Upstream |
+|---|---|---|---|
+| vscode-icons | `editor-icons/vscode-icons.svg` | Brand colours (`#130912`, `#fafafa`, `#ff694a`) | [vscode-icons#4145](https://github.com/vscode-icons/vscode-icons/pull/4145) |
+| Material Icon Theme | `editor-icons/material-icon-theme.svg` | Material palette (`#263238`, `#eceff1`, `#ff7043`) | [vscode-material-icon-theme#3517](https://github.com/material-extensions/vscode-material-icon-theme/pull/3517) |
+
+The Material Icon Theme variant is intentionally recoloured: Material Design's
+contribution rules disallow pure `#000`/`#fff` and require its own palette, so it
+does not use the brand colours. Prefer the vscode-icons variant when an on-brand
+compact icon is needed.
+
 ## Colour Palette Swatch
 
 | Asset | Path | Notes |
