@@ -299,6 +299,30 @@ def test_check_macro_name_matches_file_name(macro_overrides, check_fn):
     ("macro_overrides", "check_fn"),
     [
         pytest.param(
+            {},
+            check_passes,
+            id="matches_pattern",
+        ),
+        pytest.param(
+            {"name": "MyMacro"},
+            check_fails,
+            id="does_not_match_pattern",
+        ),
+    ],
+)
+def test_check_macro_names(macro_overrides, check_fn):
+    check_fn(
+        "check_macro_names",
+        include="",
+        macro_name_pattern="^[a-z_0-9]+$",
+        macro=macro_overrides,
+    )
+
+
+@pytest.mark.parametrize(
+    ("macro_overrides", "check_fn"),
+    [
+        pytest.param(
             {"patch_path": "package_name://macros/_macros.yml"},
             check_passes,
             id="valid_underscore_prefix",

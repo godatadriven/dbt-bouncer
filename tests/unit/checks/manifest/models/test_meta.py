@@ -3,6 +3,44 @@ import pytest
 from dbt_bouncer.testing import check_fails, check_passes
 
 
+class TestCheckModelHasLabelsKeys:
+    @pytest.mark.parametrize(
+        ("keys", "model"),
+        [
+            pytest.param(
+                ["team"],
+                {"config": {"labels": {"team": "finance"}}},
+                id="has_key",
+            ),
+            pytest.param(
+                ["team"],
+                {"config": {"labels": {"env": "prod", "team": "analytics"}}},
+                id="has_key_with_others",
+            ),
+        ],
+    )
+    def test_passes(self, keys, model):
+        check_passes("check_model_has_labels_keys", keys=keys, model=model)
+
+    @pytest.mark.parametrize(
+        ("keys", "model"),
+        [
+            pytest.param(
+                ["team"],
+                {"config": {"labels": {}}},
+                id="missing_key",
+            ),
+            pytest.param(
+                ["team"],
+                {},
+                id="no_labels_config",
+            ),
+        ],
+    )
+    def test_fails(self, keys, model):
+        check_fails("check_model_has_labels_keys", keys=keys, model=model)
+
+
 class TestCheckModelHasMetaKeys:
     @pytest.mark.parametrize(
         ("keys", "model"),

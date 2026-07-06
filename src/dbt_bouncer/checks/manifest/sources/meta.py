@@ -6,6 +6,48 @@ from dbt_bouncer.utils import find_missing_meta_keys
 
 
 @check
+def check_source_has_labels_keys(source, *, keys: NestedDict):
+    """The `labels` config for sources must have the specified keys.
+
+    !!! info "Rationale"
+
+        Labels are key-value pairs attached to warehouse resources (e.g. BigQuery table labels) that drive cost attribution, governance workflows, and access control. Requiring specific label keys on sources ensures that the same ownership and environment metadata required on models is also enforced at the ingestion boundary, giving a consistent labelling policy across the full data platform.
+
+    Parameters:
+        keys (NestedDict): A list (that may contain sub-lists) of required keys.
+
+    Receives:
+        source (SourceNode): The SourceNode object to check.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | list[str] | None): Regex pattern(s) to match the source path (i.e the .yml file where the source is configured). Source paths that match any pattern will not be checked.
+        include (str | list[str] | None): Regex pattern(s) to match the source path (i.e the .yml file where the source is configured). Only source paths that match any pattern will be checked.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_source_has_labels_keys
+              keys:
+                - env
+                - team
+        ```
+
+    """
+    config = source.config or {}
+    labels = config.get("labels") or {}
+    missing_keys = find_missing_meta_keys(
+        meta_config=labels, required_keys=keys.model_dump()
+    )
+    if missing_keys:
+        display = f"{source.source_name}.{source.name}"
+        fail(
+            f"`{display}` is missing the following keys from the `labels` config: {[x.replace('>>', '') for x in missing_keys]}"
+        )
+
+
+@check
 def check_source_has_meta_keys(source, *, keys: NestedDict):
     """The `meta` config for sources must have the specified keys.
 

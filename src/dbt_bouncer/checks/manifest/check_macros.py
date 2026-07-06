@@ -290,6 +290,42 @@ def check_macro_name_matches_file_name(macro):
 
 
 @check
+def check_macro_names(macro, *, macro_name_pattern: str):
+    """Macros must have a name that matches the supplied regex.
+
+    !!! info "Rationale"
+
+        Consistent macro naming conventions — such as requiring a shared prefix or suffix — make it immediately obvious which macros belong to the project versus packages, and help distinguish utility macros from test helpers or overrides. Enforcing a naming pattern prevents ad-hoc names that make the codebase harder to navigate and search.
+
+    Parameters:
+        macro_name_pattern (str): Regexp the macro name must match.
+
+    Receives:
+        macro (Macros): The Macros object to check.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | list[str] | None): Regex pattern(s) to match the macro path. Macro paths that match any pattern will not be checked.
+        include (str | list[str] | None): Regex pattern(s) to match the macro path. Only macro paths that match any pattern will be checked.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_macro_names
+              include: ^macros/finance
+              macro_name_pattern: ^finance_
+        ```
+
+    """
+    compiled_pattern = compile_pattern(macro_name_pattern.strip())
+    if compiled_pattern.match(str(macro.name)) is None:
+        fail(
+            f"`{macro.name}` does not match the supplied regex `{macro_name_pattern.strip()}`."
+        )
+
+
+@check
 def check_macro_property_file_location(macro):
     """Macro properties files must follow the guidance provided by dbt [here](https://docs.getdbt.com/best-practices/how-we-structure/5-the-rest-of-the-project#how-we-use-the-other-folders).
 

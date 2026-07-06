@@ -4,6 +4,8 @@ models:
   - name: stg_customers
     description: Staging table for customer data.
     config:
+      labels:
+        team: finance
       meta:
         maturity: gold
     columns:
