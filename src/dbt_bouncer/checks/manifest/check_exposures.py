@@ -289,7 +289,9 @@ def check_exposure_has_owner(
         ```
 
     """
-    owner = exposure.owner or {}
-    missing = [f for f in required_fields if not owner.get(f)]
+    if not exposure.owner:
+        fail(f"`{exposure.name}` has no owner configured.")
+        return
+    missing = [f for f in required_fields if not exposure.owner.get(f)]
     if missing:
         fail(f"`{exposure.name}` is missing required owner fields: {missing}.")
