@@ -194,6 +194,59 @@ def test_check_macro_description_populated(macro_overrides, check_fn):
     )
 
 
+class TestCheckMacroHasMetaKeys:
+    @pytest.mark.parametrize(
+        ("keys", "macro_overrides"),
+        [
+            pytest.param(
+                ["owner"],
+                {"meta": {"owner": "Data Team"}},
+                id="has_key",
+            ),
+            pytest.param(
+                ["owner"],
+                {"meta": {"maturity": "high", "owner": "Data Team"}},
+                id="has_key_with_others",
+            ),
+            pytest.param(
+                ["owner", {"team": ["name", "slack"]}],
+                {
+                    "meta": {
+                        "owner": "Data Team",
+                        "team": {"name": "Analytics", "slack": "#analytics"},
+                    },
+                },
+                id="has_nested_keys",
+            ),
+        ],
+    )
+    def test_passes(self, keys, macro_overrides):
+        check_passes("check_macro_has_meta_keys", keys=keys, macro=macro_overrides)
+
+    @pytest.mark.parametrize(
+        ("keys", "macro_overrides"),
+        [
+            pytest.param(
+                ["owner"],
+                {"meta": {}},
+                id="empty_meta",
+            ),
+            pytest.param(
+                ["owner"],
+                {"meta": {"maturity": "high"}},
+                id="missing_key",
+            ),
+            pytest.param(
+                ["owner", {"team": ["name", "slack"]}],
+                {"meta": {"owner": "Data Team", "team": {"name": "Analytics"}}},
+                id="missing_nested_key",
+            ),
+        ],
+    )
+    def test_fails(self, keys, macro_overrides):
+        check_fails("check_macro_has_meta_keys", keys=keys, macro=macro_overrides)
+
+
 @pytest.mark.parametrize(
     ("macro_overrides", "max_number_of_lines", "check_fn"),
     [

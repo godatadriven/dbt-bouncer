@@ -162,6 +162,63 @@ def test_check_seed_description_populated(seed_overrides, check_fn):
     )
 
 
+class TestCheckSeedHasMetaKeys:
+    @pytest.mark.parametrize(
+        ("keys", "seed_overrides"),
+        [
+            pytest.param(
+                ["owner"],
+                {**_SEED_BASE, "meta": {"owner": "Data Team"}},
+                id="has_key",
+            ),
+            pytest.param(
+                ["owner"],
+                {**_SEED_BASE, "meta": {"maturity": "high", "owner": "Data Team"}},
+                id="has_key_with_others",
+            ),
+            pytest.param(
+                ["owner", {"team": ["name", "slack"]}],
+                {
+                    **_SEED_BASE,
+                    "meta": {
+                        "owner": "Data Team",
+                        "team": {"name": "Analytics", "slack": "#analytics"},
+                    },
+                },
+                id="has_nested_keys",
+            ),
+        ],
+    )
+    def test_passes(self, keys, seed_overrides):
+        check_passes("check_seed_has_meta_keys", keys=keys, seed=seed_overrides)
+
+    @pytest.mark.parametrize(
+        ("keys", "seed_overrides"),
+        [
+            pytest.param(
+                ["owner"],
+                {**_SEED_BASE, "meta": {}},
+                id="empty_meta",
+            ),
+            pytest.param(
+                ["owner"],
+                {**_SEED_BASE, "meta": {"maturity": "high"}},
+                id="missing_key",
+            ),
+            pytest.param(
+                ["owner", {"team": ["name", "slack"]}],
+                {
+                    **_SEED_BASE,
+                    "meta": {"owner": "Data Team", "team": {"name": "Analytics"}},
+                },
+                id="missing_nested_key",
+            ),
+        ],
+    )
+    def test_fails(self, keys, seed_overrides):
+        check_fails("check_seed_has_meta_keys", keys=keys, seed=seed_overrides)
+
+
 _UNIT_TEST_FOR_SEED = {
     "depends_on": {"nodes": ["seed.package_name.raw_customers"]},
     "expect": {"format": "dict", "rows": [{"id": 1}]},

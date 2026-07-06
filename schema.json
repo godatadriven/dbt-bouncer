@@ -1622,6 +1622,101 @@
       "title": "CheckMacroDescriptionPopulated",
       "type": "object"
     },
+    "CheckMacroHasMetaKeys": {
+      "additionalProperties": false,
+      "description": "The `meta` config for macros must have the specified keys.\n\n!!! info \"Rationale\"\n\n    The `meta` config is a flexible, project-defined dictionary used to track ownership, maturity levels, PII classification, and other governance attributes. Requiring specific keys ensures that these attributes are consistently populated across all macros, enabling automated reporting, data cataloguing, and access-control workflows that depend on them.\n\nParameters:\n    keys (NestedDict): A list (that may contain sub-lists) of required keys.\n\nReceives:\n    macro (MacroNode): The MacroNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the macro path. Macro paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the macro path. Only macro paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_macro_has_meta_keys\n          keys:\n            - maturity\n            - owner\n    ```",
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to exclude. A list matches if any pattern matches.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to include. A list matches if any pattern matches.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_macro_has_meta_keys",
+          "default": "check_macro_has_meta_keys",
+          "title": "Name",
+          "type": "string"
+        },
+        "keys": {
+          "$ref": "#/$defs/NestedDict"
+        }
+      },
+      "required": [
+        "keys"
+      ],
+      "title": "CheckMacroHasMetaKeys",
+      "type": "object"
+    },
     "CheckMacroIsUsed": {
       "additionalProperties": false,
       "description": "Macros must be invoked by at least one other resource.\n\n!!! info \"Rationale\"\n\n    Similar to orphaned models, macros are often written for a specific purpose and later abandoned, leaving behind technical debt and confusion. This check parses the manifest to find macros that are defined in the project but are never actually invoked by any model, test, or other macro. Keeps the macro directory lean and reduces the cognitive load for developers trying to understand the codebase.\n\nReceives:\n    macro (Macros): The Macros object to check.\n    ctx (CheckContext): The check context containing the manifest.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the macro path. Macro paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the macro path. Only macro paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_macro_is_used\n    ```",
@@ -6704,6 +6799,101 @@
       "title": "CheckSeedDescriptionPopulated",
       "type": "object"
     },
+    "CheckSeedHasMetaKeys": {
+      "additionalProperties": false,
+      "description": "The `meta` config for seeds must have the specified keys.\n\n!!! info \"Rationale\"\n\n    The `meta` config is a flexible, project-defined dictionary used to track ownership, maturity levels, PII classification, and other governance attributes. Requiring specific keys ensures that these attributes are consistently populated across all seeds, enabling automated reporting, data cataloguing, and access-control workflows that depend on them.\n\nParameters:\n    keys (NestedDict): A list (that may contain sub-lists) of required keys.\n\nReceives:\n    seed (SeedNode): The SeedNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the seed path. Seed paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the seed path. Only seed paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_seed_has_meta_keys\n          keys:\n            - maturity\n            - owner\n    ```",
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to exclude. A list matches if any pattern matches.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to include. A list matches if any pattern matches.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_seed_has_meta_keys",
+          "default": "check_seed_has_meta_keys",
+          "title": "Name",
+          "type": "string"
+        },
+        "keys": {
+          "$ref": "#/$defs/NestedDict"
+        }
+      },
+      "required": [
+        "keys"
+      ],
+      "title": "CheckSeedHasMetaKeys",
+      "type": "object"
+    },
     "CheckSeedHasUnitTests": {
       "additionalProperties": false,
       "description": "Seeds must have more than the specified number of unit tests.\n\n!!! info \"Rationale\"\n\n    Seeds contain static data that is loaded directly into the warehouse, and their transformations (via the `ref()` function in downstream models) need to be verifiable. Unit tests on seeds validate that the downstream logic correctly handles the reference data \u2014 catching issues like missing mappings, unexpected nulls, or edge-case values before they reach production.\n\nParameters:\n    min_number_of_unit_tests (int | None): The minimum number of unit tests that a seed must have.\n\nReceives:\n    manifest_obj (ManifestObject): The ManifestObject object parsed from `manifest.json`.\n    seed (SeedNode): The SeedNode object to check.\n    unit_tests (list[UnitTests]): List of UnitTests objects parsed from `manifest.json`.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the seed path. Seed paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the seed path. Only seed paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\n!!! warning\n\n    This check is only supported for dbt 1.8.0 and above.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_seed_has_unit_tests\n          include: ^seeds/core\n    ```\n    ```yaml\n    manifest_checks:\n        - name: check_seed_has_unit_tests\n          min_number_of_unit_tests: 2\n    ```",
@@ -9515,6 +9705,7 @@
             "check_macro_arguments_description_populated": "#/$defs/CheckMacroArgumentsDescriptionPopulated",
             "check_macro_code_does_not_contain_regexp_pattern": "#/$defs/CheckMacroCodeDoesNotContainRegexpPattern",
             "check_macro_description_populated": "#/$defs/CheckMacroDescriptionPopulated",
+            "check_macro_has_meta_keys": "#/$defs/CheckMacroHasMetaKeys",
             "check_macro_is_used": "#/$defs/CheckMacroIsUsed",
             "check_macro_max_number_of_lines": "#/$defs/CheckMacroMaxNumberOfLines",
             "check_macro_name_matches_file_name": "#/$defs/CheckMacroNameMatchesFileName",
@@ -9565,6 +9756,7 @@
             "check_seed_column_names": "#/$defs/CheckSeedColumnNames",
             "check_seed_columns_have_types": "#/$defs/CheckSeedColumnsHaveTypes",
             "check_seed_description_populated": "#/$defs/CheckSeedDescriptionPopulated",
+            "check_seed_has_meta_keys": "#/$defs/CheckSeedHasMetaKeys",
             "check_seed_has_unit_tests": "#/$defs/CheckSeedHasUnitTests",
             "check_seed_names": "#/$defs/CheckSeedNames",
             "check_semantic_model_based_on_non_public_models": "#/$defs/CheckSemanticModelBasedOnNonPublicModels",
@@ -9619,6 +9811,9 @@
           },
           {
             "$ref": "#/$defs/CheckMacroDescriptionPopulated"
+          },
+          {
+            "$ref": "#/$defs/CheckMacroHasMetaKeys"
           },
           {
             "$ref": "#/$defs/CheckMacroIsUsed"
@@ -9769,6 +9964,9 @@
           },
           {
             "$ref": "#/$defs/CheckSeedDescriptionPopulated"
+          },
+          {
+            "$ref": "#/$defs/CheckSeedHasMetaKeys"
           },
           {
             "$ref": "#/$defs/CheckSeedHasUnitTests"

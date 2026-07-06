@@ -6,7 +6,13 @@ from typing import TYPE_CHECKING, Annotated, Any, ClassVar
 from pydantic import Field
 
 from dbt_bouncer.check_framework.decorator import check, fail
-from dbt_bouncer.utils import clean_path_str, compile_pattern, is_description_populated
+from dbt_bouncer.check_framework.exceptions import NestedDict
+from dbt_bouncer.utils import (
+    clean_path_str,
+    compile_pattern,
+    find_missing_meta_keys,
+    is_description_populated,
+)
 
 if TYPE_CHECKING:
     from jinja2 import Environment
@@ -206,6 +212,45 @@ def check_macro_description_populated(
         str(macro.description or ""), min_description_length or 4
     ):
         fail(f"`{macro.name}` does not have a populated description.")
+
+
+@check
+def check_macro_has_meta_keys(macro, *, keys: NestedDict):
+    """The `meta` config for macros must have the specified keys.
+
+    !!! info "Rationale"
+
+        The `meta` config is a flexible, project-defined dictionary used to track ownership, maturity levels, PII classification, and other governance attributes. Requiring specific keys ensures that these attributes are consistently populated across all macros, enabling automated reporting, data cataloguing, and access-control workflows that depend on them.
+
+    Parameters:
+        keys (NestedDict): A list (that may contain sub-lists) of required keys.
+
+    Receives:
+        macro (MacroNode): The MacroNode object to check.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | list[str] | None): Regex pattern(s) to match the macro path. Macro paths that match any pattern will not be checked.
+        include (str | list[str] | None): Regex pattern(s) to match the macro path. Only macro paths that match any pattern will be checked.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_macro_has_meta_keys
+              keys:
+                - maturity
+                - owner
+        ```
+
+    """
+    missing_keys = find_missing_meta_keys(
+        meta_config=macro.meta or {}, required_keys=keys.model_dump()
+    )
+    if missing_keys:
+        fail(
+            f"`{macro.name}` is missing the following keys from the `meta` config: {[x.replace('>>', '') for x in missing_keys]}"
+        )
 
 
 @check
