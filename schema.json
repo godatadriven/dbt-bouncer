@@ -4744,15 +4744,19 @@
           "type": "integer"
         },
         "materializations": {
-          "default": [
-            "incremental",
-            "table"
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
           ],
-          "items": {
-            "type": "string"
-          },
-          "title": "Materializations",
-          "type": "array"
+          "default": null,
+          "title": "Materializations"
         }
       },
       "title": "CheckModelMaterializationByFanout",

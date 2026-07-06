@@ -153,8 +153,12 @@ def check_model_incremental_has_unique_key(model):
         ```
 
     """
-    config = model.config or {}
-    if config.get("materialized") == "incremental" and not config.get("unique_key"):
+    config = model.config
+    if (
+        config
+        and config.materialized == "incremental"
+        and not getattr(config, "unique_key", None)
+    ):
         fail(
             f"`{get_clean_model_name(model.unique_id)}` is incremental but has no `unique_key`."
         )

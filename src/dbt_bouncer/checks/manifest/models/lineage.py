@@ -191,7 +191,7 @@ def check_model_materialization_by_fanout(
     ctx,
     *,
     min_downstream_models: Annotated[int, Field(gt=0)] = 3,
-    materializations: list[str] = ["incremental", "table"],  # noqa: B006
+    materializations: list[str] | None = None,
 ):
     """Heavily-reused models must use a durable materialization.
 
@@ -234,6 +234,7 @@ def check_model_materialization_by_fanout(
         ```
 
     """
+    materializations = materializations or ["incremental", "table"]
     num_downstream_models = sum(
         model.unique_id in (getattr(m.depends_on, "nodes", []) if m.depends_on else [])
         for m in ctx.models
