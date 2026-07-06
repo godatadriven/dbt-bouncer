@@ -278,13 +278,7 @@ def check_model_single_primary_key(model):
         constraints = getattr(col, "constraints", None) or []
         for c in constraints:
             c_type = getattr(c, "type", None)
-            type_str = (
-                c_type.value
-                if hasattr(c_type, "value")
-                else str(c_type)
-                if c_type
-                else ""
-            )
+            type_str = c_type.value if hasattr(c_type, "value") else str(c_type or "")
             if type_str == "primary_key":
                 pk_columns.append(col_name)
                 break

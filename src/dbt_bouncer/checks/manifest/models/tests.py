@@ -109,6 +109,10 @@ def check_model_has_tests_by_type(
         ```
 
     """
+    if min_number_of_data_tests == 0 and min_number_of_schema_tests == 0:
+        raise ValueError(
+            "At least one of `min_number_of_data_tests` or `min_number_of_schema_tests` must be greater than 0."
+        )
     num_schema_tests = 0
     num_data_tests = 0
     for test in ctx.tests:

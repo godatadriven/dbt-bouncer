@@ -97,12 +97,6 @@ class TestCheckModelHasTestsByType:
                 ],
                 id="one_schema_and_one_data_test",
             ),
-            pytest.param(
-                0,
-                0,
-                [],
-                id="no_minimums_no_tests",
-            ),
         ],
     )
     def test_passes(
@@ -155,6 +149,18 @@ class TestCheckModelHasTestsByType:
             model={},
             ctx_tests=ctx_tests,
         )
+
+    def test_raises_value_error_for_both_zero(self):
+        from dbt_bouncer.testing import _run_check
+
+        with pytest.raises(ValueError, match="At least one of"):
+            _run_check(
+                "check_model_has_tests_by_type",
+                min_number_of_data_tests=0,
+                min_number_of_schema_tests=0,
+                model={},
+                ctx_tests=[],
+            )
 
 
 class TestCheckModelHasUniqueTest:
