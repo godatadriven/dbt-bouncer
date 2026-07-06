@@ -133,6 +133,7 @@ class MacroNode(Protocol):
     arguments: list[MacroArgument]
     description: str
     macro_sql: str
+    meta: dict[str, Any]
     name: str
     original_file_path: str
     patch_path: str | None
@@ -189,6 +190,7 @@ class SeedNode(Protocol):
 
     columns: dict[str, ColumnInfo]
     description: str
+    meta: dict[str, Any]
     name: str
     unique_id: str
 
