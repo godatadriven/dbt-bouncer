@@ -45,6 +45,8 @@ def test_cli_happy_path(caplog, dbt_artifacts_dir, tmp_path):
     #     keys for the checks to validate against.
     #   - check_model_has_labels_keys: frozen fixtures pre-date the labels
     #     fixture additions, so no model carries config.labels.
+    #   - check_snapshot_has_meta_keys: the frozen snapshots predate the meta
+    #     field addition, so they carry no `meta` keys for the check to pass against.
     #   - check_source_freshness_populated: non-backwards-compatible dbt-fusion
     #     changes mean it requires dbt-core >= 1.10.
     #   - check_source_has_labels_keys: same reason as check_model_has_labels_keys.
@@ -66,6 +68,7 @@ def test_cli_happy_path(caplog, dbt_artifacts_dir, tmp_path):
                 "check_macro_has_meta_keys",
                 "check_model_has_labels_keys",
                 "check_seed_has_meta_keys",
+                "check_snapshot_has_meta_keys",
                 "check_source_freshness_populated",
                 "check_source_has_labels_keys",
                 "check_source_has_tests",

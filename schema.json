@@ -8359,6 +8359,101 @@
       "title": "CheckSnapshotDescriptionPopulated",
       "type": "object"
     },
+    "CheckSnapshotHasMetaKeys": {
+      "additionalProperties": false,
+      "description": "The `meta` config for snapshots must have the specified keys.\n\n!!! info \"Rationale\"\n\n    The `meta` config is a flexible, project-defined dictionary used to track ownership, maturity levels, PII classification, and other governance attributes. Requiring specific keys ensures that these attributes are consistently populated across all snapshots, enabling automated reporting, data cataloguing, and access-control workflows that depend on them.\n\nParameters:\n    keys (NestedDict): A list (that may contain sub-lists) of required keys.\n\nReceives:\n    snapshot (SnapshotNode): The SnapshotNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the snapshot path. Snapshot paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the snapshot path. Only snapshot paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_snapshot_has_meta_keys\n          keys:\n            - maturity\n            - owner\n    ```",
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to exclude. A list matches if any pattern matches.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to include. A list matches if any pattern matches.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_snapshot_has_meta_keys",
+          "default": "check_snapshot_has_meta_keys",
+          "title": "Name",
+          "type": "string"
+        },
+        "keys": {
+          "$ref": "#/$defs/NestedDict"
+        }
+      },
+      "required": [
+        "keys"
+      ],
+      "title": "CheckSnapshotHasMetaKeys",
+      "type": "object"
+    },
     "CheckSnapshotHasTags": {
       "additionalProperties": false,
       "description": "Snapshots must have the specified tags.\n\n!!! info \"Rationale\"\n\n    Tags on snapshots enable selective execution (e.g. `dbt snapshot --select tag:nightly`) and make it possible to apply governance policies to specific groups of snapshots. Without enforced tagging, snapshots can be inadvertently skipped in scheduled runs or included in the wrong execution contexts, leading to stale historical data.\n\nParameters:\n    criteria (Literal[\"any\", \"all\", \"one\"] | None): Whether the snapshot must have any, all, or exactly one of the specified tags. Default: `all`.\n    tags (list[str]): List of tags to check for.\n\nReceives:\n    snapshot (SnapshotNode): The SnapshotNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the snapshot path. Snapshot paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the snapshot path. Only snapshot paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_snapshot_has_tags\n          tags:\n            - tag_1\n            - tag_2\n    ```",
@@ -8468,6 +8563,95 @@
       "title": "CheckSnapshotHasTags",
       "type": "object"
     },
+    "CheckSnapshotHasUniqueKey": {
+      "additionalProperties": false,
+      "description": "Snapshots must have a `unique_key` configured.\n\n!!! info \"Rationale\"\n\n    The `unique_key` configuration is essential for snapshot correctness \u2014 dbt uses it to identify existing rows when deciding whether to insert a new record or close an old one. Without a `unique_key`, dbt cannot reliably track which rows have changed, leading to duplicate history records or missed updates that silently corrupt the slowly-changing dimension table.\n\nReceives:\n    snapshot (SnapshotNode): The SnapshotNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the snapshot path. Snapshot paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the snapshot path. Only snapshot paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_snapshot_has_unique_key\n    ```",
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to exclude. A list matches if any pattern matches.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to include. A list matches if any pattern matches.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_snapshot_has_unique_key",
+          "default": "check_snapshot_has_unique_key",
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "title": "CheckSnapshotHasUniqueKey",
+      "type": "object"
+    },
     "CheckSnapshotNames": {
       "additionalProperties": false,
       "description": "Snapshots must have a name that matches the supplied regex.\n\n!!! info \"Rationale\"\n\n    A consistent naming convention for snapshots (e.g. a domain prefix like `erp_` or a suffix like `_snapshot`) makes it immediately obvious in the warehouse that a table is a point-in-time history capture rather than a regular dimension or fact. Without naming conventions, snapshots can be confused with other tables, leading to incorrect use or accidental truncation.\n\nParameters:\n    snapshot_name_pattern (str): Regexp the snapshot name must match.\n\nReceives:\n    snapshot (SnapshotNode): The SnapshotNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the snapshot path. Snapshot paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the snapshot path. Only snapshot paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_snapshot_names\n          include: ^snapshots/erp\n          snapshot_name_pattern: ^erp\n    ```",
@@ -8562,6 +8746,106 @@
         "snapshot_name_pattern"
       ],
       "title": "CheckSnapshotNames",
+      "type": "object"
+    },
+    "CheckSnapshotStrategy": {
+      "additionalProperties": false,
+      "description": "Snapshots must use an allowed strategy and have the required strategy-specific configuration.\n\n!!! info \"Rationale\"\n\n    The snapshot strategy determines how dbt detects row changes. Using an unsupported or misconfigured strategy can lead to incorrect history capture: the `timestamp` strategy requires an `updated_at` column to detect changes, and the `check` strategy requires `check_cols` to define which columns to monitor. Enforcing both the allowed strategies and their required fields prevents silent data quality issues in slowly-changing dimension tables.\n\nParameters:\n    allowed_strategies (list[str]): List of permitted snapshot strategies. Default: `[\"check\", \"timestamp\"]`.\n\nReceives:\n    snapshot (SnapshotNode): The SnapshotNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the snapshot path. Snapshot paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the snapshot path. Only snapshot paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_snapshot_strategy\n    ```\n    ```yaml\n    manifest_checks:\n        - name: check_snapshot_strategy\n          allowed_strategies:\n            - timestamp # Only allow the timestamp strategy\n    ```",
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to exclude. A list matches if any pattern matches.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to include. A list matches if any pattern matches.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_snapshot_strategy",
+          "default": "check_snapshot_strategy",
+          "title": "Name",
+          "type": "string"
+        },
+        "allowed_strategies": {
+          "default": [
+            "check",
+            "timestamp"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "title": "Allowed Strategies",
+          "type": "array"
+        }
+      },
+      "title": "CheckSnapshotStrategy",
       "type": "object"
     },
     "CheckSourceColumnsAreAllDocumented": {
@@ -10919,8 +11203,11 @@
             "check_seed_names": "#/$defs/CheckSeedNames",
             "check_semantic_model_based_on_non_public_models": "#/$defs/CheckSemanticModelBasedOnNonPublicModels",
             "check_snapshot_description_populated": "#/$defs/CheckSnapshotDescriptionPopulated",
+            "check_snapshot_has_meta_keys": "#/$defs/CheckSnapshotHasMetaKeys",
             "check_snapshot_has_tags": "#/$defs/CheckSnapshotHasTags",
+            "check_snapshot_has_unique_key": "#/$defs/CheckSnapshotHasUniqueKey",
             "check_snapshot_names": "#/$defs/CheckSnapshotNames",
+            "check_snapshot_strategy": "#/$defs/CheckSnapshotStrategy",
             "check_source_description_populated": "#/$defs/CheckSourceDescriptionPopulated",
             "check_source_file_name": "#/$defs/CheckSourceFileName",
             "check_source_freshness_populated": "#/$defs/CheckSourceFreshnessPopulated",
@@ -11169,10 +11456,19 @@
             "$ref": "#/$defs/CheckSnapshotDescriptionPopulated"
           },
           {
+            "$ref": "#/$defs/CheckSnapshotHasMetaKeys"
+          },
+          {
             "$ref": "#/$defs/CheckSnapshotHasTags"
           },
           {
+            "$ref": "#/$defs/CheckSnapshotHasUniqueKey"
+          },
+          {
             "$ref": "#/$defs/CheckSnapshotNames"
+          },
+          {
+            "$ref": "#/$defs/CheckSnapshotStrategy"
           },
           {
             "$ref": "#/$defs/CheckSourceDescriptionPopulated"
