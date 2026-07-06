@@ -17,6 +17,11 @@ class TestCheckModelHasLabelsKeys:
                 {"config": {"labels": {"env": "prod", "team": "analytics"}}},
                 id="has_key_with_others",
             ),
+            pytest.param(
+                [{"team": ["subteam"]}],
+                {"config": {"labels": {"team": {"subteam": "frontend"}}}},
+                id="has_nested_key",
+            ),
         ],
     )
     def test_passes(self, keys, model):
@@ -34,6 +39,11 @@ class TestCheckModelHasLabelsKeys:
                 ["team"],
                 {},
                 id="no_labels_config",
+            ),
+            pytest.param(
+                [{"team": ["subteam"]}],
+                {"config": {"labels": {"team": {"other": "value"}}}},
+                id="missing_nested_key",
             ),
         ],
     )

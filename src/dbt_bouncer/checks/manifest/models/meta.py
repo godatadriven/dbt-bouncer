@@ -36,8 +36,7 @@ def check_model_has_labels_keys(model, *, keys: NestedDict):
         ```
 
     """
-    config = model.config or {}
-    labels = config.get("labels") or {}
+    labels = getattr(model.config, "labels", None) or {}
     missing_keys = find_missing_meta_keys(
         meta_config=labels, required_keys=keys.model_dump()
     )

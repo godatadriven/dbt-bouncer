@@ -35,8 +35,7 @@ def check_source_has_labels_keys(source, *, keys: NestedDict):
         ```
 
     """
-    config = source.config or {}
-    labels = config.get("labels") or {}
+    labels = getattr(source.config, "labels", None) or {}
     missing_keys = find_missing_meta_keys(
         meta_config=labels, required_keys=keys.model_dump()
     )
