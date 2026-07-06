@@ -25,3 +25,7 @@ sources:
             owner: Chris
           tags:
             - example_tag
+        columns:
+          - name: id
+            tests:
+              - not_null

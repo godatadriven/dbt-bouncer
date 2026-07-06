@@ -10,6 +10,134 @@ from dbt_bouncer.utils import get_clean_model_name, get_package_version_number
 
 
 @check
+def check_model_has_tests_by_name(
+    model,
+    ctx,
+    *,
+    test_names: list[str],
+    min_number_of_tests: int = 1,
+):
+    """Models must have a minimum number of tests matching the specified test names.
+
+    !!! info "Rationale"
+
+        Some teams require every model to have specific named tests — for example `not_null` on every primary-key column, or a custom `accepted_values` test. This check lets you enumerate the test names that must be present and specify how many matching tests are required.
+
+    Parameters:
+        min_number_of_tests (int): The minimum number of tests matching `test_names` a model must have. Default: 1.
+        test_names (list[str]): List of test names to count. Generic tests are matched by `test_metadata.name`; singular tests are matched by the test's `name` field.
+
+    Receives:
+        model (ModelNode): The ModelNode object to check.
+        tests (list[TestNode]): List of TestNode objects parsed from `manifest.json`.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.
+        include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.
+        materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_model_has_tests_by_name
+              test_names:
+                - not_null
+                - unique
+        ```
+
+    """
+    num_matching = 0
+    for test in ctx.tests:
+        attached_node = getattr(test, "attached_node", None)
+        if attached_node != model.unique_id:
+            continue
+        test_metadata = getattr(test, "test_metadata", None)
+        if test_metadata:
+            name = getattr(test_metadata, "name", None)
+        else:
+            name = getattr(test, "name", None)
+        if name in test_names:
+            num_matching += 1
+    if num_matching < min_number_of_tests:
+        fail(
+            f"`{get_clean_model_name(model.unique_id)}` has {num_matching} test(s) matching {test_names}, fewer than the minimum {min_number_of_tests}."
+        )
+
+
+@check
+def check_model_has_tests_by_type(
+    model,
+    ctx,
+    *,
+    min_number_of_data_tests: int = 0,
+    min_number_of_schema_tests: int = 0,
+):
+    """Models must have at least the specified number of schema tests and data tests.
+
+    !!! info "Rationale"
+
+        dbt tests come in two flavours: schema tests (generic tests declared in .yml files, backed by `test_metadata`) and data tests (singular SQL files with no `test_metadata`). Teams sometimes mandate a minimum number of each type to ensure both broad coverage (via schema tests) and custom business-rule validation (via data tests). This check lets you enforce those minimums per-model.
+
+    Parameters:
+        min_number_of_data_tests (int): The minimum number of data (singular) tests a model must have. Default: 0.
+        min_number_of_schema_tests (int): The minimum number of schema (generic) tests a model must have. Default: 0.
+
+    Receives:
+        model (ModelNode): The ModelNode object to check.
+        tests (list[TestNode]): List of TestNode objects parsed from `manifest.json`.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.
+        include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.
+        materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_model_has_tests_by_type
+              min_number_of_schema_tests: 1
+        ```
+        ```yaml
+        manifest_checks:
+            - name: check_model_has_tests_by_type
+              min_number_of_data_tests: 1
+              min_number_of_schema_tests: 2
+        ```
+
+    """
+    num_schema_tests = 0
+    num_data_tests = 0
+    for test in ctx.tests:
+        test_metadata = getattr(test, "test_metadata", None)
+        attached_node = getattr(test, "attached_node", None)
+        if attached_node != model.unique_id:
+            continue
+        if test_metadata:
+            num_schema_tests += 1
+        else:
+            num_data_tests += 1
+    failing = []
+    if num_schema_tests < min_number_of_schema_tests:
+        failing.append(
+            f"{num_schema_tests} schema test(s), fewer than the minimum {min_number_of_schema_tests}"
+        )
+    if num_data_tests < min_number_of_data_tests:
+        failing.append(
+            f"{num_data_tests} data test(s), fewer than the minimum {min_number_of_data_tests}"
+        )
+    if failing:
+        fail(
+            f"`{get_clean_model_name(model.unique_id)}` has "
+            + "; and ".join(failing)
+            + "."
+        )
+
+
+@check
 def check_model_has_unique_test(
     model,
     ctx,

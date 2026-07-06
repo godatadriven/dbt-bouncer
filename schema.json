@@ -4824,6 +4824,209 @@
       "title": "CheckModelHasTags",
       "type": "object"
     },
+    "CheckModelHasTestsByName": {
+      "additionalProperties": false,
+      "description": "Models must have a minimum number of tests matching the specified test names.\n\n!!! info \"Rationale\"\n\n    Some teams require every model to have specific named tests \u2014 for example `not_null` on every primary-key column, or a custom `accepted_values` test. This check lets you enumerate the test names that must be present and specify how many matching tests are required.\n\nParameters:\n    min_number_of_tests (int): The minimum number of tests matching `test_names` a model must have. Default: 1.\n    test_names (list[str]): List of test names to count. Generic tests are matched by `test_metadata.name`; singular tests are matched by the test's `name` field.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n    tests (list[TestNode]): List of TestNode objects parsed from `manifest.json`.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    materialization (Literal[\"ephemeral\", \"incremental\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_model_has_tests_by_name\n          test_names:\n            - not_null\n            - unique\n    ```",
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to exclude. A list matches if any pattern matches.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to include. A list matches if any pattern matches.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_model_has_tests_by_name",
+          "default": "check_model_has_tests_by_name",
+          "title": "Name",
+          "type": "string"
+        },
+        "test_names": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Test Names",
+          "type": "array"
+        },
+        "min_number_of_tests": {
+          "default": 1,
+          "title": "Min Number Of Tests",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "test_names"
+      ],
+      "title": "CheckModelHasTestsByName",
+      "type": "object"
+    },
+    "CheckModelHasTestsByType": {
+      "additionalProperties": false,
+      "description": "Models must have at least the specified number of schema tests and data tests.\n\n!!! info \"Rationale\"\n\n    dbt tests come in two flavours: schema tests (generic tests declared in .yml files, backed by `test_metadata`) and data tests (singular SQL files with no `test_metadata`). Teams sometimes mandate a minimum number of each type to ensure both broad coverage (via schema tests) and custom business-rule validation (via data tests). This check lets you enforce those minimums per-model.\n\nParameters:\n    min_number_of_data_tests (int): The minimum number of data (singular) tests a model must have. Default: 0.\n    min_number_of_schema_tests (int): The minimum number of schema (generic) tests a model must have. Default: 0.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n    tests (list[TestNode]): List of TestNode objects parsed from `manifest.json`.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    materialization (Literal[\"ephemeral\", \"incremental\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_model_has_tests_by_type\n          min_number_of_schema_tests: 1\n    ```\n    ```yaml\n    manifest_checks:\n        - name: check_model_has_tests_by_type\n          min_number_of_data_tests: 1\n          min_number_of_schema_tests: 2\n    ```",
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to exclude. A list matches if any pattern matches.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to include. A list matches if any pattern matches.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_model_has_tests_by_type",
+          "default": "check_model_has_tests_by_type",
+          "title": "Name",
+          "type": "string"
+        },
+        "min_number_of_data_tests": {
+          "default": 0,
+          "title": "Min Number Of Data Tests",
+          "type": "integer"
+        },
+        "min_number_of_schema_tests": {
+          "default": 0,
+          "title": "Min Number Of Schema Tests",
+          "type": "integer"
+        }
+      },
+      "title": "CheckModelHasTestsByType",
+      "type": "object"
+    },
     "CheckModelHasUniqueTest": {
       "additionalProperties": false,
       "description": "Models must have a test for uniqueness of a column.\n\n!!! info \"Rationale\"\n\n    A uniqueness test is the most fundamental data quality check \u2014 it ensures that the primary key or identifier column of a model does not contain duplicates, which would cause incorrect counts and fan-out in downstream joins. This check enforces that no model reaches production without at least one uniqueness assertion.\n\nParameters:\n    accepted_uniqueness_tests (list[str] | None): List of tests that are accepted as uniqueness tests.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    materialization (Literal[\"ephemeral\", \"incremental\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_model_has_unique_test\n          include: ^models/marts\n    ```\n    ```yaml\n    manifest_checks:\n    # Example of allowing a custom uniqueness test\n        - name: check_model_has_unique_test\n          accepted_uniqueness_tests:\n            - dbt_expectations.expect_compound_columns_to_be_unique # i.e. tests from packages must include package name\n            - my_custom_uniqueness_test\n            - unique\n    ```",
@@ -6109,6 +6312,95 @@
         "schema_name_pattern"
       ],
       "title": "CheckModelSchemaName",
+      "type": "object"
+    },
+    "CheckModelSinglePrimaryKey": {
+      "additionalProperties": false,
+      "description": "Models must have at most one column-level primary key constraint.\n\n!!! info \"Rationale\"\n\n    Declaring more than one column-level primary-key constraint in a dbt model is almost always a modelling mistake \u2014 it implies multiple independent identity columns, which is semantically ambiguous and can confuse downstream consumers. This check flags models with two or more column-level `primary_key` constraints so the author can consolidate them into a single-column PK or a composite constraint at model level.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    materialization (Literal[\"ephemeral\", \"incremental\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_model_single_primary_key\n    ```",
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to exclude. A list matches if any pattern matches.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to include. A list matches if any pattern matches.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_model_single_primary_key",
+          "default": "check_model_single_primary_key",
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "title": "CheckModelSinglePrimaryKey",
       "type": "object"
     },
     "CheckModelTestCoverage": {
@@ -8648,6 +8940,101 @@
       "title": "CheckSourceHasTags",
       "type": "object"
     },
+    "CheckSourceHasTests": {
+      "additionalProperties": false,
+      "description": "Sources must have a minimum number of tests.\n\n!!! info \"Rationale\"\n\n    Untested sources are a reliability risk: schema drift or data-quality issues in raw tables can propagate silently through your entire project. Requiring at least one test per source ensures that freshness, uniqueness, or accepted-values constraints are verified before data enters the transformation layer.\n\nParameters:\n    min_number_of_tests (int): The minimum number of tests a source must have. Default: 1.\n\nReceives:\n    source (SourceNode): The SourceNode object to check.\n    tests (list[TestNode]): List of TestNode objects parsed from `manifest.json`.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the source path (i.e the .yml file where the source is configured). Source paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the source path (i.e the .yml file where the source is configured). Only source paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_source_has_tests\n    ```\n    ```yaml\n    manifest_checks:\n        - name: check_source_has_tests\n          min_number_of_tests: 2\n    ```",
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to exclude. A list matches if any pattern matches.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to include. A list matches if any pattern matches.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_source_has_tests",
+          "default": "check_source_has_tests",
+          "title": "Name",
+          "type": "string"
+        },
+        "min_number_of_tests": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Min Number Of Tests",
+          "type": "integer"
+        }
+      },
+      "title": "CheckSourceHasTests",
+      "type": "object"
+    },
     "CheckSourceLoaderPopulated": {
       "additionalProperties": false,
       "description": "Sources must have a populated loader.\n\n!!! info \"Rationale\"\n\n    The `loader` field documents which tool or pipeline is responsible for bringing data into the warehouse (e.g. Fivetran, Airbyte, a custom ETL script). Without it, there is no traceable link between a dbt source and the upstream process that feeds it, making it difficult to investigate data quality issues, coordinate with data engineering teams, or assess the impact of changes to the ingestion layer. Requiring a populated loader turns each source into a self-documenting artifact that points clearly to its origin.\n\nReceives:\n    source (SourceNode): The SourceNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the source path (i.e the .yml file where the source is configured). Source paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the source path (i.e the .yml file where the source is configured). Only source paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_source_loader_populated\n    ```",
@@ -10202,6 +10589,8 @@
             "check_model_has_no_upstream_dependencies": "#/$defs/CheckModelHasNoUpstreamDependencies",
             "check_model_has_semi_colon": "#/$defs/CheckModelHasSemiColon",
             "check_model_has_tags": "#/$defs/CheckModelHasTags",
+            "check_model_has_tests_by_name": "#/$defs/CheckModelHasTestsByName",
+            "check_model_has_tests_by_type": "#/$defs/CheckModelHasTestsByType",
             "check_model_has_unique_test": "#/$defs/CheckModelHasUniqueTest",
             "check_model_has_unit_tests": "#/$defs/CheckModelHasUnitTests",
             "check_model_incremental_has_unique_key": "#/$defs/CheckModelIncrementalHasUniqueKey",
@@ -10215,6 +10604,7 @@
             "check_model_number_of_grants": "#/$defs/CheckModelNumberOfGrants",
             "check_model_property_file_location": "#/$defs/CheckModelPropertyFileLocation",
             "check_model_schema_name": "#/$defs/CheckModelSchemaName",
+            "check_model_single_primary_key": "#/$defs/CheckModelSinglePrimaryKey",
             "check_model_test_coverage": "#/$defs/CheckModelTestCoverage",
             "check_model_version_allowed": "#/$defs/CheckModelVersionAllowed",
             "check_model_version_pinned_in_ref": "#/$defs/CheckModelVersionPinnedInRef",
@@ -10235,6 +10625,7 @@
             "check_source_has_labels_keys": "#/$defs/CheckSourceHasLabelsKeys",
             "check_source_has_meta_keys": "#/$defs/CheckSourceHasMetaKeys",
             "check_source_has_tags": "#/$defs/CheckSourceHasTags",
+            "check_source_has_tests": "#/$defs/CheckSourceHasTests",
             "check_source_loader_populated": "#/$defs/CheckSourceLoaderPopulated",
             "check_source_min_downstream_models": "#/$defs/CheckSourceMinDownstreamModels",
             "check_source_names": "#/$defs/CheckSourceNames",
@@ -10383,6 +10774,12 @@
             "$ref": "#/$defs/CheckModelHasTags"
           },
           {
+            "$ref": "#/$defs/CheckModelHasTestsByName"
+          },
+          {
+            "$ref": "#/$defs/CheckModelHasTestsByType"
+          },
+          {
             "$ref": "#/$defs/CheckModelHasUniqueTest"
           },
           {
@@ -10420,6 +10817,9 @@
           },
           {
             "$ref": "#/$defs/CheckModelSchemaName"
+          },
+          {
+            "$ref": "#/$defs/CheckModelSinglePrimaryKey"
           },
           {
             "$ref": "#/$defs/CheckModelTestCoverage"
@@ -10480,6 +10880,9 @@
           },
           {
             "$ref": "#/$defs/CheckSourceHasTags"
+          },
+          {
+            "$ref": "#/$defs/CheckSourceHasTests"
           },
           {
             "$ref": "#/$defs/CheckSourceLoaderPopulated"

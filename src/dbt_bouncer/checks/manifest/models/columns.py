@@ -245,3 +245,50 @@ def check_model_has_constraints(model, *, required_constraint_types: list[str]):
         fail(
             f"`{get_clean_model_name(model.unique_id)}` is missing required constraint types: {missing_types}"
         )
+
+
+@check
+def check_model_single_primary_key(model):
+    """Models must have at most one column-level primary key constraint.
+
+    !!! info "Rationale"
+
+        Declaring more than one column-level primary-key constraint in a dbt model is almost always a modelling mistake — it implies multiple independent identity columns, which is semantically ambiguous and can confuse downstream consumers. This check flags models with two or more column-level `primary_key` constraints so the author can consolidate them into a single-column PK or a composite constraint at model level.
+
+    Receives:
+        model (ModelNode): The ModelNode object to check.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.
+        include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.
+        materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_model_single_primary_key
+        ```
+
+    """
+    columns = model.columns or {}
+    pk_columns: list[str] = []
+    for col_name, col in columns.items():
+        constraints = getattr(col, "constraints", None) or []
+        for c in constraints:
+            c_type = getattr(c, "type", None)
+            type_str = (
+                c_type.value
+                if hasattr(c_type, "value")
+                else str(c_type)
+                if c_type
+                else ""
+            )
+            if type_str == "primary_key":
+                pk_columns.append(col_name)
+                break
+    if len(pk_columns) > 1:
+        fail(
+            f"`{get_clean_model_name(model.unique_id)}` has more than one column-level primary key constraint: {pk_columns}"
+        )

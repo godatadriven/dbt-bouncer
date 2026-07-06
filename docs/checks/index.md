@@ -36,6 +36,7 @@
           - [Naming](./manifest/sources/naming.md)
           - [Directories](./manifest/sources/directories.md)
           - [Tags](./manifest/sources/tags.md)
+          - [Tests](./manifest/sources/tests.md)
       - [Tests](./manifest/check_tests.md)
       - [Unit Tests](./manifest/check_unit_tests.md)
 - Run Results checks:
