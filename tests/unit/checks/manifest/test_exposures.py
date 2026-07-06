@@ -2,6 +2,15 @@ import pytest
 
 from dbt_bouncer.testing import check_fails, check_passes
 
+_EXPOSURE_BASE = {
+    "depends_on": {"nodes": ["model.package_name.model_1"]},
+    "description": "A valid description.",
+    "meta": {"maturity": "high", "owner": "Finance"},
+    "name": "exposure_1",
+    "owner": {"email": "owner@example.com", "name": "Owner Name"},
+    "unique_id": "exposure.package_name.exposure_1",
+}
+
 
 @pytest.mark.parametrize(
     (
@@ -167,4 +176,121 @@ def test_check_exposure_based_on_view(
         exposure=exposure_overrides,
         materializations_to_include=materializations_to_include,
         ctx_models=ctx_models,
+    )
+
+
+@pytest.mark.parametrize(
+    ("exposure_overrides", "min_description_length", "check_fn"),
+    [
+        pytest.param(
+            {**_EXPOSURE_BASE, "description": "A valid description."},
+            None,
+            check_passes,
+            id="has_description",
+        ),
+        pytest.param(
+            {
+                **_EXPOSURE_BASE,
+                "description": "A valid description that is long enough.",
+            },
+            25,
+            check_passes,
+            id="has_description_min_length",
+        ),
+        pytest.param(
+            {**_EXPOSURE_BASE, "description": ""},
+            None,
+            check_fails,
+            id="empty_description",
+        ),
+        pytest.param(
+            {**_EXPOSURE_BASE, "description": "abc"},
+            None,
+            check_fails,
+            id="too_short_description",
+        ),
+        pytest.param(
+            {**_EXPOSURE_BASE, "description": "Short desc."},
+            25,
+            check_fails,
+            id="below_min_description_length",
+        ),
+    ],
+)
+def test_check_exposure_description_populated(
+    exposure_overrides, min_description_length, check_fn
+):
+    kwargs = {"exposure": exposure_overrides}
+    if min_description_length is not None:
+        kwargs["min_description_length"] = min_description_length
+    check_fn("check_exposure_description_populated", **kwargs)
+
+
+@pytest.mark.parametrize(
+    ("keys", "exposure_overrides", "check_fn"),
+    [
+        pytest.param(
+            ["owner"],
+            {**_EXPOSURE_BASE, "meta": {"owner": "Finance"}},
+            check_passes,
+            id="has_key",
+        ),
+        pytest.param(
+            ["maturity", "owner"],
+            {**_EXPOSURE_BASE, "meta": {"maturity": "high", "owner": "Finance"}},
+            check_passes,
+            id="has_multiple_keys",
+        ),
+        pytest.param(
+            ["owner"],
+            {**_EXPOSURE_BASE, "meta": {}},
+            check_fails,
+            id="missing_key",
+        ),
+    ],
+)
+def test_check_exposure_has_meta_keys(keys, exposure_overrides, check_fn):
+    check_fn("check_exposure_has_meta_keys", keys=keys, exposure=exposure_overrides)
+
+
+@pytest.mark.parametrize(
+    ("exposure_overrides", "required_fields", "check_fn"),
+    [
+        pytest.param(
+            {
+                **_EXPOSURE_BASE,
+                "owner": {"email": "owner@example.com", "name": "Owner Name"},
+            },
+            ["email"],
+            check_passes,
+            id="has_email",
+        ),
+        pytest.param(
+            {
+                **_EXPOSURE_BASE,
+                "owner": {"email": "owner@example.com", "name": "Owner Name"},
+            },
+            ["email", "name"],
+            check_passes,
+            id="has_email_and_name",
+        ),
+        pytest.param(
+            {**_EXPOSURE_BASE, "owner": {"name": "Owner Name"}},
+            ["email"],
+            check_fails,
+            id="missing_email",
+        ),
+        pytest.param(
+            {**_EXPOSURE_BASE, "owner": {"email": "owner@example.com"}},
+            ["email", "name"],
+            check_fails,
+            id="missing_name",
+        ),
+    ],
+)
+def test_check_exposure_has_owner(exposure_overrides, required_fields, check_fn):
+    check_fn(
+        "check_exposure_has_owner",
+        exposure=exposure_overrides,
+        required_fields=required_fields,
     )

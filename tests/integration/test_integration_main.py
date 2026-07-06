@@ -37,6 +37,9 @@ def test_cli_happy_path(caplog, dbt_artifacts_dir, tmp_path):
                 bouncer_config["manifest_checks"].remove(item)
 
     # These checks don't work with the frozen dbt_17/18/19 fixtures:
+    #   - check_exposure_description_populated / check_exposure_has_meta_keys:
+    #     these frozen fixtures pre-date the description/meta fields added to
+    #     the example exposures, so the checks will always fail against them.
     #   - check_macro_has_meta_keys / check_seed_has_meta_keys: the frozen
     #     fixtures carry no `meta` block on macros or seeds, so there are no
     #     keys for the checks to validate against.
@@ -58,6 +61,8 @@ def test_cli_happy_path(caplog, dbt_artifacts_dir, tmp_path):
     ]:
         for item in list(bouncer_config["manifest_checks"]):
             if item["name"] in [
+                "check_exposure_description_populated",
+                "check_exposure_has_meta_keys",
                 "check_macro_has_meta_keys",
                 "check_model_has_labels_keys",
                 "check_seed_has_meta_keys",

@@ -1214,6 +1214,302 @@
       "title": "CheckExposureBasedOnView",
       "type": "object"
     },
+    "CheckExposureDescriptionPopulated": {
+      "additionalProperties": false,
+      "description": "Exposures must have a populated description.\n\n!!! info \"Rationale\"\n\n    Exposures document downstream consumers of dbt models \u2014 dashboards, ML models, and APIs. Without descriptions, it is unclear what an exposure represents or who it serves, making it difficult for analysts and engineers to understand the lineage and governance of downstream consumers.\n\nParameters:\n    min_description_length (int | None): Minimum length required for the description to be considered populated.\n\nReceives:\n    exposure (ExposureNode): The ExposureNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the exposure path (i.e the .yml file where the exposure is configured). Exposure paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the exposure path (i.e the .yml file where the exposure is configured). Only exposure paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_exposure_description_populated\n    ```\n    ```yaml\n    manifest_checks:\n        - name: check_exposure_description_populated\n          min_description_length: 25\n    ```",
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to exclude. A list matches if any pattern matches.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to include. A list matches if any pattern matches.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_exposure_description_populated",
+          "default": "check_exposure_description_populated",
+          "title": "Name",
+          "type": "string"
+        },
+        "min_description_length": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Min Description Length"
+        }
+      },
+      "title": "CheckExposureDescriptionPopulated",
+      "type": "object"
+    },
+    "CheckExposureHasMetaKeys": {
+      "additionalProperties": false,
+      "description": "The `meta` config for exposures must have the specified keys.\n\n!!! info \"Rationale\"\n\n    The `meta` config is a flexible, project-defined dictionary used to track ownership, maturity levels, and other governance attributes. Requiring specific keys on exposures ensures that governance information is consistently captured for all downstream consumers, enabling automated reporting and access-control workflows that depend on these attributes.\n\nParameters:\n    keys (NestedDict): A list (that may contain sub-lists) of required keys.\n\nReceives:\n    exposure (ExposureNode): The ExposureNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the exposure path (i.e the .yml file where the exposure is configured). Exposure paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the exposure path (i.e the .yml file where the exposure is configured). Only exposure paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_exposure_has_meta_keys\n          keys:\n            - maturity\n            - owner\n    ```",
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to exclude. A list matches if any pattern matches.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to include. A list matches if any pattern matches.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_exposure_has_meta_keys",
+          "default": "check_exposure_has_meta_keys",
+          "title": "Name",
+          "type": "string"
+        },
+        "keys": {
+          "$ref": "#/$defs/NestedDict"
+        }
+      },
+      "required": [
+        "keys"
+      ],
+      "title": "CheckExposureHasMetaKeys",
+      "type": "object"
+    },
+    "CheckExposureHasOwner": {
+      "additionalProperties": false,
+      "description": "Exposures must have owner information populated.\n\n!!! info \"Rationale\"\n\n    Every exposure represents a downstream consumer (dashboard, ML model, API) that some person or team is responsible for. Without a populated owner, there is no clear point of contact when the underlying models change, when data quality issues arise, or when access needs to be reviewed. Enforcing required owner fields ensures accountability for every external dependency on dbt models.\n\nParameters:\n    required_fields (list[str]): List of owner fields that must be populated. Default: `[\"email\"]`.\n\nReceives:\n    exposure (ExposureNode): The ExposureNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the exposure path (i.e the .yml file where the exposure is configured). Exposure paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the exposure path (i.e the .yml file where the exposure is configured). Only exposure paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_exposure_has_owner\n    ```\n    ```yaml\n    manifest_checks:\n        - name: check_exposure_has_owner\n          required_fields:\n            - email\n            - name\n    ```",
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to exclude. A list matches if any pattern matches.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to include. A list matches if any pattern matches.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_exposure_has_owner",
+          "default": "check_exposure_has_owner",
+          "title": "Name",
+          "type": "string"
+        },
+        "required_fields": {
+          "default": [
+            "email"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "title": "Required Fields",
+          "type": "array"
+        }
+      },
+      "title": "CheckExposureHasOwner",
+      "type": "object"
+    },
     "CheckLineagePermittedUpstreamModels": {
       "additionalProperties": false,
       "description": "Upstream models must have a path that matches the provided `upstream_path_pattern`.\n\n!!! info \"Rationale\"\n\n    A well-structured dbt project enforces clear layer boundaries \u2014 e.g. staging models only reference sources, intermediate models only reference staging or other intermediates, and marts only reference intermediates. Without this check, developers can inadvertently create cross-layer dependencies (a mart model directly referencing a staging model) that erode the project's modularity and make refactoring risky.\n\nParameters:\n    upstream_path_pattern (str): Regexp pattern to match the upstream model(s) path.\n\nReceives:\n    manifest_obj (ManifestObject): The manifest object.\n    model (ModelNode): The ModelNode object to check.\n    models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_lineage_permitted_upstream_models\n          include: ^models/staging\n          upstream_path_pattern: $^\n        - name: check_lineage_permitted_upstream_models\n          include: ^models/intermediate\n          upstream_path_pattern: ^models/staging|^models/intermediate\n        - name: check_lineage_permitted_upstream_models\n          include: ^models/marts\n          upstream_path_pattern: ^models/staging|^models/intermediate\n    ```",
@@ -10554,6 +10850,9 @@
             "check_exposure_based_on_model": "#/$defs/CheckExposureBasedOnModel",
             "check_exposure_based_on_non_public_models": "#/$defs/CheckExposureBasedOnNonPublicModels",
             "check_exposure_based_on_view": "#/$defs/CheckExposureBasedOnView",
+            "check_exposure_description_populated": "#/$defs/CheckExposureDescriptionPopulated",
+            "check_exposure_has_meta_keys": "#/$defs/CheckExposureHasMetaKeys",
+            "check_exposure_has_owner": "#/$defs/CheckExposureHasOwner",
             "check_lineage_permitted_upstream_models": "#/$defs/CheckLineagePermittedUpstreamModels",
             "check_lineage_seed_cannot_be_used": "#/$defs/CheckLineageSeedCannotBeUsed",
             "check_lineage_source_cannot_be_used": "#/$defs/CheckLineageSourceCannotBeUsed",
@@ -10661,6 +10960,15 @@
           },
           {
             "$ref": "#/$defs/CheckExposureBasedOnView"
+          },
+          {
+            "$ref": "#/$defs/CheckExposureDescriptionPopulated"
+          },
+          {
+            "$ref": "#/$defs/CheckExposureHasMetaKeys"
+          },
+          {
+            "$ref": "#/$defs/CheckExposureHasOwner"
           },
           {
             "$ref": "#/$defs/CheckLineagePermittedUpstreamModels"

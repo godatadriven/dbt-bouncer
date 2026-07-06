@@ -60,6 +60,15 @@ manifest_checks:
   - name: check_exposure_based_on_model
   - name: check_exposure_based_on_non_public_models
   - name: check_exposure_based_on_view
+  - name: check_exposure_description_populated
+  - name: check_exposure_has_meta_keys
+    keys:
+      - maturity
+      - owner
+  - name: check_exposure_has_owner
+    required_fields:
+      - email
+      - name
 
   # Lineage
   - name: check_lineage_permitted_upstream_models
