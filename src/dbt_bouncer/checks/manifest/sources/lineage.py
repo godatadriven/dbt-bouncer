@@ -52,9 +52,9 @@ def check_duplicate_sources(source, ctx):
         return (node.database, node.schema, node.identifier)
 
     dupes = [
-        s.unique_id
+        _node(s).unique_id
         for s in ctx.sources
-        if s.unique_id != source.unique_id and rel(s) == rel(source)
+        if _node(s).unique_id != _node(source).unique_id and rel(s) == rel(source)
     ]
     if dupes:
         fail(

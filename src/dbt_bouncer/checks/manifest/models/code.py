@@ -8,6 +8,28 @@ from dbt_bouncer.utils import compile_pattern, get_clean_model_name
 _JINJA_PATTERN = re.compile(r"\{[{%].*?[%}]\}", re.DOTALL)
 _HARD_CODED_REF_PATTERN = re.compile(r"\b(?:FROM|JOIN)\s+\w+\.\w+", re.IGNORECASE)
 
+# Patterns used to strip comment forms before the select-star check.
+_JINJA_COMMENT_PATTERN = re.compile(r"\{#.*?#\}", re.DOTALL)
+_BLOCK_COMMENT_PATTERN = re.compile(r"/\*.*?\*/", re.DOTALL)
+_LINE_COMMENT_PATTERN = re.compile(r"--[^\n]*")
+
+
+def _strip_sql_comments(code: str) -> str:
+    """Remove SQL and Jinja comment forms from SQL code.
+
+    Strips Jinja block comments ({# ... #}), SQL block comments (/* ... */),
+    and SQL line comments (-- to end of line) so that a ``SELECT *`` inside a
+    comment does not trigger the select-star check.
+
+    Returns:
+        The input string with all comment forms removed.
+
+    """
+    code = _JINJA_COMMENT_PATTERN.sub("", code)
+    code = _BLOCK_COMMENT_PATTERN.sub("", code)
+    code = _LINE_COMMENT_PATTERN.sub("", code)
+    return code
+
 
 @check
 def check_model_code_does_not_contain_regexp_pattern(model, *, regexp_pattern: str):
@@ -72,7 +94,8 @@ def check_model_does_not_use_select_star(model):
         ```
 
     """
-    if re.search(r"(?i)select\s+\*", model.raw_code or ""):
+    cleaned = _strip_sql_comments(model.raw_code or "")
+    if re.search(r"(?i)select\s+\*", cleaned):
         fail(
             f"`{get_clean_model_name(model.unique_id)}` uses `SELECT *`; list columns explicitly."
         )

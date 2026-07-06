@@ -68,6 +68,23 @@ class TestCheckColumnDescriptionsAreConsistent:
                 ],
                 id="empty_descriptions_ignored",
             ),
+            pytest.param(
+                [
+                    {
+                        "columns": None,
+                        "name": "model_1",
+                        "unique_id": "model.package_name.model_1",
+                    },
+                    {
+                        "columns": {
+                            "id": {"name": "id", "description": "Primary key."}
+                        },
+                        "name": "model_2",
+                        "unique_id": "model.package_name.model_2",
+                    },
+                ],
+                id="none_columns_no_conflict",
+            ),
         ],
     )
     def test_pass(self, models_list):
@@ -97,6 +114,35 @@ class TestCheckColumnDescriptionsAreConsistent:
                     },
                 ],
                 id="same_name_different_descriptions",
+            ),
+            pytest.param(
+                [
+                    {
+                        "columns": {
+                            "id": {"name": "id", "description": "Primary key."}
+                        },
+                        "name": "model_1",
+                        "unique_id": "model.package_name.model_1",
+                    },
+                    {
+                        "columns": {
+                            "id": {"name": "id", "description": "Surrogate key."}
+                        },
+                        "name": "model_2",
+                        "unique_id": "model.package_name.model_2",
+                    },
+                    {
+                        "columns": {
+                            "other_col": {
+                                "name": "other_col",
+                                "description": "Some other column.",
+                            }
+                        },
+                        "name": "model_3",
+                        "unique_id": "model.package_name.model_3",
+                    },
+                ],
+                id="three_models_two_conflict_on_id",
             ),
         ],
     )

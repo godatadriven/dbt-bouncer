@@ -55,6 +55,18 @@ class TestCheckModelDoesNotUseSelectStar:
                 {"raw_code": None},
                 id="none_raw_code",
             ),
+            pytest.param(
+                {"raw_code": "-- SELECT * FROM old_table\nSELECT id FROM my_table"},
+                id="select_star_only_in_line_comment",
+            ),
+            pytest.param(
+                {"raw_code": "{# SELECT * FROM old_table #}\nSELECT id FROM my_table"},
+                id="select_star_only_in_jinja_comment",
+            ),
+            pytest.param(
+                {"raw_code": "/* SELECT * FROM old_table */\nSELECT id FROM my_table"},
+                id="select_star_only_in_block_comment",
+            ),
         ],
     )
     def test_pass(self, model_override):
