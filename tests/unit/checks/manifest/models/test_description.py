@@ -3,6 +3,110 @@ import pytest
 from dbt_bouncer.testing import check_fails, check_passes
 
 
+class TestCheckColumnDescriptionsAreConsistent:
+    @pytest.mark.parametrize(
+        "models_list",
+        [
+            pytest.param(
+                [
+                    {
+                        "columns": {
+                            "id": {"name": "id", "description": "Primary key."}
+                        },
+                        "name": "model_1",
+                        "unique_id": "model.package_name.model_1",
+                    },
+                    {
+                        "columns": {
+                            "id": {"name": "id", "description": "Primary key."}
+                        },
+                        "name": "model_2",
+                        "unique_id": "model.package_name.model_2",
+                    },
+                ],
+                id="same_name_same_description",
+            ),
+            pytest.param(
+                [
+                    {
+                        "columns": {
+                            "order_id": {"name": "order_id", "description": "Order PK."}
+                        },
+                        "name": "model_1",
+                        "unique_id": "model.package_name.model_1",
+                    },
+                    {
+                        "columns": {
+                            "customer_id": {
+                                "name": "customer_id",
+                                "description": "Customer FK.",
+                            }
+                        },
+                        "name": "model_2",
+                        "unique_id": "model.package_name.model_2",
+                    },
+                ],
+                id="all_distinct_column_names",
+            ),
+            pytest.param(
+                [
+                    {
+                        "columns": {
+                            "id": {"name": "id", "description": ""},
+                            "name": {"name": "name", "description": "   "},
+                        },
+                        "name": "model_1",
+                        "unique_id": "model.package_name.model_1",
+                    },
+                    {
+                        "columns": {
+                            "id": {"name": "id", "description": "Real description."},
+                        },
+                        "name": "model_2",
+                        "unique_id": "model.package_name.model_2",
+                    },
+                ],
+                id="empty_descriptions_ignored",
+            ),
+        ],
+    )
+    def test_pass(self, models_list):
+        check_passes(
+            "check_column_descriptions_are_consistent",
+            ctx_models=models_list,
+        )
+
+    @pytest.mark.parametrize(
+        "models_list",
+        [
+            pytest.param(
+                [
+                    {
+                        "columns": {
+                            "id": {"name": "id", "description": "Primary key."}
+                        },
+                        "name": "model_1",
+                        "unique_id": "model.package_name.model_1",
+                    },
+                    {
+                        "columns": {
+                            "id": {"name": "id", "description": "Surrogate key."}
+                        },
+                        "name": "model_2",
+                        "unique_id": "model.package_name.model_2",
+                    },
+                ],
+                id="same_name_different_descriptions",
+            ),
+        ],
+    )
+    def test_fail(self, models_list):
+        check_fails(
+            "check_column_descriptions_are_consistent",
+            ctx_models=models_list,
+        )
+
+
 class TestCheckModelDescriptionContainsRegexPattern:
     @pytest.mark.parametrize(
         ("model_override", "regexp_pattern"),

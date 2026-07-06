@@ -105,3 +105,89 @@ class TestCheckSourceHasMetaKeys:
             source={"meta": meta},
             keys=keys,
         )
+
+
+class TestCheckSourcePiiMeta:
+    @pytest.mark.parametrize(
+        ("source_override", "column_name_pattern", "meta_key"),
+        [
+            pytest.param(
+                {
+                    "columns": {
+                        "email_address": {
+                            "name": "email_address",
+                            "meta": {"pii": True},
+                        },
+                    },
+                },
+                "^email_.*",
+                "pii",
+                id="matching_column_has_meta_key",
+            ),
+            pytest.param(
+                {
+                    "columns": {
+                        "order_id": {
+                            "name": "order_id",
+                            "meta": {},
+                        },
+                    },
+                },
+                "^email_.*",
+                "pii",
+                id="no_matching_columns",
+            ),
+            pytest.param(
+                {"columns": {}},
+                "^email_.*",
+                "pii",
+                id="empty_columns",
+            ),
+        ],
+    )
+    def test_pass(self, source_override, column_name_pattern, meta_key):
+        check_passes(
+            "check_source_pii_meta",
+            source=source_override,
+            column_name_pattern=column_name_pattern,
+            meta_key=meta_key,
+        )
+
+    @pytest.mark.parametrize(
+        ("source_override", "column_name_pattern", "meta_key"),
+        [
+            pytest.param(
+                {
+                    "columns": {
+                        "email_address": {
+                            "name": "email_address",
+                            "meta": {},
+                        },
+                    },
+                },
+                "^email_.*",
+                "pii",
+                id="matching_column_missing_meta_key",
+            ),
+            pytest.param(
+                {
+                    "columns": {
+                        "email_address": {
+                            "name": "email_address",
+                            "meta": {"owner": "data-team"},
+                        },
+                    },
+                },
+                "^email_.*",
+                "pii",
+                id="matching_column_has_different_meta_key",
+            ),
+        ],
+    )
+    def test_fail(self, source_override, column_name_pattern, meta_key):
+        check_fails(
+            "check_source_pii_meta",
+            source=source_override,
+            column_name_pattern=column_name_pattern,
+            meta_key=meta_key,
+        )

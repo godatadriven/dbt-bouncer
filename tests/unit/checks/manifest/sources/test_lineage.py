@@ -1,3 +1,5 @@
+import pytest
+
 from dbt_bouncer.testing import check_fails, check_passes
 
 # Shared model dicts for reuse across tests
@@ -55,6 +57,108 @@ _MODEL_NO_DEPS = {
 _SOURCE_WITH_TAGS = {
     "tags": ["tag_1"],
 }
+
+# Source dicts used in check_duplicate_sources tests.
+_SOURCE_A = {
+    "database": "dev",
+    "identifier": "table_1",
+    "schema": "schema_1",
+    "unique_id": "source.package_name.source_1.table_1",
+}
+
+_SOURCE_B_DUPLICATE = {
+    "database": "dev",
+    "identifier": "table_1",
+    "schema": "schema_1",
+    "unique_id": "source.package_name.source_2.table_1",  # different unique_id, same relation
+}
+
+_SOURCE_C_UNIQUE = {
+    "database": "dev",
+    "identifier": "table_2",
+    "schema": "schema_1",
+    "unique_id": "source.package_name.source_1.table_2",  # different identifier
+}
+
+
+class TestCheckDuplicateSources:
+    def test_all_relations_unique(self):
+        check_passes(
+            "check_duplicate_sources",
+            source=_SOURCE_A,
+            ctx_sources=[_SOURCE_A, _SOURCE_C_UNIQUE],
+        )
+
+    def test_duplicate_relation(self):
+        check_fails(
+            "check_duplicate_sources",
+            source=_SOURCE_A,
+            ctx_sources=[_SOURCE_A, _SOURCE_B_DUPLICATE],
+        )
+
+
+class TestCheckSourceMinDownstreamModels:
+    @pytest.mark.parametrize(
+        ("min_models", "models_list"),
+        [
+            pytest.param(
+                1,
+                [_MODEL_DEPENDS_ON_SOURCE],
+                id="exactly_min",
+            ),
+            pytest.param(
+                1,
+                [_MODEL_DEPENDS_ON_SOURCE, _MODEL_2_DEPENDS_ON_SOURCE],
+                id="above_min",
+            ),
+            pytest.param(
+                2,
+                [_MODEL_DEPENDS_ON_SOURCE, _MODEL_2_DEPENDS_ON_SOURCE],
+                id="two_models_min_two",
+            ),
+        ],
+    )
+    def test_pass(self, min_models, models_list):
+        check_passes(
+            "check_source_min_downstream_models",
+            source=_SOURCE_WITH_TAGS,
+            min_number_of_models=min_models,
+            ctx_models=models_list,
+        )
+
+    @pytest.mark.parametrize(
+        ("min_models", "models_list"),
+        [
+            pytest.param(
+                2,
+                [_MODEL_DEPENDS_ON_SOURCE],
+                id="below_min_one_model",
+            ),
+            pytest.param(
+                1,
+                [_MODEL_NO_DEPS],
+                id="below_min_no_matching_models",
+            ),
+        ],
+    )
+    def test_fail(self, min_models, models_list):
+        check_fails(
+            "check_source_min_downstream_models",
+            source=_SOURCE_WITH_TAGS,
+            min_number_of_models=min_models,
+            ctx_models=models_list,
+        )
+
+    def test_invalid_min_raises_value_error(self):
+        from dbt_bouncer.testing import _run_check
+
+        with pytest.raises(ValueError, match="greater than 0"):
+            _run_check(
+                "check_source_min_downstream_models",
+                source=_SOURCE_WITH_TAGS,
+                min_number_of_models=0,
+                ctx_models=[_MODEL_DEPENDS_ON_SOURCE],
+            )
 
 
 class TestCheckSourceNotOrphaned:

@@ -39,6 +39,54 @@ class TestCheckModelCodeDoesNotContainRegexpPattern:
         )
 
 
+class TestCheckModelDoesNotUseSelectStar:
+    @pytest.mark.parametrize(
+        "model_override",
+        [
+            pytest.param(
+                {"raw_code": "SELECT id, name FROM my_table"},
+                id="explicit_columns",
+            ),
+            pytest.param(
+                {"raw_code": ""},
+                id="empty_raw_code",
+            ),
+            pytest.param(
+                {"raw_code": None},
+                id="none_raw_code",
+            ),
+        ],
+    )
+    def test_pass(self, model_override):
+        check_passes("check_model_does_not_use_select_star", model=model_override)
+
+    @pytest.mark.parametrize(
+        "model_override",
+        [
+            pytest.param(
+                {"raw_code": "select * from my_table"},
+                id="lowercase_select_star",
+            ),
+            pytest.param(
+                {"raw_code": "SELECT * FROM my_table"},
+                id="uppercase_select_star",
+            ),
+            pytest.param(
+                {"raw_code": "SELECT  * FROM my_table"},
+                id="select_star_extra_space",
+            ),
+            pytest.param(
+                {
+                    "raw_code": "WITH cte AS (SELECT id FROM t) SELECT * FROM cte",
+                },
+                id="select_star_in_outer_query",
+            ),
+        ],
+    )
+    def test_fail(self, model_override):
+        check_fails("check_model_does_not_use_select_star", model=model_override)
+
+
 class TestCheckModelHardCodedReferences:
     @pytest.mark.parametrize(
         "model_override",

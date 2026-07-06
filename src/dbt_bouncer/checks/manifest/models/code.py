@@ -47,6 +47,38 @@ def check_model_code_does_not_contain_regexp_pattern(model, *, regexp_pattern: s
 
 
 @check
+def check_model_does_not_use_select_star(model):
+    """Models must not use `SELECT *`.
+
+    !!! info "Rationale"
+
+        `SELECT *` makes a model's output schema implicit and brittle to upstream column changes. When a source or upstream model adds, removes, or reorders columns, a `SELECT *` model silently propagates the change, potentially breaking downstream consumers or introducing unexpected columns into the DAG. Explicit column lists are self-documenting, stable, and make schema changes intentional and reviewable.
+
+    Receives:
+        model (ModelNode): The ModelNode object to check.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.
+        include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.
+        materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_model_does_not_use_select_star
+              include: ^models/marts
+        ```
+
+    """
+    if re.search(r"(?i)select\s+\*", model.raw_code or ""):
+        fail(
+            f"`{get_clean_model_name(model.unique_id)}` uses `SELECT *`; list columns explicitly."
+        )
+
+
+@check
 def check_model_hard_coded_references(model):
     """A model must not contain hard-coded table references; use ref() or source() instead.
 
