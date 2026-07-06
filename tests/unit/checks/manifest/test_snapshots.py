@@ -70,10 +70,31 @@ def test_check_snapshot_description_populated(
             id="has_required_meta_key",
         ),
         pytest.param(
+            {
+                **_SNAPSHOT_BASE,
+                "meta": {"owner": {"email": "team@example.com"}},
+            },
+            [{"owner": ["email"]}],
+            check_passes,
+            id="has_nested_key",
+        ),
+        pytest.param(
             {**_SNAPSHOT_BASE, "meta": {}},
             ["owner"],
             check_fails,
             id="missing_required_meta_key",
+        ),
+        pytest.param(
+            {**_SNAPSHOT_BASE, "meta": {"owner": "team"}},
+            ["owner", "maturity"],
+            check_fails,
+            id="missing_one_of_multiple_required_keys",
+        ),
+        pytest.param(
+            {**_SNAPSHOT_BASE, "meta": {"owner": {}}},
+            [{"owner": ["email"]}],
+            check_fails,
+            id="missing_nested_key",
         ),
     ],
 )

@@ -89,7 +89,7 @@ def check_snapshot_has_meta_keys(snapshot, *, keys: NestedDict):
     )
     if missing_keys:
         fail(
-            f"`{snapshot.name}` is missing the following keys from the `meta` config: {[x.replace('>>', '') for x in missing_keys]}"
+            f"`{get_clean_model_name(snapshot.unique_id)}` is missing the following keys from the `meta` config: {[x.replace('>>', '') for x in missing_keys]}"
         )
 
 
@@ -162,9 +162,11 @@ def check_snapshot_has_unique_key(snapshot):
         ```
 
     """
-    config = snapshot.config or {}
-    if not config.get("unique_key"):
-        fail(f"`{snapshot.name}` does not have a `unique_key` configured.")
+    config = snapshot.config
+    if not (config and getattr(config, "unique_key", None)):
+        fail(
+            f"`{get_clean_model_name(snapshot.unique_id)}` does not have a `unique_key` configured."
+        )
 
 
 @check
@@ -240,17 +242,17 @@ def check_snapshot_strategy(
         ```
 
     """
-    config = snapshot.config or {}
-    strategy = config.get("strategy")
+    config = snapshot.config
+    strategy = getattr(config, "strategy", None) if config else None
     if strategy not in allowed_strategies:
         fail(
-            f"`{snapshot.name}` has strategy `{strategy}`, which is not one of the allowed strategies: {allowed_strategies}."
+            f"`{get_clean_model_name(snapshot.unique_id)}` has strategy `{strategy}`, which is not one of the allowed strategies: {allowed_strategies}."
         )
-    if strategy == "timestamp" and not config.get("updated_at"):
+    if strategy == "timestamp" and not (config and getattr(config, "updated_at", None)):
         fail(
-            f"`{snapshot.name}` uses the `timestamp` strategy but has no `updated_at` configured."
+            f"`{get_clean_model_name(snapshot.unique_id)}` uses the `timestamp` strategy but has no `updated_at` configured."
         )
-    if strategy == "check" and not config.get("check_cols"):
+    if strategy == "check" and not (config and getattr(config, "check_cols", None)):
         fail(
-            f"`{snapshot.name}` uses the `check` strategy but has no `check_cols` configured."
+            f"`{get_clean_model_name(snapshot.unique_id)}` uses the `check` strategy but has no `check_cols` configured."
         )

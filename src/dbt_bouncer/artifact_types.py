@@ -212,6 +212,9 @@ class SemanticModelNode(Protocol):
 class SnapshotNode(Protocol):
     """A dbt snapshot resource."""
 
+    config: NodeConfig
+    description: str
+    meta: dict[str, Any]
     name: str
     tags: list[str]
     unique_id: str
