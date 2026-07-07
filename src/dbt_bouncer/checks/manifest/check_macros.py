@@ -245,7 +245,7 @@ def check_macro_has_meta_keys(macro, *, keys: NestedDict):
 
     """
     missing_keys = find_missing_meta_keys(
-        meta_config=macro.meta or {}, required_keys=keys.model_dump()
+        meta_config=macro.meta, required_keys=keys.model_dump()
     )
     if missing_keys:
         fail(

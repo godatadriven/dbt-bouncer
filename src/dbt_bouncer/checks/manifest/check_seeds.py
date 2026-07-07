@@ -163,7 +163,7 @@ def check_seed_has_meta_keys(seed, *, keys: NestedDict):
 
     """
     missing_keys = find_missing_meta_keys(
-        meta_config=seed.meta or {}, required_keys=keys.model_dump()
+        meta_config=seed.meta, required_keys=keys.model_dump()
     )
     if missing_keys:
         fail(
