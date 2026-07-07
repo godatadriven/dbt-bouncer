@@ -61,6 +61,48 @@ def test_check_snapshot_description_populated(
 
 
 @pytest.mark.parametrize(
+    ("snapshot_overrides", "keys", "check_fn"),
+    [
+        pytest.param(
+            {**_SNAPSHOT_BASE, "meta": {"owner": "Data Team"}},
+            ["owner"],
+            check_passes,
+            id="has_required_meta_key",
+        ),
+        pytest.param(
+            {
+                **_SNAPSHOT_BASE,
+                "meta": {"owner": {"email": "team@example.com"}},
+            },
+            [{"owner": ["email"]}],
+            check_passes,
+            id="has_nested_key",
+        ),
+        pytest.param(
+            {**_SNAPSHOT_BASE, "meta": {}},
+            ["owner"],
+            check_fails,
+            id="missing_required_meta_key",
+        ),
+        pytest.param(
+            {**_SNAPSHOT_BASE, "meta": {"owner": "team"}},
+            ["owner", "maturity"],
+            check_fails,
+            id="missing_one_of_multiple_required_keys",
+        ),
+        pytest.param(
+            {**_SNAPSHOT_BASE, "meta": {"owner": {}}},
+            [{"owner": ["email"]}],
+            check_fails,
+            id="missing_nested_key",
+        ),
+    ],
+)
+def test_check_snapshot_has_meta_keys(snapshot_overrides, keys, check_fn):
+    check_fn("check_snapshot_has_meta_keys", keys=keys, snapshot=snapshot_overrides)
+
+
+@pytest.mark.parametrize(
     ("snapshot_overrides", "tags", "criteria", "check_fn"),
     [
         pytest.param(
@@ -130,6 +172,30 @@ def test_check_snapshot_has_tags_invalid_criteria():
     ("snapshot_overrides", "check_fn"),
     [
         pytest.param(
+            {**_SNAPSHOT_BASE, "config": {"unique_key": "id"}},
+            check_passes,
+            id="has_unique_key",
+        ),
+        pytest.param(
+            {**_SNAPSHOT_BASE, "config": {}},
+            check_fails,
+            id="missing_unique_key",
+        ),
+        pytest.param(
+            {**_SNAPSHOT_BASE, "config": {"unique_key": ""}},
+            check_fails,
+            id="empty_unique_key",
+        ),
+    ],
+)
+def test_check_snapshot_has_unique_key(snapshot_overrides, check_fn):
+    check_fn("check_snapshot_has_unique_key", snapshot=snapshot_overrides)
+
+
+@pytest.mark.parametrize(
+    ("snapshot_overrides", "check_fn"),
+    [
+        pytest.param(
             {
                 "alias": "snp_1",
                 "config": {},
@@ -155,5 +221,63 @@ def test_check_snapshot_names(snapshot_overrides, check_fn):
         "check_snapshot_names",
         include="",
         snapshot_name_pattern="^snp_",
+        snapshot=snapshot_overrides,
+    )
+
+
+@pytest.mark.parametrize(
+    ("snapshot_overrides", "allowed_strategies", "check_fn"),
+    [
+        pytest.param(
+            {
+                **_SNAPSHOT_BASE,
+                "config": {"strategy": "timestamp", "updated_at": "updated_at"},
+            },
+            ["check", "timestamp"],
+            check_passes,
+            id="timestamp_with_updated_at",
+        ),
+        pytest.param(
+            {
+                **_SNAPSHOT_BASE,
+                "config": {"strategy": "check", "check_cols": ["col1", "col2"]},
+            },
+            ["check", "timestamp"],
+            check_passes,
+            id="check_with_check_cols",
+        ),
+        pytest.param(
+            {**_SNAPSHOT_BASE, "config": {"strategy": "timestamp"}},
+            ["check", "timestamp"],
+            check_fails,
+            id="timestamp_without_updated_at",
+        ),
+        pytest.param(
+            {**_SNAPSHOT_BASE, "config": {"strategy": "check"}},
+            ["check", "timestamp"],
+            check_fails,
+            id="check_without_check_cols",
+        ),
+        pytest.param(
+            {**_SNAPSHOT_BASE, "config": {"strategy": "custom"}},
+            ["check", "timestamp"],
+            check_fails,
+            id="unknown_strategy",
+        ),
+        pytest.param(
+            {
+                **_SNAPSHOT_BASE,
+                "config": {"strategy": "timestamp", "updated_at": "updated_at"},
+            },
+            ["check"],
+            check_fails,
+            id="strategy_not_in_allowed_list",
+        ),
+    ],
+)
+def test_check_snapshot_strategy(snapshot_overrides, allowed_strategies, check_fn):
+    check_fn(
+        "check_snapshot_strategy",
+        allowed_strategies=allowed_strategies,
         snapshot=snapshot_overrides,
     )

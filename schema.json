@@ -1214,6 +1214,302 @@
       "title": "CheckExposureBasedOnView",
       "type": "object"
     },
+    "CheckExposureDescriptionPopulated": {
+      "additionalProperties": false,
+      "description": "Exposures must have a populated description.\n\n!!! info \"Rationale\"\n\n    Exposures document downstream consumers of dbt models \u2014 dashboards, ML models, and APIs. Without descriptions, it is unclear what an exposure represents or who it serves, making it difficult for analysts and engineers to understand the lineage and governance of downstream consumers.\n\nParameters:\n    min_description_length (int | None): Minimum length required for the description to be considered populated.\n\nReceives:\n    exposure (ExposureNode): The ExposureNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the exposure path (i.e the .yml file where the exposure is configured). Exposure paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the exposure path (i.e the .yml file where the exposure is configured). Only exposure paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_exposure_description_populated\n    ```\n    ```yaml\n    manifest_checks:\n        - name: check_exposure_description_populated\n          min_description_length: 25\n    ```",
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to exclude. A list matches if any pattern matches.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to include. A list matches if any pattern matches.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_exposure_description_populated",
+          "default": "check_exposure_description_populated",
+          "title": "Name",
+          "type": "string"
+        },
+        "min_description_length": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Min Description Length"
+        }
+      },
+      "title": "CheckExposureDescriptionPopulated",
+      "type": "object"
+    },
+    "CheckExposureHasMetaKeys": {
+      "additionalProperties": false,
+      "description": "The `meta` config for exposures must have the specified keys.\n\n!!! info \"Rationale\"\n\n    The `meta` config is a flexible, project-defined dictionary used to track ownership, maturity levels, and other governance attributes. Requiring specific keys on exposures ensures that governance information is consistently captured for all downstream consumers, enabling automated reporting and access-control workflows that depend on these attributes.\n\nParameters:\n    keys (NestedDict): A list (that may contain sub-lists) of required keys.\n\nReceives:\n    exposure (ExposureNode): The ExposureNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the exposure path (i.e the .yml file where the exposure is configured). Exposure paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the exposure path (i.e the .yml file where the exposure is configured). Only exposure paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_exposure_has_meta_keys\n          keys:\n            - maturity\n            - owner\n    ```",
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to exclude. A list matches if any pattern matches.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to include. A list matches if any pattern matches.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_exposure_has_meta_keys",
+          "default": "check_exposure_has_meta_keys",
+          "title": "Name",
+          "type": "string"
+        },
+        "keys": {
+          "$ref": "#/$defs/NestedDict"
+        }
+      },
+      "required": [
+        "keys"
+      ],
+      "title": "CheckExposureHasMetaKeys",
+      "type": "object"
+    },
+    "CheckExposureHasOwner": {
+      "additionalProperties": false,
+      "description": "Exposures must have owner information populated.\n\n!!! info \"Rationale\"\n\n    Every exposure represents a downstream consumer (dashboard, ML model, API) that some person or team is responsible for. Without a populated owner, there is no clear point of contact when the underlying models change, when data quality issues arise, or when access needs to be reviewed. Enforcing required owner fields ensures accountability for every external dependency on dbt models.\n\nParameters:\n    required_fields (list[str]): List of owner fields that must be populated. Default: `[\"email\"]`.\n\nReceives:\n    exposure (ExposureNode): The ExposureNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the exposure path (i.e the .yml file where the exposure is configured). Exposure paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the exposure path (i.e the .yml file where the exposure is configured). Only exposure paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_exposure_has_owner\n    ```\n    ```yaml\n    manifest_checks:\n        - name: check_exposure_has_owner\n          required_fields:\n            - email\n            - name\n    ```",
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to exclude. A list matches if any pattern matches.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to include. A list matches if any pattern matches.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_exposure_has_owner",
+          "default": "check_exposure_has_owner",
+          "title": "Name",
+          "type": "string"
+        },
+        "required_fields": {
+          "default": [
+            "email"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "title": "Required Fields",
+          "type": "array"
+        }
+      },
+      "title": "CheckExposureHasOwner",
+      "type": "object"
+    },
     "CheckLineagePermittedUpstreamModels": {
       "additionalProperties": false,
       "description": "Upstream models must have a path that matches the provided `upstream_path_pattern`.\n\n!!! info \"Rationale\"\n\n    A well-structured dbt project enforces clear layer boundaries \u2014 e.g. staging models only reference sources, intermediate models only reference staging or other intermediates, and marts only reference intermediates. Without this check, developers can inadvertently create cross-layer dependencies (a mart model directly referencing a staging model) that erode the project's modularity and make refactoring risky.\n\nParameters:\n    upstream_path_pattern (str): Regexp pattern to match the upstream model(s) path.\n\nReceives:\n    manifest_obj (ManifestObject): The manifest object.\n    model (ModelNode): The ModelNode object to check.\n    models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_lineage_permitted_upstream_models\n          include: ^models/staging\n          upstream_path_pattern: $^\n        - name: check_lineage_permitted_upstream_models\n          include: ^models/intermediate\n          upstream_path_pattern: ^models/staging|^models/intermediate\n        - name: check_lineage_permitted_upstream_models\n          include: ^models/marts\n          upstream_path_pattern: ^models/staging|^models/intermediate\n    ```",
@@ -4824,6 +5120,212 @@
       "title": "CheckModelHasTags",
       "type": "object"
     },
+    "CheckModelHasTestsByName": {
+      "additionalProperties": false,
+      "description": "Models must have a minimum number of tests matching the specified test names.\n\n!!! info \"Rationale\"\n\n    Some teams require every model to have specific named tests \u2014 for example `not_null` on every primary-key column, or a custom `accepted_values` test. This check lets you enumerate the test names that must be present and specify how many matching tests are required.\n\nParameters:\n    min_number_of_tests (int): The minimum number of tests matching `test_names` a model must have. Default: 1.\n    test_names (list[str]): List of test names to count. Generic tests are matched by `test_metadata.name`; singular tests are matched by the test's `name` field.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n    tests (list[TestNode]): List of TestNode objects parsed from `manifest.json`.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    materialization (Literal[\"ephemeral\", \"incremental\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_model_has_tests_by_name\n          test_names:\n            - not_null\n            - unique\n    ```",
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to exclude. A list matches if any pattern matches.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to include. A list matches if any pattern matches.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_model_has_tests_by_name",
+          "default": "check_model_has_tests_by_name",
+          "title": "Name",
+          "type": "string"
+        },
+        "test_names": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Test Names",
+          "type": "array"
+        },
+        "min_number_of_tests": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Min Number Of Tests",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "test_names"
+      ],
+      "title": "CheckModelHasTestsByName",
+      "type": "object"
+    },
+    "CheckModelHasTestsByType": {
+      "additionalProperties": false,
+      "description": "Models must have at least the specified number of schema tests and data tests.\n\n!!! info \"Rationale\"\n\n    dbt tests come in two flavours: schema tests (generic tests declared in .yml files, backed by `test_metadata`) and data tests (singular SQL files with no `test_metadata`). Teams sometimes mandate a minimum number of each type to ensure both broad coverage (via schema tests) and custom business-rule validation (via data tests). This check lets you enforce those minimums per-model.\n\nParameters:\n    min_number_of_data_tests (int): The minimum number of data (singular) tests a model must have. Default: 0.\n    min_number_of_schema_tests (int): The minimum number of schema (generic) tests a model must have. Default: 0.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n    tests (list[TestNode]): List of TestNode objects parsed from `manifest.json`.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    materialization (Literal[\"ephemeral\", \"incremental\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_model_has_tests_by_type\n          min_number_of_schema_tests: 1\n    ```\n    ```yaml\n    manifest_checks:\n        - name: check_model_has_tests_by_type\n          min_number_of_data_tests: 1\n          min_number_of_schema_tests: 2\n    ```",
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to exclude. A list matches if any pattern matches.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to include. A list matches if any pattern matches.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_model_has_tests_by_type",
+          "default": "check_model_has_tests_by_type",
+          "title": "Name",
+          "type": "string"
+        },
+        "min_number_of_data_tests": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Min Number Of Data Tests",
+          "type": "integer"
+        },
+        "min_number_of_schema_tests": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Min Number Of Schema Tests",
+          "type": "integer"
+        }
+      },
+      "title": "CheckModelHasTestsByType",
+      "type": "object"
+    },
     "CheckModelHasUniqueTest": {
       "additionalProperties": false,
       "description": "Models must have a test for uniqueness of a column.\n\n!!! info \"Rationale\"\n\n    A uniqueness test is the most fundamental data quality check \u2014 it ensures that the primary key or identifier column of a model does not contain duplicates, which would cause incorrect counts and fan-out in downstream joins. This check enforces that no model reaches production without at least one uniqueness assertion.\n\nParameters:\n    accepted_uniqueness_tests (list[str] | None): List of tests that are accepted as uniqueness tests.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    materialization (Literal[\"ephemeral\", \"incremental\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_model_has_unique_test\n          include: ^models/marts\n    ```\n    ```yaml\n    manifest_checks:\n    # Example of allowing a custom uniqueness test\n        - name: check_model_has_unique_test\n          accepted_uniqueness_tests:\n            - dbt_expectations.expect_compound_columns_to_be_unique # i.e. tests from packages must include package name\n            - my_custom_uniqueness_test\n            - unique\n    ```",
@@ -6109,6 +6611,95 @@
         "schema_name_pattern"
       ],
       "title": "CheckModelSchemaName",
+      "type": "object"
+    },
+    "CheckModelSinglePrimaryKey": {
+      "additionalProperties": false,
+      "description": "Models must have at most one column-level primary key constraint.\n\n!!! info \"Rationale\"\n\n    Declaring more than one column-level primary-key constraint in a dbt model is almost always a modelling mistake \u2014 it implies multiple independent identity columns, which is semantically ambiguous and can confuse downstream consumers. This check flags models with two or more column-level `primary_key` constraints so the author can consolidate them into a single-column PK or a composite constraint at model level.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    materialization (Literal[\"ephemeral\", \"incremental\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_model_single_primary_key\n    ```",
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to exclude. A list matches if any pattern matches.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to include. A list matches if any pattern matches.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_model_single_primary_key",
+          "default": "check_model_single_primary_key",
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "title": "CheckModelSinglePrimaryKey",
       "type": "object"
     },
     "CheckModelTestCoverage": {
@@ -7768,6 +8359,101 @@
       "title": "CheckSnapshotDescriptionPopulated",
       "type": "object"
     },
+    "CheckSnapshotHasMetaKeys": {
+      "additionalProperties": false,
+      "description": "The `meta` config for snapshots must have the specified keys.\n\n!!! info \"Rationale\"\n\n    The `meta` config is a flexible, project-defined dictionary used to track ownership, maturity levels, PII classification, and other governance attributes. Requiring specific keys ensures that these attributes are consistently populated across all snapshots, enabling automated reporting, data cataloguing, and access-control workflows that depend on them.\n\nParameters:\n    keys (NestedDict): A list (that may contain sub-lists) of required keys.\n\nReceives:\n    snapshot (SnapshotNode): The SnapshotNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the snapshot path. Snapshot paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the snapshot path. Only snapshot paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_snapshot_has_meta_keys\n          keys:\n            - maturity\n            - owner\n    ```",
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to exclude. A list matches if any pattern matches.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to include. A list matches if any pattern matches.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_snapshot_has_meta_keys",
+          "default": "check_snapshot_has_meta_keys",
+          "title": "Name",
+          "type": "string"
+        },
+        "keys": {
+          "$ref": "#/$defs/NestedDict"
+        }
+      },
+      "required": [
+        "keys"
+      ],
+      "title": "CheckSnapshotHasMetaKeys",
+      "type": "object"
+    },
     "CheckSnapshotHasTags": {
       "additionalProperties": false,
       "description": "Snapshots must have the specified tags.\n\n!!! info \"Rationale\"\n\n    Tags on snapshots enable selective execution (e.g. `dbt snapshot --select tag:nightly`) and make it possible to apply governance policies to specific groups of snapshots. Without enforced tagging, snapshots can be inadvertently skipped in scheduled runs or included in the wrong execution contexts, leading to stale historical data.\n\nParameters:\n    criteria (Literal[\"any\", \"all\", \"one\"] | None): Whether the snapshot must have any, all, or exactly one of the specified tags. Default: `all`.\n    tags (list[str]): List of tags to check for.\n\nReceives:\n    snapshot (SnapshotNode): The SnapshotNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the snapshot path. Snapshot paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the snapshot path. Only snapshot paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_snapshot_has_tags\n          tags:\n            - tag_1\n            - tag_2\n    ```",
@@ -7877,6 +8563,95 @@
       "title": "CheckSnapshotHasTags",
       "type": "object"
     },
+    "CheckSnapshotHasUniqueKey": {
+      "additionalProperties": false,
+      "description": "Snapshots must have a `unique_key` configured.\n\n!!! info \"Rationale\"\n\n    The `unique_key` configuration is essential for snapshot correctness \u2014 dbt uses it to identify existing rows when deciding whether to insert a new record or close an old one. Without a `unique_key`, dbt cannot reliably track which rows have changed, leading to duplicate history records or missed updates that silently corrupt the slowly-changing dimension table.\n\nReceives:\n    snapshot (SnapshotNode): The SnapshotNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the snapshot path. Snapshot paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the snapshot path. Only snapshot paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_snapshot_has_unique_key\n    ```",
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to exclude. A list matches if any pattern matches.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to include. A list matches if any pattern matches.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_snapshot_has_unique_key",
+          "default": "check_snapshot_has_unique_key",
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "title": "CheckSnapshotHasUniqueKey",
+      "type": "object"
+    },
     "CheckSnapshotNames": {
       "additionalProperties": false,
       "description": "Snapshots must have a name that matches the supplied regex.\n\n!!! info \"Rationale\"\n\n    A consistent naming convention for snapshots (e.g. a domain prefix like `erp_` or a suffix like `_snapshot`) makes it immediately obvious in the warehouse that a table is a point-in-time history capture rather than a regular dimension or fact. Without naming conventions, snapshots can be confused with other tables, leading to incorrect use or accidental truncation.\n\nParameters:\n    snapshot_name_pattern (str): Regexp the snapshot name must match.\n\nReceives:\n    snapshot (SnapshotNode): The SnapshotNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the snapshot path. Snapshot paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the snapshot path. Only snapshot paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_snapshot_names\n          include: ^snapshots/erp\n          snapshot_name_pattern: ^erp\n    ```",
@@ -7971,6 +8746,106 @@
         "snapshot_name_pattern"
       ],
       "title": "CheckSnapshotNames",
+      "type": "object"
+    },
+    "CheckSnapshotStrategy": {
+      "additionalProperties": false,
+      "description": "Snapshots must use an allowed strategy and have the required strategy-specific configuration.\n\n!!! info \"Rationale\"\n\n    The snapshot strategy determines how dbt detects row changes. Using an unsupported or misconfigured strategy can lead to incorrect history capture: the `timestamp` strategy requires an `updated_at` column to detect changes, and the `check` strategy requires `check_cols` to define which columns to monitor. Enforcing both the allowed strategies and their required fields prevents silent data quality issues in slowly-changing dimension tables.\n\nParameters:\n    allowed_strategies (list[str]): List of permitted snapshot strategies. Default: `[\"check\", \"timestamp\"]`.\n\nReceives:\n    snapshot (SnapshotNode): The SnapshotNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the snapshot path. Snapshot paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the snapshot path. Only snapshot paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_snapshot_strategy\n    ```\n    ```yaml\n    manifest_checks:\n        - name: check_snapshot_strategy\n          allowed_strategies:\n            - timestamp # Only allow the timestamp strategy\n    ```",
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to exclude. A list matches if any pattern matches.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to include. A list matches if any pattern matches.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_snapshot_strategy",
+          "default": "check_snapshot_strategy",
+          "title": "Name",
+          "type": "string"
+        },
+        "allowed_strategies": {
+          "default": [
+            "check",
+            "timestamp"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "title": "Allowed Strategies",
+          "type": "array"
+        }
+      },
+      "title": "CheckSnapshotStrategy",
       "type": "object"
     },
     "CheckSourceColumnsAreAllDocumented": {
@@ -8646,6 +9521,101 @@
         "tags"
       ],
       "title": "CheckSourceHasTags",
+      "type": "object"
+    },
+    "CheckSourceHasTests": {
+      "additionalProperties": false,
+      "description": "Sources must have a minimum number of tests.\n\n!!! info \"Rationale\"\n\n    Untested sources are a reliability risk: schema drift or data-quality issues in raw tables can propagate silently through your entire project. Requiring at least one test per source ensures that freshness, uniqueness, or accepted-values constraints are verified before data enters the transformation layer.\n\nParameters:\n    min_number_of_tests (int): The minimum number of tests a source must have. Default: 1.\n\nReceives:\n    source (SourceNode): The SourceNode object to check.\n    tests (list[TestNode]): List of TestNode objects parsed from `manifest.json`.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the source path (i.e the .yml file where the source is configured). Source paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the source path (i.e the .yml file where the source is configured). Only source paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_source_has_tests\n    ```\n    ```yaml\n    manifest_checks:\n        - name: check_source_has_tests\n          min_number_of_tests: 2\n    ```",
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to exclude. A list matches if any pattern matches.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to include. A list matches if any pattern matches.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_source_has_tests",
+          "default": "check_source_has_tests",
+          "title": "Name",
+          "type": "string"
+        },
+        "min_number_of_tests": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Min Number Of Tests",
+          "type": "integer"
+        }
+      },
+      "title": "CheckSourceHasTests",
       "type": "object"
     },
     "CheckSourceLoaderPopulated": {
@@ -10164,6 +11134,9 @@
             "check_exposure_based_on_model": "#/$defs/CheckExposureBasedOnModel",
             "check_exposure_based_on_non_public_models": "#/$defs/CheckExposureBasedOnNonPublicModels",
             "check_exposure_based_on_view": "#/$defs/CheckExposureBasedOnView",
+            "check_exposure_description_populated": "#/$defs/CheckExposureDescriptionPopulated",
+            "check_exposure_has_meta_keys": "#/$defs/CheckExposureHasMetaKeys",
+            "check_exposure_has_owner": "#/$defs/CheckExposureHasOwner",
             "check_lineage_permitted_upstream_models": "#/$defs/CheckLineagePermittedUpstreamModels",
             "check_lineage_seed_cannot_be_used": "#/$defs/CheckLineageSeedCannotBeUsed",
             "check_lineage_source_cannot_be_used": "#/$defs/CheckLineageSourceCannotBeUsed",
@@ -10202,6 +11175,8 @@
             "check_model_has_no_upstream_dependencies": "#/$defs/CheckModelHasNoUpstreamDependencies",
             "check_model_has_semi_colon": "#/$defs/CheckModelHasSemiColon",
             "check_model_has_tags": "#/$defs/CheckModelHasTags",
+            "check_model_has_tests_by_name": "#/$defs/CheckModelHasTestsByName",
+            "check_model_has_tests_by_type": "#/$defs/CheckModelHasTestsByType",
             "check_model_has_unique_test": "#/$defs/CheckModelHasUniqueTest",
             "check_model_has_unit_tests": "#/$defs/CheckModelHasUnitTests",
             "check_model_incremental_has_unique_key": "#/$defs/CheckModelIncrementalHasUniqueKey",
@@ -10215,6 +11190,7 @@
             "check_model_number_of_grants": "#/$defs/CheckModelNumberOfGrants",
             "check_model_property_file_location": "#/$defs/CheckModelPropertyFileLocation",
             "check_model_schema_name": "#/$defs/CheckModelSchemaName",
+            "check_model_single_primary_key": "#/$defs/CheckModelSinglePrimaryKey",
             "check_model_test_coverage": "#/$defs/CheckModelTestCoverage",
             "check_model_version_allowed": "#/$defs/CheckModelVersionAllowed",
             "check_model_version_pinned_in_ref": "#/$defs/CheckModelVersionPinnedInRef",
@@ -10227,14 +11203,18 @@
             "check_seed_names": "#/$defs/CheckSeedNames",
             "check_semantic_model_based_on_non_public_models": "#/$defs/CheckSemanticModelBasedOnNonPublicModels",
             "check_snapshot_description_populated": "#/$defs/CheckSnapshotDescriptionPopulated",
+            "check_snapshot_has_meta_keys": "#/$defs/CheckSnapshotHasMetaKeys",
             "check_snapshot_has_tags": "#/$defs/CheckSnapshotHasTags",
+            "check_snapshot_has_unique_key": "#/$defs/CheckSnapshotHasUniqueKey",
             "check_snapshot_names": "#/$defs/CheckSnapshotNames",
+            "check_snapshot_strategy": "#/$defs/CheckSnapshotStrategy",
             "check_source_description_populated": "#/$defs/CheckSourceDescriptionPopulated",
             "check_source_file_name": "#/$defs/CheckSourceFileName",
             "check_source_freshness_populated": "#/$defs/CheckSourceFreshnessPopulated",
             "check_source_has_labels_keys": "#/$defs/CheckSourceHasLabelsKeys",
             "check_source_has_meta_keys": "#/$defs/CheckSourceHasMetaKeys",
             "check_source_has_tags": "#/$defs/CheckSourceHasTags",
+            "check_source_has_tests": "#/$defs/CheckSourceHasTests",
             "check_source_loader_populated": "#/$defs/CheckSourceLoaderPopulated",
             "check_source_min_downstream_models": "#/$defs/CheckSourceMinDownstreamModels",
             "check_source_names": "#/$defs/CheckSourceNames",
@@ -10267,6 +11247,15 @@
           },
           {
             "$ref": "#/$defs/CheckExposureBasedOnView"
+          },
+          {
+            "$ref": "#/$defs/CheckExposureDescriptionPopulated"
+          },
+          {
+            "$ref": "#/$defs/CheckExposureHasMetaKeys"
+          },
+          {
+            "$ref": "#/$defs/CheckExposureHasOwner"
           },
           {
             "$ref": "#/$defs/CheckLineagePermittedUpstreamModels"
@@ -10383,6 +11372,12 @@
             "$ref": "#/$defs/CheckModelHasTags"
           },
           {
+            "$ref": "#/$defs/CheckModelHasTestsByName"
+          },
+          {
+            "$ref": "#/$defs/CheckModelHasTestsByType"
+          },
+          {
             "$ref": "#/$defs/CheckModelHasUniqueTest"
           },
           {
@@ -10422,6 +11417,9 @@
             "$ref": "#/$defs/CheckModelSchemaName"
           },
           {
+            "$ref": "#/$defs/CheckModelSinglePrimaryKey"
+          },
+          {
             "$ref": "#/$defs/CheckModelTestCoverage"
           },
           {
@@ -10458,10 +11456,19 @@
             "$ref": "#/$defs/CheckSnapshotDescriptionPopulated"
           },
           {
+            "$ref": "#/$defs/CheckSnapshotHasMetaKeys"
+          },
+          {
             "$ref": "#/$defs/CheckSnapshotHasTags"
           },
           {
+            "$ref": "#/$defs/CheckSnapshotHasUniqueKey"
+          },
+          {
             "$ref": "#/$defs/CheckSnapshotNames"
+          },
+          {
+            "$ref": "#/$defs/CheckSnapshotStrategy"
           },
           {
             "$ref": "#/$defs/CheckSourceDescriptionPopulated"
@@ -10480,6 +11487,9 @@
           },
           {
             "$ref": "#/$defs/CheckSourceHasTags"
+          },
+          {
+            "$ref": "#/$defs/CheckSourceHasTests"
           },
           {
             "$ref": "#/$defs/CheckSourceLoaderPopulated"

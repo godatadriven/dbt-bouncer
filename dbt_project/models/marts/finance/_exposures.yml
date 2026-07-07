@@ -3,6 +3,10 @@ version: 2
 exposures:
   - name: customers
     type: dashboard
+    description: Finance customers dashboard surfacing customer lifetime value and order metrics.
+    meta:
+      maturity: high
+      owner: Finance
     depends_on:
       - ref('customers')
     owner:
@@ -11,6 +15,10 @@ exposures:
 
   - name: pulse_queries
     type: notebook
+    description: Pulse notebook used for ad-hoc queries across customers and orders data.
+    meta:
+      maturity: high
+      owner: Finance
     depends_on:
       - ref('customers')
       - ref('orders')

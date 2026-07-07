@@ -121,7 +121,10 @@ class ExposureNode(Protocol):
     """A dbt exposure resource."""
 
     depends_on: DependsOn
+    description: str
+    meta: dict[str, Any]
     name: str
+    owner: dict[str, str]
     package_name: str
     unique_id: str
 
@@ -209,6 +212,9 @@ class SemanticModelNode(Protocol):
 class SnapshotNode(Protocol):
     """A dbt snapshot resource."""
 
+    config: NodeConfig
+    description: str
+    meta: dict[str, Any]
     name: str
     tags: list[str]
     unique_id: str
