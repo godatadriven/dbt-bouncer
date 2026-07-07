@@ -84,6 +84,9 @@ manifest_checks:
   - name: check_macro_is_used
   - name: check_macro_max_number_of_lines
   - name: check_macro_name_matches_file_name
+  - name: check_macro_names
+    include: ^macros/
+    macro_name_pattern: ^[a-z_]+$
   - name: check_macro_property_file_location
 
   # Metadata
@@ -156,6 +159,10 @@ manifest_checks:
   - name: check_model_has_exposure
     include: ^models/marts/finance
     exclude: ^models/marts/finance/customers_v[12].sql
+  - name: check_model_has_labels_keys
+    include: ^models/staging/crm/stg_customers.sql
+    keys:
+      - team
   - name: check_model_has_meta_keys
     keys:
       - maturity
@@ -232,6 +239,10 @@ manifest_checks:
     min_description_length: 25
   - name: check_source_freshness_populated
   - name: check_source_loader_populated
+  - name: check_source_has_labels_keys
+    include: ^models/staging/crm
+    keys:
+      - team
   - name: check_source_has_meta_keys
     keys:
       - contact:

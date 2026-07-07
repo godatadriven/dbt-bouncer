@@ -3,6 +3,54 @@ import pytest
 from dbt_bouncer.testing import check_fails, check_passes
 
 
+class TestCheckSourceHasLabelsKeys:
+    @pytest.mark.parametrize(
+        ("keys", "source"),
+        [
+            pytest.param(
+                ["team"],
+                {"config": {"labels": {"team": "finance"}}},
+                id="has_key",
+            ),
+            pytest.param(
+                ["team"],
+                {"config": {"labels": {"env": "prod", "team": "analytics"}}},
+                id="has_key_with_others",
+            ),
+            pytest.param(
+                [{"team": ["subteam"]}],
+                {"config": {"labels": {"team": {"subteam": "frontend"}}}},
+                id="has_nested_key",
+            ),
+        ],
+    )
+    def test_passes(self, keys, source):
+        check_passes("check_source_has_labels_keys", keys=keys, source=source)
+
+    @pytest.mark.parametrize(
+        ("keys", "source"),
+        [
+            pytest.param(
+                ["team"],
+                {"config": {"labels": {}}},
+                id="missing_key",
+            ),
+            pytest.param(
+                ["team"],
+                {},
+                id="no_labels_config",
+            ),
+            pytest.param(
+                [{"team": ["subteam"]}],
+                {"config": {"labels": {"team": {"other": "value"}}}},
+                id="missing_nested_key",
+            ),
+        ],
+    )
+    def test_fails(self, keys, source):
+        check_fails("check_source_has_labels_keys", keys=keys, source=source)
+
+
 class TestCheckSourceHasMetaKeys:
     @pytest.mark.parametrize(
         ("keys", "meta"),

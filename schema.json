@@ -1895,6 +1895,102 @@
       "title": "CheckMacroNameMatchesFileName",
       "type": "object"
     },
+    "CheckMacroNames": {
+      "additionalProperties": false,
+      "description": "Macros must have a name that matches the supplied regex.\n\n!!! info \"Rationale\"\n\n    Consistent macro naming conventions \u2014 such as requiring a shared prefix or suffix \u2014 make it immediately obvious which macros belong to the project versus packages, and help distinguish utility macros from test helpers or overrides. Enforcing a naming pattern prevents ad-hoc names that make the codebase harder to navigate and search.\n\nParameters:\n    macro_name_pattern (str): Regexp the macro name must match.\n\nReceives:\n    macro (Macros): The Macros object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the macro path. Macro paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the macro path. Only macro paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_macro_names\n          include: ^macros/finance\n          macro_name_pattern: ^finance_\n    ```",
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to exclude. A list matches if any pattern matches.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to include. A list matches if any pattern matches.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_macro_names",
+          "default": "check_macro_names",
+          "title": "Name",
+          "type": "string"
+        },
+        "macro_name_pattern": {
+          "title": "Macro Name Pattern",
+          "type": "string"
+        }
+      },
+      "required": [
+        "macro_name_pattern"
+      ],
+      "title": "CheckMacroNames",
+      "type": "object"
+    },
     "CheckMacroPropertyFileLocation": {
       "additionalProperties": false,
       "description": "Macro properties files must follow the guidance provided by dbt [here](https://docs.getdbt.com/best-practices/how-we-structure/5-the-rest-of-the-project#how-we-use-the-other-folders).\n\n!!! info \"Rationale\"\n\n    dbt's official project structure guidance recommends placing macro property files in predictable, consistently named YAML files alongside the macros they describe. Projects that scatter `.yml` files arbitrarily make it harder to locate documentation, run automated checks, and onboard new engineers. Enforcing the standard naming convention keeps the project structure navigable and aligned with community best practices.\n\nReceives:\n    macro (Macros): The Macros object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the macro path. Macro paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the macro path. Only macro paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_macro_property_file_location\n    ```",
@@ -3887,6 +3983,101 @@
         }
       },
       "title": "CheckModelHasExposure",
+      "type": "object"
+    },
+    "CheckModelHasLabelsKeys": {
+      "additionalProperties": false,
+      "description": "The `labels` config for models must have the specified keys.\n\n!!! info \"Rationale\"\n\n    Labels are key-value pairs attached to warehouse resources (e.g. BigQuery table labels) that drive cost attribution, governance workflows, and access control. Requiring specific label keys ensures that ownership and environment metadata are consistently populated across all models, enabling automated billing reports and policy enforcement that depend on those labels being present.\n\nParameters:\n    keys (NestedDict): A list (that may contain sub-lists) of required keys.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    materialization (Literal[\"ephemeral\", \"incremental\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_model_has_labels_keys\n          keys:\n            - env\n            - team\n    ```",
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to exclude. A list matches if any pattern matches.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to include. A list matches if any pattern matches.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_model_has_labels_keys",
+          "default": "check_model_has_labels_keys",
+          "title": "Name",
+          "type": "string"
+        },
+        "keys": {
+          "$ref": "#/$defs/NestedDict"
+        }
+      },
+      "required": [
+        "keys"
+      ],
+      "title": "CheckModelHasLabelsKeys",
       "type": "object"
     },
     "CheckModelHasMetaKeys": {
@@ -7701,6 +7892,101 @@
       "title": "CheckSourceFreshnessPopulated",
       "type": "object"
     },
+    "CheckSourceHasLabelsKeys": {
+      "additionalProperties": false,
+      "description": "The `labels` config for sources must have the specified keys.\n\n!!! info \"Rationale\"\n\n    Labels are key-value pairs attached to warehouse resources (e.g. BigQuery table labels) that drive cost attribution, governance workflows, and access control. Requiring specific label keys on sources ensures that the same ownership and environment metadata required on models is also enforced at the ingestion boundary, giving a consistent labelling policy across the full data platform.\n\nParameters:\n    keys (NestedDict): A list (that may contain sub-lists) of required keys.\n\nReceives:\n    source (SourceNode): The SourceNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the source path (i.e the .yml file where the source is configured). Source paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the source path (i.e the .yml file where the source is configured). Only source paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_source_has_labels_keys\n          keys:\n            - env\n            - team\n    ```",
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to exclude. A list matches if any pattern matches.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to include. A list matches if any pattern matches.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_source_has_labels_keys",
+          "default": "check_source_has_labels_keys",
+          "title": "Name",
+          "type": "string"
+        },
+        "keys": {
+          "$ref": "#/$defs/NestedDict"
+        }
+      },
+      "required": [
+        "keys"
+      ],
+      "title": "CheckSourceHasLabelsKeys",
+      "type": "object"
+    },
     "CheckSourceHasMetaKeys": {
       "additionalProperties": false,
       "description": "The `meta` config for sources must have the specified keys.\n\n!!! info \"Rationale\"\n\n    The `meta` config is a free-form dictionary that teams use to attach governance information to dbt nodes \u2014 things like data owner, sensitivity classification, SLA tier, or compliance labels. Without enforcing required keys, this metadata is applied inconsistently: some sources have an owner, others do not; some are labelled PII-sensitive, others are silently omitted. This check ensures that every source carries the minimum set of metadata keys needed to support data governance, access control automation, and operational runbooks.\n\nParameters:\n    keys (NestedDict): A list (that may contain sub-lists) of required keys.\n\nReceives:\n    source (SourceNode): The SourceNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the source path (i.e the .yml file where the source is configured). Source paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the source path (i.e the .yml file where the source is configured). Only source paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_source_has_meta_keys\n          keys:\n            - contact:\n                - email\n                - slack\n            - owner\n    ```",
@@ -9232,6 +9518,7 @@
             "check_macro_is_used": "#/$defs/CheckMacroIsUsed",
             "check_macro_max_number_of_lines": "#/$defs/CheckMacroMaxNumberOfLines",
             "check_macro_name_matches_file_name": "#/$defs/CheckMacroNameMatchesFileName",
+            "check_macro_names": "#/$defs/CheckMacroNames",
             "check_macro_property_file_location": "#/$defs/CheckMacroPropertyFileLocation",
             "check_model_access": "#/$defs/CheckModelAccess",
             "check_model_code_does_not_contain_regexp_pattern": "#/$defs/CheckModelCodeDoesNotContainRegexpPattern",
@@ -9253,6 +9540,7 @@
             "check_model_has_constraints": "#/$defs/CheckModelHasConstraints",
             "check_model_has_contracts_enforced": "#/$defs/CheckModelHasContractsEnforced",
             "check_model_has_exposure": "#/$defs/CheckModelHasExposure",
+            "check_model_has_labels_keys": "#/$defs/CheckModelHasLabelsKeys",
             "check_model_has_meta_keys": "#/$defs/CheckModelHasMetaKeys",
             "check_model_has_no_upstream_dependencies": "#/$defs/CheckModelHasNoUpstreamDependencies",
             "check_model_has_semi_colon": "#/$defs/CheckModelHasSemiColon",
@@ -9286,6 +9574,7 @@
             "check_source_description_populated": "#/$defs/CheckSourceDescriptionPopulated",
             "check_source_file_name": "#/$defs/CheckSourceFileName",
             "check_source_freshness_populated": "#/$defs/CheckSourceFreshnessPopulated",
+            "check_source_has_labels_keys": "#/$defs/CheckSourceHasLabelsKeys",
             "check_source_has_meta_keys": "#/$defs/CheckSourceHasMetaKeys",
             "check_source_has_tags": "#/$defs/CheckSourceHasTags",
             "check_source_loader_populated": "#/$defs/CheckSourceLoaderPopulated",
@@ -9339,6 +9628,9 @@
           },
           {
             "$ref": "#/$defs/CheckMacroNameMatchesFileName"
+          },
+          {
+            "$ref": "#/$defs/CheckMacroNames"
           },
           {
             "$ref": "#/$defs/CheckMacroPropertyFileLocation"
@@ -9402,6 +9694,9 @@
           },
           {
             "$ref": "#/$defs/CheckModelHasExposure"
+          },
+          {
+            "$ref": "#/$defs/CheckModelHasLabelsKeys"
           },
           {
             "$ref": "#/$defs/CheckModelHasMetaKeys"
@@ -9501,6 +9796,9 @@
           },
           {
             "$ref": "#/$defs/CheckSourceFreshnessPopulated"
+          },
+          {
+            "$ref": "#/$defs/CheckSourceHasLabelsKeys"
           },
           {
             "$ref": "#/$defs/CheckSourceHasMetaKeys"
