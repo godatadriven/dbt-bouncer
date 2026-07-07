@@ -81,6 +81,9 @@ manifest_checks:
   - name: check_macro_code_does_not_contain_regexp_pattern
     regexp_pattern: .*[i][f][n][u][l][l].*
   - name: check_macro_description_populated
+  - name: check_macro_has_meta_keys
+    keys:
+      - owner
   - name: check_macro_is_used
   - name: check_macro_max_number_of_lines
   - name: check_macro_name_matches_file_name
@@ -216,6 +219,9 @@ manifest_checks:
     seed_column_name_pattern: ^[a-z_]*$
   - name: check_seed_columns_have_types
   - name: check_seed_description_populated
+  - name: check_seed_has_meta_keys
+    keys:
+      - owner
   # - name: check_seed_has_unit_tests
   - name: check_seed_names
     include: ^seeds
