@@ -30,7 +30,20 @@ runs:
             repo: context.repo.repo,
             commit_sha: headSha,
           });
-          const prRef = prs.find((pr) => pr.head.sha === headSha);
+          let prRef = prs.find((pr) => pr.head.sha === headSha);
+          if (!prRef) {
+            // Fork PR head commits live only under refs/pull/*/head, never on a
+            // base-repo branch, so listPullRequestsAssociatedWithCommit does not
+            // return them. Fall back to scanning open PRs by head SHA so reviews
+            // still run for external contributors.
+            const openPrs = await github.paginate(github.rest.pulls.list, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: "open",
+              per_page: 100,
+            });
+            prRef = openPrs.find((pr) => pr.head.sha === headSha);
+          }
           if (!prRef) {
             // The PR head moved on (new commits pushed) after the CI run that
             // triggered this workflow_run — this run is stale. Signal a skip so
