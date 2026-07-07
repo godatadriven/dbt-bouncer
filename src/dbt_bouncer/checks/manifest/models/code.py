@@ -93,6 +93,14 @@ def check_model_does_not_use_select_star(model):
         materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
+    !!! warning
+
+        Comment stripping via ``_strip_sql_comments`` removes SQL/Jinja *comment*
+        forms (``-- …``, ``/* … */``, ``{# … #}``) but does **not** strip Jinja
+        *tags* (``{{ … }}`` / ``{% … %}``). A ``SELECT *`` embedded inside a Jinja
+        expression will therefore still be matched by this check. This mirrors the
+        known-limitation caveat on ``check_model_hard_coded_references``.
+
     Example(s):
         ```yaml
         manifest_checks:

@@ -99,6 +99,8 @@ def check_source_pii_meta(source, *, column_name_pattern: str, meta_key: str):
     Parameters:
         column_name_pattern (str): Regex pattern to match column names that are considered PII.
         meta_key (str): The meta key that must be present and non-empty on each matching column.
+            The key must be present with a truthy value; a falsy value (e.g. ``false``, ``0``,
+            empty string) is treated as missing.
 
     Receives:
         source (SourceNode): The SourceNode object to check.

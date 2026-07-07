@@ -47,18 +47,19 @@ def check_duplicate_sources(source, ctx):
         inner = getattr(s, "source", None)
         return inner if inner is not None else s
 
-    def rel(s):
+    src_node = _node(source)
+    src_rel = (src_node.database, src_node.schema, src_node.identifier)
+    dupes = []
+    for s in ctx.sources:
         node = _node(s)
-        return (node.database, node.schema, node.identifier)
-
-    dupes = [
-        _node(s).unique_id
-        for s in ctx.sources
-        if _node(s).unique_id != _node(source).unique_id and rel(s) == rel(source)
-    ]
+        if (
+            node.unique_id != src_node.unique_id
+            and (node.database, node.schema, node.identifier) == src_rel
+        ):
+            dupes.append(node.unique_id)
     if dupes:
         fail(
-            f"Source `{source.source_name}.{source.name}` shares its relation ({rel(source)}) with: {dupes}."
+            f"Source `{source.source_name}.{source.name}` shares its relation ({src_rel}) with: {dupes}."
         )
 
 
