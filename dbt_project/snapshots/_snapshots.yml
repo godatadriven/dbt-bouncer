@@ -3,6 +3,9 @@ version: 2
 snapshots:
   - name: snapshot_orders
     description: Snapshot of orders for tracking changes over time
+    meta:
+      maturity: high
+      owner: Data Team
     relation: ref('stg_raw_orders_for_snapshot')
     config:
       database: "{{ 'dbt' if target.type == 'duckdb' else 'padraic-slattery-sndbx-o' }}"
@@ -15,6 +18,9 @@ snapshots:
 
   - name: snapshot_orders_multiple_unique_keys
     description: Snapshot of orders using multiple unique keys for tracking changes over time
+    meta:
+      maturity: high
+      owner: Data Team
     relation: ref('stg_raw_orders_for_snapshot')
     config:
       database: "{{ 'dbt' if target.type == 'duckdb' else 'padraic-slattery-sndbx-o' }}"
