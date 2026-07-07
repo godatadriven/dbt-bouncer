@@ -1498,6 +1498,8 @@
       
         
       
+        
+      
     
     
     
@@ -1983,6 +1985,14 @@
               <td>
                 <div class="doc-md-description">
                   <p>Table and incremental models must have the specified constraint types defined.</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;highlight language-python&quot;&gt;&lt;span class=&quot;n&quot;&gt;check_model_single_primary_key&lt;/span&gt;&lt;/code&gt;" href="./#manifest.models.columns.check_model_single_primary_key">check_model_single_primary_key</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Models must have at most one column-level primary key constraint.</p>
                 </div>
               </td>
             </tr>
@@ -3060,6 +3070,202 @@
 </span><span id="__span-0-245"><a id="__codelineno-0-245" name="__codelineno-0-245"></a>        <span class="n">fail</span><span class="p">(</span>
 </span><span id="__span-0-246"><a id="__codelineno-0-246" name="__codelineno-0-246"></a>            <span class="sa">f</span><span class="s2">&quot;`</span><span class="si">{</span><span class="n">get_clean_model_name</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">unique_id</span><span class="p">)</span><span class="si">}</span><span class="s2">` is missing required constraint types: </span><span class="si">{</span><span class="n">missing_types</span><span class="si">}</span><span class="s2">&quot;</span>
 </span><span id="__span-0-247"><a id="__codelineno-0-247" name="__codelineno-0-247"></a>        <span class="p">)</span>
+</span></code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h1 id="manifest.models.columns.check_model_single_primary_key" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">check_model_single_primary_key</span></code>
+
+<a href="#manifest.models.columns.check_model_single_primary_key" class="headerlink" title="Permanent link">#</a></h1>
+
+
+    <div class="doc doc-contents ">
+
+      <p>Models must have at most one column-level primary key constraint.</p>
+<div class="admonition info">
+<p class="admonition-title">Rationale</p>
+<p>Declaring more than one column-level primary-key constraint in a dbt model is almost always a modelling mistake — it implies multiple independent identity columns, which is semantically ambiguous and can confuse downstream consumers. This check flags models with two or more column-level <code>primary_key</code> constraints so the author can consolidate them into a single-column PK or a composite constraint at model level.</p>
+</div>
+
+<p><strong>Receives at execution time:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>model</code>        <td>
+              <code><span title="ModelNode">ModelNode</span></code>
+        </td>
+        <td>
+          <div class="doc-md-description">
+            <p>The ModelNode object to check.</p>
+          </div>
+        </td>
+      </tr>
+  </tbody>
+</table>
+<p><span class="doc-section-title">Other Parameters (passed via config file):</span></p>
+<table>
+    <thead>
+    <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+    </tr>
+    </thead>
+    <tbody>
+        <tr class="doc-section-item">
+        <td><code>description</code></td>
+        <td>
+                <code><span title="str">str</span> | None</code>
+        </td>
+        <td>
+            <div class="doc-md-description">
+            <p>Description of what the check does and why it is implemented.</p>
+            </div>
+        </td>
+        </tr>
+        <tr class="doc-section-item">
+        <td><code>exclude</code></td>
+        <td>
+                <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
+        </td>
+        <td>
+            <div class="doc-md-description">
+            <p>Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.</p>
+            </div>
+        </td>
+        </tr>
+        <tr class="doc-section-item">
+        <td><code>include</code></td>
+        <td>
+                <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
+        </td>
+        <td>
+            <div class="doc-md-description">
+            <p>Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.</p>
+            </div>
+        </td>
+        </tr>
+        <tr class="doc-section-item">
+        <td><code>materialization</code></td>
+        <td>
+                <code><span title="Literal">Literal</span>[<span title="ephemeral">ephemeral</span>, <span title="incremental">incremental</span>, <span title="table">table</span>, <span title="view">view</span>] | None</code>
+        </td>
+        <td>
+            <div class="doc-md-description">
+            <p>Limit check to models with the specified materialization.</p>
+            </div>
+        </td>
+        </tr>
+        <tr class="doc-section-item">
+        <td><code>severity</code></td>
+        <td>
+                <code><span title="Literal">Literal</span>[<span title="error">error</span>, <span title="warn">warn</span>] | None</code>
+        </td>
+        <td>
+            <div class="doc-md-description">
+            <p>Severity level of the check. Default: <code>error</code>.</p>
+            </div>
+        </td>
+        </tr>
+    </tbody>
+</table>      <p>Example(s):
+    <div class="language-yaml highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">manifest_checks</span><span class="p">:</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_model_single_primary_key</span>
+</span></code></pre></div></p>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src/dbt_bouncer/checks/manifest/models/columns.py</code></summary>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-250">250</a></span>
+<span class="normal"><a href="#__codelineno-0-251">251</a></span>
+<span class="normal"><a href="#__codelineno-0-252">252</a></span>
+<span class="normal"><a href="#__codelineno-0-253">253</a></span>
+<span class="normal"><a href="#__codelineno-0-254">254</a></span>
+<span class="normal"><a href="#__codelineno-0-255">255</a></span>
+<span class="normal"><a href="#__codelineno-0-256">256</a></span>
+<span class="normal"><a href="#__codelineno-0-257">257</a></span>
+<span class="normal"><a href="#__codelineno-0-258">258</a></span>
+<span class="normal"><a href="#__codelineno-0-259">259</a></span>
+<span class="normal"><a href="#__codelineno-0-260">260</a></span>
+<span class="normal"><a href="#__codelineno-0-261">261</a></span>
+<span class="normal"><a href="#__codelineno-0-262">262</a></span>
+<span class="normal"><a href="#__codelineno-0-263">263</a></span>
+<span class="normal"><a href="#__codelineno-0-264">264</a></span>
+<span class="normal"><a href="#__codelineno-0-265">265</a></span>
+<span class="normal"><a href="#__codelineno-0-266">266</a></span>
+<span class="normal"><a href="#__codelineno-0-267">267</a></span>
+<span class="normal"><a href="#__codelineno-0-268">268</a></span>
+<span class="normal"><a href="#__codelineno-0-269">269</a></span>
+<span class="normal"><a href="#__codelineno-0-270">270</a></span>
+<span class="normal"><a href="#__codelineno-0-271">271</a></span>
+<span class="normal"><a href="#__codelineno-0-272">272</a></span>
+<span class="normal"><a href="#__codelineno-0-273">273</a></span>
+<span class="normal"><a href="#__codelineno-0-274">274</a></span>
+<span class="normal"><a href="#__codelineno-0-275">275</a></span>
+<span class="normal"><a href="#__codelineno-0-276">276</a></span>
+<span class="normal"><a href="#__codelineno-0-277">277</a></span>
+<span class="normal"><a href="#__codelineno-0-278">278</a></span>
+<span class="normal"><a href="#__codelineno-0-279">279</a></span>
+<span class="normal"><a href="#__codelineno-0-280">280</a></span>
+<span class="normal"><a href="#__codelineno-0-281">281</a></span>
+<span class="normal"><a href="#__codelineno-0-282">282</a></span>
+<span class="normal"><a href="#__codelineno-0-283">283</a></span>
+<span class="normal"><a href="#__codelineno-0-284">284</a></span>
+<span class="normal"><a href="#__codelineno-0-285">285</a></span>
+<span class="normal"><a href="#__codelineno-0-286">286</a></span>
+<span class="normal"><a href="#__codelineno-0-287">287</a></span>
+<span class="normal"><a href="#__codelineno-0-288">288</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-250"><a id="__codelineno-0-250" name="__codelineno-0-250"></a><span class="nd">@check</span>
+</span><span id="__span-0-251"><a id="__codelineno-0-251" name="__codelineno-0-251"></a><span class="k">def</span><span class="w"> </span><span class="nf">check_model_single_primary_key</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+</span><span id="__span-0-252"><a id="__codelineno-0-252" name="__codelineno-0-252"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Models must have at most one column-level primary key constraint.</span>
+</span><span id="__span-0-253"><a id="__codelineno-0-253" name="__codelineno-0-253"></a>
+</span><span id="__span-0-254"><a id="__codelineno-0-254" name="__codelineno-0-254"></a><span class="sd">    !!! info &quot;Rationale&quot;</span>
+</span><span id="__span-0-255"><a id="__codelineno-0-255" name="__codelineno-0-255"></a>
+</span><span id="__span-0-256"><a id="__codelineno-0-256" name="__codelineno-0-256"></a><span class="sd">        Declaring more than one column-level primary-key constraint in a dbt model is almost always a modelling mistake — it implies multiple independent identity columns, which is semantically ambiguous and can confuse downstream consumers. This check flags models with two or more column-level `primary_key` constraints so the author can consolidate them into a single-column PK or a composite constraint at model level.</span>
+</span><span id="__span-0-257"><a id="__codelineno-0-257" name="__codelineno-0-257"></a>
+</span><span id="__span-0-258"><a id="__codelineno-0-258" name="__codelineno-0-258"></a><span class="sd">    Receives:</span>
+</span><span id="__span-0-259"><a id="__codelineno-0-259" name="__codelineno-0-259"></a><span class="sd">        model (ModelNode): The ModelNode object to check.</span>
+</span><span id="__span-0-260"><a id="__codelineno-0-260" name="__codelineno-0-260"></a>
+</span><span id="__span-0-261"><a id="__codelineno-0-261" name="__codelineno-0-261"></a><span class="sd">    Other Parameters:</span>
+</span><span id="__span-0-262"><a id="__codelineno-0-262" name="__codelineno-0-262"></a><span class="sd">        description (str | None): Description of what the check does and why it is implemented.</span>
+</span><span id="__span-0-263"><a id="__codelineno-0-263" name="__codelineno-0-263"></a><span class="sd">        exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.</span>
+</span><span id="__span-0-264"><a id="__codelineno-0-264" name="__codelineno-0-264"></a><span class="sd">        include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.</span>
+</span><span id="__span-0-265"><a id="__codelineno-0-265" name="__codelineno-0-265"></a><span class="sd">        materialization (Literal[&quot;ephemeral&quot;, &quot;incremental&quot;, &quot;table&quot;, &quot;view&quot;] | None): Limit check to models with the specified materialization.</span>
+</span><span id="__span-0-266"><a id="__codelineno-0-266" name="__codelineno-0-266"></a><span class="sd">        severity (Literal[&quot;error&quot;, &quot;warn&quot;] | None): Severity level of the check. Default: `error`.</span>
+</span><span id="__span-0-267"><a id="__codelineno-0-267" name="__codelineno-0-267"></a>
+</span><span id="__span-0-268"><a id="__codelineno-0-268" name="__codelineno-0-268"></a><span class="sd">    Example(s):</span>
+</span><span id="__span-0-269"><a id="__codelineno-0-269" name="__codelineno-0-269"></a><span class="sd">        ```yaml</span>
+</span><span id="__span-0-270"><a id="__codelineno-0-270" name="__codelineno-0-270"></a><span class="sd">        manifest_checks:</span>
+</span><span id="__span-0-271"><a id="__codelineno-0-271" name="__codelineno-0-271"></a><span class="sd">            - name: check_model_single_primary_key</span>
+</span><span id="__span-0-272"><a id="__codelineno-0-272" name="__codelineno-0-272"></a><span class="sd">        ```</span>
+</span><span id="__span-0-273"><a id="__codelineno-0-273" name="__codelineno-0-273"></a>
+</span><span id="__span-0-274"><a id="__codelineno-0-274" name="__codelineno-0-274"></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="__span-0-275"><a id="__codelineno-0-275" name="__codelineno-0-275"></a>    <span class="n">columns</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">columns</span> <span class="ow">or</span> <span class="p">{}</span>
+</span><span id="__span-0-276"><a id="__codelineno-0-276" name="__codelineno-0-276"></a>    <span class="n">pk_columns</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="__span-0-277"><a id="__codelineno-0-277" name="__codelineno-0-277"></a>    <span class="k">for</span> <span class="n">col_name</span><span class="p">,</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">columns</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+</span><span id="__span-0-278"><a id="__codelineno-0-278" name="__codelineno-0-278"></a>        <span class="n">constraints</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">col</span><span class="p">,</span> <span class="s2">&quot;constraints&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]</span>
+</span><span id="__span-0-279"><a id="__codelineno-0-279" name="__codelineno-0-279"></a>        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">constraints</span><span class="p">:</span>
+</span><span id="__span-0-280"><a id="__codelineno-0-280" name="__codelineno-0-280"></a>            <span class="n">c_type</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="s2">&quot;type&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+</span><span id="__span-0-281"><a id="__codelineno-0-281" name="__codelineno-0-281"></a>            <span class="n">type_str</span> <span class="o">=</span> <span class="n">c_type</span><span class="o">.</span><span class="n">value</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">c_type</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">c_type</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+</span><span id="__span-0-282"><a id="__codelineno-0-282" name="__codelineno-0-282"></a>            <span class="k">if</span> <span class="n">type_str</span> <span class="o">==</span> <span class="s2">&quot;primary_key&quot;</span><span class="p">:</span>
+</span><span id="__span-0-283"><a id="__codelineno-0-283" name="__codelineno-0-283"></a>                <span class="n">pk_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">col_name</span><span class="p">)</span>
+</span><span id="__span-0-284"><a id="__codelineno-0-284" name="__codelineno-0-284"></a>                <span class="k">break</span>
+</span><span id="__span-0-285"><a id="__codelineno-0-285" name="__codelineno-0-285"></a>    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pk_columns</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+</span><span id="__span-0-286"><a id="__codelineno-0-286" name="__codelineno-0-286"></a>        <span class="n">fail</span><span class="p">(</span>
+</span><span id="__span-0-287"><a id="__codelineno-0-287" name="__codelineno-0-287"></a>            <span class="sa">f</span><span class="s2">&quot;`</span><span class="si">{</span><span class="n">get_clean_model_name</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">unique_id</span><span class="p">)</span><span class="si">}</span><span class="s2">` has more than one column-level primary key constraint: </span><span class="si">{</span><span class="n">pk_columns</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span id="__span-0-288"><a id="__codelineno-0-288" name="__codelineno-0-288"></a>        <span class="p">)</span>
 </span></code></pre></div></td></tr></table></div>
             </details>
     </div>
