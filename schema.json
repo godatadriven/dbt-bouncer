@@ -102,6 +102,95 @@
       "title": "CheckColumnDescriptionPopulated",
       "type": "object"
     },
+    "CheckColumnDescriptionsAreConsistent": {
+      "additionalProperties": false,
+      "description": "The same column name must not have conflicting descriptions across models.\n\n!!! info \"Rationale\"\n\n    When the same logical column (e.g. `customer_id`) carries a different description in two models, it signals copy-paste drift or inconsistent documentation standards. Consumers of the data catalogue see contradictory definitions, eroding trust. This check enforces a single canonical description per column name project-wide, prompting teams to agree on shared documentation.\n\nReceives:\n    models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_column_descriptions_are_consistent\n    ```",
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to exclude. A list matches if any pattern matches.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to include. A list matches if any pattern matches.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_column_descriptions_are_consistent",
+          "default": "check_column_descriptions_are_consistent",
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "title": "CheckColumnDescriptionsAreConsistent",
+      "type": "object"
+    },
     "CheckColumnHasSpecifiedTest": {
       "additionalProperties": false,
       "description": "Columns that match the specified regexp pattern must have a specified test.\n\n!!! info \"Rationale\"\n\n    Naming conventions communicate expectations: a column named `is_active` implies it is boolean and never null; a column ending in `_id` implies it is a valid foreign key. Without enforcement, these implicit contracts go untested, and referential integrity issues or null values can silently corrupt downstream aggregations. This check bridges naming conventions and data quality by automatically requiring specific tests on columns that match a pattern, eliminating the manual overhead of reviewing every column individually.\n\nParameters:\n    case_sensitive (bool): Whether the column names are case sensitive or not. Necessary for adapters like `dbt-snowflake` where the column in `catalog.json` is uppercase but the column in `manifest.json` can be lowercase. Defaults to `false` for `dbt-snowflake`, otherwise `true`.\n    column_name_pattern (str): Regex pattern to match the column name.\n    test_name (str): Name of the test to check for.\n\nReceives:\n    catalog_node (CatalogNodeEntry): The CatalogNodeEntry object to check.\n    manifest_obj (ManifestObject): The ManifestObject object parsed from `manifest.json`.\n    tests (list[TestNode]): List of TestNode objects parsed from `manifest.json`.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    catalog_checks:\n        - name: check_column_has_specified_test\n          column_name_pattern: ^is_.*\n          test_name: not_null\n    ```",
@@ -744,6 +833,95 @@
         }
       },
       "title": "CheckColumnsAreDocumentedInPublicModels",
+      "type": "object"
+    },
+    "CheckDuplicateSources": {
+      "additionalProperties": false,
+      "description": "Sources must not share the same database relation.\n\n!!! info \"Rationale\"\n\n    Two source definitions pointing at the same physical table cause ambiguous lineage and divergent staging logic. Different staging models may apply conflicting transformations to the same raw data, leading to inconsistent results. This check ensures every database relation is claimed by exactly one source definition.\n\nReceives:\n    source (SourceNode): The SourceNode object to check.\n    sources (list[SourceNode]): List of SourceNode objects parsed from `manifest.json`.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the source path (i.e the .yml file where the source is configured). Source paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the source path (i.e the .yml file where the source is configured). Only source paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_duplicate_sources\n    ```",
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to exclude. A list matches if any pattern matches.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to include. A list matches if any pattern matches.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_duplicate_sources",
+          "default": "check_duplicate_sources",
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "title": "CheckDuplicateSources",
       "type": "object"
     },
     "CheckExposureBasedOnModel": {
@@ -3424,6 +3602,95 @@
         }
       },
       "title": "CheckModelDocumentedInSameDirectory",
+      "type": "object"
+    },
+    "CheckModelDoesNotUseSelectStar": {
+      "additionalProperties": false,
+      "description": "Models must not use `SELECT *`.\n\n!!! info \"Rationale\"\n\n    `SELECT *` makes a model's output schema implicit and brittle to upstream column changes. When a source or upstream model adds, removes, or reorders columns, a `SELECT *` model silently propagates the change, potentially breaking downstream consumers or introducing unexpected columns into the DAG. Explicit column lists are self-documenting, stable, and make schema changes intentional and reviewable.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    materialization (Literal[\"ephemeral\", \"incremental\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\n!!! warning\n\n    Comment stripping via ``_strip_sql_comments`` removes SQL/Jinja *comment*\n    forms (``-- \u2026``, ``/* \u2026 */``, ``{# \u2026 #}``) but does **not** strip Jinja\n    *tags* (``{{ \u2026 }}`` / ``{% \u2026 %}``). A ``SELECT *`` embedded inside a Jinja\n    expression will therefore still be matched by this check. This mirrors the\n    known-limitation caveat on ``check_model_hard_coded_references``.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_model_does_not_use_select_star\n          include: ^models/marts\n    ```",
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to exclude. A list matches if any pattern matches.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to include. A list matches if any pattern matches.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_model_does_not_use_select_star",
+          "default": "check_model_does_not_use_select_star",
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "title": "CheckModelDoesNotUseSelectStar",
       "type": "object"
     },
     "CheckModelFileName": {
@@ -8470,6 +8737,101 @@
       "title": "CheckSourceLoaderPopulated",
       "type": "object"
     },
+    "CheckSourceMinDownstreamModels": {
+      "additionalProperties": false,
+      "description": "Sources must be referenced by at least the specified number of models.\n\n!!! info \"Rationale\"\n\n    Some sources are expected to feed multiple downstream models \u2014 for example, a raw events table that drives both a sessions model and a revenue model. Requiring a minimum number of consumers guards against accidental under-use and ensures that critical source data is fully exploited in the project's lineage.\n\nParameters:\n    min_number_of_models (int): Minimum number of models that must reference the source. Must be greater than 0.\n\nReceives:\n    models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.\n    source (SourceNode): The SourceNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the source path (i.e the .yml file where the source is configured). Source paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the source path (i.e the .yml file where the source is configured). Only source paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_source_min_downstream_models\n    ```\n    ```yaml\n    manifest_checks:\n        - name: check_source_min_downstream_models\n          min_number_of_models: 2\n    ```",
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to exclude. A list matches if any pattern matches.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to include. A list matches if any pattern matches.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_source_min_downstream_models",
+          "default": "check_source_min_downstream_models",
+          "title": "Name",
+          "type": "string"
+        },
+        "min_number_of_models": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Min Number Of Models",
+          "type": "integer"
+        }
+      },
+      "title": "CheckSourceMinDownstreamModels",
+      "type": "object"
+    },
     "CheckSourceNames": {
       "additionalProperties": false,
       "description": "Sources must have a name that matches the supplied regex.\n\n!!! info \"Rationale\"\n\n    Source names appear throughout the dbt project in `{{ source() }}` calls, documentation, and lineage graphs. Inconsistent naming (mixed case, spaces, non-standard characters) makes sources harder to reference and distinguish at a glance, and can cause subtle errors when names are used in downstream string processing or data catalogue integrations. Enforcing a naming pattern ensures all sources share a predictable, readable format from the moment they are registered in the project.\n\nParameters:\n    source_name_pattern (str): Regexp the source name must match.\n\nReceives:\n    source (SourceNode): The SourceNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the source path (i.e the .yml file where the source is configured). Source paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the source path (i.e the .yml file where the source is configured). Only source paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_source_names\n          source_name_pattern: >\n            ^[a-z0-9_]*$\n    ```",
@@ -8653,6 +9015,107 @@
         }
       },
       "title": "CheckSourceNotOrphaned",
+      "type": "object"
+    },
+    "CheckSourcePiiMeta": {
+      "additionalProperties": false,
+      "description": "Source columns matching a PII pattern must carry a governance meta key.\n\n!!! info \"Rationale\"\n\n    PII columns need explicit classification metadata for access control and compliance reporting. Without enforcing a required meta key on columns whose names indicate sensitive data, teams silently omit privacy labels, making it impossible to automate data masking, access control policies, or GDPR/CCPA audit trails.\n\nParameters:\n    column_name_pattern (str): Regex pattern to match column names that are considered PII.\n    meta_key (str): The meta key that must be present and non-empty on each matching column.\n        The key must be present with a truthy value; a falsy value (e.g. ``false``, ``0``,\n        empty string) is treated as missing.\n\nReceives:\n    source (SourceNode): The SourceNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the source path (i.e the .yml file where the source is configured). Source paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the source path (i.e the .yml file where the source is configured). Only source paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_source_pii_meta\n          column_name_pattern: ^(email|phone|address|ssn).*\n          meta_key: pii\n    ```",
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to exclude. A list matches if any pattern matches.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to include. A list matches if any pattern matches.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_source_pii_meta",
+          "default": "check_source_pii_meta",
+          "title": "Name",
+          "type": "string"
+        },
+        "column_name_pattern": {
+          "title": "Column Name Pattern",
+          "type": "string"
+        },
+        "meta_key": {
+          "title": "Meta Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "column_name_pattern",
+        "meta_key"
+      ],
+      "title": "CheckSourcePiiMeta",
       "type": "object"
     },
     "CheckSourcePropertyFileLocation": {
@@ -9696,6 +10159,8 @@
       "items": {
         "discriminator": {
           "mapping": {
+            "check_column_descriptions_are_consistent": "#/$defs/CheckColumnDescriptionsAreConsistent",
+            "check_duplicate_sources": "#/$defs/CheckDuplicateSources",
             "check_exposure_based_on_model": "#/$defs/CheckExposureBasedOnModel",
             "check_exposure_based_on_non_public_models": "#/$defs/CheckExposureBasedOnNonPublicModels",
             "check_exposure_based_on_view": "#/$defs/CheckExposureBasedOnView",
@@ -9724,6 +10189,7 @@
             "check_model_directories": "#/$defs/CheckModelDirectories",
             "check_model_documentation_coverage": "#/$defs/CheckModelDocumentationCoverage",
             "check_model_documented_in_same_directory": "#/$defs/CheckModelDocumentedInSameDirectory",
+            "check_model_does_not_use_select_star": "#/$defs/CheckModelDoesNotUseSelectStar",
             "check_model_file_name": "#/$defs/CheckModelFileName",
             "check_model_grant_privilege": "#/$defs/CheckModelGrantPrivilege",
             "check_model_grant_privilege_required": "#/$defs/CheckModelGrantPrivilegeRequired",
@@ -9770,8 +10236,10 @@
             "check_source_has_meta_keys": "#/$defs/CheckSourceHasMetaKeys",
             "check_source_has_tags": "#/$defs/CheckSourceHasTags",
             "check_source_loader_populated": "#/$defs/CheckSourceLoaderPopulated",
+            "check_source_min_downstream_models": "#/$defs/CheckSourceMinDownstreamModels",
             "check_source_names": "#/$defs/CheckSourceNames",
             "check_source_not_orphaned": "#/$defs/CheckSourceNotOrphaned",
+            "check_source_pii_meta": "#/$defs/CheckSourcePiiMeta",
             "check_source_property_file_location": "#/$defs/CheckSourcePropertyFileLocation",
             "check_source_used_by_models_in_same_directory": "#/$defs/CheckSourceUsedByModelsInSameDirectory",
             "check_source_used_by_only_one_model": "#/$defs/CheckSourceUsedByOnlyOneModel",
@@ -9785,6 +10253,12 @@
           "propertyName": "name"
         },
         "oneOf": [
+          {
+            "$ref": "#/$defs/CheckColumnDescriptionsAreConsistent"
+          },
+          {
+            "$ref": "#/$defs/CheckDuplicateSources"
+          },
           {
             "$ref": "#/$defs/CheckExposureBasedOnModel"
           },
@@ -9868,6 +10342,9 @@
           },
           {
             "$ref": "#/$defs/CheckModelDocumentedInSameDirectory"
+          },
+          {
+            "$ref": "#/$defs/CheckModelDoesNotUseSelectStar"
           },
           {
             "$ref": "#/$defs/CheckModelFileName"
@@ -10008,10 +10485,16 @@
             "$ref": "#/$defs/CheckSourceLoaderPopulated"
           },
           {
+            "$ref": "#/$defs/CheckSourceMinDownstreamModels"
+          },
+          {
             "$ref": "#/$defs/CheckSourceNames"
           },
           {
             "$ref": "#/$defs/CheckSourceNotOrphaned"
+          },
+          {
+            "$ref": "#/$defs/CheckSourcePiiMeta"
           },
           {
             "$ref": "#/$defs/CheckSourcePropertyFileLocation"

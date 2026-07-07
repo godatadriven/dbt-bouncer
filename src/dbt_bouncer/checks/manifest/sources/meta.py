@@ -2,7 +2,7 @@
 
 from dbt_bouncer.check_framework.decorator import check, fail
 from dbt_bouncer.check_framework.exceptions import NestedDict
-from dbt_bouncer.utils import find_missing_meta_keys
+from dbt_bouncer.utils import compile_pattern, find_missing_meta_keys
 
 
 @check
@@ -85,4 +85,49 @@ def check_source_has_meta_keys(source, *, keys: NestedDict):
     if missing_keys:
         fail(
             f"`{display}` is missing the following keys from the `meta` config: {[x.replace('>>', '') for x in missing_keys]}"
+        )
+
+
+@check
+def check_source_pii_meta(source, *, column_name_pattern: str, meta_key: str):
+    """Source columns matching a PII pattern must carry a governance meta key.
+
+    !!! info "Rationale"
+
+        PII columns need explicit classification metadata for access control and compliance reporting. Without enforcing a required meta key on columns whose names indicate sensitive data, teams silently omit privacy labels, making it impossible to automate data masking, access control policies, or GDPR/CCPA audit trails.
+
+    Parameters:
+        column_name_pattern (str): Regex pattern to match column names that are considered PII.
+        meta_key (str): The meta key that must be present and non-empty on each matching column.
+            The key must be present with a truthy value; a falsy value (e.g. ``false``, ``0``,
+            empty string) is treated as missing.
+
+    Receives:
+        source (SourceNode): The SourceNode object to check.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | list[str] | None): Regex pattern(s) to match the source path (i.e the .yml file where the source is configured). Source paths that match any pattern will not be checked.
+        include (str | list[str] | None): Regex pattern(s) to match the source path (i.e the .yml file where the source is configured). Only source paths that match any pattern will be checked.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_source_pii_meta
+              column_name_pattern: ^(email|phone|address|ssn).*
+              meta_key: pii
+        ```
+
+    """
+    compiled = compile_pattern(column_name_pattern.strip())
+    offending = [
+        name
+        for name, col in (source.columns or {}).items()
+        if compiled.match(str(name))
+        and not (getattr(col, "meta", None) or {}).get(meta_key)
+    ]
+    if offending:
+        fail(
+            f"Source `{source.source_name}.{source.name}` has PII-pattern columns missing `meta.{meta_key}`: {offending}."
         )

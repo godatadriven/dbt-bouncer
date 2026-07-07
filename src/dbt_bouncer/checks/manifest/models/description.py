@@ -1,6 +1,7 @@
 """Checks related to model descriptions and documentation coverage."""
 
 import re
+from collections import defaultdict
 from pathlib import Path
 from typing import Annotated, Any, cast
 
@@ -13,6 +14,39 @@ from dbt_bouncer.utils import (
     get_clean_model_name,
     is_description_populated,
 )
+
+
+@check
+def check_column_descriptions_are_consistent(ctx):
+    """The same column name must not have conflicting descriptions across models.
+
+    !!! info "Rationale"
+
+        When the same logical column (e.g. `customer_id`) carries a different description in two models, it signals copy-paste drift or inconsistent documentation standards. Consumers of the data catalogue see contradictory definitions, eroding trust. This check enforces a single canonical description per column name project-wide, prompting teams to agree on shared documentation.
+
+    Receives:
+        models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_column_descriptions_are_consistent
+        ```
+
+    """
+    descs: dict[str, set[str]] = defaultdict(set)
+    for model in ctx.models:
+        for name, col in (model.columns or {}).items():
+            d = (getattr(col, "description", "") or "").strip()
+            if d:
+                descs[name].add(d)
+    conflicts = {name: sorted(v) for name, v in descs.items() if len(v) > 1}
+    if conflicts:
+        fail(f"Columns have conflicting descriptions across models: {conflicts}.")
 
 
 @check

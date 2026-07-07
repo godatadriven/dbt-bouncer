@@ -8,6 +8,35 @@ from dbt_bouncer.utils import compile_pattern, get_clean_model_name
 _JINJA_PATTERN = re.compile(r"\{[{%].*?[%}]\}", re.DOTALL)
 _HARD_CODED_REF_PATTERN = re.compile(r"\b(?:FROM|JOIN)\s+\w+\.\w+", re.IGNORECASE)
 
+# Patterns used to strip comment forms before the select-star check.
+_JINJA_COMMENT_PATTERN = re.compile(r"\{#.*?#\}", re.DOTALL)
+_BLOCK_COMMENT_PATTERN = re.compile(r"/\*.*?\*/", re.DOTALL)
+_LINE_COMMENT_PATTERN = re.compile(r"--[^\n]*")
+
+
+def _strip_sql_comments(code: str) -> str:
+    """Remove SQL and Jinja comment forms from SQL code.
+
+    Strips Jinja block comments ({# ... #}), SQL block comments (/* ... */),
+    and SQL line comments (-- to end of line) so that a ``SELECT *`` inside a
+    comment does not trigger the select-star check.
+
+    Returns:
+        The input string with all comment forms removed.
+
+    Note:
+        Known limitation: this function does not account for SQL string
+        literals. A literal like ``SELECT '-- not a comment' AS x`` will
+        have the ``--`` portion stripped. Full SQL string-literal parsing
+        is out of scope (cf. the similar caveat on
+        ``check_model_hard_coded_references``).
+
+    """
+    code = _JINJA_COMMENT_PATTERN.sub("", code)
+    code = _BLOCK_COMMENT_PATTERN.sub("", code)
+    code = _LINE_COMMENT_PATTERN.sub("", code)
+    return code
+
 
 @check
 def check_model_code_does_not_contain_regexp_pattern(model, *, regexp_pattern: str):
@@ -43,6 +72,47 @@ def check_model_code_does_not_contain_regexp_pattern(model, *, regexp_pattern: s
     if compiled.match(str(model.raw_code)) is not None:
         fail(
             f"`{get_clean_model_name(model.unique_id)}` contains a banned string: `{regexp_pattern}`."
+        )
+
+
+@check
+def check_model_does_not_use_select_star(model):
+    """Models must not use `SELECT *`.
+
+    !!! info "Rationale"
+
+        `SELECT *` makes a model's output schema implicit and brittle to upstream column changes. When a source or upstream model adds, removes, or reorders columns, a `SELECT *` model silently propagates the change, potentially breaking downstream consumers or introducing unexpected columns into the DAG. Explicit column lists are self-documenting, stable, and make schema changes intentional and reviewable.
+
+    Receives:
+        model (ModelNode): The ModelNode object to check.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.
+        include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.
+        materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    !!! warning
+
+        Comment stripping via ``_strip_sql_comments`` removes SQL/Jinja *comment*
+        forms (``-- …``, ``/* … */``, ``{# … #}``) but does **not** strip Jinja
+        *tags* (``{{ … }}`` / ``{% … %}``). A ``SELECT *`` embedded inside a Jinja
+        expression will therefore still be matched by this check. This mirrors the
+        known-limitation caveat on ``check_model_hard_coded_references``.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_model_does_not_use_select_star
+              include: ^models/marts
+        ```
+
+    """
+    cleaned = _strip_sql_comments(model.raw_code or "")
+    if re.search(r"(?i)select\s+(?:all\s+|distinct\s+)?\*", cleaned):
+        fail(
+            f"`{get_clean_model_name(model.unique_id)}` uses `SELECT *`; list columns explicitly."
         )
 
 
