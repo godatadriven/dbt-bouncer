@@ -162,116 +162,126 @@ class TestCheckSourceMinDownstreamModels:
 
 
 class TestCheckSourceNotOrphaned:
-    def test_one_model_depends(self):
-        check_passes(
+    @pytest.mark.parametrize(
+        ("ctx_models", "check_fn"),
+        [
+            pytest.param(
+                [_MODEL_DEPENDS_ON_SOURCE], check_passes, id="one_model_depends"
+            ),
+            pytest.param(
+                [_MODEL_DEPENDS_ON_SOURCE, _MODEL_2_DEPENDS_ON_SOURCE],
+                check_passes,
+                id="two_models_depend",
+            ),
+            pytest.param([_MODEL_NO_DEPS], check_fails, id="no_model_depends"),
+        ],
+    )
+    def test_check_source_not_orphaned(self, ctx_models, check_fn):
+        check_fn(
             "check_source_not_orphaned",
             source=_SOURCE_WITH_TAGS,
-            ctx_models=[_MODEL_DEPENDS_ON_SOURCE],
-        )
-
-    def test_two_models_depend(self):
-        check_passes(
-            "check_source_not_orphaned",
-            source=_SOURCE_WITH_TAGS,
-            ctx_models=[_MODEL_DEPENDS_ON_SOURCE, _MODEL_2_DEPENDS_ON_SOURCE],
-        )
-
-    def test_no_model_depends(self):
-        check_fails(
-            "check_source_not_orphaned",
-            source=_SOURCE_WITH_TAGS,
-            ctx_models=[_MODEL_NO_DEPS],
+            ctx_models=ctx_models,
         )
 
 
 class TestCheckSourceUsedByModelsInSameDirectory:
-    def test_same_directory(self):
-        check_passes(
-            "check_source_used_by_models_in_same_directory",
-            source=_SOURCE_WITH_TAGS,
-            ctx_models=[
+    @pytest.mark.parametrize(
+        ("source", "ctx_models", "check_fn"),
+        [
+            pytest.param(
+                _SOURCE_WITH_TAGS,
+                [
+                    {
+                        **_MODEL_2_DEPENDS_ON_SOURCE,
+                        "original_file_path": "models/staging/model_2.sql",
+                        "path": "staging/model_2.sql",
+                    },
+                ],
+                check_passes,
+                id="same_directory",
+            ),
+            pytest.param(
                 {
-                    **_MODEL_2_DEPENDS_ON_SOURCE,
-                    "original_file_path": "models/staging/model_2.sql",
-                    "path": "staging/model_2.sql",
+                    "original_file_path": "models/_sources.yml",
+                    "path": "models/_sources.yml",
+                    "tags": ["tag_1"],
                 },
-            ],
-        )
-
-    def test_different_directory(self):
-        check_fails(
+                [
+                    {
+                        **_MODEL_2_DEPENDS_ON_SOURCE,
+                        "original_file_path": "models/staging/model_2.sql",
+                        "path": "staging/model_2.sql",
+                    },
+                ],
+                check_fails,
+                id="different_directory",
+            ),
+        ],
+    )
+    def test_check_source_used_by_models_in_same_directory(
+        self, source, ctx_models, check_fn
+    ):
+        check_fn(
             "check_source_used_by_models_in_same_directory",
-            source={
-                "original_file_path": "models/_sources.yml",
-                "path": "models/_sources.yml",
-                "tags": ["tag_1"],
-            },
-            ctx_models=[
-                {
-                    **_MODEL_2_DEPENDS_ON_SOURCE,
-                    "original_file_path": "models/staging/model_2.sql",
-                    "path": "staging/model_2.sql",
-                },
-            ],
+            source=source,
+            ctx_models=ctx_models,
         )
 
 
 class TestCheckSourceUsedByOnlyOneModel:
-    def test_one_model_depends(self):
-        check_passes(
+    @pytest.mark.parametrize(
+        ("ctx_models", "check_fn"),
+        [
+            pytest.param(
+                [
+                    {
+                        **_MODEL_2_DEPENDS_ON_SOURCE,
+                        "original_file_path": "models/staging/model_2.sql",
+                        "path": "staging/model_2.sql",
+                    },
+                ],
+                check_passes,
+                id="one_model_depends",
+            ),
+            pytest.param(
+                [
+                    {
+                        **_MODEL_NO_DEPS,
+                        "original_file_path": "models/staging/model_2.sql",
+                        "path": "staging/model_2.sql",
+                    },
+                ],
+                check_passes,
+                id="no_model_depends",
+            ),
+            pytest.param(
+                [
+                    {
+                        **_MODEL_DEPENDS_ON_SOURCE,
+                        "alias": "model_1",
+                        "name": "model_1",
+                        "original_file_path": "models/staging/model_1.sql",
+                        "path": "staging/model_1.sql",
+                        "unique_id": "model.package_name.model_1",
+                    },
+                    {
+                        **_MODEL_2_DEPENDS_ON_SOURCE,
+                        "original_file_path": "models/staging/model_2.sql",
+                        "path": "staging/model_2.sql",
+                    },
+                ],
+                check_fails,
+                id="two_models_depend",
+            ),
+        ],
+    )
+    def test_check_source_used_by_only_one_model(self, ctx_models, check_fn):
+        check_fn(
             "check_source_used_by_only_one_model",
             source={
                 "original_file_path": "models/_sources.yml",
                 "path": "models/_sources.yml",
                 "tags": ["tag_1"],
             },
-            ctx_models=[
-                {
-                    **_MODEL_2_DEPENDS_ON_SOURCE,
-                    "original_file_path": "models/staging/model_2.sql",
-                    "path": "staging/model_2.sql",
-                },
-            ],
-        )
-
-    def test_no_model_depends(self):
-        check_passes(
-            "check_source_used_by_only_one_model",
-            source={
-                "original_file_path": "models/_sources.yml",
-                "path": "models/_sources.yml",
-                "tags": ["tag_1"],
-            },
-            ctx_models=[
-                {
-                    **_MODEL_NO_DEPS,
-                    "original_file_path": "models/staging/model_2.sql",
-                    "path": "staging/model_2.sql",
-                },
-            ],
-        )
-
-    def test_two_models_depend(self):
-        check_fails(
-            "check_source_used_by_only_one_model",
-            source={
-                "original_file_path": "models/_sources.yml",
-                "path": "models/_sources.yml",
-                "tags": ["tag_1"],
-            },
-            ctx_models=[
-                {
-                    **_MODEL_DEPENDS_ON_SOURCE,
-                    "alias": "model_1",
-                    "name": "model_1",
-                    "original_file_path": "models/staging/model_1.sql",
-                    "path": "staging/model_1.sql",
-                    "unique_id": "model.package_name.model_1",
-                },
-                {
-                    **_MODEL_2_DEPENDS_ON_SOURCE,
-                    "original_file_path": "models/staging/model_2.sql",
-                    "path": "staging/model_2.sql",
-                },
-            ],
+            ctx_models=ctx_models,
         )

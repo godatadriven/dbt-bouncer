@@ -1,15 +1,18 @@
+import pytest
+
 from dbt_bouncer.testing import check_fails, check_passes
 
 
 class TestCheckSourceLoaderPopulated:
-    def test_loader_populated(self):
-        check_passes(
+    @pytest.mark.parametrize(
+        ("source", "check_fn"),
+        [
+            pytest.param({"loader": "Fivetran"}, check_passes, id="loader_populated"),
+            pytest.param({"loader": ""}, check_fails, id="loader_empty"),
+        ],
+    )
+    def test_check_source_loader_populated(self, source, check_fn):
+        check_fn(
             "check_source_loader_populated",
-            source={"loader": "Fivetran"},
-        )
-
-    def test_loader_empty(self):
-        check_fails(
-            "check_source_loader_populated",
-            source={"loader": ""},
+            source=source,
         )

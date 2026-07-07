@@ -34,6 +34,12 @@ jobs:
         if: steps.export.outputs.skip != 'true'
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
         with:
+          # Required to check out fork PR heads from this workflow_run job.
+          # Accepted here because the job only reads the diff and runs a
+          # constrained review (git diff/log/show, Read, Glob, Grep, Write to
+          # /tmp) with no build/test execution of the fork's code, and the
+          # token is scoped to contents:read + pull-requests:write.
+          allow-unsafe-pr-checkout: true
           ref: ${{ env.PR_HEAD_SHA }}
           fetch-depth: 0
           persist-credentials: false
