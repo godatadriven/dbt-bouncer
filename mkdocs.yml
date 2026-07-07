@@ -69,6 +69,7 @@ nav:
               - checks/manifest/sources/meta.md
               - checks/manifest/sources/naming.md
               - checks/manifest/sources/tags.md
+              - checks/manifest/sources/tests.md
           - Tests: checks/manifest/check_tests.md
           - Unit Tests: checks/manifest/check_unit_tests.md
       - Run Results:

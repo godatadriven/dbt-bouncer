@@ -45,6 +45,9 @@ def test_cli_happy_path(caplog, dbt_artifacts_dir, tmp_path):
     #   - check_source_freshness_populated: non-backwards-compatible dbt-fusion
     #     changes mean it requires dbt-core >= 1.10.
     #   - check_source_has_labels_keys: same reason as check_model_has_labels_keys.
+    #   - check_source_has_tests: the not_null test on dummy_source.customers was
+    #     added after these versions were frozen, so those manifests carry no
+    #     tests for the CRM source.
     #   - check_test_has_where_config: the `where` config was added to the
     #     test_cases data tests after these versions were frozen, so none of
     #     their tests carry a `where` config for the check to pass against.
@@ -60,6 +63,7 @@ def test_cli_happy_path(caplog, dbt_artifacts_dir, tmp_path):
                 "check_seed_has_meta_keys",
                 "check_source_freshness_populated",
                 "check_source_has_labels_keys",
+                "check_source_has_tests",
                 "check_test_has_where_config",
             ]:
                 bouncer_config["manifest_checks"].remove(item)

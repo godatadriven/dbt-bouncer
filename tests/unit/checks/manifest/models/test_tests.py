@@ -3,6 +3,190 @@ import pytest
 from dbt_bouncer.testing import check_fails, check_passes
 
 
+class TestCheckModelHasTestsByName:
+    @pytest.mark.parametrize(
+        ("test_names", "min_number_of_tests", "ctx_tests"),
+        [
+            pytest.param(
+                ["not_null", "unique"],
+                1,
+                [{"test_metadata": {"name": "not_null"}}],
+                id="one_matching_schema_test",
+            ),
+            pytest.param(
+                ["not_null", "unique"],
+                2,
+                [
+                    {"test_metadata": {"name": "not_null"}},
+                    {"test_metadata": {"name": "unique"}},
+                ],
+                id="two_matching_schema_tests",
+            ),
+            pytest.param(
+                ["my_singular_test"],
+                1,
+                [{"test_metadata": None, "name": "my_singular_test"}],
+                id="matching_singular_test",
+            ),
+        ],
+    )
+    def test_passes(self, test_names, min_number_of_tests, ctx_tests):
+        check_passes(
+            "check_model_has_tests_by_name",
+            test_names=test_names,
+            min_number_of_tests=min_number_of_tests,
+            model={},
+            ctx_tests=ctx_tests,
+        )
+
+    @pytest.mark.parametrize(
+        ("test_names", "min_number_of_tests", "ctx_tests"),
+        [
+            pytest.param(
+                ["not_null"],
+                1,
+                [],
+                id="no_tests",
+            ),
+            pytest.param(
+                ["not_null"],
+                1,
+                [{"test_metadata": {"name": "unique"}}],
+                id="test_name_does_not_match",
+            ),
+            pytest.param(
+                ["not_null", "unique"],
+                2,
+                [{"test_metadata": {"name": "not_null"}}],
+                id="one_test_below_minimum_of_2",
+            ),
+        ],
+    )
+    def test_fails(self, test_names, min_number_of_tests, ctx_tests):
+        check_fails(
+            "check_model_has_tests_by_name",
+            test_names=test_names,
+            min_number_of_tests=min_number_of_tests,
+            model={},
+            ctx_tests=ctx_tests,
+        )
+
+    def test_raises_value_error_for_zero_minimum(self):
+        from dbt_bouncer.testing import _run_check
+
+        with pytest.raises(ValueError, match="greater than 0"):
+            _run_check(
+                "check_model_has_tests_by_name",
+                test_names=["not_null"],
+                min_number_of_tests=0,
+                model={},
+                ctx_tests=[],
+            )
+
+
+class TestCheckModelHasTestsByType:
+    @pytest.mark.parametrize(
+        ("min_number_of_schema_tests", "min_number_of_data_tests", "ctx_tests"),
+        [
+            pytest.param(
+                1,
+                0,
+                [{"test_metadata": {"name": "not_null"}}],
+                id="one_schema_test_meets_minimum",
+            ),
+            pytest.param(
+                0,
+                1,
+                [{"test_metadata": None, "name": "my_data_test"}],
+                id="one_data_test_meets_minimum",
+            ),
+            pytest.param(
+                1,
+                1,
+                [
+                    {"test_metadata": {"name": "not_null"}},
+                    {"test_metadata": None, "name": "my_data_test"},
+                ],
+                id="one_schema_and_one_data_test",
+            ),
+        ],
+    )
+    def test_passes(
+        self, min_number_of_schema_tests, min_number_of_data_tests, ctx_tests
+    ):
+        check_passes(
+            "check_model_has_tests_by_type",
+            min_number_of_schema_tests=min_number_of_schema_tests,
+            min_number_of_data_tests=min_number_of_data_tests,
+            model={},
+            ctx_tests=ctx_tests,
+        )
+
+    @pytest.mark.parametrize(
+        ("min_number_of_schema_tests", "min_number_of_data_tests", "ctx_tests"),
+        [
+            pytest.param(
+                1,
+                0,
+                [],
+                id="no_tests_schema_minimum_not_met",
+            ),
+            pytest.param(
+                0,
+                1,
+                [],
+                id="no_tests_data_minimum_not_met",
+            ),
+            pytest.param(
+                1,
+                1,
+                [{"test_metadata": {"name": "not_null"}}],
+                id="schema_ok_but_data_minimum_not_met",
+            ),
+            pytest.param(
+                2,
+                0,
+                [{"test_metadata": {"name": "not_null"}}],
+                id="one_schema_test_below_minimum_of_2",
+            ),
+        ],
+    )
+    def test_fails(
+        self, min_number_of_schema_tests, min_number_of_data_tests, ctx_tests
+    ):
+        check_fails(
+            "check_model_has_tests_by_type",
+            min_number_of_schema_tests=min_number_of_schema_tests,
+            min_number_of_data_tests=min_number_of_data_tests,
+            model={},
+            ctx_tests=ctx_tests,
+        )
+
+    def test_raises_value_error_for_both_zero(self):
+        from dbt_bouncer.testing import _run_check
+
+        with pytest.raises(ValueError, match="At least one of"):
+            _run_check(
+                "check_model_has_tests_by_type",
+                min_number_of_data_tests=0,
+                min_number_of_schema_tests=0,
+                model={},
+                ctx_tests=[],
+            )
+
+    def test_raises_value_error_for_negative_minimum(self):
+        from dbt_bouncer.testing import _run_check
+
+        with pytest.raises(ValueError, match="greater than or equal to 0"):
+            _run_check(
+                "check_model_has_tests_by_type",
+                min_number_of_schema_tests=-1,
+                min_number_of_data_tests=1,
+                model={},
+                ctx_tests=[],
+            )
+
+
 class TestCheckModelHasUniqueTest:
     @pytest.mark.parametrize(
         ("accepted_uniqueness_tests", "model", "ctx_tests"),
