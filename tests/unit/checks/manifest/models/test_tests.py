@@ -71,6 +71,18 @@ class TestCheckModelHasTestsByName:
             ctx_tests=ctx_tests,
         )
 
+    def test_raises_value_error_for_zero_minimum(self):
+        from dbt_bouncer.testing import _run_check
+
+        with pytest.raises(ValueError, match="greater than 0"):
+            _run_check(
+                "check_model_has_tests_by_name",
+                test_names=["not_null"],
+                min_number_of_tests=0,
+                model={},
+                ctx_tests=[],
+            )
+
 
 class TestCheckModelHasTestsByType:
     @pytest.mark.parametrize(
@@ -158,6 +170,18 @@ class TestCheckModelHasTestsByType:
                 "check_model_has_tests_by_type",
                 min_number_of_data_tests=0,
                 min_number_of_schema_tests=0,
+                model={},
+                ctx_tests=[],
+            )
+
+    def test_raises_value_error_for_negative_minimum(self):
+        from dbt_bouncer.testing import _run_check
+
+        with pytest.raises(ValueError, match="greater than or equal to 0"):
+            _run_check(
+                "check_model_has_tests_by_type",
+                min_number_of_schema_tests=-1,
+                min_number_of_data_tests=1,
                 model={},
                 ctx_tests=[],
             )

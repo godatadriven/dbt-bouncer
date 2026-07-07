@@ -4918,6 +4918,7 @@
         },
         "min_number_of_tests": {
           "default": 1,
+          "exclusiveMinimum": 0,
           "title": "Min Number Of Tests",
           "type": "integer"
         }
@@ -5015,11 +5016,13 @@
         },
         "min_number_of_data_tests": {
           "default": 0,
+          "minimum": 0,
           "title": "Min Number Of Data Tests",
           "type": "integer"
         },
         "min_number_of_schema_tests": {
           "default": 0,
+          "minimum": 0,
           "title": "Min Number Of Schema Tests",
           "type": "integer"
         }

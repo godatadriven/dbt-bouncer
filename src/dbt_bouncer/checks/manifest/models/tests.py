@@ -15,7 +15,7 @@ def check_model_has_tests_by_name(
     ctx,
     *,
     test_names: list[str],
-    min_number_of_tests: int = 1,
+    min_number_of_tests: Annotated[int, Field(gt=0)] = 1,
 ):
     """Models must have a minimum number of tests matching the specified test names.
 
@@ -71,8 +71,8 @@ def check_model_has_tests_by_type(
     model,
     ctx,
     *,
-    min_number_of_data_tests: int = 0,
-    min_number_of_schema_tests: int = 0,
+    min_number_of_data_tests: Annotated[int, Field(ge=0)] = 0,
+    min_number_of_schema_tests: Annotated[int, Field(ge=0)] = 0,
 ):
     """Models must have at least the specified number of schema tests and data tests.
 
