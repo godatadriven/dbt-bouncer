@@ -275,6 +275,12 @@ def test_check_exposure_has_meta_keys(keys, exposure_overrides, check_fn):
             id="has_email_and_name",
         ),
         pytest.param(
+            {**_EXPOSURE_BASE, "owner": None},
+            ["email"],
+            check_fails,
+            id="owner_key_absent",
+        ),
+        pytest.param(
             {**_EXPOSURE_BASE, "owner": {}},
             ["email"],
             check_fails,
