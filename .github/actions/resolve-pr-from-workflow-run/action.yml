@@ -1,0 +1,55 @@
+name: Resolve PR from workflow_run
+description: >-
+  Resolve the pull request for a workflow_run event's head SHA and export its
+  metadata (PR_HEAD, PR_HEAD_SHA, PR_BASE, PR_BASE_SHA, PR_NUMBER,
+  PR_CHANGED_FILES) as environment variables for subsequent steps in the job.
+  If no open PR matches the head SHA (the branch was updated since the
+  triggering CI run), the `skip` output is set to 'true' instead of failing,
+  so callers can no-op cleanly rather than erroring on stale data.
+
+outputs:
+  skip:
+    description: >-
+      'true' when no open PR matches the workflow_run head SHA (a stale run);
+      otherwise 'false'. Gate downstream steps on this.
+    value: ${{ steps.resolve.outputs.skip }}
+
+runs:
+  using: composite
+  steps:
+    - id: resolve
+      uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+      with:
+        script: |
+          // Derive PR metadata from the trusted workflow_run payload — an
+          // artifact uploaded by the untrusted PR run could be forged to point
+          // a privileged workflow at an arbitrary PR/SHA.
+          const headSha = context.payload.workflow_run.head_sha;
+          const { data: prs } = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            commit_sha: headSha,
+          });
+          const prRef = prs.find((pr) => pr.head.sha === headSha);
+          if (!prRef) {
+            // The PR head moved on (new commits pushed) after the CI run that
+            // triggered this workflow_run — this run is stale. Signal a skip so
+            // the caller can no-op; the CI run for the new head triggers a fresh
+            // run. Failing here would surface a confusing red run in downstream
+            // steps (empty SHAs -> `git diff` usage dump + gh 404).
+            core.warning(`No open pull request has head SHA ${headSha}; it was likely updated since the CI run. Skipping this stale run.`);
+            core.setOutput("skip", "true");
+            return;
+          }
+          const { data: pr } = await github.rest.pulls.get({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            pull_number: prRef.number,
+          });
+          core.setOutput("skip", "false");
+          core.exportVariable("PR_HEAD", pr.head.ref);
+          core.exportVariable("PR_HEAD_SHA", headSha);
+          core.exportVariable("PR_BASE", pr.base.ref);
+          core.exportVariable("PR_BASE_SHA", pr.base.sha);
+          core.exportVariable("PR_NUMBER", pr.number);
+          core.exportVariable("PR_CHANGED_FILES", pr.changed_files);
