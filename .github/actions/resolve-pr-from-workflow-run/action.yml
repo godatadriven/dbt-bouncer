@@ -52,4 +52,8 @@ runs:
           core.exportVariable("PR_BASE", pr.base.ref);
           core.exportVariable("PR_BASE_SHA", pr.base.sha);
           core.exportVariable("PR_NUMBER", pr.number);
+          // PR_CHANGED_FILES is consumed by the AI-review workflow's prompt.
+          // The benchmark workflow does not use it; a set-but-unused env var is
+          // harmless, so the action exports a consistent metadata set for all
+          // callers rather than branching per consumer.
           core.exportVariable("PR_CHANGED_FILES", pr.changed_files);
