@@ -143,6 +143,12 @@ class TestCheckSourcePiiMeta:
                 "pii",
                 id="empty_columns",
             ),
+            pytest.param(
+                {"columns": None},
+                "^email_.*",
+                "pii",
+                id="none_columns",
+            ),
         ],
     )
     def test_pass(self, source_override, column_name_pattern, meta_key):

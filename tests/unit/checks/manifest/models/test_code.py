@@ -93,6 +93,14 @@ class TestCheckModelDoesNotUseSelectStar:
                 },
                 id="select_star_in_outer_query",
             ),
+            pytest.param(
+                {"raw_code": "SELECT DISTINCT * FROM my_table"},
+                id="select_distinct_star",
+            ),
+            pytest.param(
+                {"raw_code": "SELECT ALL * FROM my_table"},
+                id="select_all_star",
+            ),
         ],
     )
     def test_fail(self, model_override):

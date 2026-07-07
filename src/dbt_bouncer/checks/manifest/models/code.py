@@ -24,6 +24,13 @@ def _strip_sql_comments(code: str) -> str:
     Returns:
         The input string with all comment forms removed.
 
+    Note:
+        Known limitation: this function does not account for SQL string
+        literals. A literal like ``SELECT '-- not a comment' AS x`` will
+        have the ``--`` portion stripped. Full SQL string-literal parsing
+        is out of scope (cf. the similar caveat on
+        ``check_model_hard_coded_references``).
+
     """
     code = _JINJA_COMMENT_PATTERN.sub("", code)
     code = _BLOCK_COMMENT_PATTERN.sub("", code)
@@ -95,7 +102,7 @@ def check_model_does_not_use_select_star(model):
 
     """
     cleaned = _strip_sql_comments(model.raw_code or "")
-    if re.search(r"(?i)select\s+\*", cleaned):
+    if re.search(r"(?i)select\s+(?:all\s+|distinct\s+)?\*", cleaned):
         fail(
             f"`{get_clean_model_name(model.unique_id)}` uses `SELECT *`; list columns explicitly."
         )
