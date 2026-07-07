@@ -248,11 +248,11 @@ def check_snapshot_strategy(
         fail(
             f"`{get_clean_model_name(snapshot.unique_id)}` has strategy `{strategy}`, which is not one of the allowed strategies: {allowed_strategies}."
         )
-    if strategy == "timestamp" and not (config and getattr(config, "updated_at", None)):
+    if strategy == "timestamp" and not getattr(config, "updated_at", None):
         fail(
             f"`{get_clean_model_name(snapshot.unique_id)}` uses the `timestamp` strategy but has no `updated_at` configured."
         )
-    if strategy == "check" and not (config and getattr(config, "check_cols", None)):
+    if strategy == "check" and not getattr(config, "check_cols", None):
         fail(
             f"`{get_clean_model_name(snapshot.unique_id)}` uses the `check` strategy but has no `check_cols` configured."
         )
