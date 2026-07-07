@@ -22,35 +22,20 @@ jobs:
           name: ${{ env.BENCHMARK_RESULTS }}
           run_id: ${{ github.event.workflow_run.id }}
 
+      # Check out only the composite action from the default branch so the
+      # local `./_pr_resolver/...` action below is available (workflow_run runs
+      # do not check out the repo by default). A subdir path keeps it clear of
+      # the benchmark artifact downloaded into the workspace root.
+      - name: Check out composite actions
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+        with:
+          path: _pr_resolver
+          persist-credentials: false
+          sparse-checkout: .github/actions
+
       - name: Export PR Event Data
         id: export
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
-        with:
-          script: |
-            // Derive PR metadata from the trusted workflow_run payload — an
-            // artifact uploaded by the untrusted PR run could be forged to
-            // point this privileged workflow at an arbitrary PR/SHA.
-            const headSha = context.payload.workflow_run.head_sha;
-            const { data: prs } = await github.rest.repos.listPullRequestsAssociatedWithCommit({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              commit_sha: headSha,
-            });
-            const pr = prs.find((p) => p.head.sha === headSha);
-            if (!pr) {
-              // The PR head moved on (new commits pushed) after the CI run that
-              // triggered this workflow_run — this run is stale. Skip cleanly
-              // instead of failing; the CI run for the new head triggers a fresh
-              // benchmark run. Failing here surfaces a confusing red run.
-              core.warning(`No open pull request has head SHA ${headSha}; it was likely updated since the CI run. Skipping this stale benchmark run.`);
-              core.setOutput("skip", "true");
-              return;
-            }
-            core.exportVariable("PR_HEAD", pr.head.ref);
-            core.exportVariable("PR_HEAD_SHA", headSha);
-            core.exportVariable("PR_BASE", pr.base.ref);
-            core.exportVariable("PR_BASE_SHA", pr.base.sha);
-            core.exportVariable("PR_NUMBER", pr.number);
+        uses: ./_pr_resolver/.github/actions/resolve-pr-from-workflow-run
 
       - if: steps.export.outputs.skip != 'true'
         uses: bencherdev/bencher@50fb1e138651a46d2fb704fab1adab38c181552e # v0.6.6
