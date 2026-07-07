@@ -205,6 +205,151 @@ class TestCheckModelHasNoUpstreamDependencies:
         )
 
 
+class TestCheckModelMaterializationByFanout:
+    def test_passes_few_downstreams(self):
+        check_passes(
+            "check_model_materialization_by_fanout",
+            min_downstream_models=3,
+            model={
+                "alias": "hub",
+                "config": {"materialized": "view"},
+                "fqn": ["package_name", "hub"],
+                "name": "hub",
+                "original_file_path": "models/hub.sql",
+                "path": "hub.sql",
+                "unique_id": "model.package_name.hub",
+            },
+            ctx_models=[
+                {
+                    "alias": "child_1",
+                    "depends_on": {"nodes": ["model.package_name.hub"]},
+                    "fqn": ["package_name", "child_1"],
+                    "name": "child_1",
+                    "original_file_path": "models/child_1.sql",
+                    "path": "child_1.sql",
+                    "unique_id": "model.package_name.child_1",
+                },
+                {
+                    "alias": "child_2",
+                    "depends_on": {"nodes": ["model.package_name.hub"]},
+                    "fqn": ["package_name", "child_2"],
+                    "name": "child_2",
+                    "original_file_path": "models/child_2.sql",
+                    "path": "child_2.sql",
+                    "unique_id": "model.package_name.child_2",
+                },
+            ],
+        )
+
+    def test_passes_durable_materialization(self):
+        check_passes(
+            "check_model_materialization_by_fanout",
+            min_downstream_models=3,
+            model={
+                "alias": "hub",
+                "config": {"materialized": "table"},
+                "fqn": ["package_name", "hub"],
+                "name": "hub",
+                "original_file_path": "models/hub.sql",
+                "path": "hub.sql",
+                "unique_id": "model.package_name.hub",
+            },
+            ctx_models=[
+                {
+                    "alias": "child_1",
+                    "depends_on": {"nodes": ["model.package_name.hub"]},
+                    "fqn": ["package_name", "child_1"],
+                    "name": "child_1",
+                    "original_file_path": "models/child_1.sql",
+                    "path": "child_1.sql",
+                    "unique_id": "model.package_name.child_1",
+                },
+                {
+                    "alias": "child_2",
+                    "depends_on": {"nodes": ["model.package_name.hub"]},
+                    "fqn": ["package_name", "child_2"],
+                    "name": "child_2",
+                    "original_file_path": "models/child_2.sql",
+                    "path": "child_2.sql",
+                    "unique_id": "model.package_name.child_2",
+                },
+                {
+                    "alias": "child_3",
+                    "depends_on": {"nodes": ["model.package_name.hub"]},
+                    "fqn": ["package_name", "child_3"],
+                    "name": "child_3",
+                    "original_file_path": "models/child_3.sql",
+                    "path": "child_3.sql",
+                    "unique_id": "model.package_name.child_3",
+                },
+            ],
+        )
+
+    def test_fails_view_with_many_downstreams(self):
+        check_fails(
+            "check_model_materialization_by_fanout",
+            min_downstream_models=3,
+            model={
+                "alias": "hub",
+                "config": {"materialized": "view"},
+                "fqn": ["package_name", "hub"],
+                "name": "hub",
+                "original_file_path": "models/hub.sql",
+                "path": "hub.sql",
+                "unique_id": "model.package_name.hub",
+            },
+            ctx_models=[
+                {
+                    "alias": "child_1",
+                    "depends_on": {"nodes": ["model.package_name.hub"]},
+                    "fqn": ["package_name", "child_1"],
+                    "name": "child_1",
+                    "original_file_path": "models/child_1.sql",
+                    "path": "child_1.sql",
+                    "unique_id": "model.package_name.child_1",
+                },
+                {
+                    "alias": "child_2",
+                    "depends_on": {"nodes": ["model.package_name.hub"]},
+                    "fqn": ["package_name", "child_2"],
+                    "name": "child_2",
+                    "original_file_path": "models/child_2.sql",
+                    "path": "child_2.sql",
+                    "unique_id": "model.package_name.child_2",
+                },
+                {
+                    "alias": "child_3",
+                    "depends_on": {"nodes": ["model.package_name.hub"]},
+                    "fqn": ["package_name", "child_3"],
+                    "name": "child_3",
+                    "original_file_path": "models/child_3.sql",
+                    "path": "child_3.sql",
+                    "unique_id": "model.package_name.child_3",
+                },
+            ],
+        )
+
+
+class TestCheckModelMaterializationByFanoutInvalidParam:
+    @pytest.mark.parametrize(
+        "min_downstream_models",
+        [
+            pytest.param(0, id="zero"),
+            pytest.param(-1, id="negative"),
+        ],
+    )
+    def test_raises_value_error(self, min_downstream_models):
+        from dbt_bouncer.testing import _run_check
+
+        with pytest.raises(ValueError, match="greater than 0"):
+            _run_check(
+                "check_model_materialization_by_fanout",
+                min_downstream_models=min_downstream_models,
+                model={},
+                ctx_models=[{}],
+            )
+
+
 _CHAINED_VIEWS_MODELS_WITHIN_LIMIT = [
     {
         "alias": "model_0",

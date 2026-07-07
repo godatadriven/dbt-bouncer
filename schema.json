@@ -4474,6 +4474,95 @@
       "title": "CheckModelHasUnitTests",
       "type": "object"
     },
+    "CheckModelIncrementalHasUniqueKey": {
+      "additionalProperties": false,
+      "description": "Incremental models must declare a `unique_key`.\n\n!!! info \"Rationale\"\n\n    Incremental models without a `unique_key` perform insert-only loads.\n    Late-arriving or updated rows are silently duplicated on every run,\n    leading to over-counting in downstream aggregations and broken\n    idempotency. Declaring a `unique_key` enables dbt to merge or\n    delete-insert matching rows, keeping the table correct across reruns.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    materialization (Literal[\"ephemeral\", \"incremental\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_model_incremental_has_unique_key\n    ```",
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to exclude. A list matches if any pattern matches.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to include. A list matches if any pattern matches.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_model_incremental_has_unique_key",
+          "default": "check_model_incremental_has_unique_key",
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "title": "CheckModelIncrementalHasUniqueKey",
+      "type": "object"
+    },
     "CheckModelLatestVersionSpecified": {
       "additionalProperties": false,
       "description": "Check that the `latest_version` attribute of the model is set.\n\n!!! info \"Rationale\"\n\n    The `latest_version` attribute tells dbt which version of a model downstream consumers should default to when using `ref('model_name')` without specifying a version. Without it, dbt cannot resolve unversioned references, and consumers may inadvertently pin to an older version. Enforcing this attribute ensures the model versioning contract is fully specified.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    materialization (Literal[\"ephemeral\", \"incremental\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_model_latest_version_specified\n          include: ^models/marts\n    ```",
@@ -4561,6 +4650,116 @@
         }
       },
       "title": "CheckModelLatestVersionSpecified",
+      "type": "object"
+    },
+    "CheckModelMaterializationByFanout": {
+      "additionalProperties": false,
+      "description": "Heavily-reused models must use a durable materialization.\n\n!!! info \"Rationale\"\n\n    A model consumed by many downstream models but materialized as a view\n    re-executes its full query logic on every downstream build, multiplying\n    warehouse compute and increasing overall pipeline latency. Hub models\n    with high fanout should be persisted as tables or incremental models so\n    that downstream builds read pre-computed results rather than re-running\n    the same transformations repeatedly.\n\nParameters:\n    materializations (list[str] | None): Accepted durable materializations for models above the fanout threshold.\n    min_downstream_models (int | None): The minimum number of downstream models that triggers this check.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n    models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    materialization (Literal[\"ephemeral\", \"incremental\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_model_materialization_by_fanout\n    ```\n    ```yaml\n    manifest_checks:\n        - name: check_model_materialization_by_fanout\n          min_downstream_models: 5\n          materializations:\n            - incremental\n            - table\n    ```",
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to exclude. A list matches if any pattern matches.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to include. A list matches if any pattern matches.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_model_materialization_by_fanout",
+          "default": "check_model_materialization_by_fanout",
+          "title": "Name",
+          "type": "string"
+        },
+        "min_downstream_models": {
+          "default": 3,
+          "exclusiveMinimum": 0,
+          "title": "Min Downstream Models",
+          "type": "integer"
+        },
+        "materializations": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Materializations"
+        }
+      },
+      "title": "CheckModelMaterializationByFanout",
       "type": "object"
     },
     "CheckModelMaxChainedViews": {
@@ -9060,7 +9259,9 @@
             "check_model_has_tags": "#/$defs/CheckModelHasTags",
             "check_model_has_unique_test": "#/$defs/CheckModelHasUniqueTest",
             "check_model_has_unit_tests": "#/$defs/CheckModelHasUnitTests",
+            "check_model_incremental_has_unique_key": "#/$defs/CheckModelIncrementalHasUniqueKey",
             "check_model_latest_version_specified": "#/$defs/CheckModelLatestVersionSpecified",
+            "check_model_materialization_by_fanout": "#/$defs/CheckModelMaterializationByFanout",
             "check_model_max_chained_views": "#/$defs/CheckModelMaxChainedViews",
             "check_model_max_fanout": "#/$defs/CheckModelMaxFanout",
             "check_model_max_number_of_lines": "#/$defs/CheckModelMaxNumberOfLines",
@@ -9221,7 +9422,13 @@
             "$ref": "#/$defs/CheckModelHasUnitTests"
           },
           {
+            "$ref": "#/$defs/CheckModelIncrementalHasUniqueKey"
+          },
+          {
             "$ref": "#/$defs/CheckModelLatestVersionSpecified"
+          },
+          {
+            "$ref": "#/$defs/CheckModelMaterializationByFanout"
           },
           {
             "$ref": "#/$defs/CheckModelMaxChainedViews"

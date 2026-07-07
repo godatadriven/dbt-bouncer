@@ -186,6 +186,70 @@ def check_model_has_no_upstream_dependencies(model):
 
 
 @check
+def check_model_materialization_by_fanout(
+    model,
+    ctx,
+    *,
+    min_downstream_models: Annotated[int, Field(gt=0)] = 3,
+    materializations: list[str] | None = None,
+):
+    """Heavily-reused models must use a durable materialization.
+
+    !!! info "Rationale"
+
+        A model consumed by many downstream models but materialized as a view
+        re-executes its full query logic on every downstream build, multiplying
+        warehouse compute and increasing overall pipeline latency. Hub models
+        with high fanout should be persisted as tables or incremental models so
+        that downstream builds read pre-computed results rather than re-running
+        the same transformations repeatedly.
+
+    Parameters:
+        materializations (list[str] | None): Accepted durable materializations for models above the fanout threshold.
+        min_downstream_models (int | None): The minimum number of downstream models that triggers this check.
+
+    Receives:
+        model (ModelNode): The ModelNode object to check.
+        models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.
+        include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.
+        materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_model_materialization_by_fanout
+        ```
+        ```yaml
+        manifest_checks:
+            - name: check_model_materialization_by_fanout
+              min_downstream_models: 5
+              materializations:
+                - incremental
+                - table
+        ```
+
+    """
+    materializations = materializations or ["incremental", "table"]
+    num_downstream_models = sum(
+        model.unique_id in (getattr(m.depends_on, "nodes", []) if m.depends_on else [])
+        for m in ctx.models
+    )
+    materialized = model.config.materialized if model.config else None
+    if (
+        num_downstream_models >= min_downstream_models
+        and materialized not in materializations
+    ):
+        fail(
+            f"`{get_clean_model_name(model.unique_id)}` has {num_downstream_models} downstream models but is materialized as `{materialized}`; expected one of {materializations}."
+        )
+
+
+@check
 def check_model_max_chained_views(
     model,
     ctx,

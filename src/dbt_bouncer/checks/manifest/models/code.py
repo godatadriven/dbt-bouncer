@@ -125,6 +125,46 @@ def check_model_has_semi_colon(model):
 
 
 @check
+def check_model_incremental_has_unique_key(model):
+    """Incremental models must declare a `unique_key`.
+
+    !!! info "Rationale"
+
+        Incremental models without a `unique_key` perform insert-only loads.
+        Late-arriving or updated rows are silently duplicated on every run,
+        leading to over-counting in downstream aggregations and broken
+        idempotency. Declaring a `unique_key` enables dbt to merge or
+        delete-insert matching rows, keeping the table correct across reruns.
+
+    Receives:
+        model (ModelNode): The ModelNode object to check.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.
+        include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.
+        materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_model_incremental_has_unique_key
+        ```
+
+    """
+    config = model.config
+    if (
+        config
+        and config.materialized == "incremental"
+        and not getattr(config, "unique_key", None)
+    ):
+        fail(
+            f"`{get_clean_model_name(model.unique_id)}` is incremental but has no `unique_key`."
+        )
+
+
+@check
 def check_model_max_number_of_lines(model, *, max_number_of_lines: int = 100):
     """Models may not have more than the specified number of lines.
 

@@ -142,6 +142,44 @@ class TestCheckModelHasSemiColon:
         check_fails("check_model_has_semi_colon", model=model_override)
 
 
+class TestCheckModelIncrementalHasUniqueKey:
+    @pytest.mark.parametrize(
+        "model_override",
+        [
+            pytest.param(
+                {"config": {"materialized": "incremental", "unique_key": "id"}},
+                id="incremental_with_unique_key",
+            ),
+            pytest.param(
+                {"config": {"materialized": "view"}},
+                id="view_no_unique_key",
+            ),
+            pytest.param(
+                {"config": {"materialized": "table"}},
+                id="table_no_unique_key",
+            ),
+        ],
+    )
+    def test_pass(self, model_override):
+        check_passes("check_model_incremental_has_unique_key", model=model_override)
+
+    @pytest.mark.parametrize(
+        "model_override",
+        [
+            pytest.param(
+                {"config": {"materialized": "incremental"}},
+                id="incremental_no_unique_key",
+            ),
+            pytest.param(
+                {"config": {"materialized": "incremental", "unique_key": ""}},
+                id="incremental_empty_unique_key",
+            ),
+        ],
+    )
+    def test_fail(self, model_override):
+        check_fails("check_model_incremental_has_unique_key", model=model_override)
+
+
 class TestCheckModelMaxNumberOfLines:
     def test_pass(self):
         check_passes(
