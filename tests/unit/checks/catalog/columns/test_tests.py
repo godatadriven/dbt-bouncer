@@ -1,133 +1,164 @@
+import pytest
+
 from dbt_bouncer.testing import check_fails, check_passes
 
 
 class TestCheckColumnHasSpecifiedTest:
-    def test_has_test(self):
-        check_passes(
-            "check_column_has_specified_test",
-            catalog_node={
-                "columns": {
-                    "col_1": {
-                        "index": 1,
-                        "name": "col_1",
-                        "type": "INTEGER",
-                    },
-                },
-            },
-            column_name_pattern=".*_1$",
-            test_name="unique",
-            ctx_tests=[{}],
-        )
-
-    def test_missing_test(self):
-        check_fails(
-            "check_column_has_specified_test",
-            catalog_node={
-                "columns": {
-                    "col_1": {
-                        "index": 1,
-                        "name": "col_1",
-                        "type": "INTEGER",
-                    },
-                },
-            },
-            column_name_pattern=".*_1$",
-            test_name="unique",
-            ctx_tests=[
+    @pytest.mark.parametrize(
+        (
+            "catalog_node",
+            "column_name_pattern",
+            "test_name",
+            "ctx_tests",
+            "extra_kwargs",
+            "check_fn",
+        ),
+        [
+            pytest.param(
                 {
-                    "alias": "not_null_model_1_not_null",
-                    "fqn": [
-                        "package_name",
-                        "marts",
-                        "finance",
-                        "not_null_model_1_not_null",
-                    ],
-                    "name": "not_null_model_1_not_null",
-                    "test_metadata": {
-                        "name": "not_null",
-                    },
-                    "unique_id": "test.package_name.not_null_model_1_not_null.cf6c17daed",
-                }
-            ],
-        )
-
-    def test_has_test_snowflake(self):
-        # On Snowflake the catalog column is upper-cased (`COL_1`) while the test's
-        # `column_name` mirrors the lowercase YAML (`col_1`); the check should still
-        # match because `case_sensitive` defaults to `false` for the snowflake adapter.
-        check_passes(
-            "check_column_has_specified_test",
-            catalog_node={
-                "columns": {
-                    "COL_1": {
-                        "index": 1,
-                        "name": "COL_1",
-                        "type": "INTEGER",
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
                     },
                 },
-            },
-            column_name_pattern=".*_1$",
-            test_name="unique",
-            ctx_tests=[{}],
-            ctx_manifest_obj={"metadata": {"adapter_type": "snowflake"}},
-        )
-
-    def test_has_test_case_insensitive_explicit(self):
-        # Casing mismatch resolved by explicitly opting into case-insensitive matching.
-        check_passes(
-            "check_column_has_specified_test",
-            catalog_node={
-                "columns": {
-                    "COL_1": {
-                        "index": 1,
-                        "name": "COL_1",
-                        "type": "INTEGER",
+                ".*_1$",
+                "unique",
+                [{}],
+                {},
+                check_passes,
+                id="has_test",
+            ),
+            pytest.param(
+                {
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
                     },
                 },
-            },
-            column_name_pattern=".*_1$",
-            test_name="unique",
-            case_sensitive=False,
-            ctx_tests=[{}],
-        )
-
-    def test_case_mismatch_fails_when_case_sensitive(self):
-        # With the default case-sensitive comparison on a non-folding adapter, an
-        # upper-cased catalog column does not match its lowercase test entry.
-        check_fails(
-            "check_column_has_specified_test",
-            catalog_node={
-                "columns": {
-                    "COL_1": {
-                        "index": 1,
-                        "name": "COL_1",
-                        "type": "INTEGER",
+                ".*_1$",
+                "unique",
+                [
+                    {
+                        "alias": "not_null_model_1_not_null",
+                        "fqn": [
+                            "package_name",
+                            "marts",
+                            "finance",
+                            "not_null_model_1_not_null",
+                        ],
+                        "name": "not_null_model_1_not_null",
+                        "test_metadata": {
+                            "name": "not_null",
+                        },
+                        "unique_id": "test.package_name.not_null_model_1_not_null.cf6c17daed",
+                    }
+                ],
+                {},
+                check_fails,
+                id="missing_test",
+            ),
+            pytest.param(
+                # On Snowflake the catalog column is upper-cased (`COL_1`) while the
+                # test's `column_name` mirrors the lowercase YAML (`col_1`); the check
+                # should still match because `case_sensitive` defaults to `false` for
+                # the snowflake adapter.
+                {
+                    "columns": {
+                        "COL_1": {
+                            "index": 1,
+                            "name": "COL_1",
+                            "type": "INTEGER",
+                        },
                     },
                 },
-            },
-            column_name_pattern=".*_1$",
-            test_name="unique",
-            ctx_tests=[{}],
-        )
-
-    def test_lowercase_pattern_matches_upper_catalog_column_snowflake(self):
-        # On Snowflake an upper-cased catalog column (`IS_ACTIVE`) must still be
-        # selected by a conventionally lowercase pattern (`^is_.*`), otherwise the
-        # column silently falls out of scope and the check passes vacuously rather
-        # than flagging the missing test.
-        check_fails(
-            "check_column_has_specified_test",
-            catalog_node={
-                "columns": {
-                    "IS_ACTIVE": {
-                        "index": 1,
-                        "name": "IS_ACTIVE",
-                        "type": "BOOLEAN",
+                ".*_1$",
+                "unique",
+                [{}],
+                {"ctx_manifest_obj": {"metadata": {"adapter_type": "snowflake"}}},
+                check_passes,
+                id="has_test_snowflake",
+            ),
+            pytest.param(
+                # Casing mismatch resolved by explicitly opting into case-insensitive
+                # matching.
+                {
+                    "columns": {
+                        "COL_1": {
+                            "index": 1,
+                            "name": "COL_1",
+                            "type": "INTEGER",
+                        },
                     },
                 },
-            },
-            column_name_pattern="^is_.*",
-            test_name="not_null",
-            ctx_tests=[{}],
-            ctx_manifest_obj={"metadata": {"adapter_type": "snowflake"}},
+                ".*_1$",
+                "unique",
+                [{}],
+                {"case_sensitive": False},
+                check_passes,
+                id="has_test_case_insensitive_explicit",
+            ),
+            pytest.param(
+                # With the default case-sensitive comparison on a non-folding adapter,
+                # an upper-cased catalog column does not match its lowercase test entry.
+                {
+                    "columns": {
+                        "COL_1": {
+                            "index": 1,
+                            "name": "COL_1",
+                            "type": "INTEGER",
+                        },
+                    },
+                },
+                ".*_1$",
+                "unique",
+                [{}],
+                {},
+                check_fails,
+                id="case_mismatch_fails_when_case_sensitive",
+            ),
+            pytest.param(
+                # On Snowflake an upper-cased catalog column (`IS_ACTIVE`) must still be
+                # selected by a conventionally lowercase pattern (`^is_.*`), otherwise
+                # the column silently falls out of scope and the check passes vacuously
+                # rather than flagging the missing test.
+                {
+                    "columns": {
+                        "IS_ACTIVE": {
+                            "index": 1,
+                            "name": "IS_ACTIVE",
+                            "type": "BOOLEAN",
+                        },
+                    },
+                },
+                "^is_.*",
+                "not_null",
+                [{}],
+                {"ctx_manifest_obj": {"metadata": {"adapter_type": "snowflake"}}},
+                check_fails,
+                id="lowercase_pattern_matches_upper_catalog_column_snowflake",
+            ),
+        ],
+    )
+    def test_check_column_has_specified_test(
+        self,
+        catalog_node,
+        column_name_pattern,
+        test_name,
+        ctx_tests,
+        extra_kwargs,
+        check_fn,
+    ):
+        check_fn(
+            "check_column_has_specified_test",
+            catalog_node=catalog_node,
+            column_name_pattern=column_name_pattern,
+            test_name=test_name,
+            ctx_tests=ctx_tests,
+            **extra_kwargs,
         )
