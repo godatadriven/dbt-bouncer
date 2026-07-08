@@ -167,7 +167,7 @@ def check_seed_has_meta_keys(seed, *, keys: NestedDict):
     )
     if missing_keys:
         fail(
-            f"`{seed.name}` is missing the following keys from the `meta` config: {[x.replace('>>', '') for x in missing_keys]}"
+            f"`{get_clean_model_name(seed.unique_id)}` is missing the following keys from the `meta` config: {[x.replace('>>', '') for x in missing_keys]}"
         )
 
 

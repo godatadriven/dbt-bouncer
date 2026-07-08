@@ -73,6 +73,8 @@ def check_source_min_downstream_models(
 
         Some sources are expected to feed multiple downstream models — for example, a raw events table that drives both a sessions model and a revenue model. Requiring a minimum number of consumers guards against accidental under-use and ensures that critical source data is fully exploited in the project's lineage.
 
+        With the default `min_number_of_models` of 1 this check is equivalent to `check_source_not_orphaned`; prefer that check if you only need to assert a source is referenced at least once, and use this check when you want to require a higher minimum.
+
     Parameters:
         min_number_of_models (int): Minimum number of models that must reference the source. Must be greater than 0.
 
