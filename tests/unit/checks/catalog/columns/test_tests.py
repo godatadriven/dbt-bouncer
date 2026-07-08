@@ -5,14 +5,7 @@ from dbt_bouncer.testing import check_fails, check_passes
 
 class TestCheckColumnHasSpecifiedTest:
     @pytest.mark.parametrize(
-        (
-            "catalog_node",
-            "column_name_pattern",
-            "test_name",
-            "ctx_tests",
-            "case_sensitive",
-            "check_fn",
-        ),
+        ("catalog_node", "column_name_pattern", "test_name", "ctx_tests", "check_fn"),
         [
             pytest.param(
                 {
@@ -27,7 +20,6 @@ class TestCheckColumnHasSpecifiedTest:
                 ".*_1$",
                 "unique",
                 [{}],
-                True,
                 check_passes,
                 id="has_test",
             ),
@@ -59,28 +51,8 @@ class TestCheckColumnHasSpecifiedTest:
                         "unique_id": "test.package_name.not_null_model_1_not_null.cf6c17daed",
                     }
                 ],
-                True,
                 check_fails,
                 id="missing_test",
-            ),
-            pytest.param(
-                # Casing mismatch resolved by explicitly opting into case-insensitive
-                # matching.
-                {
-                    "columns": {
-                        "COL_1": {
-                            "index": 1,
-                            "name": "COL_1",
-                            "type": "INTEGER",
-                        },
-                    },
-                },
-                ".*_1$",
-                "unique",
-                [{}],
-                False,
-                check_passes,
-                id="has_test_case_insensitive_explicit",
             ),
             pytest.param(
                 # With the default case-sensitive comparison on a non-folding adapter,
@@ -97,7 +69,6 @@ class TestCheckColumnHasSpecifiedTest:
                 ".*_1$",
                 "unique",
                 [{}],
-                True,
                 check_fails,
                 id="case_mismatch_fails_when_case_sensitive",
             ),
@@ -109,16 +80,35 @@ class TestCheckColumnHasSpecifiedTest:
         column_name_pattern,
         test_name,
         ctx_tests,
-        case_sensitive,
         check_fn,
     ):
+        # ``case_sensitive`` is intentionally omitted so these cases exercise the
+        # check's default (``True``) on a non-folding adapter.
         check_fn(
             "check_column_has_specified_test",
             catalog_node=catalog_node,
             column_name_pattern=column_name_pattern,
             test_name=test_name,
             ctx_tests=ctx_tests,
-            case_sensitive=case_sensitive,
+        )
+
+    def test_check_column_has_specified_test_case_insensitive(self):
+        # Casing mismatch resolved by explicitly opting into case-insensitive matching.
+        check_passes(
+            "check_column_has_specified_test",
+            catalog_node={
+                "columns": {
+                    "COL_1": {
+                        "index": 1,
+                        "name": "COL_1",
+                        "type": "INTEGER",
+                    },
+                },
+            },
+            column_name_pattern=".*_1$",
+            test_name="unique",
+            ctx_tests=[{}],
+            case_sensitive=False,
         )
 
     @pytest.mark.parametrize(
