@@ -8,6 +8,8 @@ from pydantic import Field
 from dbt_bouncer.check_framework.decorator import check, fail
 from dbt_bouncer.utils import get_package_version_number, object_in_path
 
+_DBT_VERSION_1_8_0 = "1.8.0"
+
 
 @check
 def check_unit_test_coverage(
@@ -24,7 +26,7 @@ def check_unit_test_coverage(
 
     !!! warning
 
-        This check is only supported for dbt 1.8.0 and above.
+        This check is only supported for dbt **1.8.0** and above.
 
     Parameters:
         min_unit_test_coverage_pct (float): The minimum percentage of models that must have a unit test.
@@ -49,7 +51,7 @@ def check_unit_test_coverage(
     manifest_obj = ctx.manifest_obj
     if get_package_version_number(
         manifest_obj.manifest.metadata.dbt_version or "0.0.0"
-    ) >= get_package_version_number("1.8.0"):
+    ) >= get_package_version_number(_DBT_VERSION_1_8_0):
         relevant_models = [
             m.unique_id
             for m in ctx.models
@@ -92,7 +94,7 @@ def check_unit_test_expect_format(
 
     !!! warning
 
-        This check is only supported for dbt 1.8.0 and above.
+        This check is only supported for dbt **1.8.0** and above.
 
     Parameters:
         permitted_formats (list[Literal["csv", "dict", "sql"]] | None): A list of formats that are allowed to be used for `expect` input in a unit test.
@@ -119,7 +121,7 @@ def check_unit_test_expect_format(
     manifest_obj = ctx.manifest_obj
     if get_package_version_number(
         manifest_obj.manifest.metadata.dbt_version or "0.0.0"
-    ) >= get_package_version_number("1.8.0"):
+    ) >= get_package_version_number(_DBT_VERSION_1_8_0):
         if unit_test.expect.format is None:
             fail(
                 f"Unit test `{unit_test.name}` does not have an `expect` format defined. "
@@ -157,7 +159,7 @@ def check_unit_test_given_formats(
 
     !!! warning
 
-        This check is only supported for dbt 1.8.0 and above.
+        This check is only supported for dbt **1.8.0** and above.
 
     Parameters:
         permitted_formats (list[Literal["csv", "dict", "sql"]] | None): A list of formats that are allowed to be used for `expect` input in a unit test.
@@ -184,7 +186,7 @@ def check_unit_test_given_formats(
     manifest_obj = ctx.manifest_obj
     if get_package_version_number(
         manifest_obj.manifest.metadata.dbt_version or "0.0.0"
-    ) >= get_package_version_number("1.8.0"):
+    ) >= get_package_version_number(_DBT_VERSION_1_8_0):
         given_formats = [
             i.format.value for i in unit_test.given if i.format is not None
         ]
