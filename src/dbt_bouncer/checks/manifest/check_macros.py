@@ -226,7 +226,7 @@ def check_macro_has_meta_keys(macro, *, keys: NestedDict):
         keys (NestedDict): A list (that may contain sub-lists) of required keys.
 
     Receives:
-        macro (MacroNode): The MacroNode object to check.
+        macro (Macros): The Macros object to check.
 
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.

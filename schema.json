@@ -2098,7 +2098,7 @@
     },
     "CheckMacroHasMetaKeys": {
       "additionalProperties": false,
-      "description": "The `meta` config for macros must have the specified keys.\n\n!!! info \"Rationale\"\n\n    The `meta` config is a flexible, project-defined dictionary used to track ownership, maturity levels, PII classification, and other governance attributes. Requiring specific keys ensures that these attributes are consistently populated across all macros, enabling automated reporting, data cataloguing, and access-control workflows that depend on them.\n\nParameters:\n    keys (NestedDict): A list (that may contain sub-lists) of required keys.\n\nReceives:\n    macro (MacroNode): The MacroNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the macro path. Macro paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the macro path. Only macro paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_macro_has_meta_keys\n          keys:\n            - maturity\n            - owner\n    ```",
+      "description": "The `meta` config for macros must have the specified keys.\n\n!!! info \"Rationale\"\n\n    The `meta` config is a flexible, project-defined dictionary used to track ownership, maturity levels, PII classification, and other governance attributes. Requiring specific keys ensures that these attributes are consistently populated across all macros, enabling automated reporting, data cataloguing, and access-control workflows that depend on them.\n\nParameters:\n    keys (NestedDict): A list (that may contain sub-lists) of required keys.\n\nReceives:\n    macro (Macros): The Macros object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the macro path. Macro paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the macro path. Only macro paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_macro_has_meta_keys\n          keys:\n            - maturity\n            - owner\n    ```",
       "properties": {
         "description": {
           "anyOf": [
@@ -5205,18 +5205,18 @@
           "title": "Name",
           "type": "string"
         },
+        "min_number_of_tests": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Min Number Of Tests",
+          "type": "integer"
+        },
         "test_names": {
           "items": {
             "type": "string"
           },
           "title": "Test Names",
           "type": "array"
-        },
-        "min_number_of_tests": {
-          "default": 1,
-          "exclusiveMinimum": 0,
-          "title": "Min Number Of Tests",
-          "type": "integer"
         }
       },
       "required": [
@@ -9709,7 +9709,7 @@
     },
     "CheckSourceMinDownstreamModels": {
       "additionalProperties": false,
-      "description": "Sources must be referenced by at least the specified number of models.\n\n!!! info \"Rationale\"\n\n    Some sources are expected to feed multiple downstream models \u2014 for example, a raw events table that drives both a sessions model and a revenue model. Requiring a minimum number of consumers guards against accidental under-use and ensures that critical source data is fully exploited in the project's lineage.\n\nParameters:\n    min_number_of_models (int): Minimum number of models that must reference the source. Must be greater than 0.\n\nReceives:\n    models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.\n    source (SourceNode): The SourceNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the source path (i.e the .yml file where the source is configured). Source paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the source path (i.e the .yml file where the source is configured). Only source paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_source_min_downstream_models\n    ```\n    ```yaml\n    manifest_checks:\n        - name: check_source_min_downstream_models\n          min_number_of_models: 2\n    ```",
+      "description": "Sources must be referenced by at least the specified number of models.\n\n!!! info \"Rationale\"\n\n    Some sources are expected to feed multiple downstream models \u2014 for example, a raw events table that drives both a sessions model and a revenue model. Requiring a minimum number of consumers guards against accidental under-use and ensures that critical source data is fully exploited in the project's lineage.\n\n    With the default `min_number_of_models` of 1 this check is equivalent to `check_source_not_orphaned`; prefer that check if you only need to assert a source is referenced at least once, and use this check when you want to require a higher minimum.\n\nParameters:\n    min_number_of_models (int): Minimum number of models that must reference the source. Must be greater than 0.\n\nReceives:\n    models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.\n    source (SourceNode): The SourceNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the source path (i.e the .yml file where the source is configured). Source paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the source path (i.e the .yml file where the source is configured). Only source paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_source_min_downstream_models\n    ```\n    ```yaml\n    manifest_checks:\n        - name: check_source_min_downstream_models\n          min_number_of_models: 2\n    ```",
       "properties": {
         "description": {
           "anyOf": [

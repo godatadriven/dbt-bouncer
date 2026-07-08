@@ -14,8 +14,8 @@ def check_model_has_tests_by_name(
     model,
     ctx,
     *,
-    test_names: list[str],
     min_number_of_tests: Annotated[int, Field(gt=0)] = 1,
+    test_names: list[str],
 ):
     """Models must have a minimum number of tests matching the specified test names.
 
