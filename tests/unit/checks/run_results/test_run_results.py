@@ -4,40 +4,38 @@ from dbt_bouncer.testing import _run_check, check_fails, check_passes
 
 
 class TestCheckRunResultsMaxGigabytesBilled:
-    def test_within_limit(self):
-        check_passes(
+    @pytest.mark.parametrize(
+        ("run_result", "check_fn"),
+        [
+            pytest.param({}, check_passes, id="within_limit"),
+            pytest.param(
+                {"adapter_response": {"bytes_billed": 100000000000}},
+                check_fails,
+                id="exceeds_limit",
+            ),
+        ],
+    )
+    def test_check_run_results_max_gigabytes_billed(self, run_result, check_fn):
+        check_fn(
             "check_run_results_max_gigabytes_billed",
-            run_result={},
-            max_gigabytes_billed=10,
-        )
-
-    def test_exceeds_limit(self):
-        check_fails(
-            "check_run_results_max_gigabytes_billed",
-            run_result={"adapter_response": {"bytes_billed": 100000000000}},
+            run_result=run_result,
             max_gigabytes_billed=10,
         )
 
 
 class TestCheckRunResultsMaxExecutionTime:
-    def test_within_limit(self):
-        check_passes(
+    @pytest.mark.parametrize(
+        ("run_result", "check_fn"),
+        [
+            pytest.param({}, check_passes, id="within_limit"),
+            pytest.param({"execution_time": 10}, check_passes, id="at_limit"),
+            pytest.param({"execution_time": 100}, check_fails, id="exceeds_limit"),
+        ],
+    )
+    def test_check_run_results_max_execution_time(self, run_result, check_fn):
+        check_fn(
             "check_run_results_max_execution_time",
-            run_result={},
-            max_execution_time_seconds=10,
-        )
-
-    def test_at_limit(self):
-        check_passes(
-            "check_run_results_max_execution_time",
-            run_result={"execution_time": 10},
-            max_execution_time_seconds=10,
-        )
-
-    def test_exceeds_limit(self):
-        check_fails(
-            "check_run_results_max_execution_time",
-            run_result={"execution_time": 100},
+            run_result=run_result,
             max_execution_time_seconds=10,
         )
 
