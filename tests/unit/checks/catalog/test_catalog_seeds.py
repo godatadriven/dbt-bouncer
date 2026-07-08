@@ -81,12 +81,11 @@ class TestCheckSeedMaxBytes:
         )
 
     @pytest.mark.parametrize(
-        ("catalog_node", "byte_stat_keys", "check_fn"),
+        ("catalog_node", "check_fn"),
         [
             pytest.param(
                 # The check uses strict ``>`` so a seed exactly at the limit passes.
                 _seed_catalog_node(_byte_stat(1024)),
-                ["bytes", "num_bytes", "size"],
                 check_passes,
                 id="pass_at_exact_limit",
             ),
@@ -96,31 +95,42 @@ class TestCheckSeedMaxBytes:
                     "stats": {},
                     "unique_id": "model.package_name.model_1",
                 },
-                ["bytes", "num_bytes", "size"],
                 check_passes,
                 id="non_seed_catalog_node_is_skipped",
             ),
+        ],
+    )
+    def test_check_seed_max_bytes(self, catalog_node, check_fn):
+        # ``byte_stat_keys`` is intentionally omitted so these cases exercise the
+        # check's default stat-key handling.
+        check_fn(
+            "check_seed_max_bytes",
+            catalog_node=catalog_node,
+            max_bytes=1024,
+        )
+
+    @pytest.mark.parametrize(
+        ("catalog_node", "check_fn"),
+        [
             pytest.param(
                 # Long-tail adapter that exposes ``size_bytes`` instead of any default key.
                 _seed_catalog_node(_byte_stat(500, key="size_bytes")),
-                ["size_bytes"],
                 check_passes,
                 id="custom_byte_stat_key_pass",
             ),
             pytest.param(
                 _seed_catalog_node(_byte_stat(2048, key="size_bytes")),
-                ["size_bytes"],
                 check_fails,
                 id="custom_byte_stat_key_fail",
             ),
         ],
     )
-    def test_check_seed_max_bytes(self, catalog_node, byte_stat_keys, check_fn):
+    def test_check_seed_max_bytes_custom_stat_key(self, catalog_node, check_fn):
         check_fn(
             "check_seed_max_bytes",
             catalog_node=catalog_node,
             max_bytes=1024,
-            byte_stat_keys=byte_stat_keys,
+            byte_stat_keys=["size_bytes"],
         )
 
     def test_missing_stats_raises_runtime_error(self):
@@ -207,12 +217,11 @@ class TestCheckSeedMaxRowCount:
         )
 
     @pytest.mark.parametrize(
-        ("catalog_node", "row_stat_keys", "check_fn"),
+        ("catalog_node", "check_fn"),
         [
             pytest.param(
                 # The check uses strict ``>`` so a seed exactly at the limit passes.
                 _seed_catalog_node(_row_stat(100)),
-                ["row_count", "num_rows", "rows"],
                 check_passes,
                 id="pass_at_exact_limit",
             ),
@@ -221,31 +230,42 @@ class TestCheckSeedMaxRowCount:
                     "stats": {},
                     "unique_id": "model.package_name.model_1",
                 },
-                ["row_count", "num_rows", "rows"],
                 check_passes,
                 id="non_seed_catalog_node_is_skipped",
             ),
+        ],
+    )
+    def test_check_seed_max_row_count(self, catalog_node, check_fn):
+        # ``row_stat_keys`` is intentionally omitted so these cases exercise the
+        # check's default stat-key handling.
+        check_fn(
+            "check_seed_max_row_count",
+            catalog_node=catalog_node,
+            max_row_count=100,
+        )
+
+    @pytest.mark.parametrize(
+        ("catalog_node", "check_fn"),
+        [
             pytest.param(
                 # Long-tail adapter that exposes ``record_count`` instead of any default key.
                 _seed_catalog_node(_row_stat(50, key="record_count")),
-                ["record_count"],
                 check_passes,
                 id="custom_row_stat_key_pass",
             ),
             pytest.param(
                 _seed_catalog_node(_row_stat(200, key="record_count")),
-                ["record_count"],
                 check_fails,
                 id="custom_row_stat_key_fail",
             ),
         ],
     )
-    def test_check_seed_max_row_count(self, catalog_node, row_stat_keys, check_fn):
+    def test_check_seed_max_row_count_custom_stat_key(self, catalog_node, check_fn):
         check_fn(
             "check_seed_max_row_count",
             catalog_node=catalog_node,
             max_row_count=100,
-            row_stat_keys=row_stat_keys,
+            row_stat_keys=["record_count"],
         )
 
     def test_missing_stats_raises_runtime_error(self):

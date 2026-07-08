@@ -187,14 +187,8 @@ class TestCheckColumnsAreAllDocumented:
 
 
 class TestCheckColumnsAreAllDocumentedSnowflake:
-    @pytest.mark.parametrize(
-        "check_fn",
-        [
-            pytest.param(check_passes, id="all_documented_snowflake"),
-        ],
-    )
-    def test_check_columns_are_all_documented(self, check_fn):
-        check_fn(
+    def test_all_documented_snowflake(self):
+        check_passes(
             "check_columns_are_all_documented",
             catalog_node={
                 "columns": {
