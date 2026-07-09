@@ -72,6 +72,42 @@ class TestCheckColumnHasSpecifiedTest:
                 check_fails,
                 id="case_mismatch_fails_when_case_sensitive",
             ),
+            pytest.param(
+                # The test matches on name and column, but is attached to a
+                # different node entirely, so it must not count towards this one.
+                {
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                    },
+                },
+                ".*_1$",
+                "unique",
+                [{"attached_node": "model.package_name.model_2"}],
+                check_fails,
+                id="test_attached_to_different_node",
+            ),
+            pytest.param(
+                # A model-level test (no column_name) must not satisfy a
+                # column-level test requirement.
+                {
+                    "columns": {
+                        "col_1": {
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                    },
+                },
+                ".*_1$",
+                "unique",
+                [{"column_name": ""}],
+                check_fails,
+                id="model_level_test_does_not_satisfy_column_requirement",
+            ),
         ],
     )
     def test_check_column_has_specified_test(

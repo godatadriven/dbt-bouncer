@@ -1,3 +1,5 @@
+import re
+
 import pytest
 
 from dbt_bouncer.testing import check_fails, check_passes
@@ -110,6 +112,25 @@ class TestCheckColumnNameCompliesToColumnType:
                 ["BOOLEAN"],
                 check_passes,
                 id="valid_name_does_not_match_pattern",
+            ),
+            # This check has no model-only gate, so it also validates columns on
+            # seed catalog nodes, not just models.
+            pytest.param(
+                {
+                    "unique_id": "seed.package_name.seed_1",
+                    "columns": {
+                        "created_date": {
+                            "index": 1,
+                            "name": "created_date",
+                            "type": "VARCHAR",
+                        },
+                    },
+                },
+                ".*_date$",
+                None,
+                ["DATE"],
+                check_fails,
+                id="seed_catalog_node_is_also_validated",
             ),
         ],
     )
@@ -356,13 +377,70 @@ class TestCheckColumnTypeCompliesToColumnName:
 
 class TestCheckColumnNames:
     @pytest.mark.parametrize(
-        ("column_name_pattern", "check_fn"),
+        ("column_name_pattern", "ctx_models", "check_fn"),
         [
-            pytest.param("[a-z]*", check_passes, id="valid_name"),
-            pytest.param("[A-Z]*", check_fails, id="invalid_name"),
+            pytest.param(
+                "[a-z]*",
+                [
+                    {
+                        "columns": {
+                            "columnone": {
+                                "description": None,
+                                "index": 1,
+                                "name": "columnone",
+                                "type": "INTEGER",
+                            },
+                        },
+                    }
+                ],
+                check_passes,
+                id="valid_name",
+            ),
+            pytest.param(
+                "[A-Z]*",
+                [
+                    {
+                        "columns": {
+                            "columnone": {
+                                "description": None,
+                                "index": 1,
+                                "name": "columnone",
+                                "type": "INTEGER",
+                            },
+                        },
+                    }
+                ],
+                check_fails,
+                id="invalid_name",
+            ),
+            # `re.fullmatch` requires the entire name to match, not just a prefix
+            # (contrast with checks that use `re.match`, e.g. `check_seed_names`).
+            pytest.param(
+                "col",
+                [
+                    {
+                        "columns": {
+                            "columnone": {
+                                "description": None,
+                                "index": 1,
+                                "name": "columnone",
+                                "type": "INTEGER",
+                            },
+                        },
+                    }
+                ],
+                check_fails,
+                id="prefix_only_match_fails_fullmatch",
+            ),
+            pytest.param(
+                "[a-z]*",
+                [],
+                check_passes,
+                id="non_model_catalog_node_is_skipped",
+            ),
         ],
     )
-    def test_check_column_names(self, column_name_pattern, check_fn):
+    def test_check_column_names(self, column_name_pattern, ctx_models, check_fn):
         check_fn(
             "check_column_names",
             catalog_node={
@@ -375,16 +453,24 @@ class TestCheckColumnNames:
                 },
             },
             column_name_pattern=column_name_pattern,
-            ctx_models=[
-                {
-                    "columns": {
-                        "columnone": {
-                            "description": None,
-                            "index": 1,
-                            "name": "columnone",
-                            "type": "INTEGER",
-                        },
-                    },
-                }
-            ],
+            ctx_models=ctx_models,
         )
+
+    def test_check_column_names_invalid_regex(self):
+        from dbt_bouncer.testing import _run_check
+
+        with pytest.raises(re.error):
+            _run_check(
+                "check_column_names",
+                catalog_node={
+                    "columns": {"columnone": {"index": 1, "name": "columnone"}},
+                },
+                column_name_pattern="(unclosed",
+                ctx_models=[
+                    {
+                        "columns": {
+                            "columnone": {"index": 1, "name": "columnone"},
+                        },
+                    }
+                ],
+            )
