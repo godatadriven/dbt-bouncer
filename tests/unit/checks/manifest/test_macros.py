@@ -109,6 +109,27 @@ class TestCheckMacroArgumentsDescriptionPopulated:
                 check_fails,
                 id="test_macro_with_set_statement_missing_description",
             ),
+            pytest.param(
+                {
+                    "arguments": [
+                        {"name": "arg_1", "description": "n/a"},
+                    ],
+                    "macro_sql": "{% macro no_makes_sense(arg_1) %} select {{ arg_1 }} from table {% endmacro %}",
+                },
+                check_fails,
+                id="blocklisted_description_value",
+            ),
+            pytest.param(
+                # No arguments are documented, so the check is a no-op even
+                # though the macro SQL declares arguments (guarded by
+                # `if macro.arguments:`).
+                {
+                    "arguments": [],
+                    "macro_sql": "{% macro no_makes_sense(arg_1, arg_2) %} select coalesce({{ arg_1 }}, {{ arg_2 }}) from table {% endmacro %}",
+                },
+                check_passes,
+                id="no_documented_arguments_is_noop",
+            ),
         ],
     )
     def test_check_macro_arguments_description_populated(
@@ -117,6 +138,47 @@ class TestCheckMacroArgumentsDescriptionPopulated:
         check_fn(
             "check_macro_arguments_description_populated",
             macro=macro_overrides,
+        )
+
+    @pytest.mark.parametrize(
+        ("macro_overrides", "min_description_length", "check_fn"),
+        [
+            pytest.param(
+                {
+                    "arguments": [
+                        {
+                            "name": "arg_1",
+                            "description": "This description is long enough.",
+                        },
+                    ],
+                    "macro_sql": "{% macro no_makes_sense(arg_1) %} select {{ arg_1 }} from table {% endmacro %}",
+                },
+                25,
+                check_passes,
+                id="description_satisfies_custom_min_length",
+            ),
+            pytest.param(
+                # "short" (5 chars) passes the default min length of 4 but
+                # fails a stricter custom requirement.
+                {
+                    "arguments": [
+                        {"name": "arg_1", "description": "short"},
+                    ],
+                    "macro_sql": "{% macro no_makes_sense(arg_1) %} select {{ arg_1 }} from table {% endmacro %}",
+                },
+                25,
+                check_fails,
+                id="description_below_custom_min_length",
+            ),
+        ],
+    )
+    def test_check_macro_arguments_description_populated_min_length(
+        self, macro_overrides, min_description_length, check_fn
+    ):
+        check_fn(
+            "check_macro_arguments_description_populated",
+            macro=macro_overrides,
+            min_description_length=min_description_length,
         )
 
 
@@ -147,6 +209,27 @@ class TestCheckMacroCodeDoesNotContainRegexpPattern:
                 ".*[i][f][n][u][l][l].*",
                 check_fails,
                 id="contains_pattern",
+            ),
+            pytest.param(
+                # The pattern is applied with `re.DOTALL`, so `.*` spans
+                # newlines and matches a banned string on a later line.
+                {
+                    "macro_sql": "{% macro no_makes_sense(a, b) %}\n select ifnull({{ a }}, {{ b }}) from table \n{% endmacro %}",
+                },
+                ".*ifnull.*",
+                check_fails,
+                id="contains_pattern_across_newlines",
+            ),
+            pytest.param(
+                # `re.match` is anchored at the start of the string, so an
+                # unanchored pattern that only appears mid-string does NOT
+                # match. Users must prefix with `.*` to match anywhere.
+                {
+                    "macro_sql": "{% macro no_makes_sense(a, b) %} select ifnull({{ a }}, {{ b }}) from table {% endmacro %}",
+                },
+                "ifnull",
+                check_passes,
+                id="unanchored_pattern_mid_string_does_not_match",
             ),
         ],
     )
@@ -191,12 +274,50 @@ class TestCheckMacroDescriptionPopulated:
                 check_fails,
                 id="multiline_whitespace_description",
             ),
+            pytest.param(
+                # "n/a" is a non-empty placeholder that is explicitly treated
+                # as unpopulated (alongside "none" and "null").
+                {"description": "n/a", "macro_sql": "select 1"},
+                check_fails,
+                id="blocklisted_description_value",
+            ),
         ],
     )
     def test_check_macro_description_populated(self, macro_overrides, check_fn):
         check_fn(
             "check_macro_description_populated",
             macro=macro_overrides,
+        )
+
+    @pytest.mark.parametrize(
+        ("macro_overrides", "min_description_length", "check_fn"),
+        [
+            pytest.param(
+                {
+                    "description": "This is a sufficiently long description.",
+                    "macro_sql": "select 1",
+                },
+                25,
+                check_passes,
+                id="description_satisfies_custom_min_length",
+            ),
+            pytest.param(
+                # "A short one." (12 chars) passes the default min length of 4
+                # but fails a stricter custom requirement.
+                {"description": "A short one.", "macro_sql": "select 1"},
+                25,
+                check_fails,
+                id="description_below_custom_min_length",
+            ),
+        ],
+    )
+    def test_check_macro_description_populated_min_length(
+        self, macro_overrides, min_description_length, check_fn
+    ):
+        check_fn(
+            "check_macro_description_populated",
+            macro=macro_overrides,
+            min_description_length=min_description_length,
         )
 
 
@@ -224,6 +345,11 @@ class TestCheckMacroHasMetaKeys:
                 },
                 id="has_nested_keys",
             ),
+            pytest.param(
+                [{"governance": [{"pii": ["level"]}]}],
+                {"meta": {"governance": {"pii": {"level": "high"}}}},
+                id="has_deeply_nested_keys",
+            ),
         ],
     )
     def test_passes(self, keys, macro_overrides):
@@ -246,6 +372,11 @@ class TestCheckMacroHasMetaKeys:
                 ["owner", {"team": ["name", "slack"]}],
                 {"meta": {"owner": "Data Team", "team": {"name": "Analytics"}}},
                 id="missing_nested_key",
+            ),
+            pytest.param(
+                [{"governance": [{"pii": ["level"]}]}],
+                {"meta": {"governance": {"pii": {"classified": True}}}},
+                id="missing_deeply_nested_key",
             ),
         ],
     )
@@ -277,6 +408,20 @@ class TestCheckMacroMaxNumberOfLines:
                 check_fails,
                 id="exceeds_limit",
             ),
+            pytest.param(
+                # Exactly at the limit passes: the check only fails when the
+                # count is strictly greater than the maximum.
+                {"macro_sql": "line_1\nline_2\nline_3"},
+                3,
+                check_passes,
+                id="exactly_at_limit",
+            ),
+            pytest.param(
+                {"macro_sql": "line_1\nline_2\nline_3"},
+                2,
+                check_fails,
+                id="one_over_limit",
+            ),
         ],
     )
     def test_check_macro_max_number_of_lines(
@@ -286,6 +431,28 @@ class TestCheckMacroMaxNumberOfLines:
             "check_macro_max_number_of_lines",
             macro=macro_overrides,
             max_number_of_lines=max_number_of_lines,
+        )
+
+    @pytest.mark.parametrize(
+        ("macro_overrides", "check_fn"),
+        [
+            pytest.param(
+                {"macro_sql": "\n".join(["select 1"] * 100)},
+                check_passes,
+                id="default_limit_within",
+            ),
+            pytest.param(
+                {"macro_sql": "\n".join(["select 1"] * 101)},
+                check_fails,
+                id="default_limit_exceeded",
+            ),
+        ],
+    )
+    def test_check_macro_max_number_of_lines_default(self, macro_overrides, check_fn):
+        # The parameter is omitted so the default limit of 100 applies.
+        check_fn(
+            "check_macro_max_number_of_lines",
+            macro=macro_overrides,
         )
 
 
@@ -347,6 +514,18 @@ class TestCheckMacroNameMatchesFileName:
                 check_fails,
                 id="path_mismatch_in_object",
             ),
+            pytest.param(
+                # Windows-style backslash separators are normalised by
+                # `clean_path_str` before the file stem is compared.
+                {
+                    "name": "macro_1",
+                    "original_file_path": "macros\\subdir\\macro_1.sql",
+                    "path": "macros\\subdir\\macro_1.sql",
+                    "unique_id": "macro.package_name.macro_1",
+                },
+                check_passes,
+                id="matches_windows_path",
+            ),
         ],
     )
     def test_check_macro_name_matches_file_name(self, macro_overrides, check_fn):
@@ -385,6 +564,34 @@ class TestCheckMacroNames:
             "check_macro_names",
             include=include,
             macro_name_pattern="^[a-z_0-9]+$",
+            macro=macro_overrides,
+        )
+
+    @pytest.mark.parametrize(
+        ("macro_overrides", "macro_name_pattern", "check_fn"),
+        [
+            pytest.param(
+                # `re.match` anchors at the start but not the end, so a prefix
+                # pattern matches a longer name.
+                {"name": "finance_revenue"},
+                "^finance_",
+                check_passes,
+                id="prefix_pattern_matches_longer_name",
+            ),
+            pytest.param(
+                {"name": "revenue_finance"},
+                "^finance_",
+                check_fails,
+                id="prefix_pattern_requires_start",
+            ),
+        ],
+    )
+    def test_check_macro_names_start_anchored(
+        self, macro_overrides, macro_name_pattern, check_fn
+    ):
+        check_fn(
+            "check_macro_names",
+            macro_name_pattern=macro_name_pattern,
             macro=macro_overrides,
         )
 
@@ -441,6 +648,39 @@ class TestCheckMacroPropertyFileLocation:
                 check_fails,
                 id="missing_patch_path",
             ),
+            pytest.param(
+                # Two-level directory: the expected substring is `_dir1_dir2`
+                # and the file must still end with `__macros.yml`.
+                {
+                    "original_file_path": "macros/dir1/dir2/macro_1.sql",
+                    "patch_path": "package_name://macros/dir1/dir2/_dir1_dir2__macros.yml",
+                    "path": "macros/dir1/dir2/macro_1.sql",
+                },
+                check_passes,
+                id="valid_two_level_nested",
+            ),
+            pytest.param(
+                # Underscore prefix and expected substring are present, but the
+                # file does not end with `__macros.yml`.
+                {
+                    "original_file_path": "macros/dir1/macro_1.sql",
+                    "patch_path": "package_name://macros/dir1/_dir1_macros.yml",
+                    "path": "macros/dir1/macro_1.sql",
+                },
+                check_fails,
+                id="invalid_wrong_suffix",
+            ),
+            pytest.param(
+                # Underscore prefix is present but the expected `_dir1`
+                # substring is missing.
+                {
+                    "original_file_path": "macros/dir1/macro_1.sql",
+                    "patch_path": "package_name://macros/dir1/_other__macros.yml",
+                    "path": "macros/dir1/macro_1.sql",
+                },
+                check_fails,
+                id="invalid_missing_substring",
+            ),
         ],
     )
     def test_check_macro_property_file_location(self, macro_overrides, check_fn):
@@ -477,6 +717,30 @@ class TestCheckMacroIsUsed:
                 },
                 check_passes,
                 id="used_by_macro",
+            ),
+            pytest.param(
+                {"unique_id": "macro.package_name.macro_1"},
+                {
+                    "exposures": {
+                        "exposure.package_name.exposure_1": {
+                            "depends_on": {"macros": ["macro.package_name.macro_1"]}
+                        }
+                    }
+                },
+                check_passes,
+                id="used_by_exposure",
+            ),
+            pytest.param(
+                {"unique_id": "macro.package_name.macro_1"},
+                {
+                    "unit_tests": {
+                        "unit_test.package_name.model_1.unit_test_1": {
+                            "depends_on": {"macros": ["macro.package_name.macro_1"]}
+                        }
+                    }
+                },
+                check_passes,
+                id="used_by_unit_test",
             ),
             pytest.param(
                 {
