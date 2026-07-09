@@ -65,6 +65,15 @@ class TestCheckModelDirectories:
                 ["finance", "marketing"],
                 id="invalid_root_directory",
             ),
+            pytest.param(
+                "^marts",
+                {
+                    "original_file_path": "models/staging/stg_model_1.sql",
+                    "path": "staging/stg_model_1.sql",
+                },
+                ["finance", "marketing"],
+                id="include_does_not_match_path",
+            ),
         ],
     )
     def test_fails(self, include, model, permitted_sub_directories):
@@ -174,6 +183,32 @@ class TestCheckModelPropertyFileLocation:
                     "unique_id": "model.package_name.model_1",
                 },
                 id="invalid_name",
+            ),
+            pytest.param(
+                {
+                    "original_file_path": "models/staging/crm/stg_model_1.sql",
+                    "path": "staging/crm/stg_model_1.sql",
+                    "unique_id": "model.package_name.model_1",
+                },
+                id="not_documented",
+            ),
+            pytest.param(
+                {
+                    "original_file_path": "models/staging/crm/stg_model_1.sql",
+                    "patch_path": "package_name://models/staging/crm/stg_crm__models.yml",
+                    "path": "staging/crm/stg_model_1.sql",
+                    "unique_id": "model.package_name.model_1",
+                },
+                id="missing_leading_underscore",
+            ),
+            pytest.param(
+                {
+                    "original_file_path": "models/staging/crm/stg_model_1.sql",
+                    "patch_path": "package_name://models/staging/crm/_stg_crm__model.yml",
+                    "path": "staging/crm/stg_model_1.sql",
+                    "unique_id": "model.package_name.model_1",
+                },
+                id="wrong_suffix",
             ),
         ],
     )
