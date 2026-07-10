@@ -62,15 +62,9 @@ def check_column_has_specified_test(
         if compiled_column_name_pattern.match(str(v.name)) is not None
     ]
     tested_columns = set()
-    for t in ctx.tests:
+    for t in ctx.tests_by_attached_node.get(catalog_node.unique_id, []):
         test_metadata = getattr(t, "test_metadata", None)
-        attached_node = getattr(t, "attached_node", None)
-        if (
-            test_metadata
-            and attached_node
-            and getattr(test_metadata, "name", None) == test_name
-            and attached_node == catalog_node.unique_id
-        ):
+        if test_metadata and getattr(test_metadata, "name", None) == test_name:
             column_name = getattr(t, "column_name", "")
             # A column-level test exposes the documented (YAML) column name; model-level
             # tests have no `column_name`, so skip them rather than adding an empty entry.

@@ -49,14 +49,11 @@ def check_duplicate_sources(source, ctx):
 
     src_node = _node(source)
     src_rel = (src_node.database, src_node.schema, src_node.identifier)
-    dupes = []
-    for s in ctx.sources:
-        node = _node(s)
-        if (
-            node.unique_id != src_node.unique_id
-            and (node.database, node.schema, node.identifier) == src_rel
-        ):
-            dupes.append(node.unique_id)
+    dupes = [
+        uid
+        for uid in ctx.sources_by_relation.get(src_rel, [])
+        if uid != src_node.unique_id
+    ]
     if dupes:
         fail(
             f"Source `{source.source_name}.{source.name}` shares its relation ({src_rel}) with: {dupes}."
@@ -100,11 +97,7 @@ def check_source_min_downstream_models(
         ```
 
     """
-    n = sum(
-        source.unique_id in getattr(model.depends_on, "nodes", [])
-        for model in ctx.models
-        if model.depends_on
-    )
+    n = len(ctx.children_by_unique_id.get(source.unique_id, []))
     if n < min_number_of_models:
         fail(
             f"Source `{source.source_name}.{source.name}` is referenced by {n} model(s), fewer than the minimum {min_number_of_models}."
@@ -136,11 +129,7 @@ def check_source_not_orphaned(source, ctx):
         ```
 
     """
-    num_refs = sum(
-        source.unique_id in getattr(model.depends_on, "nodes", [])
-        for model in ctx.models
-        if model.depends_on
-    )
+    num_refs = len(ctx.children_by_unique_id.get(source.unique_id, []))
     if num_refs < 1:
         fail(
             f"Source `{source.source_name}.{source.name}` is orphaned, i.e. not referenced by any model."
@@ -171,15 +160,12 @@ def check_source_used_by_models_in_same_directory(source, ctx):
         ```
 
     """
-    reffed_models_not_in_same_dir = []
-    for model in ctx.models:
-        if (
-            model.depends_on
-            and source.unique_id in getattr(model.depends_on, "nodes", [])
-            and model.original_file_path.split("/")[:-1]
-            != source.original_file_path.split("/")[:-1]
-        ):
-            reffed_models_not_in_same_dir.append(model.name)
+    reffed_models_not_in_same_dir = [
+        m.name
+        for m in ctx.children_by_unique_id.get(source.unique_id, [])
+        if m.original_file_path.split("/")[:-1]
+        != source.original_file_path.split("/")[:-1]
+    ]
 
     if len(reffed_models_not_in_same_dir) != 0:
         fail(
@@ -212,11 +198,7 @@ def check_source_used_by_only_one_model(source, ctx):
         ```
 
     """
-    num_refs = sum(
-        source.unique_id in getattr(model.depends_on, "nodes", [])
-        for model in ctx.models
-        if model.depends_on
-    )
+    num_refs = len(ctx.children_by_unique_id.get(source.unique_id, []))
     if num_refs > 1:
         fail(
             f"Source `{source.source_name}.{source.name}` is referenced by more than one model."

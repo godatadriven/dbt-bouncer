@@ -216,15 +216,7 @@ def check_seed_has_unit_tests(
     if get_package_version_number(
         manifest_obj.manifest.metadata.dbt_version or "0.0.0"
     ) >= get_package_version_number("1.8.0"):
-        num_unit_tests = len(
-            [
-                t.unique_id
-                for t in ctx.unit_tests
-                if t.depends_on
-                and t.depends_on.nodes
-                and t.depends_on.nodes[0] == seed.unique_id
-            ]
-        )
+        num_unit_tests = len(ctx.unit_tests_by_depends_on_node.get(seed.unique_id, []))
         if num_unit_tests < min_number_of_unit_tests:
             fail(
                 f"`{get_clean_model_name(seed.unique_id)}` has {num_unit_tests} unit tests, this is less than the minimum of {min_number_of_unit_tests}."

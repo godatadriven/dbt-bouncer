@@ -49,10 +49,7 @@ def check_model_has_tests_by_name(
 
     """
     num_matching = 0
-    for test in ctx.tests:
-        attached_node = getattr(test, "attached_node", None)
-        if attached_node != model.unique_id:
-            continue
+    for test in ctx.tests_by_attached_node.get(model.unique_id, []):
         test_metadata = getattr(test, "test_metadata", None)
         if test_metadata:
             name = getattr(test_metadata, "name", None)
@@ -115,11 +112,8 @@ def check_model_has_tests_by_type(
         )
     num_schema_tests = 0
     num_data_tests = 0
-    for test in ctx.tests:
+    for test in ctx.tests_by_attached_node.get(model.unique_id, []):
         test_metadata = getattr(test, "test_metadata", None)
-        attached_node = getattr(test, "attached_node", None)
-        if attached_node != model.unique_id:
-            continue
         if test_metadata:
             num_schema_tests += 1
         else:
@@ -189,22 +183,17 @@ def check_model_has_unique_test(
 
     """
     num_unique_tests = 0
-    for test in ctx.tests:
+    for test in ctx.tests_by_attached_node.get(model.unique_id, []):
         test_metadata = getattr(test, "test_metadata", None)
-        attached_node = getattr(test, "attached_node", None)
-        if (
-            test_metadata
-            and attached_node == model.unique_id
-            and (
-                (
-                    f"{getattr(test_metadata, 'namespace', '')}.{getattr(test_metadata, 'name', '')}"
-                    in (accepted_uniqueness_tests or [])
-                )
-                or (
-                    getattr(test_metadata, "namespace", None) is None
-                    and getattr(test_metadata, "name", "")
-                    in (accepted_uniqueness_tests or [])
-                )
+        if test_metadata and (
+            (
+                f"{getattr(test_metadata, 'namespace', '')}.{getattr(test_metadata, 'name', '')}"
+                in (accepted_uniqueness_tests or [])
+            )
+            or (
+                getattr(test_metadata, "namespace", None) is None
+                and getattr(test_metadata, "name", "")
+                in (accepted_uniqueness_tests or [])
             )
         ):
             num_unique_tests += 1
@@ -260,15 +249,7 @@ def check_model_has_unit_tests(
     if get_package_version_number(
         manifest_obj.manifest.metadata.dbt_version or "0.0.0"
     ) >= get_package_version_number("1.8.0"):
-        num_unit_tests = len(
-            [
-                t.unique_id
-                for t in ctx.unit_tests
-                if t.depends_on
-                and t.depends_on.nodes
-                and t.depends_on.nodes[0] == model.unique_id
-            ]
-        )
+        num_unit_tests = len(ctx.unit_tests_by_depends_on_node.get(model.unique_id, []))
         if num_unit_tests < min_number_of_unit_tests:
             display_name = get_clean_model_name(model.unique_id)
             fail(
