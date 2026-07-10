@@ -1,5 +1,3 @@
-import re
-
 import pytest
 
 from dbt_bouncer.testing import check_fails, check_passes
@@ -457,6 +455,8 @@ class TestCheckColumnNames:
         )
 
     def test_check_column_names_invalid_regex(self):
+        import re
+
         from dbt_bouncer.testing import _run_check
 
         with pytest.raises(re.error):

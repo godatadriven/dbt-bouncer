@@ -2,32 +2,34 @@ import pytest
 
 from dbt_bouncer.testing import check_fails, check_passes
 
+_SOURCE_CATALOG_NODE = {
+    "columns": {
+        "col_1": {
+            "index": 1,
+            "name": "col_1",
+            "type": "INTEGER",
+        },
+        "col_2": {
+            "index": 2,
+            "name": "col_2",
+            "type": "INTEGER",
+        },
+    },
+    "metadata": {
+        "name": "table_1",
+        "schema": "main",
+        "type": "VIEW",
+    },
+    "unique_id": "source.package_name.source_1.table_1",
+}
+
 
 class TestCheckSourceColumnsAreAllDocumented:
     @pytest.mark.parametrize(
         ("catalog_source", "ctx_sources", "check_fn"),
         [
             pytest.param(
-                {
-                    "columns": {
-                        "col_1": {
-                            "index": 1,
-                            "name": "col_1",
-                            "type": "INTEGER",
-                        },
-                        "col_2": {
-                            "index": 2,
-                            "name": "col_2",
-                            "type": "INTEGER",
-                        },
-                    },
-                    "metadata": {
-                        "name": "table_1",
-                        "schema": "main",
-                        "type": "VIEW",
-                    },
-                    "unique_id": "source.package_name.source_1.table_1",
-                },
+                _SOURCE_CATALOG_NODE,
                 [
                     {
                         "columns": {
@@ -49,26 +51,7 @@ class TestCheckSourceColumnsAreAllDocumented:
                 id="all_documented",
             ),
             pytest.param(
-                {
-                    "columns": {
-                        "col_1": {
-                            "index": 1,
-                            "name": "col_1",
-                            "type": "INTEGER",
-                        },
-                        "col_2": {
-                            "index": 2,
-                            "name": "col_2",
-                            "type": "INTEGER",
-                        },
-                    },
-                    "metadata": {
-                        "name": "table_1",
-                        "schema": "main",
-                        "type": "VIEW",
-                    },
-                    "unique_id": "source.package_name.source_1.table_1",
-                },
+                _SOURCE_CATALOG_NODE,
                 [
                     {
                         "columns": {
@@ -89,15 +72,7 @@ class TestCheckSourceColumnsAreAllDocumented:
                 id="missing_documentation",
             ),
             pytest.param(
-                {
-                    "columns": {},
-                    "metadata": {
-                        "name": "table_1",
-                        "schema": "main",
-                        "type": "VIEW",
-                    },
-                    "unique_id": "source.package_name.source_1.table_1",
-                },
+                {**_SOURCE_CATALOG_NODE, "columns": {}},
                 [
                     {
                         "columns": {},
