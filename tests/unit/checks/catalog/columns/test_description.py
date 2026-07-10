@@ -59,6 +59,58 @@ class TestCheckColumnDescriptionPopulated:
                 check_fails,
                 id="missing_documentation",
             ),
+            pytest.param(
+                {"unique_id": "model.package_name.model_2"},
+                [
+                    {
+                        "alias": "model_2",
+                        "columns": {
+                            "col_1": {
+                                "description": "n/a",
+                                "index": 1,
+                                "name": "col_1",
+                                "type": "INTEGER",
+                            },
+                        },
+                        "fqn": ["package_name", "model_2"],
+                        "name": "model_2",
+                        "original_file_path": "model_2.sql",
+                        "path": "model_2.sql",
+                        "unique_id": "model.package_name.model_2",
+                    }
+                ],
+                check_fails,
+                id="n_a_description",
+            ),
+            pytest.param(
+                {"unique_id": "model.package_name.model_2"},
+                [
+                    {
+                        "alias": "model_2",
+                        "columns": {
+                            "col_1": {
+                                "description": "NONE",
+                                "index": 1,
+                                "name": "col_1",
+                                "type": "INTEGER",
+                            },
+                        },
+                        "fqn": ["package_name", "model_2"],
+                        "name": "model_2",
+                        "original_file_path": "model_2.sql",
+                        "path": "model_2.sql",
+                        "unique_id": "model.package_name.model_2",
+                    }
+                ],
+                check_fails,
+                id="uppercase_none_description",
+            ),
+            pytest.param(
+                {"unique_id": "model.package_name.model_2"},
+                [],
+                check_passes,
+                id="non_model_catalog_node_is_skipped",
+            ),
         ],
     )
     def test_check_column_description_populated(
@@ -262,6 +314,30 @@ class TestCheckColumnsAreDocumentedInPublicModels:
                 ],
                 check_fails,
                 id="undocumented_public",
+            ),
+            pytest.param(
+                {},
+                [
+                    {
+                        "access": "protected",
+                        "columns": {
+                            "col_1": {
+                                "description": "",
+                                "index": 1,
+                                "name": "col_1",
+                                "type": "INTEGER",
+                            },
+                            "col_2": {
+                                "description": "",
+                                "index": 2,
+                                "name": "col_2",
+                                "type": "INTEGER",
+                            },
+                        },
+                    }
+                ],
+                check_passes,
+                id="undocumented_non_public_model_is_skipped",
             ),
         ],
     )

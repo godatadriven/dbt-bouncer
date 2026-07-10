@@ -331,11 +331,36 @@ class TestCheckSeedMaxRowCount:
             )
 
 
+_SEED_CATALOG_NODE = {
+    "columns": {
+        "id": {"name": "id", "type": "INTEGER", "index": 1},
+        "first_name": {
+            "name": "first_name",
+            "type": "VARCHAR",
+            "index": 2,
+        },
+        "last_name": {
+            "name": "last_name",
+            "type": "VARCHAR",
+            "index": 3,
+        },
+    },
+    "metadata": {
+        "database": "dbt",
+        "name": "raw_customers",
+        "schema": "main",
+        "type": "BASE TABLE",
+    },
+    "unique_id": "seed.package_name.raw_customers",
+}
+
+
 class TestCheckSeedColumnsAreAllDocumented:
     @pytest.mark.parametrize(
-        ("ctx_seeds", "check_fn"),
+        ("catalog_node", "ctx_seeds", "check_fn"),
         [
             pytest.param(
+                _SEED_CATALOG_NODE,
                 [
                     {
                         "alias": "raw_customers",
@@ -355,6 +380,7 @@ class TestCheckSeedColumnsAreAllDocumented:
                 id="all_columns_documented",
             ),
             pytest.param(
+                _SEED_CATALOG_NODE,
                 [
                     {
                         "alias": "raw_customers",
@@ -372,32 +398,29 @@ class TestCheckSeedColumnsAreAllDocumented:
                 check_fails,
                 id="missing_last_name_column",
             ),
+            pytest.param(
+                {
+                    **_SEED_CATALOG_NODE,
+                    "unique_id": "model.package_name.model_1",
+                },
+                [],
+                check_passes,
+                id="non_seed_catalog_node_is_skipped",
+            ),
         ],
     )
-    def test_check_seed_columns_are_all_documented(self, ctx_seeds, check_fn):
+    def test_check_seed_columns_are_all_documented(
+        self, catalog_node, ctx_seeds, check_fn
+    ):
         check_fn(
             "check_seed_columns_are_all_documented",
-            catalog_node={
-                "columns": {
-                    "id": {"name": "id", "type": "INTEGER", "index": 1},
-                    "first_name": {
-                        "name": "first_name",
-                        "type": "VARCHAR",
-                        "index": 2,
-                    },
-                    "last_name": {
-                        "name": "last_name",
-                        "type": "VARCHAR",
-                        "index": 3,
-                    },
-                },
-                "metadata": {
-                    "database": "dbt",
-                    "name": "raw_customers",
-                    "schema": "main",
-                    "type": "BASE TABLE",
-                },
-                "unique_id": "seed.package_name.raw_customers",
-            },
+            catalog_node=catalog_node,
             ctx_seeds=ctx_seeds,
         )
+
+    def test_check_seed_columns_are_all_documented_seed_missing_from_manifest(self):
+        with pytest.raises(StopIteration):
+            check_passes(
+                "check_seed_columns_are_all_documented",
+                catalog_node=_SEED_CATALOG_NODE,
+            )
