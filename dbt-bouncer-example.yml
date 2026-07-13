@@ -207,6 +207,11 @@ manifest_checks:
   - name: check_model_materialization_by_fanout
     exclude: ^models/staging
     min_downstream_models: 5
+  - name: check_model_materialization_permitted
+    include: ^models/staging
+    permitted_materializations:
+      - ephemeral
+      - view
   - name: check_model_max_chained_views
   - name: check_model_max_fanout
     max_downstream_models: 5

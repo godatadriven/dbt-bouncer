@@ -5817,6 +5817,105 @@
       "title": "CheckModelMaterializationByFanout",
       "type": "object"
     },
+    "CheckModelMaterializationPermitted": {
+      "additionalProperties": false,
+      "description": "Models must use a permitted materialization for their location.\n\n!!! info \"Rationale\"\n\n    A project may declare a directory-wide materialization in `dbt_project.yml`\n    (e.g. all `staging` models are views), but that default can be silently\n    overridden by an in-model `config()` block or a nested properties file.\n    Asserting the resolved materialization directly - rather than comparing the\n    sources of configuration - catches any model whose final materialization was\n    overridden away from what the directory is supposed to guarantee.\n\nParameters:\n    permitted_materializations (list[Materialization]): List of materializations that models are permitted to use, e.g. `ephemeral`, `incremental`, `table`, `view`.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    materialization (Literal[\"ephemeral\", \"incremental\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_model_materialization_permitted\n          include: ^models/staging\n          permitted_materializations:\n            - view\n    ```",
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to exclude. A list matches if any pattern matches.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to include. A list matches if any pattern matches.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_model_materialization_permitted",
+          "default": "check_model_materialization_permitted",
+          "title": "Name",
+          "type": "string"
+        },
+        "permitted_materializations": {
+          "items": {
+            "$ref": "#/$defs/Materialization"
+          },
+          "title": "Permitted Materializations",
+          "type": "array"
+        }
+      },
+      "required": [
+        "permitted_materializations"
+      ],
+      "title": "CheckModelMaterializationPermitted",
+      "type": "object"
+    },
     "CheckModelMaxChainedViews": {
       "additionalProperties": false,
       "description": "Models cannot have more than the specified number of upstream dependents that are not tables.\n\n!!! info \"Rationale\"\n\n    Long chains of views and ephemeral models force the data warehouse to execute deeply nested queries at read time, which degrades query performance and can hit platform-specific nesting limits. Capping chained views encourages materialising intermediate results, trading a small amount of storage for significantly faster query execution.\n\nParameters:\n    materializations_to_include (list[str] | None): List of materializations to include in the check.\n    max_chained_views (int | None): The maximum number of upstream dependents that are not tables.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n    models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    materialization (Literal[\"ephemeral\", \"incremental\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_model_max_chained_views\n    ```\n    ```yaml\n    manifest_checks:\n        - name: check_model_max_chained_views\n          materializations_to_include:\n            - ephemeral\n            - my_custom_materialization\n            - view\n          max_chained_views: 5\n    ```",
@@ -11182,6 +11281,7 @@
             "check_model_incremental_has_unique_key": "#/$defs/CheckModelIncrementalHasUniqueKey",
             "check_model_latest_version_specified": "#/$defs/CheckModelLatestVersionSpecified",
             "check_model_materialization_by_fanout": "#/$defs/CheckModelMaterializationByFanout",
+            "check_model_materialization_permitted": "#/$defs/CheckModelMaterializationPermitted",
             "check_model_max_chained_views": "#/$defs/CheckModelMaxChainedViews",
             "check_model_max_fanout": "#/$defs/CheckModelMaxFanout",
             "check_model_max_number_of_lines": "#/$defs/CheckModelMaxNumberOfLines",
@@ -11391,6 +11491,9 @@
           },
           {
             "$ref": "#/$defs/CheckModelMaterializationByFanout"
+          },
+          {
+            "$ref": "#/$defs/CheckModelMaterializationPermitted"
           },
           {
             "$ref": "#/$defs/CheckModelMaxChainedViews"
