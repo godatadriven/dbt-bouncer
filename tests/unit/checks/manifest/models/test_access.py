@@ -339,11 +339,52 @@ class TestCheckModelHasContractsEnforced:
             model={"contract": {"enforced": True}},
         )
 
-    def test_fail(self):
+    @pytest.mark.parametrize(
+        "model_override",
+        [
+            pytest.param(
+                {"contract": {"enforced": False}},
+                id="enforced_false",
+            ),
+            pytest.param(
+                # No `contract` key at all → `model.contract` is None → `not
+                # model.contract` fails.
+                {},
+                id="contract_absent",
+            ),
+            pytest.param(
+                {"contract": None},
+                id="contract_none",
+            ),
+            pytest.param(
+                # `enforced: None` fails via `is not True`, which catches None as
+                # well as False (a `!= True` regression would too, but this pins it).
+                {"contract": {"enforced": None}},
+                id="enforced_none",
+            ),
+        ],
+    )
+    def test_fail(self, model_override):
         check_fails(
             "check_model_has_contracts_enforced",
-            model={"contract": {"enforced": False}},
+            model=model_override,
         )
+
+    def test_failure_message_uses_clean_model_name(self):
+        from dbt_bouncer.check_framework.exceptions import DbtBouncerFailedCheckError
+        from dbt_bouncer.testing import _run_check
+
+        with pytest.raises(
+            DbtBouncerFailedCheckError,
+            match=r"`model_1` does not have contracts enforced\.",
+        ) as exc_info:
+            _run_check(
+                "check_model_has_contracts_enforced",
+                model={"contract": {"enforced": False}},
+            )
+
+        # Uses the clean model name, not the full unique_id.
+        assert "model.package_name.model_1" not in str(exc_info.value)
 
 
 class TestCheckModelNumberOfGrants:
