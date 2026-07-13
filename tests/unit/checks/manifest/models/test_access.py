@@ -257,6 +257,19 @@ class TestCheckModelGrantPrivilegeRequired:
                 {"config": {"grants": {"select": ["user1"]}}},
                 id="required_grant_present",
             ),
+            pytest.param(
+                # Only the grant KEY is checked, not the grantee list. A grant with
+                # an empty grantee list still satisfies the requirement even though
+                # nobody is actually granted anything — arguably a loophole.
+                "select",
+                {"config": {"grants": {"select": []}}},
+                id="present_empty_grantee_list",
+            ),
+            pytest.param(
+                "select",
+                {"config": {"grants": {"select": ["user1"], "insert": ["user2"]}}},
+                id="present_among_several",
+            ),
         ],
     )
     def test_pass(self, privilege, model_override):
@@ -273,6 +286,41 @@ class TestCheckModelGrantPrivilegeRequired:
                 "select",
                 {"config": {"grants": {"write": ["user1"]}}},
                 id="required_grant_missing",
+            ),
+            pytest.param(
+                # Membership is an exact key match (`privilege not in grants`), NOT
+                # a prefix/regex match. Contrast with check_model_grant_privilege,
+                # where the pattern `select` DOES match `select_any_table`. This
+                # pair documents the asymmetry between the two grant checks.
+                "select",
+                {"config": {"grants": {"select_any_table": ["user1"]}}},
+                id="exact_match_not_prefix",
+            ),
+            pytest.param(
+                # Dict membership is case-sensitive, so `select` does not match the
+                # grant key `SELECT`.
+                "select",
+                {"config": {"grants": {"SELECT": ["user1"]}}},
+                id="case_sensitive",
+            ),
+            pytest.param(
+                # A model with no grants can't have the required one. `grants: None`
+                # and `grants: {}` both fall through the `(grants or {})` guard...
+                "select",
+                {"config": {"grants": None}},
+                id="grants_none",
+            ),
+            pytest.param(
+                "select",
+                {"config": {"grants": {}}},
+                id="grants_empty",
+            ),
+            pytest.param(
+                # ...and an absent config exercises the `config.grants if config`
+                # branch, yielding the same result.
+                "select",
+                {},
+                id="config_absent",
             ),
         ],
     )
