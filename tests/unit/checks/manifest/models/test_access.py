@@ -7,6 +7,8 @@ class TestCheckModelAccess:
     @pytest.mark.parametrize(
         ("access", "model_override"),
         [
+            pytest.param("private", {"access": "private"}, id="private_access"),
+            pytest.param("protected", {"access": "protected"}, id="protected_access"),
             pytest.param("public", {"access": "public"}, id="public_access"),
         ],
     )
@@ -14,13 +16,60 @@ class TestCheckModelAccess:
         check_passes("check_model_access", access=access, model=model_override)
 
     @pytest.mark.parametrize(
+        "access",
+        [
+            pytest.param("private", id="requested_private"),
+            pytest.param("protected", id="requested_protected"),
+            pytest.param("public", id="requested_public"),
+        ],
+    )
+    def test_pass_when_model_has_no_access_attribute(self, access):
+        # A model with no `access` attribute passes for ANY requested access value
+        # because the check short-circuits on `if model.access`. This documents the
+        # "Requires dbt 1.7+" fallback: older manifests (which lack `access`) do not
+        # error. If this is ever considered a bug, this test forces the discussion.
+        check_passes("check_model_access", access=access, model={})
+
+    @pytest.mark.parametrize(
         ("access", "model_override"),
         [
-            pytest.param("public", {"access": "protected"}, id="protected_access"),
+            pytest.param("protected", {"access": "private"}, id="protected_vs_private"),
+            pytest.param("public", {"access": "private"}, id="public_vs_private"),
+            pytest.param("private", {"access": "protected"}, id="private_vs_protected"),
+            pytest.param("public", {"access": "protected"}, id="public_vs_protected"),
+            pytest.param("private", {"access": "public"}, id="private_vs_public"),
+            pytest.param("protected", {"access": "public"}, id="protected_vs_public"),
         ],
     )
     def test_fail(self, access, model_override):
         check_fails("check_model_access", access=access, model=model_override)
+
+    @pytest.mark.parametrize(
+        ("access", "model_override", "match_pattern"),
+        [
+            pytest.param(
+                "public",
+                {"access": "protected"},
+                r"`model_1` has `protected` access, it should have access `public`\.",
+                id="protected_vs_public",
+            ),
+            pytest.param(
+                "private",
+                {"access": "public"},
+                r"`model_1` has `public` access, it should have access `private`\.",
+                id="public_vs_private",
+            ),
+        ],
+    )
+    def test_failure_message(self, access, model_override, match_pattern):
+        from dbt_bouncer.check_framework.exceptions import DbtBouncerFailedCheckError
+        from dbt_bouncer.testing import _run_check
+
+        with pytest.raises(DbtBouncerFailedCheckError, match=match_pattern) as exc_info:
+            _run_check("check_model_access", access=access, model=model_override)
+
+        # Uses the clean model name, not the full unique_id.
+        assert "model.package_name.model_1" not in str(exc_info.value)
 
 
 class TestCheckModelContractEnforcedForPublicModel:
