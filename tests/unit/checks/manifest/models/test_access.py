@@ -510,8 +510,6 @@ class TestCheckModelNumberOfGrants:
         ],
     )
     def test_raises_value_error_for_invalid_params(self, max_n, min_n, match_pattern):
-        from dbt_bouncer.testing import _run_check
-
         with pytest.raises(ValueError, match=match_pattern):
             _run_check(
                 "check_model_number_of_grants",
