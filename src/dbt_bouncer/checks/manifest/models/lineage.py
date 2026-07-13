@@ -235,10 +235,7 @@ def check_model_materialization_by_fanout(
 
     """
     materializations = materializations or ["incremental", "table"]
-    num_downstream_models = sum(
-        model.unique_id in (getattr(m.depends_on, "nodes", []) if m.depends_on else [])
-        for m in ctx.models
-    )
+    num_downstream_models = len(ctx.children_by_unique_id.get(model.unique_id, []))
     materialized = model.config.materialized if model.config else None
     if (
         num_downstream_models >= min_downstream_models
@@ -397,10 +394,7 @@ def check_model_max_fanout(
         ```
 
     """
-    num_downstream_models = sum(
-        model.unique_id in (getattr(m.depends_on, "nodes", []) if m.depends_on else [])
-        for m in ctx.models
-    )
+    num_downstream_models = len(ctx.children_by_unique_id.get(model.unique_id, []))
 
     if num_downstream_models > max_downstream_models:
         fail(

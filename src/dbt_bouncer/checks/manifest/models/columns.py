@@ -58,14 +58,9 @@ def check_model_columns_have_relationship_tests(
 
     # Find all relationships tests attached to this model
     relationship_tests = []
-    for test in ctx.tests:
+    for test in ctx.tests_by_attached_node.get(model.unique_id, []):
         test_metadata = getattr(test, "test_metadata", None)
-        attached_node = getattr(test, "attached_node", None)
-        if (
-            test_metadata
-            and attached_node == model.unique_id
-            and getattr(test_metadata, "name", "") == "relationships"
-        ):
+        if test_metadata and getattr(test_metadata, "name", "") == "relationships":
             relationship_tests.append(test_metadata)
 
     for col_name in columns:

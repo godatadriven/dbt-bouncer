@@ -45,11 +45,7 @@ def check_source_has_tests(
         ```
 
     """
-    num_tests = sum(
-        source.unique_id
-        in (getattr(getattr(test, "depends_on", None), "nodes", []) or [])
-        for test in ctx.tests
-    )
+    num_tests = len(ctx.tests_by_depends_on_node.get(source.unique_id, []))
     if num_tests < min_number_of_tests:
         fail(
             f"Source `{source.source_name}.{source.name}` has {num_tests} test(s), fewer than the minimum {min_number_of_tests}."
