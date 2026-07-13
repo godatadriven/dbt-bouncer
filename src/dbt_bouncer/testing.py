@@ -513,19 +513,24 @@ def check_fails(
     name: str,
     *,
     custom_checks_dir: Path | str | None = None,
+    expected_exception: type[Exception] = DbtBouncerFailedCheckError,
     match: str | None = None,
     **kwargs: Any,
 ) -> None:
-    """Assert that a check fails with ``DbtBouncerFailedCheckError``.
+    """Assert that a check raises the expected exception.
 
     Args:
         name: The check config name (e.g. ``"check_model_names"``).
         custom_checks_dir: Optional directory of custom checks, mirroring the
             ``custom_checks_dir`` config option. Set this to test a custom
             check that is not installed via an entry point.
-        match: Optional regex. When provided, the raised
-            ``DbtBouncerFailedCheckError`` message must contain a match for it
-            (via ``re.search``), mirroring ``pytest.raises(..., match=...)``.
+        expected_exception: The exception type the check is expected to raise.
+            Defaults to ``DbtBouncerFailedCheckError`` (a failed check); set it
+            to assert a different error, e.g. a ``re.error`` raised while
+            compiling an invalid pattern.
+        match: Optional regex. When provided, the raised exception's message
+            must contain a match for it (via ``re.search``), mirroring
+            ``pytest.raises(..., match=...)``.
         **kwargs: Resource overrides, context overrides, and check parameters.
 
     Example::
@@ -537,12 +542,14 @@ def check_fails(
     """
     try:
         _run_check(name, custom_checks_dir=custom_checks_dir, **kwargs)
-    except DbtBouncerFailedCheckError as exc:
+    except expected_exception as exc:
         if match is not None and re.search(match, str(exc)) is None:
             pytest.fail(
-                f"Check {name!r} failed as expected, but its message {str(exc)!r} "
-                f"did not match {match!r}."
+                f"Check {name!r} raised {type(exc).__name__} as expected, but its "
+                f"message {str(exc)!r} did not match {match!r}."
             )
         return  # Expected failure.
 
-    pytest.fail(f"Check {name!r} did not fail as expected.")
+    pytest.fail(
+        f"Check {name!r} did not raise {expected_exception.__name__} as expected."
+    )

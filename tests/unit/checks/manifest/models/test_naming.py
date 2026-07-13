@@ -2,7 +2,7 @@ import re
 
 import pytest
 
-from dbt_bouncer.testing import _run_check, check_fails, check_passes
+from dbt_bouncer.testing import check_fails, check_passes
 
 
 class TestCheckModelNames:
@@ -308,17 +308,18 @@ class TestCheckModelNames:
 
     def test_invalid_regex_pattern_raises(self):
         # compile_pattern re-raises re.error with the "Invalid regex pattern" prefix.
-        with pytest.raises(re.error, match="Invalid regex pattern"):
-            _run_check(
-                "check_model_names",
-                model_name_pattern="^stg_(",
-                model={
-                    "name": "stg_orders",
-                    "unique_id": "model.package_name.stg_orders",
-                    "path": "staging/stg_orders.sql",
-                    "original_file_path": "models/staging/stg_orders.sql",
-                },
-            )
+        check_fails(
+            "check_model_names",
+            model_name_pattern="^stg_(",
+            model={
+                "name": "stg_orders",
+                "unique_id": "model.package_name.stg_orders",
+                "path": "staging/stg_orders.sql",
+                "original_file_path": "models/staging/stg_orders.sql",
+            },
+            expected_exception=re.error,
+            match="Invalid regex pattern",
+        )
 
     def test_versioned_model_display_name_in_failure_message(self):
         # name is "dim_customers"; unique_id carries the version → display "dim_customers_v2".
