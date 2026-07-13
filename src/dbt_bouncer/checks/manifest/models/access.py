@@ -1,4 +1,4 @@
-"""Checks related to **model access controls** and **contract enforcement**."""
+"""Checks related to model access controls and contract enforcement."""
 
 from typing import Annotated
 
