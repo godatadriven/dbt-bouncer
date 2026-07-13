@@ -1,6 +1,9 @@
+import re
+
 import pytest
 
-from dbt_bouncer.testing import check_fails, check_passes
+from dbt_bouncer.check_framework.exceptions import DbtBouncerFailedCheckError
+from dbt_bouncer.testing import _run_check, check_fails, check_passes
 
 
 class TestCheckModelAccess:
@@ -25,9 +28,9 @@ class TestCheckModelAccess:
     )
     def test_pass_when_model_has_no_access_attribute(self, access):
         # A model with no `access` attribute passes for ANY requested access value
-        # because the check short-circuits on `if model.access`. This documents the
-        # "Requires dbt 1.7+" fallback: older manifests (which lack `access`) do not
-        # error. If this is ever considered a bug, this test forces the discussion.
+        # because the check short-circuits on `if model.access`. This is the intended
+        # "Requires dbt 1.7+" fallback (see the check docstring): older manifests, which
+        # lack `access`, are skipped rather than errored.
         check_passes("check_model_access", access=access, model={})
 
     @pytest.mark.parametrize(
@@ -62,9 +65,6 @@ class TestCheckModelAccess:
         ],
     )
     def test_failure_message(self, access, model_override, match_pattern):
-        from dbt_bouncer.check_framework.exceptions import DbtBouncerFailedCheckError
-        from dbt_bouncer.testing import _run_check
-
         with pytest.raises(DbtBouncerFailedCheckError, match=match_pattern) as exc_info:
             _run_check("check_model_access", access=access, model=model_override)
 
@@ -217,9 +217,6 @@ class TestCheckModelGrantPrivilege:
     def test_failure_message_lists_only_non_complying(self):
         # With a mix of complying and non-complying grants, only the non-complying
         # ones are reported. Guards against off-by-one filtering of the list.
-        from dbt_bouncer.check_framework.exceptions import DbtBouncerFailedCheckError
-        from dbt_bouncer.testing import _run_check
-
         with pytest.raises(
             DbtBouncerFailedCheckError,
             match=r"don't comply with the specified regexp pattern \(\['write'\]\)",
@@ -236,10 +233,6 @@ class TestCheckModelGrantPrivilege:
     def test_invalid_regex_raises_re_error(self):
         # An invalid pattern surfaces as `re.error` (wrapped by `compile_pattern`),
         # not as a check failure. This pins which exception type reaches the user.
-        import re
-
-        from dbt_bouncer.testing import _run_check
-
         with pytest.raises(re.error, match=r"Invalid regex pattern"):
             _run_check(
                 "check_model_grant_privilege",
@@ -371,9 +364,6 @@ class TestCheckModelHasContractsEnforced:
         )
 
     def test_failure_message_uses_clean_model_name(self):
-        from dbt_bouncer.check_framework.exceptions import DbtBouncerFailedCheckError
-        from dbt_bouncer.testing import _run_check
-
         with pytest.raises(
             DbtBouncerFailedCheckError,
             match=r"`model_1` does not have contracts enforced\.",
