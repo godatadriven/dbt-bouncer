@@ -143,6 +143,44 @@ class TestCheckModelGrantPrivilege:
                 {"config": {"grants": {"select": ["user1"]}}},
                 id="grant_select",
             ),
+            pytest.param(
+                # `re.match` is anchored at the start only, so an unanchored
+                # pattern matches any grant that STARTS with it. Users must write
+                # `^select$` for exact matching. This pins the prefix semantics and
+                # would catch a future change from `re.match` to `re.fullmatch`.
+                "select",
+                {"config": {"grants": {"select_any_table": ["user1"]}}},
+                id="prefix_match_select_any_table",
+            ),
+            pytest.param(
+                # The pattern is `.strip()`-ed before compiling, so surrounding
+                # whitespace is ignored and behaves identically to "^select$".
+                "  ^select$  ",
+                {"config": {"grants": {"select": ["user1"]}}},
+                id="whitespace_stripped_pattern",
+            ),
+            pytest.param(
+                "^(select|insert)$",
+                {"config": {"grants": {"select": ["user1"], "insert": ["user2"]}}},
+                id="alternation_pattern",
+            ),
+            pytest.param(
+                # A model with zero grants trivially complies, whether grants is
+                # None, an empty dict, or config is absent entirely.
+                "^select$",
+                {"config": {"grants": None}},
+                id="grants_none",
+            ),
+            pytest.param(
+                "^select$",
+                {"config": {"grants": {}}},
+                id="grants_empty",
+            ),
+            pytest.param(
+                "^select$",
+                {},
+                id="config_absent",
+            ),
         ],
     )
     def test_pass(self, privilege_pattern, model_override):
@@ -160,6 +198,13 @@ class TestCheckModelGrantPrivilege:
                 {"config": {"grants": {"write": ["user1"]}}},
                 id="grant_write",
             ),
+            pytest.param(
+                # No `re.IGNORECASE` is applied, so `^select$` does not match the
+                # grant `SELECT`.
+                "^select$",
+                {"config": {"grants": {"SELECT": ["user1"]}}},
+                id="case_sensitive_no_ignorecase",
+            ),
         ],
     )
     def test_fail(self, privilege_pattern, model_override):
@@ -168,6 +213,39 @@ class TestCheckModelGrantPrivilege:
             privilege_pattern=privilege_pattern,
             model=model_override,
         )
+
+    def test_failure_message_lists_only_non_complying(self):
+        # With a mix of complying and non-complying grants, only the non-complying
+        # ones are reported. Guards against off-by-one filtering of the list.
+        from dbt_bouncer.check_framework.exceptions import DbtBouncerFailedCheckError
+        from dbt_bouncer.testing import _run_check
+
+        with pytest.raises(
+            DbtBouncerFailedCheckError,
+            match=r"don't comply with the specified regexp pattern \(\['write'\]\)",
+        ) as exc_info:
+            _run_check(
+                "check_model_grant_privilege",
+                privilege_pattern="^select$",
+                model={"config": {"grants": {"select": ["user1"], "write": ["user2"]}}},
+            )
+
+        # The complying grant must not appear in the non-complying list.
+        assert "'select'" not in str(exc_info.value)
+
+    def test_invalid_regex_raises_re_error(self):
+        # An invalid pattern surfaces as `re.error` (wrapped by `compile_pattern`),
+        # not as a check failure. This pins which exception type reaches the user.
+        import re
+
+        from dbt_bouncer.testing import _run_check
+
+        with pytest.raises(re.error, match=r"Invalid regex pattern"):
+            _run_check(
+                "check_model_grant_privilege",
+                privilege_pattern="[select",
+                model={"config": {"grants": {"select": ["user1"]}}},
+            )
 
 
 class TestCheckModelGrantPrivilegeRequired:
