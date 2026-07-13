@@ -84,6 +84,22 @@ class TestCheckModelContractEnforcedForPublicModel:
                 {"access": "protected", "contract": {"enforced": False}},
                 id="protected_no_contract",
             ),
+            pytest.param(
+                {},
+                id="no_access_no_contract",
+            ),
+            pytest.param(
+                {"access": None},
+                id="null_access_no_contract",
+            ),
+            pytest.param(
+                {"access": "private"},
+                id="private_no_contract",
+            ),
+            pytest.param(
+                {"access": "public", "contract": {"enforced": True}, "columns": {}},
+                id="public_contract_enforced_empty_columns",
+            ),
         ],
     )
     def test_pass(self, model_override):
@@ -97,6 +113,18 @@ class TestCheckModelContractEnforcedForPublicModel:
             pytest.param(
                 {"access": "public", "contract": {"enforced": False}},
                 id="public_no_contract",
+            ),
+            pytest.param(
+                {"access": "public"},
+                id="public_contract_absent",
+            ),
+            pytest.param(
+                {"access": "public", "contract": None},
+                id="public_contract_none",
+            ),
+            pytest.param(
+                {"access": "public", "contract": {"enforced": None}},
+                id="public_contract_enforced_none",
             ),
         ],
     )
