@@ -2,7 +2,6 @@ import re
 
 import pytest
 
-from dbt_bouncer.check_framework.exceptions import DbtBouncerFailedCheckError
 from dbt_bouncer.testing import _run_check, check_fails, check_passes
 
 
@@ -229,7 +228,7 @@ class TestCheckModelNames:
                     "path": "staging/model_v1.sql",
                     "unique_id": "model.package_name.model_v1",
                 },
-                id="suffix_silently_never_matches",
+                id="suffix_without_wildcard_prefix_fails",
             ),
             pytest.param(
                 "",
@@ -295,17 +294,17 @@ class TestCheckModelNames:
 
     def test_pattern_whitespace_stripped_in_failure_message(self):
         # "  ^stg_  " → message shows the STRIPPED pattern in backticks, no padding.
-        with pytest.raises(DbtBouncerFailedCheckError, match=re.escape("`^stg_`")):
-            _run_check(
-                "check_model_names",
-                model_name_pattern="  ^stg_  ",
-                model={
-                    "name": "orders",
-                    "unique_id": "model.package_name.orders",
-                    "path": "staging/orders.sql",
-                    "original_file_path": "models/staging/orders.sql",
-                },
-            )
+        check_fails(
+            "check_model_names",
+            model_name_pattern="  ^stg_  ",
+            model={
+                "name": "orders",
+                "unique_id": "model.package_name.orders",
+                "path": "staging/orders.sql",
+                "original_file_path": "models/staging/orders.sql",
+            },
+            match=re.escape("`^stg_`"),
+        )
 
     def test_invalid_regex_pattern_raises(self):
         # compile_pattern re-raises re.error with the "Invalid regex pattern" prefix.
@@ -323,14 +322,14 @@ class TestCheckModelNames:
 
     def test_versioned_model_display_name_in_failure_message(self):
         # name is "dim_customers"; unique_id carries the version → display "dim_customers_v2".
-        with pytest.raises(DbtBouncerFailedCheckError, match="dim_customers_v2"):
-            _run_check(
-                "check_model_names",
-                model_name_pattern="^stg_",
-                model={
-                    "name": "dim_customers",
-                    "unique_id": "model.package_name.dim_customers.v2",
-                    "path": "marts/dim_customers.sql",
-                    "original_file_path": "models/marts/dim_customers.sql",
-                },
-            )
+        check_fails(
+            "check_model_names",
+            model_name_pattern="^stg_",
+            model={
+                "name": "dim_customers",
+                "unique_id": "model.package_name.dim_customers.v2",
+                "path": "marts/dim_customers.sql",
+                "original_file_path": "models/marts/dim_customers.sql",
+            },
+            match="dim_customers_v2",
+        )

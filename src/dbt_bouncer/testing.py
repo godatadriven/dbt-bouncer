@@ -21,6 +21,7 @@ specified.
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
@@ -512,6 +513,7 @@ def check_fails(
     name: str,
     *,
     custom_checks_dir: Path | str | None = None,
+    match: str | None = None,
     **kwargs: Any,
 ) -> None:
     """Assert that a check fails with ``DbtBouncerFailedCheckError``.
@@ -521,6 +523,9 @@ def check_fails(
         custom_checks_dir: Optional directory of custom checks, mirroring the
             ``custom_checks_dir`` config option. Set this to test a custom
             check that is not installed via an entry point.
+        match: Optional regex. When provided, the raised
+            ``DbtBouncerFailedCheckError`` message must contain a match for it
+            (via ``re.search``), mirroring ``pytest.raises(..., match=...)``.
         **kwargs: Resource overrides, context overrides, and check parameters.
 
     Example::
@@ -532,7 +537,12 @@ def check_fails(
     """
     try:
         _run_check(name, custom_checks_dir=custom_checks_dir, **kwargs)
-    except DbtBouncerFailedCheckError:
+    except DbtBouncerFailedCheckError as exc:
+        if match is not None and re.search(match, str(exc)) is None:
+            pytest.fail(
+                f"Check {name!r} failed as expected, but its message {str(exc)!r} "
+                f"did not match {match!r}."
+            )
         return  # Expected failure.
 
     pytest.fail(f"Check {name!r} did not fail as expected.")
