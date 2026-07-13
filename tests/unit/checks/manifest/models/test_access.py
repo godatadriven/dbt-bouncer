@@ -397,6 +397,37 @@ class TestCheckModelNumberOfGrants:
                 {"config": {"grants": {"select": ["user1"]}}},
                 id="within_limits",
             ),
+            pytest.param(
+                # num_grants == max passes. The docstring calls max inclusive but
+                # the code uses strict `>`, so this locks the inclusive boundary in.
+                2,
+                0,
+                {"config": {"grants": {"select": ["u1"], "insert": ["u2"]}}},
+                id="at_max_boundary",
+            ),
+            pytest.param(
+                # num_grants == min passes (min inclusive; code uses strict `<`).
+                5,
+                2,
+                {"config": {"grants": {"select": ["u1"], "insert": ["u2"]}}},
+                id="at_min_boundary",
+            ),
+            pytest.param(
+                # min == max: passes at exactly that count. The fail-either-side
+                # cases are covered by `exceeds_max` and `below_min` below.
+                2,
+                2,
+                {"config": {"grants": {"select": ["u1"], "insert": ["u2"]}}},
+                id="min_equals_max_exact",
+            ),
+            pytest.param(
+                # Grants are counted by privilege (dict key), NOT by grantee. Three
+                # grantees under one privilege count as 1, so max=1 passes.
+                1,
+                0,
+                {"config": {"grants": {"select": ["u1", "u2", "u3"]}}},
+                id="counted_by_privilege_not_grantee",
+            ),
         ],
     )
     def test_pass(self, max_n, min_n, model_override):
@@ -422,6 +453,30 @@ class TestCheckModelNumberOfGrants:
                 {"config": {"grants": {"select": ["user1"]}}},
                 id="below_min",
             ),
+            pytest.param(
+                # num_grants == max + 1 fails, with min < num so the max boundary
+                # is isolated.
+                2,
+                0,
+                {
+                    "config": {
+                        "grants": {
+                            "select": ["u1"],
+                            "insert": ["u2"],
+                            "update": ["u3"],
+                        }
+                    }
+                },
+                id="one_above_max",
+            ),
+            pytest.param(
+                # num_grants == min - 1 fails, with num < max so the min boundary
+                # is isolated.
+                5,
+                2,
+                {"config": {"grants": {"select": ["user1"]}}},
+                id="one_below_min",
+            ),
         ],
     )
     def test_fail(self, max_n, min_n, model_override):
@@ -430,6 +485,27 @@ class TestCheckModelNumberOfGrants:
             max_number_of_privileges=max_n,
             min_number_of_privileges=min_n,
             model=model_override,
+        )
+
+    @pytest.mark.parametrize(
+        "model_override",
+        [
+            pytest.param({"config": {"grants": {}}}, id="grants_empty"),
+            pytest.param({"config": {"grants": None}}, id="grants_none"),
+        ],
+    )
+    def test_defaults_pass_with_zero_grants(self, model_override):
+        # With no params, min defaults to 0, so zero grants passes. `(grants or {})`
+        # handles a None grants value without erroring.
+        check_passes("check_model_number_of_grants", model=model_override)
+
+    def test_min_1_fails_when_grants_none(self):
+        # A min of 1 with `grants: None` fails rather than errors: missing grants
+        # count as 0, confirming the `(grants or {})` guard treats None as empty.
+        check_fails(
+            "check_model_number_of_grants",
+            min_number_of_privileges=1,
+            model={"config": {"grants": None}},
         )
 
     @pytest.mark.parametrize(
