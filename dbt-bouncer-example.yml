@@ -108,10 +108,6 @@ manifest_checks:
 
   # Models
   - name: check_column_descriptions_are_consistent
-    # The fixture project contains package models (tiktok_ads) whose column
-    # descriptions vary slightly across generated models, producing expected
-    # conflicts. Warn rather than error so the example run still exits 0.
-    severity: warn
   - name: check_model_access
     include: ^models/intermediate
     access: protected

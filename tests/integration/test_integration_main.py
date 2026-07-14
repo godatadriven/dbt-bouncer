@@ -37,6 +37,10 @@ def test_cli_happy_path(caplog, dbt_artifacts_dir, tmp_path):
                 bouncer_config["manifest_checks"].remove(item)
 
     # These checks don't work with the frozen dbt_17/18/19 fixtures:
+    #   - check_column_descriptions_are_consistent: these frozen manifests
+    #     pre-date the harmonisation of the customer_id/order_date/status column
+    #     descriptions (and the customer_id -> customer_id_fk rename in `orders`),
+    #     so they still carry conflicting descriptions that cannot be rebuilt.
     #   - check_exposure_description_populated / check_exposure_has_meta_keys:
     #     these frozen fixtures pre-date the description/meta fields added to
     #     the example exposures, so the checks will always fail against them.
@@ -63,6 +67,7 @@ def test_cli_happy_path(caplog, dbt_artifacts_dir, tmp_path):
     ]:
         for item in list(bouncer_config["manifest_checks"]):
             if item["name"] in [
+                "check_column_descriptions_are_consistent",
                 "check_exposure_description_populated",
                 "check_exposure_has_meta_keys",
                 "check_macro_has_meta_keys",
