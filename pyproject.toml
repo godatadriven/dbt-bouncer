@@ -33,6 +33,7 @@ dependencies = [
   "pyyaml (<7)",
   "rich (>=13,<16)",  # Typer also pulls in rich as a dependency, relying on that would be an implicit transitive dependency.
   "semver (<4)",
+  "sqlglot (>=25,<31)",
   "typer>=0.12,<1",
 ]
 

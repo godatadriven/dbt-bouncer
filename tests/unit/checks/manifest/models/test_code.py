@@ -67,6 +67,14 @@ class TestCheckModelDoesNotUseSelectStar:
                 {"raw_code": "/* SELECT * FROM old_table */\nSELECT id FROM my_table"},
                 id="select_star_only_in_block_comment",
             ),
+            pytest.param(
+                {"raw_code": "SELECT count(*) FROM my_table"},
+                id="count_star_is_not_select_star",
+            ),
+            pytest.param(
+                {"raw_code": "SELECT 'select * from x' AS note FROM my_table"},
+                id="select_star_only_in_string_literal",
+            ),
         ],
     )
     def test_pass(self, model_override):
@@ -101,6 +109,10 @@ class TestCheckModelDoesNotUseSelectStar:
                 {"raw_code": "SELECT ALL * FROM my_table"},
                 id="select_all_star",
             ),
+            pytest.param(
+                {"raw_code": "SELECT t.* FROM my_table AS t"},
+                id="qualified_star",
+            ),
         ],
     )
     def test_fail(self, model_override):
@@ -126,6 +138,13 @@ class TestCheckModelHardCodedReferences:
                 },
                 id="cte_single_part",
             ),
+            pytest.param(
+                {
+                    "raw_code": "{% if true %}SELECT a FROM {{ ref('m') }}{% else %}SELECT b FROM {{ ref('n') }}{% endif %}",
+                    "tags": [],
+                },
+                id="jinja_control_flow_falls_back_and_passes",
+            ),
         ],
     )
     def test_pass(self, model_override):
@@ -148,6 +167,10 @@ class TestCheckModelHardCodedReferences:
             pytest.param(
                 {"raw_code": "SELECT * FROM catalog.schema.table_name", "tags": []},
                 id="three_part_identifier",
+            ),
+            pytest.param(
+                {"raw_code": 'SELECT * FROM "myschema"."my_table"', "tags": []},
+                id="quoted_schema_table",
             ),
         ],
     )
