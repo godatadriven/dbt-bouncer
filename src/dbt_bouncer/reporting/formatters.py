@@ -50,7 +50,14 @@ def _format_csv(results: list[dict[str, Any]]) -> bytes:
 
     """
     buf = io.StringIO()
-    fieldnames = ["check_run_id", "outcome", "severity", "failure_message"]
+    fieldnames = [
+        "check_run_id",
+        "outcome",
+        "severity",
+        "failure_message",
+        "file_path",
+        "unique_id",
+    ]
     writer = csv.DictWriter(buf, fieldnames=fieldnames, extrasaction="ignore")
     writer.writeheader()
     writer.writerows(results)
@@ -71,13 +78,25 @@ def _format_junit(results: list[dict[str, Any]]) -> bytes:
 
     """
     from junitparser import Failure, JUnitXml, TestCase, TestSuite
+    from junitparser.junitparser import Attr
+
+    class _TestCase(TestCase):
+        """TestCase that also serialises a ``file`` attribute.
+
+        The base ``junitparser.TestCase`` does not declare ``file``, so it is
+        silently dropped on write; declaring it via ``Attr`` emits it.
+        """
+
+        file = Attr("file")
 
     test_cases = []
     for result in results:
-        tc = TestCase(
+        tc = _TestCase(
             name=result["check_run_id"],
             classname="dbt-bouncer",
         )
+        if result.get("file_path"):
+            tc.file = result["file_path"]
         if result["outcome"] == CheckOutcome.FAILED:
             tc.result = [  # type: ignore[invalid-assignment]
                 Failure(
@@ -112,21 +131,36 @@ def _format_sarif(results: list[dict[str, Any]]) -> bytes:
     for r in results:
         level = "warning" if r.get("severity") == CheckSeverity.WARN else "error"
         if r["outcome"] == CheckOutcome.FAILED:
-            sarif_results.append(
-                {
-                    "ruleId": r["check_run_id"],
-                    "level": level,
-                    "message": {"text": r.get("failure_message") or "Check failed"},
-                }
-            )
+            entry = {
+                "ruleId": r["check_run_id"],
+                "level": level,
+                "message": {"text": r.get("failure_message") or "Check failed"},
+            }
         else:
-            sarif_results.append(
+            entry = {
+                "ruleId": r["check_run_id"],
+                "level": "none",
+                "message": {"text": "Check passed"},
+            }
+
+        # Attach the resource's file path so GitHub can render inline PR
+        # annotations. dbt-bouncer checks are file/resource-granular (no line
+        # info), so anchor at line 1 -- the conventional file-level location.
+        if r.get("file_path"):
+            entry["locations"] = [
                 {
-                    "ruleId": r["check_run_id"],
-                    "level": "none",
-                    "message": {"text": "Check passed"},
-                }
-            )
+                    "physicalLocation": {
+                        "artifactLocation": {"uri": r["file_path"]},
+                        "region": {"startLine": 1},
+                    },
+                },
+            ]
+        if r.get("unique_id"):
+            entry["logicalLocations"] = [
+                {"fullyQualifiedName": r["unique_id"]},
+            ]
+
+        sarif_results.append(entry)
 
     sarif = {
         "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/main/sarif-2.1/schema/sarif-schema-2.1.0.json",

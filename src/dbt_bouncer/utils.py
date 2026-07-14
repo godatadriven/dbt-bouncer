@@ -41,7 +41,7 @@ def create_github_comment_file(
     """Create a markdown file containing a comment for GitHub."""
     md_formatted_comment = make_markdown_table(
         [
-            ["Check name", "Failure message"],
+            ["Check name", "File", "Failure message"],
             *sorted(failed_checks if show_all_failures else failed_checks[:25]),
         ],
     )

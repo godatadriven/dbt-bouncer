@@ -800,6 +800,14 @@ def test_runner_check_id(tmp_path):
     assert "check_model_description_populated:0:stg_payments_v1" in check_run_ids
     assert "check_model_description_populated:0:stg_payments_v2" in check_run_ids
 
+    # The resource's file path and unique_id are carried through to the result.
+    file_paths = {x["file_path"] for x in output}
+    assert "models/staging/stg_payments_v1.sql" in file_paths
+    assert "models/staging/stg_payments_v2.sql" in file_paths
+    unique_ids = {x["unique_id"] for x in output}
+    assert "model.dbt_bouncer_test_project.stg_payments.v1" in unique_ids
+    assert "model.dbt_bouncer_test_project.stg_payments.v2" in unique_ids
+
     assert results[0] == 0
     assert (tmp_path / "output.json").exists()
 

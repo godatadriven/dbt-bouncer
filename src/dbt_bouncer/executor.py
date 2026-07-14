@@ -79,7 +79,8 @@ class Executor:
             checks_to_run: List of CheckToRun dicts (mutated in place during execution).
 
         Returns:
-            list[dict]: Result dicts with check_run_id, failure_message, outcome, severity.
+            list[dict]: Result dicts with check_run_id, failure_message, file_path,
+                outcome, severity, unique_id.
 
         """
         if not checks_to_run:
@@ -126,8 +127,10 @@ class Executor:
             {
                 "check_run_id": c["check_run_id"],
                 "failure_message": c.get("failure_message"),
+                "file_path": c.get("file_path"),
                 "outcome": c["outcome"],
                 "severity": c["severity"],
+                "unique_id": c.get("unique_id"),
             }
             for c in checks_to_run
         ]
