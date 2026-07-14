@@ -348,6 +348,12 @@ _CATEGORY_TO_SUBDIR: dict[str, str] = {
 
 _SUBDIR_TO_CATEGORY: dict[str, str] = {v: k for k, v in _CATEGORY_TO_SUBDIR.items()}
 
+# Modules that live under ``checks/`` but define no check classes. These are
+# skipped during discovery so their import side effects don't fire — notably
+# ``common.py`` is a backward-compat shim that emits a DeprecationWarning on
+# import (see ``checks/common.py``).
+_NON_CHECK_MODULES: set[str] = {"common.py"}
+
 
 def _build_check_module_map() -> dict[str, dict[str, str]]:
     """Build a mapping of check_name -> {module, category} by scanning check modules.
@@ -364,6 +370,9 @@ def _build_check_module_map() -> dict[str, dict[str, str]]:
     mapping: dict[str, dict[str, str]] = {}
 
     for check_file in (f for f in checks_dir.glob("**/*.py") if f.is_file()):
+        if check_file.name in _NON_CHECK_MODULES:
+            continue
+
         index = check_file.parts.index("checks")
         module_name = ".".join(
             ["dbt_bouncer", "checks", *check_file.parts[index + 1 :]]
@@ -700,11 +709,14 @@ def get_check_objects(
         check_files: list[Path] = []
         for subdir in subdirs:
             check_files.extend(f for f in subdir.glob("**/*.py") if f.is_file())
-        # Always include top-level .py files (e.g. common.py)
+        # Always include top-level .py files (in case checks live at the root)
         check_files.extend(f for f in checks_dir.glob("*.py") if f.is_file())
     else:
         check_files = [f for f in checks_dir.glob("**/*.py") if f.is_file()]
     for check_file in check_files:
+        if check_file.name in _NON_CHECK_MODULES:
+            continue
+
         index = check_file.parts.index("checks")
         module_name = ".".join(
             ["dbt_bouncer", "checks"] + list(check_file.parts[index + 1 :])  # noqa: RUF005
