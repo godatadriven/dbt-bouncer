@@ -17,6 +17,8 @@ from importlib.metadata import entry_points
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+from dbt_bouncer.types import MetaConfig, MissingMetaKeys, RequiredMetaKey
+
 if TYPE_CHECKING:
     from semver import Version
 
@@ -106,30 +108,42 @@ def resource_in_path(check: "BaseCheck", resource: Any) -> bool:
     return not object_excluded_by_path(check.exclude, resource.original_file_path)
 
 
-def find_missing_meta_keys(meta_config, required_keys) -> list[str]:
-    """Find missing keys in a meta config.
+def find_missing_meta_keys(
+    meta_config: MetaConfig,
+    required_keys: list[RequiredMetaKey],
+) -> MissingMetaKeys:
+    """Find required keys missing from a meta/labels config.
+
+    Args:
+        meta_config: The actual meta (or labels) mapping. A non-dict value
+            (``None``, etc.) is treated as an empty mapping.
+        required_keys: A list whose elements are either a ``str`` (a key that
+            must be present at this level) or a ``dict[str, list]`` (a key that
+            must be present and whose value must recursively contain the listed
+            sub-keys).
 
     Returns:
-        list[str]: List of missing keys.
+        MissingMetaKeys: Missing keys. Nested keys are joined with ``>`` (e.g.
+            ``"name>first"``).
 
     """
-    # Get all keys in meta config
-    keys_in_meta = list(flatten(meta_config).keys())
-
-    # Get required keys and convert to a list
-    required_keys = [
-        re.sub(r"(\>{1}\d{1,10})", "", f"{k}>{v}")
-        for k, v in flatten(required_keys).items()
-    ]
-
-    return [
-        x
-        for x in required_keys
-        if (x not in keys_in_meta)
-        and (
-            x not in [y[:-2] for y in keys_in_meta if y[-3] != ">" and y[-2] == ">"]
-        )  # Account for a key with a value that is a list
-    ]
+    meta = meta_config if isinstance(meta_config, dict) else {}
+    required = required_keys if isinstance(required_keys, list) else [required_keys]
+    missing: list[str] = []
+    for requirement in required:
+        if isinstance(requirement, dict):
+            for key, sub in requirement.items():
+                if key not in meta:
+                    missing.append(str(key))
+                else:
+                    sub_reqs = sub if isinstance(sub, list) else [sub]
+                    missing.extend(
+                        f"{key}>{m}"
+                        for m in find_missing_meta_keys(meta[key], sub_reqs)
+                    )
+        elif requirement not in meta:
+            missing.append(str(requirement))
+    return missing
 
 
 _SEPARATOR = ">"

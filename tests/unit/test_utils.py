@@ -11,6 +11,7 @@ from dbt_bouncer.utils import (
     _ESCAPED_SEPARATOR,
     _SEPARATOR,
     create_github_comment_file,
+    find_missing_meta_keys,
     flatten,
     get_clean_model_name,
     get_package_version_number,
@@ -145,6 +146,54 @@ def test_get_clean_model_name(unique_id, expected_model_name):
 )
 def test_flatten(data_in, data_out):
     assert flatten(data_in) == data_out
+
+
+@pytest.mark.parametrize(
+    ("meta_config", "required_keys", "expected_missing"),
+    [
+        # Plain key presence / absence.
+        ({"owner": "Bob"}, ["owner"], []),
+        ({}, ["owner"], ["owner"]),
+        # A key present with any value (including falsy ones) counts as present:
+        # presence, not truthiness, is what matters.
+        ({"owner": None}, ["owner"], []),
+        ({"owner": ""}, ["owner"], []),
+        ({"owner": []}, ["owner"], []),
+        ({"owner": {}}, ["owner"], []),
+        ({"owner": {"name": "Bob"}}, ["owner"], []),
+        ({"owner": list(range(11))}, ["owner"], []),
+        # A digit-only key name is matched literally (previously the list-index
+        # stripping regex mangled it).
+        ({"2023": "v"}, ["2023"], []),
+        # A key whose name contains the path separator is matched literally
+        # (previously escaping was asymmetric between the two sides).
+        ({"env>prod": "v"}, ["env>prod"], []),
+        # A non-dict config (e.g. absent meta -> None) is treated as empty
+        # rather than raising.
+        (None, ["owner"], ["owner"]),
+        # Nested requirements.
+        (
+            {"name": {"first": "Bob", "last": "Bobbington"}},
+            [{"name": ["first", "last"]}],
+            [],
+        ),
+        (
+            {"name": {"last": "Bobbington"}},
+            [{"name": ["first", "last"]}],
+            ["name>first"],
+        ),
+        # Ordering of multiple missing keys is preserved.
+        ({}, ["owner", "maturity"], ["owner", "maturity"]),
+        # Deeply nested missing keys are reported with a `>`-joined path.
+        (
+            {"contact": {}},
+            [{"contact": ["email", "slack"]}, "owner"],
+            ["contact>email", "contact>slack", "owner"],
+        ),
+    ],
+)
+def test_find_missing_meta_keys(meta_config, required_keys, expected_missing):
+    assert find_missing_meta_keys(meta_config, required_keys) == expected_missing
 
 
 @pytest.mark.parametrize(
