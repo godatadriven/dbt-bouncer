@@ -94,6 +94,7 @@ manifest_checks:
     keys:
       - owner
   - name: check_macro_is_used
+  - name: check_macro_max_number_of_arguments
   - name: check_macro_max_number_of_lines
   - name: check_macro_name_matches_file_name
   - name: check_macro_names

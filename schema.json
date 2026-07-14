@@ -2280,6 +2280,101 @@
       "title": "CheckMacroIsUsed",
       "type": "object"
     },
+    "CheckMacroMaxNumberOfArguments": {
+      "additionalProperties": false,
+      "description": "Macros may not have more than the specified number of arguments.\n\n!!! info \"Rationale\"\n\n    A macro with many arguments is usually a code smell \u2014 it often signals that the macro is doing several jobs at once, or that a group of related arguments should be collapsed into a single dictionary or config object. Long argument lists are harder to call correctly, harder to document, and more prone to positional-argument mistakes. Capping the argument count nudges teams toward smaller, single-responsibility macros with clearer interfaces.\n\nParameters:\n    max_number_of_arguments (int): The maximum number of permitted arguments.\n\nReceives:\n    macro (Macros): The Macros object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the macro path. Macro paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the macro path. Only macro paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_macro_max_number_of_arguments\n    ```\n    ```yaml\n    manifest_checks:\n        - name: check_macro_max_number_of_arguments\n          max_number_of_arguments: 4\n    ```",
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to exclude. A list matches if any pattern matches.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to include. A list matches if any pattern matches.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_macro_max_number_of_arguments",
+          "default": "check_macro_max_number_of_arguments",
+          "title": "Name",
+          "type": "string"
+        },
+        "max_number_of_arguments": {
+          "default": 4,
+          "exclusiveMinimum": 0,
+          "title": "Max Number Of Arguments",
+          "type": "integer"
+        }
+      },
+      "title": "CheckMacroMaxNumberOfArguments",
+      "type": "object"
+    },
     "CheckMacroMaxNumberOfLines": {
       "additionalProperties": false,
       "description": "Macros may not have more than the specified number of lines.\n\n!!! info \"Rationale\"\n\n    Long macros are a code smell \u2014 they are harder to test, document, and review. Keeping macros concise encourages single-responsibility design and makes it easier to spot logic errors. Teams that enforce a line limit are nudged to decompose complex macros into smaller, composable units that are individually testable.\n\nParameters:\n    max_number_of_lines (int): The maximum number of permitted lines.\n\nReceives:\n    macro (Macros): The Macros object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the macro path. Macro paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the macro path. Only macro paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_macro_max_number_of_lines\n    ```\n    ```yaml\n    manifest_checks:\n        - name: check_macro_max_number_of_lines\n          max_number_of_lines: 100\n    ```",
@@ -11244,6 +11339,7 @@
             "check_macro_description_populated": "#/$defs/CheckMacroDescriptionPopulated",
             "check_macro_has_meta_keys": "#/$defs/CheckMacroHasMetaKeys",
             "check_macro_is_used": "#/$defs/CheckMacroIsUsed",
+            "check_macro_max_number_of_arguments": "#/$defs/CheckMacroMaxNumberOfArguments",
             "check_macro_max_number_of_lines": "#/$defs/CheckMacroMaxNumberOfLines",
             "check_macro_name_matches_file_name": "#/$defs/CheckMacroNameMatchesFileName",
             "check_macro_names": "#/$defs/CheckMacroNames",
@@ -11380,6 +11476,9 @@
           },
           {
             "$ref": "#/$defs/CheckMacroIsUsed"
+          },
+          {
+            "$ref": "#/$defs/CheckMacroMaxNumberOfArguments"
           },
           {
             "$ref": "#/$defs/CheckMacroMaxNumberOfLines"
