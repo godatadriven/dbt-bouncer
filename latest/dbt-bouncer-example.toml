@@ -99,6 +99,9 @@ regexp_pattern = ".*[i][f][n][u][l][l].*"
 name = "check_macro_description_populated"
 
 [[manifest_checks]]
+name = "check_macro_max_number_of_arguments"
+
+[[manifest_checks]]
 name = "check_macro_max_number_of_lines"
 
 [[manifest_checks]]
