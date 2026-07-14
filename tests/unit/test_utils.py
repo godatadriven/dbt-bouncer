@@ -648,6 +648,35 @@ def test_get_check_objects_deduplicates():
     assert count == 1
 
 
+@pytest.mark.parametrize(
+    "discover_name",
+    ["_build_check_module_map", "get_check_objects"],
+)
+def test_discovery_skips_deprecation_shim(discover_name, recwarn):
+    """Check discovery must not import the ``checks/common.py`` shim (which warns)."""
+    import sys
+
+    import dbt_bouncer.utils
+    from dbt_bouncer.utils import get_check_objects
+
+    get_check_objects.cache_clear()
+    # Force a fresh import so the shim's module-level warning could fire again.
+    sys.modules.pop("dbt_bouncer.checks.common", None)
+
+    getattr(dbt_bouncer.utils, discover_name)()
+
+    shim_warnings = [
+        w
+        for w in recwarn.list
+        if issubclass(w.category, DeprecationWarning)
+        and "dbt_bouncer.checks.common" in str(w.message)
+    ]
+    get_check_objects.cache_clear()
+    assert shim_warnings == [], (
+        "Check discovery imported the deprecated checks.common shim"
+    )
+
+
 def test_compute_cache_fingerprint_changes_when_internal_checks_change():
     """Touching a file under the packaged ``checks/`` directory must change the fingerprint.
 
