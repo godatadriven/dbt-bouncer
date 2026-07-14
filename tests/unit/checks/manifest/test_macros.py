@@ -475,6 +475,130 @@ class TestCheckMacroMaxNumberOfLinesInvalidParam:
             )
 
 
+class TestCheckMacroMaxNumberOfArguments:
+    @pytest.mark.parametrize(
+        ("macro_overrides", "max_number_of_arguments", "check_fn"),
+        [
+            pytest.param(
+                {
+                    "macro_sql": "{% macro no_makes_sense(arg_1, arg_2) %} select coalesce({{ arg_1 }}, {{ arg_2 }}) from table {% endmacro %}",
+                },
+                5,
+                check_passes,
+                id="within_limit",
+            ),
+            pytest.param(
+                {
+                    "macro_sql": "{% macro no_makes_sense(arg_1, arg_2, arg_3, arg_4, arg_5, arg_6) %} select 1 {% endmacro %}",
+                },
+                4,
+                check_fails,
+                id="exceeds_limit",
+            ),
+            pytest.param(
+                # Exactly at the limit passes: the check only fails when the
+                # count is strictly greater than the maximum.
+                {
+                    "macro_sql": "{% macro no_makes_sense(arg_1, arg_2, arg_3) %} select 1 {% endmacro %}",
+                },
+                3,
+                check_passes,
+                id="exactly_at_limit",
+            ),
+            pytest.param(
+                {
+                    "macro_sql": "{% macro no_makes_sense(arg_1, arg_2, arg_3) %} select 1 {% endmacro %}",
+                },
+                2,
+                check_fails,
+                id="one_over_limit",
+            ),
+            pytest.param(
+                # Materializations declare no arguments, so they always pass.
+                {
+                    "macro_sql": "{% materialization udf, adapter=\"bigquery\" %}\n{{ return({'relations': []}) }}\n{% endmaterialization %}",
+                    "name": "materialization_udf",
+                    "original_file_path": "macros/materialization_udf.sql",
+                    "unique_id": "macro.package_name.materialization_udf",
+                },
+                1,
+                check_passes,
+                id="materialization_has_no_arguments",
+            ),
+            pytest.param(
+                # Generic tests are counted by their signature arguments,
+                # including the implicit `model` argument (here: 3).
+                {
+                    "macro_sql": '{% test expect_valid_length(model, column_name, list_values) %}\n{{ dbt_expectations.expression_is_true(model, expression="1=1") }}\n{% endtest %}',
+                    "name": "test_expect_valid_length",
+                    "original_file_path": "macros/expect_valid_length.sql",
+                    "unique_id": "macro.package_name.test_expect_valid_length",
+                },
+                2,
+                check_fails,
+                id="generic_test_counts_signature_arguments",
+            ),
+        ],
+    )
+    def test_check_macro_max_number_of_arguments(
+        self, macro_overrides, max_number_of_arguments, check_fn
+    ):
+        check_fn(
+            "check_macro_max_number_of_arguments",
+            macro=macro_overrides,
+            max_number_of_arguments=max_number_of_arguments,
+        )
+
+    @pytest.mark.parametrize(
+        ("macro_overrides", "check_fn"),
+        [
+            pytest.param(
+                {
+                    "macro_sql": "{% macro no_makes_sense(arg_1, arg_2, arg_3, arg_4) %} select 1 {% endmacro %}",
+                },
+                check_passes,
+                id="default_limit_within",
+            ),
+            pytest.param(
+                {
+                    "macro_sql": "{% macro no_makes_sense(arg_1, arg_2, arg_3, arg_4, arg_5) %} select 1 {% endmacro %}",
+                },
+                check_fails,
+                id="default_limit_exceeded",
+            ),
+        ],
+    )
+    def test_check_macro_max_number_of_arguments_default(
+        self, macro_overrides, check_fn
+    ):
+        # The parameter is omitted so the default limit of 4 applies.
+        check_fn(
+            "check_macro_max_number_of_arguments",
+            macro=macro_overrides,
+        )
+
+
+class TestCheckMacroMaxNumberOfArgumentsInvalidParam:
+    @pytest.mark.parametrize(
+        "max_number_of_arguments",
+        [
+            pytest.param(0, id="zero"),
+            pytest.param(-1, id="negative"),
+        ],
+    )
+    def test_raises_value_error(self, max_number_of_arguments):
+        from dbt_bouncer.testing import _run_check
+
+        with pytest.raises(ValueError, match="greater than 0"):
+            _run_check(
+                "check_macro_max_number_of_arguments",
+                macro={
+                    "macro_sql": "{% macro no_makes_sense(arg_1) %} select {{ arg_1 }} {% endmacro %}"
+                },
+                max_number_of_arguments=max_number_of_arguments,
+            )
+
+
 class TestCheckMacroNameMatchesFileName:
     @pytest.mark.parametrize(
         ("macro_overrides", "check_fn"),
