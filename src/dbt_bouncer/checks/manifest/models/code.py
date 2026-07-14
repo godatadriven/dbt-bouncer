@@ -3,6 +3,7 @@
 import re
 
 from dbt_bouncer.check_framework.decorator import check, fail
+from dbt_bouncer.enums import Materialization
 from dbt_bouncer.utils import compile_pattern, get_clean_model_name
 
 _JINJA_PATTERN = re.compile(r"\{[{%].*?[%}]\}", re.DOTALL)
@@ -231,6 +232,53 @@ def check_model_incremental_has_unique_key(model):
     ):
         fail(
             f"`{get_clean_model_name(model.unique_id)}` is incremental but has no `unique_key`."
+        )
+
+
+@check
+def check_model_materialization_permitted(
+    model, *, permitted_materializations: list[Materialization]
+):
+    """Models must use a permitted materialization for their location.
+
+    !!! info "Rationale"
+
+        A project may declare a directory-wide materialization in `dbt_project.yml`
+        (e.g. all `staging` models are views), but that default can be silently
+        overridden by an in-model `config()` block or a nested properties file.
+        Asserting the resolved materialization directly - rather than comparing the
+        sources of configuration - catches any model whose final materialization was
+        overridden away from what the directory is supposed to guarantee.
+
+    Parameters:
+        permitted_materializations (list[Materialization]): List of materializations that models are permitted to use, e.g. `ephemeral`, `incremental`, `table`, `view`.
+
+    Receives:
+        model (ModelNode): The ModelNode object to check.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.
+        include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.
+        materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_model_materialization_permitted
+              include: ^models/staging
+              permitted_materializations:
+                - view
+        ```
+
+    """
+    materialized = model.config.materialized if model.config else None
+    if materialized not in permitted_materializations:
+        fail(
+            f"`{get_clean_model_name(model.unique_id)}` is materialized as "
+            f"`{materialized}`, expected one of "
+            f"{[m.value for m in permitted_materializations]}."
         )
 
 

@@ -248,6 +248,62 @@ class TestCheckModelIncrementalHasUniqueKey:
         check_fails("check_model_incremental_has_unique_key", model=model_override)
 
 
+class TestCheckModelMaterializationPermitted:
+    @pytest.mark.parametrize(
+        ("model_override", "permitted_materializations"),
+        [
+            pytest.param(
+                {"config": {"materialized": "view"}},
+                ["view"],
+                id="view_permitted_view",
+            ),
+            pytest.param(
+                {"config": {"materialized": "table"}},
+                ["table"],
+                id="table_permitted_table",
+            ),
+            pytest.param(
+                {"config": {"materialized": "ephemeral"}},
+                ["ephemeral", "view"],
+                id="ephemeral_permitted_multiple",
+            ),
+        ],
+    )
+    def test_pass(self, model_override, permitted_materializations):
+        check_passes(
+            "check_model_materialization_permitted",
+            model=model_override,
+            permitted_materializations=permitted_materializations,
+        )
+
+    @pytest.mark.parametrize(
+        ("model_override", "permitted_materializations"),
+        [
+            pytest.param(
+                {"config": {"materialized": "table"}},
+                ["view"],
+                id="table_overridden_from_view",
+            ),
+            pytest.param(
+                {"config": {"materialized": "incremental"}},
+                ["view", "table"],
+                id="incremental_not_permitted",
+            ),
+            pytest.param(
+                {"config": None},
+                ["view"],
+                id="none_config",
+            ),
+        ],
+    )
+    def test_fail(self, model_override, permitted_materializations):
+        check_fails(
+            "check_model_materialization_permitted",
+            model=model_override,
+            permitted_materializations=permitted_materializations,
+        )
+
+
 class TestCheckModelMaxNumberOfLines:
     def test_pass(self):
         check_passes(
