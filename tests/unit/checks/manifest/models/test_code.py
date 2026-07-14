@@ -289,6 +289,11 @@ class TestCheckModelMaterializationPermitted:
                 ["view", "table"],
                 id="incremental_not_permitted",
             ),
+            pytest.param(
+                {"config": None},
+                ["view"],
+                id="none_config",
+            ),
         ],
     )
     def test_fail(self, model_override, permitted_materializations):
