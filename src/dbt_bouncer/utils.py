@@ -17,6 +17,8 @@ from importlib.metadata import entry_points
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+from dbt_bouncer.types import MetaConfig, MissingMetaKeys, RequiredMetaKey
+
 if TYPE_CHECKING:
     from semver import Version
 
@@ -106,7 +108,10 @@ def resource_in_path(check: "BaseCheck", resource: Any) -> bool:
     return not object_excluded_by_path(check.exclude, resource.original_file_path)
 
 
-def find_missing_meta_keys(meta_config, required_keys) -> list[str]:
+def find_missing_meta_keys(
+    meta_config: MetaConfig,
+    required_keys: list[RequiredMetaKey],
+) -> MissingMetaKeys:
     """Find required keys missing from a meta/labels config.
 
     Args:
@@ -118,7 +123,7 @@ def find_missing_meta_keys(meta_config, required_keys) -> list[str]:
             sub-keys).
 
     Returns:
-        list[str]: Missing keys. Nested keys are joined with ``>`` (e.g.
+        MissingMetaKeys: Missing keys. Nested keys are joined with ``>`` (e.g.
             ``"name>first"``).
 
     """
