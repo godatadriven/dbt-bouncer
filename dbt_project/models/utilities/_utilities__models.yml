@@ -13,8 +13,8 @@ models:
           - unique
           - not_null
       - name: customer_id
-        description: Foreign key to customers.
+        description: This is a unique identifier for a customer
       - name: order_date
-        description: Date the order was placed.
+        description: Date (UTC) that the order was placed
       - name: status
-        description: Current status of the order.
+        description: '{{ doc("orders_status") }}'
