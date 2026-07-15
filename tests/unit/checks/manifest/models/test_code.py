@@ -178,6 +178,34 @@ class TestCheckModelHardCodedReferences:
         check_fails("check_model_hard_coded_references", model=model_override)
 
 
+class TestCheckPythonModelDoesNotUseSelectStar:
+    def test_pass(self):
+        # Python models are not SQL, so the check skips them even when their
+        # source contains a literal "SELECT *".
+        check_passes(
+            "check_model_does_not_use_select_star",
+            model={
+                "language": "python",
+                "raw_code": 'def model(dbt, session):\n    return dbt.ref("upstream")  # SELECT * FROM schema.table',
+                "tags": [],
+            },
+        )
+
+
+class TestCheckPythonModelHardCodedReferences:
+    def test_pass(self):
+        # Python models are not SQL, so the check skips them even when their
+        # source contains a hard-coded dotted reference.
+        check_passes(
+            "check_model_hard_coded_references",
+            model={
+                "language": "python",
+                "raw_code": 'def model(dbt, session):\n    return session.sql("SELECT * FROM schema.table")',
+                "tags": [],
+            },
+        )
+
+
 class TestCheckModelHasSemiColon:
     @pytest.mark.parametrize(
         "model_override",

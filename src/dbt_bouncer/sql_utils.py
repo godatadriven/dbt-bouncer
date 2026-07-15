@@ -43,11 +43,12 @@ def neutralize_jinja(code: str) -> str:
     code = _JINJA_COMMENT_PATTERN.sub(" ", code)
     code = _JINJA_STATEMENT_PATTERN.sub(" ", code)
     code = _JINJA_CONFIG_PATTERN.sub(" ", code)
-    counter = {"n": 0}
+    n = 0
 
     def _placeholder(_match: re.Match[str]) -> str:
-        counter["n"] += 1
-        return f"_dbt_bouncer_jinja_{counter['n']}"
+        nonlocal n
+        n += 1
+        return f"_dbt_bouncer_jinja_{n}"
 
     return _JINJA_EXPRESSION_PATTERN.sub(_placeholder, code)
 
