@@ -112,16 +112,27 @@ def test_report_results_saves_coverage_file(tmp_path):
 
 
 def test_report_results_creates_pr_comment_file():
-    """PR comment file is created when flag is set."""
+    """PR comment file is created when flag is set, with the file path column."""
     results = [
         {
             "check_run_id": "check_model_access:0:model.my_model",
             "failure_message": "Access should be private",
+            "file_path": "models/staging/my_model.sql",
             "outcome": CheckOutcome.FAILED,
             "severity": CheckSeverity.ERROR,
+            "unique_id": "model.my_project.my_model",
         },
     ]
     reporter = Reporter(show_all_failures=False, create_pr_comment_file=True)
     with patch("dbt_bouncer.reporting.reporter.create_github_comment_file") as mock_gh:
         reporter.report_results(results)
         mock_gh.assert_called_once()
+        # Each row is [check_run_id, file_path, failure_message].
+        rows = mock_gh.call_args.kwargs["failed_checks"]
+        assert rows == [
+            [
+                "check_model_access:0:model.my_model",
+                "models/staging/my_model.sql",
+                "Access should be private",
+            ]
+        ]

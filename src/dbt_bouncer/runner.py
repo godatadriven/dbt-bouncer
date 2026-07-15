@@ -81,8 +81,10 @@ class CheckToRun(TypedDict):
     check: Any
     check_run_id: str
     failure_message: NotRequired[str]
+    file_path: NotRequired[str | None]
     outcome: NotRequired[str]
     severity: str
+    unique_id: NotRequired[str | None]
 
 
 def _should_run_check(
@@ -235,7 +237,9 @@ def runner(
                     {
                         "check": check_i,
                         "check_run_id": check_run_id,
+                        "file_path": getattr(i, "original_file_path", None),
                         "severity": check_i.severity,
+                        "unique_id": getattr(i, "unique_id", None),
                     },
                 )
         elif len(iterate_over_value) > 1:
@@ -249,7 +253,9 @@ def runner(
                 {
                     "check": check,
                     "check_run_id": check_run_id,
+                    "file_path": None,
                     "severity": check.severity,
+                    "unique_id": None,
                 },
             )
 
