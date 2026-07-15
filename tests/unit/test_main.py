@@ -155,6 +155,10 @@ def test_cli_output_formats(output_format, output_file_suffix, is_json, tmp_path
 
     assert output_file.exists()
     content = output_file.read_text()
+    # `is_json` is asserted on its own because SARIF is also valid JSON; the
+    # format-specific assertions below therefore form an independent `if/elif`
+    # chain so the `sarif` branch actually runs instead of being shadowed by the
+    # shared JSON check.
     if is_json:
         assert json.loads(output_file.read_bytes())
     if output_format == "csv":

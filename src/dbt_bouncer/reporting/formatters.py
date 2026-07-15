@@ -2,6 +2,7 @@
 
 import csv
 import io
+from functools import lru_cache
 from typing import Any
 
 import orjson
@@ -64,6 +65,28 @@ def _format_csv(results: list[dict[str, Any]]) -> bytes:
     return buf.getvalue().encode()
 
 
+@lru_cache(maxsize=1)
+def _junit_test_case_cls() -> type:
+    """Build a JUnit ``TestCase`` subclass that serialises a ``file`` attribute.
+
+    The base ``junitparser.TestCase`` does not declare ``file``, so it is
+    silently dropped on write; declaring it via ``Attr`` emits it. The subclass
+    is built lazily (to preserve the deferred ``junitparser`` import) and cached
+    so it is created once rather than on every ``_format_junit`` call.
+
+    Returns:
+        type: A ``TestCase`` subclass exposing a ``file`` attribute.
+
+    """
+    from junitparser import TestCase
+    from junitparser.junitparser import Attr
+
+    class _TestCase(TestCase):
+        file = Attr("file")
+
+    return _TestCase
+
+
 def _format_junit(results: list[dict[str, Any]]) -> bytes:
     """Serialise check results to JUnit XML format.
 
@@ -77,21 +100,12 @@ def _format_junit(results: list[dict[str, Any]]) -> bytes:
         bytes: JUnit XML document.
 
     """
-    from junitparser import Failure, JUnitXml, TestCase, TestSuite
-    from junitparser.junitparser import Attr
+    from junitparser import Failure, JUnitXml, TestSuite
 
-    class _TestCase(TestCase):
-        """TestCase that also serialises a ``file`` attribute.
-
-        The base ``junitparser.TestCase`` does not declare ``file``, so it is
-        silently dropped on write; declaring it via ``Attr`` emits it.
-        """
-
-        file = Attr("file")
-
+    test_case_cls = _junit_test_case_cls()
     test_cases = []
     for result in results:
-        tc = _TestCase(
+        tc = test_case_cls(
             name=result["check_run_id"],
             classname="dbt-bouncer",
         )

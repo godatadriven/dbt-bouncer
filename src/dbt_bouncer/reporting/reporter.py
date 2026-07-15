@@ -146,6 +146,7 @@ class Reporter:
                     "severity": r["severity"],
                     "failure_message": r["failure_message"],
                     "file_path": r.get("file_path"),
+                    "unique_id": r.get("unique_id"),
                 }
                 for r in results
                 if r["outcome"] == CheckOutcome.FAILED
