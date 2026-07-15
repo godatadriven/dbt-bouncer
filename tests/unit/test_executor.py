@@ -104,5 +104,34 @@ def test_executor_returns_result_dicts():
     results = executor.run(checks)
     result = results[0]
     assert "check_run_id" in result
+    assert "file_path" in result
     assert "outcome" in result
     assert "severity" in result
+    assert "unique_id" in result
+
+
+def test_executor_carries_file_path_and_unique_id():
+    """file_path and unique_id from the input dict flow into the result."""
+    checks = [
+        {
+            "check": _PassingCheck(),
+            "check_run_id": "check_a:0:stg_orders",
+            "file_path": "models/staging/stg_orders.sql",
+            "severity": CheckSeverity.ERROR,
+            "unique_id": "model.my_project.stg_orders",
+        },
+        # A context-only check has no resource -> file_path/unique_id absent.
+        {
+            "check": _PassingCheck(),
+            "check_run_id": "check_b:0",
+            "severity": CheckSeverity.ERROR,
+        },
+    ]
+    executor = Executor()
+    results = executor.run(checks)
+
+    assert results[0]["file_path"] == "models/staging/stg_orders.sql"
+    assert results[0]["unique_id"] == "model.my_project.stg_orders"
+    # Missing keys default to None rather than raising.
+    assert results[1]["file_path"] is None
+    assert results[1]["unique_id"] is None

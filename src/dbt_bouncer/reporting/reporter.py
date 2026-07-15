@@ -145,6 +145,8 @@ class Reporter:
                     "check_run_id": r["check_run_id"],
                     "severity": r["severity"],
                     "failure_message": r["failure_message"],
+                    "file_path": r.get("file_path"),
+                    "unique_id": r.get("unique_id"),
                 }
                 for r in results
                 if r["outcome"] == CheckOutcome.FAILED
@@ -168,6 +170,7 @@ class Reporter:
                 header_style=f"bold {border_color}",
             )
             table.add_column("Check name", justify="left", style="cyan", no_wrap=True)
+            table.add_column("File", justify="left", style="magenta")
             table.add_column("Severity", justify="center", width=10)
             table.add_column("Failure message", justify="left")
 
@@ -182,6 +185,7 @@ class Reporter:
 
                 table.add_row(
                     str(check.get("check_run_id", "")),
+                    str(check.get("file_path") or ""),
                     f"[bold {sev_color}]{sev.upper()}[/bold {sev_color}]",
                     str(check.get("failure_message", "")),
                 )
@@ -191,7 +195,11 @@ class Reporter:
             if self.create_pr_comment_file:
                 create_github_comment_file(
                     failed_checks=[
-                        [str(f["check_run_id"]), str(f.get("failure_message", ""))]
+                        [
+                            str(f["check_run_id"]),
+                            str(f.get("file_path") or ""),
+                            str(f.get("failure_message", "")),
+                        ]
                         for f in failed_checks
                     ],
                     show_all_failures=self.show_all_failures,
