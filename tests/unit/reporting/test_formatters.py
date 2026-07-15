@@ -38,6 +38,20 @@ def test_sarif_includes_location_and_logical_location():
     assert entry["ruleId"] == "check_model_description_populated:0:stg_orders"
 
 
+def test_sarif_includes_location_for_passing_result():
+    """A passing result with a file_path still attaches locations (level="none")."""
+    result = _failed_result(outcome=CheckOutcome.SUCCESS)
+    sarif = orjson.loads(_format_sarif([result]))
+    entry = sarif["runs"][0]["results"][0]
+
+    assert entry["level"] == "none"
+    location = entry["locations"][0]["physicalLocation"]
+    assert location["artifactLocation"]["uri"] == "models/staging/stg_orders.sql"
+    assert entry["logicalLocations"][0]["fullyQualifiedName"] == (
+        "model.my_project.stg_orders"
+    )
+
+
 def test_sarif_omits_location_when_no_file_path():
     """A context-only result (no file_path) omits locations entirely."""
     result = _failed_result(file_path=None, unique_id=None)

@@ -78,8 +78,7 @@ def _junit_test_case_cls() -> type:
         type: A ``TestCase`` subclass exposing a ``file`` attribute.
 
     """
-    from junitparser import TestCase
-    from junitparser.junitparser import Attr
+    from junitparser import Attr, TestCase
 
     class _TestCase(TestCase):
         file = Attr("file")
