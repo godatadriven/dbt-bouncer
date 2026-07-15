@@ -21,6 +21,11 @@ if TYPE_CHECKING:
 
 _CONFIG_PATH = Path(__file__).parent / "benchmark-config.yml"
 
+# Resolved model count, shared from the ``n_models`` fixture to the terminal
+# summary hook (which can't request fixtures). A ``StashKey`` is the pytest-
+# recommended way to attach data to ``config`` without risking attribute clashes.
+_N_MODELS_KEY = pytest.StashKey[int]()
+
 # Friendly labels for the summary table, keyed by benchmark test function name.
 _COMPONENT_LABELS = {
     "test_parse_manifest": "Parse artifacts",
@@ -119,7 +124,7 @@ def pytest_terminal_summary(config) -> None:
 
     # Prefer the count actually used to build the artifacts (stashed by the
     # ``n_models`` fixture) so the label can't drift from the real run size.
-    n_models = getattr(config, "_dbt_bouncer_n_models", None)
+    n_models = config.stash.get(_N_MODELS_KEY, None)
     if n_models is None:
         n_models = _env_model_count(5000)
     n_checks = _count_configured_checks()
@@ -185,7 +190,7 @@ def n_models(request) -> int:
     displayed scale honest to what was actually built.
     """
     count = _env_model_count(5000)
-    request.config._dbt_bouncer_n_models = count
+    request.config.stash[_N_MODELS_KEY] = count
     return count
 
 

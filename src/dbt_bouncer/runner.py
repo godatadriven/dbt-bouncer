@@ -117,6 +117,8 @@ def _should_run_check(
     return not (meta_config and check.name in meta_config)
 
 
+# Underscore-prefixed as an internal helper, but imported by the benchmark suite
+# (``tests/benchmark``) to time the match phase in isolation — keep it importable.
 def _assemble_checks_to_run(ctx: "BouncerContext") -> list[CheckToRun]:
     """Match checks to resources, deep-copy, and build the run list.
 

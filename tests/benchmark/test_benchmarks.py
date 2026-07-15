@@ -70,6 +70,8 @@ def test_check_discovery(benchmark):
 
 def test_validate_conf(benchmark, monkeypatch, benchmark_conf):
     """Benchmark check-assembly: config validation on the cold path."""
+    # Set for the whole test (not just setup) so the benchmark-timed
+    # ``validate_conf`` call itself always hits the cold path, never the cache.
     monkeypatch.setenv("DBT_BOUNCER_DISABLE_CONF_CACHE", "1")
     check_categories, contents = benchmark_conf
 
