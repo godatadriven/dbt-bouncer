@@ -173,7 +173,7 @@ There are two layers of performance coverage:
    make test-benchmark
    ```
 
-   Set `DBT_BOUNCER_BENCH_MODELS` to change the manifest size (default `5000`). In CI, the emitted `pytest_benchmark_results.json` is tracked by Bencher (`python_pytest` adapter, `ubuntu-24.04-pytest` testbed) so parse-time and check-assembly regressions fail PRs — the same mechanism as the hyperfine track.
+   Change the manifest size with `make test-benchmark BENCH_MODELS=5000` (the `make` target defaults to `1000` to keep local runs quick). Running `pytest` directly instead reads `DBT_BOUNCER_BENCH_MODELS`, falling back to `5000` when it is unset. In CI, the emitted `pytest_benchmark_results.json` is tracked by Bencher (`python_pytest` adapter, `ubuntu-24.04-pytest` testbed) so parse-time and check-assembly regressions fail PRs — the same mechanism as the hyperfine track.
 
 #### `prek`
 

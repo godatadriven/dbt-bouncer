@@ -117,7 +117,11 @@ def pytest_terminal_summary(config) -> None:
     from rich.console import Console
     from rich.table import Table
 
-    n_models = _env_model_count(5000)
+    # Prefer the count actually used to build the artifacts (stashed by the
+    # ``n_models`` fixture) so the label can't drift from the real run size.
+    n_models = getattr(config, "_dbt_bouncer_n_models", None)
+    if n_models is None:
+        n_models = _env_model_count(5000)
     n_checks = _count_configured_checks()
 
     table = Table(
@@ -172,10 +176,24 @@ def pytest_terminal_summary(config) -> None:
 
 
 @pytest.fixture(scope="session")
-def synthetic_artifacts_dir(tmp_path_factory) -> Path:
+def n_models(request) -> int:
+    """Resolve the benchmark model count once and stash it on the config.
+
+    Both the artifact build and the terminal summary need this number; reading
+    the env var in each spot risks them drifting apart. Resolving it here (and
+    stashing it for the summary hook, which can't request fixtures) keeps the
+    displayed scale honest to what was actually built.
+    """
+    count = _env_model_count(5000)
+    request.config._dbt_bouncer_n_models = count
+    return count
+
+
+@pytest.fixture(scope="session")
+def synthetic_artifacts_dir(tmp_path_factory, n_models) -> Path:
     """Build the synthetic manifest/catalog/run_results once and return its dir."""
     target = tmp_path_factory.mktemp("synthetic") / "target"
-    write_artifacts(target, n_models=_env_model_count(5000))
+    write_artifacts(target, n_models=n_models)
     return target
 
 
@@ -238,6 +256,10 @@ def runner_inputs(benchmark_conf, synthetic_artifacts_dir):
     return bouncer_config, check_categories, artifacts
 
 
+# Function-scoped on purpose: ``runner()`` deletes resource fields off the
+# context it's handed, so each benchmark round needs a fresh context. The
+# expensive inputs (parsed artifacts, validated config) stay session-scoped via
+# ``runner_inputs``; only the cheap context wrapper is rebuilt per round.
 @pytest.fixture
 def make_bouncer_context(runner_inputs) -> Callable[[], BouncerContext]:
     """Return a factory that builds a fresh ``BouncerContext`` (no re-parse)."""
