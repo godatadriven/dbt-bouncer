@@ -83,7 +83,7 @@ def _format_pct(seconds: float, baseline: float | None) -> str:
     """
     # Guard both an unknown baseline (None) and a zero mean; the latter would
     # otherwise raise ZeroDivisionError below.
-    if not baseline:
+    if baseline is None or baseline == 0:
         return "—"
     pct = seconds / baseline * 100
     return f"{pct:.0f}%" if pct >= 10 else f"{pct:.1f}%"
