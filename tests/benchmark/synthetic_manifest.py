@@ -155,6 +155,10 @@ def _model_node(idx: int, layer: str, pkg: str, parents: list[str]) -> dict[str,
         "description": f"Model {name} in the {layer} layer.",
         "access": access,
         "language": "sql",
+        # The ``if parents`` guard makes ``parents[0]`` safe: every model layer
+        # is built with a non-empty parent list (staging gets a source parent,
+        # intermediate/marts get model parents); the ``else`` is a defensive
+        # fallback for a hypothetical parentless model.
         "raw_code": f"select * from {{{{ ref('{parents[0]}') }}}}"  # noqa: S608 - synthetic dbt SQL, not a real query
         if parents
         else "select 1 as col_0;",

@@ -81,6 +81,8 @@ def _format_pct(seconds: float, baseline: float | None) -> str:
     Returns:
         The formatted percentage, or ``"—"`` when no baseline is available.
     """
+    # Guard both an unknown baseline (None) and a zero mean; the latter would
+    # otherwise raise ZeroDivisionError below.
     if not baseline:
         return "—"
     pct = seconds / baseline * 100
