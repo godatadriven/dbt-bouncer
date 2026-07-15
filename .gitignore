@@ -168,7 +168,9 @@ cython_debug/
 .agents/*
 !.agents/skills/
 *.ipynb
+.benchmarks/
 benchmark_results.json
+pytest_benchmark_results.json
 changed_files.txt
 coverage.json
 dbt.duckdb

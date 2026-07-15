@@ -75,6 +75,18 @@ test-integration: ## Run integration tests
 		./tests/integration \
 		$(MAKE_ARGS)
 
+# Default to 1,000 models to keep local runs quick; override with e.g.
+# `make test-benchmark BENCH_MODELS=5000`. CI runs the PR and main branches
+# at the same count, so Bencher comparisons stay apples-to-apples.
+BENCH_MODELS ?= 1000
+test-benchmark: ## Run code-level performance benchmarks (pytest-benchmark)
+	# No --numprocesses (xdist disables pytest-benchmark) and no --cov (skews timings).
+	DBT_BOUNCER_BENCH_MODELS=$(BENCH_MODELS) uv run pytest \
+		-c ./tests \
+		--benchmark-only \
+		--benchmark-json=pytest_benchmark_results.json \
+		./tests/benchmark
+
 test-perf: ## Run performance tests
 	bencher run \
 		--adapter shell_hyperfine \

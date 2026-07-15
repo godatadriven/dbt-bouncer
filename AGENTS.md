@@ -23,7 +23,8 @@ make install
 | `make build-and-run-dbt-bouncer` | End-to-end validation |
 | `make build-artifacts` | Regenerate test fixtures (dbt 1.10, 1.11, 1.12) |
 | `make generate-schema` | Regenerate `schema.json` from Pydantic models |
-| `make test-perf` | Performance benchmarks (bencher + hyperfine) |
+| `make test-perf` | End-to-end performance benchmarks (bencher + hyperfine) |
+| `make test-benchmark` | Code-level micro-benchmarks (pytest-benchmark, synthetic 5k-model manifest) |
 
 ## Architecture
 

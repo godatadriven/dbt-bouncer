@@ -117,13 +117,15 @@ def _should_run_check(
     return not (meta_config and check.name in meta_config)
 
 
-def runner(
-    ctx: "BouncerContext",
-) -> tuple[int, list[Any]]:
-    """Run dbt-bouncer checks.
+def _assemble_checks_to_run(ctx: "BouncerContext") -> list[CheckToRun]:
+    """Match checks to resources, deep-copy, and build the run list.
+
+    Builds the check context and per-resource skip-checks lookups, then iterates
+    every configured check, matching it against the relevant resources and
+    deep-copying a runnable instance per match.
 
     Returns:
-        tuple[int, list[Any]]: A tuple containing the exit code and a list of failed checks.
+        list[CheckToRun]: The assembled checks, ready for execution.
 
     Raises:
         RuntimeError: If more than one "iterate_over" argument is found.
@@ -258,6 +260,20 @@ def runner(
                     "unique_id": None,
                 },
             )
+
+    return checks_to_run
+
+
+def runner(
+    ctx: "BouncerContext",
+) -> tuple[int, list[Any]]:
+    """Run dbt-bouncer checks.
+
+    Returns:
+        tuple[int, list[Any]]: A tuple containing the exit code and a list of failed checks.
+
+    """
+    checks_to_run = _assemble_checks_to_run(ctx)
 
     del (
         ctx.models,

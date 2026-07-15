@@ -55,6 +55,43 @@
                 --file results.json \
                 "hyperfine --export-json results.json --runs 10 'dbt-bouncer --config-file dbt-bouncer-example.yml'"
 
+      benchmark-micro-main-branch:
+        permissions:
+          checks: write
+          contents: read
+        runs-on: ubuntu-24.04
+        steps:
+          - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+            with:
+              persist-credentials: false
+
+          - name: Setup Python
+            uses: ./.github/actions/setup_python_env
+
+          - name: Install bencher
+            uses: bencherdev/bencher@50fb1e138651a46d2fb704fab1adab38c181552e # v0.6.6
+
+          - name: Run code-level benchmarks
+            run: make test-benchmark
+
+          - name: Track base branch code-level benchmarks with Bencher
+            run: |
+              bencher run \
+                --project dbt-bouncer \
+                --token '${{ secrets.BENCHER_API_TOKEN }}' \
+                --branch main \
+                --testbed ubuntu-24.04-pytest \
+                --threshold-measure latency \
+                --threshold-test t_test \
+                --threshold-max-sample-size 64 \
+                --threshold-upper-boundary 0.999 \
+                --thresholds-reset \
+                --err \
+                --adapter python_pytest \
+                --format json \
+                --github-actions '${{ secrets.GITHUB_TOKEN }}' \
+                --file pytest_benchmark_results.json
+
       coverage-badge:
           permissions:
             contents: write

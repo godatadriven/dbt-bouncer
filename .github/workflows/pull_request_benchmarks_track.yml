@@ -7,6 +7,7 @@ on:
 
 env:
     BENCHMARK_RESULTS: benchmark_results.json
+    PYTEST_BENCHMARK_RESULTS: pytest_benchmark_results.json
 
 jobs:
   track_fork_pr_branch:
@@ -20,6 +21,12 @@ jobs:
         uses: dawidd6/action-download-artifact@b6e2e70617bc3265edd6dab6c906732b2f1ae151 # v21
         with:
           name: ${{ env.BENCHMARK_RESULTS }}
+          run_id: ${{ github.event.workflow_run.id }}
+
+      - name: Download pytest Benchmark Results
+        uses: dawidd6/action-download-artifact@b6e2e70617bc3265edd6dab6c906732b2f1ae151 # v21
+        with:
+          name: ${{ env.PYTEST_BENCHMARK_RESULTS }}
           run_id: ${{ github.event.workflow_run.id }}
 
       # Check out only the composite action from the default branch so the
@@ -60,3 +67,24 @@ jobs:
             --github-actions '${{ secrets.GITHUB_TOKEN }}' \
             --ci-number "$PR_NUMBER" \
             --file "$BENCHMARK_RESULTS"
+
+      - name: Track Code-Level Benchmarks with Bencher
+        if: steps.export.outputs.skip != 'true'
+        env:
+          BENCHER_API_TOKEN: ${{ secrets.BENCHER_API_TOKEN }}
+        run: |
+          bencher run \
+            --project dbt-bouncer \
+            --branch "$PR_HEAD" \
+            --hash "$PR_HEAD_SHA" \
+            --start-point "$PR_BASE" \
+            --start-point-hash "$PR_BASE_SHA" \
+            --start-point-clone-thresholds \
+            --start-point-reset \
+            --testbed ubuntu-24.04-pytest \
+            --err \
+            --adapter python_pytest \
+            --format json \
+            --github-actions '${{ secrets.GITHUB_TOKEN }}' \
+            --ci-number "$PR_NUMBER" \
+            --file "$PYTEST_BENCHMARK_RESULTS"
