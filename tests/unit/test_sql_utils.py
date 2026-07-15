@@ -36,6 +36,14 @@ def test_parse_sql_caches_results():
     assert parse_sql("SELECT id FROM my_table") is parse_sql("SELECT id FROM my_table")
 
 
+def test_parse_sql_honours_dialect():
+    # The dialect argument is passed straight through to sqlglot; BigQuery-style
+    # backtick-quoted identifiers must parse when the BigQuery dialect is given.
+    parsed = parse_sql("SELECT col FROM `my-project.dataset.table`", dialect="bigquery")
+    assert parsed is not None
+    assert len(parsed) == 1
+
+
 def test_neutralize_jinja_expression_becomes_single_part_identifier():
     # A ref() expression must not survive as a dotted (hard-coded-looking) reference.
     neutralized = neutralize_jinja("SELECT * FROM {{ ref('other_model') }}")

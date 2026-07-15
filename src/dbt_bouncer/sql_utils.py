@@ -14,6 +14,7 @@ from typing import cast
 
 import sqlglot
 from sqlglot import exp
+from sqlglot.errors import SqlglotError
 
 # Constructs that render to nothing in real dbt are dropped so the surrounding
 # SQL still parses: comments (``{# ... #}``), statements (``{% ... %}`` - set,
@@ -82,5 +83,8 @@ def parse_sql(
             "tuple[exp.Expression, ...]",
             tuple(e for e in sqlglot.parse(code, dialect=dialect) if e is not None),
         )
-    except Exception:  # sqlglot raises ParseError/TokenError and similar.
+    except SqlglotError:
+        # SqlglotError is the base of every sqlglot parse/tokenize error, so this
+        # catches all parse failures (ParseError, TokenError, ...) while letting
+        # genuinely unexpected errors (e.g. MemoryError, RecursionError) surface.
         return None
