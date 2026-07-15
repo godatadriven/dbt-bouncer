@@ -4,9 +4,10 @@ import re
 
 from sqlglot import exp
 
+from dbt_bouncer.artifact_types import ModelNode
 from dbt_bouncer.check_framework.decorator import check, fail
 from dbt_bouncer.enums import Materialization
-from dbt_bouncer.sql_utils import neutralize_jinja, parse_sql
+from dbt_bouncer.sql_utils import JINJA_COMMENT_PATTERN, neutralize_jinja, parse_sql
 from dbt_bouncer.utils import compile_pattern, get_clean_model_name
 
 # Patterns retained for the best-effort regex fallback used when sqlglot cannot
@@ -16,7 +17,8 @@ _HARD_CODED_REF_PATTERN = re.compile(r"\b(?:FROM|JOIN)\s+\w+\.\w+", re.IGNORECAS
 _SELECT_STAR_PATTERN = re.compile(r"(?i)select\s+(?:all\s+|distinct\s+)?\*")
 
 # Patterns used to strip comment forms before the select-star regex fallback.
-_JINJA_COMMENT_PATTERN = re.compile(r"\{#.*?#\}", re.DOTALL)
+# The Jinja-comment pattern is shared with ``sql_utils`` to keep a single source
+# of truth for what a Jinja comment looks like.
 _BLOCK_COMMENT_PATTERN = re.compile(r"/\*.*?\*/", re.DOTALL)
 _LINE_COMMENT_PATTERN = re.compile(r"--[^\n]*")
 
@@ -37,13 +39,13 @@ def _strip_sql_comments(code: str) -> str:
         does not have that limitation.
 
     """
-    code = _JINJA_COMMENT_PATTERN.sub("", code)
+    code = JINJA_COMMENT_PATTERN.sub("", code)
     code = _BLOCK_COMMENT_PATTERN.sub("", code)
     code = _LINE_COMMENT_PATTERN.sub("", code)
     return code
 
 
-def _is_sql_model(model) -> bool:
+def _is_sql_model(model: ModelNode) -> bool:
     """Determine whether a model is a SQL model (non-SQL models are skipped).
 
     Returns:

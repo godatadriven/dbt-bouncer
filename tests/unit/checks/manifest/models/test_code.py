@@ -113,6 +113,12 @@ class TestCheckModelDoesNotUseSelectStar:
                 {"raw_code": "SELECT t.* FROM my_table AS t"},
                 id="qualified_star",
             ),
+            pytest.param(
+                {
+                    "raw_code": "{% if true %}SELECT * FROM {{ ref('m') }}{% else %}SELECT * FROM {{ ref('n') }}{% endif %}",
+                },
+                id="jinja_control_flow_falls_back_and_fails",
+            ),
         ],
     )
     def test_fail(self, model_override):

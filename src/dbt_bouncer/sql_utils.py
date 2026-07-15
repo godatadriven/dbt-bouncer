@@ -21,7 +21,9 @@ from sqlglot import exp
 # expressions occupy a value/table position, so each becomes a single-part
 # placeholder identifier - notably ``{{ ref('x') }}`` never survives as a
 # dotted (hard-coded-looking) reference.
-_JINJA_COMMENT_PATTERN = re.compile(r"\{#.*?#\}", re.DOTALL)
+# Public so the regex-fallback path in ``checks.manifest.models.code`` can reuse
+# the same definition of a Jinja comment.
+JINJA_COMMENT_PATTERN = re.compile(r"\{#.*?#\}", re.DOTALL)
 _JINJA_STATEMENT_PATTERN = re.compile(r"\{%.*?%\}", re.DOTALL)
 _JINJA_CONFIG_PATTERN = re.compile(r"\{\{[-\s]*config\b.*?\}\}", re.DOTALL)
 _JINJA_EXPRESSION_PATTERN = re.compile(r"\{\{.*?\}\}", re.DOTALL)
@@ -40,7 +42,7 @@ def neutralize_jinja(code: str) -> str:
         The input string with Jinja constructs neutralized.
 
     """
-    code = _JINJA_COMMENT_PATTERN.sub(" ", code)
+    code = JINJA_COMMENT_PATTERN.sub(" ", code)
     code = _JINJA_STATEMENT_PATTERN.sub(" ", code)
     code = _JINJA_CONFIG_PATTERN.sub(" ", code)
     n = 0

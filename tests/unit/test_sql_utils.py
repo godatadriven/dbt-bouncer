@@ -30,6 +30,12 @@ def test_parse_sql_invalid_returns_none():
     assert parse_sql("this is (((not sql at all !!!") is None
 
 
+def test_parse_sql_caches_results():
+    # parse_sql is @lru_cache'd so a repeated parse is reused across callers;
+    # assert identity (not just equality) to document and guard that contract.
+    assert parse_sql("SELECT id FROM my_table") is parse_sql("SELECT id FROM my_table")
+
+
 def test_neutralize_jinja_expression_becomes_single_part_identifier():
     # A ref() expression must not survive as a dotted (hard-coded-looking) reference.
     neutralized = neutralize_jinja("SELECT * FROM {{ ref('other_model') }}")
