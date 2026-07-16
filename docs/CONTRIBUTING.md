@@ -159,11 +159,21 @@ CI will fail if `schema.json` is out of date. The schema enables editor autocomp
 
 #### Performance tests
 
-To test the performance on the `dbt-bouncer` CLI, we use [bencher](https://github.com/bencherdev/bencher) and [hyperfine](https://github.com/sharkdp/hyperfine). Provided both are installed, you can run performance tests via:
+There are two layers of performance coverage:
 
-```shell
-make test-perf
-```
+1. **End-to-end (CLI)**: we use [bencher](https://github.com/bencherdev/bencher) and [hyperfine](https://github.com/sharkdp/hyperfine) to time the whole CLI against the example project. Provided both are installed, you can run these via:
+
+   ```shell
+   make test-perf
+   ```
+
+2. **Code-level (micro-benchmarks)**: [pytest-benchmark](https://pytest-benchmark.readthedocs.io/) benchmarks the hot paths (manifest parsing, check-assembly, the runner, and a full in-process run) against a synthetic ~5,000-model manifest generated on the fly by `tests/benchmark/synthetic_manifest.py`. Run these via:
+
+   ```shell
+   make test-benchmark
+   ```
+
+   Change the manifest size with `make test-benchmark BENCH_MODELS=5000` (the `make` target defaults to `1000` to keep local runs quick). Running `pytest` directly instead reads `DBT_BOUNCER_BENCH_MODELS`, falling back to `5000` when it is unset. In CI, the emitted `pytest_benchmark_results.json` is tracked by Bencher (`python_pytest` adapter, `ubuntu-24.04-pytest` testbed) so parse-time and check-assembly regressions fail PRs — the same mechanism as the hyperfine track.
 
 #### `prek`
 
