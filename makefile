@@ -35,9 +35,8 @@ build-artifacts-111: ## Build dbt 1.11 test artifacts
 
 build-artifacts-112: ## Build dbt 1.12 test artifacts
 	# No dbt-duckdb==1.12 yet so sticking with dbt-duckdb==1.10
-	# dbt-core 1.12 is currently pre-release; --prerelease=allow lets uvx resolve the beta.
-	uvx --python "==$(PYTHON_INTERPRETER_CONSTRAINT)" --prerelease=allow --with 'dbt-duckdb~=1.10.0' --from 'dbt-core>=1.12.0b1,<1.13' dbt parse --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_112
-	uvx --python "==$(PYTHON_INTERPRETER_CONSTRAINT)" --prerelease=allow --with 'dbt-duckdb~=1.10.0' --from 'dbt-core>=1.12.0b1,<1.13' dbt docs generate --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_112
+	uvx --python "==$(PYTHON_INTERPRETER_CONSTRAINT)" --with 'dbt-duckdb~=1.10.0' --from 'dbt-core~=1.12.0' dbt parse --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_112
+	uvx --python "==$(PYTHON_INTERPRETER_CONSTRAINT)" --with 'dbt-duckdb~=1.10.0' --from 'dbt-core~=1.12.0' dbt docs generate --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_112
 	rm -r ./tests/fixtures/dbt_112/target || true
 	mv ./dbt_project/target_112 ./tests/fixtures/dbt_112/target
 
