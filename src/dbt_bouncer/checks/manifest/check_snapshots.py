@@ -1,9 +1,10 @@
-from typing import Annotated, Literal
+from typing import Annotated
 
 from pydantic import Field
 
 from dbt_bouncer.check_framework.decorator import check, fail
 from dbt_bouncer.check_framework.exceptions import NestedDict
+from dbt_bouncer.enums import Criteria
 from dbt_bouncer.utils import (
     compile_pattern,
     find_missing_meta_keys,
@@ -95,7 +96,7 @@ def check_snapshot_has_meta_keys(snapshot, *, keys: NestedDict):
 
 @check
 def check_snapshot_has_tags(
-    snapshot, *, criteria: Literal["any", "all", "one"] = "all", tags: list[str]
+    snapshot, *, criteria: Criteria = Criteria.ALL, tags: list[str]
 ):
     """Snapshots must have the specified tags.
 
@@ -104,7 +105,7 @@ def check_snapshot_has_tags(
         Tags on snapshots enable selective execution (e.g. `dbt snapshot --select tag:nightly`) and make it possible to apply governance policies to specific groups of snapshots. Without enforced tagging, snapshots can be inadvertently skipped in scheduled runs or included in the wrong execution contexts, leading to stale historical data.
 
     Parameters:
-        criteria (Literal["any", "all", "one"] | None): Whether the snapshot must have any, all, or exactly one of the specified tags. Default: `all`.
+        criteria (Literal["all", "any", "one"]): Whether the snapshot must have any, all, or exactly one of the specified tags. Default: `all`.
         tags (list[str]): List of tags to check for.
 
     Receives:
@@ -127,14 +128,14 @@ def check_snapshot_has_tags(
 
     """
     resource_tags = snapshot.tags or []
-    if criteria == "any":
+    if criteria == Criteria.ANY:
         if not any(tag in resource_tags for tag in tags):
             fail(f"`{snapshot.name}` does not have any of the required tags: {tags}.")
-    elif criteria == "all":
+    elif criteria == Criteria.ALL:
         missing_tags = [tag for tag in tags if tag not in resource_tags]
         if missing_tags:
             fail(f"`{snapshot.name}` is missing required tags: {missing_tags}.")
-    elif criteria == "one" and sum(tag in resource_tags for tag in tags) != 1:
+    elif criteria == Criteria.ONE and sum(tag in resource_tags for tag in tags) != 1:
         fail(f"`{snapshot.name}` must have exactly one of the required tags: {tags}.")
 
 

@@ -17,6 +17,7 @@ from importlib.metadata import entry_points
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+from dbt_bouncer.enums import CheckCategory
 from dbt_bouncer.types import MetaConfig, MissingMetaKeys, RequiredMetaKey
 
 if TYPE_CHECKING:
@@ -340,11 +341,7 @@ def _load_entry_point_checks(check_objects: list[type["BaseCheck"]]) -> None:
             logging.debug("Entry point load traceback:", exc_info=True)
 
 
-_CATEGORY_TO_SUBDIR: dict[str, str] = {
-    "catalog_checks": "catalog",
-    "manifest_checks": "manifest",
-    "run_results_checks": "run_results",
-}
+_CATEGORY_TO_SUBDIR: dict[str, str] = {c.value: c.directory for c in CheckCategory}
 
 _SUBDIR_TO_CATEGORY: dict[str, str] = {v: k for k, v in _CATEGORY_TO_SUBDIR.items()}
 

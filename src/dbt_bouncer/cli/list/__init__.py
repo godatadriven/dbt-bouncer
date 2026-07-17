@@ -11,7 +11,7 @@ from dbt_bouncer.cli.list.utils import (
     category_key,
     print_text_checks,
 )
-from dbt_bouncer.enums import OutputFormatCLI
+from dbt_bouncer.enums import CheckCategory, OutputFormatCLI
 from dbt_bouncer.utils import get_check_objects
 
 
@@ -27,11 +27,7 @@ def list_checks(
 ) -> None:
     """List all available dbt-bouncer checks, grouped by category."""
     # Map module path segment -> display category name
-    category_labels = {
-        "catalog": "catalog_checks",
-        "manifest": "manifest_checks",
-        "run_results": "run_results_checks",
-    }
+    category_labels = {c.directory: c.value for c in CheckCategory}
 
     checks = sorted(get_check_objects(), key=lambda c: (category_key(c), c.__name__))
     payload = build_checks_payload(checks, category_labels)

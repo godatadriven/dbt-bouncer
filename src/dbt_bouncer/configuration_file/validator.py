@@ -14,7 +14,7 @@ import typer
 import yaml
 from pydantic import RootModel, ValidationError
 
-from dbt_bouncer.enums import ConfigFileName, ConfigFileSource
+from dbt_bouncer.enums import CheckCategory, ConfigFileName, ConfigFileSource
 from dbt_bouncer.utils import compile_pattern, get_check_registry, load_config_from_yaml
 
 if TYPE_CHECKING:
@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 
 _rebuilt_classes: set[str] = set()
 
-_CHECK_CATEGORIES = ("catalog_checks", "manifest_checks", "run_results_checks")
+_CHECK_CATEGORIES = tuple(CheckCategory)
 
 
 @lru_cache(maxsize=1)
@@ -269,7 +269,7 @@ def lint_config_file(config_file_path: Path) -> list[dict[str, Any]]:
         return issues
 
     registry = get_check_registry()
-    valid_categories = {"manifest_checks", "catalog_checks", "run_results_checks"}
+    valid_categories = set(CheckCategory)
     for category in valid_categories:
         if category in data:
             checks = data[category]
@@ -617,7 +617,7 @@ def _write_cached_conf(cache_path: Path, bouncer_config: "DbtBouncerConfBase") -
                     "data": _dump_check_for_cache(check),
                 }
             )
-        checks_by_cat[cat] = items
+        checks_by_cat[str(cat)] = items
 
     payload = {
         "v": _CONF_CACHE_FORMAT_VERSION,
@@ -699,11 +699,11 @@ def validate_conf(
         )
     else:
         # Fallback: no check names to extract, use full scan.
-        if "catalog_checks" in check_categories:
+        if CheckCategory.CATALOG_CHECKS in check_categories:
             import dbt_bouncer.checks.catalog
-        if "manifest_checks" in check_categories:
+        if CheckCategory.MANIFEST_CHECKS in check_categories:
             import dbt_bouncer.checks.manifest
-        if "run_results_checks" in check_categories:
+        if CheckCategory.RUN_RESULTS_CHECKS in check_categories:
             import dbt_bouncer.checks.run_results  # noqa: F401
 
         from dbt_bouncer.configuration_file.parser import create_bouncer_conf_class

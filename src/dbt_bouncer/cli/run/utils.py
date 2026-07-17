@@ -7,7 +7,12 @@ from pathlib import Path, PurePath
 from typing import TYPE_CHECKING
 
 from dbt_bouncer.cli.utils import resolve_config_path
-from dbt_bouncer.enums import ConfigFileName, ConfigFileSource, OutputFormat
+from dbt_bouncer.enums import (
+    CheckCategory,
+    ConfigFileName,
+    ConfigFileSource,
+    OutputFormat,
+)
 from dbt_bouncer.reporting.logger import configure_console_logging
 from dbt_bouncer.version import version as get_version
 
@@ -124,7 +129,7 @@ def run_bouncer(
     logging.info(f"Running dbt-bouncer ({get_version()})...")
 
     # Validate `only` has valid values
-    valid_check_categories = ["catalog_checks", "manifest_checks", "run_results_checks"]
+    valid_check_categories = [c.value for c in CheckCategory]
     if not only.strip():
         only_parsed = valid_check_categories
     else:
