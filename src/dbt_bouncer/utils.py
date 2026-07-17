@@ -789,6 +789,23 @@ def get_clean_model_name(unique_id: str) -> str:
     return "_".join(unique_id.split(".")[2:])
 
 
+def get_model_for_catalog_node(
+    catalog_node: Any, models_by_id: dict[str, Any]
+) -> Any | None:
+    """Return the dbt model matching a catalog node, or None if it is not a model.
+
+    Args:
+        catalog_node (CatalogNodeEntry): The catalog node whose `unique_id` is looked up.
+        models_by_id (dict[str, Any]): Mapping of model `unique_id` to model object.
+
+    Returns:
+        Any | None: The matching model object if the catalog node corresponds to a dbt model, otherwise None.
+
+    """
+    model = models_by_id.get(catalog_node.unique_id)
+    return model if model is not None and model.resource_type == "model" else None
+
+
 @lru_cache
 def get_package_version_number(version_string: str) -> "Version":
     """Dbt Cloud no longer uses version numbers that comply with semantic versioning, e.g. "2024.11.06+2a3d725".

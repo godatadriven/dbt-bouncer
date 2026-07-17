@@ -1,5 +1,5 @@
 import os
-from types import ModuleType
+from types import ModuleType, SimpleNamespace
 from typing import Any, Literal
 from unittest import mock
 from unittest.mock import MagicMock, patch
@@ -14,6 +14,7 @@ from dbt_bouncer.utils import (
     find_missing_meta_keys,
     flatten,
     get_clean_model_name,
+    get_model_for_catalog_node,
     get_package_version_number,
     make_markdown_table,
     object_excluded_by_path,
@@ -69,6 +70,59 @@ def test_create_github_comment_file_show_all_failures_true(monkeypatch, tmp_path
 )
 def test_get_clean_model_name(unique_id, expected_model_name):
     assert get_clean_model_name(unique_id) == expected_model_name
+
+
+@pytest.mark.parametrize(
+    ("catalog_unique_id", "models_by_id", "expected_unique_id"),
+    [
+        # Catalog node resolves to a model.
+        (
+            "model.my_project.my_model",
+            {
+                "model.my_project.my_model": SimpleNamespace(
+                    unique_id="model.my_project.my_model", resource_type="model"
+                )
+            },
+            "model.my_project.my_model",
+        ),
+        # Catalog node has no matching entry.
+        (
+            "model.my_project.missing",
+            {
+                "model.my_project.my_model": SimpleNamespace(
+                    unique_id="model.my_project.my_model", resource_type="model"
+                )
+            },
+            None,
+        ),
+        # Matching entry exists but is not a model (e.g. a seed).
+        (
+            "seed.my_project.my_seed",
+            {
+                "seed.my_project.my_seed": SimpleNamespace(
+                    unique_id="seed.my_project.my_seed", resource_type="seed"
+                )
+            },
+            None,
+        ),
+        # Empty lookup dict resolves to None.
+        (
+            "model.my_project.my_model",
+            {},
+            None,
+        ),
+    ],
+)
+def test_get_model_for_catalog_node(
+    catalog_unique_id, models_by_id, expected_unique_id
+):
+    catalog_node = SimpleNamespace(unique_id=catalog_unique_id)
+    result = get_model_for_catalog_node(catalog_node, models_by_id)
+    if expected_unique_id is None:
+        assert result is None
+    else:
+        assert result is not None
+        assert result.unique_id == expected_unique_id
 
 
 @pytest.mark.parametrize(
