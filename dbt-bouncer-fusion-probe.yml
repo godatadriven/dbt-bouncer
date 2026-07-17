@@ -1,0 +1,88 @@
+dbt_artifacts_dir: dbt_project/target
+
+manifest_checks:
+  # Exposures
+  - name: check_exposure_based_on_model
+  - name: check_exposure_based_on_non_public_models
+  - name: check_exposure_based_on_view
+
+  # Macros (include: ^macros/ excludes Fusion auto-generated snapshot macros,
+  # which have paths rooted in snapshots/ rather than macros/)
+  - name: check_macro_arguments_description_populated
+    include: ^macros/
+  - name: check_macro_code_does_not_contain_regexp_pattern
+    regexp_pattern: .*[i][f][n][u][l][l].*
+    include: ^macros/
+  - name: check_macro_description_populated
+    include: ^macros/
+  - name: check_macro_max_number_of_lines
+    include: ^macros/
+  - name: check_macro_name_matches_file_name
+    include: ^macros/
+  - name: check_macro_property_file_location
+    include: ^macros/
+
+  # Metadata
+  - name: check_project_name
+    project_name_pattern: ^dbt_bouncer_
+
+  # Models
+  - name: check_model_access
+    include: ^models/intermediate
+    access: protected
+  - name: check_model_access
+    include: ^models/marts
+    access: public
+  - name: check_model_access
+    include: ^models/staging
+    access: protected
+  - name: check_model_code_does_not_contain_regexp_pattern
+    regexp_pattern: .*[i][f][n][u][l][l].*
+  - name: check_model_description_populated
+    include: ^models/marts
+  - name: check_model_directories
+    include: ^models
+    permitted_sub_directories:
+      - intermediate
+      - marts
+      - staging
+      - utilities
+  - name: check_model_has_meta_keys
+    include: ^models/marts
+    keys:
+      - maturity
+  - name: check_model_has_tags
+    include: ^models/staging/crm
+    tags:
+      - crm
+  - name: check_model_names
+    model_name_pattern: ^[a-z][a-z0-9_]*$
+
+  # Seeds
+  - name: check_seed_description_populated
+
+  # Snapshots
+  - name: check_snapshot_description_populated
+
+  # Sources (scope to dummy_source in crm to avoid the intentionally
+  # non-conforming Non_Conforming_Name table in payments sources)
+  - name: check_source_description_populated
+    include: ^models/staging/crm
+  - name: check_source_has_meta_keys
+    keys:
+      - owner
+    include: ^models/staging/crm
+  - name: check_source_has_tags
+    tags:
+      - example_tag
+    include: ^models/staging/crm
+  - name: check_source_loader_populated
+  - name: check_source_names
+    source_name_pattern: ^[a-z][a-z0-9_]*$
+    include: ^models/staging/crm
+
+  # Tests
+  - name: check_test_has_tags
+    include: ^models/marts
+    tags:
+      - critical
