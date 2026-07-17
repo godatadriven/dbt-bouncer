@@ -112,7 +112,7 @@ class TestCheckTestHasTags:
         )
 
     def test_check_test_has_tags_invalid_criteria(self):
-        with pytest.raises(ValueError, match="'any', 'all' or 'one'"):
+        with pytest.raises(ValueError, match="'all', 'any' or 'one'"):
             check_passes(
                 "check_test_has_tags",
                 criteria="alll",

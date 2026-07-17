@@ -5,6 +5,7 @@ from typing import Annotated, Any
 from pydantic import Field
 
 from dbt_bouncer.check_framework.decorator import check, fail
+from dbt_bouncer.enums import ModelAccess
 from dbt_bouncer.utils import is_description_populated
 
 
@@ -173,7 +174,7 @@ def check_columns_are_documented_in_public_models(
         model = next(m for m in ctx.models if m.unique_id == catalog_node.unique_id)
         non_complying_columns = []
         for _, v in catalog_node.columns.items():
-            if model.access and model.access.value == "public":
+            if model.access and model.access.value == ModelAccess.PUBLIC:
                 model_columns = model.columns or {}
                 column_config = model_columns.get(v.name)
                 if column_config is None or not is_description_populated(

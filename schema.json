@@ -2830,8 +2830,7 @@
           "type": "string"
         },
         "access": {
-          "title": "Access",
-          "type": "string"
+          "$ref": "#/$defs/ModelAccess"
         }
       },
       "required": [
@@ -3415,14 +3414,8 @@
           "type": "string"
         },
         "criteria": {
-          "default": "all",
-          "enum": [
-            "any",
-            "all",
-            "one"
-          ],
-          "title": "Criteria",
-          "type": "string"
+          "$ref": "#/$defs/Criteria",
+          "default": "all"
         },
         "required_macros": {
           "items": {
@@ -5192,14 +5185,8 @@
           "type": "string"
         },
         "criteria": {
-          "default": "all",
-          "enum": [
-            "any",
-            "all",
-            "one"
-          ],
-          "title": "Criteria",
-          "type": "string"
+          "$ref": "#/$defs/Criteria",
+          "default": "all"
         },
         "tags": {
           "items": {
@@ -8734,14 +8721,8 @@
           "type": "string"
         },
         "criteria": {
-          "default": "all",
-          "enum": [
-            "any",
-            "all",
-            "one"
-          ],
-          "title": "Criteria",
-          "type": "string"
+          "$ref": "#/$defs/Criteria",
+          "default": "all"
         },
         "tags": {
           "items": {
@@ -9694,14 +9675,8 @@
           "type": "string"
         },
         "criteria": {
-          "default": "all",
-          "enum": [
-            "any",
-            "all",
-            "one"
-          ],
-          "title": "Criteria",
-          "type": "string"
+          "$ref": "#/$defs/Criteria",
+          "default": "all"
         },
         "tags": {
           "items": {
@@ -10730,14 +10705,8 @@
           "type": "string"
         },
         "criteria": {
-          "default": "all",
-          "enum": [
-            "any",
-            "all",
-            "one"
-          ],
-          "title": "Criteria",
-          "type": "string"
+          "$ref": "#/$defs/Criteria",
+          "default": "all"
         },
         "tags": {
           "items": {
@@ -11145,6 +11114,16 @@
       "title": "CheckUnitTestGivenFormats",
       "type": "object"
     },
+    "Criteria": {
+      "description": "How many of a set of required items must match (tags, macros, \u2026).",
+      "enum": [
+        "all",
+        "any",
+        "one"
+      ],
+      "title": "Criteria",
+      "type": "string"
+    },
     "Materialization": {
       "description": "dbt materialization strategies.",
       "enum": [
@@ -11154,6 +11133,16 @@
         "view"
       ],
       "title": "Materialization",
+      "type": "string"
+    },
+    "ModelAccess": {
+      "description": "dbt model access levels.",
+      "enum": [
+        "private",
+        "protected",
+        "public"
+      ],
+      "title": "ModelAccess",
       "type": "string"
     },
     "NestedDict": {

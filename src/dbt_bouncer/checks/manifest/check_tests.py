@@ -1,7 +1,6 @@
-from typing import Literal
-
 from dbt_bouncer.check_framework.decorator import check, fail
 from dbt_bouncer.check_framework.exceptions import NestedDict
+from dbt_bouncer.enums import Criteria
 from dbt_bouncer.utils import compile_pattern, find_missing_meta_keys
 
 
@@ -44,9 +43,7 @@ def check_test_has_meta_keys(test, *, keys: NestedDict):
 
 
 @check
-def check_test_has_tags(
-    test, *, criteria: Literal["any", "all", "one"] = "all", tags: list[str]
-):
+def check_test_has_tags(test, *, criteria: Criteria = Criteria.ALL, tags: list[str]):
     """Data tests must have the specified tags.
 
     !!! info "Rationale"
@@ -76,14 +73,14 @@ def check_test_has_tags(
 
     """
     resource_tags = test.tags or []
-    if criteria == "any":
+    if criteria == Criteria.ANY:
         if not any(tag in resource_tags for tag in tags):
             fail(f"`{test.unique_id}` does not have any of the required tags: {tags}.")
-    elif criteria == "all":
+    elif criteria == Criteria.ALL:
         missing_tags = [tag for tag in tags if tag not in resource_tags]
         if missing_tags:
             fail(f"`{test.unique_id}` is missing required tags: {missing_tags}.")
-    elif criteria == "one" and sum(tag in resource_tags for tag in tags) != 1:
+    elif criteria == Criteria.ONE and sum(tag in resource_tags for tag in tags) != 1:
         fail(f"`{test.unique_id}` must have exactly one of the required tags: {tags}.")
 
 

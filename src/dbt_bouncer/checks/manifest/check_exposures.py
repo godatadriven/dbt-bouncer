@@ -4,6 +4,7 @@ from pydantic import Field
 
 from dbt_bouncer.check_framework.decorator import check, fail
 from dbt_bouncer.check_framework.exceptions import NestedDict
+from dbt_bouncer.enums import ModelAccess
 from dbt_bouncer.utils import find_missing_meta_keys, is_description_populated
 
 
@@ -162,7 +163,7 @@ def check_exposure_based_on_non_public_models(exposure, ctx):
             and model_obj.resource_type == "model"
             and model_obj.package_name == exposure.package_name
             and model_obj.access
-            and model_obj.access.value != "public"
+            and model_obj.access.value != ModelAccess.PUBLIC
         ):
             non_public_upstream_dependencies.append(model_obj.name)
 

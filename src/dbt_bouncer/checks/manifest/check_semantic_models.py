@@ -1,4 +1,5 @@
 from dbt_bouncer.check_framework.decorator import check, fail
+from dbt_bouncer.enums import ModelAccess
 
 
 @check
@@ -40,7 +41,7 @@ def check_semantic_model_based_on_non_public_models(semantic_model, ctx):
             model_obj.resource_type == "model"
             and model_obj.package_name == semantic_model.package_name
             and model_obj.access
-            and model_obj.access.value != "public"
+            and model_obj.access.value != ModelAccess.PUBLIC
         ):
             non_public_upstream_dependencies.append(model_obj.name)
 

@@ -1,10 +1,11 @@
 """Checks related to model upstream dependencies and lineage."""
 
-from typing import Annotated, Literal
+from typing import Annotated
 
 from pydantic import Field
 
 from dbt_bouncer.check_framework.decorator import check, fail
+from dbt_bouncer.enums import Criteria
 from dbt_bouncer.utils import get_clean_model_name
 
 
@@ -12,7 +13,7 @@ from dbt_bouncer.utils import get_clean_model_name
 def check_model_depends_on_macros(
     model,
     *,
-    criteria: Literal["any", "all", "one"] = "all",
+    criteria: Criteria = Criteria.ALL,
     required_macros: list[str],
 ):
     """Models must depend on the specified macros.
@@ -53,12 +54,12 @@ def check_model_depends_on_macros(
         (".").join(m.split(".")[1:])
         for m in getattr(model.depends_on, "macros", []) or []
     ]
-    if criteria == "any":
+    if criteria == Criteria.ANY:
         if not any(macro in upstream_macros for macro in required_macros):
             fail(
                 f"`{get_clean_model_name(model.unique_id)}` does not depend on any of the required macros: {required_macros}."
             )
-    elif criteria == "all":
+    elif criteria == Criteria.ALL:
         missing_macros = [
             macro for macro in required_macros if macro not in upstream_macros
         ]
@@ -67,7 +68,7 @@ def check_model_depends_on_macros(
                 f"`{get_clean_model_name(model.unique_id)}` is missing required macros: {missing_macros}."
             )
     elif (
-        criteria == "one"
+        criteria == Criteria.ONE
         and sum(macro in upstream_macros for macro in required_macros) != 1
     ):
         fail(

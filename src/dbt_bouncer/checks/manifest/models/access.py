@@ -5,11 +5,12 @@ from typing import Annotated
 from pydantic import Field
 
 from dbt_bouncer.check_framework.decorator import check, fail
+from dbt_bouncer.enums import ModelAccess
 from dbt_bouncer.utils import compile_pattern, get_clean_model_name
 
 
 @check
-def check_model_access(model, *, access: str):
+def check_model_access(model, *, access: ModelAccess):
     """Models must have the specified access attribute. Requires dbt 1.7+.
 
     !!! info "Rationale"
@@ -78,7 +79,7 @@ def check_model_contract_enforced_for_public_model(model):
     """
     if (
         model.access
-        and model.access.value == "public"
+        and model.access.value == ModelAccess.PUBLIC
         and (not model.contract or model.contract.enforced is not True)
     ):
         fail(

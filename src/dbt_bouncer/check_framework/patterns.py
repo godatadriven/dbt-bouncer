@@ -10,7 +10,7 @@ from __future__ import annotations
 import logging
 import re  # noqa: TC003 — used in PrivateAttr annotation; unconditional to avoid breakage if PEP 563 is removed
 from abc import ABC, abstractmethod
-from typing import Any, Literal
+from typing import Any
 
 from pydantic import Field, PrivateAttr
 
@@ -19,6 +19,7 @@ from dbt_bouncer.check_framework.exceptions import (
     DbtBouncerFailedCheckError,
     NestedDict,
 )
+from dbt_bouncer.enums import Criteria
 from dbt_bouncer.utils import (
     compile_pattern,
     find_missing_meta_keys,
@@ -192,7 +193,7 @@ class BaseHasTagsCheck(ABC, BaseCheck):
     The default ``criteria`` can be overridden per subclass via ``Field(default=...)``.
     """
 
-    criteria: Literal["any", "all", "one"] = Field(default="all")
+    criteria: Criteria = Field(default=Criteria.ALL)
     tags: list[str]
 
     @property
@@ -213,19 +214,19 @@ class BaseHasTagsCheck(ABC, BaseCheck):
 
         """
         resource_tags = self._resource_tags
-        if self.criteria == "any":
+        if self.criteria == Criteria.ANY:
             if not any(tag in resource_tags for tag in self.tags):
                 raise DbtBouncerFailedCheckError(
                     f"`{self._resource_display_name}` does not have any of the required tags: {self.tags}."
                 )
-        elif self.criteria == "all":
+        elif self.criteria == Criteria.ALL:
             missing_tags = [tag for tag in self.tags if tag not in resource_tags]
             if missing_tags:
                 raise DbtBouncerFailedCheckError(
                     f"`{self._resource_display_name}` is missing required tags: {missing_tags}."
                 )
         elif (
-            self.criteria == "one"
+            self.criteria == Criteria.ONE
             and sum(tag in resource_tags for tag in self.tags) != 1
         ):
             raise DbtBouncerFailedCheckError(
