@@ -105,6 +105,12 @@ def test_get_clean_model_name(unique_id, expected_model_name):
             },
             None,
         ),
+        # Empty lookup dict resolves to None.
+        (
+            "model.my_project.my_model",
+            {},
+            None,
+        ),
     ],
 )
 def test_get_model_for_catalog_node(
