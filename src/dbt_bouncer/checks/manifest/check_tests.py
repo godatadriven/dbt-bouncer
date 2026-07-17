@@ -51,7 +51,7 @@ def check_test_has_tags(test, *, criteria: Criteria = Criteria.ALL, tags: list[s
         Tags allow teams to organise tests into logical groups (e.g. `critical`, `nightly`, `schema-only`) and run subsets selectively with `dbt test --select tag:critical`. Without enforced tagging, it becomes difficult to prioritise test failures, run fast CI checks, or set up tiered alerting based on test severity.
 
     Parameters:
-        criteria (Literal["any", "all", "one"] | None): Whether the test must have any, all, or exactly one of the specified tags. Default: `all`.
+        criteria (Literal["all", "any", "one"]): Whether the test must have any, all, or exactly one of the specified tags. Default: `all`.
         tags (list[str]): List of tags to check for.
 
     Receives:

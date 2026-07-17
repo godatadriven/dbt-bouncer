@@ -14,7 +14,7 @@ def check_model_has_tags(model, *, criteria: Criteria = Criteria.ALL, tags: list
         Tags are used to group models for selective execution (e.g. `dbt run --select tag:daily`), documentation filtering, and governance tracking. Requiring models in specific directories to carry certain tags ensures that scheduling and operational workflows that depend on those tags remain reliable as the project evolves.
 
     Parameters:
-        criteria (Literal["any", "all", "one"] | None): Whether the model must have any, all, or exactly one of the specified tags. Default: `all`.
+        criteria (Literal["all", "any", "one"]): Whether the model must have any, all, or exactly one of the specified tags. Default: `all`.
         tags (list[str]): List of tags to check for.
 
     Receives:

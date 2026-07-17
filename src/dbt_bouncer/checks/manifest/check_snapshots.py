@@ -105,7 +105,7 @@ def check_snapshot_has_tags(
         Tags on snapshots enable selective execution (e.g. `dbt snapshot --select tag:nightly`) and make it possible to apply governance policies to specific groups of snapshots. Without enforced tagging, snapshots can be inadvertently skipped in scheduled runs or included in the wrong execution contexts, leading to stale historical data.
 
     Parameters:
-        criteria (Literal["any", "all", "one"] | None): Whether the snapshot must have any, all, or exactly one of the specified tags. Default: `all`.
+        criteria (Literal["all", "any", "one"]): Whether the snapshot must have any, all, or exactly one of the specified tags. Default: `all`.
         tags (list[str]): List of tags to check for.
 
     Receives:

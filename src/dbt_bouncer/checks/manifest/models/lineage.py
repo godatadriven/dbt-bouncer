@@ -23,7 +23,7 @@ def check_model_depends_on_macros(
         Some teams mandate that certain model types always use shared macros for consistency — for example, requiring all incremental models to call `dbt.is_incremental()`. This check enforces those conventions, preventing models from re-implementing logic that is already standardised in a shared macro.
 
     Parameters:
-        criteria (Literal["any", "all", "one"] | None): Whether the model must depend on any, all, or exactly one of the specified macros. Default: `all`.
+        criteria (Literal["all", "any", "one"]): Whether the model must depend on any, all, or exactly one of the specified macros. Default: `all`.
         required_macros (list[str]): List of macros the model must depend on. All macros must specify a namespace, e.g. `dbt.is_incremental`.
 
     Receives:
