@@ -111,6 +111,34 @@ def test_report_results_saves_coverage_file(tmp_path):
     assert output_file.exists()
 
 
+def test_report_results_escapes_rich_markup_in_console(capsys, monkeypatch):
+    """Failure messages containing `[...]` are not stripped by rich markup.
+
+    Regression test for a display bug where regex character classes such as
+    `[a-z0-9]` in a failure message were interpreted as rich style tags and
+    silently removed from the console report (see issue #974).
+    """
+    # Force a wide console so the failure message renders on a single line and
+    # the pattern isn't split across rich's column wrapping.
+    monkeypatch.setenv("COLUMNS", "250")
+
+    pattern = "^[a-z0-9]+(_[a-z0-9]+)*$"
+    results = [
+        {
+            "check_run_id": "check_model_names:0:model.my_model",
+            "failure_message": f"`my_model` does not match the supplied regex `{pattern}`.",
+            "file_path": "models/staging/my_model.sql",
+            "outcome": CheckOutcome.FAILED,
+            "severity": CheckSeverity.ERROR,
+        },
+    ]
+    reporter = Reporter(show_all_failures=True, create_pr_comment_file=False)
+    reporter.report_results(results)
+
+    out = capsys.readouterr().out
+    assert "[a-z0-9]" in out
+
+
 def test_report_results_creates_pr_comment_file():
     """PR comment file is created when flag is set, with the file path column."""
     results = [
