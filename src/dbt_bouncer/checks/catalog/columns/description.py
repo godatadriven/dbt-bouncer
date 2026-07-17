@@ -1,24 +1,12 @@
 """Checks related to column descriptions and documentation coverage."""
 
-from typing import Annotated, Any
+from typing import Annotated
 
 from pydantic import Field
 
 from dbt_bouncer.check_framework.decorator import check, fail
 from dbt_bouncer.enums import ModelAccess
-from dbt_bouncer.utils import is_description_populated
-
-
-def _catalog_node_model(catalog_node: Any, models_by_id: dict[str, Any]) -> Any | None:
-    """Return the model for a catalog node, or None if it isn't a model.
-
-    Returns:
-        Any | None: The matching model object, or None if the catalog node
-        does not correspond to a dbt model.
-
-    """
-    model = models_by_id.get(catalog_node.unique_id)
-    return model if model is not None and model.resource_type == "model" else None
+from dbt_bouncer.utils import get_model_for_catalog_node, is_description_populated
 
 
 @check
@@ -66,7 +54,7 @@ def check_column_description_populated(
         if ctx.models_by_unique_id
         else {m.unique_id: m for m in ctx.models}
     )
-    model = _catalog_node_model(catalog_node, models_by_id)
+    model = get_model_for_catalog_node(catalog_node, models_by_id)
     if model is not None:
         # Snowflake saves column descriptions in the 'comment' field in catalog.json
         is_snowflake = ctx.manifest_obj.manifest.metadata.adapter_type in ["snowflake"]
@@ -124,7 +112,7 @@ def check_columns_are_all_documented(catalog_node, ctx, *, case_sensitive: bool 
         if ctx.models_by_unique_id
         else {m.unique_id: m for m in ctx.models}
     )
-    model = _catalog_node_model(catalog_node, models_by_id)
+    model = get_model_for_catalog_node(catalog_node, models_by_id)
     if model is not None:
         if ctx.manifest_obj.manifest.metadata.adapter_type in ["snowflake"]:
             case_sensitive = False
@@ -186,7 +174,7 @@ def check_columns_are_documented_in_public_models(
         if ctx.models_by_unique_id
         else {m.unique_id: m for m in ctx.models}
     )
-    model = _catalog_node_model(catalog_node, models_by_id)
+    model = get_model_for_catalog_node(catalog_node, models_by_id)
     if model is not None:
         non_complying_columns = []
         for _, v in catalog_node.columns.items():
