@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Any
 
 from rich import box
 from rich.console import Console
+from rich.markup import escape
 from rich.panel import Panel
 from rich.table import Table
 
@@ -183,11 +184,15 @@ class Reporter:
                 sev = str(check.get("severity", "")).lower()
                 sev_color = "red" if CheckSeverity.ERROR in sev else "yellow"
 
+                # Escape user-derived content so text that looks like rich
+                # markup (e.g. regex character classes such as `[a-z0-9]`) is
+                # not interpreted as a style tag and stripped. The severity
+                # cell is intentional markup and is left as-is. See issue #974.
                 table.add_row(
-                    str(check.get("check_run_id", "")),
-                    str(check.get("file_path") or ""),
+                    escape(str(check.get("check_run_id", ""))),
+                    escape(str(check.get("file_path") or "")),
                     f"[bold {sev_color}]{sev.upper()}[/bold {sev_color}]",
-                    str(check.get("failure_message", "")),
+                    escape(str(check.get("failure_message", ""))),
                 )
 
             console.print(table)
