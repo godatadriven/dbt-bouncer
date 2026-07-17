@@ -7,14 +7,14 @@ from dbt_bouncer.check_framework.decorator import check, fail
 from dbt_bouncer.utils import compile_pattern
 
 
-def _is_catalog_node_a_model(catalog_node: Any, models: list[Any]) -> bool:
+def _is_catalog_node_a_model(catalog_node: Any, models_by_id: dict[str, Any]) -> bool:
     """Return True if a catalog node corresponds to a dbt model.
 
     Returns:
         bool: Whether a catalog node is a model.
 
     """
-    model = next((m for m in models if m.unique_id == catalog_node.unique_id), None)
+    model = models_by_id.get(catalog_node.unique_id)
     return model is not None and model.resource_type == "model"
 
 
@@ -241,7 +241,12 @@ def check_column_names(catalog_node, ctx, *, column_name_pattern: str):
         ```
 
     """
-    if _is_catalog_node_a_model(catalog_node, ctx.models):
+    models_by_id = (
+        ctx.models_by_unique_id
+        if ctx.models_by_unique_id
+        else {m.unique_id: m for m in ctx.models}
+    )
+    if _is_catalog_node_a_model(catalog_node, models_by_id):
         non_complying_columns: list[str] = []
         non_complying_columns.extend(
             v.name

@@ -8,15 +8,16 @@ from dbt_bouncer.check_framework.decorator import check, fail
 from dbt_bouncer.utils import is_description_populated
 
 
-def _is_catalog_node_a_model(catalog_node: Any, models: list[Any]) -> bool:
-    """Return True if a catalog node corresponds to a dbt model.
+def _catalog_node_model(catalog_node: Any, models_by_id: dict[str, Any]) -> Any | None:
+    """Return the model for a catalog node, or None if it isn't a model.
 
     Returns:
-        bool: Whether a catalog node is a model.
+        Any | None: The matching model object, or None if the catalog node
+        does not correspond to a dbt model.
 
     """
-    model = next((m for m in models if m.unique_id == catalog_node.unique_id), None)
-    return model is not None and model.resource_type == "model"
+    model = models_by_id.get(catalog_node.unique_id)
+    return model if model is not None and model.resource_type == "model" else None
 
 
 @check
@@ -59,16 +60,22 @@ def check_column_description_populated(
         ```
 
     """
-    if _is_catalog_node_a_model(catalog_node, ctx.models):
-        model = next(m for m in ctx.models if m.unique_id == catalog_node.unique_id)
+    models_by_id = (
+        ctx.models_by_unique_id
+        if ctx.models_by_unique_id
+        else {m.unique_id: m for m in ctx.models}
+    )
+    model = _catalog_node_model(catalog_node, models_by_id)
+    if model is not None:
+        # Snowflake saves column descriptions in the 'comment' field in catalog.json
+        is_snowflake = ctx.manifest_obj.manifest.metadata.adapter_type in ["snowflake"]
+        model_columns = model.columns or {}
         non_complying_columns = []
         for _, v in catalog_node.columns.items():
-            # Snowflake saves column descriptions in the 'comment' field in catalog.json
-            if ctx.manifest_obj.manifest.metadata.adapter_type in ["snowflake"]:
+            if is_snowflake:
                 description = getattr(v, "comment", "") or ""
             else:
-                columns = model.columns or {}
-                column_from_manifest = columns.get(v.name)
+                column_from_manifest = model_columns.get(v.name)
                 description = ""
                 if column_from_manifest:
                     description = column_from_manifest.description or ""
@@ -111,9 +118,13 @@ def check_columns_are_all_documented(catalog_node, ctx, *, case_sensitive: bool 
         ```
 
     """
-    if _is_catalog_node_a_model(catalog_node, ctx.models):
-        model = next(m for m in ctx.models if m.unique_id == catalog_node.unique_id)
-
+    models_by_id = (
+        ctx.models_by_unique_id
+        if ctx.models_by_unique_id
+        else {m.unique_id: m for m in ctx.models}
+    )
+    model = _catalog_node_model(catalog_node, models_by_id)
+    if model is not None:
         if ctx.manifest_obj.manifest.metadata.adapter_type in ["snowflake"]:
             case_sensitive = False
 
@@ -169,8 +180,13 @@ def check_columns_are_documented_in_public_models(
         ```
 
     """
-    if _is_catalog_node_a_model(catalog_node, ctx.models):
-        model = next(m for m in ctx.models if m.unique_id == catalog_node.unique_id)
+    models_by_id = (
+        ctx.models_by_unique_id
+        if ctx.models_by_unique_id
+        else {m.unique_id: m for m in ctx.models}
+    )
+    model = _catalog_node_model(catalog_node, models_by_id)
+    if model is not None:
         non_complying_columns = []
         for _, v in catalog_node.columns.items():
             if model.access and model.access.value == "public":
