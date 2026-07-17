@@ -2830,8 +2830,7 @@
           "type": "string"
         },
         "access": {
-          "title": "Access",
-          "type": "string"
+          "$ref": "#/$defs/ModelAccess"
         }
       },
       "required": [
@@ -3331,7 +3330,7 @@
     },
     "CheckModelDependsOnMacros": {
       "additionalProperties": false,
-      "description": "Models must depend on the specified macros.\n\n!!! info \"Rationale\"\n\n    Some teams mandate that certain model types always use shared macros for consistency \u2014 for example, requiring all incremental models to call `dbt.is_incremental()`. This check enforces those conventions, preventing models from re-implementing logic that is already standardised in a shared macro.\n\nParameters:\n    criteria (Literal[\"any\", \"all\", \"one\"] | None): Whether the model must depend on any, all, or exactly one of the specified macros. Default: `all`.\n    required_macros (list[str]): List of macros the model must depend on. All macros must specify a namespace, e.g. `dbt.is_incremental`.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    materialization (Literal[\"ephemeral\", \"incremental\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_model_depends_on_macros\n          required_macros:\n            - dbt.is_incremental\n        - name: check_model_depends_on_macros\n          criteria: one\n          required_macros:\n            - my_package.sampler\n            - my_package.sampling\n    ```",
+      "description": "Models must depend on the specified macros.\n\n!!! info \"Rationale\"\n\n    Some teams mandate that certain model types always use shared macros for consistency \u2014 for example, requiring all incremental models to call `dbt.is_incremental()`. This check enforces those conventions, preventing models from re-implementing logic that is already standardised in a shared macro.\n\nParameters:\n    criteria (Literal[\"all\", \"any\", \"one\"]): Whether the model must depend on any, all, or exactly one of the specified macros. Default: `all`.\n    required_macros (list[str]): List of macros the model must depend on. All macros must specify a namespace, e.g. `dbt.is_incremental`.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    materialization (Literal[\"ephemeral\", \"incremental\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_model_depends_on_macros\n          required_macros:\n            - dbt.is_incremental\n        - name: check_model_depends_on_macros\n          criteria: one\n          required_macros:\n            - my_package.sampler\n            - my_package.sampling\n    ```",
       "properties": {
         "description": {
           "anyOf": [
@@ -3415,14 +3414,8 @@
           "type": "string"
         },
         "criteria": {
-          "default": "all",
-          "enum": [
-            "any",
-            "all",
-            "one"
-          ],
-          "title": "Criteria",
-          "type": "string"
+          "$ref": "#/$defs/Criteria",
+          "default": "all"
         },
         "required_macros": {
           "items": {
@@ -5108,7 +5101,7 @@
     },
     "CheckModelHasTags": {
       "additionalProperties": false,
-      "description": "Models must have the specified tags.\n\n!!! info \"Rationale\"\n\n    Tags are used to group models for selective execution (e.g. `dbt run --select tag:daily`), documentation filtering, and governance tracking. Requiring models in specific directories to carry certain tags ensures that scheduling and operational workflows that depend on those tags remain reliable as the project evolves.\n\nParameters:\n    criteria (Literal[\"any\", \"all\", \"one\"] | None): Whether the model must have any, all, or exactly one of the specified tags. Default: `all`.\n    tags (list[str]): List of tags to check for.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    materialization (Literal[\"ephemeral\", \"incremental\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_model_has_tags\n          tags:\n            - tag_1\n            - tag_2\n    ```",
+      "description": "Models must have the specified tags.\n\n!!! info \"Rationale\"\n\n    Tags are used to group models for selective execution (e.g. `dbt run --select tag:daily`), documentation filtering, and governance tracking. Requiring models in specific directories to carry certain tags ensures that scheduling and operational workflows that depend on those tags remain reliable as the project evolves.\n\nParameters:\n    criteria (Literal[\"all\", \"any\", \"one\"]): Whether the model must have any, all, or exactly one of the specified tags. Default: `all`.\n    tags (list[str]): List of tags to check for.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    materialization (Literal[\"ephemeral\", \"incremental\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_model_has_tags\n          tags:\n            - tag_1\n            - tag_2\n    ```",
       "properties": {
         "description": {
           "anyOf": [
@@ -5192,14 +5185,8 @@
           "type": "string"
         },
         "criteria": {
-          "default": "all",
-          "enum": [
-            "any",
-            "all",
-            "one"
-          ],
-          "title": "Criteria",
-          "type": "string"
+          "$ref": "#/$defs/Criteria",
+          "default": "all"
         },
         "tags": {
           "items": {
@@ -8650,7 +8637,7 @@
     },
     "CheckSnapshotHasTags": {
       "additionalProperties": false,
-      "description": "Snapshots must have the specified tags.\n\n!!! info \"Rationale\"\n\n    Tags on snapshots enable selective execution (e.g. `dbt snapshot --select tag:nightly`) and make it possible to apply governance policies to specific groups of snapshots. Without enforced tagging, snapshots can be inadvertently skipped in scheduled runs or included in the wrong execution contexts, leading to stale historical data.\n\nParameters:\n    criteria (Literal[\"any\", \"all\", \"one\"] | None): Whether the snapshot must have any, all, or exactly one of the specified tags. Default: `all`.\n    tags (list[str]): List of tags to check for.\n\nReceives:\n    snapshot (SnapshotNode): The SnapshotNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the snapshot path. Snapshot paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the snapshot path. Only snapshot paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_snapshot_has_tags\n          tags:\n            - tag_1\n            - tag_2\n    ```",
+      "description": "Snapshots must have the specified tags.\n\n!!! info \"Rationale\"\n\n    Tags on snapshots enable selective execution (e.g. `dbt snapshot --select tag:nightly`) and make it possible to apply governance policies to specific groups of snapshots. Without enforced tagging, snapshots can be inadvertently skipped in scheduled runs or included in the wrong execution contexts, leading to stale historical data.\n\nParameters:\n    criteria (Literal[\"all\", \"any\", \"one\"]): Whether the snapshot must have any, all, or exactly one of the specified tags. Default: `all`.\n    tags (list[str]): List of tags to check for.\n\nReceives:\n    snapshot (SnapshotNode): The SnapshotNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the snapshot path. Snapshot paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the snapshot path. Only snapshot paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_snapshot_has_tags\n          tags:\n            - tag_1\n            - tag_2\n    ```",
       "properties": {
         "description": {
           "anyOf": [
@@ -8734,14 +8721,8 @@
           "type": "string"
         },
         "criteria": {
-          "default": "all",
-          "enum": [
-            "any",
-            "all",
-            "one"
-          ],
-          "title": "Criteria",
-          "type": "string"
+          "$ref": "#/$defs/Criteria",
+          "default": "all"
         },
         "tags": {
           "items": {
@@ -9610,7 +9591,7 @@
     },
     "CheckSourceHasTags": {
       "additionalProperties": false,
-      "description": "Sources must have the specified tags.\n\n!!! info \"Rationale\"\n\n    Tags are the primary mechanism for grouping dbt nodes into logical categories \u2014 domain areas, sensitivity levels, scheduling tiers, or compliance scopes. When sources are missing required tags, they fall outside automated workflows that rely on tag-based selection (e.g. `dbt build --select tag:pii` or scheduled refreshes filtered by domain). This check ensures that every source is tagged correctly at registration time, preventing ungrouped sources from slipping through governance and operational processes.\n\nParameters:\n    criteria (Literal[\"any\", \"all\", \"one\"] | None): Whether the source must have any, all, or exactly one of the specified tags. Default: `all`.\n    tags (list[str]): List of tags to check for.\n\nReceives:\n    source (SourceNode): The SourceNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the source path (i.e the .yml file where the source is configured). Source paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the source path (i.e the .yml file where the source is configured). Only source paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_source_has_tags\n          tags:\n            - tag_1\n            - tag_2\n    ```",
+      "description": "Sources must have the specified tags.\n\n!!! info \"Rationale\"\n\n    Tags are the primary mechanism for grouping dbt nodes into logical categories \u2014 domain areas, sensitivity levels, scheduling tiers, or compliance scopes. When sources are missing required tags, they fall outside automated workflows that rely on tag-based selection (e.g. `dbt build --select tag:pii` or scheduled refreshes filtered by domain). This check ensures that every source is tagged correctly at registration time, preventing ungrouped sources from slipping through governance and operational processes.\n\nParameters:\n    criteria (Literal[\"all\", \"any\", \"one\"]): Whether the source must have any, all, or exactly one of the specified tags. Default: `all`.\n    tags (list[str]): List of tags to check for.\n\nReceives:\n    source (SourceNode): The SourceNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the source path (i.e the .yml file where the source is configured). Source paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the source path (i.e the .yml file where the source is configured). Only source paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_source_has_tags\n          tags:\n            - tag_1\n            - tag_2\n    ```",
       "properties": {
         "description": {
           "anyOf": [
@@ -9694,14 +9675,8 @@
           "type": "string"
         },
         "criteria": {
-          "default": "all",
-          "enum": [
-            "any",
-            "all",
-            "one"
-          ],
-          "title": "Criteria",
-          "type": "string"
+          "$ref": "#/$defs/Criteria",
+          "default": "all"
         },
         "tags": {
           "items": {
@@ -10646,7 +10621,7 @@
     },
     "CheckTestHasTags": {
       "additionalProperties": false,
-      "description": "Data tests must have the specified tags.\n\n!!! info \"Rationale\"\n\n    Tags allow teams to organise tests into logical groups (e.g. `critical`, `nightly`, `schema-only`) and run subsets selectively with `dbt test --select tag:critical`. Without enforced tagging, it becomes difficult to prioritise test failures, run fast CI checks, or set up tiered alerting based on test severity.\n\nParameters:\n    criteria (Literal[\"any\", \"all\", \"one\"] | None): Whether the test must have any, all, or exactly one of the specified tags. Default: `all`.\n    tags (list[str]): List of tags to check for.\n\nReceives:\n    test (TestNode): The TestNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the test path. Test paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the test path. Only test paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_test_has_tags\n          tags:\n            - critical\n    ```",
+      "description": "Data tests must have the specified tags.\n\n!!! info \"Rationale\"\n\n    Tags allow teams to organise tests into logical groups (e.g. `critical`, `nightly`, `schema-only`) and run subsets selectively with `dbt test --select tag:critical`. Without enforced tagging, it becomes difficult to prioritise test failures, run fast CI checks, or set up tiered alerting based on test severity.\n\nParameters:\n    criteria (Literal[\"all\", \"any\", \"one\"]): Whether the test must have any, all, or exactly one of the specified tags. Default: `all`.\n    tags (list[str]): List of tags to check for.\n\nReceives:\n    test (TestNode): The TestNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the test path. Test paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the test path. Only test paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_test_has_tags\n          tags:\n            - critical\n    ```",
       "properties": {
         "description": {
           "anyOf": [
@@ -10730,14 +10705,8 @@
           "type": "string"
         },
         "criteria": {
-          "default": "all",
-          "enum": [
-            "any",
-            "all",
-            "one"
-          ],
-          "title": "Criteria",
-          "type": "string"
+          "$ref": "#/$defs/Criteria",
+          "default": "all"
         },
         "tags": {
           "items": {
@@ -11145,6 +11114,16 @@
       "title": "CheckUnitTestGivenFormats",
       "type": "object"
     },
+    "Criteria": {
+      "description": "How many of a set of required items must match (tags, macros, \u2026).",
+      "enum": [
+        "all",
+        "any",
+        "one"
+      ],
+      "title": "Criteria",
+      "type": "string"
+    },
     "Materialization": {
       "description": "dbt materialization strategies.",
       "enum": [
@@ -11154,6 +11133,16 @@
         "view"
       ],
       "title": "Materialization",
+      "type": "string"
+    },
+    "ModelAccess": {
+      "description": "dbt model access levels.",
+      "enum": [
+        "private",
+        "protected",
+        "public"
+      ],
+      "title": "ModelAccess",
       "type": "string"
     },
     "NestedDict": {

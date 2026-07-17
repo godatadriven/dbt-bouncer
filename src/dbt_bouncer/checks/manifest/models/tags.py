@@ -1,15 +1,12 @@
 """Checks related to model tags."""
 
-from typing import Literal
-
 from dbt_bouncer.check_framework.decorator import check, fail
+from dbt_bouncer.enums import Criteria
 from dbt_bouncer.utils import get_clean_model_name
 
 
 @check
-def check_model_has_tags(
-    model, *, criteria: Literal["any", "all", "one"] = "all", tags: list[str]
-):
+def check_model_has_tags(model, *, criteria: Criteria = Criteria.ALL, tags: list[str]):
     """Models must have the specified tags.
 
     !!! info "Rationale"
@@ -17,7 +14,7 @@ def check_model_has_tags(
         Tags are used to group models for selective execution (e.g. `dbt run --select tag:daily`), documentation filtering, and governance tracking. Requiring models in specific directories to carry certain tags ensures that scheduling and operational workflows that depend on those tags remain reliable as the project evolves.
 
     Parameters:
-        criteria (Literal["any", "all", "one"] | None): Whether the model must have any, all, or exactly one of the specified tags. Default: `all`.
+        criteria (Literal["all", "any", "one"]): Whether the model must have any, all, or exactly one of the specified tags. Default: `all`.
         tags (list[str]): List of tags to check for.
 
     Receives:
@@ -42,12 +39,12 @@ def check_model_has_tags(
     """
     resource_tags = model.tags or []
     display_name = get_clean_model_name(model.unique_id)
-    if criteria == "any":
+    if criteria == Criteria.ANY:
         if not any(tag in resource_tags for tag in tags):
             fail(f"`{display_name}` does not have any of the required tags: {tags}.")
-    elif criteria == "all":
+    elif criteria == Criteria.ALL:
         missing_tags = [tag for tag in tags if tag not in resource_tags]
         if missing_tags:
             fail(f"`{display_name}` is missing required tags: {missing_tags}.")
-    elif criteria == "one" and sum(tag in resource_tags for tag in tags) != 1:
+    elif criteria == Criteria.ONE and sum(tag in resource_tags for tag in tags) != 1:
         fail(f"`{display_name}` must have exactly one of the required tags: {tags}.")

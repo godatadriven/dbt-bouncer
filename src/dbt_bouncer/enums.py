@@ -8,6 +8,19 @@ class CheckOutcome(StrEnum):
     SUCCESS = auto()
 
 
+class CheckCategory(StrEnum):
+    """Top-level check categories in a dbt-bouncer config file."""
+
+    CATALOG_CHECKS = auto()
+    MANIFEST_CHECKS = auto()
+    RUN_RESULTS_CHECKS = auto()
+
+    @property
+    def directory(self) -> str:
+        """Short check-module subdirectory name (long form minus '_checks')."""
+        return self.value.removesuffix("_checks")
+
+
 class CheckSeverity(StrEnum):
     """Severity levels for dbt-bouncer check results."""
 
@@ -31,6 +44,14 @@ class ConfigFileSource(StrEnum):
     DEFAULT = auto()
 
 
+class Criteria(StrEnum):
+    """How many of a set of required items must match (tags, macros, …)."""
+
+    ALL = auto()
+    ANY = auto()
+    ONE = auto()
+
+
 class Materialization(StrEnum):
     """dbt materialization strategies."""
 
@@ -38,6 +59,14 @@ class Materialization(StrEnum):
     INCREMENTAL = auto()
     TABLE = auto()
     VIEW = auto()
+
+
+class ModelAccess(StrEnum):
+    """dbt model access levels."""
+
+    PRIVATE = auto()
+    PROTECTED = auto()
+    PUBLIC = auto()
 
 
 class OutputFormat(StrEnum):

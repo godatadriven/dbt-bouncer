@@ -163,7 +163,7 @@ class TestCheckSnapshotHasTags:
         )
 
     def test_check_snapshot_has_tags_invalid_criteria(self):
-        with pytest.raises(ValueError, match="'any', 'all' or 'one'"):
+        with pytest.raises(ValueError, match="'all', 'any' or 'one'"):
             check_passes(
                 "check_snapshot_has_tags",
                 snapshot={**_SNAPSHOT_BASE, "tags": ["tag_1"]},

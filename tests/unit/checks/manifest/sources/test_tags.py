@@ -47,7 +47,7 @@ class TestCheckSourceHasTags:
 
 class TestCheckSourceHasTagsInvalidParam:
     def test_invalid_criteria_rejected(self):
-        with pytest.raises(ValueError, match="'any', 'all' or 'one'"):
+        with pytest.raises(ValueError, match="'all', 'any' or 'one'"):
             check_passes(
                 "check_source_has_tags",
                 source={"tags": ["tag_1"]},

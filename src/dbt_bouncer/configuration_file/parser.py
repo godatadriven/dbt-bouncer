@@ -8,6 +8,7 @@ from typing import Any, Literal
 from pydantic import BaseModel, ConfigDict, Field, create_model
 from typing_extensions import Annotated
 
+from dbt_bouncer.enums import CheckCategory
 from dbt_bouncer.utils import get_check_objects
 
 
@@ -139,11 +140,7 @@ def _create_conf_class(
         type[DbtBouncerConfBase]: A Pydantic model class.
 
     """
-    category_to_check_type = {
-        "catalog_checks": "catalog",
-        "manifest_checks": "manifest",
-        "run_results_checks": "run_results",
-    }
+    category_to_check_type = {c.value: c.directory for c in CheckCategory}
 
     fields: dict[str, tuple[Any, Any]] = {}
     for category, check_type in category_to_check_type.items():
