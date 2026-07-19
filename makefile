@@ -86,6 +86,12 @@ test-benchmark: ## Run code-level performance benchmarks (pytest-benchmark)
 		--benchmark-json=pytest_benchmark_results.json \
 		./tests/benchmark
 
+# Model counts swept by the aggregate benchmark; override with e.g.
+# `make test-benchmark-aggregate BENCH_MODEL_COUNTS="100 1000 10000"`.
+BENCH_MODEL_COUNTS ?= 100 250 500 1000 2000 5000 10000
+test-benchmark-aggregate: ## Sweep the end-to-end benchmark across model counts and print a summary table
+	uv run python tests/benchmark/aggregate_benchmarks.py --models "$(BENCH_MODEL_COUNTS)"
+
 test-perf: ## Run performance tests
 	bencher run \
 		--adapter shell_hyperfine \

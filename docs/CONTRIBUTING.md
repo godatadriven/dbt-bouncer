@@ -175,6 +175,14 @@ There are two layers of performance coverage:
 
    Change the manifest size with `make test-benchmark BENCH_MODELS=5000` (the `make` target defaults to `1000` to keep local runs quick). Running `pytest` directly instead reads `DBT_BOUNCER_BENCH_MODELS`, falling back to `5000` when it is unset. In CI, the emitted `pytest_benchmark_results.json` is tracked by Bencher (`python_pytest` adapter, `ubuntu-24.04-pytest` testbed) so parse-time and check-assembly regressions fail PRs — the same mechanism as the hyperfine track.
 
+   To see how the end-to-end run scales with project size, run the sweep:
+
+   ```shell
+   make test-benchmark-aggregate
+   ```
+
+   It runs the `test_run_bouncer` end-to-end benchmark once per model count (100, 250, 500, 1000, 2000, 5000, 10000 by default) and prints a summary table of the mean run time for each. Override the counts with `make test-benchmark-aggregate BENCH_MODEL_COUNTS="100 1000 10000"`.
+
 #### `prek`
 
 [`prek`](https://github.com/j178/prek) takes care of running all code-checks for formatting and linting. Run `uv run prek install` to install `prek` in your local environment. Once this is done you can use the git pre-commit hooks to ensure proper formatting and linting.
