@@ -80,6 +80,8 @@ test-integration: ## Run integration tests
 BENCH_MODELS ?= 1000
 test-benchmark: ## Run code-level performance benchmarks (pytest-benchmark)
 	# No --numprocesses (xdist disables pytest-benchmark) and no --cov (skews timings).
+	# No -s: the phase-decomposition fixture suspends capturing itself (just for
+	# its own tqdm progress bar), so every other benchmark stays quiet as before.
 	DBT_BOUNCER_BENCH_MODELS=$(BENCH_MODELS) uv run pytest \
 		-c ./tests \
 		--benchmark-only \

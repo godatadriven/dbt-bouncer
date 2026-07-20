@@ -8,13 +8,16 @@ artifacts, config, and helpers for the benchmark tests. The top-level
 
 from __future__ import annotations
 
+import os
+import statistics
 import time
-from contextlib import contextmanager
+from contextlib import contextmanager, nullcontext, redirect_stderr, redirect_stdout
 from pathlib import Path
 from typing import TYPE_CHECKING, Callable, Iterator
 
 import pytest
 import yaml
+from tqdm import tqdm
 
 from .synthetic_manifest import _env_model_count, write_artifacts
 
@@ -30,12 +33,17 @@ _N_MODELS_KEY = pytest.StashKey[int]()
 
 # Phase decomposition of one warm ``run_bouncer`` call, stashed by the
 # ``run_bouncer_phase_decomposition`` fixture for the summary hook to render.
-# Value is ``(phase_means: dict[str, float], wall_mean: float)``.
+# Value is ``(phase_stats: dict[str, dict[str, float]], wall_stats: dict[str, float])``,
+# each stats dict holding ``median`` / ``stdev`` / ``min`` / ``max`` in seconds.
 _PHASE_KEY = pytest.StashKey[tuple]()
 
-# Number of warm rounds averaged for the phase decomposition (after a discarded
-# warmup round). Kept small — each round is a full end-to-end run.
-_PHASE_ROUNDS = 5
+# Number of warm rounds measured for the phase decomposition (after the discarded
+# warmup rounds below).
+_PHASE_ROUNDS = 100
+
+# Warmup rounds run (and discarded) before timing starts, so the disk conf cache
+# and lru caches are hot for every measured round.
+_WARMUP_ROUNDS = 1
 
 # The discrete callables ``run_bouncer`` invokes that we time, mapped to a phase
 # key. Each is a strict sub-interval of the full-run wall clock and none nests
@@ -70,9 +78,10 @@ _MEASURED_PHASES = (
 )
 
 # Display order and nesting depth (0 = top-level, 1 = indented sub-phase). The
-# runner sub-phases nest beneath the overall "Runner" row. These rows sum to the
-# full run by construction: config_load + config_assembly + parse + runner +
-# other == wall.
+# runner sub-phases nest beneath the overall "Runner" row. These rows' *means*
+# would sum exactly to the full run (config_load + config_assembly + parse +
+# runner + other == wall); the displayed medians only sum approximately, since
+# medians aren't additive the way means are.
 _PHASE_SUMMARY_ROWS = [
     ("config_load", "Config discovery + load", 0),
     ("config_assembly", "Config assembly (warm)", 0),
@@ -85,41 +94,87 @@ _PHASE_SUMMARY_ROWS = [
 ]
 
 
-def _format_duration(seconds: float) -> str:
-    """Render a duration in the most readable unit (s / ms / μs).
+def _pick_unit(seconds: float) -> tuple[float, str]:
+    """Pick a single duration unit for the whole table, sized to ``seconds``.
+
+    Called once with the full-run median (the table's largest value) so every
+    row renders in the same unit and stays vertically aligned.
+
+    Args:
+        seconds: The largest duration the table will render.
+
+    Returns:
+        ``(divisor, suffix)`` such that ``seconds * divisor`` is in that unit.
+    """
+    if seconds >= 1:
+        return 1.0, "s"
+    if seconds >= 1e-3:
+        return 1e3, "ms"
+    return 1e6, "μs"
+
+
+def _format_duration(seconds: float, divisor: float, suffix: str) -> str:
+    """Render a duration in the table's shared unit, fixed to 2 decimal places.
 
     Args:
         seconds: The duration in seconds.
+        divisor: The multiplier (from ``_pick_unit``) converting seconds to the
+            table's shared unit.
+        suffix: The unit label (from ``_pick_unit``), e.g. ``"ms"``.
 
     Returns:
-        The formatted duration, e.g. ``"1.43 ms"``.
+        The formatted duration, e.g. ``"6.70 ms"``.
     """
-    if seconds >= 1:
-        return f"{seconds:.2f} s"
-    if seconds >= 1e-3:
-        return f"{seconds * 1e3:.2f} ms"
-    return f"{seconds * 1e6:.1f} μs"
+    return f"{seconds * divisor:.2f} {suffix}"
 
 
-def _format_pct(seconds: float, baseline: float | None) -> str:
-    """Render a component's share of the full run as a percentage.
-
-    Uses whole numbers at or above 10% (e.g. ``"90%"``) and one decimal place
-    below it (e.g. ``"1.2%"``).
+def _pct_value(seconds: float, baseline: float | None) -> float:
+    """Compute a component's share of the full run as a percentage.
 
     Args:
-        seconds: The component's mean duration in seconds.
-        baseline: The full-run mean to measure against, or ``None`` if unknown.
+        seconds: The component's median duration in seconds.
+        baseline: The full-run median to measure against, or ``None``/``0`` if
+            unknown.
 
     Returns:
-        The formatted percentage, or ``"—"`` when no baseline is available.
+        The percentage (0-100), or ``0.0`` when no baseline is available.
     """
-    # Guard both an unknown baseline (None) and a zero mean; the latter would
+    # Guard both an unknown baseline (None) and a zero median; the latter would
     # otherwise raise ZeroDivisionError below.
-    if baseline is None or baseline == 0:
-        return "—"
-    pct = seconds / baseline * 100
-    return f"{pct:.0f}%" if pct >= 10 else f"{pct:.1f}%"
+    if not baseline:
+        return 0.0
+    return seconds / baseline * 100
+
+
+def _format_pct(pct: float) -> str:
+    """Render a percentage at a fixed 1-decimal precision, e.g. ``"91.2%"``.
+
+    A fixed precision (rather than switching decimal places by magnitude)
+    keeps the ``%`` column aligned across rows.
+    """
+    return f"{pct:.1f}%"
+
+
+# Floor for the terminal summary's console width (see ``pytest_terminal_summary``).
+_MIN_TABLE_WIDTH = 120
+
+
+def _series_stats(vals: list[float]) -> dict[str, float]:
+    """Compute median/stdev/min/max for one phase's per-round samples.
+
+    Args:
+        vals: The per-round durations in seconds for one phase.
+
+    Returns:
+        A dict with ``median``, ``stdev``, ``min``, and ``max`` keys (seconds).
+        ``stdev`` is the sample stdev, or ``0.0`` when fewer than 2 samples.
+    """
+    return {
+        "median": statistics.median(vals),
+        "stdev": statistics.stdev(vals) if len(vals) > 1 else 0.0,
+        "min": min(vals),
+        "max": max(vals),
+    }
 
 
 def _count_configured_checks() -> int:
@@ -199,10 +254,14 @@ def pytest_terminal_summary(config) -> None:
 
     Renders after pytest-benchmark's own stats table. Rows come from
     ``run_bouncer_phase_decomposition`` (stashed on the config): each phase's
-    mean time as a share of the full-run wall time, with the runner sub-phases
-    nested beneath the overall ``Runner`` row and an ``Other`` residual so the
-    breakdown sums to the full run exactly. The caption reports the scale the run
-    executed at (models parsed, checks evaluated).
+    median time (with stdev/min/max) as a share of the full-run wall time, with
+    the runner sub-phases nested beneath the overall ``Runner`` row and an
+    ``Other`` residual so the breakdown approximately sums to the full run
+    (see the fixture's docstring — medians aren't additive, so this isn't
+    exact). Every duration in the table shares one unit (picked from the
+    full-run median) and every percentage uses a fixed 1-decimal precision, so
+    columns stay aligned. The caption reports the scale the run executed at
+    (models parsed, checks evaluated).
 
     Args:
         config: The pytest config, carrying the stashed phase decomposition.
@@ -212,7 +271,7 @@ def pytest_terminal_summary(config) -> None:
         # No full run in this session (e.g. a filtered selection) — nothing to
         # decompose. pytest-benchmark's own stats table still prints above.
         return
-    phase_means, wall_mean = decomposition
+    phase_stats, wall_stats = decomposition
 
     from rich import box
     from rich.console import Console
@@ -225,8 +284,21 @@ def pytest_terminal_summary(config) -> None:
         n_models = _env_model_count(5000)
     n_checks = _count_configured_checks()
 
+    divisor, unit = _pick_unit(wall_stats["median"])
+    warmup_label = "warm-up" if _WARMUP_ROUNDS == 1 else "warm-ups"
+
+    # Rich falls back to an 80-column console when stdout isn't a real TTY
+    # (piped output, CI logs) — too narrow for this table's 6 columns, which
+    # would otherwise wrap every cell onto two lines. Force a floor wide enough
+    # for the table's natural width; a real, wider terminal is unaffected since
+    # this only raises the wrap threshold, it doesn't stretch the table to fit.
+    console = Console(width=max(Console().size.width, _MIN_TABLE_WIDTH))
+
     table = Table(
-        title="[bold cyan]dbt-bouncer benchmark summary[/bold cyan]",
+        title=(
+            "[bold cyan]dbt-bouncer Benchmark Summary[/bold cyan] "
+            f"(n={_PHASE_ROUNDS} runs, {_WARMUP_ROUNDS} {warmup_label} dropped)"
+        ),
         title_justify="left",
         caption=f"{n_models:,} models · {n_checks} checks evaluated",
         caption_justify="left",
@@ -236,8 +308,21 @@ def pytest_terminal_summary(config) -> None:
         header_style="bold cyan",
     )
     table.add_column("Component", justify="left", style="cyan", no_wrap=True)
-    table.add_column("Mean", justify="right")
+    table.add_column("Median", justify="right")
+    table.add_column("StdDev", justify="right")
+    table.add_column("Min", justify="right")
+    table.add_column("Max", justify="right")
     table.add_column("%", justify="right")
+
+    def _row(label: str, stats: dict[str, float], pct: float) -> None:
+        table.add_row(
+            label,
+            _format_duration(stats["median"], divisor, unit),
+            f"±{_format_duration(stats['stdev'], divisor, unit)}",
+            _format_duration(stats["min"], divisor, unit),
+            _format_duration(stats["max"], divisor, unit),
+            _format_pct(pct),
+        )
 
     # Per-phase rows, with the runner sub-phases nested beneath "Runner" via tree
     # glyphs (a sub-phase gets └─ when the next row steps back out to depth 0).
@@ -248,18 +333,15 @@ def pytest_terminal_summary(config) -> None:
             )
             is_last = nxt is None or nxt[2] < depth
             label = f"  {'└─' if is_last else '├─'} {label}"
-        mean = phase_means.get(key, 0.0)
-        table.add_row(label, _format_duration(mean), _format_pct(mean, wall_mean))
+        stats = phase_stats[key]
+        pct = _pct_value(stats["median"], wall_stats["median"])
+        _row(label, stats, pct)
 
     # Rule off the end-to-end total from the per-phase breakdown above it.
     table.add_section()
-    table.add_row(
-        "Full run (end-to-end)",
-        _format_duration(wall_mean),
-        _format_pct(wall_mean, wall_mean),
-    )
+    _row("Full run (end-to-end)", wall_stats, 100.0)
 
-    Console().print(table)
+    console.print(table)
 
 
 @pytest.fixture(scope="session")
@@ -318,53 +400,99 @@ def run_bouncer_phase_decomposition(request, benchmark_config_file) -> tuple:
 
     Wraps the discrete callables the run invokes (see ``_PHASE_TARGETS``) and
     accumulates their elapsed time per phase over ``_PHASE_ROUNDS`` warm rounds
-    (a warmup round is discarded so the disk conf cache and lru caches are hot,
-    matching what ``test_run_bouncer`` measures). Because the wrapped calls are
-    strict sub-intervals of the measured wall clock, ``sum(phases) <= wall`` and
-    the ``Other`` residual is always non-negative, so the rendered breakdown sums
-    to the full run exactly.
+    (``_WARMUP_ROUNDS`` rounds are discarded first so the disk conf cache and
+    lru caches are hot, matching what ``test_run_bouncer`` measures). Because
+    the wrapped calls are strict sub-intervals of the measured wall clock,
+    ``sum(phases) <= wall`` for every round.
 
-    Stashes and returns ``(phase_means, wall_mean)`` for the terminal summary
+    ``runner`` and ``other`` aren't measured directly: ``runner`` is the
+    per-round sum of its three sub-phases (match/execute/report), and ``other``
+    is the per-round residual (``wall - accounted``, clamped at 0). Both get
+    genuine per-round series, so every row's median/stdev/min/max come from the
+    same underlying samples (``min <= median <= max`` holds for every row).
+    Unlike the old mean-only version, this means the rendered rows no longer
+    sum to the full-run row *exactly* — medians aren't additive the way means
+    are — but in practice they're close, since ``other`` is a small residual.
+
+    Each round is a full end-to-end run, so ``_PHASE_ROUNDS`` rounds can take a
+    while; a ``tqdm`` progress bar reports round-by-round progress. It suspends
+    pytest's own output capturing for just this fixture (via the
+    ``capturemanager`` plugin) so it's visible without needing ``pytest -s`` —
+    which would also un-suppress every *other* benchmark's own dbt-bouncer
+    output, since those call the real functions directly, many times over, via
+    pytest-benchmark's calibration/measurement rounds.
+
+    Stashes and returns ``(phase_stats, wall_stats)`` for the terminal summary
     hook (which can't request fixtures).
 
     Returns:
-        A tuple of the per-phase mean seconds (including computed ``runner`` and
-        ``other`` keys) and the full-run wall-time mean in seconds.
+        A tuple of ``(phase_stats, wall_stats)``: per-phase stats dicts
+        (``median``/``stdev``/``min``/``max`` in seconds, including computed
+        ``runner`` and ``other`` keys) and the full-run wall-time stats dict.
     """
-    from statistics import mean
-
     from dbt_bouncer.cli.run.utils import run_bouncer
 
     def target() -> int:
-        return run_bouncer(config_file=benchmark_config_file, verbosity=0)
+        # ``verbosity=0`` still logs at INFO (to stderr, via a plain
+        # ``logging.StreamHandler()``) and the executor/reporter print their own
+        # rich tables unconditionally (to stdout). Over ``_PHASE_ROUNDS`` rounds
+        # that would bury the tqdm progress bar below, so silence both streams
+        # here — only for the duration of this call, so tqdm's own redraw
+        # between rounds is unaffected.
+        with (
+            Path(os.devnull).open("w") as devnull,
+            redirect_stdout(devnull),
+            redirect_stderr(devnull),
+        ):
+            return run_bouncer(config_file=benchmark_config_file, verbosity=0)
 
-    target()  # warm caches; discard
-
-    per_phase: dict[str, list[float]] = {k: [] for k in _MEASURED_PHASES}
-    walls: list[float] = []
-    for _ in range(_PHASE_ROUNDS):
-        acc: dict[str, float] = {}
-        start = time.perf_counter()
-        with _phase_timers(acc):
-            target()
-        walls.append(time.perf_counter() - start)
-        for key in _MEASURED_PHASES:
-            per_phase[key].append(acc.get(key, 0.0))
-
-    phase_means: dict[str, float] = {key: mean(vals) for key, vals in per_phase.items()}
-    phase_means["runner"] = (
-        phase_means["match"] + phase_means["execute"] + phase_means["report"]
+    # Suspend pytest's global capture just for this fixture so the tqdm bars
+    # below reach the real terminal, without needing ``pytest -s`` (which would
+    # also unmute every other benchmark's own dbt-bouncer output).
+    capmanager = request.config.pluginmanager.getplugin("capturemanager")
+    show_progress = (
+        capmanager.global_and_fixture_disabled if capmanager else nullcontext
     )
-    wall_mean = mean(walls)
-    accounted = (
-        phase_means["config_load"]
-        + phase_means["config_assembly"]
-        + phase_means["parse"]
-        + phase_means["runner"]
-    )
-    phase_means["other"] = max(0.0, wall_mean - accounted)
 
-    decomposition = (phase_means, wall_mean)
+    with show_progress():
+        for _ in tqdm(range(_WARMUP_ROUNDS), desc="Warming up caches", leave=False):
+            target()  # warm caches; discard
+
+        per_phase: dict[str, list[float]] = {k: [] for k in _MEASURED_PHASES}
+        walls: list[float] = []
+        for _ in tqdm(range(_PHASE_ROUNDS), desc="Benchmarking dbt-bouncer"):
+            acc: dict[str, float] = {}
+            start = time.perf_counter()
+            with _phase_timers(acc):
+                target()
+            walls.append(time.perf_counter() - start)
+            for key in _MEASURED_PHASES:
+                per_phase[key].append(acc.get(key, 0.0))
+
+    runner_series = [
+        per_phase["match"][i] + per_phase["execute"][i] + per_phase["report"][i]
+        for i in range(_PHASE_ROUNDS)
+    ]
+    accounted_series = [
+        per_phase["config_load"][i]
+        + per_phase["config_assembly"][i]
+        + per_phase["parse"][i]
+        + runner_series[i]
+        for i in range(_PHASE_ROUNDS)
+    ]
+    other_series = [
+        max(0.0, walls[i] - accounted_series[i]) for i in range(_PHASE_ROUNDS)
+    ]
+
+    phase_stats: dict[str, dict[str, float]] = {
+        key: _series_stats(vals) for key, vals in per_phase.items()
+    }
+    phase_stats["runner"] = _series_stats(runner_series)
+    phase_stats["other"] = _series_stats(other_series)
+
+    wall_stats = _series_stats(walls)
+
+    decomposition = (phase_stats, wall_stats)
     request.config.stash[_PHASE_KEY] = decomposition
     return decomposition
 

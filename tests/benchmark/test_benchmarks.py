@@ -169,16 +169,22 @@ def test_run_bouncer(benchmark, benchmark_config_file, run_bouncer_phase_decompo
     measured and stashed (for the terminal summary table) *before* this clean,
     unwrapped ``benchmark(...)`` call produces the headline full-run timing.
     """
-    # The decomposition must account for the whole run: the top-level phases plus
-    # the ``Other`` residual sum to the wall time (this is the invariant that lets
-    # the summary table sum to 100%).
-    phase_means, wall_mean = run_bouncer_phase_decomposition
+    # The decomposition should roughly account for the whole run: the top-level
+    # phases plus the ``Other`` residual are close to the wall time. Medians
+    # aren't additive like means (unlike the old mean-only version, this sum
+    # isn't exact — see the fixture's docstring), so this is a generous sanity
+    # bound meant to catch a missing or double-counted phase, not timing noise.
+    phase_stats, wall_stats = run_bouncer_phase_decomposition
     top_level = ("config_load", "config_assembly", "parse", "runner", "other")
-    # ``other`` is defined as ``wall - accounted``, so this sum equals ``wall_mean``
-    # exactly by construction — it's an arithmetic invariant, not a measurement one.
-    # The tiny ``1e-6`` tolerance only absorbs floating-point rounding, so it never
-    # flakes on timing variance.
-    assert abs(sum(phase_means[k] for k in top_level) - wall_mean) <= wall_mean * 1e-6
+    wall_median = wall_stats["median"]
+    accounted = sum(phase_stats[k]["median"] for k in top_level)
+    assert abs(accounted - wall_median) <= wall_median * 0.25
+
+    # Every phase's median must fall within its own min/max — this does hold
+    # exactly, since all three are computed from the same per-round samples.
+    for key in (*top_level, "match", "execute", "report"):
+        stats = phase_stats[key]
+        assert stats["min"] <= stats["median"] <= stats["max"]
 
     from dbt_bouncer.cli.run.utils import run_bouncer
 
