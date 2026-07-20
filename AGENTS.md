@@ -25,6 +25,7 @@ make install
 | `make generate-schema` | Regenerate `schema.json` from Pydantic models |
 | `make test-perf` | End-to-end performance benchmarks (bencher + hyperfine) |
 | `make test-benchmark` | Code-level micro-benchmarks (pytest-benchmark, synthetic 5k-model manifest) |
+| `make test-benchmark-aggregate` | Sweep the end-to-end benchmark across model counts and print a summary table |
 
 ## Architecture
 
