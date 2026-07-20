@@ -68,3 +68,35 @@ def test_ctx_survives_model_copy():
     copied = check.model_copy(deep=False)
     # PrivateAttr values are preserved by model_copy
     assert copied._ctx is ctx
+
+
+def test_shallow_copy_isolates_resource_and_ctx():
+    """Shallow model_copy gives each copy independent resource/ctx state.
+
+    The runner reuses one check template and shallow-copies it per matched
+    resource, so rebinding resource/ctx on one copy must not leak to the
+    template or to sibling copies.
+    """
+    template = _FakeCheck(name="fake_check")
+
+    wrapper_a = MagicMock()
+    wrapper_a.model = "model_a"
+    a = template.model_copy()
+    a.set_resource(wrapper_a, "model")
+    a.set_context(CheckContext(manifest_obj="manifest_a"))
+
+    wrapper_b = MagicMock()
+    wrapper_b.model = "model_b"
+    b = template.model_copy()
+    b.set_resource(wrapper_b, "model")
+    b.set_context(CheckContext(manifest_obj="manifest_b"))
+
+    # sibling copies do not clobber each other
+    assert a.model == "model_a"
+    assert b.model == "model_b"
+    assert a._ctx.manifest_obj == "manifest_a"
+    assert b._ctx.manifest_obj == "manifest_b"
+
+    # template is untouched
+    assert template.model is None
+    assert template._ctx is None
