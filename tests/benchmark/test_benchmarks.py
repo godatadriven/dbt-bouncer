@@ -162,8 +162,24 @@ def test_runner_report(benchmark, make_bouncer_context):
     assert exit_code in (0, 1)
 
 
-def test_run_bouncer(benchmark, benchmark_config_file):
-    """Benchmark a full in-process run over the synthetic manifest."""
+def test_run_bouncer(benchmark, benchmark_config_file, run_bouncer_phase_decomposition):
+    """Benchmark a full in-process run over the synthetic manifest.
+
+    Depends on ``run_bouncer_phase_decomposition`` so the per-phase breakdown is
+    measured and stashed (for the terminal summary table) *before* this clean,
+    unwrapped ``benchmark(...)`` call produces the headline full-run timing.
+    """
+    # The decomposition must account for the whole run: the top-level phases plus
+    # the ``Other`` residual sum to the wall time (this is the invariant that lets
+    # the summary table sum to 100%).
+    phase_means, wall_mean = run_bouncer_phase_decomposition
+    top_level = ("config_load", "config_assembly", "parse", "runner", "other")
+    # ``other`` is defined as ``wall - accounted``, so this sum equals ``wall_mean``
+    # exactly by construction — it's an arithmetic invariant, not a measurement one.
+    # The tiny ``1e-6`` tolerance only absorbs floating-point rounding, so it never
+    # flakes on timing variance.
+    assert abs(sum(phase_means[k] for k in top_level) - wall_mean) <= wall_mean * 1e-6
+
     from dbt_bouncer.cli.run.utils import run_bouncer
 
     exit_code = benchmark(run_bouncer, config_file=benchmark_config_file, verbosity=0)

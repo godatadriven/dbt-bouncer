@@ -8,8 +8,10 @@ artifacts, config, and helpers for the benchmark tests. The top-level
 
 from __future__ import annotations
 
+import time
+from contextlib import contextmanager
 from pathlib import Path
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING, Callable, Iterator
 
 import pytest
 import yaml
@@ -26,29 +28,60 @@ _CONFIG_PATH = Path(__file__).parent / "benchmark-config.yml"
 # recommended way to attach data to ``config`` without risking attribute clashes.
 _N_MODELS_KEY = pytest.StashKey[int]()
 
-# Friendly labels for the summary table, keyed by benchmark test function name.
-_COMPONENT_LABELS = {
-    "test_parse_manifest": "Parse artifacts",
-    "test_check_discovery": "Check discovery",
-    "test_validate_conf": "Config assembly",
-    "test_runner": "Runner",
-    "test_runner_match": "Match & copy",
-    "test_runner_execute": "Execute",
-    "test_runner_report": "Report",
-    "test_run_bouncer": "Full run (end-to-end)",
-}
+# Phase decomposition of one warm ``run_bouncer`` call, stashed by the
+# ``run_bouncer_phase_decomposition`` fixture for the summary hook to render.
+# Value is ``(phase_means: dict[str, float], wall_mean: float)``.
+_PHASE_KEY = pytest.StashKey[tuple]()
 
-# Display order and nesting depth (0 = top-level, 1 = indented sub-component).
-# The runner sub-phases are nested beneath the overall "Runner" row.
-_SUMMARY_ROWS = [
-    ("test_parse_manifest", 0),
-    ("test_check_discovery", 0),
-    ("test_validate_conf", 0),
-    ("test_runner", 0),
-    ("test_runner_match", 1),
-    ("test_runner_execute", 1),
-    ("test_runner_report", 1),
-    ("test_run_bouncer", 0),
+# Number of warm rounds averaged for the phase decomposition (after a discarded
+# warmup round). Kept small — each round is a full end-to-end run.
+_PHASE_ROUNDS = 5
+
+# The discrete callables ``run_bouncer`` invokes that we time, mapped to a phase
+# key. Each is a strict sub-interval of the full-run wall clock and none nests
+# inside another here (``runner`` itself is *not* wrapped — it's reconstructed
+# from its three sub-phases), so the timings never double count. Everything the
+# run does that isn't one of these calls (config mutation, ``--check``/``--only``
+# filtering, context construction, imports) falls into the ``Other`` residual.
+# Resolved lazily inside ``_phase_timers`` so importing this module stays cheap.
+_PHASE_TARGETS = [
+    ("dbt_bouncer.configuration_file.validator", "get_config_file_path", "config_load"),
+    (
+        "dbt_bouncer.configuration_file.validator",
+        "load_config_file_contents",
+        "config_load",
+    ),
+    ("dbt_bouncer.configuration_file.validator", "validate_conf", "config_assembly"),
+    ("dbt_bouncer.artifact_parsers.parser", "parse_dbt_artifacts", "parse"),
+    ("dbt_bouncer.runner", "_assemble_checks_to_run", "match"),
+    ("dbt_bouncer.executor:Executor", "run", "execute"),
+    ("dbt_bouncer.reporting.reporter:Reporter", "report_results", "report"),
+]
+
+# Phase keys measured directly (the rest are computed: ``runner`` = sum of its
+# sub-phases, ``other`` = residual).
+_MEASURED_PHASES = (
+    "config_load",
+    "config_assembly",
+    "parse",
+    "match",
+    "execute",
+    "report",
+)
+
+# Display order and nesting depth (0 = top-level, 1 = indented sub-phase). The
+# runner sub-phases nest beneath the overall "Runner" row. These rows sum to the
+# full run by construction: config_load + config_assembly + parse + runner +
+# other == wall.
+_PHASE_SUMMARY_ROWS = [
+    ("config_load", "Config discovery + load", 0),
+    ("config_assembly", "Config assembly (warm)", 0),
+    ("parse", "Parse artifacts", 0),
+    ("runner", "Runner", 0),
+    ("match", "Match & copy", 1),
+    ("execute", "Execute", 1),
+    ("report", "Report", 1),
+    ("other", "Other (glue / context build)", 0),
 ]
 
 
@@ -103,22 +136,83 @@ def _count_configured_checks() -> int:
     )
 
 
-@pytest.hookimpl(trylast=True)
-def pytest_terminal_summary(config) -> None:
-    """Print a rich summary table of the benchmarked components.
+@contextmanager
+def _phase_timers(accumulator: dict[str, float]) -> Iterator[None]:
+    """Time the callables ``run_bouncer`` invokes, accumulating per phase.
 
-    Renders after pytest-benchmark's own stats table: one row per code
-    component with its mean run time (the runner sub-phases nested beneath the
-    overall ``Runner`` row) and the scale the run executed at (models parsed,
-    checks evaluated).
+    Swaps each target in ``_PHASE_TARGETS`` for a wrapper that adds its elapsed
+    time to ``accumulator[phase]``, then restores every original on exit. The
+    run's local imports (``from ... import validate_conf`` etc.) resolve the
+    patched attribute at call time, so patching the source module/class here is
+    enough to intercept the composed run. Method targets receive ``self`` as the
+    first positional arg naturally.
+
+    Not thread-safe: the targets are patched in place as global module/class
+    attributes, so this assumes a single-threaded run (which the benchmark suite
+    is). Running it under parallel workers (e.g. ``pytest-xdist``) that share a
+    process would let concurrent runs clobber each other's patches.
 
     Args:
-        config: The pytest config, carrying ``_benchmarksession``.
+        accumulator: Mutable mapping of phase key -> accumulated seconds.
+
+    Yields:
+        None, with the timers installed for the duration of the ``with`` block.
     """
-    benchmark_session = getattr(config, "_benchmarksession", None)
-    benchmarks = list(getattr(benchmark_session, "benchmarks", []) or [])
-    if not benchmarks:
+    import importlib
+
+    def _resolve(dotted: str) -> tuple[object, str]:
+        # "pkg.mod:Class" -> patch the class attribute; "pkg.mod" -> module attr.
+        module_path, _, cls_name = dotted.partition(":")
+        owner: object = importlib.import_module(module_path)
+        if cls_name:
+            owner = getattr(owner, cls_name)
+        return owner, cls_name
+
+    def _make_wrapper(orig, phase):
+        def wrapper(*args, **kwargs):
+            start = time.perf_counter()
+            try:
+                return orig(*args, **kwargs)
+            finally:
+                accumulator[phase] = accumulator.get(phase, 0.0) + (
+                    time.perf_counter() - start
+                )
+
+        return wrapper
+
+    originals: list[tuple[object, str, object]] = []
+    for dotted, attr, phase in _PHASE_TARGETS:
+        owner, _ = _resolve(dotted)
+        orig = getattr(owner, attr)
+        originals.append((owner, attr, orig))
+        setattr(owner, attr, _make_wrapper(orig, phase))
+    try:
+        yield
+    finally:
+        for owner, attr, orig in originals:
+            setattr(owner, attr, orig)
+
+
+@pytest.hookimpl(trylast=True)
+def pytest_terminal_summary(config) -> None:
+    """Print a rich summary table decomposing one warm end-to-end run.
+
+    Renders after pytest-benchmark's own stats table. Rows come from
+    ``run_bouncer_phase_decomposition`` (stashed on the config): each phase's
+    mean time as a share of the full-run wall time, with the runner sub-phases
+    nested beneath the overall ``Runner`` row and an ``Other`` residual so the
+    breakdown sums to the full run exactly. The caption reports the scale the run
+    executed at (models parsed, checks evaluated).
+
+    Args:
+        config: The pytest config, carrying the stashed phase decomposition.
+    """
+    decomposition = config.stash.get(_PHASE_KEY, None)
+    if decomposition is None:
+        # No full run in this session (e.g. a filtered selection) — nothing to
+        # decompose. pytest-benchmark's own stats table still prints above.
         return
+    phase_means, wall_mean = decomposition
 
     from rich import box
     from rich.console import Console
@@ -145,39 +239,25 @@ def pytest_terminal_summary(config) -> None:
     table.add_column("Mean", justify="right")
     table.add_column("%", justify="right")
 
-    by_name = {bench.name: bench for bench in benchmarks}
-    spec_names = {name for name, _ in _SUMMARY_ROWS}
-
-    # Percentages are each component's share of the full end-to-end run.
-    full_run = by_name.get("test_run_bouncer")
-    baseline = full_run.stats.mean if full_run else None
-
-    # Ordered rows (spec entries present in this run), with the runner sub-phases
-    # nested beneath the "Runner" row via tree glyphs.
-    ordered = [(name, depth) for name, depth in _SUMMARY_ROWS if name in by_name]
-    for i, (name, depth) in enumerate(ordered):
-        label = _COMPONENT_LABELS.get(name, name)
+    # Per-phase rows, with the runner sub-phases nested beneath "Runner" via tree
+    # glyphs (a sub-phase gets └─ when the next row steps back out to depth 0).
+    for i, (key, label, depth) in enumerate(_PHASE_SUMMARY_ROWS):
         if depth > 0:
-            is_last = i + 1 >= len(ordered) or ordered[i + 1][1] < depth
+            nxt = (
+                _PHASE_SUMMARY_ROWS[i + 1] if i + 1 < len(_PHASE_SUMMARY_ROWS) else None
+            )
+            is_last = nxt is None or nxt[2] < depth
             label = f"  {'└─' if is_last else '├─'} {label}"
-        # Rule off the end-to-end total from the per-component breakdown above it.
-        if name == "test_run_bouncer":
-            table.add_section()
-        mean = by_name[name].stats.mean
-        table.add_row(label, _format_duration(mean), _format_pct(mean, baseline))
+        mean = phase_means.get(key, 0.0)
+        table.add_row(label, _format_duration(mean), _format_pct(mean, wall_mean))
 
-    # Any benchmarks not covered by the ordered spec (defensive fallback).
-    for bench in benchmarks:
-        if bench.name in spec_names:
-            continue
-        label = _COMPONENT_LABELS.get(
-            bench.name, bench.name.removeprefix("test_").replace("_", " ").capitalize()
-        )
-        table.add_row(
-            label,
-            _format_duration(bench.stats.mean),
-            _format_pct(bench.stats.mean, baseline),
-        )
+    # Rule off the end-to-end total from the per-phase breakdown above it.
+    table.add_section()
+    table.add_row(
+        "Full run (end-to-end)",
+        _format_duration(wall_mean),
+        _format_pct(wall_mean, wall_mean),
+    )
 
     Console().print(table)
 
@@ -230,6 +310,63 @@ def benchmark_config_file(
     cfg_path = tmp_path_factory.mktemp("bench_cfg") / "dbt-bouncer.yml"
     cfg_path.write_text(yaml.safe_dump(contents, sort_keys=False))
     return cfg_path
+
+
+@pytest.fixture(scope="session")
+def run_bouncer_phase_decomposition(request, benchmark_config_file) -> tuple:
+    """Time one warm ``run_bouncer`` broken into phases for the summary table.
+
+    Wraps the discrete callables the run invokes (see ``_PHASE_TARGETS``) and
+    accumulates their elapsed time per phase over ``_PHASE_ROUNDS`` warm rounds
+    (a warmup round is discarded so the disk conf cache and lru caches are hot,
+    matching what ``test_run_bouncer`` measures). Because the wrapped calls are
+    strict sub-intervals of the measured wall clock, ``sum(phases) <= wall`` and
+    the ``Other`` residual is always non-negative, so the rendered breakdown sums
+    to the full run exactly.
+
+    Stashes and returns ``(phase_means, wall_mean)`` for the terminal summary
+    hook (which can't request fixtures).
+
+    Returns:
+        A tuple of the per-phase mean seconds (including computed ``runner`` and
+        ``other`` keys) and the full-run wall-time mean in seconds.
+    """
+    from statistics import mean
+
+    from dbt_bouncer.cli.run.utils import run_bouncer
+
+    def target() -> int:
+        return run_bouncer(config_file=benchmark_config_file, verbosity=0)
+
+    target()  # warm caches; discard
+
+    per_phase: dict[str, list[float]] = {k: [] for k in _MEASURED_PHASES}
+    walls: list[float] = []
+    for _ in range(_PHASE_ROUNDS):
+        acc: dict[str, float] = {}
+        start = time.perf_counter()
+        with _phase_timers(acc):
+            target()
+        walls.append(time.perf_counter() - start)
+        for key in _MEASURED_PHASES:
+            per_phase[key].append(acc.get(key, 0.0))
+
+    phase_means: dict[str, float] = {key: mean(vals) for key, vals in per_phase.items()}
+    phase_means["runner"] = (
+        phase_means["match"] + phase_means["execute"] + phase_means["report"]
+    )
+    wall_mean = mean(walls)
+    accounted = (
+        phase_means["config_load"]
+        + phase_means["config_assembly"]
+        + phase_means["parse"]
+        + phase_means["runner"]
+    )
+    phase_means["other"] = max(0.0, wall_mean - accounted)
+
+    decomposition = (phase_means, wall_mean)
+    request.config.stash[_PHASE_KEY] = decomposition
+    return decomposition
 
 
 @pytest.fixture(scope="session")
