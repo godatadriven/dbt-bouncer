@@ -108,3 +108,11 @@ def test_neutralize_jinja_malformed_input_does_not_raise():
     # parse_sql can fail and callers hit their best-effort fallback.
     neutralized = neutralize_jinja("SELECT {{ x FROM t")
     assert isinstance(neutralized, str)
+
+
+def test_neutralize_jinja_unlexable_input_is_returned_unchanged():
+    # Jinja the lexer cannot tokenize at all (an unterminated ``{# ... #}``
+    # comment raises ``TemplateSyntaxError``) hits the documented fallback: the
+    # input is returned unchanged so parse_sql fails and callers fall back.
+    code = "SELECT {# unterminated comment"
+    assert neutralize_jinja(code) == code

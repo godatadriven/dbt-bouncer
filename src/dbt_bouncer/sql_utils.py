@@ -42,6 +42,10 @@ def _get_jinja_lexer_environment() -> "Environment":
     """
     from jinja2 import Environment
 
+    # ``autoescape`` only affects rendering, and this environment is used solely
+    # for its lexer (``.lex``), so it has no functional effect here. It is kept
+    # as a defensive default to satisfy bandit's B701 (jinja2_autoescape_false),
+    # matching ``check_macros`` which builds its environment the same way.
     return Environment(autoescape=True)
 
 
