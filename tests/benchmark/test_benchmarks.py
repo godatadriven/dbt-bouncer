@@ -174,6 +174,10 @@ def test_run_bouncer(benchmark, benchmark_config_file, run_bouncer_phase_decompo
     # the summary table sum to 100%).
     phase_means, wall_mean = run_bouncer_phase_decomposition
     top_level = ("config_load", "config_assembly", "parse", "runner", "other")
+    # ``other`` is defined as ``wall - accounted``, so this sum equals ``wall_mean``
+    # exactly by construction — it's an arithmetic invariant, not a measurement one.
+    # The tiny ``1e-6`` tolerance only absorbs floating-point rounding, so it never
+    # flakes on timing variance.
     assert abs(sum(phase_means[k] for k in top_level) - wall_mean) <= wall_mean * 1e-6
 
     from dbt_bouncer.cli.run.utils import run_bouncer

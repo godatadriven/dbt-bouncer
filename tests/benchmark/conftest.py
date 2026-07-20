@@ -147,6 +147,11 @@ def _phase_timers(accumulator: dict[str, float]) -> Iterator[None]:
     enough to intercept the composed run. Method targets receive ``self`` as the
     first positional arg naturally.
 
+    Not thread-safe: the targets are patched in place as global module/class
+    attributes, so this assumes a single-threaded run (which the benchmark suite
+    is). Running it under parallel workers (e.g. ``pytest-xdist``) that share a
+    process would let concurrent runs clobber each other's patches.
+
     Args:
         accumulator: Mutable mapping of phase key -> accumulated seconds.
 
