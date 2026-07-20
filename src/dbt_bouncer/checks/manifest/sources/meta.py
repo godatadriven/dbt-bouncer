@@ -13,6 +13,14 @@ def check_source_has_labels_keys(source, *, keys: NestedDict):
 
         Labels are key-value pairs attached to warehouse resources (e.g. BigQuery table labels) that drive cost attribution, governance workflows, and access control. Requiring specific label keys on sources ensures that the same ownership and environment metadata required on models is also enforced at the ingestion boundary, giving a consistent labelling policy across the full data platform.
 
+    !!! note
+
+        dbt 2.0 (Fusion) does not permit `labels` as a top-level config on a source
+        table, so `labels` must be nested under `meta` (e.g. `config.meta.labels`).
+        This check looks in both locations — the legacy top-level `config.labels`
+        and `config.meta.labels` — so it works before and after a Fusion migration
+        (e.g. one applied by `dbt-autofix`).
+
     Parameters:
         keys (NestedDict): A list (that may contain sub-lists) of required keys.
 
@@ -35,7 +43,15 @@ def check_source_has_labels_keys(source, *, keys: NestedDict):
         ```
 
     """
-    labels = getattr(source.config, "labels", None) or {}
+    # `labels` may live at the top level (`config.labels`, valid for models and
+    # source-level configs) or nested under `meta` (`config.meta.labels`, the only
+    # location dbt 2.0/Fusion allows on a source table). Union both so a required
+    # key present in either location satisfies the check; the Fusion location wins
+    # on any key clash.
+    top_level_labels = getattr(source.config, "labels", None) or {}
+    meta = getattr(source.config, "meta", None) or {}
+    meta_labels = (meta.get("labels") if isinstance(meta, dict) else None) or {}
+    labels = {**top_level_labels, **meta_labels}
     missing_keys = find_missing_meta_keys(
         meta_config=labels, required_keys=keys.model_dump()
     )

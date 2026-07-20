@@ -3,8 +3,6 @@ version: 2
 seeds:
   - name: raw_customers
     description: Raw customer data
-    meta:
-      owner: "Data Team"
     columns:
       - name: id
         data_type: integer
@@ -13,10 +11,11 @@ seeds:
       - name: last_name
         data_type: character varying(256)
 
+    config:
+      meta:
+        owner: "Data Team"
   - name: raw_orders
     description: Raw order data
-    meta:
-      owner: "Data Team"
     columns:
       - name: id
         data_type: integer
@@ -27,10 +26,11 @@ seeds:
       - name: status
         data_type: character varying(256)
 
+    config:
+      meta:
+        owner: "Data Team"
   - name: raw_payments
     description: Raw payment data
-    meta:
-      owner: "Data Team"
     columns:
       - name: id
         data_type: integer
@@ -40,3 +40,6 @@ seeds:
         data_type: character varying(256)
       - name: amount
         data_type: integer
+    config:
+      meta:
+        owner: "Data Team"
