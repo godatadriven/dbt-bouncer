@@ -22,6 +22,21 @@ class TestCheckSourceHasLabelsKeys:
                 {"config": {"labels": {"team": {"subteam": "frontend"}}}},
                 id="has_nested_key",
             ),
+            pytest.param(
+                ["team"],
+                {"config": {"meta": {"labels": {"team": "finance"}}}},
+                id="has_key_under_config_meta",  # dbt 2.0/Fusion location
+            ),
+            pytest.param(
+                ["env", "team"],
+                {
+                    "config": {
+                        "labels": {"team": "finance"},
+                        "meta": {"labels": {"env": "prod"}},
+                    },
+                },
+                id="has_keys_split_across_both_locations",
+            ),
         ],
     )
     def test_passes(self, keys, source):
@@ -44,6 +59,16 @@ class TestCheckSourceHasLabelsKeys:
                 [{"team": ["subteam"]}],
                 {"config": {"labels": {"team": {"other": "value"}}}},
                 id="missing_nested_key",
+            ),
+            pytest.param(
+                ["team"],
+                {"config": {"meta": {"labels": {}}}},
+                id="empty_labels_under_config_meta",
+            ),
+            pytest.param(
+                ["team"],
+                {"config": {"meta": {"owner": "Chris"}}},
+                id="meta_without_labels",
             ),
         ],
     )
