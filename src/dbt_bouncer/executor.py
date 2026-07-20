@@ -26,7 +26,9 @@ _MAX_BATCH_SIZE: int = 500
 class Executor:
     """Orchestrates check execution with batching and progress tracking."""
 
-    def _execute_check(self, check: CheckToRun, debug_enabled: bool) -> CheckToRun:
+    def _execute_check(
+        self, check: CheckToRun, debug_enabled: bool = False
+    ) -> CheckToRun:
         """Execute a single check and return the result.
 
         Args:
