@@ -26,14 +26,21 @@ _MAX_BATCH_SIZE: int = 500
 class Executor:
     """Orchestrates check execution with batching and progress tracking."""
 
-    def _execute_check(self, check: CheckToRun) -> CheckToRun:
+    def _execute_check(self, check: CheckToRun, debug_enabled: bool) -> CheckToRun:
         """Execute a single check and return the result.
+
+        Args:
+            check: The check to run.
+            debug_enabled: Whether the root logger has DEBUG enabled, precomputed
+                by the caller so this hot path never builds a debug f-string
+                just to have it discarded.
 
         Returns:
             CheckToRun: The check dict with outcome and optional failure_message set.
 
         """
-        logging.debug(f"Running {check['check_run_id']}...")
+        if debug_enabled:
+            logging.debug(f"Running {check['check_run_id']}...")
         try:
             check["check"].execute()
             check["outcome"] = CheckOutcome.SUCCESS
@@ -42,7 +49,10 @@ class Executor:
             if check["check"].description:
                 failure_message = f"{check['check'].description} - {failure_message}"
 
-            logging.debug(f"Check {check['check_run_id']} failed: {failure_message}")
+            if debug_enabled:
+                logging.debug(
+                    f"Check {check['check_run_id']} failed: {failure_message}"
+                )
             check["outcome"] = CheckOutcome.FAILED
             check["failure_message"] = failure_message
         except Exception as e:
@@ -50,9 +60,10 @@ class Executor:
                 traceback.TracebackException.from_exception(e).format(),
             )
             failure_message = failure_message_full[-1].strip()
-            logging.debug(
-                f"Check {check['check_run_id']} raised unexpected error:\n{''.join(failure_message_full)}"
-            )
+            if debug_enabled:
+                logging.debug(
+                    f"Check {check['check_run_id']} raised unexpected error:\n{''.join(failure_message_full)}"
+                )
 
             check["outcome"] = CheckOutcome.FAILED
             check["severity"] = CheckSeverity.WARN
@@ -68,8 +79,9 @@ class Executor:
             int: Number of checks executed.
 
         """
+        debug_enabled = logging.getLogger().isEnabledFor(logging.DEBUG)
         for check in batch:
-            self._execute_check(check)
+            self._execute_check(check, debug_enabled)
         return len(batch)
 
     def run(self, checks_to_run: list[CheckToRun]) -> list[dict[str, Any]]:

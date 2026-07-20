@@ -1,5 +1,7 @@
 """Tests for the Executor class."""
 
+import logging
+
 from dbt_bouncer.enums import CheckOutcome, CheckSeverity
 from dbt_bouncer.executor import Executor
 
@@ -31,6 +33,61 @@ class _CrashingCheck:
 
     def execute(self):
         raise ValueError("unexpected crash")
+
+
+class _CountingCheckRunId:
+    """A check_run_id stand-in that counts how often it's stringified.
+
+    Used to prove the debug f-string body is never evaluated when DEBUG
+    logging is disabled, rather than just checking no record was emitted.
+    """
+
+    def __init__(self):
+        self.calls = 0
+
+    def __str__(self):
+        self.calls += 1
+        return "counting_check:0"
+
+
+def test_execute_batch_skips_debug_formatting_when_disabled():
+    """With DEBUG disabled, the check_run_id f-string is never evaluated."""
+    check_run_id = _CountingCheckRunId()
+    checks = [
+        {
+            "check": _PassingCheck(),
+            "check_run_id": check_run_id,
+            "severity": CheckSeverity.ERROR,
+        },
+    ]
+    root_logger = logging.getLogger()
+    original_level = root_logger.level
+    root_logger.setLevel(logging.INFO)
+    try:
+        Executor().run(checks)
+    finally:
+        root_logger.setLevel(original_level)
+    assert check_run_id.calls == 0
+
+
+def test_execute_batch_formats_debug_message_when_enabled():
+    """With DEBUG enabled, the check_run_id is stringified for the debug log."""
+    check_run_id = _CountingCheckRunId()
+    checks = [
+        {
+            "check": _PassingCheck(),
+            "check_run_id": check_run_id,
+            "severity": CheckSeverity.ERROR,
+        },
+    ]
+    root_logger = logging.getLogger()
+    original_level = root_logger.level
+    root_logger.setLevel(logging.DEBUG)
+    try:
+        Executor().run(checks)
+    finally:
+        root_logger.setLevel(original_level)
+    assert check_run_id.calls >= 1
 
 
 def test_executor_all_pass():
