@@ -104,7 +104,7 @@ def test_runner(benchmark, make_bouncer_context):
 
 
 def test_runner_match(benchmark, make_bouncer_context):
-    """Benchmark the runner's match phase: matching + ``model_copy(deep=True)``.
+    """Benchmark the runner's match phase: matching + ``model_copy()`` (shallow).
 
     Assembles the ``checks_to_run`` list without executing or reporting. A fresh
     context is built per round because ``_assemble_checks_to_run`` reads resource

@@ -120,11 +120,11 @@ def _should_run_check(
 # Underscore-prefixed as an internal helper, but imported by the benchmark suite
 # (``tests/benchmark``) to time the match phase in isolation — keep it importable.
 def _assemble_checks_to_run(ctx: "BouncerContext") -> list[CheckToRun]:
-    """Match checks to resources, deep-copy, and build the run list.
+    """Match checks to resources, copy, and build the run list.
 
     Builds the check context and per-resource skip-checks lookups, then iterates
     every configured check, matching it against the relevant resources and
-    deep-copying a runnable instance per match.
+    shallow-copying a runnable instance per match.
 
     Returns:
         list[CheckToRun]: The assembled checks, ready for execution.
@@ -232,7 +232,11 @@ def _assemble_checks_to_run(ctx: "BouncerContext") -> list[CheckToRun]:
                 # wasted copies on a typical real-world config.
                 if not _should_run_check(check, i, iterate_over_value, meta_config):
                     continue
-                check_i = check.model_copy(deep=True)
+                # Shallow copy is safe: set_resource/set_context only rebind
+                # top-level attrs on the copy's own __dict__/private state, and
+                # no check mutates nested config/resource data (all read-only).
+                # deep=True here triggers ~830k recursive deepcopy calls per run.
+                check_i = check.model_copy()
                 check_run_id = _build_check_run_id(check_i, i, iterate_value)
                 check_i.set_resource(i, iterate_value)
                 check_i.set_context(check_ctx)
