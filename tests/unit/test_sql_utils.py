@@ -72,3 +72,47 @@ def test_neutralize_jinja_leading_config_does_not_break_parsing():
     )
     assert "_dbt_bouncer_jinja_" not in neutralized
     assert parse_sql(neutralized) is not None
+
+
+def test_neutralize_jinja_delimiter_inside_string_is_handled():
+    # A `%}` inside a Jinja string must not end the statement early. The old
+    # non-greedy regex truncated at the first `%}` and corrupted the SQL; the
+    # jinja2 lexer closes the block at the real delimiter.
+    neutralized = neutralize_jinja('{% set x = "%}" %}SELECT id FROM t')
+    assert "%}" not in neutralized
+    assert "_dbt_bouncer_jinja_" not in neutralized
+    assert parse_sql(neutralized) is not None
+
+
+def test_neutralize_jinja_nested_braces_become_single_placeholder():
+    # A dict/subscript expression contains inner braces; it must collapse to one
+    # placeholder rather than being split.
+    neutralized = neutralize_jinja("SELECT {{ {'a': 1}['a'] }} AS c FROM t")
+    assert neutralized.count("_dbt_bouncer_jinja_") == 1
+    assert "{" not in neutralized
+    assert parse_sql(neutralized) is not None
+
+
+def test_neutralize_jinja_whitespace_control_is_dropped():
+    # {%- ... -%} statements render to nothing just like {% ... %}.
+    neutralized = neutralize_jinja(
+        "SELECT id\n{%- if true -%} , name {%- endif -%}\nFROM t"
+    )
+    assert "{%" not in neutralized
+    assert "_dbt_bouncer_jinja_" not in neutralized
+    assert parse_sql(neutralized) is not None
+
+
+def test_neutralize_jinja_malformed_input_does_not_raise():
+    # Unclosed Jinja must degrade gracefully (return a string, no exception) so
+    # parse_sql can fail and callers hit their best-effort fallback.
+    neutralized = neutralize_jinja("SELECT {{ x FROM t")
+    assert isinstance(neutralized, str)
+
+
+def test_neutralize_jinja_unlexable_input_is_returned_unchanged():
+    # Jinja the lexer cannot tokenize at all (an unterminated ``{# ... #}``
+    # comment raises ``TemplateSyntaxError``) hits the documented fallback: the
+    # input is returned unchanged so parse_sql fails and callers fall back.
+    code = "SELECT {# unterminated comment"
+    assert neutralize_jinja(code) == code
