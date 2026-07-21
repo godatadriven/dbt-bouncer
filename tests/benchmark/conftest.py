@@ -19,7 +19,7 @@ import pytest
 import yaml
 from tqdm import tqdm
 
-from .synthetic_manifest import _env_model_count, write_artifacts
+from .synthetic_manifest import _env_int, _env_model_count, write_artifacts
 
 if TYPE_CHECKING:
     from dbt_bouncer.context import BouncerContext
@@ -38,8 +38,11 @@ _N_MODELS_KEY = pytest.StashKey[int]()
 _PHASE_KEY = pytest.StashKey[tuple]()
 
 # Number of warm rounds measured for the phase decomposition (after the discarded
-# warmup rounds below).
-_PHASE_ROUNDS = 100
+# warmup rounds below). Overridable via ``DBT_BOUNCER_BENCH_PHASE_ROUNDS`` (floored
+# at 1) so local runs can trade statistical rigour for speed — each round is a full
+# end-to-end run, so 100 rounds adds real wall time at larger model counts. Mirrors
+# ``DBT_BOUNCER_BENCH_MODELS``.
+_PHASE_ROUNDS = _env_int("DBT_BOUNCER_BENCH_PHASE_ROUNDS", 100)
 
 # Warmup rounds run (and discarded) before timing starts, so the disk conf cache
 # and lru caches are hot for every measured round.
@@ -292,7 +295,8 @@ def pytest_terminal_summary(config) -> None:
     # would otherwise wrap every cell onto two lines. Force a floor wide enough
     # for the table's natural width; a real, wider terminal is unaffected since
     # this only raises the wrap threshold, it doesn't stretch the table to fit.
-    console = Console(width=max(Console().size.width, _MIN_TABLE_WIDTH))
+    term_width = Console().size.width
+    console = Console(width=max(term_width, _MIN_TABLE_WIDTH))
 
     table = Table(
         title=(

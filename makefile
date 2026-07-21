@@ -78,11 +78,15 @@ test-integration: ## Run integration tests
 # `make test-benchmark BENCH_MODELS=5000`. CI runs the PR and main branches
 # at the same count, so Bencher comparisons stay apples-to-apples.
 BENCH_MODELS ?= 1000
+# Warm rounds measured for the phase-decomposition summary table; lower it for
+# faster local iteration, e.g. `make test-benchmark BENCH_PHASE_ROUNDS=10`.
+BENCH_PHASE_ROUNDS ?= 100
 test-benchmark: ## Run code-level performance benchmarks (pytest-benchmark)
 	# No --numprocesses (xdist disables pytest-benchmark) and no --cov (skews timings).
 	# No -s: the phase-decomposition fixture suspends capturing itself (just for
 	# its own tqdm progress bar), so every other benchmark stays quiet as before.
-	DBT_BOUNCER_BENCH_MODELS=$(BENCH_MODELS) uv run pytest \
+	DBT_BOUNCER_BENCH_MODELS=$(BENCH_MODELS) \
+	DBT_BOUNCER_BENCH_PHASE_ROUNDS=$(BENCH_PHASE_ROUNDS) uv run pytest \
 		-c ./tests \
 		--benchmark-only \
 		--benchmark-json=pytest_benchmark_results.json \
