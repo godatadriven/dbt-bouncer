@@ -62,8 +62,8 @@ def _env_int(var_name: str, default: int) -> int:
         default: Fallback when the var is unset or unparseable.
 
     Returns:
-        The resolved value, floored at 1 (an unset/invalid value returns
-        ``default`` unchanged).
+        The parsed value floored at 1, or ``default`` unchanged when the var is
+        unset or unparseable (no floor is applied to ``default``).
     """
     raw = os.getenv(var_name)
     if not raw:
