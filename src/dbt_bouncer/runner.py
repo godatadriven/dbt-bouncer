@@ -128,11 +128,13 @@ def _should_run_check(
 # Underscore-prefixed as an internal helper, but imported by the benchmark suite
 # (``tests/benchmark``) to time the match phase in isolation — keep it importable.
 def _assemble_checks_to_run(ctx: "BouncerContext") -> list[CheckToRun]:
-    """Match checks to resources, copy, and build the run list.
+    """Match checks to resources and build the run list.
 
     Builds the check context and per-resource skip-checks lookups, then iterates
     every configured check, matching it against the relevant resources and
-    shallow-copying a runnable instance per match.
+    recording the shared check instance plus the resource to bind onto it per
+    match. The executor binds the resource immediately before executing, so no
+    per-resource copy is made.
 
     Returns:
         list[CheckToRun]: The assembled checks, ready for execution.
