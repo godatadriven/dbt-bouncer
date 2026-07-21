@@ -67,8 +67,9 @@ RUN sh -c "$(wget -O- https://github.com/deluan/zsh-in-docker/releases/download/
     -p https://github.com/zsh-users/zsh-syntax-highlighting.git \
     -p git-auto-fetch
 
-# Install Atuin
-RUN curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh | sh && \
+# Install Atuin (pinned; bypass setup.atuin.sh wrapper — it fails under dash in non-tty docker builds)
+ENV ATUIN_VERSION=18.17.1
+RUN curl --proto '=https' --tlsv1.2 -LsSf https://github.com/atuinsh/atuin/releases/download/v${ATUIN_VERSION}/atuin-installer.sh | sh && \
     echo 'eval "$(atuin init zsh)"' >> "${HOME}/.zshrc"
 
 # Install Python dependencies as the non-root user
