@@ -8,6 +8,8 @@ from __future__ import annotations
 
 import importlib.util
 from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import patch
 
 import pytest
 
@@ -73,3 +75,21 @@ def test_parse_model_counts_rejects_invalid() -> None:
 
     with pytest.raises(typer.BadParameter):
         agg._parse_model_counts("100 abc")
+
+
+def test_run_single_streams_subprocess_output_and_reports_failure(capsys) -> None:
+    """``_run_single`` inherits the child's stdio instead of capturing it.
+
+    This lets the subprocess's own tqdm progress bars reach the real
+    terminal (see ``run_bouncer_phase_decomposition`` in
+    ``tests/benchmark/conftest.py``) rather than being swallowed into a pipe.
+    """
+    with patch.object(agg.subprocess, "run") as mock_run:
+        mock_run.return_value = SimpleNamespace(returncode=1)
+        result = agg._run_single(100)
+
+    assert result is None
+    _, kwargs = mock_run.call_args
+    assert "capture_output" not in kwargs
+    assert "text" not in kwargs
+    assert "benchmark failed for 100 models (exit 1)" in capsys.readouterr().err

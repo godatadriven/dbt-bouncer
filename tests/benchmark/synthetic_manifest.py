@@ -54,6 +54,26 @@ DEFAULT_DBT_VERSION = "1.11.0"
 _COLUMN_TYPES = ["INTEGER", "VARCHAR", "BOOLEAN", "DATE", "DOUBLE", "BIGINT"]
 
 
+def _env_int(var_name: str, default: int) -> int:
+    """Return a positive int from an env var, falling back to ``default``.
+
+    Args:
+        var_name: The environment variable to read.
+        default: Fallback when the var is unset or unparseable.
+
+    Returns:
+        The parsed value floored at 1, or ``default`` unchanged when the var is
+        unset or unparseable (no floor is applied to ``default``).
+    """
+    raw = os.getenv(var_name)
+    if not raw:
+        return default
+    try:
+        return max(1, int(raw))
+    except ValueError:
+        return default
+
+
 def _env_model_count(default: int) -> int:
     """Return the model count, overridable via ``DBT_BOUNCER_BENCH_MODELS``.
 
@@ -63,13 +83,7 @@ def _env_model_count(default: int) -> int:
     Returns:
         The resolved model count.
     """
-    raw = os.getenv("DBT_BOUNCER_BENCH_MODELS")
-    if not raw:
-        return default
-    try:
-        return max(1, int(raw))
-    except ValueError:
-        return default
+    return _env_int("DBT_BOUNCER_BENCH_MODELS", default)
 
 
 def _columns(n: int) -> dict[str, dict[str, Any]]:

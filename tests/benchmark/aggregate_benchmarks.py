@@ -153,17 +153,17 @@ def _run_single(n_models: int) -> float | None:
             "-q",
         ]
         env = {**os.environ, "DBT_BOUNCER_BENCH_MODELS": str(n_models)}
+        # No capture_output/text: inherit the parent's stdio so the child's
+        # tqdm progress bars (see run_bouncer_phase_decomposition in
+        # conftest.py) stream live instead of being swallowed into a pipe.
         proc = subprocess.run(  # noqa: S603 - fixed argv, no shell, no untrusted input
-            cmd, cwd=_REPO_ROOT, env=env, capture_output=True, text=True
+            cmd, cwd=_REPO_ROOT, env=env
         )
         if proc.returncode != 0 or not json_path.exists():
             typer.echo(
                 f"  benchmark failed for {n_models:,} models (exit {proc.returncode})",
                 err=True,
             )
-            tail = "\n".join((proc.stderr or proc.stdout).splitlines()[-15:])
-            if tail:
-                typer.echo(tail, err=True)
             return None
         data = json.loads(json_path.read_text())
 
