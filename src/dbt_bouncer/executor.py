@@ -29,6 +29,14 @@ class Executor:
 
         """
         logging.debug(f"Running {check['check_run_id']}...")
+        # Bind this run's resource onto the shared check instance immediately
+        # before executing. Assembly stores the resource alongside the check
+        # rather than pre-copying an instance per resource; sequential execution
+        # makes reusing one instance across its resources safe. Context-only
+        # checks have no resource and are executed as-is.
+        resource = check.get("resource")
+        if resource is not None:
+            check["check"].set_resource(resource, check["iterate_value"])
         try:
             check["check"].execute()
             check["outcome"] = CheckOutcome.SUCCESS

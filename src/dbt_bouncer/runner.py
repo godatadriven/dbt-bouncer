@@ -76,13 +76,21 @@ def _build_check_run_id(check: Any, resource: Any, iterate_value: str) -> str:
 
 
 class CheckToRun(TypedDict):
-    """A single check instance ready for execution, with its run context."""
+    """A single check ready for execution, with its run context.
+
+    ``check`` is a shared check-config instance; ``resource`` and ``iterate_value``
+    tell the executor which resource to bind onto it immediately before calling
+    ``execute()``. Because checks run sequentially, one instance can serve all of
+    its resources in turn — no per-resource copy is needed.
+    """
 
     check: Any
     check_run_id: str
     failure_message: NotRequired[str]
     file_path: NotRequired[str | None]
+    iterate_value: NotRequired[str | None]
     outcome: NotRequired[str]
+    resource: NotRequired[Any]
     severity: str
     unique_id: NotRequired[str | None]
 
@@ -225,28 +233,27 @@ def _assemble_checks_to_run(ctx: "BouncerContext") -> list[CheckToRun]:
         iterate_over_value = _CLASS_ITERATE_CACHE[cls]
         if len(iterate_over_value) == 1:
             iterate_value = next(iter(iterate_over_value))
+            # The context is identical for every resource, so set it once on the
+            # shared check-config instance rather than per match.
+            check.set_context(check_ctx)
             for i, meta_config in _resources_for(iterate_value):
-                # Filter first against the original check — _should_run_check
-                # only reads include/exclude/materialization/name, none of
-                # which need a copy. Deep-copying upfront would do 500k+
-                # wasted copies on a typical real-world config.
+                # Filter first against the check — _should_run_check only reads
+                # include/exclude/materialization/name.
                 if not _should_run_check(check, i, iterate_over_value, meta_config):
                     continue
-                # Shallow copy is safe: set_resource/set_context only rebind
-                # top-level attrs on the copy's own __dict__/private state, and
-                # no check mutates nested config/resource data (all read-only).
-                # deep=True here triggers ~830k recursive deepcopy calls per run.
-                check_i = check.model_copy()
-                check_run_id = _build_check_run_id(check_i, i, iterate_value)
-                check_i.set_resource(i, iterate_value)
-                check_i.set_context(check_ctx)
-
+                # No per-resource copy: the executor binds ``resource`` onto the
+                # shared ``check`` instance immediately before calling execute().
+                # Checks run sequentially, so reusing one instance across all of
+                # its resources is safe (and avoids ~17k+ model_copy calls).
+                check_run_id = _build_check_run_id(check, i, iterate_value)
                 checks_to_run.append(
                     {
-                        "check": check_i,
+                        "check": check,
                         "check_run_id": check_run_id,
                         "file_path": getattr(i, "original_file_path", None),
-                        "severity": check_i.severity,
+                        "iterate_value": iterate_value,
+                        "resource": i,
+                        "severity": check.severity,
                         "unique_id": getattr(i, "unique_id", None),
                     },
                 )
