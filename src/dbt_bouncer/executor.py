@@ -1,12 +1,9 @@
-"""Check execution engine with batching and parallel execution."""
+"""Check execution engine with sequential execution and progress tracking."""
 
 from __future__ import annotations
 
 import logging
-import threading
 import traceback
-from collections import defaultdict
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import TYPE_CHECKING, Any
 
 from rich.console import Console
@@ -20,11 +17,9 @@ if TYPE_CHECKING:
 
 __all__ = ["Executor"]
 
-_MAX_BATCH_SIZE: int = 500
-
 
 class Executor:
-    """Orchestrates check execution with batching and progress tracking."""
+    """Orchestrates check execution with progress tracking."""
 
     def _execute_check(self, check: CheckToRun) -> CheckToRun:
         """Execute a single check and return the result.
@@ -61,19 +56,8 @@ class Executor:
             )
         return check
 
-    def _execute_batch(self, batch: list[CheckToRun]) -> int:
-        """Execute all checks in a batch sequentially and return the count.
-
-        Returns:
-            int: Number of checks executed.
-
-        """
-        for check in batch:
-            self._execute_check(check)
-        return len(batch)
-
     def run(self, checks_to_run: list[CheckToRun]) -> list[dict[str, Any]]:
-        """Execute all checks with batching and progress tracking.
+        """Execute all checks sequentially with progress tracking.
 
         Args:
             checks_to_run: List of CheckToRun dicts (mutated in place during execution).
@@ -89,39 +73,30 @@ class Executor:
 
         logging.info(f"Assembled {len(checks_to_run)} checks, running...")
 
-        # Group checks by class to reduce ThreadPoolExecutor scheduling overhead.
-        # Checks of the same class run sequentially within a batch; different
-        # classes run in parallel across threads.
-        # Cap batch size to avoid submitting one giant task for large check sets.
-        batches: dict[str, list[CheckToRun]] = defaultdict(list)
-        for check in checks_to_run:
-            batches[check["check"].__class__.__name__].append(check)
-
-        batches_to_run: list[list[CheckToRun]] = [
-            batch[i : i + _MAX_BATCH_SIZE]
-            for batch in batches.values()
-            for i in range(0, len(batch), _MAX_BATCH_SIZE)
-        ]
-
+        # Checks are CPU-bound pure-Python work (regex matching, proxy attribute
+        # access, string ops) that never releases the GIL, so a ThreadPoolExecutor
+        # could not run them in parallel -- it only added thread-scheduling and
+        # GIL-contention overhead (and multi-second tail-latency spikes on large
+        # projects). Executing sequentially is both faster and far more
+        # predictable; see the benchmark suite (``tests/benchmark``).
         console = Console()
-        progress_lock = threading.Lock()
-
         with Progress(
             TextColumn("[progress.description]{task.description}"),
             BarColumn(),
             TaskProgressColumn(),
             console=console,
         ) as progress:
-            task = progress.add_task("Running checks...", total=len(checks_to_run))
-            with ThreadPoolExecutor() as executor:
-                futures = {
-                    executor.submit(self._execute_batch, batch): batch
-                    for batch in batches_to_run
-                }
-                for future in as_completed(futures):
-                    batch_size = future.result()
-                    with progress_lock:
-                        progress.update(task, advance=batch_size)
+            total = len(checks_to_run)
+            task = progress.add_task("Running checks...", total=total)
+            # Refresh the bar ~100 times total rather than once per check: at large
+            # check counts per-check updates add measurable overhead, and rich only
+            # renders a few times a second anyway.
+            update_step = max(1, total // 100)
+            for n, check in enumerate(checks_to_run, 1):
+                self._execute_check(check)
+                if n % update_step == 0:
+                    progress.update(task, completed=n)
+            progress.update(task, completed=total)
 
         return [
             {
