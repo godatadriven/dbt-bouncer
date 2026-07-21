@@ -48,7 +48,7 @@ make install
   - `exceptions.py` — `DbtBouncerFailedCheckError` and `NestedDict`
   - `patterns.py` — abstract check pattern ABCs
 - `src/dbt_bouncer/runner.py` — orchestrates check execution
-- `src/dbt_bouncer/executor.py` — parallel execution with `ThreadPoolExecutor`
+- `src/dbt_bouncer/executor.py` — sequential check execution with progress tracking
 - `tests/` — mirrors `src/` structure; fixtures in `tests/fixtures/`
 
 ### Check System
@@ -59,7 +59,7 @@ Checks are written using the `@check` decorator (preferred) or as class-based `B
 
 1. `runner.py` iterates checks, determines the resource type from the function's first positional parameter (decorator API) or class annotations (class-based API)
 2. Injects the per-iteration resource into the check
-3. `Executor` batches checks by class and runs them via `ThreadPoolExecutor`
+3. `Executor` runs checks sequentially with a Rich progress bar
 4. Failed checks call `fail()` (decorator API) or raise `DbtBouncerFailedCheckError` (class-based API)
 
 **Resource types:** catalog_node, catalog_source, exposure, macro, model, run_result, seed, semantic_model, snapshot, source, test, unit_test
