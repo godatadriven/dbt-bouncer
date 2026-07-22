@@ -12,7 +12,6 @@ RUN apt-get update && \
         ca-certificates \
         curl \
         git \
-        make \
         wget \
         zsh \
     && rm -rf /var/lib/apt/lists/*
@@ -25,6 +24,7 @@ RUN mkdir -p "${HOME}" && \
     chmod 755 "${HOME}" # rwxr-xr-x for home directory
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+COPY --from=ghcr.io/jdx/mise:latest /usr/local/bin/mise /usr/local/bin/mise
 
 ENV BENCHER_VERSION=0.6.6
 RUN curl --proto '=https' --tlsv1.2 -sSfL https://bencher.dev/download/install-cli.sh -o /tmp/install-bencher.sh && \

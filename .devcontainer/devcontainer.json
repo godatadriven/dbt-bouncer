@@ -15,7 +15,7 @@
 				"ms-azuretools.vscode-containers",
 				"ms-python.python",
 				"ms-python.vscode-pylance",
-				"ms-vscode.makefile-tools",
+				"jdx.mise",
 				"oderwat.indent-rainbow",
 				"redhat.vscode-yaml",
 				"samuelcolvin.jinjahtml",

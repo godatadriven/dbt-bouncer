@@ -18,12 +18,12 @@ Regenerate test fixture files after making changes to the dbt project in `dbt_pr
 ### 1. Run the build
 
 ```bash
-make build-artifacts
+mise run build-artifacts
 ```
 
-This generates fixtures for dbt 1.10 and 1.11 in `tests/fixtures/dbt_1X/target/` (manifest.json, catalog.json, run_results.json). Note: dbt 1.9 fixtures are frozen and not regenerated.
+This generates fixtures for dbt 1.10, 1.11, and 1.12 in `tests/fixtures/dbt_1X/target/` (manifest.json, catalog.json, run_results.json). Note: dbt 1.9 fixtures are frozen and not regenerated.
 
-**Note:** The Makefile uses specific dbt-duckdb version pins. Do not modify the version pins in the Makefile without understanding the compatibility matrix.
+**Note:** `mise.toml` uses specific dbt-duckdb version pins. Do not modify the version pins in `mise.toml` without understanding the compatibility matrix.
 
 ### 2. Verify the fixtures
 
@@ -37,7 +37,7 @@ ls -la tests/fixtures/dbt_111/target/
 ### 3. Run tests
 
 ```bash
-make test
+mise run test
 ```
 
 All tests should pass with the new fixtures. If tests fail, check whether the fixture schema changed in a way that requires test updates.

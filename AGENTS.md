@@ -9,23 +9,23 @@ dbt-bouncer enforces conventions for dbt projects by running validation checks a
 - **Dev Container:** supported (VSCode / GitHub Codespaces)
 
 ```bash
-make install
+mise run install
 ```
 
 ## Common Commands
 
 | Command | Description |
 |---|---|
-| `make test` | Run all tests (unit + integration) |
-| `make test-unit` | Run unit tests only |
-| `make test-integration` | Run integration tests only |
+| `mise run test` | Run all tests (unit + integration) |
+| `mise run test-unit` | Run unit tests only |
+| `mise run test-integration` | Run integration tests only |
 | `prek run --all-files` | Run pre-commit hooks (**not** `pre-commit run`) |
-| `make build-and-run-dbt-bouncer` | End-to-end validation |
-| `make build-artifacts` | Regenerate test fixtures (dbt 1.10, 1.11, 1.12) |
-| `make generate-schema` | Regenerate `schema.json` from Pydantic models |
-| `make test-perf` | End-to-end performance benchmarks (bencher + hyperfine) |
-| `make test-benchmark` | Code-level micro-benchmarks (pytest-benchmark, synthetic 5k-model manifest) |
-| `make test-benchmark-aggregate` | Sweep the end-to-end benchmark across model counts and print a summary table |
+| `mise run build-and-run-dbt-bouncer` | End-to-end validation |
+| `mise run build-artifacts` | Regenerate test fixtures (dbt 1.10, 1.11, 1.12) |
+| `mise run generate-schema` | Regenerate `schema.json` from Pydantic models |
+| `mise run test-perf` | End-to-end performance benchmarks (bencher + hyperfine) |
+| `mise run test-benchmark` | Code-level micro-benchmarks (pytest-benchmark, synthetic 5k-model manifest) |
+| `mise run test-benchmark-aggregate` | Sweep the end-to-end benchmark across model counts and print a summary table |
 
 ## Architecture
 
@@ -115,7 +115,7 @@ def check_model_xxx(model, *, some_param: str):
 **After adding or modifying checks**, regenerate the JSON Schema so editor autocomplete stays in sync:
 
 ```bash
-make generate-schema
+mise run generate-schema
 ```
 
 CI will fail if `schema.json` is out of date.
@@ -125,7 +125,7 @@ CI will fail if `schema.json` is out of date.
 1. Place in the appropriate submodule under `src/dbt_bouncer/checks/`
 2. Add to `dbt-bouncer-example.yml` and validate: `dbt-bouncer --config-file dbt-bouncer-example.yml`
 3. Write tests (happy + unhappy paths) in the mirror location under `tests/unit/checks/`
-4. Run `make test-unit` and `prek run --all-files`
+4. Run `mise run test-unit` and `prek run --all-files`
 
 ### Alternative: Class-based checks
 
@@ -161,7 +161,7 @@ class CheckModelXxx(BaseCheck):
 - **Happy path + unhappy path** test cases required
 - `__init__.py` required in test subdirectories
 - Shared fixtures in `conftest.py` files (session-scoped and per-directory)
-- Run: `make test-unit`
+- Run: `mise run test-unit`
 
 ## Releases
 

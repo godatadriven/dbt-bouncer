@@ -63,7 +63,7 @@ These are the tools used in `dbt-bouncer` development and testing:
 
 - [`bandit`](https://github.com/PyCQA/bandit) to check for security issues.
 - [GitHub Actions](https://github.com/features/actions) for automating tests and checks, once a PR is pushed to the `dbt-bouncer` repository.
-- [`make`](https://users.cs.duke.edu/~ola/courses/programming/Makefiles/Makefiles.html) to run multiple setup or test steps in combination.
+- [`mise`](https://mise.jdx.dev/) as a tool manager and task runner.
 - [`prek`](https://github.com/j178/prek) to easily run those checks.
 - [`Pydantic`](https://docs.pydantic.dev/latest/) to validate our configuration file.
 - [`pytest`](https://docs.pytest.org/en/latest/) to define, discover, and run tests.
@@ -95,7 +95,7 @@ Set required environment variables by copying `.env.example` to `.env` and updat
 First make sure that you set up your `virtualenv` as described in [Setting up an environment](#setting-up-an-environment). Next, install `dbt-bouncer`, its dependencies and `prek`:
 
 ```shell
-make install
+mise run install
 uv run prek install
 ```
 
@@ -122,29 +122,29 @@ Once you're able to manually test that your code change is working as expected, 
 - **Generating dbt artifacts:** If you change the configuration of the dbt project located in `dbt_project` then you will need to re-generate the dbt artifacts used in testing. To do so, run:
 
 ```shell
-make build-artifacts
+mise run build-artifacts
 ```
 
 ### Test commands
 
 There are a few methods for running tests locally.
 
-#### `makefile`
+#### `mise`
 
-There are multiple targets in the `makefile` to run common test suites, most notably:
+There are multiple tasks in `mise.toml` to run common test suites, most notably:
 
 ```shell
 # Runs unit tests
-make test-unit
+mise run test-unit
 
 # Runs integration tests
-make test-integration
+mise run test-integration
 
 # Runs all tests
-make test
+mise run test
 
 # Alternative for dev containers only
-make test-dev-container
+mise run test-dev-container
 ```
 
 #### JSON Schema
@@ -152,7 +152,7 @@ make test-dev-container
 A JSON Schema is generated from the Pydantic config model and committed as `schema.json` at the repo root. After adding or modifying checks, regenerate it:
 
 ```shell
-make generate-schema
+mise run generate-schema
 ```
 
 CI will fail if `schema.json` is out of date. The schema enables editor autocomplete and validation for `dbt-bouncer.yml` files (see [Config file > Editor integration](./configuration.md#editor-integration)).
@@ -164,24 +164,24 @@ There are two layers of performance coverage:
 1. **End-to-end (CLI)**: we use [bencher](https://github.com/bencherdev/bencher) and [hyperfine](https://github.com/sharkdp/hyperfine) to time the whole CLI against the example project. Provided both are installed, you can run these via:
 
    ```shell
-   make test-perf
+   mise run test-perf
    ```
 
 2. **Code-level (micro-benchmarks)**: [pytest-benchmark](https://pytest-benchmark.readthedocs.io/) benchmarks the hot paths (manifest parsing, check-assembly, the runner, and a full in-process run) against a synthetic ~5,000-model manifest generated on the fly by `tests/benchmark/synthetic_manifest.py`. Run these via:
 
    ```shell
-   make test-benchmark
+   mise run test-benchmark
    ```
 
-   Change the manifest size with `make test-benchmark BENCH_MODELS=5000` (the `make` target defaults to `1000` to keep local runs quick). Running `pytest` directly instead reads `DBT_BOUNCER_BENCH_MODELS`, falling back to `5000` when it is unset. In CI, the emitted `pytest_benchmark_results.json` is tracked by Bencher (`python_pytest` adapter, `ubuntu-24.04-pytest` testbed) so parse-time and check-assembly regressions fail PRs — the same mechanism as the hyperfine track.
+   Change the manifest size with `mise run test-benchmark --models 5000` (the `mise` task defaults to `1000` to keep local runs quick). Running `pytest` directly instead reads `DBT_BOUNCER_BENCH_MODELS`, falling back to `5000` when it is unset. In CI, the emitted `pytest_benchmark_results.json` is tracked by Bencher (`python_pytest` adapter, `ubuntu-24.04-pytest` testbed) so parse-time and check-assembly regressions fail PRs — the same mechanism as the hyperfine track.
 
    To see how the end-to-end run scales with project size, run the sweep:
 
    ```shell
-   make test-benchmark-aggregate
+   mise run test-benchmark-aggregate
    ```
 
-   It runs the `test_run_bouncer` end-to-end benchmark once per model count (100, 250, 500, 1000, 2000, 5000, 10000 by default) and prints a summary table of the mean run time for each. Override the counts with `make test-benchmark-aggregate BENCH_MODEL_COUNTS="100 1000 10000"`.
+   It runs the `test_run_bouncer` end-to-end benchmark once per model count (100, 250, 500, 1000, 2000, 5000, 10000 by default) and prints a summary table of the mean run time for each. Override the counts with `mise run test-benchmark-aggregate --model-counts "100 1000 10000"`.
 
 #### `prek`
 

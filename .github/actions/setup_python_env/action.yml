@@ -44,7 +44,12 @@ runs:
         cache-suffix: py${{ steps.resolve-version.outputs.python-version }}
         enable-cache: true
 
+    - name: Setup mise
+      uses: jdx/mise-action@5083f2a6d34e9e4299b9c9f4d436cf405e3240fb # v2
+      with:
+        install: false
+
     - name: Install dependencies
       if: inputs.install-python-deps == 'true'
       shell: bash
-      run: make install
+      run: mise run install

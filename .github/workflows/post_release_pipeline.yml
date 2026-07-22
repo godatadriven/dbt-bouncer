@@ -109,9 +109,9 @@ jobs:
               if: matrix.operating-system == 'windows-2025'
               run: |
                 $env:Path += ';C:\Users\runneradmin\.local\bin'
-                make build-and-run-dbt-bouncer
+                mise run build-and-run-dbt-bouncer
 
             - name: Regenerate dbt artifacts and run `dbt-bouncer`
               if: matrix.operating-system != 'windows-2025'
               run: |
-                (r=3;while ! make build-and-run-dbt-bouncer ; do ((--r))||exit;done)
+                (r=3;while ! mise run build-and-run-dbt-bouncer ; do ((--r))||exit;done)
