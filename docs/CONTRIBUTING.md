@@ -253,8 +253,8 @@ def test_check_model_names_fail():
     check_fails("check_model_names", model={"name": "fct_orders"}, model_name_pattern="^stg_")
 ```
 
-1. Run `make generate-schema` to regenerate `schema.json` (CI will fail if it's out of date).
-1. Run `make test` to ensure tests pass.
+1. Run `mise run generate-schema` to regenerate `schema.json` (CI will fail if it's out of date).
+1. Run `mise run test` to ensure tests pass.
 1. Open a PR!
 
 ### Class-based API (legacy)
@@ -270,7 +270,7 @@ The class-based API is a legacy escape hatch for checks that need complex Pydant
     - Uses `_require_*()` methods to access resources.
 1. Add the check to `dbt-bouncer-example.yml` and validate.
 1. Write tests using `check_passes`/`check_fails` from `dbt_bouncer.testing`.
-1. Run `make test` and open a PR.
+1. Run `mise run test` and open a PR.
 
 ### Writing tests
 
