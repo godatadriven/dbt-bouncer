@@ -9,14 +9,13 @@
 # `uv` remains the Python package manager; mise pins/installs the tools (uv
 # included) and runs the tasks.
 
-[settings]
-# `.python-version` idiomatic files are opt-in in modern mise. Enabling it here
-# means mise and uv share one Python pin (the interpreter is pinned in
-# `.python-version`, read by uv, mise, and the CI resolve-version step).
-idiomatic_version_file_enable_tools = ["python"]
-
 [tools]
-# Python is pinned in `.python-version` (read via the setting above).
+# Python is intentionally NOT managed by mise. `uv` reads `.python-version`
+# natively for the project venv, and CI's setup-python provides the matrix
+# interpreter. If mise also managed python it would install its own copy and
+# put `python`/`pip` shims ahead of the CI interpreter on PATH, breaking plain
+# `pip install` smoke tests (the console script lands off-PATH) and forcing a
+# single pinned python across the whole test matrix.
 uv = "latest"
 node = "22"
 hyperfine = "1.20"
