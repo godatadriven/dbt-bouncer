@@ -294,17 +294,17 @@ def lint_config_file(config_file_path: Path) -> list[dict[str, Any]]:
                     )
                     continue
 
-                if "name" not in check:
+                if "name" not in check and "code" not in check:
                     issues.append(
                         {
                             "line": idx + 1,
-                            "message": "Check is missing required 'name' field",
+                            "message": "Check is missing required 'name' or 'code' field",
                             "severity": "error",
                         }
                     )
-                    continue  # Cannot validate the name if it's absent
+                    continue  # Cannot validate if absent
 
-                check_name = check["name"]
+                check_name = check.get("name") or check.get("code")
                 if check_name not in registry:
                     best_match = min(
                         registry.keys(),
@@ -656,12 +656,26 @@ def validate_conf(
     """
     logging.info("Validating conf...")
 
-    # Extract check names from config to enable targeted module loading.
+    # Normalize check entries and extract check names/codes from config to enable targeted module loading.
+    registry = get_check_registry(custom_checks_dir)
     configured_check_names: set[str] = set()
     for cat in check_categories:
         for entry in config_file_contents.get(cat, []):
-            if isinstance(entry, dict) and "name" in entry:
-                configured_check_names.add(entry["name"])
+            if isinstance(entry, dict):
+                c_key = entry.get("name") or entry.get("code")
+                if c_key:
+                    configured_check_names.add(c_key)
+                    if c_key in registry:
+                        cls = registry[c_key]
+                        name_field = cls.model_fields.get("name")
+                        if name_field is not None:
+                            args = typing.get_args(name_field.annotation)
+                            if args:
+                                entry["name"] = args[0]
+                                configured_check_names.add(args[0])
+                        if getattr(cls, "code", None) is not None:
+                            entry["code"] = cls.code
+                            configured_check_names.add(cls.code)
 
     cache_path: Path | None = None
     if _conf_cache_enabled():

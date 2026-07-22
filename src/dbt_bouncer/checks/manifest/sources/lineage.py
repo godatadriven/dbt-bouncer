@@ -7,7 +7,7 @@ from pydantic import Field
 from dbt_bouncer.check_framework.decorator import check, fail
 
 
-@check
+@check(code="SO005")
 def check_duplicate_sources(source, ctx):
     """Sources must not share the same database relation.
 
@@ -60,7 +60,7 @@ def check_duplicate_sources(source, ctx):
         )
 
 
-@check
+@check(code="SO006")
 def check_source_min_downstream_models(
     source, ctx, *, min_number_of_models: Annotated[int, Field(gt=0)] = 1
 ):
@@ -104,7 +104,7 @@ def check_source_min_downstream_models(
         )
 
 
-@check
+@check(code="SO007")
 def check_source_not_orphaned(source, ctx):
     """Sources must be referenced in at least one model.
 
@@ -136,7 +136,7 @@ def check_source_not_orphaned(source, ctx):
         )
 
 
-@check
+@check(code="SO008")
 def check_source_used_by_models_in_same_directory(source, ctx):
     """Sources can only be referenced by models that are located in the same directory where the source is defined.
 
@@ -173,7 +173,7 @@ def check_source_used_by_models_in_same_directory(source, ctx):
         )
 
 
-@check
+@check(code="SO009")
 def check_source_used_by_only_one_model(source, ctx):
     """Each source can be referenced by a maximum of one model.
 

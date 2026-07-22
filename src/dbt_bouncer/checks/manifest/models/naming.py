@@ -4,7 +4,7 @@ from dbt_bouncer.check_framework.decorator import check, fail
 from dbt_bouncer.utils import compile_pattern, get_clean_model_name
 
 
-@check
+@check(code="MO038")
 def check_model_names(model, *, model_name_pattern: str):
     """Models must have a name that matches the supplied regex.
 

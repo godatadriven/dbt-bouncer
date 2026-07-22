@@ -9,7 +9,7 @@ from dbt_bouncer.enums import ModelAccess
 from dbt_bouncer.utils import get_model_for_catalog_node, is_description_populated
 
 
-@check
+@check(code="CA005")
 def check_column_description_populated(
     catalog_node,
     ctx,
@@ -78,7 +78,7 @@ def check_column_description_populated(
             )
 
 
-@check
+@check(code="CA006")
 def check_columns_are_all_documented(catalog_node, ctx, *, case_sensitive: bool = True):
     """All columns in a model should be included in the model's properties file, i.e. `.yml` file.
 
@@ -138,7 +138,7 @@ def check_columns_are_all_documented(catalog_node, ctx, *, case_sensitive: bool 
             )
 
 
-@check
+@check(code="CA007")
 def check_columns_are_documented_in_public_models(
     catalog_node,
     ctx,

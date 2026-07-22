@@ -91,7 +91,7 @@ def _hard_coded_tables(statements: tuple[exp.Expression, ...]) -> list[str]:
     return tables
 
 
-@check
+@check(code="MO007")
 def check_model_code_does_not_contain_regexp_pattern(model, *, regexp_pattern: str):
     """The raw code for a model must not match the specified regexp pattern.
 
@@ -128,7 +128,7 @@ def check_model_code_does_not_contain_regexp_pattern(model, *, regexp_pattern: s
         )
 
 
-@check
+@check(code="MO008")
 def check_model_does_not_use_select_star(model):
     """Models must not use `SELECT *`.
 
@@ -189,7 +189,7 @@ def check_model_does_not_use_select_star(model):
                 )
 
 
-@check
+@check(code="MO009")
 def check_model_hard_coded_references(model):
     """A model must not contain hard-coded table references; use ref() or source() instead.
 
@@ -256,7 +256,7 @@ def check_model_hard_coded_references(model):
         )
 
 
-@check
+@check(code="MO010")
 def check_model_has_semi_colon(model):
     """Model may not end with a semi-colon (`;`).
 
@@ -289,7 +289,7 @@ def check_model_has_semi_colon(model):
         )
 
 
-@check
+@check(code="MO011")
 def check_model_incremental_has_unique_key(model):
     """Incremental models must declare a `unique_key`.
 
@@ -329,7 +329,7 @@ def check_model_incremental_has_unique_key(model):
         )
 
 
-@check
+@check(code="MO012")
 def check_model_materialization_permitted(
     model, *, permitted_materializations: list[Materialization]
 ):
@@ -376,7 +376,7 @@ def check_model_materialization_permitted(
         )
 
 
-@check
+@check(code="MO013")
 def check_model_max_number_of_lines(model, *, max_number_of_lines: int = 100):
     """Models may not have more than the specified number of lines.
 

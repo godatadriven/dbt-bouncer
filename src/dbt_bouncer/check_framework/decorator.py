@@ -65,37 +65,50 @@ def fail(message: str) -> None:
 
 
 def check(
-    fn: Callable[..., None] | None = None,
+    fn: Callable[..., None] | str | None = None,
+    *,
+    code: str | None = None,
 ) -> type[BaseCheck] | Callable[[Callable[..., None]], type[BaseCheck]]:
     """Generate a ``BaseCheck`` subclass from a plain function.
 
     Everything is inferred from the function signature:
 
+    - **code** — optional rule code (e.g. ``"MO001"``).
     - **name** — ``fn.__name__`` (must match YAML config ``name:`` value).
     - **iterate_over** — the first positional parameter that isn't ``ctx``.
       If there are none, the check is global (runs once with context only).
     - **params** — keyword-only arguments become Pydantic fields.
     - **ctx** — injected when the function declares it.
 
-    Supports both ``@check`` and ``@check()`` usage.
+    Supports ``@check``, ``@check()``, and ``@check(code="MO001")`` usage.
 
     Returns:
         The generated ``BaseCheck`` subclass (or a decorator if called with parens).
 
     """
+    if isinstance(fn, str):
+        code = fn
+        fn = None
+
     if fn is None:
-        # Called as @check() with parens — return decorator.
+        # Called as @check() or @check(code="MO001") — return decorator.
         def wrapper(f: Callable[..., None]) -> type[BaseCheck]:
-            return _build_check_class(f)
+            return _build_check_class(f, code=code)
 
         return wrapper
 
     # Called as bare @check — fn is the decorated function.
-    return _build_check_class(fn)
+    return _build_check_class(fn, code=code)
 
 
-def _build_check_class(fn: Callable[..., None]) -> type[BaseCheck]:
+def _build_check_class(
+    fn: Callable[..., None], code: str | None = None
+) -> type[BaseCheck]:
     """Build a BaseCheck subclass from the decorated function.
+
+    Args:
+        fn: The decorated check function.
+        code: Optional rule code for the check.
 
     Returns:
         The generated ``BaseCheck`` subclass.
@@ -123,6 +136,8 @@ def _build_check_class(fn: Callable[..., None]) -> type[BaseCheck]:
     fields: dict[str, Any] = {
         "name": (Literal[name], Field(default=name)),  # type: ignore[valid-type]
     }
+    if code is not None:
+        fields["code"] = (Literal[code] | None, Field(default=code))  # type: ignore[valid-type]
 
     # Resource field for iterate_over detection by the runner.
     if iterate_over is not None:
@@ -162,10 +177,9 @@ def _build_check_class(fn: Callable[..., None]) -> type[BaseCheck]:
         **fields,
     )
 
-    # Attach the execute method.
+    # Attach the execute method and class-level metadata.
     cls.execute = execute  # type: ignore[attr-defined]
-
-    # Store iterate_over as a ClassVar for explicit runner lookup.
+    cls.code = code  # type: ignore[attr-defined]
     cls.iterate_over = iterate_over  # type: ignore[attr-defined]
 
     # Preserve metadata.

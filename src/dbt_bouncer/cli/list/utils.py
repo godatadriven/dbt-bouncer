@@ -26,6 +26,7 @@ base_fields = frozenset(
     {
         "catalog_node",
         "catalog_source",
+        "code",
         "description",
         "exclude",
         "exposure",
@@ -74,6 +75,7 @@ def get_check_params(check_class: type) -> dict[str, str]:
 class CheckDict(TypedDict):
     """Dictionary representing a check."""
 
+    code: str | None
     description: str
     name: str
     parameters: dict[str, str]
@@ -101,6 +103,7 @@ def build_checks_payload(
             description = docstring.splitlines()[0] if docstring else ""
             result[label].append(
                 {
+                    "code": getattr(check_class, "code", None),
                     "description": description,
                     "name": check_class.__name__,
                     "parameters": get_check_params(check_class),
@@ -120,6 +123,11 @@ def print_text_checks(checks_payload: dict[str, list[CheckDict]]) -> None:
     for label, checks in checks_payload.items():
         typer.echo(f"{label}:")
         for check in checks:
+            display_name = (
+                f"[{check['code']}] {check['name']}"
+                if check.get("code")
+                else check["name"]
+            )
             params = check["parameters"]
             params_text = (
                 "\n".join(
@@ -129,5 +137,5 @@ def print_text_checks(checks_payload: dict[str, list[CheckDict]]) -> None:
                 else "        (none)"
             )
             typer.echo(
-                f"  {check['name']}:\n      {check['description']}\n      Parameters:\n{params_text}\n"
+                f"  {display_name}:\n      {check['description']}\n      Parameters:\n{params_text}\n"
             )

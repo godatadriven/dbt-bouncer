@@ -531,7 +531,7 @@ def test_lint_config_file_missing_name(tmp_path):
 
     issues = lint_config_file(config_file)
     assert len(issues) == 1
-    assert issues[0]["message"] == "Check is missing required 'name' field"
+    assert issues[0]["message"] == "Check is missing required 'name' or 'code' field"
     assert issues[0]["severity"] == "error"
 
 

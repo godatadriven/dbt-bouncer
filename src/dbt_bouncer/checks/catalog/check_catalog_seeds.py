@@ -44,7 +44,7 @@ def _extract_stat_value(catalog_node: Any, stat_keys: list[str]) -> int | None:
     return None
 
 
-@check
+@check(code="CA001")
 def check_seed_columns_are_all_documented(catalog_node, ctx):
     """All columns in a seed CSV file should be included in the seed's properties file, i.e. `.yml` file.
 
@@ -92,7 +92,7 @@ def check_seed_columns_are_all_documented(catalog_node, ctx):
             )
 
 
-@check
+@check(code="CA002")
 def check_seed_max_bytes(
     catalog_node,
     *,
@@ -167,7 +167,7 @@ def check_seed_max_bytes(
         )
 
 
-@check
+@check(code="CA003")
 def check_seed_max_row_count(
     catalog_node,
     *,

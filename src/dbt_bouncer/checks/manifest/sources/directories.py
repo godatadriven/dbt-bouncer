@@ -6,7 +6,7 @@ from dbt_bouncer.check_framework.decorator import check, fail
 from dbt_bouncer.utils import clean_path_str, compile_pattern
 
 
-@check
+@check(code="SO003")
 def check_source_property_file_location(source):
     """Source properties files must follow the guidance provided by dbt [here](https://docs.getdbt.com/best-practices/how-we-structure/1-guide-overview).
 
@@ -59,7 +59,7 @@ def check_source_property_file_location(source):
         )
 
 
-@check
+@check(code="SO002")
 def check_source_file_name(source, *, file_name_pattern: str):
     r"""Sources must have a file name that matches the supplied regex.
 

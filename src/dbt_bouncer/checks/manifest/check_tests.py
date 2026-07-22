@@ -4,7 +4,7 @@ from dbt_bouncer.enums import Criteria
 from dbt_bouncer.utils import compile_pattern, find_missing_meta_keys
 
 
-@check
+@check(code="TE001")
 def check_test_has_meta_keys(test, *, keys: NestedDict):
     """The `meta` config for data tests must have the specified keys.
 
@@ -42,7 +42,7 @@ def check_test_has_meta_keys(test, *, keys: NestedDict):
         )
 
 
-@check
+@check(code="TE002")
 def check_test_has_tags(test, *, criteria: Criteria = Criteria.ALL, tags: list[str]):
     """Data tests must have the specified tags.
 
@@ -84,7 +84,7 @@ def check_test_has_tags(test, *, criteria: Criteria = Criteria.ALL, tags: list[s
         fail(f"`{test.unique_id}` must have exactly one of the required tags: {tags}.")
 
 
-@check
+@check(code="TE003")
 def check_test_has_where_config(test, *, regexp_pattern: str | None = None):
     """Data tests must have a `where` config set.
 

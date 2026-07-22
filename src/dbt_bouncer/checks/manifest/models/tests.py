@@ -9,7 +9,7 @@ from dbt_bouncer.check_framework.decorator import check, fail
 from dbt_bouncer.utils import get_clean_model_name, get_package_version_number
 
 
-@check
+@check(code="MO040")
 def check_model_has_tests_by_name(
     model,
     ctx,
@@ -63,7 +63,7 @@ def check_model_has_tests_by_name(
         )
 
 
-@check
+@check(code="MO041")
 def check_model_has_tests_by_type(
     model,
     ctx,
@@ -135,7 +135,7 @@ def check_model_has_tests_by_type(
         )
 
 
-@check
+@check(code="MO042")
 def check_model_has_unique_test(
     model,
     ctx,
@@ -203,7 +203,7 @@ def check_model_has_unique_test(
         )
 
 
-@check
+@check(code="MO043")
 def check_model_has_unit_tests(
     model, ctx, *, min_number_of_unit_tests: Annotated[int, Field(gt=0)] = 1
 ):
@@ -261,7 +261,7 @@ def check_model_has_unit_tests(
         )
 
 
-@check
+@check(code="MO044")
 def check_model_test_coverage(ctx, *, min_model_test_coverage_pct: float = 100):
     """Set the minimum percentage of models that have at least one test.
 

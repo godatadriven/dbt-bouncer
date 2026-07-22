@@ -8,7 +8,7 @@ from dbt_bouncer.enums import ModelAccess
 from dbt_bouncer.utils import find_missing_meta_keys, is_description_populated
 
 
-@check
+@check(code="EX001")
 def check_exposure_based_on_model(
     exposure,
     *,
@@ -62,7 +62,7 @@ def check_exposure_based_on_model(
         )
 
 
-@check
+@check(code="EX003")
 def check_exposure_based_on_view(
     exposure,
     ctx,
@@ -126,7 +126,7 @@ def check_exposure_based_on_view(
         )
 
 
-@check
+@check(code="EX002")
 def check_exposure_based_on_non_public_models(exposure, ctx):
     """Exposures should be based on public models only.
 
@@ -173,7 +173,7 @@ def check_exposure_based_on_non_public_models(exposure, ctx):
         )
 
 
-@check
+@check(code="EX004")
 def check_exposure_description_populated(
     exposure, *, min_description_length: Annotated[int, Field(gt=0)] | None = None
 ):
@@ -213,7 +213,7 @@ def check_exposure_description_populated(
         fail(f"`{exposure.name}` does not have a populated description.")
 
 
-@check
+@check(code="EX005")
 def check_exposure_has_meta_keys(exposure, *, keys: NestedDict):
     """The `meta` config for exposures must have the specified keys.
 
@@ -252,7 +252,7 @@ def check_exposure_has_meta_keys(exposure, *, keys: NestedDict):
         )
 
 
-@check
+@check(code="EX006")
 def check_exposure_has_owner(
     exposure,
     *,

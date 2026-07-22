@@ -2,7 +2,7 @@ from dbt_bouncer.check_framework.decorator import check, fail
 from dbt_bouncer.utils import clean_path_str, compile_pattern, get_clean_model_name
 
 
-@check
+@check(code="LI001")
 def check_lineage_permitted_upstream_models(
     model, ctx, *, package_name: str | None = None, upstream_path_pattern: str
 ):
@@ -70,7 +70,7 @@ def check_lineage_permitted_upstream_models(
         )
 
 
-@check
+@check(code="LI002")
 def check_lineage_seed_cannot_be_used(model):
     """Seed cannot be referenced in models with a path that matches the specified `include` config.
 
@@ -105,7 +105,7 @@ def check_lineage_seed_cannot_be_used(model):
         )
 
 
-@check
+@check(code="LI003")
 def check_lineage_source_cannot_be_used(model):
     """Sources cannot be referenced in models with a path that matches the specified `include` config.
 

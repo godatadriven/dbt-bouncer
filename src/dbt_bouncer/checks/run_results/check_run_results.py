@@ -3,7 +3,7 @@
 from dbt_bouncer.check_framework.decorator import check, fail
 
 
-@check
+@check(code="RR001")
 def check_run_results_max_execution_time(
     run_result, *, max_execution_time_seconds: float
 ):
@@ -50,7 +50,7 @@ def check_run_results_max_execution_time(
         )
 
 
-@check
+@check(code="RR002")
 def check_run_results_max_gigabytes_billed(run_result, *, max_gigabytes_billed: float):
     """Each result can have a maximum number of gigabytes billed.
 

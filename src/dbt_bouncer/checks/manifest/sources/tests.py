@@ -7,7 +7,7 @@ from pydantic import Field
 from dbt_bouncer.check_framework.decorator import check, fail
 
 
-@check
+@check(code="SO016")
 def check_source_has_tests(
     source,
     ctx,

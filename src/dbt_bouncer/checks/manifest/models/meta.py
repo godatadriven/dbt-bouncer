@@ -5,7 +5,7 @@ from dbt_bouncer.check_framework.exceptions import NestedDict
 from dbt_bouncer.utils import find_missing_meta_keys, get_clean_model_name
 
 
-@check
+@check(code="MO036")
 def check_model_has_labels_keys(model, *, keys: NestedDict):
     """The `labels` config for models must have the specified keys.
 
@@ -47,7 +47,7 @@ def check_model_has_labels_keys(model, *, keys: NestedDict):
         )
 
 
-@check
+@check(code="MO037")
 def check_model_has_meta_keys(model, *, keys: NestedDict):
     """The `meta` config for models must have the specified keys.
 

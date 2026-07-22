@@ -9,7 +9,7 @@ from dbt_bouncer.enums import ModelAccess
 from dbt_bouncer.utils import compile_pattern, get_clean_model_name
 
 
-@check
+@check(code="MO001")
 def check_model_access(model, *, access: ModelAccess):
     """Models must have the specified access attribute. Requires dbt 1.7+.
 
@@ -52,7 +52,7 @@ def check_model_access(model, *, access: ModelAccess):
         )
 
 
-@check
+@check(code="MO002")
 def check_model_contract_enforced_for_public_model(model):
     """Public models must have contracts enforced.
 
@@ -87,7 +87,7 @@ def check_model_contract_enforced_for_public_model(model):
         )
 
 
-@check
+@check(code="MO003")
 def check_model_grant_privilege(model, *, privilege_pattern: str):
     """Model can have grant privileges that match the specified pattern.
 
@@ -128,7 +128,7 @@ def check_model_grant_privilege(model, *, privilege_pattern: str):
         )
 
 
-@check
+@check(code="MO004")
 def check_model_grant_privilege_required(model, *, privilege: str):
     """Model must have the specified grant privilege.
 
@@ -166,7 +166,7 @@ def check_model_grant_privilege_required(model, *, privilege: str):
         )
 
 
-@check
+@check(code="MO005")
 def check_model_has_contracts_enforced(model):
     """Model must have contracts enforced.
 
@@ -198,7 +198,7 @@ def check_model_has_contracts_enforced(model):
         )
 
 
-@check
+@check(code="MO006")
 def check_model_number_of_grants(
     model,
     *,

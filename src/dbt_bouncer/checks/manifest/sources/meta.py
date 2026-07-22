@@ -5,7 +5,7 @@ from dbt_bouncer.check_framework.exceptions import NestedDict
 from dbt_bouncer.utils import compile_pattern, find_missing_meta_keys
 
 
-@check
+@check(code="SO011")
 def check_source_has_labels_keys(source, *, keys: NestedDict):
     """The `labels` config for sources must have the specified keys.
 
@@ -62,7 +62,7 @@ def check_source_has_labels_keys(source, *, keys: NestedDict):
         )
 
 
-@check
+@check(code="SO012")
 def check_source_has_meta_keys(source, *, keys: NestedDict):
     """The `meta` config for sources must have the specified keys.
 
@@ -104,7 +104,7 @@ def check_source_has_meta_keys(source, *, keys: NestedDict):
         )
 
 
-@check
+@check(code="SO013")
 def check_source_pii_meta(source, *, column_name_pattern: str, meta_key: str):
     """Source columns matching a PII pattern must carry a governance meta key.
 
