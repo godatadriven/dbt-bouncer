@@ -38,6 +38,7 @@ RUN curl -fsSL https://github.com/sharkdp/hyperfine/releases/download/v1.20.0/hy
 # Set initial PATH, virtual env settings, and disable compfix for ZSH setup
 ENV DBT_PROFILES_DIR="./dbt_project" \
     DBT_PROJECT_DIR="./dbt_project" \
+    MISE_TRUSTED_CONFIG_PATHS="/workspaces/dbt-bouncer" \
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     UV_VENV_CLEAR=1 \
