@@ -72,7 +72,7 @@
             uses: bencherdev/bencher@50fb1e138651a46d2fb704fab1adab38c181552e # v0.6.6
 
           - name: Run code-level benchmarks
-            run: make test-benchmark
+            run: mise run test-benchmark
 
           - name: Track base branch code-level benchmarks with Bencher
             run: |
@@ -110,7 +110,7 @@
                 uses: ./.github/actions/setup_python_env
 
               - name: Run unit tests with coverage
-                run: make test-unit
+                run: mise run test-unit
 
               - name: Generate coverage badge
                 run: |
@@ -236,9 +236,9 @@
               if: matrix.operating-system == 'windows-2025'
               run: |
                 $env:Path += ';C:\Users\runneradmin\.local\bin'
-                make build-and-run-dbt-bouncer
+                mise run build-and-run-dbt-bouncer
 
             - name: Regenerate dbt artifacts and run `dbt-bouncer`
               if: matrix.operating-system != 'windows-2025'
               run: |
-                (r=3;while ! make build-and-run-dbt-bouncer ; do ((--r))||exit;done)
+                (r=3;while ! mise run build-and-run-dbt-bouncer ; do ((--r))||exit;done)

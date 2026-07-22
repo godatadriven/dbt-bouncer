@@ -1,0 +1,195 @@
+# mise configuration — single source of truth for tool versions, env vars, and
+# developer tasks. Replaces the old `makefile`.
+#
+#   mise install            # provision the pinned tools below
+#   mise run install        # install Python dependencies (uv)
+#   mise tasks              # list available tasks
+#   mise run <task>         # run a task (e.g. `mise run test-unit`)
+#
+# `uv` remains the Python package manager; mise pins/installs the tools (uv
+# included) and runs the tasks.
+
+[settings]
+# `.python-version` idiomatic files are opt-in in modern mise. Enabling it here
+# means mise and uv share one Python pin (the interpreter is pinned in
+# `.python-version`, read by uv, mise, and the CI resolve-version step).
+idiomatic_version_file_enable_tools = ["python"]
+
+[tools]
+# Python is pinned in `.python-version` (read via the setting above).
+uv = "latest"
+node = "22"
+hyperfine = "1.20"
+# bencher is not in the mise registry; the ubi backend pulls the GitHub release.
+"ubi:bencherdev/bencher" = "0.6.6"
+
+[env]
+DBT_PROFILES_DIR = "./dbt_project"
+DBT_PROJECT_DIR = "./dbt_project"
+
+# --- Environment -------------------------------------------------------------
+
+[tasks.install]
+description = "Install dependencies"
+run = "uv sync --extra=dev --group=docs"
+
+# --- Artifacts / schema ------------------------------------------------------
+
+# On GitHub the `dbt build` command often returns "leaked semaphores" errors.
+[tasks.build-and-run-dbt-bouncer]
+description = "Run dbt deps, build, docs generate and run dbt-bouncer"
+run = [
+  "uv run dbt deps",
+  "uv run dbt build",
+  "uv run dbt docs generate",
+  "uv run dbt-bouncer --config-file ./dbt-bouncer-example.yml",
+]
+
+# Each version-specific task uses --target-path to write to an isolated
+# directory, so the version builds (110, 111, 112) run in parallel via the
+# `build-artifacts` aggregate. Parallel execution may cause conflicts if dbt
+# acquires project-level locks in ./dbt_project. If that happens, run with
+# `mise run --jobs 1 build-artifacts`.
+# dbt 1.9 fixtures are frozen: the `arguments:` migration applied by dbt-autofix
+# is incompatible with dbt-core 1.9 (matching the pattern for dbt 1.7/1.8).
+[tasks.build-artifacts]
+description = "Build dbt artifacts for testing"
+depends = [
+  "build-artifacts-110",
+  "build-artifacts-111",
+  "build-artifacts-112",
+  "build-artifacts-local",
+]
+
+[tasks.build-artifacts-110]
+description = "Build dbt 1.10 test artifacts"
+run = """
+PYTHON_INTERPRETER_CONSTRAINT=$(cat .python-version)
+uvx --python "==${PYTHON_INTERPRETER_CONSTRAINT}" --with 'dbt-duckdb~=1.10.0' --from 'dbt-core~=1.10.0' dbt parse --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_110
+uvx --python "==${PYTHON_INTERPRETER_CONSTRAINT}" --with 'dbt-duckdb~=1.10.0' --from 'dbt-core~=1.10.0' dbt docs generate --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_110
+rm -r ./tests/fixtures/dbt_110/target || true
+mv ./dbt_project/target_110 ./tests/fixtures/dbt_110/target
+"""
+
+[tasks.build-artifacts-111]
+description = "Build dbt 1.11 test artifacts"
+# No dbt-duckdb==1.11 yet so sticking with dbt-duckdb==1.10
+run = """
+PYTHON_INTERPRETER_CONSTRAINT=$(cat .python-version)
+uvx --python "==${PYTHON_INTERPRETER_CONSTRAINT}" --with 'dbt-duckdb~=1.10.0' --from 'dbt-core~=1.11.0' dbt parse --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_111
+uvx --python "==${PYTHON_INTERPRETER_CONSTRAINT}" --with 'dbt-duckdb~=1.10.0' --from 'dbt-core~=1.11.0' dbt docs generate --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_111
+rm -r ./tests/fixtures/dbt_111/target || true
+mv ./dbt_project/target_111 ./tests/fixtures/dbt_111/target
+"""
+
+[tasks.build-artifacts-112]
+description = "Build dbt 1.12 test artifacts"
+# No dbt-duckdb==1.12 yet so sticking with dbt-duckdb==1.10
+run = """
+PYTHON_INTERPRETER_CONSTRAINT=$(cat .python-version)
+uvx --python "==${PYTHON_INTERPRETER_CONSTRAINT}" --with 'dbt-duckdb~=1.10.0' --from 'dbt-core~=1.12.0' dbt parse --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_112
+uvx --python "==${PYTHON_INTERPRETER_CONSTRAINT}" --with 'dbt-duckdb~=1.10.0' --from 'dbt-core~=1.12.0' dbt docs generate --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_112
+rm -r ./tests/fixtures/dbt_112/target || true
+mv ./dbt_project/target_112 ./tests/fixtures/dbt_112/target
+"""
+
+[tasks.build-artifacts-local]
+description = "Build local dbt test artifacts"
+depends = ["install"]
+run = [
+  "uv run dbt parse --profiles-dir ./dbt_project --project-dir ./dbt_project",
+  "uv run dbt docs generate --profiles-dir ./dbt_project --project-dir ./dbt_project",
+]
+
+[tasks.generate-schema]
+description = "Regenerate schema.json from Pydantic models"
+run = "uv run python scripts/generate_schema.py"
+sources = ["src/**/*.py", "scripts/generate_schema.py"]
+outputs = ["schema.json"]
+
+# --- Tests -------------------------------------------------------------------
+
+[tasks.test]
+description = "Run all tests (unit + integration)"
+# Sequential (not parallel `depends`): both write junit.xml / coverage.xml.
+run = [
+  "mise run test-unit",
+  "mise run test-integration",
+]
+
+# Necessary due to https://github.com/coveragepy/coveragepy/issues/1514
+[tasks.test-dev-container]
+description = "Run tests in the dev container"
+run = """
+uv run --extra dev pytest --numprocesses 5 ./tests/unit && \
+uv run --extra dev pytest --numprocesses 5 ./tests/integration
+"""
+
+[tasks.test-integration]
+description = "Run integration tests"
+run = """
+uv run pytest \
+	-c ./tests \
+	--junitxml=junit.xml \
+	--cov-report=term-missing:skip-covered \
+	--cov-report=xml \
+	--cov=src/dbt_bouncer/ \
+	--numprocesses 5 \
+	./tests/integration
+"""
+
+# Default to 1,000 models to keep local runs quick; override with e.g.
+# `mise run test-benchmark --models 5000`. CI runs the PR and main branches
+# at the same count, so Bencher comparisons stay apples-to-apples.
+# Warm rounds (`--phase-rounds`) feed the phase-decomposition summary table;
+# lower it for faster local iteration, e.g. `--phase-rounds 10`.
+[tasks.test-benchmark]
+description = "Run code-level performance benchmarks (pytest-benchmark)"
+# No --numprocesses (xdist disables pytest-benchmark) and no --cov (skews timings).
+# No -s: the phase-decomposition fixture suspends capturing itself (just for
+# its own tqdm progress bar), so every other benchmark stays quiet as before.
+run = """
+DBT_BOUNCER_BENCH_MODELS={{option(name="models", default="1000")}} \
+DBT_BOUNCER_BENCH_PHASE_ROUNDS={{option(name="phase-rounds", default="100")}} uv run pytest \
+	-c ./tests \
+	--benchmark-only \
+	--benchmark-json=pytest_benchmark_results.json \
+	./tests/benchmark
+"""
+
+# Model counts swept by the aggregate benchmark; override with e.g.
+# `mise run test-benchmark-aggregate --model-counts "100 1000 10000"`.
+[tasks.test-benchmark-aggregate]
+description = "Sweep the end-to-end benchmark across model counts and print a summary table"
+run = 'uv run python tests/benchmark/aggregate_benchmarks.py --models "{{option(name="model-counts", default="100 250 500 1000 2000 5000 10000")}}"'
+
+[tasks.test-perf]
+description = "Run performance tests"
+run = """
+bencher run \
+	--adapter shell_hyperfine \
+	--dry-run \
+	--file results.json \
+	--format json \
+	"hyperfine --export-json results.json --runs 10 'dbt-bouncer --config-file dbt-bouncer-example.yml'"
+"""
+
+[tasks.test-unit]
+description = "Run unit tests"
+run = """
+uv run pytest \
+	-c ./tests \
+	--junitxml=junit.xml \
+	--cov-report=term-missing:skip-covered \
+	--cov-report=xml \
+	--cov=src/dbt_bouncer/ \
+	--numprocesses 5 \
+	./tests/unit
+"""
+
+[tasks.test-windows]
+description = "Run tests on Windows"
+run = """
+uv run pytest -c ./tests --numprocesses 5 ./tests/unit && \
+uv run pytest -c ./tests --numprocesses 5 ./tests/integration
+"""

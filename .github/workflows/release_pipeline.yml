@@ -72,10 +72,10 @@
 
               # Need to re-install dbt-bouncer so version bump is visible when `dbt-bouncer --version` is called
               - name: Re-install dbt-bouncer
-                run: make install
+                run: mise run install
 
               - name: Run unit tests
-                run: make test-unit
+                run: mise run test-unit
 
               - name: Save version to env var
                 id: version

@@ -1,6 +1,6 @@
 """Performance benchmarks for dbt-bouncer's hot paths.
 
-Run via ``make test-benchmark`` (which omits ``--numprocesses`` — pytest-benchmark
+Run via ``mise run test-benchmark`` (which omits ``--numprocesses`` — pytest-benchmark
 disables itself under xdist — and ``--cov`` — coverage skews timings). Uses the
 ``benchmark`` fixture from pytest-benchmark; the JSON it emits is tracked by
 Bencher (``--adapter python_pytest``) so regressions fail PRs.

@@ -8,10 +8,10 @@ Each model count needs its own ``pytest`` process because the synthetic manifest
 is built by a session-scoped fixture (see ``tests/benchmark/conftest.py``), so the
 count can only be set once per run via ``DBT_BOUNCER_BENCH_MODELS``.
 
-Run via the Makefile (recommended)::
+Run via mise (recommended)::
 
-    make test-benchmark-aggregate
-    make test-benchmark-aggregate BENCH_MODEL_COUNTS="100 1000 10000"
+    mise run test-benchmark-aggregate
+    mise run test-benchmark-aggregate --model-counts "100 1000 10000"
 
 or directly::
 
@@ -138,7 +138,7 @@ def _run_single(n_models: int) -> float | None:
     with tempfile.TemporaryDirectory() as tmp:
         json_path = Path(tmp) / "benchmark.json"
         # No --numprocesses (xdist disables pytest-benchmark) and no --cov (skews
-        # timings) — mirrors the ``test-benchmark`` Makefile target.
+        # timings) — mirrors the ``test-benchmark`` mise task.
         cmd = [
             sys.executable,
             "-m",

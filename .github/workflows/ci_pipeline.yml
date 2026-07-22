@@ -71,7 +71,7 @@ jobs:
               run: |
                 uv run python scripts/generate_schema.py
                 git diff --exit-code schema.json || {
-                  echo "::error::schema.json is out of date. Run 'make generate-schema' and commit the result."
+                  echo "::error::schema.json is out of date. Run 'mise run generate-schema' and commit the result."
                   exit 1
                 }
 
@@ -111,26 +111,26 @@ jobs:
 
             - name: Run pytest (Windows)
               if: matrix.operating-system == 'windows-2025'
-              run: make test-windows
+              run: mise run test-windows
 
             - name: Run pytest (unit tests)
               if: matrix.operating-system != 'windows-2025'
-              run: make test-unit
+              run: mise run test-unit
 
             - name: Run pytest (integration tests)
               if: matrix.operating-system != 'windows-2025'
-              run: make test-integration
+              run: mise run test-integration
 
             - name: Regenerate dbt artifacts and run `dbt-bouncer`
               if: matrix.operating-system == 'windows-2025'
               run: |
                 $env:Path += ';C:\Users\runneradmin\.local\bin'
-                make build-and-run-dbt-bouncer
+                mise run build-and-run-dbt-bouncer
 
             - name: Regenerate dbt artifacts and run `dbt-bouncer`
               if: matrix.operating-system != 'windows-2025'
               run: |
-                  (r=3;while ! make build-and-run-dbt-bouncer ; do ((--r))||exit;done)
+                  (r=3;while ! mise run build-and-run-dbt-bouncer ; do ((--r))||exit;done)
 
     benchmark-pr-branch:
         needs: [prek]
@@ -146,7 +146,7 @@ jobs:
             uses: ./.github/actions/setup_python_env
 
           - name: Install `dbt-bouncer`
-            run: make install
+            run: mise run install
 
           - name: Install Hyperfine
             uses: taiki-e/install-action@b8cecb83565409bcc297b2df6e77f030b2a468d5 # v2
@@ -177,7 +177,7 @@ jobs:
             uses: ./.github/actions/setup_python_env
 
           - name: Run code-level benchmarks
-            run: make test-benchmark
+            run: mise run test-benchmark
 
           - name: Upload Benchmark Results
             uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
@@ -199,8 +199,8 @@ jobs:
             runCmd: |
               set -eou
               uv run dbt-bouncer --config-file dbt-bouncer-example.yml
-              make test-dev-container
-              make test-perf
+              mise run test-dev-container
+              mise run test-perf
 
     e2e-tests:
         needs: [prek]
