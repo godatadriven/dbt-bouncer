@@ -1005,10 +1005,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#makefile" class="md-nav__link">
+  <a href="#mise" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
-        <code>makefile</code>
+        <code>mise</code>
       </span>
     </span>
   </a>
@@ -1331,7 +1331,7 @@
 <ul>
 <li><a href="https://github.com/PyCQA/bandit"><code>bandit</code></a> to check for security issues.</li>
 <li><a href="https://github.com/features/actions">GitHub Actions</a> for automating tests and checks, once a PR is pushed to the <code>dbt-bouncer</code> repository.</li>
-<li><a href="https://users.cs.duke.edu/~ola/courses/programming/Makefiles/Makefiles.html"><code>make</code></a> to run multiple setup or test steps in combination.</li>
+<li><a href="https://mise.jdx.dev/"><code>mise</code></a> as a tool manager and task runner.</li>
 <li><a href="https://github.com/j178/prek"><code>prek</code></a> to easily run those checks.</li>
 <li><a href="https://docs.pydantic.dev/latest/"><code>Pydantic</code></a> to validate our configuration file.</li>
 <li><a href="https://docs.pytest.org/en/latest/"><code>pytest</code></a> to define, discover, and run tests.</li>
@@ -1351,7 +1351,7 @@
 <h2 id="running-dbt-bouncer-in-development">Running <code>dbt-bouncer</code> in development<a class="headerlink" href="#running-dbt-bouncer-in-development" title="Permanent link">#</a></h2>
 <h3 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">#</a></h3>
 <p>First make sure that you set up your <code>virtualenv</code> as described in <a href="#setting-up-an-environment">Setting up an environment</a>. Next, install <code>dbt-bouncer</code>, its dependencies and <code>prek</code>:</p>
-<div class="language-shell highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>make<span class="w"> </span>install
+<div class="language-shell highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>mise<span class="w"> </span>run<span class="w"> </span>install
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>uv<span class="w"> </span>run<span class="w"> </span>prek<span class="w"> </span>install
 </span></code></pre></div>
 <p>When installed in this way, any changes you make to your local copy of the source code will be reflected immediately in your next <code>dbt-bouncer</code> run.</p>
@@ -1370,27 +1370,27 @@
 <ul>
 <li><strong>Generating dbt artifacts:</strong> If you change the configuration of the dbt project located in <code>dbt_project</code> then you will need to re-generate the dbt artifacts used in testing. To do so, run:</li>
 </ul>
-<div class="language-shell highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>make<span class="w"> </span>build-artifacts
+<div class="language-shell highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>mise<span class="w"> </span>run<span class="w"> </span>build-artifacts
 </span></code></pre></div>
 <h3 id="test-commands">Test commands<a class="headerlink" href="#test-commands" title="Permanent link">#</a></h3>
 <p>There are a few methods for running tests locally.</p>
-<h4 id="makefile"><code>makefile</code><a class="headerlink" href="#makefile" title="Permanent link">#</a></h4>
-<p>There are multiple targets in the <code>makefile</code> to run common test suites, most notably:</p>
+<h4 id="mise"><code>mise</code><a class="headerlink" href="#mise" title="Permanent link">#</a></h4>
+<p>There are multiple tasks in <code>mise.toml</code> to run common test suites, most notably:</p>
 <div class="language-shell highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># Runs unit tests</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>make<span class="w"> </span>test-unit
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>mise<span class="w"> </span>run<span class="w"> </span>test-unit
 </span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
 </span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="c1"># Runs integration tests</span>
-</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>make<span class="w"> </span>test-integration
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>mise<span class="w"> </span>run<span class="w"> </span>test-integration
 </span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>
 </span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="c1"># Runs all tests</span>
-</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>make<span class="w"> </span><span class="nb">test</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>mise<span class="w"> </span>run<span class="w"> </span><span class="nb">test</span>
 </span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>
 </span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="c1"># Alternative for dev containers only</span>
-</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>make<span class="w"> </span>test-dev-container
+</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>mise<span class="w"> </span>run<span class="w"> </span>test-dev-container
 </span></code></pre></div>
 <h4 id="json-schema">JSON Schema<a class="headerlink" href="#json-schema" title="Permanent link">#</a></h4>
 <p>A JSON Schema is generated from the Pydantic config model and committed as <code>schema.json</code> at the repo root. After adding or modifying checks, regenerate it:</p>
-<div class="language-shell highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>make<span class="w"> </span>generate-schema
+<div class="language-shell highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>mise<span class="w"> </span>run<span class="w"> </span>generate-schema
 </span></code></pre></div>
 <p>CI will fail if <code>schema.json</code> is out of date. The schema enables editor autocomplete and validation for <code>dbt-bouncer.yml</code> files (see <a href=".././configuration/#editor-integration">Config file &gt; Editor integration</a>).</p>
 <h4 id="performance-tests">Performance tests<a class="headerlink" href="#performance-tests" title="Permanent link">#</a></h4>
@@ -1398,18 +1398,18 @@
 <ol>
 <li><strong>End-to-end (CLI)</strong>: we use <a href="https://github.com/bencherdev/bencher">bencher</a> and <a href="https://github.com/sharkdp/hyperfine">hyperfine</a> to time the whole CLI against the example project. Provided both are installed, you can run these via:</li>
 </ol>
-<div class="language-shell highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>make<span class="w"> </span>test-perf
+<div class="language-shell highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>mise<span class="w"> </span>run<span class="w"> </span>test-perf
 </span></code></pre></div>
 <ol>
 <li><strong>Code-level (micro-benchmarks)</strong>: <a href="https://pytest-benchmark.readthedocs.io/">pytest-benchmark</a> benchmarks the hot paths (manifest parsing, check-assembly, the runner, and a full in-process run) against a synthetic ~5,000-model manifest generated on the fly by <code>tests/benchmark/synthetic_manifest.py</code>. Run these via:</li>
 </ol>
-<div class="language-shell highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>make<span class="w"> </span>test-benchmark
+<div class="language-shell highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>mise<span class="w"> </span>run<span class="w"> </span>test-benchmark
 </span></code></pre></div>
-<p>Change the manifest size with <code>make test-benchmark BENCH_MODELS=5000</code> (the <code>make</code> target defaults to <code>1000</code> to keep local runs quick). Running <code>pytest</code> directly instead reads <code>DBT_BOUNCER_BENCH_MODELS</code>, falling back to <code>5000</code> when it is unset. In CI, the emitted <code>pytest_benchmark_results.json</code> is tracked by Bencher (<code>python_pytest</code> adapter, <code>ubuntu-24.04-pytest</code> testbed) so parse-time and check-assembly regressions fail PRs — the same mechanism as the hyperfine track.</p>
+<p>Change the manifest size with <code>mise run test-benchmark --models 5000</code> (the <code>mise</code> task defaults to <code>1000</code> to keep local runs quick). Running <code>pytest</code> directly instead reads <code>DBT_BOUNCER_BENCH_MODELS</code>, falling back to <code>5000</code> when it is unset. In CI, the emitted <code>pytest_benchmark_results.json</code> is tracked by Bencher (<code>python_pytest</code> adapter, <code>ubuntu-24.04-pytest</code> testbed) so parse-time and check-assembly regressions fail PRs — the same mechanism as the hyperfine track.</p>
 <p>To see how the end-to-end run scales with project size, run the sweep:</p>
-<div class="language-shell highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>make<span class="w"> </span>test-benchmark-aggregate
+<div class="language-shell highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>mise<span class="w"> </span>run<span class="w"> </span>test-benchmark-aggregate
 </span></code></pre></div>
-<p>It runs the <code>test_run_bouncer</code> end-to-end benchmark once per model count (100, 250, 500, 1000, 2000, 5000, 10000 by default) and prints a summary table of the mean run time for each. Override the counts with <code>make test-benchmark-aggregate BENCH_MODEL_COUNTS="100 1000 10000"</code>.</p>
+<p>It runs the <code>test_run_bouncer</code> end-to-end benchmark once per model count (100, 250, 500, 1000, 2000, 5000, 10000 by default) and prints a summary table of the mean run time for each. Override the counts with <code>mise run test-benchmark-aggregate --model-counts "100 1000 10000"</code>.</p>
 <h4 id="prek"><code>prek</code><a class="headerlink" href="#prek" title="Permanent link">#</a></h4>
 <p><a href="https://github.com/j178/prek"><code>prek</code></a> takes care of running all code-checks for formatting and linting. Run <code>uv run prek install</code> to install <code>prek</code> in your local environment. Once this is done you can use the git pre-commit hooks to ensure proper formatting and linting.</p>
 <h4 id="pytest"><code>pytest</code><a class="headerlink" href="#pytest" title="Permanent link">#</a></h4>
@@ -1471,8 +1471,8 @@
 </span><span id="__span-11-8"><a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>    <span class="n">check_fails</span><span class="p">(</span><span class="s2">&quot;check_model_names&quot;</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;fct_orders&quot;</span><span class="p">},</span> <span class="n">model_name_pattern</span><span class="o">=</span><span class="s2">&quot;^stg_&quot;</span><span class="p">)</span>
 </span></code></pre></div>
 <ol>
-<li>Run <code>make generate-schema</code> to regenerate <code>schema.json</code> (CI will fail if it's out of date).</li>
-<li>Run <code>make test</code> to ensure tests pass.</li>
+<li>Run <code>mise run generate-schema</code> to regenerate <code>schema.json</code> (CI will fail if it's out of date).</li>
+<li>Run <code>mise run test</code> to ensure tests pass.</li>
 <li>Open a PR!</li>
 </ol>
 <h3 id="class-based-api-legacy">Class-based API (legacy)<a class="headerlink" href="#class-based-api-legacy" title="Permanent link">#</a></h3>
@@ -1489,7 +1489,7 @@
 </li>
 <li>Add the check to <code>dbt-bouncer-example.yml</code> and validate.</li>
 <li>Write tests using <code>check_passes</code>/<code>check_fails</code> from <code>dbt_bouncer.testing</code>.</li>
-<li>Run <code>make test</code> and open a PR.</li>
+<li>Run <code>mise run test</code> and open a PR.</li>
 </ol>
 <h3 id="writing-tests">Writing tests<a class="headerlink" href="#writing-tests" title="Permanent link">#</a></h3>
 <p>The <code>dbt_bouncer.testing</code> module provides <code>check_passes</code> and <code>check_fails</code> helpers:</p>
