@@ -17,6 +17,15 @@ from dbt_bouncer.utils import get_check_objects
 
 @app.command(name="list")
 def list_checks(
+    group: Annotated[
+        CheckCategory | None,
+        typer.Option(
+            "--group",
+            "-g",
+            help="Filter checks by category group. Choices: catalog_checks, manifest_checks, run_results_checks.",
+            case_sensitive=False,
+        ),
+    ] = None,
     output_format: Annotated[
         OutputFormatCLI,
         typer.Option(
@@ -26,11 +35,18 @@ def list_checks(
     ] = OutputFormatCLI.TEXT,
 ) -> None:
     """List all available dbt-bouncer checks, grouped by category."""
-    # Map module path segment -> display category name
     category_labels = {c.directory: c.value for c in CheckCategory}
 
-    checks = sorted(get_check_objects(), key=lambda c: (category_key(c), c.__name__))
+    selected_categories = frozenset({group.value}) if group is not None else None
+
+    checks = sorted(
+        get_check_objects(check_categories=selected_categories),
+        key=lambda c: (category_key(c), c.__name__),
+    )
     payload = build_checks_payload(checks, category_labels)
+
+    if group is not None:
+        payload = {k: v for k, v in payload.items() if k == group.value}
 
     if output_format == OutputFormatCLI.JSON:
         typer.echo(json.dumps(payload, indent=2))

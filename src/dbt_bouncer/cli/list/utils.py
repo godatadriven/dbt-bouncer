@@ -3,7 +3,9 @@
 import itertools
 from typing import TypedDict
 
-import typer
+from rich import box
+from rich.console import Console
+from rich.table import Table
 
 
 def category_key(check_class: type) -> str:
@@ -113,29 +115,44 @@ def build_checks_payload(
 
 
 def print_text_checks(checks_payload: dict[str, list[CheckDict]]) -> None:
-    """Print checks in text format.
+    """Print checks formatted in Rich tables grouped by category.
 
     Args:
         checks_payload: Checks grouped by category label, as returned by
             :func:`build_checks_payload`.
 
     """
+    console = Console()
     for label, checks in checks_payload.items():
-        typer.echo(f"{label}:")
+        table = Table(
+            title=f"[bold cyan]{label}[/bold cyan]",
+            title_justify="left",
+            box=box.ROUNDED,
+            border_style="cyan",
+            show_header=True,
+            header_style="bold cyan",
+        )
+        table.add_column("Code", style="bold cyan", justify="center", no_wrap=True)
+        table.add_column("Check Name", style="bold white", justify="left", no_wrap=True)
+        table.add_column("Description", justify="left")
+        table.add_column("Parameters", justify="left", style="yellow")
+
         for check in checks:
-            display_name = (
-                f"[{check['code']}] {check['name']}"
-                if check.get("code")
-                else check["name"]
-            )
-            params = check["parameters"]
+            code = check.get("code") or "-"
+            user_params = {k: v for k, v in check["parameters"].items() if k != "name"}
             params_text = (
                 "\n".join(
-                    f"        {name}: {type_str}" for name, type_str in params.items()
+                    f"{name}: {type_str}" for name, type_str in user_params.items()
                 )
-                if params
-                else "        (none)"
+                if user_params
+                else "(none)"
             )
-            typer.echo(
-                f"  {display_name}:\n      {check['description']}\n      Parameters:\n{params_text}\n"
+            table.add_row(
+                code,
+                check["name"],
+                check["description"],
+                params_text,
             )
+
+        console.print(table)
+        console.print()

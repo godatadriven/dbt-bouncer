@@ -1733,23 +1733,35 @@ def test_cli_list():
 
     assert result.exit_code == 0
     # Category headers are present
-    assert "catalog_checks:" in result.output
-    assert "manifest_checks:" in result.output
-    assert "run_results_checks:" in result.output
+    assert "catalog_checks" in result.output
+    assert "manifest_checks" in result.output
+    assert "run_results_checks" in result.output
     # Spot-check a check from each category
-    assert "CheckColumnDescriptionPopulated:" in result.output
-    assert "CheckModelDescriptionPopulated:" in result.output
-    assert "CheckSourceDescriptionPopulated:" in result.output
-    assert "CheckRunResultsMaxExecutionTime:" in result.output
+    assert "CheckColumnDescriptionPopulated" in result.output
+    assert "CheckModelDescriptionPopulated" in result.output
+    assert "CheckSourceDescriptionPopulated" in result.output
+    assert "CheckRunResultsMaxExecutionTime" in result.output
     # Descriptions are included
-    assert "Columns must have a populated description." in result.output
+    assert "Columns must" in result.output
     # catalog_checks header appears before manifest_checks header
-    assert result.output.index("catalog_checks:") < result.output.index(
-        "manifest_checks:"
+    assert result.output.index("catalog_checks") < result.output.index(
+        "manifest_checks"
     )
-    assert result.output.index("manifest_checks:") < result.output.index(
-        "run_results_checks:"
+    assert result.output.index("manifest_checks") < result.output.index(
+        "run_results_checks"
     )
+
+
+def test_cli_list_group_filter():
+    """Test that `dbt-bouncer list --group catalog_checks` filters output to catalog checks only."""
+    runner = CliRunner()
+    result = runner.invoke(app, ["list", "--group", "catalog_checks"])
+
+    assert result.exit_code == 0
+    assert "catalog_checks" in result.output
+    assert "manifest_checks" not in result.output
+    assert "run_results_checks" not in result.output
+    assert "CheckSeedMaxBytes" in result.output
 
 
 def test_cli_run_command(tmp_path):
