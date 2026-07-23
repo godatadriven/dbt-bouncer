@@ -74,7 +74,7 @@ Checks are written using the `@check` decorator (preferred) or as class-based `B
 from dbt_bouncer.check_framework.decorator import check, fail
 
 
-@check(code="MO048")
+@check(code="XX000")
 def check_model_xxx(model, *, some_param: str):
     """One-line description of the check.
 
@@ -106,7 +106,7 @@ def check_model_xxx(model, *, some_param: str):
 **Key rules:**
 
 - **Every check needs a unique rule code** — pass it as `@check(code="XX000")` and add the corresponding member to the matching `*RuleCode` enum in `enums.py`. Use the next free number for the resource's prefix; never reuse or renumber a published code, as users reference them in config
-- `@check` with no arguments — name and `iterate_over` are inferred from the function name
+- `code` is the only argument `@check` takes — the check name and `iterate_over` are inferred from the function name and signature
 - First positional parameter (excluding `ctx`) = the resource being checked (e.g. `model`, `source`, `exposure`)
 - Keyword-only arguments (after `*`) = user-configurable parameters in YAML
 - Add `ctx` as a parameter only when you need access to other resources (e.g. models list, manifest)
