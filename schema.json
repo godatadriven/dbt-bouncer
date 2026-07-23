@@ -4329,6 +4329,101 @@
       "title": "CheckModelDoesNotDirectlyJoinToSource",
       "type": "object"
     },
+    "CheckModelDoesNotRejoinUpstreamConcepts": {
+      "additionalProperties": false,
+      "description": "Models cannot join back to an upstream concept that one of their other parents already depends on.\n\n!!! info \"Rationale\"\n\n    A rejoin happens when a model reads from both a parent `B` and one of `B`'s own parents `A`. If `B` exists only to feed this model, then `A`'s columns are being pulled in twice by two different routes, and the two paths can drift apart as the logic evolves. Collapsing `B` into its only consumer \u2014 or having that consumer read solely from `B` \u2014 keeps each concept entering the model exactly once and makes the lineage graph honest about what depends on what.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n    models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    materialization (Literal[\"ephemeral\", \"incremental\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_model_does_not_rejoin_upstream_concepts\n    ```",
+      "properties": {
+        "code": {
+          "const": "MO049",
+          "default": "MO049",
+          "title": "Code",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to exclude. A list matches if any pattern matches.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to include. A list matches if any pattern matches.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_model_does_not_rejoin_upstream_concepts",
+          "default": "check_model_does_not_rejoin_upstream_concepts",
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "title": "CheckModelDoesNotRejoinUpstreamConcepts",
+      "type": "object"
+    },
     "CheckModelDoesNotUseSelectStar": {
       "additionalProperties": false,
       "description": "Models must not use `SELECT *`.\n\n!!! info \"Rationale\"\n\n    `SELECT *` makes a model's output schema implicit and brittle to upstream column changes. When a source or upstream model adds, removes, or reorders columns, a `SELECT *` model silently propagates the change, potentially breaking downstream consumers or introducing unexpected columns into the DAG. Explicit column lists are self-documenting, stable, and make schema changes intentional and reviewable.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    materialization (Literal[\"ephemeral\", \"incremental\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\n!!! info\n\n    Analysis is AST-based (via sqlglot) and flags both bare (`SELECT *`) and\n    qualified (`SELECT t.*`) stars, while correctly ignoring stars inside\n    function calls (`count(*)`), string literals, and comments. It analyses\n    the model's `raw_code` with Jinja neutralized. Non-SQL (e.g. Python)\n    models are skipped.\n\n!!! warning\n\n    Models that sqlglot cannot parse (e.g. heavy `{% ... %}` control flow)\n    fall back to a best-effort regular-expression scan, which retains the\n    original limitations around string literals and Jinja tags.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_model_does_not_use_select_star\n          include: ^models/marts\n    ```",
@@ -12253,6 +12348,7 @@
             "check_model_documentation_coverage": "#/$defs/CheckModelDocumentationCoverage",
             "check_model_documented_in_same_directory": "#/$defs/CheckModelDocumentedInSameDirectory",
             "check_model_does_not_directly_join_to_source": "#/$defs/CheckModelDoesNotDirectlyJoinToSource",
+            "check_model_does_not_rejoin_upstream_concepts": "#/$defs/CheckModelDoesNotRejoinUpstreamConcepts",
             "check_model_does_not_use_select_star": "#/$defs/CheckModelDoesNotUseSelectStar",
             "check_model_file_name": "#/$defs/CheckModelFileName",
             "check_model_grant_privilege": "#/$defs/CheckModelGrantPrivilege",
@@ -12430,6 +12526,9 @@
           },
           {
             "$ref": "#/$defs/CheckModelDoesNotDirectlyJoinToSource"
+          },
+          {
+            "$ref": "#/$defs/CheckModelDoesNotRejoinUpstreamConcepts"
           },
           {
             "$ref": "#/$defs/CheckModelDoesNotUseSelectStar"
