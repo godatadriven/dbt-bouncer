@@ -5516,6 +5516,12 @@
       "additionalProperties": false,
       "description": "Models must be declared in a properties file, i.e. a `.yml` file.\n\n!!! info \"Rationale\"\n\n    A model with no properties file has nowhere to hang a description, column definitions, tests, contracts, or meta keys. It is invisible to the generated documentation and cannot be covered by any of the checks that read those fields, so gaps in it go unnoticed rather than being reported. Requiring a properties file is the precondition for every other documentation and testing convention a project wants to enforce.\n\n    `check_model_property_file_location` also reports undocumented models, but only as a side effect of enforcing dbt Labs' `_<directory>__models.yml` naming convention. Use this check instead if you want to require a properties file without adopting that convention.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    materialization (Literal[\"ephemeral\", \"incremental\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_model_has_properties_file\n    ```",
       "properties": {
+        "code": {
+          "const": "MO051",
+          "default": "MO051",
+          "title": "Code",
+          "type": "string"
+        },
         "description": {
           "anyOf": [
             {

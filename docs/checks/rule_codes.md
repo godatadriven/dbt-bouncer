@@ -39,7 +39,7 @@ dbt-bouncer list --group manifest_checks
 | `LI` | Lineage | `manifest_checks` | 3 |
 | `MA` | Macros | `manifest_checks` | 10 |
 | `ME` | Metadata | `manifest_checks` | 1 |
-| `MO` | Models | `manifest_checks` | 50 |
+| `MO` | Models | `manifest_checks` | 51 |
 | `RR` | Run results | `run_results_checks` | 2 |
 | `SE` | Seeds | `manifest_checks` | 6 |
 | `SM` | Semantic models | `manifest_checks` | 1 |
@@ -158,6 +158,7 @@ dbt-bouncer list --group manifest_checks
 | `MO048` | `check_model_does_not_directly_join_to_source` | Models cannot reference a source and a model at the same time. |
 | `MO049` | `check_model_does_not_rejoin_upstream_concepts` | Models cannot join back to an upstream concept that one of their other parents already depends on. |
 | `MO050` | `check_model_min_downstream_models` | Models must be referenced by at least the specified number of downstream models. |
+| `MO051` | `check_model_has_properties_file` | Models must be declared in a properties file, i.e. a `.yml` file. |
 
 ## Run results (`RR`)
 
