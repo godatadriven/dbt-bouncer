@@ -149,6 +149,57 @@ def check_model_does_not_directly_join_to_source(model):
         )
 
 
+@check(code="MO049")
+def check_model_does_not_rejoin_upstream_concepts(model, ctx):
+    """Models cannot join back to an upstream concept that one of their other parents already depends on.
+
+    !!! info "Rationale"
+
+        A rejoin happens when a model reads from both a parent `B` and one of `B`'s own parents `A`. If `B` exists only to feed this model, then `A`'s columns are being pulled in twice by two different routes, and the two paths can drift apart as the logic evolves. Collapsing `B` into its only consumer — or having that consumer read solely from `B` — keeps each concept entering the model exactly once and makes the lineage graph honest about what depends on what.
+
+    Receives:
+        model (ModelNode): The ModelNode object to check.
+        models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.
+        include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.
+        materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_model_does_not_rejoin_upstream_concepts
+        ```
+
+    """
+    models_by_id = (
+        ctx.models_by_unique_id
+        if ctx.models_by_unique_id
+        else {m.unique_id: m for m in ctx.models}
+    )
+
+    parents = set(getattr(model.depends_on, "nodes", []) or [])
+
+    for parent_id in sorted(parents):
+        parent = models_by_id.get(parent_id)
+        if parent is None:
+            continue
+
+        shared_ancestors = set(getattr(parent.depends_on, "nodes", []) or []) & parents
+        if not shared_ancestors:
+            continue
+
+        # Only a rejoin worth flagging when the intermediate parent exists solely
+        # to feed this model; if it has other consumers it is a shared concept.
+        if len(ctx.children_by_unique_id.get(parent_id, [])) == 1:
+            fail(
+                f"`{get_clean_model_name(model.unique_id)}` references `{get_clean_model_name(parent_id)}` and also references {sorted(shared_ancestors)}, which `{get_clean_model_name(parent_id)}` already depends on."
+            )
+
+
 @check(code="MO030")
 def check_model_has_exposure(model, ctx):
     """Models must have an exposure.
