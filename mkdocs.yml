@@ -33,6 +33,7 @@ nav:
   - Configuration: configuration.md
   - Checks:
       - Checks: checks/index.md
+      - Rule codes: checks/rule_codes.md
       - Catalog:
           - Catalog Seeds: checks/catalog/check_catalog_seeds.md
           - Catalog Sources: checks/catalog/check_catalog_sources.md
