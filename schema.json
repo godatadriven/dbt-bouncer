@@ -4424,6 +4424,106 @@
       "title": "CheckModelDoesNotRejoinUpstreamConcepts",
       "type": "object"
     },
+    "CheckModelDoesNotUseCartesianJoin": {
+      "additionalProperties": false,
+      "description": "Models must not perform Cartesian or CROSS JOINs.\n\n!!! info \"Rationale\"\n\n    Cartesian joins (or CROSS JOINs) join every row of one table to every row\n    of another, leading to exponential row explosion, massive warehouse credit\n    consumption, and potential query timeouts. Catching unintended cross joins\n    at lint time prevents costly query execution errors in production.\n\nParameters:\n    allow_explicit_cross_join (bool): Whether to allow explicit `CROSS JOIN` statements. Default: `False`.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    materialization (Literal[\"ephemeral\", \"incremental\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\n!!! info\n\n    Analysis is AST-based (via sqlglot) and flags explicit `CROSS JOIN` keywords,\n    missing `ON`/`USING` clauses, and constant `ON` conditions (e.g. `ON 1=1`).\n    Non-SQL (e.g. Python) models are skipped.\n\n!!! warning\n\n    Models that sqlglot cannot parse (e.g. heavy `{% ... %}` control flow)\n    fall back to a best-effort regular-expression scan.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_model_does_not_use_cartesian_join\n    ```\n    ```yaml\n    manifest_checks:\n        - name: check_model_does_not_use_cartesian_join\n          allow_explicit_cross_join: true\n    ```",
+      "properties": {
+        "code": {
+          "const": "MO052",
+          "default": "MO052",
+          "title": "Code",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to exclude. A list matches if any pattern matches.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to include. A list matches if any pattern matches.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_model_does_not_use_cartesian_join",
+          "default": "check_model_does_not_use_cartesian_join",
+          "title": "Name",
+          "type": "string"
+        },
+        "allow_explicit_cross_join": {
+          "default": false,
+          "title": "Allow Explicit Cross Join",
+          "type": "boolean"
+        }
+      },
+      "title": "CheckModelDoesNotUseCartesianJoin",
+      "type": "object"
+    },
     "CheckModelDoesNotUseSelectStar": {
       "additionalProperties": false,
       "description": "Models must not use `SELECT *`.\n\n!!! info \"Rationale\"\n\n    `SELECT *` makes a model's output schema implicit and brittle to upstream column changes. When a source or upstream model adds, removes, or reorders columns, a `SELECT *` model silently propagates the change, potentially breaking downstream consumers or introducing unexpected columns into the DAG. Explicit column lists are self-documenting, stable, and make schema changes intentional and reviewable.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    materialization (Literal[\"ephemeral\", \"incremental\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\n!!! info\n\n    Analysis is AST-based (via sqlglot) and flags both bare (`SELECT *`) and\n    qualified (`SELECT t.*`) stars, while correctly ignoring stars inside\n    function calls (`count(*)`), string literals, and comments. It analyses\n    the model's `raw_code` with Jinja neutralized. Non-SQL (e.g. Python)\n    models are skipped.\n\n!!! warning\n\n    Models that sqlglot cannot parse (e.g. heavy `{% ... %}` control flow)\n    fall back to a best-effort regular-expression scan, which retains the\n    original limitations around string literals and Jinja tags.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_model_does_not_use_select_star\n          include: ^models/marts\n    ```",
@@ -12545,6 +12645,7 @@
             "check_model_documented_in_same_directory": "#/$defs/CheckModelDocumentedInSameDirectory",
             "check_model_does_not_directly_join_to_source": "#/$defs/CheckModelDoesNotDirectlyJoinToSource",
             "check_model_does_not_rejoin_upstream_concepts": "#/$defs/CheckModelDoesNotRejoinUpstreamConcepts",
+            "check_model_does_not_use_cartesian_join": "#/$defs/CheckModelDoesNotUseCartesianJoin",
             "check_model_does_not_use_select_star": "#/$defs/CheckModelDoesNotUseSelectStar",
             "check_model_file_name": "#/$defs/CheckModelFileName",
             "check_model_grant_privilege": "#/$defs/CheckModelGrantPrivilege",
@@ -12727,6 +12828,9 @@
           },
           {
             "$ref": "#/$defs/CheckModelDoesNotRejoinUpstreamConcepts"
+          },
+          {
+            "$ref": "#/$defs/CheckModelDoesNotUseCartesianJoin"
           },
           {
             "$ref": "#/$defs/CheckModelDoesNotUseSelectStar"

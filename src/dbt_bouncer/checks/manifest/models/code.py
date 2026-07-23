@@ -15,6 +15,7 @@ from dbt_bouncer.utils import compile_pattern, get_clean_model_name
 _JINJA_PATTERN = re.compile(r"\{[{%].*?[%}]\}", re.DOTALL)
 _HARD_CODED_REF_PATTERN = re.compile(r"\b(?:FROM|JOIN)\s+\w+\.\w+", re.IGNORECASE)
 _SELECT_STAR_PATTERN = re.compile(r"(?i)select\s+(?:all\s+|distinct\s+)?\*")
+_CROSS_JOIN_PATTERN = re.compile(r"\bCROSS\s+JOIN\b", re.IGNORECASE)
 
 # Patterns used to strip comment forms before the select-star regex fallback.
 # The Jinja-comment pattern is shared with ``sql_utils`` to keep a single source
@@ -126,6 +127,112 @@ def check_model_code_does_not_contain_regexp_pattern(model, *, regexp_pattern: s
         fail(
             f"`{get_clean_model_name(model.unique_id)}` contains a banned string: `{regexp_pattern}`."
         )
+
+
+@check(code="MO052")
+def check_model_does_not_use_cartesian_join(
+    model, *, allow_explicit_cross_join: bool = False
+):
+    """Models must not perform Cartesian or CROSS JOINs.
+
+    !!! info "Rationale"
+
+        Cartesian joins (or CROSS JOINs) join every row of one table to every row
+        of another, leading to exponential row explosion, massive warehouse credit
+        consumption, and potential query timeouts. Catching unintended cross joins
+        at lint time prevents costly query execution errors in production.
+
+    Parameters:
+        allow_explicit_cross_join (bool): Whether to allow explicit `CROSS JOIN` statements. Default: `False`.
+
+    Receives:
+        model (ModelNode): The ModelNode object to check.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.
+        include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.
+        materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    !!! info
+
+        Analysis is AST-based (via sqlglot) and flags explicit `CROSS JOIN` keywords,
+        missing `ON`/`USING` clauses, and constant `ON` conditions (e.g. `ON 1=1`).
+        Non-SQL (e.g. Python) models are skipped.
+
+    !!! warning
+
+        Models that sqlglot cannot parse (e.g. heavy `{% ... %}` control flow)
+        fall back to a best-effort regular-expression scan.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_model_does_not_use_cartesian_join
+        ```
+        ```yaml
+        manifest_checks:
+            - name: check_model_does_not_use_cartesian_join
+              allow_explicit_cross_join: true
+        ```
+
+    """
+    if not _is_sql_model(model):
+        return
+
+    parsed = parse_sql(neutralize_jinja(model.raw_code or ""))
+    if parsed is None:
+        # Fallback: best-effort regex on Jinja-stripped raw code.
+        cleaned = _strip_sql_comments(model.raw_code or "")
+        if not allow_explicit_cross_join and _CROSS_JOIN_PATTERN.search(cleaned):
+            fail(
+                f"`{get_clean_model_name(model.unique_id)}` uses a Cartesian or `CROSS JOIN`."
+            )
+        return
+
+    for statement in parsed:
+        for join in statement.find_all(exp.Join):
+            is_cross = (join.kind or "").upper() == "CROSS"
+            on_clause = join.args.get("on")
+            using_clause = join.args.get("using")
+
+            if is_cross:
+                if not allow_explicit_cross_join:
+                    fail(
+                        f"`{get_clean_model_name(model.unique_id)}` uses an explicit `CROSS JOIN`."
+                    )
+                continue
+
+            if not on_clause and not using_clause:
+                fail(
+                    f"`{get_clean_model_name(model.unique_id)}` uses a `JOIN` without an `ON` or `USING` clause."
+                )
+
+            if on_clause:
+                cond = on_clause.this
+                if isinstance(cond, bool):
+                    is_constant, cond_str = cond, str(cond).upper()
+                elif isinstance(cond, exp.Expression):
+                    cond_str = cond.sql()
+                    normalized = cond_str.upper().replace(" ", "")
+                    is_constant = (
+                        normalized in ("1", "TRUE", "1=1", "0=0")
+                        or isinstance(cond, (exp.Literal, exp.Boolean))
+                        or (
+                            isinstance(cond, exp.EQ)
+                            and isinstance(cond.this, exp.Literal)
+                            and isinstance(cond.expression, exp.Literal)
+                            and cond.this.this == cond.expression.this
+                        )
+                    )
+                else:
+                    is_constant, cond_str = False, str(cond)
+
+                if is_constant and not allow_explicit_cross_join:
+                    fail(
+                        f"`{get_clean_model_name(model.unique_id)}` uses a `JOIN` with a constant condition (`ON {cond_str}`)."
+                    )
 
 
 @check(code="MO008")
