@@ -44,7 +44,7 @@ dbt-bouncer list --group manifest_checks
 | `SE` | Seeds | `manifest_checks` | 6 |
 | `SM` | Semantic models | `manifest_checks` | 1 |
 | `SN` | Snapshots | `manifest_checks` | 6 |
-| `SO` | Sources | `manifest_checks` | 16 |
+| `SO` | Sources | `manifest_checks` | 17 |
 | `TE` | Tests | `manifest_checks` | 3 |
 | `UT` | Unit tests | `manifest_checks` | 3 |
 
@@ -212,6 +212,7 @@ dbt-bouncer list --group manifest_checks
 | `SO014` | `check_source_names` | Sources must have a name that matches the supplied regex. |
 | `SO015` | `check_source_has_tags` | Sources must have the specified tags. |
 | `SO016` | `check_source_has_tests` | Sources must have a minimum number of tests. |
+| `SO017` | `check_source_top_level_description_populated` | Sources must have a populated description on the top-level `sources:` entry. |
 
 ## Tests (`TE`)
 

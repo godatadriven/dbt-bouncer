@@ -313,6 +313,8 @@ manifest_checks:
     column_name_pattern: ^(email|phone|ssn).*
     meta_key: pii
   - name: check_source_property_file_location
+  - name: check_source_top_level_description_populated
+    severity: warn # The `sources:` entries in this test project have no top-level description, and the committed artifacts are frozen
   - name: check_source_used_by_models_in_same_directory
   - name: check_source_used_by_only_one_model
 
