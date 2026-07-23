@@ -74,6 +74,14 @@ class TestCheckSourceTopLevelDescriptionPopulated:
             match="top-level",
         )
 
+    def test_shorter_than_min_description_length(self):
+        check_fails(
+            "check_source_top_level_description_populated",
+            source={"source_description": "The CRM."},
+            min_description_length=25,
+            match="top-level",
+        )
+
     def test_absent_field(self):
         # `source_description` is absent from the manifest entry entirely.
         check_fails(
