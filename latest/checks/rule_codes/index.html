@@ -1912,7 +1912,7 @@
 <td><code>MO</code></td>
 <td>Models</td>
 <td><code>manifest_checks</code></td>
-<td>48</td>
+<td>49</td>
 </tr>
 <tr>
 <td><code>RR</code></td>
@@ -2422,6 +2422,11 @@
 <td><code>MO048</code></td>
 <td><code>check_model_does_not_directly_join_to_source</code></td>
 <td>Models cannot reference a source and a model at the same time.</td>
+</tr>
+<tr>
+<td><code>MO049</code></td>
+<td><code>check_model_does_not_rejoin_upstream_concepts</code></td>
+<td>Models cannot join back to an upstream concept that one of their other parents already depends on.</td>
 </tr>
 </tbody>
 </table>
