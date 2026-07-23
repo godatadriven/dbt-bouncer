@@ -294,7 +294,10 @@ def lint_config_file(config_file_path: Path) -> list[dict[str, Any]]:
                     )
                     continue
 
-                if "name" not in check and "code" not in check:
+                # Treat absent, null and empty values alike: all leave us with
+                # nothing to look up in the registry.
+                check_name = check.get("name") or check.get("code")
+                if not check_name:
                     issues.append(
                         {
                             "line": idx + 1,
@@ -304,7 +307,6 @@ def lint_config_file(config_file_path: Path) -> list[dict[str, Any]]:
                     )
                     continue  # Cannot validate if absent
 
-                check_name = check.get("name") or check.get("code")
                 if check_name not in registry:
                     best_match = min(
                         registry.keys(),

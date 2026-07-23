@@ -535,6 +535,30 @@ def test_lint_config_file_missing_name(tmp_path):
     assert issues[0]["severity"] == "error"
 
 
+@pytest.mark.parametrize(
+    "check_entry",
+    [
+        pytest.param({"name": ""}, id="empty_name"),
+        pytest.param({"name": None}, id="null_name"),
+        pytest.param({"code": ""}, id="empty_code"),
+        pytest.param({"code": None}, id="null_code"),
+    ],
+)
+def test_lint_config_file_blank_name_or_code(check_entry, tmp_path):
+    """Test lint_config_file reports blank name/code rather than raising."""
+    from dbt_bouncer.configuration_file.validator import lint_config_file
+
+    config = {"manifest_checks": [check_entry]}
+    config_file = tmp_path / "dbt-bouncer.yml"
+    with Path.open(config_file, "w") as f:
+        yaml.dump(config, f)
+
+    issues = lint_config_file(config_file)
+    assert len(issues) == 1
+    assert issues[0]["message"] == "Check is missing required 'name' or 'code' field"
+    assert issues[0]["severity"] == "error"
+
+
 def test_lint_config_file_yaml_syntax_error(tmp_path):
     """Test lint_config_file with YAML syntax error."""
     from dbt_bouncer.configuration_file.validator import lint_config_file

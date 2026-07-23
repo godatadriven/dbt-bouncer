@@ -2,6 +2,9 @@
 
 import re
 
+import pytest
+from pydantic import ValidationError
+
 from dbt_bouncer.check_framework.decorator import check
 from dbt_bouncer.configuration_file.validator import validate_conf
 from dbt_bouncer.runner import _should_run_check
@@ -49,6 +52,22 @@ def test_rule_code_config_validation() -> None:
     assert checks[0].code == "MO001"
     assert checks[1].name == "check_model_has_contracts_enforced"
     assert checks[1].code == "MO005"
+
+
+def test_rule_code_cannot_be_nulled() -> None:
+    """A check's rule code is fixed identity: config must not be able to null it."""
+
+    @check(code="MO998")
+    def check_fixed_code(model):
+        pass
+
+    assert check_fixed_code().code == "MO998"
+
+    with pytest.raises(ValidationError):
+        check_fixed_code(code=None)
+
+    with pytest.raises(ValidationError):
+        check_fixed_code(code="ZZ999")
 
 
 def test_skip_checks_with_rule_code() -> None:

@@ -65,7 +65,7 @@ def fail(message: str) -> None:
 
 
 def check(
-    fn: Callable[..., None] | str | None = None,
+    fn: Callable[..., None] | None = None,
     *,
     code: str | None = None,
 ) -> type[BaseCheck] | Callable[[Callable[..., None]], type[BaseCheck]]:
@@ -86,10 +86,6 @@ def check(
         The generated ``BaseCheck`` subclass (or a decorator if called with parens).
 
     """
-    if isinstance(fn, str):
-        code = fn
-        fn = None
-
     if fn is None:
         # Called as @check() or @check(code="MO001") — return decorator.
         def wrapper(f: Callable[..., None]) -> type[BaseCheck]:
@@ -137,7 +133,9 @@ def _build_check_class(
         "name": (Literal[name], Field(default=name)),  # type: ignore[valid-type]
     }
     if code is not None:
-        fields["code"] = (Literal[code] | None, Field(default=code))  # type: ignore[valid-type]
+        # Not optional: the code is part of the check's identity, so config must
+        # not be able to null it out.
+        fields["code"] = (Literal[code], Field(default=code))  # type: ignore[valid-type]
 
     # Resource field for iterate_over detection by the runner.
     if iterate_over is not None:
