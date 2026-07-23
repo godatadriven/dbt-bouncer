@@ -48,7 +48,7 @@ def check_source_description_populated(
         fail(f"`{display}` does not have a populated description.")
 
 
-@check
+@check(code="SO017")
 def check_source_top_level_description_populated(
     source, *, min_description_length: Annotated[int, Field(gt=0)] | None = None
 ):
