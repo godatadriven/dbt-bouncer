@@ -552,3 +552,57 @@ def check_model_max_upstream_dependencies(
         fail(
             f"`{get_clean_model_name(model.unique_id)}` has {num_upstream_sources} upstream sources, which is more than the permitted maximum of {max_upstream_sources}."
         )
+
+
+@check
+def check_model_min_downstream_models(
+    model, ctx, *, min_number_of_models: Annotated[int, Field(gt=0)] = 1
+):
+    """Models must be referenced by at least the specified number of downstream models.
+
+    !!! info "Rationale"
+
+        A model that nothing downstream references is dead weight: it still has to be built, tested, and understood on every run, but nothing consumes its output. Dead models usually accumulate after a mart is retired or a refactor leaves an intermediate model stranded. Flagging them prompts the team to either wire the model back into the lineage graph or delete it.
+
+        Downstream **models** and **snapshots** both count as consumers, since both build on top of the model. Tests and unit tests do not, as they do not make a model useful to anyone. The final layer of a project legitimately has no downstream models, so pair this check with `include`/`exclude` to scope it to the layers where a consumer is expected. To assert that final-layer models are consumed by something outside dbt, use `check_model_has_exposure` instead.
+
+    Parameters:
+        min_number_of_models (int): Minimum number of models and snapshots that must reference the model. Must be greater than 0.
+
+    Receives:
+        model (ModelNode): The ModelNode object to check.
+        models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.
+        snapshots (list[SnapshotNode]): List of SnapshotNode objects parsed from `manifest.json`.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.
+        include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.
+        materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_model_min_downstream_models
+              exclude: ^models/marts
+        ```
+        ```yaml
+        manifest_checks:
+            - name: check_model_min_downstream_models
+              include: ^models/staging
+              min_number_of_models: 2
+        ```
+
+    """
+    # children_by_unique_id is derived from ctx.models only, so snapshot consumers
+    # have to be counted separately or a model feeding only a snapshot reads as dead.
+    num_downstream = len(ctx.children_by_unique_id.get(model.unique_id, [])) + sum(
+        model.unique_id in (getattr(s.depends_on, "nodes", []) or [])
+        for s in ctx.snapshots
+    )
+
+    if num_downstream < min_number_of_models:
+        fail(
+            f"`{get_clean_model_name(model.unique_id)}` is referenced by {num_downstream} downstream model(s)/snapshot(s), fewer than the minimum of {min_number_of_models}."
+        )

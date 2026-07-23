@@ -6998,6 +6998,101 @@
       "title": "CheckModelMaxUpstreamDependencies",
       "type": "object"
     },
+    "CheckModelMinDownstreamModels": {
+      "additionalProperties": false,
+      "description": "Models must be referenced by at least the specified number of downstream models.\n\n!!! info \"Rationale\"\n\n    A model that nothing downstream references is dead weight: it still has to be built, tested, and understood on every run, but nothing consumes its output. Dead models usually accumulate after a mart is retired or a refactor leaves an intermediate model stranded. Flagging them prompts the team to either wire the model back into the lineage graph or delete it.\n\n    Downstream **models** and **snapshots** both count as consumers, since both build on top of the model. Tests and unit tests do not, as they do not make a model useful to anyone. The final layer of a project legitimately has no downstream models, so pair this check with `include`/`exclude` to scope it to the layers where a consumer is expected. To assert that final-layer models are consumed by something outside dbt, use `check_model_has_exposure` instead.\n\nParameters:\n    min_number_of_models (int): Minimum number of models and snapshots that must reference the model. Must be greater than 0.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n    models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.\n    snapshots (list[SnapshotNode]): List of SnapshotNode objects parsed from `manifest.json`.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    materialization (Literal[\"ephemeral\", \"incremental\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_model_min_downstream_models\n          exclude: ^models/marts\n    ```\n    ```yaml\n    manifest_checks:\n        - name: check_model_min_downstream_models\n          include: ^models/staging\n          min_number_of_models: 2\n    ```",
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to exclude. A list matches if any pattern matches.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to include. A list matches if any pattern matches.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_model_min_downstream_models",
+          "default": "check_model_min_downstream_models",
+          "title": "Name",
+          "type": "string"
+        },
+        "min_number_of_models": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "title": "Min Number Of Models",
+          "type": "integer"
+        }
+      },
+      "title": "CheckModelMinDownstreamModels",
+      "type": "object"
+    },
     "CheckModelNames": {
       "additionalProperties": false,
       "description": "Models must have a name that matches the supplied regex.\n\n!!! info \"Rationale\"\n\n    Naming conventions such as `stg_` for staging models and `int_` for intermediate models are a cornerstone of readable dbt projects. Enforcing these patterns in CI prevents inconsistently named models from being merged, keeping the project navigable as it grows.\n\nParameters:\n    model_name_pattern (str): Regexp the model name must match.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    materialization (Literal[\"ephemeral\", \"incremental\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_model_names\n          include: ^models/intermediate\n          model_name_pattern: ^int_\n        - name: check_model_names\n          include: ^models/staging\n          model_name_pattern: ^stg_\n    ```",
@@ -12374,6 +12469,7 @@
             "check_model_max_fanout": "#/$defs/CheckModelMaxFanout",
             "check_model_max_number_of_lines": "#/$defs/CheckModelMaxNumberOfLines",
             "check_model_max_upstream_dependencies": "#/$defs/CheckModelMaxUpstreamDependencies",
+            "check_model_min_downstream_models": "#/$defs/CheckModelMinDownstreamModels",
             "check_model_names": "#/$defs/CheckModelNames",
             "check_model_number_of_grants": "#/$defs/CheckModelNumberOfGrants",
             "check_model_property_file_location": "#/$defs/CheckModelPropertyFileLocation",
@@ -12604,6 +12700,9 @@
           },
           {
             "$ref": "#/$defs/CheckModelMaxUpstreamDependencies"
+          },
+          {
+            "$ref": "#/$defs/CheckModelMinDownstreamModels"
           },
           {
             "$ref": "#/$defs/CheckModelNames"
