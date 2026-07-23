@@ -204,6 +204,100 @@ class TestCheckModelDoesNotDirectlyJoinToSource:
         )
 
 
+# model_3 (the model under test) <- model_2 <- model_1
+_REJOIN_MODEL_1 = {"name": "model_1", "unique_id": "model.package_name.model_1"}
+_REJOIN_MODEL_2 = {
+    "depends_on": {"nodes": ["model.package_name.model_1"]},
+    "name": "model_2",
+    "unique_id": "model.package_name.model_2",
+}
+_REJOIN_MODEL_3 = {
+    "depends_on": {
+        "nodes": ["model.package_name.model_1", "model.package_name.model_2"],
+    },
+    "name": "model_3",
+    "unique_id": "model.package_name.model_3",
+}
+
+
+class TestCheckModelDoesNotRejoinUpstreamConcepts:
+    def test_passes_when_no_shared_ancestor(self):
+        check_passes(
+            "check_model_does_not_rejoin_upstream_concepts",
+            model=_REJOIN_MODEL_3,
+            ctx_models=[
+                _REJOIN_MODEL_1,
+                {**_REJOIN_MODEL_2, "depends_on": {"nodes": []}},
+                _REJOIN_MODEL_3,
+            ],
+        )
+
+    def test_passes_when_intermediate_has_other_consumers(self):
+        # model_2 also feeds model_4, so it is a shared concept rather than a
+        # single-consumer intermediate.
+        check_passes(
+            "check_model_does_not_rejoin_upstream_concepts",
+            model=_REJOIN_MODEL_3,
+            ctx_models=[
+                _REJOIN_MODEL_1,
+                _REJOIN_MODEL_2,
+                _REJOIN_MODEL_3,
+                {
+                    "depends_on": {"nodes": ["model.package_name.model_2"]},
+                    "name": "model_4",
+                    "unique_id": "model.package_name.model_4",
+                },
+            ],
+        )
+
+    def test_passes_when_parent_is_a_source(self):
+        check_passes(
+            "check_model_does_not_rejoin_upstream_concepts",
+            model={
+                "depends_on": {
+                    "nodes": [
+                        "model.package_name.model_2",
+                        "source.package_name.source_1.table_1",
+                    ],
+                },
+                "name": "model_3",
+                "unique_id": "model.package_name.model_3",
+            },
+            ctx_models=[_REJOIN_MODEL_2, _REJOIN_MODEL_3],
+        )
+
+    def test_fails(self):
+        check_fails(
+            "check_model_does_not_rejoin_upstream_concepts",
+            model=_REJOIN_MODEL_3,
+            ctx_models=[_REJOIN_MODEL_1, _REJOIN_MODEL_2, _REJOIN_MODEL_3],
+            match="already depends on",
+        )
+
+    def test_fails_when_shared_ancestor_is_a_source(self):
+        model_2 = {
+            "depends_on": {"nodes": ["source.package_name.source_1.table_1"]},
+            "name": "model_2",
+            "unique_id": "model.package_name.model_2",
+        }
+        model_3 = {
+            "depends_on": {
+                "nodes": [
+                    "model.package_name.model_2",
+                    "source.package_name.source_1.table_1",
+                ],
+            },
+            "name": "model_3",
+            "unique_id": "model.package_name.model_3",
+        }
+        check_fails(
+            "check_model_does_not_rejoin_upstream_concepts",
+            model=model_3,
+            ctx_models=[model_2, model_3],
+            match="already depends on",
+        )
+
+
 class TestCheckModelHasExposure:
     def test_passes(self):
         check_passes(

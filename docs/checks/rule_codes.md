@@ -39,7 +39,7 @@ dbt-bouncer list --group manifest_checks
 | `LI` | Lineage | `manifest_checks` | 3 |
 | `MA` | Macros | `manifest_checks` | 10 |
 | `ME` | Metadata | `manifest_checks` | 1 |
-| `MO` | Models | `manifest_checks` | 48 |
+| `MO` | Models | `manifest_checks` | 49 |
 | `RR` | Run results | `run_results_checks` | 2 |
 | `SE` | Seeds | `manifest_checks` | 6 |
 | `SM` | Semantic models | `manifest_checks` | 1 |
@@ -156,6 +156,7 @@ dbt-bouncer list --group manifest_checks
 | `MO046` | `check_model_version_allowed` | Check that the version of the model matches the supplied regex pattern. |
 | `MO047` | `check_model_version_pinned_in_ref` | Check that the version of the model is always specified in downstream nodes. |
 | `MO048` | `check_model_does_not_directly_join_to_source` | Models cannot reference a source and a model at the same time. |
+| `MO049` | `check_model_does_not_rejoin_upstream_concepts` | Models cannot join back to an upstream concept that one of their other parents already depends on. |
 
 ## Run results (`RR`)
 
