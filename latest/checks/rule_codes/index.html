@@ -1,0 +1,2758 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://godatadriven.github.io/dbt-bouncer/latest/checks/rule_codes/">
+      
+      
+        <link rel="prev" href="../">
+      
+      
+        <link rel="next" href="../catalog/check_catalog_seeds/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/logo.svg">
+      <meta name="generator" content="zensical-0.0.43">
+    
+    
+      
+        <title>Rule codes - dbt-bouncer</title>
+      
+    
+    
+      
+        
+      
+      <link rel="stylesheet" href="../../assets/stylesheets/classic/main.a2001754.min.css">
+      
+        
+          
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/classic/palette.7dc9a0ad.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,500,500i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_scope.pathname.endsWith("/")||(__md_scope=new URL(__md_scope.pathname+"/",location)),__md_hash=e=>[...e].reduce(((e,t)=>(e<<5)-e+t.charCodeAt(0)),0),__md_get=(e,t=localStorage,_=__md_scope)=>JSON.parse(t.getItem(_.pathname+"."+e)),__md_set=(e,t,_=localStorage,a=__md_scope)=>{try{_.setItem(a.pathname+"."+e,JSON.stringify(t))}catch(e){}},document.documentElement.setAttribute("data-platform",navigator.platform)</script>
+    
+      
+
+    
+    
+  <meta property="og:image" content="https://godatadriven.github.io/dbt-bouncer/latestassets/brand/social-card-light-tagline.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://godatadriven.github.io/dbt-bouncer/latestassets/brand/social-card-light-tagline.png" />
+
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer" aria-label="Navigation"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#rule-codes" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+          <aside class="md-banner md-banner--warning">
+            <div class="md-banner__inner md-grid md-typeset">
+              
+  You're not viewing the latest stable version of dbt-bouncer.
+  <a href="../../..">
+    <strong>Click here to go to stable.</strong>
+  </a>
+
+            </div>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
+          </aside>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="dbt-bouncer" class="md-header__button md-logo" aria-label="dbt-bouncer" data-md-component="logo">
+      
+  <img src="../../assets/logo.svg" alt="dbt-bouncer">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer" aria-label="Navigation">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            dbt-bouncer
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Rule codes
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme)" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9zM20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12zm-9.15 3.96h2.3L12 9z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="custom" data-md-color-accent="indigo"  aria-label="Switch to system preference"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to system preference" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search" aria-label="Search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog" aria-label="Search">
+  <button type="button" class="md-search__button">
+    Search
+  </button>
+</div>
+      
+    
+    <div class="md-header__source">
+      
+        <a href="https://github.com/godatadriven/dbt-bouncer" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2026 Fonticons, Inc.--><path fill="currentColor" d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    godatadriven/dbt-bouncer
+  </div>
+</a>
+      
+    </div>
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../getting_started/" class="md-tabs__link">
+        
+  
+  Getting started
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../configuration/" class="md-tabs__link">
+        
+  
+  Configuration
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+      
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../" class="md-tabs__link">
+          
+  
+  Checks
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../cli/" class="md-tabs__link">
+        
+  
+  CLI
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../faq/" class="md-tabs__link">
+        
+  
+  FAQ
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+      
+      
+        
+      
+    
+    
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../migration/v3/" class="md-tabs__link">
+          
+  
+  Migration
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../brand/" class="md-tabs__link">
+        
+  
+  Brand
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../CONTRIBUTING/" class="md-tabs__link">
+        
+  
+  Contributing
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../users/" class="md-tabs__link">
+        
+  
+  Users
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="dbt-bouncer" class="md-nav__button md-logo" aria-label="dbt-bouncer" data-md-component="logo">
+      
+  <img src="../../assets/logo.svg" alt="dbt-bouncer">
+
+    </a>
+    dbt-bouncer
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/godatadriven/dbt-bouncer" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2026 Fonticons, Inc.--><path fill="currentColor" d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    godatadriven/dbt-bouncer
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Home
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting_started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Getting started
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Configuration
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Checks
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4" id="__nav_4_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+  Checks
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      
+        <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Rule codes
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="././" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Rule codes
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#referencing-a-check-by-its-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Referencing a check by its code
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prefixes" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Prefixes
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#catalog-ca" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Catalog (<code>CA</code>)
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#exposures-ex" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Exposures (<code>EX</code>)
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lineage-li" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Lineage (<code>LI</code>)
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#macros-ma" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Macros (<code>MA</code>)
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#metadata-me" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Metadata (<code>ME</code>)
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#models-mo" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Models (<code>MO</code>)
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#run-results-rr" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Run results (<code>RR</code>)
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#seeds-se" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Seeds (<code>SE</code>)
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#semantic-models-sm" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Semantic models (<code>SM</code>)
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#snapshots-sn" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Snapshots (<code>SN</code>)
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sources-so" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Sources (<code>SO</code>)
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tests-te" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Tests (<code>TE</code>)
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#unit-tests-ut" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Unit tests (<code>UT</code>)
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3" id="__nav_4_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Catalog
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+  Catalog
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../catalog/check_catalog_seeds/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Catalog Seeds
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../catalog/check_catalog_sources/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Catalog Sources
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../catalog/columns/description/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Columns
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_4" id="__nav_4_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Manifest
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+  Manifest
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../manifest/check_exposures/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Exposures
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../manifest/check_lineage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Lineage
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../manifest/check_macros/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Macros
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../manifest/check_metadata/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Metadata
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../manifest/models/access/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Models
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../manifest/check_seeds/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Seeds
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../manifest/check_semantic_models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Semantic Models
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../manifest/check_snapshots/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Snapshots
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../manifest/sources/description/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Sources
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../manifest/check_tests/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Tests
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../manifest/check_unit_tests/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Unit Tests
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_5" id="__nav_4_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Run Results
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+  Run Results
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../run_results/check_run_results/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Run Results
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  CLI
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  FAQ
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../migration/v3/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Migration
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../brand/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Brand
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../CONTRIBUTING/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Contributing
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../users/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Users
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+  
+    <a href="https://github.com/godatadriven/dbt-bouncer/edit/main/docs/checks/rule_codes.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75z"/></svg>
+    </a>
+  
+  
+
+
+<!-- Generated by scripts/generate_rule_codes_doc.py. Do not edit by hand. -->
+
+<h1 id="rule-codes">Rule codes<a class="headerlink" href="#rule-codes" title="Permanent link">#</a></h1>
+<p>Every built-in check has a unique rule code: a two-letter prefix identifying the group of resources it applies to, followed by a three-digit number. Codes are stable — once published, a code always refers to the same check.</p>
+<h2 id="referencing-a-check-by-its-code">Referencing a check by its code<a class="headerlink" href="#referencing-a-check-by-its-code" title="Permanent link">#</a></h2>
+<p>Anywhere a check is named you may use its code instead. These two config entries are equivalent:</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">manifest_checks</span><span class="p">:</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_model_description_populated</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">code</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MO021</span>
+</span></code></pre></div>
+<p>Codes are also accepted in the <code>skip_checks</code> meta key on a dbt resource:</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nt">models</span><span class="p">:</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_model</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="nt">meta</span><span class="p">:</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">      </span><span class="nt">skip_checks</span><span class="p">:</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MO021</span>
+</span></code></pre></div>
+<p>To browse codes from the command line, use <a href="../../cli/"><code>dbt-bouncer list</code></a>, optionally filtered with <code>--group</code>:</p>
+<div class="language-shell highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>dbt-bouncer<span class="w"> </span>list<span class="w"> </span>--group<span class="w"> </span>manifest_checks
+</span></code></pre></div>
+<h2 id="prefixes">Prefixes<a class="headerlink" href="#prefixes" title="Permanent link">#</a></h2>
+<table>
+<thead>
+<tr>
+<th>Prefix</th>
+<th>Group</th>
+<th>Config category</th>
+<th>Checks</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CA</code></td>
+<td>Catalog</td>
+<td><code>catalog_checks</code></td>
+<td>11</td>
+</tr>
+<tr>
+<td><code>EX</code></td>
+<td>Exposures</td>
+<td><code>manifest_checks</code></td>
+<td>6</td>
+</tr>
+<tr>
+<td><code>LI</code></td>
+<td>Lineage</td>
+<td><code>manifest_checks</code></td>
+<td>3</td>
+</tr>
+<tr>
+<td><code>MA</code></td>
+<td>Macros</td>
+<td><code>manifest_checks</code></td>
+<td>10</td>
+</tr>
+<tr>
+<td><code>ME</code></td>
+<td>Metadata</td>
+<td><code>manifest_checks</code></td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>MO</code></td>
+<td>Models</td>
+<td><code>manifest_checks</code></td>
+<td>47</td>
+</tr>
+<tr>
+<td><code>RR</code></td>
+<td>Run results</td>
+<td><code>run_results_checks</code></td>
+<td>2</td>
+</tr>
+<tr>
+<td><code>SE</code></td>
+<td>Seeds</td>
+<td><code>manifest_checks</code></td>
+<td>6</td>
+</tr>
+<tr>
+<td><code>SM</code></td>
+<td>Semantic models</td>
+<td><code>manifest_checks</code></td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>SN</code></td>
+<td>Snapshots</td>
+<td><code>manifest_checks</code></td>
+<td>6</td>
+</tr>
+<tr>
+<td><code>SO</code></td>
+<td>Sources</td>
+<td><code>manifest_checks</code></td>
+<td>16</td>
+</tr>
+<tr>
+<td><code>TE</code></td>
+<td>Tests</td>
+<td><code>manifest_checks</code></td>
+<td>3</td>
+</tr>
+<tr>
+<td><code>UT</code></td>
+<td>Unit tests</td>
+<td><code>manifest_checks</code></td>
+<td>3</td>
+</tr>
+</tbody>
+</table>
+<h2 id="catalog-ca">Catalog (<code>CA</code>)<a class="headerlink" href="#catalog-ca" title="Permanent link">#</a></h2>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Check</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CA001</code></td>
+<td><code>check_seed_columns_are_all_documented</code></td>
+<td>All columns in a seed CSV file should be included in the seed's properties file, i.e. <code>.yml</code> file.</td>
+</tr>
+<tr>
+<td><code>CA002</code></td>
+<td><code>check_seed_max_bytes</code></td>
+<td>Each seed must not exceed the given size in bytes.</td>
+</tr>
+<tr>
+<td><code>CA003</code></td>
+<td><code>check_seed_max_row_count</code></td>
+<td>Each seed must not contain more than the given number of rows.</td>
+</tr>
+<tr>
+<td><code>CA004</code></td>
+<td><code>check_source_columns_are_all_documented</code></td>
+<td>All columns in a source should be included in the source's properties file, i.e. <code>.yml</code> file.</td>
+</tr>
+<tr>
+<td><code>CA005</code></td>
+<td><code>check_column_description_populated</code></td>
+<td>Columns must have a populated description.</td>
+</tr>
+<tr>
+<td><code>CA006</code></td>
+<td><code>check_columns_are_all_documented</code></td>
+<td>All columns in a model should be included in the model's properties file, i.e. <code>.yml</code> file.</td>
+</tr>
+<tr>
+<td><code>CA007</code></td>
+<td><code>check_columns_are_documented_in_public_models</code></td>
+<td>Columns should have a populated description in public models.</td>
+</tr>
+<tr>
+<td><code>CA008</code></td>
+<td><code>check_column_name_complies_to_column_type</code></td>
+<td>Columns with the specified regexp naming pattern must have data types that comply to the specified regexp pattern or list of data types.</td>
+</tr>
+<tr>
+<td><code>CA009</code></td>
+<td><code>check_column_names</code></td>
+<td>Columns must have a name that matches the supplied regex.</td>
+</tr>
+<tr>
+<td><code>CA010</code></td>
+<td><code>check_column_type_complies_to_column_name</code></td>
+<td>Columns with the specified data type must have names that comply to the specified regexp pattern.</td>
+</tr>
+<tr>
+<td><code>CA011</code></td>
+<td><code>check_column_has_specified_test</code></td>
+<td>Columns that match the specified regexp pattern must have a specified test.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="exposures-ex">Exposures (<code>EX</code>)<a class="headerlink" href="#exposures-ex" title="Permanent link">#</a></h2>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Check</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>EX001</code></td>
+<td><code>check_exposure_based_on_model</code></td>
+<td>Exposures should depend on a model.</td>
+</tr>
+<tr>
+<td><code>EX002</code></td>
+<td><code>check_exposure_based_on_non_public_models</code></td>
+<td>Exposures should be based on public models only.</td>
+</tr>
+<tr>
+<td><code>EX003</code></td>
+<td><code>check_exposure_based_on_view</code></td>
+<td>Exposures should not be based on views.</td>
+</tr>
+<tr>
+<td><code>EX004</code></td>
+<td><code>check_exposure_description_populated</code></td>
+<td>Exposures must have a populated description.</td>
+</tr>
+<tr>
+<td><code>EX005</code></td>
+<td><code>check_exposure_has_meta_keys</code></td>
+<td>The <code>meta</code> config for exposures must have the specified keys.</td>
+</tr>
+<tr>
+<td><code>EX006</code></td>
+<td><code>check_exposure_has_owner</code></td>
+<td>Exposures must have owner information populated.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="lineage-li">Lineage (<code>LI</code>)<a class="headerlink" href="#lineage-li" title="Permanent link">#</a></h2>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Check</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LI001</code></td>
+<td><code>check_lineage_permitted_upstream_models</code></td>
+<td>Upstream models must have a path that matches the provided <code>upstream_path_pattern</code>.</td>
+</tr>
+<tr>
+<td><code>LI002</code></td>
+<td><code>check_lineage_seed_cannot_be_used</code></td>
+<td>Seed cannot be referenced in models with a path that matches the specified <code>include</code> config.</td>
+</tr>
+<tr>
+<td><code>LI003</code></td>
+<td><code>check_lineage_source_cannot_be_used</code></td>
+<td>Sources cannot be referenced in models with a path that matches the specified <code>include</code> config.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="macros-ma">Macros (<code>MA</code>)<a class="headerlink" href="#macros-ma" title="Permanent link">#</a></h2>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Check</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>MA001</code></td>
+<td><code>check_macro_arguments_description_populated</code></td>
+<td>Macro arguments must have a populated description.</td>
+</tr>
+<tr>
+<td><code>MA002</code></td>
+<td><code>check_macro_code_does_not_contain_regexp_pattern</code></td>
+<td>The raw code for a macro must not match the specified regexp pattern.</td>
+</tr>
+<tr>
+<td><code>MA003</code></td>
+<td><code>check_macro_description_populated</code></td>
+<td>Macros must have a populated description.</td>
+</tr>
+<tr>
+<td><code>MA004</code></td>
+<td><code>check_macro_has_meta_keys</code></td>
+<td>The <code>meta</code> config for macros must have the specified keys.</td>
+</tr>
+<tr>
+<td><code>MA005</code></td>
+<td><code>check_macro_is_used</code></td>
+<td>Macros must be invoked by at least one other resource.</td>
+</tr>
+<tr>
+<td><code>MA006</code></td>
+<td><code>check_macro_max_number_of_arguments</code></td>
+<td>Macros may not have more than the specified number of arguments.</td>
+</tr>
+<tr>
+<td><code>MA007</code></td>
+<td><code>check_macro_max_number_of_lines</code></td>
+<td>Macros may not have more than the specified number of lines.</td>
+</tr>
+<tr>
+<td><code>MA008</code></td>
+<td><code>check_macro_name_matches_file_name</code></td>
+<td>Macros names must be the same as the file they are contained in.</td>
+</tr>
+<tr>
+<td><code>MA009</code></td>
+<td><code>check_macro_names</code></td>
+<td>Macros must have a name that matches the supplied regex.</td>
+</tr>
+<tr>
+<td><code>MA010</code></td>
+<td><code>check_macro_property_file_location</code></td>
+<td>Macro properties files must follow the guidance provided by dbt <a href="https://docs.getdbt.com/best-practices/how-we-structure/5-the-rest-of-the-project#how-we-use-the-other-folders">here</a>.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="metadata-me">Metadata (<code>ME</code>)<a class="headerlink" href="#metadata-me" title="Permanent link">#</a></h2>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Check</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ME001</code></td>
+<td><code>check_project_name</code></td>
+<td>Enforce that the name of the dbt project matches a supplied regex. Generally used to enforce that project names conform to something like  <code>company_&lt;DOMAIN&gt;</code>.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="models-mo">Models (<code>MO</code>)<a class="headerlink" href="#models-mo" title="Permanent link">#</a></h2>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Check</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>MO001</code></td>
+<td><code>check_model_access</code></td>
+<td>Models must have the specified access attribute. Requires dbt 1.7+.</td>
+</tr>
+<tr>
+<td><code>MO002</code></td>
+<td><code>check_model_contract_enforced_for_public_model</code></td>
+<td>Public models must have contracts enforced.</td>
+</tr>
+<tr>
+<td><code>MO003</code></td>
+<td><code>check_model_grant_privilege</code></td>
+<td>Model can have grant privileges that match the specified pattern.</td>
+</tr>
+<tr>
+<td><code>MO004</code></td>
+<td><code>check_model_grant_privilege_required</code></td>
+<td>Model must have the specified grant privilege.</td>
+</tr>
+<tr>
+<td><code>MO005</code></td>
+<td><code>check_model_has_contracts_enforced</code></td>
+<td>Model must have contracts enforced.</td>
+</tr>
+<tr>
+<td><code>MO006</code></td>
+<td><code>check_model_number_of_grants</code></td>
+<td>Model can have the specified number of privileges.</td>
+</tr>
+<tr>
+<td><code>MO007</code></td>
+<td><code>check_model_code_does_not_contain_regexp_pattern</code></td>
+<td>The raw code for a model must not match the specified regexp pattern.</td>
+</tr>
+<tr>
+<td><code>MO008</code></td>
+<td><code>check_model_does_not_use_select_star</code></td>
+<td>Models must not use <code>SELECT *</code>.</td>
+</tr>
+<tr>
+<td><code>MO009</code></td>
+<td><code>check_model_hard_coded_references</code></td>
+<td>A model must not contain hard-coded table references; use ref() or source() instead.</td>
+</tr>
+<tr>
+<td><code>MO010</code></td>
+<td><code>check_model_has_semi_colon</code></td>
+<td>Model may not end with a semi-colon (<code>;</code>).</td>
+</tr>
+<tr>
+<td><code>MO011</code></td>
+<td><code>check_model_incremental_has_unique_key</code></td>
+<td>Incremental models must declare a <code>unique_key</code>.</td>
+</tr>
+<tr>
+<td><code>MO012</code></td>
+<td><code>check_model_materialization_permitted</code></td>
+<td>Models must use a permitted materialization for their location.</td>
+</tr>
+<tr>
+<td><code>MO013</code></td>
+<td><code>check_model_max_number_of_lines</code></td>
+<td>Models may not have more than the specified number of lines.</td>
+</tr>
+<tr>
+<td><code>MO014</code></td>
+<td><code>check_model_columns_have_meta_keys</code></td>
+<td>Columns defined for models must have the specified keys in the <code>meta</code> config.</td>
+</tr>
+<tr>
+<td><code>MO015</code></td>
+<td><code>check_model_columns_have_relationship_tests</code></td>
+<td>Columns matching a regex pattern must have a <code>relationships</code> test, optionally validating the target column and model.</td>
+</tr>
+<tr>
+<td><code>MO016</code></td>
+<td><code>check_model_columns_have_types</code></td>
+<td>Columns defined for models must have a <code>data_type</code> declared.</td>
+</tr>
+<tr>
+<td><code>MO017</code></td>
+<td><code>check_model_has_constraints</code></td>
+<td>Table and incremental models must have the specified constraint types defined.</td>
+</tr>
+<tr>
+<td><code>MO018</code></td>
+<td><code>check_model_single_primary_key</code></td>
+<td>Models must have at most one column-level primary key constraint.</td>
+</tr>
+<tr>
+<td><code>MO019</code></td>
+<td><code>check_column_descriptions_are_consistent</code></td>
+<td>The same column name must not have conflicting descriptions across models.</td>
+</tr>
+<tr>
+<td><code>MO020</code></td>
+<td><code>check_model_description_contains_regex_pattern</code></td>
+<td>Models must have a description that matches the provided pattern.</td>
+</tr>
+<tr>
+<td><code>MO021</code></td>
+<td><code>check_model_description_populated</code></td>
+<td>Models must have a populated description.</td>
+</tr>
+<tr>
+<td><code>MO022</code></td>
+<td><code>check_model_documentation_coverage</code></td>
+<td>Set the minimum percentage of models that have a populated description.</td>
+</tr>
+<tr>
+<td><code>MO023</code></td>
+<td><code>check_model_documented_in_same_directory</code></td>
+<td>Models must be documented in the same directory where they are defined (i.e. <code>.yml</code> and <code>.sql</code> files are in the same directory).</td>
+</tr>
+<tr>
+<td><code>MO024</code></td>
+<td><code>check_model_directories</code></td>
+<td>Only specified sub-directories are permitted.</td>
+</tr>
+<tr>
+<td><code>MO025</code></td>
+<td><code>check_model_file_name</code></td>
+<td>Models must have a file name that matches the supplied regex.</td>
+</tr>
+<tr>
+<td><code>MO026</code></td>
+<td><code>check_model_property_file_location</code></td>
+<td>Model properties files must follow the guidance provided by dbt <a href="https://docs.getdbt.com/best-practices/how-we-structure/1-guide-overview">here</a>.</td>
+</tr>
+<tr>
+<td><code>MO027</code></td>
+<td><code>check_model_schema_name</code></td>
+<td>Models must have a schema name that matches the supplied regex.</td>
+</tr>
+<tr>
+<td><code>MO028</code></td>
+<td><code>check_model_depends_on_macros</code></td>
+<td>Models must depend on the specified macros.</td>
+</tr>
+<tr>
+<td><code>MO029</code></td>
+<td><code>check_model_depends_on_multiple_sources</code></td>
+<td>Models cannot reference more than one source.</td>
+</tr>
+<tr>
+<td><code>MO030</code></td>
+<td><code>check_model_has_exposure</code></td>
+<td>Models must have an exposure.</td>
+</tr>
+<tr>
+<td><code>MO031</code></td>
+<td><code>check_model_has_no_upstream_dependencies</code></td>
+<td>Identify if models have no upstream dependencies as this likely indicates hard-coded tables references.</td>
+</tr>
+<tr>
+<td><code>MO032</code></td>
+<td><code>check_model_materialization_by_fanout</code></td>
+<td>Heavily-reused models must use a durable materialization.</td>
+</tr>
+<tr>
+<td><code>MO033</code></td>
+<td><code>check_model_max_chained_views</code></td>
+<td>Models cannot have more than the specified number of upstream dependents that are not tables.</td>
+</tr>
+<tr>
+<td><code>MO034</code></td>
+<td><code>check_model_max_fanout</code></td>
+<td>Models cannot have more than the specified number of downstream models.</td>
+</tr>
+<tr>
+<td><code>MO035</code></td>
+<td><code>check_model_max_upstream_dependencies</code></td>
+<td>Limit the number of upstream dependencies a model has.</td>
+</tr>
+<tr>
+<td><code>MO036</code></td>
+<td><code>check_model_has_labels_keys</code></td>
+<td>The <code>labels</code> config for models must have the specified keys.</td>
+</tr>
+<tr>
+<td><code>MO037</code></td>
+<td><code>check_model_has_meta_keys</code></td>
+<td>The <code>meta</code> config for models must have the specified keys.</td>
+</tr>
+<tr>
+<td><code>MO038</code></td>
+<td><code>check_model_names</code></td>
+<td>Models must have a name that matches the supplied regex.</td>
+</tr>
+<tr>
+<td><code>MO039</code></td>
+<td><code>check_model_has_tags</code></td>
+<td>Models must have the specified tags.</td>
+</tr>
+<tr>
+<td><code>MO040</code></td>
+<td><code>check_model_has_tests_by_name</code></td>
+<td>Models must have a minimum number of tests matching the specified test names.</td>
+</tr>
+<tr>
+<td><code>MO041</code></td>
+<td><code>check_model_has_tests_by_type</code></td>
+<td>Models must have at least the specified number of schema tests and data tests.</td>
+</tr>
+<tr>
+<td><code>MO042</code></td>
+<td><code>check_model_has_unique_test</code></td>
+<td>Models must have a test for uniqueness of a column.</td>
+</tr>
+<tr>
+<td><code>MO043</code></td>
+<td><code>check_model_has_unit_tests</code></td>
+<td>Models must have more than the specified number of unit tests.</td>
+</tr>
+<tr>
+<td><code>MO044</code></td>
+<td><code>check_model_test_coverage</code></td>
+<td>Set the minimum percentage of models that have at least one test.</td>
+</tr>
+<tr>
+<td><code>MO045</code></td>
+<td><code>check_model_latest_version_specified</code></td>
+<td>Check that the <code>latest_version</code> attribute of the model is set.</td>
+</tr>
+<tr>
+<td><code>MO046</code></td>
+<td><code>check_model_version_allowed</code></td>
+<td>Check that the version of the model matches the supplied regex pattern.</td>
+</tr>
+<tr>
+<td><code>MO047</code></td>
+<td><code>check_model_version_pinned_in_ref</code></td>
+<td>Check that the version of the model is always specified in downstream nodes.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="run-results-rr">Run results (<code>RR</code>)<a class="headerlink" href="#run-results-rr" title="Permanent link">#</a></h2>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Check</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>RR001</code></td>
+<td><code>check_run_results_max_execution_time</code></td>
+<td>Each result can take a maximum duration (seconds).</td>
+</tr>
+<tr>
+<td><code>RR002</code></td>
+<td><code>check_run_results_max_gigabytes_billed</code></td>
+<td>Each result can have a maximum number of gigabytes billed.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="seeds-se">Seeds (<code>SE</code>)<a class="headerlink" href="#seeds-se" title="Permanent link">#</a></h2>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Check</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>SE001</code></td>
+<td><code>check_seed_column_names</code></td>
+<td>Seed columns must have names that match the supplied regex.</td>
+</tr>
+<tr>
+<td><code>SE002</code></td>
+<td><code>check_seed_columns_have_types</code></td>
+<td>Columns defined for seeds must have a <code>data_type</code> declared.</td>
+</tr>
+<tr>
+<td><code>SE003</code></td>
+<td><code>check_seed_description_populated</code></td>
+<td>Seeds must have a populated description.</td>
+</tr>
+<tr>
+<td><code>SE004</code></td>
+<td><code>check_seed_has_meta_keys</code></td>
+<td>The <code>meta</code> config for seeds must have the specified keys.</td>
+</tr>
+<tr>
+<td><code>SE005</code></td>
+<td><code>check_seed_has_unit_tests</code></td>
+<td>Seeds must have more than the specified number of unit tests.</td>
+</tr>
+<tr>
+<td><code>SE006</code></td>
+<td><code>check_seed_names</code></td>
+<td>Seed must have a name that matches the supplied regex.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="semantic-models-sm">Semantic models (<code>SM</code>)<a class="headerlink" href="#semantic-models-sm" title="Permanent link">#</a></h2>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Check</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>SM001</code></td>
+<td><code>check_semantic_model_based_on_non_public_models</code></td>
+<td>Semantic models should be based on public models only.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="snapshots-sn">Snapshots (<code>SN</code>)<a class="headerlink" href="#snapshots-sn" title="Permanent link">#</a></h2>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Check</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>SN001</code></td>
+<td><code>check_snapshot_description_populated</code></td>
+<td>Snapshots must have a populated description.</td>
+</tr>
+<tr>
+<td><code>SN002</code></td>
+<td><code>check_snapshot_has_meta_keys</code></td>
+<td>The <code>meta</code> config for snapshots must have the specified keys.</td>
+</tr>
+<tr>
+<td><code>SN003</code></td>
+<td><code>check_snapshot_has_tags</code></td>
+<td>Snapshots must have the specified tags.</td>
+</tr>
+<tr>
+<td><code>SN004</code></td>
+<td><code>check_snapshot_has_unique_key</code></td>
+<td>Snapshots must have a <code>unique_key</code> configured.</td>
+</tr>
+<tr>
+<td><code>SN005</code></td>
+<td><code>check_snapshot_names</code></td>
+<td>Snapshots must have a name that matches the supplied regex.</td>
+</tr>
+<tr>
+<td><code>SN006</code></td>
+<td><code>check_snapshot_strategy</code></td>
+<td>Snapshots must use an allowed strategy and have the required strategy-specific configuration.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="sources-so">Sources (<code>SO</code>)<a class="headerlink" href="#sources-so" title="Permanent link">#</a></h2>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Check</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>SO001</code></td>
+<td><code>check_source_description_populated</code></td>
+<td>Sources must have a populated description.</td>
+</tr>
+<tr>
+<td><code>SO002</code></td>
+<td><code>check_source_file_name</code></td>
+<td>Sources must have a file name that matches the supplied regex.</td>
+</tr>
+<tr>
+<td><code>SO003</code></td>
+<td><code>check_source_property_file_location</code></td>
+<td>Source properties files must follow the guidance provided by dbt <a href="https://docs.getdbt.com/best-practices/how-we-structure/1-guide-overview">here</a>.</td>
+</tr>
+<tr>
+<td><code>SO004</code></td>
+<td><code>check_source_freshness_populated</code></td>
+<td>Sources must have a populated freshness.</td>
+</tr>
+<tr>
+<td><code>SO005</code></td>
+<td><code>check_duplicate_sources</code></td>
+<td>Sources must not share the same database relation.</td>
+</tr>
+<tr>
+<td><code>SO006</code></td>
+<td><code>check_source_min_downstream_models</code></td>
+<td>Sources must be referenced by at least the specified number of models.</td>
+</tr>
+<tr>
+<td><code>SO007</code></td>
+<td><code>check_source_not_orphaned</code></td>
+<td>Sources must be referenced in at least one model.</td>
+</tr>
+<tr>
+<td><code>SO008</code></td>
+<td><code>check_source_used_by_models_in_same_directory</code></td>
+<td>Sources can only be referenced by models that are located in the same directory where the source is defined.</td>
+</tr>
+<tr>
+<td><code>SO009</code></td>
+<td><code>check_source_used_by_only_one_model</code></td>
+<td>Each source can be referenced by a maximum of one model.</td>
+</tr>
+<tr>
+<td><code>SO010</code></td>
+<td><code>check_source_loader_populated</code></td>
+<td>Sources must have a populated loader.</td>
+</tr>
+<tr>
+<td><code>SO011</code></td>
+<td><code>check_source_has_labels_keys</code></td>
+<td>The <code>labels</code> config for sources must have the specified keys.</td>
+</tr>
+<tr>
+<td><code>SO012</code></td>
+<td><code>check_source_has_meta_keys</code></td>
+<td>The <code>meta</code> config for sources must have the specified keys.</td>
+</tr>
+<tr>
+<td><code>SO013</code></td>
+<td><code>check_source_pii_meta</code></td>
+<td>Source columns matching a PII pattern must carry a governance meta key.</td>
+</tr>
+<tr>
+<td><code>SO014</code></td>
+<td><code>check_source_names</code></td>
+<td>Sources must have a name that matches the supplied regex.</td>
+</tr>
+<tr>
+<td><code>SO015</code></td>
+<td><code>check_source_has_tags</code></td>
+<td>Sources must have the specified tags.</td>
+</tr>
+<tr>
+<td><code>SO016</code></td>
+<td><code>check_source_has_tests</code></td>
+<td>Sources must have a minimum number of tests.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="tests-te">Tests (<code>TE</code>)<a class="headerlink" href="#tests-te" title="Permanent link">#</a></h2>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Check</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>TE001</code></td>
+<td><code>check_test_has_meta_keys</code></td>
+<td>The <code>meta</code> config for data tests must have the specified keys.</td>
+</tr>
+<tr>
+<td><code>TE002</code></td>
+<td><code>check_test_has_tags</code></td>
+<td>Data tests must have the specified tags.</td>
+</tr>
+<tr>
+<td><code>TE003</code></td>
+<td><code>check_test_has_where_config</code></td>
+<td>Data tests must have a <code>where</code> config set.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="unit-tests-ut">Unit tests (<code>UT</code>)<a class="headerlink" href="#unit-tests-ut" title="Permanent link">#</a></h2>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Check</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>UT001</code></td>
+<td><code>check_unit_test_coverage</code></td>
+<td>Set the minimum percentage of models that have a unit test.</td>
+</tr>
+<tr>
+<td><code>UT002</code></td>
+<td><code>check_unit_test_expect_format</code></td>
+<td>Unit tests can only use the specified formats.</td>
+</tr>
+<tr>
+<td><code>UT003</code></td>
+<td><code>check_unit_test_given_formats</code></td>
+<td>Unit tests can only use the specified formats.</td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://zensical.org/" target="_blank" rel="noopener">
+      Zensical
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+      <div class="md-progress" data-md-component="progress" role="progressbar"></div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate":null,"base":"../..","features":["content.action.edit","content.code.annotate","content.code.copy","navigation.expand","navigation.indexes","navigation.instant","navigation.instant.progress","navigation.prune","navigation.sections","navigation.tabs","navigation.tabs.sticky","navigation.tracking","navigation.top","toc.follow","toc.integrate"],"search":"../../assets/javascripts/workers/search.e2d2d235.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"alias":true,"canonical_version":"stable","default":"stable","provider":"mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.6e5f0216.min.js"></script>
+      
+    
+  </body>
+</html>
