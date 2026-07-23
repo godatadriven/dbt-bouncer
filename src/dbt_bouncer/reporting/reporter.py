@@ -81,7 +81,7 @@ class Reporter:
             )
             counts[check_name, resource_type] += 1
 
-        console = Console()
+        console = Console(emoji=False)
         table = Table(
             title="[bold cyan]Dry run — checks that would execute[/bold cyan]",
             title_justify="left",
@@ -129,7 +129,7 @@ class Reporter:
             else:
                 num_checks_success += 1
 
-        console = Console()
+        console = Console(emoji=False)
 
         if num_checks_error > 0 or num_checks_warn > 0:
             logger = logging.error if num_checks_error > 0 else logging.warning

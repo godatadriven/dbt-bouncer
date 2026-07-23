@@ -139,6 +139,37 @@ def test_report_results_escapes_rich_markup_in_console(capsys, monkeypatch):
     assert "[a-z0-9]" in out
 
 
+def test_report_results_does_not_substitute_emoji_shortcodes(capsys, monkeypatch):
+    """Check run IDs containing `:<digits>:` are not turned into emoji.
+
+    `check_run_id` is built as `<check_name>:<index>:<resource>`, so the 100th
+    check of a run yields `...:100:...` — which rich reads as the shortcode for
+    💯 and substitutes. `rich.markup.escape` does not prevent this (it only
+    guards square-bracket tags), so the console is built with `emoji=False`.
+
+    Beyond mangling the ID, the substituted character is unencodable in the
+    cp1252 console Windows uses, raising `UnicodeEncodeError` and aborting the
+    run outright.
+    """
+    monkeypatch.setenv("COLUMNS", "250")
+
+    results = [
+        {
+            "check_run_id": "check_model_names:100:model.my_model",
+            "failure_message": "`my_model` does not match the supplied regex.",
+            "file_path": "models/staging/my_model.sql",
+            "outcome": CheckOutcome.FAILED,
+            "severity": CheckSeverity.ERROR,
+        },
+    ]
+    reporter = Reporter(show_all_failures=True, create_pr_comment_file=False)
+    reporter.report_results(results)
+
+    out = capsys.readouterr().out
+    assert ":100:" in out
+    assert "\U0001f4af" not in out
+
+
 def test_report_results_creates_pr_comment_file():
     """PR comment file is created when flag is set, with the file path column."""
     results = [
