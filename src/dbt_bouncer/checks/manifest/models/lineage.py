@@ -554,7 +554,7 @@ def check_model_max_upstream_dependencies(
         )
 
 
-@check
+@check(code="MO050")
 def check_model_min_downstream_models(
     model, ctx, *, min_number_of_models: Annotated[int, Field(gt=0)] = 1
 ):
