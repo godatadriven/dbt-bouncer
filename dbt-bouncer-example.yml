@@ -216,6 +216,8 @@ manifest_checks:
     max_downstream_models: 5
   - name: check_model_max_number_of_lines
   - name: check_model_max_upstream_dependencies
+  - name: check_model_min_downstream_models
+    include: ^models/staging # Marts are the final layer; several intermediate models in this test project are deliberately unreferenced
   - name: check_model_number_of_grants
     include: ^models/marts
     max_number_of_privileges: 2 # Optional

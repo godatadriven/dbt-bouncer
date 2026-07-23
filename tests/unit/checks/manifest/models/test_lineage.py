@@ -919,3 +919,89 @@ class TestCheckModelMaxUpstreamDependenciesInvalidParam:
                 },
                 **kwargs,
             )
+
+
+_DOWNSTREAM_CHILD_MODEL = {
+    "depends_on": {"nodes": ["model.package_name.model_1"]},
+    "name": "model_2",
+    "unique_id": "model.package_name.model_2",
+}
+
+
+class TestCheckModelMinDownstreamModels:
+    def test_passes_with_one_downstream_model(self):
+        check_passes(
+            "check_model_min_downstream_models",
+            model={},  # default model is model_1
+            ctx_models=[_DOWNSTREAM_CHILD_MODEL],
+        )
+
+    def test_passes_with_downstream_snapshot_only(self):
+        check_passes(
+            "check_model_min_downstream_models",
+            model={},
+            ctx_snapshots=[
+                {"depends_on": {"nodes": ["model.package_name.model_1"]}},
+            ],
+        )
+
+    def test_passes_with_higher_minimum(self):
+        check_passes(
+            "check_model_min_downstream_models",
+            model={},
+            min_number_of_models=2,
+            ctx_models=[
+                _DOWNSTREAM_CHILD_MODEL,
+                {
+                    "depends_on": {"nodes": ["model.package_name.model_1"]},
+                    "name": "model_3",
+                    "unique_id": "model.package_name.model_3",
+                },
+            ],
+        )
+
+    def test_passes_with_mixed_model_and_snapshot_consumers(self):
+        # Exercises both terms of the count together: one downstream model plus
+        # one downstream snapshot must sum to 2.
+        check_passes(
+            "check_model_min_downstream_models",
+            model={},
+            min_number_of_models=2,
+            ctx_models=[_DOWNSTREAM_CHILD_MODEL],
+            ctx_snapshots=[
+                {"depends_on": {"nodes": ["model.package_name.model_1"]}},
+            ],
+        )
+
+    def test_fails_when_dead(self):
+        check_fails(
+            "check_model_min_downstream_models",
+            model={},
+            ctx_models=[
+                {
+                    "depends_on": {"nodes": ["model.package_name.model_99"]},
+                    "name": "model_2",
+                    "unique_id": "model.package_name.model_2",
+                },
+            ],
+            match="fewer than the minimum",
+        )
+
+    def test_fails_when_below_higher_minimum(self):
+        check_fails(
+            "check_model_min_downstream_models",
+            model={},
+            min_number_of_models=2,
+            ctx_models=[_DOWNSTREAM_CHILD_MODEL],
+            match="fewer than the minimum",
+        )
+
+
+class TestCheckModelMinDownstreamModelsInvalidParam:
+    def test_zero_rejected(self):
+        with pytest.raises(ValueError, match="greater than 0"):
+            check_passes(
+                "check_model_min_downstream_models",
+                model={},
+                min_number_of_models=0,
+            )
