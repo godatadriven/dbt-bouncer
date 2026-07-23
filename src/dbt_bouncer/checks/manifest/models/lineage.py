@@ -196,7 +196,7 @@ def check_model_does_not_rejoin_upstream_concepts(model, ctx):
         # to feed this model; if it has other consumers it is a shared concept.
         if len(ctx.children_by_unique_id.get(parent_id, [])) == 1:
             fail(
-                f"`{get_clean_model_name(model.unique_id)}` references `{get_clean_model_name(parent_id)}` and also references {sorted(shared_ancestors)}, which `{get_clean_model_name(parent_id)}` already depends on."
+                f"`{get_clean_model_name(model.unique_id)}` references `{get_clean_model_name(parent_id)}` and also references {sorted(get_clean_model_name(a) for a in shared_ancestors)}, which `{get_clean_model_name(parent_id)}` already depends on."
             )
 
 
