@@ -960,6 +960,19 @@ class TestCheckModelMinDownstreamModels:
             ],
         )
 
+    def test_passes_with_mixed_model_and_snapshot_consumers(self):
+        # Exercises both terms of the count together: one downstream model plus
+        # one downstream snapshot must sum to 2.
+        check_passes(
+            "check_model_min_downstream_models",
+            model={},
+            min_number_of_models=2,
+            ctx_models=[_DOWNSTREAM_CHILD_MODEL],
+            ctx_snapshots=[
+                {"depends_on": {"nodes": ["model.package_name.model_1"]}},
+            ],
+        )
+
     def test_fails_when_dead(self):
         check_fails(
             "check_model_min_downstream_models",
