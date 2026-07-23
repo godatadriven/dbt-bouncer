@@ -133,7 +133,7 @@ dbt-bouncer list --group manifest_checks
 | `MO023` | `check_model_documented_in_same_directory` | Models must be documented in the same directory where they are defined (i.e. `.yml` and `.sql` files are in the same directory). |
 | `MO024` | `check_model_directories` | Only specified sub-directories are permitted. |
 | `MO025` | `check_model_file_name` | Models must have a file name that matches the supplied regex. |
-| `MO026` | `check_model_property_file_location` | Model properties files must follow the guidance provided by dbt [here](https://docs.getdbt.com/best-practices/how-we-structure/1-guide-overview). |
+| `MO026` | `check_model_property_file_location` | Model properties files must follow the configured layout. |
 | `MO027` | `check_model_schema_name` | Models must have a schema name that matches the supplied regex. |
 | `MO028` | `check_model_depends_on_macros` | Models must depend on the specified macros. |
 | `MO029` | `check_model_depends_on_multiple_sources` | Models cannot reference more than one source. |

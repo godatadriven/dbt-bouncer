@@ -91,6 +91,13 @@ class OutputFormatCLI(StrEnum):
     TEXT = auto()
 
 
+class PropertiesLayout(StrEnum):
+    """Layouts for model properties (`.yml`) files."""
+
+    PER_DIRECTORY = auto()
+    PER_MODEL = auto()
+
+
 class ResourceType(StrEnum):
     """dbt resource types supported by dbt-bouncer."""
 

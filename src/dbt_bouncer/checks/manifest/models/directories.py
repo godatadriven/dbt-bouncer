@@ -3,6 +3,7 @@
 from pathlib import Path
 
 from dbt_bouncer.check_framework.decorator import check, fail
+from dbt_bouncer.enums import PropertiesLayout
 from dbt_bouncer.utils import clean_path_str, compile_pattern, get_clean_model_name
 
 
@@ -108,12 +109,17 @@ def check_model_file_name(model, *, file_name_pattern: str):
 
 
 @check(code="MO026")
-def check_model_property_file_location(model):
-    """Model properties files must follow the guidance provided by dbt [here](https://docs.getdbt.com/best-practices/how-we-structure/1-guide-overview).
+def check_model_property_file_location(
+    model, *, layout: PropertiesLayout = PropertiesLayout.PER_DIRECTORY
+):
+    """Model properties files must follow the configured layout.
 
     !!! info "Rationale"
 
-        dbt's official guidance recommends a specific naming and placement convention for YAML property files (e.g. `_staging__models.yml`). Following this convention ensures that property files are easy to locate, clearly scoped, and consistent with the broader dbt community's expectations.
+        Property files are only easy to find if their location is predictable. Two conventions are common. `per_directory` is [dbt's official guidance](https://docs.getdbt.com/best-practices/how-we-structure/1-guide-overview): one file per directory, named after the directory it documents (e.g. `_staging_crm__models.yml`). `per_model` gives each model its own file named after it (e.g. `stg_customers.yml`), which keeps diffs small and avoids merge conflicts when several people edit different models at once. Either works; mixing them within a project does not.
+
+    Parameters:
+        layout (Literal["per_directory", "per_model"]): The properties file layout to enforce. `per_directory` requires a file named `_<directory>__models.yml` shared by every model in the directory. `per_model` requires each model to have its own `<model_name>.yml`. Default: `per_directory`.
 
     Receives:
         model (ModelNode): The ModelNode object to check.
@@ -130,6 +136,11 @@ def check_model_property_file_location(model):
         manifest_checks:
             - name: check_model_property_file_location
         ```
+        ```yaml
+        manifest_checks:
+            - name: check_model_property_file_location
+              layout: per_model
+        ```
 
     """
     if not (
@@ -138,6 +149,18 @@ def check_model_property_file_location(model):
         and clean_path_str(model.patch_path or "") is not None
     ):
         fail(f"`{get_clean_model_name(model.unique_id)}` is not documented.")
+
+    if layout == PropertiesLayout.PER_MODEL:
+        # Only the file name is checked, not its directory: colocation of the
+        # `.yml` with its `.sql` is `check_model_documented_in_same_directory`'s
+        # job, and duplicating it here would report the same problem twice.
+        properties_yml_name = Path(clean_path_str(model.patch_path or "")).name
+        expected_name = f"{model.name}.yml"
+        if properties_yml_name != expected_name:
+            fail(
+                f"The properties file for `{get_clean_model_name(model.unique_id)}` (`{properties_yml_name}`) does not match the expected per-model file name (`{expected_name}`)."
+            )
+        return
 
     original_path = Path(clean_path_str(model.original_file_path))
     relevant_parts = original_path.parts[1:-1]
