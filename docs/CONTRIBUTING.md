@@ -84,10 +84,6 @@ uv venv
 
 This will create a new Python virtual environment.
 
-#### Setting environment variables
-
-Set required environment variables by copying `.env.example` to `.env` and updating the values.
-
 ## Running `dbt-bouncer` in development
 
 ### Installation
