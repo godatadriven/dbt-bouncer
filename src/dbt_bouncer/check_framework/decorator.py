@@ -177,6 +177,9 @@ def _build_check_class(
 
     # Attach the execute method and class-level metadata.
     cls.execute = execute  # type: ignore[attr-defined]
+    # Load-bearing despite the Pydantic `code` field above: Pydantic does not
+    # expose field defaults as class attributes, and the registry, `list` CLI
+    # and docs generator all read the code off the class via getattr.
     cls.code = code  # type: ignore[attr-defined]
     cls.iterate_over = iterate_over  # type: ignore[attr-defined]
 
