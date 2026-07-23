@@ -5512,6 +5512,95 @@
       "title": "CheckModelHasNoUpstreamDependencies",
       "type": "object"
     },
+    "CheckModelHasPropertiesFile": {
+      "additionalProperties": false,
+      "description": "Models must be declared in a properties file, i.e. a `.yml` file.\n\n!!! info \"Rationale\"\n\n    A model with no properties file has nowhere to hang a description, column definitions, tests, contracts, or meta keys. It is invisible to the generated documentation and cannot be covered by any of the checks that read those fields, so gaps in it go unnoticed rather than being reported. Requiring a properties file is the precondition for every other documentation and testing convention a project wants to enforce.\n\n    `check_model_property_file_location` also reports undocumented models, but only as a side effect of enforcing dbt Labs' `_<directory>__models.yml` naming convention. Use this check instead if you want to require a properties file without adopting that convention.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    materialization (Literal[\"ephemeral\", \"incremental\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_model_has_properties_file\n    ```",
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to exclude. A list matches if any pattern matches.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to include. A list matches if any pattern matches.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_model_has_properties_file",
+          "default": "check_model_has_properties_file",
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "title": "CheckModelHasPropertiesFile",
+      "type": "object"
+    },
     "CheckModelHasSemiColon": {
       "additionalProperties": false,
       "description": "Model may not end with a semi-colon (`;`).\n\n!!! info \"Rationale\"\n\n    dbt automatically wraps model SQL before executing it, so a trailing semi-colon can cause syntax errors in certain warehouse adapters. This check catches the mistake at lint time, preventing obscure build failures that can be hard to diagnose in CI.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    materialization (Literal[\"ephemeral\", \"incremental\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_model_has_semi_colon\n          include: ^models/marts\n    ```",
@@ -12461,6 +12550,7 @@
             "check_model_has_labels_keys": "#/$defs/CheckModelHasLabelsKeys",
             "check_model_has_meta_keys": "#/$defs/CheckModelHasMetaKeys",
             "check_model_has_no_upstream_dependencies": "#/$defs/CheckModelHasNoUpstreamDependencies",
+            "check_model_has_properties_file": "#/$defs/CheckModelHasPropertiesFile",
             "check_model_has_semi_colon": "#/$defs/CheckModelHasSemiColon",
             "check_model_has_tags": "#/$defs/CheckModelHasTags",
             "check_model_has_tests_by_name": "#/$defs/CheckModelHasTestsByName",
@@ -12664,6 +12754,9 @@
           },
           {
             "$ref": "#/$defs/CheckModelHasNoUpstreamDependencies"
+          },
+          {
+            "$ref": "#/$defs/CheckModelHasPropertiesFile"
           },
           {
             "$ref": "#/$defs/CheckModelHasSemiColon"

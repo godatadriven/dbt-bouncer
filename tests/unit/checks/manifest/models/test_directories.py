@@ -117,6 +117,42 @@ class TestCheckModelFileName:
         )
 
 
+class TestCheckModelHasPropertiesFile:
+    @pytest.mark.parametrize(
+        "patch_path",
+        [
+            pytest.param(
+                "package_name://models/staging/crm/_stg_crm__models.yml",
+                id="dbt_labs_convention",
+            ),
+            pytest.param(
+                "package_name://models/staging/crm/stg_model_1.yml",
+                id="per_model_file",
+            ),
+        ],
+    )
+    def test_passes(self, patch_path):
+        check_passes(
+            "check_model_has_properties_file",
+            model={"patch_path": patch_path},
+        )
+
+    @pytest.mark.parametrize(
+        "model",
+        [
+            pytest.param({}, id="patch_path_absent"),
+            pytest.param({"patch_path": None}, id="patch_path_none"),
+            pytest.param({"patch_path": ""}, id="patch_path_empty"),
+        ],
+    )
+    def test_fails(self, model):
+        check_fails(
+            "check_model_has_properties_file",
+            model=model,
+            match="is not declared in a properties file",
+        )
+
+
 class TestCheckModelPropertyFileLocation:
     @pytest.mark.parametrize(
         "model",
