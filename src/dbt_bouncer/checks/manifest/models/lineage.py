@@ -111,6 +111,44 @@ def check_model_depends_on_multiple_sources(model):
         )
 
 
+@check(code="MO048")
+def check_model_does_not_directly_join_to_source(model):
+    """Models cannot reference a source and a model at the same time.
+
+    !!! info "Rationale"
+
+        A model that joins raw source data directly to an already-transformed model mixes two levels of abstraction in one place. The source side bypasses the staging layer, so the renaming, casting, and cleaning applied to every other consumer of that source is silently skipped. Routing every source through a staging model first keeps raw-data handling in exactly one place and makes the lineage graph read consistently from raw to curated.
+
+    Receives:
+        model (ModelNode): The ModelNode object to check.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.
+        include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.
+        materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_model_does_not_directly_join_to_source
+        ```
+
+    """
+    # Only parents with a `model` resource type count as the curated side of the
+    # join, matching dbt-project-evaluator's `fct_direct_join_to_source`. Seed and
+    # snapshot parents are deliberately not counted.
+    upstream_nodes = getattr(model.depends_on, "nodes", []) or []
+    reffed_sources = [n for n in upstream_nodes if n.split(".")[0] == "source"]
+    reffed_models = [n for n in upstream_nodes if n.split(".")[0] == "model"]
+
+    if reffed_sources and reffed_models:
+        fail(
+            f"`{get_clean_model_name(model.unique_id)}` references both a source ({sorted(reffed_sources)}) and a model ({sorted(reffed_models)}), i.e. it joins directly to a source instead of via a staging model."
+        )
+
+
 @check(code="MO030")
 def check_model_has_exposure(model, ctx):
     """Models must have an exposure.
