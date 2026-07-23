@@ -151,6 +151,9 @@ def check_model_property_file_location(
         fail(f"`{get_clean_model_name(model.unique_id)}` is not documented.")
 
     if layout == PropertiesLayout.PER_MODEL:
+        # Only the file name is checked, not its directory: colocation of the
+        # `.yml` with its `.sql` is `check_model_documented_in_same_directory`'s
+        # job, and duplicating it here would report the same problem twice.
         properties_yml_name = Path(clean_path_str(model.patch_path or "")).name
         expected_name = f"{model.name}.yml"
         if properties_yml_name != expected_name:

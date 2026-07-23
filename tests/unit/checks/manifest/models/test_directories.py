@@ -257,6 +257,28 @@ class TestCheckModelPropertyFileLocationPerModelLayout:
             match="expected per-model file name",
         )
 
+    @pytest.mark.parametrize(
+        "layout",
+        [
+            pytest.param("per_directory", id="per_directory"),
+            pytest.param("per_model", id="per_model"),
+        ],
+    )
+    def test_undocumented_model_fails_for_every_layout(self, layout):
+        # The "not documented" guard runs before the layout branch, so a model
+        # with no patch_path fails identically whichever layout is configured.
+        check_fails(
+            "check_model_property_file_location",
+            layout=layout,
+            model={
+                "name": "stg_model_1",
+                "original_file_path": "models/staging/crm/stg_model_1.sql",
+                "path": "staging/crm/stg_model_1.sql",
+                "unique_id": "model.package_name.stg_model_1",
+            },
+            match="is not documented",
+        )
+
     def test_per_directory_is_the_default(self):
         # A per-model file must fail when `layout` is omitted, proving the
         # default preserves the pre-existing behaviour.
