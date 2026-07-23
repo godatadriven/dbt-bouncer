@@ -1729,7 +1729,10 @@ def test_cli_unsupported_dbt_version(tmp_path):
 def test_cli_list():
     """Test that `dbt-bouncer list` outputs all built-in checks grouped by category."""
     runner = CliRunner()
-    result = runner.invoke(app, ["list"])
+    # Pin the console width: Rich sizes the table to the terminal, and the
+    # default width differs between platforms (Windows reserves a column),
+    # which would wrap the values asserted on below.
+    result = runner.invoke(app, ["list"], env={"COLUMNS": "200"})
 
     assert result.exit_code == 0
     # Category headers are present
@@ -1755,7 +1758,9 @@ def test_cli_list():
 def test_cli_list_group_filter():
     """Test that `dbt-bouncer list --group catalog_checks` filters output to catalog checks only."""
     runner = CliRunner()
-    result = runner.invoke(app, ["list", "--group", "catalog_checks"])
+    result = runner.invoke(
+        app, ["list", "--group", "catalog_checks"], env={"COLUMNS": "200"}
+    )
 
     assert result.exit_code == 0
     assert "catalog_checks" in result.output
