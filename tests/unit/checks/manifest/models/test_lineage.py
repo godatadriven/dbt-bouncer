@@ -143,6 +143,67 @@ class TestCheckModelDependsOnMultipleSources:
         )
 
 
+class TestCheckModelDoesNotDirectlyJoinToSource:
+    @pytest.mark.parametrize(
+        "nodes",
+        [
+            pytest.param(
+                ["source.package_name.source_1.table_1"],
+                id="sources_only",
+            ),
+            pytest.param(
+                [
+                    "model.package_name.model_2",
+                    "model.package_name.model_3",
+                ],
+                id="models_only",
+            ),
+            pytest.param([], id="no_upstream_dependencies"),
+            pytest.param(
+                [
+                    "source.package_name.source_1.table_1",
+                    "seed.package_name.seed_1",
+                    "snapshot.package_name.snapshot_1",
+                ],
+                id="source_with_seed_and_snapshot_only",
+            ),
+        ],
+    )
+    def test_passes(self, nodes):
+        check_passes(
+            "check_model_does_not_directly_join_to_source",
+            model={"depends_on": {"nodes": nodes}},
+        )
+
+    @pytest.mark.parametrize(
+        "nodes",
+        [
+            pytest.param(
+                [
+                    "model.package_name.model_2",
+                    "source.package_name.source_1.table_1",
+                ],
+                id="one_model_and_one_source",
+            ),
+            pytest.param(
+                [
+                    "model.package_name.model_2",
+                    "seed.package_name.seed_1",
+                    "source.package_name.source_1.table_1",
+                    "source.package_name.source_2.table_1",
+                ],
+                id="multiple_models_and_sources",
+            ),
+        ],
+    )
+    def test_fails(self, nodes):
+        check_fails(
+            "check_model_does_not_directly_join_to_source",
+            model={"depends_on": {"nodes": nodes}},
+            match="references both a source",
+        )
+
+
 class TestCheckModelHasExposure:
     def test_passes(self):
         check_passes(
