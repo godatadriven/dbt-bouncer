@@ -216,6 +216,70 @@ class TestCheckModelPropertyFileLocation:
         check_fails("check_model_property_file_location", model=model)
 
 
+class TestCheckModelPropertyFileLocationPerModelLayout:
+    def test_passes(self):
+        check_passes(
+            "check_model_property_file_location",
+            layout="per_model",
+            model={
+                "name": "stg_model_1",
+                "original_file_path": "models/staging/crm/stg_model_1.sql",
+                "patch_path": "package_name://models/staging/crm/stg_model_1.yml",
+                "path": "staging/crm/stg_model_1.sql",
+                "unique_id": "model.package_name.stg_model_1",
+            },
+        )
+
+    @pytest.mark.parametrize(
+        "patch_path",
+        [
+            pytest.param(
+                "package_name://models/staging/crm/_stg_crm__models.yml",
+                id="per_directory_file",
+            ),
+            pytest.param(
+                "package_name://models/staging/crm/other_model.yml",
+                id="wrong_model_name",
+            ),
+        ],
+    )
+    def test_fails(self, patch_path):
+        check_fails(
+            "check_model_property_file_location",
+            layout="per_model",
+            model={
+                "name": "stg_model_1",
+                "original_file_path": "models/staging/crm/stg_model_1.sql",
+                "patch_path": patch_path,
+                "path": "staging/crm/stg_model_1.sql",
+                "unique_id": "model.package_name.stg_model_1",
+            },
+            match="expected per-model file name",
+        )
+
+    def test_per_directory_is_the_default(self):
+        # A per-model file must fail when `layout` is omitted, proving the
+        # default preserves the pre-existing behaviour.
+        check_fails(
+            "check_model_property_file_location",
+            model={
+                "name": "stg_model_1",
+                "original_file_path": "models/staging/crm/stg_model_1.sql",
+                "patch_path": "package_name://models/staging/crm/stg_model_1.yml",
+                "path": "staging/crm/stg_model_1.sql",
+                "unique_id": "model.package_name.stg_model_1",
+            },
+        )
+
+    def test_invalid_layout_rejected(self):
+        with pytest.raises(ValueError, match="per_directory"):
+            check_passes(
+                "check_model_property_file_location",
+                layout="per_folder",
+                model={},
+            )
+
+
 class TestCheckModelSchemaName:
     @pytest.mark.parametrize(
         ("include", "schema_name_pattern", "model"),

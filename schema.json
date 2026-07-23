@@ -7019,7 +7019,7 @@
     },
     "CheckModelPropertyFileLocation": {
       "additionalProperties": false,
-      "description": "Model properties files must follow the guidance provided by dbt [here](https://docs.getdbt.com/best-practices/how-we-structure/1-guide-overview).\n\n!!! info \"Rationale\"\n\n    dbt's official guidance recommends a specific naming and placement convention for YAML property files (e.g. `_staging__models.yml`). Following this convention ensures that property files are easy to locate, clearly scoped, and consistent with the broader dbt community's expectations.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    materialization (Literal[\"ephemeral\", \"incremental\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_model_property_file_location\n    ```",
+      "description": "Model properties files must follow the configured layout.\n\n!!! info \"Rationale\"\n\n    Property files are only easy to find if their location is predictable. Two conventions are common. `per_directory` is [dbt's official guidance](https://docs.getdbt.com/best-practices/how-we-structure/1-guide-overview): one file per directory, named after the directory it documents (e.g. `_staging_crm__models.yml`). `per_model` gives each model its own file named after it (e.g. `stg_customers.yml`), which keeps diffs small and avoids merge conflicts when several people edit different models at once. Either works; mixing them within a project does not.\n\nParameters:\n    layout (Literal[\"per_directory\", \"per_model\"]): The properties file layout to enforce. `per_directory` requires a file named `_<directory>__models.yml` shared by every model in the directory. `per_model` requires each model to have its own `<model_name>.yml`. Default: `per_directory`.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    materialization (Literal[\"ephemeral\", \"incremental\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_model_property_file_location\n    ```\n    ```yaml\n    manifest_checks:\n        - name: check_model_property_file_location\n          layout: per_model\n    ```",
       "properties": {
         "code": {
           "const": "MO026",
@@ -7107,6 +7107,10 @@
           "default": "check_model_property_file_location",
           "title": "Name",
           "type": "string"
+        },
+        "layout": {
+          "$ref": "#/$defs/PropertiesLayout",
+          "default": "per_directory"
         }
       },
       "title": "CheckModelPropertyFileLocation",
@@ -11855,6 +11859,15 @@
       ],
       "description": "A dictionary that can contain nested dictionaries or lists.",
       "title": "NestedDict"
+    },
+    "PropertiesLayout": {
+      "description": "Layouts for model properties (`.yml`) files.",
+      "enum": [
+        "per_directory",
+        "per_model"
+      ],
+      "title": "PropertiesLayout",
+      "type": "string"
     }
   },
   "additionalProperties": false,
