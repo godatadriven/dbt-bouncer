@@ -211,6 +211,9 @@ def check_model_does_not_use_cartesian_join(
 
             if on_clause:
                 cond = on_clause.this
+                # sqlglot represents bare boolean literals (`ON TRUE`/`ON FALSE`)
+                # as Python bools rather than `exp.Boolean` nodes, so this branch
+                # is live - not dead code.
                 if isinstance(cond, bool):
                     is_constant, cond_str = cond, str(cond).upper()
                 elif isinstance(cond, exp.Expression):

@@ -109,6 +109,15 @@ class TestCheckModelDoesNotUseCartesianJoin:
             allow_explicit_cross_join=True,
         )
 
+    def test_fail_allow_explicit_cross_join_missing_clause(self):
+        # `allow_explicit_cross_join` does not cover a `JOIN` with no `ON`/`USING`
+        # clause: an omitted clause is treated as an accidental Cartesian join.
+        check_fails(
+            "check_model_does_not_use_cartesian_join",
+            model={"raw_code": "SELECT a.id, b.name FROM table_a a JOIN table_b b"},
+            allow_explicit_cross_join=True,
+        )
+
     @pytest.mark.parametrize(
         "model_override",
         [
