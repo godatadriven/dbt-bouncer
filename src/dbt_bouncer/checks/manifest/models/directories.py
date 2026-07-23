@@ -108,6 +108,39 @@ def check_model_file_name(model, *, file_name_pattern: str):
         )
 
 
+@check(code="MO051")
+def check_model_has_properties_file(model):
+    """Models must be declared in a properties file, i.e. a `.yml` file.
+
+    !!! info "Rationale"
+
+        A model with no properties file has nowhere to hang a description, column definitions, tests, contracts, or meta keys. It is invisible to the generated documentation and cannot be covered by any of the checks that read those fields, so gaps in it go unnoticed rather than being reported. Requiring a properties file is the precondition for every other documentation and testing convention a project wants to enforce.
+
+        `check_model_property_file_location` also reports undocumented models, but only as a side effect of enforcing dbt Labs' `_<directory>__models.yml` naming convention. Use this check instead if you want to require a properties file without adopting that convention.
+
+    Receives:
+        model (ModelNode): The ModelNode object to check.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.
+        include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.
+        materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_model_has_properties_file
+        ```
+
+    """
+    if not getattr(model, "patch_path", None):
+        fail(
+            f"`{get_clean_model_name(model.unique_id)}` is not declared in a properties file."
+        )
+
+
 @check(code="MO026")
 def check_model_property_file_location(
     model, *, layout: PropertiesLayout = PropertiesLayout.PER_DIRECTORY
