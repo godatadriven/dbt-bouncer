@@ -15,12 +15,12 @@ Follow these steps to add a new check to dbt-bouncer.
 
 ## 2. Write the Check
 
-Use the `@check` decorator (bare, no arguments). Everything is inferred from the function signature:
+Use the `@check` decorator, passing the rule code. Everything else is inferred from the function signature:
 
 ```python
 from dbt_bouncer.check_framework.decorator import check, fail
 
-@check
+@check(code="XX000")
 def check_model_xxx(model):
     """Check description."""
     if some_condition:
@@ -29,8 +29,9 @@ def check_model_xxx(model):
 
 ## 3. Decorator API Reference
 
-`@check` is a bare decorator — it takes **no arguments**. All metadata is inferred from the function signature:
+`code` is the only argument `@check` takes. All other metadata is inferred from the function signature:
 
+- **code** — the check's unique rule code, e.g. `MO048`. See "Assign a rule code" below.
 - **name** — the function name (must match the `name:` value in YAML config).
 - **iterate_over** — the first positional parameter (excluding `ctx`). If there are none, the check is global (runs once with context only).
 - **params** — keyword-only arguments (after `*`) become user-configurable Pydantic fields.
@@ -40,7 +41,7 @@ def check_model_xxx(model):
 ### Simple check (resource only)
 
 ```python
-@check
+@check(code="MO021")
 def check_model_description_populated(model):
     """Models must have a populated description."""
     if not model.description or len(model.description.strip()) < 4:
@@ -50,7 +51,7 @@ def check_model_description_populated(model):
 ### Check with params
 
 ```python
-@check
+@check(code="MO038")
 def check_model_names(model, *, model_name_pattern: str):
     """Models must have a name matching the supplied regex."""
     import re
@@ -61,7 +62,7 @@ def check_model_names(model, *, model_name_pattern: str):
 ### Context-only check (no resource iteration)
 
 ```python
-@check
+@check(code="MO044")
 def check_model_test_coverage(ctx, *, min_model_test_coverage_pct: float = 100):
     """Set the minimum percentage of models that have at least one test."""
     ...
@@ -72,6 +73,22 @@ def check_model_test_coverage(ctx, *, min_model_test_coverage_pct: float = 100):
 ```python
 fail("message")
 ```
+
+### Assign a rule code
+
+Every check needs a unique rule code: a 2-letter resource prefix plus a 3-digit number, e.g. `MO048`. Two steps:
+
+1. Pass it to the decorator: `@check(code="MO048")`.
+2. Add the matching member to the resource's `*RuleCode` enum in `src/dbt_bouncer/enums.py`, keeping alphabetical order:
+
+    ```python
+    class ModelRuleCode(StrEnum):
+        CHECK_MODEL_XXX = "MO048"
+    ```
+
+Use the next free number for the prefix — read the enum to find it. Never reuse or renumber a published code; users reference codes in their config.
+
+Prefixes: `CA` catalog, `EX` exposure, `LI` lineage, `MA` macro, `ME` metadata, `MO` model, `RR` run results, `SE` seed, `SM` semantic model, `SN` snapshot, `SO` source, `TE` test, `UT` unit test.
 
 ## 4. Register the Check
 
@@ -108,6 +125,9 @@ def test_with_context():
 
 ```bash
 mise run generate-schema
+mise run generate-rule-codes-doc
 mise run test-unit
 prek run --all-files
 ```
+
+The `rule-codes-doc-check` hook fails if a check has no code, if a declared code is unused, or if `docs/checks/rule_codes.md` has drifted.
