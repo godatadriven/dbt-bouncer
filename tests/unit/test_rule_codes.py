@@ -54,6 +54,22 @@ def test_rule_code_config_validation() -> None:
     assert checks[1].code == "MO005"
 
 
+def test_rule_code_readable_on_the_class() -> None:
+    """The code must be readable off the class, not just off instances.
+
+    Pydantic does not expose field defaults as class attributes, so the
+    decorator sets `cls.code` explicitly. The registry, `list` CLI and docs
+    generator all rely on that; this guards against a Pydantic behaviour
+    change silently breaking them.
+    """
+
+    @check(code="MO997")
+    def check_class_level_code(model):
+        pass
+
+    assert getattr(check_class_level_code, "code", None) == "MO997"
+
+
 def test_rule_code_cannot_be_nulled() -> None:
     """A check's rule code is fixed identity: config must not be able to null it."""
 

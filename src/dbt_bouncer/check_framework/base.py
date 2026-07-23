@@ -32,6 +32,9 @@ class BaseCheck(BaseModel):
         arbitrary_types_allowed=True, defer_build=True, extra="forbid"
     )
 
+    # The `str` arm is deliberately unconstrained: built-in checks are narrowed
+    # to a `Literal` by the `@check` decorator, so this only applies to
+    # class-based plugin checks, which are free to use their own code scheme.
     code: RuleCode | str | None = Field(
         default=None,
         description="Unique rule code for the check (e.g. 'MO001').",

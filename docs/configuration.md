@@ -94,12 +94,12 @@ Alternatively, configure the schema mapping in your LSP settings.
 
 ### Name and code
 
-Every check is identified by both a name (e.g. `check_model_description_populated`) and a unique [rule code](./checks/rule_codes.md) (e.g. `MO019`). Either can be used to select a check, so these two entries are equivalent:
+Every check is identified by both a name (e.g. `check_model_description_populated`) and a unique [rule code](./checks/rule_codes.md) (e.g. `MO021`). Either can be used to select a check, so these two entries are equivalent:
 
 ```yaml
 manifest_checks:
   - name: check_model_description_populated
-  - code: MO019
+  - code: MO021
 ```
 
 ### Description

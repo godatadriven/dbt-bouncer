@@ -11,7 +11,7 @@ Anywhere a check is named you may use its code instead. These two config entries
 ```yaml
 manifest_checks:
   - name: check_model_description_populated
-  - code: MO019
+  - code: MO021
 ```
 
 Codes are also accepted in the `skip_checks` meta key on a dbt resource:
@@ -21,7 +21,7 @@ models:
   - name: my_model
     meta:
       skip_checks:
-        - MO019
+        - MO021
 ```
 
 To browse codes from the command line, use [`dbt-bouncer list`](../cli.md), optionally filtered with `--group`:
