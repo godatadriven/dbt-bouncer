@@ -143,7 +143,7 @@ def check_model_does_not_use_cartesian_join(
         at lint time prevents costly query execution errors in production.
 
     Parameters:
-        allow_explicit_cross_join (bool): Whether to allow explicit `CROSS JOIN` statements. Default: `False`.
+        allow_explicit_cross_join (bool): Whether to allow intentional Cartesian joins. When `True`, both explicit `CROSS JOIN` statements and constant-`ON` conditions (e.g. `ON 1=1`, `ON TRUE`) are permitted; a `JOIN` with no `ON`/`USING` clause still fails, as an omitted clause is more likely accidental. Default: `False`.
 
     Receives:
         model (ModelNode): The ModelNode object to check.
