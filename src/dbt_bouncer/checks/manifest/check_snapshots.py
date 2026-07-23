@@ -13,7 +13,7 @@ from dbt_bouncer.utils import (
 )
 
 
-@check
+@check(code="SN001")
 def check_snapshot_description_populated(
     snapshot, *, min_description_length: Annotated[int, Field(gt=0)] | None = None
 ):
@@ -55,7 +55,7 @@ def check_snapshot_description_populated(
         )
 
 
-@check
+@check(code="SN002")
 def check_snapshot_has_meta_keys(snapshot, *, keys: NestedDict):
     """The `meta` config for snapshots must have the specified keys.
 
@@ -94,7 +94,7 @@ def check_snapshot_has_meta_keys(snapshot, *, keys: NestedDict):
         )
 
 
-@check
+@check(code="SN003")
 def check_snapshot_has_tags(
     snapshot, *, criteria: Criteria = Criteria.ALL, tags: list[str]
 ):
@@ -139,7 +139,7 @@ def check_snapshot_has_tags(
         fail(f"`{snapshot.name}` must have exactly one of the required tags: {tags}.")
 
 
-@check
+@check(code="SN004")
 def check_snapshot_has_unique_key(snapshot):
     """Snapshots must have a `unique_key` configured.
 
@@ -170,7 +170,7 @@ def check_snapshot_has_unique_key(snapshot):
         )
 
 
-@check
+@check(code="SN005")
 def check_snapshot_names(snapshot, *, snapshot_name_pattern: str):
     """Snapshots must have a name that matches the supplied regex.
 
@@ -206,7 +206,7 @@ def check_snapshot_names(snapshot, *, snapshot_name_pattern: str):
         )
 
 
-@check
+@check(code="SN006")
 def check_snapshot_strategy(
     snapshot,
     *,

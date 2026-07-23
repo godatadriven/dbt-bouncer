@@ -262,7 +262,7 @@ class TestPrintTextChecks:
         }
         print_text_checks(payload)
         output = capsys.readouterr().out
-        assert "manifest_checks:" in output
+        assert "manifest_checks" in output
 
     def test_check_name_printed(self, capsys):
         """The check name appears in the output."""
@@ -271,7 +271,7 @@ class TestPrintTextChecks:
         }
         print_text_checks(payload)
         output = capsys.readouterr().out
-        assert "CheckBar:" in output
+        assert "CheckBar" in output
 
     def test_description_printed(self, capsys):
         """The check description appears in the output."""
@@ -310,5 +310,5 @@ class TestPrintTextChecks:
         }
         print_text_checks(payload)
         output = capsys.readouterr().out
-        assert "A:" in output
-        assert "B:" in output
+        assert "A" in output
+        assert "B" in output

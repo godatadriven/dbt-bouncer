@@ -89,7 +89,7 @@ def _parse_macro_argument_names(macro_sql: str) -> list[str]:
     return [a.name for a in signature_call.args if isinstance(a, nodes.Name)]
 
 
-@check
+@check(code="MA001")
 def check_macro_arguments_description_populated(
     macro, *, min_description_length: Annotated[int, Field(gt=0)] | None = None
 ):
@@ -152,7 +152,7 @@ def check_macro_arguments_description_populated(
         )
 
 
-@check
+@check(code="MA002")
 def check_macro_code_does_not_contain_regexp_pattern(macro, *, regexp_pattern: str):
     """The raw code for a macro must not match the specified regexp pattern.
 
@@ -188,7 +188,7 @@ def check_macro_code_does_not_contain_regexp_pattern(macro, *, regexp_pattern: s
         )
 
 
-@check
+@check(code="MA003")
 def check_macro_description_populated(
     macro, *, min_description_length: Annotated[int, Field(gt=0)] | None = None
 ):
@@ -229,7 +229,7 @@ def check_macro_description_populated(
         fail(f"`{macro.name}` does not have a populated description.")
 
 
-@check
+@check(code="MA004")
 def check_macro_has_meta_keys(macro, *, keys: NestedDict):
     """The `meta` config for macros must have the specified keys.
 
@@ -268,7 +268,7 @@ def check_macro_has_meta_keys(macro, *, keys: NestedDict):
         )
 
 
-@check
+@check(code="MA006")
 def check_macro_max_number_of_arguments(
     macro, *, max_number_of_arguments: Annotated[int, Field(gt=0)] = 4
 ):
@@ -310,7 +310,7 @@ def check_macro_max_number_of_arguments(
         )
 
 
-@check
+@check(code="MA007")
 def check_macro_max_number_of_lines(
     macro, *, max_number_of_lines: Annotated[int, Field(gt=0)] = 100
 ):
@@ -352,7 +352,7 @@ def check_macro_max_number_of_lines(
         )
 
 
-@check
+@check(code="MA008")
 def check_macro_name_matches_file_name(macro):
     """Macros names must be the same as the file they are contained in.
 
@@ -391,7 +391,7 @@ def check_macro_name_matches_file_name(macro):
             fail(f"Macro `{macro.name}` is not in a file of the same name.")
 
 
-@check
+@check(code="MA009")
 def check_macro_names(macro, *, macro_name_pattern: str):
     """Macros must have a name that matches the supplied regex.
 
@@ -427,7 +427,7 @@ def check_macro_names(macro, *, macro_name_pattern: str):
         )
 
 
-@check
+@check(code="MA010")
 def check_macro_property_file_location(macro):
     """Macro properties files must follow the guidance provided by dbt [here](https://docs.getdbt.com/best-practices/how-we-structure/5-the-rest-of-the-project#how-we-use-the-other-folders).
 
@@ -536,7 +536,7 @@ def _get_used_macros(manifest_obj: Any) -> set[str]:
     return _USED_MACROS_CACHE[obj_id]
 
 
-@check
+@check(code="MA005")
 def check_macro_is_used(macro, ctx):
     """Macros must be invoked by at least one other resource.
 

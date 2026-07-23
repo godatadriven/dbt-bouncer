@@ -2,7 +2,7 @@ from dbt_bouncer.check_framework.decorator import check, fail
 from dbt_bouncer.enums import ModelAccess
 
 
-@check
+@check(code="SM001")
 def check_semantic_model_based_on_non_public_models(semantic_model, ctx):
     """Semantic models should be based on public models only.
 

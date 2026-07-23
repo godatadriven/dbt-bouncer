@@ -3,7 +3,7 @@
 from dbt_bouncer.check_framework.decorator import check, fail
 
 
-@check
+@check(code="SO004")
 def check_source_freshness_populated(source):
     """Sources must have a populated freshness.
 

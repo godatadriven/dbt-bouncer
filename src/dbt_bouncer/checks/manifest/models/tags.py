@@ -5,7 +5,7 @@ from dbt_bouncer.enums import Criteria
 from dbt_bouncer.utils import get_clean_model_name
 
 
-@check
+@check(code="MO039")
 def check_model_has_tags(model, *, criteria: Criteria = Criteria.ALL, tags: list[str]):
     """Models must have the specified tags.
 

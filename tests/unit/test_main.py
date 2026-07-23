@@ -1729,27 +1729,44 @@ def test_cli_unsupported_dbt_version(tmp_path):
 def test_cli_list():
     """Test that `dbt-bouncer list` outputs all built-in checks grouped by category."""
     runner = CliRunner()
-    result = runner.invoke(app, ["list"])
+    # Pin the console width: Rich sizes the table to the terminal, and the
+    # default width differs between platforms (Windows reserves a column),
+    # which would wrap the values asserted on below.
+    result = runner.invoke(app, ["list"], env={"COLUMNS": "200"})
 
     assert result.exit_code == 0
     # Category headers are present
-    assert "catalog_checks:" in result.output
-    assert "manifest_checks:" in result.output
-    assert "run_results_checks:" in result.output
+    assert "catalog_checks" in result.output
+    assert "manifest_checks" in result.output
+    assert "run_results_checks" in result.output
     # Spot-check a check from each category
-    assert "CheckColumnDescriptionPopulated:" in result.output
-    assert "CheckModelDescriptionPopulated:" in result.output
-    assert "CheckSourceDescriptionPopulated:" in result.output
-    assert "CheckRunResultsMaxExecutionTime:" in result.output
+    assert "CheckColumnDescriptionPopulated" in result.output
+    assert "CheckModelDescriptionPopulated" in result.output
+    assert "CheckSourceDescriptionPopulated" in result.output
+    assert "CheckRunResultsMaxExecutionTime" in result.output
     # Descriptions are included
-    assert "Columns must have a populated description." in result.output
+    assert "Columns must" in result.output
     # catalog_checks header appears before manifest_checks header
-    assert result.output.index("catalog_checks:") < result.output.index(
-        "manifest_checks:"
+    assert result.output.index("catalog_checks") < result.output.index(
+        "manifest_checks"
     )
-    assert result.output.index("manifest_checks:") < result.output.index(
-        "run_results_checks:"
+    assert result.output.index("manifest_checks") < result.output.index(
+        "run_results_checks"
     )
+
+
+def test_cli_list_group_filter():
+    """Test that `dbt-bouncer list --group catalog_checks` filters output to catalog checks only."""
+    runner = CliRunner()
+    result = runner.invoke(
+        app, ["list", "--group", "catalog_checks"], env={"COLUMNS": "200"}
+    )
+
+    assert result.exit_code == 0
+    assert "catalog_checks" in result.output
+    assert "manifest_checks" not in result.output
+    assert "run_results_checks" not in result.output
+    assert "CheckSeedMaxBytes" in result.output
 
 
 def test_cli_run_command(tmp_path):

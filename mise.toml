@@ -100,6 +100,12 @@ run = [
   "uv run dbt docs generate --profiles-dir ./dbt_project --project-dir ./dbt_project",
 ]
 
+[tasks.generate-rule-codes-doc]
+description = "Regenerate the rule codes reference page from the check classes"
+run = "uv run python scripts/generate_rule_codes_doc.py"
+sources = ["src/**/*.py", "scripts/generate_rule_codes_doc.py"]
+outputs = ["docs/checks/rule_codes.md"]
+
 [tasks.generate-schema]
 description = "Regenerate schema.json from Pydantic models"
 run = "uv run python scripts/generate_schema.py"

@@ -92,6 +92,16 @@ Alternatively, configure the schema mapping in your LSP settings.
 
 ## Common arguments
 
+### Name and code
+
+Every check is identified by both a name (e.g. `check_model_description_populated`) and a unique [rule code](./checks/rule_codes.md) (e.g. `MO021`). Either can be used to select a check, so these two entries are equivalent:
+
+```yaml
+manifest_checks:
+  - name: check_model_description_populated
+  - code: MO021
+```
+
 ### Description
 
 All checks support a `description` argument, this can be used to provide more context about the purpose of a check and why it is implemented. The description is included in the failure message. For example, this check:

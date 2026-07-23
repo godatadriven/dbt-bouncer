@@ -401,6 +401,12 @@ def _build_check_module_map() -> dict[str, dict[str, str]]:
                             "module": module_name,
                             "category": category,
                         }
+                code_val = getattr(obj, "code", None)
+                if code_val is not None:
+                    mapping[code_val] = {
+                        "module": module_name,
+                        "category": category,
+                    }
 
     return mapping
 
@@ -773,6 +779,9 @@ def get_check_registry(
             args = typing.get_args(name_field.annotation)
             if args:
                 registry[args[0]] = cls
+        code_val = getattr(cls, "code", None)
+        if code_val is not None:
+            registry[code_val] = cls
     return registry
 
 

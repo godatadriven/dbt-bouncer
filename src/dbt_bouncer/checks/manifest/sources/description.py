@@ -8,7 +8,7 @@ from dbt_bouncer.check_framework.decorator import check, fail
 from dbt_bouncer.utils import is_description_populated
 
 
-@check
+@check(code="SO001")
 def check_source_description_populated(
     source, *, min_description_length: Annotated[int, Field(gt=0)] | None = None
 ):

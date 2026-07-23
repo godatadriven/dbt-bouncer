@@ -74,7 +74,7 @@ Checks are written using the `@check` decorator (preferred) or as class-based `B
 from dbt_bouncer.check_framework.decorator import check, fail
 
 
-@check
+@check(code="MO048")
 def check_model_xxx(model, *, some_param: str):
     """One-line description of the check.
 
@@ -105,6 +105,7 @@ def check_model_xxx(model, *, some_param: str):
 
 **Key rules:**
 
+- **Every check needs a unique rule code** — pass it as `@check(code="XX000")` and add the corresponding member to the matching `*RuleCode` enum in `enums.py`. Use the next free number for the resource's prefix; never reuse or renumber a published code, as users reference them in config
 - `@check` with no arguments — name and `iterate_over` are inferred from the function name
 - First positional parameter (excluding `ctx`) = the resource being checked (e.g. `model`, `source`, `exposure`)
 - Keyword-only arguments (after `*`) = user-configurable parameters in YAML
@@ -112,10 +113,11 @@ def check_model_xxx(model, *, some_param: str):
 - **Parameter ordering must be `(resource, ctx, *, params)`** — resource first, `ctx` second. Putting `ctx` before the resource would cause `ctx` to be treated as the iterate_over target (since the decorator picks the first non-reserved positional param). For context-only checks (no resource), use `(ctx, *, params)`.
 - Call `fail()` to signal a check failure
 
-**After adding or modifying checks**, regenerate the JSON Schema so editor autocomplete stays in sync:
+**After adding or modifying checks**, regenerate the JSON Schema so editor autocomplete stays in sync, and the rule codes reference page so the published code mapping stays accurate:
 
 ```bash
 mise run generate-schema
+mise run generate-rule-codes-doc
 ```
 
 CI will fail if `schema.json` is out of date.

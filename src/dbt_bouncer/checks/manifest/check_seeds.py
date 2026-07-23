@@ -14,7 +14,7 @@ from dbt_bouncer.utils import (
 )
 
 
-@check
+@check(code="SE001")
 def check_seed_column_names(seed, *, seed_column_name_pattern: str):
     """Seed columns must have names that match the supplied regex.
 
@@ -56,7 +56,7 @@ def check_seed_column_names(seed, *, seed_column_name_pattern: str):
         )
 
 
-@check
+@check(code="SE002")
 def check_seed_columns_have_types(seed):
     """Columns defined for seeds must have a `data_type` declared.
 
@@ -90,7 +90,7 @@ def check_seed_columns_have_types(seed):
         )
 
 
-@check
+@check(code="SE003")
 def check_seed_description_populated(
     seed, *, min_description_length: Annotated[int, Field(gt=0)] | None = None
 ):
@@ -132,7 +132,7 @@ def check_seed_description_populated(
         )
 
 
-@check
+@check(code="SE004")
 def check_seed_has_meta_keys(seed, *, keys: NestedDict):
     """The `meta` config for seeds must have the specified keys.
 
@@ -171,7 +171,7 @@ def check_seed_has_meta_keys(seed, *, keys: NestedDict):
         )
 
 
-@check
+@check(code="SE005")
 def check_seed_has_unit_tests(
     seed, ctx, *, min_number_of_unit_tests: Annotated[int, Field(gt=0)] = 1
 ):
@@ -227,7 +227,7 @@ def check_seed_has_unit_tests(
         )
 
 
-@check
+@check(code="SE006")
 def check_seed_names(seed, *, seed_name_pattern: str):
     """Seed must have a name that matches the supplied regex.
 

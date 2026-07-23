@@ -25,6 +25,10 @@ _rebuilt_classes: set[str] = set()
 
 _CHECK_CATEGORIES = tuple(CheckCategory)
 
+# Rule codes are a two-letter prefix plus three digits (e.g. "MO001"); check
+# names are snake_case, so the shape alone distinguishes them.
+RULE_CODE_PATTERN = re.compile(r"^[A-Z]{2}\d{3}$")
+
 
 @lru_cache(maxsize=1)
 def _base_field_names() -> tuple[str, ...]:
@@ -294,17 +298,19 @@ def lint_config_file(config_file_path: Path) -> list[dict[str, Any]]:
                     )
                     continue
 
-                if "name" not in check:
+                # Treat absent, null and empty values alike: all leave us with
+                # nothing to look up in the registry.
+                check_name = check.get("name") or check.get("code")
+                if not check_name:
                     issues.append(
                         {
                             "line": idx + 1,
-                            "message": "Check is missing required 'name' field",
+                            "message": "Check is missing required 'name' or 'code' field",
                             "severity": "error",
                         }
                     )
-                    continue  # Cannot validate the name if it's absent
+                    continue  # Cannot validate if absent
 
-                check_name = check["name"]
                 if check_name not in registry:
                     best_match = min(
                         registry.keys(),
@@ -656,12 +662,39 @@ def validate_conf(
     """
     logging.info("Validating conf...")
 
-    # Extract check names from config to enable targeted module loading.
+    # Normalize check entries and extract check names/codes from config to enable
+    # targeted module loading. Resolving a rule code to its check name needs the
+    # full registry, which imports every check module — the very cost targeted
+    # loading exists to avoid — so only build it when a code is actually used.
+    registry: dict[str, type[BaseCheck]] | None = None
     configured_check_names: set[str] = set()
     for cat in check_categories:
         for entry in config_file_contents.get(cat, []):
-            if isinstance(entry, dict) and "name" in entry:
-                configured_check_names.add(entry["name"])
+            if not isinstance(entry, dict):
+                continue
+            # A rule code may appear under either key, so match on its shape.
+            c_key = entry.get("name") or entry.get("code")
+            if not c_key:
+                continue
+            configured_check_names.add(c_key)
+            if not isinstance(c_key, str) or not RULE_CODE_PATTERN.match(c_key):
+                # A plain check name needs no resolution, and the check's own
+                # `code` field default fills the code in during validation.
+                continue
+            if registry is None:
+                registry = get_check_registry(custom_checks_dir)
+            cls = registry.get(c_key)
+            if cls is None:
+                continue
+            name_field = cls.model_fields.get("name")
+            if name_field is not None:
+                args = typing.get_args(name_field.annotation)
+                if args:
+                    entry["name"] = args[0]
+                    configured_check_names.add(args[0])
+            if getattr(cls, "code", None) is not None:
+                entry["code"] = cls.code
+                configured_check_names.add(cls.code)
 
     cache_path: Path | None = None
     if _conf_cache_enabled():

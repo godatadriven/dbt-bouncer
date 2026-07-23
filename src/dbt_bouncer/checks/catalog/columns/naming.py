@@ -6,7 +6,7 @@ from dbt_bouncer.check_framework.decorator import check, fail
 from dbt_bouncer.utils import compile_pattern, get_model_for_catalog_node
 
 
-@check
+@check(code="CA008")
 def check_column_name_complies_to_column_type(
     catalog_node,
     *,
@@ -102,7 +102,7 @@ def check_column_name_complies_to_column_type(
             )
 
 
-@check
+@check(code="CA010")
 def check_column_type_complies_to_column_name(
     catalog_node,
     *,
@@ -200,7 +200,7 @@ def check_column_type_complies_to_column_name(
             )
 
 
-@check
+@check(code="CA009")
 def check_column_names(catalog_node, ctx, *, column_name_pattern: str):
     """Columns must have a name that matches the supplied regex.
 

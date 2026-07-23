@@ -4,7 +4,7 @@ from dbt_bouncer.check_framework.decorator import check, fail
 from dbt_bouncer.utils import compile_pattern
 
 
-@check
+@check(code="MO045")
 def check_model_latest_version_specified(model):
     """Check that the `latest_version` attribute of the model is set.
 
@@ -34,7 +34,7 @@ def check_model_latest_version_specified(model):
         fail(f"`{model.name}` does not have a specified `latest_version`.")
 
 
-@check
+@check(code="MO046")
 def check_model_version_allowed(model, *, version_pattern: str):
     r"""Check that the version of the model matches the supplied regex pattern.
 
@@ -75,7 +75,7 @@ def check_model_version_allowed(model, *, version_pattern: str):
         )
 
 
-@check
+@check(code="MO047")
 def check_model_version_pinned_in_ref(model, ctx):
     """Check that the version of the model is always specified in downstream nodes.
 

@@ -16,7 +16,7 @@ from dbt_bouncer.utils import (
 )
 
 
-@check
+@check(code="MO019")
 def check_column_descriptions_are_consistent(ctx):
     """The same column name must not have conflicting descriptions across models.
 
@@ -49,7 +49,7 @@ def check_column_descriptions_are_consistent(ctx):
         fail(f"Columns have conflicting descriptions across models: {conflicts}.")
 
 
-@check
+@check(code="MO020")
 def check_model_description_contains_regex_pattern(model, *, regexp_pattern: str):
     """Models must have a description that matches the provided pattern.
 
@@ -85,7 +85,7 @@ def check_model_description_contains_regex_pattern(model, *, regexp_pattern: str
         )
 
 
-@check
+@check(code="MO021")
 def check_model_description_populated(
     model, *, min_description_length: Annotated[int, Field(gt=0)] | None = None
 ):
@@ -128,7 +128,7 @@ def check_model_description_populated(
         )
 
 
-@check
+@check(code="MO022")
 def check_model_documentation_coverage(
     ctx,
     *,
@@ -180,7 +180,7 @@ def check_model_documentation_coverage(
         )
 
 
-@check
+@check(code="MO023")
 def check_model_documented_in_same_directory(model):
     """Models must be documented in the same directory where they are defined (i.e. `.yml` and `.sql` files are in the same directory).
 

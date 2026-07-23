@@ -8,7 +8,7 @@ from dbt_bouncer.enums import Materialization
 from dbt_bouncer.utils import find_missing_meta_keys, get_clean_model_name
 
 
-@check
+@check(code="MO015")
 def check_model_columns_have_relationship_tests(
     model,
     ctx,
@@ -112,7 +112,7 @@ def check_model_columns_have_relationship_tests(
         )
 
 
-@check
+@check(code="MO014")
 def check_model_columns_have_meta_keys(model, *, keys: NestedDict):
     """Columns defined for models must have the specified keys in the `meta` config.
 
@@ -157,7 +157,7 @@ def check_model_columns_have_meta_keys(model, *, keys: NestedDict):
         )
 
 
-@check
+@check(code="MO016")
 def check_model_columns_have_types(model):
     """Columns defined for models must have a `data_type` declared.
 
@@ -193,7 +193,7 @@ def check_model_columns_have_types(model):
         )
 
 
-@check
+@check(code="MO017")
 def check_model_has_constraints(model, *, required_constraint_types: list[str]):
     """Table and incremental models must have the specified constraint types defined.
 
@@ -242,7 +242,7 @@ def check_model_has_constraints(model, *, required_constraint_types: list[str]):
         )
 
 
-@check
+@check(code="MO018")
 def check_model_single_primary_key(model):
     """Models must have at most one column-level primary key constraint.
 

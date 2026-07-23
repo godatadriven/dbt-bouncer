@@ -11,7 +11,7 @@ from dbt_bouncer.utils import get_package_version_number, object_in_path
 _DBT_VERSION_1_8_0 = "1.8.0"
 
 
-@check
+@check(code="UT001")
 def check_unit_test_coverage(
     ctx,
     *,
@@ -79,7 +79,7 @@ def check_unit_test_coverage(
         )
 
 
-@check
+@check(code="UT002")
 def check_unit_test_expect_format(
     unit_test,
     ctx,
@@ -144,7 +144,7 @@ def check_unit_test_expect_format(
         )
 
 
-@check
+@check(code="UT003")
 def check_unit_test_given_formats(
     unit_test,
     ctx,

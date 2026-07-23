@@ -1,7 +1,7 @@
 from dbt_bouncer.check_framework.decorator import check, fail
 
 
-@check
+@check(code="CA004")
 def check_source_columns_are_all_documented(catalog_source, ctx):
     """All columns in a source should be included in the source's properties file, i.e. `.yml` file.
 

@@ -1,4 +1,4 @@
-`dbt-bouncer` runs checks against artifacts from dbt. These checks fall into three categories:
+`dbt-bouncer` runs checks against artifacts from dbt. Every check also has a unique [rule code](./rule_codes.md) (e.g. `MO021`) that can be used in place of its name. These checks fall into three categories:
 
 - Catalog checks:
       - [Catalog Seeds](./catalog/check_catalog_seeds.md)

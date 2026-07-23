@@ -122,7 +122,13 @@ def _should_run_check(
     ):
         return False
 
-    return not (meta_config and check.name in meta_config)
+    return not (
+        meta_config
+        and (
+            check.name in meta_config
+            or (getattr(check, "code", None) and check.code in meta_config)
+        )
+    )
 
 
 # Underscore-prefixed as an internal helper, but imported by the benchmark suite

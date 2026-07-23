@@ -9,7 +9,7 @@ from dbt_bouncer.enums import Criteria
 from dbt_bouncer.utils import get_clean_model_name
 
 
-@check
+@check(code="MO028")
 def check_model_depends_on_macros(
     model,
     *,
@@ -76,7 +76,7 @@ def check_model_depends_on_macros(
         )
 
 
-@check
+@check(code="MO029")
 def check_model_depends_on_multiple_sources(model):
     """Models cannot reference more than one source.
 
@@ -111,7 +111,7 @@ def check_model_depends_on_multiple_sources(model):
         )
 
 
-@check
+@check(code="MO030")
 def check_model_has_exposure(model, ctx):
     """Models must have an exposure.
 
@@ -151,7 +151,7 @@ def check_model_has_exposure(model, ctx):
         )
 
 
-@check
+@check(code="MO031")
 def check_model_has_no_upstream_dependencies(model):
     """Identify if models have no upstream dependencies as this likely indicates hard-coded tables references.
 
@@ -186,7 +186,7 @@ def check_model_has_no_upstream_dependencies(model):
         )
 
 
-@check
+@check(code="MO032")
 def check_model_materialization_by_fanout(
     model,
     ctx,
@@ -247,7 +247,7 @@ def check_model_materialization_by_fanout(
         )
 
 
-@check
+@check(code="MO033")
 def check_model_max_chained_views(
     model,
     ctx,
@@ -363,7 +363,7 @@ def check_model_max_chained_views(
         )
 
 
-@check
+@check(code="MO034")
 def check_model_max_fanout(
     model, ctx, *, max_downstream_models: Annotated[int, Field(gt=0)] = 3
 ):
@@ -403,7 +403,7 @@ def check_model_max_fanout(
         )
 
 
-@check
+@check(code="MO035")
 def check_model_max_upstream_dependencies(
     model,
     *,

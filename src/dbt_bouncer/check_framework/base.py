@@ -21,7 +21,7 @@ from dbt_bouncer.artifact_types import (  # noqa: TC001 - needed at runtime for 
     UnitTestNode,
 )
 from dbt_bouncer.check_framework.exceptions import DbtBouncerFailedCheckError
-from dbt_bouncer.enums import CheckSeverity, Materialization
+from dbt_bouncer.enums import CheckSeverity, Materialization, RuleCode
 from dbt_bouncer.utils import is_description_populated
 
 
@@ -32,6 +32,13 @@ class BaseCheck(BaseModel):
         arbitrary_types_allowed=True, defer_build=True, extra="forbid"
     )
 
+    # The `str` arm is deliberately unconstrained: built-in checks are narrowed
+    # to a `Literal` by the `@check` decorator, so this only applies to
+    # class-based plugin checks, which are free to use their own code scheme.
+    code: RuleCode | str | None = Field(
+        default=None,
+        description="Unique rule code for the check (e.g. 'MO001').",
+    )
     description: str | None = Field(
         default=None,
         description="Description of what the check does and why it is implemented.",

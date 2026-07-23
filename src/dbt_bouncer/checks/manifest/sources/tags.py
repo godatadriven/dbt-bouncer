@@ -4,7 +4,7 @@ from dbt_bouncer.check_framework.decorator import check, fail
 from dbt_bouncer.enums import Criteria
 
 
-@check
+@check(code="SO015")
 def check_source_has_tags(
     source, *, criteria: Criteria = Criteria.ALL, tags: list[str]
 ):
