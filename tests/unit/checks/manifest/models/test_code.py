@@ -39,6 +39,123 @@ class TestCheckModelCodeDoesNotContainRegexpPattern:
         )
 
 
+class TestCheckModelDoesNotUseCartesianJoin:
+    @pytest.mark.parametrize(
+        "model_override",
+        [
+            pytest.param(
+                {
+                    "raw_code": "SELECT a.id, b.name FROM table_a a JOIN table_b b ON a.id = b.id"
+                },
+                id="join_with_on",
+            ),
+            pytest.param(
+                {
+                    "raw_code": "SELECT a.id, b.name FROM table_a a JOIN table_b b USING (id)"
+                },
+                id="join_with_using",
+            ),
+            pytest.param(
+                {"raw_code": "SELECT id FROM my_table"},
+                id="single_table_select",
+            ),
+            pytest.param(
+                {"raw_code": ""},
+                id="empty_raw_code",
+            ),
+            pytest.param(
+                {"raw_code": None},
+                id="none_raw_code",
+            ),
+            pytest.param(
+                {"language": "python", "raw_code": "import pandas as pd"},
+                id="python_model",
+            ),
+            pytest.param(
+                {"raw_code": "-- CROSS JOIN old_table\nSELECT id FROM my_table"},
+                id="cross_join_in_comment",
+            ),
+            pytest.param(
+                # Malformed Jinja (unterminated `{#`) that the Jinja lexer
+                # cannot tokenize, so `parse_sql` returns None and the regex
+                # fallback runs. No `CROSS JOIN` keyword is present, so it passes.
+                {
+                    "raw_code": "{# note\nSELECT a.id FROM table_a a JOIN table_b b ON a.id = b.id"
+                },
+                id="fallback_regex_scan_no_cross_join",
+            ),
+        ],
+    )
+    def test_pass(self, model_override):
+        check_passes("check_model_does_not_use_cartesian_join", model=model_override)
+
+    def test_pass_allow_explicit_cross_join(self):
+        check_passes(
+            "check_model_does_not_use_cartesian_join",
+            model={
+                "raw_code": "SELECT a.id, b.name FROM table_a a CROSS JOIN table_b b"
+            },
+            allow_explicit_cross_join=True,
+        )
+
+    def test_pass_allow_explicit_cross_join_constant_on(self):
+        # `allow_explicit_cross_join` also permits constant-`ON` joins, which
+        # produce a Cartesian product just like an explicit `CROSS JOIN`.
+        check_passes(
+            "check_model_does_not_use_cartesian_join",
+            model={
+                "raw_code": "SELECT a.id, b.name FROM table_a a JOIN table_b b ON 1=1"
+            },
+            allow_explicit_cross_join=True,
+        )
+
+    def test_fail_allow_explicit_cross_join_missing_clause(self):
+        # `allow_explicit_cross_join` does not cover a `JOIN` with no `ON`/`USING`
+        # clause: an omitted clause is treated as an accidental Cartesian join.
+        check_fails(
+            "check_model_does_not_use_cartesian_join",
+            model={"raw_code": "SELECT a.id, b.name FROM table_a a JOIN table_b b"},
+            allow_explicit_cross_join=True,
+        )
+
+    @pytest.mark.parametrize(
+        "model_override",
+        [
+            pytest.param(
+                {"raw_code": "SELECT a.id, b.name FROM table_a a CROSS JOIN table_b b"},
+                id="explicit_cross_join",
+            ),
+            pytest.param(
+                {"raw_code": "SELECT a.id, b.name FROM table_a a JOIN table_b b"},
+                id="join_without_on_or_using",
+            ),
+            pytest.param(
+                {
+                    "raw_code": "SELECT a.id, b.name FROM table_a a JOIN table_b b ON 1=1"
+                },
+                id="join_constant_on_1_equals_1",
+            ),
+            pytest.param(
+                {
+                    "raw_code": "SELECT a.id, b.name FROM table_a a JOIN table_b b ON TRUE"
+                },
+                id="join_constant_on_true",
+            ),
+            pytest.param(
+                # Malformed Jinja (unterminated `{#`) that the Jinja lexer
+                # cannot tokenize, so `parse_sql` returns None and the regex
+                # fallback runs and catches the `CROSS JOIN` keyword.
+                {
+                    "raw_code": "{# note\nSELECT a.id FROM table_a a CROSS JOIN table_b b"
+                },
+                id="fallback_regex_scan_cross_join",
+            ),
+        ],
+    )
+    def test_fail(self, model_override):
+        check_fails("check_model_does_not_use_cartesian_join", model=model_override)
+
+
 class TestCheckModelDoesNotUseSelectStar:
     @pytest.mark.parametrize(
         "model_override",
