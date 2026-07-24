@@ -17,9 +17,9 @@ def test_rule_codes_assigned_and_unique() -> None:
     assert len(checks) > 0
 
     codes = [getattr(c, "code", None) for c in checks]
-    assert all(code is not None for code in codes), (
-        "Some checks are missing rule codes."
-    )
+    assert all(
+        code is not None for code in codes
+    ), "Some checks are missing rule codes."
 
     pattern = re.compile(r"^[A-Z]{2}\d{3}$")
     invalid_codes = [c for c in codes if not pattern.match(c)]

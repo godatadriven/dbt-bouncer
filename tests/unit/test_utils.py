@@ -670,9 +670,9 @@ def test_discovery_skips_deprecation_shim(discover_name, recwarn):
         and "dbt_bouncer.checks.common" in str(w.message)
     ]
     get_check_objects.cache_clear()
-    assert shim_warnings == [], (
-        "Check discovery imported the deprecated checks.common shim"
-    )
+    assert (
+        shim_warnings == []
+    ), "Check discovery imported the deprecated checks.common shim"
 
 
 def test_compute_cache_fingerprint_changes_when_internal_checks_change():

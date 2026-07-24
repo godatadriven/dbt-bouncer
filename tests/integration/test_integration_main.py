@@ -98,9 +98,9 @@ def test_cli_happy_path(caplog, dbt_artifacts_dir, tmp_path):
     assert result.output.count("manifest.json") == 1
     import re
 
-    assert re.search(r"[│|]\s+[1-9]", result.output), (
-        "Artifact summary table contains no non-zero counts"
-    )
+    assert re.search(
+        r"[│|]\s+[1-9]", result.output
+    ), "Artifact summary table contains no non-zero counts"
     assert result.exit_code == 0
 
 

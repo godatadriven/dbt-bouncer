@@ -349,9 +349,9 @@ def test_cli_exclude(tmp_path):
         "check_model_access:0:stg_orders",
         "check_model_access:0:stg_payments",
     ]:
-        assert i not in [x["check_run_id"] for x in coverage], (
-            f"`{i}` in `coverage.json` when it should be excluded."
-        )
+        assert i not in [
+            x["check_run_id"] for x in coverage
+        ], f"`{i}` in `coverage.json` when it should be excluded."
 
 
 def test_cli_exclude_and_include(tmp_path):
@@ -397,16 +397,16 @@ def test_cli_exclude_and_include(tmp_path):
         "check_model_access:0:stg_customers",
         "check_model_access:0:stg_orders",
     ]:
-        assert i not in [x["check_run_id"] for x in coverage], (
-            f"`{i}` in `coverage.json` when it should be excluded."
-        )
+        assert i not in [
+            x["check_run_id"] for x in coverage
+        ], f"`{i}` in `coverage.json` when it should be excluded."
 
     for i in [
         "check_model_access:0:stg_payments",
     ]:
-        assert i in [x["check_run_id"] for x in coverage], (
-            f"`{i}` not in `coverage.json`."
-        )
+        assert i in [
+            x["check_run_id"] for x in coverage
+        ], f"`{i}` not in `coverage.json`."
 
 
 def test_cli_global_exclude(tmp_path):
@@ -452,9 +452,9 @@ def test_cli_global_exclude(tmp_path):
         "check_model_access:0:stg_orders",
         "check_model_access:0:stg_payments",
     ]:
-        assert i not in [x["check_run_id"] for x in coverage], (
-            f"`{i}` in `coverage.json` when it should be excluded."
-        )
+        assert i not in [
+            x["check_run_id"] for x in coverage
+        ], f"`{i}` in `coverage.json` when it should be excluded."
 
 
 def test_cli_global_and_local_include(tmp_path):
@@ -501,9 +501,9 @@ def test_cli_global_and_local_include(tmp_path):
         "check_model_access:0:stg_orders",
         "check_model_access:0:stg_payments",
     ]:
-        assert i in [x["check_run_id"] for x in coverage], (
-            f"`{i}` not in `coverage.json`."
-        )
+        assert i in [
+            x["check_run_id"] for x in coverage
+        ], f"`{i}` not in `coverage.json`."
 
 
 def test_cli_global_exclude_and_include(tmp_path):
@@ -549,16 +549,16 @@ def test_cli_global_exclude_and_include(tmp_path):
         "check_model_access:0:stg_customers",
         "check_model_access:0:stg_orders",
     ]:
-        assert i not in [x["check_run_id"] for x in coverage], (
-            f"`{i}` in `coverage.json` when it should be excluded."
-        )
+        assert i not in [
+            x["check_run_id"] for x in coverage
+        ], f"`{i}` in `coverage.json` when it should be excluded."
 
     for i in [
         "check_model_access:0:stg_payments",
     ]:
-        assert i in [x["check_run_id"] for x in coverage], (
-            f"`{i}` not in `coverage.json`."
-        )
+        assert i in [
+            x["check_run_id"] for x in coverage
+        ], f"`{i}` not in `coverage.json`."
 
 
 def test_cli_global_exclude_and_local_include(tmp_path):
@@ -604,16 +604,16 @@ def test_cli_global_exclude_and_local_include(tmp_path):
         "check_model_access:0:stg_customers",
         "check_model_access:0:stg_orders",
     ]:
-        assert i not in [x["check_run_id"] for x in coverage], (
-            f"`{i}` in `coverage.json` when it should be excluded."
-        )
+        assert i not in [
+            x["check_run_id"] for x in coverage
+        ], f"`{i}` in `coverage.json` when it should be excluded."
 
     for i in [
         "check_model_access:0:stg_payments",
     ]:
-        assert i in [x["check_run_id"] for x in coverage], (
-            f"`{i}` not in `coverage.json`."
-        )
+        assert i in [
+            x["check_run_id"] for x in coverage
+        ], f"`{i}` not in `coverage.json`."
 
 
 def test_cli_global_include(tmp_path):
@@ -659,9 +659,9 @@ def test_cli_global_include(tmp_path):
         "check_model_access:0:stg_orders",
         "check_model_access:0:stg_payments",
     ]:
-        assert i in [x["check_run_id"] for x in coverage], (
-            f"`{i}` not in `coverage.json`."
-        )
+        assert i in [
+            x["check_run_id"] for x in coverage
+        ], f"`{i}` not in `coverage.json`."
 
 
 def test_cli_include(tmp_path):
@@ -707,9 +707,9 @@ def test_cli_include(tmp_path):
         "check_model_access:0:stg_orders",
         "check_model_access:0:stg_payments",
     ]:
-        assert i in [x["check_run_id"] for x in coverage], (
-            f"`{i}` not in `coverage.json`."
-        )
+        assert i in [
+            x["check_run_id"] for x in coverage
+        ], f"`{i}` not in `coverage.json`."
 
 
 @pytest.mark.parametrize(

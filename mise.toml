@@ -168,6 +168,10 @@ DBT_BOUNCER_BENCH_PHASE_ROUNDS={{option(name="phase-rounds", default="100")}} uv
 description = "Sweep the end-to-end benchmark across model counts and print a summary table"
 run = 'uv run python tests/benchmark/aggregate_benchmarks.py --models "{{option(name="model-counts", default="100 250 500 1000 2000 5000 10000")}}"'
 
+[tasks.test-benchmark-chart]
+description = "Generate an Altair performance density chart and display the bell curve in the terminal"
+run = 'uv run python tests/benchmark/chart_benchmarks.py "$@"'
+
 [tasks.test-perf]
 description = "Run performance tests"
 run = """

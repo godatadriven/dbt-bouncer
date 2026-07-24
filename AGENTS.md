@@ -26,6 +26,7 @@ mise run install
 | `mise run test-perf` | End-to-end performance benchmarks (bencher + hyperfine) |
 | `mise run test-benchmark` | Code-level micro-benchmarks (pytest-benchmark, synthetic 5k-model manifest) |
 | `mise run test-benchmark-aggregate` | Sweep the end-to-end benchmark across model counts and print a summary table |
+| `mise run test-benchmark-chart` | Generate an Altair performance density chart and display the bell curve in the terminal |
 
 ## Architecture
 

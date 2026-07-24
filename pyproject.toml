@@ -50,6 +50,7 @@ run_results = "dbt_bouncer.checks.run_results"
 
 [project.optional-dependencies]
 dev = [
+  "altair>=6.0,<7",
   "bandit~=1.0",
   "dbt-core>=1.12.0,<2",
   "dbt-duckdb~=1.0",
@@ -135,6 +136,7 @@ target-version = "py311"
 
 [tool.ruff.lint]
 ignore = [
+  "A005",
   "COM812",
   "D100",
   "D203",
@@ -142,6 +144,7 @@ ignore = [
   "D406",
   "D407",
   "D409",
+  "DOC502",
   "E501",
   "G004",
   "LOG015",
@@ -178,7 +181,7 @@ select = [
 unfixable = ["B"]
 
 [tool.ruff.lint.per-file-ignores]
-"__init__.py" = ["E402"]
+"__init__.py" = ["E402", "TC004"]
 "src/dbt_bouncer/checks/*" = ["ARG001", "D101", "D401", "D417", "DOC501"]
 "src/dbt_bouncer/parsers.py" = ["TCH002"]
 "docs/assets/brand/scripts/*" = [

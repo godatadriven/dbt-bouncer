@@ -96,8 +96,8 @@ def main() -> None:
     configure_console_logging(0)
 
     # Import all check modules so the full discriminated union is built.
-    import dbt_bouncer.checks.catalog  # noqa: F401
-    import dbt_bouncer.checks.manifest  # noqa: F401
+    import dbt_bouncer.checks.catalog
+    import dbt_bouncer.checks.manifest
     import dbt_bouncer.checks.run_results  # noqa: F401
     from dbt_bouncer.check_framework.exceptions import NestedDict
     from dbt_bouncer.configuration_file.parser import create_bouncer_conf_class

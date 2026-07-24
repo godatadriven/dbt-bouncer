@@ -7,8 +7,8 @@ from typing import Annotated
 
 import typer
 
-import dbt_bouncer.cli.init  # noqa: F401 — triggers @app.command registration
-import dbt_bouncer.cli.list  # noqa: F401 — triggers @app.command registration
+import dbt_bouncer.cli.init
+import dbt_bouncer.cli.list
 import dbt_bouncer.cli.validate  # noqa: F401 — triggers @app.command registration
 from dbt_bouncer.cli import app
 from dbt_bouncer.cli.run import run

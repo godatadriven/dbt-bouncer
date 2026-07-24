@@ -112,37 +112,37 @@ run_results_checks:
 
 The goal of a CI pipeline is to test the changes in a pull request but also to provide feedback to the developer as quickly as possible without incurring unnecessary costs (time, financial, compute, etc.). To achieve this we can combine several features of dbt and `dbt-bouncer`:
 
-  1. By running `dbt parse`, dbt can generate a `manifest.json` without a database connection. We can then run our manifest checks via:
+1. By running `dbt parse`, dbt can generate a `manifest.json` without a database connection. We can then run our manifest checks via:
 
       ```shell
       dbt-bouncer --only manifest_checks
       ```
 
-  1. dbt requires models to be materialised before it can generate a `catalog.json` file. By running `dbt run --empty` we can materialise every model without processing any data. Once these materializations are performed we can run our catalog checks via:
+1. dbt requires models to be materialised before it can generate a `catalog.json` file. By running `dbt run --empty` we can materialise every model without processing any data. Once these materializations are performed we can run our catalog checks via:
 
       ```shell
       dbt-bouncer --only catalog_checks
       ```
 
-  1. Typically a CI pipeline will run a `dbt build` command with flags such as `--state` and/or `--defer`. After this command has completed we can run our run results checks via:
+1. Typically a CI pipeline will run a `dbt build` command with flags such as `--state` and/or `--defer`. After this command has completed we can run our run results checks via:
 
       ```shell
       dbt-bouncer --only run_results_checks
       ```
 
-    Additionally, you can use the `--check` flag to run only specific checks by name. This is useful for debugging or validating a single convention:
+   Additionally, you can use the `--check` flag to run only specific checks by name. This is useful for debugging or validating a single convention:
 
       ```shell
       dbt-bouncer --check check_model_has_unique_test
       ```
 
-    Multiple checks can be specified as a comma-separated list:
+   Multiple checks can be specified as a comma-separated list:
 
       ```shell
       dbt-bouncer --check check_model_has_unique_test,check_model_description_populated
       ```
 
-    The `--check` and `--only` flags can be combined: `--only` restricts to the specified categories, then `--check` further narrows to only the named checks within those categories.
+   The `--check` and `--only` flags can be combined: `--only` restricts to the specified categories, then `--check` further narrows to only the named checks within those categories.
 
 By using this approach, and combining with your own unique constraints and desires, `dbt-bouncer` can be used efficiently as part of your CI pipeline.
 
