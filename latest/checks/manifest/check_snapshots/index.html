@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../../assets/logo.svg">
-      <meta name="generator" content="zensical-0.0.43">
+      <meta name="generator" content="zensical-0.0.51">
     
     
       
@@ -32,7 +32,7 @@
       
         
       
-      <link rel="stylesheet" href="../../../assets/stylesheets/classic/main.a2001754.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/classic/main.f62f0af6.min.css">
       
         
           
@@ -1734,7 +1734,7 @@
 
 
 
-  <div class="doc doc-children">
+<div class="doc doc-children">
 
 
 
@@ -1756,7 +1756,7 @@
 
     <div class="doc doc-contents ">
 
-      <p>Snapshots must have a populated description.</p>
+        <p>Snapshots must have a populated description.</p>
 <div class="admonition info">
 <p class="admonition-title">Rationale</p>
 <p>Snapshots capture slowly-changing dimension (SCD) history and represent some of the most business-critical data in a dbt project. Without descriptions, it is unclear what entity a snapshot tracks, what the key fields represent, or how frequently it is refreshed — information that is essential for analysts interpreting historical data and for engineers maintaining the snapshot strategy.</p>
@@ -1793,84 +1793,89 @@
       </tbody>
     </table>
 
-<p><strong>Receives at execution time:</strong></p>
-<table>
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Type</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-      <tr>
-        <td><code>snapshot</code>        <td>
-              <code><span title="SnapshotNode">SnapshotNode</span></code>
-        </td>
-        <td>
-          <div class="doc-md-description">
-            <p>The SnapshotNode object to check.</p>
-          </div>
-        </td>
-      </tr>
-  </tbody>
-</table>
+
+
+    <p><span class="doc-section-title">Receives at execution time:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>snapshot</code></td>            <td>
+                  <code><span title="SnapshotNode">SnapshotNode</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The SnapshotNode object to check.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+
 <p><span class="doc-section-title">Other Parameters (passed via config file):</span></p>
-<table>
-    <thead>
-    <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Description</th>
-    </tr>
-    </thead>
-    <tbody>
-        <tr class="doc-section-item">
-        <td><code>description</code></td>
-        <td>
-                <code><span title="str">str</span> | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Description of what the check does and why it is implemented.</p>
-            </div>
-        </td>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
         </tr>
-        <tr class="doc-section-item">
-        <td><code>exclude</code></td>
-        <td>
-                <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Regex pattern(s) to match the snapshot path. Snapshot paths that match any pattern will not be checked.</p>
-            </div>
-        </td>
-        </tr>
-        <tr class="doc-section-item">
-        <td><code>include</code></td>
-        <td>
-                <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Regex pattern(s) to match the snapshot path. Only snapshot paths that match any pattern will be checked.</p>
-            </div>
-        </td>
-        </tr>
-        <tr class="doc-section-item">
-        <td><code>severity</code></td>
-        <td>
-                <code><span title="Literal">Literal</span>[<span title="error">error</span>, <span title="warn">warn</span>] | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Severity level of the check. Default: <code>error</code>.</p>
-            </div>
-        </td>
-        </tr>
-    </tbody>
-</table>      <p>Example(s):
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code>description</code></td>
+            <td>
+                  <code><span title="str">str</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Description of what the check does and why it is implemented.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>exclude</code></td>
+            <td>
+                  <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Regex pattern(s) to match the snapshot path. Snapshot paths that match any pattern will not be checked.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>include</code></td>
+            <td>
+                  <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Regex pattern(s) to match the snapshot path. Only snapshot paths that match any pattern will be checked.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>severity</code></td>
+            <td>
+                  <code><span title="Literal">Literal</span>[<span title="error">error</span>, <span title="warn">warn</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Severity level of the check. Default: <code>error</code>.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+        <p>Example(s):
     <div class="language-yaml highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">manifest_checks</span><span class="p">:</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_snapshot_description_populated</span>
 </span></code></pre></div>
@@ -1978,7 +1983,7 @@
 
     <div class="doc doc-contents ">
 
-      <p>The <code>meta</code> config for snapshots must have the specified keys.</p>
+        <p>The <code>meta</code> config for snapshots must have the specified keys.</p>
 <div class="admonition info">
 <p class="admonition-title">Rationale</p>
 <p>The <code>meta</code> config is a flexible, project-defined dictionary used to track ownership, maturity levels, PII classification, and other governance attributes. Requiring specific keys ensures that these attributes are consistently populated across all snapshots, enabling automated reporting, data cataloguing, and access-control workflows that depend on them.</p>
@@ -2015,84 +2020,89 @@
       </tbody>
     </table>
 
-<p><strong>Receives at execution time:</strong></p>
-<table>
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Type</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-      <tr>
-        <td><code>snapshot</code>        <td>
-              <code><span title="SnapshotNode">SnapshotNode</span></code>
-        </td>
-        <td>
-          <div class="doc-md-description">
-            <p>The SnapshotNode object to check.</p>
-          </div>
-        </td>
-      </tr>
-  </tbody>
-</table>
+
+
+    <p><span class="doc-section-title">Receives at execution time:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>snapshot</code></td>            <td>
+                  <code><span title="SnapshotNode">SnapshotNode</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The SnapshotNode object to check.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+
 <p><span class="doc-section-title">Other Parameters (passed via config file):</span></p>
-<table>
-    <thead>
-    <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Description</th>
-    </tr>
-    </thead>
-    <tbody>
-        <tr class="doc-section-item">
-        <td><code>description</code></td>
-        <td>
-                <code><span title="str">str</span> | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Description of what the check does and why it is implemented.</p>
-            </div>
-        </td>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
         </tr>
-        <tr class="doc-section-item">
-        <td><code>exclude</code></td>
-        <td>
-                <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Regex pattern(s) to match the snapshot path. Snapshot paths that match any pattern will not be checked.</p>
-            </div>
-        </td>
-        </tr>
-        <tr class="doc-section-item">
-        <td><code>include</code></td>
-        <td>
-                <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Regex pattern(s) to match the snapshot path. Only snapshot paths that match any pattern will be checked.</p>
-            </div>
-        </td>
-        </tr>
-        <tr class="doc-section-item">
-        <td><code>severity</code></td>
-        <td>
-                <code><span title="Literal">Literal</span>[<span title="error">error</span>, <span title="warn">warn</span>] | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Severity level of the check. Default: <code>error</code>.</p>
-            </div>
-        </td>
-        </tr>
-    </tbody>
-</table>      <p>Example(s):
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code>description</code></td>
+            <td>
+                  <code><span title="str">str</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Description of what the check does and why it is implemented.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>exclude</code></td>
+            <td>
+                  <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Regex pattern(s) to match the snapshot path. Snapshot paths that match any pattern will not be checked.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>include</code></td>
+            <td>
+                  <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Regex pattern(s) to match the snapshot path. Only snapshot paths that match any pattern will be checked.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>severity</code></td>
+            <td>
+                  <code><span title="Literal">Literal</span>[<span title="error">error</span>, <span title="warn">warn</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Severity level of the check. Default: <code>error</code>.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+        <p>Example(s):
     <div class="language-yaml highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">manifest_checks</span><span class="p">:</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_snapshot_has_meta_keys</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">      </span><span class="nt">keys</span><span class="p">:</span>
@@ -2193,7 +2203,7 @@
 
     <div class="doc doc-contents ">
 
-      <p>Snapshots must have the specified tags.</p>
+        <p>Snapshots must have the specified tags.</p>
 <div class="admonition info">
 <p class="admonition-title">Rationale</p>
 <p>Tags on snapshots enable selective execution (e.g. <code>dbt snapshot --select tag:nightly</code>) and make it possible to apply governance policies to specific groups of snapshots. Without enforced tagging, snapshots can be inadvertently skipped in scheduled runs or included in the wrong execution contexts, leading to stale historical data.</p>
@@ -2246,84 +2256,89 @@
       </tbody>
     </table>
 
-<p><strong>Receives at execution time:</strong></p>
-<table>
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Type</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-      <tr>
-        <td><code>snapshot</code>        <td>
-              <code><span title="SnapshotNode">SnapshotNode</span></code>
-        </td>
-        <td>
-          <div class="doc-md-description">
-            <p>The SnapshotNode object to check.</p>
-          </div>
-        </td>
-      </tr>
-  </tbody>
-</table>
+
+
+    <p><span class="doc-section-title">Receives at execution time:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>snapshot</code></td>            <td>
+                  <code><span title="SnapshotNode">SnapshotNode</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The SnapshotNode object to check.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+
 <p><span class="doc-section-title">Other Parameters (passed via config file):</span></p>
-<table>
-    <thead>
-    <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Description</th>
-    </tr>
-    </thead>
-    <tbody>
-        <tr class="doc-section-item">
-        <td><code>description</code></td>
-        <td>
-                <code><span title="str">str</span> | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Description of what the check does and why it is implemented.</p>
-            </div>
-        </td>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
         </tr>
-        <tr class="doc-section-item">
-        <td><code>exclude</code></td>
-        <td>
-                <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Regex pattern(s) to match the snapshot path. Snapshot paths that match any pattern will not be checked.</p>
-            </div>
-        </td>
-        </tr>
-        <tr class="doc-section-item">
-        <td><code>include</code></td>
-        <td>
-                <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Regex pattern(s) to match the snapshot path. Only snapshot paths that match any pattern will be checked.</p>
-            </div>
-        </td>
-        </tr>
-        <tr class="doc-section-item">
-        <td><code>severity</code></td>
-        <td>
-                <code><span title="Literal">Literal</span>[<span title="error">error</span>, <span title="warn">warn</span>] | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Severity level of the check. Default: <code>error</code>.</p>
-            </div>
-        </td>
-        </tr>
-    </tbody>
-</table>      <p>Example(s):
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code>description</code></td>
+            <td>
+                  <code><span title="str">str</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Description of what the check does and why it is implemented.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>exclude</code></td>
+            <td>
+                  <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Regex pattern(s) to match the snapshot path. Snapshot paths that match any pattern will not be checked.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>include</code></td>
+            <td>
+                  <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Regex pattern(s) to match the snapshot path. Only snapshot paths that match any pattern will be checked.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>severity</code></td>
+            <td>
+                  <code><span title="Literal">Literal</span>[<span title="error">error</span>, <span title="warn">warn</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Severity level of the check. Default: <code>error</code>.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+        <p>Example(s):
     <div class="language-yaml highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">manifest_checks</span><span class="p">:</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_snapshot_has_tags</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">      </span><span class="nt">tags</span><span class="p">:</span>
@@ -2436,90 +2451,95 @@
 
     <div class="doc doc-contents ">
 
-      <p>Snapshots must have a <code>unique_key</code> configured.</p>
+        <p>Snapshots must have a <code>unique_key</code> configured.</p>
 <div class="admonition info">
 <p class="admonition-title">Rationale</p>
 <p>The <code>unique_key</code> configuration is essential for snapshot correctness — dbt uses it to identify existing rows when deciding whether to insert a new record or close an old one. Without a <code>unique_key</code>, dbt cannot reliably track which rows have changed, leading to duplicate history records or missed updates that silently corrupt the slowly-changing dimension table.</p>
 </div>
 
-<p><strong>Receives at execution time:</strong></p>
-<table>
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Type</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-      <tr>
-        <td><code>snapshot</code>        <td>
-              <code><span title="SnapshotNode">SnapshotNode</span></code>
-        </td>
-        <td>
-          <div class="doc-md-description">
-            <p>The SnapshotNode object to check.</p>
-          </div>
-        </td>
-      </tr>
-  </tbody>
-</table>
+
+
+    <p><span class="doc-section-title">Receives at execution time:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>snapshot</code></td>            <td>
+                  <code><span title="SnapshotNode">SnapshotNode</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The SnapshotNode object to check.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+
 <p><span class="doc-section-title">Other Parameters (passed via config file):</span></p>
-<table>
-    <thead>
-    <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Description</th>
-    </tr>
-    </thead>
-    <tbody>
-        <tr class="doc-section-item">
-        <td><code>description</code></td>
-        <td>
-                <code><span title="str">str</span> | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Description of what the check does and why it is implemented.</p>
-            </div>
-        </td>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
         </tr>
-        <tr class="doc-section-item">
-        <td><code>exclude</code></td>
-        <td>
-                <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Regex pattern(s) to match the snapshot path. Snapshot paths that match any pattern will not be checked.</p>
-            </div>
-        </td>
-        </tr>
-        <tr class="doc-section-item">
-        <td><code>include</code></td>
-        <td>
-                <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Regex pattern(s) to match the snapshot path. Only snapshot paths that match any pattern will be checked.</p>
-            </div>
-        </td>
-        </tr>
-        <tr class="doc-section-item">
-        <td><code>severity</code></td>
-        <td>
-                <code><span title="Literal">Literal</span>[<span title="error">error</span>, <span title="warn">warn</span>] | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Severity level of the check. Default: <code>error</code>.</p>
-            </div>
-        </td>
-        </tr>
-    </tbody>
-</table>      <p>Example(s):
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code>description</code></td>
+            <td>
+                  <code><span title="str">str</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Description of what the check does and why it is implemented.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>exclude</code></td>
+            <td>
+                  <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Regex pattern(s) to match the snapshot path. Snapshot paths that match any pattern will not be checked.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>include</code></td>
+            <td>
+                  <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Regex pattern(s) to match the snapshot path. Only snapshot paths that match any pattern will be checked.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>severity</code></td>
+            <td>
+                  <code><span title="Literal">Literal</span>[<span title="error">error</span>, <span title="warn">warn</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Severity level of the check. Default: <code>error</code>.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+        <p>Example(s):
     <div class="language-yaml highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">manifest_checks</span><span class="p">:</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_snapshot_has_unique_key</span>
 </span></code></pre></div></p>
@@ -2601,7 +2621,7 @@
 
     <div class="doc doc-contents ">
 
-      <p>Snapshots must have a name that matches the supplied regex.</p>
+        <p>Snapshots must have a name that matches the supplied regex.</p>
 <div class="admonition info">
 <p class="admonition-title">Rationale</p>
 <p>A consistent naming convention for snapshots (e.g. a domain prefix like <code>erp_</code> or a suffix like <code>_snapshot</code>) makes it immediately obvious in the warehouse that a table is a point-in-time history capture rather than a regular dimension or fact. Without naming conventions, snapshots can be confused with other tables, leading to incorrect use or accidental truncation.</p>
@@ -2638,84 +2658,89 @@
       </tbody>
     </table>
 
-<p><strong>Receives at execution time:</strong></p>
-<table>
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Type</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-      <tr>
-        <td><code>snapshot</code>        <td>
-              <code><span title="SnapshotNode">SnapshotNode</span></code>
-        </td>
-        <td>
-          <div class="doc-md-description">
-            <p>The SnapshotNode object to check.</p>
-          </div>
-        </td>
-      </tr>
-  </tbody>
-</table>
+
+
+    <p><span class="doc-section-title">Receives at execution time:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>snapshot</code></td>            <td>
+                  <code><span title="SnapshotNode">SnapshotNode</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The SnapshotNode object to check.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+
 <p><span class="doc-section-title">Other Parameters (passed via config file):</span></p>
-<table>
-    <thead>
-    <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Description</th>
-    </tr>
-    </thead>
-    <tbody>
-        <tr class="doc-section-item">
-        <td><code>description</code></td>
-        <td>
-                <code><span title="str">str</span> | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Description of what the check does and why it is implemented.</p>
-            </div>
-        </td>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
         </tr>
-        <tr class="doc-section-item">
-        <td><code>exclude</code></td>
-        <td>
-                <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Regex pattern(s) to match the snapshot path. Snapshot paths that match any pattern will not be checked.</p>
-            </div>
-        </td>
-        </tr>
-        <tr class="doc-section-item">
-        <td><code>include</code></td>
-        <td>
-                <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Regex pattern(s) to match the snapshot path. Only snapshot paths that match any pattern will be checked.</p>
-            </div>
-        </td>
-        </tr>
-        <tr class="doc-section-item">
-        <td><code>severity</code></td>
-        <td>
-                <code><span title="Literal">Literal</span>[<span title="error">error</span>, <span title="warn">warn</span>] | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Severity level of the check. Default: <code>error</code>.</p>
-            </div>
-        </td>
-        </tr>
-    </tbody>
-</table>      <p>Example(s):
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code>description</code></td>
+            <td>
+                  <code><span title="str">str</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Description of what the check does and why it is implemented.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>exclude</code></td>
+            <td>
+                  <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Regex pattern(s) to match the snapshot path. Snapshot paths that match any pattern will not be checked.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>include</code></td>
+            <td>
+                  <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Regex pattern(s) to match the snapshot path. Only snapshot paths that match any pattern will be checked.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>severity</code></td>
+            <td>
+                  <code><span title="Literal">Literal</span>[<span title="error">error</span>, <span title="warn">warn</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Severity level of the check. Default: <code>error</code>.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+        <p>Example(s):
     <div class="language-yaml highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">manifest_checks</span><span class="p">:</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_snapshot_names</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">      </span><span class="nt">include</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">^snapshots/erp</span>
@@ -2809,7 +2834,7 @@
 
     <div class="doc doc-contents ">
 
-      <p>Snapshots must use an allowed strategy and have the required strategy-specific configuration.</p>
+        <p>Snapshots must use an allowed strategy and have the required strategy-specific configuration.</p>
 <div class="admonition info">
 <p class="admonition-title">Rationale</p>
 <p>The snapshot strategy determines how dbt detects row changes. Using an unsupported or misconfigured strategy can lead to incorrect history capture: the <code>timestamp</code> strategy requires an <code>updated_at</code> column to detect changes, and the <code>check</code> strategy requires <code>check_cols</code> to define which columns to monitor. Enforcing both the allowed strategies and their required fields prevents silent data quality issues in slowly-changing dimension tables.</p>
@@ -2846,84 +2871,89 @@
       </tbody>
     </table>
 
-<p><strong>Receives at execution time:</strong></p>
-<table>
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Type</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-      <tr>
-        <td><code>snapshot</code>        <td>
-              <code><span title="SnapshotNode">SnapshotNode</span></code>
-        </td>
-        <td>
-          <div class="doc-md-description">
-            <p>The SnapshotNode object to check.</p>
-          </div>
-        </td>
-      </tr>
-  </tbody>
-</table>
+
+
+    <p><span class="doc-section-title">Receives at execution time:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>snapshot</code></td>            <td>
+                  <code><span title="SnapshotNode">SnapshotNode</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The SnapshotNode object to check.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+
 <p><span class="doc-section-title">Other Parameters (passed via config file):</span></p>
-<table>
-    <thead>
-    <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Description</th>
-    </tr>
-    </thead>
-    <tbody>
-        <tr class="doc-section-item">
-        <td><code>description</code></td>
-        <td>
-                <code><span title="str">str</span> | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Description of what the check does and why it is implemented.</p>
-            </div>
-        </td>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
         </tr>
-        <tr class="doc-section-item">
-        <td><code>exclude</code></td>
-        <td>
-                <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Regex pattern(s) to match the snapshot path. Snapshot paths that match any pattern will not be checked.</p>
-            </div>
-        </td>
-        </tr>
-        <tr class="doc-section-item">
-        <td><code>include</code></td>
-        <td>
-                <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Regex pattern(s) to match the snapshot path. Only snapshot paths that match any pattern will be checked.</p>
-            </div>
-        </td>
-        </tr>
-        <tr class="doc-section-item">
-        <td><code>severity</code></td>
-        <td>
-                <code><span title="Literal">Literal</span>[<span title="error">error</span>, <span title="warn">warn</span>] | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Severity level of the check. Default: <code>error</code>.</p>
-            </div>
-        </td>
-        </tr>
-    </tbody>
-</table>      <p>Example(s):
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code>description</code></td>
+            <td>
+                  <code><span title="str">str</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Description of what the check does and why it is implemented.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>exclude</code></td>
+            <td>
+                  <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Regex pattern(s) to match the snapshot path. Snapshot paths that match any pattern will not be checked.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>include</code></td>
+            <td>
+                  <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Regex pattern(s) to match the snapshot path. Only snapshot paths that match any pattern will be checked.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>severity</code></td>
+            <td>
+                  <code><span title="Literal">Literal</span>[<span title="error">error</span>, <span title="warn">warn</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Severity level of the check. Default: <code>error</code>.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+        <p>Example(s):
     <div class="language-yaml highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">manifest_checks</span><span class="p">:</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_snapshot_strategy</span>
 </span></code></pre></div>
@@ -3109,10 +3139,10 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate":null,"base":"../../..","features":["content.action.edit","content.code.annotate","content.code.copy","navigation.expand","navigation.indexes","navigation.instant","navigation.instant.progress","navigation.prune","navigation.sections","navigation.tabs","navigation.tabs.sticky","navigation.tracking","navigation.top","toc.follow","toc.integrate"],"search":"../../../assets/javascripts/workers/search.e2d2d235.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"alias":true,"canonical_version":"stable","default":"stable","provider":"mike"}}</script>
+      <script id="__config" type="application/json">{"annotate":null,"base":"../../..","features":["content.action.edit","content.code.annotate","content.code.copy","navigation.expand","navigation.indexes","navigation.instant","navigation.instant.progress","navigation.prune","navigation.sections","navigation.tabs","navigation.tabs.sticky","navigation.tracking","navigation.top","toc.follow","toc.integrate"],"search":"../../../assets/javascripts/workers/search.b6b7e04f.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"alias":true,"canonical_version":"stable","default":"stable","provider":"mike"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.6e5f0216.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.d7f30b55.min.js"></script>
       
     
   </body>

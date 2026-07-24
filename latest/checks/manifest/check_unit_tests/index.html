@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../../assets/logo.svg">
-      <meta name="generator" content="zensical-0.0.43">
+      <meta name="generator" content="zensical-0.0.51">
     
     
       
@@ -32,7 +32,7 @@
       
         
       
-      <link rel="stylesheet" href="../../../assets/stylesheets/classic/main.a2001754.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/classic/main.f62f0af6.min.css">
       
         
           
@@ -1659,7 +1659,7 @@
 
     <div class="doc doc-contents first">
 
-      <p>Checks related to unit test coverage and formats.</p>
+        <p>Checks related to unit test coverage and formats.</p>
 
 
 
@@ -1712,7 +1712,7 @@
 
 
 
-  <div class="doc doc-children">
+<div class="doc doc-children">
 
 
 
@@ -1734,7 +1734,7 @@
 
     <div class="doc doc-contents ">
 
-      <p>Set the minimum percentage of models that have a unit test.</p>
+        <p>Set the minimum percentage of models that have a unit test.</p>
 <div class="admonition info">
 <p class="admonition-title">Rationale</p>
 <p>Unit tests validate that a model's SQL logic produces the correct output for a given set of inputs, independently of live data. Tracking coverage across the project ensures that critical business logic is not left untested, which reduces the risk of silent regressions when models are refactored or when source data shapes change unexpectedly.</p>
@@ -1775,83 +1775,88 @@
       </tbody>
     </table>
 
-<p><strong>Receives at execution time:</strong></p>
-<table>
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Type</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-      <tr>
-        <td><code>models</code>        <td>
-              <code><a class="autorefs autorefs-internal" href="../../../cli/#list">list</a>[<span title="ModelNode">ModelNode</span>]</code>
-        </td>
-        <td>
-          <div class="doc-md-description">
-            <p>List of ModelNode objects parsed from <code>manifest.json</code>.</p>
-          </div>
-        </td>
-      </tr>
-      <tr>
-        <td><code>unit_tests</code>        <td>
-              <code><a class="autorefs autorefs-internal" href="../../../cli/#list">list</a>[<span title="UnitTests">UnitTests</span>]</code>
-        </td>
-        <td>
-          <div class="doc-md-description">
-            <p>List of UnitTests objects parsed from <code>manifest.json</code>.</p>
-          </div>
-        </td>
-      </tr>
-  </tbody>
-</table>
+
+
+    <p><span class="doc-section-title">Receives at execution time:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>models</code></td>            <td>
+                  <code><a class="autorefs autorefs-internal" href="../../../cli/#list">list</a>[<span title="ModelNode">ModelNode</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>List of ModelNode objects parsed from <code>manifest.json</code>.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+<td><code>unit_tests</code></td>            <td>
+                  <code><a class="autorefs autorefs-internal" href="../../../cli/#list">list</a>[<span title="UnitTests">UnitTests</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>List of UnitTests objects parsed from <code>manifest.json</code>.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+
 <p><span class="doc-section-title">Other Parameters (passed via config file):</span></p>
-<table>
-    <thead>
-    <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Description</th>
-    </tr>
-    </thead>
-    <tbody>
-        <tr class="doc-section-item">
-        <td><code>description</code></td>
-        <td>
-                <code><span title="str">str</span> | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Description of what the check does and why it is implemented.</p>
-            </div>
-        </td>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
         </tr>
-        <tr class="doc-section-item">
-        <td><code>include</code></td>
-        <td>
-                <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.</p>
-            </div>
-        </td>
-        </tr>
-        <tr class="doc-section-item">
-        <td><code>severity</code></td>
-        <td>
-                <code><span title="Literal">Literal</span>[<span title="error">error</span>, <span title="warn">warn</span>] | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Severity level of the check. Default: <code>error</code>.</p>
-            </div>
-        </td>
-        </tr>
-    </tbody>
-</table>      <p>Example(s):
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code>description</code></td>
+            <td>
+                  <code><span title="str">str</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Description of what the check does and why it is implemented.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>include</code></td>
+            <td>
+                  <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>severity</code></td>
+            <td>
+                  <code><span title="Literal">Literal</span>[<span title="error">error</span>, <span title="warn">warn</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Severity level of the check. Default: <code>error</code>.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+        <p>Example(s):
     <div class="language-yaml highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">manifest_checks</span><span class="p">:</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_unit_test_coverage</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">      </span><span class="nt">min_unit_test_coverage_pct</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">90</span>
@@ -2008,7 +2013,7 @@
 
     <div class="doc doc-contents ">
 
-      <p>Unit tests can only use the specified formats.</p>
+        <p>Unit tests can only use the specified formats.</p>
 <div class="admonition info">
 <p class="admonition-title">Rationale</p>
 <p>dbt unit tests support multiple <code>expect</code> formats — <code>csv</code>, <code>dict</code>, and <code>sql</code> — each with different trade-offs in readability, portability, and maintenance overhead. Restricting permitted formats enforces a project-wide standard that keeps unit tests consistent and readable, and avoids formats that may be harder for the team to maintain (e.g. raw SQL expectations that are difficult to diff).</p>
@@ -2049,94 +2054,99 @@
       </tbody>
     </table>
 
-<p><strong>Receives at execution time:</strong></p>
-<table>
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Type</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-      <tr>
-        <td><code>manifest_obj</code>        <td>
-              <code><span title="ManifestObject">ManifestObject</span></code>
-        </td>
-        <td>
-          <div class="doc-md-description">
-            <p>The ManifestObject object parsed from <code>manifest.json</code>.</p>
-          </div>
-        </td>
-      </tr>
-      <tr>
-        <td><code>unit_test</code>        <td>
-              <code><span title="UnitTests">UnitTests</span></code>
-        </td>
-        <td>
-          <div class="doc-md-description">
-            <p>The UnitTests object to check.</p>
-          </div>
-        </td>
-      </tr>
-  </tbody>
-</table>
+
+
+    <p><span class="doc-section-title">Receives at execution time:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>manifest_obj</code></td>            <td>
+                  <code><span title="ManifestObject">ManifestObject</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The ManifestObject object parsed from <code>manifest.json</code>.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+<td><code>unit_test</code></td>            <td>
+                  <code><span title="UnitTests">UnitTests</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The UnitTests object to check.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+
 <p><span class="doc-section-title">Other Parameters (passed via config file):</span></p>
-<table>
-    <thead>
-    <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Description</th>
-    </tr>
-    </thead>
-    <tbody>
-        <tr class="doc-section-item">
-        <td><code>description</code></td>
-        <td>
-                <code><span title="str">str</span> | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Description of what the check does and why it is implemented.</p>
-            </div>
-        </td>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
         </tr>
-        <tr class="doc-section-item">
-        <td><code>exclude</code></td>
-        <td>
-                <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Regex pattern(s) to match the unit test path (i.e the .yml file where the unit test is configured). Unit test paths that match any pattern will not be checked.</p>
-            </div>
-        </td>
-        </tr>
-        <tr class="doc-section-item">
-        <td><code>include</code></td>
-        <td>
-                <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Regex pattern(s) to match the unit test path (i.e the .yml file where the unit test is configured). Only unit test paths that match any pattern will be checked.</p>
-            </div>
-        </td>
-        </tr>
-        <tr class="doc-section-item">
-        <td><code>severity</code></td>
-        <td>
-                <code><span title="Literal">Literal</span>[<span title="error">error</span>, <span title="warn">warn</span>] | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Severity level of the check. Default: <code>error</code>.</p>
-            </div>
-        </td>
-        </tr>
-    </tbody>
-</table>      <p>Example(s):
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code>description</code></td>
+            <td>
+                  <code><span title="str">str</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Description of what the check does and why it is implemented.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>exclude</code></td>
+            <td>
+                  <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Regex pattern(s) to match the unit test path (i.e the .yml file where the unit test is configured). Unit test paths that match any pattern will not be checked.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>include</code></td>
+            <td>
+                  <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Regex pattern(s) to match the unit test path (i.e the .yml file where the unit test is configured). Only unit test paths that match any pattern will be checked.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>severity</code></td>
+            <td>
+                  <code><span title="Literal">Literal</span>[<span title="error">error</span>, <span title="warn">warn</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Severity level of the check. Default: <code>error</code>.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+        <p>Example(s):
     <div class="language-yaml highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">manifest_checks</span><span class="p">:</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_unit_test_expect_format</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">      </span><span class="nt">permitted_formats</span><span class="p">:</span>
@@ -2288,7 +2298,7 @@
 
     <div class="doc doc-contents ">
 
-      <p>Unit tests can only use the specified formats.</p>
+        <p>Unit tests can only use the specified formats.</p>
 <div class="admonition info">
 <p class="admonition-title">Rationale</p>
 <p>The <code>given</code> section of a dbt unit test defines the mock input data for the test. Standardising the format across all <code>given</code> inputs (e.g. requiring <code>csv</code> for human-readable diffs in code review) keeps tests consistent and ensures that engineers reviewing test changes can quickly assess whether the input data is correct without needing to parse unfamiliar formats.</p>
@@ -2329,94 +2339,99 @@
       </tbody>
     </table>
 
-<p><strong>Receives at execution time:</strong></p>
-<table>
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Type</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-      <tr>
-        <td><code>manifest_obj</code>        <td>
-              <code><span title="ManifestObject">ManifestObject</span></code>
-        </td>
-        <td>
-          <div class="doc-md-description">
-            <p>The ManifestObject object parsed from <code>manifest.json</code>.</p>
-          </div>
-        </td>
-      </tr>
-      <tr>
-        <td><code>unit_test</code>        <td>
-              <code><span title="UnitTests">UnitTests</span></code>
-        </td>
-        <td>
-          <div class="doc-md-description">
-            <p>The UnitTests object to check.</p>
-          </div>
-        </td>
-      </tr>
-  </tbody>
-</table>
+
+
+    <p><span class="doc-section-title">Receives at execution time:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>manifest_obj</code></td>            <td>
+                  <code><span title="ManifestObject">ManifestObject</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The ManifestObject object parsed from <code>manifest.json</code>.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+<td><code>unit_test</code></td>            <td>
+                  <code><span title="UnitTests">UnitTests</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The UnitTests object to check.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+
 <p><span class="doc-section-title">Other Parameters (passed via config file):</span></p>
-<table>
-    <thead>
-    <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Description</th>
-    </tr>
-    </thead>
-    <tbody>
-        <tr class="doc-section-item">
-        <td><code>description</code></td>
-        <td>
-                <code><span title="str">str</span> | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Description of what the check does and why it is implemented.</p>
-            </div>
-        </td>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
         </tr>
-        <tr class="doc-section-item">
-        <td><code>exclude</code></td>
-        <td>
-                <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Regex pattern(s) to match the unit test path (i.e the .yml file where the unit test is configured). Unit test paths that match any pattern will not be checked.</p>
-            </div>
-        </td>
-        </tr>
-        <tr class="doc-section-item">
-        <td><code>include</code></td>
-        <td>
-                <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Regex pattern(s) to match the unit test path (i.e the .yml file where the unit test is configured). Only unit test paths that match any pattern will be checked.</p>
-            </div>
-        </td>
-        </tr>
-        <tr class="doc-section-item">
-        <td><code>severity</code></td>
-        <td>
-                <code><span title="Literal">Literal</span>[<span title="error">error</span>, <span title="warn">warn</span>] | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Severity level of the check. Default: <code>error</code>.</p>
-            </div>
-        </td>
-        </tr>
-    </tbody>
-</table>      <p>Example(s):
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code>description</code></td>
+            <td>
+                  <code><span title="str">str</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Description of what the check does and why it is implemented.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>exclude</code></td>
+            <td>
+                  <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Regex pattern(s) to match the unit test path (i.e the .yml file where the unit test is configured). Unit test paths that match any pattern will not be checked.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>include</code></td>
+            <td>
+                  <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Regex pattern(s) to match the unit test path (i.e the .yml file where the unit test is configured). Only unit test paths that match any pattern will be checked.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>severity</code></td>
+            <td>
+                  <code><span title="Literal">Literal</span>[<span title="error">error</span>, <span title="warn">warn</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Severity level of the check. Default: <code>error</code>.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+        <p>Example(s):
     <div class="language-yaml highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">manifest_checks</span><span class="p">:</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_unit_test_given_formats</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">      </span><span class="nt">permitted_formats</span><span class="p">:</span>
@@ -2605,10 +2620,10 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate":null,"base":"../../..","features":["content.action.edit","content.code.annotate","content.code.copy","navigation.expand","navigation.indexes","navigation.instant","navigation.instant.progress","navigation.prune","navigation.sections","navigation.tabs","navigation.tabs.sticky","navigation.tracking","navigation.top","toc.follow","toc.integrate"],"search":"../../../assets/javascripts/workers/search.e2d2d235.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"alias":true,"canonical_version":"stable","default":"stable","provider":"mike"}}</script>
+      <script id="__config" type="application/json">{"annotate":null,"base":"../../..","features":["content.action.edit","content.code.annotate","content.code.copy","navigation.expand","navigation.indexes","navigation.instant","navigation.instant.progress","navigation.prune","navigation.sections","navigation.tabs","navigation.tabs.sticky","navigation.tracking","navigation.top","toc.follow","toc.integrate"],"search":"../../../assets/javascripts/workers/search.b6b7e04f.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"alias":true,"canonical_version":"stable","default":"stable","provider":"mike"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.6e5f0216.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.d7f30b55.min.js"></script>
       
     
   </body>

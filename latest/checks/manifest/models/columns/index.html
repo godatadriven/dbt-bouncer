@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../../../assets/logo.svg">
-      <meta name="generator" content="zensical-0.0.43">
+      <meta name="generator" content="zensical-0.0.51">
     
     
       
@@ -32,7 +32,7 @@
       
         
       
-      <link rel="stylesheet" href="../../../../assets/stylesheets/classic/main.a2001754.min.css">
+      <link rel="stylesheet" href="../../../../assets/stylesheets/classic/main.f62f0af6.min.css">
       
         
           
@@ -1965,7 +1965,7 @@
 
     <div class="doc doc-contents first">
 
-      <p>Checks related to model column definitions, types, and constraints.</p>
+        <p>Checks related to model column definitions, types, and constraints.</p>
 
 
 
@@ -2034,7 +2034,7 @@
 
 
 
-  <div class="doc doc-children">
+<div class="doc doc-children">
 
 
 
@@ -2056,7 +2056,7 @@
 
     <div class="doc doc-contents ">
 
-      <p>Columns matching a regex pattern must have a <code>relationships</code> test, optionally validating the target column and model.</p>
+        <p>Columns matching a regex pattern must have a <code>relationships</code> test, optionally validating the target column and model.</p>
 <div class="admonition info">
 <p class="admonition-title">Rationale</p>
 <p>Foreign-key columns that are never validated with a <code>relationships</code> test can silently contain orphaned IDs, leading to incorrect join results and data quality issues that are hard to trace. This check ensures that columns following a naming convention (e.g. <code>_fk</code>) are always backed by a referential integrity test.</p>
@@ -2125,95 +2125,100 @@
       </tbody>
     </table>
 
-<p><strong>Receives at execution time:</strong></p>
-<table>
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Type</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-      <tr>
-        <td><code>model</code>        <td>
-              <code><span title="ModelNode">ModelNode</span></code>
-        </td>
-        <td>
-          <div class="doc-md-description">
-            <p>The ModelNode object to check.</p>
-          </div>
-        </td>
-      </tr>
-  </tbody>
-</table>
+
+
+    <p><span class="doc-section-title">Receives at execution time:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>model</code></td>            <td>
+                  <code><span title="ModelNode">ModelNode</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The ModelNode object to check.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+
 <p><span class="doc-section-title">Other Parameters (passed via config file):</span></p>
-<table>
-    <thead>
-    <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Description</th>
-    </tr>
-    </thead>
-    <tbody>
-        <tr class="doc-section-item">
-        <td><code>description</code></td>
-        <td>
-                <code><span title="str">str</span> | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Description of what the check does and why it is implemented.</p>
-            </div>
-        </td>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
         </tr>
-        <tr class="doc-section-item">
-        <td><code>exclude</code></td>
-        <td>
-                <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.</p>
-            </div>
-        </td>
-        </tr>
-        <tr class="doc-section-item">
-        <td><code>include</code></td>
-        <td>
-                <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.</p>
-            </div>
-        </td>
-        </tr>
-        <tr class="doc-section-item">
-        <td><code>materialization</code></td>
-        <td>
-                <code><span title="Literal">Literal</span>[<span title="ephemeral">ephemeral</span>, <span title="incremental">incremental</span>, <span title="table">table</span>, <span title="view">view</span>] | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Limit check to models with the specified materialization.</p>
-            </div>
-        </td>
-        </tr>
-        <tr class="doc-section-item">
-        <td><code>severity</code></td>
-        <td>
-                <code><span title="Literal">Literal</span>[<span title="error">error</span>, <span title="warn">warn</span>] | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Severity level of the check. Default: <code>error</code>.</p>
-            </div>
-        </td>
-        </tr>
-    </tbody>
-</table>      <p>Example(s):
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code>description</code></td>
+            <td>
+                  <code><span title="str">str</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Description of what the check does and why it is implemented.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>exclude</code></td>
+            <td>
+                  <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>include</code></td>
+            <td>
+                  <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>materialization</code></td>
+            <td>
+                  <code><span title="Literal">Literal</span>[<span title="ephemeral">ephemeral</span>, <span title="incremental">incremental</span>, <span title="table">table</span>, <span title="view">view</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Limit check to models with the specified materialization.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>severity</code></td>
+            <td>
+                  <code><span title="Literal">Literal</span>[<span title="error">error</span>, <span title="warn">warn</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Severity level of the check. Default: <code>error</code>.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+        <p>Example(s):
     <div class="language-yaml highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">manifest_checks</span><span class="p">:</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_model_columns_have_relationship_tests</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">      </span><span class="nt">column_name_pattern</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;_fk$&quot;</span>
@@ -2448,7 +2453,7 @@
 
     <div class="doc doc-contents ">
 
-      <p>Columns defined for models must have the specified keys in the <code>meta</code> config.</p>
+        <p>Columns defined for models must have the specified keys in the <code>meta</code> config.</p>
 <div class="admonition info">
 <p class="admonition-title">Rationale</p>
 <p>Column-level metadata such as <code>owner</code> or <code>pii</code> flags is essential for data governance, access control, and cataloguing. Without enforcement, metadata is applied inconsistently, making it difficult to identify sensitive columns or assign accountability across a large project.</p>
@@ -2485,95 +2490,100 @@
       </tbody>
     </table>
 
-<p><strong>Receives at execution time:</strong></p>
-<table>
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Type</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-      <tr>
-        <td><code>model</code>        <td>
-              <code><span title="ModelNode">ModelNode</span></code>
-        </td>
-        <td>
-          <div class="doc-md-description">
-            <p>The ModelNode object to check.</p>
-          </div>
-        </td>
-      </tr>
-  </tbody>
-</table>
+
+
+    <p><span class="doc-section-title">Receives at execution time:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>model</code></td>            <td>
+                  <code><span title="ModelNode">ModelNode</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The ModelNode object to check.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+
 <p><span class="doc-section-title">Other Parameters (passed via config file):</span></p>
-<table>
-    <thead>
-    <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Description</th>
-    </tr>
-    </thead>
-    <tbody>
-        <tr class="doc-section-item">
-        <td><code>description</code></td>
-        <td>
-                <code><span title="str">str</span> | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Description of what the check does and why it is implemented.</p>
-            </div>
-        </td>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
         </tr>
-        <tr class="doc-section-item">
-        <td><code>exclude</code></td>
-        <td>
-                <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.</p>
-            </div>
-        </td>
-        </tr>
-        <tr class="doc-section-item">
-        <td><code>include</code></td>
-        <td>
-                <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.</p>
-            </div>
-        </td>
-        </tr>
-        <tr class="doc-section-item">
-        <td><code>materialization</code></td>
-        <td>
-                <code><span title="Literal">Literal</span>[<span title="ephemeral">ephemeral</span>, <span title="incremental">incremental</span>, <span title="table">table</span>, <span title="view">view</span>] | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Limit check to models with the specified materialization.</p>
-            </div>
-        </td>
-        </tr>
-        <tr class="doc-section-item">
-        <td><code>severity</code></td>
-        <td>
-                <code><span title="Literal">Literal</span>[<span title="error">error</span>, <span title="warn">warn</span>] | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Severity level of the check. Default: <code>error</code>.</p>
-            </div>
-        </td>
-        </tr>
-    </tbody>
-</table>      <p>Example(s):
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code>description</code></td>
+            <td>
+                  <code><span title="str">str</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Description of what the check does and why it is implemented.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>exclude</code></td>
+            <td>
+                  <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>include</code></td>
+            <td>
+                  <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>materialization</code></td>
+            <td>
+                  <code><span title="Literal">Literal</span>[<span title="ephemeral">ephemeral</span>, <span title="incremental">incremental</span>, <span title="table">table</span>, <span title="view">view</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Limit check to models with the specified materialization.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>severity</code></td>
+            <td>
+                  <code><span title="Literal">Literal</span>[<span title="error">error</span>, <span title="warn">warn</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Severity level of the check. Default: <code>error</code>.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+        <p>Example(s):
     <div class="language-yaml highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">manifest_checks</span><span class="p">:</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_model_columns_have_meta_keys</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">      </span><span class="nt">keys</span><span class="p">:</span>
@@ -2686,101 +2696,106 @@
 
     <div class="doc doc-contents ">
 
-      <p>Columns defined for models must have a <code>data_type</code> declared.</p>
+        <p>Columns defined for models must have a <code>data_type</code> declared.</p>
 <div class="admonition info">
 <p class="admonition-title">Rationale</p>
 <p>Declaring column data types is a prerequisite for enforced dbt contracts and enables downstream consumers to understand the expected format of each field without querying the warehouse. It also prevents type-mismatch errors in tools that consume the schema at build time.</p>
 </div>
 
-<p><strong>Receives at execution time:</strong></p>
-<table>
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Type</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-      <tr>
-        <td><code>model</code>        <td>
-              <code><span title="ModelNode">ModelNode</span></code>
-        </td>
-        <td>
-          <div class="doc-md-description">
-            <p>The ModelNode object to check.</p>
-          </div>
-        </td>
-      </tr>
-  </tbody>
-</table>
+
+
+    <p><span class="doc-section-title">Receives at execution time:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>model</code></td>            <td>
+                  <code><span title="ModelNode">ModelNode</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The ModelNode object to check.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+
 <p><span class="doc-section-title">Other Parameters (passed via config file):</span></p>
-<table>
-    <thead>
-    <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Description</th>
-    </tr>
-    </thead>
-    <tbody>
-        <tr class="doc-section-item">
-        <td><code>description</code></td>
-        <td>
-                <code><span title="str">str</span> | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Description of what the check does and why it is implemented.</p>
-            </div>
-        </td>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
         </tr>
-        <tr class="doc-section-item">
-        <td><code>exclude</code></td>
-        <td>
-                <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.</p>
-            </div>
-        </td>
-        </tr>
-        <tr class="doc-section-item">
-        <td><code>include</code></td>
-        <td>
-                <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.</p>
-            </div>
-        </td>
-        </tr>
-        <tr class="doc-section-item">
-        <td><code>materialization</code></td>
-        <td>
-                <code><span title="Literal">Literal</span>[<span title="ephemeral">ephemeral</span>, <span title="incremental">incremental</span>, <span title="table">table</span>, <span title="view">view</span>] | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Limit check to models with the specified materialization.</p>
-            </div>
-        </td>
-        </tr>
-        <tr class="doc-section-item">
-        <td><code>severity</code></td>
-        <td>
-                <code><span title="Literal">Literal</span>[<span title="error">error</span>, <span title="warn">warn</span>] | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Severity level of the check. Default: <code>error</code>.</p>
-            </div>
-        </td>
-        </tr>
-    </tbody>
-</table>      <p>Example(s):
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code>description</code></td>
+            <td>
+                  <code><span title="str">str</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Description of what the check does and why it is implemented.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>exclude</code></td>
+            <td>
+                  <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>include</code></td>
+            <td>
+                  <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>materialization</code></td>
+            <td>
+                  <code><span title="Literal">Literal</span>[<span title="ephemeral">ephemeral</span>, <span title="incremental">incremental</span>, <span title="table">table</span>, <span title="view">view</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Limit check to models with the specified materialization.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>severity</code></td>
+            <td>
+                  <code><span title="Literal">Literal</span>[<span title="error">error</span>, <span title="warn">warn</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Severity level of the check. Default: <code>error</code>.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+        <p>Example(s):
     <div class="language-yaml highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">manifest_checks</span><span class="p">:</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_model_columns_have_types</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">      </span><span class="nt">include</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">^models/marts</span>
@@ -2873,7 +2888,7 @@
 
     <div class="doc doc-contents ">
 
-      <p>Table and incremental models must have the specified constraint types defined.</p>
+        <p>Table and incremental models must have the specified constraint types defined.</p>
 <div class="admonition info">
 <p class="admonition-title">Rationale</p>
 <p>Database constraints such as <code>primary_key</code> and <code>not_null</code> enforce data integrity at the warehouse level, providing a safety net that goes beyond dbt tests. Requiring them on materialised models ensures that quality guarantees survive even when dbt tests are skipped or not run on every refresh.</p>
@@ -2910,84 +2925,89 @@
       </tbody>
     </table>
 
-<p><strong>Receives at execution time:</strong></p>
-<table>
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Type</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-      <tr>
-        <td><code>model</code>        <td>
-              <code><span title="ModelNode">ModelNode</span></code>
-        </td>
-        <td>
-          <div class="doc-md-description">
-            <p>The ModelNode object to check.</p>
-          </div>
-        </td>
-      </tr>
-  </tbody>
-</table>
+
+
+    <p><span class="doc-section-title">Receives at execution time:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>model</code></td>            <td>
+                  <code><span title="ModelNode">ModelNode</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The ModelNode object to check.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+
 <p><span class="doc-section-title">Other Parameters (passed via config file):</span></p>
-<table>
-    <thead>
-    <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Description</th>
-    </tr>
-    </thead>
-    <tbody>
-        <tr class="doc-section-item">
-        <td><code>description</code></td>
-        <td>
-                <code><span title="str">str</span> | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Description of what the check does and why it is implemented.</p>
-            </div>
-        </td>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
         </tr>
-        <tr class="doc-section-item">
-        <td><code>exclude</code></td>
-        <td>
-                <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.</p>
-            </div>
-        </td>
-        </tr>
-        <tr class="doc-section-item">
-        <td><code>include</code></td>
-        <td>
-                <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.</p>
-            </div>
-        </td>
-        </tr>
-        <tr class="doc-section-item">
-        <td><code>severity</code></td>
-        <td>
-                <code><span title="Literal">Literal</span>[<span title="error">error</span>, <span title="warn">warn</span>] | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Severity level of the check. Default: <code>error</code>.</p>
-            </div>
-        </td>
-        </tr>
-    </tbody>
-</table>      <p>Example(s):
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code>description</code></td>
+            <td>
+                  <code><span title="str">str</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Description of what the check does and why it is implemented.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>exclude</code></td>
+            <td>
+                  <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>include</code></td>
+            <td>
+                  <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>severity</code></td>
+            <td>
+                  <code><span title="Literal">Literal</span>[<span title="error">error</span>, <span title="warn">warn</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Severity level of the check. Default: <code>error</code>.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+        <p>Example(s):
     <div class="language-yaml highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">manifest_checks</span><span class="p">:</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_model_has_constraints</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">      </span><span class="nt">required_constraint_types</span><span class="p">:</span>
@@ -3108,101 +3128,106 @@
 
     <div class="doc doc-contents ">
 
-      <p>Models must have at most one column-level primary key constraint.</p>
+        <p>Models must have at most one column-level primary key constraint.</p>
 <div class="admonition info">
 <p class="admonition-title">Rationale</p>
 <p>Declaring more than one column-level primary-key constraint in a dbt model is almost always a modelling mistake — it implies multiple independent identity columns, which is semantically ambiguous and can confuse downstream consumers. This check flags models with two or more column-level <code>primary_key</code> constraints so the author can consolidate them into a single-column PK or a composite constraint at model level.</p>
 </div>
 
-<p><strong>Receives at execution time:</strong></p>
-<table>
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Type</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-      <tr>
-        <td><code>model</code>        <td>
-              <code><span title="ModelNode">ModelNode</span></code>
-        </td>
-        <td>
-          <div class="doc-md-description">
-            <p>The ModelNode object to check.</p>
-          </div>
-        </td>
-      </tr>
-  </tbody>
-</table>
+
+
+    <p><span class="doc-section-title">Receives at execution time:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>model</code></td>            <td>
+                  <code><span title="ModelNode">ModelNode</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The ModelNode object to check.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+
 <p><span class="doc-section-title">Other Parameters (passed via config file):</span></p>
-<table>
-    <thead>
-    <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Description</th>
-    </tr>
-    </thead>
-    <tbody>
-        <tr class="doc-section-item">
-        <td><code>description</code></td>
-        <td>
-                <code><span title="str">str</span> | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Description of what the check does and why it is implemented.</p>
-            </div>
-        </td>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
         </tr>
-        <tr class="doc-section-item">
-        <td><code>exclude</code></td>
-        <td>
-                <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.</p>
-            </div>
-        </td>
-        </tr>
-        <tr class="doc-section-item">
-        <td><code>include</code></td>
-        <td>
-                <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.</p>
-            </div>
-        </td>
-        </tr>
-        <tr class="doc-section-item">
-        <td><code>materialization</code></td>
-        <td>
-                <code><span title="Literal">Literal</span>[<span title="ephemeral">ephemeral</span>, <span title="incremental">incremental</span>, <span title="table">table</span>, <span title="view">view</span>] | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Limit check to models with the specified materialization.</p>
-            </div>
-        </td>
-        </tr>
-        <tr class="doc-section-item">
-        <td><code>severity</code></td>
-        <td>
-                <code><span title="Literal">Literal</span>[<span title="error">error</span>, <span title="warn">warn</span>] | None</code>
-        </td>
-        <td>
-            <div class="doc-md-description">
-            <p>Severity level of the check. Default: <code>error</code>.</p>
-            </div>
-        </td>
-        </tr>
-    </tbody>
-</table>      <p>Example(s):
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code>description</code></td>
+            <td>
+                  <code><span title="str">str</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Description of what the check does and why it is implemented.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>exclude</code></td>
+            <td>
+                  <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>include</code></td>
+            <td>
+                  <code><span title="str">str</span> | <a class="autorefs autorefs-internal" href="../../../../cli/#list">list</a>[<span title="str">str</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>materialization</code></td>
+            <td>
+                  <code><span title="Literal">Literal</span>[<span title="ephemeral">ephemeral</span>, <span title="incremental">incremental</span>, <span title="table">table</span>, <span title="view">view</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Limit check to models with the specified materialization.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code>severity</code></td>
+            <td>
+                  <code><span title="Literal">Literal</span>[<span title="error">error</span>, <span title="warn">warn</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Severity level of the check. Default: <code>error</code>.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+        <p>Example(s):
     <div class="language-yaml highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">manifest_checks</span><span class="p">:</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_model_single_primary_key</span>
 </span></code></pre></div></p>
@@ -3359,10 +3384,10 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate":null,"base":"../../../..","features":["content.action.edit","content.code.annotate","content.code.copy","navigation.expand","navigation.indexes","navigation.instant","navigation.instant.progress","navigation.prune","navigation.sections","navigation.tabs","navigation.tabs.sticky","navigation.tracking","navigation.top","toc.follow","toc.integrate"],"search":"../../../../assets/javascripts/workers/search.e2d2d235.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"alias":true,"canonical_version":"stable","default":"stable","provider":"mike"}}</script>
+      <script id="__config" type="application/json">{"annotate":null,"base":"../../../..","features":["content.action.edit","content.code.annotate","content.code.copy","navigation.expand","navigation.indexes","navigation.instant","navigation.instant.progress","navigation.prune","navigation.sections","navigation.tabs","navigation.tabs.sticky","navigation.tracking","navigation.top","toc.follow","toc.integrate"],"search":"../../../../assets/javascripts/workers/search.b6b7e04f.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"alias":true,"canonical_version":"stable","default":"stable","provider":"mike"}}</script>
     
     
-      <script src="../../../../assets/javascripts/bundle.6e5f0216.min.js"></script>
+      <script src="../../../../assets/javascripts/bundle.d7f30b55.min.js"></script>
       
     
   </body>
