@@ -1,31 +1,112 @@
-{% import "language.html" as lang with context %}
+{#- Template for "Other parameters" sections in docstrings.
 
-<p><span class="doc-section-title">Other Parameters (passed via config file):</span></p>
-<table>
-    <thead>
-    <tr>
-        <th>{{ lang.t("Name") }}</th>
-        <th>{{ lang.t("Type") }}</th>
-        <th>{{ lang.t("Description") }}</th>
-    </tr>
-    </thead>
-    <tbody>
-    {% for parameter in section.value %}
-        <tr class="doc-section-item">
-        <td><code>{{ parameter.name }}</code></td>
-        <td>
-            {% if parameter.annotation %}
-            {% with expression = parameter.annotation %}
-                <code>{% include "expression"|get_template with context %}</code>
-            {% endwith %}
-            {% endif %}
-        </td>
-        <td>
-            <div class="doc-md-description">
-            {{ parameter.description|convert_markdown(heading_level, html_id) }}
-            </div>
-        </td>
+Overrides the upstream mkdocstrings-python template solely to customise the
+section title (these parameters are supplied via the dbt-bouncer config file).
+Kept in sync with the upstream 2.0.x template so all section styles keep working.
+
+Context:
+  section (griffe.DocstringSectionAttributes): The section to render.
+-#}
+
+{% block logs scoped %}
+  {#- Logging block.
+
+  This block can be used to log debug messages, deprecation messages, warnings, etc.
+  -#}
+  {{ log.debug("Rendering other parameters section") }}
+{% endblock logs %}
+
+{% import "language.html.jinja" as lang with context %}
+{#- Language module providing the `t` translation method. -#}
+
+{% set doc_bouncer_title = "Other Parameters (passed via config file):" %}
+
+{% if config.docstring_section_style == "table" %}
+  {% block table_style scoped %}
+    {#- Block for the `table` section style. -#}
+    <p><span class="doc-section-title">{{ doc_bouncer_title }}</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>{{ lang.t("Name") }}</th>
+          <th>{{ lang.t("Type") }}</th>
+          <th>{{ lang.t("Description") }}</th>
         </tr>
-    {% endfor %}
-    </tbody>
-</table>
+      </thead>
+      <tbody>
+        {% for parameter in section.value %}
+          <tr class="doc-section-item">
+            <td><code>{{ parameter.name }}</code></td>
+            <td>
+              {% if parameter.annotation %}
+                {% with expression = parameter.annotation, backlink_type = "used-by" %}
+                  <code>{% include "expression.html.jinja" with context %}</code>
+                {% endwith %}
+              {% endif %}
+            </td>
+            <td>
+              <div class="doc-md-description">
+                {{ parameter.description|convert_markdown(heading_level, html_id, autoref_hook=autoref_hook) }}
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endblock table_style %}
+{% elif config.docstring_section_style == "list" %}
+  {% block list_style scoped %}
+    {#- Block for the `list` section style. -#}
+    <p><span class="doc-section-title">{{ doc_bouncer_title }}</span></p>
+    <ul>
+      {% for parameter in section.value %}
+        <li class="doc-section-item field-body">
+          <b><code>{{ parameter.name }}</code></b>
+          {% if parameter.annotation %}
+            {% with expression = parameter.annotation, backlink_type = "used-by" %}
+              (<code>{% include "expression.html.jinja" with context %}</code>)
+            {% endwith %}
+          {% endif %}
+          –
+          <div class="doc-md-description">
+            {{ parameter.description|convert_markdown(heading_level, html_id, autoref_hook=autoref_hook) }}
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+  {% endblock list_style %}
+{% elif config.docstring_section_style == "spacy" %}
+  {% block spacy_style scoped %}
+    {#- Block for the `spacy` section style. -#}
+    <table>
+      <thead>
+        <tr>
+          <th><span class="doc-section-title">{{ doc_bouncer_title.rstrip(":").upper() }}</span></th>
+          <th><span>{{ lang.t("DESCRIPTION") }}</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for parameter in section.value %}
+          <tr class="doc-section-item">
+            <td><code>{{ parameter.name }}</code></td>
+            <td class="doc-param-details">
+              <div class="doc-md-description">
+                {{ parameter.description|convert_markdown(heading_level, html_id, autoref_hook=autoref_hook) }}
+              </div>
+              <p>
+                {% if parameter.annotation %}
+                  <span class="doc-param-annotation">
+                    <b>{{ lang.t("TYPE:") }}</b>
+                    {% with expression = parameter.annotation, backlink_type = "used-by" %}
+                      <code>{% include "expression.html.jinja" with context %}</code>
+                    {% endwith %}
+                  </span>
+                {% endif %}
+              </p>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endblock spacy_style %}
+{% endif %}
