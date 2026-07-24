@@ -24,7 +24,7 @@ Check out our [Getting started](./getting_started.md) guide.
 
 - Provide a **100% configurable** way to enforce conventions in a dbt project.
 - Be as **fast** as possible, running checks against dbt artifacts.
-- Be as **easy** as possible to use, with a simple config file written in `YML` or `TOML`.
+- Be as **easy** as possible to use, with a simple config file written in `YAML` or `TOML`.
 - Be as **flexible** as possible, allowing checks to be written in Python.
 - Provide **immediate feedback** when run as a **pre-commit** hook or as part of a CI pipeline.
 
