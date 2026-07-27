@@ -1,7 +1,7 @@
 """Generate a plot of benchmark runtime per iteration (distribution/histogram).
 
 Runs the benchmark (or accepts pre-existing pytest-benchmark JSON output), constructs
-an Altair performance density scatter plot (saved to HTML and PNG), and displays the
+an Altair performance density scatter plot (saved to HTML), and displays the
 scatter plot and statistical summary directly in the terminal.
 
 Run via mise (recommended)::

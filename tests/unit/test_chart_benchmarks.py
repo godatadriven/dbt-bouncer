@@ -112,7 +112,7 @@ def test_run_benchmark_json_passes_rounds() -> None:
 
 
 def test_cli_with_json_file(tmp_path: Path) -> None:
-    """The CLI entrypoint renders terminal scatter plot and exports Altair HTML & PNG."""
+    """The CLI entrypoint renders terminal scatter plot and exports Altair HTML."""
     json_path = tmp_path / "report.json"
     html_out = tmp_path / "chart.html"
     report_data = {
