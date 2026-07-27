@@ -10,7 +10,7 @@
 | Configuration | `YAML` or `TOML` config file | `.pre-commit-config.yaml` | `dbt_project.yml` + seed files (CSV) | `pyproject.toml` |
 | Checks written in | Python | Python | SQL + Jinja | Python |
 | Requires a database connection | ❌ | ❌ | ✅ | ❌ |
-| Checks any dbt artifact (manifest, catalog, run results) | ✅ | Manifest only | ❌ (queries the database) | Manifest only |
+| Checks any dbt artifact (manifest, catalog, run results) | ✅ | Manifest and catalog | ❌ (queries the database) | Manifest only |
 | Where it runs | Locally and in a CI pipeline | Only as part of `pre-commit`/`prek` | Locally and in a CI pipeline | Locally, from the command line |
 
 !!! tip
