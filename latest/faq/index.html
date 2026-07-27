@@ -1031,24 +1031,65 @@
 
 <h1 id="frequently-asked-questions">Frequently Asked Questions<a class="headerlink" href="#frequently-asked-questions" title="Permanent link">#</a></h1>
 <h2 id="can-other-tools-perform-the-same-checks-as-dbt-bouncer">Can other tools perform the same checks as <code>dbt-bouncer</code>?<a class="headerlink" href="#can-other-tools-perform-the-same-checks-as-dbt-bouncer" title="Permanent link">#</a></h2>
-<p>There are several other tools that perform similar tasks as <code>dbt-bouncer</code>.</p>
-<ul>
-<li><a href="https://github.com/dbt-checkpoint/dbt-checkpoint">dbt-checkpoint</a>: A collection of <code>pre-commit</code> hooks for dbt projects. Tests are written in python. Configuration is performed via <code>.pre-commit-config.yaml</code>. Provided the dbt artifacts have already been generated, <code>dbt-checkpoint</code> does not need access to the underlying database. The hooks execute when a new commit is made, as such <code>dbt-checkpoint</code> is designed to be run only as part of <code>pre-commit</code> (or <code>prek</code>).</li>
-<li><a href="https://github.com/dbt-labs/dbt-project-evaluator">dbt-project-evaluator</a>: This is a dbt package from dbt Labs. Tests are written in <code>.sql</code> files using a combination of Jinja and SQL. Configuration is performed via <code>dbt_project.yml</code> and seed files (i.e. csv files). Requires a connection to underlying database. Designed to be run both in a CI pipeline and also during active development.</li>
-<li><a href="https://github.com/PicnicSupermarket/dbt-score">dbt-score</a>: This is a python package installable via <code>pip</code>. A collection of tests that apply only to dbt models. Tests can be executed from the command line. Tests are written in python. Configuration is performed via a <code>pyproject.toml</code> file. Provided the dbt artifacts have already been generated, <code>dbt-score</code> does not need access to the underlying database. Designed to be run during development.</li>
-</ul>
-<p>While the above tools inhabit the same space as <code>dbt-bouncer</code> they do not provide what we consider to be the optimum experience that <code>dbt-bouncer</code> provides:</p>
-<ul>
-<li>Designed to run both locally and in a CI pipeline.</li>
-<li>Configurable via a file format, <code>YML</code>, that dbt developers are already familiar with.</li>
-<li>Does not require database access.</li>
-<li>Can run tests against any of dbt's artifacts.</li>
-<li>Allows tests to be written in python.</li>
-</ul>
-<p>As such we consider <code>dbt-bouncer</code> to be the best tool to enforce conventions in a dbt project.</p>
+<p><code>dbt-bouncer</code> is designed to be the most complete and flexible way to enforce conventions in a dbt project: it ships <strong>120+ built-in checks</strong>, is configured via a <code>YAML</code> or <code>TOML</code> file format that dbt developers are already familiar with, never needs a database connection, can run checks against any of dbt's artifacts (manifest, catalog, and run results), can run both locally and in a CI pipeline, and lets you write custom checks in python.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><code>dbt-bouncer</code></th>
+<th><a href="https://github.com/dbt-checkpoint/dbt-checkpoint"><code>dbt-checkpoint</code></a></th>
+<th><a href="https://github.com/dbt-labs/dbt-project-evaluator"><code>dbt-project-evaluator</code></a></th>
+<th><a href="https://github.com/PicnicSupermarket/dbt-score"><code>dbt-score</code></a></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Built-in checks</td>
+<td>120+</td>
+<td>Collection of <code>pre-commit</code> hooks</td>
+<td>Fixed set of SQL/Jinja tests</td>
+<td>Fixed set of model-only checks</td>
+</tr>
+<tr>
+<td>Configuration</td>
+<td><code>YAML</code> or <code>TOML</code> config file</td>
+<td><code>.pre-commit-config.yaml</code></td>
+<td><code>dbt_project.yml</code> + seed files (CSV)</td>
+<td><code>pyproject.toml</code></td>
+</tr>
+<tr>
+<td>Checks written in</td>
+<td>Python</td>
+<td>Python</td>
+<td>SQL + Jinja</td>
+<td>Python</td>
+</tr>
+<tr>
+<td>Requires a database connection</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Checks any dbt artifact (manifest, catalog, run results)</td>
+<td>✅</td>
+<td>Manifest and catalog</td>
+<td>❌ (queries the database)</td>
+<td>Manifest only</td>
+</tr>
+<tr>
+<td>Where it runs</td>
+<td>Locally and in a CI pipeline</td>
+<td>Only as part of <code>pre-commit</code>/<code>prek</code></td>
+<td>Locally and in a CI pipeline</td>
+<td>Locally, from the command line</td>
+</tr>
+</tbody>
+</table>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
-<p><code>dbt-bouncer</code> can perform all the tests currently included in <code>dbt-checkpoint</code>, <code>dbt-project-evaluator</code> and <code>dbt-score</code>. If you see an existing test that is not possible with <code>dbt-bouncer</code>, open an <a href="https://github.com/godatadriven/dbt-bouncer/issues">issue</a> and we'll add it!</p>
+<p><code>dbt-bouncer</code> can perform all the checks currently included in <code>dbt-checkpoint</code>, <code>dbt-project-evaluator</code> and <code>dbt-score</code>. If you see an existing check that is not possible with <code>dbt-bouncer</code>, open an <a href="https://github.com/godatadriven/dbt-bouncer/issues">issue</a> and we'll add it!</p>
 </div>
 <h2 id="does-dbt-bouncer-work-with-dbt-cloud">Does <code>dbt-bouncer</code> work with dbt Cloud?<a class="headerlink" href="#does-dbt-bouncer-work-with-dbt-cloud" title="Permanent link">#</a></h2>
 <p>Yes! As <code>dbt-bouncer</code> runs on the artifacts generated by dbt, it can be used with dbt Cloud as long as the artifacts generated by the CI job in dbt Cloud are available.</p>
@@ -1139,15 +1180,19 @@
 <p>Typically a CI pipeline will run a <code>dbt build</code> command with flags such as <code>--state</code> and/or <code>--defer</code>. After this command has completed we can run our run results checks via:</p>
 <div class="language-shell highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>dbt-bouncer<span class="w"> </span>--only<span class="w"> </span>run_results_checks
 </span></code></pre></div>
-<p>Additionally, you can use the <code>--check</code> flag to run only specific checks by name. This is useful for debugging or validating a single convention:</p>
-<div class="language-shell highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>dbt-bouncer<span class="w"> </span>--check<span class="w"> </span>check_model_has_unique_test
-</span></code></pre></div>
-<p>Multiple checks can be specified as a comma-separated list:</p>
-<div class="language-shell highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>dbt-bouncer<span class="w"> </span>--check<span class="w"> </span>check_model_has_unique_test,check_model_description_populated
-</span></code></pre></div>
-<p>The <code>--check</code> and <code>--only</code> flags can be combined: <code>--only</code> restricts to the specified categories, then <code>--check</code> further narrows to only the named checks within those categories.</p>
 </li>
 </ol>
+<p>Additionally, you can use the <code>--check</code> flag to run only specific checks by name. This is useful for debugging or validating a single convention:</p>
+<div class="language-text highlight"><pre><span></span><code>  ```shell
+  dbt-bouncer --check check_model_has_unique_test
+  ```
+</code></pre></div>
+<p>Multiple checks can be specified as a comma-separated list:</p>
+<div class="language-text highlight"><pre><span></span><code>  ```shell
+  dbt-bouncer --check check_model_has_unique_test,check_model_description_populated
+  ```
+</code></pre></div>
+<p>The <code>--check</code> and <code>--only</code> flags can be combined: <code>--only</code> restricts to the specified categories, then <code>--check</code> further narrows to only the named checks within those categories.</p>
 <p>By using this approach, and combining with your own unique constraints and desires, <code>dbt-bouncer</code> can be used efficiently as part of your CI pipeline.</p>
 <h2 id="how-to-set-up-dbt-bouncer-in-a-monorepo">How to set up <code>dbt-bouncer</code> in a monorepo?<a class="headerlink" href="#how-to-set-up-dbt-bouncer-in-a-monorepo" title="Permanent link">#</a></h2>
 <p>A monorepo may consist of one directory with a dbt project and other directories with unrelated code. It may be desired for <code>dbt-bouncer</code> to be configured from the root directory. Sample directory tree:</p>
