@@ -48,7 +48,7 @@ jobs:
               run: |
                 git diff --name-status origin/main..HEAD > changed_files.txt
                 cat changed_files.txt
-                cat changed_files.txt | xargs uv run prek run --files
+                cat changed_files.txt | xargs uv run prek run --show-diff-on-failure --files
 
     schema-check:
         needs: [prek]
