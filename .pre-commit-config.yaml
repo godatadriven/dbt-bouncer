@@ -107,6 +107,7 @@ repos:
       hooks:
         - id: tombi
           entry: uv run tombi format
+          exclude: '^uv\.lock$' # uv owns this file's formatting; tombi reformats it and fights dependabot updates
           language: system
           name: tombi
           require_serial: true
