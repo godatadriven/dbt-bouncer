@@ -116,12 +116,14 @@ def main_callback(
         Exit: If the version flag is passed or an invalid output format is provided.
 
     """
-    _tune_gc_for_cli()
-
     # Handle version flag
     if version:
         typer.echo(get_version())
         raise typer.Exit()
+
+    # After the early exits: `--version` and `--help` do no allocation-heavy work,
+    # so they have nothing to gain from retuning the collector.
+    _tune_gc_for_cli()
 
     if ctx.invoked_subcommand is None:
         ctx.invoke(
