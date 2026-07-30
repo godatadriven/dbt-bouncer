@@ -1,12 +1,19 @@
 """Assemble and run all checks."""
 
 import operator
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, NotRequired, TypedDict
 
 from dbt_bouncer.enums import ResourceType
 from dbt_bouncer.executor import Executor
 from dbt_bouncer.reporting.reporter import Reporter
-from dbt_bouncer.utils import get_nested_value, resource_in_path
+from dbt_bouncer.utils import (
+    clean_path_str,
+    get_nested_value,
+    object_excluded_by_path,
+    object_in_path,
+    resource_in_path,
+)
 
 if TYPE_CHECKING:
     from dbt_bouncer.context import BouncerContext
@@ -14,6 +21,32 @@ if TYPE_CHECKING:
 
 _VALID_ITERATE_OVER_VALUES = frozenset(rt.value for rt in ResourceType)
 _CLASS_ITERATE_CACHE: dict[type, frozenset[str]] = {}
+
+
+@dataclass(slots=True)
+class _ResourceFacts:
+    """Per-resource values reused by every check that targets the resource.
+
+    All of these are functions of the resource alone, so matching computes them
+    once per resource rather than once per (check, resource) pair.
+    """
+
+    resource: Any
+    skip_checks: list[str]
+    run_id_suffix: str
+    file_path: str | None
+    unique_id: str | None
+    cleaned_path: str
+
+
+def _pattern_key(pattern: str | list[str] | None) -> Any:
+    """Return a hashable cache key for an include/exclude pattern.
+
+    Returns:
+        Any: The pattern itself when hashable, else a tuple of its items.
+
+    """
+    return tuple(pattern) if isinstance(pattern, list) else pattern
 
 
 def _get_resource_meta(
@@ -67,12 +100,24 @@ def _build_check_run_id(check: Any, resource: Any, iterate_value: str) -> str:
         str: The check run ID in the format "check_name:index:resource_suffix".
 
     """
+    return f"{check.name}:{check.index}:{_run_id_suffix(resource, iterate_value)}"
+
+
+def _run_id_suffix(resource: Any, iterate_value: str) -> str:
+    """Build the resource half of a check-run ID.
+
+    Depends only on the resource, so matching caches it per resource instead of
+    recomputing it for every check that matches.
+
+    Returns:
+        str: The resource suffix (e.g. "staging_crm_stg_customers").
+
+    """
     match iterate_value:
         case "exposure" | "macro" | "test" | "unit_test":
-            suffix = resource.unique_id.split(".")[-1]
+            return resource.unique_id.split(".")[-1]
         case _:
-            suffix = "_".join(getattr(resource, iterate_value).unique_id.split(".")[2:])
-    return f"{check.name}:{check.index}:{suffix}"
+            return "_".join(getattr(resource, iterate_value).unique_id.split(".")[2:])
 
 
 class CheckToRun(TypedDict):
@@ -206,24 +251,60 @@ def _assemble_checks_to_run(ctx: "BouncerContext") -> list[CheckToRun]:
     for check_category in ctx.check_categories:
         list_of_check_configs.extend(getattr(ctx.bouncer_config, check_category))
 
-    # Per-iterate_value cache of (resource, skip_checks_for_resource) tuples.
-    # The skip_checks meta depends only on the resource, so computing it once
-    # per resource (instead of once per (check, resource) pair) is a big win
-    # when the config has many checks targeting the same resource type.
-    resources_with_meta: dict[str, list[tuple[Any, list[str]]]] = {}
+    # Per-iterate_value cache of per-resource facts. Every field depends only on
+    # the resource, never on the check, so computing them once per resource
+    # (instead of once per (check, resource) pair) is a big win when the config
+    # has many checks targeting the same resource type: the run-ID suffix, file
+    # path and unique_id are all string work over proxy objects, and
+    # ``skip_checks`` is a nested meta lookup.
+    resources_with_meta: dict[str, list[_ResourceFacts]] = {}
 
-    def _resources_for(iterate_value: str) -> list[tuple[Any, list[str]]]:
+    def _resources_for(iterate_value: str) -> list[_ResourceFacts]:
         cached = resources_with_meta.get(iterate_value)
         if cached is not None:
             return cached
-        out: list[tuple[Any, list[str]]] = []
+        out: list[_ResourceFacts] = []
         for resource in resource_map[f"{iterate_value}s"]:
             d = _get_resource_meta(resource, iterate_value, meta_by_unique_id)
+            file_path = getattr(resource, "original_file_path", None)
             out.append(
-                (resource, get_nested_value(d, ["dbt-bouncer", "skip_checks"], []))
+                _ResourceFacts(
+                    resource=resource,
+                    skip_checks=get_nested_value(d, ["dbt-bouncer", "skip_checks"], []),
+                    run_id_suffix=_run_id_suffix(resource, iterate_value),
+                    file_path=file_path,
+                    unique_id=getattr(resource, "unique_id", None),
+                    cleaned_path=clean_path_str(file_path or ""),
+                )
             )
         resources_with_meta[iterate_value] = out
         return out
+
+    # Memoised include/exclude filtering. Path matching depends only on the
+    # check's include/exclude patterns and the resource's path, so checks sharing
+    # a pattern pair (very common -- most set neither) reuse one filtered list
+    # instead of re-running the regexes per check.
+    path_filtered: dict[tuple[str, Any, Any], list[_ResourceFacts]] = {}
+
+    def _path_filtered_for(check: Any, iterate_value: str) -> list[_ResourceFacts]:
+        include, exclude = check.include, check.exclude
+        key = (iterate_value, _pattern_key(include), _pattern_key(exclude))
+        cached = path_filtered.get(key)
+        if cached is not None:
+            return cached
+        candidates = _resources_for(iterate_value)
+        if include is None and not exclude:
+            # No filter at all: every resource matches, so skip the regex work.
+            result = candidates
+        else:
+            result = [
+                facts
+                for facts in candidates
+                if object_in_path(include, facts.cleaned_path)
+                and not object_excluded_by_path(exclude, facts.cleaned_path)
+            ]
+        path_filtered[key] = result
+        return result
 
     checks_to_run: list[CheckToRun] = []
     for check in sorted(list_of_check_configs, key=operator.attrgetter("index")):
@@ -244,25 +325,38 @@ def _assemble_checks_to_run(ctx: "BouncerContext") -> list[CheckToRun]:
             # The context is identical for every resource, so set it once on the
             # shared check-config instance rather than per match.
             check.set_context(check_ctx)
-            for i, meta_config in _resources_for(iterate_value):
-                # Filter first against the check — _should_run_check only reads
-                # include/exclude/materialization/name.
-                if not _should_run_check(check, i, iterate_over_value, meta_config):
+            check_name = check.name
+            check_code = getattr(check, "code", None)
+            severity = check.severity
+            id_prefix = f"{check_name}:{check.index}:"
+            materialization = (
+                check.materialization if iterate_value == "model" else None
+            )
+            for facts in _path_filtered_for(check, iterate_value):
+                if (
+                    materialization is not None
+                    and materialization != facts.resource.model.config.materialized
+                ):
+                    continue
+                skip_checks = facts.skip_checks
+                if skip_checks and (
+                    check_name in skip_checks
+                    or (check_code and check_code in skip_checks)
+                ):
                     continue
                 # No per-resource copy: the executor binds ``resource`` onto the
                 # shared ``check`` instance immediately before calling execute().
                 # Checks run sequentially, so reusing one instance across all of
                 # its resources is safe (and avoids ~17k+ model_copy calls).
-                check_run_id = _build_check_run_id(check, i, iterate_value)
                 checks_to_run.append(
                     {
                         "check": check,
-                        "check_run_id": check_run_id,
-                        "file_path": getattr(i, "original_file_path", None),
+                        "check_run_id": id_prefix + facts.run_id_suffix,
+                        "file_path": facts.file_path,
                         "iterate_value": iterate_value,
-                        "resource": i,
-                        "severity": check.severity,
-                        "unique_id": getattr(i, "unique_id", None),
+                        "resource": facts.resource,
+                        "severity": severity,
+                        "unique_id": facts.unique_id,
                     },
                 )
         elif len(iterate_over_value) > 1:
