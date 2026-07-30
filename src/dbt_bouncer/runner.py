@@ -12,7 +12,6 @@ from dbt_bouncer.utils import (
     get_nested_value,
     object_excluded_by_path,
     object_in_path,
-    resource_in_path,
 )
 
 if TYPE_CHECKING:
@@ -88,21 +87,6 @@ def _get_resource_meta(
             return resource.meta or {}
 
 
-def _build_check_run_id(check: Any, resource: Any, iterate_value: str) -> str:
-    """Build a unique run ID string for a check against a specific resource.
-
-    Args:
-        check: The check instance (must have .name and .index attributes).
-        resource: The wrapper resource object.
-        iterate_value: The singular resource type name (e.g. "model", "exposure").
-
-    Returns:
-        str: The check run ID in the format "check_name:index:resource_suffix".
-
-    """
-    return f"{check.name}:{check.index}:{_run_id_suffix(resource, iterate_value)}"
-
-
 def _run_id_suffix(resource: Any, iterate_value: str) -> str:
     """Build the resource half of a check-run ID.
 
@@ -140,39 +124,40 @@ class CheckToRun(TypedDict):
     unique_id: NotRequired[str | None]
 
 
-def _should_run_check(
-    check: Any,
-    resource: Any,
-    iterate_over_value: frozenset[str],
-    meta_config: list[str],
+def _check_applies_to_resource(
+    check_name: str,
+    check_code: str | None,
+    materialization: str | None,
+    facts: "_ResourceFacts",
 ) -> bool:
-    """Determine if a check should run against a given resource.
+    """Decide whether a check runs against a resource, ignoring path filters.
 
-    Evaluates three conditions:
-    1. The resource path matches the check's include/exclude patterns.
-    2. For model checks, the materialization matches (if specified).
-    3. The check is not listed in the resource's skip_checks meta config.
+    Path include/exclude is handled separately (and memoised per pattern pair)
+    because it depends only on the pattern and the path; what remains is the
+    per-pair part: the materialization filter and the resource's own
+    ``skip_checks`` meta.
+
+    Args:
+        check_name: The check's configured name.
+        check_code: The check's rule code, if it has one.
+        materialization: The required materialization, or ``None`` when the
+            check does not filter on it (including every non-model resource).
+        facts: The resource's precomputed facts.
 
     Returns:
-        bool: Whether the check should run.
+        bool: Whether the check should run against this resource.
 
     """
-    if not resource_in_path(check, resource):
-        return False
-
     if (
-        iterate_over_value == {"model"}
-        and check.materialization is not None
-        and check.materialization != resource.model.config.materialized
+        materialization is not None
+        and materialization != facts.resource.model.config.materialized
     ):
         return False
 
+    skip_checks = facts.skip_checks
     return not (
-        meta_config
-        and (
-            check.name in meta_config
-            or (getattr(check, "code", None) and check.code in meta_config)
-        )
+        skip_checks
+        and (check_name in skip_checks or (check_code and check_code in skip_checks))
     )
 
 
@@ -333,15 +318,8 @@ def _assemble_checks_to_run(ctx: "BouncerContext") -> list[CheckToRun]:
                 check.materialization if iterate_value == "model" else None
             )
             for facts in _path_filtered_for(check, iterate_value):
-                if (
-                    materialization is not None
-                    and materialization != facts.resource.model.config.materialized
-                ):
-                    continue
-                skip_checks = facts.skip_checks
-                if skip_checks and (
-                    check_name in skip_checks
-                    or (check_code and check_code in skip_checks)
+                if not _check_applies_to_resource(
+                    check_name, check_code, materialization, facts
                 ):
                     continue
                 # No per-resource copy: the executor binds ``resource`` onto the
