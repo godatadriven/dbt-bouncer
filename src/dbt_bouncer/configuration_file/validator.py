@@ -351,10 +351,6 @@ def _get_stub_namespace() -> dict[str, Any]:
 
 _CONF_CACHE_FORMAT_VERSION = 1
 
-# Single-entry cache for the lightweight conf class built by
-# ``_get_lite_conf_class``; the class is interpreter-wide and immutable.
-_LITE_CONF_CLASS: dict[str, type["DbtBouncerConfBase"]] = {}
-
 _root_model_fields_cache: dict[type, tuple[tuple[str, type[RootModel]], ...]] = {}
 
 
@@ -446,6 +442,7 @@ def _construct_cached_check(
     return cls.model_construct(**data)
 
 
+@lru_cache(maxsize=1)
 def _get_lite_conf_class() -> type["DbtBouncerConfBase"]:
     """Return a lightweight Pydantic subclass of ``DbtBouncerConfBase``.
 
@@ -454,16 +451,12 @@ def _get_lite_conf_class() -> type["DbtBouncerConfBase"]:
     fields are typed as ``list[Any]``. Constructing this class is a sub-millisecond
     operation versus ~70ms for the full discriminated-union variant.
 
-    Cached on the function object since the class is interpreter-wide and immutable.
+    Cached for the interpreter's lifetime since the class is immutable.
 
     Returns:
         type[DbtBouncerConfBase]: A subclass with three ``list[Any]`` category fields.
 
     """
-    cached = _LITE_CONF_CLASS.get("cls")
-    if cached is not None:
-        return cached
-
     from pydantic import Field, create_model
 
     from dbt_bouncer.configuration_file.parser import DbtBouncerConfBase
@@ -475,7 +468,6 @@ def _get_lite_conf_class() -> type["DbtBouncerConfBase"]:
         manifest_checks=(list[Any], Field(default=[])),
         run_results_checks=(list[Any], Field(default=[])),
     )
-    _LITE_CONF_CLASS["cls"] = cls
     return cls
 
 
