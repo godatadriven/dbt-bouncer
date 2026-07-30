@@ -229,9 +229,11 @@ class CheckMyCustomCheck(BaseCheck):
     # Run dbt-bouncer
     monkeypatch.chdir(tmp_path)
     runner = CliRunner()
+    # `-v` is required: `custom_checks_dir=` is logged at DEBUG, and the root
+    # logger is only taken down to DEBUG when the user asks for that verbosity.
     result = runner.invoke(
         app,
-        ["--config-file", PurePath("dbt-bouncer.yml").as_posix()],
+        ["-v", "--config-file", PurePath("dbt-bouncer.yml").as_posix()],
     )
 
     assert len([r for r in caplog.messages if r.find("custom_checks_dir=") >= 0]) >= 1
