@@ -62,9 +62,10 @@ class Executor:
                 traceback.TracebackException.from_exception(e).format(),
             )
             failure_message = failure_message_full[-1].strip()
-            logging.debug(
-                f"Check {check['check_run_id']} raised unexpected error:\n{''.join(failure_message_full)}"
-            )
+            if self._debug_enabled:
+                logging.debug(
+                    f"Check {check['check_run_id']} raised unexpected error:\n{''.join(failure_message_full)}"
+                )
 
             check["outcome"] = CheckOutcome.FAILED
             check["severity"] = CheckSeverity.WARN
