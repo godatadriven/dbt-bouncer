@@ -88,7 +88,7 @@ def get_config_file_path(
     Raises:
         RuntimeError: If no config file is found.
 
-    """  # noqa: D400, D415
+    """  # ruff: ignore[missing-trailing-period, missing-terminal-punctuation]
     logging.debug(f"{config_file=}")
     logging.debug(f"{config_file_source=}")
 
@@ -299,8 +299,10 @@ def lint_config_file(config_file_path: Path) -> list[dict[str, Any]]:
                     continue
 
                 # Treat absent, null and empty values alike: all leave us with
-                # nothing to look up in the registry.
-                check_name = check.get("name") or check.get("code")
+                # nothing to look up in the registry. The config is arbitrary
+                # user YAML, so coerce to ``str`` rather than trusting the type.
+                raw_name = check.get("name") or check.get("code")
+                check_name: str = str(raw_name) if raw_name else ""
                 if not check_name:
                     issues.append(
                         {
@@ -314,7 +316,9 @@ def lint_config_file(config_file_path: Path) -> list[dict[str, Any]]:
                 if check_name not in registry:
                     best_match = min(
                         registry.keys(),
-                        key=lambda k: jellyfish.levenshtein_distance(k, check_name),
+                        key=lambda k, target=check_name: jellyfish.levenshtein_distance(
+                            k, target
+                        ),
                         default=None,
                     )
                     suggestion = f" Did you mean '{best_match}'?" if best_match else ""
@@ -346,6 +350,10 @@ def _get_stub_namespace() -> dict[str, Any]:
 
 
 _CONF_CACHE_FORMAT_VERSION = 1
+
+# Single-entry cache for the lightweight conf class built by
+# ``_get_lite_conf_class``; the class is interpreter-wide and immutable.
+_LITE_CONF_CLASS: dict[str, type["DbtBouncerConfBase"]] = {}
 
 _root_model_fields_cache: dict[type, tuple[tuple[str, type[RootModel]], ...]] = {}
 
@@ -452,7 +460,7 @@ def _get_lite_conf_class() -> type["DbtBouncerConfBase"]:
         type[DbtBouncerConfBase]: A subclass with three ``list[Any]`` category fields.
 
     """
-    cached = getattr(_get_lite_conf_class, "_cls", None)
+    cached = _LITE_CONF_CLASS.get("cls")
     if cached is not None:
         return cached
 
@@ -467,7 +475,7 @@ def _get_lite_conf_class() -> type["DbtBouncerConfBase"]:
         manifest_checks=(list[Any], Field(default=[])),
         run_results_checks=(list[Any], Field(default=[])),
     )
-    _get_lite_conf_class._cls = cls  # type: ignore[attr-defined]
+    _LITE_CONF_CLASS["cls"] = cls
     return cls
 
 
@@ -692,9 +700,10 @@ def validate_conf(
                 if args:
                     entry["name"] = args[0]
                     configured_check_names.add(args[0])
-            if getattr(cls, "code", None) is not None:
-                entry["code"] = cls.code
-                configured_check_names.add(cls.code)
+            code_val = getattr(cls, "code", None)
+            if code_val is not None:
+                entry["code"] = code_val
+                configured_check_names.add(code_val)
 
     cache_path: Path | None = None
     if _conf_cache_enabled():
@@ -725,7 +734,7 @@ def validate_conf(
             frozenset(configured_check_names),
             custom_checks_dir=custom_checks_dir,
         )
-        DbtBouncerConf = _create_conf_class(  # noqa: N806
+        DbtBouncerConf = _create_conf_class(  # ruff: ignore[non-lowercase-variable-in-function]
             custom_checks_dir=custom_checks_dir,
             check_categories=frozenset(check_categories),
             check_objects=check_objects,
@@ -737,11 +746,11 @@ def validate_conf(
         if CheckCategory.MANIFEST_CHECKS in check_categories:
             import dbt_bouncer.checks.manifest
         if CheckCategory.RUN_RESULTS_CHECKS in check_categories:
-            import dbt_bouncer.checks.run_results  # noqa: F401
+            import dbt_bouncer.checks.run_results  # ruff: ignore[unused-import]
 
         from dbt_bouncer.configuration_file.parser import create_bouncer_conf_class
 
-        DbtBouncerConf = create_bouncer_conf_class(  # noqa: N806
+        DbtBouncerConf = create_bouncer_conf_class(  # ruff: ignore[non-lowercase-variable-in-function]
             custom_checks_dir=custom_checks_dir,
             check_categories=frozenset(check_categories),
         )
@@ -768,8 +777,9 @@ def validate_conf(
                 ]
                 min_name = min(
                     accepted_names,
-                    key=lambda name,
-                    target=incorrect_name: jellyfish.levenshtein_distance(name, target),
+                    key=lambda name, target=incorrect_name: (
+                        jellyfish.levenshtein_distance(name, target)
+                    ),
                     default=None,
                 )
                 suggestion = f" Did you mean '{min_name}'?" if min_name else ""

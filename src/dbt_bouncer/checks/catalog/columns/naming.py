@@ -22,9 +22,6 @@ def check_column_name_complies_to_column_type(
 
     Note: One of `type_pattern` or `types` must be specified.
 
-    Raises:
-        ValueError: If neither or both of type_pattern/types are supplied.
-
     Parameters:
         column_name_pattern (str): Regex pattern to match the model name.
         type_pattern (str | None): Regex pattern to match the data types.
@@ -38,6 +35,9 @@ def check_column_name_complies_to_column_type(
         exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.
         include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Raises:
+        ValueError: If neither or both of type_pattern/types are supplied.
 
     Example(s):
         ```yaml
@@ -118,9 +118,6 @@ def check_column_type_complies_to_column_name(
 
     Note: One of `type_pattern` or `types` must be specified.
 
-    Raises:
-        ValueError: If neither or both of type_pattern/types are supplied.
-
     Parameters:
         column_name_pattern (str): Regex pattern that column names must match.
         type_pattern (str | None): Regex pattern to match the data types.
@@ -134,6 +131,9 @@ def check_column_type_complies_to_column_name(
         exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.
         include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Raises:
+        ValueError: If neither or both of type_pattern/types are supplied.
 
     Example(s):
         ```yaml

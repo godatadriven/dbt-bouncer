@@ -32,7 +32,7 @@ def get_check_types(
     check_type: str,
     custom_checks_dir: Path | None = None,
     check_objects: list[Any] | None = None,
-) -> list[Any]:
+) -> Any:
     """Get the check types from the check categories.
 
     Args:
@@ -42,7 +42,8 @@ def get_check_types(
             expensive ``get_check_objects()`` call.
 
     Returns:
-        list[str]: The check types.
+        Any: A parametrised ``list[...]`` type (not a list instance) for use as a
+            Pydantic field annotation.
 
     """
     source = (
@@ -52,9 +53,9 @@ def get_check_types(
     )
     filtered_classes = [x for x in source if _get_category(x) == check_type]
     if not filtered_classes:
-        return list[Any]  # type: ignore[return-value]
+        return list[Any]
 
-    return list[  # type: ignore[misc, return-value]
+    return list[
         Annotated[
             reduce(operator.or_, filtered_classes),  # type: ignore
             Field(discriminator="name"),
@@ -154,7 +155,7 @@ def _create_conf_class(
             resolved_type = list[Any]
         fields[category] = (resolved_type, Field(default=[]))
 
-    return create_model(  # type: ignore[call-overload]
+    return create_model(  # ty: ignore[no-matching-overload]
         "DbtBouncerConf",
         __base__=DbtBouncerConfBase,
         **fields,

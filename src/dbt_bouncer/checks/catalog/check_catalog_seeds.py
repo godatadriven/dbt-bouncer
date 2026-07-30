@@ -97,7 +97,7 @@ def check_seed_max_bytes(
     catalog_node,
     *,
     max_bytes: int,
-    byte_stat_keys: list[str] = ["bytes", "num_bytes", "size"],  # noqa: B006
+    byte_stat_keys: list[str] = ["bytes", "num_bytes", "size"],  # ruff: ignore[mutable-argument-default]
 ):
     """Each seed must not exceed the given size in bytes.
 
@@ -172,7 +172,7 @@ def check_seed_max_row_count(
     catalog_node,
     *,
     max_row_count: int,
-    row_stat_keys: list[str] = ["row_count", "num_rows", "rows"],  # noqa: B006
+    row_stat_keys: list[str] = ["row_count", "num_rows", "rows"],  # ruff: ignore[mutable-argument-default]
 ):
     """Each seed must not contain more than the given number of rows.
 

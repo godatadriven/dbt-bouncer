@@ -24,7 +24,9 @@ Run as a script to materialise the artifacts on disk::
 from __future__ import annotations
 
 import os
-from pathlib import Path  # noqa: TC003 - needed at runtime by Typer
+from pathlib import (
+    Path,  # ruff: ignore[typing-only-standard-library-import] - needed at runtime by Typer
+)
 from typing import Annotated, Any
 
 import orjson
@@ -173,7 +175,7 @@ def _model_node(idx: int, layer: str, pkg: str, parents: list[str]) -> dict[str,
         # is built with a non-empty parent list (staging gets a source parent,
         # intermediate/marts get model parents); the ``else`` is a defensive
         # fallback for a hypothetical parentless model.
-        "raw_code": f"select * from {{{{ ref('{parents[0]}') }}}}"  # noqa: S608 - synthetic dbt SQL, not a real query
+        "raw_code": f"select * from {{{{ ref('{parents[0]}') }}}}"  # ruff: ignore[hardcoded-sql-expression] - synthetic dbt SQL, not a real query
         if parents
         else "select 1 as col_0;",
         "compiled_code": "select 1 as col_0;",

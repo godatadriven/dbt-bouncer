@@ -6,7 +6,7 @@ from typing import Any, ClassVar
 
 from pydantic import BaseModel, ConfigDict, Field, PrivateAttr
 
-from dbt_bouncer.artifact_types import (  # noqa: TC001 - needed at runtime for Pydantic model_rebuild
+from dbt_bouncer.artifact_types import (  # ruff: ignore[typing-only-first-party-import] - needed at runtime for Pydantic model_rebuild
     CatalogNodeEntry,
     ExposureNode,
     MacroNode,

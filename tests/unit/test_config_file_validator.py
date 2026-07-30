@@ -322,7 +322,7 @@ def test_validate_conf_target_override(monkeypatch):
 invalid_confs = [
     (
         f,
-        pytest.raises(Exception),  # noqa: PT011
+        pytest.raises(Exception),  # ruff: ignore[pytest-raises-too-broad]
     )
     for f in Path("./tests/unit/config_files/invalid").glob("*.yml")
 ]
@@ -362,7 +362,7 @@ def test_validate_conf_incorrect_name():
         },
     )
 
-    with ctx, pytest.raises(Exception) as excinfo:  # noqa: PT011
+    with ctx, pytest.raises(Exception) as excinfo:  # ruff: ignore[pytest-raises-too-broad]
         validate_conf(
             check_categories=["manifest_checks"],
             config_file_contents={
@@ -385,7 +385,7 @@ def test_validate_conf_incorrect_names():
         },
     )
 
-    with ctx, pytest.raises(Exception) as excinfo:  # noqa: PT011
+    with ctx, pytest.raises(Exception) as excinfo:  # ruff: ignore[pytest-raises-too-broad]
         validate_conf(
             check_categories=["manifest_checks"],
             config_file_contents={
@@ -725,7 +725,7 @@ def test_validate_conf_writes_cache_file_on_cold_path(isolated_cache_dir):
     assert len(list(isolated_cache_dir.glob("conf_*.json"))) == 1
 
 
-def test_validate_conf_warm_path_matches_cold(isolated_cache_dir):  # noqa: ARG001
+def test_validate_conf_warm_path_matches_cold(isolated_cache_dir):  # ruff: ignore[unused-function-argument]
     """A warm validate_conf returns a config equivalent to the cold-path one."""
     config = {
         "manifest_checks": [
@@ -756,7 +756,7 @@ def test_validate_conf_warm_path_matches_cold(isolated_cache_dir):  # noqa: ARG0
     assert warm.dbt_artifacts_dir == cold.dbt_artifacts_dir
 
 
-def test_validate_conf_warm_path_rehydrates_nested_dict_field(isolated_cache_dir):  # noqa: ARG001
+def test_validate_conf_warm_path_rehydrates_nested_dict_field(isolated_cache_dir):  # ruff: ignore[unused-function-argument]
     """Warm-cache load must re-coerce RootModel fields (e.g. NestedDict).
 
     The warm path uses ``model_construct`` to skip Pydantic's lazy schema
@@ -923,7 +923,7 @@ def _write_custom_checks_dir(root: "Path") -> "Path":
     return custom_dir
 
 
-def test_validate_conf_warm_path_with_custom_checks_dir(isolated_cache_dir, tmp_path):  # noqa: ARG001
+def test_validate_conf_warm_path_with_custom_checks_dir(isolated_cache_dir, tmp_path):  # ruff: ignore[unused-function-argument]
     """Cold + warm runs against a custom_checks_dir must agree.
 
     Exercises both ``compute_conf_cache_key``'s custom-dir mtime hashing and

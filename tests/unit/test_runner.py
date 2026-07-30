@@ -25,11 +25,11 @@ def test_runner_coverage(caplog, tmp_path):
     )
 
     with ctx:
-        from dbt_bouncer.configuration_file.parser import (  # noqa: N812
+        from dbt_bouncer.configuration_file.parser import (  # ruff: ignore[lowercase-imported-as-non-lowercase]
             create_bouncer_conf_class as DbtBouncerConf,
         )
 
-        DbtBouncerConf = DbtBouncerConf()  # noqa: N806
+        DbtBouncerConf = DbtBouncerConf()  # ruff: ignore[non-lowercase-variable-in-function]
         results = runner(
             ctx=BouncerContext.model_construct(
                 **{
@@ -148,11 +148,11 @@ def test_runner_failure():
     )
 
     with ctx:
-        from dbt_bouncer.configuration_file.parser import (  # noqa: N812
+        from dbt_bouncer.configuration_file.parser import (  # ruff: ignore[lowercase-imported-as-non-lowercase]
             create_bouncer_conf_class as DbtBouncerConf,
         )
 
-        DbtBouncerConf = DbtBouncerConf()  # noqa: N806
+        DbtBouncerConf = DbtBouncerConf()  # ruff: ignore[non-lowercase-variable-in-function]
         results = runner(
             ctx=BouncerContext.model_construct(
                 **{
@@ -264,11 +264,11 @@ def test_runner_skip(tmp_path):
     )
 
     with ctx:
-        from dbt_bouncer.configuration_file.parser import (  # noqa: N812
+        from dbt_bouncer.configuration_file.parser import (  # ruff: ignore[lowercase-imported-as-non-lowercase]
             create_bouncer_conf_class as DbtBouncerConf,
         )
 
-        DbtBouncerConf = DbtBouncerConf()  # noqa: N806
+        DbtBouncerConf = DbtBouncerConf()  # ruff: ignore[non-lowercase-variable-in-function]
         results = runner(
             ctx=BouncerContext.model_construct(
                 **{
@@ -424,11 +424,11 @@ def test_runner_success():
     )
 
     with ctx:
-        from dbt_bouncer.configuration_file.parser import (  # noqa: N812
+        from dbt_bouncer.configuration_file.parser import (  # ruff: ignore[lowercase-imported-as-non-lowercase]
             create_bouncer_conf_class as DbtBouncerConf,
         )
 
-        DbtBouncerConf = DbtBouncerConf()  # noqa: N806
+        DbtBouncerConf = DbtBouncerConf()  # ruff: ignore[non-lowercase-variable-in-function]
         results = runner(
             ctx=BouncerContext.model_construct(
                 **{
@@ -531,11 +531,11 @@ def test_runner_success():
 
 def test_runner_windows(caplog, tmp_path):
     configure_console_logging(verbosity=0)
-    from dbt_bouncer.configuration_file.parser import (  # noqa: N812
+    from dbt_bouncer.configuration_file.parser import (  # ruff: ignore[lowercase-imported-as-non-lowercase]
         create_bouncer_conf_class as DbtBouncerConf,
     )
 
-    DbtBouncerConf = DbtBouncerConf()  # noqa: N806
+    DbtBouncerConf = DbtBouncerConf()  # ruff: ignore[non-lowercase-variable-in-function]
     results = runner(
         ctx=BouncerContext.model_construct(
             **{
@@ -656,11 +656,11 @@ def test_runner_check_id(tmp_path):
     )
 
     with ctx:
-        from dbt_bouncer.configuration_file.parser import (  # noqa: N812
+        from dbt_bouncer.configuration_file.parser import (  # ruff: ignore[lowercase-imported-as-non-lowercase]
             create_bouncer_conf_class as DbtBouncerConf,
         )
 
-        DbtBouncerConf = DbtBouncerConf()  # noqa: N806
+        DbtBouncerConf = DbtBouncerConf()  # ruff: ignore[non-lowercase-variable-in-function]
         results = runner(
             ctx=BouncerContext.model_construct(
                 **{
@@ -829,11 +829,11 @@ def test_runner_output_only_failures(output_only_failures, num_checks, tmp_path)
     )
 
     with ctx:
-        from dbt_bouncer.configuration_file.parser import (  # noqa: N812
+        from dbt_bouncer.configuration_file.parser import (  # ruff: ignore[lowercase-imported-as-non-lowercase]
             create_bouncer_conf_class as DbtBouncerConf,
         )
 
-        DbtBouncerConf = DbtBouncerConf()  # noqa: N806
+        DbtBouncerConf = DbtBouncerConf()  # ruff: ignore[non-lowercase-variable-in-function]
         runner(
             ctx=BouncerContext.model_construct(
                 **{
@@ -989,11 +989,11 @@ def test_runner_skip_catalog_check(tmp_path):
     )
 
     with ctx:
-        from dbt_bouncer.configuration_file.parser import (  # noqa: N812
+        from dbt_bouncer.configuration_file.parser import (  # ruff: ignore[lowercase-imported-as-non-lowercase]
             create_bouncer_conf_class as DbtBouncerConf,
         )
 
-        DbtBouncerConf = DbtBouncerConf()  # noqa: N806
+        DbtBouncerConf = DbtBouncerConf()  # ruff: ignore[non-lowercase-variable-in-function]
 
         results = runner(
             ctx=BouncerContext.model_construct(

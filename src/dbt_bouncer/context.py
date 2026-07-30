@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 from functools import cached_property
-from pathlib import Path  # noqa: TC003 - needed at runtime for Pydantic model_rebuild
+from pathlib import (
+    Path,  # ruff: ignore[typing-only-standard-library-import] - needed at runtime for Pydantic model_rebuild
+)
 
 from pydantic import BaseModel, ConfigDict
 
-from dbt_bouncer.artifact_types import (  # noqa: TC001 - needed at runtime for Pydantic model_rebuild
+from dbt_bouncer.artifact_types import (  # ruff: ignore[typing-only-first-party-import] - needed at runtime for Pydantic model_rebuild
     CatalogNodeWrapper,
     CatalogSourceWrapper,
     ExposureNode,
@@ -30,7 +32,7 @@ from dbt_bouncer.artifact_types import (  # noqa: TC001 - needed at runtime for 
     UnitTestNode,
 )
 from dbt_bouncer.configuration_file.parser import (
-    DbtBouncerConfBase,  # noqa: TC001 - needed at runtime for Pydantic model_rebuild
+    DbtBouncerConfBase,  # ruff: ignore[typing-only-first-party-import] - needed at runtime for Pydantic model_rebuild
 )
 
 
@@ -64,50 +66,50 @@ class BouncerContext(BaseModel):
 
     @cached_property
     def exposures_by_unique_id(self) -> dict[str, ExposureNode]:
-        """Return a dict of exposure objects keyed by unique_id."""
+        """A dict of exposure objects keyed by unique_id."""
         return {e.unique_id: e for e in self.exposures}
 
     @cached_property
     def models_flat(self) -> list[ModelNode]:
-        """Return a list of unwrapped model objects."""
+        """A list of unwrapped model objects."""
         return [m.model for m in self.models]
 
     @cached_property
     def models_by_unique_id(self) -> dict[str, ModelNode]:
-        """Return a dict of unwrapped model objects keyed by unique_id."""
+        """A dict of unwrapped model objects keyed by unique_id."""
         return {m.model.unique_id: m.model for m in self.models}
 
     @cached_property
     def run_results_flat(self) -> list[RunResultEntry]:
-        """Return a list of unwrapped run result objects."""
+        """A list of unwrapped run result objects."""
         return [r.run_result for r in self.run_results]
 
     @cached_property
     def seeds_flat(self) -> list[SeedNode]:
-        """Return a list of unwrapped seed objects."""
+        """A list of unwrapped seed objects."""
         return [s.seed for s in self.seeds]
 
     @cached_property
     def semantic_models_flat(self) -> list[SemanticModelNode]:
-        """Return a list of unwrapped semantic model objects."""
+        """A list of unwrapped semantic model objects."""
         return [sm.semantic_model for sm in self.semantic_models]
 
     @cached_property
     def snapshots_flat(self) -> list[SnapshotNode]:
-        """Return a list of unwrapped snapshot objects."""
+        """A list of unwrapped snapshot objects."""
         return [s.snapshot for s in self.snapshots]
 
     @cached_property
     def sources_by_unique_id(self) -> dict[str, SourceNode]:
-        """Return a dict of unwrapped source objects keyed by unique_id."""
+        """A dict of unwrapped source objects keyed by unique_id."""
         return {s.source.unique_id: s.source for s in self.sources}
 
     @cached_property
     def tests_by_unique_id(self) -> dict[str, TestNode]:
-        """Return a dict of unwrapped test objects keyed by unique_id."""
+        """A dict of unwrapped test objects keyed by unique_id."""
         return {t.test.unique_id: t.test for t in self.tests}
 
     @cached_property
     def tests_flat(self) -> list[TestNode]:
-        """Return a list of unwrapped test objects."""
+        """A list of unwrapped test objects."""
         return [t.test for t in self.tests]

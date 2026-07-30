@@ -908,7 +908,7 @@ class TestCheckModelMaxUpstreamDependenciesInvalidParam:
             ),
         ],
     )
-    def test_raises_value_error(self, param_name, kwargs):  # noqa: ARG002
+    def test_raises_value_error(self, param_name, kwargs):  # ruff: ignore[unused-method-argument]
         from dbt_bouncer.testing import _run_check
 
         with pytest.raises(ValueError, match="greater than 0"):

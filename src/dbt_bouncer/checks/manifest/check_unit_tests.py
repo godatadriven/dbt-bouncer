@@ -84,7 +84,7 @@ def check_unit_test_expect_format(
     unit_test,
     ctx,
     *,
-    permitted_formats: list[str] = ["csv", "dict", "sql"],  # noqa: B006
+    permitted_formats: list[str] = ["csv", "dict", "sql"],  # ruff: ignore[mutable-argument-default]
 ):
     """Unit tests can only use the specified formats.
 
@@ -149,7 +149,7 @@ def check_unit_test_given_formats(
     unit_test,
     ctx,
     *,
-    permitted_formats: list[str] = ["csv", "dict", "sql"],  # noqa: B006
+    permitted_formats: list[str] = ["csv", "dict", "sql"],  # ruff: ignore[mutable-argument-default]
 ):
     """Unit tests can only use the specified formats.
 

@@ -25,7 +25,7 @@ class ProxyStr(str):
 
     @property
     def value(self) -> str:
-        """Return the string value (mimics Pydantic enum .value access).
+        """The string value (mimics Pydantic enum .value access).
 
         Returns:
             str: The underlying string value.
@@ -89,7 +89,7 @@ class DictProxy(dict):
         for v in dict.values(self):
             yield _wrap_value(v)
 
-    def get(self, key: str, default: Any = None) -> Any:
+    def get(self, key: Any = None, default: Any = None) -> Any:
         """Get a wrapped value by key, or *default* if missing.
 
         Returns:
