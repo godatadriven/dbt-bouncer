@@ -279,7 +279,12 @@ def _assemble_checks_to_run(ctx: "BouncerContext") -> list[CheckToRun]:
             return cached
         candidates = _resources_for(iterate_value)
         if include is None and not exclude:
-            # No filter at all: every resource matches, so skip the regex work.
+            # Purely an allocation optimisation, not a correctness guard:
+            # ``object_in_path`` already returns True for a ``None`` include and
+            # ``object_excluded_by_path`` returns False for an absent exclude, so
+            # the comprehension below would produce this same list. Skipping it
+            # avoids copying the list for the common case of a check that filters
+            # on neither.
             result = candidates
         else:
             result = [
