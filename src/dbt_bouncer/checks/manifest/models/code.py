@@ -36,7 +36,13 @@ class _LazySqlglotExp:
         return getattr(real_exp, name)
 
 
-exp: Any = _LazySqlglotExp()
+if not TYPE_CHECKING:
+    # Bound only at runtime, so a type checker keeps seeing the real
+    # ``sqlglot.exp`` module imported above and still resolves ``exp.Select``,
+    # ``exp.Star`` and friends to their true types. Annotating this as ``Any``
+    # instead would shadow that import and silently erase sqlglot typing across
+    # the whole module.
+    exp = _LazySqlglotExp()
 
 # Patterns retained for the best-effort regex fallback used when sqlglot cannot
 # parse a model's SQL (e.g. heavy Jinja control flow).
