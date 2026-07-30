@@ -3,6 +3,7 @@ import operator
 import os
 from functools import lru_cache, reduce
 from pathlib import Path
+from types import GenericAlias
 from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, create_model
@@ -32,7 +33,7 @@ def get_check_types(
     check_type: str,
     custom_checks_dir: Path | None = None,
     check_objects: list[Any] | None = None,
-) -> Any:
+) -> GenericAlias:
     """Get the check types from the check categories.
 
     Args:
@@ -42,8 +43,8 @@ def get_check_types(
             expensive ``get_check_objects()`` call.
 
     Returns:
-        Any: A parametrised ``list[...]`` type (not a list instance) for use as a
-            Pydantic field annotation.
+        GenericAlias: A parametrised ``list[...]`` type (not a list instance) for
+            use as a Pydantic field annotation.
 
     """
     source = (

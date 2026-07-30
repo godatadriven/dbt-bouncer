@@ -299,11 +299,9 @@ def lint_config_file(config_file_path: Path) -> list[dict[str, Any]]:
                     continue
 
                 # Treat absent, null and empty values alike: all leave us with
-                # nothing to look up in the registry. The config is arbitrary
-                # user YAML, so coerce to ``str`` rather than trusting the type.
+                # nothing to look up in the registry.
                 raw_name = check.get("name") or check.get("code")
-                check_name: str = str(raw_name) if raw_name else ""
-                if not check_name:
+                if not raw_name:
                     issues.append(
                         {
                             "line": idx + 1,
@@ -312,6 +310,26 @@ def lint_config_file(config_file_path: Path) -> list[dict[str, Any]]:
                         }
                     )
                     continue  # Cannot validate if absent
+
+                # The config is arbitrary user YAML, so a name may be any type.
+                # Report the type plainly instead of stringifying it and then
+                # offering a nearest-match suggestion for something that was
+                # never a name -- a list value would otherwise produce
+                # "Unknown check name '['check_model_names']'".
+                if not isinstance(raw_name, str):
+                    issues.append(
+                        {
+                            "line": idx + 1,
+                            "message": (
+                                f"Check 'name' must be a string, got "
+                                f"{type(raw_name).__name__}"
+                            ),
+                            "severity": "error",
+                        }
+                    )
+                    continue
+
+                check_name = raw_name
 
                 if check_name not in registry:
                     best_match = min(

@@ -559,6 +559,51 @@ def test_lint_config_file_blank_name_or_code(check_entry, tmp_path):
     assert issues[0]["severity"] == "error"
 
 
+@pytest.mark.parametrize(
+    ("check_entry", "expected_type"),
+    [
+        pytest.param({"name": ["check_model_names"]}, "list", id="list_name"),
+        pytest.param({"name": {"a": "b"}}, "dict", id="dict_name"),
+        pytest.param({"name": 123}, "int", id="int_name"),
+        pytest.param({"code": ["MO001"]}, "list", id="list_code"),
+    ],
+)
+def test_lint_config_file_non_string_name(check_entry, expected_type, tmp_path):
+    """A non-string name is reported by type, not stringified and fuzzy-matched.
+
+    Stringifying first produced messages like "Unknown check name
+    '['check_model_names']'. Did you mean 'check_model_names'?", which points at
+    a name the user never wrote.
+    """
+    from dbt_bouncer.configuration_file.validator import lint_config_file
+
+    config = {"manifest_checks": [check_entry]}
+    config_file = tmp_path / "dbt-bouncer.yml"
+    with Path.open(config_file, "w") as f:
+        yaml.dump(config, f)
+
+    issues = lint_config_file(config_file)
+    assert len(issues) == 1
+    assert issues[0]["message"] == f"Check 'name' must be a string, got {expected_type}"
+    assert issues[0]["severity"] == "error"
+
+
+def test_lint_config_file_misspelt_name_still_suggests(tmp_path):
+    """A genuine typo still gets a nearest-match suggestion."""
+    from dbt_bouncer.configuration_file.validator import lint_config_file
+
+    config = {"manifest_checks": [{"name": "check_model_nams"}]}
+    config_file = tmp_path / "dbt-bouncer.yml"
+    with Path.open(config_file, "w") as f:
+        yaml.dump(config, f)
+
+    issues = lint_config_file(config_file)
+    assert len(issues) == 1
+    assert issues[0]["message"] == (
+        "Unknown check name 'check_model_nams'. Did you mean 'check_model_names'?"
+    )
+
+
 def test_lint_config_file_yaml_syntax_error(tmp_path):
     """Test lint_config_file with YAML syntax error."""
     from dbt_bouncer.configuration_file.validator import lint_config_file
