@@ -275,6 +275,32 @@ def _load_custom_checks(
 _ENTRY_POINT_GROUP = "dbt_bouncer.checks"
 
 
+@lru_cache(maxsize=1)
+def _check_entry_points() -> tuple[Any, ...]:
+    """Return the ``dbt_bouncer.checks`` entry points, scanned once per process.
+
+    ``entry_points()`` re-reads the metadata of every installed distribution on
+    each call, and three separate call sites need it during a single run. The
+    installed set cannot change while the process runs, so the scan is cached.
+
+    Returns:
+        tuple[Any, ...]: The entry points in the ``dbt_bouncer.checks`` group.
+
+    """
+    return tuple(entry_points(group=_ENTRY_POINT_GROUP))
+
+
+@lru_cache(maxsize=1)
+def _check_entry_point_names() -> tuple[str, ...]:
+    """Return the sorted names of the ``dbt_bouncer.checks`` entry points.
+
+    Returns:
+        tuple[str, ...]: Sorted entry point names, used in cache-key digests.
+
+    """
+    return tuple(sorted(ep.name for ep in _check_entry_points()))
+
+
 def _load_entry_point_checks(check_objects: list[type["BaseCheck"]]) -> None:
     """Load check classes from installed packages via entry points.
 
@@ -291,7 +317,7 @@ def _load_entry_point_checks(check_objects: list[type["BaseCheck"]]) -> None:
             appended.
 
     """
-    eps = entry_points(group=_ENTRY_POINT_GROUP)
+    eps = _check_entry_points()
     for ep in eps:
         # dbt-bouncer registers its own check packages in this group; loading
         # them here would import every internal check module, defeating the
@@ -469,8 +495,7 @@ def _compute_cache_fingerprint(
     if custom_checks_dir is not None and custom_checks_dir.exists():
         _hash_py_tree(h, custom_checks_dir)
 
-    ep_names = sorted(ep.name for ep in entry_points(group=_ENTRY_POINT_GROUP))
-    for name in ep_names:
+    for name in _check_entry_point_names():
         h.update(name.encode())
 
     return h.hexdigest()[:8]
@@ -508,7 +533,7 @@ def compute_conf_cache_key(
     if custom_checks_dir is not None and custom_checks_dir.exists():
         _hash_py_tree(h, custom_checks_dir)
 
-    for name in sorted(ep.name for ep in entry_points(group=_ENTRY_POINT_GROUP)):
+    for name in _check_entry_point_names():
         h.update(name.encode())
 
     h.update(orjson.dumps(config_file_contents, option=orjson.OPT_SORT_KEYS))
