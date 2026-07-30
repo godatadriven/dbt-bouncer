@@ -70,13 +70,30 @@ def configure_console_logging(verbosity: int):
     """Initialise a logger with the specified log level."""
     logger = logging.getLogger("")
     logger.propagate = True
-    logger.setLevel(logging.DEBUG)  # handlers filter the level
 
     # Override via env var
     if os.getenv("LOG_LEVEL") == "DEBUG":
         loglevel = logging.DEBUG
     else:
         loglevel = logging.INFO if verbosity == 0 else max(2 - verbosity, 0) * 10
+
+    # Set the level on the logger, not only on the handler. Leaving the logger at
+    # DEBUG and filtering in the handler means every suppressed `logging.debug()`
+    # call still builds a full LogRecord -- including `findCaller()`, which walks
+    # the stack and splits file paths -- before the handler discards it. The
+    # executor logs one debug line per check, so on a large project that is tens
+    # of thousands of records built and thrown away. Taking the logger down to the
+    # effective level lets `isEnabledFor()` short-circuit before any of that work.
+    #
+    # The logger keeps the lowest level any remaining handler asked for, so
+    # non-StreamHandler handlers (e.g. an embedding application's own) still see
+    # what they configured.
+    handler_levels = [
+        h.level
+        for h in logger.handlers
+        if type(h) is not logging.StreamHandler and h.level != logging.NOTSET
+    ]
+    logger.setLevel(min([loglevel, *handler_levels]))
 
     # Remove any previously added StreamHandlers (but not subclasses like pytest's LogCaptureHandler)
     logger.handlers = [
