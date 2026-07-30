@@ -722,7 +722,7 @@ def get_check_objects(
 
         index = check_file.parts.index("checks")
         module_name = ".".join(
-            ["dbt_bouncer", "checks"] + list(check_file.parts[index + 1 :])  # noqa: RUF005
+            ["dbt_bouncer", "checks"] + list(check_file.parts[index + 1 :])  # ruff: ignore[collection-literal-concatenation]
         )[:-3]  # Remove .py suffix
         try:
             module = importlib.import_module(module_name)
@@ -826,7 +826,7 @@ def get_package_version_number(version_string: str) -> "Version":
     Returns:
             Version: The version object.
 
-    """  # noqa: D205
+    """  # ruff: ignore[missing-blank-line-after-summary]
     from packaging.version import Version as PyPIVersion
     from semver import Version
 

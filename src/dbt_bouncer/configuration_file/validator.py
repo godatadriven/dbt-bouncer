@@ -88,7 +88,7 @@ def get_config_file_path(
     Raises:
         RuntimeError: If no config file is found.
 
-    """  # noqa: D400, D415
+    """  # ruff: ignore[missing-trailing-period, missing-terminal-punctuation]
     logging.debug(f"{config_file=}")
     logging.debug(f"{config_file_source=}")
 
@@ -300,8 +300,8 @@ def lint_config_file(config_file_path: Path) -> list[dict[str, Any]]:
 
                 # Treat absent, null and empty values alike: all leave us with
                 # nothing to look up in the registry.
-                check_name = check.get("name") or check.get("code")
-                if not check_name:
+                raw_name = check.get("name") or check.get("code")
+                if not raw_name:
                     issues.append(
                         {
                             "line": idx + 1,
@@ -311,10 +311,32 @@ def lint_config_file(config_file_path: Path) -> list[dict[str, Any]]:
                     )
                     continue  # Cannot validate if absent
 
+                # The config is arbitrary user YAML, so a name may be any type.
+                # Report the type plainly instead of stringifying it and then
+                # offering a nearest-match suggestion for something that was
+                # never a name -- a list value would otherwise produce
+                # "Unknown check name '['check_model_names']'".
+                if not isinstance(raw_name, str):
+                    issues.append(
+                        {
+                            "line": idx + 1,
+                            "message": (
+                                f"Check 'name' must be a string, got "
+                                f"{type(raw_name).__name__}"
+                            ),
+                            "severity": "error",
+                        }
+                    )
+                    continue
+
+                check_name = raw_name
+
                 if check_name not in registry:
                     best_match = min(
                         registry.keys(),
-                        key=lambda k: jellyfish.levenshtein_distance(k, check_name),
+                        key=lambda k, target=check_name: jellyfish.levenshtein_distance(
+                            k, target
+                        ),
                         default=None,
                     )
                     suggestion = f" Did you mean '{best_match}'?" if best_match else ""
@@ -438,6 +460,7 @@ def _construct_cached_check(
     return cls.model_construct(**data)
 
 
+@lru_cache(maxsize=1)
 def _get_lite_conf_class() -> type["DbtBouncerConfBase"]:
     """Return a lightweight Pydantic subclass of ``DbtBouncerConfBase``.
 
@@ -446,16 +469,12 @@ def _get_lite_conf_class() -> type["DbtBouncerConfBase"]:
     fields are typed as ``list[Any]``. Constructing this class is a sub-millisecond
     operation versus ~70ms for the full discriminated-union variant.
 
-    Cached on the function object since the class is interpreter-wide and immutable.
+    Cached for the interpreter's lifetime since the class is immutable.
 
     Returns:
         type[DbtBouncerConfBase]: A subclass with three ``list[Any]`` category fields.
 
     """
-    cached = getattr(_get_lite_conf_class, "_cls", None)
-    if cached is not None:
-        return cached
-
     from pydantic import Field, create_model
 
     from dbt_bouncer.configuration_file.parser import DbtBouncerConfBase
@@ -467,7 +486,6 @@ def _get_lite_conf_class() -> type["DbtBouncerConfBase"]:
         manifest_checks=(list[Any], Field(default=[])),
         run_results_checks=(list[Any], Field(default=[])),
     )
-    _get_lite_conf_class._cls = cls  # type: ignore[attr-defined]
     return cls
 
 
@@ -692,9 +710,10 @@ def validate_conf(
                 if args:
                     entry["name"] = args[0]
                     configured_check_names.add(args[0])
-            if getattr(cls, "code", None) is not None:
-                entry["code"] = cls.code
-                configured_check_names.add(cls.code)
+            code_val = getattr(cls, "code", None)
+            if code_val is not None:
+                entry["code"] = code_val
+                configured_check_names.add(code_val)
 
     cache_path: Path | None = None
     if _conf_cache_enabled():
@@ -725,7 +744,7 @@ def validate_conf(
             frozenset(configured_check_names),
             custom_checks_dir=custom_checks_dir,
         )
-        DbtBouncerConf = _create_conf_class(  # noqa: N806
+        DbtBouncerConf = _create_conf_class(  # ruff: ignore[non-lowercase-variable-in-function]
             custom_checks_dir=custom_checks_dir,
             check_categories=frozenset(check_categories),
             check_objects=check_objects,
@@ -737,11 +756,11 @@ def validate_conf(
         if CheckCategory.MANIFEST_CHECKS in check_categories:
             import dbt_bouncer.checks.manifest
         if CheckCategory.RUN_RESULTS_CHECKS in check_categories:
-            import dbt_bouncer.checks.run_results  # noqa: F401
+            import dbt_bouncer.checks.run_results  # ruff: ignore[unused-import]
 
         from dbt_bouncer.configuration_file.parser import create_bouncer_conf_class
 
-        DbtBouncerConf = create_bouncer_conf_class(  # noqa: N806
+        DbtBouncerConf = create_bouncer_conf_class(  # ruff: ignore[non-lowercase-variable-in-function]
             custom_checks_dir=custom_checks_dir,
             check_categories=frozenset(check_categories),
         )
@@ -768,8 +787,9 @@ def validate_conf(
                 ]
                 min_name = min(
                     accepted_names,
-                    key=lambda name,
-                    target=incorrect_name: jellyfish.levenshtein_distance(name, target),
+                    key=lambda name, target=incorrect_name: (
+                        jellyfish.levenshtein_distance(name, target)
+                    ),
                     default=None,
                 )
                 suggestion = f" Did you mean '{min_name}'?" if min_name else ""

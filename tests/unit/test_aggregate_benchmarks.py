@@ -44,7 +44,7 @@ def test_parse_mean_returns_full_run_mean() -> None:
             {"name": "test_run_bouncer", "stats": {"mean": 0.42}},
         ]
     }
-    assert agg._parse_mean(data) == 0.42
+    assert agg._parse_mean(data) == pytest.approx(0.42)
 
 
 def test_parse_mean_raises_when_full_run_missing() -> None:

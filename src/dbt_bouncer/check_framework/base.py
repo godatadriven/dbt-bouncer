@@ -6,7 +6,7 @@ from typing import Any, ClassVar
 
 from pydantic import BaseModel, ConfigDict, Field, PrivateAttr
 
-from dbt_bouncer.artifact_types import (  # noqa: TC001 - needed at runtime for Pydantic model_rebuild
+from dbt_bouncer.artifact_types import (  # ruff: ignore[typing-only-first-party-import] - needed at runtime for Pydantic model_rebuild
     CatalogNodeEntry,
     ExposureNode,
     MacroNode,
@@ -79,6 +79,12 @@ class BaseCheck(BaseModel):
 
     _ctx: Any = PrivateAttr(default=None)
     _min_description_length: ClassVar[int] = 4
+
+    # Set by the ``@check`` decorator to the check's iterate-over resource name
+    # (``None`` for context-only checks). Declared here so it is a real, typed
+    # class attribute rather than one conjured onto the generated subclass.
+    # ``ClassVar`` keeps Pydantic from treating it as a model field.
+    iterate_over: ClassVar[str | None] = None
 
     def set_context(self, ctx: Any) -> None:
         """Set the execution context for this check instance.

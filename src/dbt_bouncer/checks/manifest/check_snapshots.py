@@ -210,7 +210,7 @@ def check_snapshot_names(snapshot, *, snapshot_name_pattern: str):
 def check_snapshot_strategy(
     snapshot,
     *,
-    allowed_strategies: list[str] = ["check", "timestamp"],  # noqa: B006
+    allowed_strategies: list[str] = ["check", "timestamp"],  # ruff: ignore[mutable-argument-default]
 ):
     """Snapshots must use an allowed strategy and have the required strategy-specific configuration.
 

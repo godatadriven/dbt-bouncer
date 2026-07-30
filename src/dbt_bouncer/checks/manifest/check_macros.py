@@ -33,7 +33,7 @@ def _get_jinja_environment() -> "Environment":
     from jinja2_simple_tags import StandaloneTag
 
     class TagExtension(StandaloneTag):
-        tags: ClassVar = {
+        tags: ClassVar = {  # ty: ignore[invalid-attribute-override]
             "do",
             "endmaterialization",
             "endtest",
@@ -70,7 +70,7 @@ def _parse_macro_argument_names(macro_sql: str) -> list[str]:
 
     if "materialization" in [
         x.value.value
-        for x in ast.body[0].nodes[0].kwargs  # type: ignore[attr-defined]
+        for x in ast.body[0].nodes[0].kwargs  # ty: ignore[unresolved-attribute]
         if isinstance(x.value, nodes.Const)
     ]:
         # Materializations don't have arguments
@@ -81,7 +81,7 @@ def _parse_macro_argument_names(macro_sql: str) -> list[str]:
     # body. Walking the body is fragile: it breaks for tests whose body is a
     # single macro call or contains a `{% set %}` statement, which parses to a
     # `jinja2.nodes.Assign` node with no `.nodes` attribute (see issue #927).
-    signature_call = ast.body[0].nodes[0]  # type: ignore[attr-defined]
+    signature_call = ast.body[0].nodes[0]  # ty: ignore[unresolved-attribute]
     # With autoescape enabled the signature is wrapped in an `escape(...)`
     # call; unwrap it to reach the test's own call node.
     if signature_call.args and isinstance(signature_call.args[0], nodes.Call):

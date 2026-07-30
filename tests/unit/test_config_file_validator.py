@@ -322,7 +322,7 @@ def test_validate_conf_target_override(monkeypatch):
 invalid_confs = [
     (
         f,
-        pytest.raises(Exception),  # noqa: PT011
+        pytest.raises(Exception),  # ruff: ignore[pytest-raises-too-broad]
     )
     for f in Path("./tests/unit/config_files/invalid").glob("*.yml")
 ]
@@ -362,7 +362,7 @@ def test_validate_conf_incorrect_name():
         },
     )
 
-    with ctx, pytest.raises(Exception) as excinfo:  # noqa: PT011
+    with ctx, pytest.raises(Exception) as excinfo:  # ruff: ignore[pytest-raises-too-broad]
         validate_conf(
             check_categories=["manifest_checks"],
             config_file_contents={
@@ -385,7 +385,7 @@ def test_validate_conf_incorrect_names():
         },
     )
 
-    with ctx, pytest.raises(Exception) as excinfo:  # noqa: PT011
+    with ctx, pytest.raises(Exception) as excinfo:  # ruff: ignore[pytest-raises-too-broad]
         validate_conf(
             check_categories=["manifest_checks"],
             config_file_contents={
@@ -559,6 +559,51 @@ def test_lint_config_file_blank_name_or_code(check_entry, tmp_path):
     assert issues[0]["severity"] == "error"
 
 
+@pytest.mark.parametrize(
+    ("check_entry", "expected_type"),
+    [
+        pytest.param({"name": ["check_model_names"]}, "list", id="list_name"),
+        pytest.param({"name": {"a": "b"}}, "dict", id="dict_name"),
+        pytest.param({"name": 123}, "int", id="int_name"),
+        pytest.param({"code": ["MO001"]}, "list", id="list_code"),
+    ],
+)
+def test_lint_config_file_non_string_name(check_entry, expected_type, tmp_path):
+    """A non-string name is reported by type, not stringified and fuzzy-matched.
+
+    Stringifying first produced messages like "Unknown check name
+    '['check_model_names']'. Did you mean 'check_model_names'?", which points at
+    a name the user never wrote.
+    """
+    from dbt_bouncer.configuration_file.validator import lint_config_file
+
+    config = {"manifest_checks": [check_entry]}
+    config_file = tmp_path / "dbt-bouncer.yml"
+    with Path.open(config_file, "w") as f:
+        yaml.dump(config, f)
+
+    issues = lint_config_file(config_file)
+    assert len(issues) == 1
+    assert issues[0]["message"] == f"Check 'name' must be a string, got {expected_type}"
+    assert issues[0]["severity"] == "error"
+
+
+def test_lint_config_file_misspelt_name_still_suggests(tmp_path):
+    """A genuine typo still gets a nearest-match suggestion."""
+    from dbt_bouncer.configuration_file.validator import lint_config_file
+
+    config = {"manifest_checks": [{"name": "check_model_nams"}]}
+    config_file = tmp_path / "dbt-bouncer.yml"
+    with Path.open(config_file, "w") as f:
+        yaml.dump(config, f)
+
+    issues = lint_config_file(config_file)
+    assert len(issues) == 1
+    assert issues[0]["message"] == (
+        "Unknown check name 'check_model_nams'. Did you mean 'check_model_names'?"
+    )
+
+
 def test_lint_config_file_yaml_syntax_error(tmp_path):
     """Test lint_config_file with YAML syntax error."""
     from dbt_bouncer.configuration_file.validator import lint_config_file
@@ -725,7 +770,7 @@ def test_validate_conf_writes_cache_file_on_cold_path(isolated_cache_dir):
     assert len(list(isolated_cache_dir.glob("conf_*.json"))) == 1
 
 
-def test_validate_conf_warm_path_matches_cold(isolated_cache_dir):  # noqa: ARG001
+def test_validate_conf_warm_path_matches_cold(isolated_cache_dir):  # ruff: ignore[unused-function-argument]
     """A warm validate_conf returns a config equivalent to the cold-path one."""
     config = {
         "manifest_checks": [
@@ -756,7 +801,7 @@ def test_validate_conf_warm_path_matches_cold(isolated_cache_dir):  # noqa: ARG0
     assert warm.dbt_artifacts_dir == cold.dbt_artifacts_dir
 
 
-def test_validate_conf_warm_path_rehydrates_nested_dict_field(isolated_cache_dir):  # noqa: ARG001
+def test_validate_conf_warm_path_rehydrates_nested_dict_field(isolated_cache_dir):  # ruff: ignore[unused-function-argument]
     """Warm-cache load must re-coerce RootModel fields (e.g. NestedDict).
 
     The warm path uses ``model_construct`` to skip Pydantic's lazy schema
@@ -923,7 +968,7 @@ def _write_custom_checks_dir(root: "Path") -> "Path":
     return custom_dir
 
 
-def test_validate_conf_warm_path_with_custom_checks_dir(isolated_cache_dir, tmp_path):  # noqa: ARG001
+def test_validate_conf_warm_path_with_custom_checks_dir(isolated_cache_dir, tmp_path):  # ruff: ignore[unused-function-argument]
     """Cold + warm runs against a custom_checks_dir must agree.
 
     Exercises both ``compute_conf_cache_key``'s custom-dir mtime hashing and

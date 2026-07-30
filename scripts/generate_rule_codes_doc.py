@@ -103,9 +103,9 @@ def main() -> None:
     configure_console_logging(0)
 
     # Import all check modules so every check class is registered.
-    import dbt_bouncer.checks.catalog  # noqa: F401
-    import dbt_bouncer.checks.manifest  # noqa: F401
-    import dbt_bouncer.checks.run_results  # noqa: F401
+    import dbt_bouncer.checks.catalog  # ruff: ignore[unused-import]
+    import dbt_bouncer.checks.manifest  # ruff: ignore[unused-import]
+    import dbt_bouncer.checks.run_results  # ruff: ignore[unused-import]
     from dbt_bouncer.cli.list.utils import category_key
     from dbt_bouncer.enums import CheckCategory
     from dbt_bouncer.utils import get_check_objects

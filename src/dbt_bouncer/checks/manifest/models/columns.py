@@ -233,7 +233,7 @@ def check_model_has_constraints(model, *, required_constraint_types: list[str]):
     constraints = model.constraints or []
     actual_types: set[str] = set()
     for c in constraints:
-        c_type = getattr(c, "type")  # noqa: B009 - avoids ty shadowing of builtin `type`
+        c_type = getattr(c, "type")  # ruff: ignore[get-attr-with-constant] - avoids ty shadowing of builtin `type`
         actual_types.add(c_type.value if hasattr(c_type, "value") else str(c_type))
     missing_types = sorted(set(required_constraint_types) - actual_types)
     if missing_types:
