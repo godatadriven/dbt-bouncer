@@ -199,7 +199,7 @@ def _build_check_class(
     # expose field defaults as class attributes, and the registry, `list` CLI
     # and docs generator all read the code off the class via getattr.
     cls.code = code
-    cls.iterate_over = iterate_over  # ty: ignore[unresolved-attribute]
+    cls.iterate_over = iterate_over
 
     # Preserve metadata.
     cls.__module__ = fn.__module__
