@@ -8,16 +8,15 @@ parsing. :func:`parse_sql` returns ``None`` when parsing fails, allowing callers
 to fall back to a best-effort approach.
 """
 
+from __future__ import annotations
+
 import re
 from functools import lru_cache
 from typing import TYPE_CHECKING, cast
 
-import sqlglot
-from sqlglot import exp
-from sqlglot.errors import SqlglotError
-
 if TYPE_CHECKING:
     from jinja2 import Environment
+    from sqlglot import exp
 
 # ``JINJA_COMMENT_PATTERN`` stays public so the regex-fallback path in
 # ``checks.manifest.models.code`` can reuse the same definition of a Jinja
@@ -28,7 +27,7 @@ JINJA_COMMENT_PATTERN = re.compile(r"\{#.*?#\}", re.DOTALL)
 
 
 @lru_cache(maxsize=1)
-def _get_jinja_lexer_environment() -> "Environment":
+def _get_jinja_lexer_environment() -> Environment:
     """Build the Jinja environment used to lex model SQL.
 
     Deferred and cached: jinja2 adds ~25ms to import time. Lexing is
@@ -140,6 +139,13 @@ def parse_sql(
     """
     if not code or not code.strip():
         return ()
+
+    # Deferred like the jinja2 import above: sqlglot costs ~65ms to import, and
+    # only the three AST-based checks in ``checks.manifest.models.code`` ever
+    # reach this function.
+    import sqlglot
+    from sqlglot.errors import SqlglotError
+
     try:
         return cast(
             "tuple[exp.Expression, ...]",

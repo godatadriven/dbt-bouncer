@@ -1,14 +1,42 @@
 """Checks related to model source code content and structure."""
 
 import re
+from typing import TYPE_CHECKING, Any
 
-from sqlglot import exp
+if TYPE_CHECKING:
+    from sqlglot import exp
 
 from dbt_bouncer.artifact_types import ModelNode
 from dbt_bouncer.check_framework.decorator import check, fail
 from dbt_bouncer.enums import Materialization
 from dbt_bouncer.sql_utils import JINJA_COMMENT_PATTERN, neutralize_jinja, parse_sql
 from dbt_bouncer.utils import compile_pattern, get_clean_model_name
+
+
+class _LazySqlglotExp:
+    """Stand-in for ``sqlglot.exp`` that imports it on first attribute access.
+
+    Only three of this module's checks touch the sqlglot AST, but importing
+    ``sqlglot`` costs ~65ms — paid by every run whose config references *any*
+    check defined here. On first access this swaps itself out for the real
+    module, so the indirection costs nothing after that.
+    """
+
+    def __getattr__(self, name: str) -> Any:
+        """Import ``sqlglot.exp``, rebind the module global, and delegate.
+
+        Returns:
+            Any: The requested attribute of ``sqlglot.exp``.
+
+        """
+        global exp
+        from sqlglot import exp as real_exp
+
+        exp = real_exp
+        return getattr(real_exp, name)
+
+
+exp: Any = _LazySqlglotExp()
 
 # Patterns retained for the best-effort regex fallback used when sqlglot cannot
 # parse a model's SQL (e.g. heavy Jinja control flow).
@@ -56,7 +84,7 @@ def _is_sql_model(model: ModelNode) -> bool:
     return (getattr(model, "language", None) or "sql") == "sql"
 
 
-def _select_uses_star(select: exp.Select) -> bool:
+def _select_uses_star(select: "exp.Select") -> bool:
     """Determine whether a ``SELECT`` projects a star.
 
     Returns:
@@ -72,7 +100,7 @@ def _select_uses_star(select: exp.Select) -> bool:
     return False
 
 
-def _hard_coded_tables(statements: tuple[exp.Expression, ...]) -> list[str]:
+def _hard_coded_tables(statements: "tuple[exp.Expression, ...]") -> list[str]:
     """Find schema/catalog-qualified table references in parsed SQL.
 
     Returns:
