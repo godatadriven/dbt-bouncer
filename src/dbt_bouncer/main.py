@@ -22,6 +22,27 @@ from dbt_bouncer.enums import ConfigFileName, OutputFormat
 from dbt_bouncer.version import version as get_version
 
 
+def _tune_gc_for_cli() -> None:
+    """Raise the cyclic GC thresholds for the lifetime of a CLI run.
+
+    Parsing a dbt project allocates a very large number of small containers (one
+    proxy per manifest node, plus one per attribute access during checks). With
+    CPython's default gen-0 threshold of 700 that triggers thousands of
+    collections over a heap that only grows: measured on a 1,000-model project,
+    the collector accounts for roughly a fifth of total runtime, nearly all of it
+    in the parse and match phases.
+
+    Only the CLI tunes this, and only here -- a library must not reconfigure the
+    collector of the process that imports it, so embedders calling
+    ``run_bouncer()`` keep their own settings. Collection stays enabled (rather
+    than being disabled outright) so reference cycles are still reclaimed on very
+    large projects; raising the thresholds recovers most of the benefit.
+    """
+    import gc
+
+    gc.set_threshold(20_000, 25, 25)
+
+
 @app.callback(invoke_without_command=True)
 def main_callback(
     ctx: typer.Context,
@@ -95,6 +116,8 @@ def main_callback(
         Exit: If the version flag is passed or an invalid output format is provided.
 
     """
+    _tune_gc_for_cli()
+
     # Handle version flag
     if version:
         typer.echo(get_version())
