@@ -171,6 +171,7 @@ cython_debug/
 .benchmarks/
 benchmark_results.json
 pytest_benchmark_results.json
+benchmark_chart*.html
 changed_files.txt
 coverage.json
 dbt.duckdb

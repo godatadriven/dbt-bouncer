@@ -50,6 +50,7 @@ run_results = "dbt_bouncer.checks.run_results"
 
 [project.optional-dependencies]
 dev = [
+  "altair>=6.0,<7",
   "bandit~=1.0",
   "dbt-core>=1.12.0,<2",
   "dbt-duckdb~=1.0",

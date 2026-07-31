@@ -168,6 +168,38 @@ DBT_BOUNCER_BENCH_PHASE_ROUNDS={{option(name="phase-rounds", default="100")}} uv
 description = "Sweep the end-to-end benchmark across model counts and print a summary table"
 run = 'uv run python tests/benchmark/aggregate_benchmarks.py --models "{{option(name="model-counts", default="100 250 500 1000 2000 5000 10000")}}"'
 
+[tasks.test-benchmark-chart]
+description = "Generate an Altair performance density chart and display the bell curve in the terminal"
+run = '''
+uv run python tests/benchmark/chart_benchmarks.py \
+	--models "$usage_models" \
+	--phase-rounds "$usage_phase_rounds" \
+	--benchmark "$usage_benchmark" \
+	--output "$usage_output" \
+	${usage_benchmark_rounds:+--benchmark-rounds "$usage_benchmark_rounds"} \
+	${usage_json_file:+--json-file "$usage_json_file"}
+'''
+usage = '''
+flag "--models" help="Number of synthetic models to generate for the benchmark" default="1000" {
+    arg <MODELS>
+}
+flag "--phase-rounds" help="Number of phase rounds to run" default="50" {
+    arg <PHASE_ROUNDS>
+}
+flag "--benchmark" help="Benchmark test name to plot (e.g. 'test_run_bouncer' or 'all')" default="test_run_bouncer" {
+    arg <BENCHMARK>
+}
+flag "-o --output" help="Path to save the generated Altair chart HTML file" default="benchmark_chart.html" {
+    arg <OUTPUT>
+}
+flag "--benchmark-rounds --rounds" help="Minimum number of benchmark rounds (samples) to run for pytest-benchmark" {
+    arg <ROUNDS>
+}
+flag "--json-file" help="Path to pre-existing pytest-benchmark JSON report to plot directly" {
+    arg <JSON_FILE>
+}
+'''
+
 [tasks.test-perf]
 description = "Run performance tests"
 run = """

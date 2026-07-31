@@ -179,6 +179,14 @@ There are two layers of performance coverage:
 
    It runs the `test_run_bouncer` end-to-end benchmark once per model count (100, 250, 500, 1000, 2000, 5000, 10000 by default) and prints a summary table of the mean run time for each. Override the counts with `mise run test-benchmark-aggregate --model-counts "100 1000 10000"`.
 
+   To plot the Altair density PDF curve chart and render the bell curve directly in the terminal, run:
+
+   ```shell
+   mise run test-benchmark-chart
+   ```
+
+   Override options like `--models`, `--phase-rounds`, `--benchmark`, or `--output`, e.g. `mise run test-benchmark-chart --models 500 --output chart.html`.
+
 #### `prek`
 
 [`prek`](https://github.com/j178/prek) takes care of running all code-checks for formatting and linting. Run `uv run prek install` to install `prek` in your local environment. Once this is done you can use the git pre-commit hooks to ensure proper formatting and linting.
