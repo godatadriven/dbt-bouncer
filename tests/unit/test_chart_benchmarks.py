@@ -59,6 +59,11 @@ def test_compute_stats() -> None:
     assert stats["severe_lower"] < stats["mild_lower"]
 
 
+def test_compute_stats_empty() -> None:
+    """``_compute_stats`` returns an empty dict rather than raising on no samples."""
+    assert chart._compute_stats([]) == {}
+
+
 def test_create_altair_chart() -> None:
     """``_create_altair_chart`` returns a valid layered Altair chart object."""
     timings = [0.045, 0.046, 0.044, 0.048, 0.043, 0.075]
@@ -68,6 +73,17 @@ def test_create_altair_chart() -> None:
     chart_dict = altair_chart.to_dict()
     assert "layer" in chart_dict
     assert len(chart_dict["layer"]) >= 3
+
+
+def test_render_terminal_scatter_chart(capsys) -> None:
+    """``_render_terminal_scatter_chart`` renders a panel and summary table without raising."""
+    timings = [0.045, 0.046, 0.044, 0.048, 0.043, 0.075]
+    stats = chart._compute_stats(timings)
+    chart._render_terminal_scatter_chart("test_run_bouncer", timings, stats)
+    out = capsys.readouterr().out
+    assert "Altair Performance Scatter Plot" in out
+    assert "Rounds:" in out
+    assert "StdDev:" in out
 
 
 def test_extract_benchmarks() -> None:
