@@ -412,3 +412,26 @@ class TestCheckModelVersionPinnedInRef:
             ),
             match=r"downstream models: \['model\.package_name\.orders'\]\.",
         )
+
+    def test_fails_when_only_some_of_a_consumers_refs_are_pinned(self):
+        # A single unpinned ref is enough to make the consumer a violator, even
+        # where its other refs to the same model are correctly pinned.
+        check_fails(
+            "check_model_version_pinned_in_ref",
+            model=_MODEL_V2,
+            ctx_manifest_obj=_manifest(
+                child_map={
+                    "model.package_name.customers.v2": ["model.package_name.orders"],
+                },
+                nodes={
+                    "model.package_name.orders": _downstream_model(
+                        "orders",
+                        [
+                            {"name": "customers", "version": 2},
+                            {"name": "customers", "version": None},
+                        ],
+                    ),
+                },
+            ),
+            match=r"downstream models: \['model\.package_name\.orders'\]\.",
+        )
