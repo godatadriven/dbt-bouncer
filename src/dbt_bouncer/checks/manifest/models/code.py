@@ -1,8 +1,15 @@
 """Checks related to model source code content and structure."""
 
 import re
+from typing import TYPE_CHECKING
 
-from sqlglot import exp
+if TYPE_CHECKING:
+    # Runtime uses a function-local ``from sqlglot import exp`` in the four
+    # functions below, so importing sqlglot (~65ms) is deferred until a check
+    # actually walks the AST. This import exists so a type checker still
+    # resolves the ``exp.Select`` / ``exp.Expression`` annotations to their real
+    # types rather than silently degrading them to ``Any``.
+    from sqlglot import exp
 
 from dbt_bouncer.artifact_types import ModelNode
 from dbt_bouncer.check_framework.decorator import check, fail
@@ -56,7 +63,7 @@ def _is_sql_model(model: ModelNode) -> bool:
     return (getattr(model, "language", None) or "sql") == "sql"
 
 
-def _select_uses_star(select: exp.Select) -> bool:
+def _select_uses_star(select: "exp.Select") -> bool:
     """Determine whether a ``SELECT`` projects a star.
 
     Returns:
@@ -64,6 +71,8 @@ def _select_uses_star(select: exp.Select) -> bool:
         (``t.*``) star, ``False`` otherwise.
 
     """
+    from sqlglot import exp
+
     for projection in select.expressions:
         if isinstance(projection, exp.Star):
             return True
@@ -72,7 +81,7 @@ def _select_uses_star(select: exp.Select) -> bool:
     return False
 
 
-def _hard_coded_tables(statements: tuple[exp.Expression, ...]) -> list[str]:
+def _hard_coded_tables(statements: "tuple[exp.Expression, ...]") -> list[str]:
     """Find schema/catalog-qualified table references in parsed SQL.
 
     Returns:
@@ -80,6 +89,8 @@ def _hard_coded_tables(statements: tuple[exp.Expression, ...]) -> list[str]:
         order and de-duplicated.
 
     """
+    from sqlglot import exp
+
     seen: set[str] = set()
     tables: list[str] = []
     for statement in statements:
@@ -191,6 +202,8 @@ def check_model_does_not_use_cartesian_join(
             )
         return
 
+    from sqlglot import exp
+
     for statement in parsed:
         for join in statement.find_all(exp.Join):
             is_cross = (join.kind or "").upper() == "CROSS"
@@ -290,6 +303,8 @@ def check_model_does_not_use_select_star(model):
                 f"`{get_clean_model_name(model.unique_id)}` uses `SELECT *`; list columns explicitly."
             )
         return
+
+    from sqlglot import exp
 
     for statement in parsed:
         for select in statement.find_all(exp.Select):
