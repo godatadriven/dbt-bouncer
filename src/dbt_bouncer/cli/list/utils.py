@@ -1,14 +1,17 @@
 """Utility functions for the list CLI subcommand."""
 
 import itertools
-from typing import TypedDict
+from typing import TYPE_CHECKING, TypedDict
 
 from rich import box
 from rich.console import Console
 from rich.table import Table
 
+if TYPE_CHECKING:
+    from dbt_bouncer.check_framework.base import BaseCheck
 
-def category_key(check_class: type) -> str:
+
+def category_key(check_class: type["BaseCheck"]) -> str:
     """Return the display category name segment from the module path.
 
     Args:
@@ -54,7 +57,7 @@ base_fields = frozenset(
 )
 
 
-def get_check_params(check_class: type) -> dict[str, str]:
+def get_check_params(check_class: type["BaseCheck"]) -> dict[str, str]:
     """Return configurable parameter names and their type annotations.
 
     Args:
@@ -65,7 +68,7 @@ def get_check_params(check_class: type) -> dict[str, str]:
 
     """
     params: dict[str, str] = {}
-    for field_name, field_info in check_class.model_fields.items():  # type: ignore[attr-defined]
+    for field_name, field_info in check_class.model_fields.items():
         if field_name in base_fields:
             continue
         annotation = field_info.annotation
@@ -84,7 +87,7 @@ class CheckDict(TypedDict):
 
 
 def build_checks_payload(
-    checks: list[type], category_labels: dict[str, str]
+    checks: list[type["BaseCheck"]], category_labels: dict[str, str]
 ) -> dict[str, list[CheckDict]]:
     """Build the checks payload grouped by category.
 

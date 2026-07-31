@@ -18,7 +18,7 @@ app = typer.Typer(
 # Kept for third-party consumers that do ``from dbt_bouncer.cli import run``
 # without going through ``main.py``.  During normal CLI startup these are
 # never hit because ``main.py`` eagerly imports the subcommand modules.
-__all__ = [  # noqa: F822
+__all__ = [  # ruff: ignore[undefined-export]
     "app",
     "init",
     "list_checks",

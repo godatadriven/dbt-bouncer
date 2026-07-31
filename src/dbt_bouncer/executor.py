@@ -21,6 +21,11 @@ __all__ = ["Executor"]
 class Executor:
     """Orchestrates check execution with progress tracking."""
 
+    # Resolved once per ``run()``. Formatting a per-check debug message costs an
+    # f-string and a logging call for every check -- tens of thousands on a large
+    # project -- all of it discarded when DEBUG is off, which is the default.
+    _debug_enabled: bool = False
+
     def _execute_check(self, check: CheckToRun) -> CheckToRun:
         """Execute a single check and return the result.
 
@@ -28,7 +33,8 @@ class Executor:
             CheckToRun: The check dict with outcome and optional failure_message set.
 
         """
-        logging.debug(f"Running {check['check_run_id']}...")
+        if self._debug_enabled:
+            logging.debug(f"Running {check['check_run_id']}...")
         # Bind this run's resource onto the shared check instance immediately
         # before executing. Assembly stores the resource alongside the check
         # rather than pre-copying an instance per resource; sequential execution
@@ -45,7 +51,10 @@ class Executor:
             if check["check"].description:
                 failure_message = f"{check['check'].description} - {failure_message}"
 
-            logging.debug(f"Check {check['check_run_id']} failed: {failure_message}")
+            if self._debug_enabled:
+                logging.debug(
+                    f"Check {check['check_run_id']} failed: {failure_message}"
+                )
             check["outcome"] = CheckOutcome.FAILED
             check["failure_message"] = failure_message
         except Exception as e:
@@ -53,9 +62,10 @@ class Executor:
                 traceback.TracebackException.from_exception(e).format(),
             )
             failure_message = failure_message_full[-1].strip()
-            logging.debug(
-                f"Check {check['check_run_id']} raised unexpected error:\n{''.join(failure_message_full)}"
-            )
+            if self._debug_enabled:
+                logging.debug(
+                    f"Check {check['check_run_id']} raised unexpected error:\n{''.join(failure_message_full)}"
+                )
 
             check["outcome"] = CheckOutcome.FAILED
             check["severity"] = CheckSeverity.WARN
@@ -80,6 +90,8 @@ class Executor:
             return []
 
         logging.info(f"Assembled {len(checks_to_run)} checks, running...")
+
+        self._debug_enabled = logging.getLogger().isEnabledFor(logging.DEBUG)
 
         # Checks are CPU-bound pure-Python work (regex matching, proxy attribute
         # access, string ops) that never releases the GIL, so a ThreadPoolExecutor

@@ -11,7 +11,11 @@ from dbt_bouncer.artifact_parsers.parser import wrap_dict
 from dbt_bouncer.context import BouncerContext
 from dbt_bouncer.main import app
 from dbt_bouncer.reporting.logger import configure_console_logging
-from dbt_bouncer.runner import _should_run_check, runner
+from dbt_bouncer.runner import (
+    _check_applies_to_resource,
+    _ResourceFacts,
+    runner,
+)
 
 
 def test_runner_coverage(caplog, tmp_path):
@@ -25,11 +29,11 @@ def test_runner_coverage(caplog, tmp_path):
     )
 
     with ctx:
-        from dbt_bouncer.configuration_file.parser import (  # noqa: N812
+        from dbt_bouncer.configuration_file.parser import (  # ruff: ignore[lowercase-imported-as-non-lowercase]
             create_bouncer_conf_class as DbtBouncerConf,
         )
 
-        DbtBouncerConf = DbtBouncerConf()  # noqa: N806
+        DbtBouncerConf = DbtBouncerConf()  # ruff: ignore[non-lowercase-variable-in-function]
         results = runner(
             ctx=BouncerContext.model_construct(
                 **{
@@ -148,11 +152,11 @@ def test_runner_failure():
     )
 
     with ctx:
-        from dbt_bouncer.configuration_file.parser import (  # noqa: N812
+        from dbt_bouncer.configuration_file.parser import (  # ruff: ignore[lowercase-imported-as-non-lowercase]
             create_bouncer_conf_class as DbtBouncerConf,
         )
 
-        DbtBouncerConf = DbtBouncerConf()  # noqa: N806
+        DbtBouncerConf = DbtBouncerConf()  # ruff: ignore[non-lowercase-variable-in-function]
         results = runner(
             ctx=BouncerContext.model_construct(
                 **{
@@ -264,11 +268,11 @@ def test_runner_skip(tmp_path):
     )
 
     with ctx:
-        from dbt_bouncer.configuration_file.parser import (  # noqa: N812
+        from dbt_bouncer.configuration_file.parser import (  # ruff: ignore[lowercase-imported-as-non-lowercase]
             create_bouncer_conf_class as DbtBouncerConf,
         )
 
-        DbtBouncerConf = DbtBouncerConf()  # noqa: N806
+        DbtBouncerConf = DbtBouncerConf()  # ruff: ignore[non-lowercase-variable-in-function]
         results = runner(
             ctx=BouncerContext.model_construct(
                 **{
@@ -424,11 +428,11 @@ def test_runner_success():
     )
 
     with ctx:
-        from dbt_bouncer.configuration_file.parser import (  # noqa: N812
+        from dbt_bouncer.configuration_file.parser import (  # ruff: ignore[lowercase-imported-as-non-lowercase]
             create_bouncer_conf_class as DbtBouncerConf,
         )
 
-        DbtBouncerConf = DbtBouncerConf()  # noqa: N806
+        DbtBouncerConf = DbtBouncerConf()  # ruff: ignore[non-lowercase-variable-in-function]
         results = runner(
             ctx=BouncerContext.model_construct(
                 **{
@@ -531,11 +535,11 @@ def test_runner_success():
 
 def test_runner_windows(caplog, tmp_path):
     configure_console_logging(verbosity=0)
-    from dbt_bouncer.configuration_file.parser import (  # noqa: N812
+    from dbt_bouncer.configuration_file.parser import (  # ruff: ignore[lowercase-imported-as-non-lowercase]
         create_bouncer_conf_class as DbtBouncerConf,
     )
 
-    DbtBouncerConf = DbtBouncerConf()  # noqa: N806
+    DbtBouncerConf = DbtBouncerConf()  # ruff: ignore[non-lowercase-variable-in-function]
     results = runner(
         ctx=BouncerContext.model_construct(
             **{
@@ -656,11 +660,11 @@ def test_runner_check_id(tmp_path):
     )
 
     with ctx:
-        from dbt_bouncer.configuration_file.parser import (  # noqa: N812
+        from dbt_bouncer.configuration_file.parser import (  # ruff: ignore[lowercase-imported-as-non-lowercase]
             create_bouncer_conf_class as DbtBouncerConf,
         )
 
-        DbtBouncerConf = DbtBouncerConf()  # noqa: N806
+        DbtBouncerConf = DbtBouncerConf()  # ruff: ignore[non-lowercase-variable-in-function]
         results = runner(
             ctx=BouncerContext.model_construct(
                 **{
@@ -829,11 +833,11 @@ def test_runner_output_only_failures(output_only_failures, num_checks, tmp_path)
     )
 
     with ctx:
-        from dbt_bouncer.configuration_file.parser import (  # noqa: N812
+        from dbt_bouncer.configuration_file.parser import (  # ruff: ignore[lowercase-imported-as-non-lowercase]
             create_bouncer_conf_class as DbtBouncerConf,
         )
 
-        DbtBouncerConf = DbtBouncerConf()  # noqa: N806
+        DbtBouncerConf = DbtBouncerConf()  # ruff: ignore[non-lowercase-variable-in-function]
         runner(
             ctx=BouncerContext.model_construct(
                 **{
@@ -989,11 +993,11 @@ def test_runner_skip_catalog_check(tmp_path):
     )
 
     with ctx:
-        from dbt_bouncer.configuration_file.parser import (  # noqa: N812
+        from dbt_bouncer.configuration_file.parser import (  # ruff: ignore[lowercase-imported-as-non-lowercase]
             create_bouncer_conf_class as DbtBouncerConf,
         )
 
-        DbtBouncerConf = DbtBouncerConf()  # noqa: N806
+        DbtBouncerConf = DbtBouncerConf()  # ruff: ignore[non-lowercase-variable-in-function]
 
         results = runner(
             ctx=BouncerContext.model_construct(
@@ -1317,46 +1321,85 @@ def test_should_run_check_empty_include_list_runs_check():
     assert resource_in_path(check, resource) is True
 
 
-def test_should_run_check_materialization_mismatch():
+def _facts(materialized="view", skip_checks=None, path="models/staging/stg_orders.sql"):
+    """Build a _ResourceFacts for the non-path half of the match predicate.
+
+    Returns:
+        _ResourceFacts: The precomputed facts for a stub resource.
+
+    """
+    resource = MagicMock()
+    resource.model.config.materialized = materialized
+    resource.original_file_path = path
+    return _ResourceFacts(
+        resource=resource,
+        skip_checks=skip_checks or [],
+        run_id_suffix="stg_orders",
+        file_path=path,
+        unique_id="model.package.stg_orders",
+        cleaned_path=path,
+    )
+
+
+def test_check_applies_materialization_mismatch():
     """Test that check doesn't run when materialization doesn't match."""
-    check = MagicMock()
-    check.include = None
-    check.exclude = None
-    check.name = "test_check"
-    check.materialization = "table"
-
-    resource = MagicMock()
-    resource.model.config.materialized = "view"
-    resource.original_file_path = "models/staging/stg_orders.sql"
-
-    assert _should_run_check(check, resource, frozenset({"model"}), []) is False
+    assert (
+        _check_applies_to_resource(
+            "test_check", None, "table", _facts(materialized="view")
+        )
+        is False
+    )
 
 
-def test_should_run_check_materialization_matches():
+def test_check_applies_materialization_matches():
     """Test that check runs when materialization matches."""
-    check = MagicMock()
-    check.include = None
-    check.exclude = None
-    check.name = "test_check"
-    check.materialization = "view"
-
-    resource = MagicMock()
-    resource.model.config.materialized = "view"
-    resource.original_file_path = "models/staging/stg_orders.sql"
-
-    assert _should_run_check(check, resource, frozenset({"model"}), []) is True
+    assert (
+        _check_applies_to_resource(
+            "test_check", None, "view", _facts(materialized="view")
+        )
+        is True
+    )
 
 
-def test_should_run_check_non_model_resource():
-    """Test that materialization check is skipped for non-model resources."""
-    check = MagicMock()
-    check.include = None
-    check.exclude = None
-    check.name = "test_check"
-    check.materialization = "table"
+def test_check_applies_non_model_resource():
+    """Test that the materialization filter is skipped for non-model resources.
 
-    resource = MagicMock()
-    resource.original_file_path = "macros/my_macro.sql"
+    The caller passes ``materialization=None`` for every non-model resource, so
+    a check configured with a materialization still runs against them.
+    """
+    assert (
+        _check_applies_to_resource(
+            "test_check", None, None, _facts(path="macros/my_macro.sql")
+        )
+        is True
+    )
 
-    # Should still run for non-model resources, materialization check is skipped
-    assert _should_run_check(check, resource, frozenset({"macro"}), []) is True
+
+def test_check_applies_skipped_by_name():
+    """Test that a resource's skip_checks meta skips the check by name."""
+    assert (
+        _check_applies_to_resource(
+            "test_check", None, None, _facts(skip_checks=["test_check"])
+        )
+        is False
+    )
+
+
+def test_check_applies_skipped_by_rule_code():
+    """Test that a resource's skip_checks meta skips the check by rule code."""
+    assert (
+        _check_applies_to_resource(
+            "test_check", "MO123", None, _facts(skip_checks=["MO123"])
+        )
+        is False
+    )
+
+
+def test_check_applies_unrelated_skip_checks():
+    """Test that an unrelated skip_checks entry does not skip the check."""
+    assert (
+        _check_applies_to_resource(
+            "test_check", "MO123", None, _facts(skip_checks=["other_check", "MO999"])
+        )
+        is True
+    )

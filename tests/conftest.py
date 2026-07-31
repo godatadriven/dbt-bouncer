@@ -52,14 +52,20 @@ def _clear_module_caches():
     when class annotations are patched, models are rebuilt with different
     namespaces, or Python reuses object addresses after garbage collection.
     """
-    from dbt_bouncer import runner
+    from dbt_bouncer import runner, utils
     from dbt_bouncer.checks.manifest import check_macros
 
-    check_macros._USED_MACROS_CACHE.clear()
-    runner._CLASS_ITERATE_CACHE.clear()
+    def _clear():
+        check_macros._USED_MACROS_CACHE.clear()
+        runner._CLASS_ITERATE_CACHE.clear()
+        # Entry points are scanned once per process; tests that monkeypatch the
+        # installed set need the scan re-run.
+        utils._check_entry_points.cache_clear()
+        utils._check_entry_point_names.cache_clear()
+
+    _clear()
     yield
-    check_macros._USED_MACROS_CACHE.clear()
-    runner._CLASS_ITERATE_CACHE.clear()
+    _clear()
 
 
 @pytest.fixture(scope="session")

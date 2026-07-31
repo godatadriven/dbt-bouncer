@@ -8,7 +8,7 @@ values (display name, accessor, etc.).
 from __future__ import annotations
 
 import logging
-import re  # noqa: TC003 — used in PrivateAttr annotation; unconditional to avoid breakage if PEP 563 is removed
+import re  # ruff: ignore[typing-only-standard-library-import] — used in PrivateAttr annotation; unconditional to avoid breakage if PEP 563 is removed
 from abc import ABC, abstractmethod
 from typing import Any
 

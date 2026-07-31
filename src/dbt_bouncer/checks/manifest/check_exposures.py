@@ -67,7 +67,7 @@ def check_exposure_based_on_view(
     exposure,
     ctx,
     *,
-    materializations_to_include: list[str] = ["ephemeral", "view"],  # noqa: B006
+    materializations_to_include: list[str] = ["ephemeral", "view"],  # ruff: ignore[mutable-argument-default]
 ):
     """Exposures should not be based on views.
 
@@ -256,7 +256,7 @@ def check_exposure_has_meta_keys(exposure, *, keys: NestedDict):
 def check_exposure_has_owner(
     exposure,
     *,
-    required_fields: list[str] = ["email"],  # noqa: B006
+    required_fields: list[str] = ["email"],  # ruff: ignore[mutable-argument-default]
 ):
     """Exposures must have owner information populated.
 

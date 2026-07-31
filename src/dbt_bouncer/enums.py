@@ -80,7 +80,7 @@ class OutputFormat(StrEnum):
 
     @classmethod
     def values(cls) -> list:
-        """Return all output format values as lowercase strings."""  # noqa: DOC201
+        """Return all output format values as lowercase strings."""  # ruff: ignore[docstring-missing-returns]
         return list(cls)
 
 

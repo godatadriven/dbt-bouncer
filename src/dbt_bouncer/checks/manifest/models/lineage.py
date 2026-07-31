@@ -341,7 +341,7 @@ def check_model_max_chained_views(
     model,
     ctx,
     *,
-    materializations_to_include: list[str] = ["ephemeral", "view"],  # noqa: B006
+    materializations_to_include: list[str] = ["ephemeral", "view"],  # ruff: ignore[mutable-argument-default]
     max_chained_views: Annotated[int, Field(gt=0)] = 3,
     package_name: str | None = None,
 ):
