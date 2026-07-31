@@ -153,20 +153,35 @@ description = "Run code-level performance benchmarks (pytest-benchmark)"
 # No --numprocesses (xdist disables pytest-benchmark) and no --cov (skews timings).
 # No -s: the phase-decomposition fixture suspends capturing itself (just for
 # its own tqdm progress bar), so every other benchmark stays quiet as before.
-run = """
-DBT_BOUNCER_BENCH_MODELS={{option(name="models", default="1000")}} \
-DBT_BOUNCER_BENCH_PHASE_ROUNDS={{option(name="phase-rounds", default="100")}} uv run pytest \
+run = '''
+DBT_BOUNCER_BENCH_MODELS="$usage_models" \
+DBT_BOUNCER_BENCH_PHASE_ROUNDS="$usage_phase_rounds" uv run pytest \
 	-c ./tests \
 	--benchmark-only \
 	--benchmark-json=pytest_benchmark_results.json \
 	./tests/benchmark
-"""
+'''
+usage = '''
+flag "--models" help="Number of synthetic models to generate for the benchmark" default="1000" {
+    arg <MODELS>
+}
+flag "--phase-rounds" help="Number of phase rounds to run" default="100" {
+    arg <PHASE_ROUNDS>
+}
+'''
 
 # Model counts swept by the aggregate benchmark; override with e.g.
 # `mise run test-benchmark-aggregate --model-counts "100 1000 10000"`.
 [tasks.test-benchmark-aggregate]
 description = "Sweep the end-to-end benchmark across model counts and print a summary table"
-run = 'uv run python tests/benchmark/aggregate_benchmarks.py --models "{{option(name="model-counts", default="100 250 500 1000 2000 5000 10000")}}"'
+run = '''
+uv run python tests/benchmark/aggregate_benchmarks.py --models "$usage_model_counts"
+'''
+usage = '''
+flag "--model-counts" help="Space- or comma-separated model counts to sweep" default="100 250 500 1000 2000 5000 10000" {
+    arg <MODEL_COUNTS>
+}
+'''
 
 [tasks.test-benchmark-chart]
 description = "Generate an Altair performance density chart and display the bell curve in the terminal"
