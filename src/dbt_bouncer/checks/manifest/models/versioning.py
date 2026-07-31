@@ -42,6 +42,8 @@ def check_model_version_allowed(model, *, version_pattern: str):
 
         Teams that use model versioning often enforce a convention for version identifiers — for example, numeric-only versions or semantic version strings. This check validates that version values conform to the team's chosen scheme, preventing arbitrary or malformed version strings from being introduced.
 
+    Only versioned models are checked; a model without a `version` has nothing to validate.
+
     Parameters:
         version_pattern (str): Regexp the version must match.
 
@@ -69,7 +71,8 @@ def check_model_version_allowed(model, *, version_pattern: str):
 
     """
     compiled = compile_pattern(version_pattern.strip())
-    if model.version and (compiled.match(str(model.version)) is None):
+    # `is not None` rather than truthiness: `0` is an unusual but legitimate version.
+    if model.version is not None and (compiled.match(str(model.version)) is None):
         fail(
             f"Version `{model.version}` in `{model.name}` does not match the supplied regex `{version_pattern.strip()}`."
         )
@@ -122,16 +125,23 @@ def check_model_version_pinned_in_ref(model, ctx):
     for m in downstream_models:
         node = manifest_obj.manifest.nodes.get(m)
         refs = getattr(node, "refs", None)
-        if node and refs and isinstance(refs, list):
-            downstream_models_with_unversioned_refs.extend(
-                m
-                for ref in refs
+        if (
+            node
+            and refs
+            and isinstance(refs, list)
+            and any(
                 # `name` excludes the version, so compare against the model's
                 # `name` rather than the last segment of `unique_id` (which is
                 # the version, e.g. `v2`, for a versioned model).
-                if getattr(ref, "name", None) == model.name
-                and not getattr(ref, "version", None)
+                getattr(ref, "name", None) == model.name
+                # `is None` rather than truthiness: `ref(..., v=0)` is pinned.
+                and getattr(ref, "version", None) is None
+                for ref in refs
             )
+        ):
+            # `any` rather than a generator of matches, so a downstream model
+            # with several unpinned refs to this model is only listed once.
+            downstream_models_with_unversioned_refs.append(m)
 
     if downstream_models_with_unversioned_refs:
         fail(

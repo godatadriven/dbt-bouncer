@@ -41,6 +41,7 @@ class TestCheckModelVersionAllowed:
     @pytest.mark.parametrize(
         ("version", "version_pattern"),
         [
+            pytest.param(0, r"[0-9]\d*", id="integer_version_0"),
             pytest.param(1, r"[0-9]\d*", id="integer_version_1"),
             pytest.param(10, r"[0-9]\d*", id="integer_version_10"),
             pytest.param(100, r"[0-9]\d*", id="integer_version_100"),
@@ -49,8 +50,6 @@ class TestCheckModelVersionAllowed:
             # An unversioned model has nothing to validate, so the pattern is
             # never applied.
             pytest.param(None, r"^never_matches$", id="unversioned_model_skipped"),
-            # `version` is truthiness-checked, so a version of 0 is also skipped.
-            pytest.param(0, r"^never_matches$", id="falsy_version_zero_skipped"),
         ],
     )
     def test_passes(self, version, version_pattern):
@@ -65,6 +64,9 @@ class TestCheckModelVersionAllowed:
         [
             pytest.param("golden", r"[0-9]\d*", id="non_numeric_version"),
             pytest.param(2, r"^(stable|latest)$", id="numeric_version_not_allowed"),
+            # `version` is compared against None, not truthiness, so a version
+            # of 0 is validated like any other rather than silently skipped.
+            pytest.param(0, r"^never_matches$", id="version_zero_is_validated"),
         ],
     )
     def test_fails(self, version, version_pattern):
@@ -165,6 +167,29 @@ class TestCheckModelVersionPinnedInRef:
                 nodes={
                     "model.package_name.orders": _downstream_model(
                         "orders", [{"name": "customers", "version": 2}]
+                    ),
+                },
+            ),
+        )
+
+    def test_passes_when_downstream_ref_is_pinned_to_version_zero(self):
+        # A ref's version is compared against None, not truthiness, so
+        # `ref('customers', v=0)` counts as pinned.
+        check_passes(
+            "check_model_version_pinned_in_ref",
+            model={
+                "latest_version": 0,
+                "name": "customers",
+                "unique_id": "model.package_name.customers.v0",
+                "version": 0,
+            },
+            ctx_manifest_obj=_manifest(
+                child_map={
+                    "model.package_name.customers.v0": ["model.package_name.orders"],
+                },
+                nodes={
+                    "model.package_name.orders": _downstream_model(
+                        "orders", [{"name": "customers", "version": 0}]
                     ),
                 },
             ),
@@ -363,4 +388,27 @@ class TestCheckModelVersionPinnedInRef:
                 },
             ),
             match=r"downstream models: \['model\.package_name\.payments'\]\.",
+        )
+
+    def test_failure_message_lists_a_consumer_once_per_model_not_per_ref(self):
+        # A downstream model that refs the same versioned model more than once
+        # (e.g. a self-join across two versions) is a single violation.
+        check_fails(
+            "check_model_version_pinned_in_ref",
+            model=_MODEL_V2,
+            ctx_manifest_obj=_manifest(
+                child_map={
+                    "model.package_name.customers.v2": ["model.package_name.orders"],
+                },
+                nodes={
+                    "model.package_name.orders": _downstream_model(
+                        "orders",
+                        [
+                            {"name": "customers", "version": None},
+                            {"name": "customers"},
+                        ],
+                    ),
+                },
+            ),
+            match=r"downstream models: \['model\.package_name\.orders'\]\.",
         )
