@@ -1,9 +1,14 @@
 """Checks related to model source code content and structure."""
 
 import re
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    # Runtime uses a function-local ``from sqlglot import exp`` in the four
+    # functions below, so importing sqlglot (~65ms) is deferred until a check
+    # actually walks the AST. This import exists so a type checker still
+    # resolves the ``exp.Select`` / ``exp.Expression`` annotations to their real
+    # types rather than silently degrading them to ``Any``.
     from sqlglot import exp
 
 from dbt_bouncer.artifact_types import ModelNode
@@ -11,38 +16,6 @@ from dbt_bouncer.check_framework.decorator import check, fail
 from dbt_bouncer.enums import Materialization
 from dbt_bouncer.sql_utils import JINJA_COMMENT_PATTERN, neutralize_jinja, parse_sql
 from dbt_bouncer.utils import compile_pattern, get_clean_model_name
-
-
-class _LazySqlglotExp:
-    """Stand-in for ``sqlglot.exp`` that imports it on first attribute access.
-
-    Only three of this module's checks touch the sqlglot AST, but importing
-    ``sqlglot`` costs ~65ms — paid by every run whose config references *any*
-    check defined here. On first access this swaps itself out for the real
-    module, so the indirection costs nothing after that.
-    """
-
-    def __getattr__(self, name: str) -> Any:
-        """Import ``sqlglot.exp``, rebind the module global, and delegate.
-
-        Returns:
-            Any: The requested attribute of ``sqlglot.exp``.
-
-        """
-        global exp
-        from sqlglot import exp as real_exp
-
-        exp = real_exp
-        return getattr(real_exp, name)
-
-
-if not TYPE_CHECKING:
-    # Bound only at runtime, so a type checker keeps seeing the real
-    # ``sqlglot.exp`` module imported above and still resolves ``exp.Select``,
-    # ``exp.Star`` and friends to their true types. Annotating this as ``Any``
-    # instead would shadow that import and silently erase sqlglot typing across
-    # the whole module.
-    exp = _LazySqlglotExp()
 
 # Patterns retained for the best-effort regex fallback used when sqlglot cannot
 # parse a model's SQL (e.g. heavy Jinja control flow).
@@ -98,6 +71,8 @@ def _select_uses_star(select: "exp.Select") -> bool:
         (``t.*``) star, ``False`` otherwise.
 
     """
+    from sqlglot import exp
+
     for projection in select.expressions:
         if isinstance(projection, exp.Star):
             return True
@@ -114,6 +89,8 @@ def _hard_coded_tables(statements: "tuple[exp.Expression, ...]") -> list[str]:
         order and de-duplicated.
 
     """
+    from sqlglot import exp
+
     seen: set[str] = set()
     tables: list[str] = []
     for statement in statements:
@@ -225,6 +202,8 @@ def check_model_does_not_use_cartesian_join(
             )
         return
 
+    from sqlglot import exp
+
     for statement in parsed:
         for join in statement.find_all(exp.Join):
             is_cross = (join.kind or "").upper() == "CROSS"
@@ -324,6 +303,8 @@ def check_model_does_not_use_select_star(model):
                 f"`{get_clean_model_name(model.unique_id)}` uses `SELECT *`; list columns explicitly."
             )
         return
+
+    from sqlglot import exp
 
     for statement in parsed:
         for select in statement.find_all(exp.Select):
