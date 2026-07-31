@@ -62,6 +62,11 @@ def _clear_module_caches():
         # installed set need the scan re-run.
         utils._check_entry_points.cache_clear()
         utils._check_entry_point_names.cache_clear()
+        # The session-scoped model-rebuild fixture populates this before any
+        # test runs, so a test that monkeypatches import behaviour would
+        # otherwise be served a stale registry -- and, worse, could leave a
+        # deliberately broken one behind for whatever runs next.
+        utils.get_check_objects.cache_clear()
 
     _clear()
     yield
