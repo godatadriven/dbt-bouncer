@@ -116,11 +116,20 @@ outputs = ["schema.json"]
 
 [tasks.test]
 description = "Run all tests (unit + integration)"
-# Sequential (not parallel `depends`): both write junit.xml / coverage.xml.
-run = [
-  "mise run test-unit",
-  "mise run test-integration",
-]
+# A single pytest invocation, so `coverage.xml` / `junit.xml` describe the whole
+# suite. Chaining `test-unit` then `test-integration` instead would leave the
+# integration-only results (~74%) in `coverage.xml`, overwriting the combined
+# figure; the per-suite tasks therefore write their own scoped report files.
+run = """
+uv run pytest \
+	-c ./tests \
+	--junitxml=junit.xml \
+	--cov-report=term-missing:skip-covered \
+	--cov-report=xml \
+	--cov=src/dbt_bouncer/ \
+	--numprocesses 5 \
+	./tests/unit ./tests/integration
+"""
 
 # Necessary due to https://github.com/coveragepy/coveragepy/issues/1514
 [tasks.test-dev-container]
@@ -135,9 +144,9 @@ description = "Run integration tests"
 run = """
 uv run pytest \
 	-c ./tests \
-	--junitxml=junit.xml \
+	--junitxml=junit-integration.xml \
 	--cov-report=term-missing:skip-covered \
-	--cov-report=xml \
+	--cov-report=xml:coverage-integration.xml \
 	--cov=src/dbt_bouncer/ \
 	--numprocesses 5 \
 	./tests/integration
@@ -231,9 +240,9 @@ description = "Run unit tests"
 run = """
 uv run pytest \
 	-c ./tests \
-	--junitxml=junit.xml \
+	--junitxml=junit-unit.xml \
 	--cov-report=term-missing:skip-covered \
-	--cov-report=xml \
+	--cov-report=xml:coverage-unit.xml \
 	--cov=src/dbt_bouncer/ \
 	--numprocesses 5 \
 	./tests/unit

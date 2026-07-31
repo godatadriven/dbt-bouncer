@@ -45,8 +45,12 @@ htmlcov/
 .cache
 coverage.svg
 junit.xml
+junit-integration.xml
+junit-unit.xml
 nosetests.xml
 coverage.xml
+coverage-integration.xml
+coverage-unit.xml
 *.cover
 *.py,cover
 .hypothesis/
