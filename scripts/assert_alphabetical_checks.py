@@ -20,9 +20,9 @@ def main():
         logging.debug(f"{class_names=}")
         logging.debug(f"{sorted(class_names)=}")
         logging.debug(class_names == sorted(class_names))
-        assert class_names == sorted(
-            class_names
-        ), f"Class names are not sorted alphabetically in {f.name}"
+        assert class_names == sorted(class_names), (
+            f"Class names are not sorted alphabetically in {f.name}"
+        )
 
 
 if __name__ == "__main__":

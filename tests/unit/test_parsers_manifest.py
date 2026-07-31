@@ -62,9 +62,9 @@ def test_parse_manifest_artifact_table_format(capsys):
         r"(Exposures|Macros|Nodes|Seeds|Semantic Models|Snapshots|Sources|Tests|Unit Tests).*?[│|]\s+(\d+)",
         out,
     )
-    assert (
-        len(category_lines) == 9
-    ), f"Expected 9 categories, found {len(category_lines)}"
+    assert len(category_lines) == 9, (
+        f"Expected 9 categories, found {len(category_lines)}"
+    )
 
     # Verify all counts are numeric
     for category, count in category_lines:

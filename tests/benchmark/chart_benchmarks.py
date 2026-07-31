@@ -19,7 +19,7 @@ from __future__ import annotations
 import json
 import math
 import os
-import subprocess  # noqa: S404 - fixed, fully-controlled command (no shell, no user input)
+import subprocess  # ruff: ignore[suspicious-subprocess-import] - fixed, fully-controlled command (no shell, no user input)
 import sys
 import tempfile
 from pathlib import Path
@@ -452,7 +452,7 @@ def _run_benchmark_json(
             "DBT_BOUNCER_BENCH_PHASE_ROUNDS": str(phase_rounds),
         }
 
-        proc = subprocess.run(  # noqa: S603 - fixed argv, no shell, no untrusted input
+        proc = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] - fixed argv, no shell, no untrusted input
             cmd,
             cwd=_REPO_ROOT,
             env=env,

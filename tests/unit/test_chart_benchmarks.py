@@ -8,8 +8,6 @@ from __future__ import annotations
 
 import importlib.util
 import json
-
-# ruff: noqa: S101
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -51,11 +49,11 @@ def test_compute_stats() -> None:
     """``_compute_stats`` calculates statistics and outlier thresholds accurately."""
     data = [0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.10]
     stats = chart._compute_stats(data)
-    assert stats["min"] == 0.01
-    assert stats["max"] == 0.10
+    assert stats["min"] == pytest.approx(0.01)
+    assert stats["max"] == pytest.approx(0.10)
     assert stats["mean"] == pytest.approx(0.055)
-    assert stats["median"] == 0.055
-    assert stats["count"] == 10.0
+    assert stats["median"] == pytest.approx(0.055)
+    assert stats["count"] == pytest.approx(10.0)
     assert stats["stddev"] > 0.0
     assert stats["mild_lower"] < stats["q1"]
     assert stats["severe_lower"] < stats["mild_lower"]
