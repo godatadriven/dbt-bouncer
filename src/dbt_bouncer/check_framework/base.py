@@ -2,24 +2,30 @@
 
 from __future__ import annotations
 
-from typing import Any, ClassVar
+from typing import TYPE_CHECKING, Any, ClassVar
 
 from pydantic import BaseModel, ConfigDict, Field, PrivateAttr
 
-from dbt_bouncer.artifact_types import (  # noqa: TC001 - needed at runtime for Pydantic model_rebuild
-    CatalogNodeEntry,
-    ExposureNode,
-    MacroNode,
-    ManifestWrapper,
-    ModelNode,
-    RunResultEntry,
-    SeedNode,
-    SemanticModelNode,
-    SnapshotNode,
-    SourceNode,
-    TestNode,
-    UnitTestNode,
-)
+if TYPE_CHECKING:
+    # Only referenced by the ``_require_*`` return annotations, which are lazy
+    # under ``from __future__ import annotations``. Previously these had to be
+    # imported at runtime so Pydantic could resolve the per-resource field
+    # types; those fields are gone, so the import can go with them.
+    from dbt_bouncer.artifact_types import (
+        CatalogNodeEntry,
+        ExposureNode,
+        MacroNode,
+        ManifestWrapper,
+        ModelNode,
+        RunResultEntry,
+        SeedNode,
+        SemanticModelNode,
+        SnapshotNode,
+        SourceNode,
+        TestNode,
+        UnitTestNode,
+    )
+
 from dbt_bouncer.check_framework.exceptions import DbtBouncerFailedCheckError
 from dbt_bouncer.enums import CheckSeverity, Materialization, RuleCode
 from dbt_bouncer.utils import is_description_populated
@@ -64,21 +70,26 @@ class BaseCheck(BaseModel):
         description="Severity of the check, one of 'error' or 'warn'.",
     )
 
-    catalog_node: CatalogNodeEntry | None = Field(default=None)
-    catalog_source: CatalogNodeEntry | None = Field(default=None)
-    exposure: ExposureNode | None = Field(default=None)
-    macro: MacroNode | None = Field(default=None)
-    model: ModelNode | None = Field(default=None)
-    run_result: RunResultEntry | None = Field(default=None)
-    seed: SeedNode | None = Field(default=None)
-    semantic_model: SemanticModelNode | None = Field(default=None)
-    snapshot: SnapshotNode | None = Field(default=None)
-    source: SourceNode | None = Field(default=None)
-    test: TestNode | None = Field(default=None)
-    unit_test: UnitTestNode | None = Field(default=None)
+    # NB: the twelve per-resource fields (``model``, ``seed``, ``catalog_node``,
+    # ...) are deliberately NOT declared here. Every check binds exactly one
+    # resource, and it declares that field itself: the ``@check`` decorator adds
+    # it as ``Any | None``, and class-based checks must declare it too (the
+    # runner infers ``iterate_over`` from the subclass's own ``__annotations__``,
+    # so a subclass that declared none never matched a resource in the first
+    # place). Declaring all twelve on the base made every generated subclass
+    # re-collect and copy 19 inherited fields instead of 7 -- measured at ~29%
+    # of total check-class construction, which is the single largest cost in a
+    # warm run. ``set_resource`` writes straight into the instance ``__dict__``,
+    # so nothing here needs a slot reserved for it.
 
     _ctx: Any = PrivateAttr(default=None)
     _min_description_length: ClassVar[int] = 4
+
+    # Set by the ``@check`` decorator to the check's iterate-over resource name
+    # (``None`` for context-only checks). Declared here so it is a real, typed
+    # class attribute rather than one conjured onto the generated subclass.
+    # ``ClassVar`` keeps Pydantic from treating it as a model field.
+    iterate_over: ClassVar[str | None] = None
 
     def set_context(self, ctx: Any) -> None:
         """Set the execution context for this check instance.

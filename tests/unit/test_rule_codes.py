@@ -7,7 +7,7 @@ from pydantic import ValidationError
 
 from dbt_bouncer.check_framework.decorator import check
 from dbt_bouncer.configuration_file.validator import validate_conf
-from dbt_bouncer.runner import _should_run_check
+from dbt_bouncer.runner import _check_applies_to_resource, _ResourceFacts
 from dbt_bouncer.utils import get_check_objects, get_check_registry
 
 
@@ -17,9 +17,9 @@ def test_rule_codes_assigned_and_unique() -> None:
     assert len(checks) > 0
 
     codes = [getattr(c, "code", None) for c in checks]
-    assert all(
-        code is not None for code in codes
-    ), "Some checks are missing rule codes."
+    assert all(code is not None for code in codes), (
+        "Some checks are missing rule codes."
+    )
 
     pattern = re.compile(r"^[A-Z]{2}\d{3}$")
     invalid_codes = [c for c in codes if not pattern.match(c)]
@@ -107,14 +107,23 @@ def test_skip_checks_with_rule_code() -> None:
     res = DummyResource()
     check_inst = check_fake()
 
+    def facts(skip_checks):
+        return _ResourceFacts(
+            resource=res,
+            skip_checks=skip_checks,
+            run_id_suffix="my_model",
+            file_path=res.original_file_path,
+            unique_id="model.package.my_model",
+            cleaned_path=res.original_file_path,
+        )
+
+    name, code = check_inst.name, check_inst.code
+
     # Not skipped
-    assert _should_run_check(check_inst, res, frozenset({"model"}), []) is True
+    assert _check_applies_to_resource(name, code, None, facts([])) is True
 
     # Skipped by name
-    assert (
-        _should_run_check(check_inst, res, frozenset({"model"}), ["check_fake"])
-        is False
-    )
+    assert _check_applies_to_resource(name, code, None, facts(["check_fake"])) is False
 
     # Skipped by rule code
-    assert _should_run_check(check_inst, res, frozenset({"model"}), ["MO999"]) is False
+    assert _check_applies_to_resource(name, code, None, facts(["MO999"])) is False

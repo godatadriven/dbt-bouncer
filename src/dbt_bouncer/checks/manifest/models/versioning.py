@@ -1,7 +1,7 @@
 """Checks related to model versioning."""
 
 from dbt_bouncer.check_framework.decorator import check, fail
-from dbt_bouncer.utils import compile_pattern
+from dbt_bouncer.utils import compile_pattern, get_clean_model_name
 
 
 @check(code="MO045")
@@ -42,6 +42,8 @@ def check_model_version_allowed(model, *, version_pattern: str):
 
         Teams that use model versioning often enforce a convention for version identifiers — for example, numeric-only versions or semantic version strings. This check validates that version values conform to the team's chosen scheme, preventing arbitrary or malformed version strings from being introduced.
 
+    Only versioned models are checked; a model without a `version` has nothing to validate.
+
     Parameters:
         version_pattern (str): Regexp the version must match.
 
@@ -69,9 +71,10 @@ def check_model_version_allowed(model, *, version_pattern: str):
 
     """
     compiled = compile_pattern(version_pattern.strip())
-    if model.version and (compiled.match(str(model.version)) is None):
+    # `is not None` rather than truthiness: `0` is an unusual but legitimate version.
+    if model.version is not None and (compiled.match(str(model.version)) is None):
         fail(
-            f"Version `{model.version}` in `{model.name}` does not match the supplied regex `{version_pattern.strip()})`."
+            f"Version `{model.version}` in `{model.name}` does not match the supplied regex `{version_pattern.strip()}`."
         )
 
 
@@ -82,6 +85,8 @@ def check_model_version_pinned_in_ref(model, ctx):
     !!! info "Rationale"
 
         When a versioned model is referenced without specifying a version, dbt resolves it to the `latest_version`, meaning a version bump can silently redirect all downstream consumers. Requiring explicit version pins in `ref()` calls ensures that version upgrades are a deliberate, reviewed change rather than an implicit one.
+
+    Only versioned models are checked; a model without a `version` has nothing for a downstream `ref` to pin. Only downstream models are considered, so a `ref` from a test or exposure does not trigger this check.
 
     Receives:
         manifest_obj (ManifestObject): The ManifestObject object parsed from `manifest.json`.
@@ -102,6 +107,11 @@ def check_model_version_pinned_in_ref(model, ctx):
         ```
 
     """
+    # Only versioned models can be pinned; an unversioned model has no version
+    # for a downstream `ref` to specify.
+    if model.version is None:
+        return
+
     manifest_obj = ctx.manifest_obj
     child_map = manifest_obj.manifest.child_map
     if child_map and model.unique_id in child_map:
@@ -115,15 +125,25 @@ def check_model_version_pinned_in_ref(model, ctx):
     for m in downstream_models:
         node = manifest_obj.manifest.nodes.get(m)
         refs = getattr(node, "refs", None)
-        if node and refs and isinstance(refs, list):
-            downstream_models_with_unversioned_refs.extend(
-                m
+        if (
+            node
+            and refs
+            and isinstance(refs, list)
+            and any(
+                # `name` excludes the version, so compare against the model's
+                # `name` rather than the last segment of `unique_id` (which is
+                # the version, e.g. `v2`, for a versioned model).
+                getattr(ref, "name", None) == model.name
+                # `is None` rather than truthiness: `ref(..., v=0)` is pinned.
+                and getattr(ref, "version", None) is None
                 for ref in refs
-                if getattr(ref, "name", None) == model.unique_id.split(".")[-1]
-                and not getattr(ref, "version", None)
             )
+        ):
+            # `any` rather than a generator of matches, so a downstream model
+            # with several unpinned refs to this model is only listed once.
+            downstream_models_with_unversioned_refs.append(m)
 
     if downstream_models_with_unversioned_refs:
         fail(
-            f"`{model.name}` is referenced without a pinned version in downstream models: {downstream_models_with_unversioned_refs}."
+            f"`{get_clean_model_name(model.unique_id)}` is referenced without a pinned version in downstream models: {downstream_models_with_unversioned_refs}."
         )

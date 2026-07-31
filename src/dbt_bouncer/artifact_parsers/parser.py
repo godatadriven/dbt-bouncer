@@ -25,7 +25,7 @@ class ProxyStr(str):
 
     @property
     def value(self) -> str:
-        """Return the string value (mimics Pydantic enum .value access).
+        """The string value (mimics Pydantic enum .value access).
 
         Returns:
             str: The underlying string value.
@@ -89,7 +89,7 @@ class DictProxy(dict):
         for v in dict.values(self):
             yield _wrap_value(v)
 
-    def get(self, key: str, default: Any = None) -> Any:
+    def get(self, key: Any, default: Any = None) -> Any:
         """Get a wrapped value by key, or *default* if missing.
 
         Returns:
@@ -128,20 +128,25 @@ class ListProxy(list):
             yield _wrap_value(item)
 
 
+# Exact-type dispatch table for `_wrap_value`. orjson only ever produces plain
+# `dict`/`list`/`str` (plus primitives), and the proxy classes are deliberately
+# absent, so an already-wrapped value falls straight through.
+_WRAPPERS: dict[type, Any] = {dict: DictProxy, list: ListProxy, str: ProxyStr}
+
+
 def _wrap_value(value: Any) -> Any:
     """Wrap dicts/lists in proxies, strings in ProxyStr. Primitives pass through.
+
+    This is the hottest function in the codebase -- hundreds of thousands of calls
+    per run -- so it dispatches on the value's exact type: one dict lookup instead
+    of up to six ``isinstance`` calls.
 
     Returns:
         Any: Proxy-wrapped value or primitive as-is.
 
     """
-    if isinstance(value, dict) and not isinstance(value, DictProxy):
-        return DictProxy(value)
-    if isinstance(value, list) and not isinstance(value, ListProxy):
-        return ListProxy(value)
-    if isinstance(value, str) and not isinstance(value, ProxyStr):
-        return ProxyStr(value)
-    return value
+    wrapper = _WRAPPERS.get(value.__class__)
+    return value if wrapper is None else wrapper(value)
 
 
 def _make_wrapper(

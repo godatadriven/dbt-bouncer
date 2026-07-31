@@ -49,7 +49,7 @@ class _PermissiveSchemaGenerator(GenerateJsonSchema):
     generation succeeds, then strip these fields in post-processing.
     """
 
-    def is_instance_schema(self, schema: Any) -> dict[str, Any]:  # noqa: ARG002
+    def is_instance_schema(self, schema: Any) -> dict[str, Any]:  # ruff: ignore[unused-method-argument]
         return {}
 
 
@@ -96,14 +96,14 @@ def main() -> None:
     configure_console_logging(0)
 
     # Import all check modules so the full discriminated union is built.
-    import dbt_bouncer.checks.catalog
-    import dbt_bouncer.checks.manifest
-    import dbt_bouncer.checks.run_results  # noqa: F401
+    import dbt_bouncer.checks.catalog  # ruff: ignore[unused-import]
+    import dbt_bouncer.checks.manifest  # ruff: ignore[unused-import]
+    import dbt_bouncer.checks.run_results  # ruff: ignore[unused-import]
     from dbt_bouncer.check_framework.exceptions import NestedDict
     from dbt_bouncer.configuration_file.parser import create_bouncer_conf_class
 
     logging.info("Building DbtBouncerConf model with all checks...")
-    DbtBouncerConf = create_bouncer_conf_class()  # noqa: N806
+    DbtBouncerConf = create_bouncer_conf_class()  # ruff: ignore[non-lowercase-variable-in-function]
     DbtBouncerConf.model_rebuild(_types_namespace={"NestedDict": NestedDict})
 
     logging.info("Generating JSON Schema...")

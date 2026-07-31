@@ -140,7 +140,7 @@ def check_model_has_unique_test(
     model,
     ctx,
     *,
-    accepted_uniqueness_tests: list[str] | None = [  # noqa: B006
+    accepted_uniqueness_tests: list[str] | None = [  # ruff: ignore[mutable-argument-default]
         "dbt_expectations.expect_compound_columns_to_be_unique",
         "dbt_utils.unique_combination_of_columns",
         "unique",

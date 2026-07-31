@@ -22,7 +22,7 @@ from __future__ import annotations
 
 import json
 import os
-import subprocess  # noqa: S404 - fixed, fully-controlled command (no shell, no user input)
+import subprocess  # ruff: ignore[suspicious-subprocess-import] - fixed, fully-controlled command (no shell, no user input)
 import sys
 import tempfile
 from pathlib import Path
@@ -156,7 +156,7 @@ def _run_single(n_models: int) -> float | None:
         # No capture_output/text: inherit the parent's stdio so the child's
         # tqdm progress bars (see run_bouncer_phase_decomposition in
         # conftest.py) stream live instead of being swallowed into a pipe.
-        proc = subprocess.run(  # noqa: S603 - fixed argv, no shell, no untrusted input
+        proc = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] - fixed argv, no shell, no untrusted input
             cmd, cwd=_REPO_ROOT, env=env
         )
         if proc.returncode != 0 or not json_path.exists():

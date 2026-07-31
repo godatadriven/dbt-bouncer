@@ -164,7 +164,7 @@ class _StubCheckNoDoc:
 
 
 class _StubCheckEmptyDoc:
-    """ """  # noqa: D419
+    """ """  # ruff: ignore[empty-docstring]
 
     __module__ = "dbt_bouncer.checks.catalog.check_columns"
     __name__ = "StubCheckEmptyDoc"

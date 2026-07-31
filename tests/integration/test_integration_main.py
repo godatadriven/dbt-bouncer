@@ -98,9 +98,9 @@ def test_cli_happy_path(caplog, dbt_artifacts_dir, tmp_path):
     assert result.output.count("manifest.json") == 1
     import re
 
-    assert re.search(
-        r"[│|]\s+[1-9]", result.output
-    ), "Artifact summary table contains no non-zero counts"
+    assert re.search(r"[│|]\s+[1-9]", result.output), (
+        "Artifact summary table contains no non-zero counts"
+    )
     assert result.exit_code == 0
 
 
@@ -155,8 +155,11 @@ def test_cli_coverage(caplog, tmp_path):
 
 def test_cli_happy_path_pyproject_toml(caplog):
     runner = CliRunner()
+    # `-v`: config discovery is logged at DEBUG, and the root logger is only
+    # taken down to DEBUG when the user asks for that verbosity.
     result = runner.invoke(
         app,
+        ["-v"],
     )
 
     assert "Loading config from pyproject.toml, if exists..." in caplog.text

@@ -35,7 +35,7 @@ def _make_handler(directory: Path) -> type:
         def __init__(self, *args, **kwargs):
             super().__init__(*args, directory=str(directory), **kwargs)
 
-        def log_message(self, format, *args):  # noqa: A002
+        def log_message(self, format, *args):  # ruff: ignore[builtin-argument-shadowing]
             pass
 
     return _Handler
