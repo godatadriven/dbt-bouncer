@@ -109,8 +109,8 @@
               - name: Setup Python
                 uses: ./.github/actions/setup_python_env
 
-              - name: Run unit tests with coverage
-                run: mise run test-unit
+              - name: Run tests with coverage
+                run: mise run test
 
               - name: Generate coverage badge
                 run: |

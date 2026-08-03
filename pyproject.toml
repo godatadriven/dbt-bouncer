@@ -90,6 +90,11 @@ exclude_lines = [
   "if TYPE_CHECKING:",
 ]
 
+[tool.coverage.run]
+# Statement coverage alone reports a partially-taken `if`/`except` as covered,
+# which hid ~126 untaken branches across the config validator and check registry.
+branch = true
+
 [tool.dbt-bouncer]
 dbt_artifacts_dir = "dbt_project/target"
 
