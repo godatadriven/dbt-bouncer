@@ -37,6 +37,19 @@ DEPRECATED_CHECK_NAME_ALIASES: dict[str, str] = {
 }
 
 
+def warn_deprecated_check_name(old_name: str, new_name: str) -> None:
+    """Log the standard deprecation warning for a renamed check.
+
+    Args:
+        old_name: The deprecated check name found in the user's input.
+        new_name: The replacement check name.
+
+    """
+    logging.warning(
+        f"Check name `{old_name}` is deprecated and will be removed in a future major release; use `{new_name}` instead."
+    )
+
+
 def apply_deprecated_check_name_aliases(config_file_contents: dict) -> dict:
     """Rewrite deprecated check names to their replacements, warning per use.
 
@@ -52,9 +65,7 @@ def apply_deprecated_check_name_aliases(config_file_contents: dict) -> dict:
                 continue
             new_name = DEPRECATED_CHECK_NAME_ALIASES.get(c.get("name"))
             if new_name is not None:
-                logging.warning(
-                    f"Check name `{c['name']}` is deprecated and will be removed in a future major release; use `{new_name}` instead."
-                )
+                warn_deprecated_check_name(c["name"], new_name)
                 c["name"] = new_name
     return config_file_contents
 
@@ -361,8 +372,8 @@ def lint_config_file(config_file_path: Path) -> list[dict[str, Any]]:
                 check_name = raw_name
 
                 if check_name in DEPRECATED_CHECK_NAME_ALIASES:
-                    logging.warning(
-                        f"Check name `{check_name}` is deprecated and will be removed in a future major release; use `{DEPRECATED_CHECK_NAME_ALIASES[check_name]}` instead."
+                    warn_deprecated_check_name(
+                        check_name, DEPRECATED_CHECK_NAME_ALIASES[check_name]
                     )
                 elif check_name not in registry:
                     best_match = min(
