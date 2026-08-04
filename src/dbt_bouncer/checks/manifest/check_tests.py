@@ -1,11 +1,13 @@
 from dbt_bouncer.check_framework.decorator import check, fail
 from dbt_bouncer.check_framework.exceptions import NestedDict
 from dbt_bouncer.enums import Criteria
-from dbt_bouncer.utils import compile_pattern, find_missing_meta_keys
+from dbt_bouncer.utils import compile_pattern, find_meta_keys_criteria_failure
 
 
 @check(code="TE001")
-def check_test_has_meta_keys(test, *, keys: NestedDict):
+def check_test_has_meta_keys(
+    test, *, criteria: Criteria = Criteria.ALL, keys: NestedDict
+):
     """The `meta` config for data tests must have the specified keys.
 
     !!! info "Rationale"
@@ -13,6 +15,7 @@ def check_test_has_meta_keys(test, *, keys: NestedDict):
         The `meta` field on data tests is a flexible store for operational metadata such as ownership, severity context, or ticket references. Enforcing required keys ensures that every test carries the information needed to triage failures quickly — for example, knowing which team owns a failing test or what SLA it is tied to — without relying on tribal knowledge or documentation that falls out of sync.
 
     Parameters:
+        criteria (Literal["all", "any", "one"]): Whether the resource must have all, any, or exactly one of the specified keys. Default: `all`.
         keys (NestedDict): A list (that may contain sub-lists) of required keys.
 
     Receives:
@@ -33,13 +36,9 @@ def check_test_has_meta_keys(test, *, keys: NestedDict):
         ```
 
     """
-    missing_keys = find_missing_meta_keys(
-        meta_config=test.meta, required_keys=keys.model_dump()
-    )
-    if missing_keys:
-        fail(
-            f"`{test.unique_id}` is missing the following keys from the `meta` config: {[x.replace('>>', '') for x in missing_keys]}"
-        )
+    failure = find_meta_keys_criteria_failure(test.meta, keys.model_dump(), criteria)
+    if failure:
+        fail(f"`{test.unique_id}` {failure}")
 
 
 @check(code="TE002")

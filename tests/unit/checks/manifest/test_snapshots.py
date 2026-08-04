@@ -103,6 +103,52 @@ class TestCheckSnapshotHasMetaKeys:
     def test_check_snapshot_has_meta_keys(self, snapshot_overrides, keys, check_fn):
         check_fn("check_snapshot_has_meta_keys", keys=keys, snapshot=snapshot_overrides)
 
+    @pytest.mark.parametrize(
+        ("snapshot_overrides", "keys", "criteria", "check_fn"),
+        [
+            pytest.param(
+                {**_SNAPSHOT_BASE, "meta": {"owner": "Data Team"}},
+                ["owner", "maturity"],
+                "any",
+                check_passes,
+                id="criteria_any_one_key_present",
+            ),
+            pytest.param(
+                {**_SNAPSHOT_BASE, "meta": {}},
+                ["owner", "maturity"],
+                "any",
+                check_fails,
+                id="criteria_any_no_keys_present",
+            ),
+            pytest.param(
+                {**_SNAPSHOT_BASE, "meta": {"owner": "Data Team"}},
+                ["owner", "maturity"],
+                "one",
+                check_passes,
+                id="criteria_one_exactly_one_key_present",
+            ),
+            pytest.param(
+                {
+                    **_SNAPSHOT_BASE,
+                    "meta": {"owner": "Data Team", "maturity": "high"},
+                },
+                ["owner", "maturity"],
+                "one",
+                check_fails,
+                id="criteria_one_two_keys_present",
+            ),
+        ],
+    )
+    def test_check_snapshot_has_meta_keys_criteria(
+        self, snapshot_overrides, keys, criteria, check_fn
+    ):
+        check_fn(
+            "check_snapshot_has_meta_keys",
+            keys=keys,
+            criteria=criteria,
+            snapshot=snapshot_overrides,
+        )
+
 
 class TestCheckSnapshotHasTags:
     @pytest.mark.parametrize(

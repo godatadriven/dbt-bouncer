@@ -267,6 +267,49 @@ class TestCheckExposureHasMetaKeys:
     def test_check_exposure_has_meta_keys(self, keys, exposure_overrides, check_fn):
         check_fn("check_exposure_has_meta_keys", keys=keys, exposure=exposure_overrides)
 
+    @pytest.mark.parametrize(
+        ("keys", "criteria", "exposure_overrides", "check_fn"),
+        [
+            pytest.param(
+                ["owner", "maturity"],
+                "any",
+                {**_EXPOSURE_BASE, "meta": {"owner": "Finance"}},
+                check_passes,
+                id="criteria_any_one_key_present",
+            ),
+            pytest.param(
+                ["owner", "maturity"],
+                "any",
+                {**_EXPOSURE_BASE, "meta": {}},
+                check_fails,
+                id="criteria_any_no_keys_present",
+            ),
+            pytest.param(
+                ["owner", "maturity"],
+                "one",
+                {**_EXPOSURE_BASE, "meta": {"owner": "Finance"}},
+                check_passes,
+                id="criteria_one_exactly_one_key_present",
+            ),
+            pytest.param(
+                ["owner", "maturity"],
+                "one",
+                {**_EXPOSURE_BASE, "meta": {"owner": "Finance", "maturity": "high"}},
+                check_fails,
+                id="criteria_one_two_keys_present",
+            ),
+        ],
+    )
+    def test_check_exposure_has_meta_keys_criteria(
+        self, keys, criteria, exposure_overrides, check_fn
+    ):
+        check_fn(
+            "check_exposure_has_meta_keys",
+            keys=keys,
+            criteria=criteria,
+            exposure=exposure_overrides,
+        )
+
 
 class TestCheckExposureHasOwner:
     @pytest.mark.parametrize(

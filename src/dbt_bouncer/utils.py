@@ -17,7 +17,7 @@ from importlib.metadata import entry_points
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from dbt_bouncer.enums import CheckCategory
+from dbt_bouncer.enums import CheckCategory, Criteria
 from dbt_bouncer.types import MetaConfig, MissingMetaKeys, RequiredMetaKey
 
 if TYPE_CHECKING:
@@ -107,6 +107,42 @@ def resource_in_path(check: "BaseCheck", resource: Any) -> bool:
     if not object_in_path(check.include, resource.original_file_path):
         return False
     return not object_excluded_by_path(check.exclude, resource.original_file_path)
+
+
+def find_meta_keys_criteria_failure(
+    meta_config: dict[str, Any],
+    required_keys: list[Any],
+    criteria: Criteria,
+    config_label: str = "meta",
+) -> str | None:
+    """Evaluate required keys against a presence criteria.
+
+    A top-level entry in ``required_keys`` is satisfied when checking it alone
+    yields no missing keys (nested specs must be fully present).
+
+    Returns:
+        str | None: A failure-message fragment (without the resource name), or
+            None when the criteria is met.
+
+    """
+    if criteria == Criteria.ALL:
+        missing = find_missing_meta_keys(
+            meta_config=meta_config, required_keys=required_keys
+        )
+        if missing:
+            return f"is missing the following keys from the `{config_label}` config: {[x.replace('>>', '') for x in missing]}"
+        return None
+
+    satisfied = [
+        entry
+        for entry in required_keys
+        if not find_missing_meta_keys(meta_config=meta_config, required_keys=[entry])
+    ]
+    if criteria == Criteria.ANY and not satisfied:
+        return f"does not have any of the required keys in the `{config_label}` config: {required_keys}"
+    if criteria == Criteria.ONE and len(satisfied) != 1:
+        return f"must have exactly one of the required keys in the `{config_label}` config: {required_keys}"
+    return None
 
 
 def find_missing_meta_keys(

@@ -131,6 +131,47 @@ class TestCheckSourceHasMetaKeys:
             keys=keys,
         )
 
+    @pytest.mark.parametrize(
+        ("keys", "criteria", "meta", "check_fn"),
+        [
+            pytest.param(
+                ["owner", "maturity"],
+                "any",
+                {"owner": "Bob"},
+                check_passes,
+                id="criteria_any_one_key_present",
+            ),
+            pytest.param(
+                ["owner", "maturity"],
+                "any",
+                {},
+                check_fails,
+                id="criteria_any_no_keys_present",
+            ),
+            pytest.param(
+                ["owner", "maturity"],
+                "one",
+                {"owner": "Bob"},
+                check_passes,
+                id="criteria_one_exactly_one_key_present",
+            ),
+            pytest.param(
+                ["owner", "maturity"],
+                "one",
+                {"owner": "Bob", "maturity": "high"},
+                check_fails,
+                id="criteria_one_two_keys_present",
+            ),
+        ],
+    )
+    def test_meta_keys_criteria(self, keys, criteria, meta, check_fn):
+        check_fn(
+            "check_source_has_meta_keys",
+            source={"meta": meta},
+            keys=keys,
+            criteria=criteria,
+        )
+
 
 class TestCheckSourcePiiMeta:
     @pytest.mark.parametrize(

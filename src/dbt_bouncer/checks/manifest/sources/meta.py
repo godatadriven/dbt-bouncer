@@ -2,7 +2,12 @@
 
 from dbt_bouncer.check_framework.decorator import check, fail
 from dbt_bouncer.check_framework.exceptions import NestedDict
-from dbt_bouncer.utils import compile_pattern, find_missing_meta_keys
+from dbt_bouncer.enums import Criteria
+from dbt_bouncer.utils import (
+    compile_pattern,
+    find_meta_keys_criteria_failure,
+    find_missing_meta_keys,
+)
 
 
 @check(code="SO011")
@@ -63,7 +68,9 @@ def check_source_has_labels_keys(source, *, keys: NestedDict):
 
 
 @check(code="SO012")
-def check_source_has_meta_keys(source, *, keys: NestedDict):
+def check_source_has_meta_keys(
+    source, *, criteria: Criteria = Criteria.ALL, keys: NestedDict
+):
     """The `meta` config for sources must have the specified keys.
 
     !!! info "Rationale"
@@ -71,6 +78,7 @@ def check_source_has_meta_keys(source, *, keys: NestedDict):
         The `meta` config is a free-form dictionary that teams use to attach governance information to dbt nodes — things like data owner, sensitivity classification, SLA tier, or compliance labels. Without enforcing required keys, this metadata is applied inconsistently: some sources have an owner, others do not; some are labelled PII-sensitive, others are silently omitted. This check ensures that every source carries the minimum set of metadata keys needed to support data governance, access control automation, and operational runbooks.
 
     Parameters:
+        criteria (Literal["all", "any", "one"]): Whether the resource must have all, any, or exactly one of the specified keys. Default: `all`.
         keys (NestedDict): A list (that may contain sub-lists) of required keys.
 
     Receives:
@@ -95,13 +103,9 @@ def check_source_has_meta_keys(source, *, keys: NestedDict):
 
     """
     display = f"{source.source_name}.{source.name}"
-    missing_keys = find_missing_meta_keys(
-        meta_config=source.meta, required_keys=keys.model_dump()
-    )
-    if missing_keys:
-        fail(
-            f"`{display}` is missing the following keys from the `meta` config: {[x.replace('>>', '') for x in missing_keys]}"
-        )
+    failure = find_meta_keys_criteria_failure(source.meta, keys.model_dump(), criteria)
+    if failure:
+        fail(f"`{display}` {failure}")
 
 
 @check(code="SO013")

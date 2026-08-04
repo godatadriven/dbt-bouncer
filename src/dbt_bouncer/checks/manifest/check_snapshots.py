@@ -7,7 +7,7 @@ from dbt_bouncer.check_framework.exceptions import NestedDict
 from dbt_bouncer.enums import Criteria
 from dbt_bouncer.utils import (
     compile_pattern,
-    find_missing_meta_keys,
+    find_meta_keys_criteria_failure,
     get_clean_model_name,
     is_description_populated,
 )
@@ -56,7 +56,9 @@ def check_snapshot_description_populated(
 
 
 @check(code="SN002")
-def check_snapshot_has_meta_keys(snapshot, *, keys: NestedDict):
+def check_snapshot_has_meta_keys(
+    snapshot, *, criteria: Criteria = Criteria.ALL, keys: NestedDict
+):
     """The `meta` config for snapshots must have the specified keys.
 
     !!! info "Rationale"
@@ -64,6 +66,7 @@ def check_snapshot_has_meta_keys(snapshot, *, keys: NestedDict):
         The `meta` config is a flexible, project-defined dictionary used to track ownership, maturity levels, PII classification, and other governance attributes. Requiring specific keys ensures that these attributes are consistently populated across all snapshots, enabling automated reporting, data cataloguing, and access-control workflows that depend on them.
 
     Parameters:
+        criteria (Literal["all", "any", "one"]): Whether the resource must have all, any, or exactly one of the specified keys. Default: `all`.
         keys (NestedDict): A list (that may contain sub-lists) of required keys.
 
     Receives:
@@ -85,13 +88,12 @@ def check_snapshot_has_meta_keys(snapshot, *, keys: NestedDict):
         ```
 
     """
-    missing_keys = find_missing_meta_keys(
-        meta_config=snapshot.meta or {}, required_keys=keys.model_dump()
+    failure = find_meta_keys_criteria_failure(
+        snapshot.meta or {}, keys.model_dump(), criteria
     )
-    if missing_keys:
-        fail(
-            f"`{get_clean_model_name(snapshot.unique_id)}` is missing the following keys from the `meta` config: {[x.replace('>>', '') for x in missing_keys]}"
-        )
+    if failure:
+        display_name = get_clean_model_name(snapshot.unique_id)
+        fail(f"`{display_name}` {failure}")
 
 
 @check(code="SN003")
