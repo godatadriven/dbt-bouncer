@@ -1,5 +1,6 @@
 """Run command package."""
 
+import logging
 from pathlib import Path
 from typing import Annotated
 
@@ -7,7 +8,8 @@ import typer
 
 from dbt_bouncer.cli import app
 from dbt_bouncer.cli.run.utils import detect_config_file_source, run_bouncer
-from dbt_bouncer.enums import ConfigFileName, OutputFormat
+from dbt_bouncer.enums import ConfigFileName, ExitCode, OutputFormat
+from dbt_bouncer.exceptions import DbtBouncerArtifactError, DbtBouncerConfigError
 
 
 @app.command(name="run")
@@ -101,22 +103,30 @@ def run(
         [cyan]$ dbt-bouncer run --output-file results.json --output-format json[/cyan]
 
     Raises:
-        Exit: If an invalid output format is provided or the checks fail.
+        Exit: If an invalid output format is provided, the checks fail, the config
+            file is missing/invalid, or a required dbt artifact is missing/unsupported.
 
     """
     config_file_source = detect_config_file_source(config_file)
 
-    exit_code = run_bouncer(
-        check=check,
-        config_file=config_file,
-        create_pr_comment_file=create_pr_comment_file,
-        dry_run=dry_run,
-        only=only,
-        output_file=output_file,
-        output_format=output_format,
-        output_only_failures=output_only_failures,
-        show_all_failures=show_all_failures,
-        verbosity=verbosity,
-        config_file_source=config_file_source,
-    )
+    try:
+        exit_code = run_bouncer(
+            check=check,
+            config_file=config_file,
+            create_pr_comment_file=create_pr_comment_file,
+            dry_run=dry_run,
+            only=only,
+            output_file=output_file,
+            output_format=output_format,
+            output_only_failures=output_only_failures,
+            show_all_failures=show_all_failures,
+            verbosity=verbosity,
+            config_file_source=config_file_source,
+        )
+    except DbtBouncerConfigError as e:
+        logging.error(str(e))
+        raise typer.Exit(ExitCode.CONFIG_ERROR) from e
+    except DbtBouncerArtifactError as e:
+        logging.error(str(e))
+        raise typer.Exit(ExitCode.ARTIFACT_ERROR) from e
     raise typer.Exit(exit_code)

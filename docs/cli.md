@@ -270,11 +270,11 @@ dbt-bouncer list --output-format json
 
 ## Exit codes
 
-`dbt-bouncer` returns the following exit codes:
+`dbt-bouncer` returns distinct exit codes so that CI pipelines and scripts can tell a check failure apart from a setup problem:
 
-- `0`: All checks have succeeded.
+- `0` (`SUCCESS`): All checks have succeeded.
+- `1` (`CHECK_ERRORS`): At least one check has failed. Check the logs for more information.
+- `2` (`CONFIG_ERROR`): The config file is missing, unreadable, or invalid (e.g. an invalid `--only` value).
+- `3` (`ARTIFACT_ERROR`): A required dbt artifact (`manifest.json`, `catalog.json`, `run_results.json`) is missing or was generated with an unsupported dbt version.
 
-- `1`:
-
-    - At least one check has failed. Check the logs for more information.
-    - A fatal error occurred during check setup or check execution. Check the logs for more information.
+These codes apply to both `dbt-bouncer run` and `dbt-bouncer validate` (which only ever returns `SUCCESS`, `CHECK_ERRORS`, or `CONFIG_ERROR` — for `validate`, `CHECK_ERRORS` means lint issues were found in the config file, not that dbt checks failed).

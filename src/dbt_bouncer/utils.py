@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from dbt_bouncer.enums import CheckCategory, Criteria
+from dbt_bouncer.exceptions import DbtBouncerConfigError
 from dbt_bouncer.types import MetaConfig, MissingMetaKeys, RequiredMetaKey
 
 if TYPE_CHECKING:
@@ -911,15 +912,15 @@ def load_config_from_yaml(config_file: Path) -> Mapping[str, Any]:
         Mapping[str, Any]: Dict object.
 
     Raises:
-        FileNotFoundError: If the config file does not exist.
+        DbtBouncerConfigError: If the config file does not exist.
 
     """
     config_path = Path().cwd() / config_file
     logging.debug(f"Loading config from {config_path}...")
     if (
         not config_path.exists()
-    ):  # Shouldn't be needed as click should have already checked this
-        raise FileNotFoundError(f"No config file found at {config_path}.")
+    ):  # Shouldn't be needed as Typer should have already checked this
+        raise DbtBouncerConfigError(f"No config file found at {config_path}.")
 
     import yaml
 

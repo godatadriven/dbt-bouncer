@@ -3,6 +3,7 @@
 import yaml
 from typer.testing import CliRunner
 
+from dbt_bouncer.enums import ExitCode
 from dbt_bouncer.main import app
 
 runner = CliRunner()
@@ -28,14 +29,13 @@ class TestValidateCommand:
 
         assert result.exit_code == 0
 
-    def test_missing_config_file_raises_runtime_error(self, tmp_path, monkeypatch):
-        """When the config file does not exist a RuntimeError is raised."""
+    def test_missing_config_file_exits_config_error(self, tmp_path, monkeypatch):
+        """When the config file does not exist the CLI exits with CONFIG_ERROR."""
         monkeypatch.chdir(tmp_path)
 
         result = runner.invoke(app, ["validate"])
 
-        assert result.exit_code == 1
-        assert isinstance(result.exception, RuntimeError)
+        assert result.exit_code == ExitCode.CONFIG_ERROR
 
     def test_invalid_config_exits_nonzero(self, tmp_path, monkeypatch):
         """A config with issues exits with a non-zero code."""

@@ -4,6 +4,7 @@ import pytest
 import yaml
 
 from dbt_bouncer.cli.run.utils import run_bouncer
+from dbt_bouncer.exceptions import DbtBouncerConfigError
 
 
 def test_programmatic_happy_path(tmp_path):
@@ -49,5 +50,5 @@ def test_programmatic_failure_path(tmp_path):
 
 
 def test_programmatic_missing_config():
-    with pytest.raises((FileNotFoundError, RuntimeError)):
+    with pytest.raises(DbtBouncerConfigError):
         run_bouncer(config_file=Path("non-existent-config.yml"))

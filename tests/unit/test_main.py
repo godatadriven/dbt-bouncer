@@ -7,6 +7,7 @@ import pytest
 import yaml
 from typer.testing import CliRunner
 
+from dbt_bouncer.enums import ExitCode
 from dbt_bouncer.main import app
 from dbt_bouncer.utils import get_check_objects
 
@@ -826,8 +827,8 @@ NUM_RUN_RESULTS_CHECKS = _run_results_count()
         ),
         ("manifest_checks", 0, NUM_MANIFEST_CHECKS),
         ("run_results_checks", 0, NUM_RUN_RESULTS_CHECKS),
-        ("manifest", 1, 1),
-        ("manifest checks", 1, 1),
+        ("manifest", ExitCode.CONFIG_ERROR, 1),
+        ("manifest checks", ExitCode.CONFIG_ERROR, 1),
     ],
 )
 def test_cli_only(only_value, exit_code, number_of_checks_run, tmp_path):
@@ -1729,7 +1730,7 @@ def test_cli_severity_warn(tmp_path):
     assert result.exit_code == 0
 
 
-def test_cli_unsupported_dbt_version(tmp_path):
+def test_cli_unsupported_dbt_version(caplog, tmp_path):
     # Config file
     bouncer_config = {
         "dbt_artifacts_dir": ".",
@@ -1763,14 +1764,11 @@ def test_cli_unsupported_dbt_version(tmp_path):
         ],
     )
 
-    assert isinstance(result.exception, AssertionError)
+    assert result.exit_code == ExitCode.ARTIFACT_ERROR
     assert (
-        result.exception.args[0].find(
-            "The supplied `manifest.json` was generated with dbt version 1.8.0, this is below the minimum supported version of 1.9.0.",
-        )
-        >= 0
+        "The supplied `manifest.json` was generated with dbt version 1.8.0, this is below the minimum supported version of 1.9.0."
+        in caplog.text
     )
-    assert result.exit_code == 1
 
 
 def test_cli_list():

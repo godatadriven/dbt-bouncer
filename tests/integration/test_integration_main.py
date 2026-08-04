@@ -6,6 +6,7 @@ import yaml
 from typer.testing import CliRunner
 
 from dbt_bouncer.artifact_parsers.parser import wrap_dict
+from dbt_bouncer.enums import ExitCode
 from dbt_bouncer.main import app
 from dbt_bouncer.utils import clean_path_str
 
@@ -175,8 +176,7 @@ def test_cli_config_file_doesnt_exist():
             "non-existent-file.yml",
         ],
     )
-    assert type(result.exception) in [FileNotFoundError, RuntimeError]
-    assert result.exit_code != 0
+    assert result.exit_code == ExitCode.CONFIG_ERROR
 
 
 def test_cli_error_message(caplog, tmp_path):
@@ -219,7 +219,7 @@ def test_cli_error_message(caplog, tmp_path):
     assert result.exit_code == 1
 
 
-def test_cli_manifest_doesnt_exist(tmp_path):
+def test_cli_manifest_doesnt_exist(caplog, tmp_path):
     with Path.open(Path("dbt-bouncer-example.yml"), "r") as f:
         bouncer_config = yaml.safe_load(f)
 
@@ -236,9 +236,8 @@ def test_cli_manifest_doesnt_exist(tmp_path):
             Path(tmp_path / "dbt-bouncer-example.yml").__str__(),
         ],
     )
-    assert type(result.exception) in [FileNotFoundError]
-    assert result.exception.args[0].find("No manifest.json found at") == 0  # type: ignore[union-attr]
-    assert result.exit_code != 0
+    assert result.exit_code == ExitCode.ARTIFACT_ERROR
+    assert "No manifest.json found at" in caplog.text
 
 
 def test_cli_manifest_group_owner_email_list():
