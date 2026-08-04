@@ -187,6 +187,8 @@ jobs:
 
     dev-container:
       needs: [prek]
+      permissions:
+        contents: read
       runs-on: ubuntu-24.04
       steps:
         - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
@@ -196,6 +198,12 @@ jobs:
         - name: Build container and run tests
           uses: devcontainers/ci@513af61f4de4f75d37e4438f184ba4358f0fc1ca # v0.3
           with:
+            # mise resolves `ubi:` tools via the GitHub API. Unauthenticated
+            # runners share an IP-based limit of 60 requests/hour, so without a
+            # token this job fails intermittently on rate limits rather than on
+            # anything in the change under test.
+            env: |
+              GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
             runCmd: |
               set -eou
               uv run dbt-bouncer --config-file dbt-bouncer-example.yml
