@@ -18,6 +18,18 @@ from dbt_bouncer.runner import (
 )
 
 
+def test_runner_only_dispatches_decorator_checks():
+    """Class-based checks (no iterate_over ClassVar) are no longer discovered."""
+    from dbt_bouncer.check_framework.base import BaseCheck
+
+    class CheckLegacyStyle(BaseCheck):
+        name: str = "check_legacy_style"
+
+        def execute(self) -> None: ...
+
+    assert getattr(CheckLegacyStyle, "iterate_over", None) is None
+
+
 def test_runner_coverage(caplog, tmp_path):
     configure_console_logging(verbosity=0)
     ctx = typer.Context(

@@ -4,7 +4,6 @@ import operator
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, NotRequired, TypedDict
 
-from dbt_bouncer.enums import ResourceType
 from dbt_bouncer.executor import Executor
 from dbt_bouncer.reporting.reporter import Reporter
 from dbt_bouncer.utils import (
@@ -18,7 +17,10 @@ if TYPE_CHECKING:
     from dbt_bouncer.context import BouncerContext
 
 
-_VALID_ITERATE_OVER_VALUES = frozenset(rt.value for rt in ResourceType)
+# Maps each check class to its iterate-over resource name (an empty frozenset
+# for context-only checks), set by the ``@check`` decorator. Memoised here --
+# rather than re-reading the ClassVar per check -- because the same mapping is
+# also handed to the dry-run reporter for its "Resource type" column.
 _CLASS_ITERATE_CACHE: dict[type, frozenset[str]] = {}
 
 
@@ -175,9 +177,6 @@ def _assemble_checks_to_run(ctx: "BouncerContext") -> list[CheckToRun]:
     Returns:
         list[CheckToRun]: The assembled checks, ready for execution.
 
-    Raises:
-        RuntimeError: If more than one "iterate_over" argument is found.
-
     """
     # resource_map: wrapper objects used for check iteration.
     # Keys that are already plain lists (catalog_nodes, catalog_sources, exposures,
@@ -300,17 +299,13 @@ def _assemble_checks_to_run(ctx: "BouncerContext") -> list[CheckToRun]:
     for check in sorted(list_of_check_configs, key=operator.attrgetter("index")):
         cls = check.__class__
         if cls not in _CLASS_ITERATE_CACHE:
-            # Prefer explicit iterate_over ClassVar (set by @check decorator)
-            # over annotation introspection.
+            # Set by the @check decorator; None for context-only checks.
             explicit = getattr(cls, "iterate_over", None)
-            if explicit is not None:
-                _CLASS_ITERATE_CACHE[cls] = frozenset({explicit})
-            else:
-                _CLASS_ITERATE_CACHE[cls] = _VALID_ITERATE_OVER_VALUES.intersection(
-                    frozenset(cls.__annotations__.keys()),
-                )
+            _CLASS_ITERATE_CACHE[cls] = (
+                frozenset({explicit}) if explicit is not None else frozenset()
+            )
         iterate_over_value = _CLASS_ITERATE_CACHE[cls]
-        if len(iterate_over_value) == 1:
+        if iterate_over_value:
             iterate_value = next(iter(iterate_over_value))
             # The context is identical for every resource, so set it once on the
             # shared check-config instance rather than per match.
@@ -342,10 +337,6 @@ def _assemble_checks_to_run(ctx: "BouncerContext") -> list[CheckToRun]:
                         "unique_id": facts.unique_id,
                     },
                 )
-        elif len(iterate_over_value) > 1:
-            raise RuntimeError(
-                f"Check {check.name} has multiple iterate_over_value values: {iterate_over_value}",
-            )
         else:
             check_run_id = f"{check.name}:{check.index}"
             check.set_context(check_ctx)
