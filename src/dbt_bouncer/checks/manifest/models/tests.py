@@ -280,6 +280,10 @@ def check_model_test_coverage(ctx, *, min_model_test_coverage_pct: float = 100):
         description (str | None): Description of what the check does and why it is implemented.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
+    !!! info
+
+        A project with no models passes, as there is nothing left untested.
+
     Example(s):
         ```yaml
         manifest_checks:
@@ -298,6 +302,11 @@ def check_model_test_coverage(ctx, *, min_model_test_coverage_pct: float = 100):
         )
 
     num_models = len(ctx.models)
+    if num_models == 0:
+        # No models means nothing is left untested, so coverage is vacuously
+        # complete. Returning early also avoids dividing by zero.
+        return
+
     # Build set of model IDs that have at least one test
     tested_model_ids = {
         node

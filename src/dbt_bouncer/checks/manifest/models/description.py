@@ -150,6 +150,10 @@ def check_model_documentation_coverage(
         description (str | None): Description of what the check does and why it is implemented.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
+    !!! info
+
+        A project with no models passes, as there is nothing left undocumented.
+
     Example(s):
         ```yaml
         manifest_checks:
@@ -164,6 +168,11 @@ def check_model_documentation_coverage(
 
     """
     num_models = len(ctx.models)
+    if num_models == 0:
+        # No models means nothing is left undocumented, so coverage is vacuously
+        # complete. Returning early also avoids dividing by zero.
+        return
+
     models_with_description = []
     for model in ctx.models:
         if is_description_populated(

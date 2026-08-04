@@ -410,16 +410,21 @@ class TestCheckModelDocumentationCoverage:
             ctx_models=models_list,
         )
 
-    def test_empty_model_list_raises_zero_division_error(self):
-        # Documents current behaviour: the coverage percentage is computed as
-        # `num_models_with_descriptions / num_models` with no guard for an empty
-        # model list, so a project with no models raises rather than passing.
-        with pytest.raises(ZeroDivisionError):
-            _run_check(
-                "check_model_documentation_coverage",
-                min_model_documentation_coverage_pct=100,
-                ctx_models=[],
-            )
+    @pytest.mark.parametrize(
+        "min_pct",
+        [
+            pytest.param(0, id="zero_percent_minimum"),
+            pytest.param(100, id="hundred_percent_minimum"),
+        ],
+    )
+    def test_empty_model_list_passes(self, min_pct):
+        # With no models there is nothing left undocumented, so coverage is
+        # vacuously 100% and the check passes rather than dividing by zero.
+        check_passes(
+            "check_model_documentation_coverage",
+            min_model_documentation_coverage_pct=min_pct,
+            ctx_models=[],
+        )
 
 
 class TestCheckModelDocumentationCoverageInvalidParam:
