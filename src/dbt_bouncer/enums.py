@@ -52,6 +52,13 @@ class Criteria(StrEnum):
     ONE = auto()
 
 
+class ListOutputFormat(StrEnum):
+    """Supported output formats for the list command."""
+
+    JSON = auto()
+    TEXT = auto()
+
+
 class Materialization(StrEnum):
     """dbt materialization strategies."""
 
@@ -82,13 +89,6 @@ class OutputFormat(StrEnum):
     def values(cls) -> list:
         """Return all output format values as lowercase strings."""  # ruff: ignore[docstring-missing-returns]
         return list(cls)
-
-
-class OutputFormatCLI(StrEnum):
-    """Supported output formats for CLI list command."""
-
-    JSON = auto()
-    TEXT = auto()
 
 
 class PropertiesLayout(StrEnum):

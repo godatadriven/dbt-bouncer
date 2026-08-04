@@ -11,7 +11,7 @@ from dbt_bouncer.cli.list.utils import (
     category_key,
     print_text_checks,
 )
-from dbt_bouncer.enums import CheckCategory, OutputFormatCLI
+from dbt_bouncer.enums import CheckCategory, ListOutputFormat
 from dbt_bouncer.utils import get_check_objects
 
 
@@ -27,12 +27,12 @@ def list_checks(
         ),
     ] = None,
     output_format: Annotated[
-        OutputFormatCLI,
+        ListOutputFormat,
         typer.Option(
-            help="Output format. Choices: text, json. Defaults to text.",
+            help="Format for the command output. Choices: json, text. Defaults to text.",
             case_sensitive=False,
         ),
-    ] = OutputFormatCLI.TEXT,
+    ] = ListOutputFormat.TEXT,
 ) -> None:
     """List all available dbt-bouncer checks, grouped by category."""
     category_labels = {c.directory: c.value for c in CheckCategory}
@@ -48,7 +48,7 @@ def list_checks(
     if group is not None:
         payload = {k: v for k, v in payload.items() if k == group.value}
 
-    if output_format == OutputFormatCLI.JSON:
+    if output_format == ListOutputFormat.JSON:
         typer.echo(json.dumps(payload, indent=2))
     else:
         print_text_checks(payload)

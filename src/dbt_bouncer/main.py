@@ -76,7 +76,7 @@ def main_callback(
     output_format: Annotated[
         OutputFormat,
         typer.Option(
-            help="Format for the output file or stdout when no output file is specified. Choices: csv, json, junit, sarif, tap. Defaults to json.",
+            help="Format for the output file (requires --output-file). Choices: csv, json, junit, sarif, tap. Defaults to json.",
             case_sensitive=False,
         ),
     ] = OutputFormat.JSON,
