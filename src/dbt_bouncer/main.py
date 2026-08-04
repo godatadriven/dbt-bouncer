@@ -12,12 +12,6 @@ import dbt_bouncer.cli.list  # ruff: ignore[unused-import] — triggers @app.com
 import dbt_bouncer.cli.validate  # ruff: ignore[unused-import] — triggers @app.command registration
 from dbt_bouncer.cli import app
 from dbt_bouncer.cli.run import run
-
-# Self-alias re-export so ``from dbt_bouncer.main import run_bouncer``
-# keeps working after the function moved to ``cli.run.utils``.
-from dbt_bouncer.cli.run.utils import (
-    run_bouncer as run_bouncer,
-)
 from dbt_bouncer.enums import ConfigFileName, OutputFormat
 from dbt_bouncer.version import version as get_version
 

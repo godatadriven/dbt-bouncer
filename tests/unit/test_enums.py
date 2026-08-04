@@ -88,3 +88,13 @@ class TestPublicApi:
     def test_in_dunder_all(self):
         """The new enums appear in ``__all__``."""
         assert {"CheckCategory", "Criteria", "ModelAccess"} <= set(dbt_bouncer.__all__)
+
+    def test_dunder_all_is_derived_from_enum_names(self):
+        """``__all__`` is the sorted union of ``_ENUM_NAMES`` and the non-enum exports."""
+        assert dbt_bouncer.__all__ == sorted({*dbt_bouncer._ENUM_NAMES, "run_bouncer"})
+
+    def test_run_bouncer_resolves_from_the_top_level_package(self):
+        """``from dbt_bouncer import run_bouncer`` is the documented public entrypoint."""
+        from dbt_bouncer.cli.run.utils import run_bouncer as canonical_run_bouncer
+
+        assert dbt_bouncer.run_bouncer is canonical_run_bouncer

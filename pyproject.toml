@@ -184,8 +184,9 @@ select = [
 unfixable = ["B"]
 
 [tool.ruff.lint.per-file-ignores]
-# RUF067: `__init__.py` files here deliberately hold runtime code -- the Typer
-# `app` object and the lazy `__getattr__` subcommand loaders that keep CLI
+# RUF067: `__init__.py` files here deliberately hold runtime code -- the
+# `@app.command()` registrations in the `cli/*` subpackages and the lazy
+# `__getattr__` PEP 562 loader in the top-level package that keeps import
 # startup cheap. They are not pure re-export shims.
 "__init__.py" = ["E402", "RUF067"]
 "src/dbt_bouncer/checks/*" = ["ARG001", "D101", "D401", "D417", "DOC501"]
