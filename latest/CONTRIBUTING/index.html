@@ -1086,21 +1086,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#decorator-api-recommended" class="md-nav__link">
+  <a href="#decorator-api" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
-        Decorator API (recommended)
-      </span>
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#class-based-api-legacy" class="md-nav__link">
-    <span class="md-ellipsis">
-      <span class="md-typeset">
-        Class-based API (legacy)
+        Decorator API
       </span>
     </span>
   </a>
@@ -1423,8 +1412,8 @@
 <li>Append <code># ty: ignore</code> to the end of a line if you need to disable <code>ty</code> on that line, preferably with the specific rule to ignore such as <code># ty: ignore[invalid-argument-type]</code>.</li>
 </ul>
 <h2 id="adding-a-new-check">Adding a new check<a class="headerlink" href="#adding-a-new-check" title="Permanent link">#</a></h2>
-<p>The recommended way to add a check is with the <strong>decorator API</strong>. The <code>@check</code> decorator generates a <code>BaseCheck</code> subclass from a plain function. For checks that need complex Pydantic validation, you can also use the <strong>class-based API</strong> (see below).</p>
-<h3 id="decorator-api-recommended">Decorator API (recommended)<a class="headerlink" href="#decorator-api-recommended" title="Permanent link">#</a></h3>
+<p>Checks are added with the <strong>decorator API</strong>. The <code>@check</code> decorator generates a <code>BaseCheck</code> subclass from a plain function; it is the only way to define a check.</p>
+<h3 id="decorator-api">Decorator API<a class="headerlink" href="#decorator-api" title="Permanent link">#</a></h3>
 <p>The <code>@check</code> decorator infers everything from the function signature:</p>
 <ul>
 <li><strong>name</strong> = the function name (used in YAML config)</li>
@@ -1470,22 +1459,6 @@
 <li>Run <code>mise run test</code> to ensure tests pass.</li>
 <li>Open a PR!</li>
 </ol>
-<h3 id="class-based-api-legacy">Class-based API (legacy)<a class="headerlink" href="#class-based-api-legacy" title="Permanent link">#</a></h3>
-<p>The class-based API is a legacy escape hatch for checks that need complex Pydantic validation. Prefer the decorator API above for new checks — all built-in checks use it, and the test helpers are designed around it.</p>
-<ol>
-<li>In <code>./src/dbt_bouncer/checks</code> choose the appropriate directory for your check.</li>
-<li>Within the chosen file, add a Pydantic model inheriting from <code>BaseCheck</code>:<ul>
-<li>Class name starts with "Check".</li>
-<li>Has a <code>name: Literal["check_..."]</code> field.</li>
-<li><strong>Re-declares the resource field it iterates over</strong>, e.g. <code>model: Any = Field(default=None)</code>. The runner infers the iterated resource from the subclass's <em>own</em> annotations, which are <strong>not</strong> inherited from <code>BaseCheck</code>. Declaring the <code>_require_*()</code> accessor alone is not sufficient — without the field annotation the check never runs against any resource. Use <code>Any</code> (not the strict artifact type) so the test helpers, which build resources as plain dicts, can instantiate the check.</li>
-<li>Has an <code>execute()</code> method that raises <code>DbtBouncerFailedCheckError</code> on failure.</li>
-<li>Uses <code>_require_*()</code> methods to access resources.</li>
-</ul>
-</li>
-<li>Add the check to <code>dbt-bouncer-example.yml</code> and validate.</li>
-<li>Write tests using <code>check_passes</code>/<code>check_fails</code> from <code>dbt_bouncer.testing</code>.</li>
-<li>Run <code>mise run test</code> and open a PR.</li>
-</ol>
 <h3 id="writing-tests">Writing tests<a class="headerlink" href="#writing-tests" title="Permanent link">#</a></h3>
 <p>The <code>dbt_bouncer.testing</code> module provides <code>check_passes</code> and <code>check_fails</code> helpers:</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">dbt_bouncer.testing</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_fails</span><span class="p">,</span> <span class="n">check_passes</span>
@@ -1511,7 +1484,7 @@
 </span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="k">[project.entry-points.</span><span class="s2">&quot;dbt_bouncer.checks&quot;</span><span class="k">]</span>
 </span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="n">my_checks</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;my_package.checks&quot;</span>
 </span></code></pre></div>
-<p>Your module can use the <code>@check</code> decorator or class-based checks. dbt-bouncer discovers them automatically via the entry point. Use <code>dbt_bouncer.testing</code> in your own test suite.</p>
+<p>Your module can use the <code>@check</code> decorator to define checks. dbt-bouncer discovers them automatically via the entry point. Use <code>dbt_bouncer.testing</code> in your own test suite.</p>
 <h2 id="documentation-site">Documentation site<a class="headerlink" href="#documentation-site" title="Permanent link">#</a></h2>
 <p>The documentation at <a href="https://godatadriven.github.io/dbt-bouncer/">godatadriven.github.io/dbt-bouncer</a> is built with <a href="https://zensical.org/">Zensical</a> (the successor to Material for MkDocs by the same team). Zensical reads the existing <code>mkdocs.yml</code> at the repo root, and the docs source lives in <code>docs/</code>.</p>
 <h3 id="installing-docs-dependencies">Installing docs dependencies<a class="headerlink" href="#installing-docs-dependencies" title="Permanent link">#</a></h3>
