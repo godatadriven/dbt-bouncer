@@ -96,10 +96,10 @@ dbt-bouncer run --only catalog_checks,manifest_checks
 #### `--output-file`
 
 **Type:** Path
-**Default:** None (outputs to stdout)
+**Default:** None (no output file is written)
 **Required:** No
 
-Specifies the location where check metadata will be saved. If not provided, results are written to stdout.
+Specifies the location where check metadata will be saved. If not provided, no structured output file is written.
 
 **Example:**
 
@@ -114,7 +114,7 @@ dbt-bouncer run --output-file results/check-results.json
 **Default:** `json`
 **Required:** No
 
-Specifies the format for the output file or stdout when no output file is specified.
+Specifies the format for the output file. Requires `--output-file` to be set.
 
 **Examples:**
 
@@ -252,7 +252,7 @@ dbt-bouncer list
 #### `--output-format`
 
 **Type:** Choice
-**Options:** `text`, `json`
+**Options:** `json`, `text`
 **Default:** `text`
 **Required:** No
 

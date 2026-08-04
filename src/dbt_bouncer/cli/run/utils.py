@@ -112,7 +112,7 @@ def run_bouncer(
         dry_run: If True, print which checks would run without executing them.
         only: Limit the checks run to specific categories.
         output_file: Location of the file where check metadata will be saved.
-        output_format: Format for the output file or stdout (csv, json, junit, sarif, tap).
+        output_format: Format for the output file, requires output_file (csv, json, junit, sarif, tap).
         output_only_failures: Only failures will be included in the output file.
         show_all_failures: All failures will be printed to the console.
         verbosity: Verbosity level.
