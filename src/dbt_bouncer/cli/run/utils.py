@@ -120,13 +120,14 @@ def run_bouncer(
         config_file_source: Source of the config file.
 
     Returns:
-        int: Exit code (0 for success, 1 for failure).
+        int: `ExitCode.SUCCESS` if all checks passed, `ExitCode.CHECK_ERRORS` if one
+            or more checks failed.
 
     Raises:
-        DbtBouncerConfigError: If `--only` contains an invalid value. The config file
-            being missing, unreadable, or invalid, and a required dbt artifact being
-            missing or unsupported, surface as `DbtBouncerConfigError` /
-            `DbtBouncerArtifactError` from the config/artifact loading called here.
+        DbtBouncerConfigError: If `--only` contains an invalid value, or the config
+            file is missing, unreadable, or invalid. A required dbt artifact being
+            missing or unsupported similarly propagates as `DbtBouncerArtifactError`
+            from the artifact loading called here.
         RuntimeError: If `config_file_source` could not be determined.
 
     """
