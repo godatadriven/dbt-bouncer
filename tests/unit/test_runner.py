@@ -12,10 +12,111 @@ from dbt_bouncer.context import BouncerContext
 from dbt_bouncer.main import app
 from dbt_bouncer.reporting.logger import configure_console_logging
 from dbt_bouncer.runner import (
+    _assemble_checks_to_run,
     _check_applies_to_resource,
     _ResourceFacts,
     runner,
 )
+
+
+def test_decorator_checks_dispatch_per_resource_and_context_only():
+    """``@check``-decorated checks dispatch correctly, both flavours.
+
+    A check over ``model`` (an ``iterate_over``-bound resource check) must
+    produce one dispatch per matching model. A context-only check (no
+    positional resource parameter) must still dispatch exactly once, with no
+    ``resource`` / ``iterate_value`` binding and a context-only
+    ``check_run_id`` of the form ``name:index``.
+
+    This used to be contrasted with a hand-written, class-based check, which
+    silently degraded to the context-only dispatch path instead of being
+    rejected outright. That legacy path is now a loud ``RuntimeError`` at
+    check discovery (see ``utils._reject_class_based_check``), so there is
+    nothing left to dispatch here for it -- this test only needs to confirm
+    the two legitimate decorator-generated shapes still behave correctly.
+    """
+    from dbt_bouncer.check_framework.decorator import check
+
+    @check
+    def check_model_always_passes(model) -> None:
+        """Pass unconditionally."""
+
+    @check
+    def check_context_only_always_passes(ctx) -> None:
+        """Pass unconditionally; exists only to prove context-only dispatch."""
+
+    models = [
+        SimpleNamespace(
+            model=wrap_dict(
+                {
+                    "config": {"meta": None},
+                    "fqn": ["dbt_bouncer_test_project", f"model_{i}"],
+                    "name": f"model_{i}",
+                    "original_file_path": f"models/model_{i}.sql",
+                    "resource_type": "model",
+                    "unique_id": f"model.dbt_bouncer_test_project.model_{i}",
+                },
+            ),
+            original_file_path=f"models/model_{i}.sql",
+            unique_id=f"model.dbt_bouncer_test_project.model_{i}",
+        )
+        for i in range(2)
+    ]
+
+    resource_check = check_model_always_passes(index=0)
+    context_only_check = check_context_only_always_passes(index=1)
+
+    ctx = BouncerContext.model_construct(
+        **{
+            "bouncer_config": SimpleNamespace(
+                manifest_checks=[resource_check, context_only_check],
+            ),
+            "catalog_nodes": [],
+            "catalog_sources": [],
+            "check_categories": ["manifest_checks"],
+            "create_pr_comment_file": False,
+            "dry_run": False,
+            "exposures": [],
+            "macros": [],
+            "manifest_obj": None,
+            "models": models,
+            "output_file": None,
+            "output_format": "json",
+            "output_only_failures": False,
+            "run_results": [],
+            "seeds": [],
+            "semantic_models": [],
+            "show_all_failures": False,
+            "snapshots": [],
+            "sources": [],
+            "tests": [],
+            "unit_tests": [],
+        }
+    )
+
+    checks_to_run = _assemble_checks_to_run(ctx)
+
+    resource_entries = [c for c in checks_to_run if c["check"] is resource_check]
+    context_only_entries = [
+        c for c in checks_to_run if c["check"] is context_only_check
+    ]
+
+    # A decorator-based resource check produces one dispatch per matching
+    # resource.
+    assert len(resource_entries) == len(models)
+    for entry in resource_entries:
+        assert "resource" in entry
+        assert entry["iterate_value"] == "model"
+
+    # A decorator-based context-only check dispatches exactly once, with no
+    # resource binding -- and, importantly, does NOT trip the class-based
+    # check guard even though its ``iterate_over`` is ``None`` just like a
+    # never-decorated class's would be.
+    assert len(context_only_entries) == 1
+    context_only_entry = context_only_entries[0]
+    assert "resource" not in context_only_entry
+    assert "iterate_value" not in context_only_entry
+    assert context_only_entry["check_run_id"] == "check_context_only_always_passes:1"
 
 
 def test_runner_coverage(caplog, tmp_path):

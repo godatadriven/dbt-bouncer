@@ -43,25 +43,24 @@ mise run install
   - `validate/` — lint config file (`validate`)
 - `src/dbt_bouncer/main.py` — Typer app setup, subcommand registration, backward-compatible `main_callback`
 - `src/dbt_bouncer/check_framework/` — core check infrastructure package:
-  - `base.py` — `BaseCheck` (Pydantic model), used by class-based checks
+  - `base.py` — `BaseCheck` (Pydantic model), the internal base class the `@check` decorator generates subclasses from
   - `context.py` — `CheckContext` dataclass for execution context
-  - `decorator.py` — `@check` decorator and `fail()` helper (preferred API)
+  - `decorator.py` — `@check` decorator and `fail()` helper — the only way to define a check
   - `exceptions.py` — `DbtBouncerFailedCheckError` and `NestedDict`
-  - `patterns.py` — abstract check pattern ABCs
 - `src/dbt_bouncer/runner.py` — orchestrates check execution
 - `src/dbt_bouncer/executor.py` — sequential check execution with progress tracking
 - `tests/` — mirrors `src/` structure; fixtures in `tests/fixtures/`
 
 ### Check System
 
-Checks are written using the `@check` decorator (preferred) or as class-based `BaseCheck` subclasses (for plugin authors). The decorator API infers the check name and resource type from the function signature.
+Checks are written using the `@check` decorator, which infers the check name and resource type from the function signature.
 
 ### Runner Flow
 
-1. `runner.py` iterates checks, determines the resource type from the function's first positional parameter (decorator API) or class annotations (class-based API)
+1. `runner.py` iterates checks, determines the resource type from the function's first positional parameter
 2. Injects the per-iteration resource into the check
 3. `Executor` runs checks sequentially with a Rich progress bar
-4. Failed checks call `fail()` (decorator API) or raise `DbtBouncerFailedCheckError` (class-based API)
+4. Failed checks call `fail()` to raise `DbtBouncerFailedCheckError`
 
 **Resource types:** catalog_node, catalog_source, exposure, macro, model, run_result, seed, semantic_model, snapshot, source, test, unit_test
 
@@ -69,7 +68,7 @@ Checks are written using the `@check` decorator (preferred) or as class-based `B
 
 **Naming:** `check_<resource_type>_xxx` (e.g. `check_model_has_description`, `check_exposure_based_on_model`). The check name and resource type are inferred from the function name.
 
-**Template (decorator API — preferred):**
+**Template:**
 
 ```python
 from dbt_bouncer.check_framework.decorator import check, fail
@@ -129,34 +128,6 @@ CI will fail if `schema.json` is out of date.
 2. Add to `dbt-bouncer-example.yml` and validate: `dbt-bouncer --config-file dbt-bouncer-example.yml`
 3. Write tests (happy + unhappy paths) in the mirror location under `tests/unit/checks/`
 4. Run `mise run test-unit` and `prek run --all-files`
-
-### Alternative: Class-based checks
-
-For plugin authors or cases requiring custom Pydantic validation, checks can still be written as `BaseCheck` subclasses:
-
-```python
-from typing import Any, Literal
-
-from pydantic import Field
-
-from dbt_bouncer.check_framework.base import BaseCheck
-from dbt_bouncer.check_framework.exceptions import DbtBouncerFailedCheckError
-
-
-class CheckModelXxx(BaseCheck):
-    """Docstring with Parameters, Receives, Other Parameters, Example(s) sections."""
-
-    model: Any | None = Field(default=None)
-    name: Literal["check_model_xxx"]
-
-    def execute(self) -> None:
-        """Execute the check."""
-        model = self._require_model()
-        if not some_condition:
-            raise DbtBouncerFailedCheckError(
-                f"`{model.unique_id}` failed: reason."
-            )
-```
 
 ## Testing
 

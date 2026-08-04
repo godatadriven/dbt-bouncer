@@ -211,9 +211,9 @@ uv run pytest ./tests/unit/checks/catalog/test_columns.py::test_check_columns_ar
 
 ## Adding a new check
 
-The recommended way to add a check is with the **decorator API**. The `@check` decorator generates a `BaseCheck` subclass from a plain function. For checks that need complex Pydantic validation, you can also use the **class-based API** (see below).
+Checks are added with the **decorator API**. The `@check` decorator generates a `BaseCheck` subclass from a plain function; it is the only way to define a check.
 
-### Decorator API (recommended)
+### Decorator API
 
 The `@check` decorator infers everything from the function signature:
 
@@ -261,21 +261,6 @@ def test_check_model_names_fail():
 1. Run `mise run test` to ensure tests pass.
 1. Open a PR!
 
-### Class-based API (legacy)
-
-The class-based API is a legacy escape hatch for checks that need complex Pydantic validation. Prefer the decorator API above for new checks — all built-in checks use it, and the test helpers are designed around it.
-
-1. In `./src/dbt_bouncer/checks` choose the appropriate directory for your check.
-1. Within the chosen file, add a Pydantic model inheriting from `BaseCheck`:
-    - Class name starts with "Check".
-    - Has a `name: Literal["check_..."]` field.
-    - **Re-declares the resource field it iterates over**, e.g. `model: Any = Field(default=None)`. The runner infers the iterated resource from the subclass's *own* annotations, which are **not** inherited from `BaseCheck`. Declaring the `_require_*()` accessor alone is not sufficient — without the field annotation the check never runs against any resource. Use `Any` (not the strict artifact type) so the test helpers, which build resources as plain dicts, can instantiate the check.
-    - Has an `execute()` method that raises `DbtBouncerFailedCheckError` on failure.
-    - Uses `_require_*()` methods to access resources.
-1. Add the check to `dbt-bouncer-example.yml` and validate.
-1. Write tests using `check_passes`/`check_fails` from `dbt_bouncer.testing`.
-1. Run `mise run test` and open a PR.
-
 ### Writing tests
 
 The `dbt_bouncer.testing` module provides `check_passes` and `check_fails` helpers:
@@ -309,7 +294,7 @@ External packages can register checks via entry points:
 my_checks = "my_package.checks"
 ```
 
-Your module can use the `@check` decorator or class-based checks. dbt-bouncer discovers them automatically via the entry point. Use `dbt_bouncer.testing` in your own test suite.
+Your module can use the `@check` decorator to define checks. dbt-bouncer discovers them automatically via the entry point. Use `dbt_bouncer.testing` in your own test suite.
 
 ## Documentation site
 

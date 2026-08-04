@@ -962,19 +962,12 @@ def test_validate_conf_invalid_cache_falls_back_to_cold_path(isolated_cache_dir)
 CUSTOM_CHECK_SOURCE = '''\
 """Trivial custom check used to exercise the conf cache + custom_checks_dir path."""
 
-from typing import Literal
-
-from dbt_bouncer.check_framework.base import BaseCheck
+from dbt_bouncer.check_framework.decorator import check
 
 
-class CheckCustomNoop(BaseCheck):
+@check
+def check_custom_noop(model) -> None:  # pragma: no cover - never executed in cache tests
     """No-op check for tests."""
-
-    name: Literal["check_custom_noop"]
-    model: object = None
-
-    def execute(self) -> None:  # pragma: no cover - never executed in cache tests
-        """Do nothing."""
 '''
 
 
