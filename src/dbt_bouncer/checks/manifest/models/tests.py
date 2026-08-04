@@ -1,12 +1,11 @@
 """Checks related to model test coverage and test configuration."""
 
-import logging
 from typing import Annotated
 
 from pydantic import Field
 
 from dbt_bouncer.check_framework.decorator import check, fail
-from dbt_bouncer.utils import get_clean_model_name, get_package_version_number
+from dbt_bouncer.utils import get_clean_model_name
 
 
 @check(code="MO040")
@@ -228,10 +227,6 @@ def check_model_has_unit_tests(
         materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
-    !!! warning
-
-        This check is only supported for dbt 1.8.0 and above.
-
     Example(s):
         ```yaml
         manifest_checks:
@@ -245,19 +240,11 @@ def check_model_has_unit_tests(
         ```
 
     """
-    manifest_obj = ctx.manifest_obj
-    if get_package_version_number(
-        manifest_obj.manifest.metadata.dbt_version or "0.0.0"
-    ) >= get_package_version_number("1.8.0"):
-        num_unit_tests = len(ctx.unit_tests_by_depends_on_node.get(model.unique_id, []))
-        if num_unit_tests < min_number_of_unit_tests:
-            display_name = get_clean_model_name(model.unique_id)
-            fail(
-                f"`{display_name}` has {num_unit_tests} unit tests, this is less than the minimum of {min_number_of_unit_tests}."
-            )
-    else:
-        logging.warning(
-            "This unit test check is only supported for dbt 1.8.0 and above."
+    num_unit_tests = len(ctx.unit_tests_by_depends_on_node.get(model.unique_id, []))
+    if num_unit_tests < min_number_of_unit_tests:
+        display_name = get_clean_model_name(model.unique_id)
+        fail(
+            f"`{display_name}` has {num_unit_tests} unit tests, this is less than the minimum of {min_number_of_unit_tests}."
         )
 
 

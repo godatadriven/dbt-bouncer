@@ -1,4 +1,3 @@
-import logging
 from types import SimpleNamespace
 from typing import Any
 
@@ -257,49 +256,37 @@ class TestBaseHasUnitTestsCheck:
     """Tests for BaseHasUnitTestsCheck."""
 
     @staticmethod
-    def _build(dbt_version, unit_tests, **kwargs):
+    def _build(unit_tests, **kwargs):
         check = _HasUnitTestsCheck(
             model=_model(unique_id="model.pkg.a_model"),
             **kwargs,
         )
-        check.set_context(
-            SimpleNamespace(
-                manifest_obj=SimpleNamespace(
-                    manifest=SimpleNamespace(
-                        metadata=SimpleNamespace(dbt_version=dbt_version)
-                    )
-                ),
-                unit_tests=unit_tests,
-            )
-        )
+        check.set_context(SimpleNamespace(unit_tests=unit_tests))
         return check
 
     @pytest.mark.parametrize(
-        ("dbt_version", "unit_tests", "kwargs"),
+        ("unit_tests", "kwargs"),
         [
             pytest.param(
-                "1.8.0",
                 [_unit_test(["model.pkg.a_model"])],
                 {},
                 id="exactly_default_minimum",
             ),
             pytest.param(
-                "1.10.0",
                 [_unit_test(["model.pkg.a_model"]), _unit_test(["model.pkg.a_model"])],
                 {"min_number_of_unit_tests": 2},
                 id="exactly_explicit_minimum",
             ),
             pytest.param(
-                "1.8.0",
                 [],
                 {"min_number_of_unit_tests": 0},
                 id="minimum_of_zero_needs_no_unit_tests",
             ),
         ],
     )
-    def test_passes(self, dbt_version, unit_tests, kwargs):
+    def test_passes(self, unit_tests, kwargs):
         """A resource with enough unit tests does not raise."""
-        self._build(dbt_version, unit_tests, **kwargs).execute()
+        self._build(unit_tests, **kwargs).execute()
 
     @pytest.mark.parametrize(
         ("unit_tests", "kwargs", "match"),
@@ -341,28 +328,10 @@ class TestBaseHasUnitTestsCheck:
     )
     def test_fails(self, unit_tests, kwargs, match):
         """A resource without enough unit tests raises."""
-        check = self._build("1.8.0", unit_tests, **kwargs)
+        check = self._build(unit_tests, **kwargs)
 
         with pytest.raises(DbtBouncerFailedCheckError, match=match):
             check.execute()
-
-    @pytest.mark.parametrize(
-        "dbt_version",
-        [
-            pytest.param("1.7.9", id="below_1_8"),
-            pytest.param("1.6.0", id="well_below_1_8"),
-            # `execute()` substitutes 0.0.0 when the manifest reports no version.
-            pytest.param(None, id="version_absent"),
-        ],
-    )
-    def test_skipped_below_dbt_1_8(self, caplog, dbt_version):
-        """On dbt below 1.8 the check warns and passes, because unit tests do not exist there."""
-        check = self._build(dbt_version, [])
-
-        with caplog.at_level(logging.WARNING):
-            check.execute()
-
-        assert "only supported for dbt 1.8.0 and above" in caplog.text
 
 
 class TestBaseHasTagsCheck:

@@ -1,5 +1,3 @@
-import logging
-
 import pytest
 
 from dbt_bouncer.testing import _run_check, check_fails, check_passes
@@ -42,7 +40,7 @@ def _test_on(model_name: str, *, depends_on: str | None = None) -> dict:
     }
 
 
-_DBT_18_MANIFEST_METADATA = {"metadata": {"dbt_version": "1.8.0"}}
+_MANIFEST_METADATA = {"metadata": {"dbt_version": "1.9.0"}}
 
 
 class TestCheckModelHasTestsByName:
@@ -368,18 +366,8 @@ class TestCheckModelHasUnitTests:
             min_number_of_unit_tests=min_number_of_unit_tests,
             model={},
             ctx_unit_tests=ctx_unit_tests,
-            ctx_manifest_obj=_DBT_18_MANIFEST_METADATA,
+            ctx_manifest_obj=_MANIFEST_METADATA,
         )
-
-    def test_dbt_version_below_1_8_0_warns_instead_of_failing(self, caplog):
-        with caplog.at_level(logging.WARNING):
-            check_passes(
-                "check_model_has_unit_tests",
-                min_number_of_unit_tests=5,
-                model={},
-                ctx_manifest_obj={"metadata": {"dbt_version": "1.7.0"}},
-            )
-        assert "1.8.0" in caplog.text
 
     def test_failure_message_reports_the_count_and_minimum(self):
         check_fails(
@@ -387,7 +375,7 @@ class TestCheckModelHasUnitTests:
             min_number_of_unit_tests=2,
             model={},
             ctx_unit_tests=[{}],
-            ctx_manifest_obj=_DBT_18_MANIFEST_METADATA,
+            ctx_manifest_obj=_MANIFEST_METADATA,
             match=r"has 1 unit tests, this is less than the minimum of 2\.",
         )
 

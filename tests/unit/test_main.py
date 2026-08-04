@@ -1704,7 +1704,7 @@ def test_cli_unsupported_dbt_version(tmp_path):
     with Path.open(Path("./dbt_project/target/manifest.json"), "r") as f:
         manifest = json.load(f)
 
-    manifest["metadata"]["dbt_version"] = "1.5.5"
+    manifest["metadata"]["dbt_version"] = "1.8.0"
     with Path.open(tmp_path / "manifest.json", "w") as f:
         json.dump(manifest, f)
 
@@ -1721,7 +1721,7 @@ def test_cli_unsupported_dbt_version(tmp_path):
     assert isinstance(result.exception, AssertionError)
     assert (
         result.exception.args[0].find(
-            "The supplied `manifest.json` was generated with dbt version 1.5.5, this is below the minimum supported version of",
+            "The supplied `manifest.json` was generated with dbt version 1.8.0, this is below the minimum supported version of 1.9.0.",
         )
         >= 0
     )

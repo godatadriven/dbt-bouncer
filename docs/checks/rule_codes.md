@@ -108,7 +108,7 @@ dbt-bouncer list --group manifest_checks
 
 | Code | Check | Description |
 | --- | --- | --- |
-| `MO001` | `check_model_access` | Models must have the specified access attribute. Requires dbt 1.7+. |
+| `MO001` | `check_model_access` | Models must have the specified access attribute. |
 | `MO002` | `check_model_contract_enforced_for_public_model` | Public models must have contracts enforced. |
 | `MO003` | `check_model_grant_privilege` | Model can have grant privileges that match the specified pattern. |
 | `MO004` | `check_model_grant_privilege_required` | Model must have the specified grant privilege. |

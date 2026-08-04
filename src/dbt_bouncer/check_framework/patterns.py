@@ -7,7 +7,6 @@ values (display name, accessor, etc.).
 
 from __future__ import annotations
 
-import logging
 import re  # ruff: ignore[typing-only-standard-library-import] — used in PrivateAttr annotation; unconditional to avoid breakage if PEP 563 is removed
 from abc import ABC, abstractmethod
 from typing import Any
@@ -20,11 +19,7 @@ from dbt_bouncer.check_framework.exceptions import (
     NestedDict,
 )
 from dbt_bouncer.enums import Criteria
-from dbt_bouncer.utils import (
-    compile_pattern,
-    find_missing_meta_keys,
-    get_package_version_number,
-)
+from dbt_bouncer.utils import compile_pattern, find_missing_meta_keys
 
 
 class BaseNamePatternCheck(ABC, BaseCheck):
@@ -163,26 +158,18 @@ class BaseHasUnitTestsCheck(ABC, BaseCheck):
             DbtBouncerFailedCheckError: If resource does not have enough unit tests.
 
         """
-        manifest_obj = self._require_manifest()
-        if get_package_version_number(
-            manifest_obj.manifest.metadata.dbt_version or "0.0.0"
-        ) >= get_package_version_number("1.8.0"):
-            num_unit_tests = len(
-                [
-                    t.unique_id
-                    for t in self._ctx.unit_tests
-                    if t.depends_on
-                    and t.depends_on.nodes
-                    and t.depends_on.nodes[0] == self._resource_unique_id
-                ],
-            )
-            if num_unit_tests < self.min_number_of_unit_tests:
-                raise DbtBouncerFailedCheckError(
-                    f"`{self._resource_display_name}` has {num_unit_tests} unit tests, this is less than the minimum of {self.min_number_of_unit_tests}."
-                )
-        else:
-            logging.warning(
-                "This unit test check is only supported for dbt 1.8.0 and above.",
+        num_unit_tests = len(
+            [
+                t.unique_id
+                for t in self._ctx.unit_tests
+                if t.depends_on
+                and t.depends_on.nodes
+                and t.depends_on.nodes[0] == self._resource_unique_id
+            ],
+        )
+        if num_unit_tests < self.min_number_of_unit_tests:
+            raise DbtBouncerFailedCheckError(
+                f"`{self._resource_display_name}` has {num_unit_tests} unit tests, this is less than the minimum of {self.min_number_of_unit_tests}."
             )
 
 

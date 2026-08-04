@@ -48,10 +48,6 @@ def _extract_stat_value(catalog_node: Any, stat_keys: list[str]) -> int | None:
 def check_seed_columns_are_all_documented(catalog_node, ctx):
     """All columns in a seed CSV file should be included in the seed's properties file, i.e. `.yml` file.
 
-    !!! warning
-
-        This check is only supported for dbt 1.9.0 and above.
-
     !!! info "Rationale"
 
         Seed CSV files often serve as reference data (e.g. country codes, product categories) that are queried directly by downstream models. When a column exists in the CSV but not in the properties file, it is invisible to documentation tools, data catalogues, and column-level tests. This check ensures that every column in a seed is explicitly declared, making it easier for consumers to understand the seed's schema and for teams to apply descriptions and tests uniformly.
