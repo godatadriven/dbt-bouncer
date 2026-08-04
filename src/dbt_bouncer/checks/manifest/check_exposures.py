@@ -4,8 +4,11 @@ from pydantic import Field
 
 from dbt_bouncer.check_framework.decorator import check, fail
 from dbt_bouncer.check_framework.exceptions import NestedDict
-from dbt_bouncer.enums import ModelAccess
-from dbt_bouncer.utils import find_missing_meta_keys, is_description_populated
+from dbt_bouncer.enums import Criteria, ModelAccess
+from dbt_bouncer.utils import (
+    find_meta_keys_criteria_failure,
+    is_description_populated,
+)
 
 
 @check(code="EX001")
@@ -214,7 +217,9 @@ def check_exposure_description_populated(
 
 
 @check(code="EX005")
-def check_exposure_has_meta_keys(exposure, *, keys: NestedDict):
+def check_exposure_has_meta_keys(
+    exposure, *, criteria: Criteria = Criteria.ALL, keys: NestedDict
+):
     """The `meta` config for exposures must have the specified keys.
 
     !!! info "Rationale"
@@ -222,6 +227,7 @@ def check_exposure_has_meta_keys(exposure, *, keys: NestedDict):
         The `meta` config is a flexible, project-defined dictionary used to track ownership, maturity levels, and other governance attributes. Requiring specific keys on exposures ensures that governance information is consistently captured for all downstream consumers, enabling automated reporting and access-control workflows that depend on these attributes.
 
     Parameters:
+        criteria (Literal["all", "any", "one"]): Whether the resource must have all, any, or exactly one of the specified keys. Default: `all`.
         keys (NestedDict): A list (that may contain sub-lists) of required keys.
 
     Receives:
@@ -243,13 +249,11 @@ def check_exposure_has_meta_keys(exposure, *, keys: NestedDict):
         ```
 
     """
-    missing_keys = find_missing_meta_keys(
-        meta_config=exposure.meta or {}, required_keys=keys.model_dump()
+    failure = find_meta_keys_criteria_failure(
+        exposure.meta or {}, keys.model_dump(), criteria
     )
-    if missing_keys:
-        fail(
-            f"`{exposure.name}` is missing the following keys from the `meta` config: {[x.replace('>>', '') for x in missing_keys]}"
-        )
+    if failure:
+        fail(f"`{exposure.name}` {failure}")
 
 
 @check(code="EX006")

@@ -365,6 +365,47 @@ class TestCheckSeedHasMetaKeys:
     def test_fails(self, keys, seed_overrides):
         check_fails("check_seed_has_meta_keys", keys=keys, seed=seed_overrides)
 
+    @pytest.mark.parametrize(
+        ("keys", "criteria", "seed_overrides", "check_fn"),
+        [
+            pytest.param(
+                ["owner", "maturity"],
+                "any",
+                {**_SEED_BASE, "meta": {"owner": "Data Team"}},
+                check_passes,
+                id="criteria_any_one_key_present",
+            ),
+            pytest.param(
+                ["owner", "maturity"],
+                "any",
+                {**_SEED_BASE, "meta": {}},
+                check_fails,
+                id="criteria_any_no_keys_present",
+            ),
+            pytest.param(
+                ["owner", "maturity"],
+                "one",
+                {**_SEED_BASE, "meta": {"owner": "Data Team"}},
+                check_passes,
+                id="criteria_one_exactly_one_key_present",
+            ),
+            pytest.param(
+                ["owner", "maturity"],
+                "one",
+                {**_SEED_BASE, "meta": {"owner": "Data Team", "maturity": "high"}},
+                check_fails,
+                id="criteria_one_two_keys_present",
+            ),
+        ],
+    )
+    def test_criteria(self, keys, criteria, seed_overrides, check_fn):
+        check_fn(
+            "check_seed_has_meta_keys",
+            keys=keys,
+            criteria=criteria,
+            seed=seed_overrides,
+        )
+
 
 _UNIT_TEST_FOR_SEED = {
     "depends_on": {"nodes": ["seed.package_name.raw_customers"]},

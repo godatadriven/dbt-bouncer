@@ -383,6 +383,47 @@ class TestCheckMacroHasMetaKeys:
     def test_fails(self, keys, macro_overrides):
         check_fails("check_macro_has_meta_keys", keys=keys, macro=macro_overrides)
 
+    @pytest.mark.parametrize(
+        ("keys", "criteria", "macro_overrides", "check_fn"),
+        [
+            pytest.param(
+                ["owner", "maturity"],
+                "any",
+                {"meta": {"owner": "Data Team"}},
+                check_passes,
+                id="criteria_any_one_key_present",
+            ),
+            pytest.param(
+                ["owner", "maturity"],
+                "any",
+                {"meta": {}},
+                check_fails,
+                id="criteria_any_no_keys_present",
+            ),
+            pytest.param(
+                ["owner", "maturity"],
+                "one",
+                {"meta": {"owner": "Data Team"}},
+                check_passes,
+                id="criteria_one_exactly_one_key_present",
+            ),
+            pytest.param(
+                ["owner", "maturity"],
+                "one",
+                {"meta": {"owner": "Data Team", "maturity": "high"}},
+                check_fails,
+                id="criteria_one_two_keys_present",
+            ),
+        ],
+    )
+    def test_criteria(self, keys, criteria, macro_overrides, check_fn):
+        check_fn(
+            "check_macro_has_meta_keys",
+            keys=keys,
+            criteria=criteria,
+            macro=macro_overrides,
+        )
+
 
 class TestCheckMacroMaxNumberOfLines:
     @pytest.mark.parametrize(

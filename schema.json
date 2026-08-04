@@ -1396,7 +1396,7 @@
     },
     "CheckExposureHasMetaKeys": {
       "additionalProperties": false,
-      "description": "The `meta` config for exposures must have the specified keys.\n\n!!! info \"Rationale\"\n\n    The `meta` config is a flexible, project-defined dictionary used to track ownership, maturity levels, and other governance attributes. Requiring specific keys on exposures ensures that governance information is consistently captured for all downstream consumers, enabling automated reporting and access-control workflows that depend on these attributes.\n\nParameters:\n    keys (NestedDict): A list (that may contain sub-lists) of required keys.\n\nReceives:\n    exposure (ExposureNode): The ExposureNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the exposure path (i.e the .yml file where the exposure is configured). Exposure paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the exposure path (i.e the .yml file where the exposure is configured). Only exposure paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_exposure_has_meta_keys\n          keys:\n            - maturity\n            - owner\n    ```",
+      "description": "The `meta` config for exposures must have the specified keys.\n\n!!! info \"Rationale\"\n\n    The `meta` config is a flexible, project-defined dictionary used to track ownership, maturity levels, and other governance attributes. Requiring specific keys on exposures ensures that governance information is consistently captured for all downstream consumers, enabling automated reporting and access-control workflows that depend on these attributes.\n\nParameters:\n    criteria (Literal[\"all\", \"any\", \"one\"]): Whether the resource must have all, any, or exactly one of the specified keys. Default: `all`.\n    keys (NestedDict): A list (that may contain sub-lists) of required keys.\n\nReceives:\n    exposure (ExposureNode): The ExposureNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the exposure path (i.e the .yml file where the exposure is configured). Exposure paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the exposure path (i.e the .yml file where the exposure is configured). Only exposure paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_exposure_has_meta_keys\n          keys:\n            - maturity\n            - owner\n    ```",
       "properties": {
         "code": {
           "const": "EX005",
@@ -1484,6 +1484,10 @@
           "default": "check_exposure_has_meta_keys",
           "title": "Name",
           "type": "string"
+        },
+        "criteria": {
+          "$ref": "#/$defs/Criteria",
+          "default": "all"
         },
         "keys": {
           "$ref": "#/$defs/NestedDict"
@@ -2224,7 +2228,7 @@
     },
     "CheckMacroHasMetaKeys": {
       "additionalProperties": false,
-      "description": "The `meta` config for macros must have the specified keys.\n\n!!! info \"Rationale\"\n\n    The `meta` config is a flexible, project-defined dictionary used to track ownership, maturity levels, PII classification, and other governance attributes. Requiring specific keys ensures that these attributes are consistently populated across all macros, enabling automated reporting, data cataloguing, and access-control workflows that depend on them.\n\nParameters:\n    keys (NestedDict): A list (that may contain sub-lists) of required keys.\n\nReceives:\n    macro (Macros): The Macros object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the macro path. Macro paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the macro path. Only macro paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_macro_has_meta_keys\n          keys:\n            - maturity\n            - owner\n    ```",
+      "description": "The `meta` config for macros must have the specified keys.\n\n!!! info \"Rationale\"\n\n    The `meta` config is a flexible, project-defined dictionary used to track ownership, maturity levels, PII classification, and other governance attributes. Requiring specific keys ensures that these attributes are consistently populated across all macros, enabling automated reporting, data cataloguing, and access-control workflows that depend on them.\n\nParameters:\n    criteria (Literal[\"all\", \"any\", \"one\"]): Whether the resource must have all, any, or exactly one of the specified keys. Default: `all`.\n    keys (NestedDict): A list (that may contain sub-lists) of required keys.\n\nReceives:\n    macro (Macros): The Macros object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the macro path. Macro paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the macro path. Only macro paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_macro_has_meta_keys\n          keys:\n            - maturity\n            - owner\n    ```",
       "properties": {
         "code": {
           "const": "MA004",
@@ -2312,6 +2316,10 @@
           "default": "check_macro_has_meta_keys",
           "title": "Name",
           "type": "string"
+        },
+        "criteria": {
+          "$ref": "#/$defs/Criteria",
+          "default": "all"
         },
         "keys": {
           "$ref": "#/$defs/NestedDict"
@@ -5418,7 +5426,7 @@
     },
     "CheckModelHasMetaKeys": {
       "additionalProperties": false,
-      "description": "The `meta` config for models must have the specified keys.\n\n!!! info \"Rationale\"\n\n    The `meta` config is a flexible, project-defined dictionary used to track ownership, maturity levels, PII classification, and other governance attributes. Requiring specific keys ensures that these attributes are consistently populated across all models, enabling automated reporting, data cataloguing, and access-control workflows that depend on them.\n\nParameters:\n    keys (NestedDict): A list (that may contain sub-lists) of required keys.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    materialization (Literal[\"ephemeral\", \"incremental\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_model_has_meta_keys\n          keys:\n            - maturity\n            - owner\n    ```",
+      "description": "The `meta` config for models must have the specified keys.\n\n!!! info \"Rationale\"\n\n    The `meta` config is a flexible, project-defined dictionary used to track ownership, maturity levels, PII classification, and other governance attributes. Requiring specific keys ensures that these attributes are consistently populated across all models, enabling automated reporting, data cataloguing, and access-control workflows that depend on them.\n\nParameters:\n    criteria (Literal[\"all\", \"any\", \"one\"]): Whether the resource must have all, any, or exactly one of the specified keys. Default: `all`.\n    keys (NestedDict): A list (that may contain sub-lists) of required keys.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    materialization (Literal[\"ephemeral\", \"incremental\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_model_has_meta_keys\n          keys:\n            - maturity\n            - owner\n    ```",
       "properties": {
         "code": {
           "const": "MO037",
@@ -5506,6 +5514,10 @@
           "default": "check_model_has_meta_keys",
           "title": "Name",
           "type": "string"
+        },
+        "criteria": {
+          "$ref": "#/$defs/Criteria",
+          "default": "all"
         },
         "keys": {
           "$ref": "#/$defs/NestedDict"
@@ -8816,7 +8828,7 @@
     },
     "CheckSeedHasMetaKeys": {
       "additionalProperties": false,
-      "description": "The `meta` config for seeds must have the specified keys.\n\n!!! info \"Rationale\"\n\n    The `meta` config is a flexible, project-defined dictionary used to track ownership, maturity levels, PII classification, and other governance attributes. Requiring specific keys ensures that these attributes are consistently populated across all seeds, enabling automated reporting, data cataloguing, and access-control workflows that depend on them.\n\nParameters:\n    keys (NestedDict): A list (that may contain sub-lists) of required keys.\n\nReceives:\n    seed (SeedNode): The SeedNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the seed path. Seed paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the seed path. Only seed paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_seed_has_meta_keys\n          keys:\n            - maturity\n            - owner\n    ```",
+      "description": "The `meta` config for seeds must have the specified keys.\n\n!!! info \"Rationale\"\n\n    The `meta` config is a flexible, project-defined dictionary used to track ownership, maturity levels, PII classification, and other governance attributes. Requiring specific keys ensures that these attributes are consistently populated across all seeds, enabling automated reporting, data cataloguing, and access-control workflows that depend on them.\n\nParameters:\n    criteria (Literal[\"all\", \"any\", \"one\"]): Whether the resource must have all, any, or exactly one of the specified keys. Default: `all`.\n    keys (NestedDict): A list (that may contain sub-lists) of required keys.\n\nReceives:\n    seed (SeedNode): The SeedNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the seed path. Seed paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the seed path. Only seed paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_seed_has_meta_keys\n          keys:\n            - maturity\n            - owner\n    ```",
       "properties": {
         "code": {
           "const": "SE004",
@@ -8904,6 +8916,10 @@
           "default": "check_seed_has_meta_keys",
           "title": "Name",
           "type": "string"
+        },
+        "criteria": {
+          "$ref": "#/$defs/Criteria",
+          "default": "all"
         },
         "keys": {
           "$ref": "#/$defs/NestedDict"
@@ -9560,7 +9576,7 @@
     },
     "CheckSnapshotHasMetaKeys": {
       "additionalProperties": false,
-      "description": "The `meta` config for snapshots must have the specified keys.\n\n!!! info \"Rationale\"\n\n    The `meta` config is a flexible, project-defined dictionary used to track ownership, maturity levels, PII classification, and other governance attributes. Requiring specific keys ensures that these attributes are consistently populated across all snapshots, enabling automated reporting, data cataloguing, and access-control workflows that depend on them.\n\nParameters:\n    keys (NestedDict): A list (that may contain sub-lists) of required keys.\n\nReceives:\n    snapshot (SnapshotNode): The SnapshotNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the snapshot path. Snapshot paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the snapshot path. Only snapshot paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_snapshot_has_meta_keys\n          keys:\n            - maturity\n            - owner\n    ```",
+      "description": "The `meta` config for snapshots must have the specified keys.\n\n!!! info \"Rationale\"\n\n    The `meta` config is a flexible, project-defined dictionary used to track ownership, maturity levels, PII classification, and other governance attributes. Requiring specific keys ensures that these attributes are consistently populated across all snapshots, enabling automated reporting, data cataloguing, and access-control workflows that depend on them.\n\nParameters:\n    criteria (Literal[\"all\", \"any\", \"one\"]): Whether the resource must have all, any, or exactly one of the specified keys. Default: `all`.\n    keys (NestedDict): A list (that may contain sub-lists) of required keys.\n\nReceives:\n    snapshot (SnapshotNode): The SnapshotNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the snapshot path. Snapshot paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the snapshot path. Only snapshot paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_snapshot_has_meta_keys\n          keys:\n            - maturity\n            - owner\n    ```",
       "properties": {
         "code": {
           "const": "SN002",
@@ -9648,6 +9664,10 @@
           "default": "check_snapshot_has_meta_keys",
           "title": "Name",
           "type": "string"
+        },
+        "criteria": {
+          "$ref": "#/$defs/Criteria",
+          "default": "all"
         },
         "keys": {
           "$ref": "#/$defs/NestedDict"
@@ -10574,7 +10594,7 @@
     },
     "CheckSourceHasMetaKeys": {
       "additionalProperties": false,
-      "description": "The `meta` config for sources must have the specified keys.\n\n!!! info \"Rationale\"\n\n    The `meta` config is a free-form dictionary that teams use to attach governance information to dbt nodes \u2014 things like data owner, sensitivity classification, SLA tier, or compliance labels. Without enforcing required keys, this metadata is applied inconsistently: some sources have an owner, others do not; some are labelled PII-sensitive, others are silently omitted. This check ensures that every source carries the minimum set of metadata keys needed to support data governance, access control automation, and operational runbooks.\n\nParameters:\n    keys (NestedDict): A list (that may contain sub-lists) of required keys.\n\nReceives:\n    source (SourceNode): The SourceNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the source path (i.e the .yml file where the source is configured). Source paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the source path (i.e the .yml file where the source is configured). Only source paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_source_has_meta_keys\n          keys:\n            - contact:\n                - email\n                - slack\n            - owner\n    ```",
+      "description": "The `meta` config for sources must have the specified keys.\n\n!!! info \"Rationale\"\n\n    The `meta` config is a free-form dictionary that teams use to attach governance information to dbt nodes \u2014 things like data owner, sensitivity classification, SLA tier, or compliance labels. Without enforcing required keys, this metadata is applied inconsistently: some sources have an owner, others do not; some are labelled PII-sensitive, others are silently omitted. This check ensures that every source carries the minimum set of metadata keys needed to support data governance, access control automation, and operational runbooks.\n\nParameters:\n    criteria (Literal[\"all\", \"any\", \"one\"]): Whether the resource must have all, any, or exactly one of the specified keys. Default: `all`.\n    keys (NestedDict): A list (that may contain sub-lists) of required keys.\n\nReceives:\n    source (SourceNode): The SourceNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the source path (i.e the .yml file where the source is configured). Source paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the source path (i.e the .yml file where the source is configured). Only source paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_source_has_meta_keys\n          keys:\n            - contact:\n                - email\n                - slack\n            - owner\n    ```",
       "properties": {
         "code": {
           "const": "SO012",
@@ -10662,6 +10682,10 @@
           "default": "check_source_has_meta_keys",
           "title": "Name",
           "type": "string"
+        },
+        "criteria": {
+          "$ref": "#/$defs/Criteria",
+          "default": "all"
         },
         "keys": {
           "$ref": "#/$defs/NestedDict"
@@ -11778,7 +11802,7 @@
     },
     "CheckTestHasMetaKeys": {
       "additionalProperties": false,
-      "description": "The `meta` config for data tests must have the specified keys.\n\n!!! info \"Rationale\"\n\n    The `meta` field on data tests is a flexible store for operational metadata such as ownership, severity context, or ticket references. Enforcing required keys ensures that every test carries the information needed to triage failures quickly \u2014 for example, knowing which team owns a failing test or what SLA it is tied to \u2014 without relying on tribal knowledge or documentation that falls out of sync.\n\nParameters:\n    keys (NestedDict): A list (that may contain sub-lists) of required keys.\n\nReceives:\n    test (TestNode): The TestNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the test path. Test paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the test path. Only test paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_test_has_meta_keys\n          keys:\n            - owner\n    ```",
+      "description": "The `meta` config for data tests must have the specified keys.\n\n!!! info \"Rationale\"\n\n    The `meta` field on data tests is a flexible store for operational metadata such as ownership, severity context, or ticket references. Enforcing required keys ensures that every test carries the information needed to triage failures quickly \u2014 for example, knowing which team owns a failing test or what SLA it is tied to \u2014 without relying on tribal knowledge or documentation that falls out of sync.\n\nParameters:\n    criteria (Literal[\"all\", \"any\", \"one\"]): Whether the resource must have all, any, or exactly one of the specified keys. Default: `all`.\n    keys (NestedDict): A list (that may contain sub-lists) of required keys.\n\nReceives:\n    test (TestNode): The TestNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the test path. Test paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the test path. Only test paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_test_has_meta_keys\n          keys:\n            - owner\n    ```",
       "properties": {
         "code": {
           "const": "TE001",
@@ -11866,6 +11890,10 @@
           "default": "check_test_has_meta_keys",
           "title": "Name",
           "type": "string"
+        },
+        "criteria": {
+          "$ref": "#/$defs/Criteria",
+          "default": "all"
         },
         "keys": {
           "$ref": "#/$defs/NestedDict"

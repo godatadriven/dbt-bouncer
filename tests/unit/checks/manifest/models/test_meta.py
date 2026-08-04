@@ -248,6 +248,42 @@ class TestCheckModelHasMetaKeys:
         check_fn("check_model_has_meta_keys", keys=keys, model=model)
 
     @pytest.mark.parametrize(
+        ("keys", "criteria", "model", "check_fn"),
+        [
+            pytest.param(
+                ["owner", "maturity"],
+                "any",
+                {"meta": {"owner": "Bob"}},
+                check_passes,
+                id="criteria_any_one_key_present",
+            ),
+            pytest.param(
+                ["owner", "maturity"],
+                "any",
+                {"meta": {}},
+                check_fails,
+                id="criteria_any_no_keys_present",
+            ),
+            pytest.param(
+                ["owner", "maturity"],
+                "one",
+                {"meta": {"owner": "Bob"}},
+                check_passes,
+                id="criteria_one_exactly_one_key_present",
+            ),
+            pytest.param(
+                ["owner", "maturity"],
+                "one",
+                {"meta": {"owner": "Bob", "maturity": "high"}},
+                check_fails,
+                id="criteria_one_two_keys_present",
+            ),
+        ],
+    )
+    def test_check_model_has_meta_keys_criteria(self, keys, criteria, model, check_fn):
+        check_fn("check_model_has_meta_keys", keys=keys, criteria=criteria, model=model)
+
+    @pytest.mark.parametrize(
         ("keys", "model", "match"),
         [
             pytest.param(

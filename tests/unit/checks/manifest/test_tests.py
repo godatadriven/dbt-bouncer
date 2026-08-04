@@ -5,38 +5,71 @@ from dbt_bouncer.testing import check_fails, check_passes
 
 class TestCheckTestHasMetaKeys:
     @pytest.mark.parametrize(
-        ("keys", "test_overrides", "check_fn"),
+        ("keys", "criteria", "test_overrides", "check_fn"),
         [
             pytest.param(
                 ["owner"],
+                "all",
                 {"meta": {"owner": "team-finance"}},
                 check_passes,
                 id="has_required_key",
             ),
             pytest.param(
                 ["owner", "maturity"],
+                "all",
                 {"meta": {"owner": "team-finance", "maturity": "high"}},
                 check_passes,
                 id="has_all_required_keys",
             ),
             pytest.param(
                 ["owner"],
+                "all",
                 {"meta": {}},
                 check_fails,
                 id="missing_required_key",
             ),
             pytest.param(
                 ["owner", "maturity"],
+                "all",
                 {"meta": {"owner": "team-finance"}},
                 check_fails,
                 id="missing_one_of_required_keys",
             ),
+            pytest.param(
+                ["owner", "maturity"],
+                "any",
+                {"meta": {"owner": "team-finance"}},
+                check_passes,
+                id="criteria_any_one_key_present",
+            ),
+            pytest.param(
+                ["owner", "maturity"],
+                "any",
+                {"meta": {}},
+                check_fails,
+                id="criteria_any_no_keys_present",
+            ),
+            pytest.param(
+                ["owner", "maturity"],
+                "one",
+                {"meta": {"owner": "team-finance"}},
+                check_passes,
+                id="criteria_one_exactly_one_key_present",
+            ),
+            pytest.param(
+                ["owner", "maturity"],
+                "one",
+                {"meta": {"owner": "team-finance", "maturity": "high"}},
+                check_fails,
+                id="criteria_one_two_keys_present",
+            ),
         ],
     )
-    def test_check_test_has_meta_keys(self, keys, test_overrides, check_fn):
+    def test_check_test_has_meta_keys(self, keys, criteria, test_overrides, check_fn):
         check_fn(
             "check_test_has_meta_keys",
             keys=keys,
+            criteria=criteria,
             test=test_overrides,
         )
 

@@ -7,10 +7,12 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from dbt_bouncer.check_framework.base import BaseCheck
+from dbt_bouncer.enums import Criteria
 from dbt_bouncer.utils import (
     _ESCAPED_SEPARATOR,
     _SEPARATOR,
     create_github_comment_file,
+    find_meta_keys_criteria_failure,
     find_missing_meta_keys,
     flatten,
     get_clean_model_name,
@@ -192,6 +194,22 @@ def test_flatten(data_in, data_out):
 )
 def test_find_missing_meta_keys(meta_config, required_keys, expected_missing):
     assert find_missing_meta_keys(meta_config, required_keys) == expected_missing
+
+
+@pytest.mark.parametrize(
+    ("meta", "criteria", "fails"),
+    [
+        ({"owner": "x"}, Criteria.ALL, True),  # maturity missing
+        ({"owner": "x"}, Criteria.ANY, False),  # one key present
+        ({}, Criteria.ANY, True),  # none present
+        ({"owner": "x"}, Criteria.ONE, False),  # exactly one
+        ({}, Criteria.ONE, True),  # none present
+        ({"owner": "x", "maturity": "high"}, Criteria.ONE, True),  # two present
+    ],
+)
+def test_find_meta_keys_criteria_failure(meta, criteria, fails):
+    result = find_meta_keys_criteria_failure(meta, ["maturity", "owner"], criteria)
+    assert (result is not None) == fails
 
 
 @pytest.mark.parametrize(

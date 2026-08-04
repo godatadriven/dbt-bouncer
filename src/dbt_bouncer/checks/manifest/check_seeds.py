@@ -4,9 +4,10 @@ from pydantic import Field
 
 from dbt_bouncer.check_framework.decorator import check, fail
 from dbt_bouncer.check_framework.exceptions import NestedDict
+from dbt_bouncer.enums import Criteria
 from dbt_bouncer.utils import (
     compile_pattern,
-    find_missing_meta_keys,
+    find_meta_keys_criteria_failure,
     get_clean_model_name,
     is_description_populated,
 )
@@ -131,7 +132,9 @@ def check_seed_description_populated(
 
 
 @check(code="SE004")
-def check_seed_has_meta_keys(seed, *, keys: NestedDict):
+def check_seed_has_meta_keys(
+    seed, *, criteria: Criteria = Criteria.ALL, keys: NestedDict
+):
     """The `meta` config for seeds must have the specified keys.
 
     !!! info "Rationale"
@@ -139,6 +142,7 @@ def check_seed_has_meta_keys(seed, *, keys: NestedDict):
         The `meta` config is a flexible, project-defined dictionary used to track ownership, maturity levels, PII classification, and other governance attributes. Requiring specific keys ensures that these attributes are consistently populated across all seeds, enabling automated reporting, data cataloguing, and access-control workflows that depend on them.
 
     Parameters:
+        criteria (Literal["all", "any", "one"]): Whether the resource must have all, any, or exactly one of the specified keys. Default: `all`.
         keys (NestedDict): A list (that may contain sub-lists) of required keys.
 
     Receives:
@@ -160,13 +164,10 @@ def check_seed_has_meta_keys(seed, *, keys: NestedDict):
         ```
 
     """
-    missing_keys = find_missing_meta_keys(
-        meta_config=seed.meta, required_keys=keys.model_dump()
-    )
-    if missing_keys:
-        fail(
-            f"`{get_clean_model_name(seed.unique_id)}` is missing the following keys from the `meta` config: {[x.replace('>>', '') for x in missing_keys]}"
-        )
+    failure = find_meta_keys_criteria_failure(seed.meta, keys.model_dump(), criteria)
+    if failure:
+        display_name = get_clean_model_name(seed.unique_id)
+        fail(f"`{display_name}` {failure}")
 
 
 @check(code="SE005")
