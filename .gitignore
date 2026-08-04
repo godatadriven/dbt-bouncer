@@ -197,6 +197,7 @@ dbt_project/target/snapshots
 dbt_project/target/graph_summary.json
 dbt_project/target/graph.gpickle
 dbt_project/target/index.html
+dbt_project/target/osi_document.json
 dbt_project/target/partial_parse.msgpack
 dbt_project/target/perf_info.json
 dbt_project/target/semantic_manifest.json
