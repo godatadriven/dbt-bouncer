@@ -147,12 +147,33 @@ class TestCheckModelDoesNotUseCartesianJoin:
                 },
                 id="fallback_regex_scan_no_cross_join",
             ),
-            # sqlglot represents `ON NULL` as an exp.Null whose `.this` is None,
-            # which is neither a bool nor an Expression, so the condition is not
-            # treated as constant.
+            # `ON NULL` matches no rows at all, so it is degenerate rather than a
+            # Cartesian product and is not treated as a constant condition.
             pytest.param(
                 {"raw_code": "SELECT 1 FROM a JOIN b ON NULL"},
                 id="join_on_null_is_not_a_constant_condition",
+            ),
+            # A `NATURAL JOIN` joins on the columns the two relations share. It
+            # carries neither an `ON` nor a `USING` clause, but it is not an
+            # unconstrained join.
+            pytest.param(
+                {"raw_code": "SELECT 1 FROM a NATURAL JOIN b"},
+                id="natural_join",
+            ),
+            # A literal on either side of a genuine join predicate is not a
+            # constant condition: both operands must be literals for the
+            # predicate to be constant.
+            pytest.param(
+                {"raw_code": "SELECT 1 FROM a JOIN b ON 1 = b.id"},
+                id="literal_on_the_left_of_a_join_predicate",
+            ),
+            pytest.param(
+                {"raw_code": "SELECT 1 FROM a JOIN b ON b.id = 1"},
+                id="literal_on_the_right_of_a_join_predicate",
+            ),
+            pytest.param(
+                {"raw_code": "SELECT 1 FROM a JOIN b ON a.id = b.id"},
+                id="columns_on_both_sides",
             ),
         ],
     )
@@ -186,21 +207,19 @@ class TestCheckModelDoesNotUseCartesianJoin:
                 {"raw_code": "SELECT 1 FROM a JOIN b ON 0=0"},
                 id="join_constant_on_0_equals_0",
             ),
-            # Documents current behaviour: a NATURAL JOIN carries neither an `ON`
-            # nor a `USING` clause, so it is reported as an accidental Cartesian
-            # join even though it joins on the shared column names.
             pytest.param(
-                {"raw_code": "SELECT 1 FROM a NATURAL JOIN b"},
-                id="natural_join_reported_as_missing_clause",
+                {"raw_code": "SELECT 1 FROM a JOIN b ON 1"},
+                id="join_constant_on_bare_literal",
             ),
-            # Documents current behaviour: only the LEFT operand of the `ON`
-            # expression is inspected, so a literal on the left is treated as a
-            # constant condition even when the predicate is a genuine one. The
-            # equivalent `ON b.id = 1` passes - see
-            # test_literal_on_the_right_of_a_join_predicate_passes.
             pytest.param(
-                {"raw_code": "SELECT 1 FROM a JOIN b ON 1 = b.id"},
-                id="literal_on_the_left_of_a_join_predicate",
+                {"raw_code": "SELECT 1 FROM a JOIN b ON 'x' = 'x'"},
+                id="join_constant_on_equal_string_literals",
+            ),
+            # An implicit comma join carries no `ON`/`USING` clause and, unlike a
+            # `NATURAL JOIN`, is a genuine Cartesian product.
+            pytest.param(
+                {"raw_code": "SELECT 1 FROM a, b"},
+                id="implicit_comma_join",
             ),
             pytest.param(
                 # The regex fallback catches the `CROSS JOIN` keyword.
@@ -265,11 +284,14 @@ class TestCheckModelDoesNotUseCartesianJoin:
                 id="missing_clause",
             ),
             pytest.param(
-                # The reported condition is only the LEFT operand of the `ON`
-                # expression (`on_clause.this`), so `ON 1=1` renders as `ON 1`.
                 "SELECT 1 FROM a JOIN b ON 1=1",
-                r"uses a `JOIN` with a constant condition \(`ON 1`\)\.",
+                r"uses a `JOIN` with a constant condition \(`ON 1 = 1`\)\.",
                 id="constant_on",
+            ),
+            pytest.param(
+                "SELECT 1 FROM a JOIN b ON TRUE",
+                r"uses a `JOIN` with a constant condition \(`ON TRUE`\)\.",
+                id="constant_on_true",
             ),
             pytest.param(
                 "{# note\nSELECT 1 FROM a CROSS JOIN b",
@@ -288,16 +310,13 @@ class TestCheckModelDoesNotUseCartesianJoin:
     @pytest.mark.parametrize(
         "raw_code",
         [
+            pytest.param("SELECT 1 FROM a JOIN b ON 1 = b.id", id="literal_on_left"),
             pytest.param("SELECT 1 FROM a JOIN b ON b.id = 1", id="literal_on_right"),
-            pytest.param(
-                "SELECT 1 FROM a JOIN b ON a.id = b.id", id="columns_on_both_sides"
-            ),
         ],
     )
-    def test_literal_on_the_right_of_a_join_predicate_passes(self, raw_code):
-        # Counterpart to the `literal_on_the_left_of_a_join_predicate` failing
-        # case: the constant-condition test is asymmetric because it inspects
-        # only `on_clause.this` (the left operand).
+    def test_constant_condition_detection_is_symmetric(self, raw_code):
+        # A literal on one side of the predicate does not make it constant,
+        # whichever side it sits on.
         check_passes(
             "check_model_does_not_use_cartesian_join", model={"raw_code": raw_code}
         )
