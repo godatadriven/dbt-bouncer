@@ -8,6 +8,7 @@ import pytest
 
 from dbt_bouncer.check_framework.base import BaseCheck
 from dbt_bouncer.enums import Criteria
+from dbt_bouncer.exceptions import DbtBouncerConfigError
 from dbt_bouncer.utils import (
     _ESCAPED_SEPARATOR,
     _SEPARATOR,
@@ -435,7 +436,7 @@ class TestExtractChecksFromModule:
         mock_module.CheckLegacyStyle = CheckLegacyStyle  # type: ignore[attr-defined]
 
         check_objects: list[Any] = []
-        with pytest.raises(RuntimeError) as exc_info:
+        with pytest.raises(DbtBouncerConfigError) as exc_info:
             _extract_checks_from_module(mock_module, "test_module", check_objects)
 
         message = str(exc_info.value)

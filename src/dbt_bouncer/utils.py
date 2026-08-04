@@ -243,13 +243,14 @@ def _reject_class_based_check(cls: type, source: str) -> None:
             or a file path) included in the error message.
 
     Raises:
-        RuntimeError: If ``cls`` was not produced by the ``@check`` decorator.
+        DbtBouncerConfigError: If ``cls`` was not produced by the ``@check``
+            decorator.
 
     """
     from dbt_bouncer.check_framework.base import BaseCheck
 
     if issubclass(cls, BaseCheck) and "iterate_over" not in cls.__dict__:
-        raise RuntimeError(
+        raise DbtBouncerConfigError(
             f"`{cls.__name__}` in `{source}` is a hand-written class-based check. "
             "Class-based checks were removed in dbt-bouncer v4; define it with the "
             "`@check` decorator instead "

@@ -235,13 +235,15 @@ def check_my_custom_check(model) -> None:
     assert result.exit_code == 0
 
 
-def test_cli_custom_checks_dir_class_based_check_raises(monkeypatch, tmp_path):
+def test_cli_custom_checks_dir_class_based_check_raises(caplog, monkeypatch, tmp_path):
     """A hand-written ``BaseCheck`` subclass in a custom_checks_dir fails loudly.
 
     Class-based checks were removed in v4 (see ``_reject_class_based_check``
     in ``utils.py``) -- ignoring the migration guide and subclassing
-    ``BaseCheck`` directly must raise a clear ``RuntimeError`` rather than
-    the check silently degrading, as it did before that guard existed.
+    ``BaseCheck`` directly must fail with a clear, actionable message rather
+    than the check silently degrading, as it did before that guard existed.
+    The guard raises ``DbtBouncerConfigError``, so the CLI reports it as a
+    config error and exits ``CONFIG_ERROR`` instead of surfacing a traceback.
     """
     get_check_objects.cache_clear()
 
@@ -294,11 +296,10 @@ class CheckMyCustomCheck(BaseCheck):
         ["--config-file", PurePath("dbt-bouncer.yml").as_posix()],
     )
 
-    assert result.exit_code != 0
-    assert isinstance(result.exception, RuntimeError)
-    assert "CheckMyCustomCheck" in str(result.exception)
-    assert "v4" in str(result.exception)
-    assert "@check" in str(result.exception)
+    assert result.exit_code == ExitCode.CONFIG_ERROR
+    assert "CheckMyCustomCheck" in caplog.text
+    assert "v4" in caplog.text
+    assert "@check" in caplog.text
 
 
 def test_cli_description(tmp_path):
