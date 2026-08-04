@@ -3736,9 +3736,9 @@
       "title": "CheckModelDependsOnMultipleSources",
       "type": "object"
     },
-    "CheckModelDescriptionContainsRegexPattern": {
+    "CheckModelDescriptionContainsRegexpPattern": {
       "additionalProperties": false,
-      "description": "Models must have a description that matches the provided pattern.\n\n!!! info \"Rationale\"\n\n    A free-text description field is easy to fill with placeholder or low-quality content. Requiring descriptions to match a pattern (e.g. a minimum sentence structure or a specific prefix) ensures that documentation meets a baseline standard of usefulness rather than just being non-empty.\n\nParameters:\n    regexp_pattern (str): The regexp pattern that should match the model description.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    materialization (Literal[\"ephemeral\", \"incremental\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_model_description_contains_regex_pattern\n          regexp_pattern: .*pattern_to_match.*\n    ```",
+      "description": "Models must have a description that matches the provided pattern.\n\n!!! info \"Rationale\"\n\n    A free-text description field is easy to fill with placeholder or low-quality content. Requiring descriptions to match a pattern (e.g. a minimum sentence structure or a specific prefix) ensures that documentation meets a baseline standard of usefulness rather than just being non-empty.\n\nParameters:\n    regexp_pattern (str): The regexp pattern that should match the model description.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    materialization (Literal[\"ephemeral\", \"incremental\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_model_description_contains_regexp_pattern\n          regexp_pattern: .*pattern_to_match.*\n    ```",
       "properties": {
         "code": {
           "const": "MO020",
@@ -3822,8 +3822,8 @@
           "description": "Severity of the check, one of 'error' or 'warn'."
         },
         "name": {
-          "const": "check_model_description_contains_regex_pattern",
-          "default": "check_model_description_contains_regex_pattern",
+          "const": "check_model_description_contains_regexp_pattern",
+          "default": "check_model_description_contains_regexp_pattern",
           "title": "Name",
           "type": "string"
         },
@@ -3835,7 +3835,7 @@
       "required": [
         "regexp_pattern"
       ],
-      "title": "CheckModelDescriptionContainsRegexPattern",
+      "title": "CheckModelDescriptionContainsRegexpPattern",
       "type": "object"
     },
     "CheckModelDescriptionPopulated": {
@@ -12638,7 +12638,7 @@
             "check_model_contract_enforced_for_public_model": "#/$defs/CheckModelContractEnforcedForPublicModel",
             "check_model_depends_on_macros": "#/$defs/CheckModelDependsOnMacros",
             "check_model_depends_on_multiple_sources": "#/$defs/CheckModelDependsOnMultipleSources",
-            "check_model_description_contains_regex_pattern": "#/$defs/CheckModelDescriptionContainsRegexPattern",
+            "check_model_description_contains_regexp_pattern": "#/$defs/CheckModelDescriptionContainsRegexpPattern",
             "check_model_description_populated": "#/$defs/CheckModelDescriptionPopulated",
             "check_model_directories": "#/$defs/CheckModelDirectories",
             "check_model_documentation_coverage": "#/$defs/CheckModelDocumentationCoverage",
@@ -12809,7 +12809,7 @@
             "$ref": "#/$defs/CheckModelDependsOnMultipleSources"
           },
           {
-            "$ref": "#/$defs/CheckModelDescriptionContainsRegexPattern"
+            "$ref": "#/$defs/CheckModelDescriptionContainsRegexpPattern"
           },
           {
             "$ref": "#/$defs/CheckModelDescriptionPopulated"

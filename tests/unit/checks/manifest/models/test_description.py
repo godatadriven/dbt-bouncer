@@ -156,7 +156,7 @@ class TestCheckColumnDescriptionsAreConsistent:
         )
 
 
-class TestCheckModelDescriptionContainsRegexPattern:
+class TestCheckModelDescriptionContainsRegexpPattern:
     @pytest.mark.parametrize(
         ("model_override", "regexp_pattern", "check_fn"),
         [
@@ -229,11 +229,11 @@ class TestCheckModelDescriptionContainsRegexPattern:
             ),
         ],
     )
-    def test_check_model_description_contains_regex_pattern(
+    def test_check_model_description_contains_regexp_pattern(
         self, model_override, regexp_pattern, check_fn
     ):
         check_fn(
-            "check_model_description_contains_regex_pattern",
+            "check_model_description_contains_regexp_pattern",
             model=model_override,
             regexp_pattern=regexp_pattern,
         )
@@ -242,14 +242,14 @@ class TestCheckModelDescriptionContainsRegexPattern:
         # The check calls str(model.description) rather than defaulting to "",
         # so a None description is matched as the literal "None".
         check_passes(
-            "check_model_description_contains_regex_pattern",
+            "check_model_description_contains_regexp_pattern",
             model={"description": None},
             regexp_pattern="None",
         )
 
     def test_invalid_regex_raises_re_error(self):
         check_fails(
-            "check_model_description_contains_regex_pattern",
+            "check_model_description_contains_regexp_pattern",
             model={"description": "abc"},
             regexp_pattern="(unclosed",
             expected_exception=re.error,

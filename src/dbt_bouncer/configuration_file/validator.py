@@ -29,6 +29,35 @@ _CHECK_CATEGORIES = tuple(CheckCategory)
 # names are snake_case, so the shape alone distinguishes them.
 RULE_CODE_PATTERN = re.compile(r"^[A-Z]{2}\d{3}$")
 
+# Deprecated check names accepted for backwards compatibility. Rewritten to
+# their replacement (with a warning) before config validation, and removed in
+# the next major release.
+DEPRECATED_CHECK_NAME_ALIASES: dict[str, str] = {
+    "check_model_description_contains_regex_pattern": "check_model_description_contains_regexp_pattern",
+}
+
+
+def apply_deprecated_check_name_aliases(config_file_contents: dict) -> dict:
+    """Rewrite deprecated check names to their replacements, warning per use.
+
+    Returns:
+        dict: The same mapping, mutated in place.
+
+    """
+    for category, checks in config_file_contents.items():
+        if not category.endswith("_checks") or not isinstance(checks, list):
+            continue
+        for c in checks:
+            if not isinstance(c, dict):
+                continue
+            new_name = DEPRECATED_CHECK_NAME_ALIASES.get(c.get("name"))
+            if new_name is not None:
+                logging.warning(
+                    f"Check name `{c['name']}` is deprecated and will be removed in a future major release; use `{new_name}` instead."
+                )
+                c["name"] = new_name
+    return config_file_contents
+
 
 @lru_cache(maxsize=1)
 def _base_field_names() -> tuple[str, ...]:
@@ -331,7 +360,11 @@ def lint_config_file(config_file_path: Path) -> list[dict[str, Any]]:
 
                 check_name = raw_name
 
-                if check_name not in registry:
+                if check_name in DEPRECATED_CHECK_NAME_ALIASES:
+                    logging.warning(
+                        f"Check name `{check_name}` is deprecated and will be removed in a future major release; use `{DEPRECATED_CHECK_NAME_ALIASES[check_name]}` instead."
+                    )
+                elif check_name not in registry:
                     best_match = min(
                         registry.keys(),
                         key=lambda k, target=check_name: jellyfish.levenshtein_distance(
@@ -679,6 +712,8 @@ def validate_conf(
 
     """
     logging.info("Validating conf...")
+
+    config_file_contents = apply_deprecated_check_name_aliases(config_file_contents)
 
     # Normalize check entries and extract check names/codes from config to enable
     # targeted module loading. Resolving a rule code to its check name needs the
