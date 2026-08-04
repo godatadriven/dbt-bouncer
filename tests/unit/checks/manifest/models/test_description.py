@@ -510,12 +510,10 @@ class TestCheckModelDocumentedInSameDirectory:
             pytest.param({"patch_path": ""}, id="patch_path_empty_string"),
         ],
     )
-    def test_undocumented_model_fails_with_the_directory_message(self, model_override):
-        # Documents current behaviour: the "is not documented" branch is
-        # unreachable because `clean_path_str` never returns None and the wrapped
-        # resource always satisfies `hasattr(model, "patch_path")`. An
-        # undocumented model therefore falls through to the directory comparison
-        # and is reported as documented in a different (empty) directory.
+    def test_undocumented_model_fails_as_undocumented(self, model_override):
+        # A model with no patch_path has no documentation at all, so it is
+        # reported as undocumented rather than as documented in a different
+        # (empty) directory.
         check_fails(
             "check_model_documented_in_same_directory",
             model={
@@ -523,5 +521,5 @@ class TestCheckModelDocumentedInSameDirectory:
                 "path": "staging/model_1.sql",
                 **model_override,
             },
-            match=r"is documented in a different directory to the `\.sql` file: `` vs `models/staging`",
+            match=r"`model_1` is not documented\.",
         )
