@@ -18,7 +18,7 @@ def check_model_directories(
         A well-structured dbt project organises models into predictable directories (e.g. `staging`, `intermediate`, `marts`). Enforcing permitted sub-directories prevents ad-hoc folders from proliferating, making the project layout consistent and navigable for all contributors.
 
     Parameters:
-        include (str): Regex pattern to the directory to check.
+        include (str): Regex pattern matched against the start of each model's file path. Models outside this directory are skipped entirely, and the directory immediately after the matched prefix is what gets validated against `permitted_sub_directories`. For this check, `include` replaces the standard path-filter behaviour documented under `Other Parameters` for other checks: it is required and a single pattern, not an optional list.
         permitted_sub_directories (list[str]): List of permitted sub-directories.
 
     Receives:
@@ -27,7 +27,6 @@ def check_model_directories(
     Other Parameters:
         description (str | None): Description of what the check does and why it is implemented.
         exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.
-        include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.
         materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
