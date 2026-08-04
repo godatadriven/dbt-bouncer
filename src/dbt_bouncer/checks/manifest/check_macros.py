@@ -497,6 +497,36 @@ def check_macro_property_file_location(macro):
 _USED_MACROS_CACHE: dict[int, set[str]] = {}
 
 
+def _dispatches_to_own_name(macro: Any) -> bool:
+    """Whether a macro calls a dispatched implementation of its own name.
+
+    dbt's dispatch convention names implementations `<prefix>__<name>`, e.g.
+    `default__generate_schema_name` or `duckdb__apply_grants`. A macro that
+    depends on such an implementation of its own name is overriding a dbt
+    built-in, and is therefore invoked by dbt itself rather than by another
+    resource in the manifest.
+
+    Args:
+        macro: The macro object to inspect.
+
+    Returns:
+        True if the macro overrides a dispatched built-in.
+
+    """
+    depends_on = getattr(macro, "depends_on", None)
+    if depends_on is None or not hasattr(depends_on, "macros"):
+        return False
+
+    suffix = f"__{macro.name}"
+    for unique_id in depends_on.macros:
+        # `unique_id` is `macro.<package_name>.<macro_name>`.
+        dispatched_name = unique_id.rsplit(".", 1)[-1]
+        # `!= suffix` rejects an empty dispatch prefix.
+        if dispatched_name.endswith(suffix) and dispatched_name != suffix:
+            return True
+    return False
+
+
 def _get_used_macros(manifest_obj: Any) -> set[str]:
     obj_id = id(manifest_obj)
     if obj_id not in _USED_MACROS_CACHE:
@@ -516,7 +546,10 @@ def _get_used_macros(manifest_obj: Any) -> set[str]:
                 if hasattr(item, "depends_on") and hasattr(item.depends_on, "macros"):
                     used_macros.update(item.depends_on.macros)
 
-        # Add macros that override default dbt macros (identifiable via the depends_on key-value pair)
+        # Add macros that override default dbt macros. dbt < 2.0 records the
+        # dispatch edge on the built-in itself (`macro.dbt.<name>` depends on
+        # `macro.dbt.default__<name>`), so the overridable names can be read
+        # straight off the `dbt` package.
         overridable_dbt_macros = set()
         macros_collection = getattr(manifest_data, "macros", {})
         for item in macros_collection.values():
@@ -528,8 +561,11 @@ def _get_used_macros(manifest_obj: Any) -> set[str]:
             ):
                 overridable_dbt_macros.add(item.name)
 
+        # dbt 2.0 omits `depends_on` for macros in the built-in `dbt` and
+        # adapter packages, leaving `overridable_dbt_macros` empty, so also
+        # detect an override from its own dispatch edge.
         for item in macros_collection.values():
-            if item.name in overridable_dbt_macros:
+            if item.name in overridable_dbt_macros or _dispatches_to_own_name(item):
                 used_macros.add(item.unique_id)
 
         _USED_MACROS_CACHE[obj_id] = used_macros
