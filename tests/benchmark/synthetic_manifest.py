@@ -49,7 +49,7 @@ from dbt_bouncer.testing import (
 )
 
 DEFAULT_PACKAGE_NAME = "dbt_bouncer_perf"
-# >= 1.8.0 so unit_tests are parsed; v12 schema shape.
+# >= 1.9.0 so unit_tests are parsed; v12 schema shape.
 DEFAULT_DBT_VERSION = "1.11.0"
 
 # Column data types cycled through so column-type checks have real variety.
@@ -376,7 +376,7 @@ def build_manifest(
         n_models: Total number of models (split ~50/25/25 across
             staging/intermediate/marts).
         package_name: Package name shared by every resource.
-        dbt_version: dbt version stamped in metadata (must be >= 1.8.0 for
+        dbt_version: dbt version stamped in metadata (must be >= 1.9.0 for
             unit_tests to be parsed).
 
     Returns:

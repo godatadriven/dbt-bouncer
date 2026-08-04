@@ -216,11 +216,11 @@ def parse_dbt_artifacts(
 
     dbt_version = manifest_dict["metadata"]["dbt_version"]
     if not get_package_version_number(dbt_version) >= get_package_version_number(
-        "1.7.0"
+        "1.9.0"
     ):
         raise AssertionError(
             f"The supplied `manifest.json` was generated with dbt version {dbt_version}, "
-            "this is below the minimum supported version of 1.7.0."
+            "this is below the minimum supported version of 1.9.0."
         )
 
     manifest_proxy = DictProxy(manifest_dict)
@@ -298,15 +298,12 @@ def parse_dbt_artifacts(
         if v.get("package_name") == target_package
     ]
 
-    # Unit tests (dbt >= 1.8.0)
-    if get_package_version_number(dbt_version) >= get_package_version_number("1.8.0"):
-        project_unit_tests: list[DictProxy] = [
-            DictProxy(v)
-            for _, v in manifest_dict.get("unit_tests", {}).items()
-            if v.get("package_name") == target_package
-        ]
-    else:
-        project_unit_tests = []
+    # Unit tests
+    project_unit_tests: list[DictProxy] = [
+        DictProxy(v)
+        for _, v in manifest_dict.get("unit_tests", {}).items()
+        if v.get("package_name") == target_package
+    ]
 
     # --- Catalog ---
     if (

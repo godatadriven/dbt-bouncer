@@ -391,10 +391,10 @@ _SEED_FOR_UNIT_TEST = {
 }
 
 
-_DBT_18_MANIFEST_METADATA = {
+_MANIFEST_METADATA = {
     "metadata": {
         "dbt_schema_version": "https://schemas.getdbt.com/dbt/manifest/v12.json",
-        "dbt_version": "1.8.0",
+        "dbt_version": "1.9.0",
         "project_name": "dbt_bouncer_test_project",
         "adapter_type": "postgres",
     },
@@ -415,7 +415,7 @@ class TestCheckSeedHasUnitTests:
             seed=_SEED_FOR_UNIT_TEST,
             min_number_of_unit_tests=min_number_of_unit_tests,
             ctx_unit_tests=[_UNIT_TEST_FOR_SEED],
-            ctx_manifest_obj=_DBT_18_MANIFEST_METADATA,
+            ctx_manifest_obj=_MANIFEST_METADATA,
         )
 
     def test_check_seed_has_unit_tests_zero_unit_tests(self):
@@ -423,7 +423,7 @@ class TestCheckSeedHasUnitTests:
             "check_seed_has_unit_tests",
             seed=_SEED_FOR_UNIT_TEST,
             min_number_of_unit_tests=1,
-            ctx_manifest_obj=_DBT_18_MANIFEST_METADATA,
+            ctx_manifest_obj=_MANIFEST_METADATA,
         )
 
     def test_check_seed_has_unit_tests_depends_on_different_seed(self):
@@ -437,7 +437,7 @@ class TestCheckSeedHasUnitTests:
                     "depends_on": {"nodes": ["seed.package_name.other_seed"]},
                 }
             ],
-            ctx_manifest_obj=_DBT_18_MANIFEST_METADATA,
+            ctx_manifest_obj=_MANIFEST_METADATA,
         )
 
     def test_check_seed_has_unit_tests_empty_depends_on_nodes(self):
@@ -451,20 +451,8 @@ class TestCheckSeedHasUnitTests:
                     "depends_on": {"nodes": []},
                 }
             ],
-            ctx_manifest_obj=_DBT_18_MANIFEST_METADATA,
+            ctx_manifest_obj=_MANIFEST_METADATA,
         )
-
-    def test_check_seed_has_unit_tests_dbt_version_below_1_8_0(self, caplog):
-        import logging
-
-        with caplog.at_level(logging.WARNING):
-            check_passes(
-                "check_seed_has_unit_tests",
-                seed=_SEED_FOR_UNIT_TEST,
-                min_number_of_unit_tests=5,
-                ctx_manifest_obj={"metadata": {"dbt_version": "1.7.0"}},
-            )
-        assert "1.8.0" in caplog.text
 
 
 class TestCheckSeedNames:

@@ -1,4 +1,3 @@
-import logging
 from typing import Annotated
 
 from pydantic import Field
@@ -9,7 +8,6 @@ from dbt_bouncer.utils import (
     compile_pattern,
     find_missing_meta_keys,
     get_clean_model_name,
-    get_package_version_number,
     is_description_populated,
 )
 
@@ -195,10 +193,6 @@ def check_seed_has_unit_tests(
         include (str | list[str] | None): Regex pattern(s) to match the seed path. Only seed paths that match any pattern will be checked.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
-    !!! warning
-
-        This check is only supported for dbt 1.8.0 and above.
-
     Example(s):
         ```yaml
         manifest_checks:
@@ -212,18 +206,10 @@ def check_seed_has_unit_tests(
         ```
 
     """
-    manifest_obj = ctx.manifest_obj
-    if get_package_version_number(
-        manifest_obj.manifest.metadata.dbt_version or "0.0.0"
-    ) >= get_package_version_number("1.8.0"):
-        num_unit_tests = len(ctx.unit_tests_by_depends_on_node.get(seed.unique_id, []))
-        if num_unit_tests < min_number_of_unit_tests:
-            fail(
-                f"`{get_clean_model_name(seed.unique_id)}` has {num_unit_tests} unit tests, this is less than the minimum of {min_number_of_unit_tests}."
-            )
-    else:
-        logging.warning(
-            "This unit test check is only supported for dbt 1.8.0 and above."
+    num_unit_tests = len(ctx.unit_tests_by_depends_on_node.get(seed.unique_id, []))
+    if num_unit_tests < min_number_of_unit_tests:
+        fail(
+            f"`{get_clean_model_name(seed.unique_id)}` has {num_unit_tests} unit tests, this is less than the minimum of {min_number_of_unit_tests}."
         )
 
 

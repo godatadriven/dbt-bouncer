@@ -11,7 +11,7 @@ from dbt_bouncer.utils import compile_pattern, get_clean_model_name
 
 @check(code="MO001")
 def check_model_access(model, *, access: ModelAccess):
-    """Models must have the specified access attribute. Requires dbt 1.7+.
+    """Models must have the specified access attribute.
 
     !!! info "Rationale"
 
