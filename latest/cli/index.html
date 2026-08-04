@@ -1285,19 +1285,14 @@
 </span><span id="__span-17-5"><a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>dbt-bouncer<span class="w"> </span>list<span class="w"> </span>--output-format<span class="w"> </span>json
 </span></code></pre></div>
 <h2 id="exit-codes">Exit codes<a class="headerlink" href="#exit-codes" title="Permanent link">#</a></h2>
-<p><code>dbt-bouncer</code> returns the following exit codes:</p>
+<p><code>dbt-bouncer</code> returns distinct exit codes so that CI pipelines and scripts can tell a check failure apart from a setup problem:</p>
 <ul>
-<li>
-<p><code>0</code>: All checks have succeeded.</p>
-</li>
-<li>
-<p><code>1</code>:</p>
-<ul>
-<li>At least one check has failed. Check the logs for more information.</li>
-<li>A fatal error occurred during check setup or check execution. Check the logs for more information.</li>
+<li><code>0</code> (<code>SUCCESS</code>): All checks have succeeded.</li>
+<li><code>1</code> (<code>CHECK_ERRORS</code>): At least one check has failed. Check the logs for more information.</li>
+<li><code>2</code> (<code>CONFIG_ERROR</code>): The config file is missing, unreadable, or invalid (e.g. an invalid <code>--only</code> value).</li>
+<li><code>3</code> (<code>ARTIFACT_ERROR</code>): A required dbt artifact (<code>manifest.json</code>, <code>catalog.json</code>, <code>run_results.json</code>) is missing or was generated with an unsupported dbt version.</li>
 </ul>
-</li>
-</ul>
+<p>These codes apply to both <code>dbt-bouncer run</code> and <code>dbt-bouncer validate</code> (which only ever returns <code>SUCCESS</code>, <code>CHECK_ERRORS</code>, or <code>CONFIG_ERROR</code> — for <code>validate</code>, <code>CHECK_ERRORS</code> means lint issues were found in the config file, not that dbt checks failed).</p>
 
 
 
