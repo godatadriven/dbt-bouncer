@@ -1244,6 +1244,9 @@
 <h2 id="configuration-changes">Configuration changes<a class="headerlink" href="#configuration-changes" title="Permanent link">#</a></h2>
 <h3 id="your-config-files-still-work">Your config files still work<a class="headerlink" href="#your-config-files-still-work" title="Permanent link">#</a></h3>
 <p>Existing <code>dbt-bouncer.yml</code> and <code>pyproject.toml [tool.dbt-bouncer]</code> configurations are fully compatible. Check names and parameters are unchanged.</p>
+<blockquote>
+<p><strong>Renamed in v4:</strong> <code>check_model_description_contains_regex_pattern</code> is now <code>check_model_description_contains_regexp_pattern</code>, matching the <code>regexp_pattern</code> parameter and the other two <code>regexp</code>-named checks. The old name still works and logs a deprecation warning; it will be removed in a future major release.</p>
+</blockquote>
 <h3 id="config-validation-is-now-strict">Config validation is now strict<a class="headerlink" href="#config-validation-is-now-strict" title="Permanent link">#</a></h3>
 <p>Two changes that may surface pre-existing issues in your config:</p>
 <ol>
