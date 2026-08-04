@@ -110,7 +110,7 @@ def resource_in_path(check: "BaseCheck", resource: Any) -> bool:
 
 
 def find_meta_keys_criteria_failure(
-    meta_config: dict[str, Any],
+    meta_config: MetaConfig,
     required_keys: list[Any],
     criteria: Criteria,
     config_label: str = "meta",
