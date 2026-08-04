@@ -219,6 +219,44 @@ def flatten(
     return flattened
 
 
+def _reject_class_based_check(cls: type, source: str) -> None:
+    """Raise if ``cls`` is a hand-written ``BaseCheck`` subclass, not one built by ``@check``.
+
+    The ``@check`` decorator always assigns ``iterate_over`` directly onto the
+    class it generates (``cls.iterate_over = iterate_over`` in
+    ``check_framework/decorator.py``) -- even when the value is ``None``, for
+    a context-only check. A class written by hand and subclassed from
+    ``BaseCheck`` never has ``iterate_over`` in its own ``__dict__``, since it
+    only ever inherits the ``ClassVar`` default from the base class. That
+    presence-in-``__dict__`` check is therefore a reliable way to tell a
+    legacy, hand-written check apart from a decorator-generated one, even
+    though ``getattr(cls, "iterate_over", ...)`` alone cannot (both can
+    legitimately be ``None``).
+
+    Non-``BaseCheck`` classes (e.g. lightweight stand-ins used in tests) are
+    left alone -- this guard only concerns itself with the class-based check
+    framework that was removed in v4.
+
+    Args:
+        cls: The discovered class to check.
+        source: A human-readable origin for ``cls`` (a module's dotted name,
+            or a file path) included in the error message.
+
+    Raises:
+        RuntimeError: If ``cls`` was not produced by the ``@check`` decorator.
+
+    """
+    from dbt_bouncer.check_framework.base import BaseCheck
+
+    if issubclass(cls, BaseCheck) and "iterate_over" not in cls.__dict__:
+        raise RuntimeError(
+            f"`{cls.__name__}` in `{source}` is a hand-written class-based check. "
+            "Class-based checks were removed in dbt-bouncer v4; define it with the "
+            "`@check` decorator instead "
+            "(see `dbt_bouncer.check_framework.decorator.check`)."
+        )
+
+
 def _extract_checks_from_module(
     module: Any, module_name: str, check_objects: list[type["BaseCheck"]]
 ) -> None:
@@ -242,6 +280,9 @@ def _extract_checks_from_module(
             and name.startswith("Check")
             and obj.__module__ == module_name
         ):
+            _reject_class_based_check(
+                obj, getattr(module, "__file__", None) or module_name
+            )
             check_objects.append(obj)
 
 
@@ -369,6 +410,7 @@ def _load_entry_point_checks(check_objects: list[type["BaseCheck"]]) -> None:
             target = ep.load()
 
             if inspect.isclass(target) and target.__name__.startswith("Check"):
+                _reject_class_based_check(target, target.__module__)
                 check_objects.append(target)
             elif inspect.ismodule(target):
                 # Check if it's a package (has __path__) — walk submodules

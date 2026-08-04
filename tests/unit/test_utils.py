@@ -413,6 +413,65 @@ class TestExtractChecksFromModule:
 
         assert len(check_objects) == 0
 
+    def test_rejects_hand_written_base_check_subclass(self):
+        """A hand-written ``BaseCheck`` subclass (never passed through ``@check``) raises."""
+        import types
+
+        from dbt_bouncer.utils import _extract_checks_from_module
+
+        class CheckLegacyStyle(BaseCheck):
+            """Pre-decorator, class-based check.
+
+            Declares ``model`` via a plain annotation instead of going
+            through ``@check``, so no ``iterate_over`` ClassVar is ever set
+            directly on this class -- only inherited from ``BaseCheck``.
+            """
+
+            name: str = "check_legacy_style"
+            model: Any = None
+
+        CheckLegacyStyle.__module__ = "test_module"
+        mock_module = types.ModuleType("test_module")
+        mock_module.CheckLegacyStyle = CheckLegacyStyle  # type: ignore[attr-defined]
+
+        check_objects: list[Any] = []
+        with pytest.raises(RuntimeError) as exc_info:
+            _extract_checks_from_module(mock_module, "test_module", check_objects)
+
+        message = str(exc_info.value)
+        assert "CheckLegacyStyle" in message
+        assert "test_module" in message
+        assert "v4" in message
+        assert "@check" in message
+        assert check_objects == []
+
+    def test_allows_decorator_generated_context_only_check(self):
+        """A ``@check``-decorated, context-only check must NOT trip the guard.
+
+        This is the regression case: the discriminator must key off
+        ``iterate_over`` being set in ``__dict__`` at all, not off its value,
+        since a legitimate context-only check also has ``iterate_over is
+        None``.
+        """
+        import types
+
+        from dbt_bouncer.check_framework.decorator import check
+        from dbt_bouncer.utils import _extract_checks_from_module
+
+        @check
+        def check_context_only_example(ctx) -> None:
+            """Run globally, exercising the context-only dispatch path."""
+
+        cls = check_context_only_example
+        cls.__module__ = "test_module"
+        mock_module = types.ModuleType("test_module")
+        setattr(mock_module, cls.__name__, cls)
+
+        check_objects: list[Any] = []
+        _extract_checks_from_module(mock_module, "test_module", check_objects)
+
+        assert check_objects == [cls]
+
 
 # --- Tests for _load_custom_checks ---
 
@@ -506,6 +565,13 @@ class CheckEntryPointFake(BaseCheck):
 
     def execute(self) -> None:
         """No-op execute for testing."""
+
+
+# These entry-point tests exercise discovery mechanics (module walk, package
+# walk, direct-class registration), not the class-based-check guard, so mark
+# this stand-in the same way the `@check` decorator would (a context-only
+# check, hence `None`) to keep it out of that guard's way.
+CheckEntryPointFake.iterate_over = None
 
 
 def _make_fake_ep(

@@ -204,6 +204,65 @@ def test_cli_custom_checks_dir(caplog, monkeypatch, tmp_path):
     Path(tmp_path / "my_checks_dir/__init__.py").write_text("")
     Path(tmp_path / "my_checks_dir/manifest/check_models.py").write_text(
         """
+from dbt_bouncer.check_framework.decorator import check
+
+
+@check
+def check_my_custom_check(model) -> None:
+    assert 1 == 1
+"""
+    )
+
+    # Manifest file
+    with Path.open(Path("./dbt_project/target/manifest.json"), "r") as f:
+        manifest = json.load(f)
+
+    with Path.open(tmp_path / "manifest.json", "w") as f:
+        json.dump(manifest, f)
+
+    # Run dbt-bouncer
+    monkeypatch.chdir(tmp_path)
+    runner = CliRunner()
+    # `-v` is required: `custom_checks_dir=` is logged at DEBUG, and the root
+    # logger is only taken down to DEBUG when the user asks for that verbosity.
+    result = runner.invoke(
+        app,
+        ["-v", "--config-file", PurePath("dbt-bouncer.yml").as_posix()],
+    )
+
+    assert len([r for r in caplog.messages if r.find("custom_checks_dir=") >= 0]) >= 1
+
+    assert result.exit_code == 0
+
+
+def test_cli_custom_checks_dir_class_based_check_raises(monkeypatch, tmp_path):
+    """A hand-written ``BaseCheck`` subclass in a custom_checks_dir fails loudly.
+
+    Class-based checks were removed in v4 (see ``_reject_class_based_check``
+    in ``utils.py``) -- ignoring the migration guide and subclassing
+    ``BaseCheck`` directly must raise a clear ``RuntimeError`` rather than
+    the check silently degrading, as it did before that guard existed.
+    """
+    get_check_objects.cache_clear()
+
+    # Config file
+    bouncer_config = {
+        "custom_checks_dir": "my_checks_dir",
+        "dbt_artifacts_dir": ".",
+        "manifest_checks": [
+            {
+                "name": "check_my_custom_check",
+            },
+        ],
+    }
+
+    with Path(tmp_path / "dbt-bouncer.yml").open("w") as f:
+        yaml.dump(bouncer_config, f)
+
+    Path(tmp_path / "my_checks_dir/manifest").mkdir(parents=True)
+    Path(tmp_path / "my_checks_dir/__init__.py").write_text("")
+    Path(tmp_path / "my_checks_dir/manifest/check_models.py").write_text(
+        """
 from typing import Any, Literal
 
 from pydantic import Field
@@ -230,16 +289,16 @@ class CheckMyCustomCheck(BaseCheck):
     # Run dbt-bouncer
     monkeypatch.chdir(tmp_path)
     runner = CliRunner()
-    # `-v` is required: `custom_checks_dir=` is logged at DEBUG, and the root
-    # logger is only taken down to DEBUG when the user asks for that verbosity.
     result = runner.invoke(
         app,
-        ["-v", "--config-file", PurePath("dbt-bouncer.yml").as_posix()],
+        ["--config-file", PurePath("dbt-bouncer.yml").as_posix()],
     )
 
-    assert len([r for r in caplog.messages if r.find("custom_checks_dir=") >= 0]) >= 1
-
-    assert result.exit_code == 0
+    assert result.exit_code != 0
+    assert isinstance(result.exception, RuntimeError)
+    assert "CheckMyCustomCheck" in str(result.exception)
+    assert "v4" in str(result.exception)
+    assert "@check" in str(result.exception)
 
 
 def test_cli_description(tmp_path):
