@@ -203,6 +203,7 @@ def test_find_missing_meta_keys(meta_config, required_keys, expected_missing):
         ({"owner": "x"}, Criteria.ANY, False),  # one key present
         ({}, Criteria.ANY, True),  # none present
         ({"owner": "x"}, Criteria.ONE, False),  # exactly one
+        ({}, Criteria.ONE, True),  # none present
         ({"owner": "x", "maturity": "high"}, Criteria.ONE, True),  # two present
     ],
 )
