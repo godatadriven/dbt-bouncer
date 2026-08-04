@@ -61,9 +61,8 @@ class TestCheckModelAccess:
     )
     def test_pass_when_model_has_no_access_attribute(self, access):
         # A model with no `access` attribute passes for ANY requested access value
-        # because the check short-circuits on `if model.access`. This is the intended
-        # "Requires dbt 1.7+" fallback (see the check docstring): older manifests, which
-        # lack `access`, are skipped rather than errored.
+        # because the check short-circuits on `if model.access`, so an absent
+        # attribute is skipped rather than errored.
         check_passes("check_model_access", access=access, model={})
 
     def test_invalid_access_value_rejected(self):
