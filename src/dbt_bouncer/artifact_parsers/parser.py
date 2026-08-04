@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING, Any, NamedTuple
 
 import orjson
 
+from dbt_bouncer.exceptions import DbtBouncerArtifactError
 from dbt_bouncer.utils import clean_path_str, get_package_version_number
 
 if TYPE_CHECKING:
@@ -203,14 +204,14 @@ def parse_dbt_artifacts(
         ParsedArtifacts: Named tuple of lightweight proxy objects.
 
     Raises:
-        AssertionError: If the dbt version is below the minimum supported version.
-        FileNotFoundError: If a required artifact file does not exist.
+        DbtBouncerArtifactError: If the dbt version is below the minimum supported
+            version, or a required artifact file does not exist.
 
     """
     # --- Manifest ---
     manifest_path = dbt_artifacts_dir / "manifest.json"
     if not manifest_path.exists():
-        raise FileNotFoundError(f"No manifest.json found at {manifest_path}.")
+        raise DbtBouncerArtifactError(f"No manifest.json found at {manifest_path}.")
 
     manifest_dict = orjson.loads(manifest_path.read_bytes())
 
@@ -218,7 +219,7 @@ def parse_dbt_artifacts(
     if not get_package_version_number(dbt_version) >= get_package_version_number(
         "1.9.0"
     ):
-        raise AssertionError(
+        raise DbtBouncerArtifactError(
             f"The supplied `manifest.json` was generated with dbt version {dbt_version}, "
             "this is below the minimum supported version of 1.9.0."
         )
@@ -312,7 +313,7 @@ def parse_dbt_artifacts(
     ):
         catalog_path = dbt_artifacts_dir / "catalog.json"
         if not catalog_path.exists():
-            raise FileNotFoundError(f"No catalog.json found at {catalog_path}.")
+            raise DbtBouncerArtifactError(f"No catalog.json found at {catalog_path}.")
 
         catalog_dict = orjson.loads(catalog_path.read_bytes())
         nodes_dict = manifest_dict.get("nodes", {})
@@ -351,7 +352,7 @@ def parse_dbt_artifacts(
     ):
         rr_path = dbt_artifacts_dir / "run_results.json"
         if not rr_path.exists():
-            raise FileNotFoundError(f"No run_results.json found at {rr_path}.")
+            raise DbtBouncerArtifactError(f"No run_results.json found at {rr_path}.")
 
         rr_dict = orjson.loads(rr_path.read_bytes())
         nodes_dict = manifest_dict.get("nodes", {})

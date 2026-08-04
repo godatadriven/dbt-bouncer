@@ -19,6 +19,7 @@ from dbt_bouncer.configuration_file.validator import (
     validate_conf,
 )
 from dbt_bouncer.enums import ConfigFileSource
+from dbt_bouncer.exceptions import DbtBouncerConfigError
 from dbt_bouncer.main import app
 
 
@@ -240,7 +241,7 @@ def test_load_config_file_contents_pyproject_toml_no_bouncer_section(
     pyproject_file = tmp_path / "pyproject.toml"
     pyproject_file.write_text(PYPROJECT_TOML_MISSPELLED_CONFIG)
 
-    with pytest.raises(RuntimeError):
+    with pytest.raises(DbtBouncerConfigError):
         load_config_file_contents(
             config_file_path=tmp_path / "pyproject.toml",
             allow_default_config_file_creation=False,
@@ -414,7 +415,7 @@ def test_validate_conf_invalid_parameter_type():
         },
     )
 
-    with ctx, pytest.raises(RuntimeError) as excinfo:
+    with ctx, pytest.raises(DbtBouncerConfigError) as excinfo:
         validate_conf(
             check_categories=["manifest_checks"],
             config_file_contents={

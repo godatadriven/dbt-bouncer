@@ -1,4 +1,4 @@
-from enum import StrEnum, auto
+from enum import IntEnum, StrEnum, auto
 
 
 class CheckOutcome(StrEnum):
@@ -50,6 +50,15 @@ class Criteria(StrEnum):
     ALL = auto()
     ANY = auto()
     ONE = auto()
+
+
+class ExitCode(IntEnum):
+    """Process exit codes returned by the dbt-bouncer CLI."""
+
+    SUCCESS = 0
+    CHECK_ERRORS = 1
+    CONFIG_ERROR = 2
+    ARTIFACT_ERROR = 3
 
 
 class ListOutputFormat(StrEnum):

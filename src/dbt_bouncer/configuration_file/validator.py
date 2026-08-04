@@ -15,6 +15,7 @@ import yaml
 from pydantic import RootModel, ValidationError
 
 from dbt_bouncer.enums import CheckCategory, ConfigFileName, ConfigFileSource
+from dbt_bouncer.exceptions import DbtBouncerConfigError
 from dbt_bouncer.utils import compile_pattern, get_check_registry, load_config_from_yaml
 
 if TYPE_CHECKING:
@@ -126,7 +127,7 @@ def get_config_file_path(
         PurePath: Config file for dbt-bouncer.
 
     Raises:
-        RuntimeError: If no config file is found.
+        DbtBouncerConfigError: If no config file is found.
 
     """  # ruff: ignore[missing-trailing-period, missing-terminal-punctuation]
     logging.debug(f"{config_file=}")
@@ -136,7 +137,7 @@ def get_config_file_path(
         logging.debug(f"Config file passed via command line: {config_file}")
         config_file_path = Path(config_file)
         if not config_file_path.exists():
-            raise RuntimeError(f"Config file not found: {config_file}")
+            raise DbtBouncerConfigError(f"Config file not found: {config_file}")
         return config_file
 
     if config_file_path_via_env_var := os.getenv("DBT_BOUNCER_CONFIG_FILE"):
@@ -180,7 +181,7 @@ def get_config_file_path(
 
         if pyproject_toml_dir is None:
             logging.debug("No pyproject.toml found.")
-            raise RuntimeError(
+            raise DbtBouncerConfigError(
                 "No config file found. Please provide a `dbt-bouncer.yml`, `dbt-bouncer.yaml`, `dbt-bouncer.toml`, or a `pyproject.toml` with a `[tool.dbt-bouncer]` section. Alternatively, pass the path via the `--config-file` flag.",
             )
 
@@ -201,7 +202,7 @@ def load_config_file_contents(
         Mapping[str, Any]: Config for dbt-bouncer.
 
     Raises:
-        RuntimeError: If the config file type is not supported or does not contain the expected keys.
+        DbtBouncerConfigError: If the config file type is not supported or does not contain the expected keys.
 
     """
     match config_file_path.suffix:
@@ -245,11 +246,11 @@ def load_config_file_contents(
                     return load_config_from_yaml(created_config_file)
 
                 else:
-                    raise RuntimeError(
+                    raise DbtBouncerConfigError(
                         "No configuration for `dbt-bouncer` could be found. You can pass the path to your config file via the `--config-file` flag. Alternatively, configure `pyproject.toml` or use a `dbt-bouncer.toml` file.",
                     )
         case _:
-            raise RuntimeError(
+            raise DbtBouncerConfigError(
                 f"Config file must be a `.toml`, `.yaml`, or `.yml` file. Got {config_file_path.suffix}."
             )
 
@@ -719,7 +720,7 @@ def validate_conf(
         DbtBouncerConf: The validated configuration.
 
     Raises:
-        RuntimeError: If the configuration is invalid.
+        DbtBouncerConfigError: If the configuration is invalid.
 
     """
     logging.info("Validating conf...")
@@ -848,7 +849,7 @@ def validate_conf(
                     f"{len(error_message) + 1}. {location}: {error['msg']}"
                 )
 
-        raise RuntimeError("\n".join(error_message)) from e
+        raise DbtBouncerConfigError("\n".join(error_message)) from e
 
     if cache_path is not None:
         _write_cached_conf(cache_path, bouncer_config)

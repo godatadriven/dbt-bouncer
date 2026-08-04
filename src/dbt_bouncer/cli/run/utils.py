@@ -13,6 +13,7 @@ from dbt_bouncer.enums import (
     ConfigFileSource,
     OutputFormat,
 )
+from dbt_bouncer.exceptions import DbtBouncerConfigError
 from dbt_bouncer.reporting.logger import configure_console_logging
 from dbt_bouncer.version import version as get_version
 
@@ -122,7 +123,11 @@ def run_bouncer(
         int: Exit code (0 for success, 1 for failure).
 
     Raises:
-        RuntimeError: If runtime errors occur.
+        DbtBouncerConfigError: If `--only` contains an invalid value. The config file
+            being missing, unreadable, or invalid, and a required dbt artifact being
+            missing or unsupported, surface as `DbtBouncerConfigError` /
+            `DbtBouncerArtifactError` from the config/artifact loading called here.
+        RuntimeError: If `config_file_source` could not be determined.
 
     """
     configure_console_logging(verbosity)
@@ -136,7 +141,7 @@ def run_bouncer(
         only_parsed = [x.strip() for x in set(only.strip().split(",")) if x != ""]
 
     for x in [i for i in only_parsed if i not in valid_check_categories]:
-        raise RuntimeError(
+        raise DbtBouncerConfigError(
             f"`--only` contains an invalid value (`{x}`). Valid values are `{valid_check_categories}` or any comma-separated combination."
         )
 

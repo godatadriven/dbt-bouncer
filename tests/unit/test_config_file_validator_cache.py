@@ -19,6 +19,7 @@ from dbt_bouncer.configuration_file.validator import (
     _load_cached_conf,
     _write_cached_conf,
 )
+from dbt_bouncer.exceptions import DbtBouncerConfigError
 
 
 def _payload(checks=None, version=_CONF_CACHE_FORMAT_VERSION):
@@ -235,7 +236,7 @@ class TestValidateConfFullScanFallback:
         self, monkeypatch, config_file_contents, match
     ):
         """A check entry with no usable name is skipped during name extraction and rejected by validation."""
-        with pytest.raises(RuntimeError, match=match):
+        with pytest.raises(DbtBouncerConfigError, match=match):
             self._validate(monkeypatch, config_file_contents)
 
 
