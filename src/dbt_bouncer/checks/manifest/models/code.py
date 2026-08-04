@@ -53,6 +53,42 @@ def _strip_sql_comments(code: str) -> str:
     return code
 
 
+def _constant_join_condition(on_clause: "exp.Expression") -> tuple[bool, str]:
+    """Determine whether a join's ``ON`` condition is a constant.
+
+    A constant condition (``ON TRUE``, ``ON 1``, ``ON 1=1``) constrains nothing,
+    so the join produces a Cartesian product. ``on_clause`` is the condition
+    expression itself, so both operands of a comparison must be inspected -
+    looking only at ``on_clause.this`` would treat ``ON 1 = b.id`` as constant
+    while letting the equivalent ``ON b.id = 1`` through.
+
+    Args:
+        on_clause: The expression held in a join's ``on`` argument.
+
+    Returns:
+        tuple[bool, str]: Whether the condition is constant, and the condition
+        rendered back to SQL for use in the failure message.
+
+    """
+    from sqlglot import exp
+
+    cond_str = on_clause.sql()
+
+    # `ON TRUE` / `ON FALSE` parse to exp.Boolean; a bare `ON 1` to exp.Literal.
+    if isinstance(on_clause, (exp.Boolean, exp.Literal)):
+        return True, cond_str
+
+    # `ON 1 = 1` and `ON 'x' = 'x'`: constant only when *both* operands are
+    # literals. `ON NULL` is an exp.Null rather than a literal and matches no
+    # rows, so it is degenerate rather than Cartesian and is not flagged.
+    if isinstance(on_clause, exp.EQ) and isinstance(
+        on_clause.this, (exp.Literal, exp.Boolean)
+    ):
+        return isinstance(on_clause.expression, (exp.Literal, exp.Boolean)), cond_str
+
+    return False, cond_str
+
+
 def _is_sql_model(model: ModelNode) -> bool:
     """Determine whether a model is a SQL model (non-SQL models are skipped).
 
@@ -169,8 +205,12 @@ def check_model_does_not_use_cartesian_join(
     !!! info
 
         Analysis is AST-based (via sqlglot) and flags explicit `CROSS JOIN` keywords,
-        missing `ON`/`USING` clauses, and constant `ON` conditions (e.g. `ON 1=1`).
-        Non-SQL (e.g. Python) models are skipped.
+        missing `ON`/`USING` clauses, and constant `ON` conditions (e.g. `ON 1=1`,
+        `ON TRUE`). A condition is constant only when every operand is a literal,
+        so a genuine predicate is not flagged whichever side its literal sits on
+        (`ON 1 = b.id` and `ON b.id = 1` both pass). `NATURAL JOIN` is not flagged,
+        as it joins on the columns the two relations share. Non-SQL (e.g. Python)
+        models are skipped.
 
     !!! warning
 
@@ -209,6 +249,9 @@ def check_model_does_not_use_cartesian_join(
             is_cross = (join.kind or "").upper() == "CROSS"
             on_clause = join.args.get("on")
             using_clause = join.args.get("using")
+            # A `NATURAL JOIN` joins on the columns the two relations share, so
+            # it constrains the join despite carrying no `ON`/`USING` clause.
+            is_natural = (join.args.get("method") or "").upper() == "NATURAL"
 
             if is_cross:
                 if not allow_explicit_cross_join:
@@ -217,34 +260,13 @@ def check_model_does_not_use_cartesian_join(
                     )
                 continue
 
-            if not on_clause and not using_clause:
+            if not on_clause and not using_clause and not is_natural:
                 fail(
                     f"`{get_clean_model_name(model.unique_id)}` uses a `JOIN` without an `ON` or `USING` clause."
                 )
 
-            if on_clause:
-                cond = on_clause.this
-                # sqlglot represents bare boolean literals (`ON TRUE`/`ON FALSE`)
-                # as Python bools rather than `exp.Boolean` nodes, so this branch
-                # is live - not dead code.
-                if isinstance(cond, bool):
-                    is_constant, cond_str = cond, str(cond).upper()
-                elif isinstance(cond, exp.Expression):
-                    cond_str = cond.sql()
-                    normalized = cond_str.upper().replace(" ", "")
-                    is_constant = (
-                        normalized in ("1", "TRUE", "1=1", "0=0")
-                        or isinstance(cond, (exp.Literal, exp.Boolean))
-                        or (
-                            isinstance(cond, exp.EQ)
-                            and isinstance(cond.this, exp.Literal)
-                            and isinstance(cond.expression, exp.Literal)
-                            and cond.this.this == cond.expression.this
-                        )
-                    )
-                else:
-                    is_constant, cond_str = False, str(cond)
-
+            if on_clause is not None:
+                is_constant, cond_str = _constant_join_condition(on_clause)
                 if is_constant and not allow_explicit_cross_join:
                     fail(
                         f"`{get_clean_model_name(model.unique_id)}` uses a `JOIN` with a constant condition (`ON {cond_str}`)."
