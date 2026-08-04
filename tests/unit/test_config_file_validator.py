@@ -13,6 +13,7 @@ from typer.main import get_command
 
 from dbt_bouncer.configuration_file.validator import (
     _get_stub_namespace,
+    apply_deprecated_check_name_aliases,
     get_config_file_path,
     load_config_file_contents,
     validate_conf,
@@ -514,6 +515,27 @@ def test_lint_config_file_valid(tmp_path):
 
     issues = lint_config_file(config_file)
     assert issues == []
+
+
+def test_lint_config_file_deprecated_check_name_is_not_an_error(tmp_path, caplog):
+    """A deprecated check name lints clean and logs a deprecation warning."""
+    from dbt_bouncer.configuration_file.validator import lint_config_file
+
+    config = {
+        "manifest_checks": [
+            {
+                "name": "check_model_description_contains_regex_pattern",
+                "regexp_pattern": ".*",
+            },
+        ],
+    }
+    config_file = tmp_path / "dbt-bouncer.yml"
+    with Path.open(config_file, "w") as f:
+        yaml.dump(config, f)
+
+    issues = lint_config_file(config_file)
+    assert issues == []
+    assert "deprecated" in caplog.text
 
 
 def test_lint_config_file_missing_name(tmp_path):
@@ -1023,3 +1045,49 @@ def test_compute_conf_cache_key_includes_custom_checks_dir(tmp_path):
     )
 
     assert key_before != key_after
+
+
+def test_deprecated_regex_check_name_is_aliased(caplog):
+    contents = {
+        "manifest_checks": [
+            {
+                "name": "check_model_description_contains_regex_pattern",
+                "regexp_pattern": ".*x.*",
+            }
+        ]
+    }
+    result = apply_deprecated_check_name_aliases(contents)
+    assert (
+        result["manifest_checks"][0]["name"]
+        == "check_model_description_contains_regexp_pattern"
+    )
+    assert "deprecated" in caplog.text
+
+
+def test_validate_conf_deprecated_regex_check_name_still_runs(caplog):
+    """A config using the old check name validates and runs the renamed check."""
+    ctx = typer.Context(
+        get_command(app),
+        obj={
+            "config_file_path": "",
+            "custom_checks_dir": None,
+        },
+    )
+
+    with ctx:
+        conf = validate_conf(
+            check_categories=["manifest_checks"],
+            config_file_contents={
+                "manifest_checks": [
+                    {
+                        "name": "check_model_description_contains_regex_pattern",
+                        "regexp_pattern": ".*pattern_to_match.*",
+                    }
+                ]
+            },
+        )
+
+    assert conf.manifest_checks[0].name == (
+        "check_model_description_contains_regexp_pattern"
+    )
+    assert "deprecated" in caplog.text

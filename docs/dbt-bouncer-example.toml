@@ -164,7 +164,7 @@ materialization = "incremental"
 name = "check_model_depends_on_multiple_sources"
 
 [[manifest_checks]]
-name = "check_model_description_contains_regex_pattern"
+name = "check_model_description_contains_regexp_pattern"
 include = "^models/marts/finance/customers"
 regexp_pattern = ".*as well as some derived facts.*"
 

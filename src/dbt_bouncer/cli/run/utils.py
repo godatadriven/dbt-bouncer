@@ -140,14 +140,26 @@ def run_bouncer(
             f"`--only` contains an invalid value (`{x}`). Valid values are `{valid_check_categories}` or any comma-separated combination."
         )
 
-    # Parse `--check` into a set of check names (empty set means run all)
-    check_names: set[str] = {x.strip() for x in check.strip().split(",") if x.strip()}
-
     # Using local imports to speed up CLI startup
     from dbt_bouncer.configuration_file.validator import (
+        DEPRECATED_CHECK_NAME_ALIASES,
         get_config_file_path,
         load_config_file_contents,
+        warn_deprecated_check_name,
     )
+
+    # Parse `--check` into a set of check names (empty set means run all),
+    # rewriting any deprecated names to their replacements and warning per use.
+    check_names: set[str] = set()
+    for raw_name in check.strip().split(","):
+        name = raw_name.strip()
+        if not name:
+            continue
+        new_name = DEPRECATED_CHECK_NAME_ALIASES.get(name)
+        if new_name is not None:
+            warn_deprecated_check_name(name, new_name)
+            name = new_name
+        check_names.add(name)
 
     config_file = resolve_config_path(config_file)
     if config_file_source is None:

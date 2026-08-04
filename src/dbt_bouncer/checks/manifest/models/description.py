@@ -50,7 +50,7 @@ def check_column_descriptions_are_consistent(ctx):
 
 
 @check(code="MO020")
-def check_model_description_contains_regex_pattern(model, *, regexp_pattern: str):
+def check_model_description_contains_regexp_pattern(model, *, regexp_pattern: str):
     """Models must have a description that matches the provided pattern.
 
     !!! info "Rationale"
@@ -73,7 +73,7 @@ def check_model_description_contains_regex_pattern(model, *, regexp_pattern: str
     Example(s):
         ```yaml
         manifest_checks:
-            - name: check_model_description_contains_regex_pattern
+            - name: check_model_description_contains_regexp_pattern
               regexp_pattern: .*pattern_to_match.*
         ```
 

@@ -127,7 +127,7 @@ dbt-bouncer list --group manifest_checks
 | `MO017` | `check_model_has_constraints` | Table and incremental models must have the specified constraint types defined. |
 | `MO018` | `check_model_single_primary_key` | Models must have at most one column-level primary key constraint. |
 | `MO019` | `check_column_descriptions_are_consistent` | The same column name must not have conflicting descriptions across models. |
-| `MO020` | `check_model_description_contains_regex_pattern` | Models must have a description that matches the provided pattern. |
+| `MO020` | `check_model_description_contains_regexp_pattern` | Models must have a description that matches the provided pattern. |
 | `MO021` | `check_model_description_populated` | Models must have a populated description. |
 | `MO022` | `check_model_documentation_coverage` | Set the minimum percentage of models that have a populated description. |
 | `MO023` | `check_model_documented_in_same_directory` | Models must be documented in the same directory where they are defined (i.e. `.yml` and `.sql` files are in the same directory). |

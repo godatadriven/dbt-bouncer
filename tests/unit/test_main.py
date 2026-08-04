@@ -949,6 +949,51 @@ def test_cli_check(check_value, exit_code, number_of_checks_run, tmp_path):
     assert len(results) == number_of_checks_run
 
 
+def test_cli_check_deprecated_name_resolves_and_warns(caplog, tmp_path):
+    """`--check` accepts a deprecated check name, resolves it, and warns."""
+    # Config file
+    bouncer_config = {
+        "dbt_artifacts_dir": ".",
+        "manifest_checks": [
+            {
+                "name": "check_model_description_contains_regexp_pattern",
+                "regexp_pattern": ".*",
+            },
+        ],
+    }
+
+    with Path(tmp_path / "dbt-bouncer.yml").open("w") as f:
+        yaml.dump(bouncer_config, f)
+
+    # Artifact files
+    for file in ["catalog.json", "manifest.json", "run_results.json"]:
+        with Path.open(Path(f"./dbt_project/target/{file}"), "r") as f:
+            data = json.load(f)
+        with Path.open(tmp_path / file, "w") as f:
+            json.dump(data, f)
+
+    # Run dbt-bouncer
+    runner = CliRunner()
+    result = runner.invoke(
+        app,
+        [
+            "--config-file",
+            Path(tmp_path / "dbt-bouncer.yml").__str__(),
+            "--output-file",
+            Path(tmp_path / "results.json").__str__(),
+            "--check",
+            "check_model_description_contains_regex_pattern",
+        ],
+    )
+    assert result.exit_code == 0
+
+    with Path.open(tmp_path / "results.json", "r") as f:
+        results = json.load(f)
+    assert len(results) == _count_models()
+
+    assert "deprecated" in caplog.text
+
+
 @pytest.mark.parametrize(
     ("check_value", "only_value", "exit_code", "number_of_checks_run"),
     [
