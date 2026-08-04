@@ -50,7 +50,7 @@ run = [
 # acquires project-level locks in ./dbt_project. If that happens, run with
 # `mise run --jobs 1 build-artifacts`.
 # dbt 1.9 fixtures are frozen: the `arguments:` migration applied by dbt-autofix
-# is incompatible with dbt-core 1.9 (matching the pattern for dbt 1.7/1.8).
+# is incompatible with dbt-core 1.9.
 [tasks.build-artifacts]
 description = "Build dbt artifacts for testing"
 depends = [
