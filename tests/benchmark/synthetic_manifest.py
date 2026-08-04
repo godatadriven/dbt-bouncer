@@ -376,7 +376,7 @@ def build_manifest(
         n_models: Total number of models (split ~50/25/25 across
             staging/intermediate/marts).
         package_name: Package name shared by every resource.
-        dbt_version: dbt version stamped in metadata (must be >= 1.8.0 for
+        dbt_version: dbt version stamped in metadata (must be >= 1.9.0 for
             unit_tests to be parsed).
 
     Returns:
