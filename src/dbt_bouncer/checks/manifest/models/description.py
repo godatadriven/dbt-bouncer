@@ -198,6 +198,10 @@ def check_model_documented_in_same_directory(model):
         materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
+    !!! info
+
+        A model with no properties file at all is reported as not documented.
+
     Example(s):
         ```yaml
         manifest_checks:
@@ -209,13 +213,12 @@ def check_model_documented_in_same_directory(model):
     model_sql_path = Path(clean_path_str(model.original_file_path))
     model_sql_dir = model_sql_path.parent.parts
 
-    if not (
-        hasattr(model, "patch_path")
-        and clean_path_str(model.patch_path or "") is not None
-    ):
+    # A model with no patch_path has no properties file, so there is no
+    # documentation directory to compare against.
+    patch_path_str = clean_path_str(getattr(model, "patch_path", None) or "")
+    if not patch_path_str:
         fail(f"`{get_clean_model_name(model.unique_id)}` is not documented.")
 
-    patch_path_str = clean_path_str(model.patch_path or "")
     start_idx = patch_path_str.find("models")
     if start_idx != -1:
         patch_path_str = patch_path_str[start_idx:]
