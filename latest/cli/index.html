@@ -1174,9 +1174,9 @@
 </span></code></pre></div>
 <h4 id="-output-file"><code>--output-file</code><a class="headerlink" href="#-output-file" title="Permanent link">#</a></h4>
 <p><strong>Type:</strong> Path
-<strong>Default:</strong> None (outputs to stdout)
+<strong>Default:</strong> None (no output file is written)
 <strong>Required:</strong> No</p>
-<p>Specifies the location where check metadata will be saved. If not provided, results are written to stdout.</p>
+<p>Specifies the location where check metadata will be saved. If not provided, no structured output file is written.</p>
 <p><strong>Example:</strong></p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>dbt-bouncer<span class="w"> </span>run<span class="w"> </span>--output-file<span class="w"> </span>results/check-results.json
 </span></code></pre></div>
@@ -1185,7 +1185,7 @@
 <strong>Options:</strong> <code>csv</code>, <code>json</code>, <code>junit</code>, <code>sarif</code>, <code>tap</code>
 <strong>Default:</strong> <code>json</code>
 <strong>Required:</strong> No</p>
-<p>Specifies the format for the output file or stdout when no output file is specified.</p>
+<p>Specifies the format for the output file. Requires <code>--output-file</code> to be set.</p>
 <p><strong>Examples:</strong></p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># Output as JSON (default)</span>
 </span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>dbt-bouncer<span class="w"> </span>run<span class="w"> </span>--output-format<span class="w"> </span>json
@@ -1273,7 +1273,7 @@
 <h3 id="options_2">Options<a class="headerlink" href="#options_2" title="Permanent link">#</a></h3>
 <h4 id="-output-format_1"><code>--output-format</code><a class="headerlink" href="#-output-format_1" title="Permanent link">#</a></h4>
 <p><strong>Type:</strong> Choice
-<strong>Options:</strong> <code>text</code>, <code>json</code>
+<strong>Options:</strong> <code>json</code>, <code>text</code>
 <strong>Default:</strong> <code>text</code>
 <strong>Required:</strong> No</p>
 <p>Controls the output format. Use <code>json</code> for machine-readable output.</p>
