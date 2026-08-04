@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 from types import SimpleNamespace
+from typing import Any
 from unittest.mock import MagicMock
 
 import pytest
@@ -12,22 +13,113 @@ from dbt_bouncer.context import BouncerContext
 from dbt_bouncer.main import app
 from dbt_bouncer.reporting.logger import configure_console_logging
 from dbt_bouncer.runner import (
+    _assemble_checks_to_run,
     _check_applies_to_resource,
     _ResourceFacts,
     runner,
 )
 
 
-def test_runner_only_dispatches_decorator_checks():
-    """Class-based checks (no iterate_over ClassVar) are no longer discovered."""
+def test_class_based_check_degrades_to_a_single_context_only_dispatch():
+    """A class-based check that declares its resource only via ``__annotations__``.
+
+    (the pre-decorator, legacy style) has no decorator-set ``iterate_over``
+    ClassVar, so ``_assemble_checks_to_run`` cannot detect it as per-resource.
+    It falls into the context-only branch and is dispatched exactly once,
+    regardless of how many resources are present, with no ``resource`` /
+    ``iterate_value`` binding and a context-only ``check_run_id`` of the form
+    ``name:index``. This is a silent degradation, not a "no longer
+    discovered" -- for contrast, a real ``@check``-decorated check over the
+    same resource still produces one dispatch per matching resource.
+    """
     from dbt_bouncer.check_framework.base import BaseCheck
+    from dbt_bouncer.check_framework.decorator import check
 
     class CheckLegacyStyle(BaseCheck):
+        """Pre-decorator, class-based check.
+
+        Declares ``model`` via a plain annotation instead of going through
+        ``@check``, so no ``iterate_over`` ClassVar is ever set.
+        """
+
         name: str = "check_legacy_style"
+        model: Any = None
 
         def execute(self) -> None: ...
 
-    assert getattr(CheckLegacyStyle, "iterate_over", None) is None
+    @check
+    def check_model_always_passes(model) -> None:
+        """Pass unconditionally; exists only to contrast with the legacy style."""
+
+    models = [
+        SimpleNamespace(
+            model=wrap_dict(
+                {
+                    "config": {"meta": None},
+                    "fqn": ["dbt_bouncer_test_project", f"model_{i}"],
+                    "name": f"model_{i}",
+                    "original_file_path": f"models/model_{i}.sql",
+                    "resource_type": "model",
+                    "unique_id": f"model.dbt_bouncer_test_project.model_{i}",
+                },
+            ),
+            original_file_path=f"models/model_{i}.sql",
+            unique_id=f"model.dbt_bouncer_test_project.model_{i}",
+        )
+        for i in range(2)
+    ]
+
+    legacy_check = CheckLegacyStyle(index=0)
+    decorator_check = check_model_always_passes(index=1)
+
+    ctx = BouncerContext.model_construct(
+        **{
+            "bouncer_config": SimpleNamespace(
+                manifest_checks=[legacy_check, decorator_check],
+            ),
+            "catalog_nodes": [],
+            "catalog_sources": [],
+            "check_categories": ["manifest_checks"],
+            "create_pr_comment_file": False,
+            "dry_run": False,
+            "exposures": [],
+            "macros": [],
+            "manifest_obj": None,
+            "models": models,
+            "output_file": None,
+            "output_format": "json",
+            "output_only_failures": False,
+            "run_results": [],
+            "seeds": [],
+            "semantic_models": [],
+            "show_all_failures": False,
+            "snapshots": [],
+            "sources": [],
+            "tests": [],
+            "unit_tests": [],
+        }
+    )
+
+    checks_to_run = _assemble_checks_to_run(ctx)
+
+    legacy_entries = [c for c in checks_to_run if c["check"] is legacy_check]
+    decorator_entries = [c for c in checks_to_run if c["check"] is decorator_check]
+
+    # The class-based check degrades to a single context-only dispatch, even
+    # though two models are present -- proving per-resource iteration did not
+    # happen.
+    assert len(legacy_entries) == 1
+    legacy_entry = legacy_entries[0]
+    assert "resource" not in legacy_entry
+    assert "iterate_value" not in legacy_entry
+    assert legacy_entry["check_run_id"] == "check_legacy_style:0"
+
+    # A real decorator-based check, run against the same context, still
+    # produces one dispatch per matching resource.
+    assert len(decorator_entries) == len(models)
+    for entry in decorator_entries:
+        assert "resource" in entry
+        assert entry["iterate_value"] == "model"
 
 
 def test_runner_coverage(caplog, tmp_path):
