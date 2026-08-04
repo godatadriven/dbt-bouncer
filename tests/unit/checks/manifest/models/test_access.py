@@ -8,15 +8,48 @@ from dbt_bouncer.testing import _run_check, check_fails, check_passes
 
 class TestCheckModelAccess:
     @pytest.mark.parametrize(
-        ("access", "model_override"),
+        ("access", "model_override", "check_fn"),
         [
-            pytest.param("private", {"access": "private"}, id="private_access"),
-            pytest.param("protected", {"access": "protected"}, id="protected_access"),
-            pytest.param("public", {"access": "public"}, id="public_access"),
+            pytest.param(
+                "private", {"access": "private"}, check_passes, id="private_access"
+            ),
+            pytest.param(
+                "protected",
+                {"access": "protected"},
+                check_passes,
+                id="protected_access",
+            ),
+            pytest.param(
+                "public", {"access": "public"}, check_passes, id="public_access"
+            ),
+            pytest.param(
+                "protected",
+                {"access": "private"},
+                check_fails,
+                id="protected_vs_private",
+            ),
+            pytest.param(
+                "public", {"access": "private"}, check_fails, id="public_vs_private"
+            ),
+            pytest.param(
+                "private",
+                {"access": "protected"},
+                check_fails,
+                id="private_vs_protected",
+            ),
+            pytest.param(
+                "public", {"access": "protected"}, check_fails, id="public_vs_protected"
+            ),
+            pytest.param(
+                "private", {"access": "public"}, check_fails, id="private_vs_public"
+            ),
+            pytest.param(
+                "protected", {"access": "public"}, check_fails, id="protected_vs_public"
+            ),
         ],
     )
-    def test_pass(self, access, model_override):
-        check_passes("check_model_access", access=access, model=model_override)
+    def test_check_model_access(self, access, model_override, check_fn):
+        check_fn("check_model_access", access=access, model=model_override)
 
     @pytest.mark.parametrize(
         "access",
@@ -33,19 +66,11 @@ class TestCheckModelAccess:
         # lack `access`, are skipped rather than errored.
         check_passes("check_model_access", access=access, model={})
 
-    @pytest.mark.parametrize(
-        ("access", "model_override"),
-        [
-            pytest.param("protected", {"access": "private"}, id="protected_vs_private"),
-            pytest.param("public", {"access": "private"}, id="public_vs_private"),
-            pytest.param("private", {"access": "protected"}, id="private_vs_protected"),
-            pytest.param("public", {"access": "protected"}, id="public_vs_protected"),
-            pytest.param("private", {"access": "public"}, id="private_vs_public"),
-            pytest.param("protected", {"access": "public"}, id="protected_vs_public"),
-        ],
-    )
-    def test_fail(self, access, model_override):
-        check_fails("check_model_access", access=access, model=model_override)
+    def test_invalid_access_value_rejected(self):
+        with pytest.raises(ValueError, match="'private', 'protected' or 'public'"):
+            _run_check(
+                "check_model_access", access="publik", model={"access": "public"}
+            )
 
     @pytest.mark.parametrize(
         ("access", "model_override", "match_pattern"),
@@ -74,73 +99,67 @@ class TestCheckModelAccess:
 
 class TestCheckModelContractEnforcedForPublicModel:
     @pytest.mark.parametrize(
-        "model_override",
+        ("model_override", "check_fn"),
         [
             pytest.param(
                 {"access": "public", "contract": {"enforced": True}},
+                check_passes,
                 id="public_contract_enforced",
             ),
             pytest.param(
                 {"access": "protected", "contract": {"enforced": False}},
+                check_passes,
                 id="protected_no_contract",
             ),
-            pytest.param(
-                {},
-                id="no_access_no_contract",
-            ),
-            pytest.param(
-                {"access": None},
-                id="null_access_no_contract",
-            ),
-            pytest.param(
-                {"access": "private"},
-                id="private_no_contract",
-            ),
+            pytest.param({}, check_passes, id="no_access_no_contract"),
+            pytest.param({"access": None}, check_passes, id="null_access_no_contract"),
+            pytest.param({"access": "private"}, check_passes, id="private_no_contract"),
             pytest.param(
                 {"access": "public", "contract": {"enforced": True}, "columns": {}},
+                check_passes,
                 id="public_contract_enforced_empty_columns",
             ),
-        ],
-    )
-    def test_pass(self, model_override):
-        check_passes(
-            "check_model_contract_enforced_for_public_model", model=model_override
-        )
-
-    @pytest.mark.parametrize(
-        "model_override",
-        [
             pytest.param(
                 {"access": "public", "contract": {"enforced": False}},
+                check_fails,
                 id="public_no_contract",
             ),
             pytest.param(
-                {"access": "public"},
-                id="public_contract_absent",
+                {"access": "public"}, check_fails, id="public_contract_absent"
             ),
             pytest.param(
                 {"access": "public", "contract": None},
+                check_fails,
                 id="public_contract_none",
             ),
             pytest.param(
                 {"access": "public", "contract": {"enforced": None}},
+                check_fails,
                 id="public_contract_enforced_none",
             ),
         ],
     )
-    def test_fail(self, model_override):
+    def test_check_model_contract_enforced_for_public_model(
+        self, model_override, check_fn
+    ):
+        check_fn("check_model_contract_enforced_for_public_model", model=model_override)
+
+    def test_failure_message(self):
         check_fails(
-            "check_model_contract_enforced_for_public_model", model=model_override
+            "check_model_contract_enforced_for_public_model",
+            model={"access": "public", "contract": {"enforced": False}},
+            match=r"`model_1` is a public model but does not have contracts enforced\.",
         )
 
 
 class TestCheckModelGrantPrivilege:
     @pytest.mark.parametrize(
-        ("privilege_pattern", "model_override"),
+        ("privilege_pattern", "model_override", "check_fn"),
         [
             pytest.param(
                 "select",
                 {"config": {"grants": {"select": ["user1"]}}},
+                check_passes,
                 id="grant_select",
             ),
             pytest.param(
@@ -150,6 +169,7 @@ class TestCheckModelGrantPrivilege:
                 # would catch a future change from `re.match` to `re.fullmatch`.
                 "select",
                 {"config": {"grants": {"select_any_table": ["user1"]}}},
+                check_passes,
                 id="prefix_match_select_any_table",
             ),
             pytest.param(
@@ -157,11 +177,13 @@ class TestCheckModelGrantPrivilege:
                 # whitespace is ignored and behaves identically to "^select$".
                 "  ^select$  ",
                 {"config": {"grants": {"select": ["user1"]}}},
+                check_passes,
                 id="whitespace_stripped_pattern",
             ),
             pytest.param(
                 "^(select|insert)$",
                 {"config": {"grants": {"select": ["user1"], "insert": ["user2"]}}},
+                check_passes,
                 id="alternation_pattern",
             ),
             pytest.param(
@@ -169,33 +191,31 @@ class TestCheckModelGrantPrivilege:
                 # None, an empty dict, or config is absent entirely.
                 "^select$",
                 {"config": {"grants": None}},
+                check_passes,
                 id="grants_none",
             ),
             pytest.param(
                 "^select$",
                 {"config": {"grants": {}}},
+                check_passes,
                 id="grants_empty",
             ),
+            pytest.param("^select$", {}, check_passes, id="config_absent"),
             pytest.param(
-                "^select$",
-                {},
-                id="config_absent",
+                "^select$", {"config": {}}, check_passes, id="grants_key_absent"
             ),
-        ],
-    )
-    def test_pass(self, privilege_pattern, model_override):
-        check_passes(
-            "check_model_grant_privilege",
-            privilege_pattern=privilege_pattern,
-            model=model_override,
-        )
-
-    @pytest.mark.parametrize(
-        ("privilege_pattern", "model_override"),
-        [
+            # Grant keys are coerced with str() before matching, so a non-string
+            # key is matched by its string form rather than raising.
+            pytest.param(
+                "^1$",
+                {"config": {"grants": {1: ["user1"]}}},
+                check_passes,
+                id="non_string_grant_key_coerced",
+            ),
             pytest.param(
                 "^select$",
                 {"config": {"grants": {"write": ["user1"]}}},
+                check_fails,
                 id="grant_write",
             ),
             pytest.param(
@@ -203,12 +223,21 @@ class TestCheckModelGrantPrivilege:
                 # grant `SELECT`.
                 "^select$",
                 {"config": {"grants": {"SELECT": ["user1"]}}},
+                check_fails,
                 id="case_sensitive_no_ignorecase",
+            ),
+            pytest.param(
+                "^select$",
+                {"config": {"grants": {1: ["user1"]}}},
+                check_fails,
+                id="non_string_grant_key_mismatch",
             ),
         ],
     )
-    def test_fail(self, privilege_pattern, model_override):
-        check_fails(
+    def test_check_model_grant_privilege(
+        self, privilege_pattern, model_override, check_fn
+    ):
+        check_fn(
             "check_model_grant_privilege",
             privilege_pattern=privilege_pattern,
             model=model_override,
@@ -243,11 +272,12 @@ class TestCheckModelGrantPrivilege:
 
 class TestCheckModelGrantPrivilegeRequired:
     @pytest.mark.parametrize(
-        ("privilege", "model_override"),
+        ("privilege", "model_override", "check_fn"),
         [
             pytest.param(
                 "select",
                 {"config": {"grants": {"select": ["user1"]}}},
+                check_passes,
                 id="required_grant_present",
             ),
             pytest.param(
@@ -256,28 +286,19 @@ class TestCheckModelGrantPrivilegeRequired:
                 # nobody is actually granted anything — arguably a loophole.
                 "select",
                 {"config": {"grants": {"select": []}}},
+                check_passes,
                 id="present_empty_grantee_list",
             ),
             pytest.param(
                 "select",
                 {"config": {"grants": {"select": ["user1"], "insert": ["user2"]}}},
+                check_passes,
                 id="present_among_several",
             ),
-        ],
-    )
-    def test_pass(self, privilege, model_override):
-        check_passes(
-            "check_model_grant_privilege_required",
-            privilege=privilege,
-            model=model_override,
-        )
-
-    @pytest.mark.parametrize(
-        ("privilege", "model_override"),
-        [
             pytest.param(
                 "select",
                 {"config": {"grants": {"write": ["user1"]}}},
+                check_fails,
                 id="required_grant_missing",
             ),
             pytest.param(
@@ -287,6 +308,7 @@ class TestCheckModelGrantPrivilegeRequired:
                 # pair documents the asymmetry between the two grant checks.
                 "select",
                 {"config": {"grants": {"select_any_table": ["user1"]}}},
+                check_fails,
                 id="exact_match_not_prefix",
             ),
             pytest.param(
@@ -294,6 +316,7 @@ class TestCheckModelGrantPrivilegeRequired:
                 # grant key `SELECT`.
                 "select",
                 {"config": {"grants": {"SELECT": ["user1"]}}},
+                check_fails,
                 id="case_sensitive",
             ),
             pytest.param(
@@ -301,11 +324,13 @@ class TestCheckModelGrantPrivilegeRequired:
                 # and `grants: {}` both fall through the `(grants or {})` guard...
                 "select",
                 {"config": {"grants": None}},
+                check_fails,
                 id="grants_none",
             ),
             pytest.param(
                 "select",
                 {"config": {"grants": {}}},
+                check_fails,
                 id="grants_empty",
             ),
             pytest.param(
@@ -313,55 +338,59 @@ class TestCheckModelGrantPrivilegeRequired:
                 # branch, yielding the same result.
                 "select",
                 {},
+                check_fails,
                 id="config_absent",
             ),
+            pytest.param("select", {"config": None}, check_fails, id="config_none"),
         ],
     )
-    def test_fail(self, privilege, model_override):
-        check_fails(
+    def test_check_model_grant_privilege_required(
+        self, privilege, model_override, check_fn
+    ):
+        check_fn(
             "check_model_grant_privilege_required",
             privilege=privilege,
             model=model_override,
         )
 
-
-class TestCheckModelHasContractsEnforced:
-    def test_pass(self):
-        check_passes(
-            "check_model_has_contracts_enforced",
-            model={"contract": {"enforced": True}},
+    def test_failure_message(self):
+        check_fails(
+            "check_model_grant_privilege_required",
+            privilege="select",
+            model={"config": {"grants": {"write": ["user1"]}}},
+            match=r"does not have the required grant privilege \(`select`\)\.",
         )
 
+
+class TestCheckModelHasContractsEnforced:
     @pytest.mark.parametrize(
-        "model_override",
+        ("model_override", "check_fn"),
         [
             pytest.param(
-                {"contract": {"enforced": False}},
-                id="enforced_false",
+                {"contract": {"enforced": True}}, check_passes, id="enforced_true"
+            ),
+            pytest.param(
+                {"contract": {"enforced": False}}, check_fails, id="enforced_false"
             ),
             pytest.param(
                 # No `contract` key at all → `model.contract` is None → `not
                 # model.contract` fails.
                 {},
+                check_fails,
                 id="contract_absent",
             ),
-            pytest.param(
-                {"contract": None},
-                id="contract_none",
-            ),
+            pytest.param({"contract": None}, check_fails, id="contract_none"),
             pytest.param(
                 # `enforced: None` fails via `is not True`, which catches None as
                 # well as False (a `!= True` regression would too, but this pins it).
                 {"contract": {"enforced": None}},
+                check_fails,
                 id="enforced_none",
             ),
         ],
     )
-    def test_fail(self, model_override):
-        check_fails(
-            "check_model_has_contracts_enforced",
-            model=model_override,
-        )
+    def test_check_model_has_contracts_enforced(self, model_override, check_fn):
+        check_fn("check_model_has_contracts_enforced", model=model_override)
 
     def test_failure_message_uses_clean_model_name(self):
         with pytest.raises(
@@ -379,12 +408,13 @@ class TestCheckModelHasContractsEnforced:
 
 class TestCheckModelNumberOfGrants:
     @pytest.mark.parametrize(
-        ("max_n", "min_n", "model_override"),
+        ("max_n", "min_n", "model_override", "check_fn"),
         [
             pytest.param(
                 1,
                 1,
                 {"config": {"grants": {"select": ["user1"]}}},
+                check_passes,
                 id="within_limits",
             ),
             pytest.param(
@@ -393,6 +423,7 @@ class TestCheckModelNumberOfGrants:
                 2,
                 0,
                 {"config": {"grants": {"select": ["u1"], "insert": ["u2"]}}},
+                check_passes,
                 id="at_max_boundary",
             ),
             pytest.param(
@@ -400,6 +431,7 @@ class TestCheckModelNumberOfGrants:
                 5,
                 2,
                 {"config": {"grants": {"select": ["u1"], "insert": ["u2"]}}},
+                check_passes,
                 id="at_min_boundary",
             ),
             pytest.param(
@@ -408,6 +440,7 @@ class TestCheckModelNumberOfGrants:
                 2,
                 2,
                 {"config": {"grants": {"select": ["u1"], "insert": ["u2"]}}},
+                check_passes,
                 id="min_equals_max_exact",
             ),
             pytest.param(
@@ -416,31 +449,21 @@ class TestCheckModelNumberOfGrants:
                 1,
                 0,
                 {"config": {"grants": {"select": ["u1", "u2", "u3"]}}},
+                check_passes,
                 id="counted_by_privilege_not_grantee",
             ),
-        ],
-    )
-    def test_pass(self, max_n, min_n, model_override):
-        check_passes(
-            "check_model_number_of_grants",
-            max_number_of_privileges=max_n,
-            min_number_of_privileges=min_n,
-            model=model_override,
-        )
-
-    @pytest.mark.parametrize(
-        ("max_n", "min_n", "model_override"),
-        [
             pytest.param(
                 1,
                 1,
                 {"config": {"grants": {"select": ["user1"], "write": ["user1"]}}},
+                check_fails,
                 id="exceeds_max",
             ),
             pytest.param(
                 2,
                 2,
                 {"config": {"grants": {"select": ["user1"]}}},
+                check_fails,
                 id="below_min",
             ),
             pytest.param(
@@ -457,6 +480,7 @@ class TestCheckModelNumberOfGrants:
                         }
                     }
                 },
+                check_fails,
                 id="one_above_max",
             ),
             pytest.param(
@@ -465,12 +489,13 @@ class TestCheckModelNumberOfGrants:
                 5,
                 2,
                 {"config": {"grants": {"select": ["user1"]}}},
+                check_fails,
                 id="one_below_min",
             ),
         ],
     )
-    def test_fail(self, max_n, min_n, model_override):
-        check_fails(
+    def test_check_model_number_of_grants(self, max_n, min_n, model_override, check_fn):
+        check_fn(
             "check_model_number_of_grants",
             max_number_of_privileges=max_n,
             min_number_of_privileges=min_n,
@@ -482,6 +507,7 @@ class TestCheckModelNumberOfGrants:
         [
             pytest.param({"config": {"grants": {}}}, id="grants_empty"),
             pytest.param({"config": {"grants": None}}, id="grants_none"),
+            pytest.param({"config": None}, id="config_none"),
         ],
     )
     def test_defaults_pass_with_zero_grants(self, model_override):
@@ -489,13 +515,20 @@ class TestCheckModelNumberOfGrants:
         # handles a None grants value without erroring.
         check_passes("check_model_number_of_grants", model=model_override)
 
-    def test_min_1_fails_when_grants_none(self):
-        # A min of 1 with `grants: None` fails rather than errors: missing grants
-        # count as 0, confirming the `(grants or {})` guard treats None as empty.
+    @pytest.mark.parametrize(
+        "model_override",
+        [
+            pytest.param({"config": {"grants": None}}, id="grants_none"),
+            pytest.param({"config": None}, id="config_none"),
+        ],
+    )
+    def test_min_1_fails_when_grants_absent(self, model_override):
+        # A min of 1 with no grants fails rather than errors: missing grants count
+        # as 0, confirming the `(grants or {})` guard treats None as empty.
         check_fails(
             "check_model_number_of_grants",
             min_number_of_privileges=1,
-            model={"config": {"grants": None}},
+            model=model_override,
         )
 
     @pytest.mark.parametrize(
@@ -503,9 +536,6 @@ class TestCheckModelNumberOfGrants:
         [
             pytest.param(1, -1, "greater than or equal to 0", id="min_negative"),
             pytest.param(0, 0, "greater than 0", id="max_zero"),
-            pytest.param(
-                1, -1, "greater than or equal to 0", id="min_negative_valid_max"
-            ),
             pytest.param(1, 2, "must not exceed", id="min_exceeds_max"),
         ],
     )
@@ -517,3 +547,29 @@ class TestCheckModelNumberOfGrants:
                 min_number_of_privileges=min_n,
                 model={"config": {"grants": {"select": ["user1"]}}},
             )
+
+    @pytest.mark.parametrize(
+        ("max_n", "min_n", "match_pattern"),
+        [
+            pytest.param(
+                1,
+                0,
+                r"has more grants \(`2`\) than the specified maximum \(1\)\.",
+                id="above_max",
+            ),
+            pytest.param(
+                5,
+                3,
+                r"has less grants \(`2`\) than the specified minimum \(3\)\.",
+                id="below_min",
+            ),
+        ],
+    )
+    def test_failure_messages(self, max_n, min_n, match_pattern):
+        check_fails(
+            "check_model_number_of_grants",
+            max_number_of_privileges=max_n,
+            min_number_of_privileges=min_n,
+            model={"config": {"grants": {"select": ["u1"], "insert": ["u2"]}}},
+            match=match_pattern,
+        )
