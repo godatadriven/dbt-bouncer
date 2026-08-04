@@ -13,6 +13,7 @@ from types import ModuleType
 import pytest
 
 from dbt_bouncer import utils
+from dbt_bouncer.exceptions import DbtBouncerConfigError
 
 FAKE_MAP = {
     "check_fake": {
@@ -249,8 +250,8 @@ class TestLoadConfigFromYaml:
     """Tests for `load_config_from_yaml`."""
 
     def test_missing_file_raises(self, tmp_path):
-        """A config path that does not exist raises FileNotFoundError naming the path."""
+        """A config path that does not exist raises DbtBouncerConfigError naming the path."""
         missing = tmp_path / "no_such_config.yml"
 
-        with pytest.raises(FileNotFoundError, match="No config file found at"):
+        with pytest.raises(DbtBouncerConfigError, match="No config file found at"):
             utils.load_config_from_yaml(missing)
