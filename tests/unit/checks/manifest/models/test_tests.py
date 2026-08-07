@@ -40,7 +40,7 @@ def _test_on(model_name: str, *, depends_on: str | None = None) -> dict:
     }
 
 
-_MANIFEST_METADATA = {"metadata": {"dbt_version": "1.9.0"}}
+_MANIFEST_METADATA = {"metadata": {"dbt_version": "1.10.0"}}
 
 
 class TestCheckModelHasTestsByName:

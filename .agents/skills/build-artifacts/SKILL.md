@@ -21,7 +21,7 @@ Regenerate test fixture files after making changes to the dbt project in `dbt_pr
 mise run build-artifacts
 ```
 
-This generates fixtures for dbt 1.10, 1.11, and 1.12 in `tests/fixtures/dbt_1X/target/` (manifest.json, catalog.json, run_results.json). Note: dbt 1.9 fixtures are frozen and not regenerated.
+This generates fixtures for dbt 1.10, 1.11, and 1.12 in `tests/fixtures/dbt_1X/target/` (manifest.json, catalog.json, run_results.json). dbt 1.10 is the minimum supported version.
 
 **Note:** `mise.toml` uses specific dbt-duckdb version pins. Do not modify the version pins in `mise.toml` without understanding the compatibility matrix.
 
