@@ -63,7 +63,7 @@ dev = [
   "rumdl>=0.1.19",
   "ruff>=0.8,<1",
   "shandy-sqlfmt[jinjafmt]>=0.7,<1",
-  "tombi>=0.7.32",
+  "tombi>=1.2,<2",
   "tqdm>=4,<5",
   "ty>=0.0.7"
 ]

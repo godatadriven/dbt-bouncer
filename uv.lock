@@ -417,7 +417,7 @@ requires-dist = [
   { name = "semver", specifier = "<4" },
   { name = "shandy-sqlfmt", extras = ["jinjafmt"], marker = "extra == 'dev'", specifier = ">=0.7,<1" },
   { name = "sqlglot", specifier = ">=25,<31" },
-  { name = "tombi", marker = "extra == 'dev'", specifier = ">=0.7.32" },
+  { name = "tombi", marker = "extra == 'dev'", specifier = ">=1.2,<2" },
   { name = "tqdm", marker = "extra == 'dev'", specifier = ">=4,<5" },
   { name = "ty", marker = "extra == 'dev'", specifier = ">=0.0.7" },
   { name = "typer", specifier = ">=0.12,<1" },
