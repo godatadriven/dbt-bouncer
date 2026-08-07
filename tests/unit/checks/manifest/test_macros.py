@@ -938,6 +938,60 @@ class TestCheckMacroIsUsed:
                 id="overrides_dbt_builtin",
             ),
             pytest.param(
+                # dbt 2.0 no longer populates `depends_on.macros` for macros in
+                # the built-in `dbt` package, so the override must be detected
+                # from the overriding macro's own dispatch edge.
+                {
+                    "name": "generate_schema_name",
+                    "unique_id": "macro.my_project.generate_schema_name",
+                    "depends_on": {
+                        "macros": ["macro.dbt.default__generate_schema_name"]
+                    },
+                },
+                {
+                    "macros": {
+                        "macro.dbt.generate_schema_name": {
+                            "name": "generate_schema_name",
+                            "package_name": "dbt",
+                            "depends_on": {"macros": []},
+                        },
+                        "macro.my_project.generate_schema_name": {
+                            "name": "generate_schema_name",
+                            "package_name": "my_project",
+                            "unique_id": "macro.my_project.generate_schema_name",
+                            "depends_on": {
+                                "macros": ["macro.dbt.default__generate_schema_name"]
+                            },
+                        },
+                    }
+                },
+                check_passes,
+                id="overrides_dbt_builtin_without_dbt_package_dispatch_edge",
+            ),
+            pytest.param(
+                # An override of an adapter-dispatched macro calls the adapter
+                # implementation (`duckdb__`) rather than `default__`.
+                {
+                    "name": "apply_grants",
+                    "unique_id": "macro.my_project.apply_grants",
+                    "depends_on": {"macros": ["macro.dbt_duckdb.duckdb__apply_grants"]},
+                },
+                {
+                    "macros": {
+                        "macro.my_project.apply_grants": {
+                            "name": "apply_grants",
+                            "package_name": "my_project",
+                            "unique_id": "macro.my_project.apply_grants",
+                            "depends_on": {
+                                "macros": ["macro.dbt_duckdb.duckdb__apply_grants"]
+                            },
+                        },
+                    }
+                },
+                check_passes,
+                id="overrides_adapter_dispatched_builtin",
+            ),
+            pytest.param(
                 {"unique_id": "macro.package_name.macro_1"},
                 {
                     "nodes": {
@@ -946,6 +1000,31 @@ class TestCheckMacroIsUsed:
                 },
                 check_fails,
                 id="unused",
+            ),
+            pytest.param(
+                # Calling a dispatched macro is not the same as overriding one:
+                # the dispatched name must match the calling macro's own name.
+                {
+                    "name": "macro_1",
+                    "unique_id": "macro.package_name.macro_1",
+                    "depends_on": {
+                        "macros": ["macro.dbt.default__generate_schema_name"]
+                    },
+                },
+                {
+                    "macros": {
+                        "macro.package_name.macro_1": {
+                            "name": "macro_1",
+                            "package_name": "package_name",
+                            "unique_id": "macro.package_name.macro_1",
+                            "depends_on": {
+                                "macros": ["macro.dbt.default__generate_schema_name"]
+                            },
+                        },
+                    }
+                },
+                check_fails,
+                id="calls_dispatched_macro_of_another_name",
             ),
         ],
     )
