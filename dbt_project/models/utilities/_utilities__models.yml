@@ -4,6 +4,8 @@ models:
   - name: py_order_stats
     description: Python model example for testing Python model support in dbt-bouncer.
     config:
+      # dbt 2.0 (Fusion) does not support Python models on duckdb.
+      enabled: "{{ (dbt_version.split('.')[0] | int) < 2 }}"
       meta:
         maturity: gold
     columns:
