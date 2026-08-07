@@ -28,6 +28,11 @@
 
   jobs:
       build-and-push-image:
+          # Share the gh-pages concurrency group with the merge pipeline so a
+          # release deploy never races a merge deploy onto gh-pages.
+          concurrency:
+              group: deploy-docs-gh-pages
+              cancel-in-progress: false
           environment:
               name: publish
               url: https://pypi.org/p/dbt-bouncer

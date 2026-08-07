@@ -141,6 +141,10 @@
                   fi
 
       deploy-docs:
+          # Serialise gh-pages pushes so concurrent merges do not race.
+          concurrency:
+            group: deploy-docs-gh-pages
+            cancel-in-progress: false
           permissions:
             contents: write
           runs-on: ubuntu-24.04
