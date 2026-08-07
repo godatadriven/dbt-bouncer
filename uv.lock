@@ -389,7 +389,7 @@ docs = [
 requires-dist = [
     { name = "altair", marker = "extra == 'dev'", specifier = ">=6.0,<7" },
     { name = "bandit", marker = "extra == 'dev'", specifier = "~=1.0" },
-    { name = "dbt-core", marker = "extra == 'dev'", specifier = ">=2.0.0a1,<3" },
+    { name = "dbt-core", marker = "extra == 'dev'", specifier = ">=2.0.0a5,<3" },
     { name = "dbt-duckdb", marker = "extra == 'dev'", specifier = "~=1.0" },
     { name = "jellyfish", specifier = ">=1,<2" },
     { name = "jinja2", specifier = ">=3,<4" },

@@ -226,6 +226,7 @@ tests/fixtures/dbt_112/target/graph_summary.json
 tests/fixtures/dbt_112/target/graph.gpickle
 tests/fixtures/dbt_112/target/osi_document.json
 tests/fixtures/dbt_112/target/partial_parse.msgpack
+tests/fixtures/dbt_112/target/run/
 tests/fixtures/dbt_112/target/perf_info.json
 tests/fixtures/dbt_112/target/semantic_manifest.json
 # dbt 2.0 emits extra per-node directories alongside the three JSON artifacts
@@ -234,6 +235,7 @@ tests/fixtures/dbt_20/target/compiled/
 tests/fixtures/dbt_20/target/data/
 tests/fixtures/dbt_20/target/ephemeral/
 tests/fixtures/dbt_20/target/generic_tests/
+tests/fixtures/dbt_20/target/run/
 tests/fixtures/dbt_20/target/schemas/
 tests/fixtures/dbt_20/target/semantic_manifest.json
 tests/fixtures/dbt_20/target/snapshots/

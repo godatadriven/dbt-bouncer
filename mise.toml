@@ -68,26 +68,41 @@ run = [
   "mise run build-artifacts-local",
 ]
 
+# `dbt build` runs first so the DuckDB database actually contains the relations.
+# The catalog is produced by introspecting that database: without the build step a
+# fresh clone (which has no gitignored ./dbt.duckdb) silently emits an EMPTY
+# catalog.json, and every catalog check then passes vacuously.
 [tasks.build-artifacts-112]
 description = "Build dbt 1.12 test artifacts"
 # No dbt-duckdb==1.12 yet so sticking with dbt-duckdb==1.10
 run = """
 PYTHON_INTERPRETER_CONSTRAINT=$(cat .python-version)
-uvx --python "==${PYTHON_INTERPRETER_CONSTRAINT}" --with 'dbt-duckdb~=1.10.0' --from 'dbt-core~=1.12.0' dbt parse --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_112
-uvx --python "==${PYTHON_INTERPRETER_CONSTRAINT}" --with 'dbt-duckdb~=1.10.0' --from 'dbt-core~=1.12.0' dbt docs generate --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_112
+DBT_112="uvx --python ==${PYTHON_INTERPRETER_CONSTRAINT} --with dbt-duckdb~=1.10.0 --from dbt-core~=1.12.0 dbt"
+$DBT_112 build --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_112
+$DBT_112 docs generate --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_112
 rm -r ./tests/fixtures/dbt_112/target || true
 mv ./dbt_project/target_112 ./tests/fixtures/dbt_112/target
 """
 
 [tasks.build-artifacts-20]
 description = "Build dbt 2.0 (Fusion) test artifacts"
-# dbt 2.0 drops `dbt docs generate`; `compile --write-catalog` writes both
-# manifest.json and catalog.json. It must NOT be `dbt parse`: on dbt 2.0 a parse-only
-# run emits no macro-to-macro `depends_on` edges at all, which silently breaks
-# macro-graph checks such as check_macro_is_used.
+# dbt 2.0 drops `dbt docs generate`, so the catalog comes from `compile --write-catalog`.
+# Neither command may be `dbt parse`: on dbt 2.0 a parse-only run emits no
+# macro-to-macro `depends_on` edges at all, which silently breaks macro-graph checks
+# such as check_macro_is_used.
+#
+# Three steps, because no single dbt 2.0 command writes all three artifacts:
+#   build   -> populates DuckDB, writes manifest.json + a real run_results.json
+#   compile -> writes catalog.json by introspecting that populated database, but
+#              also rewrites run_results.json with zero results (compile executes
+#              nothing), so it targets a scratch path and only catalog.json is kept.
 run = """
 PYTHON_INTERPRETER_CONSTRAINT=$(cat .python-version)
-uvx --python "==${PYTHON_INTERPRETER_CONSTRAINT}" --prerelease=allow --with 'dbt-duckdb~=1.10.0' --from 'dbt-core>=2.0.0a1,<3' dbt compile --write-catalog --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_20
+DBT_20="uvx --python ==${PYTHON_INTERPRETER_CONSTRAINT} --prerelease=allow --with dbt-duckdb~=1.10.0 --from dbt-core>=2.0.0a5,<3 dbt"
+$DBT_20 build --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_20
+$DBT_20 compile --write-catalog --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_20_catalog
+mv ./dbt_project/target_20_catalog/catalog.json ./dbt_project/target_20/catalog.json
+rm -r ./dbt_project/target_20_catalog
 rm -r ./tests/fixtures/dbt_20/target || true
 mkdir -p ./tests/fixtures/dbt_20
 mv ./dbt_project/target_20 ./tests/fixtures/dbt_20/target
