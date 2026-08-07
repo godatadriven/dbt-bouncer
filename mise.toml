@@ -35,12 +35,15 @@ run = "uv sync --extra=dev --group=docs"
 # --- Artifacts / schema ------------------------------------------------------
 
 # On GitHub the `dbt build` command often returns "leaked semaphores" errors.
+# dbt 2.0 drops `dbt docs generate`; use `compile --write-catalog` first (produces
+# catalog.json), then `build` (produces manifest.json + run_results.json without
+# clobbering the catalog). Explicit --profiles-dir/--project-dir for CI correctness.
 [tasks.build-and-run-dbt-bouncer]
-description = "Run dbt deps, build, docs generate and run dbt-bouncer"
+description = "Run dbt deps, compile --write-catalog, build and run dbt-bouncer"
 run = [
-  "uv run dbt deps",
-  "uv run dbt build",
-  "uv run dbt docs generate",
+  "uv run dbt deps --profiles-dir ./dbt_project --project-dir ./dbt_project",
+  "uv run dbt compile --write-catalog --profiles-dir ./dbt_project --project-dir ./dbt_project",
+  "uv run dbt build --profiles-dir ./dbt_project --project-dir ./dbt_project",
   "uv run dbt-bouncer --config-file ./dbt-bouncer-example.yml",
 ]
 
@@ -51,35 +54,19 @@ run = [
 # version builds in parallel makes them fight for that lock, so this aggregate
 # runs the sub-tasks in series. This is slower but reliable. To parallelise,
 # give each version its own DuckDB file first.
+#
+# dbt 1.10 and 1.11 are frozen alongside 1.7/1.8: their committed fixtures stay for
+# backward-compat parsing coverage but are no longer rebuilt. The fixture project now
+# declares semantic models in the dbt 1.12+ nested `semantic_model:` spec, which 1.10
+# and 1.11 cannot parse, and schema YAML cannot be version-gated with `{% if %}`.
+# Only dbt 1.12 and 2.0 are actively rebuilt.
 [tasks.build-artifacts]
 description = "Build dbt artifacts for testing"
 run = [
-  "mise run build-artifacts-110",
-  "mise run build-artifacts-111",
   "mise run build-artifacts-112",
+  "mise run build-artifacts-20",
   "mise run build-artifacts-local",
 ]
-
-[tasks.build-artifacts-110]
-description = "Build dbt 1.10 test artifacts"
-run = """
-PYTHON_INTERPRETER_CONSTRAINT=$(cat .python-version)
-uvx --python "==${PYTHON_INTERPRETER_CONSTRAINT}" --with 'dbt-duckdb~=1.10.0' --from 'dbt-core~=1.10.0' dbt parse --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_110
-uvx --python "==${PYTHON_INTERPRETER_CONSTRAINT}" --with 'dbt-duckdb~=1.10.0' --from 'dbt-core~=1.10.0' dbt docs generate --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_110
-rm -r ./tests/fixtures/dbt_110/target || true
-mv ./dbt_project/target_110 ./tests/fixtures/dbt_110/target
-"""
-
-[tasks.build-artifacts-111]
-description = "Build dbt 1.11 test artifacts"
-# No dbt-duckdb==1.11 yet so sticking with dbt-duckdb==1.10
-run = """
-PYTHON_INTERPRETER_CONSTRAINT=$(cat .python-version)
-uvx --python "==${PYTHON_INTERPRETER_CONSTRAINT}" --with 'dbt-duckdb~=1.10.0' --from 'dbt-core~=1.11.0' dbt parse --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_111
-uvx --python "==${PYTHON_INTERPRETER_CONSTRAINT}" --with 'dbt-duckdb~=1.10.0' --from 'dbt-core~=1.11.0' dbt docs generate --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_111
-rm -r ./tests/fixtures/dbt_111/target || true
-mv ./dbt_project/target_111 ./tests/fixtures/dbt_111/target
-"""
 
 [tasks.build-artifacts-112]
 description = "Build dbt 1.12 test artifacts"
@@ -92,12 +79,26 @@ rm -r ./tests/fixtures/dbt_112/target || true
 mv ./dbt_project/target_112 ./tests/fixtures/dbt_112/target
 """
 
+[tasks.build-artifacts-20]
+description = "Build dbt 2.0 (Fusion) test artifacts"
+# dbt 2.0 drops `dbt docs generate`; `compile --write-catalog` writes both
+# manifest.json and catalog.json. It must NOT be `dbt parse`: on dbt 2.0 a parse-only
+# run emits no macro-to-macro `depends_on` edges at all, which silently breaks
+# macro-graph checks such as check_macro_is_used.
+run = """
+PYTHON_INTERPRETER_CONSTRAINT=$(cat .python-version)
+uvx --python "==${PYTHON_INTERPRETER_CONSTRAINT}" --prerelease=allow --with 'dbt-duckdb~=1.10.0' --from 'dbt-core>=2.0.0a1,<3' dbt compile --write-catalog --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_20
+rm -r ./tests/fixtures/dbt_20/target || true
+mkdir -p ./tests/fixtures/dbt_20
+mv ./dbt_project/target_20 ./tests/fixtures/dbt_20/target
+"""
+
 [tasks.build-artifacts-local]
 description = "Build local dbt test artifacts"
 depends = ["install"]
+# The venv now resolves dbt-core 2.0, so `docs generate` is unavailable here too.
 run = [
-  "uv run dbt parse --profiles-dir ./dbt_project --project-dir ./dbt_project",
-  "uv run dbt docs generate --profiles-dir ./dbt_project --project-dir ./dbt_project",
+  "uv run dbt compile --write-catalog --profiles-dir ./dbt_project --project-dir ./dbt_project",
 ]
 
 [tasks.generate-rule-codes-doc]
