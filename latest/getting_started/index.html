@@ -959,10 +959,13 @@
 <p>Generate dbt artifacts by running a dbt command:</p>
 <ul>
 <li><code>dbt parse</code> to generate a <code>manifest.json</code> artifact (no database connection required!).</li>
-<li><code>dbt docs generate</code> to generate a <code>catalog.json</code> artifact (necessary if you are using catalog checks).</li>
+<li><code>dbt compile --write-catalog</code> to generate a <code>catalog.json</code> artifact (necessary if you are using catalog checks). On dbt 1.x, use <code>dbt docs generate</code> — the <code>--write-catalog</code> flag does not exist there.</li>
 <li><code>dbt run</code> (or any other command that implies it e.g. <code>dbt build</code>) to generate a <code>run_results.json</code> artifact (necessary if you are using run results checks).</li>
 </ul>
 </li>
+</ol>
+<p><code>dbt compile</code> executes nothing, so it writes a <code>run_results.json</code> with zero results. Generate the catalog before, or into a different <code>--target-path</code> than, the command that produces your <code>run_results.json</code>.</p>
+<ol>
 <li>
 <p>Create a config file (<code>dbt-bouncer.yml</code>, <code>dbt-bouncer.toml</code>, or a <code>[tool.dbt-bouncer]</code> section in <code>pyproject.toml</code>), details <a href=".././configuration/">here</a>. Alternatively, you can run <code>dbt-bouncer init</code> to generate a basic configuration file.</p>
 </li>

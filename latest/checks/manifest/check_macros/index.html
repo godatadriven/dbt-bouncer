@@ -3834,6 +3834,10 @@
 <p class="admonition-title">Rationale</p>
 <p>Similar to orphaned models, macros are often written for a specific purpose and later abandoned, leaving behind technical debt and confusion. This check parses the manifest to find macros that are defined in the project but are never actually invoked by any model, test, or other macro. Keeps the macro directory lean and reduces the cognitive load for developers trying to understand the codebase.</p>
 </div>
+<div class="admonition warning">
+<p class="admonition-title">Generate your manifest with <code>dbt compile</code>, not <code>dbt parse</code>, on dbt 2.0</p>
+<p>This check reads the macro-to-macro dependency graph (<code>depends_on.macros</code>). On dbt 2.0 (Fusion) a <code>dbt parse</code> run records no macro-to-macro dependencies at all, so any macro that is only ever invoked by another macro is reported as unused. Generate the manifest with <code>dbt compile</code> instead. Manifests from dbt 1.x are unaffected: <code>dbt parse</code> records the full macro graph there.</p>
+</div>
 
 
 
@@ -3964,7 +3968,11 @@
 <span class="normal"><a href="#__codelineno-0-601">601</a></span>
 <span class="normal"><a href="#__codelineno-0-602">602</a></span>
 <span class="normal"><a href="#__codelineno-0-603">603</a></span>
-<span class="normal"><a href="#__codelineno-0-604">604</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-575"><a id="__codelineno-0-575" name="__codelineno-0-575"></a><span class="nd">@check</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="s2">&quot;MA005&quot;</span><span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-604">604</a></span>
+<span class="normal"><a href="#__codelineno-0-605">605</a></span>
+<span class="normal"><a href="#__codelineno-0-606">606</a></span>
+<span class="normal"><a href="#__codelineno-0-607">607</a></span>
+<span class="normal"><a href="#__codelineno-0-608">608</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-575"><a id="__codelineno-0-575" name="__codelineno-0-575"></a><span class="nd">@check</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="s2">&quot;MA005&quot;</span><span class="p">)</span>
 </span><span id="__span-0-576"><a id="__codelineno-0-576" name="__codelineno-0-576"></a><span class="k">def</span><span class="w"> </span><span class="nf">check_macro_is_used</span><span class="p">(</span><span class="n">macro</span><span class="p">,</span> <span class="n">ctx</span><span class="p">):</span>
 </span><span id="__span-0-577"><a id="__codelineno-0-577" name="__codelineno-0-577"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Macros must be invoked by at least one other resource.</span>
 </span><span id="__span-0-578"><a id="__codelineno-0-578" name="__codelineno-0-578"></a>
@@ -3972,28 +3980,32 @@
 </span><span id="__span-0-580"><a id="__codelineno-0-580" name="__codelineno-0-580"></a>
 </span><span id="__span-0-581"><a id="__codelineno-0-581" name="__codelineno-0-581"></a><span class="sd">        Similar to orphaned models, macros are often written for a specific purpose and later abandoned, leaving behind technical debt and confusion. This check parses the manifest to find macros that are defined in the project but are never actually invoked by any model, test, or other macro. Keeps the macro directory lean and reduces the cognitive load for developers trying to understand the codebase.</span>
 </span><span id="__span-0-582"><a id="__codelineno-0-582" name="__codelineno-0-582"></a>
-</span><span id="__span-0-583"><a id="__codelineno-0-583" name="__codelineno-0-583"></a><span class="sd">    Receives:</span>
-</span><span id="__span-0-584"><a id="__codelineno-0-584" name="__codelineno-0-584"></a><span class="sd">        macro (Macros): The Macros object to check.</span>
-</span><span id="__span-0-585"><a id="__codelineno-0-585" name="__codelineno-0-585"></a><span class="sd">        ctx (CheckContext): The check context containing the manifest.</span>
+</span><span id="__span-0-583"><a id="__codelineno-0-583" name="__codelineno-0-583"></a><span class="sd">    !!! warning &quot;Generate your manifest with `dbt compile`, not `dbt parse`, on dbt 2.0&quot;</span>
+</span><span id="__span-0-584"><a id="__codelineno-0-584" name="__codelineno-0-584"></a>
+</span><span id="__span-0-585"><a id="__codelineno-0-585" name="__codelineno-0-585"></a><span class="sd">        This check reads the macro-to-macro dependency graph (`depends_on.macros`). On dbt 2.0 (Fusion) a `dbt parse` run records no macro-to-macro dependencies at all, so any macro that is only ever invoked by another macro is reported as unused. Generate the manifest with `dbt compile` instead. Manifests from dbt 1.x are unaffected: `dbt parse` records the full macro graph there.</span>
 </span><span id="__span-0-586"><a id="__codelineno-0-586" name="__codelineno-0-586"></a>
-</span><span id="__span-0-587"><a id="__codelineno-0-587" name="__codelineno-0-587"></a><span class="sd">    Other Parameters:</span>
-</span><span id="__span-0-588"><a id="__codelineno-0-588" name="__codelineno-0-588"></a><span class="sd">        description (str | None): Description of what the check does and why it is implemented.</span>
-</span><span id="__span-0-589"><a id="__codelineno-0-589" name="__codelineno-0-589"></a><span class="sd">        exclude (str | list[str] | None): Regex pattern(s) to match the macro path. Macro paths that match any pattern will not be checked.</span>
-</span><span id="__span-0-590"><a id="__codelineno-0-590" name="__codelineno-0-590"></a><span class="sd">        include (str | list[str] | None): Regex pattern(s) to match the macro path. Only macro paths that match any pattern will be checked.</span>
-</span><span id="__span-0-591"><a id="__codelineno-0-591" name="__codelineno-0-591"></a><span class="sd">        severity (Literal[&quot;error&quot;, &quot;warn&quot;] | None): Severity level of the check. Default: `error`.</span>
-</span><span id="__span-0-592"><a id="__codelineno-0-592" name="__codelineno-0-592"></a>
-</span><span id="__span-0-593"><a id="__codelineno-0-593" name="__codelineno-0-593"></a><span class="sd">    Example(s):</span>
-</span><span id="__span-0-594"><a id="__codelineno-0-594" name="__codelineno-0-594"></a><span class="sd">        ```yaml</span>
-</span><span id="__span-0-595"><a id="__codelineno-0-595" name="__codelineno-0-595"></a><span class="sd">        manifest_checks:</span>
-</span><span id="__span-0-596"><a id="__codelineno-0-596" name="__codelineno-0-596"></a><span class="sd">            - name: check_macro_is_used</span>
-</span><span id="__span-0-597"><a id="__codelineno-0-597" name="__codelineno-0-597"></a><span class="sd">        ```</span>
-</span><span id="__span-0-598"><a id="__codelineno-0-598" name="__codelineno-0-598"></a>
-</span><span id="__span-0-599"><a id="__codelineno-0-599" name="__codelineno-0-599"></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="__span-0-600"><a id="__codelineno-0-600" name="__codelineno-0-600"></a>    <span class="n">used_macros</span> <span class="o">=</span> <span class="n">_get_used_macros</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">manifest_obj</span><span class="p">)</span>
-</span><span id="__span-0-601"><a id="__codelineno-0-601" name="__codelineno-0-601"></a>    <span class="k">if</span> <span class="n">macro</span><span class="o">.</span><span class="n">unique_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">used_macros</span><span class="p">:</span>
-</span><span id="__span-0-602"><a id="__codelineno-0-602" name="__codelineno-0-602"></a>        <span class="n">fail</span><span class="p">(</span>
-</span><span id="__span-0-603"><a id="__codelineno-0-603" name="__codelineno-0-603"></a>            <span class="sa">f</span><span class="s2">&quot;Macro `</span><span class="si">{</span><span class="n">macro</span><span class="o">.</span><span class="n">unique_id</span><span class="si">}</span><span class="s2">` is not invoked by any model, test, or other macro.&quot;</span>
-</span><span id="__span-0-604"><a id="__codelineno-0-604" name="__codelineno-0-604"></a>        <span class="p">)</span>
+</span><span id="__span-0-587"><a id="__codelineno-0-587" name="__codelineno-0-587"></a><span class="sd">    Receives:</span>
+</span><span id="__span-0-588"><a id="__codelineno-0-588" name="__codelineno-0-588"></a><span class="sd">        macro (Macros): The Macros object to check.</span>
+</span><span id="__span-0-589"><a id="__codelineno-0-589" name="__codelineno-0-589"></a><span class="sd">        ctx (CheckContext): The check context containing the manifest.</span>
+</span><span id="__span-0-590"><a id="__codelineno-0-590" name="__codelineno-0-590"></a>
+</span><span id="__span-0-591"><a id="__codelineno-0-591" name="__codelineno-0-591"></a><span class="sd">    Other Parameters:</span>
+</span><span id="__span-0-592"><a id="__codelineno-0-592" name="__codelineno-0-592"></a><span class="sd">        description (str | None): Description of what the check does and why it is implemented.</span>
+</span><span id="__span-0-593"><a id="__codelineno-0-593" name="__codelineno-0-593"></a><span class="sd">        exclude (str | list[str] | None): Regex pattern(s) to match the macro path. Macro paths that match any pattern will not be checked.</span>
+</span><span id="__span-0-594"><a id="__codelineno-0-594" name="__codelineno-0-594"></a><span class="sd">        include (str | list[str] | None): Regex pattern(s) to match the macro path. Only macro paths that match any pattern will be checked.</span>
+</span><span id="__span-0-595"><a id="__codelineno-0-595" name="__codelineno-0-595"></a><span class="sd">        severity (Literal[&quot;error&quot;, &quot;warn&quot;] | None): Severity level of the check. Default: `error`.</span>
+</span><span id="__span-0-596"><a id="__codelineno-0-596" name="__codelineno-0-596"></a>
+</span><span id="__span-0-597"><a id="__codelineno-0-597" name="__codelineno-0-597"></a><span class="sd">    Example(s):</span>
+</span><span id="__span-0-598"><a id="__codelineno-0-598" name="__codelineno-0-598"></a><span class="sd">        ```yaml</span>
+</span><span id="__span-0-599"><a id="__codelineno-0-599" name="__codelineno-0-599"></a><span class="sd">        manifest_checks:</span>
+</span><span id="__span-0-600"><a id="__codelineno-0-600" name="__codelineno-0-600"></a><span class="sd">            - name: check_macro_is_used</span>
+</span><span id="__span-0-601"><a id="__codelineno-0-601" name="__codelineno-0-601"></a><span class="sd">        ```</span>
+</span><span id="__span-0-602"><a id="__codelineno-0-602" name="__codelineno-0-602"></a>
+</span><span id="__span-0-603"><a id="__codelineno-0-603" name="__codelineno-0-603"></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="__span-0-604"><a id="__codelineno-0-604" name="__codelineno-0-604"></a>    <span class="n">used_macros</span> <span class="o">=</span> <span class="n">_get_used_macros</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">manifest_obj</span><span class="p">)</span>
+</span><span id="__span-0-605"><a id="__codelineno-0-605" name="__codelineno-0-605"></a>    <span class="k">if</span> <span class="n">macro</span><span class="o">.</span><span class="n">unique_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">used_macros</span><span class="p">:</span>
+</span><span id="__span-0-606"><a id="__codelineno-0-606" name="__codelineno-0-606"></a>        <span class="n">fail</span><span class="p">(</span>
+</span><span id="__span-0-607"><a id="__codelineno-0-607" name="__codelineno-0-607"></a>            <span class="sa">f</span><span class="s2">&quot;Macro `</span><span class="si">{</span><span class="n">macro</span><span class="o">.</span><span class="n">unique_id</span><span class="si">}</span><span class="s2">` is not invoked by any model, test, or other macro.&quot;</span>
+</span><span id="__span-0-608"><a id="__codelineno-0-608" name="__codelineno-0-608"></a>        <span class="p">)</span>
 </span></code></pre></div></td></tr></table></div>
             </details>
     </div>
