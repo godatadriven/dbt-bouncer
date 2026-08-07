@@ -32,7 +32,7 @@
 
 <div align="center">
   <a>
-    <img alt="dbt-core" src="https://img.shields.io/badge/dbt--core%20-%3E%3D1.9-333?logo=dbt">
+    <img alt="dbt-core" src="https://img.shields.io/badge/dbt--core%20-%3E%3D1.10-333?logo=dbt">
   </a>
   <a>
     <img alt="dbt Cloud Supported" src="https://img.shields.io/badge/dbt%20Cloud%20-Supported-ff694a?logo=dbt">

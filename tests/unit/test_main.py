@@ -1810,7 +1810,7 @@ def test_cli_unsupported_dbt_version(caplog, tmp_path):
     with Path.open(Path("./dbt_project/target/manifest.json"), "r") as f:
         manifest = json.load(f)
 
-    manifest["metadata"]["dbt_version"] = "1.8.0"
+    manifest["metadata"]["dbt_version"] = "1.9.0"
     with Path.open(tmp_path / "manifest.json", "w") as f:
         json.dump(manifest, f)
 
@@ -1826,7 +1826,7 @@ def test_cli_unsupported_dbt_version(caplog, tmp_path):
 
     assert result.exit_code == ExitCode.ARTIFACT_ERROR
     assert (
-        "The supplied `manifest.json` was generated with dbt version 1.8.0, this is below the minimum supported version of 1.9.0."
+        "The supplied `manifest.json` was generated with dbt version 1.9.0, this is below the minimum supported version of 1.10.0."
         in caplog.text
     )
 

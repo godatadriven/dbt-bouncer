@@ -435,7 +435,7 @@ _SEED_FOR_UNIT_TEST = {
 _MANIFEST_METADATA = {
     "metadata": {
         "dbt_schema_version": "https://schemas.getdbt.com/dbt/manifest/v12.json",
-        "dbt_version": "1.9.0",
+        "dbt_version": "1.10.0",
         "project_name": "dbt_bouncer_test_project",
         "adapter_type": "postgres",
     },

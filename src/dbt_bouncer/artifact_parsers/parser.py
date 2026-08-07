@@ -217,11 +217,11 @@ def parse_dbt_artifacts(
 
     dbt_version = manifest_dict["metadata"]["dbt_version"]
     if not get_package_version_number(dbt_version) >= get_package_version_number(
-        "1.9.0"
+        "1.10.0"
     ):
         raise DbtBouncerArtifactError(
             f"The supplied `manifest.json` was generated with dbt version {dbt_version}, "
-            "this is below the minimum supported version of 1.9.0."
+            "this is below the minimum supported version of 1.10.0."
         )
 
     manifest_proxy = DictProxy(manifest_dict)
