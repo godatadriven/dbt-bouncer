@@ -21,17 +21,18 @@ Regenerate test fixture files after making changes to the dbt project in `dbt_pr
 mise run build-artifacts
 ```
 
-This generates fixtures for dbt 1.10, 1.11, and 1.12 in `tests/fixtures/dbt_1X/target/` (manifest.json, catalog.json, run_results.json). dbt 1.10 is the minimum supported version.
+This generates fixtures for dbt 1.12 and 2.0 in `tests/fixtures/dbt_112/target/` and `tests/fixtures/dbt_20/target/` (manifest.json, catalog.json, run_results.json). The dbt 1.7–1.11 fixtures are frozen: they stay committed for backward-compat parsing coverage but are no longer rebuilt.
 
 **Note:** `mise.toml` uses specific dbt-duckdb version pins. Do not modify the version pins in `mise.toml` without understanding the compatibility matrix.
 
 ### 2. Verify the fixtures
 
-Check that the generated files exist and are non-empty:
+Check that the generated files exist and are non-empty. `catalog.json` is built by introspecting the DuckDB database, so a fixture built without the preceding `dbt build` step silently ends up with an empty `nodes` object and every catalog check then passes vacuously — check the node count, not just the file size:
 
 ```bash
-ls -la tests/fixtures/dbt_110/target/
-ls -la tests/fixtures/dbt_111/target/
+for v in dbt_112 dbt_20; do
+  python -c "import json;c=json.load(open('tests/fixtures/$v/target/catalog.json'));print('$v', len(c['nodes']), 'catalog nodes')"
+done
 ```
 
 ### 3. Run tests

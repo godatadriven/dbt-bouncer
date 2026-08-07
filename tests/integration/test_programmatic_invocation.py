@@ -28,8 +28,11 @@ def test_programmatic_happy_path(tmp_path):
     assert exit_code == 0
 
 
-def test_programmatic_failure_path(tmp_path):
-    artifacts_dir = Path("tests/fixtures/dbt_110/target").absolute()
+# dbt_110 is deliberate: it is a frozen fixture that is no longer rebuilt, so this
+# asserts the oldest and newest supported artifact formats both still parse.
+@pytest.mark.parametrize("fixture_name", ["dbt_110", "dbt_20"])
+def test_programmatic_failure_path(tmp_path, fixture_name):
+    artifacts_dir = Path(f"tests/fixtures/{fixture_name}/target").absolute()
 
     config_data = {
         "dbt_artifacts_dir": str(artifacts_dir),

@@ -21,7 +21,7 @@ mise run install
 | `mise run test-integration` | Run integration tests only |
 | `prek run --all-files` | Run pre-commit hooks (**not** `pre-commit run`) |
 | `mise run build-and-run-dbt-bouncer` | End-to-end validation |
-| `mise run build-artifacts` | Regenerate test fixtures (dbt 1.10, 1.11, 1.12) |
+| `mise run build-artifacts` | Regenerate test fixtures (dbt 1.12, 2.0) |
 | `mise run generate-schema` | Regenerate `schema.json` from Pydantic models |
 | `mise run test-perf` | End-to-end performance benchmarks (bencher + hyperfine) |
 | `mise run test-benchmark` | Code-level micro-benchmarks (pytest-benchmark, synthetic 5k-model manifest) |
