@@ -4,6 +4,7 @@
 
 | dbt Core | dbt-bouncer 0.* | dbt-bouncer 1.* | dbt-bouncer 2.* | dbt-bouncer 3.* | dbt-bouncer 4.* |
 | - | - | - | - | - | - |
+| 2.0 (Fusion) | :x: | :x: | :x: | :x: | :white_check_mark: |
 | 1.12 | :x: | :x: | :x: | :white_check_mark: (>=3.5) | :white_check_mark: |
 | 1.11 | :x: | :white_check_mark: (>=1.31.2rc3) | :white_check_mark: | :white_check_mark: | :white_check_mark: |
 | 1.10 | :x: | :white_check_mark: (>=1.13) | :white_check_mark: | :white_check_mark: | :white_check_mark: |
