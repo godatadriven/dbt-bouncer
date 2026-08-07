@@ -580,6 +580,10 @@ def check_macro_is_used(macro, ctx):
 
         Similar to orphaned models, macros are often written for a specific purpose and later abandoned, leaving behind technical debt and confusion. This check parses the manifest to find macros that are defined in the project but are never actually invoked by any model, test, or other macro. Keeps the macro directory lean and reduces the cognitive load for developers trying to understand the codebase.
 
+    !!! warning "Generate your manifest with `dbt compile`, not `dbt parse`, on dbt 2.0"
+
+        This check reads the macro-to-macro dependency graph (`depends_on.macros`). On dbt 2.0 (Fusion) a `dbt parse` run records no macro-to-macro dependencies at all, so any macro that is only ever invoked by another macro is reported as unused. Generate the manifest with `dbt compile` instead. Manifests from dbt 1.x are unaffected: `dbt parse` records the full macro graph there.
+
     Receives:
         macro (Macros): The Macros object to check.
         ctx (CheckContext): The check context containing the manifest.
