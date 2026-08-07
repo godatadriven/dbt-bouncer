@@ -255,7 +255,7 @@ You can use the official pre-commit hook, in your `.pre-commit-config.yaml` file
 ```yaml
 repos:
   - repo: https://github.com/godatadriven/dbt-bouncer
-    rev: v1.19.0 # Check https://github.com/godatadriven/dbt-bouncer/releases for latest version
+    rev: v4.0.0 # Check https://github.com/godatadriven/dbt-bouncer/releases for latest version
     hooks:
       - id: dbt-bouncer
         args: ["--config-file", "<PATH_TO_CONFIG_FILE>"] # Optional
