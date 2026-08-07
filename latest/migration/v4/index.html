@@ -1,0 +1,1321 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://godatadriven.github.io/dbt-bouncer/latest/migration/v4/">
+      
+      
+        <link rel="prev" href="../v3/">
+      
+      
+        <link rel="next" href="../../brand/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/logo.svg">
+      <meta name="generator" content="zensical-0.0.51">
+    
+    
+      
+        <title>Migrating to dbt-bouncer v4.0.0 - dbt-bouncer</title>
+      
+    
+    
+      
+        
+      
+      <link rel="stylesheet" href="../../assets/stylesheets/classic/main.f62f0af6.min.css">
+      
+        
+          
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/classic/palette.7dc9a0ad.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,500,500i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_scope.pathname.endsWith("/")||(__md_scope=new URL(__md_scope.pathname+"/",location)),__md_hash=e=>[...e].reduce(((e,t)=>(e<<5)-e+t.charCodeAt(0)),0),__md_get=(e,t=localStorage,_=__md_scope)=>JSON.parse(t.getItem(_.pathname+"."+e)),__md_set=(e,t,_=localStorage,a=__md_scope)=>{try{_.setItem(a.pathname+"."+e,JSON.stringify(t))}catch(e){}},document.documentElement.setAttribute("data-platform",navigator.platform)</script>
+    
+      
+
+    
+    
+  <meta property="og:image" content="https://godatadriven.github.io/dbt-bouncer/latestassets/brand/social-card-light-tagline.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://godatadriven.github.io/dbt-bouncer/latestassets/brand/social-card-light-tagline.png" />
+
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer" aria-label="Navigation"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#migrating-to-dbt-bouncer-v400" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+          <aside class="md-banner md-banner--warning">
+            <div class="md-banner__inner md-grid md-typeset">
+              
+  You're not viewing the latest stable version of dbt-bouncer.
+  <a href="../../..">
+    <strong>Click here to go to stable.</strong>
+  </a>
+
+            </div>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
+          </aside>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="dbt-bouncer" class="md-header__button md-logo" aria-label="dbt-bouncer" data-md-component="logo">
+      
+  <img src="../../assets/logo.svg" alt="dbt-bouncer">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer" aria-label="Navigation">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            dbt-bouncer
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Migrating to dbt-bouncer v4.0.0
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme)" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9zM20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12zm-9.15 3.96h2.3L12 9z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="custom" data-md-color-accent="indigo"  aria-label="Switch to system preference"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to system preference" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search" aria-label="Search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog" aria-label="Search">
+  <button type="button" class="md-search__button">
+    Search
+  </button>
+</div>
+      
+    
+    <div class="md-header__source">
+      
+        <a href="https://github.com/godatadriven/dbt-bouncer" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2026 Fonticons, Inc.--><path fill="currentColor" d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    godatadriven/dbt-bouncer
+  </div>
+</a>
+      
+    </div>
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../getting_started/" class="md-tabs__link">
+        
+  
+  Getting started
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../configuration/" class="md-tabs__link">
+        
+  
+  Configuration
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+      
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../checks/" class="md-tabs__link">
+          
+  
+  Checks
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../cli/" class="md-tabs__link">
+        
+  
+  CLI
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../faq/" class="md-tabs__link">
+        
+  
+  FAQ
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+      
+      
+        
+      
+        
+      
+    
+    
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../v3/" class="md-tabs__link">
+          
+  
+  Migration
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../brand/" class="md-tabs__link">
+        
+  
+  Brand
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../CONTRIBUTING/" class="md-tabs__link">
+        
+  
+  Contributing
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../users/" class="md-tabs__link">
+        
+  
+  Users
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="dbt-bouncer" class="md-nav__button md-logo" aria-label="dbt-bouncer" data-md-component="logo">
+      
+  <img src="../../assets/logo.svg" alt="dbt-bouncer">
+
+    </a>
+    dbt-bouncer
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/godatadriven/dbt-bouncer" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2026 Fonticons, Inc.--><path fill="currentColor" d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    godatadriven/dbt-bouncer
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Home
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting_started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Getting started
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Configuration
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../checks/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Checks
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  CLI
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  FAQ
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Migration
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+  Migration
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../v3/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  v3
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      
+        <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  v4
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="././" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  v4
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#who-needs-to-do-what" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Who needs to do what
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#minimum-supported-dbt-version-is-now-19" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Minimum supported dbt version is now 1.9
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#removed-import-paths" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Removed import paths
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#class-based-custom-checks-are-rejected" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Class-based custom checks are rejected
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#removed-back-compat-re-exports" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Removed back-compat re-exports
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#renamed-outputformatcli-to-listoutputformat" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Renamed: <code>OutputFormatCLI</code> to <code>ListOutputFormat</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#informational-and-additive-changes" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Informational and additive changes
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Informational and additive changes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#distinct-exit-codes-for-config-and-artifact-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Distinct exit codes for config and artifact errors
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#check-renamed-check_model_description_contains_regex_pattern" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Check renamed: <code>check_model_description_contains_regex_pattern</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#new-criteria-parameter-for-the-has_meta_keys-checks" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        New <code>criteria</code> parameter for the <code>has_meta_keys</code> checks
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getting-help" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Getting help
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../brand/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Brand
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../CONTRIBUTING/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Contributing
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../users/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Users
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+  
+    <a href="https://github.com/godatadriven/dbt-bouncer/edit/main/docs/migration/v4.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75z"/></svg>
+    </a>
+  
+  
+
+
+<h1 id="migrating-to-dbt-bouncer-v400">Migrating to dbt-bouncer v4.0.0<a class="headerlink" href="#migrating-to-dbt-bouncer-v400" title="Permanent link">#</a></h1>
+<p>dbt-bouncer v4.0.0 removes the back-compat shims that v3 kept around, raises the minimum supported dbt version, and adds a few small, non-breaking improvements. This guide covers what changed and what you need to do to upgrade.</p>
+<h2 id="who-needs-to-do-what">Who needs to do what<a class="headerlink" href="#who-needs-to-do-what" title="Permanent link">#</a></h2>
+<table>
+<thead>
+<tr>
+<th>You are...</th>
+<th>Action required</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Running dbt manifests/catalogs generated by dbt-core below 1.9</td>
+<td><strong>Must upgrade</strong> — <a href="#minimum-supported-dbt-version-is-now-19">see dbt version floor</a></td>
+</tr>
+<tr>
+<td>Importing from <code>dbt_bouncer.check_base</code>, <code>check_context</code>, <code>check_decorator</code>, <code>check_patterns</code> or <code>checks.common</code></td>
+<td><strong>Must update imports</strong> — <a href="#removed-import-paths">see removed import paths</a></td>
+</tr>
+<tr>
+<td>Writing custom checks by subclassing <code>BaseCheck</code> with an <code>execute()</code> method</td>
+<td><strong>Must migrate</strong> — <a href="#class-based-custom-checks-are-rejected">see class-based checks removed</a></td>
+</tr>
+<tr>
+<td>Importing <code>dbt_bouncer.main.run_bouncer</code> or <code>dbt_bouncer.cli.list_checks</code></td>
+<td><strong>Must update imports</strong> — <a href="#removed-back-compat-re-exports">see removed re-exports</a></td>
+</tr>
+<tr>
+<td>Importing <code>dbt_bouncer.enums.OutputFormatCLI</code></td>
+<td><strong>Must update imports</strong> — <a href="#renamed-outputformatcli-to-listoutputformat">see renamed enum</a></td>
+</tr>
+<tr>
+<td>Using <code>check_model_description_contains_regex_pattern</code> in config</td>
+<td>No immediate action — <a href="#check-renamed-check_model_description_contains_regex_pattern">see deprecated check name</a></td>
+</tr>
+<tr>
+<td>Scripting against dbt-bouncer's exit code</td>
+<td>Review — <a href="#distinct-exit-codes-for-config-and-artifact-errors">see new exit codes</a></td>
+</tr>
+<tr>
+<td>Using the <code>*_has_meta_keys</code> checks</td>
+<td>No action needed — <a href="#new-criteria-parameter-for-the-has_meta_keys-checks">see new <code>criteria</code> parameter</a></td>
+</tr>
+<tr>
+<td>Using <code>dbt-bouncer.yml</code> / <code>dbt-bouncer.toml</code> config only, no custom checks or Python imports</td>
+<td>No action required</td>
+</tr>
+<tr>
+<td>Using the dbt-bouncer GitHub Action</td>
+<td>No action required</td>
+</tr>
+</tbody>
+</table>
+<h2 id="minimum-supported-dbt-version-is-now-19">Minimum supported dbt version is now 1.9<a class="headerlink" href="#minimum-supported-dbt-version-is-now-19" title="Permanent link">#</a></h2>
+<p>The minimum supported dbt-core version has been raised from 1.7 to 1.9. A <code>manifest.json</code> (or other artifact) generated with an older dbt version is no longer accepted:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>The supplied `manifest.json` was generated with dbt version 1.8.0, this is below the minimum supported version of 1.9.0.
+</span></code></pre></div>
+<p>This is now a hard, fail-fast error raised at artifact-parsing time (exit code <code>3</code>, see <a href="#distinct-exit-codes-for-config-and-artifact-errors">exit codes</a>) rather than a warning.</p>
+<p>Previously, running against a dbt 1.7 or 1.8 manifest could silently skip checks that were internally gated on a minimum dbt version (for example, unit-test checks were only evaluated for manifests generated with dbt &gt;= 1.8.0). Those checks would report success without ever running. With the 1.9 floor, every one of those gates is now unconditionally true, so this failure mode is gone — either your artifact is supported and every check runs, or parsing fails immediately and tells you why.</p>
+<p>Forward compatibility with dbt 1.12+ / dbt Fusion (dbt-core 2.0) is unaffected by this change.</p>
+<h2 id="removed-import-paths">Removed import paths<a class="headerlink" href="#removed-import-paths" title="Permanent link">#</a></h2>
+<p>The five deprecation shim modules that have warned since v3.0.0 are gone. Importing from any of them now raises <code>ImportError</code> immediately — there is no more deprecation warning, because the modules themselves no longer exist.</p>
+<table>
+<thead>
+<tr>
+<th>Removed</th>
+<th>Replacement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>dbt_bouncer.check_base</code></td>
+<td><code>dbt_bouncer.check_framework.base</code></td>
+</tr>
+<tr>
+<td><code>dbt_bouncer.check_context</code></td>
+<td><code>dbt_bouncer.check_framework.context</code></td>
+</tr>
+<tr>
+<td><code>dbt_bouncer.check_decorator</code></td>
+<td><code>dbt_bouncer.check_framework.decorator</code></td>
+</tr>
+<tr>
+<td><code>dbt_bouncer.check_patterns</code></td>
+<td><code>dbt_bouncer.check_framework.patterns</code> — also removed, no replacement (see below)</td>
+</tr>
+<tr>
+<td><code>dbt_bouncer.checks.common</code></td>
+<td><code>dbt_bouncer.check_framework.exceptions</code></td>
+</tr>
+</tbody>
+</table>
+<div class="language-diff highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="gd">- from dbt_bouncer.check_decorator import check, fail</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="gi">+ from dbt_bouncer.check_framework.decorator import check, fail</span>
+</span></code></pre></div>
+<p>Note that <code>dbt_bouncer.check_framework.patterns</code> itself has also been removed as part of dropping the class-based check framework — see the next section. If you were importing pattern ABCs (<code>BaseColumnsHaveTypesCheck</code>, <code>BaseDescriptionPopulatedCheck</code>, <code>BaseHasMetaKeysCheck</code>, <code>BaseHasTagsCheck</code>, <code>BaseHasUnitTestsCheck</code>, <code>BaseNamePatternCheck</code>) from either the shim or the canonical module, there is no replacement — rewrite the check using the <code>@check</code> decorator.</p>
+<h2 id="class-based-custom-checks-are-rejected">Class-based custom checks are rejected<a class="headerlink" href="#class-based-custom-checks-are-rejected" title="Permanent link">#</a></h2>
+<p>The class-based check framework (subclassing <code>BaseCheck</code> directly and implementing <code>execute()</code>) has been dropped. The <code>@check</code> decorator is now the only way to define a check — it was already the recommended path throughout v3.</p>
+<p>This is not an import error: <code>BaseCheck</code> still exists (it is the internal class the <code>@check</code> decorator builds subclasses from), so a subclass still imports and instantiates fine. Instead, check discovery rejects it. Loading a hand-written subclass raises <code>DbtBouncerConfigError</code>, so dbt-bouncer stops with exit code <code>2</code> and a message naming the offending class and the file it came from:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>`CheckMyCustomCheck` in `my_checks/manifest/check_models.py` is a hand-written
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>class-based check. Class-based checks were removed in dbt-bouncer v4; define it
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>with the `@check` decorator instead.
+</span></code></pre></div>
+<p>The failure happens when your custom-checks module is loaded, not part-way through a run, so you find out immediately rather than watching a check quietly do nothing.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># v3.x — rejected at discovery in v4</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">dbt_bouncer.check_framework.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseCheck</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="k">class</span><span class="w"> </span><span class="nc">CheckModelAccess</span><span class="p">(</span><span class="n">BaseCheck</span><span class="p">):</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="n">access</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;private&quot;</span><span class="p">,</span> <span class="s2">&quot;protected&quot;</span><span class="p">,</span> <span class="s2">&quot;public&quot;</span><span class="p">]</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="n">model</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>    <span class="n">name</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;check_model_access&quot;</span><span class="p">]</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">access</span><span class="o">.</span><span class="n">value</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">access</span><span class="p">:</span>
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>            <span class="k">raise</span> <span class="n">DbtBouncerFailedCheckError</span><span class="p">(</span>
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>                <span class="sa">f</span><span class="s2">&quot;Model `</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">` has access `</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">access</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s2">`, expected `</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">access</span><span class="si">}</span><span class="s2">`.&quot;</span>
+</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>            <span class="p">)</span>
+</span></code></pre></div>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># v4.0.0 — the only supported way to define a check</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">dbt_bouncer.check_framework.decorator</span><span class="w"> </span><span class="kn">import</span> <span class="n">check</span><span class="p">,</span> <span class="n">fail</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="nd">@check</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="k">def</span><span class="w"> </span><span class="nf">check_model_access</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">access</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Each model should have the specified access level.&quot;&quot;&quot;</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>    <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">access</span> <span class="ow">and</span> <span class="n">model</span><span class="o">.</span><span class="n">access</span><span class="o">.</span><span class="n">value</span> <span class="o">!=</span> <span class="n">access</span><span class="p">:</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>        <span class="n">fail</span><span class="p">(</span>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>            <span class="sa">f</span><span class="s2">&quot;Model `</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">` has access `</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">access</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s2">`, expected `</span><span class="si">{</span><span class="n">access</span><span class="si">}</span><span class="s2">`.&quot;</span>
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>        <span class="p">)</span>
+</span></code></pre></div>
+<p>If you have custom checks still written the class-based way, migrate each one to the decorator API — see <a href="../../CONTRIBUTING/#adding-a-new-check">Adding a new check</a> for the full pattern, including how the resource iterated over is inferred from the function's first parameter.</p>
+<h2 id="removed-back-compat-re-exports">Removed back-compat re-exports<a class="headerlink" href="#removed-back-compat-re-exports" title="Permanent link">#</a></h2>
+<p>Two undocumented re-exports that existed purely to ease the v2 → v3 transition are gone:</p>
+<div class="language-diff highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="gd">- from dbt_bouncer.main import run_bouncer</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="gi">+ from dbt_bouncer import run_bouncer</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a># or the canonical path:
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="gi">+ from dbt_bouncer.cli.run.utils import run_bouncer</span>
+</span></code></pre></div>
+<div class="language-diff highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="gd">- from dbt_bouncer.cli import list_checks</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="gi">+ from dbt_bouncer.cli.list import list_checks</span>
+</span></code></pre></div>
+<p>Both were self-aliases/lazy re-exports rather than documented public API, so if you were importing the canonical paths already this is a no-op.</p>
+<h2 id="renamed-outputformatcli-to-listoutputformat">Renamed: <code>OutputFormatCLI</code> to <code>ListOutputFormat</code><a class="headerlink" href="#renamed-outputformatcli-to-listoutputformat" title="Permanent link">#</a></h2>
+<p><code>dbt_bouncer.enums.OutputFormatCLI</code> — the enum backing the <code>list</code> command's <code>--output-format</code> option — is renamed to <code>ListOutputFormat</code> to distinguish it from the separate <code>OutputFormat</code> enum used by the <code>run</code> command's <code>--output-format</code> option (which supports a different set of choices: <code>csv</code>, <code>json</code>, <code>junit</code>, <code>sarif</code>, <code>tap</code>).</p>
+<div class="language-diff highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="gd">- from dbt_bouncer.enums import OutputFormatCLI</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="gi">+ from dbt_bouncer.enums import ListOutputFormat</span>
+</span></code></pre></div>
+<p>The two enums remain deliberately separate — they are not being merged — this is a rename only.</p>
+<p>Also corrected in the same change: the <code>--output-format</code> help text and docs previously claimed it applied "to the output file or stdout when no output file is specified". That was never accurate — structured output is only ever written when <code>--output-file</code> is set. Without an output file, the console always shows the rich table regardless of the chosen format. No behaviour changed; only the documentation was wrong.</p>
+<h2 id="informational-and-additive-changes">Informational and additive changes<a class="headerlink" href="#informational-and-additive-changes" title="Permanent link">#</a></h2>
+<p>The following changes do not require any action on your part, but are worth knowing about.</p>
+<h3 id="distinct-exit-codes-for-config-and-artifact-errors">Distinct exit codes for config and artifact errors<a class="headerlink" href="#distinct-exit-codes-for-config-and-artifact-errors" title="Permanent link">#</a></h3>
+<p><code>dbt-bouncer</code> previously exited <code>1</code> for every failure mode, making it impossible for a CI pipeline to tell a genuine check failure apart from a misconfigured run. Exit codes are now:</p>
+<ul>
+<li><code>0</code> (<code>SUCCESS</code>) — all checks succeeded.</li>
+<li><code>1</code> (<code>CHECK_ERRORS</code>) — at least one check failed with error severity.</li>
+<li><code>2</code> (<code>CONFIG_ERROR</code>) — the config file is missing, unreadable, or invalid (for example, an invalid <code>--only</code> value).</li>
+<li><code>3</code> (<code>ARTIFACT_ERROR</code>) — a required dbt artifact (<code>manifest.json</code>, <code>catalog.json</code>, <code>run_results.json</code>) is missing, or was generated with an unsupported dbt version.</li>
+</ul>
+<p>Two typed exceptions, <code>DbtBouncerConfigError</code> and <code>DbtBouncerArtifactError</code> (both <code>RuntimeError</code> subclasses), back the new codes and replace what were previously bare <code>RuntimeError</code>, <code>FileNotFoundError</code> and <code>AssertionError</code> raises. If you call <code>run_bouncer()</code> directly and catch <code>RuntimeError</code> around it, that code keeps working unchanged since both new exception types still subclass it.</p>
+<h3 id="check-renamed-check_model_description_contains_regex_pattern">Check renamed: <code>check_model_description_contains_regex_pattern</code><a class="headerlink" href="#check-renamed-check_model_description_contains_regex_pattern" title="Permanent link">#</a></h3>
+<p>Renamed to <code>check_model_description_contains_regexp_pattern</code>, matching its <code>regexp_pattern</code> parameter and the naming of the other two pattern-matching checks. The rule code (<code>MO020</code>) and behaviour are unchanged.</p>
+<div class="language-diff highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="w"> </span> manifest_checks:
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="gd">-   - name: check_model_description_contains_regex_pattern</span>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="gi">+   - name: check_model_description_contains_regexp_pattern</span>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w"> </span>     regexp_pattern: .*pattern_to_match.*
+</span></code></pre></div>
+<p>Unlike the changes above, this is a soft break: the old name <strong>still works</strong> for the whole v4 cycle via a deprecated-name alias that rewrites it before validation and logs a deprecation warning. This applies wherever a check name can be supplied — the config file, the <code>--check</code> CLI flag, and <code>dbt-bouncer validate</code>.</p>
+<p>One thing to be aware of: because the alias is applied before validation, <code>schema.json</code> only contains the new name. If your editor validates config against the JSON Schema, it will flag a config still using the old name, even though dbt-bouncer itself accepts it. Treat that as a nudge to migrate rather than an error to work around.</p>
+<h3 id="new-criteria-parameter-for-the-has_meta_keys-checks">New <code>criteria</code> parameter for the <code>has_meta_keys</code> checks<a class="headerlink" href="#new-criteria-parameter-for-the-has_meta_keys-checks" title="Permanent link">#</a></h3>
+<p>The <code>criteria</code> parameter (<code>all</code> / <code>any</code> / <code>one</code>) — already available on the <code>*_has_tags</code> checks — is now also available on the seven <code>*_has_meta_keys</code> checks: <code>check_exposure_has_meta_keys</code>, <code>check_macro_has_meta_keys</code>, <code>check_model_has_meta_keys</code>, <code>check_seed_has_meta_keys</code>, <code>check_snapshot_has_meta_keys</code>, <code>check_source_has_meta_keys</code> and <code>check_test_has_meta_keys</code>.</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="nt">manifest_checks</span><span class="p">:</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_model_has_meta_keys</span>
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">    </span><span class="nt">criteria</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">any</span><span class="w"> </span><span class="c1"># at least one of the listed keys must be present</span>
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">    </span><span class="nt">keys</span><span class="p">:</span>
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">owner</span>
+</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">team</span>
+</span></code></pre></div>
+<p>The default is <code>all</code>, matching the previous, only, behaviour, so existing configs are unaffected — no action is required. <code>check_model_columns_have_meta_keys</code> and the <code>*_has_labels_keys</code> checks are unchanged by this release.</p>
+<h2 id="getting-help">Getting help<a class="headerlink" href="#getting-help" title="Permanent link">#</a></h2>
+<p>If you run into issues upgrading:</p>
+<ol>
+<li>Check that any manifest, catalog or run-results artifact you pass in was generated with dbt-core &gt;= 1.9.</li>
+<li>Update imports for the removed shim modules and re-exports per the tables above.</li>
+<li>Migrate any class-based custom checks to the <code>@check</code> decorator.</li>
+<li>Open an issue at <a href="https://github.com/godatadriven/dbt-bouncer/issues">github.com/godatadriven/dbt-bouncer/issues</a></li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://zensical.org/" target="_blank" rel="noopener">
+      Zensical
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+      <div class="md-progress" data-md-component="progress" role="progressbar"></div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate":null,"base":"../..","features":["content.action.edit","content.code.annotate","content.code.copy","navigation.expand","navigation.indexes","navigation.instant","navigation.instant.progress","navigation.prune","navigation.sections","navigation.tabs","navigation.tabs.sticky","navigation.tracking","navigation.top","toc.follow","toc.integrate"],"search":"../../assets/javascripts/workers/search.b6b7e04f.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"alias":true,"canonical_version":"stable","default":"stable","provider":"mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7f30b55.min.js"></script>
+      
+    
+  </body>
+</html>

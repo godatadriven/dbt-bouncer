@@ -14,7 +14,7 @@
         <link rel="prev" href="../../faq/">
       
       
-        <link rel="next" href="../../brand/">
+        <link rel="next" href="../v4/">
       
       
         
@@ -350,6 +350,8 @@
       
         
       
+        
+      
     
     
     
@@ -672,6 +674,8 @@
   
     
     
+      
+        
       
         
       
@@ -1104,6 +1108,33 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../v4/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  v4
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1214,6 +1245,9 @@
 
 <h1 id="migrating-to-dbt-bouncer-v300">Migrating to dbt-bouncer v3.0.0<a class="headerlink" href="#migrating-to-dbt-bouncer-v300" title="Permanent link">#</a></h1>
 <p>dbt-bouncer v3.0.0 is a major release with significant internal improvements. This guide covers what changed and what you need to do to upgrade.</p>
+<blockquote>
+<p><strong>Upgrading past v3?</strong> Several of the APIs described below changed again in v4. This guide documents the v2 → v3 migration only; see <a href="../v4/">Migrating to v4.0.0</a> for what v4 renames, removes and rejects.</p>
+</blockquote>
 <h2 id="who-needs-to-do-what">Who needs to do what<a class="headerlink" href="#who-needs-to-do-what" title="Permanent link">#</a></h2>
 <table>
 <thead>
@@ -1244,9 +1278,6 @@
 <h2 id="configuration-changes">Configuration changes<a class="headerlink" href="#configuration-changes" title="Permanent link">#</a></h2>
 <h3 id="your-config-files-still-work">Your config files still work<a class="headerlink" href="#your-config-files-still-work" title="Permanent link">#</a></h3>
 <p>Existing <code>dbt-bouncer.yml</code> and <code>pyproject.toml [tool.dbt-bouncer]</code> configurations are fully compatible. Check names and parameters are unchanged.</p>
-<blockquote>
-<p><strong>Renamed in v4:</strong> <code>check_model_description_contains_regex_pattern</code> is now <code>check_model_description_contains_regexp_pattern</code>, matching the <code>regexp_pattern</code> parameter and the other two <code>regexp</code>-named checks. The old name still works and logs a deprecation warning; it will be removed in a future major release.</p>
-</blockquote>
 <h3 id="config-validation-is-now-strict">Config validation is now strict<a class="headerlink" href="#config-validation-is-now-strict" title="Permanent link">#</a></h3>
 <p>Two changes that may surface pre-existing issues in your config:</p>
 <ol>
@@ -1269,9 +1300,6 @@
 <li><code>dbt-bouncer run --dry-run</code> — preview which checks would run without executing them</li>
 <li>Rich-formatted table output for artifact parsing and results</li>
 </ul>
-<blockquote>
-<p><strong>Removed in v4:</strong> the undocumented <code>from dbt_bouncer.cli import list_checks</code> lazy re-export is gone. Import it from its own module instead: <code>from dbt_bouncer.cli.list import list_checks</code>.</p>
-</blockquote>
 <h3 id="click-typer">Click → Typer<a class="headerlink" href="#click-typer" title="Permanent link">#</a></h3>
 <p>The CLI framework changed from Click to Typer. If you were relying on Click-specific behaviour in wrapper scripts, review the <a href="https://typer.tiangolo.com/">Typer docs</a>. The command-line interface is otherwise the same.</p>
 <p>One notable difference: boolean flags now use <code>--flag</code> / <code>--no-flag</code> syntax instead of <code>--flag true/false</code>:</p>
@@ -1356,10 +1384,6 @@
 </span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>    <span class="n">run_bouncer</span><span class="p">,</span>
 </span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="p">)</span>
 </span></code></pre></div>
-<blockquote>
-<p><strong>Renamed in v4:</strong> <code>dbt_bouncer.enums.OutputFormatCLI</code> is now <code>dbt_bouncer.enums.ListOutputFormat</code>. Update <code>from dbt_bouncer.enums import OutputFormatCLI</code> to <code>from dbt_bouncer.enums import ListOutputFormat</code>.</p>
-<p><strong>Removed in v4:</strong> the undocumented <code>from dbt_bouncer.main import run_bouncer</code> alias is gone. Use <code>from dbt_bouncer import run_bouncer</code> (above) or the canonical <code>from dbt_bouncer.cli.run.utils import run_bouncer</code>.</p>
-</blockquote>
 <h3 id="module-structure-changes">Module structure changes<a class="headerlink" href="#module-structure-changes" title="Permanent link">#</a></h3>
 <table>
 <thead>
@@ -1469,9 +1493,6 @@
 </span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>    <span class="p">)</span>
 </span></code></pre></div>
 <h3 id="class-based-checks-legacy">Class-based checks (legacy)<a class="headerlink" href="#class-based-checks-legacy" title="Permanent link">#</a></h3>
-<blockquote>
-<p><strong>Removed in v4:</strong> class-based checks (subclassing <code>BaseCheck</code> directly) now raise a <code>RuntimeError</code> at check discovery, naming the offending class and the module or file it came from, instead of being silently skipped. Migrate to the decorator API above — see <a href="../../CONTRIBUTING/#adding-a-new-check">Adding a new check</a>.</p>
-</blockquote>
 <p>Class-based checks remain supported in v3 but are a legacy escape hatch — prefer the decorator API above. If you do subclass <code>BaseCheck</code>, two things commonly trip people up:</p>
 <ul>
 <li><strong>Re-declare the resource field on your subclass.</strong> The runner infers which resource a class-based check iterates over from the subclass's <em>own</em> annotations (<code>__annotations__</code>), which Python does <strong>not</strong> inherit from <code>BaseCheck</code>. Calling <code>self._require_model()</code> is not enough — you must also declare the field, e.g. <code>model: Any = Field(default=None)</code>. Without it the check never iterates over any resource.</li>
