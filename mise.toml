@@ -44,18 +44,20 @@ run = [
   "uv run dbt-bouncer --config-file ./dbt-bouncer-example.yml",
 ]
 
-# Each version-specific task uses --target-path to write to an isolated
-# directory, so the version builds (110, 111, 112) run in parallel via the
-# `build-artifacts` aggregate. Parallel execution may cause conflicts if dbt
-# acquires project-level locks in ./dbt_project. If that happens, run with
-# `mise run --jobs 1 build-artifacts`.
+# Each version-specific task uses --target-path to write compiled artifacts to
+# an isolated directory. The DuckDB database is NOT isolated: every task shares
+# the same `path: ./dbt.duckdb` from profiles.yml. The `dbt docs generate` step
+# opens that file read-write, and DuckDB takes an exclusive lock. Running the
+# version builds in parallel makes them fight for that lock, so this aggregate
+# runs the sub-tasks in series. This is slower but reliable. To parallelise,
+# give each version its own DuckDB file first.
 [tasks.build-artifacts]
 description = "Build dbt artifacts for testing"
-depends = [
-  "build-artifacts-110",
-  "build-artifacts-111",
-  "build-artifacts-112",
-  "build-artifacts-local",
+run = [
+  "mise run build-artifacts-110",
+  "mise run build-artifacts-111",
+  "mise run build-artifacts-112",
+  "mise run build-artifacts-local",
 ]
 
 [tasks.build-artifacts-110]
