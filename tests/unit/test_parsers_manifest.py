@@ -9,7 +9,14 @@ import pytest
 from dbt_bouncer.artifact_parsers.parser import parse_dbt_artifacts
 
 
-@pytest.fixture(params=["dbt_112", "dbt_20"], ids=["dbt_core_112", "dbt_20"])
+# Covers the full span of supported artifact formats: the two frozen fixtures that
+# are no longer rebuilt (dbt_110, dbt_111) through to the actively built ones
+# (dbt_112, dbt_20). The frozen ones guard against a parser change silently
+# breaking older manifests, which nothing else would catch.
+@pytest.fixture(
+    params=["dbt_110", "dbt_111", "dbt_112", "dbt_20"],
+    ids=["dbt_core_110", "dbt_core_111", "dbt_core_112", "dbt_20"],
+)
 def dbt_artifacts_dir(request) -> Path:
     return Path(f"tests/fixtures/{request.param}/target")
 

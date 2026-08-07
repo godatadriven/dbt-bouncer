@@ -5,6 +5,11 @@ models:
     description: Python model example for testing Python model support in dbt-bouncer.
     config:
       # dbt 2.0 (Fusion) does not support Python models on duckdb.
+      # This MUST use the inline dbt_version built-in, not dbt_version_at_least():
+      # project macros are not in scope when dbt 1.x evaluates `enabled:` at parse
+      # time, so the macro form fails on dbt 1.12 with
+      # "Compilation Error: 'dbt_version_at_least' is undefined". dbt 2.0 accepts
+      # the macro, but both versions must parse this file.
       enabled: "{{ (dbt_version.split('.')[0] | int) < 2 }}"
       meta:
         maturity: gold
