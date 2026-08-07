@@ -79,6 +79,7 @@ nav:
   - FAQ: faq.md
   - Migration:
       - v3: migration/v3.md
+      - v4: migration/v4.md
   - Brand: brand.md
   - Contributing: CONTRIBUTING.md
   - Users: users.md
