@@ -16,7 +16,7 @@ clean-targets:
   - "target"
   - "dbt_packages"
 
-require-dbt-version: [">=1.9.0", "<3.0.0"]
+require-dbt-version: [">=1.10.0", "<3.0.0"]
 
 models:
   +internal_package:
