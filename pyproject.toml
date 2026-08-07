@@ -85,6 +85,10 @@ docs = [
   "zensical~=0.0.43"
 ]
 
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
 [tool.coverage.report]
 exclude_lines = [
   "if TYPE_CHECKING:",
