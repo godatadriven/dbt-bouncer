@@ -1393,7 +1393,7 @@
 <p>To see how the end-to-end run scales with project size, run the sweep:</p>
 <div class="language-shell highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>mise<span class="w"> </span>run<span class="w"> </span>test-benchmark-aggregate
 </span></code></pre></div>
-<p>It runs the <code>test_run_bouncer</code> end-to-end benchmark once per model count (100, 250, 500, 1000, 2000, 5000, 10000 by default) and prints a summary table of the mean run time for each. Override the counts with <code>mise run test-benchmark-aggregate --model-counts "100 1000 10000"</code>.</p>
+<p>It runs the <code>test_run_bouncer</code> end-to-end benchmark once per model count (100, 250, 500, 1000, 2000, 5000, 12000 by default) and prints a summary table of the mean run time for each. Override the counts with <code>mise run test-benchmark-aggregate --model-counts "100 1000 12000"</code>.</p>
 <p>To plot the Altair density PDF curve chart and render the bell curve directly in the terminal, run:</p>
 <div class="language-shell highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>mise<span class="w"> </span>run<span class="w"> </span>test-benchmark-chart
 </span></code></pre></div>
