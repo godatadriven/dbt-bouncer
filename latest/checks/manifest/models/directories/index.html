@@ -2990,7 +2990,8 @@
 <span class="normal"><a href="#__codelineno-0-222">222</a></span>
 <span class="normal"><a href="#__codelineno-0-223">223</a></span>
 <span class="normal"><a href="#__codelineno-0-224">224</a></span>
-<span class="normal"><a href="#__codelineno-0-225">225</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-143"><a id="__codelineno-0-143" name="__codelineno-0-143"></a><span class="nd">@check</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="s2">&quot;MO026&quot;</span><span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-225">225</a></span>
+<span class="normal"><a href="#__codelineno-0-226">226</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-143"><a id="__codelineno-0-143" name="__codelineno-0-143"></a><span class="nd">@check</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="s2">&quot;MO026&quot;</span><span class="p">)</span>
 </span><span id="__span-0-144"><a id="__codelineno-0-144" name="__codelineno-0-144"></a><span class="k">def</span><span class="w"> </span><span class="nf">check_model_property_file_location</span><span class="p">(</span>
 </span><span id="__span-0-145"><a id="__codelineno-0-145" name="__codelineno-0-145"></a>    <span class="n">model</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">layout</span><span class="p">:</span> <span class="n">PropertiesLayout</span> <span class="o">=</span> <span class="n">PropertiesLayout</span><span class="o">.</span><span class="n">PER_DIRECTORY</span>
 </span><span id="__span-0-146"><a id="__codelineno-0-146" name="__codelineno-0-146"></a><span class="p">):</span>
@@ -3049,30 +3050,31 @@
 </span><span id="__span-0-199"><a id="__codelineno-0-199" name="__codelineno-0-199"></a>
 </span><span id="__span-0-200"><a id="__codelineno-0-200" name="__codelineno-0-200"></a>    <span class="n">mapped_parts</span> <span class="o">=</span> <span class="p">[]</span>
 </span><span id="__span-0-201"><a id="__codelineno-0-201" name="__codelineno-0-201"></a>    <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">relevant_parts</span><span class="p">:</span>
-</span><span id="__span-0-202"><a id="__codelineno-0-202" name="__codelineno-0-202"></a>        <span class="k">if</span> <span class="n">part</span> <span class="o">==</span> <span class="s2">&quot;staging&quot;</span><span class="p">:</span>
-</span><span id="__span-0-203"><a id="__codelineno-0-203" name="__codelineno-0-203"></a>            <span class="n">mapped_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;stg&quot;</span><span class="p">)</span>
-</span><span id="__span-0-204"><a id="__codelineno-0-204" name="__codelineno-0-204"></a>        <span class="k">elif</span> <span class="n">part</span> <span class="o">==</span> <span class="s2">&quot;intermediate&quot;</span><span class="p">:</span>
-</span><span id="__span-0-205"><a id="__codelineno-0-205" name="__codelineno-0-205"></a>            <span class="n">mapped_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;int&quot;</span><span class="p">)</span>
-</span><span id="__span-0-206"><a id="__codelineno-0-206" name="__codelineno-0-206"></a>        <span class="k">elif</span> <span class="n">part</span> <span class="o">==</span> <span class="s2">&quot;marts&quot;</span><span class="p">:</span>
-</span><span id="__span-0-207"><a id="__codelineno-0-207" name="__codelineno-0-207"></a>            <span class="k">continue</span>
-</span><span id="__span-0-208"><a id="__codelineno-0-208" name="__codelineno-0-208"></a>        <span class="k">else</span><span class="p">:</span>
-</span><span id="__span-0-209"><a id="__codelineno-0-209" name="__codelineno-0-209"></a>            <span class="n">mapped_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">part</span><span class="p">)</span>
-</span><span id="__span-0-210"><a id="__codelineno-0-210" name="__codelineno-0-210"></a>
-</span><span id="__span-0-211"><a id="__codelineno-0-211" name="__codelineno-0-211"></a>    <span class="n">expected_substr</span> <span class="o">=</span> <span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">mapped_parts</span><span class="p">)</span>
-</span><span id="__span-0-212"><a id="__codelineno-0-212" name="__codelineno-0-212"></a>    <span class="n">properties_yml_name</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">clean_path_str</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">patch_path</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">name</span>
-</span><span id="__span-0-213"><a id="__codelineno-0-213" name="__codelineno-0-213"></a>
-</span><span id="__span-0-214"><a id="__codelineno-0-214" name="__codelineno-0-214"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">properties_yml_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">):</span>
-</span><span id="__span-0-215"><a id="__codelineno-0-215" name="__codelineno-0-215"></a>        <span class="n">fail</span><span class="p">(</span>
-</span><span id="__span-0-216"><a id="__codelineno-0-216" name="__codelineno-0-216"></a>            <span class="sa">f</span><span class="s2">&quot;The properties file for `</span><span class="si">{</span><span class="n">get_clean_model_name</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">unique_id</span><span class="p">)</span><span class="si">}</span><span class="s2">` (`</span><span class="si">{</span><span class="n">properties_yml_name</span><span class="si">}</span><span class="s2">`) does not start with an underscore.&quot;</span>
-</span><span id="__span-0-217"><a id="__codelineno-0-217" name="__codelineno-0-217"></a>        <span class="p">)</span>
-</span><span id="__span-0-218"><a id="__codelineno-0-218" name="__codelineno-0-218"></a>    <span class="k">if</span> <span class="n">expected_substr</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">properties_yml_name</span><span class="p">:</span>
-</span><span id="__span-0-219"><a id="__codelineno-0-219" name="__codelineno-0-219"></a>        <span class="n">fail</span><span class="p">(</span>
-</span><span id="__span-0-220"><a id="__codelineno-0-220" name="__codelineno-0-220"></a>            <span class="sa">f</span><span class="s2">&quot;The properties file for `</span><span class="si">{</span><span class="n">get_clean_model_name</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">unique_id</span><span class="p">)</span><span class="si">}</span><span class="s2">` (`</span><span class="si">{</span><span class="n">properties_yml_name</span><span class="si">}</span><span class="s2">`) does not contain the expected substring (`</span><span class="si">{</span><span class="n">expected_substr</span><span class="si">}</span><span class="s2">`).&quot;</span>
-</span><span id="__span-0-221"><a id="__codelineno-0-221" name="__codelineno-0-221"></a>        <span class="p">)</span>
-</span><span id="__span-0-222"><a id="__codelineno-0-222" name="__codelineno-0-222"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">properties_yml_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;__models.yml&quot;</span><span class="p">):</span>
-</span><span id="__span-0-223"><a id="__codelineno-0-223" name="__codelineno-0-223"></a>        <span class="n">fail</span><span class="p">(</span>
-</span><span id="__span-0-224"><a id="__codelineno-0-224" name="__codelineno-0-224"></a>            <span class="sa">f</span><span class="s2">&quot;The properties file for `</span><span class="si">{</span><span class="n">get_clean_model_name</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">unique_id</span><span class="p">)</span><span class="si">}</span><span class="s2">` (`</span><span class="si">{</span><span class="n">properties_yml_name</span><span class="si">}</span><span class="s2">`) does not end with `__models.yml`.&quot;</span>
-</span><span id="__span-0-225"><a id="__codelineno-0-225" name="__codelineno-0-225"></a>        <span class="p">)</span>
+</span><span id="__span-0-202"><a id="__codelineno-0-202" name="__codelineno-0-202"></a>        <span class="k">match</span> <span class="n">part</span><span class="p">:</span>
+</span><span id="__span-0-203"><a id="__codelineno-0-203" name="__codelineno-0-203"></a>            <span class="k">case</span> <span class="s2">&quot;staging&quot;</span><span class="p">:</span>
+</span><span id="__span-0-204"><a id="__codelineno-0-204" name="__codelineno-0-204"></a>                <span class="n">mapped_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;stg&quot;</span><span class="p">)</span>
+</span><span id="__span-0-205"><a id="__codelineno-0-205" name="__codelineno-0-205"></a>            <span class="k">case</span> <span class="s2">&quot;intermediate&quot;</span><span class="p">:</span>
+</span><span id="__span-0-206"><a id="__codelineno-0-206" name="__codelineno-0-206"></a>                <span class="n">mapped_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;int&quot;</span><span class="p">)</span>
+</span><span id="__span-0-207"><a id="__codelineno-0-207" name="__codelineno-0-207"></a>            <span class="k">case</span> <span class="s2">&quot;marts&quot;</span><span class="p">:</span>
+</span><span id="__span-0-208"><a id="__codelineno-0-208" name="__codelineno-0-208"></a>                <span class="k">continue</span>
+</span><span id="__span-0-209"><a id="__codelineno-0-209" name="__codelineno-0-209"></a>            <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
+</span><span id="__span-0-210"><a id="__codelineno-0-210" name="__codelineno-0-210"></a>                <span class="n">mapped_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">part</span><span class="p">)</span>
+</span><span id="__span-0-211"><a id="__codelineno-0-211" name="__codelineno-0-211"></a>
+</span><span id="__span-0-212"><a id="__codelineno-0-212" name="__codelineno-0-212"></a>    <span class="n">expected_substr</span> <span class="o">=</span> <span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">mapped_parts</span><span class="p">)</span>
+</span><span id="__span-0-213"><a id="__codelineno-0-213" name="__codelineno-0-213"></a>    <span class="n">properties_yml_name</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">clean_path_str</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">patch_path</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">name</span>
+</span><span id="__span-0-214"><a id="__codelineno-0-214" name="__codelineno-0-214"></a>
+</span><span id="__span-0-215"><a id="__codelineno-0-215" name="__codelineno-0-215"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">properties_yml_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">):</span>
+</span><span id="__span-0-216"><a id="__codelineno-0-216" name="__codelineno-0-216"></a>        <span class="n">fail</span><span class="p">(</span>
+</span><span id="__span-0-217"><a id="__codelineno-0-217" name="__codelineno-0-217"></a>            <span class="sa">f</span><span class="s2">&quot;The properties file for `</span><span class="si">{</span><span class="n">get_clean_model_name</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">unique_id</span><span class="p">)</span><span class="si">}</span><span class="s2">` (`</span><span class="si">{</span><span class="n">properties_yml_name</span><span class="si">}</span><span class="s2">`) does not start with an underscore.&quot;</span>
+</span><span id="__span-0-218"><a id="__codelineno-0-218" name="__codelineno-0-218"></a>        <span class="p">)</span>
+</span><span id="__span-0-219"><a id="__codelineno-0-219" name="__codelineno-0-219"></a>    <span class="k">if</span> <span class="n">expected_substr</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">properties_yml_name</span><span class="p">:</span>
+</span><span id="__span-0-220"><a id="__codelineno-0-220" name="__codelineno-0-220"></a>        <span class="n">fail</span><span class="p">(</span>
+</span><span id="__span-0-221"><a id="__codelineno-0-221" name="__codelineno-0-221"></a>            <span class="sa">f</span><span class="s2">&quot;The properties file for `</span><span class="si">{</span><span class="n">get_clean_model_name</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">unique_id</span><span class="p">)</span><span class="si">}</span><span class="s2">` (`</span><span class="si">{</span><span class="n">properties_yml_name</span><span class="si">}</span><span class="s2">`) does not contain the expected substring (`</span><span class="si">{</span><span class="n">expected_substr</span><span class="si">}</span><span class="s2">`).&quot;</span>
+</span><span id="__span-0-222"><a id="__codelineno-0-222" name="__codelineno-0-222"></a>        <span class="p">)</span>
+</span><span id="__span-0-223"><a id="__codelineno-0-223" name="__codelineno-0-223"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">properties_yml_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;__models.yml&quot;</span><span class="p">):</span>
+</span><span id="__span-0-224"><a id="__codelineno-0-224" name="__codelineno-0-224"></a>        <span class="n">fail</span><span class="p">(</span>
+</span><span id="__span-0-225"><a id="__codelineno-0-225" name="__codelineno-0-225"></a>            <span class="sa">f</span><span class="s2">&quot;The properties file for `</span><span class="si">{</span><span class="n">get_clean_model_name</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">unique_id</span><span class="p">)</span><span class="si">}</span><span class="s2">` (`</span><span class="si">{</span><span class="n">properties_yml_name</span><span class="si">}</span><span class="s2">`) does not end with `__models.yml`.&quot;</span>
+</span><span id="__span-0-226"><a id="__codelineno-0-226" name="__codelineno-0-226"></a>        <span class="p">)</span>
 </span></code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -3237,8 +3239,7 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/dbt_bouncer/checks/manifest/models/directories.py</code></summary>
-              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-228">228</a></span>
-<span class="normal"><a href="#__codelineno-0-229">229</a></span>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-229">229</a></span>
 <span class="normal"><a href="#__codelineno-0-230">230</a></span>
 <span class="normal"><a href="#__codelineno-0-231">231</a></span>
 <span class="normal"><a href="#__codelineno-0-232">232</a></span>
@@ -3280,50 +3281,51 @@
 <span class="normal"><a href="#__codelineno-0-268">268</a></span>
 <span class="normal"><a href="#__codelineno-0-269">269</a></span>
 <span class="normal"><a href="#__codelineno-0-270">270</a></span>
-<span class="normal"><a href="#__codelineno-0-271">271</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-228"><a id="__codelineno-0-228" name="__codelineno-0-228"></a><span class="nd">@check</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="s2">&quot;MO027&quot;</span><span class="p">)</span>
-</span><span id="__span-0-229"><a id="__codelineno-0-229" name="__codelineno-0-229"></a><span class="k">def</span><span class="w"> </span><span class="nf">check_model_schema_name</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">schema_name_pattern</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-</span><span id="__span-0-230"><a id="__codelineno-0-230" name="__codelineno-0-230"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Models must have a schema name that matches the supplied regex.</span>
-</span><span id="__span-0-231"><a id="__codelineno-0-231" name="__codelineno-0-231"></a>
-</span><span id="__span-0-232"><a id="__codelineno-0-232" name="__codelineno-0-232"></a><span class="sd">    !!! info &quot;Rationale&quot;</span>
-</span><span id="__span-0-233"><a id="__codelineno-0-233" name="__codelineno-0-233"></a>
-</span><span id="__span-0-234"><a id="__codelineno-0-234" name="__codelineno-0-234"></a><span class="sd">        Consistent schema naming (e.g. `stg_payments` for staging models or `intermediate` for intermediate ones) makes it clear where a model lives in the transformation pipeline without inspecting its SQL. This also prevents models from landing in unexpected schemas in production due to misconfigured `dbt_project.yml` settings.</span>
-</span><span id="__span-0-235"><a id="__codelineno-0-235" name="__codelineno-0-235"></a>
-</span><span id="__span-0-236"><a id="__codelineno-0-236" name="__codelineno-0-236"></a><span class="sd">    Note that most setups will use schema names in development that are prefixed, for example:</span>
-</span><span id="__span-0-237"><a id="__codelineno-0-237" name="__codelineno-0-237"></a><span class="sd">        * dbt_jdoe_stg_payments</span>
-</span><span id="__span-0-238"><a id="__codelineno-0-238" name="__codelineno-0-238"></a><span class="sd">        * mary_stg_payments</span>
-</span><span id="__span-0-239"><a id="__codelineno-0-239" name="__codelineno-0-239"></a>
-</span><span id="__span-0-240"><a id="__codelineno-0-240" name="__codelineno-0-240"></a><span class="sd">    Please account for this if you wish to run `dbt-bouncer` against locally generated manifests.</span>
-</span><span id="__span-0-241"><a id="__codelineno-0-241" name="__codelineno-0-241"></a>
-</span><span id="__span-0-242"><a id="__codelineno-0-242" name="__codelineno-0-242"></a><span class="sd">    Parameters:</span>
-</span><span id="__span-0-243"><a id="__codelineno-0-243" name="__codelineno-0-243"></a><span class="sd">        schema_name_pattern (str): Regexp the schema name must match.</span>
-</span><span id="__span-0-244"><a id="__codelineno-0-244" name="__codelineno-0-244"></a>
-</span><span id="__span-0-245"><a id="__codelineno-0-245" name="__codelineno-0-245"></a><span class="sd">    Receives:</span>
-</span><span id="__span-0-246"><a id="__codelineno-0-246" name="__codelineno-0-246"></a><span class="sd">        model (ModelNode): The ModelNode object to check.</span>
-</span><span id="__span-0-247"><a id="__codelineno-0-247" name="__codelineno-0-247"></a>
-</span><span id="__span-0-248"><a id="__codelineno-0-248" name="__codelineno-0-248"></a><span class="sd">    Other Parameters:</span>
-</span><span id="__span-0-249"><a id="__codelineno-0-249" name="__codelineno-0-249"></a><span class="sd">        description (str | None): Description of what the check does and why it is implemented.</span>
-</span><span id="__span-0-250"><a id="__codelineno-0-250" name="__codelineno-0-250"></a><span class="sd">        exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.</span>
-</span><span id="__span-0-251"><a id="__codelineno-0-251" name="__codelineno-0-251"></a><span class="sd">        include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.</span>
-</span><span id="__span-0-252"><a id="__codelineno-0-252" name="__codelineno-0-252"></a><span class="sd">        materialization (Literal[&quot;ephemeral&quot;, &quot;incremental&quot;, &quot;table&quot;, &quot;view&quot;] | None): Limit check to models with the specified materialization.</span>
-</span><span id="__span-0-253"><a id="__codelineno-0-253" name="__codelineno-0-253"></a><span class="sd">        severity (Literal[&quot;error&quot;, &quot;warn&quot;] | None): Severity level of the check. Default: `error`.</span>
-</span><span id="__span-0-254"><a id="__codelineno-0-254" name="__codelineno-0-254"></a>
-</span><span id="__span-0-255"><a id="__codelineno-0-255" name="__codelineno-0-255"></a><span class="sd">    Example(s):</span>
-</span><span id="__span-0-256"><a id="__codelineno-0-256" name="__codelineno-0-256"></a><span class="sd">        ```yaml</span>
-</span><span id="__span-0-257"><a id="__codelineno-0-257" name="__codelineno-0-257"></a><span class="sd">        manifest_checks:</span>
-</span><span id="__span-0-258"><a id="__codelineno-0-258" name="__codelineno-0-258"></a><span class="sd">            - name: check_model_schema_name</span>
-</span><span id="__span-0-259"><a id="__codelineno-0-259" name="__codelineno-0-259"></a><span class="sd">              include: ^models/intermediate</span>
-</span><span id="__span-0-260"><a id="__codelineno-0-260" name="__codelineno-0-260"></a><span class="sd">              schema_name_pattern: .*intermediate # Accounting for schemas like `dbt_jdoe_intermediate`.</span>
-</span><span id="__span-0-261"><a id="__codelineno-0-261" name="__codelineno-0-261"></a><span class="sd">            - name: check_model_schema_name</span>
-</span><span id="__span-0-262"><a id="__codelineno-0-262" name="__codelineno-0-262"></a><span class="sd">              include: ^models/staging</span>
-</span><span id="__span-0-263"><a id="__codelineno-0-263" name="__codelineno-0-263"></a><span class="sd">              schema_name_pattern: .*stg_.*</span>
-</span><span id="__span-0-264"><a id="__codelineno-0-264" name="__codelineno-0-264"></a><span class="sd">        ```</span>
-</span><span id="__span-0-265"><a id="__codelineno-0-265" name="__codelineno-0-265"></a>
-</span><span id="__span-0-266"><a id="__codelineno-0-266" name="__codelineno-0-266"></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="__span-0-267"><a id="__codelineno-0-267" name="__codelineno-0-267"></a>    <span class="n">compiled</span> <span class="o">=</span> <span class="n">compile_pattern</span><span class="p">(</span><span class="n">schema_name_pattern</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
-</span><span id="__span-0-268"><a id="__codelineno-0-268" name="__codelineno-0-268"></a>    <span class="k">if</span> <span class="n">compiled</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">schema_</span><span class="p">))</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="__span-0-269"><a id="__codelineno-0-269" name="__codelineno-0-269"></a>        <span class="n">fail</span><span class="p">(</span>
-</span><span id="__span-0-270"><a id="__codelineno-0-270" name="__codelineno-0-270"></a>            <span class="sa">f</span><span class="s2">&quot;`</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">schema_</span><span class="si">}</span><span class="s2">` does not match the supplied regex `</span><span class="si">{</span><span class="n">schema_name_pattern</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="si">}</span><span class="s2">)`.&quot;</span>
-</span><span id="__span-0-271"><a id="__codelineno-0-271" name="__codelineno-0-271"></a>        <span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-271">271</a></span>
+<span class="normal"><a href="#__codelineno-0-272">272</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-229"><a id="__codelineno-0-229" name="__codelineno-0-229"></a><span class="nd">@check</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="s2">&quot;MO027&quot;</span><span class="p">)</span>
+</span><span id="__span-0-230"><a id="__codelineno-0-230" name="__codelineno-0-230"></a><span class="k">def</span><span class="w"> </span><span class="nf">check_model_schema_name</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">schema_name_pattern</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+</span><span id="__span-0-231"><a id="__codelineno-0-231" name="__codelineno-0-231"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Models must have a schema name that matches the supplied regex.</span>
+</span><span id="__span-0-232"><a id="__codelineno-0-232" name="__codelineno-0-232"></a>
+</span><span id="__span-0-233"><a id="__codelineno-0-233" name="__codelineno-0-233"></a><span class="sd">    !!! info &quot;Rationale&quot;</span>
+</span><span id="__span-0-234"><a id="__codelineno-0-234" name="__codelineno-0-234"></a>
+</span><span id="__span-0-235"><a id="__codelineno-0-235" name="__codelineno-0-235"></a><span class="sd">        Consistent schema naming (e.g. `stg_payments` for staging models or `intermediate` for intermediate ones) makes it clear where a model lives in the transformation pipeline without inspecting its SQL. This also prevents models from landing in unexpected schemas in production due to misconfigured `dbt_project.yml` settings.</span>
+</span><span id="__span-0-236"><a id="__codelineno-0-236" name="__codelineno-0-236"></a>
+</span><span id="__span-0-237"><a id="__codelineno-0-237" name="__codelineno-0-237"></a><span class="sd">    Note that most setups will use schema names in development that are prefixed, for example:</span>
+</span><span id="__span-0-238"><a id="__codelineno-0-238" name="__codelineno-0-238"></a><span class="sd">        * dbt_jdoe_stg_payments</span>
+</span><span id="__span-0-239"><a id="__codelineno-0-239" name="__codelineno-0-239"></a><span class="sd">        * mary_stg_payments</span>
+</span><span id="__span-0-240"><a id="__codelineno-0-240" name="__codelineno-0-240"></a>
+</span><span id="__span-0-241"><a id="__codelineno-0-241" name="__codelineno-0-241"></a><span class="sd">    Please account for this if you wish to run `dbt-bouncer` against locally generated manifests.</span>
+</span><span id="__span-0-242"><a id="__codelineno-0-242" name="__codelineno-0-242"></a>
+</span><span id="__span-0-243"><a id="__codelineno-0-243" name="__codelineno-0-243"></a><span class="sd">    Parameters:</span>
+</span><span id="__span-0-244"><a id="__codelineno-0-244" name="__codelineno-0-244"></a><span class="sd">        schema_name_pattern (str): Regexp the schema name must match.</span>
+</span><span id="__span-0-245"><a id="__codelineno-0-245" name="__codelineno-0-245"></a>
+</span><span id="__span-0-246"><a id="__codelineno-0-246" name="__codelineno-0-246"></a><span class="sd">    Receives:</span>
+</span><span id="__span-0-247"><a id="__codelineno-0-247" name="__codelineno-0-247"></a><span class="sd">        model (ModelNode): The ModelNode object to check.</span>
+</span><span id="__span-0-248"><a id="__codelineno-0-248" name="__codelineno-0-248"></a>
+</span><span id="__span-0-249"><a id="__codelineno-0-249" name="__codelineno-0-249"></a><span class="sd">    Other Parameters:</span>
+</span><span id="__span-0-250"><a id="__codelineno-0-250" name="__codelineno-0-250"></a><span class="sd">        description (str | None): Description of what the check does and why it is implemented.</span>
+</span><span id="__span-0-251"><a id="__codelineno-0-251" name="__codelineno-0-251"></a><span class="sd">        exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.</span>
+</span><span id="__span-0-252"><a id="__codelineno-0-252" name="__codelineno-0-252"></a><span class="sd">        include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.</span>
+</span><span id="__span-0-253"><a id="__codelineno-0-253" name="__codelineno-0-253"></a><span class="sd">        materialization (Literal[&quot;ephemeral&quot;, &quot;incremental&quot;, &quot;table&quot;, &quot;view&quot;] | None): Limit check to models with the specified materialization.</span>
+</span><span id="__span-0-254"><a id="__codelineno-0-254" name="__codelineno-0-254"></a><span class="sd">        severity (Literal[&quot;error&quot;, &quot;warn&quot;] | None): Severity level of the check. Default: `error`.</span>
+</span><span id="__span-0-255"><a id="__codelineno-0-255" name="__codelineno-0-255"></a>
+</span><span id="__span-0-256"><a id="__codelineno-0-256" name="__codelineno-0-256"></a><span class="sd">    Example(s):</span>
+</span><span id="__span-0-257"><a id="__codelineno-0-257" name="__codelineno-0-257"></a><span class="sd">        ```yaml</span>
+</span><span id="__span-0-258"><a id="__codelineno-0-258" name="__codelineno-0-258"></a><span class="sd">        manifest_checks:</span>
+</span><span id="__span-0-259"><a id="__codelineno-0-259" name="__codelineno-0-259"></a><span class="sd">            - name: check_model_schema_name</span>
+</span><span id="__span-0-260"><a id="__codelineno-0-260" name="__codelineno-0-260"></a><span class="sd">              include: ^models/intermediate</span>
+</span><span id="__span-0-261"><a id="__codelineno-0-261" name="__codelineno-0-261"></a><span class="sd">              schema_name_pattern: .*intermediate # Accounting for schemas like `dbt_jdoe_intermediate`.</span>
+</span><span id="__span-0-262"><a id="__codelineno-0-262" name="__codelineno-0-262"></a><span class="sd">            - name: check_model_schema_name</span>
+</span><span id="__span-0-263"><a id="__codelineno-0-263" name="__codelineno-0-263"></a><span class="sd">              include: ^models/staging</span>
+</span><span id="__span-0-264"><a id="__codelineno-0-264" name="__codelineno-0-264"></a><span class="sd">              schema_name_pattern: .*stg_.*</span>
+</span><span id="__span-0-265"><a id="__codelineno-0-265" name="__codelineno-0-265"></a><span class="sd">        ```</span>
+</span><span id="__span-0-266"><a id="__codelineno-0-266" name="__codelineno-0-266"></a>
+</span><span id="__span-0-267"><a id="__codelineno-0-267" name="__codelineno-0-267"></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="__span-0-268"><a id="__codelineno-0-268" name="__codelineno-0-268"></a>    <span class="n">compiled</span> <span class="o">=</span> <span class="n">compile_pattern</span><span class="p">(</span><span class="n">schema_name_pattern</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+</span><span id="__span-0-269"><a id="__codelineno-0-269" name="__codelineno-0-269"></a>    <span class="k">if</span> <span class="n">compiled</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">schema_</span><span class="p">))</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-0-270"><a id="__codelineno-0-270" name="__codelineno-0-270"></a>        <span class="n">fail</span><span class="p">(</span>
+</span><span id="__span-0-271"><a id="__codelineno-0-271" name="__codelineno-0-271"></a>            <span class="sa">f</span><span class="s2">&quot;`</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">schema_</span><span class="si">}</span><span class="s2">` does not match the supplied regex `</span><span class="si">{</span><span class="n">schema_name_pattern</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="si">}</span><span class="s2">)`.&quot;</span>
+</span><span id="__span-0-272"><a id="__codelineno-0-272" name="__codelineno-0-272"></a>        <span class="p">)</span>
 </span></code></pre></div></td></tr></table></div>
             </details>
     </div>
