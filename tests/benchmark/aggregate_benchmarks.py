@@ -11,7 +11,7 @@ count can only be set once per run via ``DBT_BOUNCER_BENCH_MODELS``.
 Run via mise (recommended)::
 
     mise run test-benchmark-aggregate
-    mise run test-benchmark-aggregate --model-counts "100 1000 10000"
+    mise run test-benchmark-aggregate --model-counts "100 1000 12000"
 
 or directly::
 
@@ -34,7 +34,9 @@ import typer
 _FULL_RUN_BENCHMARK = "test_run_bouncer"
 
 # Model counts swept when none are supplied on the command line.
-DEFAULT_MODEL_COUNTS = [100, 250, 500, 1000, 2000, 5000, 10000]
+# The largest is 12,000. There are enterprises out there like Monzo
+# that have such large data warehouses: https://monzo.com/blog/a-meshy-approach-to-data
+DEFAULT_MODEL_COUNTS = [100, 250, 500, 1_000, 2_000, 5_000, 12_000]
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 
@@ -179,7 +181,7 @@ def main(
         str | None,
         typer.Option(
             help="Space- or comma-separated model counts to sweep "
-            "(default: 100 250 500 1000 2000 5000 10000).",
+            "(default: 100 250 500 1000 2000 5000 12000).",
         ),
     ] = None,
 ) -> None:

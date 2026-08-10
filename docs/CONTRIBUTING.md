@@ -177,7 +177,7 @@ There are two layers of performance coverage:
    mise run test-benchmark-aggregate
    ```
 
-   It runs the `test_run_bouncer` end-to-end benchmark once per model count (100, 250, 500, 1000, 2000, 5000, 10000 by default) and prints a summary table of the mean run time for each. Override the counts with `mise run test-benchmark-aggregate --model-counts "100 1000 10000"`.
+   It runs the `test_run_bouncer` end-to-end benchmark once per model count (100, 250, 500, 1000, 2000, 5000, 12000 by default) and prints a summary table of the mean run time for each. Override the counts with `mise run test-benchmark-aggregate --model-counts "100 1000 12000"`.
 
    To plot the Altair density PDF curve chart and render the bell curve directly in the terminal, run:
 
