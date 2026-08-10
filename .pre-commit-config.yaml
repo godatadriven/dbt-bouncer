@@ -28,6 +28,16 @@ repos:
 
     - repo: local
       hooks:
+        - id: matchify
+          # Runs before ruff-format so the rewritten match statements are formatted.
+          entry: uv run matchify
+          language: system
+          name: matchify
+          require_serial: true
+          types_or: [python, pyi]
+
+    - repo: local
+      hooks:
         - id: ruff
           name: ruff
           entry: uv run ruff check --force-exclude --config pyproject.toml --fix
