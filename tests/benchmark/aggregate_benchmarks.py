@@ -35,7 +35,7 @@ _FULL_RUN_BENCHMARK = "test_run_bouncer"
 
 # Model counts swept when none are supplied on the command line.
 # The largest is 12,000. There are enterprises out there like Monzo
-# That have such large data warehouses: https://monzo.com/blog/a-meshy-approach-to-data
+# that have such large data warehouses: https://monzo.com/blog/a-meshy-approach-to-data
 DEFAULT_MODEL_COUNTS = [100, 250, 500, 1_000, 2_000, 5_000, 12_000]
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
