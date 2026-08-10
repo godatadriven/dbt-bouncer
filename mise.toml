@@ -196,14 +196,14 @@ flag "--phase-rounds" help="Number of phase rounds to run" default="100" {
 '''
 
 # Model counts swept by the aggregate benchmark; override with e.g.
-# `mise run test-benchmark-aggregate --model-counts "100 1000 10000"`.
+# `mise run test-benchmark-aggregate --model-counts "100 1000 12000"`.
 [tasks.test-benchmark-aggregate]
 description = "Sweep the end-to-end benchmark across model counts and print a summary table"
 run = '''
 uv run python tests/benchmark/aggregate_benchmarks.py --models "$usage_model_counts"
 '''
 usage = '''
-flag "--model-counts" help="Space- or comma-separated model counts to sweep" default="100 250 500 1000 2000 5000 10000" {
+flag "--model-counts" help="Space- or comma-separated model counts to sweep" default="100 250 500 1000 2000 5000 12000" {
     arg <MODEL_COUNTS>
 }
 '''

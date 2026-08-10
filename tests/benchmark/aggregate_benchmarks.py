@@ -11,7 +11,7 @@ count can only be set once per run via ``DBT_BOUNCER_BENCH_MODELS``.
 Run via mise (recommended)::
 
     mise run test-benchmark-aggregate
-    mise run test-benchmark-aggregate --model-counts "100 1000 10000"
+    mise run test-benchmark-aggregate --model-counts "100 1000 12000"
 
 or directly::
 
