@@ -40,12 +40,13 @@ def check_source_has_tags(
     resource_tags = source.tags or []
     display = f"{source.source_name}.{source.name}"
 
-    if criteria == Criteria.ANY:
-        if not any(tag in resource_tags for tag in tags):
-            fail(f"`{display}` does not have any of the required tags: {tags}.")
-    elif criteria == Criteria.ALL:
-        missing_tags = [tag for tag in tags if tag not in resource_tags]
-        if missing_tags:
-            fail(f"`{display}` is missing required tags: {missing_tags}.")
-    elif criteria == Criteria.ONE and sum(tag in resource_tags for tag in tags) != 1:
-        fail(f"`{display}` must have exactly one of the required tags: {tags}.")
+    match criteria:
+        case Criteria.ANY:
+            if not any(tag in resource_tags for tag in tags):
+                fail(f"`{display}` does not have any of the required tags: {tags}.")
+        case Criteria.ALL:
+            missing_tags = [tag for tag in tags if tag not in resource_tags]
+            if missing_tags:
+                fail(f"`{display}` is missing required tags: {missing_tags}.")
+        case Criteria.ONE if sum(tag in resource_tags for tag in tags) != 1:
+            fail(f"`{display}` must have exactly one of the required tags: {tags}.")

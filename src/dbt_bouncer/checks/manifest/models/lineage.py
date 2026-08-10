@@ -54,26 +54,26 @@ def check_model_depends_on_macros(
         (".").join(m.split(".")[1:])
         for m in getattr(model.depends_on, "macros", []) or []
     ]
-    if criteria == Criteria.ANY:
-        if not any(macro in upstream_macros for macro in required_macros):
+    match criteria:
+        case Criteria.ANY:
+            if not any(macro in upstream_macros for macro in required_macros):
+                fail(
+                    f"`{get_clean_model_name(model.unique_id)}` does not depend on any of the required macros: {required_macros}."
+                )
+        case Criteria.ALL:
+            missing_macros = [
+                macro for macro in required_macros if macro not in upstream_macros
+            ]
+            if missing_macros:
+                fail(
+                    f"`{get_clean_model_name(model.unique_id)}` is missing required macros: {missing_macros}."
+                )
+        case Criteria.ONE if (
+            sum(macro in upstream_macros for macro in required_macros) != 1
+        ):
             fail(
-                f"`{get_clean_model_name(model.unique_id)}` does not depend on any of the required macros: {required_macros}."
+                f"`{get_clean_model_name(model.unique_id)}` must depend on exactly one of the required macros: {required_macros}."
             )
-    elif criteria == Criteria.ALL:
-        missing_macros = [
-            macro for macro in required_macros if macro not in upstream_macros
-        ]
-        if missing_macros:
-            fail(
-                f"`{get_clean_model_name(model.unique_id)}` is missing required macros: {missing_macros}."
-            )
-    elif (
-        criteria == Criteria.ONE
-        and sum(macro in upstream_macros for macro in required_macros) != 1
-    ):
-        fail(
-            f"`{get_clean_model_name(model.unique_id)}` must depend on exactly one of the required macros: {required_macros}."
-        )
 
 
 @check(code="MO029")

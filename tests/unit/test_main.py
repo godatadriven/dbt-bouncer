@@ -162,24 +162,27 @@ def test_cli_output_formats(output_format, output_file_suffix, is_json, tmp_path
     # shared JSON check.
     if is_json:
         assert json.loads(output_file.read_bytes())
-    if output_format == "csv":
-        assert "check_run_id" in content
-        assert "file_path" in content
-        assert "unique_id" in content
-    elif output_format == "junit":
-        assert "<?xml" in content
-        assert "testsuite" in content
-        assert "file=" in content
-    elif output_format == "sarif":
-        sarif = json.loads(content)
-        failed = [
-            r for r in sarif["runs"][0]["results"] if r["level"] in ("error", "warning")
-        ]
-        assert failed, "expected at least one failing SARIF result"
-        location = failed[0]["locations"][0]["physicalLocation"]
-        assert location["artifactLocation"]["uri"]
-    elif output_format == "tap":
-        assert content.startswith("TAP version 13")
+    match output_format:
+        case "csv":
+            assert "check_run_id" in content
+            assert "file_path" in content
+            assert "unique_id" in content
+        case "junit":
+            assert "<?xml" in content
+            assert "testsuite" in content
+            assert "file=" in content
+        case "sarif":
+            sarif = json.loads(content)
+            failed = [
+                r
+                for r in sarif["runs"][0]["results"]
+                if r["level"] in ("error", "warning")
+            ]
+            assert failed, "expected at least one failing SARIF result"
+            location = failed[0]["locations"][0]["physicalLocation"]
+            assert location["artifactLocation"]["uri"]
+        case "tap":
+            assert content.startswith("TAP version 13")
     assert result.exit_code == 1  # checks fail due to invalid directories
 
 

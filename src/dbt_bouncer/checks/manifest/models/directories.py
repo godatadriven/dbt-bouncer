@@ -199,14 +199,15 @@ def check_model_property_file_location(
 
     mapped_parts = []
     for part in relevant_parts:
-        if part == "staging":
-            mapped_parts.append("stg")
-        elif part == "intermediate":
-            mapped_parts.append("int")
-        elif part == "marts":
-            continue
-        else:
-            mapped_parts.append(part)
+        match part:
+            case "staging":
+                mapped_parts.append("stg")
+            case "intermediate":
+                mapped_parts.append("int")
+            case "marts":
+                continue
+            case _:
+                mapped_parts.append(part)
 
     expected_substr = "_".join(mapped_parts)
     properties_yml_name = Path(clean_path_str(model.patch_path or "")).name

@@ -117,38 +117,39 @@ def _model_node(idx: int, layer: str, pkg: str, parents: list[str]) -> dict[str,
     Returns:
         A raw model-node dict.
     """
-    if layer == "staging":
-        sub = "crm" if idx % 2 == 0 else "payments"
-        name = f"stg_{sub}_{idx}"
-        path = f"staging/{sub}/{name}.sql"
-        original_file_path = f"models/staging/{sub}/{name}.sql"
-        fqn = [pkg, "staging", sub, name]
-        materialized = "view"
-        schema = f"stg_{sub}"
-        access = "protected"
-        enforced = False
-        constraints: list[dict[str, Any]] = []
-    elif layer == "intermediate":
-        name = f"int_{idx}"
-        path = f"intermediate/{name}.sql"
-        original_file_path = f"models/intermediate/{name}.sql"
-        fqn = [pkg, "intermediate", name]
-        materialized = "ephemeral"
-        schema = "intermediate"
-        access = "protected"
-        enforced = False
-        constraints = []
-    else:  # marts
-        prefix = "fct" if idx % 2 == 0 else "dim"
-        name = f"{prefix}_{idx}"
-        path = f"marts/finance/{name}.sql"
-        original_file_path = f"models/marts/finance/{name}.sql"
-        fqn = [pkg, "marts", "finance", name]
-        materialized = "table"
-        schema = "marts"
-        access = "public"
-        enforced = True
-        constraints = [{"type": "primary_key", "columns": ["col_0"]}]
+    match layer:
+        case "staging":
+            sub = "crm" if idx % 2 == 0 else "payments"
+            name = f"stg_{sub}_{idx}"
+            path = f"staging/{sub}/{name}.sql"
+            original_file_path = f"models/staging/{sub}/{name}.sql"
+            fqn = [pkg, "staging", sub, name]
+            materialized = "view"
+            schema = f"stg_{sub}"
+            access = "protected"
+            enforced = False
+            constraints: list[dict[str, Any]] = []
+        case "intermediate":
+            name = f"int_{idx}"
+            path = f"intermediate/{name}.sql"
+            original_file_path = f"models/intermediate/{name}.sql"
+            fqn = [pkg, "intermediate", name]
+            materialized = "ephemeral"
+            schema = "intermediate"
+            access = "protected"
+            enforced = False
+            constraints = []
+        case _:  # marts
+            prefix = "fct" if idx % 2 == 0 else "dim"
+            name = f"{prefix}_{idx}"
+            path = f"marts/finance/{name}.sql"
+            original_file_path = f"models/marts/finance/{name}.sql"
+            fqn = [pkg, "marts", "finance", name]
+            materialized = "table"
+            schema = "marts"
+            access = "public"
+            enforced = True
+            constraints = [{"type": "primary_key", "columns": ["col_0"]}]
 
     unique_id = f"model.{pkg}.{name}"
     columns = _columns(3)
