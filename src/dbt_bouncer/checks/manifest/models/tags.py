@@ -39,12 +39,17 @@ def check_model_has_tags(model, *, criteria: Criteria = Criteria.ALL, tags: list
     """
     resource_tags = model.tags or []
     display_name = get_clean_model_name(model.unique_id)
-    if criteria == Criteria.ANY:
-        if not any(tag in resource_tags for tag in tags):
-            fail(f"`{display_name}` does not have any of the required tags: {tags}.")
-    elif criteria == Criteria.ALL:
-        missing_tags = [tag for tag in tags if tag not in resource_tags]
-        if missing_tags:
-            fail(f"`{display_name}` is missing required tags: {missing_tags}.")
-    elif criteria == Criteria.ONE and sum(tag in resource_tags for tag in tags) != 1:
-        fail(f"`{display_name}` must have exactly one of the required tags: {tags}.")
+    match criteria:
+        case Criteria.ANY:
+            if not any(tag in resource_tags for tag in tags):
+                fail(
+                    f"`{display_name}` does not have any of the required tags: {tags}."
+                )
+        case Criteria.ALL:
+            missing_tags = [tag for tag in tags if tag not in resource_tags]
+            if missing_tags:
+                fail(f"`{display_name}` is missing required tags: {missing_tags}.")
+        case Criteria.ONE if sum(tag in resource_tags for tag in tags) != 1:
+            fail(
+                f"`{display_name}` must have exactly one of the required tags: {tags}."
+            )

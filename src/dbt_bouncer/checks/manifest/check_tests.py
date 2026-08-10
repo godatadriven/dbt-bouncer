@@ -72,15 +72,20 @@ def check_test_has_tags(test, *, criteria: Criteria = Criteria.ALL, tags: list[s
 
     """
     resource_tags = test.tags or []
-    if criteria == Criteria.ANY:
-        if not any(tag in resource_tags for tag in tags):
-            fail(f"`{test.unique_id}` does not have any of the required tags: {tags}.")
-    elif criteria == Criteria.ALL:
-        missing_tags = [tag for tag in tags if tag not in resource_tags]
-        if missing_tags:
-            fail(f"`{test.unique_id}` is missing required tags: {missing_tags}.")
-    elif criteria == Criteria.ONE and sum(tag in resource_tags for tag in tags) != 1:
-        fail(f"`{test.unique_id}` must have exactly one of the required tags: {tags}.")
+    match criteria:
+        case Criteria.ANY:
+            if not any(tag in resource_tags for tag in tags):
+                fail(
+                    f"`{test.unique_id}` does not have any of the required tags: {tags}."
+                )
+        case Criteria.ALL:
+            missing_tags = [tag for tag in tags if tag not in resource_tags]
+            if missing_tags:
+                fail(f"`{test.unique_id}` is missing required tags: {missing_tags}.")
+        case Criteria.ONE if sum(tag in resource_tags for tag in tags) != 1:
+            fail(
+                f"`{test.unique_id}` must have exactly one of the required tags: {tags}."
+            )
 
 
 @check(code="TE003")

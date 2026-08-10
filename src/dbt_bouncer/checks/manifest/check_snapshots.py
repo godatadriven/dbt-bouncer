@@ -130,15 +130,20 @@ def check_snapshot_has_tags(
 
     """
     resource_tags = snapshot.tags or []
-    if criteria == Criteria.ANY:
-        if not any(tag in resource_tags for tag in tags):
-            fail(f"`{snapshot.name}` does not have any of the required tags: {tags}.")
-    elif criteria == Criteria.ALL:
-        missing_tags = [tag for tag in tags if tag not in resource_tags]
-        if missing_tags:
-            fail(f"`{snapshot.name}` is missing required tags: {missing_tags}.")
-    elif criteria == Criteria.ONE and sum(tag in resource_tags for tag in tags) != 1:
-        fail(f"`{snapshot.name}` must have exactly one of the required tags: {tags}.")
+    match criteria:
+        case Criteria.ANY:
+            if not any(tag in resource_tags for tag in tags):
+                fail(
+                    f"`{snapshot.name}` does not have any of the required tags: {tags}."
+                )
+        case Criteria.ALL:
+            missing_tags = [tag for tag in tags if tag not in resource_tags]
+            if missing_tags:
+                fail(f"`{snapshot.name}` is missing required tags: {missing_tags}.")
+        case Criteria.ONE if sum(tag in resource_tags for tag in tags) != 1:
+            fail(
+                f"`{snapshot.name}` must have exactly one of the required tags: {tags}."
+            )
 
 
 @check(code="SN004")
