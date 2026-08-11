@@ -98,7 +98,7 @@ description = "Build dbt 2.0 (Fusion) test artifacts"
 #              nothing), so it targets a scratch path and only catalog.json is kept.
 run = """
 PYTHON_INTERPRETER_CONSTRAINT=$(cat .python-version)
-DBT_20="uvx --python ==${PYTHON_INTERPRETER_CONSTRAINT} --prerelease=allow --with dbt-duckdb~=1.10.0 --from dbt-core>=2.0.0a5,<3 dbt"
+DBT_20="uvx --python ==${PYTHON_INTERPRETER_CONSTRAINT} --prerelease=allow --with dbt-duckdb~=1.10.0 --from dbt-core>=2.0.0b1,<3 dbt"
 $DBT_20 build --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_20
 $DBT_20 compile --write-catalog --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_20_catalog
 mv ./dbt_project/target_20_catalog/catalog.json ./dbt_project/target_20/catalog.json

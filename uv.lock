@@ -395,7 +395,7 @@ docs = [
 requires-dist = [
     { name = "altair", marker = "extra == 'dev'", specifier = ">=6.0,<7" },
     { name = "bandit", marker = "extra == 'dev'", specifier = "~=1.0" },
-    { name = "dbt-core", marker = "extra == 'dev'", specifier = ">=2.0.0a5,<3" },
+    { name = "dbt-core", marker = "extra == 'dev'", specifier = ">=2.0.0b1,<3" },
     { name = "dbt-duckdb", marker = "extra == 'dev'", specifier = "~=1.0" },
     { name = "jellyfish", specifier = ">=1,<2" },
     { name = "jinja2", specifier = ">=3,<4" },
@@ -459,9 +459,9 @@ wheels = [
 
 [[package]]
 name = "dbt-core"
-version = "2.0.0a5"
+version = "2.0.0b1"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/50/58/666da55b1c6ee9601152251a7c609e10a6eb79d612e31eff8dd465881b77/dbt_core-2.0.0a5.tar.gz", hash = "sha256:96979413e7c1f4d873113f1c6e5b7f346dadd03a9c26506b045a0d83b664ec79", size = 4460, upload-time = "2026-07-20T10:04:17.875Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/78/18/8579322465fbf8cca0ac822b845c3c53a419d584f509cf6c8d29e267a0c8/dbt_core-2.0.0b1.tar.gz", hash = "sha256:5ab55d4156cf5bf47ab27f8e5f7ab25bbaee7248f09b92de83a7ec9464750d3a", size = 4454, upload-time = "2026-08-10T15:36:56.16Z" }
 
 [[package]]
 name = "dbt-duckdb"
