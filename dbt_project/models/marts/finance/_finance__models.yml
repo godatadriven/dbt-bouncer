@@ -18,6 +18,7 @@ models:
         constraints:
           - type: primary_key
             columns: [customer_id_pk]
+            warn_unenforced: false
         columns:
           - name: customer_id_pk
             data_type: bigint
@@ -82,6 +83,7 @@ models:
         constraints:
           - type: primary_key
             columns: [customer_id]
+            warn_unenforced: false
         columns:
           - name: customer_id
             data_type: bigint
@@ -146,6 +148,7 @@ models:
         constraints:
           - type: primary_key
             columns: [customer_id]
+            warn_unenforced: false
         columns:
           - name: customer_id
             data_type: bigint
@@ -223,6 +226,7 @@ models:
     constraints:
       - type: primary_key
         columns: [order_id_pk]
+        warn_unenforced: false
 
     columns:
       - name: order_id_pk
