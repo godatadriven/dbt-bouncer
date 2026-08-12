@@ -38,6 +38,9 @@
     <img alt="dbt Cloud Supported" src="https://img.shields.io/badge/dbt%20Cloud%20-Supported-ff694a?logo=dbt">
   </a>
   <a>
+    <img alt="dbt Fusion Supported" src="https://img.shields.io/badge/dbt%20Fusion%20-Supported-ff694a?logo=dbt">
+  </a>
+  <a>
     <img alt="Docker Supported" src="https://img.shields.io/badge/Docker%20-Supported-0db7ed?logo=docker">
   </a>
   <a>
