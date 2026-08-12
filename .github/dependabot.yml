@@ -4,7 +4,11 @@ updates:
     - package-ecosystem: github-actions
       cooldown:
         default-days: 14
-      directory: /
+      # "/" scans .github/workflows; the globs cover composite actions under
+      # .github/actions, which the "/" root does not reach.
+      directories:
+        - /
+        - /.github/actions/*
       schedule:
           interval: monthly
     - package-ecosystem: pip
