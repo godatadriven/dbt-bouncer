@@ -53,3 +53,29 @@
                 - name: Regenerate dbt artifacts and run `dbt-bouncer`
                   run: |
                     (r=3;while ! mise run build-and-run-dbt-bouncer ; do ((--r))||exit;done)
+
+        dbt-fusion:
+            permissions:
+              contents: read
+            runs-on: ubuntu-24.04
+            steps:
+                - name: Checkout
+                  uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+                  with:
+                    persist-credentials: false
+
+                - name: Setup Python
+                  uses: ./.github/actions/setup_python_env
+
+                - name: Install latest native dbt Fusion CLI
+                  run: |
+                    export SHELL=/bin/bash
+                    curl -fsSL https://public.cdn.getdbt.com/fs/install/install.sh | sh -s -- --update
+                    echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+                    # Log the installed version. The probe tracks the latest Fusion
+                    # release on purpose, so this makes drift failures easy to trace.
+                    "$HOME/.local/bin/dbt" --version
+
+                - name: Regenerate dbt artifacts and run `dbt-bouncer`
+                  run: |
+                    (r=3;while ! mise run build-and-run-dbt-bouncer-fusion ; do ((--r))||exit;done)

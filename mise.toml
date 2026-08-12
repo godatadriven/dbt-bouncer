@@ -47,6 +47,22 @@ run = [
   "uv run dbt-bouncer --config-file ./dbt-bouncer-example.yml",
 ]
 
+# This task uses the native dbt Fusion binary. It must be on PATH as `dbt` (the
+# probe CI job installs it). Do NOT use `uv run dbt` here: that is Python dbt-core.
+# The probe is manifest-only, via `dbt parse`. Catalog coverage would need a
+# successful `dbt build` first, but the native Fusion engine currently fails this
+# project's enforced `orders` contract: it resolves the seed integer columns to
+# bigint, which mismatches the integer contract. `dbt parse` skips execution, so it
+# is not affected. This still validates that dbt-bouncer accepts the manifest the
+# native Fusion engine emits.
+[tasks.build-and-run-dbt-bouncer-fusion]
+description = "Parse the test project with the native dbt Fusion CLI and run manifest checks"
+run = [
+  "dbt deps --profiles-dir ./dbt_project --project-dir ./dbt_project",
+  "dbt parse --profiles-dir ./dbt_project --project-dir ./dbt_project",
+  "uv run dbt-bouncer --config-file ./.github/dbt-bouncer-fusion-probe.yml",
+]
+
 # Each version-specific task uses --target-path to write compiled artifacts to
 # an isolated directory. The DuckDB database is NOT isolated: every task shares
 # the same `path: ./dbt.duckdb` from profiles.yml. The `dbt docs generate` step
