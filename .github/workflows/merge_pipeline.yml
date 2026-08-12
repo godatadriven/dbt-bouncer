@@ -29,7 +29,7 @@
             run: pip install git+https://github.com/godatadriven/dbt-bouncer.git@${{ github.sha }}
 
           - name: Install bencher
-            uses: bencherdev/bencher@50fb1e138651a46d2fb704fab1adab38c181552e # v0.6.6
+            uses: bencherdev/bencher@4c83b25441d145ee273adaf74be30f2382e6ba85 # v0.6.11
 
           - name: Install Hyperfine
             uses: taiki-e/install-action@b8cecb83565409bcc297b2df6e77f030b2a468d5 # v2
@@ -69,7 +69,7 @@
             uses: ./.github/actions/setup_python_env
 
           - name: Install bencher
-            uses: bencherdev/bencher@50fb1e138651a46d2fb704fab1adab38c181552e # v0.6.6
+            uses: bencherdev/bencher@4c83b25441d145ee273adaf74be30f2382e6ba85 # v0.6.11
 
           - name: Run code-level benchmarks
             run: mise run test-benchmark
