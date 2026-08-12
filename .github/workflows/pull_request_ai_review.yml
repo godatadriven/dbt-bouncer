@@ -20,7 +20,7 @@ jobs:
       # local `./_pr_resolver/...` action below is available (workflow_run runs
       # do not check out the repo by default).
       - name: Check out composite actions
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           path: _pr_resolver
           persist-credentials: false
@@ -32,7 +32,7 @@ jobs:
 
       - name: Checkout PR Head
         if: steps.export.outputs.skip != 'true'
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           # Required to check out fork PR heads from this workflow_run job.
           # Accepted here because the job only reads the diff and runs a
