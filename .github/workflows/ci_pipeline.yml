@@ -25,7 +25,7 @@ jobs:
         runs-on: ubuntu-24.04
         steps:
             - name: Checkout
-              uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
               with:
                 fetch-depth: "0"
                 persist-credentials: false
@@ -57,7 +57,7 @@ jobs:
         runs-on: ubuntu-24.04
         steps:
             - name: Checkout
-              uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
               with:
                 persist-credentials: false
 
@@ -96,7 +96,7 @@ jobs:
                     - '3.13'
                     - '3.14'
         steps:
-            - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
               with:
                 persist-credentials: false
 
@@ -138,7 +138,7 @@ jobs:
           contents: read
         runs-on: ubuntu-24.04
         steps:
-          - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+          - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
             with:
               persist-credentials: false
 
@@ -169,7 +169,7 @@ jobs:
           contents: read
         runs-on: ubuntu-24.04
         steps:
-          - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+          - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
             with:
               persist-credentials: false
 
@@ -191,7 +191,7 @@ jobs:
         contents: read
       runs-on: ubuntu-24.04
       steps:
-        - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+        - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
           with:
             persist-credentials: false
 
@@ -217,7 +217,7 @@ jobs:
         runs-on: ubuntu-24.04
         steps:
             - name: Checkout
-              uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
               with:
                 persist-credentials: false
 
@@ -262,7 +262,7 @@ jobs:
       runs-on: ubuntu-24.04
       steps:
           - name: Checkout
-            uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+            uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
             with:
               persist-credentials: false
 
