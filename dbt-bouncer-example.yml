@@ -120,6 +120,28 @@ manifest_checks:
     access: protected
   - name: check_model_code_does_not_contain_regexp_pattern
     regexp_pattern: .*[i][f][n][u][l][l].*
+  # The `check_model_column_*` checks are manifest-only analogues of the
+  # `check_column_*` catalog checks above: they validate the columns declared in
+  # a model's properties file and so do not require `catalog.json`.
+  - name: check_model_column_description_populated
+    include: ^models/marts
+  - name: check_model_column_has_specified_test
+    column_name_pattern: ^is_.*
+    test_name: not_null
+  # Unlike the catalog checks, data types come from the `data_type` declared in
+  # the properties file and are compared verbatim, so the casing here must match
+  # how the types are written in the `.yml` files.
+  - name: check_model_column_name_complies_to_column_type
+    column_name_pattern: ^is_.*
+    types:
+      - boolean
+  - name: check_model_column_names
+    column_name_pattern: >
+      [a-z_]*
+  - name: check_model_column_type_complies_to_column_name
+    column_name_pattern: ^(is|has)_.*
+    types:
+      - boolean
   - name: check_model_columns_have_relationship_tests
     column_name_pattern: "_fk$"
   - name: check_model_columns_have_meta_keys

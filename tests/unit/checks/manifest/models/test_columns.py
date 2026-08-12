@@ -658,3 +658,479 @@ class TestCheckModelSinglePrimaryKey:
             },
             match=r"has more than one column-level primary key constraint: \['col_1', 'col_2'\]",
         )
+
+
+def _typed_cols(**names_to_types: str | None) -> dict:
+    """Build a `columns` dict from column name -> declared `data_type`.
+
+    A `None` type produces a column with no `data_type` declared at all,
+    mirroring a properties file that omits the key.
+
+    Returns:
+        dict: A `columns` mapping keyed by column name.
+
+    """
+    return {
+        name: {"name": name}
+        if data_type is None
+        else {"name": name, "data_type": data_type}
+        for name, data_type in names_to_types.items()
+    }
+
+
+def _col_test(column_name: str, *, name: str = "not_null") -> dict:
+    """Build a column-level test node attached to the default model.
+
+    Returns:
+        dict: A manifest test node dict.
+
+    """
+    return {"column_name": column_name, "test_metadata": {"name": name}}
+
+
+class TestCheckModelColumnHasSpecifiedTest:
+    @pytest.mark.parametrize(
+        ("model_override", "ctx_tests", "check_fn"),
+        [
+            pytest.param(
+                {"columns": _cols("is_active")},
+                [_col_test("is_active")],
+                check_passes,
+                id="matching_column_has_test",
+            ),
+            pytest.param(
+                {"columns": _cols("is_active", "customer_id")},
+                [_col_test("is_active")],
+                check_passes,
+                id="non_matching_column_needs_no_test",
+            ),
+            pytest.param(
+                {"columns": _cols("customer_id")},
+                [],
+                check_passes,
+                id="no_columns_match_pattern",
+            ),
+            pytest.param({"columns": {}}, [], check_passes, id="no_columns"),
+            pytest.param({"columns": None}, [], check_passes, id="columns_is_none"),
+            pytest.param(
+                {"columns": _cols("is_active")},
+                [],
+                check_fails,
+                id="matching_column_has_no_tests",
+            ),
+            pytest.param(
+                {"columns": _cols("is_active")},
+                [_col_test("is_active", name="unique")],
+                check_fails,
+                id="matching_column_has_a_different_test",
+            ),
+            pytest.param(
+                {"columns": _cols("is_active", "is_deleted")},
+                [_col_test("is_active")],
+                check_fails,
+                id="one_of_two_matching_columns_untested",
+            ),
+            # A model-level test carries no `column_name`, so it must not be
+            # treated as covering a column.
+            pytest.param(
+                {"columns": _cols("is_active")},
+                [{"column_name": "", "test_metadata": {"name": "not_null"}}],
+                check_fails,
+                id="model_level_test_does_not_count",
+            ),
+            pytest.param(
+                {"columns": _cols("is_active")},
+                [{"column_name": "is_active", "test_metadata": None}],
+                check_fails,
+                id="test_without_test_metadata",
+            ),
+        ],
+    )
+    def test_check_model_column_has_specified_test(
+        self, model_override, ctx_tests, check_fn
+    ):
+        check_fn(
+            "check_model_column_has_specified_test",
+            column_name_pattern="^is_.*",
+            test_name="not_null",
+            model=model_override,
+            ctx_tests=ctx_tests,
+        )
+
+    def test_failure_message_lists_untested_columns(self):
+        check_fails(
+            "check_model_column_has_specified_test",
+            column_name_pattern="^is_.*",
+            test_name="not_null",
+            model={"columns": _cols("is_active", "is_deleted")},
+            ctx_tests=[],
+            match=r"has columns that should have a `not_null` test: \['is_active', 'is_deleted'\]",
+        )
+
+    def test_tests_attached_to_another_model_are_ignored(self):
+        # `tests_by_attached_node` is keyed by `attached_node`, so a test on a
+        # different model must not satisfy this model's requirement.
+        check_fails(
+            "check_model_column_has_specified_test",
+            column_name_pattern="^is_.*",
+            test_name="not_null",
+            model={"columns": _cols("is_active")},
+            ctx_tests=[
+                {
+                    "attached_node": "model.package_name.model_2",
+                    "column_name": "is_active",
+                    "test_metadata": {"name": "not_null"},
+                },
+            ],
+        )
+
+
+class TestCheckModelColumnDescriptionPopulated:
+    @pytest.mark.parametrize(
+        ("min_description_length", "model_override", "check_fn"),
+        [
+            pytest.param(
+                None,
+                {"columns": {"col_1": {"name": "col_1", "description": "A column."}}},
+                check_passes,
+                id="populated_description",
+            ),
+            pytest.param(None, {"columns": {}}, check_passes, id="no_columns"),
+            pytest.param(None, {"columns": None}, check_passes, id="columns_is_none"),
+            pytest.param(
+                25,
+                {
+                    "columns": {
+                        "col_1": {
+                            "name": "col_1",
+                            "description": "A description that is comfortably long enough.",
+                        },
+                    },
+                },
+                check_passes,
+                id="meets_custom_min_description_length",
+            ),
+            pytest.param(
+                None,
+                {"columns": {"col_1": {"name": "col_1", "description": ""}}},
+                check_fails,
+                id="empty_description",
+            ),
+            pytest.param(
+                None,
+                {"columns": {"col_1": {"name": "col_1"}}},
+                check_fails,
+                id="description_absent",
+            ),
+            pytest.param(
+                None,
+                {"columns": {"col_1": {"name": "col_1", "description": "n/a"}}},
+                check_fails,
+                id="placeholder_description",
+            ),
+            pytest.param(
+                None,
+                {"columns": {"col_1": {"name": "col_1", "description": "abc"}}},
+                check_fails,
+                id="shorter_than_default_min_length",
+            ),
+            pytest.param(
+                25,
+                {"columns": {"col_1": {"name": "col_1", "description": "A column."}}},
+                check_fails,
+                id="shorter_than_custom_min_description_length",
+            ),
+        ],
+    )
+    def test_check_model_column_description_populated(
+        self, min_description_length, model_override, check_fn
+    ):
+        check_fn(
+            "check_model_column_description_populated",
+            min_description_length=min_description_length,
+            model=model_override,
+        )
+
+    def test_failure_message_lists_undocumented_columns(self):
+        check_fails(
+            "check_model_column_description_populated",
+            model={
+                "columns": {
+                    "col_1": {"name": "col_1", "description": ""},
+                    "col_2": {"name": "col_2", "description": "A documented column."},
+                    "col_3": {"name": "col_3"},
+                },
+            },
+            match=r"has columns that do not have a populated description: \['col_1', 'col_3'\]",
+        )
+
+
+class TestCheckModelColumnNameCompliesToColumnType:
+    @pytest.mark.parametrize(
+        ("kwargs", "model_override", "check_fn"),
+        [
+            pytest.param(
+                {"types": ["BOOLEAN"]},
+                {"columns": _typed_cols(is_active="BOOLEAN")},
+                check_passes,
+                id="types_complying",
+            ),
+            pytest.param(
+                {"type_pattern": "^BOOL"},
+                {"columns": _typed_cols(is_active="BOOLEAN")},
+                check_passes,
+                id="type_pattern_complying",
+            ),
+            pytest.param(
+                {"types": ["BOOLEAN"]},
+                {"columns": _typed_cols(customer_id="INTEGER")},
+                check_passes,
+                id="column_name_does_not_match_pattern",
+            ),
+            # `data_type` is optional in a properties file, so a column without
+            # one is skipped rather than failed (see check_model_columns_have_types).
+            pytest.param(
+                {"types": ["BOOLEAN"]},
+                {"columns": _typed_cols(is_active=None)},
+                check_passes,
+                id="no_declared_data_type_is_skipped",
+            ),
+            pytest.param(
+                {"type_pattern": "^BOOL"},
+                {"columns": _typed_cols(is_active=None)},
+                check_passes,
+                id="no_declared_data_type_is_skipped_type_pattern",
+            ),
+            pytest.param(
+                {"types": ["BOOLEAN"]}, {"columns": {}}, check_passes, id="no_columns"
+            ),
+            pytest.param(
+                {"types": ["BOOLEAN"]},
+                {"columns": None},
+                check_passes,
+                id="columns_is_none",
+            ),
+            pytest.param(
+                {"types": ["BOOLEAN"]},
+                {"columns": _typed_cols(is_active="INTEGER")},
+                check_fails,
+                id="types_non_complying",
+            ),
+            pytest.param(
+                {"type_pattern": "^BOOL"},
+                {"columns": _typed_cols(is_active="INTEGER")},
+                check_fails,
+                id="type_pattern_non_complying",
+            ),
+            pytest.param(
+                {"types": ["BOOLEAN"]},
+                {"columns": _typed_cols(is_active="BOOLEAN", is_deleted="INTEGER")},
+                check_fails,
+                id="one_of_two_matching_columns_non_complying",
+            ),
+        ],
+    )
+    def test_check_model_column_name_complies_to_column_type(
+        self, kwargs, model_override, check_fn
+    ):
+        check_fn(
+            "check_model_column_name_complies_to_column_type",
+            column_name_pattern="^is_.*",
+            model=model_override,
+            **kwargs,
+        )
+
+    @pytest.mark.parametrize(
+        ("kwargs", "match"),
+        [
+            pytest.param(
+                {},
+                r"Either 'type_pattern' or 'types' must be supplied\.",
+                id="neither_supplied",
+            ),
+            pytest.param(
+                {"type_pattern": "^BOOL", "types": ["BOOLEAN"]},
+                r"Only one of 'type_pattern' or 'types' can be supplied\.",
+                id="both_supplied",
+            ),
+        ],
+    )
+    def test_type_arguments_are_mutually_exclusive_and_required(self, kwargs, match):
+        check_fails(
+            "check_model_column_name_complies_to_column_type",
+            expected_exception=ValueError,
+            match=match,
+            column_name_pattern="^is_.*",
+            model={"columns": _typed_cols(is_active="BOOLEAN")},
+            **kwargs,
+        )
+
+    def test_failure_message_lists_non_complying_columns(self):
+        check_fails(
+            "check_model_column_name_complies_to_column_type",
+            column_name_pattern="^is_.*",
+            types=["BOOLEAN"],
+            model={"columns": _typed_cols(is_active="INTEGER")},
+            match=r"has columns matching `\^is_\.\*` whose declared data type is not in \['BOOLEAN'\]: \['is_active'\]",
+        )
+
+
+class TestCheckModelColumnTypeCompliesToColumnName:
+    @pytest.mark.parametrize(
+        ("kwargs", "model_override", "check_fn"),
+        [
+            pytest.param(
+                {"types": ["BOOLEAN"]},
+                {"columns": _typed_cols(is_active="BOOLEAN")},
+                check_passes,
+                id="types_complying",
+            ),
+            pytest.param(
+                {"type_pattern": "^BOOL"},
+                {"columns": _typed_cols(is_active="BOOLEAN")},
+                check_passes,
+                id="type_pattern_complying",
+            ),
+            pytest.param(
+                {"types": ["BOOLEAN"]},
+                {"columns": _typed_cols(customer_id="INTEGER")},
+                check_passes,
+                id="type_not_in_scope",
+            ),
+            pytest.param(
+                {"types": ["BOOLEAN"]},
+                {"columns": _typed_cols(customer_id=None)},
+                check_passes,
+                id="no_declared_data_type_is_skipped",
+            ),
+            pytest.param(
+                {"type_pattern": ".*"},
+                {"columns": _typed_cols(customer_id=None)},
+                check_passes,
+                id="no_declared_data_type_is_skipped_type_pattern",
+            ),
+            pytest.param(
+                {"types": ["BOOLEAN"]}, {"columns": {}}, check_passes, id="no_columns"
+            ),
+            pytest.param(
+                {"types": ["BOOLEAN"]},
+                {"columns": None},
+                check_passes,
+                id="columns_is_none",
+            ),
+            pytest.param(
+                {"types": ["BOOLEAN"]},
+                {"columns": _typed_cols(active_flag="BOOLEAN")},
+                check_fails,
+                id="types_non_complying_name",
+            ),
+            pytest.param(
+                {"type_pattern": "^BOOL"},
+                {"columns": _typed_cols(active_flag="BOOLEAN")},
+                check_fails,
+                id="type_pattern_non_complying_name",
+            ),
+            pytest.param(
+                {"types": ["BOOLEAN"]},
+                {"columns": _typed_cols(is_active="BOOLEAN", active_flag="BOOLEAN")},
+                check_fails,
+                id="one_of_two_typed_columns_non_complying",
+            ),
+        ],
+    )
+    def test_check_model_column_type_complies_to_column_name(
+        self, kwargs, model_override, check_fn
+    ):
+        check_fn(
+            "check_model_column_type_complies_to_column_name",
+            column_name_pattern="^is_.*",
+            model=model_override,
+            **kwargs,
+        )
+
+    @pytest.mark.parametrize(
+        ("kwargs", "match"),
+        [
+            pytest.param(
+                {},
+                r"Either 'type_pattern' or 'types' must be supplied\.",
+                id="neither_supplied",
+            ),
+            pytest.param(
+                {"type_pattern": "^BOOL", "types": ["BOOLEAN"]},
+                r"Only one of 'type_pattern' or 'types' can be supplied\.",
+                id="both_supplied",
+            ),
+        ],
+    )
+    def test_type_arguments_are_mutually_exclusive_and_required(self, kwargs, match):
+        check_fails(
+            "check_model_column_type_complies_to_column_name",
+            expected_exception=ValueError,
+            match=match,
+            column_name_pattern="^is_.*",
+            model={"columns": _typed_cols(is_active="BOOLEAN")},
+            **kwargs,
+        )
+
+    def test_failure_message_lists_non_complying_columns(self):
+        check_fails(
+            "check_model_column_type_complies_to_column_name",
+            column_name_pattern="^is_.*",
+            types=["BOOLEAN"],
+            model={"columns": _typed_cols(active_flag="BOOLEAN")},
+            match=r"has columns with declared types in \['BOOLEAN'\] that don't comply with the specified naming pattern \(`\^is_\.\*`\): \['active_flag'\]",
+        )
+
+
+class TestCheckModelColumnNames:
+    @pytest.mark.parametrize(
+        ("column_name_pattern", "model_override", "check_fn"),
+        [
+            pytest.param(
+                "[a-z_]*",
+                {"columns": _cols("customer_id", "is_active")},
+                check_passes,
+                id="all_columns_match",
+            ),
+            pytest.param("[a-z_]*", {"columns": {}}, check_passes, id="no_columns"),
+            pytest.param(
+                "[a-z_]*", {"columns": None}, check_passes, id="columns_is_none"
+            ),
+            pytest.param(
+                "[a-z_]*",
+                {"columns": _cols("CustomerId")},
+                check_fails,
+                id="column_does_not_match",
+            ),
+            # The pattern is applied with `fullmatch`, so a partial match fails.
+            pytest.param(
+                "^customer",
+                {"columns": _cols("customer_id")},
+                check_fails,
+                id="partial_match_is_not_enough",
+            ),
+            pytest.param(
+                "[a-z_]*",
+                {"columns": _cols("customer_id", "CustomerId")},
+                check_fails,
+                id="one_of_two_columns_does_not_match",
+            ),
+        ],
+    )
+    def test_check_model_column_names(
+        self, column_name_pattern, model_override, check_fn
+    ):
+        check_fn(
+            "check_model_column_names",
+            column_name_pattern=column_name_pattern,
+            model=model_override,
+        )
+
+    def test_failure_message_lists_non_complying_columns(self):
+        check_fails(
+            "check_model_column_names",
+            column_name_pattern="[a-z_]*",
+            model={"columns": _cols("CustomerId", "customer_id")},
+            match=r"has columns \(\['CustomerId'\]\) that do not match the supplied regex: `\[a-z_\]\*`\.",
+        )
