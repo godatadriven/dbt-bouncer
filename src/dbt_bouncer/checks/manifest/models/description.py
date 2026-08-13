@@ -141,7 +141,7 @@ def check_model_documentation_coverage(
         Rather than requiring every single model to be documented immediately, this check allows teams to set a realistic target and enforce it incrementally. It prevents documentation coverage from silently regressing as new models are added, nudging teams towards full documentation over time.
 
     Parameters:
-        min_model_documentation_coverage_pct (float): The minimum percentage of models that must have a populated description.
+        min_model_documentation_coverage_pct (int): The minimum percentage of models that must have a populated description.
 
     Receives:
         models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.
@@ -159,11 +159,6 @@ def check_model_documentation_coverage(
         manifest_checks:
             - name: check_model_documentation_coverage
               min_model_documentation_coverage_pct: 90
-        ```
-        ```yaml
-        manifest_checks:
-            - name: check_model_documentation_coverage
-              min_description_length: 25 # Setting a stricter requirement for description length
         ```
 
     """
