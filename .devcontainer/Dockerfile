@@ -26,7 +26,7 @@ RUN mkdir -p "${HOME}" && \
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 COPY --from=ghcr.io/jdx/mise:latest /usr/local/bin/mise /usr/local/bin/mise
 
-ENV BENCHER_VERSION=0.6.6
+ENV BENCHER_VERSION=0.6.11
 RUN curl --proto '=https' --tlsv1.2 -sSfL https://bencher.dev/download/install-cli.sh -o /tmp/install-bencher.sh && \
     sh /tmp/install-bencher.sh && \
     rm /tmp/install-bencher.sh

@@ -45,7 +45,7 @@ jobs:
         uses: ./_pr_resolver/.github/actions/resolve-pr-from-workflow-run
 
       - if: steps.export.outputs.skip != 'true'
-        uses: bencherdev/bencher@50fb1e138651a46d2fb704fab1adab38c181552e # v0.6.6
+        uses: bencherdev/bencher@4c83b25441d145ee273adaf74be30f2382e6ba85 # v0.6.11
 
       - name: Track Benchmarks with Bencher
         if: steps.export.outputs.skip != 'true'
