@@ -20,7 +20,7 @@ uv = "latest"
 node = "22"
 hyperfine = "1.20"
 # bencher is not in the mise registry; the ubi backend pulls the GitHub release.
-"ubi:bencherdev/bencher" = "0.6.6"
+"ubi:bencherdev/bencher" = "0.6.11"
 
 [env]
 DBT_PROFILES_DIR = "./dbt_project"
