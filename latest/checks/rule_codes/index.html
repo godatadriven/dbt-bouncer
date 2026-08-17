@@ -1916,7 +1916,7 @@
 <td><code>MO</code></td>
 <td>Models</td>
 <td><code>manifest_checks</code></td>
-<td>52</td>
+<td>57</td>
 </tr>
 <tr>
 <td><code>RR</code></td>
@@ -2446,6 +2446,31 @@
 <td><code>MO052</code></td>
 <td><code>check_model_does_not_use_cartesian_join</code></td>
 <td>Models must not perform Cartesian or CROSS JOINs.</td>
+</tr>
+<tr>
+<td><code>MO053</code></td>
+<td><code>check_model_column_has_specified_test</code></td>
+<td>Columns declared in a model's properties file that match the specified regexp pattern must have a specified test.</td>
+</tr>
+<tr>
+<td><code>MO054</code></td>
+<td><code>check_model_column_description_populated</code></td>
+<td>Columns declared in a model's properties file must have a populated description.</td>
+</tr>
+<tr>
+<td><code>MO055</code></td>
+<td><code>check_model_column_name_complies_to_column_type</code></td>
+<td>Columns with the specified regexp naming pattern must have declared data types that comply to the specified regexp pattern or list of data types.</td>
+</tr>
+<tr>
+<td><code>MO056</code></td>
+<td><code>check_model_column_type_complies_to_column_name</code></td>
+<td>Columns with the specified declared data type must have names that comply to the specified regexp pattern.</td>
+</tr>
+<tr>
+<td><code>MO057</code></td>
+<td><code>check_model_column_names</code></td>
+<td>Columns declared in a model's properties file must have a name that matches the supplied regex.</td>
 </tr>
 </tbody>
 </table>
