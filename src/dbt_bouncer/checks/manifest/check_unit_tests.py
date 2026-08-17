@@ -44,6 +44,11 @@ def check_unit_test_coverage(
     relevant_models = [
         m.unique_id for m in ctx.models if object_in_path(include, m.original_file_path)
     ]
+    if not relevant_models:
+        # No matching models means nothing is left untested, so coverage is
+        # vacuously complete. Returning early also avoids dividing by zero.
+        return
+
     models_with_unit_test = []
     for unit_test in ctx.unit_tests:
         if unit_test.depends_on and unit_test.depends_on.nodes:

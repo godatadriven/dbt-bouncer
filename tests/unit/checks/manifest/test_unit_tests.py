@@ -79,6 +79,15 @@ class TestCheckUnitTestCoverage:
             pytest.param(
                 "The third check",
                 "^models/staging",
+                100,
+                [],
+                [],
+                check_passes,
+                id="no_relevant_models_passes",
+            ),
+            pytest.param(
+                "The fourth check",
+                "^models/staging",
                 75,
                 [
                     {
