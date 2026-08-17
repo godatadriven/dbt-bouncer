@@ -184,6 +184,11 @@ github-comment.md
 pytest-coverage.txt
 results.json
 
+# OpenSpecs
+openspec
+.agents/skills/open*
+.agents.skills/.open
+
 dbt_project/dbt_packages
 dbt_project/dbt_project/
 dbt_project/logs
@@ -240,3 +245,4 @@ tests/fixtures/dbt_20/target/schemas/
 tests/fixtures/dbt_20/target/semantic_manifest.json
 tests/fixtures/dbt_20/target/snapshots/
 tmp/
+.agents/skills/.openspec-target
