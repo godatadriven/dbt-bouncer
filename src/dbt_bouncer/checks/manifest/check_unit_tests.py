@@ -22,7 +22,7 @@ def check_unit_test_coverage(
         Unit tests validate that a model's SQL logic produces the correct output for a given set of inputs, independently of live data. Tracking coverage across the project ensures that critical business logic is not left untested, which reduces the risk of silent regressions when models are refactored or when source data shapes change unexpectedly.
 
     Parameters:
-        min_unit_test_coverage_pct (float): The minimum percentage of models that must have a unit test.
+        min_unit_test_coverage_pct (int): The minimum percentage of models that must have a unit test.
 
     Receives:
         models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.
