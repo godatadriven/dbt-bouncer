@@ -27,10 +27,17 @@ def check_source_columns_are_all_documented(catalog_source, ctx):
 
     """
     source = next(s for s in ctx.sources if s.unique_id == catalog_source.unique_id)
+    catalog_columns = getattr(catalog_source, "columns", None)
+    if catalog_columns is None and hasattr(catalog_source, "source"):
+        catalog_columns = getattr(catalog_source.source, "columns", None)
+    if catalog_columns is None:
+        catalog_columns = {}
+
+    source_columns = {name.lower() for name in (source.columns or {})}
     undocumented_columns = [
         v.name
-        for _, v in catalog_source.columns.items()
-        if v.name not in (source.columns or {})
+        for _, v in catalog_columns.items()
+        if v.name.lower() not in source_columns
     ]
     if undocumented_columns:
         fail(
