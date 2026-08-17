@@ -3123,6 +3123,581 @@
       "title": "CheckModelCodeDoesNotContainRegexpPattern",
       "type": "object"
     },
+    "CheckModelColumnDescriptionPopulated": {
+      "additionalProperties": false,
+      "description": "Columns declared in a model's properties file must have a populated description.\n\n!!! info \"Rationale\"\n\n    Column-level documentation is where data consumers spend most of their time: understanding what `is_active` means, whether `amount` is in cents or pounds, or which ID to join on. Without column descriptions, analysts guess, make mistakes, and create conflicting metrics. This check ensures every column is explained, which is especially valuable for data catalogues and BI tool integrations that surface these descriptions automatically.\n\nThis is the manifest-only analogue of `check_column_description_populated`, which requires `catalog.json`. It only evaluates columns declared in `model.columns`, i.e. columns present in the model's properties file; use the catalog check `check_columns_are_all_documented` to detect columns that exist in the warehouse but are undocumented.\n\nParameters:\n    min_description_length (int | None): Minimum length required for the description to be considered populated.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    materialization (Literal[\"ephemeral\", \"incremental\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_model_column_description_populated\n          include: ^models/marts\n    ```\n    ```yaml\n    manifest_checks:\n        - name: check_model_column_description_populated\n          min_description_length: 25 # Setting a stricter requirement for description length\n    ```",
+      "properties": {
+        "code": {
+          "const": "MO054",
+          "default": "MO054",
+          "title": "Code",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to exclude. A list matches if any pattern matches.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to include. A list matches if any pattern matches.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_model_column_description_populated",
+          "default": "check_model_column_description_populated",
+          "title": "Name",
+          "type": "string"
+        },
+        "min_description_length": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Min Description Length"
+        }
+      },
+      "title": "CheckModelColumnDescriptionPopulated",
+      "type": "object"
+    },
+    "CheckModelColumnHasSpecifiedTest": {
+      "additionalProperties": false,
+      "description": "Columns declared in a model's properties file that match the specified regexp pattern must have a specified test.\n\n!!! info \"Rationale\"\n\n    Naming conventions communicate expectations: a column named `is_active` implies it is boolean and never null; a column ending in `_id` implies it is a valid foreign key. Without enforcement, these implicit contracts go untested, and referential integrity issues or null values can silently corrupt downstream aggregations. This check bridges naming conventions and data quality by automatically requiring specific tests on columns that match a pattern, eliminating the manual overhead of reviewing every column individually.\n\nThis is the manifest-only analogue of `check_column_has_specified_test`, which requires `catalog.json`. It only evaluates columns declared in `model.columns`, i.e. columns present in the model's properties file; columns that exist in the warehouse but are not documented are invisible to this check. Unlike the catalog check it has no `case_sensitive` parameter: both the column names and the tests are read from `manifest.json`, so no cross-artifact casing mismatch is possible.\n\nParameters:\n    column_name_pattern (str): Regex pattern to match the column name.\n    test_name (str): Name of the test to check for.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n    tests (list[TestNode]): List of TestNode objects parsed from `manifest.json`.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    materialization (Literal[\"ephemeral\", \"incremental\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_model_column_has_specified_test\n          column_name_pattern: ^is_.*\n          test_name: not_null\n    ```",
+      "properties": {
+        "code": {
+          "const": "MO053",
+          "default": "MO053",
+          "title": "Code",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to exclude. A list matches if any pattern matches.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to include. A list matches if any pattern matches.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_model_column_has_specified_test",
+          "default": "check_model_column_has_specified_test",
+          "title": "Name",
+          "type": "string"
+        },
+        "column_name_pattern": {
+          "title": "Column Name Pattern",
+          "type": "string"
+        },
+        "test_name": {
+          "title": "Test Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "column_name_pattern",
+        "test_name"
+      ],
+      "title": "CheckModelColumnHasSpecifiedTest",
+      "type": "object"
+    },
+    "CheckModelColumnNameCompliesToColumnType": {
+      "additionalProperties": false,
+      "description": "Columns with the specified regexp naming pattern must have declared data types that comply to the specified regexp pattern or list of data types.\n\n!!! info \"Rationale\"\n\n    Naming conventions that encode data types (e.g. `is_` prefix for booleans, `_date` suffix for dates, `_id` suffix for integers) are a common and effective way to make schemas self-describing. Without enforcement, these conventions drift over time: a column named `is_active` might be stored as an integer in one model and a boolean in another, causing silent cast errors downstream. This check ties naming patterns to data types, catching mismatches at CI time rather than in production queries.\n\nThis is the manifest-only analogue of `check_column_name_complies_to_column_type`, which requires `catalog.json`. It only evaluates columns declared in `model.columns` and compares against the `data_type` declared in the properties file, not the type physically introspected from the warehouse. Columns with no declared `data_type` are skipped rather than failed \u2014 use `check_model_columns_have_types` to enforce that a type is declared.\n\nNote: One of `type_pattern` or `types` must be specified.\n\nParameters:\n    column_name_pattern (str): Regex pattern to match the column name.\n    type_pattern (str | None): Regex pattern to match the data types.\n    types (list[str] | None): List of data types to check.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    materialization (Literal[\"ephemeral\", \"incremental\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nRaises:\n    ValueError: If neither or both of type_pattern/types are supplied.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        # Columns whose names end with \"_date\" must be of type DATE.\n        - name: check_model_column_name_complies_to_column_type\n          column_name_pattern: .*_date$\n          types:\n            - DATE\n    ```\n    ```yaml\n    manifest_checks:\n        # Snake-case columns must not be a STRUCT type.\n        - name: check_model_column_name_complies_to_column_type\n          column_name_pattern: ^[a-z_]*$\n          type_pattern: ^(?!STRUCT)\n    ```",
+      "properties": {
+        "code": {
+          "const": "MO055",
+          "default": "MO055",
+          "title": "Code",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to exclude. A list matches if any pattern matches.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to include. A list matches if any pattern matches.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_model_column_name_complies_to_column_type",
+          "default": "check_model_column_name_complies_to_column_type",
+          "title": "Name",
+          "type": "string"
+        },
+        "column_name_pattern": {
+          "title": "Column Name Pattern",
+          "type": "string"
+        },
+        "type_pattern": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Type Pattern"
+        },
+        "types": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Types"
+        }
+      },
+      "required": [
+        "column_name_pattern"
+      ],
+      "title": "CheckModelColumnNameCompliesToColumnType",
+      "type": "object"
+    },
+    "CheckModelColumnNames": {
+      "additionalProperties": false,
+      "description": "Columns declared in a model's properties file must have a name that matches the supplied regex.\n\n!!! info \"Rationale\"\n\n    Consistent column naming is the foundation of a readable and maintainable dbt project. Inconsistent casing, abbreviations, or special characters make SQL harder to write, cause join errors, and confuse data consumers who query the warehouse directly. A single enforced naming pattern (e.g. `^[a-z_]*$` for snake_case) eliminates an entire class of stylistic bugs and ensures that columns look the same whether viewed in dbt docs, a BI tool, or a raw SQL editor.\n\nThis is the manifest-only analogue of `check_column_names`, which requires `catalog.json`. It only evaluates columns declared in `model.columns`, i.e. columns present in the model's properties file; columns that exist in the warehouse but are undocumented are invisible to this check.\n\nParameters:\n    column_name_pattern (str): Regexp the column name must match.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    materialization (Literal[\"ephemeral\", \"incremental\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_model_column_names\n          column_name_pattern: [a-z_] # Lowercase only, underscores allowed\n    ```",
+      "properties": {
+        "code": {
+          "const": "MO057",
+          "default": "MO057",
+          "title": "Code",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to exclude. A list matches if any pattern matches.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to include. A list matches if any pattern matches.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_model_column_names",
+          "default": "check_model_column_names",
+          "title": "Name",
+          "type": "string"
+        },
+        "column_name_pattern": {
+          "title": "Column Name Pattern",
+          "type": "string"
+        }
+      },
+      "required": [
+        "column_name_pattern"
+      ],
+      "title": "CheckModelColumnNames",
+      "type": "object"
+    },
+    "CheckModelColumnTypeCompliesToColumnName": {
+      "additionalProperties": false,
+      "description": "Columns with the specified declared data type must have names that comply to the specified regexp pattern.\n\n!!! info \"Rationale\"\n\n    This is the reverse of `check_model_column_name_complies_to_column_type`. While that check ensures columns with a given naming pattern have the correct data type, this check ensures columns with a given data type follow the correct naming convention. For example, you may want all `BOOLEAN` columns to start with `is_` or `has_`, or all `DATE` columns to end with `_date`. Enforcing this direction catches columns that have the right type but the wrong name \u2014 a gap the other check cannot cover.\n\nThis is the manifest-only analogue of `check_column_type_complies_to_column_name`, which requires `catalog.json`. It only evaluates columns declared in `model.columns` and compares against the `data_type` declared in the properties file, not the type physically introspected from the warehouse. Columns with no declared `data_type` are skipped rather than failed \u2014 use `check_model_columns_have_types` to enforce that a type is declared.\n\nNote: One of `type_pattern` or `types` must be specified.\n\nParameters:\n    column_name_pattern (str): Regex pattern that column names must match.\n    type_pattern (str | None): Regex pattern to match the data types.\n    types (list[str] | None): List of data types to check.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    materialization (Literal[\"ephemeral\", \"incremental\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nRaises:\n    ValueError: If neither or both of type_pattern/types are supplied.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        # BOOLEAN columns must start with \"is_\" or \"has_\"\n        - name: check_model_column_type_complies_to_column_name\n          column_name_pattern: ^(is|has)_.*\n          types:\n            - BOOLEAN\n    ```\n    ```yaml\n    manifest_checks:\n        # Integer-like columns must end with \"_id\" or \"_count\"\n        - name: check_model_column_type_complies_to_column_name\n          column_name_pattern: .*((_id)|(_count))$\n          types:\n            - BIGINT\n            - INTEGER\n    ```",
+      "properties": {
+        "code": {
+          "const": "MO056",
+          "default": "MO056",
+          "title": "Code",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to exclude. A list matches if any pattern matches.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to include. A list matches if any pattern matches.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_model_column_type_complies_to_column_name",
+          "default": "check_model_column_type_complies_to_column_name",
+          "title": "Name",
+          "type": "string"
+        },
+        "column_name_pattern": {
+          "title": "Column Name Pattern",
+          "type": "string"
+        },
+        "type_pattern": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Type Pattern"
+        },
+        "types": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Types"
+        }
+      },
+      "required": [
+        "column_name_pattern"
+      ],
+      "title": "CheckModelColumnTypeCompliesToColumnName",
+      "type": "object"
+    },
     "CheckModelColumnsHaveMetaKeys": {
       "additionalProperties": false,
       "description": "Columns defined for models must have the specified keys in the `meta` config.\n\n!!! info \"Rationale\"\n\n    Column-level metadata such as `owner` or `pii` flags is essential for data governance, access control, and cataloguing. Without enforcement, metadata is applied inconsistently, making it difficult to identify sensitive columns or assign accountability across a large project.\n\nParameters:\n    keys (NestedDict): A list (that may contain sub-lists) of required keys.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    materialization (Literal[\"ephemeral\", \"incremental\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_model_columns_have_meta_keys\n          keys:\n            - owner\n            - pii\n    ```",
@@ -12660,6 +13235,11 @@
             "check_macro_property_file_location": "#/$defs/CheckMacroPropertyFileLocation",
             "check_model_access": "#/$defs/CheckModelAccess",
             "check_model_code_does_not_contain_regexp_pattern": "#/$defs/CheckModelCodeDoesNotContainRegexpPattern",
+            "check_model_column_description_populated": "#/$defs/CheckModelColumnDescriptionPopulated",
+            "check_model_column_has_specified_test": "#/$defs/CheckModelColumnHasSpecifiedTest",
+            "check_model_column_name_complies_to_column_type": "#/$defs/CheckModelColumnNameCompliesToColumnType",
+            "check_model_column_names": "#/$defs/CheckModelColumnNames",
+            "check_model_column_type_complies_to_column_name": "#/$defs/CheckModelColumnTypeCompliesToColumnName",
             "check_model_columns_have_meta_keys": "#/$defs/CheckModelColumnsHaveMetaKeys",
             "check_model_columns_have_relationship_tests": "#/$defs/CheckModelColumnsHaveRelationshipTests",
             "check_model_columns_have_types": "#/$defs/CheckModelColumnsHaveTypes",
@@ -12817,6 +13397,21 @@
           },
           {
             "$ref": "#/$defs/CheckModelCodeDoesNotContainRegexpPattern"
+          },
+          {
+            "$ref": "#/$defs/CheckModelColumnDescriptionPopulated"
+          },
+          {
+            "$ref": "#/$defs/CheckModelColumnHasSpecifiedTest"
+          },
+          {
+            "$ref": "#/$defs/CheckModelColumnNameCompliesToColumnType"
+          },
+          {
+            "$ref": "#/$defs/CheckModelColumnNames"
+          },
+          {
+            "$ref": "#/$defs/CheckModelColumnTypeCompliesToColumnName"
           },
           {
             "$ref": "#/$defs/CheckModelColumnsHaveMetaKeys"
