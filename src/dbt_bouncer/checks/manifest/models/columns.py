@@ -639,10 +639,11 @@ def check_model_column_names(model, *, column_name_pattern: str):
 
     """
     columns = model.columns or {}
+    compiled_column_name_pattern = compile_pattern(column_name_pattern.strip())
     non_complying_columns = [
         col_name
         for col_name in columns
-        if re.fullmatch(column_name_pattern.strip(), str(col_name)) is None
+        if compiled_column_name_pattern.fullmatch(str(col_name)) is None
     ]
 
     if non_complying_columns:
