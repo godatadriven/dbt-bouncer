@@ -246,3 +246,5 @@ tests/fixtures/dbt_20/target/semantic_manifest.json
 tests/fixtures/dbt_20/target/snapshots/
 tmp/
 .agents/skills/.openspec-target
+skills/suggesting-dbt-bouncer-checks/.DS_Store
+skills/.DS_Store
