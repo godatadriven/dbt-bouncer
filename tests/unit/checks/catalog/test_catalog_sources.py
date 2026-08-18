@@ -173,6 +173,43 @@ class TestCheckSourceColumnsAreAllDocumentedSnowflake:
             ctx_manifest_obj={"metadata": {"adapter_type": "snowflake"}},
         )
 
+    def test_genuinely_undocumented_column_still_fails_on_snowflake(self):
+        # Case-insensitive matching must not make undocumented columns pass:
+        # COL_2 is absent from the properties file, so the check must fail.
+        check_fails(
+            "check_source_columns_are_all_documented",
+            catalog_source={
+                **_SOURCE_CATALOG_NODE,
+                "columns": {
+                    "COL_1": {
+                        **_SOURCE_CATALOG_NODE["columns"]["col_1"],
+                        "name": "COL_1",
+                    },
+                    "COL_2": {
+                        **_SOURCE_CATALOG_NODE["columns"]["col_2"],
+                        "name": "COL_2",
+                    },
+                },
+            },
+            ctx_sources=[
+                {
+                    "columns": {
+                        "col_1": {"name": "col_1"},
+                    },
+                    "fqn": ["package_name", "source_1", "table_1"],
+                    "identifier": "table_1",
+                    "loader": "csv",
+                    "name": "table_1",
+                    "original_file_path": "path/to/source_1.yml",
+                    "path": "path/to/source_1.yml",
+                    "source_description": "",
+                    "source_name": "source_1",
+                    "unique_id": "source.package_name.source_1.table_1",
+                }
+            ],
+            ctx_manifest_obj={"metadata": {"adapter_type": "snowflake"}},
+        )
+
     def test_case_insensitive_opt_in_on_non_snowflake_adapter(self):
         # A non-Snowflake adapter keeps the default postgres manifest, so the
         # case-insensitive path is only reached via an explicit parameter.
