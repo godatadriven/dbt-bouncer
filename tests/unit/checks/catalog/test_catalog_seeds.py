@@ -424,3 +424,71 @@ class TestCheckSeedColumnsAreAllDocumented:
                 "check_seed_columns_are_all_documented",
                 catalog_node=_SEED_CATALOG_NODE,
             )
+
+
+_SEED_CATALOG_NODE_UPPERCASE = {
+    **_SEED_CATALOG_NODE,
+    "columns": {
+        "ID": {**_SEED_CATALOG_NODE["columns"]["id"], "name": "ID"},
+        "FIRST_NAME": {
+            **_SEED_CATALOG_NODE["columns"]["first_name"],
+            "name": "FIRST_NAME",
+        },
+        "LAST_NAME": {
+            **_SEED_CATALOG_NODE["columns"]["last_name"],
+            "name": "LAST_NAME",
+        },
+    },
+}
+
+_SEED_MANIFEST_LOWERCASE = {
+    "alias": "raw_customers",
+    "columns": {
+        "id": {"name": "id"},
+        "first_name": {"name": "first_name"},
+        "last_name": {"name": "last_name"},
+    },
+    "fqn": ["package_name", "raw_customers"],
+    "name": "raw_customers",
+    "original_file_path": "seeds/raw_customers.csv",
+    "path": "raw_customers.csv",
+    "unique_id": "seed.package_name.raw_customers",
+}
+
+
+class TestCheckSeedColumnsAreAllDocumentedSnowflake:
+    def test_uppercase_catalog_columns_pass_on_snowflake(self):
+        check_passes(
+            "check_seed_columns_are_all_documented",
+            catalog_node=_SEED_CATALOG_NODE_UPPERCASE,
+            ctx_seeds=[_SEED_MANIFEST_LOWERCASE],
+            ctx_manifest_obj={"metadata": {"adapter_type": "snowflake"}},
+        )
+
+    def test_genuinely_undocumented_column_still_fails_on_snowflake(self):
+        # Case-insensitive matching must not make undocumented columns pass:
+        # LAST_NAME is absent from the properties file, so the check must fail.
+        check_fails(
+            "check_seed_columns_are_all_documented",
+            catalog_node=_SEED_CATALOG_NODE_UPPERCASE,
+            ctx_seeds=[
+                {
+                    **_SEED_MANIFEST_LOWERCASE,
+                    "columns": {
+                        "id": {"name": "id"},
+                        "first_name": {"name": "first_name"},
+                    },
+                }
+            ],
+            ctx_manifest_obj={"metadata": {"adapter_type": "snowflake"}},
+        )
+
+    def test_case_insensitive_opt_in_on_non_snowflake_adapter(self):
+        # A non-Snowflake adapter keeps the default postgres manifest, so the
+        # case-insensitive path is only reached via an explicit parameter.
+        check_passes(
+            "check_seed_columns_are_all_documented",
+            case_sensitive=False,
+            catalog_node=_SEED_CATALOG_NODE_UPPERCASE,
+            ctx_seeds=[_SEED_MANIFEST_LOWERCASE],
+        )

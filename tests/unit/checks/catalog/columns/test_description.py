@@ -349,3 +349,75 @@ class TestCheckColumnsAreDocumentedInPublicModels:
             catalog_node=catalog_node,
             ctx_models=ctx_models,
         )
+
+
+_PUBLIC_MODEL_LOWERCASE = {
+    "access": "public",
+    "columns": {
+        "col_1": {
+            "description": "This is a description",
+            "index": 1,
+            "name": "col_1",
+            "type": "INTEGER",
+        },
+    },
+}
+
+
+class TestCheckColumnsAreDocumentedInPublicModelsSnowflake:
+    def test_uppercase_catalog_columns_match_documented_lowercase(self):
+        check_passes(
+            "check_columns_are_documented_in_public_models",
+            catalog_node={
+                "columns": {
+                    "COL_1": {"index": 1, "name": "COL_1", "type": "INTEGER"},
+                },
+            },
+            ctx_models=[_PUBLIC_MODEL_LOWERCASE],
+            ctx_manifest_obj={"metadata": {"adapter_type": "snowflake"}},
+        )
+
+    def test_undocumented_column_still_fails_on_snowflake(self):
+        # Case-insensitive matching still evaluates the description: COL_2 maps
+        # to col_2, whose description is empty, so the check must fail.
+        check_fails(
+            "check_columns_are_documented_in_public_models",
+            catalog_node={
+                "columns": {
+                    "COL_1": {"index": 1, "name": "COL_1", "type": "INTEGER"},
+                    "COL_2": {"index": 2, "name": "COL_2", "type": "INTEGER"},
+                },
+            },
+            ctx_models=[
+                {
+                    "access": "public",
+                    "columns": {
+                        "col_1": {
+                            "description": "This is a description",
+                            "index": 1,
+                            "name": "col_1",
+                            "type": "INTEGER",
+                        },
+                        "col_2": {
+                            "description": "",
+                            "index": 2,
+                            "name": "col_2",
+                            "type": "INTEGER",
+                        },
+                    },
+                }
+            ],
+            ctx_manifest_obj={"metadata": {"adapter_type": "snowflake"}},
+        )
+
+    def test_case_insensitive_opt_in_on_non_snowflake_adapter(self):
+        check_passes(
+            "check_columns_are_documented_in_public_models",
+            case_sensitive=False,
+            catalog_node={
+                "columns": {
+                    "COL_1": {"index": 1, "name": "COL_1", "type": "INTEGER"},
+                },
+            },
+            ctx_models=[_PUBLIC_MODEL_LOWERCASE],
+        )
