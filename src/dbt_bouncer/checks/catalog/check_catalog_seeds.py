@@ -45,12 +45,17 @@ def _extract_stat_value(catalog_node: Any, stat_keys: list[str]) -> int | None:
 
 
 @check(code="CA001")
-def check_seed_columns_are_all_documented(catalog_node, ctx):
+def check_seed_columns_are_all_documented(
+    catalog_node, ctx, *, case_sensitive: bool = True
+):
     """All columns in a seed CSV file should be included in the seed's properties file, i.e. `.yml` file.
 
     !!! info "Rationale"
 
         Seed CSV files often serve as reference data (e.g. country codes, product categories) that are queried directly by downstream models. When a column exists in the CSV but not in the properties file, it is invisible to documentation tools, data catalogues, and column-level tests. This check ensures that every column in a seed is explicitly declared, making it easier for consumers to understand the seed's schema and for teams to apply descriptions and tests uniformly.
+
+    Parameters:
+        case_sensitive (bool): Whether the column names are case sensitive or not. Necessary for adapters like `dbt-snowflake` where the column in `catalog.json` is uppercase but the column in `manifest.json` can be lowercase. Defaults to `false` for `dbt-snowflake`, otherwise `true`.
 
     Receives:
         catalog_node (CatalogNodeEntry): The CatalogNodeEntry object to check.
@@ -75,12 +80,23 @@ def check_seed_columns_are_all_documented(catalog_node, ctx):
     ):
         seed = next(s for s in ctx.seeds if s.unique_id == catalog_node.unique_id)
 
+        if ctx.manifest_obj.manifest.metadata.adapter_type in ["snowflake"]:
+            case_sensitive = False
+
         seed_columns = seed.columns or {}
-        undocumented_columns = [
-            v.name
-            for _, v in catalog_node.columns.items()
-            if v.name not in seed_columns
-        ]
+        if case_sensitive:
+            undocumented_columns = [
+                v.name
+                for _, v in catalog_node.columns.items()
+                if v.name not in seed_columns
+            ]
+        else:
+            seed_columns_lower = {c.lower() for c in seed_columns}
+            undocumented_columns = [
+                v.name
+                for _, v in catalog_node.columns.items()
+                if v.name.lower() not in seed_columns_lower
+            ]
 
         if undocumented_columns:
             fail(

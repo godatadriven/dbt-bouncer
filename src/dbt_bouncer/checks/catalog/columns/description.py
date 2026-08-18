@@ -143,6 +143,7 @@ def check_columns_are_documented_in_public_models(
     catalog_node,
     ctx,
     *,
+    case_sensitive: bool = True,
     min_description_length: Annotated[int, Field(gt=0)] | None = None,
 ):
     """Columns should have a populated description in public models.
@@ -151,9 +152,13 @@ def check_columns_are_documented_in_public_models(
 
         Public models form the stable, documented API of a dbt project — they are the models that external consumers, BI tools, and other projects are expected to query directly. Undocumented columns in a public model undermine this contract: consumers cannot tell what a field means, which ID to join on, or whether a flag is nullable. Requiring column descriptions on public models ensures the published interface is self-explanatory and trustworthy, which is especially important as teams scale and data catalogues surface model metadata automatically.
 
+    Parameters:
+        case_sensitive (bool): Whether the column names are case sensitive or not. Necessary for adapters like `dbt-snowflake` where the column in `catalog.json` is uppercase but the column in `manifest.json` can be lowercase. Defaults to `false` for `dbt-snowflake`, otherwise `true`.
+        min_description_length (int | None): Minimum length required for the description to be considered populated.
+
     Receives:
         catalog_node (CatalogNodeEntry): The CatalogNodeEntry object to check.
-        min_description_length (int | None): Minimum length required for the description to be considered populated.
+        manifest_obj (ManifestObject): The ManifestObject object parsed from `manifest.json`.
         models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.
 
     Other Parameters:
@@ -176,11 +181,18 @@ def check_columns_are_documented_in_public_models(
     )
     model = get_model_for_catalog_node(catalog_node, models_by_id)
     if model is not None:
+        if ctx.manifest_obj.manifest.metadata.adapter_type in ["snowflake"]:
+            case_sensitive = False
+
+        model_columns = model.columns or {}
+        if not case_sensitive:
+            model_columns = {k.lower(): c for k, c in model_columns.items()}
+
         non_complying_columns = []
         for _, v in catalog_node.columns.items():
             if model.access and model.access.value == ModelAccess.PUBLIC:
-                model_columns = model.columns or {}
-                column_config = model_columns.get(v.name)
+                lookup_name = v.name if case_sensitive else v.name.lower()
+                column_config = model_columns.get(lookup_name)
                 if column_config is None or not is_description_populated(
                     column_config.description or "", min_description_length or 4
                 ):
