@@ -777,7 +777,7 @@
     },
     "CheckColumnsAreDocumentedInPublicModels": {
       "additionalProperties": false,
-      "description": "Columns should have a populated description in public models.\n\n!!! info \"Rationale\"\n\n    Public models form the stable, documented API of a dbt project \u2014 they are the models that external consumers, BI tools, and other projects are expected to query directly. Undocumented columns in a public model undermine this contract: consumers cannot tell what a field means, which ID to join on, or whether a flag is nullable. Requiring column descriptions on public models ensures the published interface is self-explanatory and trustworthy, which is especially important as teams scale and data catalogues surface model metadata automatically.\n\nReceives:\n    catalog_node (CatalogNodeEntry): The CatalogNodeEntry object to check.\n    min_description_length (int | None): Minimum length required for the description to be considered populated.\n    models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    catalog_checks:\n        - name: check_columns_are_documented_in_public_models\n    ```",
+      "description": "Columns should have a populated description in public models.\n\n!!! info \"Rationale\"\n\n    Public models form the stable, documented API of a dbt project \u2014 they are the models that external consumers, BI tools, and other projects are expected to query directly. Undocumented columns in a public model undermine this contract: consumers cannot tell what a field means, which ID to join on, or whether a flag is nullable. Requiring column descriptions on public models ensures the published interface is self-explanatory and trustworthy, which is especially important as teams scale and data catalogues surface model metadata automatically.\n\nParameters:\n    case_sensitive (bool): Whether the column names are case sensitive or not. Necessary for adapters like `dbt-snowflake` where the column in `catalog.json` is uppercase but the column in `manifest.json` can be lowercase. Defaults to `false` for `dbt-snowflake`, otherwise `true`.\n    min_description_length (int | None): Minimum length required for the description to be considered populated.\n\nReceives:\n    catalog_node (CatalogNodeEntry): The CatalogNodeEntry object to check.\n    manifest_obj (ManifestObject): The ManifestObject object parsed from `manifest.json`.\n    models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    catalog_checks:\n        - name: check_columns_are_documented_in_public_models\n    ```",
       "properties": {
         "code": {
           "const": "CA007",
@@ -865,6 +865,11 @@
           "default": "check_columns_are_documented_in_public_models",
           "title": "Name",
           "type": "string"
+        },
+        "case_sensitive": {
+          "default": true,
+          "title": "Case Sensitive",
+          "type": "boolean"
         },
         "min_description_length": {
           "anyOf": [
@@ -9105,7 +9110,7 @@
     },
     "CheckSeedColumnsAreAllDocumented": {
       "additionalProperties": false,
-      "description": "All columns in a seed CSV file should be included in the seed's properties file, i.e. `.yml` file.\n\n!!! info \"Rationale\"\n\n    Seed CSV files often serve as reference data (e.g. country codes, product categories) that are queried directly by downstream models. When a column exists in the CSV but not in the properties file, it is invisible to documentation tools, data catalogues, and column-level tests. This check ensures that every column in a seed is explicitly declared, making it easier for consumers to understand the seed's schema and for teams to apply descriptions and tests uniformly.\n\nReceives:\n    catalog_node (CatalogNodeEntry): The CatalogNodeEntry object to check.\n    manifest_obj (ManifestObject): The ManifestObject object parsed from `manifest.json`.\n    seeds (list[SeedNode]): List of SeedNode objects parsed from `manifest.json`.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the seed path. Seed paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the seed path. Only seed paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    catalog_checks:\n        - name: check_seed_columns_are_all_documented\n    ```",
+      "description": "All columns in a seed CSV file should be included in the seed's properties file, i.e. `.yml` file.\n\n!!! info \"Rationale\"\n\n    Seed CSV files often serve as reference data (e.g. country codes, product categories) that are queried directly by downstream models. When a column exists in the CSV but not in the properties file, it is invisible to documentation tools, data catalogues, and column-level tests. This check ensures that every column in a seed is explicitly declared, making it easier for consumers to understand the seed's schema and for teams to apply descriptions and tests uniformly.\n\nParameters:\n    case_sensitive (bool): Whether the column names are case sensitive or not. Necessary for adapters like `dbt-snowflake` where the column in `catalog.json` is uppercase but the column in `manifest.json` can be lowercase. Defaults to `false` for `dbt-snowflake`, otherwise `true`.\n\nReceives:\n    catalog_node (CatalogNodeEntry): The CatalogNodeEntry object to check.\n    manifest_obj (ManifestObject): The ManifestObject object parsed from `manifest.json`.\n    seeds (list[SeedNode]): List of SeedNode objects parsed from `manifest.json`.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the seed path. Seed paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the seed path. Only seed paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    catalog_checks:\n        - name: check_seed_columns_are_all_documented\n    ```",
       "properties": {
         "code": {
           "const": "CA001",
@@ -9193,6 +9198,11 @@
           "default": "check_seed_columns_are_all_documented",
           "title": "Name",
           "type": "string"
+        },
+        "case_sensitive": {
+          "default": true,
+          "title": "Case Sensitive",
+          "type": "boolean"
         }
       },
       "title": "CheckSeedColumnsAreAllDocumented",
