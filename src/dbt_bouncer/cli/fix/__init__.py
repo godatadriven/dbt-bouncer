@@ -49,6 +49,8 @@ def fix(
             "Install it with: pip install 'dbt-bouncer[fix]'",
             err=True,
         )
+        # `from None` suppresses the ImportError chain: the echoed install
+        # hint is the whole story, a traceback would only add noise.
         raise typer.Exit(ExitCode.CONFIG_ERROR) from None
 
     from rich import box

@@ -106,6 +106,9 @@ def run_bouncer(
 ) -> int:
     """Programmatic entrypoint for dbt-bouncer.
 
+    The exceptions documented on ``prepare_run_context`` (config, artifact, and
+    source-detection errors) propagate unchanged.
+
     Args:
         config_file: Location of the config file (YML, YAML, or TOML).
         check: Limit the checks run to specific check names, comma-separated.
@@ -122,9 +125,6 @@ def run_bouncer(
     Returns:
         int: `ExitCode.SUCCESS` if all checks passed, `ExitCode.CHECK_ERRORS` if one
             or more checks failed.
-
-    The exceptions documented on ``prepare_run_context`` (config, artifact, and
-    source-detection errors) propagate unchanged.
 
     """
     configure_console_logging(verbosity)
