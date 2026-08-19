@@ -235,5 +235,5 @@ npx skills add godatadriven/dbt-bouncer --skill suggesting-dbt-bouncer-checks
 
 ```shell
 /plugin marketplace add godatadriven/dbt-bouncer
-/plugin install dbt-bouncer@<marketplace-name>
+/plugin install dbt-bouncer@dbt-bouncer-marketplace
 ```

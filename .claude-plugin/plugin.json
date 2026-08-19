@@ -1,0 +1,12 @@
+{
+  "name": "dbt-bouncer",
+  "description": "AI skills for dbt-bouncer.",
+  "version": "1.0.0",
+  "author": {
+    "name": "godatadriven"
+  },
+  "license": "MIT",
+  "homepage": "https://godatadriven.github.io/dbt-bouncer/",
+  "repository": "https://github.com/godatadriven/dbt-bouncer",
+  "keywords": ["dbt", "dbt-bouncer", "data-quality"]
+}
