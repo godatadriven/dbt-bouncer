@@ -24,9 +24,12 @@ methods, and YAML-defined named selectors.
 from __future__ import annotations
 
 from fnmatch import fnmatch
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from dbt_bouncer.exceptions import DbtBouncerConfigError
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 _VALID_METHODS = ("fqn", "name", "package", "path", "tag")
 
@@ -174,7 +177,7 @@ class Selector:
         self._selected_ids = selected
 
     @staticmethod
-    def _iter_manifest_resources(manifest: Any) -> Any:
+    def _iter_manifest_resources(manifest: Any) -> Iterator[tuple[str, Any]]:
         """Yield ``(unique_id, resource)`` pairs from all manifest collections.
 
         Yields:

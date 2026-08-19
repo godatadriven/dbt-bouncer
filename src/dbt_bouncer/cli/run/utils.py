@@ -233,7 +233,7 @@ def run_bouncer(
                     check_obj.include = bouncer_config.include
                 if bouncer_config.exclude and not check_obj.exclude:
                     check_obj.exclude = bouncer_config.exclude
-                if getattr(bouncer_config, "selector", None) and not check_obj.selector:
+                if bouncer_config.selector and not check_obj.selector:
                     check_obj.selector = bouncer_config.selector
         else:
             # i.e. if `only` used then remove non-specified check categories
