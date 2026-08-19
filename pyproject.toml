@@ -61,6 +61,7 @@ dev = [
   "pytest-cov>=5,<8",
   "pytest-xdist~=3.0",
   "pyupgrade~=3.0",
+  "ruamel.yaml>=0.18,<1",
   "rumdl>=0.1.19",
   "ruff>=0.8,<1",
   "shandy-sqlfmt[jinjafmt]>=0.7,<1",
@@ -68,6 +69,7 @@ dev = [
   "tqdm>=4,<5",
   "ty>=0.0.7"
 ]
+fix = ["ruamel.yaml>=0.18,<1"]
 
 # PEP 735 dev-only groups (not published in wheel metadata).
 # `docs` lives here because PyPI rejects direct URL deps in published projects;

@@ -123,17 +123,70 @@ def run_bouncer(
         int: `ExitCode.SUCCESS` if all checks passed, `ExitCode.CHECK_ERRORS` if one
             or more checks failed.
 
-    Raises:
-        DbtBouncerConfigError: If `--only` contains an invalid value, or the config
-            file is missing, unreadable, or invalid. A required dbt artifact being
-            missing or unsupported similarly propagates as `DbtBouncerArtifactError`
-            from the artifact loading called here.
-        RuntimeError: If `config_file_source` could not be determined.
+    The exceptions documented on ``prepare_run_context`` (config, artifact, and
+    source-detection errors) propagate unchanged.
 
     """
     configure_console_logging(verbosity)
     logging.info(f"Running dbt-bouncer ({get_version()})...")
 
+    ctx, _ = prepare_run_context(
+        check=check,
+        config_file=config_file,
+        config_file_source=config_file_source,
+        create_pr_comment_file=create_pr_comment_file,
+        dry_run=dry_run,
+        only=only,
+        output_file=output_file,
+        output_format=output_format,
+        output_only_failures=output_only_failures,
+        show_all_failures=show_all_failures,
+    )
+
+    from dbt_bouncer.runner import runner
+
+    results = runner(ctx=ctx)
+    return results[0]
+
+
+def prepare_run_context(
+    config_file: PurePath | None = None,
+    check: str = "",
+    create_pr_comment_file: bool = False,
+    dry_run: bool = False,
+    only: str = "",
+    output_file: Path | None = None,
+    output_format: OutputFormat = OutputFormat.JSON,
+    output_only_failures: bool = False,
+    show_all_failures: bool = False,
+    config_file_source: ConfigFileSource | None = None,
+) -> tuple[BouncerContext, Path]:
+    """Load and validate the config, parse artifacts, and build the run context.
+
+    Shared by ``run_bouncer`` and the ``fix`` subcommand.
+
+    Args:
+        config_file: Location of the config file (YML, YAML, or TOML).
+        check: Limit the checks run to specific check names, comma-separated.
+        create_pr_comment_file: Create a `github-comment.md` file.
+        dry_run: If True, the context is built for a dry run.
+        only: Limit the checks run to specific categories.
+        output_file: Location of the file where check metadata will be saved.
+        output_format: Format for the output file, requires output_file.
+        output_only_failures: Only failures will be included in the output file.
+        show_all_failures: All failures will be printed to the console.
+        config_file_source: Source of the config file.
+
+    Returns:
+        tuple[BouncerContext, Path]: The ready-to-run context and the resolved
+        dbt artifacts directory.
+
+    Raises:
+        DbtBouncerConfigError: If `only` contains an invalid value, or the config
+            file is missing, unreadable, or invalid.
+        RuntimeError: If `config_file_source` could not be determined.
+
+    """
     # Validate `only` has valid values
     valid_check_categories = [c.value for c in CheckCategory]
     if not only.strip():
@@ -263,8 +316,6 @@ def run_bouncer(
         config_file_path.parent / (bouncer_config.dbt_artifacts_dir or "target")
     )
 
-    from dbt_bouncer.runner import runner
-
     normalized_output_format = (
         output_format.value
         if isinstance(output_format, OutputFormat)
@@ -282,5 +333,4 @@ def run_bouncer(
         output_only_failures=output_only_failures,
         show_all_failures=show_all_failures,
     )
-    results = runner(ctx=ctx)
-    return results[0]
+    return ctx, dbt_artifacts_dir

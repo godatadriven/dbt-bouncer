@@ -268,6 +268,64 @@ dbt-bouncer list
 dbt-bouncer list --output-format json
 ```
 
+## fix (experimental)
+
+The `fix` subcommand runs the configured checks and automatically fixes failures whose remedy is mechanical:
+
+```bash
+dbt-bouncer fix
+```
+
+The command requires the optional `fix` dependency:
+
+```bash
+pip install 'dbt-bouncer[fix]'
+```
+
+### What it can fix
+
+- `check_model_has_tags` (with `criteria: all`, the default): the missing tags are appended to the model's `config.tags`. dbt merges tags additively across sources, so appending is safe.
+- `check_model_access`: the model's `access` is set to the required value.
+
+### What it cannot fix — by design
+
+`fix` is honest about its limits. It edits dbt properties (YAML) files only, via a round-trip parser that preserves comments and formatting. It will not:
+
+- Touch SQL or Python model files.
+- Create a properties-file entry — the failing model must already be documented in a YAML file (`patch_path` in the manifest). Models without an entry are reported as not fixable.
+- Fix anything that needs human judgement: descriptions, names, test coverage, `criteria: any`/`one` tag choices, and every other check. These are listed as "Not fixable" with a reason.
+- Refresh your artifacts — the run uses the existing `manifest.json`, so re-run `dbt parse` after fixing to make a second `dbt-bouncer run` pass.
+
+### Options
+
+#### `--config-file`
+
+**Type:** Path
+**Default:** `dbt-bouncer.yml`
+**Required:** No
+
+Specifies the location of the configuration file.
+
+#### `--dbt-project-dir`
+
+**Type:** Path
+**Default:** The parent of the dbt artifacts directory
+**Required:** No
+
+The dbt project root, used to resolve properties-file paths from the manifest's `patch_path` values.
+
+#### `--dry-run`
+
+**Type:** Flag
+**Default:** False
+**Required:** No
+
+Show what would be fixed without writing any file.
+
+### Exit codes
+
+`fix` exits with `0` when every failure was fixed (or there were none), and `1` when failures remain — because they are not fixable, or because `--dry-run` was passed.
+
 ## Exit codes
 
 `dbt-bouncer` returns distinct exit codes so that CI pipelines and scripts can tell a check failure apart from a setup problem:
