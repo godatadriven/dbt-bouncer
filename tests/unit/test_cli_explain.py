@@ -49,6 +49,13 @@ class TestExplainCommand:
         assert result.exit_code == ExitCode.CONFIG_ERROR
         assert "Did you mean" in _all_output(result)
 
+    def test_gibberish_check_gets_no_suggestion(self):
+        """Input that resembles no check yields an error without a suggestion."""
+        result = runner.invoke(app, ["explain", "xyzzy"])
+
+        assert result.exit_code == ExitCode.CONFIG_ERROR
+        assert "Did you mean" not in _all_output(result)
+
     def test_json_output(self):
         """The JSON output carries the full structured payload."""
         result = runner.invoke(

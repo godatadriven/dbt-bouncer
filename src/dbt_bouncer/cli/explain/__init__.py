@@ -56,6 +56,13 @@ def explain_check(
             key=lambda k: jellyfish.levenshtein_distance(k, check),
             default=None,
         )
+        # Only offer the nearest match when it is plausibly a typo -- for
+        # input that resembles nothing (e.g. 'xyzzy') a suggestion misleads.
+        if (
+            best_match is not None
+            and jellyfish.levenshtein_distance(best_match, check) > 3
+        ):
+            best_match = None
         suggestion = f" Did you mean '{best_match}'?" if best_match else ""
         Console(stderr=True).print(
             f"[bold red]Unknown check name or rule code '{check}'.{suggestion}[/bold red]"
