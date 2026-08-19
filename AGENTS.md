@@ -137,6 +137,19 @@ CI will fail if `schema.json` is out of date.
 - Shared fixtures in `conftest.py` files (session-scoped and per-directory)
 - Run: `mise run test-unit`
 
+## Skills
+
+AI skills live in `skills/`. Each skill is a directory with a `SKILL.md` file and an optional `references/` subdirectory.
+
+The repository is also a Claude Code plugin. The plugin metadata lives in `.claude-plugin/`:
+
+- `.claude-plugin/marketplace.json` — the marketplace catalog. It lists one plugin (`dbt-bouncer`) with `source: "./"`.
+- `.claude-plugin/plugin.json` — the plugin manifest. Its `version` field is the single version for all bundled skills.
+
+Claude Code auto-discovers `skills/`. To add a skill, create `skills/<skill-name>/SKILL.md`. No `marketplace.json` change is needed.
+
+**After any change to a file under `skills/`, bump the `version` in `.claude-plugin/plugin.json`.** Use semantic versioning. The bump must be part of the same PR. CI does not enforce this rule, so the PR author and the AI reviewer must confirm it.
+
 ## Releases
 
 ### Release notes

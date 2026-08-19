@@ -74,6 +74,7 @@ jobs:
             6. **Breaking Changes**: Config schema changes, removed/renamed checks, changed function signatures.
             7. **Documentation**: Docstrings on public functions with Parameters/Returns sections, updated AGENTS.md if architecture changed.
             8. **Cross-file version consistency**: When a PR bumps a version-pinned tool (e.g. `bencherdev/bencher` in workflow files), grep the entire repo for the OLD version string to find other references (Dockerfiles, env vars, docs). Flag any stale occurrences as 🔴 **Issue**.
+            9. **Skill version bumps**: If the PR changes any file under `skills/` (for example a `SKILL.md` or a `references/` file), confirm that the `version` field in `.claude-plugin/plugin.json` is bumped in the same PR. If it is not, flag as 🔴 **Issue**.
 
             ## Severity Levels
             Use these severity levels for review findings:
