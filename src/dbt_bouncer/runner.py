@@ -287,7 +287,7 @@ def _assemble_checks_to_run(ctx: "BouncerContext") -> list[CheckToRun]:
 
     def _path_filtered_for(check: Any, iterate_value: str) -> list[_ResourceFacts]:
         include, exclude = check.include, check.exclude
-        selector_raw = getattr(check, "selector", None)
+        selector_raw = check.selector
         key = (
             iterate_value,
             _pattern_key(include),
