@@ -40,6 +40,7 @@ mise run install
   - `explain/` — explain one check offline (`explain_check`, `build_explain_payload`, `print_text_explanation`)
   - `init/` — interactive config file creation (`init`, `build_initial_config`, `write_config_file`)
   - `list/` — list available checks (`list_checks`, `build_checks_payload`, `category_key`, `get_check_params`, `print_text_checks`)
+  - `mcp/` — MCP server exposing dbt-bouncer to AI coding agents (`mcp_serve`, `build_server`; requires the optional `mcp` extra)
   - `run/` — execute bouncer checks (`run`, `run_bouncer`, `_detect_config_file_source`, `_build_context`)
   - `validate/` — lint config file (`validate`)
 - `src/dbt_bouncer/main.py` — Typer app setup, subcommand registration, backward-compatible `main_callback`

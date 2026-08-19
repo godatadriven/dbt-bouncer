@@ -110,6 +110,36 @@ class TestRunChecksTool:
 
         assert "error" in payload
 
+    def test_timeout_returns_error_payload(self, monkeypatch):
+        """A hung subprocess surfaces as an error payload, not an exception."""
+
+        def fake_run(cmd, **_kwargs):
+            raise mcp_server.subprocess.TimeoutExpired(cmd=cmd, timeout=600)
+
+        monkeypatch.setattr(mcp_server.shutil, "which", lambda _: "/usr/bin/fake")
+        monkeypatch.setattr(mcp_server.subprocess, "run", fake_run)
+
+        payload = mcp_server.run_checks()
+
+        assert "did not finish" in payload["error"]
+
+    def test_passing_run(self, monkeypatch):
+        """A clean run maps to passed=True with no failures."""
+
+        def fake_run(cmd, **_kwargs):
+            output_file = Path(cmd[cmd.index("--output-file") + 1])
+            output_file.write_text("[]")
+            return SimpleNamespace(returncode=0, stdout="Done. SUCCESS=5\n", stderr="")
+
+        monkeypatch.setattr(mcp_server.shutil, "which", lambda _: "/usr/bin/fake")
+        monkeypatch.setattr(mcp_server.subprocess, "run", fake_run)
+
+        payload = mcp_server.run_checks()
+
+        assert payload["exit_code"] == 0
+        assert payload["passed"] is True
+        assert payload["failures"] == []
+
     def test_subprocess_invocation(self, monkeypatch):
         """The subprocess result and output file map into the payload."""
 
