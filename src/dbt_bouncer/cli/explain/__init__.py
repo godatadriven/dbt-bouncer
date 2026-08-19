@@ -15,7 +15,7 @@ def explain_check(
     check: Annotated[
         str,
         typer.Argument(
-            help="Check name (e.g. 'check_model_names') or rule code (e.g. 'MO021')."
+            help="Check name (e.g. 'check_model_names') or rule code (e.g. 'MO038')."
         ),
     ],
     custom_checks_dir: Annotated[
