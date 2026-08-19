@@ -191,6 +191,7 @@ It will report:
 - YAML syntax errors with line numbers
 - Missing required fields (like `name` in checks)
 - Incorrect configuration types (e.g., if a check category is not a list)
+- Everything `dbt-bouncer run` would reject: unknown keys, unknown check parameters, and mistyped parameter values — with a "Did you mean" suggestion for the closest valid name
 
 Example output for a valid config:
 
@@ -203,7 +204,7 @@ Example output for issues:
 ```text
 Found 2 issue(s) in config file:
   Line 1: Check is missing required 'name' field
-  Line 3: YAML syntax error: ...
+  Line 3: model_name_patern: Extra inputs are not permitted. Did you mean 'model_name_pattern'?
 ```
 
 ### Options

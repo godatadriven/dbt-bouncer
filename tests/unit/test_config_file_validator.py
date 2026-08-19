@@ -1085,3 +1085,170 @@ def test_validate_conf_deprecated_regex_check_name_still_runs(caplog):
         "check_model_description_contains_regexp_pattern"
     )
     assert "deprecated" in caplog.text
+
+
+def test_validate_conf_extra_top_level_key_suggestion():
+    """An unknown top-level key gets a did-you-mean suggestion."""
+    ctx = typer.Context(
+        get_command(app),
+        obj={
+            "config_file_path": "",
+            "custom_checks_dir": None,
+        },
+    )
+
+    with ctx, pytest.raises(DbtBouncerConfigError) as excinfo:
+        validate_conf(
+            check_categories=["manifest_checks"],
+            config_file_contents={
+                "severtiy": "warn",
+                "manifest_checks": [{"name": "check_model_description_populated"}],
+            },
+        )
+
+    assert "severtiy: Extra inputs are not permitted. Did you mean 'severity'?" in str(
+        excinfo.value
+    )
+
+
+def test_validate_conf_extra_check_key_suggestion():
+    """An unknown check parameter gets a did-you-mean suggestion."""
+    ctx = typer.Context(
+        get_command(app),
+        obj={
+            "config_file_path": "",
+            "custom_checks_dir": None,
+        },
+    )
+
+    with ctx, pytest.raises(DbtBouncerConfigError) as excinfo:
+        validate_conf(
+            check_categories=["manifest_checks"],
+            config_file_contents={
+                "manifest_checks": [
+                    {
+                        "name": "check_model_names",
+                        "model_name_patern": "^stg_",
+                    }
+                ]
+            },
+        )
+
+    assert (
+        "model_name_patern: Extra inputs are not permitted. "
+        "Did you mean 'model_name_pattern'?"
+    ) in str(excinfo.value)
+
+
+def test_validate_conf_error_details_carry_loc():
+    """Structured details on the raised error carry the Pydantic loc tuples."""
+    ctx = typer.Context(
+        get_command(app),
+        obj={
+            "config_file_path": "",
+            "custom_checks_dir": None,
+        },
+    )
+
+    with ctx, pytest.raises(DbtBouncerConfigError) as excinfo:
+        validate_conf(
+            check_categories=["manifest_checks"],
+            config_file_contents={
+                "severtiy": "warn",
+                "manifest_checks": [{"name": "check_model_description_populated"}],
+            },
+        )
+
+    details = excinfo.value.details
+    assert details is not None
+    assert details[0]["loc"] == ("severtiy",)
+
+
+def test_suggest_closest_returns_empty_for_distant_key():
+    """No suggestion is offered when nothing is within the distance cap."""
+    from dbt_bouncer.configuration_file.validator import _suggest_closest
+
+    assert _suggest_closest("severtiy", ["severity"]) != ""
+    assert _suggest_closest("completely_unrelated", ["severity", "include"]) == ""
+    assert _suggest_closest("anything", []) == ""
+
+
+def test_resolve_loc_line(tmp_path):
+    """Loc tuples resolve to the line of the deepest matching YAML key."""
+    from dbt_bouncer.configuration_file.validator import _resolve_loc_line
+
+    config_file = tmp_path / "dbt-bouncer.yml"
+    config_file.write_text(
+        "severtiy: warn\n"
+        "manifest_checks:\n"
+        "  - name: check_model_names\n"
+        "    model_name_patern: ^stg_\n"
+    )
+
+    assert _resolve_loc_line(config_file, ("severtiy",)) == 1
+    assert (
+        _resolve_loc_line(
+            config_file,
+            ("manifest_checks", 0, "check_model_names", "model_name_patern"),
+        )
+        == 4
+    )
+    # The union tag is not a YAML key, so the walk stops at the check item.
+    assert (
+        _resolve_loc_line(
+            config_file,
+            ("manifest_checks", 0, "check_model_names", "model_name_pattern"),
+        )
+        == 3
+    )
+    # Unresolvable inputs fall back to line 1.
+    assert _resolve_loc_line(config_file, ("manifest_checks", 99)) == 2
+    assert _resolve_loc_line(tmp_path / "dbt-bouncer.toml", ("severtiy",)) == 1
+
+
+def test_lint_config_file_deep_valid(tmp_path):
+    """A config that passes full validation yields no issues."""
+    from dbt_bouncer.configuration_file.validator import lint_config_file_deep
+
+    config_file = tmp_path / "dbt-bouncer.yml"
+    config_file.write_text(
+        "manifest_checks:\n  - name: check_model_description_populated\n"
+    )
+
+    assert lint_config_file_deep(config_file) == []
+
+
+def test_lint_config_file_deep_reports_line_and_suggestion(tmp_path):
+    """Full validation issues carry resolved line numbers and suggestions."""
+    from dbt_bouncer.configuration_file.validator import lint_config_file_deep
+
+    config_file = tmp_path / "dbt-bouncer.yml"
+    config_file.write_text(
+        "severtiy: warn\n"
+        "manifest_checks:\n"
+        "  - name: check_model_description_populated\n"
+    )
+
+    issues = lint_config_file_deep(config_file)
+
+    assert len(issues) == 1
+    assert issues[0]["line"] == 1
+    assert "Did you mean 'severity'?" in issues[0]["message"]
+
+
+def test_lint_config_file_deep_toml(tmp_path):
+    """TOML configs are fully validated, with issues reported at line 1."""
+    from dbt_bouncer.configuration_file.validator import lint_config_file_deep
+
+    config_file = tmp_path / "dbt-bouncer.toml"
+    config_file.write_text(
+        'severtiy = "warn"\n'
+        "[[manifest_checks]]\n"
+        'name = "check_model_description_populated"\n'
+    )
+
+    issues = lint_config_file_deep(config_file)
+
+    assert len(issues) == 1
+    assert issues[0]["line"] == 1
+    assert "severtiy" in issues[0]["message"]

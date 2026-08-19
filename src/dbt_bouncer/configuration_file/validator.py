@@ -4,7 +4,7 @@ import re
 import tomllib
 import types
 import typing
-from collections.abc import Mapping
+from collections.abc import Iterable, Mapping
 from functools import lru_cache
 from pathlib import Path, PurePath
 from typing import TYPE_CHECKING, Any
@@ -36,6 +36,25 @@ RULE_CODE_PATTERN = re.compile(r"^[A-Z]{2}\d{3}$")
 DEPRECATED_CHECK_NAME_ALIASES: dict[str, str] = {
     "check_model_description_contains_regex_pattern": "check_model_description_contains_regexp_pattern",
 }
+
+
+def _suggest_closest(target: str, candidates: Iterable[str]) -> str:
+    """Return a did-you-mean suffix for the candidate closest to ``target``.
+
+    Returns:
+        str: `` Did you mean '<candidate>'?`` when the closest candidate is
+        within a Levenshtein distance of 3, else an empty string. The cap
+        avoids surfacing absurd suggestions for keys that resemble nothing.
+
+    """
+    best = min(
+        candidates,
+        key=lambda c: jellyfish.levenshtein_distance(c, target),
+        default=None,
+    )
+    if best is not None and jellyfish.levenshtein_distance(best, target) <= 3:
+        return f" Did you mean '{best}'?"
+    return ""
 
 
 def warn_deprecated_check_name(old_name: str, new_name: str) -> None:
@@ -392,6 +411,119 @@ def lint_config_file(config_file_path: Path) -> list[dict[str, Any]]:
                             "severity": "error",
                         }
                     )
+
+    return issues
+
+
+def _resolve_loc_line(config_file_path: Path, loc: tuple[Any, ...]) -> int:
+    """Best-effort line number for a Pydantic error location in a YAML file.
+
+    Walks the YAML node tree (which carries source marks) along ``loc``.
+    Discriminated-union tags (check names) appear in ``loc`` but are not YAML
+    keys, so unresolvable string parts are skipped and the walk continues.
+
+    Returns:
+        int: 1-based line number of the deepest resolvable part, or 1 when the
+        file is not YAML or nothing resolves.
+
+    """
+    if config_file_path.suffix not in (".yml", ".yaml"):
+        return 1
+
+    try:
+        node = yaml.compose(  # type: ignore[possibly-missing-attribute]
+            config_file_path.read_text(),
+            Loader=yaml.CSafeLoader,  # type: ignore[possibly-missing-attribute]
+        )
+    except (OSError, yaml.YAMLError):
+        return 1
+
+    line = 1
+    for part in loc:
+        match node:
+            case yaml.MappingNode():
+                for key_node, value_node in node.value:
+                    if key_node.value == str(part):
+                        line = key_node.start_mark.line + 1
+                        node = value_node
+                        break
+                # An unmatched part (e.g. a union tag) is skipped; the walk
+                # continues from the current node.
+            case yaml.SequenceNode() if isinstance(part, int):
+                if part >= len(node.value):
+                    break
+                node = node.value[part]
+                line = node.start_mark.line + 1
+            case _:
+                break
+    return line
+
+
+def lint_config_file_deep(config_file_path: Path) -> list[dict[str, Any]]:
+    """Validate the config file against the full Pydantic model.
+
+    Complements ``lint_config_file``: the surface lint catches YAML syntax and
+    shape issues, this catches everything ``dbt-bouncer run`` would reject —
+    unknown keys, unknown check parameters, and mistyped parameter values.
+
+    Args:
+        config_file_path: Path to the config file.
+
+    Returns:
+        list[dict[str, Any]]: Issues found, each with 'line', 'message', and
+        'severity'.
+
+    """
+    issues: list[dict[str, Any]] = []
+
+    try:
+        config_file_contents = dict(
+            load_config_file_contents(
+                config_file_path, allow_default_config_file_creation=False
+            )
+        )
+    except DbtBouncerConfigError as e:
+        return [{"line": 1, "message": str(e), "severity": "error"}]
+
+    check_categories = [
+        k
+        for k in config_file_contents
+        if k.endswith("_checks") and config_file_contents.get(k) != []
+    ]
+
+    custom_checks_dir = None
+    if config_file_contents.get("custom_checks_dir"):
+        custom_checks_dir = (
+            Path(config_file_path).parent / config_file_contents["custom_checks_dir"]
+        )
+
+    try:
+        validate_conf(
+            check_categories=check_categories,
+            config_file_contents=config_file_contents,
+            custom_checks_dir=custom_checks_dir,
+        )
+    except DbtBouncerConfigError as e:
+        details = e.details or [{"loc": (), "message": m} for m in str(e).splitlines()]
+        for detail in details:
+            issues.append(
+                {
+                    "line": _resolve_loc_line(
+                        config_file_path, tuple(detail.get("loc", ()))
+                    ),
+                    "message": detail["message"],
+                    "severity": "error",
+                }
+            )
+    except Exception as e:
+        logging.warning(f"Unexpected error during config validation: {e}")
+        issues.append(
+            {
+                "line": 1,
+                "message": f"Unexpected error during config validation: {e}",
+                "severity": "error",
+            }
+        )
 
     return issues
 
@@ -819,9 +951,12 @@ def validate_conf(
     try:
         bouncer_config = DbtBouncerConf(**config_file_contents)
     except ValidationError as e:
-        accepted_names = list(get_check_registry(custom_checks_dir).keys())
-        error_message: list[str] = []
+        check_registry = get_check_registry(custom_checks_dir)
+        accepted_names = list(check_registry.keys())
+        details: list[dict[str, Any]] = []
         for error in e.errors():
+            loc = error["loc"]
+            location = " -> ".join(str(part) for part in loc)
             if (
                 compile_pattern(
                     r"Input tag \S* found using 'name' does not match any of the expected tags: [\S\s]*",
@@ -840,16 +975,37 @@ def validate_conf(
                     default=None,
                 )
                 suggestion = f" Did you mean '{min_name}'?" if min_name else ""
-                error_message.append(
-                    f"{len(error_message) + 1}. Check '{incorrect_name}' does not match any of the expected checks.{suggestion}"
-                )
+                message = f"Check '{incorrect_name}' does not match any of the expected checks.{suggestion}"
+            elif error["type"] == "extra_forbidden":
+                # An unknown key was found. Suggest the closest valid key: for
+                # a top-level key the candidates come from the conf class, for
+                # a check-level key from the check class named by the union
+                # tag in ``loc`` (e.g. ("manifest_checks", 0, "check_x", key)).
+                extra_key = str(loc[-1])
+                candidates: set[str] = set()
+                if len(loc) == 1:
+                    candidates = set(DbtBouncerConf.model_fields)
+                elif len(loc) >= 4:
+                    check_cls = check_registry.get(str(loc[2]))
+                    if check_cls is not None:
+                        resource_field = getattr(check_cls, "iterate_over", None)
+                        candidates = {
+                            f
+                            for f in check_cls.model_fields
+                            if f not in ("index", resource_field)
+                        }
+                suggestion = _suggest_closest(extra_key, candidates)
+                message = f"{location}: {error['msg']}"
+                if suggestion:
+                    message = f"{message}.{suggestion}"
             else:
-                location = " -> ".join(str(loc) for loc in error["loc"])
-                error_message.append(
-                    f"{len(error_message) + 1}. {location}: {error['msg']}"
-                )
+                message = f"{location}: {error['msg']}"
+            details.append({"loc": loc, "message": message})
 
-        raise DbtBouncerConfigError("\n".join(error_message)) from e
+        raise DbtBouncerConfigError(
+            "\n".join(f"{i + 1}. {d['message']}" for i, d in enumerate(details)),
+            details=details,
+        ) from e
 
     if cache_path is not None:
         _write_cached_conf(cache_path, bouncer_config)

@@ -22,8 +22,10 @@ def validate(
 ) -> None:
     """Validate the dbt-bouncer configuration file.
 
-    Checks for YAML syntax errors and common configuration issues,
-    reporting line numbers for any issues found.
+    Checks for YAML syntax errors and common configuration issues, then runs
+    the full configuration validation that `dbt-bouncer run` performs. Unknown
+    keys, unknown check parameters, and mistyped values are reported with line
+    numbers.
 
     Raises:
         Exit: With code SUCCESS if the config file is valid, CHECK_ERRORS if issues
@@ -40,9 +42,17 @@ def validate(
         logging.error(f"Config file not found: {config_path}")
         raise typer.Exit(ExitCode.CONFIG_ERROR)
 
-    from dbt_bouncer.configuration_file.validator import lint_config_file
+    from dbt_bouncer.configuration_file.validator import (
+        lint_config_file,
+        lint_config_file_deep,
+    )
 
     issues = lint_config_file(config_path)
+
+    # The deep pass duplicates surface findings (e.g. unknown check names), so
+    # it only runs once the surface lint is clean.
+    if not issues:
+        issues = lint_config_file_deep(config_path)
 
     if not issues:
         console.print("[bold green]Configuration file is valid![/bold green] ✅")
