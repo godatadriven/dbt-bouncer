@@ -218,3 +218,22 @@ exit_code = run_bouncer(
     **Best for:** embedding `dbt-bouncer` into existing Python tooling, test suites, or custom orchestration.
 
     **Watch out:** requires Python knowledge; not suitable for teams without Python experience.
+
+### Skills
+
+You can install dbt-bouncer AI skills like so:
+
+#### Vercel Skills CLI
+
+```shell
+npx skills add godatadriven/dbt-bouncer
+# or just this skill:
+npx skills add godatadriven/dbt-bouncer --skill suggesting-dbt-bouncer-checks
+```
+
+#### Claude Code plugin marketplace
+
+```shell
+/plugin marketplace add godatadriven/dbt-bouncer
+/plugin install dbt-bouncer@dbt-bouncer-marketplace
+```

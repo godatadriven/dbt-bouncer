@@ -1,0 +1,16 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "dbt-bouncer-marketplace",
+  "description": "AI skills for dbt-bouncer.",
+  "owner": {
+    "name": "godatadriven",
+    "url": "https://github.com/godatadriven/dbt-bouncer"
+  },
+  "plugins": [
+    {
+      "name": "dbt-bouncer",
+      "description": "AI skills for dbt-bouncer, including suggesting-dbt-bouncer-checks.",
+      "source": "./"
+    }
+  ]
+}
