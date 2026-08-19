@@ -1,7 +1,7 @@
 ---
 name: suggesting-dbt-bouncer-checks
 description: Analyzes a dbt project and suggests dbt-bouncer checks that already pass (for existing projects) or a sensible starter config (for greenfield projects). Use when adding dbt-bouncer to a project, creating or extending a dbt-bouncer.yml config, or enforcing dbt conventions with dbt-bouncer.
-user-invocable: false
+user-invocable: true
 metadata:
   author: godatadriven
 ---
