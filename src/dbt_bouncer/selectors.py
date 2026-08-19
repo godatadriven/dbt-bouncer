@@ -89,6 +89,10 @@ class SelectorAtom:
 
         """
         if self.method == "name":
+            # Fall back to the last unique-ID segment for resources whose
+            # manifest entry carries no ``name`` attribute (e.g. proxy objects
+            # for exotic resource types) — intentional, so name atoms still
+            # work everywhere.
             name = getattr(node, "name", None) or unique_id.split(".")[-1]
             return fnmatch(str(name), self.value)
         if self.method == "tag":

@@ -181,3 +181,17 @@ def test_invalid_selector_rejected_at_config_time():
                 ]
             },
         )
+
+
+def test_invalid_global_selector_rejected_at_config_time():
+    """A syntactically invalid global selector fails config validation."""
+    from dbt_bouncer.configuration_file.validator import validate_conf
+
+    with pytest.raises(DbtBouncerConfigError):
+        validate_conf(
+            check_categories=["manifest_checks"],
+            config_file_contents={
+                "manifest_checks": [{"name": "check_model_description_populated"}],
+                "selector": "state:modified",
+            },
+        )
