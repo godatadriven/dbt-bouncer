@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any, ClassVar
 
-from pydantic import BaseModel, ConfigDict, Field, PrivateAttr
+from pydantic import BaseModel, ConfigDict, Field, PrivateAttr, field_validator
 
 from dbt_bouncer.enums import CheckSeverity, Materialization, RuleCode
 from dbt_bouncer.utils import is_description_populated
@@ -44,10 +44,29 @@ class BaseCheck(BaseModel):
         default=None,
         description="Limit check to models with the specified materialization.",
     )
+    selector: str | None = Field(
+        default=None,
+        description="dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+    )
     severity: CheckSeverity | None = Field(
         default=CheckSeverity.ERROR,
         description="Severity of the check, one of 'error' or 'warn'.",
     )
+
+    @field_validator("selector")
+    @classmethod
+    def _validate_selector(cls, value: str | None) -> str | None:
+        """Reject syntactically invalid selectors at config-validation time.
+
+        Returns:
+            str | None: The validated selector string.
+
+        """
+        if value is not None:
+            from dbt_bouncer.selectors import parse_selector
+
+            parse_selector(value)
+        return value
 
     # NB: the twelve per-resource fields (``model``, ``seed``, ``catalog_node``,
     # ...) are deliberately NOT declared here. Every check binds exactly one

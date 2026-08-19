@@ -217,6 +217,37 @@ dbt-bouncer --only catalog_checks,manifest_checks
 
 For a detailed description see [here](./faq.md#how-to-configure-dbt-bouncer-for-use-in-a-ci-pipeline).
 
+### Selector
+
+All checks accept an optional `selector` argument that uses dbt-style node selection syntax. Where `include`/`exclude` filter on file paths, `selector` filters on node properties and the dbt DAG:
+
+- `tag:finance`: resources with the tag.
+- `path:models/staging`: resources under a path (glob patterns supported).
+- `fqn:my_project.marts.*`: glob match on the dot-joined fully qualified name.
+- `package:my_package`: resources from a package.
+- `stg_customers` or `stg_*`: glob match on the resource name.
+- `+orders`: `orders` plus all of its ancestors. `orders+`: `orders` plus all of its descendants. `+orders+`: both. Graph operators can wrap any method, for example `+tag:critical`.
+- Space-separated atoms form a union (OR), comma-separated atoms form an intersection (AND) — the same semantics as dbt. For example, `stg_*,tag:critical tag:finance` selects staging models with the `critical` tag, plus everything with the `finance` tag.
+
+```yaml
+manifest_checks:
+  # Enforce descriptions on every ancestor of the `orders` model
+  - name: check_model_description_populated
+    selector: +orders
+
+  # Enforce a unique test on all models tagged `critical`
+  - name: check_model_has_unique_test
+    selector: tag:critical
+```
+
+`selector` can also be set at the global level; as with `include`/`exclude`, the **check** level wins when both are set. It composes with `include`/`exclude`: a resource must pass both filters.
+
+!!! note
+
+    - Selection is resolved against the manifest. A check still only runs on the resource type it iterates: a model check with `selector: +orders` runs on the model ancestors of `orders`, not on its source ancestors.
+    - `tag:`, `package:`, `path:`, and `fqn:` only match resources that carry the corresponding attribute in the manifest.
+    - Not supported (run dbt itself for these): the `@` operator, degree limits (`2+orders`), `state:`, `result:`, `config.*:`, and `test_type:` methods, and YAML-defined named selectors.
+
 ### Severity
 
 All checks accept a `severity` argument, valid values are:

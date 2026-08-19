@@ -45,6 +45,7 @@ base_fields = frozenset(
         "models_by_unique_id",
         "run_result",
         "seed",
+        "selector",
         "semantic_model",
         "severity",
         "snapshot",

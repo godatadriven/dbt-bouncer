@@ -264,15 +264,36 @@ def _assemble_checks_to_run(ctx: "BouncerContext") -> list[CheckToRun]:
         resources_with_meta[iterate_value] = out
         return out
 
-    # Memoised include/exclude filtering. Path matching depends only on the
-    # check's include/exclude patterns and the resource's path, so checks sharing
-    # a pattern pair (very common -- most set neither) reuse one filtered list
-    # instead of re-running the regexes per check.
-    path_filtered: dict[tuple[str, Any, Any], list[_ResourceFacts]] = {}
+    # Memoised selector resolution. A selector resolves to a static set of
+    # unique IDs for the manifest, so checks sharing a selector string reuse
+    # one resolved instance.
+    selectors_by_raw: dict[str, Any] = {}
+
+    def _selector_for(raw: str) -> Any:
+        cached = selectors_by_raw.get(raw)
+        if cached is not None:
+            return cached
+        from dbt_bouncer.selectors import Selector
+
+        selector = Selector(raw, ctx.manifest_obj.manifest)
+        selectors_by_raw[raw] = selector
+        return selector
+
+    # Memoised include/exclude/selector filtering. Matching depends only on the
+    # check's patterns and the resource, so checks sharing a pattern triple
+    # (very common -- most set none) reuse one filtered list instead of
+    # re-running the regexes per check.
+    path_filtered: dict[tuple[str, Any, Any, Any], list[_ResourceFacts]] = {}
 
     def _path_filtered_for(check: Any, iterate_value: str) -> list[_ResourceFacts]:
         include, exclude = check.include, check.exclude
-        key = (iterate_value, _pattern_key(include), _pattern_key(exclude))
+        selector_raw = getattr(check, "selector", None)
+        key = (
+            iterate_value,
+            _pattern_key(include),
+            _pattern_key(exclude),
+            selector_raw,
+        )
         cached = path_filtered.get(key)
         if cached is not None:
             return cached
@@ -292,6 +313,9 @@ def _assemble_checks_to_run(ctx: "BouncerContext") -> list[CheckToRun]:
                 if object_in_path(include, facts.cleaned_path)
                 and not object_excluded_by_path(exclude, facts.cleaned_path)
             ]
+        if selector_raw:
+            selector = _selector_for(selector_raw)
+            result = [facts for facts in result if selector.matches(facts.unique_id)]
         path_filtered[key] = result
         return result
 

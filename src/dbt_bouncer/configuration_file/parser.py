@@ -91,6 +91,10 @@ class DbtBouncerConfBase(BaseModel):
     package_name: str | None = Field(
         default=None, description="If you want to run `dbt-bouncer` against a package."
     )
+    selector: str | None = Field(
+        default=None,
+        description="dbt-style node selector applied to all checks that do not set their own.",
+    )
     severity: Literal["error", "warn"] | None = Field(
         default=None,
         description="Severity of the check, one of 'error' or 'warn'.",
