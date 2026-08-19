@@ -39,12 +39,13 @@ DEPRECATED_CHECK_NAME_ALIASES: dict[str, str] = {
 
 
 def _suggest_closest(target: str, candidates: Iterable[str]) -> str:
-    """Return a did-you-mean suffix for the candidate closest to ``target``.
+    """Return a did-you-mean sentence for the candidate closest to ``target``.
 
     Returns:
-        str: `` Did you mean '<candidate>'?`` when the closest candidate is
+        str: ``Did you mean '<candidate>'?`` when the closest candidate is
         within a Levenshtein distance of 3, else an empty string. The cap
         avoids surfacing absurd suggestions for keys that resemble nothing.
+        The caller is responsible for surrounding punctuation and spacing.
 
     """
     best = min(
@@ -53,7 +54,7 @@ def _suggest_closest(target: str, candidates: Iterable[str]) -> str:
         default=None,
     )
     if best is not None and jellyfish.levenshtein_distance(best, target) <= 3:
-        return f" Did you mean '{best}'?"
+        return f"Did you mean '{best}'?"
     return ""
 
 
@@ -967,6 +968,10 @@ def validate_conf(
                 incorrect_name = error["msg"][
                     error["msg"].find("tag") + 5 : error["msg"].find("found using") - 2
                 ]
+                # Unlike ``_suggest_closest``, no distance cap is applied here:
+                # a check entry must name a registered check, so the nearest
+                # registry entry is always the most useful pointer, even for a
+                # badly mangled name.
                 min_name = min(
                     accepted_names,
                     key=lambda name, target=incorrect_name: (
@@ -997,7 +1002,7 @@ def validate_conf(
                 suggestion = _suggest_closest(extra_key, candidates)
                 message = f"{location}: {error['msg']}"
                 if suggestion:
-                    message = f"{message}.{suggestion}"
+                    message = f"{message}. {suggestion}"
             else:
                 message = f"{location}: {error['msg']}"
             details.append({"loc": loc, "message": message})
