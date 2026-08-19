@@ -37,6 +37,7 @@ mise run install
   - `manifest/` — manifest checks (`models/` has 11 files by concern: access, code, columns, description, directories, lineage, meta, naming, tags, tests, versioning; `sources/` similarly split)
   - `run_results/` — run results checks
 - `src/dbt_bouncer/cli/` — CLI subpackage, one subdirectory per subcommand:
+  - `explain/` — explain one check offline (`explain_check`, `build_explain_payload`, `print_text_explanation`)
   - `init/` — interactive config file creation (`init`, `build_initial_config`, `write_config_file`)
   - `list/` — list available checks (`list_checks`, `build_checks_payload`, `category_key`, `get_check_params`, `print_text_checks`)
   - `run/` — execute bouncer checks (`run`, `run_bouncer`, `_detect_config_file_source`, `_build_context`)
