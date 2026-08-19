@@ -1,6 +1,14 @@
 from enum import IntEnum, StrEnum, auto
 
 
+class AutofixMutateResult(StrEnum):
+    """Outcome of one autofix mutation against a properties-file document."""
+
+    CHANGED = auto()
+    MISSING = auto()
+    NOOP = auto()
+
+
 class CheckOutcome(StrEnum):
     """Possible outcomes of a dbt-bouncer check execution."""
 

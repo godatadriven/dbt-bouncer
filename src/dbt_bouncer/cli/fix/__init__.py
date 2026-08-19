@@ -59,6 +59,10 @@ def fix(
     from dbt_bouncer.cli.run.utils import prepare_run_context
     from dbt_bouncer.enums import CheckOutcome
     from dbt_bouncer.executor import Executor
+
+    # Deliberate coupling to the runner's internal matcher: `fix` needs the
+    # assembled check/resource pairs (which the public runner() discards after
+    # reporting), and the benchmark suite already imports it the same way.
     from dbt_bouncer.runner import _assemble_checks_to_run
 
     ctx, dbt_artifacts_dir = prepare_run_context(config_file=config_file)

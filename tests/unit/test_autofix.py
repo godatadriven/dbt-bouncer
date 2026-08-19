@@ -3,6 +3,7 @@
 from types import SimpleNamespace
 
 from dbt_bouncer.autofix import (
+    AutofixMutateResult,
     PlannedFix,
     apply_fixes,
     plan_fixes,
@@ -173,7 +174,10 @@ class TestApplyFixes:
 def test_planned_fix_dataclass_fields():
     """PlannedFix exposes the fields the CLI renders."""
     fix = PlannedFix(
-        check_run_id="a", description="b", file=None, mutate=lambda _doc: "noop"
+        check_run_id="a",
+        description="b",
+        file=None,
+        mutate=lambda _doc: AutofixMutateResult.NOOP,
     )
 
     assert fix.description == "b"

@@ -175,7 +175,9 @@ def prepare_run_context(
         output_format: Format for the output file, requires output_file.
         output_only_failures: Only failures will be included in the output file.
         show_all_failures: All failures will be printed to the console.
-        config_file_source: Source of the config file.
+        config_file_source: Source of the config file. When None (the common
+            case — only `run_bouncer` ever passes it), the source is
+            auto-detected from `config_file`.
 
     Returns:
         tuple[BouncerContext, Path]: The ready-to-run context and the resolved

@@ -22,14 +22,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
+from dbt_bouncer.enums import AutofixMutateResult
+
 if TYPE_CHECKING:
     from collections.abc import Callable, Sequence
     from pathlib import Path
-
-# Result of a fix mutation: the file entry was edited, was already in the
-# required state (e.g. an earlier fix in this run for another version of the
-# same model edited it first), or was not found at all.
-MutateResult = str  # "changed" | "noop" | "missing"
 
 
 @dataclass(slots=True)
@@ -39,7 +36,7 @@ class PlannedFix:
     check_run_id: str
     description: str
     file: Path
-    mutate: Callable[[Any], MutateResult]
+    mutate: Callable[[Any], AutofixMutateResult]
 
 
 @dataclass(slots=True)
@@ -103,10 +100,10 @@ def _fix_model_has_tags(
     missing = [t for t in check.tags if t not in existing]
     model_name = str(model.name)
 
-    def mutate(doc: Any) -> MutateResult:
+    def mutate(doc: Any) -> AutofixMutateResult:
         entry = _find_model_entry(doc, model_name)
         if entry is None:
-            return "missing"
+            return AutofixMutateResult.MISSING
         config = entry.setdefault("config", {})
         tags = config.setdefault("tags", [])
         changed = False
@@ -114,7 +111,7 @@ def _fix_model_has_tags(
             if tag not in tags:
                 tags.append(tag)
                 changed = True
-        return "changed" if changed else "noop"
+        return AutofixMutateResult.CHANGED if changed else AutofixMutateResult.NOOP
 
     return PlannedFix(
         check_run_id=check_run_id,
@@ -137,14 +134,14 @@ def _fix_model_access(
     required_str = str(getattr(required, "value", required))
     model_name = str(model.name)
 
-    def mutate(doc: Any) -> MutateResult:
+    def mutate(doc: Any) -> AutofixMutateResult:
         entry = _find_model_entry(doc, model_name)
         if entry is None:
-            return "missing"
+            return AutofixMutateResult.MISSING
         if entry.get("access") == required_str:
-            return "noop"
+            return AutofixMutateResult.NOOP
         entry["access"] = required_str
-        return "changed"
+        return AutofixMutateResult.CHANGED
 
     return PlannedFix(
         check_run_id=check_run_id,
@@ -255,10 +252,10 @@ def apply_fixes(
         for fix in fixes:
             result = fix.mutate(doc)
             match result:
-                case "changed":
+                case AutofixMutateResult.CHANGED:
                     applied.append(fix)
                     file_changed = True
-                case "noop":
+                case AutofixMutateResult.NOOP:
                     # Already in the required state -- typically an earlier fix in
                     # this run edited the same entry (versioned models share one
                     # properties entry), or the artifacts are stale.
