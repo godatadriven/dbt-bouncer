@@ -119,6 +119,24 @@ class TestParseSelector:
         assert atom.method == "tag"
         assert atom.value == "critical"
 
+    def test_at_operator(self):
+        """The @ operator sets the at flag and clears graph flags."""
+        atom = parse_selector("@orders")[0][0]
+
+        assert atom.at is True
+        assert atom.ancestors is False
+        assert atom.descendants is False
+        assert atom.method == "name"
+        assert atom.value == "orders"
+
+    def test_at_operator_wraps_a_method(self):
+        """The @ operator can wrap a method atom."""
+        atom = parse_selector("@tag:critical")[0][0]
+
+        assert atom.at is True
+        assert atom.method == "tag"
+        assert atom.value == "critical"
+
 
 class TestSelectorMatching:
     """Tests for selector resolution against a manifest."""
@@ -235,6 +253,70 @@ class TestDegreeLimits:
         all_ids = set(manifest.nodes) | set(manifest.sources) | set(manifest.exposures)
 
         assert {uid for uid in all_ids if selector.matches(uid)} == expected
+
+
+@pytest.fixture
+def diamond_manifest():
+    """Build a manifest with a diamond so @ differs from +x+.
+
+    Edges: a -> b, a -> c, b -> d, c -> d, c -> e.
+
+    Returns:
+        SimpleNamespace: The fake manifest.
+
+    """
+    ids = {k: f"model.my_project.{k}" for k in "abcde"}
+    return SimpleNamespace(
+        child_map={
+            ids["a"]: [ids["b"], ids["c"]],
+            ids["b"]: [ids["d"]],
+            ids["c"]: [ids["d"], ids["e"]],
+            ids["d"]: [],
+            ids["e"]: [],
+        },
+        exposures={},
+        macros={},
+        nodes={ids[k]: _node(k) for k in "abcde"},
+        parent_map={
+            ids["a"]: [],
+            ids["b"]: [ids["a"]],
+            ids["c"]: [ids["a"]],
+            ids["d"]: [ids["b"], ids["c"]],
+            ids["e"]: [ids["c"]],
+        },
+        semantic_models={},
+        sources={},
+        unit_tests={},
+    )
+
+
+class TestAtOperator:
+    """Tests for the @ operator."""
+
+    def test_at_includes_parents_of_descendants(self, diamond_manifest):
+        """@b selects b, its descendants, and the ancestors of those descendants."""
+        selector = Selector("@b", diamond_manifest)
+        all_ids = set(diamond_manifest.nodes)
+
+        # b, d (descendant), a and c (parents of b and d). e is excluded.
+        assert {uid for uid in all_ids if selector.matches(uid)} == {
+            "model.my_project.a",
+            "model.my_project.b",
+            "model.my_project.c",
+            "model.my_project.d",
+        }
+
+    def test_at_differs_from_both_sided_plus(self, diamond_manifest):
+        """+b+ omits c, which @b includes."""
+        both_sided = Selector("+b+", diamond_manifest)
+        all_ids = set(diamond_manifest.nodes)
+
+        # +b+ = ancestors(b)={a} + descendants(b)={d} + b. No c.
+        assert {uid for uid in all_ids if both_sided.matches(uid)} == {
+            "model.my_project.a",
+            "model.my_project.b",
+            "model.my_project.d",
+        }
 
 
 def test_invalid_selector_rejected_at_config_time():
