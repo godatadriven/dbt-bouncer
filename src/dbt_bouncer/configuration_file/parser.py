@@ -6,7 +6,7 @@ from pathlib import Path
 from types import GenericAlias
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, create_model
+from pydantic import BaseModel, ConfigDict, Field, create_model, field_validator
 from typing_extensions import Annotated
 
 from dbt_bouncer.enums import CheckCategory
@@ -91,10 +91,30 @@ class DbtBouncerConfBase(BaseModel):
     package_name: str | None = Field(
         default=None, description="If you want to run `dbt-bouncer` against a package."
     )
+    selector: str | None = Field(
+        default=None,
+        description="dbt-style node selector applied to all checks that do not set their own.",
+    )
     severity: Literal["error", "warn"] | None = Field(
         default=None,
         description="Severity of the check, one of 'error' or 'warn'.",
     )
+
+    @field_validator("selector")
+    @classmethod
+    def _validate_selector(cls, value: str | None) -> str | None:
+        """Reject syntactically invalid global selectors at config-validation time.
+
+        Mirrors the validator on ``BaseCheck.selector`` so a typo in the
+        global ``selector`` fails fast instead of at manifest-resolution time.
+
+        Returns:
+            str | None: The validated selector string.
+
+        """
+        from dbt_bouncer.selectors import validate_selector_field
+
+        return validate_selector_field(value)
 
 
 @lru_cache(maxsize=None)

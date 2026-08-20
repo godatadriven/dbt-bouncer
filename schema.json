@@ -73,6 +73,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -181,6 +194,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -275,6 +301,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -387,6 +426,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -517,6 +569,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -618,6 +683,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -748,6 +826,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -847,6 +938,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -961,6 +1065,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -1055,6 +1172,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -1163,6 +1293,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -1257,6 +1400,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -1363,6 +1519,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -1472,6 +1641,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -1577,6 +1759,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -1681,6 +1876,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -1796,6 +2004,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -1891,6 +2112,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -1985,6 +2219,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -2094,6 +2341,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -2195,6 +2455,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -2304,6 +2577,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -2409,6 +2695,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -2503,6 +2802,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -2605,6 +2917,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -2706,6 +3031,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -2800,6 +3138,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -2903,6 +3254,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -2997,6 +3361,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -3099,6 +3476,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -3200,6 +3590,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -3309,6 +3712,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -3415,6 +3831,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -3545,6 +3974,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -3646,6 +4088,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -3776,6 +4231,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -3876,6 +4344,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -4003,6 +4484,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -4098,6 +4592,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -4192,6 +4699,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -4302,6 +4822,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -4396,6 +4929,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -4499,6 +5045,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -4591,6 +5150,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -4698,6 +5270,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -4800,6 +5385,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -4894,6 +5492,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -4990,6 +5601,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -5084,6 +5708,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -5185,6 +5822,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -5279,6 +5929,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -5382,6 +6045,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -5483,6 +6159,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -5586,6 +6275,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -5680,6 +6382,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -5786,6 +6501,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -5881,6 +6609,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -5975,6 +6716,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -6076,6 +6830,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -6182,6 +6949,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -6276,6 +7056,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -6372,6 +7165,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -6466,6 +7272,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -6575,6 +7394,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -6687,6 +7519,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -6793,6 +7638,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -6908,6 +7766,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -7009,6 +7880,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -7104,6 +7988,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -7198,6 +8095,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -7315,6 +8225,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -7419,6 +8342,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -7544,6 +8480,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -7645,6 +8594,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -7744,6 +8706,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -7858,6 +8833,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -7958,6 +8946,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -8060,6 +9061,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -8168,6 +9182,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -8266,6 +9293,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -8369,6 +9409,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -8463,6 +9516,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -8563,6 +9629,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -8666,6 +9745,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -8760,6 +9852,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -8875,6 +9980,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -8976,6 +10094,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -9079,6 +10210,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -9181,6 +10325,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -9281,6 +10438,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -9375,6 +10545,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -9484,6 +10667,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -9589,6 +10785,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -9689,6 +10898,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -9804,6 +11026,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -9918,6 +11153,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -10019,6 +11267,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -10123,6 +11384,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -10232,6 +11506,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -10336,6 +11623,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -10446,6 +11746,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -10540,6 +11853,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -10642,6 +11968,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -10749,6 +12088,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -10848,6 +12200,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -10957,6 +12322,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -11059,6 +12437,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -11153,6 +12544,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -11254,6 +12658,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -11359,6 +12776,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -11469,6 +12899,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -11570,6 +13013,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -11664,6 +13120,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -11765,6 +13234,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -11868,6 +13350,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -11962,6 +13457,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -12070,6 +13578,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -12164,6 +13685,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -12273,6 +13807,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -12368,6 +13915,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -12462,6 +14022,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -12567,6 +14140,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -12677,6 +14263,19 @@
           "default": null,
           "description": "Limit check to models with the specified materialization."
         },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
         "severity": {
           "anyOf": [
             {
@@ -12776,6 +14375,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -12878,6 +14490,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -12985,6 +14610,19 @@
           ],
           "default": null,
           "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
         },
         "severity": {
           "anyOf": [
@@ -13146,6 +14784,19 @@
       "default": null,
       "description": "If you want to run `dbt-bouncer` against a package.",
       "title": "Package Name"
+    },
+    "selector": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "dbt-style node selector applied to all checks that do not set their own.",
+      "title": "Selector"
     },
     "severity": {
       "anyOf": [

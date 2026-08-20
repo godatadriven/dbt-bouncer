@@ -228,11 +228,13 @@ def run_bouncer(
                 # Add indices to uniquely identify checks
                 check_obj.index = idx
 
-                # Handle global `exclude` and `include` args
+                # Handle global `exclude`, `include` and `selector` args
                 if bouncer_config.include and not check_obj.include:
                     check_obj.include = bouncer_config.include
                 if bouncer_config.exclude and not check_obj.exclude:
                     check_obj.exclude = bouncer_config.exclude
+                if bouncer_config.selector and not check_obj.selector:
+                    check_obj.selector = bouncer_config.selector
         else:
             # i.e. if `only` used then remove non-specified check categories
             setattr(bouncer_config, category, [])
