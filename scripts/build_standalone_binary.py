@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import logging
 import platform
+import stat
 import subprocess
 import sys
 from pathlib import Path
@@ -62,6 +63,9 @@ def build_pyinstaller_command(
         )
     )
 
+    # PyInstaller on Windows appends .exe automatically; avoid duplicate .exe.exe
+    target_base = target_name.removesuffix(".exe")
+
     entrypoint = Path("src/dbt_bouncer/main.py").resolve()
     schema_file = Path("schema.json").resolve()
 
@@ -70,7 +74,7 @@ def build_pyinstaller_command(
         "-m",
         "PyInstaller",
         "--name",
-        target_name,
+        target_base,
         "--onefile",
         "--clean",
         "--noconfirm",
@@ -153,10 +157,18 @@ def main() -> int:
                 else f"dbt-bouncer-{tag}.exe"
             )
         )
+        target_base = target_name.removesuffix(".exe")
         binary_path = output_dir / target_name
+        if not binary_path.exists() and (output_dir / f"{target_base}.exe").exists():
+            binary_path = output_dir / f"{target_base}.exe"
+
         if not binary_path.exists():
             logger.error("Built binary not found at %s", binary_path)
             return 1
+
+        # Ensure executable permissions on POSIX
+        if platform.system().lower() != "windows":
+            binary_path.chmod(binary_path.stat().st_mode | stat.S_IEXEC)
 
         logger.info("Verifying built binary at %s...", binary_path)
         test_version = subprocess.run(
