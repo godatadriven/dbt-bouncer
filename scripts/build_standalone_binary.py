@@ -40,6 +40,29 @@ def get_target_platform_tag() -> str:
     return f"{system}-{arch}"
 
 
+def resolve_target_names(tag: str, binary_name: str | None = None) -> tuple[str, str]:
+    """Resolve the final binary filename and the base name without extension.
+
+    Args:
+        tag: Platform tag (e.g. 'linux-x86_64', 'windows-x86_64').
+        binary_name: Optional explicit custom binary name.
+
+    Returns:
+        tuple[str, str]: A tuple of `(target_name, target_base)` where `target_name`
+            includes `.exe` on Windows, and `target_base` has `.exe` stripped.
+
+    """
+    if binary_name:
+        target_name = binary_name
+    elif "windows" in tag:
+        target_name = f"dbt-bouncer-{tag}.exe"
+    else:
+        target_name = f"dbt-bouncer-{tag}"
+
+    target_base = target_name.removesuffix(".exe")
+    return target_name, target_base
+
+
 def build_pyinstaller_command(
     output_dir: Path,
     binary_name: str | None = None,
@@ -55,16 +78,7 @@ def build_pyinstaller_command(
 
     """
     tag = get_target_platform_tag()
-    target_name = (
-        binary_name
-        if binary_name
-        else (
-            f"dbt-bouncer-{tag}" if "windows" not in tag else f"dbt-bouncer-{tag}.exe"
-        )
-    )
-
-    # PyInstaller on Windows appends .exe automatically; avoid duplicate .exe.exe
-    target_base = target_name.removesuffix(".exe")
+    _, target_base = resolve_target_names(tag, binary_name)
 
     entrypoint = Path("src/dbt_bouncer/main.py").resolve()
     schema_file = Path("schema.json").resolve()
@@ -106,8 +120,11 @@ def build_pyinstaller_command(
     return cmd
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     """Execute standalone binary build.
+
+    Args:
+        argv: Optional command line argument list (defaults to sys.argv[1:]).
 
     Returns:
         int: Exit status code (0 for success, non-zero for failure).
@@ -134,7 +151,7 @@ def main() -> int:
         help="Run smoke test against the built binary after compilation.",
     )
 
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     output_dir = args.output_dir.resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -148,16 +165,7 @@ def main() -> int:
 
     if args.verify:
         tag = get_target_platform_tag()
-        target_name = (
-            args.binary_name
-            if args.binary_name
-            else (
-                f"dbt-bouncer-{tag}"
-                if "windows" not in tag
-                else f"dbt-bouncer-{tag}.exe"
-            )
-        )
-        target_base = target_name.removesuffix(".exe")
+        target_name, target_base = resolve_target_names(tag, args.binary_name)
         binary_path = output_dir / target_name
         if not binary_path.exists() and (output_dir / f"{target_base}.exe").exists():
             binary_path = output_dir / f"{target_base}.exe"

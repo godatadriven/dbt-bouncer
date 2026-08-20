@@ -1,12 +1,17 @@
+# ruff: file-ignore[suspicious-subprocess-import]
 """Unit tests for standalone binary packaging script."""
 
 from __future__ import annotations
 
+import subprocess
 from typing import TYPE_CHECKING
+from unittest.mock import MagicMock
 
 from scripts.build_standalone_binary import (
     build_pyinstaller_command,
     get_target_platform_tag,
+    main,
+    resolve_target_names,
 )
 
 if TYPE_CHECKING:
@@ -42,6 +47,20 @@ class TestStandaloneBinaryPackaging:
         monkeypatch.setattr("platform.machine", lambda: "arm64")
         assert get_target_platform_tag() == "darwin-arm64"
 
+    def test_resolve_target_names_custom_and_default(self):
+        """Target names resolve correctly with and without custom names."""
+        name, base = resolve_target_names("linux-x86_64", "custom-bouncer")
+        assert name == "custom-bouncer"
+        assert base == "custom-bouncer"
+
+        name, base = resolve_target_names("windows-x86_64")
+        assert name == "dbt-bouncer-windows-x86_64.exe"
+        assert base == "dbt-bouncer-windows-x86_64"
+
+        name, base = resolve_target_names("darwin-arm64")
+        assert name == "dbt-bouncer-darwin-arm64"
+        assert base == "dbt-bouncer-darwin-arm64"
+
     def test_build_pyinstaller_command_default(self, tmp_path: Path):
         """PyInstaller command generates correct onefile and dependency flags."""
         cmd = build_pyinstaller_command(tmp_path)
@@ -62,3 +81,45 @@ class TestStandaloneBinaryPackaging:
 
         name_idx = cmd.index("--name")
         assert cmd[name_idx + 1] == custom_name
+
+    def test_main_success_flow(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+        """main() succeeds when PyInstaller returns returncode 0."""
+        mock_run = MagicMock(
+            return_value=subprocess.CompletedProcess(args=[], returncode=0)
+        )
+        monkeypatch.setattr("subprocess.run", mock_run)
+
+        exit_code = main(["--output-dir", str(tmp_path)])
+        assert exit_code == 0
+        assert mock_run.called
+
+    def test_main_failure_flow(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+        """main() returns failure code when PyInstaller fails."""
+        mock_run = MagicMock(
+            return_value=subprocess.CompletedProcess(args=[], returncode=1)
+        )
+        monkeypatch.setattr("subprocess.run", mock_run)
+
+        exit_code = main(["--output-dir", str(tmp_path)])
+        assert exit_code == 1
+
+    def test_main_verify_flow(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+        """main() with --verify checks the built binary."""
+        binary_file = tmp_path / "dbt-bouncer-linux-x86_64"
+        binary_file.write_text("binary-stub")
+
+        mock_run = MagicMock(
+            side_effect=[
+                subprocess.CompletedProcess(args=[], returncode=0),
+                subprocess.CompletedProcess(
+                    args=[], returncode=0, stdout="dbt-bouncer 1.0.0"
+                ),
+            ]
+        )
+        monkeypatch.setattr("subprocess.run", mock_run)
+        monkeypatch.setattr("platform.system", lambda: "Linux")
+        monkeypatch.setattr("platform.machine", lambda: "x86_64")
+
+        exit_code = main(["--output-dir", str(tmp_path), "--verify"])
+        assert exit_code == 0
+        assert mock_run.call_count == 2
