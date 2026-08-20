@@ -11,6 +11,7 @@ import dbt_bouncer.cli.explain  # ruff: ignore[unused-import] — triggers @app.
 import dbt_bouncer.cli.init  # ruff: ignore[unused-import] — triggers @app.command registration
 import dbt_bouncer.cli.list  # ruff: ignore[unused-import] — triggers @app.command registration
 import dbt_bouncer.cli.mcp  # ruff: ignore[unused-import] — triggers @app.command registration
+import dbt_bouncer.cli.studio  # ruff: ignore[unused-import] — triggers @app.command registration
 import dbt_bouncer.cli.validate  # ruff: ignore[unused-import] — triggers @app.command registration
 from dbt_bouncer.cli import app
 from dbt_bouncer.cli.run import run
