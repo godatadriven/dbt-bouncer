@@ -268,6 +268,57 @@ dbt-bouncer list
 dbt-bouncer list --output-format json
 ```
 
+## explain
+
+The `explain` subcommand describes one check: what it does, its configurable parameters, and example usage. It works offline and does not need dbt artifacts:
+
+```bash
+dbt-bouncer explain check_model_names
+```
+
+A check can be referenced by its name or by its rule code, so `dbt-bouncer explain MO038` shows the same output. An unknown name or code exits with code 2 (`CONFIG_ERROR`) and prints the closest match.
+
+Example output:
+
+```text
+╭─ check_model_names (MO038) ─────────────────────────────────────╮
+│ Models must have a name that matches the supplied regex.        │
+│ ...                                                             │
+╰────────────────────────────────────────────────────── manifest ─╯
+Parameters
+╭─────────────────────┬──────┬──────────┬─────────╮
+│ Name                │ Type │ Required │ Default │
+├─────────────────────┼──────┼──────────┼─────────┤
+│ model_name_pattern  │ str  │   yes    │ -       │
+╰─────────────────────┴──────┴──────────┴─────────╯
+Documentation: https://godatadriven.github.io/dbt-bouncer/checks/manifest/models/naming/
+```
+
+### Options
+
+#### `--custom-checks-dir`
+
+**Type:** Path
+**Default:** None
+**Required:** No
+
+Directory containing custom checks. When passed, custom checks can be explained too.
+
+#### `--output-format`
+
+**Type:** Choice
+**Options:** `json`, `text`
+**Default:** `text`
+**Required:** No
+
+Controls the output format. Use `json` for machine-readable output.
+
+**Example:**
+
+```bash
+dbt-bouncer explain check_model_names --output-format json
+```
+
 ## Exit codes
 
 `dbt-bouncer` returns distinct exit codes so that CI pipelines and scripts can tell a check failure apart from a setup problem:
