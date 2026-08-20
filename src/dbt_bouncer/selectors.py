@@ -8,6 +8,9 @@ node selection:
 - ``path:models/staging`` — resources under a path (glob patterns supported).
 - ``fqn:my_project.marts.*`` — glob match on the dot-joined fully
   qualified name.
+- ``config.materialized:table`` — resources whose ``config.<key>`` equals
+  the value. List config values (e.g. ``config.tags``) use a membership
+  test, and boolean values match case-insensitively.
 - ``package:my_package`` — resources from a package.
 - ``stg_customers`` / ``stg_*`` — glob match on the resource name.
 - ``+orders`` — ``orders`` plus all its ancestors; ``orders+`` — plus all
@@ -21,9 +24,8 @@ node selection:
 - Space-separated atoms are a union (OR); comma-separated atoms are an
   intersection (AND). Same semantics as dbt.
 
-Not supported (use dbt itself for these):
-``state:``/``result:``/``config.*:``/``test_type:`` methods, and
-YAML-defined named selectors.
+Not supported (use dbt itself for these): the ``state:``, ``result:``, and
+``test_type:`` methods, and YAML-defined named selectors.
 """
 
 from __future__ import annotations
@@ -66,6 +68,7 @@ class SelectorAtom:
         "ancestor_degree",
         "ancestors",
         "at",
+        "config_key",
         "descendant_degree",
         "descendants",
         "method",
@@ -88,6 +91,7 @@ class SelectorAtom:
         self.ancestor_degree: int | None = None
         self.descendants = False
         self.descendant_degree: int | None = None
+        self.config_key: str | None = None
         self.at = raw.startswith("@")
         if self.at:
             # ``@`` is exclusive: it runs its own two-stage traversal and does
@@ -113,11 +117,17 @@ class SelectorAtom:
             raise DbtBouncerConfigError(f"Invalid selector atom: '{raw}'.")
         if ":" in core:
             method, _, value = core.partition(":")
-            if method not in _VALID_METHODS or not value:
+            if method.startswith("config."):
+                config_key = method[len("config.") :]
+                if not config_key or not value:
+                    raise DbtBouncerConfigError(f"Invalid selector atom: '{raw}'.")
+                self.method, self.config_key, self.value = "config", config_key, value
+            elif method not in _VALID_METHODS or not value:
                 raise DbtBouncerConfigError(
                     f"Invalid selector atom: '{raw}'. Supported methods: {', '.join(_VALID_METHODS)}."
                 )
-            self.method, self.value = method, value
+            else:
+                self.method, self.value = method, value
         else:
             self.method, self.value = "name", core
 
@@ -150,6 +160,18 @@ class SelectorAtom:
             if any(c in value for c in "*?["):
                 return fnmatch(path, value) or fnmatch(path, f"{value}/*")
             return path == value or path.startswith(f"{value}/")
+        if self.method == "config":
+            config = getattr(node, "config", None)
+            if config is None or self.config_key is None:
+                return False
+            actual = getattr(config, self.config_key, None)
+            if actual is None:
+                return False
+            if isinstance(actual, bool):
+                return self.value.lower() == str(actual).lower()
+            if isinstance(actual, (list, tuple, set)):
+                return self.value in [str(item) for item in actual]
+            return str(actual) == self.value
         # self.method == "fqn"
         fqn = getattr(node, "fqn", None)
         if not fqn:

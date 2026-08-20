@@ -70,7 +70,15 @@ class TestParseSelector:
 
     @pytest.mark.parametrize(
         "raw",
-        ["", "   ", "+", "tag:", "state:modified", "config.materialized:table"],
+        [
+            "",
+            "   ",
+            "+",
+            "tag:",
+            "state:modified",
+            "config.:table",  # empty config key
+            "config.materialized:",  # empty value
+        ],
     )
     def test_invalid_selectors_raise(self, raw):
         """Empty selectors and unsupported methods are rejected."""
@@ -136,6 +144,23 @@ class TestParseSelector:
         assert atom.at is True
         assert atom.method == "tag"
         assert atom.value == "critical"
+
+    def test_config_method(self):
+        """A config.<key> atom parses into the config method and sub-key."""
+        atom = parse_selector("config.materialized:table")[0][0]
+
+        assert atom.method == "config"
+        assert atom.config_key == "materialized"
+        assert atom.value == "table"
+
+    def test_config_method_wraps_a_graph_operator(self):
+        """A graph operator can wrap a config atom."""
+        atom = parse_selector("+config.materialized:table")[0][0]
+
+        assert atom.ancestors is True
+        assert atom.method == "config"
+        assert atom.config_key == "materialized"
+        assert atom.value == "table"
 
 
 class TestSelectorMatching:
@@ -317,6 +342,86 @@ class TestAtOperator:
             "model.my_project.b",
             "model.my_project.d",
         }
+
+
+@pytest.fixture
+def config_manifest():
+    """Build a manifest whose nodes carry a config object.
+
+    Returns:
+        SimpleNamespace: The fake manifest.
+
+    """
+
+    def _cfg_node(**config):
+        return SimpleNamespace(
+            fqn=["my_project", config.get("name", "n")],
+            name=config.get("name", "n"),
+            original_file_path="models/n.sql",
+            package_name="my_project",
+            tags=[],
+            config=SimpleNamespace(**config),
+        )
+
+    return SimpleNamespace(
+        child_map={},
+        exposures={},
+        macros={},
+        nodes={
+            "model.my_project.a": _cfg_node(
+                name="a", materialized="table", tags=["nightly"], enabled=True
+            ),
+            "model.my_project.b": _cfg_node(
+                name="b", materialized="view", tags=["hourly"], enabled=False
+            ),
+            "model.my_project.c": _cfg_node(
+                name="c", materialized="table", owner="finance"
+            ),
+        },
+        parent_map={},
+        semantic_models={},
+        sources={},
+        unit_tests={},
+    )
+
+
+class TestConfigMethod:
+    """Tests for the config.<key> selection method."""
+
+    @pytest.mark.parametrize(
+        ("raw", "expected"),
+        [
+            # String config value, matched on two nodes.
+            (
+                "config.materialized:table",
+                {"model.my_project.a", "model.my_project.c"},
+            ),
+            ("config.materialized:view", {"model.my_project.b"}),
+            # List config value uses membership, like the tag: method.
+            ("config.tags:nightly", {"model.my_project.a"}),
+            # Boolean config value matches case-insensitively.
+            ("config.enabled:false", {"model.my_project.b"}),
+            # Custom config key, present on one node only.
+            ("config.owner:finance", {"model.my_project.c"}),
+            # No node has this value.
+            ("config.materialized:incremental", set()),
+        ],
+    )
+    def test_config_selection(self, config_manifest, raw, expected):
+        """Each config atom resolves to the expected set of unique IDs."""
+        selector = Selector(raw, config_manifest)
+        all_ids = set(config_manifest.nodes)
+
+        assert {uid for uid in all_ids if selector.matches(uid)} == expected
+
+    def test_config_atom_ignores_resources_without_config(self, config_manifest):
+        """A config atom does not match a resource lacking a config object."""
+        config_manifest.sources["source.my_project.raw.s"] = SimpleNamespace(
+            name="s", fqn=["my_project", "s"]
+        )
+        selector = Selector("config.materialized:table", config_manifest)
+
+        assert selector.matches("source.my_project.raw.s") is False
 
 
 def test_invalid_selector_rejected_at_config_time():
