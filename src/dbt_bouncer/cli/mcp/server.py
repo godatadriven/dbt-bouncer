@@ -189,6 +189,20 @@ def run_checks(
             "error": "The `dbt-bouncer` executable was not found on PATH. Install it with `pip install dbt-bouncer`."
         }
 
+    # These values come from the calling agent and are passed as option values
+    # to the subprocess. There is no shell, so they cannot inject shell syntax,
+    # but a leading dash would be misread by the CLI parser as another flag.
+    # Reject that up front with a clear error rather than a cryptic parse failure.
+    for label, value in (
+        ("config_file", config_file),
+        ("only", only),
+        ("check", check),
+    ):
+        if value and value.startswith("-"):
+            return {
+                "error": f"Invalid {label} value '{value}': must not start with '-'."
+            }
+
     with tempfile.TemporaryDirectory() as tmp_dir:
         output_file = Path(tmp_dir) / "results.json"
         cmd = [

@@ -114,6 +114,19 @@ class TestRunChecksTool:
 
         assert "error" in payload
 
+    def test_dash_prefixed_argument_rejected(self, monkeypatch):
+        """A value starting with '-' is rejected before the subprocess runs."""
+        monkeypatch.setattr(mcp_server.shutil, "which", lambda _: "/usr/bin/fake")
+
+        def fail_if_called(*_args, **_kwargs):  # pragma: no cover - must not run
+            raise AssertionError("subprocess.run must not be reached")
+
+        monkeypatch.setattr(mcp_server.subprocess, "run", fail_if_called)
+
+        payload = mcp_server.run_checks(config_file="--output-file")
+
+        assert "config_file" in payload["error"]
+
     def test_timeout_returns_error_payload(self, monkeypatch):
         """A hung subprocess surfaces as an error payload, not an exception."""
 
@@ -188,6 +201,10 @@ def test_build_server_registers_tools():
 def test_mcp_command_without_dependency(monkeypatch):
     """The mcp command exits with CONFIG_ERROR when `mcp` is not installed."""
 
+    # In production the ImportError is raised by importing `build_server` (the
+    # `mcp` package is absent). We cannot easily un-import an installed package,
+    # so we make the call raise instead: the command wraps both the import and
+    # the call in one `try`, so either path hits the same CONFIG_ERROR handler.
     def raise_import_error():
         raise ImportError("No module named 'mcp'")
 
