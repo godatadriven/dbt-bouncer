@@ -35,7 +35,6 @@
     "neutralize",
     "neutralized",
     "orjson",
-    "patern",
     "pathlib",
     "pgoslatara",
     "prek",
@@ -81,5 +80,13 @@
   ],
   "ignoreRegExpList": [
     "/\\b[A-Z]{2,}_[A-Z_]+\\b/g"
+  ],
+  "overrides": [
+    {
+      "filename": "docs/cli.md",
+      "words": [
+        "patern"
+      ]
+    }
   ]
 }

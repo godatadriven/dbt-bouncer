@@ -53,8 +53,10 @@ def _suggest_closest(target: str, candidates: Iterable[str]) -> str:
         key=lambda c: jellyfish.levenshtein_distance(c, target),
         default=None,
     )
-    if best is not None and jellyfish.levenshtein_distance(best, target) <= 3:
-        return f"Did you mean '{best}'?"
+    if best is not None:
+        distance = jellyfish.levenshtein_distance(best, target)
+        if distance <= 3:
+            return f"Did you mean '{best}'?"
     return ""
 
 
