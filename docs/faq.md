@@ -86,6 +86,10 @@ The check `check_model_code_does_not_contain_regexp_pattern` will match against 
     - Discouraging memory-intensive operations: `regexp_pattern: .*\.to_pandas\(\).*`
     - Enforcing use of specific libraries: Use `include`/`exclude` patterns to target only Python models
 
+## Can AI coding agents use `dbt-bouncer`?
+
+Yes! `dbt-bouncer` ships a [Model Context Protocol](https://modelcontextprotocol.io) server. An AI coding agent can read which conventions your project enforces before it generates dbt code, and can run the checks to verify its work. Install the optional dependency with `pip install 'dbt-bouncer[mcp]'` and start the server with `dbt-bouncer mcp`. See the [CLI documentation](./cli.md#mcp) for the available tools and an example client configuration.
+
 ## How to configure `dbt-bouncer` for use in a CI pipeline?
 
 `dbt-bouncer` is designed to be use primarily in a CI pipeline such as GitHub Actions or Azure DevOps. To do this we create a config file such as:

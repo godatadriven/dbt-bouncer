@@ -320,6 +320,40 @@ Controls the output format. Use `json` for machine-readable output.
 dbt-bouncer explain check_model_names --output-format json
 ```
 
+## mcp
+
+The `mcp` subcommand starts a [Model Context Protocol](https://modelcontextprotocol.io) server on the stdio transport:
+
+```bash
+dbt-bouncer mcp
+```
+
+This lets AI coding agents (Claude Code, Cursor, etc.) query and run dbt-bouncer. The server exposes four tools:
+
+- `read_project_config`: Read and validate the project's config file. The agent learns which conventions the project enforces before it generates dbt code.
+- `list_checks`: List all available checks, grouped by category.
+- `explain_check`: Explain one check by name or rule code: description, parameters, and example usage.
+- `run_checks`: Run the configured checks against the project's dbt artifacts. This requires at minimum a `manifest.json` (from `dbt parse`).
+
+The command requires the optional `mcp` dependency:
+
+```bash
+pip install 'dbt-bouncer[mcp]'
+```
+
+Example client configuration (Claude Code, `.mcp.json`):
+
+```json
+{
+  "mcpServers": {
+    "dbt-bouncer": {
+      "command": "dbt-bouncer",
+      "args": ["mcp"]
+    }
+  }
+}
+```
+
 ## Exit codes
 
 `dbt-bouncer` returns distinct exit codes so that CI pipelines and scripts can tell a check failure apart from a setup problem:
