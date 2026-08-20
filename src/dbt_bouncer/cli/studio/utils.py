@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import logging
 from typing import TYPE_CHECKING, Any
 
 from rich import box
@@ -19,6 +20,8 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from dbt_bouncer.check_framework.base import BaseCheck
+
+logger = logging.getLogger(__name__)
 
 
 def load_run_results(results_path: Path | None) -> list[dict[str, Any]]:
@@ -37,8 +40,13 @@ def load_run_results(results_path: Path | None) -> list[dict[str, Any]]:
         content = json.loads(results_path.read_text(encoding="utf-8"))
         if isinstance(content, list):
             return content
-    except Exception:
-        return []
+        logger.warning(
+            "Expected results file `%s` to contain a JSON list, but got %s.",
+            results_path,
+            type(content).__name__,
+        )
+    except (json.JSONDecodeError, OSError) as e:
+        logger.warning("Failed to load results file `%s`: %s", results_path, e)
     return []
 
 
@@ -76,7 +84,8 @@ def load_configured_checks(config_path: Path | None) -> set[str]:
                 for item in val:
                     if isinstance(item, dict) and "name" in item:
                         configured.add(item["name"])
-    except Exception:
+    except (yaml.YAMLError, OSError, Exception) as e:
+        logger.warning("Failed to load configured checks from `%s`: %s", config_path, e)
         return set()
 
     return configured
@@ -110,7 +119,7 @@ def filter_checks(
             for c in filtered
             if term in get_check_name(c).lower()
             or term in c.__name__.lower()
-            or (getattr(c, "code", None) and term in getattr(c, "code", "").lower())
+            or term in (getattr(c, "code", "") or "").lower()
             or (c.__doc__ and term in c.__doc__.lower())
         ]
 
@@ -140,132 +149,126 @@ def render_studio_dashboard(
     if console is None:
         console = Console()
 
-    configured = configured_checks or set()
-    results_list = results or []
+    active_configured = configured_checks or set()
 
-    # Map failures by check name
+    # Calculate failure count per check if results are provided
     failure_counts: dict[str, int] = {}
-    for res in results_list:
-        name = res.get("name") or res.get("check_name")
-        status = res.get("status") or res.get("severity")
-        if name and status in ("error", "failed", "warn"):
-            failure_counts[name] = failure_counts.get(name, 0) + 1
+    if results:
+        for r in results:
+            name = r.get("check_name") or r.get("name")
+            status = r.get("status")
+            if name and status in ("failed", "error"):
+                failure_counts[name] = failure_counts.get(name, 0) + 1
 
-    # Header Panel
-    total_checks = len(checks)
-    active_count = sum(1 for c in checks if get_check_name(c) in configured)
     header_text = Text()
-    header_text.append("dbt-bouncer Studio", style="bold white on #ff694a")
-    header_text.append(f"  v{get_version()}  ", style="bold white")
-    header_text.append(f"• Total Checks: {total_checks} ", style="cyan")
-    if configured:
-        header_text.append(f"• Active in Config: {active_count} ", style="green")
+    header_text.append("dbt-bouncer studio", style="bold red")
+    header_text.append(f"  v{get_version()}", style="dim")
     if selected_category:
-        header_text.append(f"• Category: {selected_category} ", style="yellow")
+        header_text.append(f" | category: {selected_category}", style="cyan")
     if search_term:
-        header_text.append(f"• Search: '{search_term}' ", style="magenta")
-    if results_list:
-        total_failures = sum(failure_counts.values())
-        fail_style = "bold red" if total_failures > 0 else "bold green"
-        header_text.append(f"• Results: {total_failures} Failures ", style=fail_style)
+        header_text.append(f" | search: '{search_term}'", style="yellow")
+
+    total_checks = len(checks)
+    active_count = sum(1 for c in checks if get_check_name(c) in active_configured)
+    header_text.append(
+        f"  ({total_checks} checks, {active_count} active in project)", style="green"
+    )
 
     console.print(
-        Panel(
-            header_text,
-            box=box.HEAVY,
-            border_style="#ff694a",
-            padding=(0, 1),
-        )
+        Panel(header_text, box=box.ROUNDED, style="bold white on rgb(30,30,30)")
     )
 
     if not checks:
         console.print(
             Panel(
-                Text(
-                    "No checks match the current search or category filter.",
-                    style="yellow",
-                ),
+                Text("No checks matched your filter criteria.", style="yellow"),
                 box=box.ROUNDED,
-                border_style="yellow",
             )
         )
         return
 
-    # Check Table
     table = Table(
-        title="[bold white]Available & Active Checks[/bold white]",
-        title_justify="left",
+        title="Available & Configured Checks",
         box=box.ROUNDED,
-        border_style="cyan",
-        header_style="bold cyan",
+        header_style="bold magenta",
         expand=True,
     )
-    table.add_column("Code", style="bold cyan", width=8, no_wrap=True)
-    table.add_column("Check Name", style="bold white", min_width=30)
-    table.add_column("Category", style="dim", width=18)
-    table.add_column("Configured", justify="center", width=12)
-    if results_list:
-        table.add_column("Results Status", justify="center", width=16)
-    table.add_column("Description", style="italic", ratio=1)
+    table.add_column("Rule Code", style="bold cyan", width=11)
+    table.add_column("Check Name", style="bold white", min_width=32)
+    table.add_column("Category", style="green", width=14)
+    table.add_column("Active", justify="center", width=8)
+    table.add_column("Description", style="dim", ratio=1)
+    if results is not None:
+        table.add_column("Failures", justify="center", width=10)
 
     for check_class in checks:
-        code = getattr(check_class, "code", "") or "-"
         name = get_check_name(check_class)
+        code = getattr(check_class, "code", "-") or "-"
         cat = category_key(check_class)
-        is_active = name in configured
-        config_badge = (
-            "[bold green]Active[/bold green]" if is_active else "[dim]Available[/dim]"
+        is_active = name in active_configured
+        active_badge = (
+            Text("✓ active", style="bold green")
+            if is_active
+            else Text("-", style="dim")
         )
+
         doc = (
-            (check_class.__doc__ or "").strip().splitlines()[0]
+            (check_class.__doc__ or "").strip().split("\n")[0]
             if check_class.__doc__
             else ""
         )
 
-        row_args = [code, name, cat, config_badge]
-        if results_list:
+        row_args = [code, name, cat, active_badge, doc]
+        if results is not None:
             fails = failure_counts.get(name, 0)
-            if fails > 0:
-                res_badge = f"[bold red]{fails} Failure(s)[/bold red]"
-            elif is_active:
-                res_badge = "[green]Passed[/green]"
-            else:
-                res_badge = "[dim]Not Run[/dim]"
-            row_args.append(res_badge)
-        row_args.append(doc)
+            fail_badge = (
+                Text(f"{fails} failed", style="bold red")
+                if fails > 0
+                else Text("0", style="dim green")
+            )
+            row_args.append(fail_badge)
 
         table.add_row(*row_args)
 
     console.print(table)
 
-    # Spotlight Panel for Top/Matched Check
-    if len(checks) == 1 or (search_term and len(checks) <= 3):
+    # If a specific single check or search matches <= 3 checks, render spotlight details
+    if 1 <= len(checks) <= 3:
         for check_class in checks:
             payload = build_explain_payload(check_class)
             detail_text = Text()
-            detail_text.append(f"{payload['docstring']}\n\n", style="white")
-            if payload["parameters"]:
-                detail_text.append("Parameters:\n", style="bold cyan")
-                for pname, pinfo in payload["parameters"].items():
-                    req_label = (
-                        "required"
-                        if pinfo["required"]
-                        else f"default: {pinfo['default']}"
-                    )
+            detail_text.append(f"Name: {payload['name']}\n", style="bold white")
+            detail_text.append(
+                f"Rule Code: {payload['code'] or 'None'}\n", style="bold cyan"
+            )
+            detail_text.append(f"Category: {payload['category']}\n\n", style="green")
+            detail_text.append(f"Description:\n{payload['docstring']}\n\n", style="dim")
+
+            params = payload.get("parameters", {})
+            if params:
+                detail_text.append("Configurable Parameters:\n", style="bold underline")
+                for p_name, p_info in params.items():
+                    p_type = p_info.get("type", "Any")
+                    p_default = p_info.get("default", "REQUIRED")
                     detail_text.append(
-                        f"  • {pname} ({pinfo['type']}) — {req_label}\n", style="yellow"
+                        f"  • {p_name} ({p_type}): default={p_default}\n",
+                        style="yellow",
                     )
-            if payload["documentation_url"]:
+            else:
                 detail_text.append(
-                    f"\nDocumentation: {payload['documentation_url']}",
-                    style="dim underline",
+                    "Configurable Parameters: None (standard check)\n", style="dim"
+                )
+
+            if payload.get("documentation_url"):
+                detail_text.append(
+                    f"\nDocumentation URL: {payload['documentation_url']}\n",
+                    style="blue",
                 )
 
             console.print(
                 Panel(
                     detail_text,
-                    title=f"[bold white]Spotlight: {payload['name']} ({payload['code']})[/bold white]",
+                    title=f"Check Details: {payload['name']}",
                     box=box.ROUNDED,
-                    border_style="green",
                 )
             )

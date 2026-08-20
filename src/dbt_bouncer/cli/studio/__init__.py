@@ -96,7 +96,7 @@ def studio(
             ConfigFileName.DBT_BOUNCER_YAML,
             ConfigFileName.DBT_BOUNCER_TOML,
         ):
-            candidate = Path(default_name)
+            candidate = Path(default_name.value)
             if candidate.exists():
                 configured_checks = load_configured_checks(candidate)
                 break

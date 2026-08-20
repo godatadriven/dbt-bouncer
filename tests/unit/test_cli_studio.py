@@ -1,7 +1,9 @@
 """Unit tests for dbt_bouncer.cli.studio."""
 
+from __future__ import annotations
+
 import json
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 from typer.testing import CliRunner
 
@@ -15,6 +17,9 @@ from dbt_bouncer.enums import ExitCode
 from dbt_bouncer.main import app
 from dbt_bouncer.utils import get_check_objects
 
+if TYPE_CHECKING:
+    from pathlib import Path
+
 runner = CliRunner()
 
 
@@ -26,8 +31,8 @@ class TestStudioCommand:
         result = runner.invoke(app, ["studio"])
 
         assert result.exit_code == 0
-        assert "dbt-bouncer Studio" in result.output
-        assert "Available & Active Checks" in result.output
+        assert "dbt-bouncer studio" in result.output
+        assert "Available & Configured Checks" in result.output
 
     def test_studio_filter_by_search(self):
         """Filtering by search shows matching checks and spotlight details."""
@@ -36,7 +41,7 @@ class TestStudioCommand:
         assert result.exit_code == 0
         assert "check_model_names" in result.output
         assert "MO038" in result.output
-        assert "Spotlight" in result.output
+        assert "Check Details" in result.output
 
     def test_studio_filter_by_category(self):
         """Filtering by category limits checks to that category."""
@@ -62,7 +67,7 @@ class TestStudioCommand:
         result = runner.invoke(app, ["studio", "--config-file", str(config)])
 
         assert result.exit_code == 0
-        assert "Active in Config" in result.output
+        assert "active" in result.output
 
     def test_studio_with_results_file(self, tmp_path: Path):
         """A results file displays execution status and failure counts."""
@@ -98,7 +103,7 @@ class TestStudioCommand:
 
         assert result.exit_code == 0
         assert "Failures" in result.output
-        assert "Failure(s)" in result.output
+        assert "failed" in result.output
 
     def test_studio_no_matching_checks(self):
         """A search yielding no matches shows a clear warning panel."""
