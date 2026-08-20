@@ -61,7 +61,7 @@ def create_github_comment_file(
         comment_file = "github-comment.md"
 
     logging.info(f"Writing comment for GitHub to {comment_file}...")
-    with Path.open(Path(comment_file), "w") as f:
+    with Path.open(Path(comment_file), "w", encoding="utf-8") as f:
         f.write(md_formatted_comment)
 
 
@@ -967,7 +967,7 @@ def load_config_from_yaml(config_file: Path) -> Mapping[str, Any]:
 
     import yaml
 
-    with Path.open(config_path, "r") as f:
+    with Path.open(config_path, "r", encoding="utf-8") as f:
         conf = yaml.load(f, Loader=yaml.CSafeLoader)  # type: ignore[possibly-missing-attribute]
 
     logging.info(f"Loaded config from {config_file}...")
