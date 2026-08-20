@@ -767,6 +767,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#can-ai-coding-agents-use-dbt-bouncer" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Can AI coding agents use <code>dbt-bouncer</code>?
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#how-to-configure-dbt-bouncer-for-use-in-a-ci-pipeline" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -1162,6 +1173,8 @@
 <li>Enforcing use of specific libraries: Use <code>include</code>/<code>exclude</code> patterns to target only Python models</li>
 </ul>
 </div>
+<h2 id="can-ai-coding-agents-use-dbt-bouncer">Can AI coding agents use <code>dbt-bouncer</code>?<a class="headerlink" href="#can-ai-coding-agents-use-dbt-bouncer" title="Permanent link">#</a></h2>
+<p>Yes! <code>dbt-bouncer</code> ships a <a href="https://modelcontextprotocol.io">Model Context Protocol</a> server. An AI coding agent can read which conventions your project enforces before it generates dbt code, and can run the checks to verify its work. Install the optional dependency with <code>pip install 'dbt-bouncer[mcp]'</code> and start the server with <code>dbt-bouncer mcp</code>. See the <a href=".././cli/#mcp">CLI documentation</a> for the available tools and an example client configuration.</p>
 <h2 id="how-to-configure-dbt-bouncer-for-use-in-a-ci-pipeline">How to configure <code>dbt-bouncer</code> for use in a CI pipeline?<a class="headerlink" href="#how-to-configure-dbt-bouncer-for-use-in-a-ci-pipeline" title="Permanent link">#</a></h2>
 <p><code>dbt-bouncer</code> is designed to be use primarily in a CI pipeline such as GitHub Actions or Azure DevOps. To do this we create a config file such as:</p>
 <div class="language-yaml highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nt">catalog_checks</span><span class="p">:</span>

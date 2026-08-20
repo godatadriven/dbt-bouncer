@@ -970,6 +970,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#mcp" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        mcp
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#exit-codes" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -1377,6 +1388,30 @@
 <p>Controls the output format. Use <code>json</code> for machine-readable output.</p>
 <p><strong>Example:</strong></p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>dbt-bouncer<span class="w"> </span>explain<span class="w"> </span>check_model_names<span class="w"> </span>--output-format<span class="w"> </span>json
+</span></code></pre></div>
+<h2 id="mcp">mcp<a class="headerlink" href="#mcp" title="Permanent link">#</a></h2>
+<p>The <code>mcp</code> subcommand starts a <a href="https://modelcontextprotocol.io">Model Context Protocol</a> server on the stdio transport:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>dbt-bouncer<span class="w"> </span>mcp
+</span></code></pre></div>
+<p>This lets AI coding agents (Claude Code, Cursor, etc.) query and run dbt-bouncer. The server exposes four tools:</p>
+<ul>
+<li><code>read_project_config</code>: Read and validate the project's config file. The agent learns which conventions the project enforces before it generates dbt code.</li>
+<li><code>list_checks</code>: List all available checks, grouped by category.</li>
+<li><code>explain_check</code>: Explain one check by name or rule code: description, parameters, and example usage.</li>
+<li><code>run_checks</code>: Run the configured checks against the project's dbt artifacts. This requires at minimum a <code>manifest.json</code> (from <code>dbt parse</code>).</li>
+</ul>
+<p>The command requires the optional <code>mcp</code> dependency:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>pip<span class="w"> </span>install<span class="w"> </span><span class="s1">&#39;dbt-bouncer[mcp]&#39;</span>
+</span></code></pre></div>
+<p>Example client configuration (Claude Code, <code>.mcp.json</code>):</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="p">{</span>
+</span><span id="__span-23-2"><a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a><span class="w">  </span><span class="nt">&quot;mcpServers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-23-3"><a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a><span class="w">    </span><span class="nt">&quot;dbt-bouncer&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-23-4"><a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a><span class="w">      </span><span class="nt">&quot;command&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dbt-bouncer&quot;</span><span class="p">,</span>
+</span><span id="__span-23-5"><a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a><span class="w">      </span><span class="nt">&quot;args&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;mcp&quot;</span><span class="p">]</span>
+</span><span id="__span-23-6"><a id="__codelineno-23-6" name="__codelineno-23-6" href="#__codelineno-23-6"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-23-7"><a id="__codelineno-23-7" name="__codelineno-23-7" href="#__codelineno-23-7"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-23-8"><a id="__codelineno-23-8" name="__codelineno-23-8" href="#__codelineno-23-8"></a><span class="p">}</span>
 </span></code></pre></div>
 <h2 id="exit-codes">Exit codes<a class="headerlink" href="#exit-codes" title="Permanent link">#</a></h2>
 <p><code>dbt-bouncer</code> returns distinct exit codes so that CI pipelines and scripts can tell a check failure apart from a setup problem:</p>
