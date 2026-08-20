@@ -1296,6 +1296,7 @@
 <li>YAML syntax errors with line numbers</li>
 <li>Missing required fields (like <code>name</code> in checks)</li>
 <li>Incorrect configuration types (e.g., if a check category is not a list)</li>
+<li>Everything <code>dbt-bouncer run</code> would reject: unknown keys, unknown check parameters, and mistyped parameter values — with a "Did you mean" suggestion for the closest valid name</li>
 </ul>
 <p>Example output for a valid config:</p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>Config file is valid!
@@ -1303,7 +1304,7 @@
 <p>Example output for issues:</p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>Found 2 issue(s) in config file:
 </span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>  Line 1: Check is missing required &#39;name&#39; field
-</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>  Line 3: YAML syntax error: ...
+</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>  Line 3: model_name_patern: Extra inputs are not permitted. Did you mean &#39;model_name_pattern&#39;?
 </span></code></pre></div>
 <h3 id="options_1">Options<a class="headerlink" href="#options_1" title="Permanent link">#</a></h3>
 <h4 id="-config-file_1"><code>--config-file</code><a class="headerlink" href="#-config-file_1" title="Permanent link">#</a></h4>
