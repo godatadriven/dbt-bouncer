@@ -62,11 +62,9 @@ class BaseCheck(BaseModel):
             str | None: The validated selector string.
 
         """
-        if value is not None:
-            from dbt_bouncer.selectors import parse_selector
+        from dbt_bouncer.selectors import validate_selector_field
 
-            parse_selector(value)
-        return value
+        return validate_selector_field(value)
 
     # NB: the twelve per-resource fields (``model``, ``seed``, ``catalog_node``,
     # ...) are deliberately NOT declared here. Every check binds exactly one

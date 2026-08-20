@@ -206,6 +206,27 @@ def parse_selector(raw: str) -> list[list[SelectorAtom]]:
     return groups
 
 
+def validate_selector_field(value: str | None) -> str | None:
+    """Validate a ``selector`` field value at config-validation time.
+
+    Shared by the check-level and global ``selector`` field validators so a
+    typo fails fast instead of at manifest-resolution time.
+
+    A syntactically invalid selector raises ``DbtBouncerConfigError`` from
+    ``parse_selector``.
+
+    Args:
+        value: The selector string, or None.
+
+    Returns:
+        str | None: The validated selector string.
+
+    """
+    if value is not None:
+        parse_selector(value)
+    return value
+
+
 class Selector:
     """A parsed selector resolved against one manifest.
 

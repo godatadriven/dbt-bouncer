@@ -112,11 +112,9 @@ class DbtBouncerConfBase(BaseModel):
             str | None: The validated selector string.
 
         """
-        if value is not None:
-            from dbt_bouncer.selectors import parse_selector
+        from dbt_bouncer.selectors import validate_selector_field
 
-            parse_selector(value)
-        return value
+        return validate_selector_field(value)
 
 
 @lru_cache(maxsize=None)
