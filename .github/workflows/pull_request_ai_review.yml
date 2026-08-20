@@ -128,7 +128,10 @@ jobs:
         if: always() && steps.export.outputs.skip != 'true'
         env:
           BASE_REF: ${{ env.PR_BASE }}
-          GH_TOKEN: ${{ secrets.PAT_GITHUB }}
+          # Post as github-actions[bot] instead of a personal account. In a
+          # workflow_run event this is the privileged base-repo token, so it
+          # works for fork PRs too.
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           HEAD_SHA: ${{ env.PR_HEAD_SHA }}
         run: |-
           COMMENT_FILE="/tmp/ai-pr-review-comment.md"
