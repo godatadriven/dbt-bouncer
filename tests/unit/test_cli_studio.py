@@ -129,10 +129,22 @@ class TestStudioUtils:
         corrupt.write_text("invalid json")
         assert load_run_results(corrupt) == []
 
+    def test_load_run_results_dict_json(self, tmp_path: Path):
+        """JSON containing a dict instead of a list returns an empty list."""
+        dict_json = tmp_path / "dict.json"
+        dict_json.write_text(json.dumps({"status": "error"}))
+        assert load_run_results(dict_json) == []
+
     def test_load_configured_checks_none_and_nonexistent(self, tmp_path: Path):
         """None or nonexistent path returns an empty set."""
         assert load_configured_checks(None) == set()
         assert load_configured_checks(tmp_path / "does_not_exist.yml") == set()
+
+    def test_load_configured_checks_invalid_yaml(self, tmp_path: Path):
+        """Malformed YAML file returns an empty set."""
+        invalid_yaml = tmp_path / "invalid.yml"
+        invalid_yaml.write_text("manifest_checks: [unclosed")
+        assert load_configured_checks(invalid_yaml) == set()
 
     def test_load_configured_checks_toml(self, tmp_path: Path):
         """TOML configuration files are parsed correctly."""
