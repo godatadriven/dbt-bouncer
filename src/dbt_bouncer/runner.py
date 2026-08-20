@@ -220,13 +220,17 @@ def _assemble_checks_to_run(ctx: "BouncerContext") -> list[CheckToRun]:
     )
 
     # Pre-compute unique_id -> meta lookup for catalog_node/catalog_source
-    # skip_checks. "sources" is wrapped the same way as models/seeds/snapshots
-    # (the real node nested under a `.source` attribute), so it reuses the same
-    # unwrap loop -- "sources".rstrip("s") yields "source".
+    # skip_checks. Each resource is wrapped with the real node nested under a
+    # `.source`/`.model`/etc. attribute, so unwrap it before reading meta.
+    inner_attr_by_key = {
+        "models": "model",
+        "seeds": "seed",
+        "snapshots": "snapshot",
+        "sources": "source",
+    }
     meta_by_unique_id: dict[str, Any] = {}
-    for resource_key in ["models", "seeds", "snapshots", "sources"]:
+    for resource_key, inner_attr in inner_attr_by_key.items():
         for resource in resource_map.get(resource_key, []):
-            inner_attr = resource_key.rstrip("s")  # "models" -> "model"
             node = getattr(resource, inner_attr, None)
             if node is not None and hasattr(node, "unique_id"):
                 try:
