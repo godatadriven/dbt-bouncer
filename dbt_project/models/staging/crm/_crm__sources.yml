@@ -2,6 +2,13 @@ version: 2
 
 sources:
   - name: dummy_source
+    # Use the `main` schema so this source aliases the `main.customers` table
+    # that the `on-run-start` hook in dbt_project.yml creates. That hook builds
+    # a real relation during `dbt build`, so this source lands in catalog.json
+    # (unlike an `external_location` source, which never becomes a physical
+    # relation). This gives catalog source checks real coverage. See GitHub
+    # issue #1064.
+    schema: main
     config:
       freshness:
         warn_after: {count: 12, period: hour}
@@ -14,8 +21,6 @@ sources:
       - name: customers
         description: This is actually a seed but we are abusing it so we have a realistic source we can use for development.
         config:
-          external_location: "read_csv('./dbt_project/seeds/raw_customers.csv')"
-          formatter: oldstyle
           meta:
             contact:
               email: chris@email.com
@@ -30,3 +35,5 @@ sources:
           - name: id
             tests:
               - not_null
+          - name: first_name
+          - name: last_name

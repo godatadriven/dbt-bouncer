@@ -32,7 +32,20 @@ def check_source_columns_are_all_documented(
         ```
 
     """
-    source = next(s for s in ctx.sources if s.unique_id == catalog_source.unique_id)
+    # `ctx.sources` holds wrapped source objects (the real SourceNode nested
+    # under a `.source` attribute) in a live runner, so read the unwrapped
+    # source from `sources_by_unique_id`, mirroring how the catalog column
+    # checks read models from `models_by_unique_id`. The unit-test harness
+    # leaves that lookup empty, so fall back to the flat `ctx.sources` list it
+    # builds instead.
+    sources_by_id = (
+        ctx.sources_by_unique_id
+        if ctx.sources_by_unique_id
+        else {s.unique_id: s for s in ctx.sources}
+    )
+    source = sources_by_id.get(catalog_source.unique_id)
+    if source is None:
+        return
 
     if ctx.manifest_obj.manifest.metadata.adapter_type in ["snowflake"]:
         case_sensitive = False

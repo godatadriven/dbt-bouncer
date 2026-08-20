@@ -251,10 +251,12 @@ class TestCheckSourceColumnsAreAllDocumentedSnowflake:
     def test_check_source_columns_are_all_documented_source_missing_from_manifest(
         self,
     ):
-        with pytest.raises(StopIteration):
-            check_passes(
-                "check_source_columns_are_all_documented",
-                catalog_source={
-                    "unique_id": "source.package_name.source_1.table_1",
-                },
-            )
+        # A catalog source with no matching manifest source is skipped rather
+        # than crashing the run, mirroring how the catalog column checks skip a
+        # catalog node that is not a model.
+        check_passes(
+            "check_source_columns_are_all_documented",
+            catalog_source={
+                "unique_id": "source.package_name.source_1.table_1",
+            },
+        )

@@ -40,6 +40,16 @@ models:
         +schema: stg_payments
   internal_package:
     +materialized: table
+# Create a real relation for the `dummy_source.customers` source so it appears
+# in catalog.json and the catalog source checks get real coverage. `id` is cast
+# to BIGINT to match the `customers` model contract. See GitHub issue #1064.
+on-run-start:
+  - >
+    CREATE OR REPLACE TABLE main.customers AS
+    SELECT CAST(id AS BIGINT) AS id,
+           CAST(first_name AS VARCHAR) AS first_name,
+           CAST(last_name AS VARCHAR) AS last_name
+    FROM read_csv_auto('./dbt_project/seeds/raw_customers.csv')
 flags:
   require_generic_test_arguments_property: true
 vars:
