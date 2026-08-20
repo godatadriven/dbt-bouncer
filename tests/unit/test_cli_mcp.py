@@ -47,6 +47,10 @@ class TestExplainCheckTool:
         assert payload["category"] == "manifest"
         assert "model_name_pattern" in payload["parameters"]
         assert "Example(s):" in payload["docstring"]
+        # Delegating to the explain payload builder adds the docs URL.
+        assert payload["documentation_url"] == (
+            "https://godatadriven.github.io/dbt-bouncer/checks/manifest/models/naming/"
+        )
 
     def test_by_rule_code(self):
         """A check is explained by its rule code."""
@@ -114,7 +118,7 @@ class TestRunChecksTool:
         """A hung subprocess surfaces as an error payload, not an exception."""
 
         def fake_run(cmd, **_kwargs):
-            raise mcp_server.subprocess.TimeoutExpired(cmd=cmd, timeout=600)
+            raise mcp_server.subprocess.TimeoutExpired(cmd=cmd, timeout=120)
 
         monkeypatch.setattr(mcp_server.shutil, "which", lambda _: "/usr/bin/fake")
         monkeypatch.setattr(mcp_server.subprocess, "run", fake_run)

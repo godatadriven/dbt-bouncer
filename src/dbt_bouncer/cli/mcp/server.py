@@ -12,7 +12,6 @@ with log lines and progress output.
 
 from __future__ import annotations
 
-import inspect
 import json
 import shutil
 
@@ -20,16 +19,15 @@ import shutil
 # the MCP stdio protocol stream (see module docstring).
 import subprocess  # ruff: ignore[suspicious-subprocess-import] # nosec B404
 import tempfile
-import typing
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from mcp.server.fastmcp import FastMCP
 
-# Ten minutes: comfortably above a full run on a very large dbt project,
+# Two minutes: comfortably above a full run on a very large dbt project,
 # small enough that a hung subprocess does not stall the agent forever.
-_RUN_TIMEOUT_SECONDS = 600
+_RUN_TIMEOUT_SECONDS = 120
 
 
 def list_checks(category: str | None = None) -> dict[str, Any]:
@@ -70,11 +68,13 @@ def explain_check(check: str) -> dict[str, Any]:
 
     Returns:
         dict[str, Any]: The check's name, code, category, full docstring
-        (including YAML examples), and configurable parameters — or an
-        ``error`` key when the check is unknown.
+        (including YAML examples), configurable parameters, and documentation
+        URL — or an ``error`` key when the check is unknown.
 
     """
-    from dbt_bouncer.cli.list.utils import category_key, get_check_params
+    # Delegate to the `explain` subcommand's payload builder (#1070) so both
+    # surfaces describe a check identically.
+    from dbt_bouncer.cli.explain.utils import build_explain_payload
     from dbt_bouncer.utils import get_check_registry
 
     registry = get_check_registry()
@@ -84,24 +84,7 @@ def explain_check(check: str) -> dict[str, Any]:
             "error": f"Unknown check name or rule code '{check}'. Use the list_checks tool to see all checks."
         }
 
-    name = check
-    name_field = check_class.model_fields.get("name")
-    if name_field is not None:
-        args = typing.get_args(name_field.annotation)
-        if args:
-            name = str(args[0])
-
-    docstring = inspect.cleandoc(check_class.__doc__ or "")
-    return {
-        "category": category_key(check_class),
-        "code": getattr(check_class, "code", None),
-        "description": docstring.splitlines()[0] if docstring else "",
-        "docstring": docstring,
-        "name": name,
-        "parameters": {
-            k: v for k, v in get_check_params(check_class).items() if k != "name"
-        },
-    }
+    return dict(build_explain_payload(check_class))
 
 
 def read_project_config(config_file: str | None = None) -> dict[str, Any]:
