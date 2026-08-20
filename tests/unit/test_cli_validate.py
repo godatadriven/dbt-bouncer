@@ -10,7 +10,7 @@ runner = CliRunner()
 
 
 def _write_yaml(path, content: dict) -> None:
-    with path.open("w") as f:
+    with path.open("w", encoding="utf-8") as f:
         yaml.dump(content, f)
 
 

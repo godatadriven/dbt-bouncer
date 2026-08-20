@@ -21,7 +21,7 @@ def test_programmatic_happy_path(tmp_path):
         ],
     }
     config_file = tmp_path / "dbt-bouncer.yml"
-    with config_file.open("w") as f:
+    with config_file.open("w", encoding="utf-8") as f:
         yaml.dump(config_data, f)
 
     exit_code = run_bouncer(config_file=config_file)
@@ -45,7 +45,7 @@ def test_programmatic_failure_path(tmp_path, fixture_name):
         ],
     }
     config_file = tmp_path / "dbt-bouncer.yml"
-    with config_file.open("w") as f:
+    with config_file.open("w", encoding="utf-8") as f:
         yaml.dump(config_data, f)
 
     exit_code = run_bouncer(config_file=config_file)

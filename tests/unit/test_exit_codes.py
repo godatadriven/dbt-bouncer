@@ -16,7 +16,7 @@ _MANIFEST_PATH = Path("./dbt_project/target/manifest.json").resolve()
 
 
 def _write_config(path: Path, config: dict) -> None:
-    with path.open("w") as f:
+    with path.open("w", encoding="utf-8") as f:
         yaml.dump(config, f)
 
 
@@ -59,9 +59,9 @@ class TestRunExitCodes:
                 ],
             },
         )
-        with Path.open(_MANIFEST_PATH, "r") as f:
+        with Path.open(_MANIFEST_PATH, "r", encoding="utf-8") as f:
             manifest = json.load(f)
-        with Path.open(tmp_path / "manifest.json", "w") as f:
+        with Path.open(tmp_path / "manifest.json", "w", encoding="utf-8") as f:
             json.dump(manifest, f)
 
         result = runner.invoke(app, ["run", "--only", "not_a_real_category"])
@@ -84,9 +84,9 @@ class TestRunExitCodes:
                 ],
             },
         )
-        with Path.open(_MANIFEST_PATH, "r") as f:
+        with Path.open(_MANIFEST_PATH, "r", encoding="utf-8") as f:
             manifest = json.load(f)
-        with Path.open(tmp_path / "manifest.json", "w") as f:
+        with Path.open(tmp_path / "manifest.json", "w", encoding="utf-8") as f:
             json.dump(manifest, f)
 
         result = runner.invoke(app, ["run"])
@@ -109,9 +109,9 @@ class TestRunExitCodes:
                 ],
             },
         )
-        with Path.open(_MANIFEST_PATH, "r") as f:
+        with Path.open(_MANIFEST_PATH, "r", encoding="utf-8") as f:
             manifest = json.load(f)
-        with Path.open(tmp_path / "manifest.json", "w") as f:
+        with Path.open(tmp_path / "manifest.json", "w", encoding="utf-8") as f:
             json.dump(manifest, f)
 
         result = runner.invoke(app, ["run"])
