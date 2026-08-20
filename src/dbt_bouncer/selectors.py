@@ -13,16 +13,20 @@ node selection:
 - ``+orders`` — ``orders`` plus all its ancestors; ``orders+`` — plus all
   its descendants; ``+orders+`` — both. Graph operators can wrap any
   method (e.g. ``+tag:critical``).
+- ``2+orders`` — ``orders`` plus ancestors up to 2 edges away; ``orders+3``
+  — plus descendants up to 3 edges away. A degree limit truncates the graph
+  walk at the given number of hops.
 - Space-separated atoms are a union (OR); comma-separated atoms are an
   intersection (AND). Same semantics as dbt.
 
-Not supported (use dbt itself for these): the ``@`` operator, degree
-limits (``2+model``), ``state:``/``result:``/``config.*:``/``test_type:``
-methods, and YAML-defined named selectors.
+Not supported (use dbt itself for these): the ``@`` operator,
+``state:``/``result:``/``config.*:``/``test_type:`` methods, and
+YAML-defined named selectors.
 """
 
 from __future__ import annotations
 
+import re
 from fnmatch import fnmatch
 from typing import TYPE_CHECKING, Any
 
@@ -32,6 +36,13 @@ if TYPE_CHECKING:
     from collections.abc import Iterator
 
 _VALID_METHODS = ("fqn", "name", "package", "path", "tag")
+
+# A leading ``+`` graph operator, optionally prefixed with a hop count
+# (``2+orders``). An empty count means an unbounded walk.
+_ANCESTOR_OP = re.compile(r"^(\d*)\+")
+# A trailing ``+`` graph operator, optionally suffixed with a hop count
+# (``orders+3``). An empty count means an unbounded walk.
+_DESCENDANT_OP = re.compile(r"\+(\d*)$")
 
 # Manifest collections that participate in selection, i.e. every collection
 # whose members carry a ``unique_id`` that can appear in ``parent_map``/
@@ -49,22 +60,44 @@ _MANIFEST_COLLECTIONS = (
 class SelectorAtom:
     """One parsed selector atom, e.g. ``tag:finance`` or ``+orders``."""
 
-    __slots__ = ("ancestors", "descendants", "method", "value")
+    __slots__ = (
+        "ancestor_degree",
+        "ancestors",
+        "descendant_degree",
+        "descendants",
+        "method",
+        "value",
+    )
 
     def __init__(self, raw: str) -> None:
         """Parse a raw atom string.
 
         Args:
-            raw: The atom text, optionally wrapped in ``+`` graph operators.
+            raw: The atom text, optionally wrapped in graph operators
+                (``+`` or ``2+``).
 
         Raises:
             DbtBouncerConfigError: If the atom is empty or uses an
                 unsupported selection method.
 
         """
-        self.ancestors = raw.startswith("+")
-        self.descendants = raw.endswith("+") and len(raw) > 1
-        core = raw.removeprefix("+").removesuffix("+")
+        self.ancestors = False
+        self.ancestor_degree: int | None = None
+        self.descendants = False
+        self.descendant_degree: int | None = None
+        core = raw
+        ancestor = _ANCESTOR_OP.match(core)
+        if ancestor:
+            self.ancestors = True
+            self.ancestor_degree = int(ancestor.group(1)) if ancestor.group(1) else None
+            core = core[ancestor.end() :]
+        descendant = _DESCENDANT_OP.search(core)
+        if descendant:
+            self.descendants = True
+            self.descendant_degree = (
+                int(descendant.group(1)) if descendant.group(1) else None
+            )
+            core = core[: descendant.start()]
         if not core:
             raise DbtBouncerConfigError(f"Invalid selector atom: '{raw}'.")
         if ":" in core:
@@ -172,10 +205,19 @@ class Selector:
                 atom_ids = {
                     uid for uid, node in resources if atom.matches_node(uid, node)
                 }
+                # Walk both directions from the original matched seed so that
+                # ``+x+`` does not treat ancestors as new seeds for the
+                # descendant walk.
+                expanded = set(atom_ids)
                 if atom.ancestors:
-                    atom_ids |= self._closure(atom_ids, parent_map)
+                    expanded |= self._closure(
+                        atom_ids, parent_map, atom.ancestor_degree
+                    )
                 if atom.descendants:
-                    atom_ids |= self._closure(atom_ids, child_map)
+                    expanded |= self._closure(
+                        atom_ids, child_map, atom.descendant_degree
+                    )
+                atom_ids = expanded
                 group_ids = atom_ids if group_ids is None else group_ids & atom_ids
             selected |= group_ids or set()
         self._selected_ids = selected
@@ -196,32 +238,43 @@ class Selector:
                 yield str(uid), node
 
     @staticmethod
-    def _closure(seed_ids: set[str], edge_map: Any) -> set[str]:
+    def _closure(
+        seed_ids: set[str], edge_map: Any, degree: int | None = None
+    ) -> set[str]:
         """Return the transitive closure of ``seed_ids`` over ``edge_map``.
+
+        The walk runs level by level so that ``degree`` can cap it at a fixed
+        number of hops from the seeds.
 
         Args:
             seed_ids: The starting unique IDs.
             edge_map: ``parent_map`` (for ancestors) or ``child_map`` (for
                 descendants).
+            degree: The maximum number of hops to walk, or None for an
+                unbounded walk.
 
         Returns:
-            set[str]: Every unique ID reachable from the seeds, excluding
-            the seeds themselves.
+            set[str]: Every unique ID reached within ``degree`` hops of the
+            seeds, excluding the seeds themselves.
 
         """
         reached: set[str] = set()
-        frontier = list(seed_ids)
-        while frontier:
-            uid = frontier.pop()
-            try:
-                neighbours = edge_map[uid]
-            except (KeyError, TypeError):
-                continue
-            for neighbour in neighbours or []:
-                n = str(neighbour)
-                if n not in reached and n not in seed_ids:
-                    reached.add(n)
-                    frontier.append(n)
+        frontier = set(seed_ids)
+        hops = 0
+        while frontier and (degree is None or hops < degree):
+            hops += 1
+            next_frontier: set[str] = set()
+            for uid in frontier:
+                try:
+                    neighbours = edge_map[uid]
+                except (KeyError, TypeError):
+                    continue
+                for neighbour in neighbours or []:
+                    n = str(neighbour)
+                    if n not in reached and n not in seed_ids:
+                        reached.add(n)
+                        next_frontier.add(n)
+            frontier = next_frontier
         return reached
 
     def matches(self, unique_id: str | None) -> bool:

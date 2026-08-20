@@ -227,6 +227,7 @@ All checks accept an optional `selector` argument that uses dbt-style node selec
 - `package:my_package`: resources from a package.
 - `stg_customers` or `stg_*`: glob match on the resource name.
 - `+orders`: `orders` plus all of its ancestors. `orders+`: `orders` plus all of its descendants. `+orders+`: both. Graph operators can wrap any method, for example `+tag:critical`.
+- `2+orders`: `orders` plus ancestors up to 2 edges away. `orders+3`: `orders` plus descendants up to 3 edges away. A number limits the graph walk to that many hops.
 - Space-separated atoms form a union (OR), comma-separated atoms form an intersection (AND) — the same semantics as dbt. For example, `stg_*,tag:critical tag:finance` selects staging models with the `critical` tag, plus everything with the `finance` tag.
 
 ```yaml
@@ -246,7 +247,7 @@ manifest_checks:
 
     - Selection is resolved against the manifest. A check still only runs on the resource type it iterates: a model check with `selector: +orders` runs on the model ancestors of `orders`, not on its source ancestors.
     - `tag:`, `package:`, `path:`, and `fqn:` only match resources that carry the corresponding attribute in the manifest.
-    - Not supported (run dbt itself for these): the `@` operator, degree limits (`2+orders`), `state:`, `result:`, `config.*:`, and `test_type:` methods, and YAML-defined named selectors.
+    - Not supported (run dbt itself for these): the `@` operator, `state:`, `result:`, `config.*:`, and `test_type:` methods, and YAML-defined named selectors.
 
 ### Severity
 

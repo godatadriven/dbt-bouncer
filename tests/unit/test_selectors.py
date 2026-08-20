@@ -92,6 +92,33 @@ class TestParseSelector:
         assert atom.method == "name"
         assert atom.value == "orders"
 
+    def test_unbounded_graph_operators_have_no_degree(self):
+        """A bare + operator carries no degree limit."""
+        atom = parse_selector("+orders+")[0][0]
+
+        assert atom.ancestor_degree is None
+        assert atom.descendant_degree is None
+
+    def test_degree_operators(self):
+        """Numeric graph operators set the degree limit on each side."""
+        atom = parse_selector("2+orders+3")[0][0]
+
+        assert atom.ancestors is True
+        assert atom.ancestor_degree == 2
+        assert atom.descendants is True
+        assert atom.descendant_degree == 3
+        assert atom.method == "name"
+        assert atom.value == "orders"
+
+    def test_degree_operator_wraps_a_method(self):
+        """A degree operator can wrap a method atom."""
+        atom = parse_selector("2+tag:critical")[0][0]
+
+        assert atom.ancestors is True
+        assert atom.ancestor_degree == 2
+        assert atom.method == "tag"
+        assert atom.value == "critical"
+
 
 class TestSelectorMatching:
     """Tests for selector resolution against a manifest."""
@@ -163,6 +190,51 @@ class TestSelectorMatching:
         selector = Selector("tag:finance", manifest)
 
         assert selector.matches("macro.my_project.my_macro") is False
+
+
+class TestDegreeLimits:
+    """Tests for numeric degree limits on graph operators."""
+
+    @pytest.mark.parametrize(
+        ("raw", "expected"),
+        [
+            # One hop of ancestors stops at stg_orders.
+            ("1+orders", {"model.my_project.orders", "model.my_project.stg_orders"}),
+            # Two hops reach the source, i.e. the full chain here.
+            (
+                "2+orders",
+                {
+                    "model.my_project.orders",
+                    "model.my_project.stg_orders",
+                    "source.my_project.raw.raw_orders",
+                },
+            ),
+            # A degree larger than the graph behaves like the unbounded form.
+            (
+                "9+orders",
+                {
+                    "model.my_project.orders",
+                    "model.my_project.stg_orders",
+                    "source.my_project.raw.raw_orders",
+                },
+            ),
+            # One hop each side excludes the second-degree descendant (dashboard).
+            (
+                "1+stg_orders+1",
+                {
+                    "source.my_project.raw.raw_orders",
+                    "model.my_project.stg_orders",
+                    "model.my_project.orders",
+                },
+            ),
+        ],
+    )
+    def test_degree_selection(self, manifest, raw, expected):
+        """A degree limit truncates the graph walk at the given number of hops."""
+        selector = Selector(raw, manifest)
+        all_ids = set(manifest.nodes) | set(manifest.sources) | set(manifest.exposures)
+
+        assert {uid for uid in all_ids if selector.matches(uid)} == expected
 
 
 def test_invalid_selector_rejected_at_config_time():
