@@ -127,3 +127,48 @@ class TestValidateCommand:
         result = runner.invoke(app, ["validate"])
 
         assert "Line" in result.output
+
+    def test_unknown_top_level_key_reports_suggestion(self, tmp_path, monkeypatch):
+        """A typo in a top-level key fails validation with a suggestion."""
+        monkeypatch.chdir(tmp_path)
+        (tmp_path / "dbt-bouncer.yml").write_text(
+            "severtiy: warn\n"
+            "manifest_checks:\n"
+            "  - name: check_model_description_populated\n"
+        )
+
+        result = runner.invoke(app, ["validate"])
+
+        assert result.exit_code == ExitCode.CHECK_ERRORS
+        assert "severtiy" in result.output
+        assert "Did you mean" in result.output
+
+    def test_unknown_check_parameter_reports_line(self, tmp_path, monkeypatch):
+        """A typo in a check parameter fails validation with its line number."""
+        monkeypatch.chdir(tmp_path)
+        (tmp_path / "dbt-bouncer.yml").write_text(
+            "manifest_checks:\n"
+            "  - name: check_model_names\n"
+            "    model_name_patern: ^stg_\n"
+        )
+
+        result = runner.invoke(app, ["validate"])
+
+        assert result.exit_code == ExitCode.CHECK_ERRORS
+        assert "Line 3" in result.output
+        assert "model_name_patern" in result.output
+
+    def test_toml_config_is_fully_validated(self, tmp_path, monkeypatch):
+        """A TOML config with an unknown key exits non-zero."""
+        monkeypatch.chdir(tmp_path)
+        config_file = tmp_path / "dbt-bouncer.toml"
+        config_file.write_text(
+            'severtiy = "warn"\n'
+            "[[manifest_checks]]\n"
+            'name = "check_model_description_populated"\n'
+        )
+
+        result = runner.invoke(app, ["validate", "--config-file", str(config_file)])
+
+        assert result.exit_code == ExitCode.CHECK_ERRORS
+        assert "severtiy" in result.output
