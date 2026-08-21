@@ -1,4 +1,3 @@
-# ruff: file-ignore[suspicious-subprocess-import, subprocess-without-shell-equals-true]
 """Build standalone zero-Python single-binary executable using PyInstaller.
 
 Packages dbt-bouncer and its dependencies into a standalone single-file executable

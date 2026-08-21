@@ -1,4 +1,3 @@
-# ruff: file-ignore[suspicious-subprocess-import]
 """Unit tests for standalone binary packaging script."""
 
 from __future__ import annotations
