@@ -262,7 +262,7 @@ def load_config_file_contents(
                     logging.info(
                         "A `dbt-bouncer.yml` file has been created in the current directory with default settings."
                     )
-                    with Path.open(created_config_file, "w") as f:
+                    with Path.open(created_config_file, "w", encoding="utf-8") as f:
                         f.write(DEFAULT_DBT_BOUNCER_CONFIG)
 
                     return load_config_from_yaml(created_config_file)

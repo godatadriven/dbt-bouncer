@@ -444,7 +444,7 @@ def run_bouncer_phase_decomposition(request, benchmark_config_file) -> tuple:
         # here — only for the duration of this call, so tqdm's own redraw
         # between rounds is unaffected.
         with (
-            Path(os.devnull).open("w") as devnull,
+            Path(os.devnull).open("w", encoding="utf-8") as devnull,
             redirect_stdout(devnull),
             redirect_stderr(devnull),
         ):
