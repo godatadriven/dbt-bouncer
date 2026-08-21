@@ -74,7 +74,7 @@ def _get_resource_meta(
             return getattr(resource, iterate_value).config.meta or {}
         except AttributeError:
             return getattr(resource, iterate_value).meta or {}
-    elif iterate_value == "catalog_node":
+    elif iterate_value in {"catalog_node", "catalog_source"}:
         return meta_by_unique_id.get(getattr(resource, "unique_id", ""), {})
     elif iterate_value == "run_result":
         return {}
@@ -219,11 +219,18 @@ def _assemble_checks_to_run(ctx: "BouncerContext") -> list[CheckToRun]:
         unit_tests=ctx.unit_tests,
     )
 
-    # Pre-compute unique_id -> meta lookup for catalog_node skip_checks
+    # Pre-compute unique_id -> meta lookup for catalog_node/catalog_source
+    # skip_checks. Each resource is wrapped with the real node nested under a
+    # `.source`/`.model`/etc. attribute, so unwrap it before reading meta.
+    inner_attr_by_key = {
+        "models": "model",
+        "seeds": "seed",
+        "snapshots": "snapshot",
+        "sources": "source",
+    }
     meta_by_unique_id: dict[str, Any] = {}
-    for resource_key in ["models", "seeds", "snapshots"]:
+    for resource_key, inner_attr in inner_attr_by_key.items():
         for resource in resource_map.get(resource_key, []):
-            inner_attr = resource_key.rstrip("s")  # "models" -> "model"
             node = getattr(resource, inner_attr, None)
             if node is not None and hasattr(node, "unique_id"):
                 try:
