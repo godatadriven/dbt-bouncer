@@ -1,0 +1,78 @@
+---
+name: Build standalone binaries
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/build_standalone_binaries.yml
+      - scripts/build_standalone_binary.py
+      - pyproject.toml
+  release:
+    types:
+      - published
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-binaries:
+    name: Build ${{ matrix.target }}
+    permissions:
+      contents: write
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        # Intel macOS (darwin-x86_64) is intentionally omitted: GitHub's macos-13
+        # Intel runners are deprecated and queue without ever starting. Intel Mac
+        # users install via pip or pipx.
+        include:
+          - os: ubuntu-24.04
+            target: linux-x86_64
+            binary_name: dbt-bouncer-linux-x86_64
+          - os: macos-14
+            target: darwin-arm64
+            binary_name: dbt-bouncer-darwin-arm64
+          - os: windows-2025
+            target: windows-x86_64
+            binary_name: dbt-bouncer-windows-x86_64.exe
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Setup Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: "3.11"
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@94527f2e458b27549849d47d273a16bec83a01e9 # v7
+        with:
+          enable-cache: true
+
+      - name: Build standalone binary
+        shell: bash
+        run: |
+          uv sync --extra dev
+          uv run --with pyinstaller python scripts/build_standalone_binary.py --binary-name ${{ matrix.binary_name }} --verify
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: ${{ matrix.binary_name }}
+          path: dist/${{ matrix.binary_name }}
+          if-no-files-found: error
+
+      - name: Upload binary asset to release
+        if: ${{ github.event_name == 'release' }}
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Pass the release tag through an env var to avoid shell injection.
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          gh release upload "$RELEASE_TAG" dist/${{ matrix.binary_name }} --clobber

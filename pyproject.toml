@@ -207,7 +207,11 @@ unfixable = ["B"]
   "S603",
   "T201",
 ]
+# The standalone binary build script runs PyInstaller and the built binary via
+# subprocess with controlled arguments, so the subprocess S-rules do not apply.
+"scripts/build_standalone_binary.py" = ["S404", "S603"]
 "tests/*" = ["D100", "D101", "D102", "D103", "D104", "E402"]
+"tests/unit/test_standalone_binary_packaging.py" = ["S404"]
 # The synthetic-manifest builders are internal test helpers; documenting a
 # "Returns" section on every small factory is noise.
 "tests/benchmark/*" = ["D413", "DOC201"]

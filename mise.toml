@@ -63,6 +63,10 @@ run = [
   "uv run dbt-bouncer --config-file ./.github/dbt-bouncer-fusion-probe.yml",
 ]
 
+[tasks.build-binary]
+description = "Build standalone single-binary executable with PyInstaller"
+run = "uv run --with pyinstaller python scripts/build_standalone_binary.py"
+
 # Each version-specific task uses --target-path to write compiled artifacts to
 # an isolated directory. The DuckDB database is NOT isolated: every task shares
 # the same `path: ./dbt.duckdb` from profiles.yml. The `dbt docs generate` step
