@@ -50,6 +50,26 @@ def load_run_results(results_path: Path | None) -> list[dict[str, Any]]:
     return []
 
 
+def _result_check_name(result: dict[str, Any]) -> str | None:
+    """Derive the check name from a single dbt-bouncer result record.
+
+    The `check_run_id` field has the form `check_name:index:resource`, so the
+    check name is the segment before the first colon. For records that instead
+    carry an explicit `check_name` or `name` field, that value is used.
+
+    Args:
+        result: A single result record from a dbt-bouncer output file.
+
+    Returns:
+        str | None: The check name, or None if it cannot be determined.
+
+    """
+    run_id = result.get("check_run_id")
+    if isinstance(run_id, str) and run_id:
+        return run_id.split(":", 1)[0]
+    return result.get("check_name") or result.get("name")
+
+
 def load_configured_checks(config_path: Path | None) -> set[str]:
     """Load configured check names from a dbt-bouncer config file.
 
@@ -128,6 +148,29 @@ def filter_checks(
     return filtered
 
 
+def _severity_badge(error_count: int, warn_count: int) -> Text:
+    """Build the errors/warnings cell for a single check row.
+
+    Args:
+        error_count: Number of failed checks with `error` severity.
+        warn_count: Number of failed checks with `warn` severity.
+
+    Returns:
+        Text: A rich cell showing the error and warning counts.
+
+    """
+    badge = Text()
+    if error_count:
+        badge.append(f"{error_count} error", style="bold red")
+    if warn_count:
+        if error_count:
+            badge.append(", ")
+        badge.append(f"{warn_count} warn", style="bold yellow")
+    if not error_count and not warn_count:
+        badge.append("0", style="dim green")
+    return badge
+
+
 def render_studio_dashboard(
     checks: list[type[BaseCheck]],
     *,
@@ -151,16 +194,27 @@ def render_studio_dashboard(
     if console is None:
         console = Console()
 
+    from dbt_bouncer.enums import CheckOutcome, CheckSeverity
+
     active_configured = configured_checks or set()
 
-    # Calculate failure count per check if results are provided
-    failure_counts: dict[str, int] = {}
+    # Count failed checks per check name, split by severity. A failed check with
+    # `error` severity is an error. A failed check with `warn` severity is a
+    # warning, which must still be displayed even though it is not a failure.
+    # Successful checks are not counted.
+    error_counts: dict[str, int] = {}
+    warn_counts: dict[str, int] = {}
     if results:
         for r in results:
-            name = r.get("check_name") or r.get("name")
-            status = r.get("status")
-            if name and status in ("failed", "error"):
-                failure_counts[name] = failure_counts.get(name, 0) + 1
+            if str(r.get("outcome", "")) != CheckOutcome.FAILED:
+                continue
+            name = _result_check_name(r)
+            if not name:
+                continue
+            if str(r.get("severity", "")) == CheckSeverity.WARN:
+                warn_counts[name] = warn_counts.get(name, 0) + 1
+            else:
+                error_counts[name] = error_counts.get(name, 0) + 1
 
     header_text = Text()
     header_text.append("dbt-bouncer studio", style="bold red")
@@ -201,7 +255,7 @@ def render_studio_dashboard(
     table.add_column("Active", justify="center", width=8)
     table.add_column("Description", style="dim", ratio=1)
     if results is not None:
-        table.add_column("Failures", justify="center", width=10)
+        table.add_column("Errors / Warns", justify="center", width=16)
 
     for check_class in checks:
         name = get_check_name(check_class)
@@ -222,13 +276,9 @@ def render_studio_dashboard(
 
         row_args = [code, name, cat, active_badge, doc]
         if results is not None:
-            fails = failure_counts.get(name, 0)
-            fail_badge = (
-                Text(f"{fails} failed", style="bold red")
-                if fails > 0
-                else Text("0", style="dim green")
+            row_args.append(
+                _severity_badge(error_counts.get(name, 0), warn_counts.get(name, 0))
             )
-            row_args.append(fail_badge)
 
         table.add_row(*row_args)
 

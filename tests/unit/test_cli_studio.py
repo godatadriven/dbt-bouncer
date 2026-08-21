@@ -9,6 +9,7 @@ from typer.testing import CliRunner
 
 from dbt_bouncer.cli.explain.utils import get_check_name
 from dbt_bouncer.cli.studio.utils import (
+    _result_check_name,
     filter_checks,
     load_configured_checks,
     load_run_results,
@@ -70,19 +71,89 @@ class TestStudioCommand:
         assert "active" in result.output
 
     def test_studio_with_results_file(self, tmp_path: Path):
-        """A results file displays execution status and failure counts."""
+        """A results file in dbt-bouncer output format displays error counts."""
         results_file = tmp_path / "results.json"
         results_file.write_text(
             json.dumps(
                 [
                     {
-                        "name": "check_model_names",
-                        "status": "error",
+                        "check_run_id": "check_model_names:0:staging_stg_customers",
+                        "outcome": "failed",
                         "severity": "error",
+                        "failure_message": "bad name",
                     },
                     {
-                        "name": "check_model_names",
-                        "status": "error",
+                        "check_run_id": "check_model_names:0:staging_stg_orders",
+                        "outcome": "failed",
+                        "severity": "error",
+                        "failure_message": "bad name",
+                    },
+                ]
+            )
+        )
+
+        result = runner.invoke(
+            app,
+            [
+                "studio",
+                "--results-file",
+                str(results_file),
+                "--search",
+                "check_model_names",
+            ],
+            env={"COLUMNS": "160"},
+        )
+
+        assert result.exit_code == 0
+        assert "2 error" in result.output
+
+    def test_studio_results_distinguishes_error_and_warn(self, tmp_path: Path):
+        """A failed check with warn severity is shown as a warning, not an error."""
+        results_file = tmp_path / "results.json"
+        results_file.write_text(
+            json.dumps(
+                [
+                    {
+                        "check_run_id": "check_model_names:0:staging_stg_customers",
+                        "outcome": "failed",
+                        "severity": "error",
+                        "failure_message": "bad name",
+                    },
+                    {
+                        "check_run_id": "check_model_names:1:staging_stg_orders",
+                        "outcome": "failed",
+                        "severity": "warn",
+                        "failure_message": "bad name",
+                    },
+                ]
+            )
+        )
+
+        result = runner.invoke(
+            app,
+            [
+                "studio",
+                "--results-file",
+                str(results_file),
+                "--search",
+                "check_model_names",
+            ],
+            env={"COLUMNS": "160"},
+        )
+
+        assert result.exit_code == 0
+        assert "1 error" in result.output
+        assert "1 warn" in result.output
+
+    def test_studio_results_ignores_successful_checks(self, tmp_path: Path):
+        """A successful outcome is not counted as an error or a warning."""
+        results_file = tmp_path / "results.json"
+        results_file.write_text(
+            json.dumps(
+                [
+                    {
+                        "check_run_id": "check_model_names:0:staging_stg_customers",
+                        "outcome": "success",
                         "severity": "error",
                     },
                 ]
@@ -102,8 +173,8 @@ class TestStudioCommand:
         )
 
         assert result.exit_code == 0
-        assert "Failures" in result.output
-        assert "failed" in result.output
+        assert "1 error" not in result.output
+        assert "1 warn" not in result.output
 
     def test_studio_missing_config_file_warns(self, tmp_path: Path):
         """An explicit config file that does not exist warns and still runs."""
@@ -175,3 +246,21 @@ class TestStudioUtils:
         filtered = filter_checks(all_checks, search="check_model_names")
         assert len(filtered) >= 1
         assert any(get_check_name(c) == "check_model_names" for c in filtered)
+
+    def test_result_check_name_from_run_id(self):
+        """The check name is the segment before the first colon of check_run_id."""
+        record = {"check_run_id": "check_model_names:0:staging_stg_customers"}
+        assert _result_check_name(record) == "check_model_names"
+
+    def test_result_check_name_fallback_fields(self):
+        """A record without check_run_id falls back to check_name or name."""
+        assert _result_check_name({"check_name": "check_model_has_tags"}) == (
+            "check_model_has_tags"
+        )
+        assert _result_check_name({"name": "check_model_has_tags"}) == (
+            "check_model_has_tags"
+        )
+
+    def test_result_check_name_missing_returns_none(self):
+        """A record with no identifying field returns None."""
+        assert _result_check_name({"outcome": "failed"}) is None

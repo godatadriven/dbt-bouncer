@@ -40,7 +40,7 @@ def studio(
         typer.Option(
             "--results-file",
             "-r",
-            help="Path to a JSON run results file to display execution status.",
+            help="Path to a dbt-bouncer JSON output file (from `run --output-file ... --output-format json`) to display error and warning counts. This is not dbt's own `run_results.json`.",
         ),
     ] = None,
     search: Annotated[
