@@ -42,6 +42,7 @@ mise run install
   - `list/` — list available checks (`list_checks`, `build_checks_payload`, `category_key`, `get_check_params`, `print_text_checks`)
   - `mcp/` — MCP server exposing dbt-bouncer to AI coding agents (`mcp_serve`, `build_server`; requires the optional `mcp` extra)
   - `run/` — execute bouncer checks (`run`, `run_bouncer`, `_detect_config_file_source`, `_build_context`)
+  - `studio/` — interactive terminal studio dashboard (`studio`, `render_studio_dashboard`, `filter_checks`, `load_configured_checks`)
   - `validate/` — lint config file (`validate`)
 - `src/dbt_bouncer/main.py` — Typer app setup, subcommand registration, backward-compatible `main_callback`
 - `src/dbt_bouncer/check_framework/` — core check infrastructure package:
