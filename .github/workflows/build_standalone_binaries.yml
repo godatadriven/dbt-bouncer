@@ -17,45 +17,28 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  set-matrix:
-    name: Resolve build matrix
-    runs-on: ubuntu-24.04
-    outputs:
-      matrix: ${{ steps.compute.outputs.matrix }}
-    steps:
-      - name: Compute build matrix
-        id: compute
-        shell: bash
-        env:
-          EVENT_NAME: ${{ github.event_name }}
-        run: |
-          # The darwin-x86_64 build targets GitHub's macos-13 Intel runners.
-          # These runners are deprecated and can queue without ever starting,
-          # which hangs the run. Build Intel only on release and manual dispatch
-          # (best-effort). Excluding it from pull_request keeps PR CI green.
-          include='[
-            {"os":"ubuntu-24.04","target":"linux-x86_64","binary_name":"dbt-bouncer-linux-x86_64"},
-            {"os":"macos-14","target":"darwin-arm64","binary_name":"dbt-bouncer-darwin-arm64"},
-            {"os":"windows-2025","target":"windows-x86_64","binary_name":"dbt-bouncer-windows-x86_64.exe"}
-          ]'
-          if [ "$EVENT_NAME" != "pull_request" ]; then
-            include=$(jq -c '. + [{"os":"macos-13","target":"darwin-x86_64","binary_name":"dbt-bouncer-darwin-x86_64","experimental":true}]' <<< "$include")
-          fi
-          echo "matrix={\"include\":$(jq -c . <<< "$include")}" >> "$GITHUB_OUTPUT"
-
   build-binaries:
     name: Build ${{ matrix.target }}
-    needs: set-matrix
     permissions:
       contents: write
     runs-on: ${{ matrix.os }}
-    # The Intel build is best-effort: tolerate a failure and cap its runtime so a
-    # scarce macos-13 runner cannot stall a release run indefinitely.
-    continue-on-error: ${{ matrix.experimental || false }}
-    timeout-minutes: ${{ matrix.experimental && 20 || 30 }}
+    timeout-minutes: 30
     strategy:
       fail-fast: false
-      matrix: ${{ fromJSON(needs.set-matrix.outputs.matrix) }}
+      matrix:
+        # Intel macOS (darwin-x86_64) is intentionally omitted: GitHub's macos-13
+        # Intel runners are deprecated and queue without ever starting. Intel Mac
+        # users install via pip or pipx.
+        include:
+          - os: ubuntu-24.04
+            target: linux-x86_64
+            binary_name: dbt-bouncer-linux-x86_64
+          - os: macos-14
+            target: darwin-arm64
+            binary_name: dbt-bouncer-darwin-arm64
+          - os: windows-2025
+            target: windows-x86_64
+            binary_name: dbt-bouncer-windows-x86_64.exe
 
     steps:
       - name: Checkout
