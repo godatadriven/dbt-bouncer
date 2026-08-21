@@ -232,7 +232,7 @@ def test_runner_coverage(caplog, tmp_path):
             )
         )
 
-    with Path.open(tmp_path / "coverage.json", "r") as f:
+    with Path.open(tmp_path / "coverage.json", "r", encoding="utf-8") as f:
         coverage = json.load(f)
 
     assert results[0] == 0
@@ -512,7 +512,7 @@ def test_runner_skip(tmp_path):
             )
         )
 
-    with Path.open(tmp_path / "coverage.json", "r") as f:
+    with Path.open(tmp_path / "coverage.json", "r", encoding="utf-8") as f:
         coverage = json.load(f)
 
     assert results[0] == 0
@@ -739,7 +739,7 @@ def test_runner_windows(caplog, tmp_path):
         )
     )
 
-    with Path.open(tmp_path / "coverage.json", "r") as f:
+    with Path.open(tmp_path / "coverage.json", "r", encoding="utf-8") as f:
         coverage = json.load(f)
 
     assert results[0] == 0
@@ -898,7 +898,7 @@ def test_runner_check_id(tmp_path):
             )
         )
 
-    with Path.open(tmp_path / "output.json", "r") as f:
+    with Path.open(tmp_path / "output.json", "r", encoding="utf-8") as f:
         output = json.load(f)
 
     check_run_ids = [x["check_run_id"] for x in output]
@@ -1069,7 +1069,7 @@ def test_runner_output_only_failures(output_only_failures, num_checks, tmp_path)
             )
         )
 
-    with Path.open(tmp_path / "output.json", "r") as f:
+    with Path.open(tmp_path / "output.json", "r", encoding="utf-8") as f:
         output = json.load(f)
 
     assert (tmp_path / "output.json").exists()
@@ -1291,7 +1291,7 @@ def test_runner_skip_catalog_check(tmp_path):
             )
         )
 
-    with Path.open(tmp_path / "coverage.json", "r") as f:
+    with Path.open(tmp_path / "coverage.json", "r", encoding="utf-8") as f:
         coverage = json.load(f)
 
     # stg_orders check is skipped due to skip_checks, so no failures

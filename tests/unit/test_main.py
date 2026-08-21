@@ -21,7 +21,9 @@ _DBT_PROJECT_DIR = "dbt_project"
 
 @lru_cache(maxsize=1)
 def _load_manifest() -> dict:
-    with Path.open(Path(f"{_DBT_PROJECT_DIR}/target/manifest.json")) as f:
+    with Path.open(
+        Path(f"{_DBT_PROJECT_DIR}/target/manifest.json"), encoding="utf-8"
+    ) as f:
         return json.load(f)
 
 
@@ -74,7 +76,9 @@ def _count_models(
 
 @lru_cache(maxsize=1)
 def _run_results_count() -> int:
-    with Path.open(Path(f"{_DBT_PROJECT_DIR}/target/run_results.json")) as f:
+    with Path.open(
+        Path(f"{_DBT_PROJECT_DIR}/target/run_results.json"), encoding="utf-8"
+    ) as f:
         return len(json.load(f)["results"])
 
 
@@ -90,7 +94,9 @@ def _catalog_checks_count(include_pattern: str) -> int:
 
     """
     m = _load_manifest()
-    with Path.open(Path(f"{_DBT_PROJECT_DIR}/target/catalog.json")) as f:
+    with Path.open(
+        Path(f"{_DBT_PROJECT_DIR}/target/catalog.json"), encoding="utf-8"
+    ) as f:
         catalog = json.load(f)
     pname = _project_name()
     nodes_dict = m.get("nodes", {})
@@ -128,14 +134,16 @@ def test_cli_output_formats(output_format, output_file_suffix, is_json, tmp_path
         ],
     }
 
-    with Path(tmp_path / "dbt-bouncer.yml").open("w") as f:
+    with Path(tmp_path / "dbt-bouncer.yml").open("w", encoding="utf-8") as f:
         yaml.dump(bouncer_config, f)
 
     # Manifest file
-    with Path.open(Path("./dbt_project/target/manifest.json"), "r") as f:
+    with Path.open(
+        Path("./dbt_project/target/manifest.json"), "r", encoding="utf-8"
+    ) as f:
         manifest = json.load(f)
 
-    with Path.open(tmp_path / "manifest.json", "w") as f:
+    with Path.open(tmp_path / "manifest.json", "w", encoding="utf-8") as f:
         json.dump(manifest, f)
 
     output_file = tmp_path / output_file_suffix
@@ -200,7 +208,7 @@ def test_cli_custom_checks_dir(caplog, monkeypatch, tmp_path):
         ],
     }
 
-    with Path(tmp_path / "dbt-bouncer.yml").open("w") as f:
+    with Path(tmp_path / "dbt-bouncer.yml").open("w", encoding="utf-8") as f:
         yaml.dump(bouncer_config, f)
 
     Path(tmp_path / "my_checks_dir/manifest").mkdir(parents=True)
@@ -217,10 +225,12 @@ def check_my_custom_check(model) -> None:
     )
 
     # Manifest file
-    with Path.open(Path("./dbt_project/target/manifest.json"), "r") as f:
+    with Path.open(
+        Path("./dbt_project/target/manifest.json"), "r", encoding="utf-8"
+    ) as f:
         manifest = json.load(f)
 
-    with Path.open(tmp_path / "manifest.json", "w") as f:
+    with Path.open(tmp_path / "manifest.json", "w", encoding="utf-8") as f:
         json.dump(manifest, f)
 
     # Run dbt-bouncer
@@ -261,7 +271,7 @@ def test_cli_custom_checks_dir_class_based_check_raises(caplog, monkeypatch, tmp
         ],
     }
 
-    with Path(tmp_path / "dbt-bouncer.yml").open("w") as f:
+    with Path(tmp_path / "dbt-bouncer.yml").open("w", encoding="utf-8") as f:
         yaml.dump(bouncer_config, f)
 
     Path(tmp_path / "my_checks_dir/manifest").mkdir(parents=True)
@@ -285,10 +295,12 @@ class CheckMyCustomCheck(BaseCheck):
     )
 
     # Manifest file
-    with Path.open(Path("./dbt_project/target/manifest.json"), "r") as f:
+    with Path.open(
+        Path("./dbt_project/target/manifest.json"), "r", encoding="utf-8"
+    ) as f:
         manifest = json.load(f)
 
-    with Path.open(tmp_path / "manifest.json", "w") as f:
+    with Path.open(tmp_path / "manifest.json", "w", encoding="utf-8") as f:
         json.dump(manifest, f)
 
     # Run dbt-bouncer
@@ -324,14 +336,16 @@ def test_cli_description(tmp_path):
         ],
     }
 
-    with Path(tmp_path / "dbt-bouncer.yml").open("w") as f:
+    with Path(tmp_path / "dbt-bouncer.yml").open("w", encoding="utf-8") as f:
         yaml.dump(bouncer_config, f)
 
     # Manifest file
-    with Path.open(Path("./dbt_project/target/manifest.json"), "r") as f:
+    with Path.open(
+        Path("./dbt_project/target/manifest.json"), "r", encoding="utf-8"
+    ) as f:
         manifest = json.load(f)
 
-    with Path.open(tmp_path / "manifest.json", "w") as f:
+    with Path.open(tmp_path / "manifest.json", "w", encoding="utf-8") as f:
         json.dump(manifest, f)
 
     # Run dbt-bouncer
@@ -346,7 +360,7 @@ def test_cli_description(tmp_path):
         ],
     )
 
-    with Path.open(tmp_path / "coverage.json", "r") as f:
+    with Path.open(tmp_path / "coverage.json", "r", encoding="utf-8") as f:
         coverage = json.load(f)
 
     import logging
@@ -385,14 +399,16 @@ def test_cli_exclude(tmp_path):
         ],
     }
 
-    with Path(tmp_path / "dbt-bouncer.yml").open("w") as f:
+    with Path(tmp_path / "dbt-bouncer.yml").open("w", encoding="utf-8") as f:
         yaml.dump(bouncer_config, f)
 
     # Manifest file
-    with Path.open(Path("./dbt_project/target/manifest.json"), "r") as f:
+    with Path.open(
+        Path("./dbt_project/target/manifest.json"), "r", encoding="utf-8"
+    ) as f:
         manifest = json.load(f)
 
-    with Path.open(tmp_path / "manifest.json", "w") as f:
+    with Path.open(tmp_path / "manifest.json", "w", encoding="utf-8") as f:
         json.dump(manifest, f)
 
     # Run dbt-bouncer
@@ -407,7 +423,7 @@ def test_cli_exclude(tmp_path):
         ],
     )
 
-    with Path.open(tmp_path / "coverage.json", "r") as f:
+    with Path.open(tmp_path / "coverage.json", "r", encoding="utf-8") as f:
         coverage = json.load(f)
 
     for i in [
@@ -434,14 +450,16 @@ def test_cli_exclude_and_include(tmp_path):
         ],
     }
 
-    with Path(tmp_path / "dbt-bouncer.yml").open("w") as f:
+    with Path(tmp_path / "dbt-bouncer.yml").open("w", encoding="utf-8") as f:
         yaml.dump(bouncer_config, f)
 
     # Manifest file
-    with Path.open(Path("./dbt_project/target/manifest.json"), "r") as f:
+    with Path.open(
+        Path("./dbt_project/target/manifest.json"), "r", encoding="utf-8"
+    ) as f:
         manifest = json.load(f)
 
-    with Path.open(tmp_path / "manifest.json", "w") as f:
+    with Path.open(tmp_path / "manifest.json", "w", encoding="utf-8") as f:
         json.dump(manifest, f)
 
     # Run dbt-bouncer
@@ -456,7 +474,7 @@ def test_cli_exclude_and_include(tmp_path):
         ],
     )
 
-    with Path.open(tmp_path / "coverage.json", "r") as f:
+    with Path.open(tmp_path / "coverage.json", "r", encoding="utf-8") as f:
         coverage = json.load(f)
 
     for i in [
@@ -488,14 +506,16 @@ def test_cli_global_exclude(tmp_path):
         ],
     }
 
-    with Path(tmp_path / "dbt-bouncer.yml").open("w") as f:
+    with Path(tmp_path / "dbt-bouncer.yml").open("w", encoding="utf-8") as f:
         yaml.dump(bouncer_config, f)
 
     # Manifest file
-    with Path.open(Path("./dbt_project/target/manifest.json"), "r") as f:
+    with Path.open(
+        Path("./dbt_project/target/manifest.json"), "r", encoding="utf-8"
+    ) as f:
         manifest = json.load(f)
 
-    with Path.open(tmp_path / "manifest.json", "w") as f:
+    with Path.open(tmp_path / "manifest.json", "w", encoding="utf-8") as f:
         json.dump(manifest, f)
 
     # Run dbt-bouncer
@@ -510,7 +530,7 @@ def test_cli_global_exclude(tmp_path):
         ],
     )
 
-    with Path.open(tmp_path / "coverage.json", "r") as f:
+    with Path.open(tmp_path / "coverage.json", "r", encoding="utf-8") as f:
         coverage = json.load(f)
 
     for i in [
@@ -537,14 +557,16 @@ def test_cli_global_and_local_include(tmp_path):
         ],
     }
 
-    with Path(tmp_path / "dbt-bouncer.yml").open("w") as f:
+    with Path(tmp_path / "dbt-bouncer.yml").open("w", encoding="utf-8") as f:
         yaml.dump(bouncer_config, f)
 
     # Manifest file
-    with Path.open(Path("./dbt_project/target/manifest.json"), "r") as f:
+    with Path.open(
+        Path("./dbt_project/target/manifest.json"), "r", encoding="utf-8"
+    ) as f:
         manifest = json.load(f)
 
-    with Path.open(tmp_path / "manifest.json", "w") as f:
+    with Path.open(tmp_path / "manifest.json", "w", encoding="utf-8") as f:
         json.dump(manifest, f)
 
     # Run dbt-bouncer
@@ -559,7 +581,7 @@ def test_cli_global_and_local_include(tmp_path):
         ],
     )
 
-    with Path.open(tmp_path / "coverage.json", "r") as f:
+    with Path.open(tmp_path / "coverage.json", "r", encoding="utf-8") as f:
         coverage = json.load(f)
 
     for i in [
@@ -586,14 +608,16 @@ def test_cli_global_exclude_and_include(tmp_path):
         ],
     }
 
-    with Path(tmp_path / "dbt-bouncer.yml").open("w") as f:
+    with Path(tmp_path / "dbt-bouncer.yml").open("w", encoding="utf-8") as f:
         yaml.dump(bouncer_config, f)
 
     # Manifest file
-    with Path.open(Path("./dbt_project/target/manifest.json"), "r") as f:
+    with Path.open(
+        Path("./dbt_project/target/manifest.json"), "r", encoding="utf-8"
+    ) as f:
         manifest = json.load(f)
 
-    with Path.open(tmp_path / "manifest.json", "w") as f:
+    with Path.open(tmp_path / "manifest.json", "w", encoding="utf-8") as f:
         json.dump(manifest, f)
 
     # Run dbt-bouncer
@@ -608,7 +632,7 @@ def test_cli_global_exclude_and_include(tmp_path):
         ],
     )
 
-    with Path.open(tmp_path / "coverage.json", "r") as f:
+    with Path.open(tmp_path / "coverage.json", "r", encoding="utf-8") as f:
         coverage = json.load(f)
 
     for i in [
@@ -641,14 +665,16 @@ def test_cli_global_exclude_and_local_include(tmp_path):
         ],
     }
 
-    with Path(tmp_path / "dbt-bouncer.yml").open("w") as f:
+    with Path(tmp_path / "dbt-bouncer.yml").open("w", encoding="utf-8") as f:
         yaml.dump(bouncer_config, f)
 
     # Manifest file
-    with Path.open(Path("./dbt_project/target/manifest.json"), "r") as f:
+    with Path.open(
+        Path("./dbt_project/target/manifest.json"), "r", encoding="utf-8"
+    ) as f:
         manifest = json.load(f)
 
-    with Path.open(tmp_path / "manifest.json", "w") as f:
+    with Path.open(tmp_path / "manifest.json", "w", encoding="utf-8") as f:
         json.dump(manifest, f)
 
     # Run dbt-bouncer
@@ -663,7 +689,7 @@ def test_cli_global_exclude_and_local_include(tmp_path):
         ],
     )
 
-    with Path.open(tmp_path / "coverage.json", "r") as f:
+    with Path.open(tmp_path / "coverage.json", "r", encoding="utf-8") as f:
         coverage = json.load(f)
 
     for i in [
@@ -695,14 +721,16 @@ def test_cli_global_include(tmp_path):
         ],
     }
 
-    with Path(tmp_path / "dbt-bouncer.yml").open("w") as f:
+    with Path(tmp_path / "dbt-bouncer.yml").open("w", encoding="utf-8") as f:
         yaml.dump(bouncer_config, f)
 
     # Manifest file
-    with Path.open(Path("./dbt_project/target/manifest.json"), "r") as f:
+    with Path.open(
+        Path("./dbt_project/target/manifest.json"), "r", encoding="utf-8"
+    ) as f:
         manifest = json.load(f)
 
-    with Path.open(tmp_path / "manifest.json", "w") as f:
+    with Path.open(tmp_path / "manifest.json", "w", encoding="utf-8") as f:
         json.dump(manifest, f)
 
     # Run dbt-bouncer
@@ -717,7 +745,7 @@ def test_cli_global_include(tmp_path):
         ],
     )
 
-    with Path.open(tmp_path / "coverage.json", "r") as f:
+    with Path.open(tmp_path / "coverage.json", "r", encoding="utf-8") as f:
         coverage = json.load(f)
 
     for i in [
@@ -743,14 +771,16 @@ def test_cli_include(tmp_path):
         ],
     }
 
-    with Path(tmp_path / "dbt-bouncer.yml").open("w") as f:
+    with Path(tmp_path / "dbt-bouncer.yml").open("w", encoding="utf-8") as f:
         yaml.dump(bouncer_config, f)
 
     # Manifest file
-    with Path.open(Path("./dbt_project/target/manifest.json"), "r") as f:
+    with Path.open(
+        Path("./dbt_project/target/manifest.json"), "r", encoding="utf-8"
+    ) as f:
         manifest = json.load(f)
 
-    with Path.open(tmp_path / "manifest.json", "w") as f:
+    with Path.open(tmp_path / "manifest.json", "w", encoding="utf-8") as f:
         json.dump(manifest, f)
 
     # Run dbt-bouncer
@@ -765,7 +795,7 @@ def test_cli_include(tmp_path):
         ],
     )
 
-    with Path.open(tmp_path / "coverage.json", "r") as f:
+    with Path.open(tmp_path / "coverage.json", "r", encoding="utf-8") as f:
         coverage = json.load(f)
 
     for i in [
@@ -839,14 +869,16 @@ def test_cli_materialization(manifest_check, num_checks, tmp_path):
         ],
     }
 
-    with Path(tmp_path / "dbt-bouncer.yml").open("w") as f:
+    with Path(tmp_path / "dbt-bouncer.yml").open("w", encoding="utf-8") as f:
         yaml.dump(bouncer_config, f)
 
     # Manifest file
-    with Path.open(Path("./dbt_project/target/manifest.json"), "r") as f:
+    with Path.open(
+        Path("./dbt_project/target/manifest.json"), "r", encoding="utf-8"
+    ) as f:
         manifest = json.load(f)
 
-    with Path.open(tmp_path / "manifest.json", "w") as f:
+    with Path.open(tmp_path / "manifest.json", "w", encoding="utf-8") as f:
         json.dump(manifest, f)
 
     # Run dbt-bouncer
@@ -861,7 +893,7 @@ def test_cli_materialization(manifest_check, num_checks, tmp_path):
         ],
     )
 
-    with Path.open(tmp_path / "coverage.json", "r") as f:
+    with Path.open(tmp_path / "coverage.json", "r", encoding="utf-8") as f:
         coverage = json.load(f)
 
     assert len(coverage) == num_checks
@@ -916,14 +948,16 @@ def test_cli_only(only_value, exit_code, number_of_checks_run, tmp_path):
         ],
     }
 
-    with Path(tmp_path / "dbt-bouncer.yml").open("w") as f:
+    with Path(tmp_path / "dbt-bouncer.yml").open("w", encoding="utf-8") as f:
         yaml.dump(bouncer_config, f)
 
     # Artifact files
     for file in ["catalog.json", "manifest.json", "run_results.json"]:
-        with Path.open(Path(f"./dbt_project/target/{file}"), "r") as f:
+        with Path.open(
+            Path(f"./dbt_project/target/{file}"), "r", encoding="utf-8"
+        ) as f:
             data = json.load(f)
-        with Path.open(tmp_path / file, "w") as f:
+        with Path.open(tmp_path / file, "w", encoding="utf-8") as f:
             json.dump(data, f)
 
     # Run dbt-bouncer
@@ -942,7 +976,7 @@ def test_cli_only(only_value, exit_code, number_of_checks_run, tmp_path):
     assert result.exit_code == exit_code
 
     if exit_code == 0:
-        with Path.open(tmp_path / "results.json", "r") as f:
+        with Path.open(tmp_path / "results.json", "r", encoding="utf-8") as f:
             results = json.load(f)
         assert len(results) == number_of_checks_run
 
@@ -983,14 +1017,16 @@ def test_cli_check(check_value, exit_code, number_of_checks_run, tmp_path):
         ],
     }
 
-    with Path(tmp_path / "dbt-bouncer.yml").open("w") as f:
+    with Path(tmp_path / "dbt-bouncer.yml").open("w", encoding="utf-8") as f:
         yaml.dump(bouncer_config, f)
 
     # Artifact files
     for file in ["catalog.json", "manifest.json", "run_results.json"]:
-        with Path.open(Path(f"./dbt_project/target/{file}"), "r") as f:
+        with Path.open(
+            Path(f"./dbt_project/target/{file}"), "r", encoding="utf-8"
+        ) as f:
             data = json.load(f)
-        with Path.open(tmp_path / file, "w") as f:
+        with Path.open(tmp_path / file, "w", encoding="utf-8") as f:
             json.dump(data, f)
 
     # Run dbt-bouncer
@@ -1008,7 +1044,7 @@ def test_cli_check(check_value, exit_code, number_of_checks_run, tmp_path):
     )
     assert result.exit_code == exit_code
 
-    with Path.open(tmp_path / "results.json", "r") as f:
+    with Path.open(tmp_path / "results.json", "r", encoding="utf-8") as f:
         results = json.load(f)
     assert len(results) == number_of_checks_run
 
@@ -1026,14 +1062,16 @@ def test_cli_check_deprecated_name_resolves_and_warns(caplog, tmp_path):
         ],
     }
 
-    with Path(tmp_path / "dbt-bouncer.yml").open("w") as f:
+    with Path(tmp_path / "dbt-bouncer.yml").open("w", encoding="utf-8") as f:
         yaml.dump(bouncer_config, f)
 
     # Artifact files
     for file in ["catalog.json", "manifest.json", "run_results.json"]:
-        with Path.open(Path(f"./dbt_project/target/{file}"), "r") as f:
+        with Path.open(
+            Path(f"./dbt_project/target/{file}"), "r", encoding="utf-8"
+        ) as f:
             data = json.load(f)
-        with Path.open(tmp_path / file, "w") as f:
+        with Path.open(tmp_path / file, "w", encoding="utf-8") as f:
             json.dump(data, f)
 
     # Run dbt-bouncer
@@ -1051,7 +1089,7 @@ def test_cli_check_deprecated_name_resolves_and_warns(caplog, tmp_path):
     )
     assert result.exit_code == 0
 
-    with Path.open(tmp_path / "results.json", "r") as f:
+    with Path.open(tmp_path / "results.json", "r", encoding="utf-8") as f:
         results = json.load(f)
     assert len(results) == _count_models()
 
@@ -1092,13 +1130,15 @@ def test_cli_check_combined_with_only(
         ],
     }
 
-    with Path(tmp_path / "dbt-bouncer.yml").open("w") as f:
+    with Path(tmp_path / "dbt-bouncer.yml").open("w", encoding="utf-8") as f:
         yaml.dump(bouncer_config, f)
 
     for file in ["catalog.json", "manifest.json", "run_results.json"]:
-        with Path.open(Path(f"./dbt_project/target/{file}"), "r") as f:
+        with Path.open(
+            Path(f"./dbt_project/target/{file}"), "r", encoding="utf-8"
+        ) as f:
             data = json.load(f)
-        with Path.open(tmp_path / file, "w") as f:
+        with Path.open(tmp_path / file, "w", encoding="utf-8") as f:
             json.dump(data, f)
 
     args = [
@@ -1116,7 +1156,7 @@ def test_cli_check_combined_with_only(
     result = runner.invoke(app, args)
     assert result.exit_code == exit_code
 
-    with Path.open(tmp_path / "results.json", "r") as f:
+    with Path.open(tmp_path / "results.json", "r", encoding="utf-8") as f:
         results = json.load(f)
     assert len(results) == number_of_checks_run
 
@@ -1141,7 +1181,7 @@ def test_cli_package_name(package_name, number_of_checks_run, tmp_path):
         "package_name": package_name,
     }
 
-    with Path(tmp_path / "dbt-bouncer.yml").open("w") as f:
+    with Path(tmp_path / "dbt-bouncer.yml").open("w", encoding="utf-8") as f:
         yaml.dump(bouncer_config, f)
 
     # Artifact files
@@ -1521,7 +1561,7 @@ def test_cli_package_name(package_name, number_of_checks_run, tmp_path):
         "semantic_models": {},
         "unit_tests": {},
     }
-    with Path.open(tmp_path / "manifest.json", "w") as f:
+    with Path.open(tmp_path / "manifest.json", "w", encoding="utf-8") as f:
         json.dump(manifest_data, f)
 
     # Run dbt-bouncer
@@ -1538,7 +1578,7 @@ def test_cli_package_name(package_name, number_of_checks_run, tmp_path):
     assert result.exit_code == 0
 
     if result.exit_code == 0:
-        with Path.open(tmp_path / "results.json", "r") as f:
+        with Path.open(tmp_path / "results.json", "r", encoding="utf-8") as f:
             results = json.load(f)
         assert len(results) == number_of_checks_run
 
@@ -1556,14 +1596,16 @@ def test_cli_severity_default(tmp_path):
         ],
     }
 
-    with Path(tmp_path / "dbt-bouncer.yml").open("w") as f:
+    with Path(tmp_path / "dbt-bouncer.yml").open("w", encoding="utf-8") as f:
         yaml.dump(bouncer_config, f)
 
     # Manifest file
-    with Path.open(Path("./dbt_project/target/manifest.json"), "r") as f:
+    with Path.open(
+        Path("./dbt_project/target/manifest.json"), "r", encoding="utf-8"
+    ) as f:
         manifest = json.load(f)
 
-    with Path.open(tmp_path / "manifest.json", "w") as f:
+    with Path.open(tmp_path / "manifest.json", "w", encoding="utf-8") as f:
         json.dump(manifest, f)
 
     # Run dbt-bouncer
@@ -1578,7 +1620,7 @@ def test_cli_severity_default(tmp_path):
         ],
     )
 
-    with Path.open(tmp_path / "coverage.json", "r") as f:
+    with Path.open(tmp_path / "coverage.json", "r", encoding="utf-8") as f:
         coverage = json.load(f)
 
     assert (
@@ -1606,14 +1648,16 @@ def test_cli_severity_error(tmp_path):
         ],
     }
 
-    with Path(tmp_path / "dbt-bouncer.yml").open("w") as f:
+    with Path(tmp_path / "dbt-bouncer.yml").open("w", encoding="utf-8") as f:
         yaml.dump(bouncer_config, f)
 
     # Manifest file
-    with Path.open(Path("./dbt_project/target/manifest.json"), "r") as f:
+    with Path.open(
+        Path("./dbt_project/target/manifest.json"), "r", encoding="utf-8"
+    ) as f:
         manifest = json.load(f)
 
-    with Path.open(tmp_path / "manifest.json", "w") as f:
+    with Path.open(tmp_path / "manifest.json", "w", encoding="utf-8") as f:
         json.dump(manifest, f)
 
     # Run dbt-bouncer
@@ -1628,7 +1672,7 @@ def test_cli_severity_error(tmp_path):
         ],
     )
 
-    with Path.open(tmp_path / "coverage.json", "r") as f:
+    with Path.open(tmp_path / "coverage.json", "r", encoding="utf-8") as f:
         coverage = json.load(f)
 
     assert (
@@ -1657,14 +1701,16 @@ def test_cli_severity_global_priority(tmp_path):
         "severity": "warn",
     }
 
-    with Path(tmp_path / "dbt-bouncer.yml").open("w") as f:
+    with Path(tmp_path / "dbt-bouncer.yml").open("w", encoding="utf-8") as f:
         yaml.dump(bouncer_config, f)
 
     # Manifest file
-    with Path.open(Path("./dbt_project/target/manifest.json"), "r") as f:
+    with Path.open(
+        Path("./dbt_project/target/manifest.json"), "r", encoding="utf-8"
+    ) as f:
         manifest = json.load(f)
 
-    with Path.open(tmp_path / "manifest.json", "w") as f:
+    with Path.open(tmp_path / "manifest.json", "w", encoding="utf-8") as f:
         json.dump(manifest, f)
 
     # Run dbt-bouncer
@@ -1679,7 +1725,7 @@ def test_cli_severity_global_priority(tmp_path):
         ],
     )
 
-    with Path.open(tmp_path / "coverage.json", "r") as f:
+    with Path.open(tmp_path / "coverage.json", "r", encoding="utf-8") as f:
         coverage = json.load(f)
 
     assert (
@@ -1707,14 +1753,16 @@ def test_cli_severity_global_warn(tmp_path):
         "severity": "warn",
     }
 
-    with Path(tmp_path / "dbt-bouncer.yml").open("w") as f:
+    with Path(tmp_path / "dbt-bouncer.yml").open("w", encoding="utf-8") as f:
         yaml.dump(bouncer_config, f)
 
     # Manifest file
-    with Path.open(Path("./dbt_project/target/manifest.json"), "r") as f:
+    with Path.open(
+        Path("./dbt_project/target/manifest.json"), "r", encoding="utf-8"
+    ) as f:
         manifest = json.load(f)
 
-    with Path.open(tmp_path / "manifest.json", "w") as f:
+    with Path.open(tmp_path / "manifest.json", "w", encoding="utf-8") as f:
         json.dump(manifest, f)
 
     # Run dbt-bouncer
@@ -1729,7 +1777,7 @@ def test_cli_severity_global_warn(tmp_path):
         ],
     )
 
-    with Path.open(tmp_path / "coverage.json", "r") as f:
+    with Path.open(tmp_path / "coverage.json", "r", encoding="utf-8") as f:
         coverage = json.load(f)
 
     assert (
@@ -1757,14 +1805,16 @@ def test_cli_severity_warn(tmp_path):
         ],
     }
 
-    with Path(tmp_path / "dbt-bouncer.yml").open("w") as f:
+    with Path(tmp_path / "dbt-bouncer.yml").open("w", encoding="utf-8") as f:
         yaml.dump(bouncer_config, f)
 
     # Manifest file
-    with Path.open(Path("./dbt_project/target/manifest.json"), "r") as f:
+    with Path.open(
+        Path("./dbt_project/target/manifest.json"), "r", encoding="utf-8"
+    ) as f:
         manifest = json.load(f)
 
-    with Path.open(tmp_path / "manifest.json", "w") as f:
+    with Path.open(tmp_path / "manifest.json", "w", encoding="utf-8") as f:
         json.dump(manifest, f)
 
     # Run dbt-bouncer
@@ -1779,7 +1829,7 @@ def test_cli_severity_warn(tmp_path):
         ],
     )
 
-    with Path.open(tmp_path / "coverage.json", "r") as f:
+    with Path.open(tmp_path / "coverage.json", "r", encoding="utf-8") as f:
         coverage = json.load(f)
 
     assert (
@@ -1806,15 +1856,17 @@ def test_cli_unsupported_dbt_version(caplog, tmp_path):
         ],
     }
 
-    with Path(tmp_path / "dbt-bouncer.yml").open("w") as f:
+    with Path(tmp_path / "dbt-bouncer.yml").open("w", encoding="utf-8") as f:
         yaml.dump(bouncer_config, f)
 
     # Manifest file
-    with Path.open(Path("./dbt_project/target/manifest.json"), "r") as f:
+    with Path.open(
+        Path("./dbt_project/target/manifest.json"), "r", encoding="utf-8"
+    ) as f:
         manifest = json.load(f)
 
     manifest["metadata"]["dbt_version"] = "1.9.0"
-    with Path.open(tmp_path / "manifest.json", "w") as f:
+    with Path.open(tmp_path / "manifest.json", "w", encoding="utf-8") as f:
         json.dump(manifest, f)
 
     # Run dbt-bouncer
@@ -1891,14 +1943,16 @@ def test_cli_run_command(tmp_path):
         ],
     }
 
-    with Path(tmp_path / "dbt-bouncer.yml").open("w") as f:
+    with Path(tmp_path / "dbt-bouncer.yml").open("w", encoding="utf-8") as f:
         yaml.dump(bouncer_config, f)
 
     # Manifest file
-    with Path.open(Path("./dbt_project/target/manifest.json"), "r") as f:
+    with Path.open(
+        Path("./dbt_project/target/manifest.json"), "r", encoding="utf-8"
+    ) as f:
         manifest = json.load(f)
 
-    with Path.open(tmp_path / "manifest.json", "w") as f:
+    with Path.open(tmp_path / "manifest.json", "w", encoding="utf-8") as f:
         json.dump(manifest, f)
 
     output_file = tmp_path / "output.json"

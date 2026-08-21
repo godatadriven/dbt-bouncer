@@ -336,7 +336,7 @@ invalid_confs = [
     ids=[f.stem for f, _ in invalid_confs],
 )
 def test_validate_conf_invalid(f, expectation):
-    with Path.open(f, "r") as fp:
+    with Path.open(f, "r", encoding="utf-8") as fp:
         conf = yaml.safe_load(fp)
 
     ctx = typer.Context(
@@ -450,7 +450,7 @@ valid_confs = [
     ids=[f.stem for f, _ in valid_confs],
 )
 def test_validate_conf_valid(f, expectation):
-    with Path.open(f, "r") as fp:
+    with Path.open(f, "r", encoding="utf-8") as fp:
         conf = yaml.safe_load(fp)
 
     ctx = typer.Context(
@@ -511,7 +511,7 @@ def test_lint_config_file_valid(tmp_path):
         ],
     }
     config_file = tmp_path / "dbt-bouncer.yml"
-    with Path.open(config_file, "w") as f:
+    with Path.open(config_file, "w", encoding="utf-8") as f:
         yaml.dump(config, f)
 
     issues = lint_config_file(config_file)
@@ -531,7 +531,7 @@ def test_lint_config_file_deprecated_check_name_is_not_an_error(tmp_path, caplog
         ],
     }
     config_file = tmp_path / "dbt-bouncer.yml"
-    with Path.open(config_file, "w") as f:
+    with Path.open(config_file, "w", encoding="utf-8") as f:
         yaml.dump(config, f)
 
     issues = lint_config_file(config_file)
@@ -549,7 +549,7 @@ def test_lint_config_file_missing_name(tmp_path):
         ],
     }
     config_file = tmp_path / "dbt-bouncer.yml"
-    with Path.open(config_file, "w") as f:
+    with Path.open(config_file, "w", encoding="utf-8") as f:
         yaml.dump(config, f)
 
     issues = lint_config_file(config_file)
@@ -573,7 +573,7 @@ def test_lint_config_file_blank_name_or_code(check_entry, tmp_path):
 
     config = {"manifest_checks": [check_entry]}
     config_file = tmp_path / "dbt-bouncer.yml"
-    with Path.open(config_file, "w") as f:
+    with Path.open(config_file, "w", encoding="utf-8") as f:
         yaml.dump(config, f)
 
     issues = lint_config_file(config_file)
@@ -602,7 +602,7 @@ def test_lint_config_file_non_string_name(check_entry, expected_type, tmp_path):
 
     config = {"manifest_checks": [check_entry]}
     config_file = tmp_path / "dbt-bouncer.yml"
-    with Path.open(config_file, "w") as f:
+    with Path.open(config_file, "w", encoding="utf-8") as f:
         yaml.dump(config, f)
 
     issues = lint_config_file(config_file)
@@ -617,7 +617,7 @@ def test_lint_config_file_misspelt_name_still_suggests(tmp_path):
 
     config = {"manifest_checks": [{"name": "check_model_nams"}]}
     config_file = tmp_path / "dbt-bouncer.yml"
-    with Path.open(config_file, "w") as f:
+    with Path.open(config_file, "w", encoding="utf-8") as f:
         yaml.dump(config, f)
 
     issues = lint_config_file(config_file)
@@ -632,7 +632,7 @@ def test_lint_config_file_yaml_syntax_error(tmp_path):
     from dbt_bouncer.configuration_file.validator import lint_config_file
 
     config_file = tmp_path / "dbt-bouncer.yml"
-    with Path.open(config_file, "w") as f:
+    with Path.open(config_file, "w", encoding="utf-8") as f:
         f.write("manifest_checks:\n  - name: test\n    invalid yaml: [}")
 
     issues = lint_config_file(config_file)
@@ -671,7 +671,7 @@ def test_lint_config_file_not_list(tmp_path):
         "manifest_checks": "not a list",
     }
     config_file = tmp_path / "dbt-bouncer.yml"
-    with Path.open(config_file, "w") as f:
+    with Path.open(config_file, "w", encoding="utf-8") as f:
         yaml.dump(config, f)
 
     issues = lint_config_file(config_file)
@@ -714,7 +714,7 @@ def test_lint_config_file_multiple_issues(tmp_path):
         ],
     }
     config_file = tmp_path / "dbt-bouncer.yml"
-    with Path.open(config_file, "w") as f:
+    with Path.open(config_file, "w", encoding="utf-8") as f:
         yaml.dump(config, f)
 
     issues = lint_config_file(config_file)

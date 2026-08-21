@@ -14,7 +14,7 @@ artifact_paths = [f.__str__() for f in Path("./tests/fixtures").iterdir()]
 
 @pytest.mark.parametrize("dbt_artifacts_dir", artifact_paths, ids=artifact_paths)
 def test_cli_happy_path(caplog, dbt_artifacts_dir, tmp_path):
-    with Path.open(Path("dbt-bouncer-example.yml"), "r") as f:
+    with Path.open(Path("dbt-bouncer-example.yml"), "r", encoding="utf-8") as f:
         bouncer_config = yaml.safe_load(f)
 
     bouncer_config["dbt_artifacts_dir"] = (
@@ -23,7 +23,7 @@ def test_cli_happy_path(caplog, dbt_artifacts_dir, tmp_path):
 
     config_file = Path(tmp_path / "dbt-bouncer-example.yml")
 
-    with config_file.open("w") as f:
+    with config_file.open("w", encoding="utf-8") as f:
         yaml.dump(bouncer_config, f)
 
     runner = CliRunner()
@@ -59,14 +59,16 @@ def test_cli_coverage(caplog, tmp_path):
         ],
     }
 
-    with Path(tmp_path / "dbt-bouncer.yml").open("w") as f:
+    with Path(tmp_path / "dbt-bouncer.yml").open("w", encoding="utf-8") as f:
         yaml.dump(bouncer_config, f)
 
     # Manifest file
-    with Path.open(Path("./dbt_project/target/manifest.json"), "r") as f:
+    with Path.open(
+        Path("./dbt_project/target/manifest.json"), "r", encoding="utf-8"
+    ) as f:
         manifest = json.load(f)
 
-    with Path.open(tmp_path / "manifest.json", "w") as f:
+    with Path.open(tmp_path / "manifest.json", "w", encoding="utf-8") as f:
         json.dump(manifest, f)
 
     # Run dbt-bouncer
@@ -80,7 +82,7 @@ def test_cli_coverage(caplog, tmp_path):
             tmp_path / "coverage.json",
         ],
     )
-    with Path.open(tmp_path / "coverage.json", "r") as f:
+    with Path.open(tmp_path / "coverage.json", "r", encoding="utf-8") as f:
         coverage = json.load(f)
 
     assert (tmp_path / "coverage.json").exists()
@@ -150,14 +152,16 @@ def test_cli_error_message(caplog, tmp_path):
         ],
     }
 
-    with Path(tmp_path / "dbt-bouncer.yml").open("w") as f:
+    with Path(tmp_path / "dbt-bouncer.yml").open("w", encoding="utf-8") as f:
         yaml.dump(bouncer_config, f)
 
     # Manifest file
-    with Path.open(Path("./dbt_project/target/manifest.json"), "r") as f:
+    with Path.open(
+        Path("./dbt_project/target/manifest.json"), "r", encoding="utf-8"
+    ) as f:
         manifest = json.load(f)
 
-    with Path.open(tmp_path / "manifest.json", "w") as f:
+    with Path.open(tmp_path / "manifest.json", "w", encoding="utf-8") as f:
         json.dump(manifest, f)
 
     # Run dbt-bouncer
@@ -178,12 +182,12 @@ def test_cli_error_message(caplog, tmp_path):
 
 
 def test_cli_manifest_doesnt_exist(caplog, tmp_path):
-    with Path.open(Path("dbt-bouncer-example.yml"), "r") as f:
+    with Path.open(Path("dbt-bouncer-example.yml"), "r", encoding="utf-8") as f:
         bouncer_config = yaml.safe_load(f)
 
     bouncer_config["dbt_artifacts_dir"] = "non-existent-dir/target"
 
-    with Path(tmp_path / "dbt-bouncer-example.yml").open("w") as f:
+    with Path(tmp_path / "dbt-bouncer-example.yml").open("w", encoding="utf-8") as f:
         yaml.dump(bouncer_config, f)
 
     runner = CliRunner()
