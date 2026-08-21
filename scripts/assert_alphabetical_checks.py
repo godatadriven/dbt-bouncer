@@ -9,7 +9,7 @@ def main():
     """Assert that all checks are alphabetically sorted."""
     for f in Path("src/dbt_bouncer/checks").glob("*/*.py"):
         logging.info(f"Checking {f.name}...")
-        with Path.open(f) as file:
+        with Path.open(f, encoding="utf-8") as file:
             node = ast.parse(file.read())
 
         class_names = [
