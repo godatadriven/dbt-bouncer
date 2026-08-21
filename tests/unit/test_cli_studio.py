@@ -105,6 +105,15 @@ class TestStudioCommand:
         assert "Failures" in result.output
         assert "failed" in result.output
 
+    def test_studio_missing_config_file_warns(self, tmp_path: Path):
+        """An explicit config file that does not exist warns and still runs."""
+        missing = tmp_path / "does_not_exist.yml"
+
+        result = runner.invoke(app, ["studio", "--config-file", str(missing)])
+
+        assert result.exit_code == 0
+        assert "not found" in result.output
+
     def test_studio_no_matching_checks(self):
         """A search yielding no matches shows a clear warning panel."""
         result = runner.invoke(
@@ -153,6 +162,12 @@ class TestStudioUtils:
             '[tool.dbt-bouncer]\nmanifest_checks = [{ name = "check_model_names" }]\n'
         )
         assert load_configured_checks(toml_file) == {"check_model_names"}
+
+    def test_load_configured_checks_invalid_toml(self, tmp_path: Path):
+        """Malformed TOML file returns an empty set instead of raising."""
+        invalid_toml = tmp_path / "invalid.toml"
+        invalid_toml.write_text("this is = not valid toml ][")
+        assert load_configured_checks(invalid_toml) == set()
 
     def test_filter_checks(self):
         """filter_checks filters by category and search."""

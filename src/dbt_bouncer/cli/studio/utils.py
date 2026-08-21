@@ -84,7 +84,9 @@ def load_configured_checks(config_path: Path | None) -> set[str]:
                 for item in val:
                     if isinstance(item, dict) and "name" in item:
                         configured.add(item["name"])
-    except (yaml.YAMLError, OSError) as e:
+    # `tomllib.TOMLDecodeError` inherits from `ValueError`, so malformed TOML is
+    # caught here alongside YAML and filesystem errors.
+    except (OSError, ValueError, yaml.YAMLError) as e:
         logger.warning("Failed to load configured checks from `%s`: %s", config_path, e)
         return set()
 

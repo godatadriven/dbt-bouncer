@@ -88,9 +88,17 @@ def studio(
 
     # Resolve config file if provided or if default exists
     configured_checks: set[str] = set()
-    if config_file and config_file.exists():
-        configured_checks = load_configured_checks(config_file)
-    elif config_file is None:
+    if config_file is not None:
+        if config_file.exists():
+            configured_checks = load_configured_checks(config_file)
+        else:
+            # The user explicitly requested this file, so warn rather than
+            # silently ignore it. The dashboard still lists all checks.
+            Console(stderr=True).print(
+                f"[bold yellow]Config file '{config_file}' not found. "
+                f"Showing all checks as inactive.[/bold yellow]"
+            )
+    else:
         for default_name in (
             ConfigFileName.DBT_BOUNCER_YML,
             ConfigFileName.DBT_BOUNCER_YAML,
