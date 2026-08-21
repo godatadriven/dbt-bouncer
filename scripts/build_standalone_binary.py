@@ -191,6 +191,18 @@ def main(argv: list[str] | None = None) -> int:
             )
             return test_version.returncode
 
+        # Also run --help to confirm the Typer command tree assembled correctly
+        # (subcommands registered), which --version alone does not exercise.
+        test_help = subprocess.run(
+            [str(binary_path), "--help"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if test_help.returncode != 0:
+            logger.error("Binary verification --help failed:\n%s", test_help.stderr)
+            return test_help.returncode
+
         logger.info(
             "Binary verification succeeded! Output: %s", test_version.stdout.strip()
         )

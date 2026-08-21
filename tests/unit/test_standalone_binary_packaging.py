@@ -114,6 +114,9 @@ class TestStandaloneBinaryPackaging:
                 subprocess.CompletedProcess(
                     args=[], returncode=0, stdout="dbt-bouncer 1.0.0"
                 ),
+                subprocess.CompletedProcess(
+                    args=[], returncode=0, stdout="Usage: dbt-bouncer"
+                ),
             ]
         )
         monkeypatch.setattr("subprocess.run", mock_run)
@@ -122,4 +125,5 @@ class TestStandaloneBinaryPackaging:
 
         exit_code = main(["--output-dir", str(tmp_path), "--verify"])
         assert exit_code == 0
-        assert mock_run.call_count == 2
+        # build (PyInstaller) + --version + --help smoke tests
+        assert mock_run.call_count == 3

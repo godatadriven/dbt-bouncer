@@ -22,6 +22,11 @@ jobs:
     permissions:
       contents: write
     runs-on: ${{ matrix.os }}
+    # GitHub's Intel macOS (macos-13) runners are being retired and can queue
+    # without ever starting. The Intel build is marked experimental so it never
+    # blocks the workflow: it fails fast and is tolerated when no runner exists.
+    continue-on-error: ${{ matrix.experimental || false }}
+    timeout-minutes: ${{ matrix.experimental && 20 || 30 }}
     strategy:
       fail-fast: false
       matrix:
@@ -35,6 +40,7 @@ jobs:
           - os: macos-13
             target: darwin-x86_64
             binary_name: dbt-bouncer-darwin-x86_64
+            experimental: true
           - os: windows-2025
             target: windows-x86_64
             binary_name: dbt-bouncer-windows-x86_64.exe
@@ -71,5 +77,7 @@ jobs:
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Pass the release tag through an env var to avoid shell injection.
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
         run: |
-          gh release upload ${{ github.event.release.tag_name }} dist/${{ matrix.binary_name }} --clobber
+          gh release upload "$RELEASE_TAG" dist/${{ matrix.binary_name }} --clobber
