@@ -59,6 +59,7 @@ class ExitCode(IntEnum):
     CHECK_ERRORS = 1
     CONFIG_ERROR = 2
     ARTIFACT_ERROR = 3
+    NO_CHECKS_RUN = 4
 
 
 class ListOutputFormat(StrEnum):
