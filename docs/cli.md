@@ -129,6 +129,12 @@ dbt-bouncer run --output-format junit --output-file results.xml
 dbt-bouncer run --output-format sarif --output-file results.sarif
 ```
 
+!!! warning "Do not parse the console table"
+
+    The console results table is for humans. It truncates check names to fit the terminal width. Do not parse this table in scripts.
+
+    For machine-readable output, set `--output-file` and select a structured `--output-format`. The supported formats are `csv`, `json`, `junit`, `sarif`, and `tap`. Parse the output file instead of the console table.
+
 #### `--output-only-failures`
 
 **Type:** Flag

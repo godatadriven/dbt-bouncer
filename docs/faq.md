@@ -149,6 +149,18 @@ The goal of a CI pipeline is to test the changes in a pull request but also to p
 
 By using this approach, and combining with your own unique constraints and desires, `dbt-bouncer` can be used efficiently as part of your CI pipeline.
 
+## How do I get machine-readable results to parse in a script?
+
+Do not parse the console results table. That table is for humans. It truncates check names to fit the terminal width.
+
+Set `--output-file` and select a structured `--output-format`. The supported formats are `csv`, `json`, `junit`, `sarif`, and `tap`.
+
+```shell
+dbt-bouncer run --output-file results/check-results.json --output-format json
+```
+
+Then read the output file in your script. See the [CLI reference](./cli.md) for full option details.
+
 ## How to set up `dbt-bouncer` in a monorepo?
 
 A monorepo may consist of one directory with a dbt project and other directories with unrelated code. It may be desired for `dbt-bouncer` to be configured from the root directory. Sample directory tree:
