@@ -13,6 +13,7 @@ with log lines and progress output.
 from __future__ import annotations
 
 import json
+import logging
 import shutil
 
 # The subprocess module is used deliberately: an in-process run would corrupt
@@ -255,6 +256,19 @@ def build_server() -> FastMCP:
 
     """
     from mcp.server.fastmcp import FastMCP
+
+    # Resolve a forward reference in FastMCP's own `Settings` model. Without
+    # this, pydantic-settings emits an IncompleteFieldDefinitionWarning for the
+    # `lifespan` field when the server is built (upstream mcp issue). The rebuild
+    # is a no-op if the reference already resolves. Guarded so a future mcp
+    # refactor that renames or removes the model cannot break server startup.
+    try:
+        from mcp.server.fastmcp.server import Settings
+
+        Settings.model_rebuild()
+    except Exception:  # pragma: no cover - defensive against mcp internals
+        # The warning is cosmetic, so a failed rebuild must not stop the server.
+        logging.debug("FastMCP Settings.model_rebuild() failed.", exc_info=True)
 
     server = FastMCP(
         "dbt-bouncer",
