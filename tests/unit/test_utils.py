@@ -503,10 +503,8 @@ class CheckCustomExample:
         assert len(check_objects) == 1
         assert check_objects[0].__name__ == "CheckCustomExample"
 
-    def test_warns_on_invalid_check_file(self, tmp_path, caplog):
-        """Test that a warning is logged and the file is skipped when a custom check file is invalid."""
-        import logging
-
+    def test_raises_on_invalid_check_file(self, tmp_path):
+        """Test that a DbtBouncerConfigError is raised when a custom check file fails to import."""
         from dbt_bouncer.utils import _load_custom_checks
 
         custom_dir = tmp_path / "custom_checks"
@@ -517,12 +515,24 @@ class CheckCustomExample:
         check_file.write_text("this is not valid python syntax !!!")
 
         check_objects: list[Any] = []
-        with caplog.at_level(logging.WARNING):
-            # Should not raise — the file is skipped with a warning
+        # A configured custom check that cannot import must fail the run.
+        with pytest.raises(DbtBouncerConfigError, match=r"check_broken\.py"):
             _load_custom_checks(custom_dir, check_objects)
 
-        assert any("check_broken.py" in msg for msg in caplog.messages)
-        assert any("skipped" in msg.lower() for msg in caplog.messages)
+    def test_raises_on_broken_import_in_check_file(self, tmp_path):
+        """Test that a DbtBouncerConfigError is raised when a custom check file has a broken import."""
+        from dbt_bouncer.utils import _load_custom_checks
+
+        custom_dir = tmp_path / "custom_checks"
+        manifest_dir = custom_dir / "manifest"
+        manifest_dir.mkdir(parents=True)
+
+        check_file = manifest_dir / "check_bad_import.py"
+        check_file.write_text("import a_module_that_does_not_exist\n")
+
+        check_objects: list[Any] = []
+        with pytest.raises(DbtBouncerConfigError, match=r"check_bad_import\.py"):
+            _load_custom_checks(custom_dir, check_objects)
 
     def test_warns_on_top_level_check_file(self, tmp_path, caplog):
         """Test that a top-level .py file warns and is not loaded, while a subdirectory check still loads."""
