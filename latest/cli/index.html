@@ -1267,6 +1267,11 @@
 </span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="c1"># Output as SARIF for GitHub Code Scanning</span>
 </span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>dbt-bouncer<span class="w"> </span>run<span class="w"> </span>--output-format<span class="w"> </span>sarif<span class="w"> </span>--output-file<span class="w"> </span>results.sarif
 </span></code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Do not parse the console table</p>
+<p>The console results table is for humans. It truncates check names to fit the terminal width. Do not parse this table in scripts.</p>
+<p>For machine-readable output, set <code>--output-file</code> and select a structured <code>--output-format</code>. The supported formats are <code>csv</code>, <code>json</code>, <code>junit</code>, <code>sarif</code>, and <code>tap</code>. Parse the output file instead of the console table.</p>
+</div>
 <h4 id="-output-only-failures"><code>--output-only-failures</code><a class="headerlink" href="#-output-only-failures" title="Permanent link">#</a></h4>
 <p><strong>Type:</strong> Flag
 <strong>Default:</strong> False
