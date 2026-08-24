@@ -634,6 +634,112 @@ def test_runner_success():
     assert results[0] == 0
 
 
+def _no_match_context(*, dry_run: bool) -> BouncerContext:
+    """Build a context whose model check matches no resources.
+
+    The config has one model check, but the ``models`` list is empty, so the
+    match phase produces zero checks to run.
+
+    Returns:
+        BouncerContext: A ready-to-run context with no matching resources.
+
+    """
+    from dbt_bouncer.configuration_file.parser import (  # ruff: ignore[lowercase-imported-as-non-lowercase]
+        create_bouncer_conf_class as DbtBouncerConf,
+    )
+
+    DbtBouncerConf = DbtBouncerConf()  # ruff: ignore[non-lowercase-variable-in-function]
+    return BouncerContext.model_construct(
+        **{
+            "bouncer_config": DbtBouncerConf(
+                **{
+                    "manifest_checks": [
+                        {
+                            "exclude": None,
+                            "include": None,
+                            "index": 0,
+                            "name": "check_model_description_populated",
+                        },
+                    ]
+                }
+            ),
+            "catalog_nodes": [],
+            "catalog_sources": [],
+            "check_categories": ["manifest_checks"],
+            "create_pr_comment_file": False,
+            "dry_run": dry_run,
+            "exposures": [],
+            "macros": [],
+            "manifest_obj": SimpleNamespace(
+                manifest=wrap_dict(
+                    {
+                        "child_map": {},
+                        "disabled": {},
+                        "docs": {},
+                        "exposures": {},
+                        "group_map": {},
+                        "groups": {},
+                        "macros": {},
+                        "metadata": {
+                            "dbt_schema_version": "https://schemas.getdbt.com/dbt/manifest/v12.json",
+                            "project_name": "dbt_bouncer_test_project",
+                        },
+                        "metrics": {},
+                        "nodes": {},
+                        "parent_map": {},
+                        "saved_queries": {},
+                        "selectors": {},
+                        "semantic_models": {},
+                        "sources": {},
+                        "unit_tests": {},
+                    },
+                )
+            ),
+            "models": [],
+            "output_file": None,
+            "output_format": "json",
+            "output_only_failures": False,
+            "run_results": [],
+            "seeds": [],
+            "semantic_models": [],
+            "snapshots": [],
+            "show_all_failures": False,
+            "sources": [],
+            "tests": [],
+            "unit_tests": [],
+        }
+    )
+
+
+def test_runner_no_checks_run(caplog):
+    """A run that matches no resources exits with `NO_CHECKS_RUN`.
+
+    A config that matches nothing is almost always a mistake, so the runner
+    must not hide it behind a green "all checks passed" summary.
+    """
+    from dbt_bouncer.enums import ExitCode
+
+    configure_console_logging(verbosity=0)
+    results = runner(ctx=_no_match_context(dry_run=False))
+
+    assert results[0] == ExitCode.NO_CHECKS_RUN
+    assert results[1] == []
+    assert "No checks were run" in caplog.text
+
+
+def test_runner_no_checks_run_dry_run():
+    """A dry run that matches no resources keeps the existing behaviour.
+
+    The dry-run path reports the empty plan and returns `SUCCESS`; it must not
+    trip the `NO_CHECKS_RUN` guard.
+    """
+    from dbt_bouncer.enums import ExitCode
+
+    results = runner(ctx=_no_match_context(dry_run=True))
+
+    assert results[0] == ExitCode.SUCCESS
+
+
 def test_runner_windows(caplog, tmp_path):
     configure_console_logging(verbosity=0)
     from dbt_bouncer.configuration_file.parser import (  # ruff: ignore[lowercase-imported-as-non-lowercase]

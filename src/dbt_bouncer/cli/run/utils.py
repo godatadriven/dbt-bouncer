@@ -121,7 +121,8 @@ def run_bouncer(
 
     Returns:
         int: `ExitCode.SUCCESS` if all checks passed, `ExitCode.CHECK_ERRORS` if one
-            or more checks failed.
+            or more checks failed, `ExitCode.NO_CHECKS_RUN` if the config matched no
+            resources and no checks ran.
 
     Raises:
         DbtBouncerConfigError: If `--only` contains an invalid value, or the config

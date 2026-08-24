@@ -893,10 +893,15 @@ def test_cli_materialization(manifest_check, num_checks, tmp_path):
         ],
     )
 
-    with Path.open(tmp_path / "coverage.json", "r", encoding="utf-8") as f:
-        coverage = json.load(f)
+    # A config that matches no resources exits before writing an output file, so
+    # only assert on the coverage file when at least one check ran.
+    if num_checks:
+        with Path.open(tmp_path / "coverage.json", "r", encoding="utf-8") as f:
+            coverage = json.load(f)
 
-    assert len(coverage) == num_checks
+        assert len(coverage) == num_checks
+    else:
+        assert not (tmp_path / "coverage.json").exists()
 
 
 NUM_CATALOG_CHECKS = _catalog_checks_count(r"^models/marts")
@@ -1101,10 +1106,10 @@ def test_cli_check_deprecated_name_resolves_and_warns(caplog, tmp_path):
     [
         # --check filters within the --only category
         ("check_model_access", "manifest_checks", 0, NUM_MANIFEST_CHECKS),
-        # --check name not in the --only category: zero checks run
-        ("check_run_results_max_execution_time", "manifest_checks", 0, 0),
-        # Unknown check name: zero checks run (with warning)
-        ("nonexistent_check", "", 0, 0),
+        # --check name not in the --only category: zero checks run, exit 4
+        ("check_run_results_max_execution_time", "manifest_checks", 4, 0),
+        # Unknown check name: zero checks run (with warning), exit 4
+        ("nonexistent_check", "", 4, 0),
     ],
 )
 def test_cli_check_combined_with_only(
@@ -1156,9 +1161,14 @@ def test_cli_check_combined_with_only(
     result = runner.invoke(app, args)
     assert result.exit_code == exit_code
 
-    with Path.open(tmp_path / "results.json", "r", encoding="utf-8") as f:
-        results = json.load(f)
-    assert len(results) == number_of_checks_run
+    # A run that matches no checks exits before writing an output file, so only
+    # assert on the results file when at least one check ran.
+    if number_of_checks_run:
+        with Path.open(tmp_path / "results.json", "r", encoding="utf-8") as f:
+            results = json.load(f)
+        assert len(results) == number_of_checks_run
+    else:
+        assert not (tmp_path / "results.json").exists()
 
 
 @pytest.mark.parametrize(

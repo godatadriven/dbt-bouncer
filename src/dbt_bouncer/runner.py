@@ -1,9 +1,11 @@
 """Assemble and run all checks."""
 
+import logging
 import operator
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, NotRequired, TypedDict
 
+from dbt_bouncer.enums import ExitCode
 from dbt_bouncer.executor import Executor
 from dbt_bouncer.reporting.reporter import Reporter
 from dbt_bouncer.utils import (
@@ -394,6 +396,17 @@ def runner(
 
     """
     checks_to_run = _assemble_checks_to_run(ctx)
+
+    # A config that matches no resources is almost always a mistake. Exit
+    # non-zero so the mistake is not hidden by a green "all checks passed"
+    # summary. The dry-run path is exempt; it reports the empty plan later.
+    if not checks_to_run and not ctx.dry_run:
+        logging.error(
+            "No checks were run. A config that matches no resources exits without "
+            "running anything. Check the `package_name`, the config file, the dbt "
+            "artifacts, and any `--check` or `--only` filters."
+        )
+        return (ExitCode.NO_CHECKS_RUN, [])
 
     del (
         ctx.models,
