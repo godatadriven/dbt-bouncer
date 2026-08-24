@@ -305,7 +305,7 @@ def _load_custom_checks(
             appended.
 
     Raises:
-        Warns if a custom check file fails to load (the file is skipped).
+        DbtBouncerConfigError: If a custom check file fails to import.
 
     """
     logging.debug(f"{custom_checks_dir=}")
@@ -340,11 +340,14 @@ def _load_custom_checks(
                 OSError,
                 SyntaxError,
             ) as e:
-                logging.warning(
-                    f"Failed to load custom check file `{check_file}`: {e}. "
-                    "This file will be skipped."
-                )
+                # A configured custom check that cannot import must fail the run.
+                # A silent skip keeps the run green while the check never loads.
                 logging.debug("Custom check load traceback:", exc_info=True)
+                raise DbtBouncerConfigError(
+                    f"Failed to load custom check file `{check_file}`: {e}. "
+                    "A custom check that cannot be imported must not be skipped "
+                    "silently."
+                ) from e
     else:
         logging.warning(
             f"Custom checks directory `{custom_checks_dir}` does not exist."
