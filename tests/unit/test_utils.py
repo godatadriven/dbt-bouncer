@@ -524,6 +524,46 @@ class CheckCustomExample:
         assert any("check_broken.py" in msg for msg in caplog.messages)
         assert any("skipped" in msg.lower() for msg in caplog.messages)
 
+    def test_warns_on_top_level_check_file(self, tmp_path, caplog):
+        """Test that a top-level .py file warns and is not loaded, while a subdirectory check still loads."""
+        import logging
+
+        from dbt_bouncer.utils import _load_custom_checks
+
+        custom_dir = tmp_path / "custom_checks"
+        manifest_dir = custom_dir / "manifest"
+        manifest_dir.mkdir(parents=True)
+
+        # Valid check in a subdirectory — must be loaded.
+        subdir_check = manifest_dir / "check_custom.py"
+        subdir_check.write_text(
+            """
+class CheckCustomExample:
+    pass
+"""
+        )
+
+        # Misplaced check at the top level — must be skipped with a warning.
+        top_level_check = custom_dir / "check_top_level.py"
+        top_level_check.write_text(
+            """
+class CheckTopLevelExample:
+    pass
+"""
+        )
+
+        check_objects: list[Any] = []
+        with caplog.at_level(logging.WARNING):
+            _load_custom_checks(custom_dir, check_objects)
+
+        # The subdirectory check is loaded; the top-level check is not.
+        loaded_names = [obj.__name__ for obj in check_objects]
+        assert loaded_names == ["CheckCustomExample"]
+
+        # A warning names the skipped top-level file.
+        assert any("check_top_level.py" in msg for msg in caplog.messages)
+        assert any("subdirectory" in msg for msg in caplog.messages)
+
     def test_warns_on_nonexistent_directory(self, tmp_path, caplog):
         """Test that a warning is logged when the custom check directory does not exist."""
         import logging

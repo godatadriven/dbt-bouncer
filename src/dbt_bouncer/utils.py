@@ -315,6 +315,18 @@ def _load_custom_checks(
         ]
         logging.debug(f"{custom_check_files=}")
 
+        # Files placed directly in the top level are not discovered by the
+        # `*/*.py` glob. Warn the user so these files are not silently ignored.
+        top_level = [f for f in custom_checks_dir.glob("*.py") if f.is_file()]
+        if top_level:
+            top_level_names = [str(f) for f in top_level]
+            logging.warning(
+                f"Found Python file(s) directly in the custom checks directory "
+                f"that were not loaded: {top_level_names}. A custom check file "
+                f"must be in a subdirectory (for example "
+                f"`{custom_checks_dir}/models/my_check.py`) to be discovered."
+            )
+
         for check_file in custom_check_files:
             # Use a unique module name to avoid conflicts
             unique_module_name = (
