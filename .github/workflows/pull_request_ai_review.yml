@@ -44,8 +44,98 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Analyse PR
+      # Build the review prompt once and store it in the environment. The
+      # analyse step and its retry both read `REVIEW_PROMPT`, so there is one
+      # copy of the prompt, not two. The runtime values (PR_CHANGED_FILES,
+      # PR_BASE, PR_HEAD_SHA) are interpolated here, after the export step set
+      # them.
+      - name: Build review prompt
+        id: build_prompt
         if: steps.export.outputs.skip != 'true'
+        run: |-
+          {
+            echo "REVIEW_PROMPT<<REVIEW_PROMPT_DELIM"
+            cat <<'REVIEW_PROMPT_BODY'
+          You are a senior Python engineer reviewing a PR for dbt-bouncer, a tool that
+          enforces conventions for dbt projects by running validation checks against dbt
+          artifacts. This PR changes ${{ env.PR_CHANGED_FILES }} files.
+
+          Analyse the full diff for this PR by running:
+            git diff origin/${{ env.PR_BASE }}...${{ env.PR_HEAD_SHA }}
+
+          For each file, determine what changed and WHY.
+
+          ## Review Criteria
+          Check for these issues and report them in the Review Findings section:
+          1. **Python Quality**: Type hints on function signatures, clean imports, no dead code, proper use of Pydantic models and `Field()`.
+          2. **Check Structure**: Proper use of `@check` decorator or `BaseCheck` subclass, correct `iterate_over_value` annotations, `fail()` or `DbtBouncerFailedCheckError` usage.
+          3. **Test Coverage**: Parametrised tests with happy + unhappy paths, proper fixture usage, edge cases covered.
+          4. **Security**: No hardcoded secrets, safe deserialization (no `yaml.unsafe_load`, no `pickle`), no command injection.
+          5. **Style**: ruff/ruff-format compliance, snake_case naming, alphabetical ordering of lists and config sections.
+          6. **Breaking Changes**: Config schema changes, removed/renamed checks, changed function signatures.
+          7. **Documentation**: Docstrings on public functions with Parameters/Returns sections, updated AGENTS.md if architecture changed.
+          8. **Cross-file version consistency**: When a PR bumps a version-pinned tool (e.g. `bencherdev/bencher` in workflow files), grep the entire repo for the OLD version string to find other references (Dockerfiles, env vars, docs). Flag any stale occurrences as 🔴 **Issue**.
+          9. **Skill version bumps**: If the PR changes any file under `skills/` (for example a `SKILL.md` or a `references/` file), confirm that the `version` field in `.claude-plugin/plugin.json` is bumped in the same PR. If it is not, flag as 🔴 **Issue**.
+
+          ## Severity Levels
+          Use these severity levels for review findings:
+          - 🔴 **Issue** — bugs, security problems, missing tests on new checks, breaking changes without migration notes
+          - 🟡 **Suggestion** — performance improvements, optional tests, documentation gaps, style nits
+          - ✅ **All clear** — explicitly state when a category has no issues (proves it was checked)
+
+          ## Adaptive Collapsibility
+          If this PR changes 4 or more files, wrap the "File Changes" table in a `<details>` block:
+          ```
+          <details>
+          <summary>📄 File Changes (N files)</summary>
+          | File | Change | Description |
+          ...
+          </details>
+          ```
+          If fewer than 4 files, show the "File Changes" table expanded (no `<details>` wrapper).
+          For the "Review Findings" section: NEVER collapse it if it contains any 🔴 or 🟡 items —
+          those must always be immediately visible. Only wrap it in a `<details>` block if it
+          contains no issues (only ✅ items).
+
+          ## Output Format
+          You MUST write your analysis to the file `/tmp/ai-pr-review-comment.md` using the Write tool.
+          The file must start with the exact string `<!-- ai-pr-review-marker -->`.
+          Write the complete markdown to this file — do not output it to the conversation.
+          Use this template:
+          <!-- ai-pr-review-marker -->
+          ## 🔍 AI PR Review
+          > **One-sentence TL;DR of the PR's purpose and business value.**
+
+          **Type:** `feature` | `bugfix` | `refactor` | `docs` | `chore` | `test`
+
+          ### Summary
+          2-3 sentences explaining what changed and **why**. Focus on intent and business value,
+          not implementation details. Explain how files relate to each other.
+
+          ### File Changes
+          | File | Change | Description |
+          |------|--------|-------------|
+          | `path/to/file` | New/Modified/Deleted | One-line description of what changed in this file |
+
+          ### Review Findings
+          - 🔴 **Issue:** file:line — description
+          - 🟡 **Suggestion:** file:line — description
+          - ✅ No issues with [category]
+          (If no issues at all, write "✅ No issues found. Reviewed for Python quality, check structure, tests, security, style, breaking changes, and documentation.")
+          ---
+          *Generated by [Claude Code](https://github.com/anthropics/claude-code-action)*
+          REVIEW_PROMPT_BODY
+            echo "REVIEW_PROMPT_DELIM"
+          } >> "$GITHUB_ENV"
+
+      # The Anthropic API can return a transient 529 (overloaded). Run the
+      # review, then retry once if the first attempt fails. Both attempts are
+      # non-fatal (continue-on-error), so a sustained overload falls back to the
+      # summary comment below instead of failing the whole workflow.
+      - name: Analyse PR
+        id: analyse
+        if: steps.export.outputs.skip != 'true'
+        continue-on-error: true
         uses: anthropics/claude-code-action@2f6ae6dec5e61533cbcb273c336448960b2c6a06 # v1
         with:
           allowed_bots: "dependabot"
@@ -54,75 +144,26 @@ jobs:
           claude_args: >-
             --model claude-opus-4-6
             --allowedTools 'Bash(git diff*),Bash(git log*),Bash(git show*),Read,Glob,Grep,Write'
-          prompt: |-
-            You are a senior Python engineer reviewing a PR for dbt-bouncer, a tool that
-            enforces conventions for dbt projects by running validation checks against dbt
-            artifacts. This PR changes ${{ env.PR_CHANGED_FILES }} files.
+          prompt: ${{ env.REVIEW_PROMPT }}
 
-            Analyse the full diff for this PR by running:
-              git diff origin/${{ env.PR_BASE }}...${{ env.PR_HEAD_SHA }}
+      # Give a transient overload time to clear before the second attempt.
+      - name: Wait before AI review retry
+        if: steps.export.outputs.skip != 'true' && steps.analyse.outcome == 'failure'
+        run: sleep 20
 
-            For each file, determine what changed and WHY.
-
-            ## Review Criteria
-            Check for these issues and report them in the Review Findings section:
-            1. **Python Quality**: Type hints on function signatures, clean imports, no dead code, proper use of Pydantic models and `Field()`.
-            2. **Check Structure**: Proper use of `@check` decorator or `BaseCheck` subclass, correct `iterate_over_value` annotations, `fail()` or `DbtBouncerFailedCheckError` usage.
-            3. **Test Coverage**: Parametrised tests with happy + unhappy paths, proper fixture usage, edge cases covered.
-            4. **Security**: No hardcoded secrets, safe deserialization (no `yaml.unsafe_load`, no `pickle`), no command injection.
-            5. **Style**: ruff/ruff-format compliance, snake_case naming, alphabetical ordering of lists and config sections.
-            6. **Breaking Changes**: Config schema changes, removed/renamed checks, changed function signatures.
-            7. **Documentation**: Docstrings on public functions with Parameters/Returns sections, updated AGENTS.md if architecture changed.
-            8. **Cross-file version consistency**: When a PR bumps a version-pinned tool (e.g. `bencherdev/bencher` in workflow files), grep the entire repo for the OLD version string to find other references (Dockerfiles, env vars, docs). Flag any stale occurrences as 🔴 **Issue**.
-            9. **Skill version bumps**: If the PR changes any file under `skills/` (for example a `SKILL.md` or a `references/` file), confirm that the `version` field in `.claude-plugin/plugin.json` is bumped in the same PR. If it is not, flag as 🔴 **Issue**.
-
-            ## Severity Levels
-            Use these severity levels for review findings:
-            - 🔴 **Issue** — bugs, security problems, missing tests on new checks, breaking changes without migration notes
-            - 🟡 **Suggestion** — performance improvements, optional tests, documentation gaps, style nits
-            - ✅ **All clear** — explicitly state when a category has no issues (proves it was checked)
-
-            ## Adaptive Collapsibility
-            If this PR changes 4 or more files, wrap the "File Changes" table in a `<details>` block:
-            ```
-            <details>
-            <summary>📄 File Changes (N files)</summary>
-            | File | Change | Description |
-            ...
-            </details>
-            ```
-            If fewer than 4 files, show the "File Changes" table expanded (no `<details>` wrapper).
-            For the "Review Findings" section: NEVER collapse it if it contains any 🔴 or 🟡 items —
-            those must always be immediately visible. Only wrap it in a `<details>` block if it
-            contains no issues (only ✅ items).
-
-            ## Output Format
-            You MUST write your analysis to the file `/tmp/ai-pr-review-comment.md` using the Write tool.
-            The file must start with the exact string `<!-- ai-pr-review-marker -->`.
-            Write the complete markdown to this file — do not output it to the conversation.
-            Use this template:
-            <!-- ai-pr-review-marker -->
-            ## 🔍 AI PR Review
-            > **One-sentence TL;DR of the PR's purpose and business value.**
-
-            **Type:** `feature` | `bugfix` | `refactor` | `docs` | `chore` | `test`
-
-            ### Summary
-            2-3 sentences explaining what changed and **why**. Focus on intent and business value,
-            not implementation details. Explain how files relate to each other.
-
-            ### File Changes
-            | File | Change | Description |
-            |------|--------|-------------|
-            | `path/to/file` | New/Modified/Deleted | One-line description of what changed in this file |
-
-            ### Review Findings
-            - 🔴 **Issue:** file:line — description
-            - 🟡 **Suggestion:** file:line — description
-            - ✅ No issues with [category]
-            (If no issues at all, write "✅ No issues found. Reviewed for Python quality, check structure, tests, security, style, breaking changes, and documentation.")
-            ---
-            *Generated by [Claude Code](https://github.com/anthropics/claude-code-action)*
+      - name: Analyse PR (retry)
+        id: analyse_retry
+        if: steps.export.outputs.skip != 'true' && steps.analyse.outcome == 'failure'
+        continue-on-error: true
+        uses: anthropics/claude-code-action@2f6ae6dec5e61533cbcb273c336448960b2c6a06 # v1
+        with:
+          allowed_bots: "dependabot"
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ secrets.PAT_GITHUB }}
+          claude_args: >-
+            --model claude-opus-4-6
+            --allowedTools 'Bash(git diff*),Bash(git log*),Bash(git show*),Read,Glob,Grep,Write'
+          prompt: ${{ env.REVIEW_PROMPT }}
 
       - name: Post or update review comment
         if: always() && steps.export.outputs.skip != 'true'
