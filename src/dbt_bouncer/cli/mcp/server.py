@@ -13,6 +13,7 @@ with log lines and progress output.
 from __future__ import annotations
 
 import json
+import logging
 import shutil
 
 # The subprocess module is used deliberately: an in-process run would corrupt
@@ -265,9 +266,9 @@ def build_server() -> FastMCP:
         from mcp.server.fastmcp.server import Settings
 
         Settings.model_rebuild()
-    # Defensive against mcp internals changing; the warning is cosmetic.
-    except Exception:  # ruff: ignore[try-except-pass] # nosec B110 # pragma: no cover
-        pass
+    except Exception:  # pragma: no cover - defensive against mcp internals
+        # The warning is cosmetic, so a failed rebuild must not stop the server.
+        logging.debug("FastMCP Settings.model_rebuild() failed.", exc_info=True)
 
     server = FastMCP(
         "dbt-bouncer",
