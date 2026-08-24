@@ -256,6 +256,19 @@ def build_server() -> FastMCP:
     """
     from mcp.server.fastmcp import FastMCP
 
+    # Resolve a forward reference in FastMCP's own `Settings` model. Without
+    # this, pydantic-settings emits an IncompleteFieldDefinitionWarning for the
+    # `lifespan` field when the server is built (upstream mcp issue). The rebuild
+    # is a no-op if the reference already resolves. Guarded so a future mcp
+    # refactor that renames or removes the model cannot break server startup.
+    try:
+        from mcp.server.fastmcp.server import Settings
+
+        Settings.model_rebuild()
+    # Defensive against mcp internals changing; the warning is cosmetic.
+    except Exception:  # ruff: ignore[try-except-pass] # nosec B110 # pragma: no cover
+        pass
+
     server = FastMCP(
         "dbt-bouncer",
         instructions=(
