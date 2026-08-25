@@ -16,6 +16,78 @@ from dbt_bouncer.utils import (
 )
 
 
+def _test_kwargs(test_meta):
+    """Return the `kwargs` mapping of a test's metadata (dict or object).
+
+    Returns:
+        dict | object: The kwargs, or an empty dict if absent.
+
+    """
+    return getattr(test_meta, "kwargs", {}) or {}
+
+
+def _kwargs_value(kwargs, key):
+    """Read ``key`` from test kwargs that may be a dict or an object.
+
+    Returns:
+        str: The value, or an empty string if absent.
+
+    """
+    if isinstance(kwargs, dict):
+        return kwargs.get(key, "")
+    return getattr(kwargs, key, "")
+
+
+def _relationship_test_metadata(model_unique_id, ctx):
+    """Return the `relationships` test metadata attached to a model.
+
+    Returns:
+        list: The relationships test-metadata objects.
+
+    """
+    relationship_tests = []
+    for test in ctx.tests_by_attached_node.get(model_unique_id, []):
+        test_metadata = getattr(test, "test_metadata", None)
+        if test_metadata and getattr(test_metadata, "name", "") == "relationships":
+            relationship_tests.append(test_metadata)
+    return relationship_tests
+
+
+def _relationship_column_failure(
+    col_name, relationship_tests, target_column_pattern, target_model_pattern
+):
+    """Return why a column fails its relationships-test requirement, else ``None``.
+
+    Returns:
+        str | None: The failure reason, or ``None`` if the column passes.
+
+    """
+    matching_test = None
+    for test_meta in relationship_tests:
+        if _kwargs_value(_test_kwargs(test_meta), "column_name") == col_name:
+            matching_test = test_meta
+            break
+
+    if matching_test is None:
+        return "no relationships test found"
+
+    kwargs = _test_kwargs(matching_test)
+    target_field = _kwargs_value(kwargs, "field")
+    target_to = _kwargs_value(kwargs, "to")
+
+    if target_column_pattern and not re.search(target_column_pattern, target_field):
+        return f'target column "{target_field}" does not match pattern "{target_column_pattern}"'
+
+    if target_model_pattern:
+        # Extract the model name from ref('model_name') or source('source', 'table').
+        ref_match = re.search(r"ref\(['\"](\w+)['\"]\)", target_to)
+        target_model_name = ref_match.group(1) if ref_match else target_to
+        if not re.search(target_model_pattern, target_model_name):
+            return f'target model "{target_model_name}" does not match pattern "{target_model_pattern}"'
+
+    return None
+
+
 @check(code="MO015")
 def check_model_columns_have_relationship_tests(
     model,
@@ -64,55 +136,20 @@ def check_model_columns_have_relationship_tests(
     columns = model.columns or {}
     failing_columns: dict[str, str] = {}
 
-    # Find all relationships tests attached to this model
-    relationship_tests = []
-    for test in ctx.tests_by_attached_node.get(model.unique_id, []):
-        test_metadata = getattr(test, "test_metadata", None)
-        if test_metadata and getattr(test_metadata, "name", "") == "relationships":
-            relationship_tests.append(test_metadata)
+    relationship_tests = _relationship_test_metadata(model.unique_id, ctx)
 
     for col_name in columns:
         if not re.search(column_name_pattern, col_name):
             continue
 
-        # Find a relationships test for this column
-        matching_test = None
-        for test_meta in relationship_tests:
-            kwargs = getattr(test_meta, "kwargs", {}) or {}
-            if isinstance(kwargs, dict):
-                test_col = kwargs.get("column_name", "")
-            else:
-                test_col = getattr(kwargs, "column_name", "")
-            if test_col == col_name:
-                matching_test = test_meta
-                break
-
-        if matching_test is None:
-            failing_columns[col_name] = "no relationships test found"
-            continue
-
-        kwargs = getattr(matching_test, "kwargs", {}) or {}
-        if isinstance(kwargs, dict):
-            target_field = kwargs.get("field", "")
-            target_to = kwargs.get("to", "")
-        else:
-            target_field = getattr(kwargs, "field", "")
-            target_to = getattr(kwargs, "to", "")
-
-        if target_column_pattern and not re.search(target_column_pattern, target_field):
-            failing_columns[col_name] = (
-                f'target column "{target_field}" does not match pattern "{target_column_pattern}"'
-            )
-            continue
-
-        if target_model_pattern:
-            # Extract model name from ref('model_name') or source('source', 'table')
-            ref_match = re.search(r"ref\(['\"](\w+)['\"]\)", target_to)
-            target_model_name = ref_match.group(1) if ref_match else target_to
-            if not re.search(target_model_pattern, target_model_name):
-                failing_columns[col_name] = (
-                    f'target model "{target_model_name}" does not match pattern "{target_model_pattern}"'
-                )
+        reason = _relationship_column_failure(
+            col_name,
+            relationship_tests,
+            target_column_pattern,
+            target_model_pattern,
+        )
+        if reason is not None:
+            failing_columns[col_name] = reason
 
     if failing_columns:
         fail(

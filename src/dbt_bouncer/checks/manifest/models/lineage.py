@@ -336,6 +336,73 @@ def check_model_materialization_by_fanout(
         )
 
 
+def _upstream_model_ids(model_obj, pkg_name):
+    """Return the unique_ids of a model's upstream models in ``pkg_name``.
+
+    Returns:
+        list[str]: Upstream model unique_ids in the given package.
+
+    """
+    if model_obj is None or not model_obj.depends_on:
+        return []
+    upstream_nodes = list(getattr(model_obj.depends_on, "nodes", []) or [])
+    # Node ids have the form `model.<package>.<name>`; the trailing dot anchors
+    # the package boundary so `pkg` does not match `pkg_extra`.
+    prefix = f"model.{pkg_name}."
+    return [node_id for node_id in upstream_nodes if node_id.startswith(prefix)]
+
+
+def _is_view_model(model_obj, materializations):
+    """Return whether a model is materialized as one of ``materializations``.
+
+    Returns:
+        bool: True if the model's materialization is in ``materializations``.
+
+    """
+    return bool(
+        model_obj
+        and model_obj.config
+        and model_obj.config.materialized in materializations
+    )
+
+
+def _upstream_view_models(
+    models_by_id,
+    materializations,
+    max_views,
+    model_unique_ids_to_check,
+    pkg_name,
+    depth=0,
+):
+    """Return unique_ids of upstream models that are views, up to ``max_views`` deep.
+
+    Recurse one level per call. Stop at ``max_views`` depth, or when no upstream
+    view models remain.
+
+    Returns:
+        list[str]: Upstream model unique_ids that are views.
+
+    """
+    if depth == max_views or model_unique_ids_to_check == []:
+        return model_unique_ids_to_check
+
+    relevant_upstream_models = [
+        upstream_id
+        for model_id in model_unique_ids_to_check
+        for upstream_id in _upstream_model_ids(models_by_id.get(model_id), pkg_name)
+        if _is_view_model(models_by_id.get(upstream_id), materializations)
+    ]
+
+    return _upstream_view_models(
+        models_by_id=models_by_id,
+        materializations=materializations,
+        max_views=max_views,
+        model_unique_ids_to_check=relevant_upstream_models,
+        pkg_name=pkg_name,
+        depth=depth + 1,
+    )
+
+
 @check(code="MO033")
 def check_model_max_chained_views(
     model,
@@ -390,63 +457,14 @@ def check_model_max_chained_views(
         else {m.unique_id: m for m in ctx.models}
     )
 
-    def return_upstream_view_models(
-        materializations, max_views, model_unique_ids_to_check, pkg_name, depth=0
-    ):
-        """Recursive function to return model unique_id's of upstream models that are views.
-
-        Returns:
-            list[str]: List of model unique_id's of upstream models that are views.
-
-        """
-        if depth == max_views or model_unique_ids_to_check == []:
-            return model_unique_ids_to_check
-
-        relevant_upstream_models = []
-        for model_id in model_unique_ids_to_check:
-            model_obj = models_by_id.get(model_id)
-            if model_obj is None:
-                continue
-            upstream_nodes = (
-                list(getattr(model_obj.depends_on, "nodes", []) or [])
-                if model_obj.depends_on
-                else []
-            )
-            if upstream_nodes != []:
-                upstream_models = [
-                    m
-                    for m in upstream_nodes
-                    if m.split(".")[0] == "model" and m.split(".")[1] == pkg_name
-                ]
-                for i in upstream_models:
-                    upstream_obj = models_by_id.get(i)
-                    if (
-                        upstream_obj
-                        and upstream_obj.config
-                        and upstream_obj.config.materialized in materializations
-                    ):
-                        relevant_upstream_models.append(i)
-
-        depth += 1
-        return return_upstream_view_models(
-            materializations=materializations,
-            max_views=max_views,
-            model_unique_ids_to_check=relevant_upstream_models,
-            pkg_name=pkg_name,
-            depth=depth,
-        )
-
-    if (
-        len(
-            return_upstream_view_models(
-                materializations=materializations_to_include,
-                max_views=max_chained_views,
-                model_unique_ids_to_check=[model.unique_id],
-                pkg_name=(package_name or manifest_obj.manifest.metadata.project_name),
-            )
-        )
-        != 0
-    ):
+    chained_views = _upstream_view_models(
+        models_by_id=models_by_id,
+        materializations=materializations_to_include,
+        max_views=max_chained_views,
+        model_unique_ids_to_check=[model.unique_id],
+        pkg_name=(package_name or manifest_obj.manifest.metadata.project_name),
+    )
+    if chained_views:
         fail(
             f"`{get_clean_model_name(model.unique_id)}` has more than {max_chained_views} upstream dependents that are not tables."
         )
