@@ -346,11 +346,10 @@ def _upstream_model_ids(model_obj, pkg_name):
     if model_obj is None or not model_obj.depends_on:
         return []
     upstream_nodes = list(getattr(model_obj.depends_on, "nodes", []) or [])
-    return [
-        node_id
-        for node_id in upstream_nodes
-        if node_id.split(".")[0] == "model" and node_id.split(".")[1] == pkg_name
-    ]
+    # Node ids have the form `model.<package>.<name>`; the trailing dot anchors
+    # the package boundary so `pkg` does not match `pkg_extra`.
+    prefix = f"model.{pkg_name}."
+    return [node_id for node_id in upstream_nodes if node_id.startswith(prefix)]
 
 
 def _is_view_model(model_obj, materializations):
