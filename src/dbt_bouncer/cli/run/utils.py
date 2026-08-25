@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path, PurePath
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from dbt_bouncer.cli.utils import resolve_config_path
 from dbt_bouncer.enums import (
@@ -18,6 +18,8 @@ from dbt_bouncer.reporting.logger import configure_console_logging
 from dbt_bouncer.version import version as get_version
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from dbt_bouncer.configuration_file.parser import DbtBouncerConfBase
     from dbt_bouncer.context import BouncerContext
 
@@ -91,6 +93,137 @@ def _build_context(
     )
 
 
+def _configured_categories(config_file_contents: Mapping[str, Any]) -> list[str]:
+    """Return the non-empty ``*_checks`` category keys present in the config.
+
+    Returns:
+        list[str]: The configured check-category names.
+
+    """
+    return [
+        i
+        for i in config_file_contents
+        if i.endswith("_checks") and config_file_contents.get(i) != []
+    ]
+
+
+def _resolve_custom_checks_dir(
+    config_file_contents: Mapping[str, Any], config_file_path: PurePath
+) -> Path | None:
+    """Resolve ``custom_checks_dir`` relative to the config file.
+
+    Returns:
+        Path | None: The resolved directory, or ``None`` if not configured.
+
+    """
+    custom_checks_dir = config_file_contents.get("custom_checks_dir")
+    if not custom_checks_dir:
+        return None
+    return Path(config_file_path.parent / custom_checks_dir)
+
+
+def _parse_check_names(check: str) -> set[str]:
+    """Parse ``--check`` into a set of check names, rewriting deprecated aliases.
+
+    Rewrite any deprecated name to its replacement and warn once per use.
+
+    Returns:
+        set[str]: The requested check names. An empty set means run all checks.
+
+    """
+    from dbt_bouncer.configuration_file.validator import (
+        DEPRECATED_CHECK_NAME_ALIASES,
+        warn_deprecated_check_name,
+    )
+
+    check_names: set[str] = set()
+    for raw_name in check.strip().split(","):
+        name = raw_name.strip()
+        if not name:
+            continue
+        new_name = DEPRECATED_CHECK_NAME_ALIASES.get(name)
+        if new_name is not None:
+            warn_deprecated_check_name(name, new_name)
+            name = new_name
+        check_names.add(name)
+    return check_names
+
+
+def _apply_global_severity(config_file_contents: Mapping[str, Any]) -> None:
+    """Copy a top-level ``severity`` onto every check entry, in place."""
+    severity = config_file_contents.get("severity")
+    if not severity:
+        return
+
+    logging.info(f"Setting `severity` for all checks to `{severity}`.")
+    for category in config_file_contents:
+        if category.endswith("_checks") and isinstance(
+            config_file_contents[category], list
+        ):
+            for c in config_file_contents[category]:
+                c["severity"] = severity
+
+
+def _apply_global_check_defaults(
+    bouncer_config: DbtBouncerConfBase, check_obj: Any
+) -> None:
+    """Copy global ``include``/``exclude``/``selector`` onto a check that omits them."""
+    if bouncer_config.include and not check_obj.include:
+        check_obj.include = bouncer_config.include
+    if bouncer_config.exclude and not check_obj.exclude:
+        check_obj.exclude = bouncer_config.exclude
+    if bouncer_config.selector and not check_obj.selector:
+        check_obj.selector = bouncer_config.selector
+
+
+def _apply_category_filters(
+    bouncer_config: DbtBouncerConfBase,
+    check_categories: list[str],
+    only_parsed: list[str],
+) -> None:
+    """Index checks, apply global include/exclude/selector, and honour ``--only``.
+
+    Categories not selected by ``--only`` are emptied so no checks run for them.
+    """
+    for category in check_categories:
+        if category not in only_parsed:
+            # i.e. if `only` used then remove non-specified check categories
+            setattr(bouncer_config, category, [])
+            continue
+        for idx, check_obj in enumerate(getattr(bouncer_config, category)):
+            # Add indices to uniquely identify checks
+            check_obj.index = idx
+            _apply_global_check_defaults(bouncer_config, check_obj)
+
+
+def _filter_by_check_names(
+    bouncer_config: DbtBouncerConfBase,
+    check_categories: list[str],
+    check_names: set[str],
+) -> None:
+    """Restrict each category to checks whose name is in ``check_names``.
+
+    Warn about any requested name that is absent from the (possibly filtered) config.
+    """
+    all_configured_names: set[str] = {
+        c.name
+        for category in check_categories
+        for c in getattr(bouncer_config, category)
+    }
+    unknown_names = check_names - all_configured_names
+    if unknown_names:
+        logging.warning(
+            f"`--check` contains values not found in the (possibly filtered) config: {sorted(unknown_names)}. No checks will run for these names."
+        )
+
+    for category in check_categories:
+        setattr(
+            bouncer_config,
+            category,
+            [c for c in getattr(bouncer_config, category) if c.name in check_names],
+        )
+
+
 def run_bouncer(
     config_file: PurePath | None = None,
     check: str = "",
@@ -135,38 +268,27 @@ def run_bouncer(
     configure_console_logging(verbosity)
     logging.info(f"Running dbt-bouncer ({get_version()})...")
 
-    # Validate `only` has valid values
+    # Validate `only` has valid values. Raised directly here so this public
+    # entrypoint documents the exception it can produce.
     valid_check_categories = [c.value for c in CheckCategory]
-    if not only.strip():
-        only_parsed = valid_check_categories
-    else:
-        only_parsed = [x.strip() for x in set(only.strip().split(",")) if x != ""]
-
-    for x in [i for i in only_parsed if i not in valid_check_categories]:
+    only_parsed = (
+        [x.strip() for x in set(only.strip().split(",")) if x != ""]
+        if only.strip()
+        else valid_check_categories
+    )
+    invalid = [x for x in only_parsed if x not in valid_check_categories]
+    if invalid:
         raise DbtBouncerConfigError(
-            f"`--only` contains an invalid value (`{x}`). Valid values are `{valid_check_categories}` or any comma-separated combination."
+            f"`--only` contains an invalid value (`{invalid[0]}`). Valid values are `{valid_check_categories}` or any comma-separated combination."
         )
+
+    check_names = _parse_check_names(check)
 
     # Using local imports to speed up CLI startup
     from dbt_bouncer.configuration_file.validator import (
-        DEPRECATED_CHECK_NAME_ALIASES,
         get_config_file_path,
         load_config_file_contents,
-        warn_deprecated_check_name,
     )
-
-    # Parse `--check` into a set of check names (empty set means run all),
-    # rewriting any deprecated names to their replacements and warning per use.
-    check_names: set[str] = set()
-    for raw_name in check.strip().split(","):
-        name = raw_name.strip()
-        if not name:
-            continue
-        new_name = DEPRECATED_CHECK_NAME_ALIASES.get(name)
-        if new_name is not None:
-            warn_deprecated_check_name(name, new_name)
-            name = new_name
-        check_names.add(name)
 
     config_file = resolve_config_path(config_file)
     if config_file_source is None:
@@ -186,79 +308,30 @@ def run_bouncer(
         config_file_path, allow_default_config_file_creation=True
     )
 
-    # Handle `severity` at the global level
-    if config_file_contents.get("severity"):
-        logging.info(
-            f"Setting `severity` for all checks to `{config_file_contents['severity']}`."
-        )
-        for category in config_file_contents:
-            if category.endswith("_checks") and isinstance(
-                config_file_contents[category], list
-            ):
-                for c in config_file_contents[category]:
-                    c["severity"] = config_file_contents["severity"]
-
+    _apply_global_severity(config_file_contents)
     logging.debug(f"{config_file_contents=}")
 
-    check_categories = [
-        i
-        for i in config_file_contents
-        if i.endswith("_checks") and config_file_contents.get(i) != []
-    ]
+    check_categories = _configured_categories(config_file_contents)
     logging.debug(f"{check_categories=}")
 
-    # Resolve custom_checks_dir relative to config file
-    custom_checks_dir = None
-    if config_file_contents.get("custom_checks_dir"):
-        custom_checks_dir = (
-            config_file_path.parent / config_file_contents["custom_checks_dir"]
-        )
+    custom_checks_dir = _resolve_custom_checks_dir(
+        config_file_contents, config_file_path
+    )
 
     from dbt_bouncer.configuration_file.validator import validate_conf
 
     bouncer_config = validate_conf(
         check_categories=check_categories,
         config_file_contents=dict(config_file_contents),
-        custom_checks_dir=Path(custom_checks_dir) if custom_checks_dir else None,
+        custom_checks_dir=custom_checks_dir,
     )
     logging.debug("bouncer_config=%r", bouncer_config)
 
-    for category in check_categories:
-        if category in only_parsed:
-            for idx, check_obj in enumerate(getattr(bouncer_config, category)):
-                # Add indices to uniquely identify checks
-                check_obj.index = idx
-
-                # Handle global `exclude`, `include` and `selector` args
-                if bouncer_config.include and not check_obj.include:
-                    check_obj.include = bouncer_config.include
-                if bouncer_config.exclude and not check_obj.exclude:
-                    check_obj.exclude = bouncer_config.exclude
-                if bouncer_config.selector and not check_obj.selector:
-                    check_obj.selector = bouncer_config.selector
-        else:
-            # i.e. if `only` used then remove non-specified check categories
-            setattr(bouncer_config, category, [])
+    _apply_category_filters(bouncer_config, check_categories, only_parsed)
 
     # Filter to specific check names when `--check` is provided
     if check_names:
-        all_configured_names: set[str] = {
-            c.name
-            for category in check_categories
-            for c in getattr(bouncer_config, category)
-        }
-        unknown_names = check_names - all_configured_names
-        if unknown_names:
-            logging.warning(
-                f"`--check` contains values not found in the (possibly filtered) config: {sorted(unknown_names)}. No checks will run for these names."
-            )
-
-        for category in check_categories:
-            setattr(
-                bouncer_config,
-                category,
-                [c for c in getattr(bouncer_config, category) if c.name in check_names],
-            )
+        _filter_by_check_names(bouncer_config, check_categories, check_names)
 
     logging.debug("bouncer_config=%r", bouncer_config)
 
