@@ -176,6 +176,38 @@ def check_model_code_does_not_contain_regexp_pattern(model, *, regexp_pattern: s
         )
 
 
+def _cartesian_join_failure(
+    join: "exp.Join", model_name: str, allow_explicit_cross_join: bool
+) -> str | None:
+    """Return a failure message if ``join`` is a Cartesian join, else ``None``.
+
+    Returns:
+        str | None: The failure reason, or ``None`` if the join is constrained.
+
+    """
+    is_cross = (join.kind or "").upper() == "CROSS"
+    on_clause = join.args.get("on")
+    using_clause = join.args.get("using")
+    # A `NATURAL JOIN` joins on the columns the two relations share, so it
+    # constrains the join despite carrying no `ON`/`USING` clause.
+    is_natural = (join.args.get("method") or "").upper() == "NATURAL"
+
+    if is_cross:
+        if not allow_explicit_cross_join:
+            return f"`{model_name}` uses an explicit `CROSS JOIN`."
+        return None
+
+    if not on_clause and not using_clause and not is_natural:
+        return f"`{model_name}` uses a `JOIN` without an `ON` or `USING` clause."
+
+    if on_clause is not None:
+        is_constant, cond_str = _constant_join_condition(on_clause)
+        if is_constant and not allow_explicit_cross_join:
+            return f"`{model_name}` uses a `JOIN` with a constant condition (`ON {cond_str}`)."
+
+    return None
+
+
 @check(code="MO052")
 def check_model_does_not_use_cartesian_join(
     model, *, allow_explicit_cross_join: bool = False
@@ -244,33 +276,14 @@ def check_model_does_not_use_cartesian_join(
 
     from sqlglot import exp
 
+    model_name = get_clean_model_name(model.unique_id)
     for statement in parsed:
         for join in statement.find_all(exp.Join):
-            is_cross = (join.kind or "").upper() == "CROSS"
-            on_clause = join.args.get("on")
-            using_clause = join.args.get("using")
-            # A `NATURAL JOIN` joins on the columns the two relations share, so
-            # it constrains the join despite carrying no `ON`/`USING` clause.
-            is_natural = (join.args.get("method") or "").upper() == "NATURAL"
-
-            if is_cross:
-                if not allow_explicit_cross_join:
-                    fail(
-                        f"`{get_clean_model_name(model.unique_id)}` uses an explicit `CROSS JOIN`."
-                    )
-                continue
-
-            if not on_clause and not using_clause and not is_natural:
-                fail(
-                    f"`{get_clean_model_name(model.unique_id)}` uses a `JOIN` without an `ON` or `USING` clause."
-                )
-
-            if on_clause is not None:
-                is_constant, cond_str = _constant_join_condition(on_clause)
-                if is_constant and not allow_explicit_cross_join:
-                    fail(
-                        f"`{get_clean_model_name(model.unique_id)}` uses a `JOIN` with a constant condition (`ON {cond_str}`)."
-                    )
+            message = _cartesian_join_failure(
+                join, model_name, allow_explicit_cross_join
+            )
+            if message is not None:
+                fail(message)
 
 
 @check(code="MO008")
