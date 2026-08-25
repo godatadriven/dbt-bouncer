@@ -167,24 +167,18 @@ def _check_applies_to_resource(
 
 # Underscore-prefixed as an internal helper, but imported by the benchmark suite
 # (``tests/benchmark``) to time the match phase in isolation — keep it importable.
-def _assemble_checks_to_run(ctx: "BouncerContext") -> list[CheckToRun]:
-    """Match checks to resources and build the run list.
+def _build_resource_map(ctx: "BouncerContext") -> dict[str, list[Any]]:
+    """Map each iterate-over key to the wrapper objects used for check iteration.
 
-    Builds the check context and per-resource skip-checks lookups, then iterates
-    every configured check, matching it against the relevant resources and
-    recording the shared check instance plus the resource to bind onto it per
-    match. The executor binds the resource immediately before executing, so no
-    per-resource copy is made.
+    Keys that are already plain lists (catalog_nodes, catalog_sources, exposures,
+    macros, sources, unit_tests) are identical to ``parsed_data``; the others differ
+    because ``parsed_data`` stores unwrapped inner objects for context injection.
 
     Returns:
-        list[CheckToRun]: The assembled checks, ready for execution.
+        dict[str, list[Any]]: The resource map keyed by iterate-over name.
 
     """
-    # resource_map: wrapper objects used for check iteration.
-    # Keys that are already plain lists (catalog_nodes, catalog_sources, exposures,
-    # macros, sources, unit_tests) are identical in both dicts; the others differ
-    # because parsed_data stores unwrapped inner objects for context injection.
-    resource_map: dict[str, list[Any]] = {
+    return {
         "catalog_nodes": ctx.catalog_nodes,
         "catalog_sources": ctx.catalog_sources,
         "exposures": ctx.exposures,
@@ -199,9 +193,17 @@ def _assemble_checks_to_run(ctx: "BouncerContext") -> list[CheckToRun]:
         "unit_tests": ctx.unit_tests,
     }
 
+
+def _build_check_context(ctx: "BouncerContext") -> Any:
+    """Build the shared ``CheckContext`` injected into every check.
+
+    Returns:
+        CheckContext: The context shared by all checks in this run.
+
+    """
     from dbt_bouncer.check_framework.context import CheckContext
 
-    check_ctx = CheckContext(
+    return CheckContext(
         catalog_nodes=ctx.catalog_nodes,
         catalog_sources=ctx.catalog_sources,
         exposures=ctx.exposures,
@@ -221,9 +223,17 @@ def _assemble_checks_to_run(ctx: "BouncerContext") -> list[CheckToRun]:
         unit_tests=ctx.unit_tests,
     )
 
-    # Pre-compute unique_id -> meta lookup for catalog_node/catalog_source
-    # skip_checks. Each resource is wrapped with the real node nested under a
-    # `.source`/`.model`/etc. attribute, so unwrap it before reading meta.
+
+def _build_meta_by_unique_id(resource_map: dict[str, list[Any]]) -> dict[str, Any]:
+    """Pre-compute a unique_id -> meta lookup for skip_checks resolution.
+
+    Each resource wraps the real node under a ``.source``/``.model``/etc.
+    attribute, so unwrap it before reading meta.
+
+    Returns:
+        dict[str, Any]: Mapping of resource unique_id to its meta config.
+
+    """
     inner_attr_by_key = {
         "models": "model",
         "seeds": "seed",
@@ -239,26 +249,46 @@ def _assemble_checks_to_run(ctx: "BouncerContext") -> list[CheckToRun]:
                     meta_by_unique_id[node.unique_id] = node.config.meta
                 except AttributeError:
                     meta_by_unique_id[node.unique_id] = getattr(node, "meta", {})
+    return meta_by_unique_id
 
-    list_of_check_configs = []
-    for check_category in ctx.check_categories:
-        list_of_check_configs.extend(getattr(ctx.bouncer_config, check_category))
 
-    # Per-iterate_value cache of per-resource facts. Every field depends only on
-    # the resource, never on the check, so computing them once per resource
-    # (instead of once per (check, resource) pair) is a big win when the config
-    # has many checks targeting the same resource type: the run-ID suffix, file
-    # path and unique_id are all string work over proxy objects, and
-    # ``skip_checks`` is a nested meta lookup.
-    resources_with_meta: dict[str, list[_ResourceFacts]] = {}
+class _CheckMatcher:
+    """Resolves the resources each configured check runs against.
 
-    def _resources_for(iterate_value: str) -> list[_ResourceFacts]:
-        cached = resources_with_meta.get(iterate_value)
+    Memoises per-iterate_value resource facts, resolved selectors, and
+    include/exclude/selector filtering, so checks that share inputs reuse the
+    work. When a config has many checks targeting the same resource type, the
+    per-resource facts (run-ID suffix, file path, unique_id, and the nested
+    ``skip_checks`` meta lookup) are computed once per resource rather than once
+    per (check, resource) pair.
+    """
+
+    def __init__(
+        self,
+        resource_map: dict[str, list[Any]],
+        meta_by_unique_id: dict[str, Any],
+        manifest_obj: Any,
+    ) -> None:
+        self._resource_map = resource_map
+        self._meta_by_unique_id = meta_by_unique_id
+        self._manifest_obj = manifest_obj
+        self._resources_with_meta: dict[str, list[_ResourceFacts]] = {}
+        self._selectors_by_raw: dict[str, Any] = {}
+        self._path_filtered: dict[tuple[str, Any, Any, Any], list[_ResourceFacts]] = {}
+
+    def resources_for(self, iterate_value: str) -> list[_ResourceFacts]:
+        """Return the cached per-resource facts for a resource type.
+
+        Returns:
+            list[_ResourceFacts]: One entry per resource of the given type.
+
+        """
+        cached = self._resources_with_meta.get(iterate_value)
         if cached is not None:
             return cached
         out: list[_ResourceFacts] = []
-        for resource in resource_map[f"{iterate_value}s"]:
-            d = _get_resource_meta(resource, iterate_value, meta_by_unique_id)
+        for resource in self._resource_map[f"{iterate_value}s"]:
+            d = _get_resource_meta(resource, iterate_value, self._meta_by_unique_id)
             file_path = getattr(resource, "original_file_path", None)
             out.append(
                 _ResourceFacts(
@@ -270,31 +300,36 @@ def _assemble_checks_to_run(ctx: "BouncerContext") -> list[CheckToRun]:
                     cleaned_path=clean_path_str(file_path or ""),
                 )
             )
-        resources_with_meta[iterate_value] = out
+        self._resources_with_meta[iterate_value] = out
         return out
 
-    # Memoised selector resolution. A selector resolves to a static set of
-    # unique IDs for the manifest, so checks sharing a selector string reuse
-    # one resolved instance.
-    selectors_by_raw: dict[str, Any] = {}
+    def _selector_for(self, raw: str) -> Any:
+        """Return the resolved (and cached) selector for a selector string.
 
-    def _selector_for(raw: str) -> Any:
-        cached = selectors_by_raw.get(raw)
+        Returns:
+            Selector: The resolved selector, reused across checks sharing ``raw``.
+
+        """
+        cached = self._selectors_by_raw.get(raw)
         if cached is not None:
             return cached
         from dbt_bouncer.selectors import Selector
 
-        selector = Selector(raw, ctx.manifest_obj.manifest)
-        selectors_by_raw[raw] = selector
+        selector = Selector(raw, self._manifest_obj.manifest)
+        self._selectors_by_raw[raw] = selector
         return selector
 
-    # Memoised include/exclude/selector filtering. Matching depends only on the
-    # check's patterns and the resource, so checks sharing a pattern triple
-    # (very common -- most set none) reuse one filtered list instead of
-    # re-running the regexes per check.
-    path_filtered: dict[tuple[str, Any, Any, Any], list[_ResourceFacts]] = {}
+    def path_filtered_for(self, check: Any, iterate_value: str) -> list[_ResourceFacts]:
+        """Return the resources a check runs against after include/exclude/selector.
 
-    def _path_filtered_for(check: Any, iterate_value: str) -> list[_ResourceFacts]:
+        Matching depends only on the check's patterns and the resource, so checks
+        sharing a pattern triple (very common -- most set none) reuse one filtered
+        list instead of re-running the regexes per check.
+
+        Returns:
+            list[_ResourceFacts]: The resources the check runs against.
+
+        """
         include, exclude = check.include, check.exclude
         selector_raw = check.selector
         key = (
@@ -303,17 +338,17 @@ def _assemble_checks_to_run(ctx: "BouncerContext") -> list[CheckToRun]:
             _pattern_key(exclude),
             selector_raw,
         )
-        cached = path_filtered.get(key)
+        cached = self._path_filtered.get(key)
         if cached is not None:
             return cached
-        candidates = _resources_for(iterate_value)
+
+        candidates = self.resources_for(iterate_value)
         if include is None and not exclude:
             # Purely an allocation optimisation, not a correctness guard:
-            # ``object_in_path`` already returns True for a ``None`` include and
+            # ``object_in_path`` returns True for a ``None`` include and
             # ``object_excluded_by_path`` returns False for an absent exclude, so
             # the comprehension below would produce this same list. Skipping it
-            # avoids copying the list for the common case of a check that filters
-            # on neither.
+            # avoids copying the list for the common case that filters on neither.
             result = candidates
         else:
             result = [
@@ -323,60 +358,108 @@ def _assemble_checks_to_run(ctx: "BouncerContext") -> list[CheckToRun]:
                 and not object_excluded_by_path(exclude, facts.cleaned_path)
             ]
         if selector_raw:
-            selector = _selector_for(selector_raw)
+            selector = self._selector_for(selector_raw)
             result = [facts for facts in result if selector.matches(facts.unique_id)]
-        path_filtered[key] = result
+        self._path_filtered[key] = result
         return result
+
+
+def _iterate_value_for(cls: type) -> str | None:
+    """Return the single resource key a check class iterates over.
+
+    Memoise the answer in ``_CLASS_ITERATE_CACHE`` (also read by the dry-run
+    reporter). Return ``None`` for context-only checks.
+
+    Returns:
+        str | None: The iterate-over value, or ``None`` for context-only checks.
+
+    """
+    cached = _CLASS_ITERATE_CACHE.get(cls)
+    if cached is None:
+        # Set by the @check decorator; None for context-only checks.
+        explicit = getattr(cls, "iterate_over", None)
+        cached = frozenset({explicit}) if explicit is not None else frozenset()
+        _CLASS_ITERATE_CACHE[cls] = cached
+    return next(iter(cached)) if cached else None
+
+
+def _iterating_check_entries(
+    check: Any, iterate_value: str, matcher: "_CheckMatcher"
+) -> list[CheckToRun]:
+    """Build the run entries for a check that iterates over a resource type.
+
+    No per-resource copy is made: the executor binds ``resource`` onto the shared
+    ``check`` instance immediately before calling execute(). Checks run
+    sequentially, so reusing one instance across its resources is safe (and avoids
+    ~17k+ model_copy calls).
+
+    Returns:
+        list[CheckToRun]: One entry per matched resource.
+
+    """
+    check_name = check.name
+    check_code = getattr(check, "code", None)
+    severity = check.severity
+    id_prefix = f"{check_name}:{check.index}:"
+    materialization = check.materialization if iterate_value == "model" else None
+
+    entries: list[CheckToRun] = []
+    for facts in matcher.path_filtered_for(check, iterate_value):
+        if not _check_applies_to_resource(
+            check_name, check_code, materialization, facts
+        ):
+            continue
+        entries.append(
+            {
+                "check": check,
+                "check_run_id": id_prefix + facts.run_id_suffix,
+                "file_path": facts.file_path,
+                "iterate_value": iterate_value,
+                "resource": facts.resource,
+                "severity": severity,
+                "unique_id": facts.unique_id,
+            },
+        )
+    return entries
+
+
+def _assemble_checks_to_run(ctx: "BouncerContext") -> list[CheckToRun]:
+    """Match checks to resources and build the run list.
+
+    Builds the check context and per-resource skip-checks lookups, then iterates
+    every configured check, matching it against the relevant resources and
+    recording the shared check instance plus the resource to bind onto it per
+    match. The executor binds the resource immediately before executing, so no
+    per-resource copy is made.
+
+    Returns:
+        list[CheckToRun]: The assembled checks, ready for execution.
+
+    """
+    resource_map = _build_resource_map(ctx)
+    check_ctx = _build_check_context(ctx)
+    meta_by_unique_id = _build_meta_by_unique_id(resource_map)
+    matcher = _CheckMatcher(resource_map, meta_by_unique_id, ctx.manifest_obj)
+
+    list_of_check_configs = []
+    for check_category in ctx.check_categories:
+        list_of_check_configs.extend(getattr(ctx.bouncer_config, check_category))
 
     checks_to_run: list[CheckToRun] = []
     for check in sorted(list_of_check_configs, key=operator.attrgetter("index")):
-        cls = check.__class__
-        if cls not in _CLASS_ITERATE_CACHE:
-            # Set by the @check decorator; None for context-only checks.
-            explicit = getattr(cls, "iterate_over", None)
-            _CLASS_ITERATE_CACHE[cls] = (
-                frozenset({explicit}) if explicit is not None else frozenset()
+        # The context is identical for every resource, so set it once on the
+        # shared check-config instance rather than per match.
+        check.set_context(check_ctx)
+        iterate_value = _iterate_value_for(check.__class__)
+        if iterate_value is not None:
+            checks_to_run.extend(
+                _iterating_check_entries(check, iterate_value, matcher)
             )
-        iterate_over_value = _CLASS_ITERATE_CACHE[cls]
-        if iterate_over_value:
-            iterate_value = next(iter(iterate_over_value))
-            # The context is identical for every resource, so set it once on the
-            # shared check-config instance rather than per match.
-            check.set_context(check_ctx)
-            check_name = check.name
-            check_code = getattr(check, "code", None)
-            severity = check.severity
-            id_prefix = f"{check_name}:{check.index}:"
-            materialization = (
-                check.materialization if iterate_value == "model" else None
-            )
-            for facts in _path_filtered_for(check, iterate_value):
-                if not _check_applies_to_resource(
-                    check_name, check_code, materialization, facts
-                ):
-                    continue
-                # No per-resource copy: the executor binds ``resource`` onto the
-                # shared ``check`` instance immediately before calling execute().
-                # Checks run sequentially, so reusing one instance across all of
-                # its resources is safe (and avoids ~17k+ model_copy calls).
-                checks_to_run.append(
-                    {
-                        "check": check,
-                        "check_run_id": id_prefix + facts.run_id_suffix,
-                        "file_path": facts.file_path,
-                        "iterate_value": iterate_value,
-                        "resource": facts.resource,
-                        "severity": severity,
-                        "unique_id": facts.unique_id,
-                    },
-                )
         else:
-            check_run_id = f"{check.name}:{check.index}"
-            check.set_context(check_ctx)
             checks_to_run.append(
                 {
                     "check": check,
-                    "check_run_id": check_run_id,
+                    "check_run_id": f"{check.name}:{check.index}",
                     "file_path": None,
                     "severity": check.severity,
                     "unique_id": None,
