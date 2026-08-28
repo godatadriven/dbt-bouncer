@@ -2006,3 +2006,191 @@ def test_cli_run_command(tmp_path):
     content_legacy = json.loads(output_file_legacy.read_bytes())
     # Both should produce the same checks
     assert len(content) == len(content_legacy)
+
+
+# ---------------------------------------------------------------------------
+# Environment variables
+#
+# Every `run` option can also be set via a `DBT_BOUNCER_*` variable. This
+# matters for wrappers that cannot control argv -- most notably `pre-commit
+# run`, which has no argument passthrough -- and so cannot ask for
+# `--output-file`/`--output-format` on the command line.
+# ---------------------------------------------------------------------------
+
+ENV_VAR_ARGV_PREFIXES = pytest.mark.parametrize(
+    "argv_prefix",
+    [
+        pytest.param(["run"], id="run-subcommand"),
+        pytest.param([], id="legacy-no-subcommand"),
+    ],
+)
+
+
+def _write_env_var_fixture(tmp_path) -> Path:
+    """Write a config file and manifest into `tmp_path` for the env var tests.
+
+    The single check fails, so a run always produces at least one failure to
+    write to the output file.
+
+    Returns:
+        Path: The config file to pass via `--config-file`.
+
+    """
+    bouncer_config = {
+        "dbt_artifacts_dir": ".",
+        "manifest_checks": [
+            {
+                "name": "check_model_directories",
+                "include": "models",
+                "permitted_sub_directories": ["staging"],
+            },
+        ],
+    }
+    config_file = tmp_path / "dbt-bouncer.yml"
+    with config_file.open("w", encoding="utf-8") as f:
+        yaml.dump(bouncer_config, f)
+
+    with Path.open(
+        Path("./dbt_project/target/manifest.json"), "r", encoding="utf-8"
+    ) as f:
+        manifest = json.load(f)
+    with Path.open(tmp_path / "manifest.json", "w", encoding="utf-8") as f:
+        json.dump(manifest, f)
+
+    return config_file
+
+
+@ENV_VAR_ARGV_PREFIXES
+def test_cli_env_var_output_options(argv_prefix, tmp_path):
+    """Output options are read from the environment when absent from argv."""
+    config_file = _write_env_var_fixture(tmp_path)
+    output_file = tmp_path / "results.json"
+
+    runner = CliRunner()
+    result = runner.invoke(
+        app,
+        [*argv_prefix, "--config-file", config_file.__str__()],
+        env={
+            "DBT_BOUNCER_ONLY": "manifest_checks",
+            "DBT_BOUNCER_OUTPUT_FILE": output_file.__str__(),
+            "DBT_BOUNCER_OUTPUT_FORMAT": "json",
+            "DBT_BOUNCER_OUTPUT_ONLY_FAILURES": "true",
+        },
+    )
+
+    assert result.exit_code == ExitCode.CHECK_ERRORS
+    assert output_file.exists()
+    results = json.loads(output_file.read_bytes())
+    assert len(results) > 0
+    assert all(r["outcome"] == "failed" for r in results)
+
+
+@ENV_VAR_ARGV_PREFIXES
+def test_cli_env_var_check_selection(argv_prefix, tmp_path):
+    """`--check` is read from the environment, narrowing the checks that run."""
+    config_file = _write_env_var_fixture(tmp_path)
+    output_file = tmp_path / "results.json"
+
+    runner = CliRunner()
+    result = runner.invoke(
+        app,
+        [
+            *argv_prefix,
+            "--config-file",
+            config_file.__str__(),
+            "--output-file",
+            output_file.__str__(),
+        ],
+        env={"DBT_BOUNCER_CHECK": "check_model_does_not_exist"},
+    )
+
+    # No check matches the name, so nothing runs.
+    assert result.exit_code == ExitCode.NO_CHECKS_RUN
+
+
+def test_cli_env_var_dry_run(tmp_path):
+    """`--dry-run` is read from the environment as a boolean flag."""
+    config_file = _write_env_var_fixture(tmp_path)
+    output_file = tmp_path / "results.json"
+
+    runner = CliRunner()
+    result = runner.invoke(
+        app,
+        [
+            "run",
+            "--config-file",
+            config_file.__str__(),
+            "--output-file",
+            output_file.__str__(),
+        ],
+        env={"DBT_BOUNCER_DRY_RUN": "true"},
+    )
+
+    assert result.exit_code == ExitCode.SUCCESS
+    # A dry run lists the checks instead of executing them, so nothing is written.
+    assert not output_file.exists()
+
+
+def test_cli_env_var_verbosity(monkeypatch, tmp_path):
+    """`--verbosity` is read from the environment through the counter type."""
+    import dbt_bouncer.cli.run.utils as run_utils
+
+    recorded: list[int] = []
+    original = run_utils.configure_console_logging
+
+    def _record(verbosity: int):
+        recorded.append(verbosity)
+        return original(verbosity)
+
+    monkeypatch.setattr(run_utils, "configure_console_logging", _record)
+
+    config_file = _write_env_var_fixture(tmp_path)
+
+    runner = CliRunner()
+    runner.invoke(
+        app,
+        ["run", "--config-file", config_file.__str__()],
+        env={"DBT_BOUNCER_VERBOSITY": "2"},
+    )
+
+    assert recorded == [2]
+
+
+def test_cli_flag_takes_precedence_over_env_var(tmp_path):
+    """An explicit CLI argument wins over the same option set in the environment."""
+    config_file = _write_env_var_fixture(tmp_path)
+    output_file = tmp_path / "results.out"
+
+    runner = CliRunner()
+    result = runner.invoke(
+        app,
+        [
+            "run",
+            "--config-file",
+            config_file.__str__(),
+            "--output-file",
+            output_file.__str__(),
+            "--output-format",
+            "json",
+        ],
+        env={"DBT_BOUNCER_OUTPUT_FORMAT": "csv"},
+    )
+
+    assert result.exit_code == ExitCode.CHECK_ERRORS
+    # Valid JSON, so the flag beat the environment.
+    assert json.loads(output_file.read_bytes())
+
+
+def test_cli_env_var_invalid_output_format(tmp_path):
+    """An invalid value in the environment fails with a usage error naming the variable."""
+    config_file = _write_env_var_fixture(tmp_path)
+
+    runner = CliRunner()
+    result = runner.invoke(
+        app,
+        ["run", "--config-file", config_file.__str__()],
+        env={"DBT_BOUNCER_OUTPUT_FORMAT": "not-a-format"},
+    )
+
+    assert result.exit_code == 2
+    assert "DBT_BOUNCER_OUTPUT_FORMAT" in result.output

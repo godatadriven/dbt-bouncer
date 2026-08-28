@@ -50,6 +50,7 @@ def main_callback(
     create_pr_comment_file: Annotated[
         bool,
         typer.Option(
+            envvar="DBT_BOUNCER_CREATE_PR_COMMENT_FILE",
             hidden=True,
             help="Create a `github-comment.md` file that will be sent to GitHub as a PR comment. Defaults to True when `dbt-bouncer` is run as a GitHub Action.",
         ),
@@ -57,47 +58,62 @@ def main_callback(
     check: Annotated[
         str,
         typer.Option(
-            help="Limit the checks run to specific check names, comma-separated. Examples: 'check_model_has_unique_test', 'check_model_names,check_source_freshness_populated'."
+            envvar="DBT_BOUNCER_CHECK",
+            help="Limit the checks run to specific check names, comma-separated. Examples: 'check_model_has_unique_test', 'check_model_names,check_source_freshness_populated'.",
         ),
     ] = "",
     only: Annotated[
         str,
         typer.Option(
-            help="Limit the checks run to specific categories, comma-separated. Examples: 'manifest_checks', 'catalog_checks,manifest_checks'."
+            envvar="DBT_BOUNCER_ONLY",
+            help="Limit the checks run to specific categories, comma-separated. Examples: 'manifest_checks', 'catalog_checks,manifest_checks'.",
         ),
     ] = "",
     output_file: Annotated[
         Path | None,
-        typer.Option(help="Location of the file where check metadata will be saved."),
+        typer.Option(
+            envvar="DBT_BOUNCER_OUTPUT_FILE",
+            help="Location of the file where check metadata will be saved.",
+        ),
     ] = None,
     output_format: Annotated[
         OutputFormat,
         typer.Option(
-            help="Format for the output file (requires --output-file). Choices: csv, json, junit, sarif, tap. Defaults to json.",
             case_sensitive=False,
+            envvar="DBT_BOUNCER_OUTPUT_FORMAT",
+            help="Format for the output file (requires --output-file). Choices: csv, json, junit, sarif, tap. Defaults to json.",
         ),
     ] = OutputFormat.JSON,
     output_only_failures: Annotated[
         bool,
         typer.Option(
-            help="If passed then only failures will be included in the output file."
+            envvar="DBT_BOUNCER_OUTPUT_ONLY_FAILURES",
+            help="If passed then only failures will be included in the output file.",
         ),
     ] = False,
     dry_run: Annotated[
         bool,
         typer.Option(
+            envvar="DBT_BOUNCER_DRY_RUN",
             help="Print which checks would run (name, resource type, count) without executing them.",
         ),
     ] = False,
     show_all_failures: Annotated[
         bool,
         typer.Option(
-            help="If passed then all failures will be printed to the console."
+            envvar="DBT_BOUNCER_SHOW_ALL_FAILURES",
+            help="If passed then all failures will be printed to the console.",
         ),
     ] = False,
     verbosity: Annotated[
         int,
-        typer.Option("-v", "--verbosity", help="Verbosity.", count=True),
+        typer.Option(
+            "-v",
+            "--verbosity",
+            count=True,
+            envvar="DBT_BOUNCER_VERBOSITY",
+            help="Verbosity.",
+        ),
     ] = 0,
     version: Annotated[
         bool,
