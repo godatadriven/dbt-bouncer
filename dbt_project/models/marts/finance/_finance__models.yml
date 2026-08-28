@@ -23,8 +23,9 @@ models:
           - name: customer_id_pk
             data_type: bigint
             description: This is a unique identifier for a customer
-            meta:
-              maturity: gold
+            config:
+              meta:
+                maturity: gold
             tests:
               - unique
               - not_null
@@ -32,52 +33,60 @@ models:
           - name: first_name
             data_type: string
             description: Customer's first name. PII.
-            meta:
-              maturity: gold
+            config:
+              meta:
+                maturity: gold
 
           - name: last_name
             data_type: string
             description: Customer's last name. PII.
-            meta:
-              maturity: gold
+            config:
+              meta:
+                maturity: gold
 
           - name: new_column
             data_type: string
             description: New column to simulate a new version of this model
-            meta:
-              maturity: gold
+            config:
+              meta:
+                maturity: gold
 
           - name: first_order_date
             data_type: date
             description: Date (UTC) of a customer's first order
-            meta:
-              maturity: gold
+            config:
+              meta:
+                maturity: gold
 
           - name: most_recent_order_date
             data_type: date
             description: Date (UTC) of a customer's most recent order
-            meta:
-              maturity: gold
+            config:
+              meta:
+                maturity: gold
 
           - name: number_of_orders
             data_type: bigint
             description: Count of the number of orders a customer has placed
-            meta:
-              maturity: gold
+            config:
+              meta:
+                maturity: gold
 
           - name: is_recurring_customer
             data_type: boolean
             description: Boolean indicating whether a customer has placed more than five orders
-            meta:
-              maturity: gold
+            config:
+              meta:
+                maturity: gold
             tests:
               - not_null
 
           - name: customer_lifetime_value
             data_type: double
             description: Sum of all payments a customer has made
-            meta:
-              maturity: gold
+            config:
+              meta:
+                maturity: gold
 
       - v: 2
         constraints:
@@ -88,8 +97,9 @@ models:
           - name: customer_id
             data_type: bigint
             description: This is a unique identifier for a customer
-            meta:
-              maturity: gold
+            config:
+              meta:
+                maturity: gold
             tests:
               - unique
               - not_null
@@ -97,52 +107,60 @@ models:
           - name: first_name
             data_type: string
             description: Customer's first name. PII.
-            meta:
-              maturity: gold
+            config:
+              meta:
+                maturity: gold
 
           - name: last_name
             data_type: string
             description: Customer's last name. PII.
-            meta:
-              maturity: gold
+            config:
+              meta:
+                maturity: gold
 
           - name: new_column
             data_type: string
             description: New column to simulate a new version of this model
-            meta:
-              maturity: gold
+            config:
+              meta:
+                maturity: gold
 
           - name: first_order_date
             data_type: date
             description: Date (UTC) of a customer's first order
-            meta:
-              maturity: gold
+            config:
+              meta:
+                maturity: gold
 
           - name: most_recent_order_date
             data_type: date
             description: Date (UTC) of a customer's most recent order
-            meta:
-              maturity: gold
+            config:
+              meta:
+                maturity: gold
 
           - name: number_of_orders
             data_type: bigint
             description: Count of the number of orders a customer has placed
-            meta:
-              maturity: gold
+            config:
+              meta:
+                maturity: gold
 
           - name: is_recurring_customer
             data_type: boolean
             description: Boolean indicating whether a customer has placed more than five orders
-            meta:
-              maturity: gold
+            config:
+              meta:
+                maturity: gold
             tests:
               - not_null
 
           - name: customer_lifetime_value
             data_type: double
             description: Sum of all payments a customer has made
-            meta:
-              maturity: gold
+            config:
+              meta:
+                maturity: gold
 
       - v: 1
         constraints:
@@ -153,8 +171,9 @@ models:
           - name: customer_id
             data_type: bigint
             description: This is a unique identifier for a customer
-            meta:
-              maturity: gold
+            config:
+              meta:
+                maturity: gold
             tests:
               - unique
               - not_null
@@ -162,46 +181,53 @@ models:
           - name: first_name
             data_type: string
             description: Customer's first name. PII.
-            meta:
-              maturity: gold
+            config:
+              meta:
+                maturity: gold
 
           - name: last_name
             data_type: string
             description: Customer's last name. PII.
-            meta:
-              maturity: gold
+            config:
+              meta:
+                maturity: gold
 
           - name: first_order_date
             data_type: date
             description: Date (UTC) of a customer's first order
-            meta:
-              maturity: gold
+            config:
+              meta:
+                maturity: gold
 
           - name: most_recent_order_date
             data_type: date
             description: Date (UTC) of a customer's most recent order
-            meta:
-              maturity: gold
+            config:
+              meta:
+                maturity: gold
 
           - name: number_of_orders
             data_type: bigint
             description: Count of the number of orders a customer has placed
-            meta:
-              maturity: gold
+            config:
+              meta:
+                maturity: gold
 
           - name: is_recurring_customer
             data_type: boolean
             description: Boolean indicating whether a customer has placed more than five orders
-            meta:
-              maturity: gold
+            config:
+              meta:
+                maturity: gold
             tests:
               - not_null
 
           - name: customer_lifetime_value
             data_type: double
             description: Sum of all payments a customer has made
-            meta:
-              maturity: gold
+            config:
+              meta:
+                maturity: gold
 
   - name: orders
     description: This table has basic information about orders, as well as some derived facts based on payments
