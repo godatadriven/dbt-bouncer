@@ -21,6 +21,7 @@ All the main CLI options (`--check`, `--only`, `--output-file`, etc.) work with 
 **Type:** Path
 **Default:** `dbt-bouncer.yml`
 **Required:** No
+**Environment variable:** `DBT_BOUNCER_CONFIG_FILE` (see [Config file](configuration.md))
 
 Specifies the location of the YAML configuration file containing your dbt-bouncer checks.
 
@@ -35,6 +36,7 @@ dbt-bouncer run --config-file config/checks.yml
 **Type:** Flag
 **Default:** False
 **Required:** No
+**Environment variable:** `DBT_BOUNCER_DRY_RUN`
 
 When passed, assembles the full check list as normal but prints a summary table showing the check name, resource type, and count for each check that would run — then exits with code 0 without executing any checks. Useful for previewing which checks are in scope before a full run.
 
@@ -62,6 +64,7 @@ Dry run complete. 2524 check(s) would run.
 **Type:** String (comma-separated)
 **Default:** Empty (runs all checks)
 **Required:** No
+**Environment variable:** `DBT_BOUNCER_CHECK`
 
 Limits the checks run to specific check names. Multiple checks can be specified as a comma-separated list.
 
@@ -80,6 +83,7 @@ dbt-bouncer run --check check_model_names,check_source_freshness_populated
 **Type:** String (comma-separated)
 **Default:** Empty (runs all categories)
 **Required:** No
+**Environment variable:** `DBT_BOUNCER_ONLY`
 
 Limits the checks run to specific categories. Multiple categories can be specified as a comma-separated list.
 
@@ -98,6 +102,7 @@ dbt-bouncer run --only catalog_checks,manifest_checks
 **Type:** Path
 **Default:** None (no output file is written)
 **Required:** No
+**Environment variable:** `DBT_BOUNCER_OUTPUT_FILE`
 
 Specifies the location where check metadata will be saved. If not provided, no structured output file is written.
 
@@ -113,6 +118,7 @@ dbt-bouncer run --output-file results/check-results.json
 **Options:** `csv`, `json`, `junit`, `sarif`, `tap`
 **Default:** `json`
 **Required:** No
+**Environment variable:** `DBT_BOUNCER_OUTPUT_FORMAT`
 
 Specifies the format for the output file. Requires `--output-file` to be set.
 
@@ -140,6 +146,7 @@ dbt-bouncer run --output-format sarif --output-file results.sarif
 **Type:** Flag
 **Default:** False
 **Required:** No
+**Environment variable:** `DBT_BOUNCER_OUTPUT_ONLY_FAILURES`
 
 When passed, only failures will be included in the output file. Successful checks are omitted.
 
@@ -154,6 +161,7 @@ dbt-bouncer run --output-file results.json --output-only-failures
 **Type:** Flag
 **Default:** False
 **Required:** No
+**Environment variable:** `DBT_BOUNCER_SHOW_ALL_FAILURES`
 
 When passed, all failures will be printed to the console, even if an output file is specified.
 
@@ -168,6 +176,7 @@ dbt-bouncer run --show-all-failures
 **Type:** Counter
 **Default:** 0
 **Required:** No
+**Environment variable:** `DBT_BOUNCER_VERBOSITY`
 
 Controls the verbosity of logging output. Can be specified multiple times to increase verbosity.
 
@@ -182,6 +191,47 @@ dbt-bouncer run -vv
 
 # Maximum verbosity
 dbt-bouncer run -vvv
+```
+
+### Environment variables
+
+Every `run` option can also be set with an environment variable. This is useful when
+`dbt-bouncer` is invoked by a wrapper that does not let you control the command line —
+`pre-commit run`, for instance, passes no arguments beyond the `args:` list committed in
+`.pre-commit-config.yaml`.
+
+| Option | Environment variable |
+| --- | --- |
+| `--check` | `DBT_BOUNCER_CHECK` |
+| `--dry-run` | `DBT_BOUNCER_DRY_RUN` |
+| `--only` | `DBT_BOUNCER_ONLY` |
+| `--output-file` | `DBT_BOUNCER_OUTPUT_FILE` |
+| `--output-format` | `DBT_BOUNCER_OUTPUT_FORMAT` |
+| `--output-only-failures` | `DBT_BOUNCER_OUTPUT_ONLY_FAILURES` |
+| `--show-all-failures` | `DBT_BOUNCER_SHOW_ALL_FAILURES` |
+| `-v`, `--verbosity` | `DBT_BOUNCER_VERBOSITY` |
+
+A command-line argument always wins over the corresponding environment variable.
+
+Flags accept the usual truthy and falsy strings (`1`/`0`, `true`/`false`, `yes`/`no`).
+`DBT_BOUNCER_VERBOSITY` takes the count as a number, so `DBT_BOUNCER_VERBOSITY=2` is
+equivalent to `-vv`.
+
+These variables apply to `run` and to the legacy no-subcommand invocation. They are not
+read by `validate`, `list` or `explain`.
+
+`--config-file` is the exception to the table: it is read from `DBT_BOUNCER_CONFIG_FILE`,
+but with its own precedence rules, described under [Config file](configuration.md).
+
+**Example** — getting machine-readable output from the pre-commit hook, which accepts no
+arguments of your own:
+
+```bash
+DBT_BOUNCER_OUTPUT_FILE=results.json \
+DBT_BOUNCER_OUTPUT_FORMAT=json \
+DBT_BOUNCER_OUTPUT_ONLY_FAILURES=true \
+DBT_BOUNCER_ONLY=manifest_checks \
+  pre-commit run dbt-bouncer --all-files
 ```
 
 ## validate

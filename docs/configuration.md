@@ -10,6 +10,11 @@ The following options are available, in order of priority:
 1. A file named `dbt-bouncer.toml` in the current working directory.
 1. A `[tool.dbt-bouncer]` section in `pyproject.toml`.
 
+The config file selects *which checks* run. The `run` command's other options — output
+file and format, check and category filters, verbosity — are not config file keys; set
+them on the command line, or with the `DBT_BOUNCER_*` variables described under
+[CLI > Environment variables](cli.md#environment-variables).
+
 Here is an example config file in `yaml`:
 
 ```yaml
