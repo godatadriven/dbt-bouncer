@@ -2069,10 +2069,10 @@ def test_cli_env_var_output_options(argv_prefix, tmp_path):
     runner = CliRunner()
     result = runner.invoke(
         app,
-        [*argv_prefix, "--config-file", config_file.__str__()],
+        [*argv_prefix, "--config-file", str(config_file)],
         env={
             "DBT_BOUNCER_ONLY": "manifest_checks",
-            "DBT_BOUNCER_OUTPUT_FILE": output_file.__str__(),
+            "DBT_BOUNCER_OUTPUT_FILE": str(output_file),
             "DBT_BOUNCER_OUTPUT_FORMAT": "json",
             "DBT_BOUNCER_OUTPUT_ONLY_FAILURES": "true",
         },
@@ -2097,9 +2097,9 @@ def test_cli_env_var_check_selection(argv_prefix, tmp_path):
         [
             *argv_prefix,
             "--config-file",
-            config_file.__str__(),
+            str(config_file),
             "--output-file",
-            output_file.__str__(),
+            str(output_file),
         ],
         env={"DBT_BOUNCER_CHECK": "check_model_does_not_exist"},
     )
@@ -2108,7 +2108,8 @@ def test_cli_env_var_check_selection(argv_prefix, tmp_path):
     assert result.exit_code == ExitCode.NO_CHECKS_RUN
 
 
-def test_cli_env_var_dry_run(tmp_path):
+@ENV_VAR_ARGV_PREFIXES
+def test_cli_env_var_dry_run(argv_prefix, tmp_path):
     """`--dry-run` is read from the environment as a boolean flag."""
     config_file = _write_env_var_fixture(tmp_path)
     output_file = tmp_path / "results.json"
@@ -2117,11 +2118,11 @@ def test_cli_env_var_dry_run(tmp_path):
     result = runner.invoke(
         app,
         [
-            "run",
+            *argv_prefix,
             "--config-file",
-            config_file.__str__(),
+            str(config_file),
             "--output-file",
-            output_file.__str__(),
+            str(output_file),
         ],
         env={"DBT_BOUNCER_DRY_RUN": "true"},
     )
@@ -2149,7 +2150,7 @@ def test_cli_env_var_verbosity(monkeypatch, tmp_path):
     runner = CliRunner()
     runner.invoke(
         app,
-        ["run", "--config-file", config_file.__str__()],
+        ["run", "--config-file", str(config_file)],
         env={"DBT_BOUNCER_VERBOSITY": "2"},
     )
 
@@ -2167,9 +2168,9 @@ def test_cli_flag_takes_precedence_over_env_var(tmp_path):
         [
             "run",
             "--config-file",
-            config_file.__str__(),
+            str(config_file),
             "--output-file",
-            output_file.__str__(),
+            str(output_file),
             "--output-format",
             "json",
         ],
@@ -2188,7 +2189,7 @@ def test_cli_env_var_invalid_output_format(tmp_path):
     runner = CliRunner()
     result = runner.invoke(
         app,
-        ["run", "--config-file", config_file.__str__()],
+        ["run", "--config-file", str(config_file)],
         env={"DBT_BOUNCER_OUTPUT_FORMAT": "not-a-format"},
     )
 
