@@ -807,6 +807,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Environment variables
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1196,7 +1207,8 @@
 <h4 id="-config-file"><code>--config-file</code><a class="headerlink" href="#-config-file" title="Permanent link">#</a></h4>
 <p><strong>Type:</strong> Path
 <strong>Default:</strong> <code>dbt-bouncer.yml</code>
-<strong>Required:</strong> No</p>
+<strong>Required:</strong> No
+<strong>Environment variable:</strong> <code>DBT_BOUNCER_CONFIG_FILE</code> (see <a href="../configuration/">Config file</a>)</p>
 <p>Specifies the location of the YAML configuration file containing your dbt-bouncer checks.</p>
 <p><strong>Example:</strong></p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>dbt-bouncer<span class="w"> </span>run<span class="w"> </span>--config-file<span class="w"> </span>config/checks.yml
@@ -1204,7 +1216,8 @@
 <h4 id="-dry-run"><code>--dry-run</code><a class="headerlink" href="#-dry-run" title="Permanent link">#</a></h4>
 <p><strong>Type:</strong> Flag
 <strong>Default:</strong> False
-<strong>Required:</strong> No</p>
+<strong>Required:</strong> No
+<strong>Environment variable:</strong> <code>DBT_BOUNCER_DRY_RUN</code></p>
 <p>When passed, assembles the full check list as normal but prints a summary table showing the check name, resource type, and count for each check that would run — then exits with code 0 without executing any checks. Useful for previewing which checks are in scope before a full run.</p>
 <p><strong>Example:</strong></p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>dbt-bouncer<span class="w"> </span>run<span class="w"> </span>--dry-run
@@ -1222,7 +1235,8 @@
 <h4 id="-check"><code>--check</code><a class="headerlink" href="#-check" title="Permanent link">#</a></h4>
 <p><strong>Type:</strong> String (comma-separated)
 <strong>Default:</strong> Empty (runs all checks)
-<strong>Required:</strong> No</p>
+<strong>Required:</strong> No
+<strong>Environment variable:</strong> <code>DBT_BOUNCER_CHECK</code></p>
 <p>Limits the checks run to specific check names. Multiple checks can be specified as a comma-separated list.</p>
 <p><strong>Examples:</strong></p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># Run a single check</span>
@@ -1234,7 +1248,8 @@
 <h4 id="-only"><code>--only</code><a class="headerlink" href="#-only" title="Permanent link">#</a></h4>
 <p><strong>Type:</strong> String (comma-separated)
 <strong>Default:</strong> Empty (runs all categories)
-<strong>Required:</strong> No</p>
+<strong>Required:</strong> No
+<strong>Environment variable:</strong> <code>DBT_BOUNCER_ONLY</code></p>
 <p>Limits the checks run to specific categories. Multiple categories can be specified as a comma-separated list.</p>
 <p><strong>Examples:</strong></p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># Run only manifest checks</span>
@@ -1246,7 +1261,8 @@
 <h4 id="-output-file"><code>--output-file</code><a class="headerlink" href="#-output-file" title="Permanent link">#</a></h4>
 <p><strong>Type:</strong> Path
 <strong>Default:</strong> None (no output file is written)
-<strong>Required:</strong> No</p>
+<strong>Required:</strong> No
+<strong>Environment variable:</strong> <code>DBT_BOUNCER_OUTPUT_FILE</code></p>
 <p>Specifies the location where check metadata will be saved. If not provided, no structured output file is written.</p>
 <p><strong>Example:</strong></p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>dbt-bouncer<span class="w"> </span>run<span class="w"> </span>--output-file<span class="w"> </span>results/check-results.json
@@ -1255,7 +1271,8 @@
 <p><strong>Type:</strong> Choice
 <strong>Options:</strong> <code>csv</code>, <code>json</code>, <code>junit</code>, <code>sarif</code>, <code>tap</code>
 <strong>Default:</strong> <code>json</code>
-<strong>Required:</strong> No</p>
+<strong>Required:</strong> No
+<strong>Environment variable:</strong> <code>DBT_BOUNCER_OUTPUT_FORMAT</code></p>
 <p>Specifies the format for the output file. Requires <code>--output-file</code> to be set.</p>
 <p><strong>Examples:</strong></p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># Output as JSON (default)</span>
@@ -1275,7 +1292,8 @@
 <h4 id="-output-only-failures"><code>--output-only-failures</code><a class="headerlink" href="#-output-only-failures" title="Permanent link">#</a></h4>
 <p><strong>Type:</strong> Flag
 <strong>Default:</strong> False
-<strong>Required:</strong> No</p>
+<strong>Required:</strong> No
+<strong>Environment variable:</strong> <code>DBT_BOUNCER_OUTPUT_ONLY_FAILURES</code></p>
 <p>When passed, only failures will be included in the output file. Successful checks are omitted.</p>
 <p><strong>Example:</strong></p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>dbt-bouncer<span class="w"> </span>run<span class="w"> </span>--output-file<span class="w"> </span>results.json<span class="w"> </span>--output-only-failures
@@ -1283,7 +1301,8 @@
 <h4 id="-show-all-failures"><code>--show-all-failures</code><a class="headerlink" href="#-show-all-failures" title="Permanent link">#</a></h4>
 <p><strong>Type:</strong> Flag
 <strong>Default:</strong> False
-<strong>Required:</strong> No</p>
+<strong>Required:</strong> No
+<strong>Environment variable:</strong> <code>DBT_BOUNCER_SHOW_ALL_FAILURES</code></p>
 <p>When passed, all failures will be printed to the console, even if an output file is specified.</p>
 <p><strong>Example:</strong></p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>dbt-bouncer<span class="w"> </span>run<span class="w"> </span>--show-all-failures
@@ -1291,7 +1310,8 @@
 <h4 id="-v-verbosity"><code>-v, --verbosity</code><a class="headerlink" href="#-v-verbosity" title="Permanent link">#</a></h4>
 <p><strong>Type:</strong> Counter
 <strong>Default:</strong> 0
-<strong>Required:</strong> No</p>
+<strong>Required:</strong> No
+<strong>Environment variable:</strong> <code>DBT_BOUNCER_VERBOSITY</code></p>
 <p>Controls the verbosity of logging output. Can be specified multiple times to increase verbosity.</p>
 <p><strong>Examples:</strong></p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="c1"># Basic logging</span>
@@ -1303,9 +1323,72 @@
 </span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="c1"># Maximum verbosity</span>
 </span><span id="__span-10-8"><a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>dbt-bouncer<span class="w"> </span>run<span class="w"> </span>-vvv
 </span></code></pre></div>
+<h3 id="environment-variables">Environment variables<a class="headerlink" href="#environment-variables" title="Permanent link">#</a></h3>
+<p>Every <code>run</code> option can also be set with an environment variable. This is useful when
+<code>dbt-bouncer</code> is invoked by a wrapper that does not let you control the command line —
+<code>pre-commit run</code>, for instance, passes no arguments beyond the <code>args:</code> list committed in
+<code>.pre-commit-config.yaml</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Environment variable</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--check</code></td>
+<td><code>DBT_BOUNCER_CHECK</code></td>
+</tr>
+<tr>
+<td><code>--dry-run</code></td>
+<td><code>DBT_BOUNCER_DRY_RUN</code></td>
+</tr>
+<tr>
+<td><code>--only</code></td>
+<td><code>DBT_BOUNCER_ONLY</code></td>
+</tr>
+<tr>
+<td><code>--output-file</code></td>
+<td><code>DBT_BOUNCER_OUTPUT_FILE</code></td>
+</tr>
+<tr>
+<td><code>--output-format</code></td>
+<td><code>DBT_BOUNCER_OUTPUT_FORMAT</code></td>
+</tr>
+<tr>
+<td><code>--output-only-failures</code></td>
+<td><code>DBT_BOUNCER_OUTPUT_ONLY_FAILURES</code></td>
+</tr>
+<tr>
+<td><code>--show-all-failures</code></td>
+<td><code>DBT_BOUNCER_SHOW_ALL_FAILURES</code></td>
+</tr>
+<tr>
+<td><code>-v</code>, <code>--verbosity</code></td>
+<td><code>DBT_BOUNCER_VERBOSITY</code></td>
+</tr>
+</tbody>
+</table>
+<p>A command-line argument always wins over the corresponding environment variable.</p>
+<p>Flags accept the usual truthy and falsy strings (<code>1</code>/<code>0</code>, <code>true</code>/<code>false</code>, <code>yes</code>/<code>no</code>).
+<code>DBT_BOUNCER_VERBOSITY</code> takes the count as a number, so <code>DBT_BOUNCER_VERBOSITY=2</code> is
+equivalent to <code>-vv</code>.</p>
+<p>These variables apply to <code>run</code> and to the legacy no-subcommand invocation. They are not
+read by <code>validate</code>, <code>list</code> or <code>explain</code>.</p>
+<p><code>--config-file</code> is the exception to the table: it is read from <code>DBT_BOUNCER_CONFIG_FILE</code>,
+but with its own precedence rules, described under <a href="../configuration/">Config file</a>.</p>
+<p><strong>Example</strong> — getting machine-readable output from the pre-commit hook, which accepts no
+arguments of your own:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="nv">DBT_BOUNCER_OUTPUT_FILE</span><span class="o">=</span>results.json<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="nv">DBT_BOUNCER_OUTPUT_FORMAT</span><span class="o">=</span>json<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="nv">DBT_BOUNCER_OUTPUT_ONLY_FAILURES</span><span class="o">=</span><span class="nb">true</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="nv">DBT_BOUNCER_ONLY</span><span class="o">=</span>manifest_checks<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="w">  </span>pre-commit<span class="w"> </span>run<span class="w"> </span>dbt-bouncer<span class="w"> </span>--all-files
+</span></code></pre></div>
 <h2 id="validate">validate<a class="headerlink" href="#validate" title="Permanent link">#</a></h2>
 <p>The <code>validate</code> subcommand checks your configuration file for common issues:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>dbt-bouncer<span class="w"> </span>validate<span class="w"> </span>--config-file<span class="w"> </span>dbt-bouncer.yml
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>dbt-bouncer<span class="w"> </span>validate<span class="w"> </span>--config-file<span class="w"> </span>dbt-bouncer.yml
 </span></code></pre></div>
 <p>It will report:</p>
 <ul>
@@ -1315,12 +1398,12 @@
 <li>Everything <code>dbt-bouncer run</code> would reject: unknown keys, unknown check parameters, and mistyped parameter values — with a "Did you mean" suggestion for the closest valid name</li>
 </ul>
 <p>Example output for a valid config:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>Config file is valid!
+<div class="language-text highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>Config file is valid!
 </span></code></pre></div>
 <p>Example output for issues:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>Found 2 issue(s) in config file:
-</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>  Line 1: Check is missing required &#39;name&#39; field
-</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>  Line 3: model_name_patern: Extra inputs are not permitted. Did you mean &#39;model_name_pattern&#39;?
+<div class="language-text highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>Found 2 issue(s) in config file:
+</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>  Line 1: Check is missing required &#39;name&#39; field
+</span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>  Line 3: model_name_patern: Extra inputs are not permitted. Did you mean &#39;model_name_pattern&#39;?
 </span></code></pre></div>
 <h3 id="options_1">Options<a class="headerlink" href="#options_1" title="Permanent link">#</a></h3>
 <h4 id="-config-file_1"><code>--config-file</code><a class="headerlink" href="#-config-file_1" title="Permanent link">#</a></h4>
@@ -1329,11 +1412,11 @@
 <strong>Required:</strong> No</p>
 <p>Specifies the location of the YAML configuration file to validate.</p>
 <p><strong>Example:</strong></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>dbt-bouncer<span class="w"> </span>validate<span class="w"> </span>--config-file<span class="w"> </span>config/checks.yml
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>dbt-bouncer<span class="w"> </span>validate<span class="w"> </span>--config-file<span class="w"> </span>config/checks.yml
 </span></code></pre></div>
 <h2 id="init">init<a class="headerlink" href="#init" title="Permanent link">#</a></h2>
 <p>The <code>init</code> subcommand creates a <code>dbt-bouncer.yml</code> configuration file interactively:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>dbt-bouncer<span class="w"> </span>init
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>dbt-bouncer<span class="w"> </span>init
 </span></code></pre></div>
 <p>It asks a series of questions and writes a starter configuration file based on your answers:</p>
 <ul>
@@ -1345,7 +1428,7 @@
 <p>If a <code>dbt-bouncer.yml</code> file already exists, you will be prompted before it is overwritten.</p>
 <h2 id="list">list<a class="headerlink" href="#list" title="Permanent link">#</a></h2>
 <p>The <code>list</code> subcommand lists all available dbt-bouncer checks, grouped by category:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>dbt-bouncer<span class="w"> </span>list
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>dbt-bouncer<span class="w"> </span>list
 </span></code></pre></div>
 <h3 id="options_2">Options<a class="headerlink" href="#options_2" title="Permanent link">#</a></h3>
 <h4 id="-output-format_1"><code>--output-format</code><a class="headerlink" href="#-output-format_1" title="Permanent link">#</a></h4>
@@ -1355,29 +1438,29 @@
 <strong>Required:</strong> No</p>
 <p>Controls the output format. Use <code>json</code> for machine-readable output.</p>
 <p><strong>Examples:</strong></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="c1"># List checks as human-readable text (default)</span>
-</span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>dbt-bouncer<span class="w"> </span>list
-</span><span id="__span-17-3"><a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>
-</span><span id="__span-17-4"><a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a><span class="c1"># List checks as JSON</span>
-</span><span id="__span-17-5"><a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>dbt-bouncer<span class="w"> </span>list<span class="w"> </span>--output-format<span class="w"> </span>json
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="c1"># List checks as human-readable text (default)</span>
+</span><span id="__span-18-2"><a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>dbt-bouncer<span class="w"> </span>list
+</span><span id="__span-18-3"><a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>
+</span><span id="__span-18-4"><a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a><span class="c1"># List checks as JSON</span>
+</span><span id="__span-18-5"><a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a>dbt-bouncer<span class="w"> </span>list<span class="w"> </span>--output-format<span class="w"> </span>json
 </span></code></pre></div>
 <h2 id="explain">explain<a class="headerlink" href="#explain" title="Permanent link">#</a></h2>
 <p>The <code>explain</code> subcommand describes one check: what it does, its configurable parameters, and example usage. It works offline and does not need dbt artifacts:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>dbt-bouncer<span class="w"> </span>explain<span class="w"> </span>check_model_names
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>dbt-bouncer<span class="w"> </span>explain<span class="w"> </span>check_model_names
 </span></code></pre></div>
 <p>A check can be referenced by its name or by its rule code, so <code>dbt-bouncer explain MO038</code> shows the same output. An unknown name or code exits with code 2 (<code>CONFIG_ERROR</code>) and prints the closest match.</p>
 <p>Example output:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>╭─ check_model_names (MO038) ─────────────────────────────────────╮
-</span><span id="__span-19-2"><a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>│ Models must have a name that matches the supplied regex.        │
-</span><span id="__span-19-3"><a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>│ ...                                                             │
-</span><span id="__span-19-4"><a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a>╰────────────────────────────────────────────────────── manifest ─╯
-</span><span id="__span-19-5"><a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a>Parameters
-</span><span id="__span-19-6"><a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a>╭─────────────────────┬──────┬──────────┬─────────╮
-</span><span id="__span-19-7"><a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a>│ Name                │ Type │ Required │ Default │
-</span><span id="__span-19-8"><a id="__codelineno-19-8" name="__codelineno-19-8" href="#__codelineno-19-8"></a>├─────────────────────┼──────┼──────────┼─────────┤
-</span><span id="__span-19-9"><a id="__codelineno-19-9" name="__codelineno-19-9" href="#__codelineno-19-9"></a>│ model_name_pattern  │ str  │   yes    │ -       │
-</span><span id="__span-19-10"><a id="__codelineno-19-10" name="__codelineno-19-10" href="#__codelineno-19-10"></a>╰─────────────────────┴──────┴──────────┴─────────╯
-</span><span id="__span-19-11"><a id="__codelineno-19-11" name="__codelineno-19-11" href="#__codelineno-19-11"></a>Documentation: https://godatadriven.github.io/dbt-bouncer/checks/manifest/models/naming/
+<div class="language-text highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>╭─ check_model_names (MO038) ─────────────────────────────────────╮
+</span><span id="__span-20-2"><a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>│ Models must have a name that matches the supplied regex.        │
+</span><span id="__span-20-3"><a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>│ ...                                                             │
+</span><span id="__span-20-4"><a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a>╰────────────────────────────────────────────────────── manifest ─╯
+</span><span id="__span-20-5"><a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a>Parameters
+</span><span id="__span-20-6"><a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a>╭─────────────────────┬──────┬──────────┬─────────╮
+</span><span id="__span-20-7"><a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a>│ Name                │ Type │ Required │ Default │
+</span><span id="__span-20-8"><a id="__codelineno-20-8" name="__codelineno-20-8" href="#__codelineno-20-8"></a>├─────────────────────┼──────┼──────────┼─────────┤
+</span><span id="__span-20-9"><a id="__codelineno-20-9" name="__codelineno-20-9" href="#__codelineno-20-9"></a>│ model_name_pattern  │ str  │   yes    │ -       │
+</span><span id="__span-20-10"><a id="__codelineno-20-10" name="__codelineno-20-10" href="#__codelineno-20-10"></a>╰─────────────────────┴──────┴──────────┴─────────╯
+</span><span id="__span-20-11"><a id="__codelineno-20-11" name="__codelineno-20-11" href="#__codelineno-20-11"></a>Documentation: https://godatadriven.github.io/dbt-bouncer/checks/manifest/models/naming/
 </span></code></pre></div>
 <h3 id="options_3">Options<a class="headerlink" href="#options_3" title="Permanent link">#</a></h3>
 <h4 id="-custom-checks-dir"><code>--custom-checks-dir</code><a class="headerlink" href="#-custom-checks-dir" title="Permanent link">#</a></h4>
@@ -1392,11 +1475,11 @@
 <strong>Required:</strong> No</p>
 <p>Controls the output format. Use <code>json</code> for machine-readable output.</p>
 <p><strong>Example:</strong></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>dbt-bouncer<span class="w"> </span>explain<span class="w"> </span>check_model_names<span class="w"> </span>--output-format<span class="w"> </span>json
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>dbt-bouncer<span class="w"> </span>explain<span class="w"> </span>check_model_names<span class="w"> </span>--output-format<span class="w"> </span>json
 </span></code></pre></div>
 <h2 id="mcp">mcp<a class="headerlink" href="#mcp" title="Permanent link">#</a></h2>
 <p>The <code>mcp</code> subcommand starts a <a href="https://modelcontextprotocol.io">Model Context Protocol</a> server on the stdio transport:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>dbt-bouncer<span class="w"> </span>mcp
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>dbt-bouncer<span class="w"> </span>mcp
 </span></code></pre></div>
 <p>This lets AI coding agents (Claude Code, Cursor, etc.) query and run dbt-bouncer. The server exposes four tools:</p>
 <ul>
@@ -1406,17 +1489,17 @@
 <li><code>run_checks</code>: Run the configured checks against the project's dbt artifacts. This requires at minimum a <code>manifest.json</code> (from <code>dbt parse</code>).</li>
 </ul>
 <p>The command requires the optional <code>mcp</code> dependency:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>pip<span class="w"> </span>install<span class="w"> </span><span class="s1">&#39;dbt-bouncer[mcp]&#39;</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>pip<span class="w"> </span>install<span class="w"> </span><span class="s1">&#39;dbt-bouncer[mcp]&#39;</span>
 </span></code></pre></div>
 <p>Example client configuration (Claude Code, <code>.mcp.json</code>):</p>
-<div class="language-json highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="p">{</span>
-</span><span id="__span-23-2"><a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a><span class="w">  </span><span class="nt">&quot;mcpServers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-23-3"><a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a><span class="w">    </span><span class="nt">&quot;dbt-bouncer&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-23-4"><a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a><span class="w">      </span><span class="nt">&quot;command&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dbt-bouncer&quot;</span><span class="p">,</span>
-</span><span id="__span-23-5"><a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a><span class="w">      </span><span class="nt">&quot;args&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;mcp&quot;</span><span class="p">]</span>
-</span><span id="__span-23-6"><a id="__codelineno-23-6" name="__codelineno-23-6" href="#__codelineno-23-6"></a><span class="w">    </span><span class="p">}</span>
-</span><span id="__span-23-7"><a id="__codelineno-23-7" name="__codelineno-23-7" href="#__codelineno-23-7"></a><span class="w">  </span><span class="p">}</span>
-</span><span id="__span-23-8"><a id="__codelineno-23-8" name="__codelineno-23-8" href="#__codelineno-23-8"></a><span class="p">}</span>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="p">{</span>
+</span><span id="__span-24-2"><a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a><span class="w">  </span><span class="nt">&quot;mcpServers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-24-3"><a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a><span class="w">    </span><span class="nt">&quot;dbt-bouncer&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-24-4"><a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a><span class="w">      </span><span class="nt">&quot;command&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dbt-bouncer&quot;</span><span class="p">,</span>
+</span><span id="__span-24-5"><a id="__codelineno-24-5" name="__codelineno-24-5" href="#__codelineno-24-5"></a><span class="w">      </span><span class="nt">&quot;args&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;mcp&quot;</span><span class="p">]</span>
+</span><span id="__span-24-6"><a id="__codelineno-24-6" name="__codelineno-24-6" href="#__codelineno-24-6"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-24-7"><a id="__codelineno-24-7" name="__codelineno-24-7" href="#__codelineno-24-7"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-24-8"><a id="__codelineno-24-8" name="__codelineno-24-8" href="#__codelineno-24-8"></a><span class="p">}</span>
 </span></code></pre></div>
 <h2 id="exit-codes">Exit codes<a class="headerlink" href="#exit-codes" title="Permanent link">#</a></h2>
 <p><code>dbt-bouncer</code> returns distinct exit codes so that CI pipelines and scripts can tell a check failure apart from a setup problem:</p>

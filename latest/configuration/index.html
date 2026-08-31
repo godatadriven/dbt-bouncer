@@ -1016,6 +1016,10 @@ The following options are available, in order of priority:</p>
 <li>A file named <code>dbt-bouncer.toml</code> in the current working directory.</li>
 <li>A <code>[tool.dbt-bouncer]</code> section in <code>pyproject.toml</code>.</li>
 </ol>
+<p>The config file selects <em>which checks</em> run. The <code>run</code> command's other options — output
+file and format, check and category filters, verbosity — are not config file keys; set
+them on the command line, or with the <code>DBT_BOUNCER_*</code> variables described under
+<a href="../cli/#environment-variables">CLI &gt; Environment variables</a>.</p>
 <p>Here is an example config file in <code>yaml</code>:</p>
 <div class="language-yaml highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># [Optional] Directory where the dbt artifacts exists, generally the `target` directory inside a dbt project. Defaults to `$DBT_PROJECT_DIR/target` if $DBT_PROJECT_DIR is set, else `./target`.</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nt">dbt_artifacts_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">target</span>
