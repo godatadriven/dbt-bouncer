@@ -23,7 +23,19 @@ def read_preset_text(name: PresetName | str) -> str:
     Returns:
         str: The preset file text, comments included.
 
+    Raises:
+        DbtBouncerConfigError: If `name` is not a known preset.
+
     """
+    from dbt_bouncer.enums import PresetName
+    from dbt_bouncer.exceptions import DbtBouncerConfigError
+
+    valid = {p.value for p in PresetName}
+    if str(name) not in valid:
+        raise DbtBouncerConfigError(
+            f"Unknown preset `{name}`. Valid presets are: {sorted(valid)}."
+        )
+
     resource = resources.files(__name__) / f"{name}.yml"
     return resource.read_text(encoding="utf-8")
 

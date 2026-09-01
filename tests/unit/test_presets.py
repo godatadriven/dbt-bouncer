@@ -8,6 +8,7 @@ from typer.testing import CliRunner
 from dbt_bouncer import presets
 from dbt_bouncer.cli.run.utils import _resolve_config_contents
 from dbt_bouncer.enums import ConfigFileSource, PresetName
+from dbt_bouncer.exceptions import DbtBouncerConfigError
 from dbt_bouncer.main import app
 from dbt_bouncer.presets import load_preset_contents, read_preset_text
 
@@ -44,6 +45,12 @@ def test_preset_is_schema_valid(preset):
     preset_file = Path(presets.__file__).parent / f"{preset}.yml"
     result = CliRunner().invoke(app, ["validate", "--config-file", str(preset_file)])
     assert result.exit_code == 0, result.output
+
+
+def test_unknown_preset_raises_clear_error():
+    """An unknown preset name fails early with a clear error."""
+    with pytest.raises(DbtBouncerConfigError, match="Unknown preset"):
+        read_preset_text("not-a-preset")
 
 
 def test_resolve_config_contents_uses_preset():
