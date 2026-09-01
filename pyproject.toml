@@ -243,6 +243,9 @@ exclude = [
 MD007.indent = 4
 respect_gitignore = true
 
+[tool.setuptools.package-data]
+dbt_bouncer = ["presets/*.yml"]
+
 [tool.uv]
 package = true
 prerelease = "allow"

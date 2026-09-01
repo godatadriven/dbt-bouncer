@@ -15,7 +15,7 @@ import dbt_bouncer.cli.studio  # ruff: ignore[unused-import] — triggers @app.c
 import dbt_bouncer.cli.validate  # ruff: ignore[unused-import] — triggers @app.command registration
 from dbt_bouncer.cli import app
 from dbt_bouncer.cli.run import run
-from dbt_bouncer.enums import ConfigFileName, OutputFormat
+from dbt_bouncer.enums import ConfigFileName, OutputFormat, PresetName
 from dbt_bouncer.version import version as get_version
 
 
@@ -91,6 +91,14 @@ def main_callback(
             help="If passed then only failures will be included in the output file.",
         ),
     ] = False,
+    preset: Annotated[
+        PresetName | None,
+        typer.Option(
+            case_sensitive=False,
+            envvar="DBT_BOUNCER_PRESET",
+            help="Run a bundled preset config (minimal, standard, strict) instead of a config file. Ignored when --config-file is provided.",
+        ),
+    ] = None,
     dry_run: Annotated[
         bool,
         typer.Option(
@@ -149,6 +157,7 @@ def main_callback(
             output_file=output_file,
             output_format=output_format,
             output_only_failures=output_only_failures,
+            preset=preset,
             show_all_failures=show_all_failures,
             verbosity=verbosity,
         )

@@ -12,6 +12,7 @@ from dbt_bouncer.enums import (
     ConfigFileName,
     ConfigFileSource,
     OutputFormat,
+    PresetName,
 )
 from dbt_bouncer.exceptions import DbtBouncerConfigError
 from dbt_bouncer.reporting.logger import configure_console_logging
@@ -224,6 +225,50 @@ def _filter_by_check_names(
         )
 
 
+def _resolve_config_contents(
+    config_file: PurePath,
+    config_file_source: ConfigFileSource,
+    preset: PresetName | None,
+) -> tuple[dict[str, Any], PurePath]:
+    """Load the config contents, from a bundled preset or a config file.
+
+    A preset is used only when requested and no explicit `--config-file` was
+    given. When a preset is used, paths resolve relative to the current working
+    directory.
+
+    Returns:
+        tuple[dict[str, Any], PurePath]: The config contents and the config file
+            path used to resolve relative paths.
+
+    """
+    from dbt_bouncer.configuration_file.validator import (
+        get_config_file_path,
+        load_config_file_contents,
+    )
+
+    if preset is not None and config_file_source == ConfigFileSource.COMMANDLINE:
+        logging.warning(
+            f"Both `--preset` and an explicit `--config-file` were provided. Ignoring `--preset {preset}` and using the config file."
+        )
+        preset = None
+
+    if preset is not None:
+        from dbt_bouncer.presets import load_preset_contents
+
+        logging.info(f"Using the `{preset}` preset configuration.")
+        config_file_path = Path.cwd() / ConfigFileName.DBT_BOUNCER_YML
+        return load_preset_contents(preset), config_file_path
+
+    config_file_path = get_config_file_path(
+        config_file=config_file,
+        config_file_source=config_file_source,
+    )
+    config_file_contents = load_config_file_contents(
+        config_file_path, allow_default_config_file_creation=True
+    )
+    return dict(config_file_contents), config_file_path
+
+
 def run_bouncer(
     config_file: PurePath | None = None,
     check: str = "",
@@ -233,6 +278,7 @@ def run_bouncer(
     output_file: Path | None = None,
     output_format: OutputFormat = OutputFormat.JSON,
     output_only_failures: bool = False,
+    preset: PresetName | None = None,
     show_all_failures: bool = False,
     verbosity: int = 0,
     config_file_source: ConfigFileSource | None = None,
@@ -248,6 +294,7 @@ def run_bouncer(
         output_file: Location of the file where check metadata will be saved.
         output_format: Format for the output file, requires output_file (csv, json, junit, sarif, tap).
         output_only_failures: Only failures will be included in the output file.
+        preset: Use a bundled preset config (minimal, standard, strict) instead of a config file. Ignored when an explicit `--config-file` is provided.
         show_all_failures: All failures will be printed to the console.
         verbosity: Verbosity level.
         config_file_source: Source of the config file.
@@ -284,12 +331,6 @@ def run_bouncer(
 
     check_names = _parse_check_names(check)
 
-    # Using local imports to speed up CLI startup
-    from dbt_bouncer.configuration_file.validator import (
-        get_config_file_path,
-        load_config_file_contents,
-    )
-
     config_file = resolve_config_path(config_file)
     if config_file_source is None:
         config_file_source = detect_config_file_source(config_file)
@@ -300,12 +341,8 @@ def run_bouncer(
         raise RuntimeError(
             "config_file_source was not set by the config-file lookup logic."
         )
-    config_file_path = get_config_file_path(
-        config_file=config_file,
-        config_file_source=config_file_source,
-    )
-    config_file_contents = load_config_file_contents(
-        config_file_path, allow_default_config_file_creation=True
+    config_file_contents, config_file_path = _resolve_config_contents(
+        config_file, config_file_source, preset
     )
 
     _apply_global_severity(config_file_contents)

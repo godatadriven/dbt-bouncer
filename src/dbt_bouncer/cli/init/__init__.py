@@ -1,26 +1,77 @@
 """Init command package."""
 
 from pathlib import Path
+from typing import Annotated
 
 import typer
 from rich.console import Console
 
 from dbt_bouncer.cli import app
-from dbt_bouncer.cli.init.utils import build_initial_config, write_config_file
-from dbt_bouncer.enums import ConfigFileName
+from dbt_bouncer.cli.init.utils import (
+    build_initial_config,
+    count_preset_checks,
+    write_config_file,
+    write_preset_config_file,
+)
+from dbt_bouncer.enums import ConfigFileName, PresetName
+
+
+def _confirm_overwrite(console: Console, config_path: Path) -> None:
+    """Abort unless the user agrees to overwrite an existing config file.
+
+    Raises:
+        Abort: If the file exists and the user declines to overwrite it.
+
+    """
+    if not config_path.exists():
+        return
+    console.print(f"\n[yellow]Warning:[/yellow] {config_path} already exists.")
+    if not typer.confirm("Overwrite?", default=False):
+        console.print("[red]Aborted.[/red]")
+        raise typer.Abort()
+
+
+def _init_from_preset(console: Console, preset: PresetName) -> None:
+    """Scaffold a config file from a bundled preset, non-interactively."""
+    config_path = Path(ConfigFileName.DBT_BOUNCER_YML)
+    _confirm_overwrite(console, config_path)
+
+    write_preset_config_file(preset)
+    checks_count = count_preset_checks(preset)
+
+    console.print(f"\n[bold green][OK] Created {config_path}[/bold green]")
+    console.print(
+        f"  Added the [cyan]{preset}[/cyan] preset with [cyan]{checks_count}[/cyan] checks.\n"
+    )
+    console.print(
+        "  Run [cyan]dbt-bouncer validate[/cyan] to confirm your config is valid.\n"
+    )
 
 
 @app.command(name="init")
-def init() -> None:
-    """Create a dbt-bouncer.yml file interactively.
+def init(
+    preset: Annotated[
+        PresetName | None,
+        typer.Option(
+            case_sensitive=False,
+            help="Scaffold from a bundled preset (minimal, standard, strict) non-interactively.",
+        ),
+    ] = None,
+) -> None:
+    """Create a dbt-bouncer.yml file.
 
-    Asks questions to customize your initial configuration.
+    Without options, asks questions to customize your initial configuration.
+    With `--preset`, writes a bundled preset non-interactively.
 
-    Raises:
-        Abort: If the user declines to overwrite an existing config file.
-
+    In both paths, `_confirm_overwrite` aborts if the file exists and the user
+    declines to overwrite it.
     """
     console = Console()
+
+    if preset is not None:
+        _init_from_preset(console, preset)
+        return
+
     console.print("\n[bold blue]>> dbt-bouncer initialization[/bold blue]\n")
 
     # Interactive prompts
@@ -39,15 +90,7 @@ def init() -> None:
     )
 
     config_path = Path(ConfigFileName.DBT_BOUNCER_YML)
-    if config_path.exists():
-        console.print(f"\n[yellow]Warning:[/yellow] {config_path} already exists.")
-        overwrite = typer.confirm(
-            "Overwrite?",
-            default=False,
-        )
-        if not overwrite:
-            console.print("[red]Aborted.[/red]")
-            raise typer.Abort()
+    _confirm_overwrite(console, config_path)
 
     # Build config based on answers
     result = build_initial_config(

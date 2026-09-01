@@ -8,7 +8,7 @@ import typer
 
 from dbt_bouncer.cli import app
 from dbt_bouncer.cli.run.utils import detect_config_file_source, run_bouncer
-from dbt_bouncer.enums import ConfigFileName, ExitCode, OutputFormat
+from dbt_bouncer.enums import ConfigFileName, ExitCode, OutputFormat, PresetName
 from dbt_bouncer.exceptions import DbtBouncerArtifactError, DbtBouncerConfigError
 
 
@@ -75,6 +75,15 @@ def run(
             rich_help_panel="Output Options",
         ),
     ] = False,
+    preset: Annotated[
+        PresetName | None,
+        typer.Option(
+            case_sensitive=False,
+            envvar="DBT_BOUNCER_PRESET",
+            help="Run a bundled preset config (minimal, standard, strict) instead of a config file. Ignored when --config-file is provided.",
+            rich_help_panel="Check Selection",
+        ),
+    ] = None,
     show_all_failures: Annotated[
         bool,
         typer.Option(
@@ -128,6 +137,7 @@ def run(
             output_file=output_file,
             output_format=output_format,
             output_only_failures=output_only_failures,
+            preset=preset,
             show_all_failures=show_all_failures,
             verbosity=verbosity,
             config_file_source=config_file_source,
