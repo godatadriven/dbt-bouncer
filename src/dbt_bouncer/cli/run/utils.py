@@ -269,6 +269,203 @@ def _resolve_config_contents(
     return dict(config_file_contents), config_file_path
 
 
+def _parse_only(only: str) -> list[str]:
+    """Parse and validate ``--only`` into a list of category names.
+
+    Returns:
+        list[str]: The requested categories, or all categories when empty.
+
+    Raises:
+        DbtBouncerConfigError: If a value is not a valid check category.
+
+    """
+    valid_check_categories = [c.value for c in CheckCategory]
+    only_parsed = (
+        [x.strip() for x in set(only.strip().split(",")) if x != ""]
+        if only.strip()
+        else valid_check_categories
+    )
+    invalid = [x for x in only_parsed if x not in valid_check_categories]
+    if invalid:
+        raise DbtBouncerConfigError(
+            f"`--only` contains an invalid value (`{invalid[0]}`). Valid values are `{valid_check_categories}` or any comma-separated combination."
+        )
+    return only_parsed
+
+
+def _prepare_bouncer_config(
+    config_file: PurePath,
+    config_file_source: ConfigFileSource,
+    only_parsed: list[str],
+    check_names: set[str],
+    preset: PresetName | None,
+) -> tuple[DbtBouncerConfBase, list[str], PurePath]:
+    """Load and filter the config, ready to build a context.
+
+    Uses a bundled preset when requested, else the config file.
+
+    Returns:
+        tuple[DbtBouncerConfBase, list[str], PurePath]: The validated config, the
+            configured categories, and the config file path.
+
+    """
+    from dbt_bouncer.configuration_file.validator import validate_conf
+
+    config_file_contents, config_file_path = _resolve_config_contents(
+        config_file, config_file_source, preset
+    )
+
+    _apply_global_severity(config_file_contents)
+    check_categories = _configured_categories(config_file_contents)
+    custom_checks_dir = _resolve_custom_checks_dir(
+        config_file_contents, config_file_path
+    )
+
+    bouncer_config = validate_conf(
+        check_categories=check_categories,
+        config_file_contents=dict(config_file_contents),
+        custom_checks_dir=custom_checks_dir,
+    )
+
+    _apply_category_filters(bouncer_config, check_categories, only_parsed)
+    if check_names:
+        _filter_by_check_names(bouncer_config, check_categories, check_names)
+
+    return bouncer_config, check_categories, config_file_path
+
+
+def _artifacts_dir(
+    bouncer_config: DbtBouncerConfBase, config_file_path: PurePath
+) -> Path:
+    """Resolve the dbt artifacts directory for a config.
+
+    Returns:
+        Path: The artifacts directory.
+
+    """
+    return Path(
+        config_file_path.parent / (bouncer_config.dbt_artifacts_dir or "target")
+    )
+
+
+def _context_from_config(
+    bouncer_config: DbtBouncerConfBase,
+    check_categories: list[str],
+    config_file_path: PurePath,
+    *,
+    create_pr_comment_file: bool = False,
+    dry_run: bool = False,
+    output_file: Path | None = None,
+    output_format: OutputFormat = OutputFormat.JSON,
+    output_only_failures: bool = False,
+    show_all_failures: bool = False,
+    dbt_artifacts_dir: Path | None = None,
+) -> BouncerContext:
+    """Parse artifacts and build a context from a prepared config.
+
+    Returns:
+        BouncerContext: Ready-to-run context.
+
+    """
+    normalized_output_format = (
+        output_format.value
+        if isinstance(output_format, OutputFormat)
+        else OutputFormat(output_format.lower()).value
+    )
+    return _build_context(
+        bouncer_config=bouncer_config,
+        check_categories=check_categories,
+        create_pr_comment_file=create_pr_comment_file,
+        dbt_artifacts_dir=dbt_artifacts_dir
+        or _artifacts_dir(bouncer_config, config_file_path),
+        dry_run=dry_run,
+        output_file=output_file,
+        output_format=normalized_output_format,
+        output_only_failures=output_only_failures,
+        show_all_failures=show_all_failures,
+    )
+
+
+def _resolve_accepted_fingerprints(
+    baseline: Path | None,
+    state: Path | None,
+    bouncer_config: DbtBouncerConfBase,
+    check_categories: list[str],
+    config_file_path: PurePath,
+) -> set[str] | None:
+    """Build the set of already-known failure fingerprints to suppress.
+
+    Combines a stored baseline file and a `--state` base run. Returns ``None``
+    when neither is requested so the normal run is unchanged.
+
+    Returns:
+        set[str] | None: The accepted fingerprints, or ``None``.
+
+    Raises:
+        DbtBouncerConfigError: If `--state` is not a directory.
+        DbtBouncerArtifactError: If the base artifacts cannot be loaded.
+
+    """
+    if baseline is None and state is None:
+        return None
+
+    from dbt_bouncer.regression import failure_fingerprints, load_baseline
+
+    accepted: set[str] = set()
+    if baseline is not None:
+        accepted |= load_baseline(baseline)
+
+    if state is not None:
+        from dbt_bouncer.exceptions import DbtBouncerArtifactError
+        from dbt_bouncer.runner import collect_failures
+
+        if not state.is_dir():
+            raise DbtBouncerConfigError(
+                f"`--state {state}` is not a directory. Point it at a directory of dbt artifacts from a previous run (the `target` directory containing `manifest.json`)."
+            )
+        logging.info(f"Running checks against base artifacts in `{state}`...")
+        try:
+            base_ctx = _context_from_config(
+                bouncer_config,
+                check_categories,
+                config_file_path,
+                dbt_artifacts_dir=state,
+            )
+            base_failures = collect_failures(base_ctx)
+        except DbtBouncerArtifactError as e:
+            # Name `--state` as the source so the user knows which artifact set
+            # failed to load (the base one, not the current run's).
+            raise DbtBouncerArtifactError(
+                f"Failed to load the base artifacts from `--state {state}`: {e}"
+            ) from e
+        accepted |= failure_fingerprints(base_failures)
+
+    return accepted
+
+
+def _resolve_config_file_source(
+    config_file: PurePath, config_file_source: ConfigFileSource | None
+) -> ConfigFileSource:
+    """Resolve the config file source, detecting it when not given.
+
+    Returns:
+        ConfigFileSource: The resolved source.
+
+    Raises:
+        RuntimeError: If the source could not be determined.
+
+    """
+    if config_file_source is None:
+        config_file_source = detect_config_file_source(Path(config_file))
+    if (
+        config_file_source is None
+    ):  # pragma: no cover — unreachable; narrows type for the checker.
+        raise RuntimeError(
+            "config_file_source was not set by the config-file lookup logic."
+        )
+    return config_file_source
+
+
 def run_bouncer(
     config_file: PurePath | None = None,
     check: str = "",
@@ -282,6 +479,8 @@ def run_bouncer(
     show_all_failures: bool = False,
     verbosity: int = 0,
     config_file_source: ConfigFileSource | None = None,
+    baseline: Path | None = None,
+    state: Path | None = None,
 ) -> int:
     """Programmatic entrypoint for dbt-bouncer.
 
@@ -298,102 +497,49 @@ def run_bouncer(
         show_all_failures: All failures will be printed to the console.
         verbosity: Verbosity level.
         config_file_source: Source of the config file.
+        baseline: Path to a baseline file. Failures listed in it are suppressed.
+        state: Directory of dbt artifacts from a previous run. Failures present in that base run are suppressed.
+
+    An invalid `--only` value, a missing or invalid config file, or a missing
+    baseline file propagate as `DbtBouncerConfigError`. A missing or unsupported
+    dbt artifact propagates as `DbtBouncerArtifactError`.
 
     Returns:
         int: `ExitCode.SUCCESS` if all checks passed, `ExitCode.CHECK_ERRORS` if one
             or more checks failed, `ExitCode.NO_CHECKS_RUN` if the config matched no
             resources and no checks ran.
 
-    Raises:
-        DbtBouncerConfigError: If `--only` contains an invalid value, or the config
-            file is missing, unreadable, or invalid. A required dbt artifact being
-            missing or unsupported similarly propagates as `DbtBouncerArtifactError`
-            from the artifact loading called here.
-        RuntimeError: If `config_file_source` could not be determined.
-
     """
     configure_console_logging(verbosity)
     logging.info(f"Running dbt-bouncer ({get_version()})...")
 
-    # Validate `only` has valid values. Raised directly here so this public
-    # entrypoint documents the exception it can produce.
-    valid_check_categories = [c.value for c in CheckCategory]
-    only_parsed = (
-        [x.strip() for x in set(only.strip().split(",")) if x != ""]
-        if only.strip()
-        else valid_check_categories
-    )
-    invalid = [x for x in only_parsed if x not in valid_check_categories]
-    if invalid:
-        raise DbtBouncerConfigError(
-            f"`--only` contains an invalid value (`{invalid[0]}`). Valid values are `{valid_check_categories}` or any comma-separated combination."
-        )
-
+    only_parsed = _parse_only(only)
     check_names = _parse_check_names(check)
 
     config_file = resolve_config_path(config_file)
-    if config_file_source is None:
-        config_file_source = detect_config_file_source(config_file)
+    config_file_source = _resolve_config_file_source(config_file, config_file_source)
 
-    if (
-        config_file_source is None
-    ):  # pragma: no cover — unreachable; narrows type for the checker.
-        raise RuntimeError(
-            "config_file_source was not set by the config-file lookup logic."
-        )
-    config_file_contents, config_file_path = _resolve_config_contents(
-        config_file, config_file_source, preset
+    bouncer_config, check_categories, config_file_path = _prepare_bouncer_config(
+        config_file, config_file_source, only_parsed, check_names, preset
     )
 
-    _apply_global_severity(config_file_contents)
-    logging.debug(f"{config_file_contents=}")
-
-    check_categories = _configured_categories(config_file_contents)
-    logging.debug(f"{check_categories=}")
-
-    custom_checks_dir = _resolve_custom_checks_dir(
-        config_file_contents, config_file_path
+    accept = _resolve_accepted_fingerprints(
+        baseline, state, bouncer_config, check_categories, config_file_path
     )
 
-    from dbt_bouncer.configuration_file.validator import validate_conf
-
-    bouncer_config = validate_conf(
-        check_categories=check_categories,
-        config_file_contents=dict(config_file_contents),
-        custom_checks_dir=custom_checks_dir,
-    )
-    logging.debug("bouncer_config=%r", bouncer_config)
-
-    _apply_category_filters(bouncer_config, check_categories, only_parsed)
-
-    # Filter to specific check names when `--check` is provided
-    if check_names:
-        _filter_by_check_names(bouncer_config, check_categories, check_names)
-
-    logging.debug("bouncer_config=%r", bouncer_config)
-
-    dbt_artifacts_dir = Path(
-        config_file_path.parent / (bouncer_config.dbt_artifacts_dir or "target")
+    ctx = _context_from_config(
+        bouncer_config,
+        check_categories,
+        config_file_path,
+        create_pr_comment_file=create_pr_comment_file,
+        dry_run=dry_run,
+        output_file=output_file,
+        output_format=output_format,
+        output_only_failures=output_only_failures,
+        show_all_failures=show_all_failures,
     )
 
     from dbt_bouncer.runner import runner
 
-    normalized_output_format = (
-        output_format.value
-        if isinstance(output_format, OutputFormat)
-        else OutputFormat(output_format.lower()).value
-    )
-
-    ctx = _build_context(
-        bouncer_config=bouncer_config,
-        check_categories=check_categories,
-        create_pr_comment_file=create_pr_comment_file,
-        dbt_artifacts_dir=dbt_artifacts_dir,
-        dry_run=dry_run,
-        output_file=output_file,
-        output_format=normalized_output_format,
-        output_only_failures=output_only_failures,
-        show_all_failures=show_all_failures,
-    )
-    results = runner(ctx=ctx)
+    results = runner(ctx=ctx, accept=accept)
     return results[0]

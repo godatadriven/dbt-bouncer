@@ -50,6 +50,22 @@ def run(
             rich_help_panel="Check Selection",
         ),
     ] = "",
+    baseline: Annotated[
+        Path | None,
+        typer.Option(
+            envvar="DBT_BOUNCER_BASELINE",
+            help="Path to a baseline file. Failures listed in it are suppressed, so only new failures are reported.",
+            rich_help_panel="Regression",
+        ),
+    ] = None,
+    state: Annotated[
+        Path | None,
+        typer.Option(
+            envvar="DBT_BOUNCER_STATE",
+            help="Directory of dbt artifacts from a previous run. Failures present in that base run are suppressed, so only new failures are reported.",
+            rich_help_panel="Regression",
+        ),
+    ] = None,
     output_file: Annotated[
         Path | None,
         typer.Option(
@@ -129,6 +145,7 @@ def run(
 
     try:
         exit_code = run_bouncer(
+            baseline=baseline,
             check=check,
             config_file=config_file,
             create_pr_comment_file=create_pr_comment_file,
@@ -139,6 +156,7 @@ def run(
             output_only_failures=output_only_failures,
             preset=preset,
             show_all_failures=show_all_failures,
+            state=state,
             verbosity=verbosity,
             config_file_source=config_file_source,
         )
