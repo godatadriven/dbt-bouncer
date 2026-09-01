@@ -1,9 +1,14 @@
 """Utility functions for the init CLI subcommand."""
 
+from __future__ import annotations
+
 from pathlib import Path
-from typing import Any, NamedTuple
+from typing import TYPE_CHECKING, Any, NamedTuple
 
 from dbt_bouncer.enums import ConfigFileName
+
+if TYPE_CHECKING:
+    from dbt_bouncer.enums import PresetName
 
 
 class InitConfig(NamedTuple):
@@ -65,6 +70,43 @@ def build_initial_config(
     }
 
     return InitConfig(config=config_dict, checks_count=len(manifest_checks))
+
+
+def count_preset_checks(preset: PresetName) -> int:
+    """Count the checks defined in a bundled preset.
+
+    Args:
+        preset: The preset name (minimal, standard, strict).
+
+    Returns:
+        int: The total number of checks across all categories.
+
+    """
+    from dbt_bouncer.presets import load_preset_contents
+
+    contents = load_preset_contents(preset)
+    return sum(
+        len(v)
+        for k, v in contents.items()
+        if k.endswith("_checks") and isinstance(v, list)
+    )
+
+
+def write_preset_config_file(preset: PresetName) -> Path:
+    """Write a bundled preset to `dbt-bouncer.yml`, comments preserved.
+
+    Args:
+        preset: The preset name (minimal, standard, strict).
+
+    Returns:
+        Path: The path to the created config file.
+
+    """
+    from dbt_bouncer.presets import read_preset_text
+
+    config_path = Path(ConfigFileName.DBT_BOUNCER_YML)
+    config_path.write_text(read_preset_text(preset), encoding="utf-8")
+    return config_path
 
 
 def write_config_file(config_dict: dict[str, Any]) -> Path:

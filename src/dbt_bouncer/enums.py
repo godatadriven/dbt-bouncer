@@ -101,6 +101,14 @@ class OutputFormat(StrEnum):
         return list(cls)
 
 
+class PresetName(StrEnum):
+    """Bundled configuration presets shipped with dbt-bouncer."""
+
+    MINIMAL = auto()
+    STANDARD = auto()
+    STRICT = auto()
+
+
 class PropertiesLayout(StrEnum):
     """Layouts for model properties (`.yml`) files."""
 

@@ -1,0 +1,61 @@
+# dbt-bouncer "strict" preset.
+#
+# A demanding, opinionated ruleset for teams that want strong governance. It
+# enforces documentation, testing, naming, and source hygiene across the whole
+# project. Every check works without project-specific values and needs only
+# `manifest.json`.
+#
+# The naming patterns assume snake_case names. Adjust them to your standard.
+# Add `catalog_checks` (needs `catalog.json`) and `run_results_checks` (needs
+# `run_results.json`) once those artifacts are available.
+#
+# Use it directly:   dbt-bouncer run --preset strict
+# Or scaffold a copy: dbt-bouncer init --preset strict
+manifest_checks:
+  # Exposures
+  - name: check_exposure_based_on_non_public_models
+  - name: check_exposure_description_populated
+  - name: check_exposure_has_owner
+    required_fields:
+      - email
+      - name
+
+  # Macros
+  - name: check_macro_arguments_description_populated
+  - name: check_macro_description_populated
+  - name: check_macro_name_matches_file_name
+
+  # Models
+  - name: check_model_column_names
+    column_name_pattern: ^[a-z_0-9]+$
+  - name: check_model_description_populated
+  - name: check_model_documentation_coverage
+    min_model_documentation_coverage_pct: 90
+  - name: check_model_documented_in_same_directory
+  - name: check_model_hard_coded_references
+  - name: check_model_has_properties_file
+  - name: check_model_has_semi_colon
+  - name: check_model_has_tests_by_type
+    min_number_of_schema_tests: 1
+  - name: check_model_has_unique_test
+  - name: check_model_max_chained_views
+  - name: check_model_names
+    model_name_pattern: ^[a-z_0-9]+$
+  - name: check_model_test_coverage
+
+  # Seeds
+  - name: check_seed_description_populated
+
+  # Snapshots
+  - name: check_snapshot_description_populated
+  - name: check_snapshot_has_unique_key
+  - name: check_snapshot_strategy
+
+  # Sources
+  - name: check_duplicate_sources
+  - name: check_source_description_populated
+  - name: check_source_freshness_populated
+  - name: check_source_loader_populated
+  - name: check_source_names
+    source_name_pattern: ^[a-z_0-9]+$
+  - name: check_source_not_orphaned

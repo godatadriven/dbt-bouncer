@@ -97,6 +97,28 @@ dbt-bouncer run --only manifest_checks
 dbt-bouncer run --only catalog_checks,manifest_checks
 ```
 
+#### `--preset`
+
+**Type:** Choice
+**Options:** `minimal`, `standard`, `strict`
+**Default:** None
+**Required:** No
+**Environment variable:** `DBT_BOUNCER_PRESET`
+
+Runs a bundled preset config instead of a config file. A preset is a ready-made ruleset, so you can run dbt-bouncer without writing a config file first. See [Presets](#presets) for what each preset contains.
+
+An explicit `--config-file` takes precedence. If you pass both, the preset is ignored and a warning is logged.
+
+**Examples:**
+
+```bash
+# Run the strict preset without a config file
+dbt-bouncer run --preset strict
+
+# Scaffold an editable copy instead of running it
+dbt-bouncer init --preset strict
+```
+
 #### `--output-file`
 
 **Type:** Path
@@ -295,6 +317,46 @@ It asks a series of questions and writes a starter configuration file based on y
 - Whether to enforce naming conventions for staging models
 
 If a `dbt-bouncer.yml` file already exists, you will be prompted before it is overwritten.
+
+### `--preset`
+
+Instead of the interactive questions, `init --preset <name>` writes a bundled preset to `dbt-bouncer.yml` non-interactively. The comments in the preset are kept, so you get an editable, documented starting point.
+
+```bash
+dbt-bouncer init --preset standard
+```
+
+See [Presets](#presets) for what each preset contains.
+
+## presets
+
+A preset is a ready-made ruleset that ships with dbt-bouncer. Use a preset to start without writing a config file, then tune it to your project.
+
+There are three presets:
+
+| Preset | Checks | Use for |
+|---|---|---|
+| `minimal` | A small, high-signal set (model and source documentation, a unique test, source freshness). | A first run, or a large legacy project. |
+| `standard` | A balanced set of documentation, testing, and source-hygiene checks. | A typical project. |
+| `strict` | A demanding, opinionated set that also enforces naming, coverage thresholds, and snapshot rules. | Teams that want strong governance. |
+
+Every preset needs only `manifest.json`. The naming patterns in `strict` assume snake_case names, so adjust them to your standard.
+
+There are two ways to use a preset:
+
+- Run it directly, no config file needed:
+
+  ```bash
+  dbt-bouncer run --preset strict
+  ```
+
+- Scaffold an editable copy and extend it:
+
+  ```bash
+  dbt-bouncer init --preset strict
+  ```
+
+To add catalog checks (needs `catalog.json`) or run-results checks (needs `run_results.json`), scaffold a copy and add those categories yourself.
 
 ## list
 
