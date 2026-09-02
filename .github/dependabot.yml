@@ -9,12 +9,22 @@ updates:
       directories:
         - /
         - /.github/actions/*
+      # Combine all GitHub Actions updates (across both directories) into one PR.
+      groups:
+        github-actions:
+          patterns:
+            - "*"
       schedule:
           interval: monthly
     - package-ecosystem: pip
       cooldown:
         default-days: 14
       directory: /
+      # Combine all Python dependency updates into one PR.
+      groups:
+        python-dependencies:
+          patterns:
+            - "*"
       ignore:
         - dependency-name: "*"
           update-types: ["version-update:semver-patch"]
