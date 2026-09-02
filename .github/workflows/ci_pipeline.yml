@@ -149,7 +149,7 @@ jobs:
             run: mise run install
 
           - name: Install Hyperfine
-            uses: taiki-e/install-action@b8cecb83565409bcc297b2df6e77f030b2a468d5 # v2
+            uses: taiki-e/install-action@5b4d68e2e660441203ab128a23676f1e4faf1532 # v2
             with:
               tool: hyperfine@1.20
 
