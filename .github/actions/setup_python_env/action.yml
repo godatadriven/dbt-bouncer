@@ -39,13 +39,13 @@ runs:
         python-version: ${{ steps.resolve-version.outputs.python-version }}
 
     - name: Install uv
-      uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7
+      uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
       with:
         cache-suffix: py${{ steps.resolve-version.outputs.python-version }}
         enable-cache: true
 
     - name: Setup mise
-      uses: jdx/mise-action@7e36c90d9ab29c415a2384db3006f3ec8a8cc654 # v4.2.4
+      uses: jdx/mise-action@3c2e0cf82a5b2e5249f0d3635a4d83d0ae861518 # v4.2.5
       with:
         install: false
 
