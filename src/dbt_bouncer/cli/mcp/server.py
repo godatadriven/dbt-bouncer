@@ -21,10 +21,7 @@ import shutil
 import subprocess  # ruff: ignore[suspicious-subprocess-import] # nosec B404
 import tempfile
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
-
-if TYPE_CHECKING:
-    from mcp.server.fastmcp import FastMCP
+from typing import Any
 
 # Two minutes: comfortably above a full run on a very large dbt project,
 # small enough that a hung subprocess does not stall the agent forever.
@@ -248,29 +245,40 @@ def run_checks(
     }
 
 
-def build_server() -> FastMCP:
-    """Build the FastMCP server with all dbt-bouncer tools registered.
+def build_server() -> Any:
+    """Build the MCP server with all dbt-bouncer tools registered.
+
+    The server class differs by mcp version. mcp<2 provides ``FastMCP``. mcp>=2
+    renames it to ``MCPServer``. Both expose the same ``.tool()``, ``.run()``,
+    and ``.list_tools()`` methods that this function and its callers use.
 
     Returns:
-        FastMCP: The configured server. Call ``.run()`` to serve on stdio.
+        Any: The configured server. Call ``.run()`` to serve on stdio.
 
     """
-    from mcp.server.fastmcp import FastMCP
-
-    # Resolve a forward reference in FastMCP's own `Settings` model. Without
-    # this, pydantic-settings emits an IncompleteFieldDefinitionWarning for the
-    # `lifespan` field when the server is built (upstream mcp issue). The rebuild
-    # is a no-op if the reference already resolves. Guarded so a future mcp
-    # refactor that renames or removes the model cannot break server startup.
     try:
-        from mcp.server.fastmcp.server import Settings
+        # mcp<2 provides FastMCP; mcp>=2 renamed it to MCPServer (below).
+        from mcp.server.fastmcp import FastMCP as McpServer  # ty: ignore
+    except ModuleNotFoundError:
+        # A missing top-level `mcp` package re-raises here and is handled by the
+        # `mcp` command as a CONFIG_ERROR.
+        from mcp.server import MCPServer as McpServer
+
+    # Resolve a forward reference in FastMCP's own `Settings` model (mcp<2 only).
+    # Without this, pydantic-settings emits an IncompleteFieldDefinitionWarning
+    # for the `lifespan` field when the server is built (upstream mcp issue). The
+    # rebuild is a no-op if the reference already resolves. Guarded so a future
+    # mcp refactor that renames or removes the model cannot break server startup.
+    # mcp>=2 has no such module, so the import fails and is skipped.
+    try:
+        from mcp.server.fastmcp.server import Settings  # ty: ignore[unresolved-import]
 
         Settings.model_rebuild()
     except Exception:  # pragma: no cover - defensive against mcp internals
         # The warning is cosmetic, so a failed rebuild must not stop the server.
         logging.debug("FastMCP Settings.model_rebuild() failed.", exc_info=True)
 
-    server = FastMCP(
+    server = McpServer(
         "dbt-bouncer",
         instructions=(
             "dbt-bouncer enforces conventions in dbt projects. Use "
