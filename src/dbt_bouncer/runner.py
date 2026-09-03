@@ -469,10 +469,56 @@ def _assemble_checks_to_run(ctx: "BouncerContext") -> list[CheckToRun]:
     return checks_to_run
 
 
+def _release_ctx_resources(ctx: "BouncerContext") -> None:
+    """Free the large per-resource lists once checks are assembled.
+
+    The lists are emptied rather than deleted: this frees the wrapper objects
+    they hold, avoids mutating Pydantic attribute metadata, and is safe to call
+    from either entry point (`collect_failures` and `runner`).
+
+    Only these six are freed: the check context consumes them in a derived form
+    (the ``*_flat`` / ``*_by_unique_id`` cached properties), so the original
+    wrappers are no longer needed. The remaining resource lists (exposures,
+    macros, sources, unit_tests, catalog_nodes, catalog_sources) are passed to
+    the check context directly and must stay.
+    """
+    ctx.models = []
+    ctx.run_results = []
+    ctx.seeds = []
+    ctx.semantic_models = []
+    ctx.snapshots = []
+    ctx.tests = []
+
+
+def collect_failures(ctx: "BouncerContext") -> list[dict[str, Any]]:
+    """Assemble and execute checks, returning raw results without reporting.
+
+    This is used to compute a baseline or a `--state` comparison set: it runs the
+    checks but prints nothing and writes no output file.
+
+    Returns:
+        list[dict[str, Any]]: The executor result dicts. Empty if no checks ran.
+
+    """
+    checks_to_run = _assemble_checks_to_run(ctx)
+    if not checks_to_run:
+        return []
+
+    _release_ctx_resources(ctx)
+    return Executor().run(checks_to_run)
+
+
 def runner(
     ctx: "BouncerContext",
+    accept: set[str] | None = None,
 ) -> tuple[int, list[Any]]:
     """Run dbt-bouncer checks.
+
+    Args:
+        ctx: The execution context.
+        accept: Fingerprints of already-known failures to suppress (baseline or
+            state). Suppressed failures do not report and do not affect the exit
+            code.
 
     Returns:
         tuple[int, list[Any]]: A tuple containing the exit code and a list of failed checks.
@@ -491,15 +537,6 @@ def runner(
         )
         return (ExitCode.NO_CHECKS_RUN, [])
 
-    del (
-        ctx.models,
-        ctx.run_results,
-        ctx.seeds,
-        ctx.semantic_models,
-        ctx.snapshots,
-        ctx.tests,
-    )
-
     reporter = Reporter(
         show_all_failures=ctx.show_all_failures,
         create_pr_comment_file=ctx.create_pr_comment_file,
@@ -513,7 +550,12 @@ def runner(
             checks_to_run, iterate_cache=_CLASS_ITERATE_CACHE
         )
 
-    executor = Executor()
-    results = executor.run(checks_to_run)
+    _release_ctx_resources(ctx)
+    results = Executor().run(checks_to_run)
+
+    if accept is not None:
+        from dbt_bouncer.regression import apply_regression_filter
+
+        results, _ = apply_regression_filter(results, accept)
 
     return reporter.report_results(results)

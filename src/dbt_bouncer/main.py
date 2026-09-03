@@ -7,6 +7,7 @@ from typing import Annotated
 
 import typer
 
+import dbt_bouncer.cli.baseline  # ruff: ignore[unused-import] — triggers @app.command registration
 import dbt_bouncer.cli.explain  # ruff: ignore[unused-import] — triggers @app.command registration
 import dbt_bouncer.cli.init  # ruff: ignore[unused-import] — triggers @app.command registration
 import dbt_bouncer.cli.list  # ruff: ignore[unused-import] — triggers @app.command registration
@@ -69,6 +70,20 @@ def main_callback(
             help="Limit the checks run to specific categories, comma-separated. Examples: 'manifest_checks', 'catalog_checks,manifest_checks'.",
         ),
     ] = "",
+    baseline: Annotated[
+        Path | None,
+        typer.Option(
+            envvar="DBT_BOUNCER_BASELINE",
+            help="Path to a baseline file. Failures listed in it are suppressed, so only new failures are reported.",
+        ),
+    ] = None,
+    state: Annotated[
+        Path | None,
+        typer.Option(
+            envvar="DBT_BOUNCER_STATE",
+            help="Directory of dbt artifacts from a previous run. Failures present in that base run are suppressed, so only new failures are reported.",
+        ),
+    ] = None,
     output_file: Annotated[
         Path | None,
         typer.Option(
@@ -149,6 +164,7 @@ def main_callback(
     if ctx.invoked_subcommand is None:
         ctx.invoke(
             run,
+            baseline=baseline,
             check=check,
             config_file=config_file,
             create_pr_comment_file=create_pr_comment_file,
@@ -159,5 +175,6 @@ def main_callback(
             output_only_failures=output_only_failures,
             preset=preset,
             show_all_failures=show_all_failures,
+            state=state,
             verbosity=verbosity,
         )

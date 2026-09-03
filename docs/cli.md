@@ -97,6 +97,21 @@ dbt-bouncer run --only manifest_checks
 dbt-bouncer run --only catalog_checks,manifest_checks
 ```
 
+#### `--baseline`
+
+**Type:** Path
+**Default:** None
+**Required:** No
+**Environment variable:** `DBT_BOUNCER_BASELINE`
+
+Path to a baseline file written by [`dbt-bouncer baseline`](#baseline). Failures listed in the baseline are suppressed, so the run fails only on newly introduced failures. See [Baselines](#baseline) for the workflow.
+
+**Example:**
+
+```bash
+dbt-bouncer run --baseline .dbt-bouncer-baseline.json
+```
+
 #### `--preset`
 
 **Type:** Choice
@@ -117,6 +132,26 @@ dbt-bouncer run --preset strict
 
 # Scaffold an editable copy instead of running it
 dbt-bouncer init --preset strict
+```
+
+#### `--state`
+
+**Type:** Path
+**Default:** None
+**Required:** No
+**Environment variable:** `DBT_BOUNCER_STATE`
+
+Compares the current run against a base set of dbt artifacts. Failures present in the base run are suppressed, so the run fails only on new failures. The value is a directory of dbt artifacts from a previous run (the `target` directory containing `manifest.json`).
+
+This matches dbt's own `--state` flag, which also points at a directory of artifacts from a previous run.
+
+`--state` runs the checks twice (once against the base artifacts, once against the current artifacts), so it parses the artifacts twice and takes about twice as long as a normal run.
+
+**Example:**
+
+```bash
+# Compare against a directory of base artifacts
+dbt-bouncer run --state ./base-target
 ```
 
 #### `--output-file`
@@ -224,6 +259,7 @@ Every `run` option can also be set with an environment variable. This is useful 
 
 | Option | Environment variable |
 | --- | --- |
+| `--baseline` | `DBT_BOUNCER_BASELINE` |
 | `--check` | `DBT_BOUNCER_CHECK` |
 | `--dry-run` | `DBT_BOUNCER_DRY_RUN` |
 | `--only` | `DBT_BOUNCER_ONLY` |
@@ -231,6 +267,7 @@ Every `run` option can also be set with an environment variable. This is useful 
 | `--output-format` | `DBT_BOUNCER_OUTPUT_FORMAT` |
 | `--output-only-failures` | `DBT_BOUNCER_OUTPUT_ONLY_FAILURES` |
 | `--show-all-failures` | `DBT_BOUNCER_SHOW_ALL_FAILURES` |
+| `--state` | `DBT_BOUNCER_STATE` |
 | `-v`, `--verbosity` | `DBT_BOUNCER_VERBOSITY` |
 
 A command-line argument always wins over the corresponding environment variable.
@@ -300,6 +337,32 @@ Specifies the location of the YAML configuration file to validate.
 ```bash
 dbt-bouncer validate --config-file config/checks.yml
 ```
+
+## baseline
+
+A baseline is the set of failures a project already has. With a baseline, a run reports only failures that are not in the baseline, so a team can adopt strict checks and fail only on new problems.
+
+Use the `baseline` subcommand to record the current failures:
+
+```bash
+dbt-bouncer baseline --output-file .dbt-bouncer-baseline.json
+```
+
+This runs every configured check and writes each failure to the baseline file. The default file name is `.dbt-bouncer-baseline.json`. Commit the file, then pass it to `run`:
+
+```bash
+dbt-bouncer run --baseline .dbt-bouncer-baseline.json
+```
+
+Now the run fails only on failures that are not in the baseline. To burn down the backlog, fix some failures and regenerate the baseline.
+
+The `--state` option does the same thing without a stored file. It compares the current run against a base set of artifacts and suppresses failures present in the base run. See the `--state` option under [`run`](#run).
+
+You can pass `--baseline` and `--state` together. A failure is suppressed when it is present in either the baseline file or the state base run.
+
+### Options
+
+The `baseline` subcommand takes `--config-file`, `--check`, `--only`, `--output-file`, and `-v`/`--verbosity`. They behave the same as for [`run`](#run).
 
 ## init
 
