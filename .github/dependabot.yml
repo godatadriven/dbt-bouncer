@@ -16,7 +16,9 @@ updates:
             - "*"
       schedule:
           interval: monthly
-    - package-ecosystem: pip
+    # "uv" ecosystem updates both pyproject.toml and uv.lock together.
+    # "pip" only updates pyproject.toml and leaves uv.lock stale.
+    - package-ecosystem: uv
       cooldown:
         default-days: 14
       directory: /
