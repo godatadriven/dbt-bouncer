@@ -184,7 +184,7 @@ class TestRunChecksTool:
 
 
 def test_build_server_registers_tools():
-    """The FastMCP server registers all four tools."""
+    """The MCP server registers all four tools."""
     pytest.importorskip("mcp")
 
     server = mcp_server.build_server()
