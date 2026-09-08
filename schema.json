@@ -3403,6 +3403,131 @@
       "title": "CheckModelAccess",
       "type": "object"
     },
+    "CheckModelAlias": {
+      "additionalProperties": false,
+      "description": "Models must have an explicit alias and/or an alias that matches the supplied regex.\n\n!!! info \"Rationale\"\n\n    `check_model_names` governs the file name; the alias governs the table name consumers see in the warehouse. Marts often carry layer suffixes in the file name (e.g. `fct_volume_fraction_ldm`) and expose a clean alias (`FCT_VOLUME_FRACTION`); enforcing this in CI keeps warehouse naming consistent.\n\nParameters:\n    alias_pattern (str | None): Regexp the model alias must match. If not supplied, the alias is not checked against a pattern.\n    require_explicit_alias (bool): If `True`, the model must have an alias explicitly configured (i.e. not just dbt's default of the model name). Default: `False`.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    materialization (Literal[\"ephemeral\", \"incremental\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_model_alias\n          include: ^models/marts\n          require_explicit_alias: true\n          alias_pattern: ^(FCT|DIM)_[A-Z_]+$\n    ```",
+      "properties": {
+        "code": {
+          "const": "MO058",
+          "default": "MO058",
+          "title": "Code",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to exclude. A list matches if any pattern matches.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to include. A list matches if any pattern matches.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_model_alias",
+          "default": "check_model_alias",
+          "title": "Name",
+          "type": "string"
+        },
+        "alias_pattern": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Alias Pattern"
+        },
+        "require_explicit_alias": {
+          "default": false,
+          "title": "Require Explicit Alias",
+          "type": "boolean"
+        }
+      },
+      "title": "CheckModelAlias",
+      "type": "object"
+    },
     "CheckModelCodeDoesNotContainRegexpPattern": {
       "additionalProperties": false,
       "description": "The raw code for a model must not match the specified regexp pattern.\n\n!!! info \"Rationale\"\n\n    Teams often adopt coding standards that forbid certain SQL patterns \u2014 for example, using `ifnull` instead of `coalesce`, or using deprecated functions. This check allows those standards to be enforced automatically at CI time, preventing non-compliant code from reaching production.\n\nParameters:\n    regexp_pattern (str): The regexp pattern that should not be matched by the model code.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    materialization (Literal[\"ephemeral\", \"incremental\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        # Prefer `coalesce` over `ifnull`: https://docs.sqlfluff.com/en/stable/rules.html#sqlfluff.rules.sphinx.Rule_CV02\n        - name: check_model_code_does_not_contain_regexp_pattern\n          regexp_pattern: .*[i][f][n][u][l][l].*\n    ```",
@@ -14900,6 +15025,7 @@
             "check_macro_names": "#/$defs/CheckMacroNames",
             "check_macro_property_file_location": "#/$defs/CheckMacroPropertyFileLocation",
             "check_model_access": "#/$defs/CheckModelAccess",
+            "check_model_alias": "#/$defs/CheckModelAlias",
             "check_model_code_does_not_contain_regexp_pattern": "#/$defs/CheckModelCodeDoesNotContainRegexpPattern",
             "check_model_column_description_populated": "#/$defs/CheckModelColumnDescriptionPopulated",
             "check_model_column_has_specified_test": "#/$defs/CheckModelColumnHasSpecifiedTest",
@@ -15060,6 +15186,9 @@
           },
           {
             "$ref": "#/$defs/CheckModelAccess"
+          },
+          {
+            "$ref": "#/$defs/CheckModelAlias"
           },
           {
             "$ref": "#/$defs/CheckModelCodeDoesNotContainRegexpPattern"

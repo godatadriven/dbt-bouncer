@@ -39,7 +39,7 @@ dbt-bouncer list --group manifest_checks
 | `LI` | Lineage | `manifest_checks` | 3 |
 | `MA` | Macros | `manifest_checks` | 10 |
 | `ME` | Metadata | `manifest_checks` | 1 |
-| `MO` | Models | `manifest_checks` | 57 |
+| `MO` | Models | `manifest_checks` | 58 |
 | `RR` | Run results | `run_results_checks` | 2 |
 | `SE` | Seeds | `manifest_checks` | 6 |
 | `SM` | Semantic models | `manifest_checks` | 1 |
@@ -165,6 +165,7 @@ dbt-bouncer list --group manifest_checks
 | `MO055` | `check_model_column_name_complies_to_column_type` | Columns with the specified regexp naming pattern must have declared data types that comply to the specified regexp pattern or list of data types. |
 | `MO056` | `check_model_column_type_complies_to_column_name` | Columns with the specified declared data type must have names that comply to the specified regexp pattern. |
 | `MO057` | `check_model_column_names` | Columns declared in a model's properties file must have a name that matches the supplied regex. |
+| `MO058` | `check_model_alias` | Models must have an explicit alias and/or an alias that matches the supplied regex. |
 
 ## Run results (`RR`)
 
