@@ -108,6 +108,45 @@ class TestCheckModelAlias:
     def test_no_params_always_passes(self):
         check_passes("check_model_alias", model={"name": "orders", "alias": "orders"})
 
+    def test_explicit_alias_and_pattern_both_satisfied_passes(self):
+        # Both requirements composed: an explicit alias that also matches the pattern.
+        check_passes(
+            "check_model_alias",
+            model={
+                "name": "fct_orders_ldm",
+                "alias": "FCT_ORDERS",
+                "config": {"alias": "FCT_ORDERS"},
+            },
+            require_explicit_alias=True,
+            alias_pattern="^(FCT|DIM)_[A-Z_]+$",
+        )
+
+    def test_explicit_alias_failing_pattern_fails_on_pattern(self):
+        # An explicit alias satisfies `require_explicit_alias`, so the pattern failure
+        # must be the one that surfaces.
+        check_fails(
+            "check_model_alias",
+            model={
+                "name": "fct_orders_ldm",
+                "alias": "fct_orders",
+                "config": {"alias": "fct_orders"},
+            },
+            require_explicit_alias=True,
+            alias_pattern="^(FCT|DIM)_[A-Z_]+$",
+            match="does not match the supplied regex",
+        )
+
+    def test_missing_alias_with_pattern_fails_on_explicit_requirement(self):
+        # No explicit alias, so the `require_explicit_alias` failure surfaces first even
+        # though a pattern is also supplied.
+        check_fails(
+            "check_model_alias",
+            model={"name": "fct_orders", "alias": "fct_orders", "config": None},
+            require_explicit_alias=True,
+            alias_pattern="^(FCT|DIM)_[A-Z_]+$",
+            match="has no explicit alias configured",
+        )
+
 
 class TestCheckModelNames:
     @pytest.mark.parametrize(

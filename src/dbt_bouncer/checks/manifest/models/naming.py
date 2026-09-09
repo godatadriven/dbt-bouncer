@@ -43,11 +43,12 @@ def check_model_alias(
     # `model.alias` always exists in the manifest (dbt defaults it to `model.name`), so an
     # explicitly configured alias is detected via the (unrendered) config first, falling back
     # to comparing the resolved alias to the model name.
+    config_alias = model.config.alias if model.config else None
     unrendered_alias = (
         model.unrendered_config.get("alias") if model.unrendered_config else None
     )
     explicit_alias = (
-        (model.config.alias if model.config else None) is not None
+        config_alias is not None
         or unrendered_alias is not None
         or model.alias != model.name
     )
