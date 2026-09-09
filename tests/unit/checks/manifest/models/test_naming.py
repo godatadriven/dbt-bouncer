@@ -21,6 +21,133 @@ def _model(name: str, *, version: str | None = None) -> dict:
     return {"name": name, "unique_id": unique_id}
 
 
+class TestCheckModelAlias:
+    def test_explicit_alias_via_config_passes_when_not_required(self):
+        check_passes(
+            "check_model_alias",
+            model={
+                "name": "fct_orders",
+                "alias": "FCT_ORDERS",
+                "config": {"alias": "FCT_ORDERS"},
+            },
+            require_explicit_alias=False,
+        )
+
+    def test_explicit_alias_via_config_satisfies_requirement(self):
+        check_passes(
+            "check_model_alias",
+            model={
+                "name": "fct_orders",
+                "alias": "FCT_ORDERS",
+                "config": {"alias": "FCT_ORDERS"},
+            },
+            require_explicit_alias=True,
+        )
+
+    def test_explicit_alias_via_unrendered_config_satisfies_requirement(self):
+        # `config.alias` may be None while `unrendered_config` still records the
+        # user-supplied (pre-Jinja-rendering) alias.
+        check_passes(
+            "check_model_alias",
+            model={
+                "name": "fct_orders",
+                "alias": "FCT_ORDERS",
+                "config": None,
+                "unrendered_config": {"alias": "FCT_ORDERS"},
+            },
+            require_explicit_alias=True,
+        )
+
+    def test_alias_differing_from_name_satisfies_requirement(self):
+        # No config/unrendered_config record of an explicit alias, but the resolved
+        # alias differs from the model name (e.g. set via a custom `generate_alias_name`
+        # macro), so it is still treated as explicit.
+        check_passes(
+            "check_model_alias",
+            model={"name": "fct_orders_ldm", "alias": "fct_orders", "config": None},
+            require_explicit_alias=True,
+        )
+
+    def test_missing_alias_fails_when_required(self):
+        check_fails(
+            "check_model_alias",
+            model={"name": "fct_orders", "alias": "fct_orders", "config": None},
+            require_explicit_alias=True,
+            match="has no explicit alias configured",
+        )
+
+    def test_missing_alias_passes_when_not_required(self):
+        check_passes(
+            "check_model_alias",
+            model={"name": "fct_orders", "alias": "fct_orders", "config": None},
+            require_explicit_alias=False,
+        )
+
+    def test_alias_matching_pattern_passes(self):
+        check_passes(
+            "check_model_alias",
+            model={"name": "fct_orders_ldm", "alias": "FCT_ORDERS"},
+            alias_pattern="^(FCT|DIM)_[A-Z_]+$",
+        )
+
+    def test_alias_not_matching_pattern_fails(self):
+        check_fails(
+            "check_model_alias",
+            model={"name": "fct_orders_ldm", "alias": "fct_orders"},
+            alias_pattern="^(FCT|DIM)_[A-Z_]+$",
+            match="does not match the supplied regex",
+        )
+
+    def test_alias_equal_to_name_not_matching_pattern_fails(self):
+        check_fails(
+            "check_model_alias",
+            model={"name": "orders", "alias": "orders"},
+            alias_pattern="^(FCT|DIM)_[A-Z_]+$",
+        )
+
+    def test_no_params_always_passes(self):
+        check_passes("check_model_alias", model={"name": "orders", "alias": "orders"})
+
+    def test_explicit_alias_and_pattern_both_satisfied_passes(self):
+        # Both requirements composed: an explicit alias that also matches the pattern.
+        check_passes(
+            "check_model_alias",
+            model={
+                "name": "fct_orders_ldm",
+                "alias": "FCT_ORDERS",
+                "config": {"alias": "FCT_ORDERS"},
+            },
+            require_explicit_alias=True,
+            alias_pattern="^(FCT|DIM)_[A-Z_]+$",
+        )
+
+    def test_explicit_alias_failing_pattern_fails_on_pattern(self):
+        # An explicit alias satisfies `require_explicit_alias`, so the pattern failure
+        # must be the one that surfaces.
+        check_fails(
+            "check_model_alias",
+            model={
+                "name": "fct_orders_ldm",
+                "alias": "fct_orders",
+                "config": {"alias": "fct_orders"},
+            },
+            require_explicit_alias=True,
+            alias_pattern="^(FCT|DIM)_[A-Z_]+$",
+            match="does not match the supplied regex",
+        )
+
+    def test_missing_alias_with_pattern_fails_on_explicit_requirement(self):
+        # No explicit alias, so the `require_explicit_alias` failure surfaces first even
+        # though a pattern is also supplied.
+        check_fails(
+            "check_model_alias",
+            model={"name": "fct_orders", "alias": "fct_orders", "config": None},
+            require_explicit_alias=True,
+            alias_pattern="^(FCT|DIM)_[A-Z_]+$",
+            match="has no explicit alias configured",
+        )
+
+
 class TestCheckModelNames:
     @pytest.mark.parametrize(
         ("model_name_pattern", "model", "check_fn"),

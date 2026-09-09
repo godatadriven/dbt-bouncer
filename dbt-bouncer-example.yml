@@ -118,6 +118,9 @@ manifest_checks:
   - name: check_model_access
     include: ^models/staging
     access: protected
+  - name: check_model_alias
+    include: ^models/marts
+    alias_pattern: ^[a-z][a-z0-9_]*$
   - name: check_model_code_does_not_contain_regexp_pattern
     regexp_pattern: .*[i][f][n][u][l][l].*
   # The `check_model_column_*` checks are manifest-only analogues of the

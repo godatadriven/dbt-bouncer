@@ -79,6 +79,7 @@ class ManifestMetadata(Protocol):
 class NodeConfig(Protocol):
     """Node-level configuration block."""
 
+    alias: str | None
     grants: dict[str, Any]
     materialized: str
     meta: dict[str, Any]
@@ -157,6 +158,7 @@ class ModelNode(Protocol):
     """A dbt model resource."""
 
     access: Any
+    alias: str
     columns: dict[str, ColumnInfo]
     config: NodeConfig
     constraints: list[Constraint]
@@ -175,6 +177,7 @@ class ModelNode(Protocol):
     schema_: str
     tags: list[str]
     unique_id: str
+    unrendered_config: dict[str, Any] | None
     version: int | None
 
 
