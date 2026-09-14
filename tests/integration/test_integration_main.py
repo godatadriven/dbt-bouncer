@@ -1,4 +1,5 @@
 import json
+import re
 from pathlib import Path, PurePath
 
 import pytest
@@ -10,6 +11,19 @@ from dbt_bouncer.enums import ExitCode
 from dbt_bouncer.main import app
 
 artifact_paths = [f.__str__() for f in Path("./tests/fixtures").iterdir()]
+
+
+def strip_ansi(text: str) -> str:
+    """Remove ANSI escape codes from text.
+
+    Args:
+        text: Text containing ANSI escape codes.
+
+    Returns:
+        Text with ANSI codes removed.
+
+    """
+    return re.sub(r"\x1b\[[0-9;]*m", "", text)
 
 
 @pytest.mark.parametrize("dbt_artifacts_dir", artifact_paths, ids=artifact_paths)
@@ -38,8 +52,6 @@ def test_cli_happy_path(caplog, dbt_artifacts_dir, tmp_path):
     # Rich falls back to ASCII separators on legacy Windows consoles, so
     # accept either "│" or "|".
     assert result.output.count("manifest.json") == 1
-    import re
-
     assert re.search(r"[│|]\s+[1-9]", result.output), (
         "Artifact summary table contains no non-zero counts"
     )
@@ -179,6 +191,146 @@ def test_cli_error_message(caplog, tmp_path):
         in caplog.text
     )
     assert result.exit_code == 1
+
+
+@pytest.mark.parametrize(
+    (
+        "severity",
+        "expected_exit_code",
+        "expected_summary",
+        "expected_log",
+        "unexpected_log",
+        "expected_table_title",
+        "unexpected_table_title",
+    ),
+    [
+        (
+            "warn",
+            ExitCode.SUCCESS,
+            "Done. SUCCESS=0 WARN=1 ERROR=0",
+            "`dbt-bouncer` has warnings. Please see below for more details or run `dbt-bouncer` with the `-v` flag.",
+            "`dbt-bouncer` failed.",
+            "Warning checks",
+            "Failed checks",
+        ),
+        (
+            "error",
+            ExitCode.CHECK_ERRORS,
+            "Done. SUCCESS=0 WARN=0 ERROR=1",
+            "`dbt-bouncer` failed. Please see below for more details or run `dbt-bouncer` with the `-v` flag.",
+            "`dbt-bouncer` has warnings.",
+            "Failed checks",
+            "Warning checks",
+        ),
+    ],
+)
+def test_cli_severity_exit_codes_and_summary_line(
+    caplog,
+    tmp_path,
+    severity,
+    expected_exit_code,
+    expected_summary,
+    expected_log,
+    unexpected_log,
+    expected_table_title,
+    unexpected_table_title,
+):
+    """Test that check severity 'warn' exits 0 and 'error' exits 1, with correct summary line and table."""
+    fixture_target = Path("./tests/fixtures/dbt_112/target").resolve()
+    bouncer_config = {
+        "dbt_artifacts_dir": str(fixture_target),
+        "manifest_checks": [
+            {
+                "name": "check_model_names",
+                "include": r"models/marts/finance/orders\.sql",
+                "model_name_pattern": "^stg_",
+                "severity": severity,
+            },
+        ],
+    }
+
+    config_file = tmp_path / "dbt-bouncer.yml"
+    with config_file.open("w", encoding="utf-8") as f:
+        yaml.dump(bouncer_config, f)
+
+    runner = CliRunner()
+    result = runner.invoke(app, ["run", "--config-file", str(config_file)])
+
+    clean_output = strip_ansi(result.output)
+    assert result.exit_code == expected_exit_code
+    assert expected_summary in clean_output
+    assert expected_log in caplog.text
+    assert unexpected_log not in caplog.text
+    assert expected_table_title in clean_output
+    assert unexpected_table_title not in clean_output
+
+
+def test_cli_severity_mixed_warn_and_error(caplog, tmp_path):
+    """Test that mixed check results correctly report SUCCESS, WARN, and ERROR counts and exit 1."""
+    fixture_target = Path("./tests/fixtures/dbt_112/target").resolve()
+    bouncer_config = {
+        "dbt_artifacts_dir": str(fixture_target),
+        "manifest_checks": [
+            {
+                "name": "check_model_names",
+                "include": r"models/staging/crm/stg_orders\.sql",
+                "model_name_pattern": "^stg_",
+            },
+            {
+                "name": "check_model_names",
+                "include": r"models/marts/finance/orders\.sql",
+                "model_name_pattern": "^stg_",
+                "severity": "warn",
+            },
+            {
+                "name": "check_model_names",
+                "include": r"models/marts/finance/customers_v1\.sql",
+                "model_name_pattern": "^stg_",
+                "severity": "error",
+            },
+        ],
+    }
+
+    config_file = tmp_path / "dbt-bouncer.yml"
+    with config_file.open("w", encoding="utf-8") as f:
+        yaml.dump(bouncer_config, f)
+
+    runner = CliRunner()
+    result = runner.invoke(app, ["run", "--config-file", str(config_file)])
+
+    clean_output = strip_ansi(result.output)
+    assert result.exit_code == ExitCode.CHECK_ERRORS
+    assert "Done. SUCCESS=1 WARN=1 ERROR=1" in clean_output
+    assert "`dbt-bouncer` failed." in caplog.text
+
+
+def test_cli_global_severity_warn_failure_exits_zero(caplog, tmp_path):
+    """Test that top-level severity 'warn' config applies to checks and exits 0 on failure."""
+    fixture_target = Path("./tests/fixtures/dbt_112/target").resolve()
+    bouncer_config = {
+        "severity": "warn",
+        "dbt_artifacts_dir": str(fixture_target),
+        "manifest_checks": [
+            {
+                "name": "check_model_names",
+                "include": r"models/marts/finance/orders\.sql",
+                "model_name_pattern": "^stg_",
+            },
+        ],
+    }
+
+    config_file = tmp_path / "dbt-bouncer.yml"
+    with config_file.open("w", encoding="utf-8") as f:
+        yaml.dump(bouncer_config, f)
+
+    runner = CliRunner()
+    result = runner.invoke(app, ["--config-file", str(config_file)])
+
+    clean_output = strip_ansi(result.output)
+    assert result.exit_code == ExitCode.SUCCESS
+    assert "Done. SUCCESS=0 WARN=1 ERROR=0" in clean_output
+    assert "`dbt-bouncer` has warnings." in caplog.text
+    assert "`dbt-bouncer` failed." not in caplog.text
 
 
 def test_cli_manifest_doesnt_exist(caplog, tmp_path):
