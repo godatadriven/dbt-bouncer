@@ -47,8 +47,31 @@
                 - name: Setup Python
                   uses: ./.github/actions/setup_python_env
 
-                - name: Install latest released dbt-core
-                  run: uv run pip install dbt-core -U
+                # The project venv pins dbt 2.0, so this job covers the legacy dbt-core
+                # 1.x line instead. The task installs the newest 1.x release in an
+                # isolated uvx environment, which leaves the venv untouched.
+                - name: Regenerate dbt artifacts and run `dbt-bouncer`
+                  run: |
+                    (r=3;while ! mise run build-and-run-dbt-bouncer-dbt1 ; do ((--r))||exit;done)
+
+        dbt-2:
+            permissions:
+              contents: read
+            runs-on: ubuntu-24.04
+            steps:
+                - name: Checkout
+                  uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+                  with:
+                    persist-credentials: false
+
+                - name: Setup Python
+                  uses: ./.github/actions/setup_python_env
+
+                # uv.lock pins one dbt 2.0 patch release. This step upgrades the venv to
+                # the newest 2.x release, so the probe catches artifact drift before the
+                # lockfile moves.
+                - name: Install latest released dbt 2.x
+                  run: uv run pip install "dbt<3" -U
 
                 - name: Regenerate dbt artifacts and run `dbt-bouncer`
                   run: |

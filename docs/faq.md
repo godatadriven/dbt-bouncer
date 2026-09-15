@@ -84,7 +84,15 @@ jobs:
 
 ## Does `dbt-bouncer` work with dbt 2.0 / Fusion?
 
-Yes. dbt-core 2.0 (the Rust-based [Fusion](https://docs.getdbt.com/docs/fusion/about-fusion) engine) emits the same `manifest.json`, `catalog.json` and `run_results.json` artifacts — at manifest schema v12 — as dbt-core 1.x. Because `dbt-bouncer` consumes those artifacts directly, every check that works against dbt-core also works against dbt 2.0. Our CI builds the test project with dbt 2.0 and runs `dbt-bouncer` against the result on every pull request.
+Yes. dbt 2.0 (the Rust-based [Fusion](https://docs.getdbt.com/docs/fusion/about-fusion) engine) emits the same `manifest.json`, `catalog.json` and `run_results.json` artifacts — at manifest schema v12, catalog schema v1 and run results schema v6 — as dbt-core 1.x. Because `dbt-bouncer` consumes those artifacts directly, every check that works against dbt-core 1.x also works against dbt 2.0. Our CI builds the test project with dbt 2.0 and runs `dbt-bouncer` against the result on every pull request.
+
+Three details changed at dbt 2.0. Plan for them:
+
+- dbt 2.0 ships as the `dbt` and `dbt-oss` distributions. The `dbt-core` distribution stays on the 1.x line.
+- `--write-catalog` moved off `dbt build`. Use `dbt compile --write-catalog` or `dbt docs generate --write-catalog`.
+- The Apache-2.0 `dbt-oss` distribution writes no `catalog.json`. Catalog checks need the `dbt` distribution.
+
+dbt 2.0 also writes Parquet artifacts under `target/private/`. These back the dbt docs v2 site. `dbt-bouncer` reads the JSON artifacts and ignores the Parquet directory.
 
 ## Does `dbt-bouncer` support Python models?
 

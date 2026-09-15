@@ -313,7 +313,15 @@ def parse_dbt_artifacts(
     ):
         catalog_path = dbt_artifacts_dir / "catalog.json"
         if not catalog_path.exists():
-            raise DbtBouncerArtifactError(f"No catalog.json found at {catalog_path}.")
+            # dbt 2.0 removed `--write-catalog` from `dbt build`, so a pipeline that
+            # only runs `dbt build` now reaches this branch. Name the commands that do
+            # write a catalog rather than only reporting the missing path.
+            raise DbtBouncerArtifactError(
+                f"No catalog.json found at {catalog_path}. "
+                "Generate one with `dbt compile --write-catalog` on dbt 2.0, or with "
+                "`dbt docs generate` on dbt 1.x. On dbt 2.0 the Apache-2.0 `dbt-oss` "
+                "distribution writes no catalog.json; use the `dbt` distribution."
+            )
 
         catalog_dict = orjson.loads(catalog_path.read_bytes())
         nodes_dict = manifest_dict.get("nodes", {})

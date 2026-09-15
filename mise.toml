@@ -35,9 +35,11 @@ run = "uv sync --extra=dev --group=docs"
 # --- Artifacts / schema ------------------------------------------------------
 
 # On GitHub the `dbt build` command often returns "leaked semaphores" errors.
-# dbt 2.0 drops `dbt docs generate`; use `compile --write-catalog` first (produces
-# catalog.json), then `build` (produces manifest.json + run_results.json without
-# clobbering the catalog). Explicit --profiles-dir/--project-dir for CI correctness.
+# dbt 2.0 removed `--write-catalog` from `build`; the flag lives on `compile` and on
+# `docs generate`. Run `compile --write-catalog` first (produces catalog.json), then
+# `build` (produces manifest.json + a real run_results.json without clobbering the
+# catalog). Do not reverse the order: `compile` writes an EMPTY run_results.json.
+# Explicit --profiles-dir/--project-dir for CI correctness.
 [tasks.build-and-run-dbt-bouncer]
 description = "Run dbt deps, compile --write-catalog, build and run dbt-bouncer"
 run = [
@@ -47,8 +49,24 @@ run = [
   "uv run dbt-bouncer --config-file ./dbt-bouncer-example.yml",
 ]
 
+# Legacy-line coverage: the project venv now resolves dbt 2.0, so this task pins the
+# latest dbt-core 1.x release in an isolated uvx environment instead of overwriting the
+# venv. dbt 1.x has no `--write-catalog` flag, so the catalog comes from `docs generate`,
+# which dbt 2.0 in turn cannot use for a JSON catalog. The two lines therefore need
+# separate tasks. `dbt-core~=1.0` means ">=1.0,<2.0", so this tracks the newest 1.x.
+[tasks.build-and-run-dbt-bouncer-dbt1]
+description = "Build the test project with the latest dbt-core 1.x release and run dbt-bouncer"
+run = """
+PYTHON_INTERPRETER_CONSTRAINT=$(cat .python-version)
+DBT_1="uvx --python ==${PYTHON_INTERPRETER_CONSTRAINT} --with dbt-duckdb~=1.10.0 --from dbt-core~=1.0 dbt"
+$DBT_1 deps --profiles-dir ./dbt_project --project-dir ./dbt_project
+$DBT_1 build --profiles-dir ./dbt_project --project-dir ./dbt_project
+$DBT_1 docs generate --profiles-dir ./dbt_project --project-dir ./dbt_project
+uv run dbt-bouncer --config-file ./dbt-bouncer-example.yml
+"""
+
 # This task uses the native dbt Fusion binary. It must be on PATH as `dbt` (the
-# probe CI job installs it). Do NOT use `uv run dbt` here: that is Python dbt-core.
+# probe CI job installs it). Do NOT use `uv run dbt` here: that is the pinned dbt 2.0.
 # The probe is manifest-only, via `dbt parse`. Catalog coverage would need a
 # successful `dbt build` first, but the native Fusion engine currently fails this
 # project's enforced `orders` contract: it resolves the seed integer columns to
@@ -106,16 +124,20 @@ mv ./dbt_project/target_112 ./tests/fixtures/dbt_112/target
 
 [tasks.build-artifacts-20]
 description = "Build dbt 2.0 (Fusion) test artifacts"
-# `build --write-catalog` writes all three artifacts in one step: build populates DuckDB
-# and writes manifest.json + a real run_results.json, and --write-catalog writes
-# catalog.json by introspecting the populated database. dbt 2.0 drops `docs generate`.
+# dbt 2.0 ships as the `dbt` distribution (a self-contained Rust binary with the adapters
+# built in), so no `--with dbt-duckdb` is needed. `compile --write-catalog` writes
+# catalog.json by introspecting the populated DuckDB database, then `build` populates that
+# database and writes manifest.json + a real run_results.json without clobbering the
+# catalog. dbt 2.0 removed `--write-catalog` from `build`, so a single `build` step no
+# longer produces a catalog.
 # Do not use `dbt parse`: on dbt 2.0 a parse-only run emits no macro-to-macro `depends_on`
 # edges at all, which silently breaks macro-graph checks such as check_macro_is_used.
 # The final move places the built target under tests/fixtures, matching build-artifacts-112.
 run = """
 PYTHON_INTERPRETER_CONSTRAINT=$(cat .python-version)
-DBT_20="uvx --python ==${PYTHON_INTERPRETER_CONSTRAINT} --prerelease=allow --with dbt-duckdb~=1.10.0 --from dbt-core>=2.0.0b1,<3 dbt"
-$DBT_20 build --write-catalog --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_20
+DBT_20="uvx --python ==${PYTHON_INTERPRETER_CONSTRAINT} --from dbt>=2,<3 dbt"
+$DBT_20 compile --write-catalog --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_20
+$DBT_20 build --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_20
 rm -r ./tests/fixtures/dbt_20/target || true
 mkdir -p ./tests/fixtures/dbt_20
 mv ./dbt_project/target_20 ./tests/fixtures/dbt_20/target
@@ -124,14 +146,14 @@ mv ./dbt_project/target_20 ./tests/fixtures/dbt_20/target
 [tasks.build-artifacts-local]
 description = "Build local dbt test artifacts"
 depends = ["install"]
-# `build --write-catalog` writes all three artifacts in one step: build populates DuckDB
-# and writes a real run_results.json (the test_main.py CLI tests read
-# dbt_project/target/run_results.json and need real results), and --write-catalog writes
-# catalog.json by introspecting the populated database. Do not use `compile` here: it
-# writes an EMPTY run_results.json. The venv resolves dbt-core 2.0, which supports
-# `build --write-catalog` (dbt 1.x needs `docs generate`, unavailable on 2.0).
+# `compile --write-catalog` writes catalog.json by introspecting the DuckDB database, then
+# `build` populates that database and writes manifest.json + a real run_results.json (the
+# test_main.py CLI tests read dbt_project/target/run_results.json and need real results).
+# Keep this order: `compile` alone writes an EMPTY run_results.json, and `build` alone
+# writes no catalog, because dbt 2.0 removed `--write-catalog` from `build`.
 run = [
-  "uv run dbt build --write-catalog --profiles-dir ./dbt_project --project-dir ./dbt_project",
+  "uv run dbt compile --write-catalog --profiles-dir ./dbt_project --project-dir ./dbt_project",
+  "uv run dbt build --profiles-dir ./dbt_project --project-dir ./dbt_project",
 ]
 
 [tasks.generate-rule-codes-doc]

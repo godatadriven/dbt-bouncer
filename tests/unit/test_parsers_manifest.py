@@ -7,6 +7,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from dbt_bouncer.artifact_parsers.parser import parse_dbt_artifacts
+from dbt_bouncer.exceptions import DbtBouncerArtifactError
 
 
 # Covers the full span of supported artifact formats: the two frozen fixtures that
@@ -81,3 +82,24 @@ def test_parse_manifest_artifact_table_format(capsys, dbt_artifacts_dir):
     # Verify all counts are numeric
     for category, count in category_lines:
         assert count.isdigit(), f"Count for {category} is not numeric: {count}"
+
+
+def test_parse_missing_catalog_names_the_generating_commands(tmp_path):
+    """A missing catalog.json must tell the user which dbt command writes one."""
+    manifest = Path("tests/fixtures/dbt_20/target/manifest.json")
+    (tmp_path / "manifest.json").write_bytes(manifest.read_bytes())
+
+    bouncer_config = MagicMock()
+    bouncer_config.package_name = "dbt_bouncer_test_project"
+    bouncer_config.catalog_checks = [MagicMock()]
+    bouncer_config.run_results_checks = []
+
+    with pytest.raises(DbtBouncerArtifactError) as excinfo:
+        parse_dbt_artifacts(bouncer_config, tmp_path)
+
+    message = str(excinfo.value)
+    assert "No catalog.json found" in message
+    # dbt 2.0 moved --write-catalog off `dbt build`, so the remedy differs per line.
+    assert "dbt compile --write-catalog" in message
+    assert "dbt docs generate" in message
+    assert "dbt-oss" in message
