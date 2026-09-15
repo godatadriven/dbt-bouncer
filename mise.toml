@@ -35,19 +35,32 @@ run = "uv sync --extra=dev --group=docs"
 # --- Artifacts / schema ------------------------------------------------------
 
 # On GitHub the `dbt build` command often returns "leaked semaphores" errors.
-# dbt 2.0 removed `--write-catalog` from `build`; the flag lives on `compile` and on
-# `docs generate`. Run `compile --write-catalog` first (produces catalog.json), then
-# `build` (produces manifest.json + a real run_results.json without clobbering the
-# catalog). Do not reverse the order: `compile` writes an EMPTY run_results.json.
-# Explicit --profiles-dir/--project-dir for CI correctness.
+#
+# dbt 2.0 removed `--write-catalog` from `build`. The flag lives on `compile` and on
+# `docs generate`, and both of those write an EMPTY run_results.json. Neither command
+# alone produces all three artifacts, so this runs two steps:
+#
+#   1. `build` populates DuckDB and writes manifest.json + a real run_results.json.
+#   2. `compile --write-catalog` introspects that populated database for the catalog.
+#
+# Keep this order. The catalog is built by introspection, so running the catalog step
+# against an unpopulated database writes a catalog.json with ZERO nodes, and every
+# catalog check then passes vacuously. A fresh clone and a CI runner both start with no
+# ./dbt.duckdb, so that is the normal case, not an edge case.
+#
+# Step 2 uses a scratch --target-path so it cannot overwrite the real run_results.json;
+# only catalog.json is moved across. --target-path is resolved relative to
+# --project-dir. Explicit --profiles-dir/--project-dir for CI correctness.
 [tasks.build-and-run-dbt-bouncer]
-description = "Run dbt deps, compile --write-catalog, build and run dbt-bouncer"
-run = [
-  "uv run dbt deps --profiles-dir ./dbt_project --project-dir ./dbt_project",
-  "uv run dbt compile --write-catalog --profiles-dir ./dbt_project --project-dir ./dbt_project",
-  "uv run dbt build --profiles-dir ./dbt_project --project-dir ./dbt_project",
-  "uv run dbt-bouncer --config-file ./dbt-bouncer-example.yml",
-]
+description = "Run dbt deps, build, write the catalog and run dbt-bouncer"
+run = """
+uv run dbt deps --profiles-dir ./dbt_project --project-dir ./dbt_project
+uv run dbt build --profiles-dir ./dbt_project --project-dir ./dbt_project
+uv run dbt compile --write-catalog --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_catalog
+mv ./dbt_project/target_catalog/catalog.json ./dbt_project/target/catalog.json
+rm -r ./dbt_project/target_catalog
+uv run dbt-bouncer --config-file ./dbt-bouncer-example.yml
+"""
 
 # Legacy-line coverage: the project venv now resolves dbt 2.0, so this task pins the
 # latest dbt-core 1.x release in an isolated uvx environment instead of overwriting the
@@ -65,19 +78,16 @@ $DBT_1 docs generate --profiles-dir ./dbt_project --project-dir ./dbt_project
 uv run dbt-bouncer --config-file ./dbt-bouncer-example.yml
 """
 
-# This task uses the native dbt Fusion binary. It must be on PATH as `dbt` (the
-# probe CI job installs it). Do NOT use `uv run dbt` here: that is the pinned dbt 2.0.
-# The probe is manifest-only, via `dbt parse`. Catalog coverage would need a
-# successful `dbt build` first, but the native Fusion engine currently fails this
-# project's enforced `orders` contract: it resolves the seed integer columns to
-# bigint, which mismatches the integer contract. `dbt parse` skips execution, so it
-# is not affected. This still validates that dbt-bouncer accepts the manifest the
-# native Fusion engine emits.
+# Parse-only probe of the dbt Fusion engine, which the `dbt` distribution provides.
+# It covers a code path the other tasks do not: `dbt parse` needs no database, so it
+# proves dbt-bouncer accepts a manifest built without any warehouse connection. The
+# config is manifest-only for the same reason, because `dbt parse` writes no catalog
+# and no run results.
 [tasks.build-and-run-dbt-bouncer-fusion]
-description = "Parse the test project with the native dbt Fusion CLI and run manifest checks"
+description = "Parse the test project with the dbt Fusion CLI and run manifest checks"
 run = [
-  "dbt deps --profiles-dir ./dbt_project --project-dir ./dbt_project",
-  "dbt parse --profiles-dir ./dbt_project --project-dir ./dbt_project",
+  "uv run dbt deps --profiles-dir ./dbt_project --project-dir ./dbt_project",
+  "uv run dbt parse --profiles-dir ./dbt_project --project-dir ./dbt_project",
   "uv run dbt-bouncer --config-file ./.github/dbt-bouncer-fusion-probe.yml",
 ]
 
@@ -125,19 +135,23 @@ mv ./dbt_project/target_112 ./tests/fixtures/dbt_112/target
 [tasks.build-artifacts-20]
 description = "Build dbt 2.0 (Fusion) test artifacts"
 # dbt 2.0 ships as the `dbt` distribution (a self-contained Rust binary with the adapters
-# built in), so no `--with dbt-duckdb` is needed. `compile --write-catalog` writes
-# catalog.json by introspecting the populated DuckDB database, then `build` populates that
-# database and writes manifest.json + a real run_results.json without clobbering the
-# catalog. dbt 2.0 removed `--write-catalog` from `build`, so a single `build` step no
-# longer produces a catalog.
+# built in), so no `--with dbt-duckdb` is needed. dbt 2.0 removed `--write-catalog` from
+# `build`, so the catalog needs a second command: `build` populates DuckDB and writes
+# manifest.json + a real run_results.json, then `compile --write-catalog` introspects that
+# populated database. The catalog step writes to a scratch target path, because `compile`
+# also writes an EMPTY run_results.json; only catalog.json is moved across.
+# Keep the build step first. Running the catalog step against an unpopulated database
+# writes a catalog.json with ZERO nodes, which makes every catalog check pass vacuously.
 # Do not use `dbt parse`: on dbt 2.0 a parse-only run emits no macro-to-macro `depends_on`
 # edges at all, which silently breaks macro-graph checks such as check_macro_is_used.
 # The final move places the built target under tests/fixtures, matching build-artifacts-112.
 run = """
 PYTHON_INTERPRETER_CONSTRAINT=$(cat .python-version)
-DBT_20="uvx --python ==${PYTHON_INTERPRETER_CONSTRAINT} --from dbt>=2,<3 dbt"
-$DBT_20 compile --write-catalog --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_20
+DBT_20="uvx --python ==${PYTHON_INTERPRETER_CONSTRAINT} --from dbt>=2,<2.1 dbt"
 $DBT_20 build --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_20
+$DBT_20 compile --write-catalog --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_20_catalog
+mv ./dbt_project/target_20_catalog/catalog.json ./dbt_project/target_20/catalog.json
+rm -r ./dbt_project/target_20_catalog
 rm -r ./tests/fixtures/dbt_20/target || true
 mkdir -p ./tests/fixtures/dbt_20
 mv ./dbt_project/target_20 ./tests/fixtures/dbt_20/target
@@ -146,15 +160,19 @@ mv ./dbt_project/target_20 ./tests/fixtures/dbt_20/target
 [tasks.build-artifacts-local]
 description = "Build local dbt test artifacts"
 depends = ["install"]
-# `compile --write-catalog` writes catalog.json by introspecting the DuckDB database, then
-# `build` populates that database and writes manifest.json + a real run_results.json (the
+# `build` populates DuckDB and writes manifest.json + a real run_results.json (the
 # test_main.py CLI tests read dbt_project/target/run_results.json and need real results).
-# Keep this order: `compile` alone writes an EMPTY run_results.json, and `build` alone
-# writes no catalog, because dbt 2.0 removed `--write-catalog` from `build`.
-run = [
-  "uv run dbt compile --write-catalog --profiles-dir ./dbt_project --project-dir ./dbt_project",
-  "uv run dbt build --profiles-dir ./dbt_project --project-dir ./dbt_project",
-]
+# `compile --write-catalog` then introspects that populated database for the catalog,
+# because dbt 2.0 removed `--write-catalog` from `build`. The catalog step writes to a
+# scratch target path, because `compile` also writes an EMPTY run_results.json.
+# Keep the build step first: the catalog step against an unpopulated database writes a
+# catalog.json with ZERO nodes, which makes every catalog check pass vacuously.
+run = """
+uv run dbt build --profiles-dir ./dbt_project --project-dir ./dbt_project
+uv run dbt compile --write-catalog --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_catalog
+mv ./dbt_project/target_catalog/catalog.json ./dbt_project/target/catalog.json
+rm -r ./dbt_project/target_catalog
+"""
 
 [tasks.generate-rule-codes-doc]
 description = "Regenerate the rule codes reference page from the check classes"

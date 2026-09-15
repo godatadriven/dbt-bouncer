@@ -1,9 +1,8 @@
-# Scheduled probe config for the native dbt Fusion engine. It is a curated,
-# manifest-only subset of dbt-bouncer-example.yml. `dbt parse` under Fusion writes
-# only manifest.json, so catalog_checks and run_results_checks are intentionally
-# absent. Checks are scoped to skip Fusion's auto-generated snapshot macros and the
-# intentionally non-conforming payments source. See the mise task
-# build-and-run-dbt-bouncer-fusion for why `dbt build` is not run here.
+# Scheduled probe config for the dbt Fusion engine, run against a database-free
+# `dbt parse`. It is a curated, manifest-only subset of dbt-bouncer-example.yml.
+# `dbt parse` writes only manifest.json, so catalog_checks and run_results_checks are
+# intentionally absent. Checks are scoped to skip Fusion's auto-generated snapshot
+# macros and the intentionally non-conforming payments source.
 # dbt_artifacts_dir is resolved relative to THIS file, which lives in .github/.
 dbt_artifacts_dir: ../dbt_project/target
 

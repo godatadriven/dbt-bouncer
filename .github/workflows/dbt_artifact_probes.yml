@@ -68,10 +68,11 @@
                   uses: ./.github/actions/setup_python_env
 
                 # uv.lock pins one dbt 2.0 patch release. This step upgrades the venv to
-                # the newest 2.x release, so the probe catches artifact drift before the
-                # lockfile moves.
-                - name: Install latest released dbt 2.x
-                  run: uv run pip install "dbt<3" -U
+                # the newest release in the supported 2.0 series, so the probe catches
+                # artifact drift before the lockfile moves. The bound matches the pin in
+                # pyproject.toml; raise both together when adopting a new dbt minor.
+                - name: Install latest released dbt 2.0.x
+                  run: uv run pip install "dbt<2.1" -U
 
                 - name: Regenerate dbt artifacts and run `dbt-bouncer`
                   run: |
@@ -90,15 +91,15 @@
                 - name: Setup Python
                   uses: ./.github/actions/setup_python_env
 
-                - name: Install latest native dbt Fusion CLI
+                # The `dbt` distribution on PyPI is the Fusion engine CLI, so pip gives
+                # the same engine the native installer does, at a version this project
+                # pins. Log the version, because a drift failure is easiest to trace
+                # from the release it started on.
+                - name: Install latest released dbt Fusion CLI
                   run: |
-                    export SHELL=/bin/bash
-                    curl -fsSL https://public.cdn.getdbt.com/fs/install/install.sh | sh -s -- --update
-                    echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-                    # Log the installed version. The probe tracks the latest Fusion
-                    # release on purpose, so this makes drift failures easy to trace.
-                    "$HOME/.local/bin/dbt" --version
+                    uv run pip install "dbt<2.1" -U
+                    uv run dbt --version
 
-                - name: Regenerate dbt artifacts and run `dbt-bouncer`
+                - name: Parse the project and run `dbt-bouncer`
                   run: |
                     (r=3;while ! mise run build-and-run-dbt-bouncer-fusion ; do ((--r))||exit;done)

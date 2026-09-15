@@ -256,7 +256,10 @@ models:
 
     columns:
       - name: order_id_pk
-        data_type: integer
+        # bigint, not integer: DuckDB stores the seed integer columns as bigint, and
+        # dbt 2.0 enforces the contract against that resolved type. The `customers`
+        # contract below already declares bigint for the same reason.
+        data_type: bigint
         tests:
           - unique
           - not_null
@@ -268,7 +271,7 @@ models:
           meta:
             maturity: gold
       - name: customer_id_fk
-        data_type: integer
+        data_type: bigint
         description: Foreign key to the customers table
         tests:
           - not_null
