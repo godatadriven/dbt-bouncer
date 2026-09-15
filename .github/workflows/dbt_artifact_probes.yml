@@ -67,38 +67,27 @@
                 - name: Setup Python
                   uses: ./.github/actions/setup_python_env
 
-                # uv.lock pins one dbt 2.0 patch release. This step upgrades the venv to
-                # the newest release in the supported 2.0 series, so the probe catches
-                # artifact drift before the lockfile moves. The bound matches the pin in
-                # pyproject.toml; raise both together when adopting a new dbt minor.
-                - name: Install latest released dbt 2.0.x
-                  run: uv run pip install "dbt<2.1" -U
+                # pyproject.toml pins dbt to the 2.0 series and uv.lock pins one patch
+                # release. This probe deliberately has NO upper bound, so it installs the
+                # newest dbt above 2.0.0 and reports drift before either pin moves. Log
+                # the version, because a drift failure is easiest to trace from the
+                # release it started on.
+                # `uv pip install` targets the project venv. Do not use `uv run pip`:
+                # uv does not put pip in the venv, so that form falls through to the
+                # system interpreter and fails on a PEP 668 externally-managed install.
+                - name: Install latest released dbt
+                  run: |
+                    uv pip install "dbt>2.0.0" -U
+                    uv run dbt --version
 
+                # Two probes, one engine. The `dbt` distribution on PyPI is the Fusion
+                # engine, so a separate Fusion job would install exactly this package.
+                # What differs is the code path, not the engine, so both run here:
+                # `build` covers the warehouse path and all three artifacts, and `parse`
+                # covers the database-free path that writes manifest.json alone.
                 - name: Regenerate dbt artifacts and run `dbt-bouncer`
                   run: |
                     (r=3;while ! mise run build-and-run-dbt-bouncer ; do ((--r))||exit;done)
-
-        dbt-fusion:
-            permissions:
-              contents: read
-            runs-on: ubuntu-24.04
-            steps:
-                - name: Checkout
-                  uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-                  with:
-                    persist-credentials: false
-
-                - name: Setup Python
-                  uses: ./.github/actions/setup_python_env
-
-                # The `dbt` distribution on PyPI is the Fusion engine CLI, so pip gives
-                # the same engine the native installer does, at a version this project
-                # pins. Log the version, because a drift failure is easiest to trace
-                # from the release it started on.
-                - name: Install latest released dbt Fusion CLI
-                  run: |
-                    uv run pip install "dbt<2.1" -U
-                    uv run dbt --version
 
                 - name: Parse the project and run `dbt-bouncer`
                   run: |

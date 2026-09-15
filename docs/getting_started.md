@@ -12,12 +12,6 @@
 
 1. Run `dbt-bouncer` to validate that your conventions are being maintained.
 
-!!! note "Catalog generation on dbt 2.0"
-
-    dbt 2.0 removed `--write-catalog` from `dbt build`. The flag is available on `dbt compile` and on `dbt docs generate`. A plain `dbt build` writes no `catalog.json`.
-
-    dbt 2.0 also ships two distributions. `pip install dbt` writes `catalog.json`. The Apache-2.0 `dbt-oss` distribution writes no JSON catalog, so catalog checks need the `dbt` distribution. Both distributions write `manifest.json` and `run_results.json`, so manifest checks and run results checks work on either.
-
 ---
 
 ### Installing with Python
