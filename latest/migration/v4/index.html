@@ -932,6 +932,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#dbt-20-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        dbt 2.0 support
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1109,6 +1120,10 @@
 <td>No action needed — <a href="#new-criteria-parameter-for-the-has_meta_keys-checks">see new <code>criteria</code> parameter</a></td>
 </tr>
 <tr>
+<td>Upgrading to dbt 2.0</td>
+<td>Review how you generate <code>catalog.json</code> — <a href="#dbt-20-support">see dbt 2.0 support</a></td>
+</tr>
+<tr>
 <td>Using <code>dbt-bouncer.yml</code> / <code>dbt-bouncer.toml</code> config only, no custom checks or Python imports</td>
 <td>No action required</td>
 </tr>
@@ -1244,6 +1259,41 @@
 </span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">team</span>
 </span></code></pre></div>
 <p>The default is <code>all</code>, matching the previous, only, behaviour, so existing configs are unaffected — no action is required. <code>check_model_columns_have_meta_keys</code> and the <code>*_has_labels_keys</code> checks are unchanged by this release.</p>
+<h3 id="dbt-20-support">dbt 2.0 support<a class="headerlink" href="#dbt-20-support" title="Permanent link">#</a></h3>
+<p>dbt-bouncer v4.0.0 runs against dbt 2.0. No dbt-bouncer config change is needed. Every check that works against dbt-core 1.x works against dbt 2.0, because dbt 2.0 emits the same artifact schemas: manifest v12, catalog v1 and run results v6.</p>
+<p>Three things changed on the dbt side. They change how you generate artifacts, not how you configure dbt-bouncer.</p>
+<p><strong>dbt 2.0 ships under new distribution names.</strong> The <code>dbt-core</code> distribution stays on the 1.x line. dbt 2.0 ships as <code>dbt</code> (the Fusion engine CLI) and as <code>dbt-oss</code> (the Apache-2.0 build).</p>
+<table>
+<thead>
+<tr>
+<th>You install</th>
+<th>You get</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>pip install dbt-core</code></td>
+<td>dbt 1.x</td>
+</tr>
+<tr>
+<td><code>pip install dbt</code></td>
+<td>dbt 2.x, writes <code>catalog.json</code></td>
+</tr>
+<tr>
+<td><code>pip install dbt-oss</code></td>
+<td>dbt 2.x, writes no <code>catalog.json</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong><code>--write-catalog</code> moved off <code>dbt build</code>.</strong> On dbt 2.0 the flag is available on <code>dbt compile</code> and on <code>dbt docs generate</code>. A plain <code>dbt build</code> writes no <code>catalog.json</code>. If your pipeline relied on <code>dbt build --write-catalog</code>, split it:</p>
+<div class="language-shell highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>dbt<span class="w"> </span>compile<span class="w"> </span>--write-catalog<span class="w"> </span><span class="c1"># writes catalog.json</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>dbt<span class="w"> </span>build<span class="w">                   </span><span class="c1"># writes manifest.json and a real run_results.json</span>
+</span></code></pre></div>
+<p>Keep that order. <code>dbt compile</code> executes nothing, so it writes a <code>run_results.json</code> with zero results, and <code>dbt build</code> does not overwrite the catalog.</p>
+<p><strong>The <code>dbt-oss</code> distribution writes no JSON catalog.</strong> It writes the catalog as Parquet under <code>target/private/</code> instead. If you run catalog checks, use the <code>dbt</code> distribution. If you pass a <code>target</code> directory with no <code>catalog.json</code> while catalog checks are configured, dbt-bouncer fails fast with exit code <code>3</code>:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>No catalog.json found at dbt_project/target/catalog.json.
+</span></code></pre></div>
+<p>Manifest checks and run results checks work on either distribution.</p>
 <h2 id="getting-help">Getting help<a class="headerlink" href="#getting-help" title="Permanent link">#</a></h2>
 <p>If you run into issues upgrading:</p>
 <ol>
