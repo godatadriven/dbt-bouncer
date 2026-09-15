@@ -7,9 +7,9 @@ seeds:
       - name: id
         data_type: bigint
       - name: first_name
-        data_type: character varying(256)
+        data_type: string
       - name: last_name
-        data_type: character varying(256)
+        data_type: string
 
     config:
       meta:
@@ -24,7 +24,7 @@ seeds:
       - name: order_date
         data_type: date
       - name: status
-        data_type: character varying(256)
+        data_type: string
 
     config:
       meta:
@@ -37,7 +37,7 @@ seeds:
       - name: order_id
         data_type: bigint
       - name: payment_method
-        data_type: character varying(256)
+        data_type: string
       - name: amount
         data_type: bigint
     config:
