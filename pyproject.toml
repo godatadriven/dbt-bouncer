@@ -52,8 +52,14 @@ run_results = "dbt_bouncer.checks.run_results"
 dev = [
   "altair>=6.0,<7",
   "bandit~=1.0",
-  "dbt-core>=2.0.0b1,<3",
-  "dbt-duckdb~=1.0",
+  # dbt 2.0 ships as the `dbt` distribution, a self-contained Rust binary with the
+  # adapters built in. The `dbt-core` namespace is deprecated at 2.0 and its 2.x line
+  # is pre-release only, so a separate `dbt-duckdb` adapter is no longer needed here.
+  # dbt is only ever invoked as a CLI to build test fixtures; nothing imports it.
+  # Pinned to the 2.0 minor series: a 2.1 release can change artifacts or CLI flags,
+  # as 2.0 did when it removed `--write-catalog` from `dbt build`. Raise this pin
+  # deliberately, after rebuilding the fixtures against the new minor version.
+  "dbt>=2,<2.1",
   "matchify>=0.2,<1",
   "mcp>=1.9,<3",
   "prek>=0.1,<1",
@@ -147,47 +153,9 @@ indent-width = 4
 target-version = "py311"
 
 [tool.ruff.lint]
-ignore = [
-  "COM812",
-  "D100",
-  "D203",
-  "D213",
-  "D406",
-  "D407",
-  "D409",
-  "E501",
-  "G004",
-  "LOG015",
-  "S101"
-]
+ignore = ["COM812", "D100", "D203", "D213", "D406", "D407", "D409", "E501", "G004", "LOG015", "S101"]
 preview = true
-select = [
-  "A",
-  "ARG",
-  "B",
-  "C4",
-  "COM",
-  "D",
-  "DOC",
-  "E",
-  "EXE",
-  "F",
-  "I",
-  "ICN",
-  "LOG",
-  "G",
-  "N",
-  "PT",
-  "PTH",
-  "Q",
-  "RUF",
-  "S",
-  "SIM",
-  "T20",
-  "TCH",
-  "TID",
-  "W"
-]
+select = ["A", "ARG", "B", "C4", "COM", "D", "DOC", "E", "EXE", "F", "I", "ICN", "LOG", "G", "N", "PT", "PTH", "Q", "RUF", "S", "SIM", "T20", "TCH", "TID", "W"]
 unfixable = ["B"]
 
 [tool.ruff.lint.per-file-ignores]
@@ -248,4 +216,3 @@ dbt_bouncer = ["presets/*.yml"]
 
 [tool.uv]
 package = true
-prerelease = "allow"

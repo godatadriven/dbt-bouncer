@@ -52,5 +52,19 @@ on-run-start:
     FROM read_csv_auto('./dbt_project/seeds/raw_customers.csv')
 flags:
   require_generic_test_arguments_property: true
+  # Promote every dbt warning to an error, so a new warning in this fixture project
+  # fails the build instead of accumulating unnoticed. dbt 2.0 has no `--warn-error`
+  # flag, so this project-level setting is the only way to express it.
+  # InvalidConfig is silenced because dbt 2.0 raises it when it cannot validate the
+  # semantic manifest without dbt platform credentials. That is environmental, and
+  # this project has no credentials by design.
+  # The dbt 1.x tasks in mise.toml reset this with `--warn-error-options`. dbt 1.x
+  # emits two warnings that dbt 2.0 does not, and neither is a defect here: a known
+  # false positive on custom generic tests (dbt-core issue #11792) and dbt-duckdb
+  # rejecting the `grants` config, which exists to give dbt-bouncer a grants fixture.
+  warn_error_options:
+    error: all
+    silence:
+      - InvalidConfig
 vars:
   fivetran__remove_empty_table_warnings: true

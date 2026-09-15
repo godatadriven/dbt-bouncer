@@ -5,7 +5,7 @@ seeds:
     description: Raw customer data
     columns:
       - name: id
-        data_type: integer
+        data_type: bigint
       - name: first_name
         data_type: character varying(256)
       - name: last_name
@@ -18,9 +18,9 @@ seeds:
     description: Raw order data
     columns:
       - name: id
-        data_type: integer
+        data_type: bigint
       - name: user_id
-        data_type: integer
+        data_type: bigint
       - name: order_date
         data_type: date
       - name: status
@@ -33,13 +33,13 @@ seeds:
     description: Raw payment data
     columns:
       - name: id
-        data_type: integer
+        data_type: bigint
       - name: order_id
-        data_type: integer
+        data_type: bigint
       - name: payment_method
         data_type: character varying(256)
       - name: amount
-        data_type: integer
+        data_type: bigint
     config:
       meta:
         owner: "Data Team"

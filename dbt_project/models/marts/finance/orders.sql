@@ -29,8 +29,11 @@ with
     final as (
 
         select
-            orders.order_id as order_id_pk,
-            orders.customer_id as customer_id_fk,
+            -- Cast explicitly: dbt 1.x resolves these seed columns as integer and dbt
+            -- 2.0 resolves them as bigint, so an inferred type cannot satisfy the
+            -- enforced contract on both engines.
+            cast(orders.order_id as bigint) as order_id_pk,
+            cast(orders.customer_id as bigint) as customer_id_fk,
             orders.order_date,
             orders.status,
 
