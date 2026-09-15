@@ -43,13 +43,18 @@ models:
 # Create a real relation for the `dummy_source.customers` source so it appears
 # in catalog.json and the catalog source checks get real coverage. `id` is cast
 # to BIGINT to match the `customers` model contract. See GitHub issue #1064.
+# The statement is DuckDB-only: `read_csv_auto`, the `main` schema and the local
+# seed path exist on no other adapter. The dbt Cloud probe job runs on BigQuery,
+# so the hook is gated on the adapter and renders to nothing everywhere else.
 on-run-start:
   - >
+    {% if target.type == 'duckdb' %}
     CREATE OR REPLACE TABLE main.customers AS
     SELECT CAST(id AS BIGINT) AS id,
            CAST(first_name AS VARCHAR) AS first_name,
            CAST(last_name AS VARCHAR) AS last_name
     FROM read_csv_auto('./dbt_project/seeds/raw_customers.csv')
+    {% endif %}
 flags:
   require_generic_test_arguments_property: true
   # Promote every dbt warning to an error, so a new warning in this fixture project
