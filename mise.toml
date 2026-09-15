@@ -129,7 +129,11 @@ run = [
 # catalog.json, and every catalog check then passes vacuously.
 [tasks.build-artifacts-112]
 description = "Build dbt 1.12 test artifacts"
-# No dbt-duckdb==1.12 yet so sticking with dbt-duckdb==1.10
+# dbt-duckdb tracks its own version line, not dbt-core's. The newest release is 1.11.0
+# and no 1.12 exists, so there is no version-matched adapter to move to. 1.10 is the
+# deliberate pin for this frozen 1.x fixture line: the artifacts it produces are the
+# backward-compatibility baseline, so the adapter stays put unless a bug forces a bump.
+# dbt 2.0 needs no adapter at all, because it compiles them into the binary.
 # See build-and-run-dbt-bouncer-dbt1 for why the legacy line resets warn_error_options.
 run = """
 PYTHON_INTERPRETER_CONSTRAINT=$(cat .python-version)
