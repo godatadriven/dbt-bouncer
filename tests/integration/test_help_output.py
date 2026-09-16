@@ -1,21 +1,7 @@
 """Integration tests for the CLI's help surface."""
 
-import re
-
 from dbt_bouncer.main import app
-
-
-def strip_ansi(text: str) -> str:
-    """Remove ANSI escape codes from text.
-
-    Args:
-        text: Text containing ANSI escape codes.
-
-    Returns:
-        Text with ANSI codes removed.
-
-    """
-    return re.sub(r"\x1b\[[0-9;]*m", "", text)
+from tests.integration.constants import strip_ansi
 
 
 def test_cli_help(cli_runner):
