@@ -4,9 +4,10 @@ import re
 from pathlib import Path
 from unittest.mock import MagicMock
 
+import orjson
 import pytest
 
-from dbt_bouncer.artifact_parsers.parser import parse_dbt_artifacts
+from dbt_bouncer.artifact_parsers.parser import parse_dbt_artifacts, wrap_dict
 from dbt_bouncer.exceptions import DbtBouncerArtifactError
 
 
@@ -103,3 +104,55 @@ def test_parse_missing_catalog_names_the_generating_commands(tmp_path):
     assert "dbt compile --write-catalog" in message
     assert "dbt docs generate" in message
     assert "dbt-oss" in message
+
+
+def _manifest_with_group_owner(owner: dict) -> dict:
+    """Return the test project's manifest with a single group using `owner`.
+
+    Args:
+        owner: The `owner` mapping to attach to the group.
+
+    Returns:
+        The manifest dict, ready for `wrap_dict`.
+
+    """
+    manifest = orjson.loads(Path("dbt_project/target/manifest.json").read_bytes())
+    manifest["groups"] = {
+        "group.dbt_bouncer_test_project.analytics_engineering": {
+            "name": "analytics_engineering",
+            "resource_type": "group",
+            "package_name": "dbt_bouncer_test_project",
+            "path": "models/",
+            "original_file_path": "models/schema.yml",
+            "unique_id": "group.dbt_bouncer_test_project.analytics_engineering",
+            "owner": owner,
+        }
+    }
+    return manifest
+
+
+@pytest.mark.parametrize(
+    ("email", "expected"),
+    [
+        (
+            ["user1@example.com", "user2@example.com", "user3@example.com"],
+            ["user1@example.com", "user2@example.com", "user3@example.com"],
+        ),
+        ("single@example.com", "single@example.com"),
+    ],
+    ids=["list", "string"],
+)
+def test_group_owner_email_accepts_list_or_string(email, expected):
+    """A group owner email parses whether the manifest holds a list or a string."""
+    manifest = _manifest_with_group_owner(
+        {"name": "Analytics Engineering Team", "email": email}
+    )
+
+    parsed_manifest = wrap_dict(manifest)
+
+    assert (
+        parsed_manifest.groups[
+            "group.dbt_bouncer_test_project.analytics_engineering"
+        ].owner.email
+        == expected
+    )
