@@ -1,9 +1,10 @@
-"""Paths and shared config snippets used across the integration suite.
+"""Paths, helpers and shared config snippets used across the integration suite.
 
 Kept out of `conftest.py` so test modules can import them without triggering a
 second import of the conftest that pytest has already loaded as a plugin.
 """
 
+import re
 from pathlib import Path
 
 # Resolved at import time, before any test chdirs into a tmp_path.
@@ -20,3 +21,19 @@ ARTIFACT_IDS = [p.name for p in ARTIFACT_DIRS]
 
 # A check that fails on every model: no model name starts with "zzz_".
 FAILING_CHECK = [{"name": "check_model_names", "model_name_pattern": "^zzz_"}]
+
+
+def strip_ansi(text: str) -> str:
+    """Remove ANSI escape codes from text.
+
+    Rich styles its output even under `CliRunner`, so assertions against
+    `result.output` go through this first.
+
+    Args:
+        text: Text containing ANSI escape codes.
+
+    Returns:
+        str: Text with ANSI codes removed.
+
+    """
+    return re.sub(r"\x1b\[[0-9;]*m", "", text)
