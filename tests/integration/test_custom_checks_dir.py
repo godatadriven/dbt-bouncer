@@ -12,7 +12,7 @@ These tests drive the whole chain: a `.py` file in `tmp_path`, a config that
 names it, `dbt-bouncer run`, and the resulting exit code.
 """
 
-from pathlib import PurePath
+from pathlib import Path, PurePath
 
 import pytest
 
@@ -102,7 +102,7 @@ def custom_checks_config(write_config):
     def _write(
         checks: list[dict],
         dir_name: str = _CUSTOM_CHECKS_DIR_NAME,
-        artifacts_dir=DBT_112_TARGET,
+        artifacts_dir: Path = DBT_112_TARGET,
     ):
         return write_config(
             {
