@@ -7,6 +7,7 @@ directory. These fixtures centralise that setup; before they existed the same
 roughly eight tests.
 """
 
+import json
 import shutil
 from collections.abc import Callable
 from pathlib import Path
@@ -96,3 +97,51 @@ def artifacts_in_tmp_path(tmp_path) -> Path:
     """
     shutil.copy(DBT_PROJECT_TARGET / "manifest.json", tmp_path / "manifest.json")
     return tmp_path
+
+
+@pytest.fixture
+def artifacts_with_skip_checks(tmp_path) -> Callable[..., Path]:
+    """Return a factory writing an artifacts dir whose models carry `skip_checks` meta.
+
+    `skip_checks` is read off a resource's own dbt meta, so a test that covers
+    it end to end needs a manifest that carries it. The committed fixtures are
+    generated from `dbt_project`, so the factory derives a copy in `tmp_path`
+    rather than edit them.
+
+    Returns:
+        Callable[..., Path]: Called with a mapping of model name to the
+            `skip_checks` entries that model must carry (and optionally the
+            artifacts directory to derive from), returns the new directory.
+
+    """
+
+    def _write(
+        skip_checks_by_model: dict[str, list[str]],
+        artifacts_dir: Path = DBT_112_TARGET,
+    ) -> Path:
+        with (artifacts_dir / "manifest.json").open("r", encoding="utf-8") as f:
+            manifest = json.load(f)
+
+        patched = set()
+        for node in manifest["nodes"].values():
+            name = node.get("name")
+            if node.get("resource_type") != "model" or name not in skip_checks_by_model:
+                continue
+            meta = node.setdefault("config", {}).setdefault("meta", {})
+            meta["dbt-bouncer"] = {"skip_checks": skip_checks_by_model[name]}
+            patched.add(name)
+
+        # A silent miss would leave the test asserting against an unmodified
+        # manifest, which passes for the wrong reason.
+        missing = sorted(set(skip_checks_by_model) - patched)
+        if missing:
+            msg = f"No model named {missing} in `{artifacts_dir}`."
+            raise ValueError(msg)
+
+        out_dir = tmp_path / "artifacts_with_skip_checks"
+        out_dir.mkdir(exist_ok=True)
+        with (out_dir / "manifest.json").open("w", encoding="utf-8") as f:
+            json.dump(manifest, f)
+        return out_dir
+
+    return _write
