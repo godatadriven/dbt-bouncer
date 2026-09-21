@@ -12,7 +12,7 @@ These tests drive the whole chain: a `.py` file in `tmp_path`, a config that
 names it, `dbt-bouncer run`, and the resulting exit code.
 """
 
-from pathlib import PurePath
+from pathlib import Path, PurePath
 
 import pytest
 
@@ -36,6 +36,22 @@ def check_model_name_prefix(model, *, prefix: str = "stg_"):
     if not str(model.name).startswith(prefix):
         fail(f"`{model.unique_id}` does not start with `{prefix}`.")
 '''
+
+# The same check with a rule code attached. A custom code belongs to no
+# `*RuleCode` enum, so this also pins that a plain string is an accepted code.
+_CUSTOM_CHECK_WITH_CODE = '''
+from dbt_bouncer.check_framework.decorator import check, fail
+
+
+@check(code="CU001")
+def check_model_name_prefix(model, *, prefix: str = "stg_"):
+    """Model names must start with the configured prefix."""
+    if not str(model.name).startswith(prefix):
+        fail(f"`{model.unique_id}` does not start with `{prefix}`.")
+'''
+
+# The rule code carried by `_CUSTOM_CHECK_WITH_CODE`.
+_CUSTOM_CODE = "CU001"
 
 # Logged when the config names a check the registry does not hold -- i.e. when
 # the custom check was not discovered.
@@ -83,11 +99,15 @@ def custom_checks_config(write_config):
 
     """
 
-    def _write(checks: list[dict], dir_name: str = _CUSTOM_CHECKS_DIR_NAME):
+    def _write(
+        checks: list[dict],
+        dir_name: str = _CUSTOM_CHECKS_DIR_NAME,
+        artifacts_dir: Path = DBT_112_TARGET,
+    ):
         return write_config(
             {
                 "custom_checks_dir": dir_name,
-                "dbt_artifacts_dir": str(DBT_112_TARGET),
+                "dbt_artifacts_dir": str(artifacts_dir),
                 "manifest_checks": checks,
             }
         )
@@ -167,6 +187,44 @@ def test_custom_check_respects_severity_warn(
 
     assert result.exit_code == ExitCode.SUCCESS, result.output
     assert "Done. SUCCESS=0 WARN=1 ERROR=0" in strip_ansi(result.output)
+
+
+def test_custom_check_can_be_configured_by_rule_code(
+    cli_runner, custom_checks_config, tmp_path
+):
+    """A custom check that declares a rule code is configurable by that code.
+
+    Code resolution builds the registry from `custom_checks_dir` too, so a
+    custom code has to survive the same path a built-in code takes.
+    """
+    _write_custom_check(tmp_path, body=_CUSTOM_CHECK_WITH_CODE)
+    config_file = custom_checks_config([{"code": _CUSTOM_CODE, "include": _ORDERS}])
+
+    result = _run(cli_runner, config_file)
+
+    assert result.exit_code == ExitCode.CHECK_ERRORS, result.output
+    assert "Done. SUCCESS=0 WARN=0 ERROR=1" in strip_ansi(result.output)
+
+
+def test_custom_check_is_skipped_by_its_rule_code(
+    artifacts_with_skip_checks, cli_runner, custom_checks_config, tmp_path
+):
+    """A model's `skip_checks` meta skips a custom check by its rule code.
+
+    `stg_orders` passes the check either way, so the run still executes a check
+    and the dropped `orders` failure is what the counts measure.
+    """
+    _write_custom_check(tmp_path, body=_CUSTOM_CHECK_WITH_CODE)
+    artifacts_dir = artifacts_with_skip_checks({"orders": [_CUSTOM_CODE]})
+    config_file = custom_checks_config(
+        [{"name": "check_model_name_prefix", "include": [_ORDERS, _STG_ORDERS]}],
+        artifacts_dir=artifacts_dir,
+    )
+
+    result = _run(cli_runner, config_file)
+
+    assert result.exit_code == ExitCode.SUCCESS, result.output
+    assert "All checks passed! SUCCESS=1 WARN=0 ERROR=0" in strip_ansi(result.output)
 
 
 def test_custom_check_unknown_without_custom_checks_dir(
