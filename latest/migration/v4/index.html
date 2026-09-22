@@ -888,6 +888,28 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#a-custom-check-that-fails-to-import-now-stops-the-run" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        A custom check that fails to import now stops the run
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#a-run-that-matches-no-resources-now-exits-4" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        A run that matches no resources now exits <code>4</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#informational-and-additive-changes" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -926,6 +948,17 @@
     <span class="md-ellipsis">
       <span class="md-typeset">
         New <code>criteria</code> parameter for the <code>has_meta_keys</code> checks
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#new-github-action-inputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        New GitHub Action inputs
       </span>
     </span>
   </a>
@@ -1108,6 +1141,14 @@
 <td><strong>Must update imports</strong> — <a href="#renamed-outputformatcli-to-listoutputformat">see renamed enum</a></td>
 </tr>
 <tr>
+<td>Keeping custom checks in a <code>custom_checks_dir</code></td>
+<td><strong>Must verify that every file imports</strong> — <a href="#a-custom-check-that-fails-to-import-now-stops-the-run">see custom check load failures</a></td>
+</tr>
+<tr>
+<td>Relying on a run that matches no resources exiting <code>0</code></td>
+<td><strong>Must review</strong> — <a href="#a-run-that-matches-no-resources-now-exits-4">see no checks run</a></td>
+</tr>
+<tr>
 <td>Using <code>check_model_description_contains_regex_pattern</code> in config</td>
 <td>No immediate action — <a href="#check-renamed-check_model_description_contains_regex_pattern">see deprecated check name</a></td>
 </tr>
@@ -1129,7 +1170,7 @@
 </tr>
 <tr>
 <td>Using the dbt-bouncer GitHub Action</td>
-<td>No action required</td>
+<td>No action required — <a href="#new-github-action-inputs">new optional inputs are available</a></td>
 </tr>
 </tbody>
 </table>
@@ -1229,6 +1270,29 @@
 </span></code></pre></div>
 <p>The two enums remain deliberately separate — they are not being merged — this is a rename only.</p>
 <p>Also corrected in the same change: the <code>--output-format</code> help text and docs previously claimed it applied "to the output file or stdout when no output file is specified". That was never accurate — structured output is only ever written when <code>--output-file</code> is set. Without an output file, the console always shows the rich table regardless of the chosen format. No behaviour changed; only the documentation was wrong.</p>
+<h2 id="a-custom-check-that-fails-to-import-now-stops-the-run">A custom check that fails to import now stops the run<a class="headerlink" href="#a-custom-check-that-fails-to-import-now-stops-the-run" title="Permanent link">#</a></h2>
+<p>In v3, a file in your <code>custom_checks_dir</code> that raised on import was logged as a warning and skipped. The run continued and could report "all checks passed" while the check never loaded once.</p>
+<p>In v4 the same failure raises <code>DbtBouncerConfigError</code> and the run stops with exit code <code>2</code>:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>Failed to load custom check file `my_checks/models/check_naming.py`: No module
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>named &#39;yaml&#39;. A custom check that cannot be imported must not be skipped
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>silently.
+</span></code></pre></div>
+<p>The import error is caught for <code>AttributeError</code>, <code>ImportError</code>, <code>ModuleNotFoundError</code>, <code>OSError</code> and <code>SyntaxError</code>. Run at <code>-vvv</code> to see the original traceback.</p>
+<p>Before you upgrade, run your existing config once and confirm that the check count matches what you expect. If a custom check has been quietly failing to import since you wrote it, v4 is where you find out.</p>
+<p>Two related messages remain warnings, not errors:</p>
+<ul>
+<li>A <code>custom_checks_dir</code> that does not exist.</li>
+<li>A Python file placed directly in the top level of <code>custom_checks_dir</code>. Custom checks are discovered by a <code>*/*.py</code> glob, so a check file must sit in a subdirectory (for example <code>my_checks/models/check_naming.py</code>). v4 warns about top-level files instead of ignoring them in silence.</li>
+</ul>
+<h2 id="a-run-that-matches-no-resources-now-exits-4">A run that matches no resources now exits <code>4</code><a class="headerlink" href="#a-run-that-matches-no-resources-now-exits-4" title="Permanent link">#</a></h2>
+<p>In v3, a config that matched no resources printed a success summary and exited <code>0</code>. A typo in <code>package_name</code>, a <code>--check</code> filter that matched nothing, or artifacts from the wrong project all produced a green run that checked nothing.</p>
+<p>In v4 this exits <code>4</code> (<code>NO_CHECKS_RUN</code>) and logs:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>No checks were run. A config that matches no resources exits without running
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>anything. Check the `package_name`, the config file, the dbt artifacts, and any
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>`--check` or `--only` filters.
+</span></code></pre></div>
+<p><code>--dry-run</code> is exempt. It reports the empty plan instead.</p>
+<p>If a pipeline of yours deliberately runs dbt-bouncer against a project with no matching resources, either narrow the step so it does not run, or accept exit code <code>4</code> explicitly.</p>
 <h2 id="informational-and-additive-changes">Informational and additive changes<a class="headerlink" href="#informational-and-additive-changes" title="Permanent link">#</a></h2>
 <p>The following changes do not require any action on your part, but are worth knowing about.</p>
 <h3 id="distinct-exit-codes-for-config-and-artifact-errors">Distinct exit codes for config and artifact errors<a class="headerlink" href="#distinct-exit-codes-for-config-and-artifact-errors" title="Permanent link">#</a></h3>
@@ -1236,29 +1300,62 @@
 <ul>
 <li><code>0</code> (<code>SUCCESS</code>) — all checks succeeded.</li>
 <li><code>1</code> (<code>CHECK_ERRORS</code>) — at least one check failed with error severity.</li>
-<li><code>2</code> (<code>CONFIG_ERROR</code>) — the config file is missing, unreadable, or invalid (for example, an invalid <code>--only</code> value).</li>
+<li><code>2</code> (<code>CONFIG_ERROR</code>) — the config file is missing, unreadable, or invalid (for example, an invalid <code>--only</code> value, or a custom check that fails to import).</li>
 <li><code>3</code> (<code>ARTIFACT_ERROR</code>) — a required dbt artifact (<code>manifest.json</code>, <code>catalog.json</code>, <code>run_results.json</code>) is missing, or was generated with an unsupported dbt version.</li>
+<li><code>4</code> (<code>NO_CHECKS_RUN</code>) — the config matched no resources, so nothing ran. See <a href="#a-run-that-matches-no-resources-now-exits-4">a run that matches no resources now exits <code>4</code></a>.</li>
 </ul>
+<p>Codes <code>2</code>, <code>3</code> and <code>4</code> are all new. A script that treats any non-zero exit as "checks failed" keeps working. A script that treats <code>1</code> as the only failure mode must be updated, because a misconfigured run no longer exits <code>1</code>.</p>
 <p>Two typed exceptions, <code>DbtBouncerConfigError</code> and <code>DbtBouncerArtifactError</code> (both <code>RuntimeError</code> subclasses), back the new codes and replace what were previously bare <code>RuntimeError</code>, <code>FileNotFoundError</code> and <code>AssertionError</code> raises. If you call <code>run_bouncer()</code> directly and catch <code>RuntimeError</code> around it, that code keeps working unchanged since both new exception types still subclass it.</p>
 <h3 id="check-renamed-check_model_description_contains_regex_pattern">Check renamed: <code>check_model_description_contains_regex_pattern</code><a class="headerlink" href="#check-renamed-check_model_description_contains_regex_pattern" title="Permanent link">#</a></h3>
 <p>Renamed to <code>check_model_description_contains_regexp_pattern</code>, matching its <code>regexp_pattern</code> parameter and the naming of the other two pattern-matching checks. The rule code (<code>MO020</code>) and behaviour are unchanged.</p>
-<div class="language-diff highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="w"> </span> manifest_checks:
-</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="gd">-   - name: check_model_description_contains_regex_pattern</span>
-</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="gi">+   - name: check_model_description_contains_regexp_pattern</span>
-</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w"> </span>     regexp_pattern: .*pattern_to_match.*
+<div class="language-diff highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="w"> </span> manifest_checks:
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="gd">-   - name: check_model_description_contains_regex_pattern</span>
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="gi">+   - name: check_model_description_contains_regexp_pattern</span>
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="w"> </span>     regexp_pattern: .*pattern_to_match.*
 </span></code></pre></div>
 <p>Unlike the changes above, this is a soft break: the old name <strong>still works</strong> for the whole v4 cycle via a deprecated-name alias that rewrites it before validation and logs a deprecation warning. This applies wherever a check name can be supplied — the config file, the <code>--check</code> CLI flag, and <code>dbt-bouncer validate</code>.</p>
 <p>One thing to be aware of: because the alias is applied before validation, <code>schema.json</code> only contains the new name. If your editor validates config against the JSON Schema, it will flag a config still using the old name, even though dbt-bouncer itself accepts it. Treat that as a nudge to migrate rather than an error to work around.</p>
 <h3 id="new-criteria-parameter-for-the-has_meta_keys-checks">New <code>criteria</code> parameter for the <code>has_meta_keys</code> checks<a class="headerlink" href="#new-criteria-parameter-for-the-has_meta_keys-checks" title="Permanent link">#</a></h3>
 <p>The <code>criteria</code> parameter (<code>all</code> / <code>any</code> / <code>one</code>) — already available on the <code>*_has_tags</code> checks — is now also available on the seven <code>*_has_meta_keys</code> checks: <code>check_exposure_has_meta_keys</code>, <code>check_macro_has_meta_keys</code>, <code>check_model_has_meta_keys</code>, <code>check_seed_has_meta_keys</code>, <code>check_snapshot_has_meta_keys</code>, <code>check_source_has_meta_keys</code> and <code>check_test_has_meta_keys</code>.</p>
-<div class="language-yaml highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="nt">manifest_checks</span><span class="p">:</span>
-</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_model_has_meta_keys</span>
-</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">    </span><span class="nt">criteria</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">any</span><span class="w"> </span><span class="c1"># at least one of the listed keys must be present</span>
-</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">    </span><span class="nt">keys</span><span class="p">:</span>
-</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">owner</span>
-</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">team</span>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="nt">manifest_checks</span><span class="p">:</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_model_has_meta_keys</span>
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="w">    </span><span class="nt">criteria</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">any</span><span class="w"> </span><span class="c1"># at least one of the listed keys must be present</span>
+</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="w">    </span><span class="nt">keys</span><span class="p">:</span>
+</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">owner</span>
+</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">team</span>
 </span></code></pre></div>
 <p>The default is <code>all</code>, matching the previous, only, behaviour, so existing configs are unaffected — no action is required. <code>check_model_columns_have_meta_keys</code> and the <code>*_has_labels_keys</code> checks are unchanged by this release.</p>
+<h3 id="new-github-action-inputs">New GitHub Action inputs<a class="headerlink" href="#new-github-action-inputs" title="Permanent link">#</a></h3>
+<p>The action gained four optional inputs, so a workflow can reach the features added in v4 without falling back to environment variables:</p>
+<table>
+<thead>
+<tr>
+<th>Input</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>baseline</code></td>
+<td>Path to a baseline file. Only new failures fail the run.</td>
+</tr>
+<tr>
+<td><code>dry-run</code></td>
+<td>Print the checks that would run, without running them.</td>
+</tr>
+<tr>
+<td><code>preset</code></td>
+<td>Run a bundled preset (<code>minimal</code>, <code>standard</code>, <code>strict</code>) instead of a config file.</td>
+</tr>
+<tr>
+<td><code>state</code></td>
+<td>Directory of base artifacts. Only new failures fail the run.</td>
+</tr>
+</tbody>
+</table>
+<p>Set either <code>config-file</code> or <code>preset</code>, not both. When <code>preset</code> is set, the action does not pass <code>config-file</code>, because dbt-bouncer ignores <code>--preset</code> whenever an explicit <code>--config-file</code> is supplied.</p>
+<p>A config file resolves artifact paths relative to its own directory. A preset has no file, so it resolves them relative to the repository root and expects <code>target/</code> there. If your dbt project is not at the repository root, set <code>DBT_PROJECT_DIR</code> in the workflow and the action passes it through. See <a href="../../getting_started/#github-actions">the GitHub Actions setup</a> for an example.</p>
+<p>Every existing input keeps its name, default and meaning, so an unchanged workflow behaves exactly as it did in v3.</p>
 <h3 id="dbt-20-support">dbt 2.0 support<a class="headerlink" href="#dbt-20-support" title="Permanent link">#</a></h3>
 <p>dbt-bouncer v4.0.0 runs against dbt 2.0. No dbt-bouncer config change is needed. Every check that works against dbt-core 1.x works against dbt 2.0, because dbt 2.0 emits the same artifact schemas: manifest v12, catalog v1 and run results v6.</p>
 <p>Three things changed on the dbt side. They change how you generate artifacts, not how you configure dbt-bouncer.</p>
@@ -1286,12 +1383,12 @@
 </tbody>
 </table>
 <p><strong><code>--write-catalog</code> moved off <code>dbt build</code>.</strong> On dbt 2.0 the flag is available on <code>dbt compile</code> and on <code>dbt docs generate</code>. A plain <code>dbt build</code> writes no <code>catalog.json</code>. If your pipeline relied on <code>dbt build --write-catalog</code>, split it:</p>
-<div class="language-shell highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>dbt<span class="w"> </span>compile<span class="w"> </span>--write-catalog<span class="w"> </span><span class="c1"># writes catalog.json</span>
-</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>dbt<span class="w"> </span>build<span class="w">                   </span><span class="c1"># writes manifest.json and a real run_results.json</span>
+<div class="language-shell highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>dbt<span class="w"> </span>compile<span class="w"> </span>--write-catalog<span class="w"> </span><span class="c1"># writes catalog.json</span>
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>dbt<span class="w"> </span>build<span class="w">                   </span><span class="c1"># writes manifest.json and a real run_results.json</span>
 </span></code></pre></div>
 <p>Keep that order. <code>dbt compile</code> executes nothing, so it writes a <code>run_results.json</code> with zero results, and <code>dbt build</code> does not overwrite the catalog.</p>
 <p><strong>The <code>dbt-oss</code> distribution writes no JSON catalog.</strong> It writes the catalog as Parquet under <code>target/private/</code> instead. If you run catalog checks, use the <code>dbt</code> distribution. If you pass a <code>target</code> directory with no <code>catalog.json</code> while catalog checks are configured, dbt-bouncer fails fast with exit code <code>3</code>:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>No catalog.json found at dbt_project/target/catalog.json.
+<div class="language-text highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>No catalog.json found at dbt_project/target/catalog.json.
 </span></code></pre></div>
 <p>Manifest checks and run results checks work on either distribution.</p>
 <h2 id="getting-help">Getting help<a class="headerlink" href="#getting-help" title="Permanent link">#</a></h2>

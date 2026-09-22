@@ -1070,6 +1070,95 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#studio" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        studio
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="studio">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#options_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Options
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Options">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#-category-c" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>--category</code>, <code>-c</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-config-file_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>--config-file</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-custom-checks-dir_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>--custom-checks-dir</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-results-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>--results-file</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-search-s" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>--search</code>, <code>-s</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#mcp" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -1670,9 +1759,65 @@ arguments of your own:</p>
 <p><strong>Example:</strong></p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-29-1"><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>dbt-bouncer<span class="w"> </span>explain<span class="w"> </span>check_model_names<span class="w"> </span>--output-format<span class="w"> </span>json
 </span></code></pre></div>
+<h2 id="studio">studio<a class="headerlink" href="#studio" title="Permanent link">#</a></h2>
+<p>The <code>studio</code> subcommand prints the Terminal Studio dashboard. The dashboard shows every available check in one table, marks the checks your config activates, and prints the full details of a single check when the filters narrow the table to one row:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-30-1"><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a>dbt-bouncer<span class="w"> </span>studio
+</span></code></pre></div>
+<p>The command renders once and exits. It does not need dbt artifacts. Pass <code>--config-file</code> to mark active checks, and pass <code>--results-file</code> to show error and warning counts from a previous run.</p>
+<p>Example output:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-31-1"><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a>╭──────────────────────────────────────────────────────────────────────╮
+</span><span id="__span-31-2"><a id="__codelineno-31-2" name="__codelineno-31-2" href="#__codelineno-31-2"></a>│ dbt-bouncer studio  vX.X.X | search: &#39;alias&#39;  (1 checks, 1 active)    │
+</span><span id="__span-31-3"><a id="__codelineno-31-3" name="__codelineno-31-3" href="#__codelineno-31-3"></a>╰──────────────────────────────────────────────────────────────────────╯
+</span><span id="__span-31-4"><a id="__codelineno-31-4" name="__codelineno-31-4" href="#__codelineno-31-4"></a>                     Available &amp; Configured Checks
+</span><span id="__span-31-5"><a id="__codelineno-31-5" name="__codelineno-31-5" href="#__codelineno-31-5"></a>╭───────────┬────────────────────┬──────────┬──────────┬───────────────╮
+</span><span id="__span-31-6"><a id="__codelineno-31-6" name="__codelineno-31-6" href="#__codelineno-31-6"></a>│ Rule Code │ Check Name         │ Category │  Active  │ Description   │
+</span><span id="__span-31-7"><a id="__codelineno-31-7" name="__codelineno-31-7" href="#__codelineno-31-7"></a>├───────────┼────────────────────┼──────────┼──────────┼───────────────┤
+</span><span id="__span-31-8"><a id="__codelineno-31-8" name="__codelineno-31-8" href="#__codelineno-31-8"></a>│ MO058     │ check_model_alias  │ manifest │ ✓ active │ Models must…  │
+</span><span id="__span-31-9"><a id="__codelineno-31-9" name="__codelineno-31-9" href="#__codelineno-31-9"></a>╰───────────┴────────────────────┴──────────┴──────────┴───────────────╯
+</span></code></pre></div>
+<h3 id="options_5">Options<a class="headerlink" href="#options_5" title="Permanent link">#</a></h3>
+<h4 id="-category-c"><code>--category</code>, <code>-c</code><a class="headerlink" href="#-category-c" title="Permanent link">#</a></h4>
+<p><strong>Type:</strong> Choice
+<strong>Options:</strong> <code>catalog_checks</code>, <code>manifest_checks</code>, <code>run_results_checks</code>
+<strong>Default:</strong> None
+<strong>Required:</strong> No</p>
+<p>Shows only the checks in one category. An invalid category exits with code <code>2</code> (<code>CONFIG_ERROR</code>).</p>
+<p><strong>Example:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-32-1"><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a>dbt-bouncer<span class="w"> </span>studio<span class="w"> </span>--category<span class="w"> </span>manifest_checks
+</span></code></pre></div>
+<h4 id="-config-file_2"><code>--config-file</code><a class="headerlink" href="#-config-file_2" title="Permanent link">#</a></h4>
+<p><strong>Type:</strong> Path
+<strong>Default:</strong> None
+<strong>Required:</strong> No</p>
+<p>Location of the config file (YML, YAML, or TOML). The dashboard reads it to mark which checks are active in your project. Without this option, no check is marked active.</p>
+<p><strong>Example:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-33-1"><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a>dbt-bouncer<span class="w"> </span>studio<span class="w"> </span>--config-file<span class="w"> </span>dbt-bouncer.yml
+</span></code></pre></div>
+<h4 id="-custom-checks-dir_1"><code>--custom-checks-dir</code><a class="headerlink" href="#-custom-checks-dir_1" title="Permanent link">#</a></h4>
+<p><strong>Type:</strong> Path
+<strong>Default:</strong> None
+<strong>Required:</strong> No</p>
+<p>Directory that contains custom checks. When you pass it, the dashboard lists your custom checks alongside the built-in ones.</p>
+<h4 id="-results-file"><code>--results-file</code><a class="headerlink" href="#-results-file" title="Permanent link">#</a></h4>
+<p><strong>Type:</strong> Path
+<strong>Default:</strong> None
+<strong>Required:</strong> No</p>
+<p>Path to a dbt-bouncer JSON output file, written by <code>dbt-bouncer run --output-file results.json --output-format json</code>. The dashboard adds the error and warning count for each check. This is not dbt's own <code>run_results.json</code>.</p>
+<p><strong>Example:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-34-1"><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a>dbt-bouncer<span class="w"> </span>run<span class="w"> </span>--output-file<span class="w"> </span>results.json<span class="w"> </span>--output-format<span class="w"> </span>json
+</span><span id="__span-34-2"><a id="__codelineno-34-2" name="__codelineno-34-2" href="#__codelineno-34-2"></a>dbt-bouncer<span class="w"> </span>studio<span class="w"> </span>--results-file<span class="w"> </span>results.json
+</span></code></pre></div>
+<h4 id="-search-s"><code>--search</code>, <code>-s</code><a class="headerlink" href="#-search-s" title="Permanent link">#</a></h4>
+<p><strong>Type:</strong> String
+<strong>Default:</strong> None
+<strong>Required:</strong> No</p>
+<p>Shows only the checks whose name, rule code, or description contains the supplied text.</p>
+<p><strong>Example:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-35-1"><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a>dbt-bouncer<span class="w"> </span>studio<span class="w"> </span>--search<span class="w"> </span><span class="nb">alias</span>
+</span></code></pre></div>
 <h2 id="mcp">mcp<a class="headerlink" href="#mcp" title="Permanent link">#</a></h2>
 <p>The <code>mcp</code> subcommand starts a <a href="https://modelcontextprotocol.io">Model Context Protocol</a> server on the stdio transport:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-30-1"><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a>dbt-bouncer<span class="w"> </span>mcp
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-36-1"><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a>dbt-bouncer<span class="w"> </span>mcp
 </span></code></pre></div>
 <p>This lets AI coding agents (Claude Code, Cursor, etc.) query and run dbt-bouncer. The server exposes four tools:</p>
 <ul>
@@ -1682,17 +1827,17 @@ arguments of your own:</p>
 <li><code>run_checks</code>: Run the configured checks against the project's dbt artifacts. This requires at minimum a <code>manifest.json</code> (from <code>dbt parse</code>).</li>
 </ul>
 <p>The command requires the optional <code>mcp</code> dependency:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-31-1"><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a>pip<span class="w"> </span>install<span class="w"> </span><span class="s1">&#39;dbt-bouncer[mcp]&#39;</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-37-1"><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a>pip<span class="w"> </span>install<span class="w"> </span><span class="s1">&#39;dbt-bouncer[mcp]&#39;</span>
 </span></code></pre></div>
 <p>Example client configuration (Claude Code, <code>.mcp.json</code>):</p>
-<div class="language-json highlight"><pre><span></span><code><span id="__span-32-1"><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a><span class="p">{</span>
-</span><span id="__span-32-2"><a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a><span class="w">  </span><span class="nt">&quot;mcpServers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-32-3"><a id="__codelineno-32-3" name="__codelineno-32-3" href="#__codelineno-32-3"></a><span class="w">    </span><span class="nt">&quot;dbt-bouncer&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-32-4"><a id="__codelineno-32-4" name="__codelineno-32-4" href="#__codelineno-32-4"></a><span class="w">      </span><span class="nt">&quot;command&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dbt-bouncer&quot;</span><span class="p">,</span>
-</span><span id="__span-32-5"><a id="__codelineno-32-5" name="__codelineno-32-5" href="#__codelineno-32-5"></a><span class="w">      </span><span class="nt">&quot;args&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;mcp&quot;</span><span class="p">]</span>
-</span><span id="__span-32-6"><a id="__codelineno-32-6" name="__codelineno-32-6" href="#__codelineno-32-6"></a><span class="w">    </span><span class="p">}</span>
-</span><span id="__span-32-7"><a id="__codelineno-32-7" name="__codelineno-32-7" href="#__codelineno-32-7"></a><span class="w">  </span><span class="p">}</span>
-</span><span id="__span-32-8"><a id="__codelineno-32-8" name="__codelineno-32-8" href="#__codelineno-32-8"></a><span class="p">}</span>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-38-1"><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a><span class="p">{</span>
+</span><span id="__span-38-2"><a id="__codelineno-38-2" name="__codelineno-38-2" href="#__codelineno-38-2"></a><span class="w">  </span><span class="nt">&quot;mcpServers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-38-3"><a id="__codelineno-38-3" name="__codelineno-38-3" href="#__codelineno-38-3"></a><span class="w">    </span><span class="nt">&quot;dbt-bouncer&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-38-4"><a id="__codelineno-38-4" name="__codelineno-38-4" href="#__codelineno-38-4"></a><span class="w">      </span><span class="nt">&quot;command&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dbt-bouncer&quot;</span><span class="p">,</span>
+</span><span id="__span-38-5"><a id="__codelineno-38-5" name="__codelineno-38-5" href="#__codelineno-38-5"></a><span class="w">      </span><span class="nt">&quot;args&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;mcp&quot;</span><span class="p">]</span>
+</span><span id="__span-38-6"><a id="__codelineno-38-6" name="__codelineno-38-6" href="#__codelineno-38-6"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-38-7"><a id="__codelineno-38-7" name="__codelineno-38-7" href="#__codelineno-38-7"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-38-8"><a id="__codelineno-38-8" name="__codelineno-38-8" href="#__codelineno-38-8"></a><span class="p">}</span>
 </span></code></pre></div>
 <h2 id="exit-codes">Exit codes<a class="headerlink" href="#exit-codes" title="Permanent link">#</a></h2>
 <p><code>dbt-bouncer</code> returns distinct exit codes so that CI pipelines and scripts can tell a check failure apart from a setup problem:</p>
