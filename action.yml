@@ -204,7 +204,16 @@ runs:
           run \
           ${{ steps.assemble-config-param.outputs.config-param }} \
           ${{ steps.assemble-send-pr-comment-param.outputs.send-pr-comment-param }} \
-          ${{ steps.assemble-baseline-param.outputs.baseline-param }} ${{ steps.assemble-check-param.outputs.check-param }} ${{ steps.assemble-dry-run-param.outputs.dry-run-param }} ${{ steps.assemble-only-param.outputs.only-param }} ${{ steps.assemble-output-file-param.outputs.output-file-param }} ${{ steps.assemble-output-format-param.outputs.output-format-param }} ${{ steps.assemble-output-only-failures-param.outputs.output-only-failures-param }} ${{ steps.assemble-show-all-failures-param.outputs.show-all-failures-param }} ${{ steps.assemble-state-param.outputs.state-param }} ${{ steps.assemble-verbose-param.outputs.verbose-param }}
+          ${{ steps.assemble-baseline-param.outputs.baseline-param }} \
+          ${{ steps.assemble-check-param.outputs.check-param }} \
+          ${{ steps.assemble-dry-run-param.outputs.dry-run-param }} \
+          ${{ steps.assemble-only-param.outputs.only-param }} \
+          ${{ steps.assemble-output-file-param.outputs.output-file-param }} \
+          ${{ steps.assemble-output-format-param.outputs.output-format-param }} \
+          ${{ steps.assemble-output-only-failures-param.outputs.output-only-failures-param }} \
+          ${{ steps.assemble-show-all-failures-param.outputs.show-all-failures-param }} \
+          ${{ steps.assemble-state-param.outputs.state-param }} \
+          ${{ steps.assemble-verbose-param.outputs.verbose-param }}
 
     - name: Send PR comment
       if: always() && inputs.send-pr-comment == 'true' && steps.run-dbt-bouncer.outcome != 'success'

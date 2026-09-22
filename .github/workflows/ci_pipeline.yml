@@ -288,7 +288,7 @@ jobs:
 
             - name: Modify Dockerfile to use local dbt-bouncer version
               run: |
-                set -eou
+                set -euo pipefail
                 sed -i -E 's/ENTRYPOINT \["uvx", "dbt-bouncer==0.0.0"\]/ENTRYPOINT \["uvx", "."\]/' Dockerfile
                 sed -i -E '/ENTRYPOINT/i\COPY . .' ./Dockerfile
 
