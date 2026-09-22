@@ -204,8 +204,11 @@ jobs:
             # anything in the change under test.
             env: |
               GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
+            # `set -eu`, not `set -euo pipefail`: the devcontainer CLI runs this
+            # with `--entrypoint /bin/sh`, and /bin/sh on the Debian-slim base is
+            # dash, which rejects `-o pipefail`. No command below uses a pipe.
             runCmd: |
-              set -eou
+              set -eu
               uv run dbt-bouncer --config-file dbt-bouncer-example.yml
               mise run test-dev-container
               mise run test-perf
@@ -233,7 +236,7 @@ jobs:
 
             - name: Modify Dockerfile to use local dbt-bouncer version
               run: |
-                set -eou
+                set -euo pipefail
                 sed -i -E 's/ENTRYPOINT \["uvx", "dbt-bouncer==0.0.0"\]/ENTRYPOINT \["uvx", "."\]/' Dockerfile
                 sed -i -E '/ENTRYPOINT/i\COPY . .' ./Dockerfile
 
