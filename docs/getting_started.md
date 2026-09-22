@@ -174,6 +174,16 @@ Set either `config-file` or `preset`, not both. When `preset` is set, the action
 
 The `baseline` and `state` paths are resolved relative to the repository root.
 
+A config file resolves artifact paths relative to its own directory. A preset has no file, so it resolves them relative to the repository root and expects `target/` there. If your dbt project is not at the repository root, set `DBT_PROJECT_DIR` and the action passes it through:
+
+```yaml
+            - uses: godatadriven/dbt-bouncer@vX.X
+              env:
+                DBT_PROJECT_DIR: dbt_project
+              with:
+                preset: strict
+```
+
 We recommend pinning both a major and minor version number.
 
 !!! tip "Trade-offs"

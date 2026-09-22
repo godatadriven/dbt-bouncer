@@ -373,12 +373,15 @@ jobs:
             # Case E: a baseline round trip. The action only ever runs `run`, so
             # the config and the baseline are produced by direct docker calls
             # first. `-w /app` is required because the image sets no WORKDIR.
+            # `-w /app` and DBT_PROJECT_DIR mirror what the action itself passes,
+            # so the baseline is recorded against the same artifacts the action
+            # will check. The image sets no WORKDIR, so without `-w` the CWD is /.
             - name: "E: build a failing config and its baseline"
               run: |
                 set -euo pipefail
-                docker run --rm -w /app --volume "$PWD":/app \
+                docker run --rm -w /app --env DBT_PROJECT_DIR --volume "$PWD":/app \
                   "$ACTION_IMAGE" init --preset strict
-                docker run --rm -w /app --volume "$PWD":/app \
+                docker run --rm -w /app --env DBT_PROJECT_DIR --volume "$PWD":/app \
                   "$ACTION_IMAGE" baseline \
                     --config-file /app/dbt-bouncer.yml \
                     --output-file /app/baseline.json

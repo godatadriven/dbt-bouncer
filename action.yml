@@ -39,7 +39,7 @@ inputs:
   preset:
     default: ''
     description: >-
-      Run a bundled preset config instead of a config file. One of: minimal, standard, strict. When set, `config-file` is not passed.
+      Run a bundled preset config instead of a config file. One of: minimal, standard, strict. When set, `config-file` is not passed. A preset resolves artifact paths relative to the repository root, so set the DBT_PROJECT_DIR environment variable if your dbt project is not at the root.
     required: false
   send-pr-comment:
     default: 'true'
@@ -193,11 +193,13 @@ runs:
       run: >
         docker run --rm \
           --env CREATE_DBT_BOUNCER_CONFIG_FILE=false \
+          --env DBT_PROJECT_DIR \
           --env GITHUB_REF='${{ github.ref }}' \
           --env GITHUB_REPOSITORY='${{ github.repository }}' \
           --env GITHUB_RUN_ID='${{ github.run_id }}' \
           --env GITHUB_TOKEN='${{ github.token }}' \
           --volume "$GITHUB_WORKSPACE":/app \
+          --workdir /app \
           ghcr.io/godatadriven/dbt-bouncer:v0.0.0 \
           run \
           ${{ steps.assemble-config-param.outputs.config-param }} \
