@@ -1,6 +1,11 @@
 name: 'dbt-bouncer'
 description: 'Configure and enforce conventions for your dbt project.'
 inputs:
+  baseline:
+    default: ''
+    description: >-
+      Path to a baseline file, relative to the repository root. Failures listed in it are suppressed, so only new failures are reported.
+    required: false
   check:
     default: ''
     description: >-
@@ -8,7 +13,11 @@ inputs:
     required: false
   config-file:
     default: 'dbt-bouncer.yml'
-    description: 'Location of the YML config file.'
+    description: 'Location of the YML config file. Ignored when `preset` is set.'
+    required: false
+  dry-run:
+    default: 'false'
+    description: 'Print which checks would run (name, resource type, count) without executing them.'
     required: false
   only:
     default: ''
@@ -27,6 +36,11 @@ inputs:
     default: 'false'
     description: If passed then only failures will be included in the output file.
     required: false
+  preset:
+    default: ''
+    description: >-
+      Run a bundled preset config instead of a config file. One of: minimal, standard, strict. When set, `config-file` is not passed. A preset resolves artifact paths relative to the repository root, so set the DBT_PROJECT_DIR environment variable if your dbt project is not at the root.
+    required: false
   send-pr-comment:
     default: 'true'
     description: |
@@ -37,6 +51,11 @@ inputs:
     default: 'false'
     description: Print all failures to the console.
     required: false
+  state:
+    default: ''
+    description: >-
+      Directory of dbt artifacts from a previous run, relative to the repository root. Failures present in that base run are suppressed, so only new failures are reported.
+    required: false
   verbose:
     default: 'false'
     description: Run dbt-bouncer in verbose mode.
@@ -46,6 +65,28 @@ runs:
   using: composite
 
   steps:
+    - name: Assemble `config-file` and `preset` parameters
+      id: assemble-config-param
+      shell: bash
+      # `--preset` is ignored whenever an explicit `--config-file` is passed, so
+      # the two are mutually exclusive here: a preset replaces the config file.
+      run: >
+        if [[ "${{ inputs.preset }}" = "" ]]; then
+          echo "config-param=--config-file /app/${{ inputs.config-file }}" >> $GITHUB_OUTPUT
+        else
+          echo "config-param=--preset ${{ inputs.preset }}" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Assemble `baseline` parameter
+      id: assemble-baseline-param
+      shell: bash
+      run: >
+        if [[ "${{ inputs.baseline }}" = "" ]]; then
+          echo "baseline-param=" >> $GITHUB_OUTPUT
+        else
+          echo "baseline-param=--baseline /app/${{ inputs.baseline }}" >> $GITHUB_OUTPUT
+        fi
+
     - name: Assemble `check` parameter
       id: assemble-check-param
       shell: bash
@@ -54,6 +95,16 @@ runs:
           echo "check-param=" >> $GITHUB_OUTPUT
         else
           echo "check-param=--check ${{ inputs.check }}" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Assemble `dry-run` parameter
+      id: assemble-dry-run-param
+      shell: bash
+      run: >
+        if [[ "${{ inputs.dry-run }}" = "false" ]]; then
+          echo "dry-run-param=" >> $GITHUB_OUTPUT
+        else
+          echo "dry-run-param=--dry-run" >> $GITHUB_OUTPUT
         fi
 
     - name: Assemble `only` parameter
@@ -106,6 +157,16 @@ runs:
           echo "show-all-failures-param=--show-all-failures" >> $GITHUB_OUTPUT
         fi
 
+    - name: Assemble `state` parameter
+      id: assemble-state-param
+      shell: bash
+      run: >
+        if [[ "${{ inputs.state }}" = "" ]]; then
+          echo "state-param=" >> $GITHUB_OUTPUT
+        else
+          echo "state-param=--state /app/${{ inputs.state }}" >> $GITHUB_OUTPUT
+        fi
+
     - name: Assemble `send-pr-comment` parameter
       id: assemble-send-pr-comment-param
       shell: bash
@@ -132,16 +193,27 @@ runs:
       run: >
         docker run --rm \
           --env CREATE_DBT_BOUNCER_CONFIG_FILE=false \
+          --env DBT_PROJECT_DIR \
           --env GITHUB_REF='${{ github.ref }}' \
           --env GITHUB_REPOSITORY='${{ github.repository }}' \
           --env GITHUB_RUN_ID='${{ github.run_id }}' \
           --env GITHUB_TOKEN='${{ github.token }}' \
           --volume "$GITHUB_WORKSPACE":/app \
+          --workdir /app \
           ghcr.io/godatadriven/dbt-bouncer:v0.0.0 \
           run \
-          --config-file /app/${{ inputs.config-file }} \
+          ${{ steps.assemble-config-param.outputs.config-param }} \
           ${{ steps.assemble-send-pr-comment-param.outputs.send-pr-comment-param }} \
-          ${{ steps.assemble-check-param.outputs.check-param }} ${{ steps.assemble-only-param.outputs.only-param }} ${{ steps.assemble-output-file-param.outputs.output-file-param }} ${{ steps.assemble-output-format-param.outputs.output-format-param }} ${{ steps.assemble-output-only-failures-param.outputs.output-only-failures-param }} ${{ steps.assemble-show-all-failures-param.outputs.show-all-failures-param }} ${{ steps.assemble-verbose-param.outputs.verbose-param }}
+          ${{ steps.assemble-baseline-param.outputs.baseline-param }} \
+          ${{ steps.assemble-check-param.outputs.check-param }} \
+          ${{ steps.assemble-dry-run-param.outputs.dry-run-param }} \
+          ${{ steps.assemble-only-param.outputs.only-param }} \
+          ${{ steps.assemble-output-file-param.outputs.output-file-param }} \
+          ${{ steps.assemble-output-format-param.outputs.output-format-param }} \
+          ${{ steps.assemble-output-only-failures-param.outputs.output-only-failures-param }} \
+          ${{ steps.assemble-show-all-failures-param.outputs.show-all-failures-param }} \
+          ${{ steps.assemble-state-param.outputs.state-param }} \
+          ${{ steps.assemble-verbose-param.outputs.verbose-param }}
 
     - name: Send PR comment
       if: always() && inputs.send-pr-comment == 'true' && steps.run-dbt-bouncer.outcome != 'success'

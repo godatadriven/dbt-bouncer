@@ -155,15 +155,33 @@ jobs:
 
             - uses: godatadriven/dbt-bouncer@vX.X
               with:
+                baseline: '' # optional, path to a baseline file, so only new failures fail the run
                 check: '' # optional, comma-separated check names to run
                 config-file: ./<PATH_TO_CONFIG_FILE>
+                dry-run: false # optional, defaults to false
                 only: manifest_checks # optional, defaults to running all checks
                 output-file: results.json # optional, default does not save a results file
                 output-format: json # optional, one of: csv, json, junit, sarif, tap. Defaults to json
-                output-only-failures: false # optional, defaults to true
+                output-only-failures: false # optional, defaults to false
+                preset: '' # optional, one of: minimal, standard, strict. Replaces config-file
                 send-pr-comment: true # optional, defaults to true
                 show-all-failures: false # optional, defaults to false
+                state: '' # optional, directory of base artifacts, so only new failures fail the run
                 verbose: false # optional, defaults to false
+```
+
+Set either `config-file` or `preset`, not both. When `preset` is set, the action runs a [bundled preset](cli.md#presets) and does not pass `config-file`.
+
+The `baseline` and `state` paths are resolved relative to the repository root.
+
+A config file resolves artifact paths relative to its own directory. A preset has no file, so it resolves them relative to the repository root and expects `target/` there. If your dbt project is not at the repository root, set `DBT_PROJECT_DIR` and the action passes it through:
+
+```yaml
+            - uses: godatadriven/dbt-bouncer@vX.X
+              env:
+                DBT_PROJECT_DIR: dbt_project
+              with:
+                preset: strict
 ```
 
 We recommend pinning both a major and minor version number.
