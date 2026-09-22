@@ -211,6 +211,9 @@ dbt_project/target/partial_parse.msgpack
 dbt_project/target/perf_info.json
 dbt_project/target/semantic_manifest.json
 dbt_project/target/sources.json
+# Scratch target directories written by ad-hoc `dbt docs generate` runs when
+# comparing dbt versions. Regenerable, and large enough to bloat a clone.
+dbt_project/target_docs*/
 dbt_project/.user.yml
 dbt_project/package-lock.yml
 dist_pypi/
@@ -252,4 +255,6 @@ tests/fixtures/dbt_20/target/semantic_manifest.json
 tests/fixtures/dbt_20/target/snapshots/
 tmp/
 .agents/skills/.openspec-target
+# Screenshots, console logs and page snapshots written by the Playwright MCP server.
+.playwright-mcp/
 .DS_Store

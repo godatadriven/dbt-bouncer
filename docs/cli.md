@@ -501,6 +501,98 @@ Controls the output format. Use `json` for machine-readable output.
 dbt-bouncer explain check_model_names --output-format json
 ```
 
+## studio
+
+The `studio` subcommand prints the Terminal Studio dashboard. The dashboard shows every available check in one table, marks the checks your config activates, and prints the full details of a single check when the filters narrow the table to one row:
+
+```bash
+dbt-bouncer studio
+```
+
+The command renders once and exits. It does not need dbt artifacts. Pass `--config-file` to mark active checks, and pass `--results-file` to show error and warning counts from a previous run.
+
+Example output:
+
+```text
+╭──────────────────────────────────────────────────────────────────────╮
+│ dbt-bouncer studio  vX.X.X | search: 'alias'  (1 checks, 1 active)    │
+╰──────────────────────────────────────────────────────────────────────╯
+                     Available & Configured Checks
+╭───────────┬────────────────────┬──────────┬──────────┬───────────────╮
+│ Rule Code │ Check Name         │ Category │  Active  │ Description   │
+├───────────┼────────────────────┼──────────┼──────────┼───────────────┤
+│ MO058     │ check_model_alias  │ manifest │ ✓ active │ Models must…  │
+╰───────────┴────────────────────┴──────────┴──────────┴───────────────╯
+```
+
+### Options
+
+#### `--category`, `-c`
+
+**Type:** Choice
+**Options:** `catalog_checks`, `manifest_checks`, `run_results_checks`
+**Default:** None
+**Required:** No
+
+Shows only the checks in one category. An invalid category exits with code `2` (`CONFIG_ERROR`).
+
+**Example:**
+
+```bash
+dbt-bouncer studio --category manifest_checks
+```
+
+#### `--config-file`
+
+**Type:** Path
+**Default:** None
+**Required:** No
+
+Location of the config file (YML, YAML, or TOML). The dashboard reads it to mark which checks are active in your project. Without this option, no check is marked active.
+
+**Example:**
+
+```bash
+dbt-bouncer studio --config-file dbt-bouncer.yml
+```
+
+#### `--custom-checks-dir`
+
+**Type:** Path
+**Default:** None
+**Required:** No
+
+Directory that contains custom checks. When you pass it, the dashboard lists your custom checks alongside the built-in ones.
+
+#### `--results-file`
+
+**Type:** Path
+**Default:** None
+**Required:** No
+
+Path to a dbt-bouncer JSON output file, written by `dbt-bouncer run --output-file results.json --output-format json`. The dashboard adds the error and warning count for each check. This is not dbt's own `run_results.json`.
+
+**Example:**
+
+```bash
+dbt-bouncer run --output-file results.json --output-format json
+dbt-bouncer studio --results-file results.json
+```
+
+#### `--search`, `-s`
+
+**Type:** String
+**Default:** None
+**Required:** No
+
+Shows only the checks whose name, rule code, or description contains the supplied text.
+
+**Example:**
+
+```bash
+dbt-bouncer studio --search alias
+```
+
 ## mcp
 
 The `mcp` subcommand starts a [Model Context Protocol](https://modelcontextprotocol.io) server on the stdio transport:
