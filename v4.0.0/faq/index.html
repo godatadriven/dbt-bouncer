@@ -1,0 +1,1545 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://godatadriven.github.io/dbt-bouncer/v4.0.0/faq/">
+      
+      
+        <link rel="prev" href="../cli/">
+      
+      
+        <link rel="next" href="../migration/v3/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/logo.svg">
+      <meta name="generator" content="zensical-0.0.53">
+    
+    
+      
+        <title>Frequently Asked Questions - dbt-bouncer</title>
+      
+    
+    
+      
+        
+      
+      <link rel="stylesheet" href="../assets/stylesheets/classic/main.39e53929.min.css">
+      
+        
+          
+        
+        <link rel="stylesheet" href="../assets/stylesheets/classic/palette.7dc9a0ad.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,500,500i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("..",location),__md_scope.pathname.endsWith("/")||(__md_scope=new URL(__md_scope.pathname+"/",location)),__md_hash=e=>[...e].reduce(((e,t)=>(e<<5)-e+t.charCodeAt(0)),0),__md_get=(e,t=localStorage,_=__md_scope)=>JSON.parse(t.getItem(_.pathname+"."+e)),__md_set=(e,t,_=localStorage,a=__md_scope)=>{try{_.setItem(a.pathname+"."+e,JSON.stringify(t))}catch(e){}},document.documentElement.setAttribute("data-platform",navigator.platform)</script>
+    
+      
+
+    
+    
+  <meta property="og:image" content="https://godatadriven.github.io/dbt-bouncer/v4.0.0assets/brand/social-card-light-tagline.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://godatadriven.github.io/dbt-bouncer/v4.0.0assets/brand/social-card-light-tagline.png" />
+
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer" aria-label="Navigation"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#frequently-asked-questions" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+          <aside class="md-banner md-banner--warning">
+            <div class="md-banner__inner md-grid md-typeset">
+              
+  You're not viewing the latest stable version of dbt-bouncer.
+  <a href="../..">
+    <strong>Click here to go to stable.</strong>
+  </a>
+
+            </div>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL(".."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
+          </aside>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="./.." title="dbt-bouncer" class="md-header__button md-logo" aria-label="dbt-bouncer" data-md-component="logo">
+      
+  <img src="../assets/logo.svg" alt="dbt-bouncer">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer" aria-label="Navigation">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            dbt-bouncer
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Frequently Asked Questions
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme)" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9zM20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12zm-9.15 3.96h2.3L12 9z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="custom" data-md-color-accent="indigo"  aria-label="Switch to system preference"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to system preference" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search" aria-label="Search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog" aria-label="Search">
+  <button type="button" class="md-search__button">
+    Search
+  </button>
+</div>
+      
+    
+    <div class="md-header__source">
+      
+        <a href="https://github.com/godatadriven/dbt-bouncer" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.3.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2026 Fonticons, Inc.--><path fill="currentColor" d="M216.5 362.5c-66-8-112.5-55.5-112.5-117 0-25 9-52 24-70-6.5-16.5-5.5-51.5 2-66 20-2.5 47 8 63 22.5 19-6 39-9 63.5-9s44.5 3 62.5 8.5c15.5-14 43-24.5 63-22 7 13.5 8 48.5 1.5 65.5 16 19 24.5 44.5 24.5 70.5 0 61.5-46.5 108-113.5 116.5 17 11 28.5 35 28.5 62.5v52c0 15 12.5 23.5 27.5 17.5C441 459.5 512 369 512 257 512 115.5 397 0 255.5 0S0 115.5 0 257c0 111 70.5 203 165.5 237.5 13.5 5 26.5-4 26.5-17.5v-40c-7 3-16 5-24 5-33 0-52.5-18-66.5-51.5-5.5-13.5-11.5-21.5-23-23-6-.5-8-3-8-6 0-6 10-10.5 20-10.5 14.5 0 27 9 40 27.5 10 14.5 20.5 21 33 21s20.5-4.5 32-16c8.5-8.5 15-16 21-21"/></svg>
+  </div>
+  <div class="md-source__repository">
+    godatadriven/dbt-bouncer
+  </div>
+</a>
+      
+    </div>
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="./.." class="md-tabs__link">
+        
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../getting_started/" class="md-tabs__link">
+        
+  
+  Getting started
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../configuration/" class="md-tabs__link">
+        
+  
+  Configuration
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+      
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+      <li class="md-tabs__item">
+        <a href="../checks/" class="md-tabs__link">
+          
+  
+  Checks
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../cli/" class="md-tabs__link">
+        
+  
+  CLI
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="././" class="md-tabs__link">
+        
+  
+  FAQ
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+      
+      
+        
+      
+        
+      
+    
+    
+    
+    
+      <li class="md-tabs__item">
+        <a href="../migration/v3/" class="md-tabs__link">
+          
+  
+  Migration
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../brand/" class="md-tabs__link">
+        
+  
+  Brand
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../CONTRIBUTING/" class="md-tabs__link">
+        
+  
+  Contributing
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../users/" class="md-tabs__link">
+        
+  
+  Users
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="./.." title="dbt-bouncer" class="md-nav__button md-logo" aria-label="dbt-bouncer" data-md-component="logo">
+      
+  <img src="../assets/logo.svg" alt="dbt-bouncer">
+
+    </a>
+    dbt-bouncer
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/godatadriven/dbt-bouncer" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.3.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2026 Fonticons, Inc.--><path fill="currentColor" d="M216.5 362.5c-66-8-112.5-55.5-112.5-117 0-25 9-52 24-70-6.5-16.5-5.5-51.5 2-66 20-2.5 47 8 63 22.5 19-6 39-9 63.5-9s44.5 3 62.5 8.5c15.5-14 43-24.5 63-22 7 13.5 8 48.5 1.5 65.5 16 19 24.5 44.5 24.5 70.5 0 61.5-46.5 108-113.5 116.5 17 11 28.5 35 28.5 62.5v52c0 15 12.5 23.5 27.5 17.5C441 459.5 512 369 512 257 512 115.5 397 0 255.5 0S0 115.5 0 257c0 111 70.5 203 165.5 237.5 13.5 5 26.5-4 26.5-17.5v-40c-7 3-16 5-24 5-33 0-52.5-18-66.5-51.5-5.5-13.5-11.5-21.5-23-23-6-.5-8-3-8-6 0-6 10-10.5 20-10.5 14.5 0 27 9 40 27.5 10 14.5 20.5 21 33 21s20.5-4.5 32-16c8.5-8.5 15-16 21-21"/></svg>
+  </div>
+  <div class="md-source__repository">
+    godatadriven/dbt-bouncer
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="./.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Home
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Getting started
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Configuration
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../checks/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Checks
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  CLI
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      
+        <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  FAQ
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="././" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  FAQ
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#can-other-tools-perform-the-same-checks-as-dbt-bouncer" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Can other tools perform the same checks as <code>dbt-bouncer</code>?
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-do-i-onboard-an-existing-dbt-project" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        How do I onboard an existing dbt project?
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#does-dbt-bouncer-work-with-dbt-cloud" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Does <code>dbt-bouncer</code> work with dbt Cloud?
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#does-dbt-bouncer-work-with-dbt-20-fusion" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Does <code>dbt-bouncer</code> work with dbt 2.0 / Fusion?
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#does-dbt-bouncer-support-python-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Does <code>dbt-bouncer</code> support Python models?
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Does dbt-bouncer support Python models?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Example
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#can-ai-coding-agents-use-dbt-bouncer" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Can AI coding agents use <code>dbt-bouncer</code>?
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-to-configure-dbt-bouncer-for-use-in-a-ci-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        How to configure <code>dbt-bouncer</code> for use in a CI pipeline?
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-do-i-get-machine-readable-results-to-parse-in-a-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        How do I get machine-readable results to parse in a script?
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-to-set-up-dbt-bouncer-in-a-monorepo" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        How to set up <code>dbt-bouncer</code> in a monorepo?
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-to-set-up-dbt-bouncer-in-a-dbt-mesh" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        How to set up <code>dbt-bouncer</code> in a dbt Mesh?
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How to set up dbt-bouncer in a dbt Mesh?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#approach-1-individual-dbt-bounceryml-configuration-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Approach 1: Individual <code>dbt-bouncer.yml</code> configuration file
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#approach-2-centralised-dbt-bounceryml-configuration-file-shared-via-git-submodule" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Approach 2: Centralised <code>dbt-bouncer.yml</code> configuration file shared via git submodule
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-to-set-up-dbt-bouncer-with-prekpre-commit" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        How to set up <code>dbt-bouncer</code> with <code>prek</code>/<code>pre-commit</code>?
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#can-i-skip-specific-checks-for-an-exposuremodelsourceetc" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Can I skip specific checks for an exposure/model/source/etc.?
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-to-add-a-custom-check-to-dbt-bouncer" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        How to add a custom check to <code>dbt-bouncer</code>?
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How to add a custom check to dbt-bouncer?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Example
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../migration/v3/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Migration
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../brand/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Brand
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CONTRIBUTING/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Contributing
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../users/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Users
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+  
+    <a href="https://github.com/godatadriven/dbt-bouncer/edit/main/docs/faq.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75z"/></svg>
+    </a>
+  
+  
+
+
+<h1 id="frequently-asked-questions">Frequently Asked Questions<a class="headerlink" href="#frequently-asked-questions" title="Permanent link">#</a></h1>
+<h2 id="can-other-tools-perform-the-same-checks-as-dbt-bouncer">Can other tools perform the same checks as <code>dbt-bouncer</code>?<a class="headerlink" href="#can-other-tools-perform-the-same-checks-as-dbt-bouncer" title="Permanent link">#</a></h2>
+<p><code>dbt-bouncer</code> is designed to be the most complete and flexible way to enforce conventions in a dbt project: it ships <strong>120+ built-in checks</strong>, is configured via a <code>YAML</code> or <code>TOML</code> file format that dbt developers are already familiar with, never needs a database connection, can run checks against any of dbt's artifacts (manifest, catalog, and run results), can run both locally and in a CI pipeline, and lets you write custom checks in python.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><code>dbt-bouncer</code></th>
+<th><a href="https://github.com/dbt-checkpoint/dbt-checkpoint"><code>dbt-checkpoint</code></a></th>
+<th><a href="https://github.com/dbt-labs/dbt-project-evaluator"><code>dbt-project-evaluator</code></a></th>
+<th><a href="https://github.com/PicnicSupermarket/dbt-score"><code>dbt-score</code></a></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Built-in checks</td>
+<td>120+</td>
+<td>Collection of <code>pre-commit</code> hooks</td>
+<td>Fixed set of SQL/Jinja tests</td>
+<td>Fixed set of model-only checks</td>
+</tr>
+<tr>
+<td>Configuration</td>
+<td><code>YAML</code> or <code>TOML</code> config file</td>
+<td><code>.pre-commit-config.yaml</code></td>
+<td><code>dbt_project.yml</code> + seed files (CSV)</td>
+<td><code>pyproject.toml</code></td>
+</tr>
+<tr>
+<td>Checks written in</td>
+<td>Python</td>
+<td>Python</td>
+<td>SQL + Jinja</td>
+<td>Python</td>
+</tr>
+<tr>
+<td>Requires a database connection</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Checks any dbt artifact (manifest, catalog, run results)</td>
+<td>✅</td>
+<td>Manifest and catalog</td>
+<td>❌ (queries the database)</td>
+<td>Manifest only</td>
+</tr>
+<tr>
+<td>Where it runs</td>
+<td>Locally and in a CI pipeline</td>
+<td>Only as part of <code>pre-commit</code>/<code>prek</code></td>
+<td>Locally and in a CI pipeline</td>
+<td>Locally, from the command line</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p><code>dbt-bouncer</code> can perform all the checks currently included in <code>dbt-checkpoint</code>, <code>dbt-project-evaluator</code> and <code>dbt-score</code>. If you see an existing check that is not possible with <code>dbt-bouncer</code>, open an <a href="https://github.com/godatadriven/dbt-bouncer/issues">issue</a> and we'll add it!</p>
+</div>
+<h2 id="how-do-i-onboard-an-existing-dbt-project">How do I onboard an existing dbt project?<a class="headerlink" href="#how-do-i-onboard-an-existing-dbt-project" title="Permanent link">#</a></h2>
+<p>An existing project usually fails many checks on the first run. Do not try to fix every failure first. Adopt the checks with a baseline, then reduce the backlog over time. A baseline records the current failures, so the run reports only failures that are new.</p>
+<p>Follow these steps:</p>
+<ol>
+<li>Create a starter config. Run <code>dbt-bouncer init</code>, or start from a preset with <code>dbt-bouncer init --preset standard</code>.</li>
+<li>Generate the dbt artifacts. Run <code>dbt parse</code> for manifest checks, or <code>dbt build</code> when you also use catalog or run-results checks.</li>
+<li>
+<p>Record the current failures as a baseline:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>dbt-bouncer<span class="w"> </span>baseline<span class="w"> </span>--output-file<span class="w"> </span>.dbt-bouncer-baseline.json
+</span></code></pre></div>
+</li>
+<li>
+<p>Commit the config file and the baseline file.</p>
+</li>
+<li>
+<p>Run <code>dbt-bouncer</code> with the baseline so only new failures fail the build:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>dbt-bouncer<span class="w"> </span>run<span class="w"> </span>--baseline<span class="w"> </span>.dbt-bouncer-baseline.json
+</span></code></pre></div>
+</li>
+</ol>
+<p>Now the check run is green, and any new violation fails the build. To reduce the backlog, fix some failures and regenerate the baseline with the same command. The baseline shrinks as the project improves.</p>
+<p>Two more options help during onboarding:</p>
+<ul>
+<li>To compare against a previous run without a stored file, use <code>--state &lt;dir&gt;</code> in place of <code>--baseline</code>. It points at a directory of dbt artifacts from a previous run, the same way dbt's own <code>--state</code> flag does. See the <a href="../cli/">CLI reference</a>.</li>
+<li>To warn instead of fail while the team adapts, set <code>severity: warn</code> at the top of the config file. Change it to <code>error</code> once the team is ready.</li>
+</ul>
+<h2 id="does-dbt-bouncer-work-with-dbt-cloud">Does <code>dbt-bouncer</code> work with dbt Cloud?<a class="headerlink" href="#does-dbt-bouncer-work-with-dbt-cloud" title="Permanent link">#</a></h2>
+<p>Yes! As <code>dbt-bouncer</code> runs on the artifacts generated by dbt, it can be used with dbt Cloud as long as the artifacts generated by the CI job in dbt Cloud are available.</p>
+<p>For GitHub this can be achieved using the <a href="https://github.com/pgoslatara/dbt-cloud-download-artifacts-action">pgoslatara/dbt-cloud-download-artifacts-action</a> action:</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CI pipeline</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="nt">on</span><span class="p">:</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">  </span><span class="nt">pull_request</span><span class="p">:</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">      </span><span class="nt">branches</span><span class="p">:</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">main</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="nt">jobs</span><span class="p">:</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">    </span><span class="nt">download-artifacts</span><span class="p">:</span>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">        </span><span class="nt">runs-on</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu-latest</span>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">        </span><span class="nt">permissions</span><span class="p">:</span>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">            </span><span class="nt">pull-requests</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">write</span>
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="w">        </span><span class="nt">steps</span><span class="p">:</span>
+</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Checkout</span>
+</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="w">            </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@v6</span>
+</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>
+</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a><span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Download dbt artifacts</span>
+</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a><span class="w">            </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pgoslatara/dbt-cloud-download-artifacts-action@v1</span>
+</span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a><span class="w">            </span><span class="nt">with</span><span class="p">:</span>
+</span><span id="__span-2-20"><a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a><span class="w">              </span><span class="nt">commit-sha</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${{ github.event.pull_request.head.sha }}</span>
+</span><span id="__span-2-21"><a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a><span class="w">              </span><span class="nt">dbt-cloud-api-token</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${{ secrets.DBT_CLOUD_API_TOKEN }}</span>
+</span><span id="__span-2-22"><a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a>
+</span><span id="__span-2-23"><a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a><span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Run dbt-bouncer</span>
+</span><span id="__span-2-24"><a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a><span class="w">            </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">godatadriven/dbt-bouncer@vX.X</span>
+</span></code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>dbt Cloud now supports a "<a href="https://docs.getdbt.com/docs/dbt-versions/upgrade-dbt-version-in-cloud#versionless">versionless</a>" option, which allows dbt projects to be run with the latest version of dbt. One effect of choosing this option is that dbt artifacts may receive non-breaking changes (<a href="https://github.com/dbt-labs/dbt-core/blob/main/core/dbt/artifacts/README.md#making-changes-to-dbtartifacts">source</a>), these may or may not be compatible with <code>dbt-bouncer</code>. If you encounter a bug as a result of this, please open an <a href="https://github.com/godatadriven/dbt-bouncer/issues">issue</a> and we'll investigate.</p>
+</div>
+<h2 id="does-dbt-bouncer-work-with-dbt-20-fusion">Does <code>dbt-bouncer</code> work with dbt 2.0 / Fusion?<a class="headerlink" href="#does-dbt-bouncer-work-with-dbt-20-fusion" title="Permanent link">#</a></h2>
+<p>Yes. dbt 2.0 (the Rust-based <a href="https://docs.getdbt.com/docs/fusion/about-fusion">Fusion</a> engine) emits the same <code>manifest.json</code>, <code>catalog.json</code> and <code>run_results.json</code> artifacts — at manifest schema v12, catalog schema v1 and run results schema v6 — as dbt-core 1.x. Because <code>dbt-bouncer</code> consumes those artifacts directly, every check that works against dbt-core 1.x also works against dbt 2.0. Our CI builds the test project with dbt 2.0 and runs <code>dbt-bouncer</code> against the result on every pull request.</p>
+<p>Three details changed at dbt 2.0. Plan for them:</p>
+<ul>
+<li>dbt 2.0 ships as the <code>dbt</code> and <code>dbt-oss</code> distributions. The <code>dbt-core</code> distribution stays on the 1.x line.</li>
+<li><code>--write-catalog</code> moved off <code>dbt build</code>. Use <code>dbt compile --write-catalog</code> or <code>dbt docs generate --write-catalog</code>.</li>
+<li>The Apache-2.0 <code>dbt-oss</code> distribution writes no <code>catalog.json</code>. Catalog checks need the <code>dbt</code> distribution.</li>
+</ul>
+<p>dbt 2.0 also writes Parquet artifacts under <code>target/private/</code>. These back the dbt docs v2 site. <code>dbt-bouncer</code> reads the JSON artifacts and ignores the Parquet directory.</p>
+<h2 id="does-dbt-bouncer-support-python-models">Does <code>dbt-bouncer</code> support Python models?<a class="headerlink" href="#does-dbt-bouncer-support-python-models" title="Permanent link">#</a></h2>
+<p>Yes! <code>dbt-bouncer</code> fully supports <a href="https://docs.getdbt.com/docs/build/python-models">Python models</a> (introduced in dbt 1.3). All checks that work with SQL models also work with Python models, this means <code>dbt-bouncer</code> can enforce conventions on your Python models just as it does for SQL models.</p>
+<h3 id="example">Example<a class="headerlink" href="#example" title="Permanent link">#</a></h3>
+<p>A Python model can be validated with the same checks as SQL models:</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nt">manifest_checks</span><span class="p">:</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_model_has_meta_keys</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">    </span><span class="nt">keys</span><span class="p">:</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">maturity</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_model_description_populated</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_model_code_does_not_contain_regexp_pattern</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">    </span><span class="nt">regexp_pattern</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">.*\.to_pandas\(\)</span><span class="w">  </span><span class="c1"># Discourage memory-intensive operations</span>
+</span></code></pre></div>
+<p>The check <code>check_model_code_does_not_contain_regexp_pattern</code> will match against the Python code in <code>raw_code</code>, allowing you to enforce conventions like avoiding certain libraries or patterns in your Python models.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>You can use regex patterns to enforce Python-specific conventions, such as:</p>
+<ul>
+<li>Preventing certain imports: <code>regexp_pattern: .*import\s+os.*</code></li>
+<li>Discouraging memory-intensive operations: <code>regexp_pattern: .*\.to_pandas\(\).*</code></li>
+<li>Enforcing use of specific libraries: Use <code>include</code>/<code>exclude</code> patterns to target only Python models</li>
+</ul>
+</div>
+<h2 id="can-ai-coding-agents-use-dbt-bouncer">Can AI coding agents use <code>dbt-bouncer</code>?<a class="headerlink" href="#can-ai-coding-agents-use-dbt-bouncer" title="Permanent link">#</a></h2>
+<p>Yes! <code>dbt-bouncer</code> ships a <a href="https://modelcontextprotocol.io">Model Context Protocol</a> server. An AI coding agent can read which conventions your project enforces before it generates dbt code, and can run the checks to verify its work. Install the optional dependency with <code>pip install 'dbt-bouncer[mcp]'</code> and start the server with <code>dbt-bouncer mcp</code>. See the <a href=".././cli/#mcp">CLI documentation</a> for the available tools and an example client configuration.</p>
+<h2 id="how-to-configure-dbt-bouncer-for-use-in-a-ci-pipeline">How to configure <code>dbt-bouncer</code> for use in a CI pipeline?<a class="headerlink" href="#how-to-configure-dbt-bouncer-for-use-in-a-ci-pipeline" title="Permanent link">#</a></h2>
+<p><code>dbt-bouncer</code> is designed to be use primarily in a CI pipeline such as GitHub Actions or Azure DevOps. To do this we create a config file such as:</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nt">catalog_checks</span><span class="p">:</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_column_description_populated</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">    </span><span class="nt">include</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">^models/marts</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="nt">manifest_checks</span><span class="p">:</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_model_directories</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">    </span><span class="nt">include</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">^models</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">    </span><span class="nt">permitted_sub_directories</span><span class="p">:</span>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">intermediate</span>
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">marts</span>
+</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">staging</span>
+</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">utilities</span>
+</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>
+</span><span id="__span-4-14"><a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a><span class="nt">run_results_checks</span><span class="p">:</span>
+</span><span id="__span-4-15"><a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_run_results_max_execution_time</span>
+</span><span id="__span-4-16"><a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a><span class="w">    </span><span class="nt">max_execution_time_seconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+</span></code></pre></div>
+<p>The goal of a CI pipeline is to test the changes in a pull request but also to provide feedback to the developer as quickly as possible without incurring unnecessary costs (time, financial, compute, etc.). To achieve this we can combine several features of dbt and <code>dbt-bouncer</code>:</p>
+<ol>
+<li>
+<p>By running <code>dbt parse</code>, dbt can generate a <code>manifest.json</code> without a database connection. We can then run our manifest checks via:</p>
+<div class="language-shell highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>dbt-bouncer<span class="w"> </span>--only<span class="w"> </span>manifest_checks
+</span></code></pre></div>
+</li>
+<li>
+<p>dbt requires models to be materialised before it can generate a <code>catalog.json</code> file. By running <code>dbt run --empty</code> we can materialise every model without processing any data. Once these materializations are performed we can run our catalog checks via:</p>
+<div class="language-shell highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>dbt-bouncer<span class="w"> </span>--only<span class="w"> </span>catalog_checks
+</span></code></pre></div>
+</li>
+<li>
+<p>Typically a CI pipeline will run a <code>dbt build</code> command with flags such as <code>--state</code> and/or <code>--defer</code>. After this command has completed we can run our run results checks via:</p>
+<div class="language-shell highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>dbt-bouncer<span class="w"> </span>--only<span class="w"> </span>run_results_checks
+</span></code></pre></div>
+</li>
+</ol>
+<p>Additionally, you can use the <code>--check</code> flag to run only specific checks by name. This is useful for debugging or validating a single convention:</p>
+<div class="language-text highlight"><pre><span></span><code>  ```shell
+  dbt-bouncer --check check_model_has_unique_test
+  ```
+</code></pre></div>
+<p>Multiple checks can be specified as a comma-separated list:</p>
+<div class="language-text highlight"><pre><span></span><code>  ```shell
+  dbt-bouncer --check check_model_has_unique_test,check_model_description_populated
+  ```
+</code></pre></div>
+<p>The <code>--check</code> and <code>--only</code> flags can be combined: <code>--only</code> restricts to the specified categories, then <code>--check</code> further narrows to only the named checks within those categories.</p>
+<p>By using this approach, and combining with your own unique constraints and desires, <code>dbt-bouncer</code> can be used efficiently as part of your CI pipeline.</p>
+<h2 id="how-do-i-get-machine-readable-results-to-parse-in-a-script">How do I get machine-readable results to parse in a script?<a class="headerlink" href="#how-do-i-get-machine-readable-results-to-parse-in-a-script" title="Permanent link">#</a></h2>
+<p>Do not parse the console results table. That table is for humans. It truncates check names to fit the terminal width.</p>
+<p>Set <code>--output-file</code> and select a structured <code>--output-format</code>. The supported formats are <code>csv</code>, <code>json</code>, <code>junit</code>, <code>sarif</code>, and <code>tap</code>.</p>
+<div class="language-shell highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>dbt-bouncer<span class="w"> </span>run<span class="w"> </span>--output-file<span class="w"> </span>results/check-results.json<span class="w"> </span>--output-format<span class="w"> </span>json
+</span></code></pre></div>
+<p>Then read the output file in your script. See the <a href=".././cli/">CLI reference</a> for full option details.</p>
+<h2 id="how-to-set-up-dbt-bouncer-in-a-monorepo">How to set up <code>dbt-bouncer</code> in a monorepo?<a class="headerlink" href="#how-to-set-up-dbt-bouncer-in-a-monorepo" title="Permanent link">#</a></h2>
+<p>A monorepo may consist of one directory with a dbt project and other directories with unrelated code. It may be desired for <code>dbt-bouncer</code> to be configured from the root directory. Sample directory tree:</p>
+<div class="language-shell highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>.
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>├──<span class="w"> </span>dbt-bouncer.yml
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>├──<span class="w"> </span>README.md
+</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>├──<span class="w"> </span>dbt-project
+</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>│<span class="w">   </span>├──<span class="w"> </span>models
+</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>│<span class="w">   </span>├──<span class="w"> </span>dbt_project.yml
+</span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>│<span class="w">   </span>└──<span class="w"> </span>profiles.yml
+</span><span id="__span-11-8"><a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>└──<span class="w"> </span>package-a
+</span><span id="__span-11-9"><a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a><span class="w">    </span>├──<span class="w"> </span>src
+</span><span id="__span-11-10"><a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a><span class="w">    </span>├──<span class="w"> </span>tests
+</span><span id="__span-11-11"><a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a><span class="w">    </span>└──<span class="w"> </span>package.json
+</span></code></pre></div>
+<p>To ease configuration you can use <code>exclude</code> or <code>include</code> at the global level (see <a href=".././configuration/">Config File</a> for more details). For the above example <code>dbt-bouncer.yml</code> could be configured as:</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="nt">dbt_artifacts_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dbt-project/target</span>
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="nt">include</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">^dbt-project</span>
+</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>
+</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="nt">manifest_checks</span><span class="p">:</span>
+</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_exposure_based_on_non_public_models</span>
+</span></code></pre></div>
+<p><code>dbt-bouncer</code> can now be run from the root directory.</p>
+<h2 id="how-to-set-up-dbt-bouncer-in-a-dbt-mesh">How to set up <code>dbt-bouncer</code> in a dbt Mesh?<a class="headerlink" href="#how-to-set-up-dbt-bouncer-in-a-dbt-mesh" title="Permanent link">#</a></h2>
+<p>A <a href="https://docs.getdbt.com/best-practices/how-we-mesh/mesh-1-intro#what-is-dbt-mesh">dbt Mesh</a> is a collection of dbt projects in an organization, some of which can read models from other dbt projects. Natively supported by dbt Cloud, a dbt Mesh can also be set up with dbt Core using a plugin such as <a href="https://github.com/nicholasyager/dbt-loom">dbt-loom</a>.</p>
+<p>One challenge in a dbt Mesh is the large number of developers working across multiple dbt projects leading to differing conventions being implemented. There are multiple approaches to using <code>dbt-bouncer</code> in a dbt Mesh, two are outlined below.</p>
+<h3 id="approach-1-individual-dbt-bounceryml-configuration-file">Approach 1: Individual <code>dbt-bouncer.yml</code> configuration file<a class="headerlink" href="#approach-1-individual-dbt-bounceryml-configuration-file" title="Permanent link">#</a></h3>
+<p>Each dbt project can have its own <code>dbt-bouncer.yml</code> configuration file. This allows each project to adopt and implement its own conventions in addition to any conventions to be shared across all dbt projects. Should a breaking change be required to the config file then each dbt project can be updated independently at a time that makes sense.</p>
+<p>This is the recommended approach due to its simplicity and ability to update each dbt project independently.</p>
+<h3 id="approach-2-centralised-dbt-bounceryml-configuration-file-shared-via-git-submodule">Approach 2: Centralised <code>dbt-bouncer.yml</code> configuration file shared via git submodule<a class="headerlink" href="#approach-2-centralised-dbt-bounceryml-configuration-file-shared-via-git-submodule" title="Permanent link">#</a></h3>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>With this approach, a change to the centralised <code>dbt-bouncer.yml</code> file may result in CI pipelines in dbt projects failing despite no changes being made to these projects. As such we recommend implementing this approach only after extensive discussion with all dbt project developers so that all dbt projects can be brought into line before <code>dbt-bouncer</code> is enforced in the CI pipeline.</p>
+<p>Should it be necessary for a breaking change to be made to the centralised <code>dbt-bouncer.yml</code> configuration file, we recommend setting the <code>severity</code> of the relevant check to <code>warn</code> so that CI pipelines in dbt projects will not fail and maintainers have sufficient time to make the necessary changes.</p>
+</div>
+<p><a href="https://github.blog/open-source/git/working-with-submodules/">Git submodules</a> allow the contents from one repository to be accessible from a different repository. Such a setup for <code>dbt-bouncer</code> can be achieved as follows (this example uses GitHub, similar setups can be achieved with other providers):</p>
+<ol>
+<li>
+<p>Set up a dedicated repository to store a centralised <code>dbt-bouncer.yml</code> configuration file that will be used by all dbt projects. Let's call this repository <code>dbt-bouncer-config</code>.</p>
+</li>
+<li>
+<p>The contents of the <code>dbt-bouncer.yml</code> file in <code>dbt-bouncer-config</code> should contain the following configuration for <code>dbt_artifacts_dir</code>:</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="nt">dbt_artifacts_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../target</span>
+</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>
+</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="nt">manifest_checks</span><span class="p">:</span>
+</span><span id="__span-13-4"><a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_model_directories</span>
+</span><span id="__span-13-5"><a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="w">    </span><span class="nt">include</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">^models</span>
+</span><span id="__span-13-6"><a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="w">    </span><span class="nt">permitted_sub_directories</span><span class="p">:</span>
+</span><span id="__span-13-7"><a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">intermediate</span>
+</span><span id="__span-13-8"><a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">marts</span>
+</span><span id="__span-13-9"><a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">staging</span>
+</span><span id="__span-13-10"><a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">utilities</span>
+</span><span id="__span-13-11"><a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a><span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+</span></code></pre></div>
+</li>
+<li>
+<p>In every repository add a git submodule via:</p>
+<div class="language-shell highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>git<span class="w"> </span>submodule<span class="w"> </span>add<span class="w"> </span>git@github.com:&lt;YOUR_ORG&gt;/dbt-bouncer-config.git
+</span></code></pre></div>
+</li>
+<li>
+<p>Run <code>dbt-bouncer</code>:</p>
+<div class="language-shell highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>dbt-bouncer<span class="w"> </span>--config-file<span class="w"> </span>dbt-bouncer-config/dbt-bouncer.yml
+</span></code></pre></div>
+</li>
+</ol>
+<p>Your directory tree should look like this:</p>
+<div class="language-shell highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>.
+</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>├──<span class="w"> </span>dbt-bouncer-config
+</span><span id="__span-16-3"><a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>│<span class="w">   </span>└──<span class="w"> </span>dbt-bouncer.yml
+</span><span id="__span-16-4"><a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a>├──<span class="w"> </span>dbt_project.yml
+</span><span id="__span-16-5"><a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a>├──<span class="w"> </span>macros
+</span><span id="__span-16-6"><a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a>│<span class="w">   </span>└──<span class="w"> </span>...
+</span><span id="__span-16-7"><a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a>├──<span class="w"> </span>models
+</span><span id="__span-16-8"><a id="__codelineno-16-8" name="__codelineno-16-8" href="#__codelineno-16-8"></a>│<span class="w">   </span>└──<span class="w"> </span>...
+</span><span id="__span-16-9"><a id="__codelineno-16-9" name="__codelineno-16-9" href="#__codelineno-16-9"></a>├──<span class="w"> </span>profiles.yml
+</span><span id="__span-16-10"><a id="__codelineno-16-10" name="__codelineno-16-10" href="#__codelineno-16-10"></a>├──<span class="w"> </span>README.md
+</span><span id="__span-16-11"><a id="__codelineno-16-11" name="__codelineno-16-11" href="#__codelineno-16-11"></a>└──<span class="w"> </span>target
+</span><span id="__span-16-12"><a id="__codelineno-16-12" name="__codelineno-16-12" href="#__codelineno-16-12"></a><span class="w">    </span>├──<span class="w"> </span>catalog.json
+</span><span id="__span-16-13"><a id="__codelineno-16-13" name="__codelineno-16-13" href="#__codelineno-16-13"></a><span class="w">    </span>├──<span class="w"> </span>manifest.json
+</span><span id="__span-16-14"><a id="__codelineno-16-14" name="__codelineno-16-14" href="#__codelineno-16-14"></a><span class="w">    </span>└──<span class="w"> </span>run_results.json
+</span></code></pre></div>
+<p>Note: if you update your central <code>dbt-bouncer.yml</code> file, you will need to run <code>git submodule update --remote</code> in every repository to update the submodule.</p>
+<h2 id="how-to-set-up-dbt-bouncer-with-prekpre-commit">How to set up <code>dbt-bouncer</code> with <code>prek</code>/<code>pre-commit</code>?<a class="headerlink" href="#how-to-set-up-dbt-bouncer-with-prekpre-commit" title="Permanent link">#</a></h2>
+<p>You can use the official pre-commit hook, in your <code>.pre-commit-config.yaml</code> file:</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="nt">repos</span><span class="p">:</span>
+</span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">repo</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://github.com/godatadriven/dbt-bouncer</span>
+</span><span id="__span-17-3"><a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="w">    </span><span class="nt">rev</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v4.0.0</span><span class="w"> </span><span class="c1"># Check https://github.com/godatadriven/dbt-bouncer/releases for latest version</span>
+</span><span id="__span-17-4"><a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a><span class="w">    </span><span class="nt">hooks</span><span class="p">:</span>
+</span><span id="__span-17-5"><a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dbt-bouncer</span>
+</span><span id="__span-17-6"><a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a><span class="w">        </span><span class="nt">args</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;--config-file&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;&lt;PATH_TO_CONFIG_FILE&gt;&quot;</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="c1"># Optional</span>
+</span></code></pre></div>
+<p>Alternatively, you can use a local hook to run automatically run <code>dbt-bouncer</code> before your commits get added to the git tree.</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">repo</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">local</span>
+</span><span id="__span-18-2"><a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="w">  </span><span class="nt">hooks</span><span class="p">:</span>
+</span><span id="__span-18-3"><a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dbt-bouncer</span>
+</span><span id="__span-18-4"><a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a><span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dbt-bouncer</span>
+</span><span id="__span-18-5"><a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a><span class="w">      </span><span class="nt">entry</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dbt-bouncer</span><span class="w"> </span><span class="c1"># --config-file &lt;PATH_TO_CONFIG_FILE&gt;</span>
+</span><span id="__span-18-6"><a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a><span class="w">      </span><span class="nt">language</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">system</span>
+</span><span id="__span-18-7"><a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a><span class="w">      </span><span class="nt">pass_filenames</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+</span><span id="__span-18-8"><a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a><span class="w">      </span><span class="nt">always_run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</span></code></pre></div>
+<h2 id="can-i-skip-specific-checks-for-an-exposuremodelsourceetc">Can I skip specific checks for an exposure/model/source/etc.?<a class="headerlink" href="#can-i-skip-specific-checks-for-an-exposuremodelsourceetc" title="Permanent link">#</a></h2>
+<p>Yes! Many dbt objects permit adding a <code>meta</code> config field (<a href="https://docs.getdbt.com/reference/resource-configs/meta">docs</a>), this can be used to skip checks for the object. For example, for a model:</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="nt">models</span><span class="p">:</span>
+</span><span id="__span-19-2"><a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_model</span>
+</span><span id="__span-19-3"><a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a><span class="w">    </span><span class="nt">config</span><span class="p">:</span>
+</span><span id="__span-19-4"><a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a><span class="w">      </span><span class="nt">meta</span><span class="p">:</span>
+</span><span id="__span-19-5"><a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a><span class="w">        </span><span class="nt">dbt-bouncer</span><span class="p">:</span>
+</span><span id="__span-19-6"><a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a><span class="w">          </span><span class="nt">skip_checks</span><span class="p">:</span>
+</span><span id="__span-19-7"><a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a><span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_model_description_populated</span>
+</span><span id="__span-19-8"><a id="__codelineno-19-8" name="__codelineno-19-8" href="#__codelineno-19-8"></a><span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_model_has_meta_keys</span>
+</span><span id="__span-19-9"><a id="__codelineno-19-9" name="__codelineno-19-9" href="#__codelineno-19-9"></a><span class="w">          </span><span class="nt">reason</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">We recommend documenting why these checks are being skipped.</span>
+</span></code></pre></div>
+<p>And for a source:</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+</span><span id="__span-20-2"><a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>
+</span><span id="__span-20-3"><a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a><span class="nt">sources</span><span class="p">:</span>
+</span><span id="__span-20-4"><a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">source_system</span>
+</span><span id="__span-20-5"><a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a><span class="w">    </span><span class="nt">tables</span><span class="p">:</span>
+</span><span id="__span-20-6"><a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">source_1</span>
+</span><span id="__span-20-7"><a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a><span class="w">        </span><span class="nt">config</span><span class="p">:</span>
+</span><span id="__span-20-8"><a id="__codelineno-20-8" name="__codelineno-20-8" href="#__codelineno-20-8"></a><span class="w">          </span><span class="nt">meta</span><span class="p">:</span>
+</span><span id="__span-20-9"><a id="__codelineno-20-9" name="__codelineno-20-9" href="#__codelineno-20-9"></a><span class="w">            </span><span class="nt">dbt-bouncer</span><span class="p">:</span>
+</span><span id="__span-20-10"><a id="__codelineno-20-10" name="__codelineno-20-10" href="#__codelineno-20-10"></a><span class="w">              </span><span class="nt">skip_checks</span><span class="p">:</span>
+</span><span id="__span-20-11"><a id="__codelineno-20-11" name="__codelineno-20-11" href="#__codelineno-20-11"></a><span class="w">                </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_source_description_populated</span>
+</span><span id="__span-20-12"><a id="__codelineno-20-12" name="__codelineno-20-12" href="#__codelineno-20-12"></a><span class="w">                </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_source_has_meta_keys</span>
+</span><span id="__span-20-13"><a id="__codelineno-20-13" name="__codelineno-20-13" href="#__codelineno-20-13"></a><span class="w">                </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_source_has_tags</span>
+</span><span id="__span-20-14"><a id="__codelineno-20-14" name="__codelineno-20-14" href="#__codelineno-20-14"></a><span class="w">                </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_source_names</span>
+</span><span id="__span-20-15"><a id="__codelineno-20-15" name="__codelineno-20-15" href="#__codelineno-20-15"></a><span class="w">              </span><span class="nt">reason</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">We recommend documenting why these checks are being skipped.</span>
+</span></code></pre></div>
+<p>Similar can be done for other objects that support the <code>meta</code> value.</p>
+<h2 id="how-to-add-a-custom-check-to-dbt-bouncer">How to add a custom check to <code>dbt-bouncer</code>?<a class="headerlink" href="#how-to-add-a-custom-check-to-dbt-bouncer" title="Permanent link">#</a></h2>
+<p>In addition to the checks built into <code>dbt-bouncer</code>, you can write custom checks specific to your project's conventions. To add a custom check:</p>
+<ol>
+<li>Create an empty directory and add a <code>custom_checks_dir</code> key to your config file. The value should be the path to the directory, relative to the config file.</li>
+<li>In this directory create an empty <code>__init__.py</code> file.</li>
+<li>Create a subdirectory named <code>catalog</code>, <code>manifest</code>, or <code>run_results</code> depending on the artifact type you want to check.</li>
+<li>
+<p>In that subdirectory create a Python file that defines a check using the <code>@check</code> decorator:</p>
+<ul>
+<li>The function name must start with <code>check_</code>.</li>
+<li>The function must be decorated with <code>@check</code> from <code>dbt_bouncer.check_framework.decorator</code>.</li>
+<li>The first positional parameter determines the resource type to iterate over (e.g. <code>model</code>, <code>source</code>, <code>exposure</code>, <code>seed</code>).</li>
+<li>Keyword-only arguments (after <code>*</code>) become user-configurable parameters, with types inferred from type hints.</li>
+<li>Add <code>ctx</code> as a parameter only if the function needs access to the full check context (e.g. all models, all sources).</li>
+<li>Use <code>fail()</code> from <code>dbt_bouncer.check_framework.decorator</code> to signal a check failure with a clear message.</li>
+<li>Include a docstring describing what the check does.</li>
+</ul>
+</li>
+<li>
+<p>Add the check name and any desired arguments to your config file.</p>
+</li>
+<li>Run <code>dbt-bouncer</code> — your custom check will be executed.</li>
+</ol>
+<h3 id="example_1">Example<a class="headerlink" href="#example_1" title="Permanent link">#</a></h3>
+<p>Directory tree:</p>
+<div class="language-shell highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>.
+</span><span id="__span-21-2"><a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>├──<span class="w"> </span>dbt-bouncer.yml
+</span><span id="__span-21-3"><a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>├──<span class="w"> </span>dbt_project.yml
+</span><span id="__span-21-4"><a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a>├──<span class="w"> </span>my_custom_checks
+</span><span id="__span-21-5"><a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a><span class="p">|</span><span class="w">   </span>├──<span class="w"> </span>__init__.py
+</span><span id="__span-21-6"><a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a><span class="p">|</span><span class="w">   </span>└──<span class="w"> </span>manifest
+</span><span id="__span-21-7"><a id="__codelineno-21-7" name="__codelineno-21-7" href="#__codelineno-21-7"></a><span class="p">|</span><span class="w">       </span>└──<span class="w"> </span>check_custom_to_me.py
+</span><span id="__span-21-8"><a id="__codelineno-21-8" name="__codelineno-21-8" href="#__codelineno-21-8"></a>└──<span class="w"> </span>target
+</span><span id="__span-21-9"><a id="__codelineno-21-9" name="__codelineno-21-9" href="#__codelineno-21-9"></a><span class="w">    </span>└──<span class="w"> </span>manifest.json
+</span></code></pre></div>
+<p>Contents of <code>check_custom_to_me.py</code>:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+</span><span id="__span-22-2"><a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>
+</span><span id="__span-22-3"><a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">dbt_bouncer.check_framework.decorator</span><span class="w"> </span><span class="kn">import</span> <span class="n">check</span><span class="p">,</span> <span class="n">fail</span>
+</span><span id="__span-22-4"><a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a>
+</span><span id="__span-22-5"><a id="__codelineno-22-5" name="__codelineno-22-5" href="#__codelineno-22-5"></a>
+</span><span id="__span-22-6"><a id="__codelineno-22-6" name="__codelineno-22-6" href="#__codelineno-22-6"></a><span class="nd">@check</span>
+</span><span id="__span-22-7"><a id="__codelineno-22-7" name="__codelineno-22-7" href="#__codelineno-22-7"></a><span class="k">def</span><span class="w"> </span><span class="nf">check_model_naming_convention</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">model_name_pattern</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;^(stg|int|fct|dim)_&quot;</span><span class="p">):</span>
+</span><span id="__span-22-8"><a id="__codelineno-22-8" name="__codelineno-22-8" href="#__codelineno-22-8"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Model names must match the supplied regex.&quot;&quot;&quot;</span>
+</span><span id="__span-22-9"><a id="__codelineno-22-9" name="__codelineno-22-9" href="#__codelineno-22-9"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">model_name_pattern</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">)):</span>
+</span><span id="__span-22-10"><a id="__codelineno-22-10" name="__codelineno-22-10" href="#__codelineno-22-10"></a>        <span class="n">fail</span><span class="p">(</span>
+</span><span id="__span-22-11"><a id="__codelineno-22-11" name="__codelineno-22-11" href="#__codelineno-22-11"></a>            <span class="sa">f</span><span class="s2">&quot;`</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">unique_id</span><span class="si">}</span><span class="s2">` does not match the required pattern &quot;</span>
+</span><span id="__span-22-12"><a id="__codelineno-22-12" name="__codelineno-22-12" href="#__codelineno-22-12"></a>            <span class="sa">f</span><span class="s2">&quot;`</span><span class="si">{</span><span class="n">model_name_pattern</span><span class="si">}</span><span class="s2">`.&quot;</span>
+</span><span id="__span-22-13"><a id="__codelineno-22-13" name="__codelineno-22-13" href="#__codelineno-22-13"></a>        <span class="p">)</span>
+</span></code></pre></div>
+<p>Contents of <code>dbt-bouncer.yml</code>:</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="nt">custom_checks_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_custom_checks</span>
+</span><span id="__span-23-2"><a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>
+</span><span id="__span-23-3"><a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a><span class="nt">manifest_checks</span><span class="p">:</span>
+</span><span id="__span-23-4"><a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_model_naming_convention</span>
+</span><span id="__span-23-5"><a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a><span class="w">      </span><span class="nt">include</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">^models/staging</span>
+</span><span id="__span-23-6"><a id="__codelineno-23-6" name="__codelineno-23-6" href="#__codelineno-23-6"></a><span class="w">      </span><span class="nt">model_name_pattern</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">^stg_</span>
+</span></code></pre></div>
+<p>All custom checks automatically support the following parameters (no need to declare them): <code>description</code>, <code>exclude</code>, <code>include</code>, and <code>severity</code>.</p>
+<p>To contribute a new check back to <code>dbt-bouncer</code> itself, see <a href=".././CONTRIBUTING/#adding-a-new-check">Contributing</a>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://zensical.org/" target="_blank" rel="noopener">
+      Zensical
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+      <div class="md-progress" data-md-component="progress" role="progressbar"></div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate":null,"base":"..","features":["content.action.edit","content.code.annotate","content.code.copy","navigation.expand","navigation.indexes","navigation.instant","navigation.instant.progress","navigation.prune","navigation.sections","navigation.tabs","navigation.tabs.sticky","navigation.tracking","navigation.top","toc.follow","toc.integrate"],"search":"../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"alias":true,"canonical_version":"stable","default":"stable","provider":"mike"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.69c251d7.min.js"></script>
+      
+    
+  </body>
+</html>
