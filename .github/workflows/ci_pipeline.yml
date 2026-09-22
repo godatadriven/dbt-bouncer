@@ -255,6 +255,157 @@ jobs:
                   "${REGISTRY}/${IMAGE_NAME}:ci" \
                   --config-file /app/dbt-bouncer-example.yml
 
+    # Exercises `action.yml` itself, rather than the CLI it wraps. The e2e job
+    # above calls `docker run` directly, so it never evaluates the composite
+    # action's parameter assembly steps or its `${{ }}` wiring. Every case here
+    # asserts observable behaviour, so an input that never reaches the CLI fails
+    # the job instead of passing silently.
+    action-tests:
+        needs: [prek]
+        permissions:
+          contents: read
+        runs-on: ubuntu-24.04
+        env:
+            # Must match the image tag hardcoded in `action.yml`. It is spelled out
+            # rather than built from `github.repository` so that a fork run builds
+            # the tag the action actually pulls.
+            ACTION_IMAGE: ghcr.io/godatadriven/dbt-bouncer:v0.0.0
+        steps:
+            - name: Checkout
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+              with:
+                persist-credentials: false
+
+            - name: checkout-merge
+              uses: check-spelling/checkout-merge@c9cfe4b33a6ceb6c13136887a6fd3a3ed6443f28 # v0.0.8
+
+            - name: Setup Python
+              id: setup-python
+              uses: ./.github/actions/setup_python_env
+
+            - name: Set up Docker Buildx
+              uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4
+
+            - name: Modify Dockerfile to use local dbt-bouncer version
+              run: |
+                set -eou
+                sed -i -E 's/ENTRYPOINT \["uvx", "dbt-bouncer==0.0.0"\]/ENTRYPOINT \["uvx", "."\]/' Dockerfile
+                sed -i -E '/ENTRYPOINT/i\COPY . .' ./Dockerfile
+
+            - name: Build image under the tag the action pulls
+              uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+              with:
+                  build-args: PYTHON_VERSION=${{ steps.setup-python.outputs.python-version }}
+                  cache-from: type=gha
+                  cache-to: type=gha,mode=max
+                  context: .
+                  load: true
+                  push: false
+                  tags: ${{ env.ACTION_IMAGE }}
+
+            # Case A: the pre-existing inputs still behave as they did, with none
+            # of the new inputs set. Guards against a regression for workflows
+            # that are not updated.
+            - name: "A: config-file only"
+              uses: ./
+              with:
+                config-file: dbt-bouncer-example.yml
+                send-pr-comment: false
+
+            # Case B: `--preset` is ignored whenever an explicit `--config-file`
+            # is passed, so the action must omit `--config-file` when `preset` is
+            # set. If it does not, dbt-bouncer looks for the non-existent
+            # /app/dbt-bouncer.yml and exits 2, failing this step.
+            - name: "B: preset replaces config-file"
+              uses: ./
+              with:
+                output-file: preset-results.json
+                output-format: json
+                preset: minimal
+                send-pr-comment: false
+
+            # Exit code 0 alone could be luck, so confirm the results came from
+            # the preset. The minimal preset runs source checks; the pyproject.toml
+            # fallback config does not.
+            - name: "B: assert the results came from the preset"
+              run: |
+                set -euo pipefail
+                jq -e '[.[] | .check_run_id | split(":")[0]]
+                       | index("check_source_freshness_populated")' preset-results.json
+
+            # Case C: the strict preset fails this project, so exit 0 here proves
+            # --dry-run reached the CLI. A dropped flag would exit 1.
+            - name: "C: dry-run short-circuits a failing preset"
+              uses: ./
+              with:
+                dry-run: true
+                preset: strict
+                send-pr-comment: false
+
+            # Control for case C: without --dry-run the same preset must fail.
+            # Without this, case C would pass even if strict stopped failing.
+            - name: "C: control — strict preset fails without dry-run"
+              id: strict-control
+              continue-on-error: true
+              uses: ./
+              with:
+                preset: strict
+                send-pr-comment: false
+
+            - name: "C: assert the control failed"
+              env:
+                OUTCOME: ${{ steps.strict-control.outcome }}
+              run: |
+                set -euo pipefail
+                test "$OUTCOME" = "failure"
+
+            # Case D: comparing the artifacts against themselves means every
+            # failure is present in the base run, so all are suppressed. Exit 0
+            # proves --state reached the CLI; the control above shows the same
+            # preset fails without it.
+            - name: "D: state suppresses pre-existing failures"
+              uses: ./
+              with:
+                preset: strict
+                send-pr-comment: false
+                state: dbt_project/target
+
+            # Case E: a baseline round trip. The action only ever runs `run`, so
+            # the config and the baseline are produced by direct docker calls
+            # first. `-w /app` is required because the image sets no WORKDIR.
+            - name: "E: build a failing config and its baseline"
+              run: |
+                set -euo pipefail
+                docker run --rm -w /app --volume "$PWD":/app \
+                  "$ACTION_IMAGE" init --preset strict
+                docker run --rm -w /app --volume "$PWD":/app \
+                  "$ACTION_IMAGE" baseline \
+                    --config-file /app/dbt-bouncer.yml \
+                    --output-file /app/baseline.json
+                test -s baseline.json
+
+            - name: "E: control — the config fails without a baseline"
+              id: baseline-control
+              continue-on-error: true
+              uses: ./
+              with:
+                config-file: dbt-bouncer.yml
+                send-pr-comment: false
+
+            - name: "E: baseline suppresses those same failures"
+              uses: ./
+              with:
+                baseline: baseline.json
+                config-file: dbt-bouncer.yml
+                send-pr-comment: false
+
+            - name: "E: assert the control failed"
+              env:
+                OUTCOME: ${{ steps.baseline-control.outcome }}
+              run: |
+                set -euo pipefail
+                test "$OUTCOME" = "failure"
+
     docs-build:
       needs: [prek]
       permissions:
