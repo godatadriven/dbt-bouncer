@@ -37,12 +37,13 @@ mise run install
   - `manifest/` — manifest checks (`models/` has 11 files by concern: access, code, columns, description, directories, lineage, meta, naming, tags, tests, versioning; `sources/` similarly split)
   - `run_results/` — run results checks
 - `src/dbt_bouncer/cli/` — CLI subpackage, one subdirectory per subcommand:
+  - `baseline/` — record current failures to a baseline file (`baseline`, `write_baseline`)
   - `explain/` — explain one check offline (`explain_check`, `build_explain_payload`, `print_text_explanation`)
   - `init/` — interactive config file creation (`init`, `build_initial_config`, `write_config_file`)
   - `list/` — list available checks (`list_checks`, `build_checks_payload`, `category_key`, `get_check_params`, `print_text_checks`)
   - `mcp/` — MCP server exposing dbt-bouncer to AI coding agents (`mcp_serve`, `build_server`; requires the optional `mcp` extra)
   - `run/` — execute bouncer checks (`run`, `run_bouncer`, `_detect_config_file_source`, `_build_context`)
-  - `studio/` — interactive terminal studio dashboard (`studio`, `render_studio_dashboard`, `filter_checks`, `load_configured_checks`)
+  - `studio/` — terminal studio dashboard, rendered once per invocation (`studio`, `render_studio_dashboard`, `filter_checks`, `load_configured_checks`)
   - `validate/` — lint config file (`validate`)
 - `src/dbt_bouncer/main.py` — Typer app setup, subcommand registration, backward-compatible `main_callback`
 - `src/dbt_bouncer/check_framework/` — core check infrastructure package:
@@ -52,6 +53,9 @@ mise run install
   - `exceptions.py` — `DbtBouncerFailedCheckError` and `NestedDict`
 - `src/dbt_bouncer/runner.py` — orchestrates check execution
 - `src/dbt_bouncer/executor.py` — sequential check execution with progress tracking
+- `src/dbt_bouncer/presets/` — bundled configs (`minimal.yml`, `standard.yml`, `strict.yml`) loaded by `--preset`
+- `src/dbt_bouncer/regression.py` — baseline and `--state` filtering (`fingerprint`, `build_baseline`, `load_baseline`, `apply_regression_filter`)
+- `src/dbt_bouncer/selectors.py` — selector expression parsing for check targeting (`SelectorAtom`, `Selector`, `parse_selector`)
 - `tests/` — mirrors `src/` structure; fixtures in `tests/fixtures/`
 
 ### Check System
