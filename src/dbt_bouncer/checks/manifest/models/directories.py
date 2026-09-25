@@ -56,9 +56,12 @@ def check_model_directories(
     if matched_path is None:
         fail("matched_path is None")
     path_after_match = clean_path[matched_path.end() + 1 :]
-    directory_to_check = Path(path_after_match).parts[0]
+    parts_after_match = Path(path_after_match).parts
+    directory_to_check = parts_after_match[0]
 
-    if directory_to_check.replace(".sql", "") == model.name:
+    # A single remaining part is the model file itself, sitting directly in
+    # the included directory rather than in a sub-directory.
+    if len(parts_after_match) == 1:
         fail(
             f"`{get_clean_model_name(model.unique_id)}` is not located in a valid sub-directory ({permitted_sub_directories})."
         )

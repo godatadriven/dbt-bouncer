@@ -200,6 +200,40 @@ class TestCheckSourceUsedByModelsInSameDirectory:
                 check_passes,
                 id="same_directory",
             ),
+            # Backslash separators are normalised before the directories are
+            # compared, so Windows-generated manifests are checked correctly.
+            pytest.param(
+                {
+                    "original_file_path": "models\\staging\\_sources.yml",
+                    "path": "models\\staging\\_sources.yml",
+                    "tags": ["tag_1"],
+                },
+                [
+                    {
+                        **_MODEL_2_DEPENDS_ON_SOURCE,
+                        "original_file_path": "models\\staging\\model_2.sql",
+                        "path": "staging\\model_2.sql",
+                    },
+                ],
+                check_passes,
+                id="same_directory_windows_separators",
+            ),
+            pytest.param(
+                {
+                    "original_file_path": "models\\staging\\_sources.yml",
+                    "path": "models\\staging\\_sources.yml",
+                    "tags": ["tag_1"],
+                },
+                [
+                    {
+                        **_MODEL_2_DEPENDS_ON_SOURCE,
+                        "original_file_path": "models\\marts\\model_2.sql",
+                        "path": "marts\\model_2.sql",
+                    },
+                ],
+                check_fails,
+                id="different_directory_windows_separators",
+            ),
             pytest.param(
                 {
                     "original_file_path": "models/_sources.yml",
