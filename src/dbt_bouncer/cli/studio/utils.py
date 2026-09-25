@@ -201,12 +201,16 @@ def render_studio_dashboard(
     # Count failed checks per check name, split by severity. A failed check with
     # `error` severity is an error. A failed check with `warn` severity is a
     # warning, which must still be displayed even though it is not a failure.
-    # Successful checks are not counted.
+    # A check that raised an internal error is counted the same way, by its
+    # severity. Successful checks are not counted.
     error_counts: dict[str, int] = {}
     warn_counts: dict[str, int] = {}
     if results:
         for r in results:
-            if str(r.get("outcome", "")) != CheckOutcome.FAILED:
+            if str(r.get("outcome", "")) not in (
+                CheckOutcome.FAILED,
+                CheckOutcome.INTERNAL_ERROR,
+            ):
                 continue
             name = _result_check_name(r)
             if not name:

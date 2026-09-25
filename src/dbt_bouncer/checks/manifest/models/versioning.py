@@ -1,6 +1,7 @@
 """Checks related to model versioning."""
 
 from dbt_bouncer.check_framework.decorator import check, fail
+from dbt_bouncer.types import RegexPattern
 from dbt_bouncer.utils import compile_pattern, get_clean_model_name
 
 
@@ -35,7 +36,7 @@ def check_model_latest_version_specified(model):
 
 
 @check(code="MO046")
-def check_model_version_allowed(model, *, version_pattern: str):
+def check_model_version_allowed(model, *, version_pattern: RegexPattern):
     r"""Check that the version of the model matches the supplied regex pattern.
 
     !!! info "Rationale"

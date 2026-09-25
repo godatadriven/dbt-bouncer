@@ -1,6 +1,5 @@
-import re
-
 import pytest
+from pydantic import ValidationError
 
 from dbt_bouncer.testing import _run_check, check_fails, check_passes
 
@@ -71,7 +70,7 @@ class TestCheckSeedColumnNames:
         )
 
     def test_check_seed_column_names_invalid_regex(self):
-        with pytest.raises(re.error):
+        with pytest.raises(ValidationError, match="Invalid regex pattern"):
             _run_check(
                 "check_seed_column_names",
                 seed={"columns": {"id": {"name": "id"}}},
@@ -552,7 +551,7 @@ class TestCheckSeedNames:
         )
 
     def test_check_seed_names_invalid_regex(self):
-        with pytest.raises(re.error):
+        with pytest.raises(ValidationError, match="Invalid regex pattern"):
             _run_check(
                 "check_seed_names",
                 seed={"name": "raw_customers"},

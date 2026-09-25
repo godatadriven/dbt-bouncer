@@ -1,6 +1,5 @@
-import re
-
 import pytest
+from pydantic import ValidationError
 
 from dbt_bouncer.testing import _run_check, check_fails, check_passes
 
@@ -96,12 +95,12 @@ class TestCheckModelCodeDoesNotContainRegexpPattern:
             regexp_pattern=regexp_pattern,
         )
 
-    def test_invalid_regex_raises_re_error(self):
+    def test_invalid_regex_rejected_at_config_load(self):
         check_fails(
             "check_model_code_does_not_contain_regexp_pattern",
             model={"raw_code": "select 1"},
             regexp_pattern="(unclosed",
-            expected_exception=re.error,
+            expected_exception=ValidationError,
             match="Invalid regex pattern",
         )
 
@@ -804,7 +803,7 @@ class TestCheckModelMaxNumberOfLines:
             pytest.param(-1, id="negative"),
         ],
     )
-    def test_raises_value_error(self, max_number_of_lines):
+    def test_rejected_at_config_load(self, max_number_of_lines):
         with pytest.raises(ValueError, match="greater than 0"):
             _run_check(
                 "check_model_max_number_of_lines",

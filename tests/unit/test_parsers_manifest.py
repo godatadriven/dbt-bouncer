@@ -156,3 +156,47 @@ def test_group_owner_email_accepts_list_or_string(email, expected):
         ].owner.email
         == expected
     )
+
+
+def _bouncer_config(*, catalog: bool = False, run_results: bool = False):
+    bouncer_config = MagicMock()
+    bouncer_config.package_name = "dbt_bouncer_test_project"
+    bouncer_config.catalog_checks = [MagicMock()] if catalog else []
+    bouncer_config.run_results_checks = [MagicMock()] if run_results else []
+    return bouncer_config
+
+
+@pytest.mark.parametrize(
+    ("contents", "match"),
+    [
+        pytest.param(b'{"metadata": {"dbt_ver', "may be truncated", id="truncated"),
+        pytest.param(b"", "may be truncated", id="empty"),
+        pytest.param(b"[1, 2]", "expected a JSON object, got list", id="not_object"),
+        pytest.param(b"{}", "no `metadata.dbt_version`", id="no_metadata"),
+    ],
+)
+def test_parse_unusable_manifest_raises_artifact_error(tmp_path, contents, match):
+    """A corrupt manifest is an artifact error (exit 3), not a traceback."""
+    (tmp_path / "manifest.json").write_bytes(contents)
+
+    with pytest.raises(DbtBouncerArtifactError, match=match):
+        parse_dbt_artifacts(_bouncer_config(), tmp_path)
+
+
+@pytest.mark.parametrize(
+    ("file_name", "flags"),
+    [
+        pytest.param("catalog.json", {"catalog": True}, id="catalog"),
+        pytest.param("run_results.json", {"run_results": True}, id="run_results"),
+    ],
+)
+def test_parse_truncated_secondary_artifact_raises_artifact_error(
+    tmp_path, file_name, flags
+):
+    """Catalog and run results are decoded with the same guard as the manifest."""
+    manifest = Path("tests/fixtures/dbt_112/target/manifest.json")
+    (tmp_path / "manifest.json").write_bytes(manifest.read_bytes())
+    (tmp_path / file_name).write_bytes(b'{"nodes": {')
+
+    with pytest.raises(DbtBouncerArtifactError, match=re.escape(file_name)):
+        parse_dbt_artifacts(_bouncer_config(**flags), tmp_path)

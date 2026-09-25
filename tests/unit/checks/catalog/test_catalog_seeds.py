@@ -1,4 +1,5 @@
 import pytest
+from pydantic import ValidationError
 
 from dbt_bouncer.testing import check_fails, check_passes
 
@@ -171,16 +172,16 @@ class TestCheckSeedMaxBytes:
                 max_bytes=1024,
             )
 
-    def test_invalid_max_bytes_raises_value_error(self):
-        with pytest.raises(ValueError, match="must be positive"):
+    def test_invalid_max_bytes_rejected_at_config_load(self):
+        with pytest.raises(ValidationError, match="greater than 0"):
             check_passes(
                 "check_seed_max_bytes",
                 catalog_node=_seed_catalog_node(_byte_stat(100)),
                 max_bytes=0,
             )
 
-    def test_empty_byte_stat_keys_raises_value_error(self):
-        with pytest.raises(ValueError, match="must not be empty"):
+    def test_empty_byte_stat_keys_rejected_at_config_load(self):
+        with pytest.raises(ValidationError, match="at least 1 item"):
             check_passes(
                 "check_seed_max_bytes",
                 catalog_node=_seed_catalog_node(_byte_stat(100)),
@@ -304,16 +305,16 @@ class TestCheckSeedMaxRowCount:
                 max_row_count=100,
             )
 
-    def test_invalid_max_row_count_raises_value_error(self):
-        with pytest.raises(ValueError, match="must be positive"):
+    def test_invalid_max_row_count_rejected_at_config_load(self):
+        with pytest.raises(ValidationError, match="greater than 0"):
             check_passes(
                 "check_seed_max_row_count",
                 catalog_node=_seed_catalog_node(_row_stat(10)),
                 max_row_count=-1,
             )
 
-    def test_empty_row_stat_keys_raises_value_error(self):
-        with pytest.raises(ValueError, match="must not be empty"):
+    def test_empty_row_stat_keys_rejected_at_config_load(self):
+        with pytest.raises(ValidationError, match="at least 1 item"):
             check_passes(
                 "check_seed_max_row_count",
                 catalog_node=_seed_catalog_node(_row_stat(10)),

@@ -182,6 +182,44 @@ class TestCheckMacroArgumentsDescriptionPopulated:
         )
 
 
+class TestMacroLoopControls:
+    """`{% break %}` and `{% continue %}` are valid dbt Jinja.
+
+    dbt enables Jinja's `loopcontrols` extension, so macros may use them. Parsing
+    such a macro used to raise, which crashed both checks that read macro
+    arguments.
+    """
+
+    _MACRO_SQL = (
+        "{% macro first_non_null(arg_1, arg_2) %}"
+        "{% for x in [arg_1, arg_2] %}"
+        "{% if x is none %}{% continue %}{% endif %}"
+        "{{ x }}{% break %}"
+        "{% endfor %}"
+        "{% endmacro %}"
+    )
+
+    def test_arguments_description_populated_parses_loop_controls(self):
+        check_passes(
+            "check_macro_arguments_description_populated",
+            macro={
+                "arguments": [
+                    {"name": "arg_1", "description": "This is arg_1."},
+                    {"name": "arg_2", "description": "This is arg_2."},
+                ],
+                "macro_sql": self._MACRO_SQL,
+            },
+        )
+
+    def test_max_number_of_arguments_parses_loop_controls(self):
+        check_fails(
+            "check_macro_max_number_of_arguments",
+            macro={"macro_sql": self._MACRO_SQL},
+            max_number_of_arguments=1,
+            match="arguments",
+        )
+
+
 class TestCheckMacroCodeDoesNotContainRegexpPattern:
     @pytest.mark.parametrize(
         ("macro_overrides", "regexp_pattern", "check_fn"),

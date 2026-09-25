@@ -51,6 +51,7 @@ def write_baseline(
     """
     import orjson
 
+    from dbt_bouncer.enums import CheckOutcome
     from dbt_bouncer.regression import build_baseline
     from dbt_bouncer.runner import collect_failures
 
@@ -67,7 +68,17 @@ def write_baseline(
     )
     ctx = _context_from_config(bouncer_config, check_categories, config_file_path)
 
-    document = build_baseline(collect_failures(ctx))
+    results = collect_failures(ctx)
+    num_internal_errors = sum(
+        1 for r in results if r.get("outcome") == CheckOutcome.INTERNAL_ERROR
+    )
+    if num_internal_errors:
+        # A crash is not a known failure to accept, so it stays out of the
+        # baseline and `run --baseline` keeps reporting it.
+        logging.warning(
+            f"{num_internal_errors} check(s) raised an unexpected error and were not recorded in the baseline. `dbt-bouncer run --baseline` will still report them."
+        )
+    document = build_baseline(results)
 
     target = output_file or Path(DEFAULT_BASELINE_FILE)
     target.write_bytes(orjson.dumps(document, option=orjson.OPT_INDENT_2))

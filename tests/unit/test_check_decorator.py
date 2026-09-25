@@ -1,6 +1,7 @@
 """Tests for the @check decorator."""
 
 import pytest
+from pydantic import ValidationError
 
 from dbt_bouncer.check_framework.base import BaseCheck
 from dbt_bouncer.check_framework.decorator import check, fail
@@ -67,6 +68,19 @@ def check_decorator_resource_and_ctx(model, ctx):
 
 
 CheckDecoratorResourceAndCtx = check_decorator_resource_and_ctx
+
+
+def _min_not_above_max(*, max_count: int, min_count: int) -> None:
+    if min_count > max_count:
+        raise ValueError("`min_count` must not exceed `max_count`.")
+
+
+@check(validate=_min_not_above_max)
+def check_decorator_with_validate(model, *, max_count: int = 10, min_count: int = 0):
+    """Validate a check with a cross-parameter validator."""
+
+
+CheckDecoratorWithValidate = check_decorator_with_validate
 
 
 # --- Tests ---
@@ -175,3 +189,34 @@ class TestFailHelper:
     def test_raises_failed_check_error(self):
         with pytest.raises(DbtBouncerFailedCheckError, match="test message"):
             fail("test message")
+
+
+class TestCheckDecoratorValidate:
+    """`@check(validate=...)` rejects bad parameters when the check is built."""
+
+    def test_valid_params_construct(self):
+        instance = CheckDecoratorWithValidate(
+            name="check_decorator_with_validate", max_count=5, min_count=5
+        )
+        assert instance.min_count == 5
+
+    def test_invalid_params_raise_validation_error_at_construction(self):
+        # Construction is what config loading does, so the error surfaces as a
+        # config error before any check runs, not once per resource.
+        with pytest.raises(ValidationError, match="must not exceed `max_count`"):
+            CheckDecoratorWithValidate(
+                name="check_decorator_with_validate", max_count=1, min_count=2
+            )
+
+    def test_defaults_are_validated(self):
+        # The validator sees every keyword-only param, including defaulted ones.
+        with pytest.raises(ValidationError, match="must not exceed"):
+            CheckDecoratorWithValidate(
+                name="check_decorator_with_validate", max_count=-1
+            )
+
+    def test_check_without_validate_has_no_extra_validator(self):
+        instance = CheckDecoratorWithParams(
+            name="check_decorator_with_params", min_length=-100
+        )
+        assert instance.min_length == -100

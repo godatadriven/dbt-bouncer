@@ -231,8 +231,13 @@ def load_config_file_contents(
         case ".yml" | ".yaml":
             return load_config_from_yaml(Path(config_file_path))
         case ".toml":
-            with Path(config_file_path).open("rb") as f:
-                toml_cfg = tomllib.load(f)
+            try:
+                with Path(config_file_path).open("rb") as f:
+                    toml_cfg = tomllib.load(f)
+            except tomllib.TOMLDecodeError as e:
+                raise DbtBouncerConfigError(
+                    f"Config file `{config_file_path}` is not valid TOML: {e}"
+                ) from e
 
             # dbt-bouncer.toml: config is at the top level
             if config_file_path.name == ConfigFileName.DBT_BOUNCER_TOML:

@@ -1,6 +1,5 @@
-import re
-
 import pytest
+from pydantic import ValidationError
 
 from dbt_bouncer.check_framework.exceptions import DbtBouncerFailedCheckError
 from dbt_bouncer.testing import _run_check, check_fails, check_passes
@@ -258,10 +257,10 @@ class TestCheckModelGrantPrivilege:
         # The complying grant must not appear in the non-complying list.
         assert "'select'" not in str(exc_info.value)
 
-    def test_invalid_regex_raises_re_error(self):
-        # An invalid pattern surfaces as `re.error` (wrapped by `compile_pattern`),
-        # not as a check failure. This pins which exception type reaches the user.
-        with pytest.raises(re.error, match=r"Invalid regex pattern"):
+    def test_invalid_regex_rejected_at_config_load(self):
+        # An invalid pattern is rejected when the check config is built, so it
+        # is a config error rather than a crash in every check run.
+        with pytest.raises(ValidationError, match=r"Invalid regex pattern"):
             _run_check(
                 "check_model_grant_privilege",
                 privilege_pattern="[select",

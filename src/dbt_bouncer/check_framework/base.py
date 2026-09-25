@@ -7,6 +7,7 @@ from typing import Any, ClassVar
 from pydantic import BaseModel, ConfigDict, Field, PrivateAttr, field_validator
 
 from dbt_bouncer.enums import CheckSeverity, Materialization, RuleCode
+from dbt_bouncer.types import validate_regex_patterns
 from dbt_bouncer.utils import is_description_populated
 
 
@@ -52,6 +53,22 @@ class BaseCheck(BaseModel):
         default=CheckSeverity.ERROR,
         description="Severity of the check, one of 'error' or 'warn'.",
     )
+
+    @field_validator("exclude", "include")
+    @classmethod
+    def _validate_path_patterns(
+        cls, value: str | list[str] | None
+    ) -> str | list[str] | None:
+        """Reject invalid ``include``/``exclude`` regexes at config-validation time.
+
+        Without this an invalid pattern only surfaces when the runner first
+        matches it against a resource path, as a traceback.
+
+        Returns:
+            str | list[str] | None: The validated pattern(s).
+
+        """
+        return validate_regex_patterns(value)
 
     @field_validator("selector")
     @classmethod
