@@ -32,9 +32,11 @@ from __future__ import annotations
 
 import re
 from fnmatch import fnmatch
+from pathlib import PurePosixPath
 from typing import TYPE_CHECKING, Any
 
 from dbt_bouncer.exceptions import DbtBouncerConfigError
+from dbt_bouncer.utils import clean_path_str
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -155,11 +157,11 @@ class SelectorAtom:
         if self.method == "package":
             return str(getattr(node, "package_name", "")) == self.value
         if self.method == "path":
-            path = str(getattr(node, "original_file_path", "")).replace("\\", "/")
-            value = self.value.rstrip("/")
-            if any(c in value for c in "*?["):
+            path = clean_path_str(str(getattr(node, "original_file_path", "")))
+            if any(c in self.value for c in "*?["):
+                value = self.value.rstrip("/")
                 return fnmatch(path, value) or fnmatch(path, f"{value}/*")
-            return path == value or path.startswith(f"{value}/")
+            return PurePosixPath(path).is_relative_to(self.value)
         if self.method == "config":
             config = getattr(node, "config", None)
             if config is None or self.config_key is None:

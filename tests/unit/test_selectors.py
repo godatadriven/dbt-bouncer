@@ -180,6 +180,22 @@ class TestSelectorMatching:
                     "source.my_project.raw.raw_orders",
                 },
             ),
+            (
+                "path:models/staging/",
+                {
+                    "model.my_project.stg_orders",
+                    "source.my_project.raw.raw_orders",
+                },
+            ),
+            (
+                "path:./models/staging",
+                {
+                    "model.my_project.stg_orders",
+                    "source.my_project.raw.raw_orders",
+                },
+            ),
+            ("path:models/stag", set()),
+            ("path:models/marts/orders.sql", {"model.my_project.orders"}),
             ("fqn:my_project.marts.*", {"model.my_project.orders"}),
             (
                 "tag:finance tag:staging",

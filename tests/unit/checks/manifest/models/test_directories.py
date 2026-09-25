@@ -63,6 +63,15 @@ class TestCheckModelDirectories:
                 check_fails,
                 id="model_not_in_any_sub_directory",
             ),
+            # A permitted sub-directory that shares the model's name is still a
+            # sub-directory, not the model file itself.
+            pytest.param(
+                "models",
+                _model_at("models/model_1/model_1.sql"),
+                ["model_1"],
+                check_passes,
+                id="sub_directory_named_like_model",
+            ),
             pytest.param(
                 "^marts",
                 _model_at("models/staging/stg_model_1.sql"),
@@ -102,6 +111,17 @@ class TestCheckModelDirectories:
                 "original_file_path": "models/model_1.sql",
                 "path": "marts/sales/model_1.sql",
             },
+            permitted_sub_directories=["finance", "marketing"],
+            match=r"is not located in a valid sub-directory",
+        )
+
+    def test_failure_message_when_versioned_model_is_not_in_a_sub_directory(self):
+        # A versioned model's file stem (`model_1_v2`) differs from its name
+        # (`model_1`), but it is still the file, not a sub-directory.
+        check_fails(
+            "check_model_directories",
+            include="models",
+            model=_model_at("models/model_1_v2.sql", version=2),
             permitted_sub_directories=["finance", "marketing"],
             match=r"is not located in a valid sub-directory",
         )

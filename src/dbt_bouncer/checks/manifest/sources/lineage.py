@@ -1,10 +1,12 @@
 """Checks related to source lineage and usage."""
 
+from pathlib import PurePosixPath
 from typing import Annotated
 
 from pydantic import Field
 
 from dbt_bouncer.check_framework.decorator import check, fail
+from dbt_bouncer.utils import clean_path_str
 
 
 @check(code="SO005")
@@ -160,11 +162,11 @@ def check_source_used_by_models_in_same_directory(source, ctx):
         ```
 
     """
+    source_dir = PurePosixPath(clean_path_str(source.original_file_path)).parent
     reffed_models_not_in_same_dir = [
         m.name
         for m in ctx.children_by_unique_id.get(source.unique_id, [])
-        if m.original_file_path.split("/")[:-1]
-        != source.original_file_path.split("/")[:-1]
+        if PurePosixPath(clean_path_str(m.original_file_path)).parent != source_dir
     ]
 
     if len(reffed_models_not_in_same_dir) != 0:

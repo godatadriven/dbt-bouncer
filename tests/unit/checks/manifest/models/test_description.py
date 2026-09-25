@@ -486,8 +486,28 @@ class TestCheckModelDocumentedInSameDirectory:
                 check_fails,
                 id="documented_in_sibling_directory",
             ),
-            # `patch_path` is truncated from the first "models" segment onwards;
-            # a patch_path without one is compared in full.
+            # Only the `<package>://` prefix is removed from `patch_path`, so a
+            # package name containing "models" does not skew the comparison.
+            pytest.param(
+                {
+                    "original_file_path": "models/staging/model_1.sql",
+                    "patch_path": "my_models://models/staging/_schema.yml",
+                    "path": "staging/model_1.sql",
+                },
+                check_passes,
+                id="package_name_containing_models",
+            ),
+            # Custom `model-paths` whose root is not `models/` are compared in full.
+            pytest.param(
+                {
+                    "original_file_path": "src/models/staging/model_1.sql",
+                    "patch_path": "package_name://src/models/staging/_schema.yml",
+                    "path": "staging/model_1.sql",
+                },
+                check_passes,
+                id="custom_model_path",
+            ),
+            # A patch_path without a package prefix is compared in full.
             pytest.param(
                 {
                     "original_file_path": "models/staging/model_1.sql",
