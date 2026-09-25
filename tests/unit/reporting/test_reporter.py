@@ -3,6 +3,9 @@
 from typing import TYPE_CHECKING, cast
 from unittest.mock import patch
 
+import orjson
+import pytest
+
 from dbt_bouncer.enums import CheckOutcome, CheckSeverity
 from dbt_bouncer.reporting.reporter import Reporter
 
@@ -87,6 +90,60 @@ def test_report_results_warnings_only():
 
     assert exit_code == 0
     assert returned == results
+
+
+@pytest.mark.parametrize(
+    ("severity", "expected_exit_code"),
+    [(CheckSeverity.ERROR, 1), (CheckSeverity.WARN, 0)],
+)
+def test_report_results_internal_error_follows_severity(
+    capsys, monkeypatch, severity, expected_exit_code
+):
+    """A crashed check fails the run at `error` severity, and only warns at `warn`."""
+    monkeypatch.setenv("COLUMNS", "200")
+    results = [
+        {
+            "check_run_id": "check_model_access:0:model.my_model",
+            "failure_message": "`dbt-bouncer` encountered an error (KeyError: 'x')",
+            "outcome": CheckOutcome.INTERNAL_ERROR,
+            "severity": severity,
+        },
+    ]
+    reporter = Reporter(show_all_failures=False, create_pr_comment_file=False)
+    exit_code, _ = reporter.report_results(results)
+
+    assert exit_code == expected_exit_code
+    output = capsys.readouterr().out
+    assert "All checks passed" not in output
+    assert "SUCCESS=0 WARN=0 ERROR=0 INTERNAL_ERROR=1" in output
+    assert "encountered an error" in output
+
+
+def test_report_results_output_only_failures_includes_internal_errors(tmp_path):
+    """`--output-only-failures` keeps crashed checks alongside failed ones."""
+    output_file = tmp_path / "coverage.json"
+    results = [
+        {
+            "check_run_id": "check_a:0",
+            "failure_message": None,
+            "outcome": CheckOutcome.SUCCESS,
+            "severity": CheckSeverity.ERROR,
+        },
+        {
+            "check_run_id": "check_b:0",
+            "failure_message": "crashed",
+            "outcome": CheckOutcome.INTERNAL_ERROR,
+            "severity": CheckSeverity.ERROR,
+        },
+    ]
+    reporter = Reporter(
+        output_file=output_file, output_format="json", output_only_failures=True
+    )
+    reporter.report_results(results)
+
+    saved = orjson.loads(output_file.read_bytes())
+    assert [r["check_run_id"] for r in saved] == ["check_b:0"]
+    assert saved[0]["outcome"] == "internal_error"
 
 
 def test_report_results_saves_coverage_file(tmp_path):

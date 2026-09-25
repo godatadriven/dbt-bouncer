@@ -1,7 +1,9 @@
 """Checks related to model source code content and structure."""
 
 import re
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Annotated
+
+from pydantic import Field
 
 if TYPE_CHECKING:
     # Runtime uses a function-local ``from sqlglot import exp`` in the four
@@ -15,6 +17,7 @@ from dbt_bouncer.artifact_types import ModelNode
 from dbt_bouncer.check_framework.decorator import check, fail
 from dbt_bouncer.enums import Materialization
 from dbt_bouncer.sql_utils import JINJA_COMMENT_PATTERN, neutralize_jinja, parse_sql
+from dbt_bouncer.types import RegexPattern
 from dbt_bouncer.utils import compile_pattern, get_clean_model_name
 
 # Patterns retained for the best-effort regex fallback used when sqlglot cannot
@@ -140,7 +143,9 @@ def _hard_coded_tables(statements: "tuple[exp.Expression, ...]") -> list[str]:
 
 
 @check(code="MO007")
-def check_model_code_does_not_contain_regexp_pattern(model, *, regexp_pattern: str):
+def check_model_code_does_not_contain_regexp_pattern(
+    model, *, regexp_pattern: RegexPattern
+):
     """The raw code for a model must not match the specified regexp pattern.
 
     !!! info "Rationale"
@@ -537,7 +542,9 @@ def check_model_materialization_permitted(
 
 
 @check(code="MO013")
-def check_model_max_number_of_lines(model, *, max_number_of_lines: int = 100):
+def check_model_max_number_of_lines(
+    model, *, max_number_of_lines: Annotated[int, Field(gt=0)] = 100
+):
     """Models may not have more than the specified number of lines.
 
     !!! info "Rationale"
@@ -569,11 +576,6 @@ def check_model_max_number_of_lines(model, *, max_number_of_lines: int = 100):
         ```
 
     """
-    if max_number_of_lines <= 0:
-        raise ValueError(
-            f"`max_number_of_lines` must be greater than 0, got {max_number_of_lines}."
-        )
-
     actual_number_of_lines = (model.raw_code or "").count("\n") + 1
 
     if actual_number_of_lines > max_number_of_lines:

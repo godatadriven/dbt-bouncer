@@ -1,6 +1,5 @@
-import re
-
 import pytest
+from pydantic import ValidationError
 
 from dbt_bouncer.testing import check_fails, check_passes
 
@@ -125,12 +124,13 @@ class TestCheckModelVersionAllowed:
             ),
         )
 
-    def test_invalid_regex_raises_re_error(self):
+    def test_invalid_regex_rejected_at_config_load(self):
         check_fails(
             "check_model_version_allowed",
             model={"version": "1"},
             version_pattern="[unterminated",
-            expected_exception=re.error,
+            expected_exception=ValidationError,
+            match="Invalid regex pattern",
         )
 
 

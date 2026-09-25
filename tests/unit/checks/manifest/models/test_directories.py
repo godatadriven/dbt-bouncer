@@ -1,6 +1,5 @@
-import re
-
 import pytest
+from pydantic import ValidationError
 
 from dbt_bouncer.testing import check_fails, check_passes
 
@@ -91,6 +90,18 @@ class TestCheckModelDirectories:
             permitted_sub_directories=permitted_sub_directories,
         )
 
+    @pytest.mark.parametrize("include", ["^models/.*", "models/staging.*"])
+    def test_include_matching_the_whole_path_fails_with_guidance(self, include):
+        # A trailing `.*` consumes the file name too, leaving no sub-directory to
+        # compare. This used to raise an IndexError inside the check.
+        check_fails(
+            "check_model_directories",
+            include=include,
+            model=_model_at("models/staging/stg_model_1.sql"),
+            permitted_sub_directories=["staging"],
+            match=r"matched the whole path `models/staging/stg_model_1\.sql`",
+        )
+
     def test_failure_message_names_the_offending_sub_directory(self):
         check_fails(
             "check_model_directories",
@@ -166,12 +177,12 @@ class TestCheckModelFileName:
             model=model,
         )
 
-    def test_invalid_regex_raises_re_error(self):
+    def test_invalid_regex_rejected_at_config_load(self):
         check_fails(
             "check_model_file_name",
             file_name_pattern="(unclosed",
             model=_model_at("model_v1.sql", name="model_v1"),
-            expected_exception=re.error,
+            expected_exception=ValidationError,
             match="Invalid regex pattern",
         )
 
@@ -509,7 +520,7 @@ class TestCheckModelSchemaName:
             match=r"`dbt_jdoe_int_domain` does not match the supplied regex",
         )
 
-    def test_invalid_regex_raises_re_error(self):
+    def test_invalid_regex_rejected_at_config_load(self):
         check_fails(
             "check_model_schema_name",
             schema_name_pattern="(unclosed",
@@ -519,6 +530,6 @@ class TestCheckModelSchemaName:
                 schema="stg_domain",
                 unique_id="model.package_name.stg_model_1",
             ),
-            expected_exception=re.error,
+            expected_exception=ValidationError,
             match="Invalid regex pattern",
         )

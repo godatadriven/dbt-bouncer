@@ -263,6 +263,8 @@ All checks accept a `severity` argument, valid values are:
 - `error`: If the check fails then `dbt-bouncer` will return a non-zero exit code.
 - `warn`: If the check fails then `dbt-bouncer` will log a warning but return a zero exit code.
 
+A check that raises an unexpected error (for example, a bug in a custom check) has not verified anything, so it is reported with the outcome `internal_error` rather than as a pass. It follows the check's severity: at `error` (the default) it fails the run, at `warn` it is reported but the run passes. Internal errors are never recorded by `dbt-bouncer baseline`, so `--baseline` and `--state` cannot suppress them.
+
 `severity` can also be specified globally, this is useful when applying `dbt-bouncer` to a pre-existing dbt project. It allows you to run `dbt-bouncer`, identify the checks that fail and address the failures in your own time without receiving non-zero exit codes:
 
 ```yaml

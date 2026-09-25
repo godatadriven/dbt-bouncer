@@ -6,6 +6,7 @@ from pydantic import Field
 
 from dbt_bouncer.check_framework.decorator import check, fail
 from dbt_bouncer.enums import ModelAccess
+from dbt_bouncer.types import RegexPattern
 from dbt_bouncer.utils import compile_pattern, get_clean_model_name
 
 
@@ -88,7 +89,7 @@ def check_model_contract_enforced_for_public_model(model):
 
 
 @check(code="MO003")
-def check_model_grant_privilege(model, *, privilege_pattern: str):
+def check_model_grant_privilege(model, *, privilege_pattern: RegexPattern):
     """Model can have grant privileges that match the specified pattern.
 
     !!! info "Rationale"
@@ -198,7 +199,22 @@ def check_model_has_contracts_enforced(model):
         )
 
 
-@check(code="MO006")
+def _min_privileges_not_above_max(
+    *, max_number_of_privileges: int, min_number_of_privileges: int
+) -> None:
+    """Reject a minimum number of privileges above the maximum.
+
+    Raises:
+        ValueError: If `min_number_of_privileges` exceeds `max_number_of_privileges`.
+
+    """
+    if min_number_of_privileges > max_number_of_privileges:
+        raise ValueError(
+            f"`min_number_of_privileges` ({min_number_of_privileges}) must not exceed `max_number_of_privileges` ({max_number_of_privileges})."
+        )
+
+
+@check(code="MO006", validate=_min_privileges_not_above_max)
 def check_model_number_of_grants(
     model,
     *,
@@ -235,11 +251,6 @@ def check_model_number_of_grants(
         ```
 
     """
-    if min_number_of_privileges > max_number_of_privileges:
-        raise ValueError(
-            f"`min_number_of_privileges` ({min_number_of_privileges}) must not exceed `max_number_of_privileges` ({max_number_of_privileges})."
-        )
-
     config = model.config
     grants = config.grants if config else {}
     num_grants = len((grants or {}).keys())

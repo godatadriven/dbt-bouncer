@@ -8,11 +8,13 @@ from pydantic import Field
 from dbt_bouncer.check_framework.decorator import check, fail
 from dbt_bouncer.check_framework.exceptions import NestedDict
 from dbt_bouncer.enums import Materialization
+from dbt_bouncer.types import RegexPattern
 from dbt_bouncer.utils import (
     compile_pattern,
     find_missing_meta_keys,
     get_clean_model_name,
     is_description_populated,
+    require_exactly_one_of_type_pattern_or_types,
 )
 
 
@@ -93,9 +95,9 @@ def check_model_columns_have_relationship_tests(
     model,
     ctx,
     *,
-    column_name_pattern: str,
-    target_column_pattern: str | None = None,
-    target_model_pattern: str | None = None,
+    column_name_pattern: RegexPattern,
+    target_column_pattern: RegexPattern | None = None,
+    target_model_pattern: RegexPattern | None = None,
 ):
     """Columns matching a regex pattern must have a `relationships` test, optionally validating the target column and model.
 
@@ -333,7 +335,7 @@ def check_model_column_has_specified_test(
     model,
     ctx,
     *,
-    column_name_pattern: str,
+    column_name_pattern: RegexPattern,
     test_name: str,
 ):
     """Columns declared in a model's properties file that match the specified regexp pattern must have a specified test.
@@ -448,12 +450,12 @@ def check_model_column_description_populated(
         )
 
 
-@check(code="MO055")
+@check(code="MO055", validate=require_exactly_one_of_type_pattern_or_types)
 def check_model_column_name_complies_to_column_type(
     model,
     *,
-    column_name_pattern: str,
-    type_pattern: str | None = None,
+    column_name_pattern: RegexPattern,
+    type_pattern: RegexPattern | None = None,
     types: list[str] | None = None,
 ):
     """Columns with the specified regexp naming pattern must have declared data types that comply to the specified regexp pattern or list of data types.
@@ -481,9 +483,6 @@ def check_model_column_name_complies_to_column_type(
         materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
-    Raises:
-        ValueError: If neither or both of type_pattern/types are supplied.
-
     Example(s):
         ```yaml
         manifest_checks:
@@ -502,13 +501,6 @@ def check_model_column_name_complies_to_column_type(
         ```
 
     """
-    if not (type_pattern or types):
-        msg = "Either 'type_pattern' or 'types' must be supplied."
-        raise ValueError(msg)
-    if type_pattern is not None and types is not None:
-        msg = "Only one of 'type_pattern' or 'types' can be supplied."
-        raise ValueError(msg)
-
     compiled_column_name_pattern = compile_pattern(column_name_pattern.strip())
     columns = model.columns or {}
     # Columns without a declared `data_type` are skipped: compliance cannot be
@@ -545,12 +537,12 @@ def check_model_column_name_complies_to_column_type(
             )
 
 
-@check(code="MO056")
+@check(code="MO056", validate=require_exactly_one_of_type_pattern_or_types)
 def check_model_column_type_complies_to_column_name(
     model,
     *,
-    column_name_pattern: str,
-    type_pattern: str | None = None,
+    column_name_pattern: RegexPattern,
+    type_pattern: RegexPattern | None = None,
     types: list[str] | None = None,
 ):
     """Columns with the specified declared data type must have names that comply to the specified regexp pattern.
@@ -578,9 +570,6 @@ def check_model_column_type_complies_to_column_name(
         materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
-    Raises:
-        ValueError: If neither or both of type_pattern/types are supplied.
-
     Example(s):
         ```yaml
         manifest_checks:
@@ -601,13 +590,6 @@ def check_model_column_type_complies_to_column_name(
         ```
 
     """
-    if not (type_pattern or types):
-        msg = "Either 'type_pattern' or 'types' must be supplied."
-        raise ValueError(msg)
-    if type_pattern is not None and types is not None:
-        msg = "Only one of 'type_pattern' or 'types' can be supplied."
-        raise ValueError(msg)
-
     compiled_column_name_pattern = compile_pattern(column_name_pattern.strip())
     columns = model.columns or {}
     # Columns without a declared `data_type` are skipped: compliance cannot be
@@ -645,7 +627,7 @@ def check_model_column_type_complies_to_column_name(
 
 
 @check(code="MO057")
-def check_model_column_names(model, *, column_name_pattern: str):
+def check_model_column_names(model, *, column_name_pattern: RegexPattern):
     """Columns declared in a model's properties file must have a name that matches the supplied regex.
 
     !!! info "Rationale"

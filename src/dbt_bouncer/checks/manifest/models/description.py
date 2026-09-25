@@ -8,6 +8,7 @@ from typing import Annotated, Any, cast
 from pydantic import Field
 
 from dbt_bouncer.check_framework.decorator import check, fail
+from dbt_bouncer.types import RegexPattern
 from dbt_bouncer.utils import (
     clean_path_str,
     compile_pattern,
@@ -50,7 +51,9 @@ def check_column_descriptions_are_consistent(ctx):
 
 
 @check(code="MO020")
-def check_model_description_contains_regexp_pattern(model, *, regexp_pattern: str):
+def check_model_description_contains_regexp_pattern(
+    model, *, regexp_pattern: RegexPattern
+):
     """Models must have a description that matches the provided pattern.
 
     !!! info "Rationale"

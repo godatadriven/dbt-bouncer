@@ -3,6 +3,7 @@
 import re
 
 from dbt_bouncer.check_framework.decorator import check, fail
+from dbt_bouncer.types import RegexPattern
 from dbt_bouncer.utils import compile_pattern
 
 
@@ -11,7 +12,7 @@ def check_column_has_specified_test(
     catalog_node,
     ctx,
     *,
-    column_name_pattern: str,
+    column_name_pattern: RegexPattern,
     test_name: str,
     case_sensitive: bool = True,
 ):

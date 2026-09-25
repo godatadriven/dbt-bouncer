@@ -1,5 +1,7 @@
 """Tests for the Executor class."""
 
+import pytest
+
 from dbt_bouncer.enums import CheckOutcome, CheckSeverity
 from dbt_bouncer.executor import Executor
 
@@ -69,19 +71,25 @@ def test_executor_with_failure():
     assert "private" in results[0]["failure_message"]
 
 
-def test_executor_unexpected_error_downgrades_to_warn():
-    """Unexpected exceptions are downgraded to WARN severity."""
+@pytest.mark.parametrize("severity", [CheckSeverity.ERROR, CheckSeverity.WARN])
+def test_executor_unexpected_error_is_internal_error(severity):
+    """Unexpected exceptions get their own outcome and keep the configured severity.
+
+    They used to be reported as a `warn` failure, which let a crashing check
+    pass the run. Keeping the severity makes an `error` check fail closed.
+    """
     checks = [
         {
             "check": _CrashingCheck(),
             "check_run_id": "check_a:0",
-            "severity": CheckSeverity.ERROR,
+            "severity": severity,
         },
     ]
     executor = Executor()
     results = executor.run(checks)
-    assert results[0]["outcome"] == CheckOutcome.FAILED
-    assert results[0]["severity"] == CheckSeverity.WARN
+    assert results[0]["outcome"] == CheckOutcome.INTERNAL_ERROR
+    assert results[0]["severity"] == severity
+    assert "encountered an error" in results[0]["failure_message"]
 
 
 def test_executor_empty_checks():

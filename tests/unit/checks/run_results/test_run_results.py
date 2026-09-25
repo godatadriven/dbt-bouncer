@@ -1,4 +1,5 @@
 import pytest
+from pydantic import ValidationError
 
 from dbt_bouncer.testing import _run_check, check_fails, check_passes
 
@@ -20,6 +21,37 @@ class TestCheckRunResultsMaxGigabytesBilled:
             "check_run_results_max_gigabytes_billed",
             run_result=run_result,
             max_gigabytes_billed=10,
+        )
+
+    @pytest.mark.parametrize(
+        "run_result",
+        [
+            # dbt-bigquery writes an empty adapter response for nodes that ran no
+            # query. This used to raise "`bytes_billed` not found" on every one.
+            pytest.param(
+                {"adapter_response": {}, "status": "skipped"}, id="skipped_node"
+            ),
+            pytest.param(
+                {"adapter_response": {}, "status": "error"}, id="errored_node"
+            ),
+        ],
+    )
+    def test_node_that_ran_no_query_passes(self, run_result):
+        check_passes(
+            "check_run_results_max_gigabytes_billed",
+            run_result=run_result,
+            max_gigabytes_billed=10,
+        )
+
+    def test_non_bigquery_adapter_response_still_raises(self):
+        # A populated response without `bytes_billed` means a different adapter,
+        # which the check cannot evaluate.
+        check_fails(
+            "check_run_results_max_gigabytes_billed",
+            run_result={"adapter_response": {"_message": "OK", "rows_affected": 1}},
+            max_gigabytes_billed=10,
+            expected_exception=RuntimeError,
+            match="`bytes_billed` not found",
         )
 
 
@@ -46,8 +78,8 @@ class TestCheckRunResultsMaxExecutionTime:
             pytest.param(-1, id="negative"),
         ],
     )
-    def test_raises_value_error_for_invalid_param(self, max_execution_time_seconds):
-        with pytest.raises(ValueError, match="must be positive"):
+    def test_invalid_param_rejected_at_config_load(self, max_execution_time_seconds):
+        with pytest.raises(ValidationError, match="greater than 0"):
             _run_check(
                 "check_run_results_max_execution_time",
                 run_result={},
@@ -63,8 +95,8 @@ class TestCheckRunResultsMaxGigabytesBilledInvalidParam:
             pytest.param(-1, id="negative"),
         ],
     )
-    def test_raises_value_error(self, max_gigabytes_billed):
-        with pytest.raises(ValueError, match="must be positive"):
+    def test_rejected_at_config_load(self, max_gigabytes_billed):
+        with pytest.raises(ValidationError, match="greater than 0"):
             _run_check(
                 "check_run_results_max_gigabytes_billed",
                 run_result={},

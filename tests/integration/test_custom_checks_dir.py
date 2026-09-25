@@ -14,6 +14,7 @@ names it, `dbt-bouncer run`, and the resulting exit code.
 
 from pathlib import Path, PurePath
 
+import orjson
 import pytest
 
 from dbt_bouncer.enums import ExitCode
@@ -48,6 +49,17 @@ def check_model_name_prefix(model, *, prefix: str = "stg_"):
     """Model names must start with the configured prefix."""
     if not str(model.name).startswith(prefix):
         fail(f"`{model.unique_id}` does not start with `{prefix}`.")
+'''
+
+# A check with a bug: it raises instead of passing or failing, for every model.
+_CRASHING_CUSTOM_CHECK = '''
+from dbt_bouncer.check_framework.decorator import check
+
+
+@check
+def check_model_name_prefix(model):
+    """Model names must start with a prefix (but the check has a bug)."""
+    raise KeyError("not_a_real_key")
 '''
 
 # The rule code carried by `_CUSTOM_CHECK_WITH_CODE`.
@@ -303,3 +315,68 @@ def test_custom_check_that_cannot_import_fails_the_run(
 
     assert result.exit_code == ExitCode.CONFIG_ERROR, result.output
     assert "Failed to load custom check file" in caplog.text
+
+
+def test_custom_check_that_raises_fails_the_run(
+    caplog, cli_runner, custom_checks_config, tmp_path
+):
+    """A check that crashes fails closed instead of passing the run.
+
+    It used to be reported as a warning and exit 0, so a check that verified
+    nothing left CI green.
+    """
+    _write_custom_check(tmp_path, body=_CRASHING_CUSTOM_CHECK)
+    config_file = custom_checks_config(
+        [{"name": "check_model_name_prefix", "include": _ORDERS}]
+    )
+
+    result = _run(cli_runner, config_file)
+
+    assert result.exit_code == ExitCode.CHECK_ERRORS, result.output
+    assert "Done. SUCCESS=0 WARN=0 ERROR=0 INTERNAL_ERROR=1" in strip_ansi(
+        result.output
+    )
+    assert "raised an unexpected error" in caplog.text
+    assert "`dbt-bouncer` failed." in caplog.text
+
+
+def test_custom_check_that_raises_at_warn_severity_passes_the_run(
+    caplog, cli_runner, custom_checks_config, tmp_path
+):
+    """`severity: warn` is the opt-out: a crash is reported but does not fail the run."""
+    _write_custom_check(tmp_path, body=_CRASHING_CUSTOM_CHECK)
+    config_file = custom_checks_config(
+        [{"name": "check_model_name_prefix", "include": _ORDERS, "severity": "warn"}]
+    )
+
+    result = _run(cli_runner, config_file)
+
+    assert result.exit_code == ExitCode.SUCCESS, result.output
+    assert "INTERNAL_ERROR=1" in strip_ansi(result.output)
+    assert "`dbt-bouncer` has warnings." in caplog.text
+
+
+def test_baseline_does_not_record_a_crashing_check(
+    caplog, cli_runner, custom_checks_config, tmp_path
+):
+    """A crash is not a known failure: `baseline` leaves it out and says so."""
+    _write_custom_check(tmp_path, body=_CRASHING_CUSTOM_CHECK)
+    config_file = custom_checks_config(
+        [{"name": "check_model_name_prefix", "include": _ORDERS}]
+    )
+    baseline_file = tmp_path / "baseline.json"
+
+    result = cli_runner.invoke(
+        app,
+        [
+            "baseline",
+            "--config-file",
+            PurePath(config_file).as_posix(),
+            "--output-file",
+            PurePath(baseline_file).as_posix(),
+        ],
+    )
+
+    assert result.exit_code == ExitCode.SUCCESS, result.output
+    assert orjson.loads(baseline_file.read_bytes())["failures"] == []
+    assert "were not recorded in the baseline" in caplog.text

@@ -36,6 +36,13 @@ def _success(check_run_id, unique_id=None):
     }
 
 
+def _internal_error(check_run_id, unique_id=None):
+    return {
+        **_failure(check_run_id, unique_id=unique_id, message="crashed"),
+        "outcome": CheckOutcome.INTERNAL_ERROR,
+    }
+
+
 def test_fingerprint_ignores_index_and_message():
     """The fingerprint is stable across a changed index and message."""
     a = _failure("check_model_names:3:model.x", unique_id="model.x", message="was 5")
@@ -138,3 +145,26 @@ def test_apply_regression_filter_suppresses_known():
     assert suppressed == 1
     kept_ids = {r["check_run_id"] for r in kept}
     assert kept_ids == {"check_a:1:model.new", "check_b:0:model.ok"}
+
+
+def test_internal_errors_are_never_baselined():
+    """A crash is not a known failure, so it is left out of the baseline."""
+    results = [
+        _failure("check_a:0:model.one", unique_id="model.one"),
+        _internal_error("check_b:0:model.two", unique_id="model.two"),
+    ]
+
+    assert failure_fingerprints(results) == {"check_a::model.one"}
+    assert [e["fingerprint"] for e in build_baseline(results)["failures"]] == [
+        "check_a::model.one"
+    ]
+
+
+def test_apply_regression_filter_keeps_internal_errors():
+    """An internal error is reported even if its fingerprint is accepted."""
+    results = [_internal_error("check_b:0:model.two", unique_id="model.two")]
+
+    kept, suppressed = apply_regression_filter(results, {"check_b::model.two"})
+
+    assert suppressed == 0
+    assert kept == results

@@ -243,6 +243,7 @@ def check_model_names(model, *, model_name_pattern: str):
     - Keyword-only arguments (after `*`) become user-configurable parameters.
     - Add `ctx` as a parameter only if the function needs access to the `CheckContext`.
     - Call `fail(message)` to signal a check failure.
+    - Validate parameters in their type, not in the function body, so a misconfigured check is a config error at load time instead of an exception raised for every resource. Use `RegexPattern` (from `dbt_bouncer.types`) for regex parameters and `Annotated[int, Field(gt=0)]`-style constraints for bounds. For a rule that spans several parameters, pass `validate=` to `@check`: a callable that receives the keyword-only parameters as keyword arguments and raises `ValueError`.
 1. Add the check to `dbt-bouncer-example.yml` and run `dbt-bouncer --config-file dbt-bouncer-example.yml`.
 1. Write tests using the test helpers:
 

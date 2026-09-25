@@ -5,6 +5,7 @@ from pydantic import Field
 from dbt_bouncer.check_framework.decorator import check, fail
 from dbt_bouncer.check_framework.exceptions import NestedDict
 from dbt_bouncer.enums import Criteria
+from dbt_bouncer.types import RegexPattern
 from dbt_bouncer.utils import (
     compile_pattern,
     find_meta_keys_criteria_failure,
@@ -14,7 +15,7 @@ from dbt_bouncer.utils import (
 
 
 @check(code="SE001")
-def check_seed_column_names(seed, *, seed_column_name_pattern: str):
+def check_seed_column_names(seed, *, seed_column_name_pattern: RegexPattern):
     """Seed columns must have names that match the supplied regex.
 
     !!! info "Rationale"
@@ -215,7 +216,7 @@ def check_seed_has_unit_tests(
 
 
 @check(code="SE006")
-def check_seed_names(seed, *, seed_name_pattern: str):
+def check_seed_names(seed, *, seed_name_pattern: RegexPattern):
     """Seed must have a name that matches the supplied regex.
 
     !!! info "Rationale"

@@ -14,7 +14,7 @@ import typing
 from collections.abc import Mapping
 from functools import lru_cache
 from importlib.metadata import entry_points
-from pathlib import Path
+from pathlib import Path, PurePath
 from typing import TYPE_CHECKING, Any
 
 from dbt_bouncer.enums import CheckCategory, Criteria
@@ -96,6 +96,24 @@ def get_nested_value(
         else:
             return default
     return current_level
+
+
+def require_exactly_one_of_type_pattern_or_types(
+    *, type_pattern: str | None, types: list[str] | None, **_: Any
+) -> None:
+    """Require exactly one of `type_pattern` or `types`.
+
+    Shared ``@check(validate=...)`` rule for the column name/type compliance
+    checks, which match column types either by regex or by an explicit list.
+
+    Raises:
+        ValueError: If neither or both are supplied.
+
+    """
+    if not (type_pattern or types):
+        raise ValueError("Either 'type_pattern' or 'types' must be supplied.")
+    if type_pattern is not None and types is not None:
+        raise ValueError("Only one of 'type_pattern' or 'types' can be supplied.")
 
 
 def resource_in_path(check: "BaseCheck", resource: Any) -> bool:
@@ -970,7 +988,8 @@ def load_config_from_yaml(config_file: Path) -> Mapping[str, Any]:
         Mapping[str, Any]: Dict object.
 
     Raises:
-        DbtBouncerConfigError: If the config file does not exist.
+        DbtBouncerConfigError: If the config file does not exist, is not valid
+            YAML, or does not contain a mapping at the top level.
 
     """
     config_path = Path().cwd() / config_file
@@ -982,12 +1001,39 @@ def load_config_from_yaml(config_file: Path) -> Mapping[str, Any]:
 
     import yaml
 
-    with Path.open(config_path, "r", encoding="utf-8") as f:
-        conf = yaml.load(f, Loader=yaml.CSafeLoader)  # type: ignore[possibly-missing-attribute]
+    try:
+        with Path.open(config_path, "r", encoding="utf-8") as f:
+            conf = yaml.load(f, Loader=yaml.CSafeLoader)  # type: ignore[possibly-missing-attribute]
+    except yaml.YAMLError as e:
+        raise DbtBouncerConfigError(
+            f"Config file `{config_file}` is not valid YAML: {e}"
+        ) from e
 
+    ensure_config_is_mapping(conf, config_file)
     logging.info(f"Loaded config from {config_file}...")
 
     return conf
+
+
+def ensure_config_is_mapping(conf: Any, config_file: PurePath) -> None:
+    """Reject config file contents that are not a key/value mapping.
+
+    An empty file loads as ``None`` and a file holding a bare list or scalar
+    loads as that value; neither can be validated as a config, so fail with a
+    config error instead of a ``TypeError`` further down.
+
+    Raises:
+        DbtBouncerConfigError: If ``conf`` is not a mapping.
+
+    """
+    if conf is None:
+        raise DbtBouncerConfigError(
+            f"Config file `{config_file}` is empty. Add at least one of `catalog_checks`, `manifest_checks` or `run_results_checks`, or run `dbt-bouncer init` to create one."
+        )
+    if not isinstance(conf, Mapping):
+        raise DbtBouncerConfigError(
+            f"Config file `{config_file}` must contain a mapping of keys to values at the top level, got a {type(conf).__name__}."
+        )
 
 
 def make_markdown_table(array: list[list[str]]) -> str:
