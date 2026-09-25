@@ -24,6 +24,7 @@ from pathlib import Path
 
 import pytest
 import yaml
+from typer.testing import CliRunner
 
 from dbt_bouncer.cli.run.utils import (
     _context_from_config,
@@ -430,8 +431,6 @@ class TestInvalidSelector:
         self, caplog, message, selector, tmp_path
     ):
         """The CLI exits CONFIG_ERROR and logs the message, not a stack trace."""
-        from typer.testing import CliRunner
-
         config_file = _write_config(tmp_path, [{**_CHECK, "selector": selector}])
 
         result = CliRunner().invoke(app, ["run", "--config-file", str(config_file)])
