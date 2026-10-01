@@ -1,7 +1,12 @@
 """Tests for the regression (baseline/state) filter."""
 
+import tempfile
+from pathlib import Path
+
 import orjson
 import pytest
+from hypothesis import given, settings
+from hypothesis import strategies as st
 
 from dbt_bouncer.enums import CheckOutcome
 from dbt_bouncer.exceptions import DbtBouncerConfigError
@@ -168,3 +173,70 @@ def test_apply_regression_filter_keeps_internal_errors():
 
     assert suppressed == 0
     assert kept == results
+
+
+class TestRegressionProperties:
+    """Property-based tests for baseline serialization and filtering."""
+
+    @settings(max_examples=50)
+    @given(
+        st.lists(
+            st.fixed_dictionaries(
+                {
+                    "check_run_id": st.tuples(
+                        st.from_regex(r"check_[a-z_]+", fullmatch=True),
+                        st.integers(min_value=0, max_value=100),
+                    ).map(lambda p: f"{p[0]}:{p[1]}"),
+                    "failure_message": st.text(),
+                    "file_path": st.one_of(
+                        st.none(),
+                        st.from_regex(r"models/[a-z_]+\.sql", fullmatch=True),
+                    ),
+                    "outcome": st.sampled_from(
+                        [
+                            CheckOutcome.FAILED,
+                            CheckOutcome.INTERNAL_ERROR,
+                            CheckOutcome.SUCCESS,
+                        ]
+                    ),
+                    "severity": st.sampled_from(["error", "warn"]),
+                    "unique_id": st.one_of(
+                        st.none(),
+                        st.from_regex(
+                            r"(model|source|seed)\.[a-z_]+\.[a-z_]+", fullmatch=True
+                        ),
+                    ),
+                }
+            ),
+            max_size=20,
+        )
+    )
+    def test_baseline_roundtrip_and_sorting_invariants(self, results):
+        """build_baseline followed by load_baseline preserves failure fingerprints."""
+        baseline_doc = build_baseline(results)
+        assert baseline_doc["version"] == 1
+
+        fingerprints = [entry["fingerprint"] for entry in baseline_doc["failures"]]
+        assert fingerprints == sorted(fingerprints)
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            baseline_file = Path(tmp_dir) / "baseline.json"
+            baseline_file.write_bytes(orjson.dumps(baseline_doc))
+            assert load_baseline(baseline_file) == failure_fingerprints(results)
+
+    @settings(max_examples=50)
+    @given(
+        check_name=st.from_regex(r"check_[a-z_]+", fullmatch=True),
+        unique_id=st.from_regex(r"model\.[a-z_]+\.[a-z_]+", fullmatch=True),
+        idx1=st.integers(min_value=0, max_value=1000),
+        idx2=st.integers(min_value=0, max_value=1000),
+        msg1=st.text(),
+        msg2=st.text(),
+    )
+    def test_fingerprint_invariance_property(
+        self, check_name, unique_id, idx1, idx2, msg1, msg2
+    ):
+        """Fingerprint identity is invariant to volatile check run index and failure message."""
+        res1 = _failure(f"{check_name}:{idx1}", unique_id=unique_id, message=msg1)
+        res2 = _failure(f"{check_name}:{idx2}", unique_id=unique_id, message=msg2)
+        assert fingerprint(res1) == fingerprint(res2) == f"{check_name}::{unique_id}"
