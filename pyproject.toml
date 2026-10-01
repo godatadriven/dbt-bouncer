@@ -60,6 +60,7 @@ dev = [
   # as 2.0 did when it removed `--write-catalog` from `dbt build`. Raise this pin
   # deliberately, after rebuilding the fixtures against the new minor version.
   "dbt>=2,<2.1",
+  "hypothesis>=6,<7",
   "matchify>=0.2,<1",
   "mcp>=1.9,<3",
   "prek>=0.1,<1",

@@ -3,9 +3,11 @@
 from types import SimpleNamespace
 
 import pytest
+from hypothesis import given, settings
+from hypothesis import strategies as st
 
 from dbt_bouncer.exceptions import DbtBouncerConfigError
-from dbt_bouncer.selectors import Selector, parse_selector
+from dbt_bouncer.selectors import Selector, SelectorAtom, parse_selector
 
 
 def _node(name, tags=None, package="my_project", path=None, fqn=None):
@@ -470,3 +472,81 @@ def test_invalid_global_selector_rejected_at_config_time():
                 "selector": "state:modified",
             },
         )
+
+
+_IDENTIFIER = st.from_regex(r"[a-zA-Z][a-zA-Z0-9_]*", fullmatch=True)
+_METHODS = st.sampled_from(["fqn", "name", "package", "path", "tag"])
+
+_CORE_ATOM = st.one_of(
+    _IDENTIFIER,
+    st.tuples(_METHODS, _IDENTIFIER).map(lambda p: f"{p[0]}:{p[1]}"),
+    st.tuples(_IDENTIFIER, _IDENTIFIER).map(lambda p: f"config.{p[0]}:{p[1]}"),
+)
+
+_DEGREE = st.integers(min_value=1, max_value=99).map(str)
+
+
+@st.composite
+def _wrapped_atom_strategy(draw: st.DrawFn) -> str:
+    core = draw(_CORE_ATOM)
+    if draw(st.booleans()):
+        return f"@{core}"
+
+    prefix = f"{draw(st.one_of(st.just(''), _DEGREE))}+" if draw(st.booleans()) else ""
+    suffix = f"+{draw(st.one_of(st.just(''), _DEGREE))}" if draw(st.booleans()) else ""
+    return f"{prefix}{core}{suffix}"
+
+
+_CONJUNCTION = st.lists(_wrapped_atom_strategy(), min_size=1, max_size=3).map(
+    lambda atoms: ",".join(atoms)
+)
+_VALID_SELECTOR = st.lists(_CONJUNCTION, min_size=1, max_size=4).map(
+    lambda conj: " ".join(conj)
+)
+
+
+class TestSelectorProperties:
+    """Property-based tests for selector parsing using Hypothesis."""
+
+    @settings(max_examples=100)
+    @given(st.text())
+    def test_parse_selector_fuzz_never_crashes(self, raw_text: str):
+        """parse_selector must either succeed or raise DbtBouncerConfigError."""
+        try:
+            groups = parse_selector(raw_text)
+            assert len(groups) > 0
+            assert all(len(group) > 0 for group in groups)
+        except DbtBouncerConfigError:
+            pass
+
+    @settings(max_examples=50)
+    @given(_VALID_SELECTOR)
+    def test_valid_selectors_satisfy_invariants(self, selector_str: str):
+        """Valid selector expressions must preserve structural invariants."""
+        groups = parse_selector(selector_str)
+        tokens = selector_str.split()
+
+        assert len(groups) == len(tokens)
+
+        for group, token in zip(groups, tokens, strict=True):
+            raw_atoms = [atom for atom in token.split(",") if atom]
+            assert len(group) == len(raw_atoms)
+
+            for atom in group:
+                assert isinstance(atom, SelectorAtom)
+                assert atom.method in (
+                    "config",
+                    "fqn",
+                    "name",
+                    "package",
+                    "path",
+                    "tag",
+                )
+                assert len(atom.value) > 0
+
+                if atom.ancestor_degree is not None:
+                    assert atom.ancestor_degree > 0
+                    assert atom.ancestors is True
+                if atom.descendant_degree is not None:
+                    assert atom.descendant_degree > 0
+                    assert atom.descendants is True
