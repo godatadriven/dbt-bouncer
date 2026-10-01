@@ -298,8 +298,7 @@ class TestDegreeLimits:
         assert {uid for uid in all_ids if selector.matches(uid)} == expected
 
 
-@pytest.fixture
-def diamond_manifest():
+def _build_diamond_manifest():
     """Build a manifest with a diamond so @ differs from +x+.
 
     Edges: a -> b, a -> c, b -> d, c -> d, c -> e.
@@ -331,6 +330,17 @@ def diamond_manifest():
         sources={},
         unit_tests={},
     )
+
+
+@pytest.fixture
+def diamond_manifest():
+    """Fixture providing a diamond manifest.
+
+    Returns:
+        SimpleNamespace: The fake manifest.
+
+    """
+    return _build_diamond_manifest()
 
 
 class TestAtOperator:
@@ -503,6 +513,22 @@ _CONJUNCTION = st.lists(_wrapped_atom_strategy(), min_size=1, max_size=3).map(
 _VALID_SELECTOR = st.lists(_CONJUNCTION, min_size=1, max_size=4).map(
     lambda conj: " ".join(conj)
 )
+_GRAPH_NODES = ["a", "b", "c", "d", "e"]
+
+
+@st.composite
+def _directed_graphs(draw: st.DrawFn) -> dict[str, list[str]]:
+    """Generate arbitrary directed graphs over a fixed node set.
+
+    Returns:
+        dict[str, list[str]]: Adjacency list mapping node to neighbors.
+
+    """
+    graph = {}
+    for node in _GRAPH_NODES:
+        targets = draw(st.lists(st.sampled_from(_GRAPH_NODES), unique=True))
+        graph[node] = targets
+    return graph
 
 
 class TestSelectorProperties:
@@ -550,3 +576,64 @@ class TestSelectorProperties:
                 if atom.descendant_degree is not None:
                     assert atom.descendant_degree > 0
                     assert atom.descendants is True
+
+    @settings(max_examples=50)
+    @given(
+        graph=_directed_graphs(),
+        seeds=st.sets(st.sampled_from(_GRAPH_NODES)),
+        d1=st.integers(min_value=1, max_value=5),
+        d2=st.integers(min_value=1, max_value=5),
+    )
+    def test_closure_degree_monotonicity_and_seed_disjointness(
+        self, graph: dict[str, list[str]], seeds: set[str], d1: int, d2: int
+    ):
+        """Selector._closure guarantees degree monotonicity and seed exclusion."""
+        min_d, max_d = sorted([d1, d2])
+        closure_min = Selector._closure(seeds, graph, min_d)
+        closure_max = Selector._closure(seeds, graph, max_d)
+        closure_unbounded = Selector._closure(seeds, graph, None)
+
+        assert closure_min.isdisjoint(seeds)
+        assert closure_max.isdisjoint(seeds)
+        assert closure_unbounded.isdisjoint(seeds)
+        assert closure_min <= closure_max <= closure_unbounded
+
+    @settings(max_examples=50)
+    @given(graph=_directed_graphs(), seeds=st.sets(st.sampled_from(_GRAPH_NODES)))
+    def test_closure_transitive_exhaustion(
+        self, graph: dict[str, list[str]], seeds: set[str]
+    ):
+        """Walking from the closed set reaches no new nodes outside the closed set."""
+        closure_once = Selector._closure(seeds, graph, None)
+        assert Selector._closure(seeds | closure_once, graph, None) == set()
+
+    @settings(max_examples=50)
+    @given(
+        a=st.sampled_from(["a", "b", "c", "d", "e"]),
+        b=st.sampled_from(["a", "b", "c", "d", "e"]),
+    )
+    def test_selector_union_and_intersection_algebra(self, a: str, b: str):
+        """Space-separated selectors act as unions, and comma-separated selectors act as intersections."""
+        manifest = _build_diamond_manifest()
+        sel_a = Selector(a, manifest)._selected_ids
+        sel_b = Selector(b, manifest)._selected_ids
+        sel_union = Selector(f"{a} {b}", manifest)._selected_ids
+        sel_inter = Selector(f"{a},{b}", manifest)._selected_ids
+
+        assert sel_union == sel_a | sel_b
+        assert sel_inter == sel_a & sel_b
+
+    @settings(max_examples=50)
+    @given(node=st.sampled_from(["a", "b", "c", "d", "e"]))
+    def test_selector_operator_subsumption_hierarchy(self, node: str):
+        """The @ operator subsumes single nodes, ancestor walks, and descendant walks."""
+        manifest = _build_diamond_manifest()
+        sel_base = Selector(node, manifest)._selected_ids
+        sel_anc = Selector(f"+{node}", manifest)._selected_ids
+        sel_desc = Selector(f"{node}+", manifest)._selected_ids
+        sel_both = Selector(f"+{node}+", manifest)._selected_ids
+        sel_at = Selector(f"@{node}", manifest)._selected_ids
+
+        assert sel_base <= sel_anc <= sel_at
+        assert sel_base <= sel_desc <= sel_at
+        assert sel_both <= sel_at

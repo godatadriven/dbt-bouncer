@@ -1,4 +1,5 @@
 import os
+import tempfile
 import tomllib
 from contextlib import nullcontext as does_not_raise
 from pathlib import Path
@@ -8,6 +9,8 @@ from unittest import mock
 import pytest
 import typer
 import yaml
+from hypothesis import given, settings
+from hypothesis import strategies as st
 from pydantic import PydanticUserError
 from typer.main import get_command
 
@@ -60,6 +63,60 @@ def test_get_file_config_path_env_var(tmp_path):
         )
 
     assert config_file_path == Path(custom_config_file_path)
+
+
+_CONFIG_SOURCES = ["cli", "env", "yml", "yaml", "toml", "pyproject"]
+
+
+@settings(max_examples=64)
+@given(present=st.sets(st.sampled_from(_CONFIG_SOURCES)))
+def test_get_config_file_path_precedence_cascade(present: set[str]):
+    """get_config_file_path strictly resolves the highest-priority configuration source available."""
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        tmp_path = Path(tmp_dir)
+
+        cli_file = tmp_path / "custom_cli_config.yml"
+        if "cli" in present:
+            cli_file.write_text("cli: 1")
+
+        env_val = str(tmp_path / "env_config.yml") if "env" in present else None
+
+        if "yml" in present:
+            (tmp_path / "dbt-bouncer.yml").write_text("yml: 1")
+        if "yaml" in present:
+            (tmp_path / "dbt-bouncer.yaml").write_text("yaml: 1")
+        if "toml" in present:
+            (tmp_path / "dbt-bouncer.toml").write_text("toml = 1")
+        if "pyproject" in present:
+            (tmp_path / "pyproject.toml").write_text("[tool.dbt-bouncer]\n")
+
+        with mock.patch("pathlib.Path.cwd", return_value=tmp_path):
+            env_dict = {"DBT_BOUNCER_CONFIG_FILE": env_val} if env_val else {}
+            with mock.patch.dict(os.environ, env_dict, clear=True):
+                if "cli" in present:
+                    result = get_config_file_path(
+                        cli_file, ConfigFileSource.COMMANDLINE
+                    )
+                    assert result == cli_file
+                elif not present:
+                    with pytest.raises(DbtBouncerConfigError):
+                        get_config_file_path(
+                            Path("dbt-bouncer.yml"), ConfigFileSource.DEFAULT
+                        )
+                else:
+                    result = get_config_file_path(
+                        Path("dbt-bouncer.yml"), ConfigFileSource.DEFAULT
+                    )
+                    if "env" in present:
+                        assert str(result) == env_val
+                    elif "yml" in present:
+                        assert result == tmp_path / "dbt-bouncer.yml"
+                    elif "yaml" in present:
+                        assert result == tmp_path / "dbt-bouncer.yaml"
+                    elif "toml" in present:
+                        assert result == tmp_path / "dbt-bouncer.toml"
+                    elif "pyproject" in present:
+                        assert result == tmp_path / "pyproject.toml"
 
 
 DBT_BOUNCER_TOML_SAMPLE_CONFIG = """\
