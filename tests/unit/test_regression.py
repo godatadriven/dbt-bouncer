@@ -8,7 +8,7 @@ import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
-from dbt_bouncer.enums import CheckOutcome
+from dbt_bouncer.enums import CheckOutcome, CheckSeverity
 from dbt_bouncer.exceptions import DbtBouncerConfigError
 from dbt_bouncer.regression import (
     apply_regression_filter,
@@ -199,7 +199,7 @@ class TestRegressionProperties:
                             CheckOutcome.SUCCESS,
                         ]
                     ),
-                    "severity": st.sampled_from(["error", "warn"]),
+                    "severity": st.sampled_from(list(CheckSeverity)),
                     "unique_id": st.one_of(
                         st.none(),
                         st.from_regex(
@@ -261,7 +261,7 @@ class TestRegressionProperties:
                             CheckOutcome.SUCCESS,
                         ]
                     ),
-                    "severity": st.sampled_from(["error", "warn"]),
+                    "severity": st.sampled_from(list(CheckSeverity)),
                     "unique_id": st.one_of(
                         st.none(),
                         st.from_regex(

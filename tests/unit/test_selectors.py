@@ -7,7 +7,7 @@ from hypothesis import given, settings
 from hypothesis import strategies as st
 
 from dbt_bouncer.exceptions import DbtBouncerConfigError
-from dbt_bouncer.selectors import Selector, SelectorAtom, parse_selector
+from dbt_bouncer.selectors import Selector, SelectorAtom, _closure, parse_selector
 
 
 def _node(name, tags=None, package="my_project", path=None, fqn=None):
@@ -587,11 +587,13 @@ class TestSelectorProperties:
     def test_closure_degree_monotonicity_and_seed_disjointness(
         self, graph: dict[str, list[str]], seeds: set[str], d1: int, d2: int
     ):
-        """Selector._closure guarantees degree monotonicity and seed exclusion."""
+        """_closure guarantees degree monotonicity and seed exclusion."""
+        # Test the package-level _closure graph traversal function directly to verify
+        # its mathematical invariants (degree monotonicity and seed exclusion).
         min_d, max_d = sorted([d1, d2])
-        closure_min = Selector._closure(seeds, graph, min_d)
-        closure_max = Selector._closure(seeds, graph, max_d)
-        closure_unbounded = Selector._closure(seeds, graph, None)
+        closure_min = _closure(seeds, graph, min_d)
+        closure_max = _closure(seeds, graph, max_d)
+        closure_unbounded = _closure(seeds, graph, None)
 
         assert closure_min.isdisjoint(seeds)
         assert closure_max.isdisjoint(seeds)
@@ -604,8 +606,10 @@ class TestSelectorProperties:
         self, graph: dict[str, list[str]], seeds: set[str]
     ):
         """Walking from the closed set reaches no new nodes outside the closed set."""
-        closure_once = Selector._closure(seeds, graph, None)
-        assert Selector._closure(seeds | closure_once, graph, None) == set()
+        # Test the package-level _closure graph traversal function directly to verify
+        # that walking from the closed set reaches no new nodes outside the closed set.
+        closure_once = _closure(seeds, graph, None)
+        assert _closure(seeds | closure_once, graph, None) == set()
 
     @settings(max_examples=50)
     @given(
