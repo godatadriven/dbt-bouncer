@@ -125,19 +125,28 @@ class Reporter:
         # severity is `error`. A crashed `warn` check is reported but, like a
         # failed `warn` check, does not change the exit code.
         num_checks_internal_error_blocking = 0
+        # Hot loop over every result: enum members are bound to locals because
+        # class attribute access on an Enum is slow, and SUCCESS (by far the
+        # most common outcome) is tested first so most results need one compare.
+        outcome_failed = CheckOutcome.FAILED
+        outcome_internal_error = CheckOutcome.INTERNAL_ERROR
+        outcome_success = CheckOutcome.SUCCESS
+        severity_error = CheckSeverity.ERROR
         for r in results:
-            match r["outcome"]:
-                case CheckOutcome.FAILED:
-                    if r["severity"] == CheckSeverity.ERROR:
-                        num_checks_error += 1
-                    else:
-                        num_checks_warn += 1
-                case CheckOutcome.INTERNAL_ERROR:
-                    num_checks_internal_error += 1
-                    if r["severity"] == CheckSeverity.ERROR:
-                        num_checks_internal_error_blocking += 1
-                case _:
-                    num_checks_success += 1
+            outcome = r["outcome"]
+            if outcome == outcome_success:
+                num_checks_success += 1
+            elif outcome == outcome_failed:
+                if r["severity"] == severity_error:
+                    num_checks_error += 1
+                else:
+                    num_checks_warn += 1
+            elif outcome == outcome_internal_error:
+                num_checks_internal_error += 1
+                if r["severity"] == severity_error:
+                    num_checks_internal_error_blocking += 1
+            else:
+                num_checks_success += 1
 
         run_failed = num_checks_error > 0 or num_checks_internal_error_blocking > 0
         has_problems = (
