@@ -1,6 +1,7 @@
 from dbt_bouncer.check_framework.decorator import check, fail
 from dbt_bouncer.check_framework.exceptions import NestedDict
 from dbt_bouncer.enums import Criteria
+from dbt_bouncer.types import RegexPattern
 from dbt_bouncer.utils import compile_pattern, find_meta_keys_criteria_failure
 
 
@@ -89,7 +90,7 @@ def check_test_has_tags(test, *, criteria: Criteria = Criteria.ALL, tags: list[s
 
 
 @check(code="TE003")
-def check_test_has_where_config(test, *, regexp_pattern: str | None = None):
+def check_test_has_where_config(test, *, regexp_pattern: RegexPattern | None = None):
     """Data tests must have a `where` config set.
 
     By default this check only verifies that a `where` config is present (i.e.

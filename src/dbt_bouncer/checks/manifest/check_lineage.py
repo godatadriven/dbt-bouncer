@@ -1,10 +1,11 @@
 from dbt_bouncer.check_framework.decorator import check, fail
+from dbt_bouncer.types import RegexPattern
 from dbt_bouncer.utils import clean_path_str, compile_pattern, get_clean_model_name
 
 
 @check(code="LI001")
 def check_lineage_permitted_upstream_models(
-    model, ctx, *, package_name: str | None = None, upstream_path_pattern: str
+    model, ctx, *, package_name: str | None = None, upstream_path_pattern: RegexPattern
 ):
     """Upstream models must have a path that matches the provided `upstream_path_pattern`.
 

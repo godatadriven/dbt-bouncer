@@ -100,6 +100,21 @@ class DbtBouncerConfBase(BaseModel):
         description="Severity of the check, one of 'error' or 'warn'.",
     )
 
+    @field_validator("exclude", "include")
+    @classmethod
+    def _validate_path_patterns(cls, value: str | None) -> str | None:
+        """Reject invalid global ``include``/``exclude`` regexes at config-validation time.
+
+        Mirrors the validator on ``BaseCheck.include``/``BaseCheck.exclude``.
+
+        Returns:
+            str | None: The validated pattern.
+
+        """
+        from dbt_bouncer.types import validate_regex_pattern
+
+        return None if value is None else validate_regex_pattern(value)
+
     @field_validator("selector")
     @classmethod
     def _validate_selector(cls, value: str | None) -> str | None:

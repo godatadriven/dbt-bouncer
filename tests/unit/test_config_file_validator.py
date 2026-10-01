@@ -1252,3 +1252,88 @@ def test_lint_config_file_deep_toml(tmp_path):
     assert len(issues) == 1
     assert issues[0]["line"] == 1
     assert "severtiy" in issues[0]["message"]
+
+
+@pytest.mark.parametrize(
+    ("file_name", "contents", "match"),
+    [
+        pytest.param("dbt-bouncer.yml", "", "is empty", id="empty_yaml"),
+        pytest.param(
+            "dbt-bouncer.yml", "# only a comment\n", "is empty", id="comment_only_yaml"
+        ),
+        pytest.param(
+            "dbt-bouncer.yml",
+            "- name: check_model_names\n",
+            "must contain a mapping",
+            id="yaml_list",
+        ),
+        pytest.param(
+            "dbt-bouncer.yml",
+            "manifest_checks:\n  - name: [\n",
+            "is not valid YAML",
+            id="yaml_syntax_error",
+        ),
+        pytest.param(
+            "dbt-bouncer.toml",
+            "[[manifest_checks]\nname = 1\n",
+            "is not valid TOML",
+            id="toml_syntax_error",
+        ),
+    ],
+)
+def test_load_config_file_contents_rejects_unusable_file(
+    tmp_path, file_name, contents, match
+):
+    """A config file that cannot be loaded raises a config error, not a traceback."""
+    config_file = tmp_path / file_name
+    config_file.write_text(contents)
+
+    with pytest.raises(DbtBouncerConfigError, match=match):
+        load_config_file_contents(config_file_path=config_file)
+
+
+@pytest.mark.parametrize(
+    "config",
+    [
+        pytest.param(
+            {
+                "manifest_checks": [
+                    {"name": "check_model_description_populated", "include": "[bad"}
+                ]
+            },
+            id="check_include",
+        ),
+        pytest.param(
+            {
+                "manifest_checks": [
+                    {
+                        "name": "check_model_description_populated",
+                        "exclude": ["^models/ok", "(bad"],
+                    }
+                ]
+            },
+            id="check_exclude_list",
+        ),
+        pytest.param(
+            {
+                "include": "[bad",
+                "manifest_checks": [{"name": "check_model_description_populated"}],
+            },
+            id="global_include",
+        ),
+        pytest.param(
+            {
+                "manifest_checks": [
+                    {"name": "check_model_names", "model_name_pattern": "^stg_("}
+                ]
+            },
+            id="check_param",
+        ),
+    ],
+)
+def test_validate_conf_rejects_invalid_regex(config, monkeypatch):
+    """Invalid regexes are config errors at load time, like invalid selectors."""
+    monkeypatch.setenv("DBT_BOUNCER_DISABLE_CONF_CACHE", "1")
+
+    with pytest.raises(DbtBouncerConfigError, match="Invalid regex pattern"):
+        validate_conf(check_categories=["manifest_checks"], config_file_contents=config)

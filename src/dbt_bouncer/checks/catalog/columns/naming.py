@@ -3,15 +3,20 @@
 import re
 
 from dbt_bouncer.check_framework.decorator import check, fail
-from dbt_bouncer.utils import compile_pattern, get_model_for_catalog_node
+from dbt_bouncer.types import RegexPattern
+from dbt_bouncer.utils import (
+    compile_pattern,
+    get_model_for_catalog_node,
+    require_exactly_one_of_type_pattern_or_types,
+)
 
 
-@check(code="CA008")
+@check(code="CA008", validate=require_exactly_one_of_type_pattern_or_types)
 def check_column_name_complies_to_column_type(
     catalog_node,
     *,
-    column_name_pattern: str,
-    type_pattern: str | None = None,
+    column_name_pattern: RegexPattern,
+    type_pattern: RegexPattern | None = None,
     types: list[str] | None = None,
 ):
     """Columns with the specified regexp naming pattern must have data types that comply to the specified regexp pattern or list of data types.
@@ -35,9 +40,6 @@ def check_column_name_complies_to_column_type(
         exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.
         include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
-
-    Raises:
-        ValueError: If neither or both of type_pattern/types are supplied.
 
     Example(s):
         ```yaml
@@ -65,13 +67,6 @@ def check_column_name_complies_to_column_type(
         ```
 
     """
-    if not (type_pattern or types):
-        msg = "Either 'type_pattern' or 'types' must be supplied."
-        raise ValueError(msg)
-    if type_pattern is not None and types is not None:
-        msg = "Only one of 'type_pattern' or 'types' can be supplied."
-        raise ValueError(msg)
-
     compiled_column_name_pattern = compile_pattern(column_name_pattern.strip())
 
     if type_pattern:
@@ -102,12 +97,12 @@ def check_column_name_complies_to_column_type(
             )
 
 
-@check(code="CA010")
+@check(code="CA010", validate=require_exactly_one_of_type_pattern_or_types)
 def check_column_type_complies_to_column_name(
     catalog_node,
     *,
-    column_name_pattern: str,
-    type_pattern: str | None = None,
+    column_name_pattern: RegexPattern,
+    type_pattern: RegexPattern | None = None,
     types: list[str] | None = None,
 ):
     """Columns with the specified data type must have names that comply to the specified regexp pattern.
@@ -131,9 +126,6 @@ def check_column_type_complies_to_column_name(
         exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.
         include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
-
-    Raises:
-        ValueError: If neither or both of type_pattern/types are supplied.
 
     Example(s):
         ```yaml
@@ -163,13 +155,6 @@ def check_column_type_complies_to_column_name(
         ```
 
     """
-    if not (type_pattern or types):
-        msg = "Either 'type_pattern' or 'types' must be supplied."
-        raise ValueError(msg)
-    if type_pattern is not None and types is not None:
-        msg = "Only one of 'type_pattern' or 'types' can be supplied."
-        raise ValueError(msg)
-
     compiled_column_name_pattern = compile_pattern(column_name_pattern.strip())
 
     if type_pattern:
@@ -201,7 +186,7 @@ def check_column_type_complies_to_column_name(
 
 
 @check(code="CA009")
-def check_column_names(catalog_node, ctx, *, column_name_pattern: str):
+def check_column_names(catalog_node, ctx, *, column_name_pattern: RegexPattern):
     """Columns must have a name that matches the supplied regex.
 
     !!! info "Rationale"

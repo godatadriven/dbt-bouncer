@@ -194,6 +194,30 @@ class ParsedArtifacts(NamedTuple):
     run_results: list[SimpleNamespace]
 
 
+def _load_json_artifact(path: Path) -> dict[str, Any]:
+    """Read and decode a dbt JSON artifact.
+
+    Returns:
+        dict[str, Any]: The decoded artifact.
+
+    Raises:
+        DbtBouncerArtifactError: If the file cannot be read, is not valid JSON
+            (e.g. truncated by an interrupted dbt run), or is not a JSON object.
+
+    """
+    try:
+        data = orjson.loads(path.read_bytes())
+    except (OSError, orjson.JSONDecodeError) as e:
+        raise DbtBouncerArtifactError(
+            f"Could not read `{path}`: {e}. The file may be truncated or corrupt; regenerate it with dbt."
+        ) from e
+    if not isinstance(data, dict):
+        raise DbtBouncerArtifactError(
+            f"`{path}` is not a dbt artifact: expected a JSON object, got {type(data).__name__}."
+        )
+    return data
+
+
 def parse_dbt_artifacts(
     bouncer_config: DbtBouncerConfBase,
     dbt_artifacts_dir: Path,
@@ -205,7 +229,8 @@ def parse_dbt_artifacts(
 
     Raises:
         DbtBouncerArtifactError: If the dbt version is below the minimum supported
-            version, or a required artifact file does not exist.
+            version, or a required artifact file does not exist, cannot be
+            decoded, or lacks the manifest's `metadata.dbt_version`.
 
     """
     # --- Manifest ---
@@ -213,9 +238,13 @@ def parse_dbt_artifacts(
     if not manifest_path.exists():
         raise DbtBouncerArtifactError(f"No manifest.json found at {manifest_path}.")
 
-    manifest_dict = orjson.loads(manifest_path.read_bytes())
+    manifest_dict = _load_json_artifact(manifest_path)
 
-    dbt_version = manifest_dict["metadata"]["dbt_version"]
+    dbt_version = (manifest_dict.get("metadata") or {}).get("dbt_version")
+    if not isinstance(dbt_version, str):
+        raise DbtBouncerArtifactError(
+            f"`{manifest_path}` has no `metadata.dbt_version`, so it is not a dbt manifest."
+        )
     if not get_package_version_number(dbt_version) >= get_package_version_number(
         "1.10.0"
     ):
@@ -323,7 +352,7 @@ def parse_dbt_artifacts(
                 "distribution writes no catalog.json; use the `dbt` distribution."
             )
 
-        catalog_dict = orjson.loads(catalog_path.read_bytes())
+        catalog_dict = _load_json_artifact(catalog_path)
         nodes_dict = manifest_dict.get("nodes", {})
         sources_dict = manifest_dict.get("sources", {})
 
@@ -362,7 +391,7 @@ def parse_dbt_artifacts(
         if not rr_path.exists():
             raise DbtBouncerArtifactError(f"No run_results.json found at {rr_path}.")
 
-        rr_dict = orjson.loads(rr_path.read_bytes())
+        rr_dict = _load_json_artifact(rr_path)
         nodes_dict = manifest_dict.get("nodes", {})
         exposures_dict = manifest_dict.get("exposures", {})
         unit_tests_dict = manifest_dict.get("unit_tests", {})

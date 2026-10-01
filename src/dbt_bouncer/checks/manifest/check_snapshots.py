@@ -5,6 +5,7 @@ from pydantic import Field
 from dbt_bouncer.check_framework.decorator import check, fail
 from dbt_bouncer.check_framework.exceptions import NestedDict
 from dbt_bouncer.enums import Criteria
+from dbt_bouncer.types import RegexPattern
 from dbt_bouncer.utils import (
     compile_pattern,
     find_meta_keys_criteria_failure,
@@ -178,7 +179,7 @@ def check_snapshot_has_unique_key(snapshot):
 
 
 @check(code="SN005")
-def check_snapshot_names(snapshot, *, snapshot_name_pattern: str):
+def check_snapshot_names(snapshot, *, snapshot_name_pattern: RegexPattern):
     """Snapshots must have a name that matches the supplied regex.
 
     !!! info "Rationale"

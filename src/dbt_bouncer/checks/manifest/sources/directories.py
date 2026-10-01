@@ -3,6 +3,7 @@
 from pathlib import Path
 
 from dbt_bouncer.check_framework.decorator import check, fail
+from dbt_bouncer.types import RegexPattern
 from dbt_bouncer.utils import clean_path_str, compile_pattern
 
 
@@ -60,7 +61,7 @@ def check_source_property_file_location(source):
 
 
 @check(code="SO002")
-def check_source_file_name(source, *, file_name_pattern: str):
+def check_source_file_name(source, *, file_name_pattern: RegexPattern):
     r"""Sources must have a file name that matches the supplied regex.
 
     !!! info "Rationale"

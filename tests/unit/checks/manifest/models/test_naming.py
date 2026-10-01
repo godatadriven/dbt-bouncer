@@ -1,6 +1,7 @@
 import re
 
 import pytest
+from pydantic import ValidationError
 
 from dbt_bouncer.testing import check_fails, check_passes
 
@@ -272,13 +273,13 @@ class TestCheckModelNames:
             match=re.escape("`^stg_`"),
         )
 
-    def test_invalid_regex_pattern_raises(self):
-        # compile_pattern re-raises re.error with the "Invalid regex pattern" prefix.
+    def test_invalid_regex_pattern_rejected_at_config_load(self):
+        # The pattern is validated when the check config is built, not per model.
         check_fails(
             "check_model_names",
             model_name_pattern="^stg_(",
             model=_model("stg_orders"),
-            expected_exception=re.error,
+            expected_exception=ValidationError,
             match="Invalid regex pattern",
         )
 

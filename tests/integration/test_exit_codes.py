@@ -197,3 +197,62 @@ def test_missing_manifest_exits_artifact_error(
 
     assert result.exit_code == ExitCode.ARTIFACT_ERROR, result.output
     assert "No manifest.json found" in caplog.text
+
+
+@pytest.mark.parametrize(
+    ("contents", "expected_log"),
+    [
+        pytest.param("", "is empty", id="empty_file"),
+        pytest.param(
+            "manifest_checks:\n  - name: [\n", "is not valid YAML", id="yaml_syntax"
+        ),
+        pytest.param(
+            "manifest_checks:\n"
+            "  - name: check_model_description_populated\n"
+            "    include: '[unclosed'\n",
+            "Invalid regex pattern '[unclosed'",
+            id="invalid_include_regex",
+        ),
+        pytest.param(
+            "manifest_checks:\n"
+            "  - name: check_model_names\n"
+            "    model_name_pattern: '^stg_('\n",
+            "Invalid regex pattern '^stg_('",
+            id="invalid_param_regex",
+        ),
+    ],
+)
+def test_unusable_config_exits_config_error(
+    caplog, cli_runner, tmp_path, contents, expected_log
+):
+    """A config file that cannot be loaded or validated exits CONFIG_ERROR, not 1."""
+    config_file = tmp_path / "dbt-bouncer.yml"
+    config_file.write_text(contents, encoding="utf-8")
+
+    result = cli_runner.invoke(
+        app, ["run", "--config-file", PurePath(config_file).as_posix()]
+    )
+
+    assert result.exit_code == ExitCode.CONFIG_ERROR, result.output
+    assert expected_log in caplog.text
+    assert "Traceback" not in result.output
+
+
+def test_truncated_manifest_exits_artifact_error(
+    caplog, cli_runner, tmp_path, write_config
+):
+    """A manifest cut short by an interrupted dbt run exits ARTIFACT_ERROR."""
+    target = tmp_path / "target"
+    target.mkdir()
+    manifest = (DBT_112_TARGET / "manifest.json").read_bytes()
+    (target / "manifest.json").write_bytes(manifest[:500])
+    config_file = write_config(
+        {"dbt_artifacts_dir": str(target), "manifest_checks": [_FAILING_CHECK]}
+    )
+
+    result = cli_runner.invoke(
+        app, ["run", "--config-file", PurePath(config_file).as_posix()]
+    )
+
+    assert result.exit_code == ExitCode.ARTIFACT_ERROR, result.output
+    assert "may be truncated or corrupt" in caplog.text

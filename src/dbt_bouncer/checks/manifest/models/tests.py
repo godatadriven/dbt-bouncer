@@ -62,7 +62,22 @@ def check_model_has_tests_by_name(
         )
 
 
-@check(code="MO041")
+def _require_a_minimum_number_of_tests(
+    *, min_number_of_data_tests: int, min_number_of_schema_tests: int
+) -> None:
+    """Reject a config where neither test minimum is set.
+
+    Raises:
+        ValueError: If both minimums are 0, which would make the check a no-op.
+
+    """
+    if min_number_of_data_tests == 0 and min_number_of_schema_tests == 0:
+        raise ValueError(
+            "At least one of `min_number_of_data_tests` or `min_number_of_schema_tests` must be greater than 0."
+        )
+
+
+@check(code="MO041", validate=_require_a_minimum_number_of_tests)
 def check_model_has_tests_by_type(
     model,
     ctx,
@@ -105,10 +120,6 @@ def check_model_has_tests_by_type(
         ```
 
     """
-    if min_number_of_data_tests == 0 and min_number_of_schema_tests == 0:
-        raise ValueError(
-            "At least one of `min_number_of_data_tests` or `min_number_of_schema_tests` must be greater than 0."
-        )
     num_schema_tests = 0
     num_data_tests = 0
     for test in ctx.tests_by_attached_node.get(model.unique_id, []):
@@ -249,7 +260,9 @@ def check_model_has_unit_tests(
 
 
 @check(code="MO044")
-def check_model_test_coverage(ctx, *, min_model_test_coverage_pct: float = 100):
+def check_model_test_coverage(
+    ctx, *, min_model_test_coverage_pct: Annotated[float, Field(ge=0, le=100)] = 100
+):
     """Set the minimum percentage of models that have at least one test.
 
     !!! info "Rationale"
@@ -279,15 +292,6 @@ def check_model_test_coverage(ctx, *, min_model_test_coverage_pct: float = 100):
         ```
 
     """
-    if min_model_test_coverage_pct < 0:
-        raise ValueError(
-            f"`min_model_test_coverage_pct` must be greater than or equal to 0, got {min_model_test_coverage_pct}."
-        )
-    if min_model_test_coverage_pct > 100:
-        raise ValueError(
-            f"`min_model_test_coverage_pct` must be less than or equal to 100, got {min_model_test_coverage_pct}."
-        )
-
     num_models = len(ctx.models)
     if num_models == 0:
         # No models means nothing is left untested, so coverage is vacuously

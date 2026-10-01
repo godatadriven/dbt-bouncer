@@ -113,7 +113,8 @@ def check_model_xxx(model, *, some_param: str):
 **Key rules:**
 
 - **Every check needs a unique rule code** — pass it as `@check(code="XX000")` and add the corresponding member to the matching `*RuleCode` enum in `enums.py`. Use the next free number for the resource's prefix; never reuse or renumber a published code, as users reference them in config
-- `code` is the only argument `@check` takes — the check name and `iterate_over` are inferred from the function name and signature
+- `@check` takes only `code` and, optionally, `validate` — the check name and `iterate_over` are inferred from the function name and signature
+- **Validate parameters at config load, never in the check body.** Constrain a single parameter through its annotation (`RegexPattern` from `dbt_bouncer.types` for any regex, `Annotated[int, Field(gt=0)]` for bounds). For a rule spanning several parameters, pass `@check(code=..., validate=fn)`, where `fn(**params)` raises `ValueError`. A `raise` in the body runs once per resource and is reported as an `internal_error`, not a config error
 - First positional parameter (excluding `ctx`) = the resource being checked (e.g. `model`, `source`, `exposure`)
 - Keyword-only arguments (after `*`) = user-configurable parameters in YAML
 - Add `ctx` as a parameter only when you need access to other resources (e.g. models list, manifest)

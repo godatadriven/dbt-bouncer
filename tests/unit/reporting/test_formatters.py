@@ -7,6 +7,7 @@ from dbt_bouncer.reporting.formatters import (
     _format_csv,
     _format_junit,
     _format_sarif,
+    _format_tap,
 )
 
 
@@ -82,3 +83,38 @@ def test_csv_includes_file_path_and_unique_id_columns():
     assert "unique_id" in header
     assert "models/staging/stg_orders.sql" in csv_text
     assert "model.my_project.stg_orders" in csv_text
+
+
+def test_junit_marks_internal_error_with_error_element():
+    """A crashed check is a JUnit <error>, distinct from a <failure>."""
+    xml = _format_junit(
+        [_failed_result(outcome=CheckOutcome.INTERNAL_ERROR, failure_message="boom")]
+    ).decode()
+    assert "<error" in xml
+    assert "<failure" not in xml
+    assert 'message="boom"' in xml
+
+
+def test_sarif_reports_internal_error_at_its_severity():
+    """A crashed check is reported, never rendered as `Check passed`."""
+    sarif = orjson.loads(
+        _format_sarif(
+            [
+                _failed_result(
+                    outcome=CheckOutcome.INTERNAL_ERROR, failure_message="boom"
+                )
+            ]
+        )
+    )
+    entry = sarif["runs"][0]["results"][0]
+    assert entry["level"] == "error"
+    assert entry["message"]["text"] == "boom"
+
+
+def test_tap_marks_internal_error_not_ok():
+    """TAP reports a crashed check as `not ok`, with its message."""
+    tap = _format_tap(
+        [_failed_result(outcome=CheckOutcome.INTERNAL_ERROR, failure_message="boom")]
+    ).decode()
+    assert "not ok 1 - check_model_description_populated:0:stg_orders" in tap
+    assert "  # boom" in tap

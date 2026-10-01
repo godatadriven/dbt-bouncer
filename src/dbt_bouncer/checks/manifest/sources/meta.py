@@ -3,6 +3,7 @@
 from dbt_bouncer.check_framework.decorator import check, fail
 from dbt_bouncer.check_framework.exceptions import NestedDict
 from dbt_bouncer.enums import Criteria
+from dbt_bouncer.types import RegexPattern
 from dbt_bouncer.utils import (
     compile_pattern,
     find_meta_keys_criteria_failure,
@@ -109,7 +110,7 @@ def check_source_has_meta_keys(
 
 
 @check(code="SO013")
-def check_source_pii_meta(source, *, column_name_pattern: str, meta_key: str):
+def check_source_pii_meta(source, *, column_name_pattern: RegexPattern, meta_key: str):
     """Source columns matching a PII pattern must carry a governance meta key.
 
     !!! info "Rationale"

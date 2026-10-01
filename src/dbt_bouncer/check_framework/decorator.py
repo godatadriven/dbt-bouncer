@@ -12,6 +12,12 @@ Everything is inferred from the function signature:
 - **params** — keyword-only arguments become user-configurable Pydantic fields.
 - **ctx** — injected automatically only when the function declares it.
 
+Parameter validation belongs in the model, not the check body, so a
+misconfigured check is a config error at load time rather than an exception
+raised once per resource. Constrain a single parameter with its annotation
+(``Annotated[int, Field(gt=0)]``, ``RegexPattern``). For a rule spanning
+several parameters, pass ``validate=`` to ``@check``.
+
 Example::
 
     from dbt_bouncer.check_framework.decorator import check, fail
@@ -31,6 +37,14 @@ Example::
     @check
     def check_model_documentation_coverage(ctx, *, min_pct: int = 100):
         ...  # context-only check, no iterate_over
+
+    def _min_not_above_max(*, min_count: int, max_count: int) -> None:
+        if min_count > max_count:
+            raise ValueError("`min_count` must not exceed `max_count`.")
+
+    @check(validate=_min_not_above_max)
+    def check_model_xxx(model, *, min_count: int = 0, max_count: int = 10):
+        ...
 """
 
 from __future__ import annotations
@@ -42,7 +56,7 @@ from typing import TYPE_CHECKING, Any, Literal, NoReturn, overload
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-from pydantic import Field, create_model
+from pydantic import Field, create_model, model_validator
 
 from dbt_bouncer.check_framework.base import BaseCheck
 from dbt_bouncer.check_framework.exceptions import DbtBouncerFailedCheckError
@@ -74,7 +88,10 @@ def check(fn: Callable[..., None]) -> type[BaseCheck]: ...
 
 @overload
 def check(
-    fn: None = None, *, code: str | None = None
+    fn: None = None,
+    *,
+    code: str | None = None,
+    validate: Callable[..., None] | None = None,
 ) -> Callable[[Callable[..., None]], type[BaseCheck]]: ...
 
 
@@ -82,6 +99,7 @@ def check(
     fn: Callable[..., None] | None = None,
     *,
     code: str | None = None,
+    validate: Callable[..., None] | None = None,
 ) -> type[BaseCheck] | Callable[[Callable[..., None]], type[BaseCheck]]:
     """Generate a ``BaseCheck`` subclass from a plain function.
 
@@ -94,6 +112,11 @@ def check(
     - **params** — keyword-only arguments become Pydantic fields.
     - **ctx** — injected when the function declares it.
 
+    ``validate`` is an optional callable for rules that span several
+    parameters. It is called with the check's keyword-only parameters as
+    keyword arguments once the config is loaded, and raises ``ValueError`` to
+    reject them. The error is reported as a config error, before any check runs.
+
     Supports ``@check``, ``@check()``, and ``@check(code="MO001")`` usage.
 
     Returns:
@@ -103,22 +126,25 @@ def check(
     if fn is None:
         # Called as @check() or @check(code="MO001") — return decorator.
         def wrapper(f: Callable[..., None]) -> type[BaseCheck]:
-            return _build_check_class(f, code=code)
+            return _build_check_class(f, code=code, validate=validate)
 
         return wrapper
 
     # Called as bare @check — fn is the decorated function.
-    return _build_check_class(fn, code=code)
+    return _build_check_class(fn, code=code, validate=validate)
 
 
 def _build_check_class(
-    fn: Callable[..., None], code: str | None = None
+    fn: Callable[..., None],
+    code: str | None = None,
+    validate: Callable[..., None] | None = None,
 ) -> type[BaseCheck]:
     """Build a BaseCheck subclass from the decorated function.
 
     Args:
         fn: The decorated check function.
         code: Optional rule code for the check.
+        validate: Optional cross-parameter validator, see ``check``.
 
     Returns:
         The generated ``BaseCheck`` subclass.
@@ -184,12 +210,22 @@ def _build_check_class(
             args.append(self._ctx)
         fn(*args, **kwargs)
 
+    validators: dict[str, Any] = {}
+    if validate is not None:
+
+        def _validate_params(self: BaseCheck) -> BaseCheck:
+            validate(**{p: getattr(self, p) for p in param_names})
+            return self
+
+        validators["_validate_params"] = model_validator(mode="after")(_validate_params)
+
     # Convert function name to PascalCase class name.
     class_name = _to_pascal_case(name)
 
     cls = create_model(
         class_name,
         __base__=BaseCheck,
+        __validators__=validators,
         **fields,
     )
 

@@ -1,12 +1,16 @@
 """Checks related to model naming conventions."""
 
 from dbt_bouncer.check_framework.decorator import check, fail
+from dbt_bouncer.types import RegexPattern
 from dbt_bouncer.utils import compile_pattern, get_clean_model_name
 
 
 @check(code="MO058")
 def check_model_alias(
-    model, *, alias_pattern: str | None = None, require_explicit_alias: bool = False
+    model,
+    *,
+    alias_pattern: RegexPattern | None = None,
+    require_explicit_alias: bool = False,
 ):
     """Models must have an explicit alias and/or an alias that matches the supplied regex.
 
@@ -65,7 +69,7 @@ def check_model_alias(
 
 
 @check(code="MO038")
-def check_model_names(model, *, model_name_pattern: str):
+def check_model_names(model, *, model_name_pattern: RegexPattern):
     """Models must have a name that matches the supplied regex.
 
     !!! info "Rationale"

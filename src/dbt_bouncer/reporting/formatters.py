@@ -90,7 +90,9 @@ def _format_junit(results: list[dict[str, Any]]) -> bytes:
     """Serialise check results to JUnit XML format.
 
     Each check result becomes a TestCase. Failed checks are marked with a
-    <failure> element; warn-severity failures use type="warn".
+    <failure> element; warn-severity failures use type="warn". Checks that
+    raised an unexpected error are marked with an <error> element, JUnit's
+    standard way to tell a crashed test apart from a failed one.
 
     Args:
         results: List of check result dicts.
@@ -99,7 +101,7 @@ def _format_junit(results: list[dict[str, Any]]) -> bytes:
         bytes: JUnit XML document.
 
     """
-    from junitparser import Failure, JUnitXml, TestSuite
+    from junitparser import Error, Failure, JUnitXml, TestSuite
 
     test_case_cls = _junit_test_case_cls()
     test_cases = []
@@ -110,13 +112,21 @@ def _format_junit(results: list[dict[str, Any]]) -> bytes:
         )
         if result.get("file_path"):
             tc.file = result["file_path"]
-        if result["outcome"] == CheckOutcome.FAILED:
-            tc.result = [  # type: ignore[invalid-assignment]
-                Failure(
-                    message=result.get("failure_message") or "",
-                    type_=result.get("severity", CheckSeverity.ERROR),
-                )
-            ]
+        match result["outcome"]:
+            case CheckOutcome.FAILED:
+                tc.result = [  # type: ignore[invalid-assignment]
+                    Failure(
+                        message=result.get("failure_message") or "",
+                        type_=result.get("severity", CheckSeverity.ERROR),
+                    )
+                ]
+            case CheckOutcome.INTERNAL_ERROR:
+                tc.result = [  # type: ignore[invalid-assignment]
+                    Error(
+                        message=result.get("failure_message") or "",
+                        type_=result.get("severity", CheckSeverity.ERROR),
+                    )
+                ]
         test_cases.append(tc)
 
     suite = TestSuite("dbt-bouncer")
@@ -143,7 +153,7 @@ def _format_sarif(results: list[dict[str, Any]]) -> bytes:
     sarif_results = []
     for r in results:
         level = "warning" if r.get("severity") == CheckSeverity.WARN else "error"
-        if r["outcome"] == CheckOutcome.FAILED:
+        if r["outcome"] != CheckOutcome.SUCCESS:
             entry = {
                 "ruleId": r["check_run_id"],
                 "level": level,
@@ -205,9 +215,9 @@ def _format_tap(results: list[dict[str, Any]]) -> bytes:
     """
     lines = ["TAP version 13", f"1..{len(results)}"]
     for i, r in enumerate(results, 1):
-        status = "ok" if r["outcome"] != CheckOutcome.FAILED else "not ok"
+        status = "ok" if r["outcome"] == CheckOutcome.SUCCESS else "not ok"
         lines.append(f"{status} {i} - {r['check_run_id']}")
-        if r["outcome"] == CheckOutcome.FAILED and r.get("failure_message"):
+        if r["outcome"] != CheckOutcome.SUCCESS and r.get("failure_message"):
             for msg_line in r["failure_message"].splitlines():
                 lines.append(f"  # {msg_line}")
     return "\n".join(lines).encode()

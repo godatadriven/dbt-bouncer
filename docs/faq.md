@@ -378,7 +378,7 @@ In addition to the checks built into `dbt-bouncer`, you can write custom checks 
     - The first positional parameter determines the resource type to iterate over (e.g. `model`, `source`, `exposure`, `seed`).
     - Keyword-only arguments (after `*`) become user-configurable parameters, with types inferred from type hints.
     - Add `ctx` as a parameter only if the function needs access to the full check context (e.g. all models, all sources).
-    - Use `fail()` from `dbt_bouncer.check_framework.decorator` to signal a check failure with a clear message.
+    - Use `fail()` from `dbt_bouncer.check_framework.decorator` to signal a check failure with a clear message. Any other exception raised by the check is reported as an `internal_error` and, at the default `error` severity, fails the run.
     - Include a docstring describing what the check does.
 
 1. Add the check name and any desired arguments to your config file.

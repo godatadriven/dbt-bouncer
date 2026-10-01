@@ -632,9 +632,9 @@ Example client configuration (Claude Code, `.mcp.json`):
 `dbt-bouncer` returns distinct exit codes so that CI pipelines and scripts can tell a check failure apart from a setup problem:
 
 - `0` (`SUCCESS`): All checks have succeeded.
-- `1` (`CHECK_ERRORS`): At least one check has failed. Check the logs for more information.
-- `2` (`CONFIG_ERROR`): The config file is missing, unreadable, or invalid (e.g. an invalid `--only` value).
-- `3` (`ARTIFACT_ERROR`): A required dbt artifact (`manifest.json`, `catalog.json`, `run_results.json`) is missing or was generated with an unsupported dbt version.
+- `1` (`CHECK_ERRORS`): At least one check with `error` severity has failed, or raised an unexpected error instead of passing or failing (reported with the outcome `internal_error`). Check the logs for more information.
+- `2` (`CONFIG_ERROR`): The config file is missing, empty, not valid YAML/TOML, or invalid (e.g. an invalid `--only` value, an invalid regex in `include`/`exclude` or a check parameter, or a check parameter out of range).
+- `3` (`ARTIFACT_ERROR`): A required dbt artifact (`manifest.json`, `catalog.json`, `run_results.json`) is missing, cannot be decoded (e.g. truncated by an interrupted dbt run), or was generated with an unsupported dbt version.
 - `4` (`NO_CHECKS_RUN`): No checks ran because the config matched no resources. Check the `package_name`, the config file, the dbt artifacts, and any `--check` or `--only` filters.
 
 These codes apply to both `dbt-bouncer run` and `dbt-bouncer validate` (which only ever returns `SUCCESS`, `CHECK_ERRORS`, or `CONFIG_ERROR` — for `validate`, `CHECK_ERRORS` means lint issues were found in the config file, not that dbt checks failed).

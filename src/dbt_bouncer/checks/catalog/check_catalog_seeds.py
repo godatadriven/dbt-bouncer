@@ -1,4 +1,6 @@
-from typing import Any
+from typing import Annotated, Any
+
+from pydantic import Field
 
 from dbt_bouncer.check_framework.decorator import check, fail
 from dbt_bouncer.utils import get_clean_model_name
@@ -108,8 +110,12 @@ def check_seed_columns_are_all_documented(
 def check_seed_max_bytes(
     catalog_node,
     *,
-    max_bytes: int,
-    byte_stat_keys: list[str] = ["bytes", "num_bytes", "size"],  # ruff: ignore[mutable-argument-default]
+    max_bytes: Annotated[int, Field(gt=0)],
+    byte_stat_keys: Annotated[list[str], Field(min_length=1)] = [  # ruff: ignore[mutable-argument-default]
+        "bytes",
+        "num_bytes",
+        "size",
+    ],
 ):
     """Each seed must not exceed the given size in bytes.
 
@@ -158,11 +164,6 @@ def check_seed_max_bytes(
     if catalog_node.unique_id is None or not catalog_node.unique_id.startswith("seed."):
         return
 
-    if max_bytes <= 0:
-        raise ValueError(f"`max_bytes` must be positive, got {max_bytes}.")
-    if not byte_stat_keys:
-        raise ValueError("`byte_stat_keys` must not be empty.")
-
     bytes_used = _extract_stat_value(catalog_node, byte_stat_keys)
     if bytes_used is None:
         raise RuntimeError(
@@ -183,8 +184,12 @@ def check_seed_max_bytes(
 def check_seed_max_row_count(
     catalog_node,
     *,
-    max_row_count: int,
-    row_stat_keys: list[str] = ["row_count", "num_rows", "rows"],  # ruff: ignore[mutable-argument-default]
+    max_row_count: Annotated[int, Field(gt=0)],
+    row_stat_keys: Annotated[list[str], Field(min_length=1)] = [  # ruff: ignore[mutable-argument-default]
+        "row_count",
+        "num_rows",
+        "rows",
+    ],
 ):
     """Each seed must not contain more than the given number of rows.
 
@@ -232,11 +237,6 @@ def check_seed_max_row_count(
     """
     if catalog_node.unique_id is None or not catalog_node.unique_id.startswith("seed."):
         return
-
-    if max_row_count <= 0:
-        raise ValueError(f"`max_row_count` must be positive, got {max_row_count}.")
-    if not row_stat_keys:
-        raise ValueError("`row_stat_keys` must not be empty.")
 
     row_count = _extract_stat_value(catalog_node, row_stat_keys)
     if row_count is None:

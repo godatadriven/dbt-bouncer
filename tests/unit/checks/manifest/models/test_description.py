@@ -1,6 +1,5 @@
-import re
-
 import pytest
+from pydantic import ValidationError
 
 from dbt_bouncer.testing import _run_check, check_fails, check_passes
 
@@ -247,12 +246,12 @@ class TestCheckModelDescriptionContainsRegexpPattern:
             regexp_pattern="None",
         )
 
-    def test_invalid_regex_raises_re_error(self):
+    def test_invalid_regex_rejected_at_config_load(self):
         check_fails(
             "check_model_description_contains_regexp_pattern",
             model={"description": "abc"},
             regexp_pattern="(unclosed",
-            expected_exception=re.error,
+            expected_exception=ValidationError,
             match="Invalid regex pattern",
         )
 
@@ -435,7 +434,7 @@ class TestCheckModelDocumentationCoverageInvalidParam:
             pytest.param(101, "less than or equal to 100", id="over_100"),
         ],
     )
-    def test_raises_value_error(self, min_pct, match_pattern):
+    def test_rejected_at_config_load(self, min_pct, match_pattern):
         with pytest.raises(ValueError, match=match_pattern):
             _run_check(
                 "check_model_documentation_coverage",

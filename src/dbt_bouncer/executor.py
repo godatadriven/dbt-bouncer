@@ -10,7 +10,7 @@ from rich.console import Console
 from rich.progress import BarColumn, Progress, TaskProgressColumn, TextColumn
 
 from dbt_bouncer.check_framework.exceptions import DbtBouncerFailedCheckError
-from dbt_bouncer.enums import CheckOutcome, CheckSeverity
+from dbt_bouncer.enums import CheckOutcome
 
 if TYPE_CHECKING:
     from dbt_bouncer.runner import CheckToRun
@@ -67,8 +67,10 @@ class Executor:
                     f"Check {check['check_run_id']} raised unexpected error:\n{''.join(failure_message_full)}"
                 )
 
-            check["outcome"] = CheckOutcome.FAILED
-            check["severity"] = CheckSeverity.WARN
+            # Fail closed: a check that crashed has not verified anything, so it
+            # keeps its configured severity (``error`` by default) rather than
+            # being downgraded to a warning that would let the run pass.
+            check["outcome"] = CheckOutcome.INTERNAL_ERROR
             check["failure_message"] = (
                 f"`dbt-bouncer` encountered an error ({failure_message}), run with `-v` to see more details or report an issue at https://github.com/godatadriven/dbt-bouncer/issues."
             )

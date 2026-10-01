@@ -8,6 +8,7 @@ from pydantic import Field
 from dbt_bouncer.check_framework.decorator import check, fail
 from dbt_bouncer.check_framework.exceptions import NestedDict
 from dbt_bouncer.enums import Criteria
+from dbt_bouncer.types import RegexPattern
 from dbt_bouncer.utils import (
     clean_path_str,
     compile_pattern,
@@ -42,7 +43,11 @@ def _get_jinja_environment() -> "Environment":
             "test",
         }
 
-    return Environment(autoescape=True, extensions=[TagExtension])
+    # `loopcontrols` provides `{% break %}` and `{% continue %}`. dbt enables it,
+    # so macros may use them; without it parsing such a macro raises.
+    return Environment(
+        autoescape=True, extensions=[TagExtension, "jinja2.ext.loopcontrols"]
+    )
 
 
 def _parse_macro_argument_names(macro_sql: str) -> list[str]:
@@ -154,7 +159,9 @@ def check_macro_arguments_description_populated(
 
 
 @check(code="MA002")
-def check_macro_code_does_not_contain_regexp_pattern(macro, *, regexp_pattern: str):
+def check_macro_code_does_not_contain_regexp_pattern(
+    macro, *, regexp_pattern: RegexPattern
+):
     """The raw code for a macro must not match the specified regexp pattern.
 
     !!! info "Rationale"
@@ -392,7 +399,7 @@ def check_macro_name_matches_file_name(macro):
 
 
 @check(code="MA009")
-def check_macro_names(macro, *, macro_name_pattern: str):
+def check_macro_names(macro, *, macro_name_pattern: RegexPattern):
     """Macros must have a name that matches the supplied regex.
 
     !!! info "Rationale"

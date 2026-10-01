@@ -2,9 +2,16 @@ from enum import IntEnum, StrEnum, auto
 
 
 class CheckOutcome(StrEnum):
-    """Possible outcomes of a dbt-bouncer check execution."""
+    """Possible outcomes of a dbt-bouncer check execution.
+
+    ``INTERNAL_ERROR`` means the check raised an unexpected exception instead of
+    passing or failing, so its result is unknown. It is kept apart from
+    ``FAILED`` so that a crash is never mistaken for, or baselined as, a real
+    failure.
+    """
 
     FAILED = auto()
+    INTERNAL_ERROR = auto()
     SUCCESS = auto()
 
 

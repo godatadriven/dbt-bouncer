@@ -120,21 +120,49 @@ class Reporter:
         num_checks_error = 0
         num_checks_warn = 0
         num_checks_success = 0
+        num_checks_internal_error = 0
+        # Internal errors that block the run: the check crashed and its
+        # severity is `error`. A crashed `warn` check is reported but, like a
+        # failed `warn` check, does not change the exit code.
+        num_checks_internal_error_blocking = 0
+        # Hot loop over every result: enum members are bound to locals because
+        # class attribute access on an Enum is slow, and SUCCESS (by far the
+        # most common outcome) is tested first so most results need one compare.
+        outcome_failed = CheckOutcome.FAILED
+        outcome_success = CheckOutcome.SUCCESS
+        severity_error = CheckSeverity.ERROR
         for r in results:
-            if r["outcome"] == CheckOutcome.FAILED:
-                if r["severity"] == CheckSeverity.ERROR:
+            outcome = r["outcome"]
+            if outcome == outcome_success:
+                num_checks_success += 1
+            elif outcome == outcome_failed:
+                if r["severity"] == severity_error:
                     num_checks_error += 1
                 else:
                     num_checks_warn += 1
             else:
-                num_checks_success += 1
+                # INTERNAL_ERROR, or any unknown outcome: fail closed rather
+                # than count a result we cannot interpret as a success.
+                num_checks_internal_error += 1
+                if r["severity"] == severity_error:
+                    num_checks_internal_error_blocking += 1
+
+        run_failed = num_checks_error > 0 or num_checks_internal_error_blocking > 0
+        has_problems = (
+            num_checks_error > 0 or num_checks_warn > 0 or num_checks_internal_error > 0
+        )
 
         console = Console(emoji=False)
 
-        if num_checks_error > 0 or num_checks_warn > 0:
-            logger = logging.error if num_checks_error > 0 else logging.warning
+        if num_checks_internal_error > 0:
+            (logging.error if num_checks_internal_error_blocking else logging.warning)(
+                f"{num_checks_internal_error} check(s) raised an unexpected error instead of passing or failing, so their result is unknown. Run `dbt-bouncer` with the `-v` flag to see the traceback."
+            )
+
+        if has_problems:
+            logger = logging.error if run_failed else logging.warning
             logger(
-                f"`dbt-bouncer` {'failed' if num_checks_error > 0 else 'has warnings'}. Please see below for more details or run `dbt-bouncer` with the `-v` flag."
+                f"`dbt-bouncer` {'failed' if run_failed else 'has warnings'}. Please see below for more details or run `dbt-bouncer` with the `-v` flag."
                 + (
                     ""
                     if num_checks_error < 25 or self.show_all_failures
@@ -150,12 +178,12 @@ class Reporter:
                     "unique_id": r.get("unique_id"),
                 }
                 for r in results
-                if r["outcome"] == CheckOutcome.FAILED
+                if r["outcome"] != CheckOutcome.SUCCESS
             ]
             logging.debug(f"{failed_checks=}")
 
             # Set title and style based on severity
-            if num_checks_error > 0:
+            if run_failed:
                 title = "[bold red]Failed checks[/bold red]"
                 border_color = "red"
             else:
@@ -210,7 +238,7 @@ class Reporter:
                     show_all_failures=self.show_all_failures,
                 )
 
-        if num_checks_error == 0 and num_checks_warn == 0:
+        if not has_problems:
             console.print(
                 Panel(
                     f"[bold green][OK] All checks passed! SUCCESS={num_checks_success} WARN={num_checks_warn} ERROR={num_checks_error}[/bold green]",
@@ -222,10 +250,15 @@ class Reporter:
                 f"Done. [bold green]SUCCESS={num_checks_success}[/bold green] "
                 f"[bold yellow]WARN={num_checks_warn}[/bold yellow] "
                 f"[bold red]ERROR={num_checks_error}[/bold red]"
+                + (
+                    f" [bold red]INTERNAL_ERROR={num_checks_internal_error}[/bold red]"
+                    if num_checks_internal_error
+                    else ""
+                )
             )
 
         results_to_save = (
-            [r for r in results if r["outcome"] == CheckOutcome.FAILED]
+            [r for r in results if r["outcome"] != CheckOutcome.SUCCESS]
             if self.output_only_failures
             else results
         )
@@ -237,4 +270,4 @@ class Reporter:
                 _format_results(results_to_save, self.output_format)
             )
 
-        return 1 if num_checks_error != 0 else 0, results
+        return 1 if run_failed else 0, results

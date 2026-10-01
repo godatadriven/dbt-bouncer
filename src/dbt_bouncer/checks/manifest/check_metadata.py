@@ -1,10 +1,11 @@
 from dbt_bouncer.check_framework.decorator import check, fail
+from dbt_bouncer.types import RegexPattern
 from dbt_bouncer.utils import compile_pattern
 
 
 @check(code="ME001")
 def check_project_name(
-    ctx, *, package_name: str | None = None, project_name_pattern: str
+    ctx, *, package_name: str | None = None, project_name_pattern: RegexPattern
 ):
     """Enforce that the name of the dbt project matches a supplied regex. Generally used to enforce that project names conform to something like  `company_<DOMAIN>`.
 
