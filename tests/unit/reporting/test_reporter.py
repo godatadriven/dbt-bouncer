@@ -119,6 +119,26 @@ def test_report_results_internal_error_follows_severity(
     assert "encountered an error" in output
 
 
+def test_report_results_unknown_outcome_fails_closed(capsys, monkeypatch):
+    """An outcome the reporter does not recognise is never counted as a success."""
+    monkeypatch.setenv("COLUMNS", "200")
+    results = [
+        {
+            "check_run_id": "check_model_access:0:model.my_model",
+            "failure_message": None,
+            "outcome": "not_a_real_outcome",
+            "severity": CheckSeverity.ERROR,
+        },
+    ]
+    reporter = Reporter(show_all_failures=False, create_pr_comment_file=False)
+    exit_code, _ = reporter.report_results(results)
+
+    assert exit_code == 1
+    output = capsys.readouterr().out
+    assert "All checks passed" not in output
+    assert "SUCCESS=0 WARN=0 ERROR=0 INTERNAL_ERROR=1" in output
+
+
 def test_report_results_output_only_failures_includes_internal_errors(tmp_path):
     """`--output-only-failures` keeps crashed checks alongside failed ones."""
     output_file = tmp_path / "coverage.json"
