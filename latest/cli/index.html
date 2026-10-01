@@ -1843,9 +1843,9 @@ arguments of your own:</p>
 <p><code>dbt-bouncer</code> returns distinct exit codes so that CI pipelines and scripts can tell a check failure apart from a setup problem:</p>
 <ul>
 <li><code>0</code> (<code>SUCCESS</code>): All checks have succeeded.</li>
-<li><code>1</code> (<code>CHECK_ERRORS</code>): At least one check has failed. Check the logs for more information.</li>
-<li><code>2</code> (<code>CONFIG_ERROR</code>): The config file is missing, unreadable, or invalid (e.g. an invalid <code>--only</code> value).</li>
-<li><code>3</code> (<code>ARTIFACT_ERROR</code>): A required dbt artifact (<code>manifest.json</code>, <code>catalog.json</code>, <code>run_results.json</code>) is missing or was generated with an unsupported dbt version.</li>
+<li><code>1</code> (<code>CHECK_ERRORS</code>): At least one check with <code>error</code> severity has failed, or raised an unexpected error instead of passing or failing (reported with the outcome <code>internal_error</code>). Check the logs for more information.</li>
+<li><code>2</code> (<code>CONFIG_ERROR</code>): The config file is missing, empty, not valid YAML/TOML, or invalid (e.g. an invalid <code>--only</code> value, an invalid regex in <code>include</code>/<code>exclude</code> or a check parameter, or a check parameter out of range).</li>
+<li><code>3</code> (<code>ARTIFACT_ERROR</code>): A required dbt artifact (<code>manifest.json</code>, <code>catalog.json</code>, <code>run_results.json</code>) is missing, cannot be decoded (e.g. truncated by an interrupted dbt run), or was generated with an unsupported dbt version.</li>
 <li><code>4</code> (<code>NO_CHECKS_RUN</code>): No checks ran because the config matched no resources. Check the <code>package_name</code>, the config file, the dbt artifacts, and any <code>--check</code> or <code>--only</code> filters.</li>
 </ul>
 <p>These codes apply to both <code>dbt-bouncer run</code> and <code>dbt-bouncer validate</code> (which only ever returns <code>SUCCESS</code>, <code>CHECK_ERRORS</code>, or <code>CONFIG_ERROR</code> — for <code>validate</code>, <code>CHECK_ERRORS</code> means lint issues were found in the config file, not that dbt checks failed).</p>

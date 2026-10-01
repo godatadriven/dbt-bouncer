@@ -1444,6 +1444,7 @@
 <li>Keyword-only arguments (after <code>*</code>) become user-configurable parameters.</li>
 <li>Add <code>ctx</code> as a parameter only if the function needs access to the <code>CheckContext</code>.</li>
 <li>Call <code>fail(message)</code> to signal a check failure.</li>
+<li>Validate parameters in their type, not in the function body, so a misconfigured check is a config error at load time instead of an exception raised for every resource. Use <code>RegexPattern</code> (from <code>dbt_bouncer.types</code>) for regex parameters and <code>Annotated[int, Field(gt=0)]</code>-style constraints for bounds. For a rule that spans several parameters, pass <code>validate=</code> to <code>@check</code>: a callable that receives the keyword-only parameters as keyword arguments and raises <code>ValueError</code>.</li>
 </ul>
 </li>
 <li>Add the check to <code>dbt-bouncer-example.yml</code> and run <code>dbt-bouncer --config-file dbt-bouncer-example.yml</code>.</li>

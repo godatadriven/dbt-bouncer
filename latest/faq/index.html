@@ -1430,7 +1430,7 @@
 <li>The first positional parameter determines the resource type to iterate over (e.g. <code>model</code>, <code>source</code>, <code>exposure</code>, <code>seed</code>).</li>
 <li>Keyword-only arguments (after <code>*</code>) become user-configurable parameters, with types inferred from type hints.</li>
 <li>Add <code>ctx</code> as a parameter only if the function needs access to the full check context (e.g. all models, all sources).</li>
-<li>Use <code>fail()</code> from <code>dbt_bouncer.check_framework.decorator</code> to signal a check failure with a clear message.</li>
+<li>Use <code>fail()</code> from <code>dbt_bouncer.check_framework.decorator</code> to signal a check failure with a clear message. Any other exception raised by the check is reported as an <code>internal_error</code> and, at the default <code>error</code> severity, fails the run.</li>
 <li>Include a docstring describing what the check does.</li>
 </ul>
 </li>
