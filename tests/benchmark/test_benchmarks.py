@@ -64,7 +64,10 @@ def test_check_discovery(benchmark):
         _clear_assembly_caches()
         return (), {}
 
-    checks = benchmark.pedantic(get_check_objects, setup=setup, rounds=5, iterations=1)
+    # Sub-millisecond work: extra rounds stop one runner stall from skewing the result.
+    checks = benchmark.pedantic(
+        get_check_objects, setup=setup, rounds=20, iterations=1, warmup_rounds=1
+    )
     assert len(checks) > 0
 
 

@@ -84,6 +84,7 @@ jobs:
             --testbed ubuntu-24.04-pytest \
             --err \
             --adapter python_pytest \
+            --average median \
             --format json \
             --github-actions '${{ secrets.GITHUB_TOKEN }}' \
             --ci-number "$PR_NUMBER" \

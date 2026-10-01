@@ -88,6 +88,7 @@
                 --thresholds-reset \
                 --err \
                 --adapter python_pytest \
+                --average median \
                 --format json \
                 --github-actions '${{ secrets.GITHUB_TOKEN }}' \
                 --file pytest_benchmark_results.json
