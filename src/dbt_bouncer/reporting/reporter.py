@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from collections import Counter
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -50,53 +51,116 @@ class Reporter:
         self.output_format = output_format
         self.output_only_failures = output_only_failures
 
-    def report_dry_run(
+    def report_check_plan(
         self,
         checks_to_run: list[CheckToRun],
         *,
+        configured_checks: list[Any] | None = None,
+        dry_run: bool = False,
         iterate_cache: dict[type, frozenset[str]] | None = None,
-    ) -> tuple[int, list[Any]]:
-        """Print a dry-run summary table and return early.
+    ) -> None:
+        """Print configured rule counts and their actual assembled executions.
 
         Args:
             checks_to_run: List of CheckToRun dicts.
+            configured_checks: Selected check configurations, including those
+                matching no resources. Defaults to configurations in the run list.
+            dry_run: Whether to label the table as a dry-run preview.
             iterate_cache: Mapping of check class -> iterate-over values.
                 Passed explicitly to avoid coupling to runner module state.
 
-        Returns:
-            tuple[int, list[Any]]: Always (0, []).
-
         """
-        from collections import Counter
-
         if iterate_cache is None:
             iterate_cache = {}
+        if configured_checks is None:
+            configured_checks = list(
+                {id(c["check"]): c["check"] for c in checks_to_run}.values()
+            )
 
-        counts: Counter[tuple[str, str]] = Counter()
-        for c in checks_to_run:
-            check_name = c["check"].__class__.__name__
+        keys_by_config: dict[int, tuple[str, str]] = {}
+        rule_counts: Counter[tuple[str, str]] = Counter()
+        for check in configured_checks:
+            cls = check.__class__
             resource_type = next(
-                iter(iterate_cache.get(c["check"].__class__, {"(none)"})),
+                iter(
+                    iterate_cache.get(
+                        cls, {getattr(cls, "iterate_over", None) or "(none)"}
+                    )
+                ),
                 "(none)",
             )
-            counts[check_name, resource_type] += 1
+            key = (getattr(check, "name", cls.__name__), resource_type)
+            keys_by_config[id(check)] = key
+            rule_counts[key] += 1
+        execution_counts = Counter(
+            keys_by_config[id(c["check"])] for c in checks_to_run
+        )
 
         console = Console(emoji=False)
         table = Table(
-            title="[bold cyan]Dry run — checks that would execute[/bold cyan]",
+            title=(
+                "[bold cyan]Dry run — checks that would execute[/bold cyan]"
+                if dry_run
+                else "[bold cyan]Assembled checks[/bold cyan]"
+            ),
             title_justify="left",
             box=box.ROUNDED,
             border_style="cyan",
             show_header=True,
             header_style="bold cyan",
         )
-        table.add_column("Check name", justify="left", style="cyan", no_wrap=True)
+        table.add_column("Check name", justify="left", style="cyan", overflow="fold")
         table.add_column("Resource type", justify="center")
-        table.add_column("Count", justify="right")
-        for (check_name, resource_type), count in sorted(counts.items()):
-            table.add_row(check_name, resource_type, str(count))
+        table.add_column("Rules", justify="right")
+        table.add_column("Executions", justify="right")
+        for key, rules in sorted(rule_counts.items()):
+            check_name, resource_type = key
+            table.add_row(
+                escape(check_name),
+                resource_type,
+                str(rules),
+                str(execution_counts[key]),
+            )
+        table.add_section()
+        table.add_row(
+            "Total",
+            "",
+            str(len(configured_checks)),
+            str(len(checks_to_run)),
+            style="bold",
+        )
         console.print(table)
         console.print(
+            "[dim]Rules = configured check instances; executions = matched "
+            "resources per rule (context-only rules run once).[/dim]"
+        )
+
+    def report_dry_run(
+        self,
+        checks_to_run: list[CheckToRun],
+        *,
+        configured_checks: list[Any] | None = None,
+        iterate_cache: dict[type, frozenset[str]] | None = None,
+    ) -> tuple[int, list[Any]]:
+        """Print a dry-run summary table and return early.
+
+        Args:
+            checks_to_run: List of CheckToRun dicts.
+            configured_checks: Selected check configurations, including those
+                matching no resources.
+            iterate_cache: Mapping of check class -> iterate-over values.
+
+        Returns:
+            tuple[int, list[Any]]: Always (0, []).
+
+        """
+        self.report_check_plan(
+            checks_to_run,
+            configured_checks=configured_checks,
+            dry_run=True,
+            iterate_cache=iterate_cache,
+        )
+        Console(emoji=False).print(
             Panel(
                 f"[bold cyan]Dry run complete. {len(checks_to_run)} check(s) would run.[/bold cyan]",
                 border_style="cyan",

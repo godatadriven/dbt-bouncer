@@ -1,5 +1,6 @@
 """Tests for the Reporter class."""
 
+import re
 from typing import TYPE_CHECKING, cast
 from unittest.mock import patch
 
@@ -39,6 +40,82 @@ def test_report_dry_run_returns_zero():
 
     assert exit_code == 0
     assert results == []
+
+
+@pytest.mark.parametrize("dry_run", [False, True])
+def test_check_plan_explains_configured_rules_and_executions(
+    capsys, monkeypatch, dry_run
+):
+    """Repeated and unmatched rules remain visible, with an exact run total."""
+    from dbt_bouncer.check_framework.decorator import check
+
+    @check
+    def check_model_example(model, *, required_tag: str):
+        """Pass."""
+
+    @check
+    def check_source_example(source):
+        """Pass."""
+
+    @check
+    def check_project_example(ctx):
+        """Pass."""
+
+    monkeypatch.setenv("COLUMNS", "140")
+    model_rules = [
+        check_model_example(index=0, required_tag="finance"),
+        check_model_example(index=1, required_tag="pii"),
+    ]
+    source_rule = check_source_example(index=2)
+    project_rule = check_project_example(index=3)
+    configured_checks = [*model_rules, source_rule, project_rule]
+    checks: list[CheckToRun] = [
+        {
+            "check": rule,
+            "check_run_id": f"{rule.name}:{rule.index}:{resource}",
+            "iterate_value": "model",
+            "severity": "error",
+        }
+        for rule, resources in zip(model_rules, [range(3), range(2)], strict=True)
+        for resource in resources
+    ]
+    checks.append(
+        {
+            "check": project_rule,
+            "check_run_id": f"{project_rule.name}:3",
+            "severity": "error",
+        }
+    )
+    reporter = Reporter()
+    if dry_run:
+        assert reporter.report_dry_run(checks, configured_checks=configured_checks) == (
+            0,
+            [],
+        )
+    else:
+        reporter.report_check_plan(checks, configured_checks=configured_checks)
+
+    output = capsys.readouterr().out
+    assert "Rules" in output
+    assert "Executions" in output
+    for name, resource_type, rules, executions in [
+        ("check_model_example", "model", 2, 5),
+        ("check_project_example", "(none)", 1, 1),
+        ("check_source_example", "source", 1, 0),
+        ("Total", "", 4, 6),
+    ]:
+        assert re.search(
+            rf"{name}\s+[│|]\s*{re.escape(resource_type)}\s*[│|]\s*{rules}\s*[│|]\s*{executions}\s*[│|]",
+            output,
+        ), output
+
+
+def test_check_plan_empty(capsys):
+    Reporter().report_check_plan([], configured_checks=[])
+    assert re.search(
+        r"Total\s+[│|]\s*[│|]\s*0\s*[│|]\s*0\s*[│|]",
+        capsys.readouterr().out,
+    )
 
 
 def test_report_results_all_pass():

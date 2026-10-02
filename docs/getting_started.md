@@ -69,8 +69,35 @@ When parsing artifacts, `dbt-bouncer` displays a summary table of discovered res
 │ catalog.json     │ Nodes           │    13 │
 │                  │ Sources         │     0 │
 │ run_results.json │ Results         │    51 │
+├──────────────────┼─────────────────┼───────┤
+│                  │ Total           │   130 │
 ╰──────────────────┴─────────────────┴───────╯
 ```
+
+The total is the sum of the displayed counts for the selected package, not a
+count of unique dbt resources across artifacts. For example, a model can appear
+in the manifest, catalog, and run results. Catalog and run-result rows are only
+included when their checks are configured.
+
+Before execution, an **Assembled checks** table explains how configured checks
+expand into individual executions:
+
+| Check name | Resource type | Rules | Executions |
+|---|---|---:|---:|
+| check_model_description_populated | model | 1 | 12 |
+| check_model_names | model | 2 | 6 |
+| **Total** | | **3** | **18** |
+
+**Rules** counts configured instances of each check; repeated configurations of
+the same check are grouped together. **Executions** counts the actual matched
+resources for those rules, after path filters, selectors, materialization
+filters, and resource-level `skip_checks`. Context-only rules execute once.
+Rules matching no resources remain visible with zero executions.
+
+The executions total is exactly the number in `Assembled 18 checks, running...`.
+It is not the artifact total multiplied by the number of rules: each rule can
+target a different subset of resources. `dbt-bouncer run --dry-run` shows the
+same breakdown without executing checks.
 
 !!! tip "Trade-offs"
     **Best for:** manual runs, quick one-off validation, local development, scripting.
