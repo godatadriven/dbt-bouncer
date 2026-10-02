@@ -84,6 +84,25 @@ def test_parse_manifest_artifact_table_format(capsys, dbt_artifacts_dir):
     for category, count in category_lines:
         assert count.isdigit(), f"Count for {category} is not numeric: {count}"
 
+    total = re.search(r"Total.*?[│|]\s+(\d+)", out)
+    assert total is not None
+    assert int(total.group(1)) == sum(int(count) for _, count in category_lines)
+
+
+def test_artifact_table_total_includes_secondary_artifacts(capsys, dbt_artifacts_dir):
+    parse_dbt_artifacts(
+        _bouncer_config(catalog=True, run_results=True), dbt_artifacts_dir
+    )
+    out = capsys.readouterr().out
+    counts = re.findall(
+        r"(Exposures|Macros|Nodes|Seeds|Semantic Models|Snapshots|Sources|Tests|Unit Tests|Results).*?[│|]\s+(\d+)",
+        out,
+    )
+    total = re.search(r"Total.*?[│|]\s+(\d+)", out)
+    assert len(counts) == 12
+    assert total is not None
+    assert int(total.group(1)) == sum(int(count) for _, count in counts)
+
 
 def test_parse_missing_catalog_names_the_generating_commands(tmp_path):
     """A missing catalog.json must tell the user which dbt command writes one."""

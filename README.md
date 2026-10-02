@@ -138,7 +138,11 @@ See the [CLI reference](https://godatadriven.github.io/dbt-bouncer/cli/) for all
     │ catalog.json     │ Nodes           │    13 │
     │                  │ Sources         │     0 │
     │ run_results.json │ Results         │    51 │
+    ├──────────────────┼─────────────────┼───────┤
+    │                  │ Total           │   130 │
     ╰──────────────────┴─────────────────┴───────╯
+    Assembled checks
+    ... per-check breakdown of configured rules and executions ...
     Assembled 463 checks, running...
     Running checks... ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100%
     `dbt-bouncer` failed. Please see below for more details or run `dbt-bouncer` with the `-v` flag.
@@ -150,6 +154,11 @@ See the [CLI reference](https://godatadriven.github.io/dbt-bouncer/cli/) for all
     ╰────────────────────────────────────┴────────────┴──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
     Done. SUCCESS=462 WARN=0 ERROR=1
     ```
+
+   The assembled-checks table shows how each configured rule expands into
+   executions after filtering, with a total matching the logged check count.
+   See [the output guide](https://godatadriven.github.io/dbt-bouncer/getting_started/)
+   for an example.
 
 ## Reporting bugs and contributing code
 

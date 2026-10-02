@@ -1,4 +1,5 @@
 import json
+import re
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import MagicMock
@@ -19,7 +20,10 @@ from dbt_bouncer.runner import (
 )
 
 
-def test_decorator_checks_dispatch_per_resource_and_context_only():
+@pytest.mark.parametrize("dry_run", [False, True])
+def test_decorator_checks_dispatch_per_resource_and_context_only(
+    capsys, monkeypatch, dry_run
+):
     """``@check``-decorated checks dispatch correctly, both flavours.
 
     A check over ``model`` (an ``iterate_over``-bound resource check) must
@@ -45,6 +49,11 @@ def test_decorator_checks_dispatch_per_resource_and_context_only():
     def check_context_only_always_passes(ctx) -> None:
         """Pass unconditionally; exists only to prove context-only dispatch."""
 
+    @check
+    def check_source_always_passes(source) -> None:
+        """Pass unconditionally; exists to prove unmatched rules are reported."""
+
+    monkeypatch.setenv("COLUMNS", "140")
     models = [
         SimpleNamespace(
             model=wrap_dict(
@@ -65,17 +74,18 @@ def test_decorator_checks_dispatch_per_resource_and_context_only():
 
     resource_check = check_model_always_passes(index=0)
     context_only_check = check_context_only_always_passes(index=1)
+    unmatched_check = check_source_always_passes(index=2)
 
     ctx = BouncerContext.model_construct(
         **{
             "bouncer_config": SimpleNamespace(
-                manifest_checks=[resource_check, context_only_check],
+                manifest_checks=[resource_check, context_only_check, unmatched_check],
             ),
             "catalog_nodes": [],
             "catalog_sources": [],
             "check_categories": ["manifest_checks"],
             "create_pr_comment_file": False,
-            "dry_run": False,
+            "dry_run": dry_run,
             "exposures": [],
             "macros": [],
             "manifest_obj": None,
@@ -117,6 +127,16 @@ def test_decorator_checks_dispatch_per_resource_and_context_only():
     assert "resource" not in context_only_entry
     assert "iterate_value" not in context_only_entry
     assert context_only_entry["check_run_id"] == "check_context_only_always_passes:1"
+
+    exit_code, results = runner(ctx)
+    assert exit_code == 0
+    assert len(results) == (0 if dry_run else 3)
+    output = capsys.readouterr().out
+    assert re.search(
+        r"check_source_always_passes\s+[│|]\s*source\s*[│|]\s*1\s*[│|]\s*0\s*[│|]",
+        output,
+    )
+    assert re.search(r"Total\s+[│|]\s*[│|]\s*3\s*[│|]\s*3\s*[│|]", output)
 
 
 def test_runner_coverage(caplog, tmp_path):

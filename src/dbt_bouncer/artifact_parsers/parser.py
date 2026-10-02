@@ -487,27 +487,38 @@ def _log_artifact_summary(
     table.add_column("Category", justify="left", style="bright_white")
     table.add_column("Count", justify="right", style="bold green")
 
-    table.add_row("manifest.json", "Exposures", str(len(project_exposures)))
-    table.add_row("", "Macros", str(len(project_macros)))
-    table.add_row("", "Nodes", str(len(project_models)))
-    table.add_row("", "Seeds", str(len(project_seeds)))
-    table.add_row("", "Semantic Models", str(len(project_semantic_models)))
-    table.add_row("", "Snapshots", str(len(project_snapshots)))
-    table.add_row("", "Sources", str(len(project_sources)))
-    table.add_row("", "Tests", str(len(project_tests)))
-    table.add_row("", "Unit Tests", str(len(project_unit_tests)))
+    rows = [
+        ("manifest.json", "Exposures", len(project_exposures)),
+        ("", "Macros", len(project_macros)),
+        ("", "Nodes", len(project_models)),
+        ("", "Seeds", len(project_seeds)),
+        ("", "Semantic Models", len(project_semantic_models)),
+        ("", "Snapshots", len(project_snapshots)),
+        ("", "Sources", len(project_sources)),
+        ("", "Tests", len(project_tests)),
+        ("", "Unit Tests", len(project_unit_tests)),
+    ]
 
     if (
         hasattr(bouncer_config, "catalog_checks")
         and bouncer_config.catalog_checks != []
     ):
-        table.add_row("catalog.json", "Nodes", str(len(project_catalog_nodes)))
-        table.add_row("", "Sources", str(len(project_catalog_sources)))
+        rows.extend(
+            [
+                ("catalog.json", "Nodes", len(project_catalog_nodes)),
+                ("", "Sources", len(project_catalog_sources)),
+            ]
+        )
 
     if (
         hasattr(bouncer_config, "run_results_checks")
         and bouncer_config.run_results_checks != []
     ):
-        table.add_row("run_results.json", "Results", str(len(project_run_results)))
+        rows.append(("run_results.json", "Results", len(project_run_results)))
+
+    for artifact, category, count in rows:
+        table.add_row(artifact, category, str(count))
+    table.add_section()
+    table.add_row("", "Total", str(sum(count for _, _, count in rows)), style="bold")
 
     Console().print(table)

@@ -38,7 +38,7 @@ dbt-bouncer run --config-file config/checks.yml
 **Required:** No
 **Environment variable:** `DBT_BOUNCER_DRY_RUN`
 
-When passed, assembles the full check list as normal but prints a summary table showing the check name, resource type, and count for each check that would run — then exits with code 0 without executing any checks. Useful for previewing which checks are in scope before a full run.
+When passed, assembles the full check list as normal but prints a summary table showing the check name, resource type, number of configured rules, and assembled executions — then exits with code 0 without executing any checks. Repeated configurations of the same check are grouped together, rules matching no resources show zero executions, and a total row gives the full run count. Normal runs show the same breakdown before execution. Useful for previewing which checks are in scope before a full run.
 
 **Example:**
 

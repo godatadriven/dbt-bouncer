@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 # Maps each check class to its iterate-over resource name (an empty frozenset
 # for context-only checks), set by the ``@check`` decorator. Memoised here --
 # rather than re-reading the ClassVar per check -- because the same mapping is
-# also handed to the dry-run reporter for its "Resource type" column.
+# also handed to the check-plan reporter for its "Resource type" column.
 _CLASS_ITERATE_CACHE: dict[type, frozenset[str]] = {}
 
 
@@ -367,7 +367,7 @@ class _CheckMatcher:
 def _iterate_value_for(cls: type) -> str | None:
     """Return the single resource key a check class iterates over.
 
-    Memoise the answer in ``_CLASS_ITERATE_CACHE`` (also read by the dry-run
+    Memoise the answer in ``_CLASS_ITERATE_CACHE`` (also read by the check-plan
     reporter). Return ``None`` for context-only checks.
 
     Returns:
@@ -544,12 +544,24 @@ def runner(
         output_format=ctx.output_format,
         output_only_failures=ctx.output_only_failures,
     )
+    configured_checks = [
+        check
+        for category in ctx.check_categories
+        for check in getattr(ctx.bouncer_config, category)
+    ]
 
     if ctx.dry_run:
         return reporter.report_dry_run(
-            checks_to_run, iterate_cache=_CLASS_ITERATE_CACHE
+            checks_to_run,
+            configured_checks=configured_checks,
+            iterate_cache=_CLASS_ITERATE_CACHE,
         )
 
+    reporter.report_check_plan(
+        checks_to_run,
+        configured_checks=configured_checks,
+        iterate_cache=_CLASS_ITERATE_CACHE,
+    )
     _release_ctx_resources(ctx)
     results = Executor().run(checks_to_run)
 
