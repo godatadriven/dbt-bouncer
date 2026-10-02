@@ -1,4 +1,6 @@
 import pytest
+from hypothesis import given, settings
+from hypothesis import strategies as st
 
 from dbt_bouncer.sql_utils import neutralize_jinja, parse_sql
 
@@ -116,3 +118,21 @@ def test_neutralize_jinja_unlexable_input_is_returned_unchanged():
     # input is returned unchanged so parse_sql fails and callers fall back.
     code = "SELECT {# unterminated comment"
     assert neutralize_jinja(code) == code
+
+
+class TestNeutralizeJinjaProperties:
+    """Property-based tests for Jinja neutralization."""
+
+    @settings(max_examples=50)
+    @given(st.text(alphabet=st.characters(blacklist_characters="{}%#\r\n")))
+    def test_identity_on_clean_sql(self, sql: str):
+        """Clean SQL without Jinja constructs or newlines is unchanged."""
+        assert neutralize_jinja(sql) == sql
+
+    @settings(max_examples=100)
+    @given(st.text())
+    def test_never_crashes_on_arbitrary_fuzzed_text(self, text: str):
+        """neutralize_jinja must never raise unhandled exceptions and is idempotent."""
+        result = neutralize_jinja(text)
+        assert isinstance(result, str)
+        assert neutralize_jinja(result) == result

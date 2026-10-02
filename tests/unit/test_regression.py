@@ -8,7 +8,7 @@ import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
-from dbt_bouncer.enums import CheckOutcome
+from dbt_bouncer.enums import CheckOutcome, CheckSeverity
 from dbt_bouncer.exceptions import DbtBouncerConfigError
 from dbt_bouncer.regression import (
     apply_regression_filter,
@@ -199,7 +199,7 @@ class TestRegressionProperties:
                             CheckOutcome.SUCCESS,
                         ]
                     ),
-                    "severity": st.sampled_from(["error", "warn"]),
+                    "severity": st.sampled_from(list(CheckSeverity)),
                     "unique_id": st.one_of(
                         st.none(),
                         st.from_regex(
@@ -240,3 +240,66 @@ class TestRegressionProperties:
         res1 = _failure(f"{check_name}:{idx1}", unique_id=unique_id, message=msg1)
         res2 = _failure(f"{check_name}:{idx2}", unique_id=unique_id, message=msg2)
         assert fingerprint(res1) == fingerprint(res2) == f"{check_name}::{unique_id}"
+
+    @settings(max_examples=50)
+    @given(
+        results=st.lists(
+            st.fixed_dictionaries(
+                {
+                    "check_run_id": st.from_regex(
+                        r"check_[a-z_]+:[0-9]+", fullmatch=True
+                    ),
+                    "failure_message": st.text(),
+                    "file_path": st.one_of(
+                        st.none(),
+                        st.from_regex(r"models/[a-z_]+\.sql", fullmatch=True),
+                    ),
+                    "outcome": st.sampled_from(
+                        [
+                            CheckOutcome.FAILED,
+                            CheckOutcome.INTERNAL_ERROR,
+                            CheckOutcome.SUCCESS,
+                        ]
+                    ),
+                    "severity": st.sampled_from(list(CheckSeverity)),
+                    "unique_id": st.one_of(
+                        st.none(),
+                        st.from_regex(
+                            r"(model|source|seed)\.[a-z_]+\.[a-z_]+", fullmatch=True
+                        ),
+                    ),
+                }
+            ),
+            max_size=20,
+        ),
+        accepted=st.sets(
+            st.from_regex(
+                r"check_[a-z_]+::(model|source|seed)\.[a-z_]+\.[a-z_]+",
+                fullmatch=True,
+            ),
+            max_size=10,
+        ),
+    )
+    def test_apply_regression_filter_invariants(self, results, accepted):
+        """Regression filter satisfies conservation, exclusion, safety, and idempotence laws."""
+        kept, suppressed = apply_regression_filter(results, accepted)
+
+        # 1. Conservation law: every result is either kept or counted as suppressed.
+        assert len(kept) + suppressed == len(results)
+
+        # 2. Strict suppression: no kept failure has an accepted fingerprint.
+        for r in kept:
+            if r.get("outcome") == CheckOutcome.FAILED:
+                assert fingerprint(r) not in accepted
+
+        # 3. Crash and success immunity: non-failed results are never suppressed.
+        kept_non_failures = [r for r in kept if r.get("outcome") != CheckOutcome.FAILED]
+        total_non_failures = [
+            r for r in results if r.get("outcome") != CheckOutcome.FAILED
+        ]
+        assert len(kept_non_failures) == len(total_non_failures)
+
+        # 4. Idempotence: re-filtering kept results suppresses nothing further.
+        kept_again, suppressed_again = apply_regression_filter(kept, accepted)
+        assert kept_again == kept
+        assert suppressed_again == 0

@@ -229,6 +229,44 @@ def validate_selector_field(value: str | None) -> str | None:
     return value
 
 
+def _closure(seed_ids: set[str], edge_map: Any, degree: int | None = None) -> set[str]:
+    """Return the transitive closure of ``seed_ids`` over ``edge_map``.
+
+    The walk runs level by level so that ``degree`` can cap it at a fixed
+    number of hops from the seeds.
+
+    Args:
+        seed_ids: The starting unique IDs.
+        edge_map: ``parent_map`` (for ancestors) or ``child_map`` (for
+            descendants).
+        degree: The maximum number of hops to walk, or None for an
+            unbounded walk.
+
+    Returns:
+        set[str]: Every unique ID reached within ``degree`` hops of the
+        seeds, excluding the seeds themselves.
+
+    """
+    reached: set[str] = set()
+    frontier = set(seed_ids)
+    hops = 0
+    while frontier and (degree is None or hops < degree):
+        hops += 1
+        next_frontier: set[str] = set()
+        for uid in frontier:
+            try:
+                neighbours = edge_map[uid]
+            except (KeyError, TypeError):
+                continue
+            for neighbour in neighbours or []:
+                n = str(neighbour)
+                if n not in reached and n not in seed_ids:
+                    reached.add(n)
+                    next_frontier.add(n)
+        frontier = next_frontier
+    return reached
+
+
 class Selector:
     """A parsed selector resolved against one manifest.
 
@@ -237,6 +275,8 @@ class Selector:
     ``parent_map``/``child_map``, and the union/intersection structure
     reduces the atom sets to a single set of unique IDs.
     """
+
+    _closure = staticmethod(_closure)
 
     def __init__(self, raw: str, manifest: Any) -> None:
         """Parse ``raw`` and resolve it against ``manifest``.
@@ -264,21 +304,17 @@ class Selector:
                 if atom.at:
                     # ``@x`` = x, its descendants, and the ancestors of that
                     # whole set (dbt's "at" operator).
-                    with_descendants = atom_ids | self._closure(atom_ids, child_map)
-                    atom_ids = with_descendants | self._closure(
-                        with_descendants, parent_map
-                    )
+                    with_descendants = atom_ids | _closure(atom_ids, child_map)
+                    atom_ids = with_descendants | _closure(with_descendants, parent_map)
                 else:
                     # Walk both directions from the original matched seed so
                     # that ``+x+`` does not treat ancestors as new seeds for
                     # the descendant walk.
                     expanded = set(atom_ids)
                     if atom.ancestors:
-                        expanded |= self._closure(
-                            atom_ids, parent_map, atom.ancestor_degree
-                        )
+                        expanded |= _closure(atom_ids, parent_map, atom.ancestor_degree)
                     if atom.descendants:
-                        expanded |= self._closure(
+                        expanded |= _closure(
                             atom_ids, child_map, atom.descendant_degree
                         )
                     atom_ids = expanded
@@ -300,46 +336,6 @@ class Selector:
                 continue
             for uid, node in collection.items():
                 yield str(uid), node
-
-    @staticmethod
-    def _closure(
-        seed_ids: set[str], edge_map: Any, degree: int | None = None
-    ) -> set[str]:
-        """Return the transitive closure of ``seed_ids`` over ``edge_map``.
-
-        The walk runs level by level so that ``degree`` can cap it at a fixed
-        number of hops from the seeds.
-
-        Args:
-            seed_ids: The starting unique IDs.
-            edge_map: ``parent_map`` (for ancestors) or ``child_map`` (for
-                descendants).
-            degree: The maximum number of hops to walk, or None for an
-                unbounded walk.
-
-        Returns:
-            set[str]: Every unique ID reached within ``degree`` hops of the
-            seeds, excluding the seeds themselves.
-
-        """
-        reached: set[str] = set()
-        frontier = set(seed_ids)
-        hops = 0
-        while frontier and (degree is None or hops < degree):
-            hops += 1
-            next_frontier: set[str] = set()
-            for uid in frontier:
-                try:
-                    neighbours = edge_map[uid]
-                except (KeyError, TypeError):
-                    continue
-                for neighbour in neighbours or []:
-                    n = str(neighbour)
-                    if n not in reached and n not in seed_ids:
-                        reached.add(n)
-                        next_frontier.add(n)
-            frontier = next_frontier
-        return reached
 
     def matches(self, unique_id: str | None) -> bool:
         """Whether a resource is selected.

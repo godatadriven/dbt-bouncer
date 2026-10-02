@@ -1,11 +1,18 @@
 """Tests for the output formatters, focusing on file-location plumbing."""
 
+import csv
+import io
+
 import orjson
+from hypothesis import given, settings
+from hypothesis import strategies as st
+from junitparser import JUnitXml
 
 from dbt_bouncer.enums import CheckOutcome, CheckSeverity
 from dbt_bouncer.reporting.formatters import (
     _format_csv,
     _format_junit,
+    _format_results,
     _format_sarif,
     _format_tap,
 )
@@ -118,3 +125,86 @@ def test_tap_marks_internal_error_not_ok():
     ).decode()
     assert "not ok 1 - check_model_description_populated:0:stg_orders" in tap
     assert "  # boom" in tap
+
+
+_VALID_XML_TEXT = st.text(
+    alphabet=st.characters(
+        blacklist_categories=("Cs",),
+        blacklist_characters="".join(chr(c) for c in range(32) if c not in (9, 10, 13)),
+    ),
+    max_size=100,
+)
+
+_ADVERSARIAL_TEXT = st.one_of(
+    st.none(),
+    _VALID_XML_TEXT,
+    st.sampled_from(
+        [
+            "<script>alert(1)</script>",
+            "</failure></testcase>",
+            'foo,bar\r\nbaz"quote"',
+            "ok 1 - fake tap",
+            "not ok 2 - fake tap",
+            "&amp; &lt; &gt; &quot; &#39;",
+            "emoji 🎉🚀💥 \t\n",
+            "\n\n\n",
+        ]
+    ),
+)
+
+_CHECK_RESULT_STRATEGY = st.fixed_dictionaries(
+    {
+        "check_run_id": st.from_regex(r"check_[a-z]+:[0-9]+", fullmatch=True),
+        "failure_message": _ADVERSARIAL_TEXT,
+        "file_path": st.one_of(
+            st.none(),
+            st.from_regex(r"models/[a-z_]+\.sql", fullmatch=True),
+        ),
+        "outcome": st.sampled_from(list(CheckOutcome)),
+        "severity": st.sampled_from(list(CheckSeverity)),
+        "unique_id": st.one_of(
+            st.none(),
+            st.from_regex(r"model\.p\.[a-z_]+", fullmatch=True),
+        ),
+    }
+)
+
+
+class TestFormatterProperties:
+    """Property-based tests for output formatters."""
+
+    @settings(max_examples=50)
+    @given(results=st.lists(_CHECK_RESULT_STRATEGY, max_size=15))
+    def test_all_formatters_cardinality_and_parsing(self, results):
+        """All formatters preserve result cardinality and produce valid syntax under adversarial inputs."""
+        # 1. JSON
+        json_bytes = _format_results(results, "json")
+        parsed_json = orjson.loads(json_bytes)
+        assert len(parsed_json) == len(results)
+
+        # 2. CSV
+        csv_bytes = _format_results(results, "csv")
+        csv_rows = list(csv.DictReader(io.StringIO(csv_bytes.decode())))
+        assert len(csv_rows) == len(results)
+
+        # 3. SARIF
+        sarif = orjson.loads(_format_results(results, "sarif"))
+        assert len(sarif["runs"][0]["results"]) == len(results)
+
+        # 4. TAP
+        tap_text = _format_results(results, "tap").decode()
+        lines = tap_text.splitlines()
+        assert lines[0] == "TAP version 13"
+        assert lines[1] == f"1..{len(results)}"
+        test_lines = [
+            line
+            for line in lines[2:]
+            if line.startswith("ok ") or line.startswith("not ok ")
+        ]
+        assert len(test_lines) == len(results)
+
+        # 5. JUnit XML
+        junit_bytes = _format_results(results, "junit")
+        xml = JUnitXml.fromstring(junit_bytes)
+        testcases = [tc for suite in xml for tc in suite]
+        assert len(testcases) == len(results)
