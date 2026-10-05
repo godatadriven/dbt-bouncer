@@ -57,6 +57,7 @@ To add your company:
 * [Automate Sensitive Data Protection with Metadata-Driven Masking](https://xebia.com/blog/automate-sensitive-data-protection-with-metadata-driven-masking/)
 * [Beyond deterministic checks: MCPs & Agents in dbt development](https://kiliantscherny.substack.com/p/beyond-deterministic-checks-mcps?r=3qra7e&utm_campaign=post&utm_medium=web&triedRedirect=true#:~:text=I%E2%80%99ve%20enjoyed%20using%20dbt%2Dbouncer%20for%20this.%20A%20lot%20of%20its%20functionality%20overlaps%20with%20dbt%2Dcheckpoint%E2%80%99s%2C%20but%20it%20has%20some%20nice%20extra%20features%20that%20can%20be%20quite%20useful.)
 * [dbt Testing: A Complete Guide to Data Tests, Unit Tests, and Testing Packages](https://datacoves.com/post/dbt-test-options#:~:text=dbt%2Dbouncer%3A%20Artifact%2DBased%20Convention%20Enforcement)
+* [Guardrails for AI-written dbt projects with dbt-bouncer](https://xebia.com/blog/guardrails-for-ai-written-dbt-projects/)
 * [Maintaining conventions in dbt projects with dbt-bouncer](https://xebia.com/blog/maintaining-conventions-in-dbt-projects-with-dbt-bouncer/)
 
 ## Repos
