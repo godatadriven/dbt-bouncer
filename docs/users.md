@@ -27,7 +27,7 @@ To add your company:
 
 <p>
     <h3>Datashift</h3>
-    <img src="hhttps://github.com/godatadriven/dbt-bouncer/raw/main/docs/assets/datashift_logo.webp" width="500"/>
+    <img src="https://github.com/godatadriven/dbt-bouncer/raw/main/docs/assets/datashift_logo.webp" width="500"/>
 </p>
 
 <p>
