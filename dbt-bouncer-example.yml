@@ -55,6 +55,29 @@ catalog_checks:
   - name: check_source_columns_are_all_documented
     exclude: ^models/staging/crm # Not a good idea, here for demonstration purposes only
 
+# Requires the dbt Information Schema (dbt 2.0+): `dbt_artifacts_dir` must contain
+# `info_schema/v1`, written by `dbt compile --static-analysis strict --generate-info-schema`.
+info_schema_checks:
+  - name: check_info_schema_query
+    description: Public models must have a description.
+    sql: |
+      SELECT unique_id
+      FROM dbt.models
+      WHERE access = 'public'
+        AND coalesce(description, '') = ''
+  - name: check_model_column_descriptions_propagated
+  - name: check_model_column_meta_propagated
+    meta_key: pii
+  - name: check_model_column_types_match_inferred
+    severity: warn # `orders` and `customers` declare `double` amounts that their SQL produces as integers
+  - name: check_model_columns_have_lineage
+  - name: check_model_grain_is_tested
+  - name: check_model_has_grain
+    include: ^models/marts
+  - name: check_model_public_columns_not_derived_from_meta
+    meta_key: pii
+  - name: check_source_columns_are_used
+
 manifest_checks:
   # Exposures
   - name: check_exposure_based_on_model

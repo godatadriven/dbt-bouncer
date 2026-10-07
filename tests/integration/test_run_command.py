@@ -27,6 +27,9 @@ def test_run_happy_path_across_artifact_versions(
 ):
     """The shipped example config passes against every supported artifact format."""
     example_config["dbt_artifacts_dir"] = str(artifacts_dir / "target")
+    # Only dbt 2.0+ writes the Information Schema, so dbt 1.x fixtures cannot run these.
+    if not (artifacts_dir / "target" / "info_schema" / "v1").is_dir():
+        example_config.pop("info_schema_checks")
     config_file = write_config(example_config, name="dbt-bouncer-example.yml")
 
     result = cli_runner.invoke(app, f"--config-file {PurePath(config_file).as_posix()}")

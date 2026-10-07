@@ -2,8 +2,8 @@
 
 The fixture's `info_schema/v1` is written by `mise run build-artifacts-20` with
 `--static-analysis strict --generate-info-schema`. The shipped example config
-does not use this category, because CI also runs that config against dbt 1.x
-artifacts, which have no Information Schema.
+also runs this category (see `test_run_command.py`); these tests add a failing
+check and the missing-artifact error.
 """
 
 from pathlib import PurePath

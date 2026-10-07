@@ -196,9 +196,9 @@ dbt_project/target/compiled
 dbt_project/target/data
 dbt_project/target/ephemeral
 dbt_project/target/generic_tests
-dbt_project/target/info_schema
 # dbt 2.0 writes its Parquet artifacts (the docs v2 index) under target/private.
-# dbt-bouncer reads the JSON artifacts, so these stay out of the repository.
+# dbt-bouncer reads the JSON artifacts and `target/info_schema/v1` (committed for
+# `info_schema_checks`), so these stay out of the repository.
 dbt_project/target/private
 dbt_project/target/run
 dbt_project/target/schemas

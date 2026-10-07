@@ -59,6 +59,14 @@ uv run dbt build --profiles-dir ./dbt_project --project-dir ./dbt_project
 uv run dbt compile --write-catalog --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_catalog
 mv ./dbt_project/target_catalog/catalog.json ./dbt_project/target/catalog.json
 rm -r ./dbt_project/target_catalog
+# Strict static analysis (needed for column types and lineage) exits 1 on deliberate quirks in
+# the test project but still writes the Information Schema; `test -f` guards against an empty run.
+# See build-artifacts-20.
+uv run dbt compile --static-analysis strict --generate-info-schema --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_info_schema || true
+test -f ./dbt_project/target_info_schema/info_schema/v1/dbt.project.parquet
+rm -rf ./dbt_project/target/info_schema
+mv ./dbt_project/target_info_schema/info_schema ./dbt_project/target/info_schema
+rm -r ./dbt_project/target_info_schema
 uv run dbt-bouncer --config-file ./dbt-bouncer-example.yml
 """
 
@@ -194,6 +202,14 @@ uv run dbt build --profiles-dir ./dbt_project --project-dir ./dbt_project
 uv run dbt compile --write-catalog --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_catalog
 mv ./dbt_project/target_catalog/catalog.json ./dbt_project/target/catalog.json
 rm -r ./dbt_project/target_catalog
+# Strict static analysis (needed for column types and lineage) exits 1 on deliberate quirks in
+# the test project but still writes the Information Schema; `test -f` guards against an empty run.
+# See build-artifacts-20.
+uv run dbt compile --static-analysis strict --generate-info-schema --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_info_schema || true
+test -f ./dbt_project/target_info_schema/info_schema/v1/dbt.project.parquet
+rm -rf ./dbt_project/target/info_schema
+mv ./dbt_project/target_info_schema/info_schema ./dbt_project/target/info_schema
+rm -r ./dbt_project/target_info_schema
 """
 
 [tasks.generate-rule-codes-doc]
