@@ -33,7 +33,7 @@ def list_checks(category: str | None = None) -> dict[str, Any]:
 
     Args:
         category: Optional filter, one of ``catalog_checks``,
-            ``manifest_checks``, or ``run_results_checks``.
+            ``info_schema_checks``, ``manifest_checks``, or ``run_results_checks``.
 
     Returns:
         dict[str, Any]: Category label to list of checks (code, name,

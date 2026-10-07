@@ -18,7 +18,7 @@ def studio(
         typer.Option(
             "--category",
             "-c",
-            help="Filter checks by category (catalog_checks, manifest_checks, run_results_checks).",
+            help="Filter checks by category (catalog_checks, info_schema_checks, manifest_checks, run_results_checks).",
         ),
     ] = None,
     config_file: Annotated[

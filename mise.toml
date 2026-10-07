@@ -153,6 +153,11 @@ description = "Build dbt 2.0 (Fusion) test artifacts"
 # manifest.json + a real run_results.json, then `compile --write-catalog` introspects that
 # populated database. The catalog step writes to a scratch target path, because `compile`
 # also writes an EMPTY run_results.json; only catalog.json is moved across.
+# A third command writes the dbt Information Schema (`info_schema/v1`, read by
+# `info_schema_checks`). It needs `--static-analysis strict` for column types and lineage,
+# and strict analysis reports errors for deliberate quirks in the test project (contract type
+# mismatches, which `check_model_column_types_match_inferred` detects) and exits 1. The files
+# are still written, so the exit code is ignored and `test -f` guards against an empty run.
 # Keep the build step first. Running the catalog step against an unpopulated database
 # writes a catalog.json with ZERO nodes, which makes every catalog check pass vacuously.
 # Do not use `dbt parse`: on dbt 2.0 a parse-only run emits no macro-to-macro `depends_on`
@@ -165,6 +170,10 @@ $DBT_20 build --profiles-dir ./dbt_project --project-dir ./dbt_project --target-
 $DBT_20 compile --write-catalog --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_20_catalog
 mv ./dbt_project/target_20_catalog/catalog.json ./dbt_project/target_20/catalog.json
 rm -r ./dbt_project/target_20_catalog
+$DBT_20 compile --static-analysis strict --generate-info-schema --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_20_info_schema || true
+test -f ./dbt_project/target_20_info_schema/info_schema/v1/dbt.project.parquet
+mv ./dbt_project/target_20_info_schema/info_schema ./dbt_project/target_20/info_schema
+rm -r ./dbt_project/target_20_info_schema
 rm -r ./tests/fixtures/dbt_20/target || true
 mkdir -p ./tests/fixtures/dbt_20
 mv ./dbt_project/target_20 ./tests/fixtures/dbt_20/target

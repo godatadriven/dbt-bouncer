@@ -29,6 +29,7 @@ def test_parse_manifest_artifact_table_output(capsys, dbt_artifacts_dir):
     bouncer_config = MagicMock()
     bouncer_config.package_name = "dbt_bouncer_test_project"
     bouncer_config.catalog_checks = []
+    bouncer_config.info_schema_checks = []
     bouncer_config.run_results_checks = []
 
     # Parse all artifacts (this will trigger the table print in parser.py)
@@ -59,6 +60,7 @@ def test_parse_manifest_artifact_table_format(capsys, dbt_artifacts_dir):
     bouncer_config = MagicMock()
     bouncer_config.package_name = "dbt_bouncer_test_project"
     bouncer_config.catalog_checks = []
+    bouncer_config.info_schema_checks = []
     bouncer_config.run_results_checks = []
 
     # Parse all artifacts
@@ -93,6 +95,7 @@ def test_parse_missing_catalog_names_the_generating_commands(tmp_path):
     bouncer_config = MagicMock()
     bouncer_config.package_name = "dbt_bouncer_test_project"
     bouncer_config.catalog_checks = [MagicMock()]
+    bouncer_config.info_schema_checks = []
     bouncer_config.run_results_checks = []
 
     with pytest.raises(DbtBouncerArtifactError) as excinfo:
@@ -162,6 +165,7 @@ def _bouncer_config(*, catalog: bool = False, run_results: bool = False):
     bouncer_config = MagicMock()
     bouncer_config.package_name = "dbt_bouncer_test_project"
     bouncer_config.catalog_checks = [MagicMock()] if catalog else []
+    bouncer_config.info_schema_checks = []
     bouncer_config.run_results_checks = [MagicMock()] if run_results else []
     return bouncer_config
 

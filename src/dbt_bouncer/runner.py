@@ -208,6 +208,7 @@ def _build_check_context(ctx: "BouncerContext") -> Any:
         catalog_sources=ctx.catalog_sources,
         exposures=ctx.exposures,
         exposures_by_unique_id=ctx.exposures_by_unique_id,
+        info_schema=ctx.info_schema,
         macros=ctx.macros,
         manifest_obj=ctx.manifest_obj,
         models=ctx.models_flat,

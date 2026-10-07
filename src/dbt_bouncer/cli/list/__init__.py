@@ -22,7 +22,7 @@ def list_checks(
         typer.Option(
             "--group",
             "-g",
-            help="Filter checks by category group. Choices: catalog_checks, manifest_checks, run_results_checks.",
+            help="Filter checks by category group. Choices: catalog_checks, info_schema_checks, manifest_checks, run_results_checks.",
             case_sensitive=False,
         ),
     ] = None,

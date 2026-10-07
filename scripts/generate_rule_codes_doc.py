@@ -24,6 +24,7 @@ DOC_PATH = Path("docs/checks/rule_codes.md")
 _GROUP_LABELS = {
     "CatalogRuleCode": "Catalog",
     "ExposureRuleCode": "Exposures",
+    "InfoSchemaRuleCode": "Information schema",
     "LineageRuleCode": "Lineage",
     "MacroRuleCode": "Macros",
     "MetadataRuleCode": "Metadata",

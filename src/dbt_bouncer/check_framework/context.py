@@ -19,6 +19,10 @@ class CheckContext:
 
     manifest_obj: Any = None
 
+    # The dbt Information Schema (an ``InfoSchema``), loaded only when
+    # ``info_schema_checks`` are configured.
+    info_schema: Any = None
+
     # Resource lists (unwrapped inner objects)
     catalog_nodes: list[Any] = field(default_factory=list)
     catalog_sources: list[Any] = field(default_factory=list)

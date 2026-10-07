@@ -1028,7 +1028,7 @@ def ensure_config_is_mapping(conf: Any, config_file: PurePath) -> None:
     """
     if conf is None:
         raise DbtBouncerConfigError(
-            f"Config file `{config_file}` is empty. Add at least one of `catalog_checks`, `manifest_checks` or `run_results_checks`, or run `dbt-bouncer init` to create one."
+            f"Config file `{config_file}` is empty. Add at least one of `catalog_checks`, `info_schema_checks`, `manifest_checks` or `run_results_checks`, or run `dbt-bouncer init` to create one."
         )
     if not isinstance(conf, Mapping):
         raise DbtBouncerConfigError(

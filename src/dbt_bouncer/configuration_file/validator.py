@@ -97,7 +97,7 @@ def apply_deprecated_check_name_aliases(config_file_contents: dict) -> dict:
 def _base_field_names() -> tuple[str, ...]:
     """Return the names of the cacheable scalar fields on ``DbtBouncerConfBase``.
 
-    Derived from ``DbtBouncerConfBase.model_fields`` minus the three check
+    Derived from ``DbtBouncerConfBase.model_fields`` minus the check
     categories (which are dynamic and handled separately). Computing this on
     demand means any new base field is picked up by the cache automatically —
     no hand-maintained tuple to drift out of sync. Cached for the lifetime of
@@ -657,7 +657,7 @@ def _get_lite_conf_class() -> type["DbtBouncerConfBase"]:
     Cached for the interpreter's lifetime since the class is immutable.
 
     Returns:
-        type[DbtBouncerConfBase]: A subclass with three ``list[Any]`` category fields.
+        type[DbtBouncerConfBase]: A subclass with one ``list[Any]`` field per check category.
 
     """
     from pydantic import Field, create_model
@@ -668,6 +668,7 @@ def _get_lite_conf_class() -> type["DbtBouncerConfBase"]:
         "DbtBouncerConfLite",
         __base__=DbtBouncerConfBase,
         catalog_checks=(list[Any], Field(default=[])),
+        info_schema_checks=(list[Any], Field(default=[])),
         manifest_checks=(list[Any], Field(default=[])),
         run_results_checks=(list[Any], Field(default=[])),
     )
@@ -950,6 +951,8 @@ def _build_conf_class(
         # Fallback: no check names to extract, use full scan.
         if CheckCategory.CATALOG_CHECKS in check_categories:
             import dbt_bouncer.checks.catalog
+        if CheckCategory.INFO_SCHEMA_CHECKS in check_categories:
+            import dbt_bouncer.checks.info_schema
         if CheckCategory.MANIFEST_CHECKS in check_categories:
             import dbt_bouncer.checks.manifest
         if CheckCategory.RUN_RESULTS_CHECKS in check_categories:

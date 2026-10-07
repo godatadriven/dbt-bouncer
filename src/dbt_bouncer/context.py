@@ -9,6 +9,9 @@ from pathlib import (
 
 from pydantic import BaseModel, ConfigDict
 
+from dbt_bouncer.artifact_parsers.info_schema import (
+    InfoSchema,  # ruff: ignore[typing-only-first-party-import] - needed at runtime for Pydantic model_rebuild
+)
 from dbt_bouncer.artifact_types import (  # ruff: ignore[typing-only-first-party-import] - needed at runtime for Pydantic model_rebuild
     CatalogNodeWrapper,
     CatalogSourceWrapper,
@@ -49,6 +52,7 @@ class BouncerContext(BaseModel):
     create_pr_comment_file: bool
     dry_run: bool
     exposures: list[ExposureNode]
+    info_schema: InfoSchema | None = None
     macros: list[MacroNode]
     manifest_obj: ManifestWrapper
     models: list[ModelWrapper]

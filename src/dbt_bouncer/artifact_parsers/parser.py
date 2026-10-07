@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING, Any, NamedTuple
 
 import orjson
 
+from dbt_bouncer.artifact_parsers.info_schema import InfoSchema, info_schema_dir
 from dbt_bouncer.exceptions import DbtBouncerArtifactError
 from dbt_bouncer.utils import clean_path_str, get_package_version_number
 
@@ -191,6 +192,7 @@ class ParsedArtifacts(NamedTuple):
     unit_tests: list[DictProxy]
     catalog_nodes: list[SimpleNamespace]
     catalog_sources: list[SimpleNamespace]
+    info_schema: InfoSchema | None
     run_results: list[SimpleNamespace]
 
 
@@ -420,6 +422,14 @@ def parse_dbt_artifacts(
     else:
         project_run_results = []
 
+    # --- Information Schema (dbt 2.0+) ---
+    info_schema: InfoSchema | None = None
+    if (
+        hasattr(bouncer_config, "info_schema_checks")
+        and bouncer_config.info_schema_checks != []
+    ):
+        info_schema = InfoSchema.from_directory(info_schema_dir(dbt_artifacts_dir))
+
     # Log parsed counts
     _log_artifact_summary(
         bouncer_config=bouncer_config,
@@ -435,6 +445,7 @@ def parse_dbt_artifacts(
         project_unit_tests=project_unit_tests,
         project_catalog_nodes=project_catalog_nodes,
         project_catalog_sources=project_catalog_sources,
+        info_schema=info_schema,
         project_run_results=project_run_results,
     )
 
@@ -451,6 +462,7 @@ def parse_dbt_artifacts(
         unit_tests=project_unit_tests,
         catalog_nodes=project_catalog_nodes,
         catalog_sources=project_catalog_sources,
+        info_schema=info_schema,
         run_results=project_run_results,
     )
 
@@ -469,6 +481,7 @@ def _log_artifact_summary(
     project_unit_tests: list[Any],
     project_catalog_nodes: list[Any],
     project_catalog_sources: list[Any],
+    info_schema: InfoSchema | None,
     project_run_results: list[Any],
 ) -> None:
     """Log a summary table of parsed artifacts."""
@@ -503,6 +516,13 @@ def _log_artifact_summary(
     ):
         table.add_row("catalog.json", "Nodes", str(len(project_catalog_nodes)))
         table.add_row("", "Sources", str(len(project_catalog_sources)))
+
+    if info_schema is not None and info_schema.directory is not None:
+        table.add_row(
+            "info_schema/v1",
+            "Tables",
+            str(len(list(info_schema.directory.glob("*.parquet")))),
+        )
 
     if (
         hasattr(bouncer_config, "run_results_checks")

@@ -19,6 +19,7 @@ class CheckCategory(StrEnum):
     """Top-level check categories in a dbt-bouncer config file."""
 
     CATALOG_CHECKS = auto()
+    INFO_SCHEMA_CHECKS = auto()
     MANIFEST_CHECKS = auto()
     RUN_RESULTS_CHECKS = auto()
 
@@ -165,6 +166,20 @@ class ExposureRuleCode(StrEnum):
     CHECK_EXPOSURE_DESCRIPTION_POPULATED = "EX004"
     CHECK_EXPOSURE_HAS_META_KEYS = "EX005"
     CHECK_EXPOSURE_HAS_OWNER = "EX006"
+
+
+class InfoSchemaRuleCode(StrEnum):
+    """Rule codes for dbt Information Schema checks."""
+
+    CHECK_INFO_SCHEMA_QUERY = "IS001"
+    CHECK_MODEL_COLUMN_DESCRIPTIONS_PROPAGATED = "IS002"
+    CHECK_MODEL_COLUMN_META_PROPAGATED = "IS003"
+    CHECK_MODEL_COLUMN_TYPES_MATCH_INFERRED = "IS004"
+    CHECK_MODEL_COLUMNS_HAVE_LINEAGE = "IS005"
+    CHECK_MODEL_GRAIN_IS_TESTED = "IS006"
+    CHECK_MODEL_HAS_GRAIN = "IS007"
+    CHECK_MODEL_PUBLIC_COLUMNS_NOT_DERIVED_FROM_META = "IS008"
+    CHECK_SOURCE_COLUMNS_ARE_USED = "IS009"
 
 
 class LineageRuleCode(StrEnum):
@@ -335,6 +350,7 @@ class UnitTestRuleCode(StrEnum):
 RuleCode = (
     CatalogRuleCode
     | ExposureRuleCode
+    | InfoSchemaRuleCode
     | LineageRuleCode
     | MacroRuleCode
     | MetadataRuleCode

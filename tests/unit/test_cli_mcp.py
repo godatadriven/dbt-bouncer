@@ -18,11 +18,12 @@ class TestListChecksTool:
     """Tests for the list_checks tool payload."""
 
     def test_all_categories(self):
-        """Without a filter, all three categories are returned."""
+        """Without a filter, every category is returned."""
         payload = mcp_server.list_checks()
 
         assert set(payload) == {
             "catalog_checks",
+            "info_schema_checks",
             "manifest_checks",
             "run_results_checks",
         }
