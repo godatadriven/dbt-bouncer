@@ -517,12 +517,8 @@ def _log_artifact_summary(
         table.add_row("catalog.json", "Nodes", str(len(project_catalog_nodes)))
         table.add_row("", "Sources", str(len(project_catalog_sources)))
 
-    if info_schema is not None and info_schema.directory is not None:
-        table.add_row(
-            "info_schema/v1",
-            "Tables",
-            str(len(list(info_schema.directory.glob("*.parquet")))),
-        )
+    if info_schema is not None:
+        table.add_row("info_schema/v1", "Tables", str(len(info_schema.table_files)))
 
     if (
         hasattr(bouncer_config, "run_results_checks")

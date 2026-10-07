@@ -60,3 +60,16 @@ def test_query_cannot_read_files(info_schema_dir, sql):
 def test_in_memory_rows_have_no_database():
     with pytest.raises(DbtBouncerArtifactError, match="no database"):
         InfoSchema.from_rows(models=[]).query("SELECT 1")
+
+
+def test_table_files_skip_invalid_names(info_schema_dir):
+    (info_schema_dir / "not-a-table.parquet").write_bytes(b"")
+
+    info_schema = InfoSchema.from_directory(info_schema_dir)
+
+    assert sorted(info_schema.table_files) == [
+        "dbt.column_lineage",
+        "dbt.models",
+        "dbt.project",
+    ]
+    assert InfoSchema.from_rows(models=[]).table_files == {}

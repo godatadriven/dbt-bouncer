@@ -127,6 +127,24 @@ class InfoSchema:
         return cls(tables={f"dbt.{name}": rows for name, rows in tables.items()})
 
     @cached_property
+    def table_files(self) -> dict[str, Path]:
+        """The Parquet file of each table, keyed by ``<schema>.<table>``.
+
+        Files whose names are not a valid ``<schema>.<table>`` are skipped.
+
+        Returns:
+            dict[str, Path]: The table files; empty for a reader built from rows.
+
+        """
+        if self.directory is None:
+            return {}
+        return {
+            parquet_file.stem: parquet_file
+            for parquet_file in sorted(self.directory.glob("*.parquet"))
+            if _TABLE_FILE_PATTERN.match(parquet_file.stem)
+        }
+
+    @cached_property
     def connection(self) -> duckdb.DuckDBPyConnection:
         """An in-memory DuckDB database holding every Information Schema table.
 
@@ -148,11 +166,8 @@ class InfoSchema:
         import duckdb
 
         con = duckdb.connect(":memory:")
-        for parquet_file in sorted(self.directory.glob("*.parquet")):
-            match = _TABLE_FILE_PATTERN.match(parquet_file.stem)
-            if match is None:
-                continue
-            schema, table = match.groups()
+        for name, parquet_file in self.table_files.items():
+            schema, table = name.split(".")
             con.execute(f'CREATE SCHEMA IF NOT EXISTS "{schema}"')
             # Identifiers come from the allow-list regex above; the path is a bound parameter.
             con.execute(
@@ -168,6 +183,11 @@ class InfoSchema:
 
         Every value comes back as text, so results print as-is and time zone
         aware timestamps need no extra Python packages.
+
+        The caller must make sure that ``sql`` is a single SELECT: it is wrapped
+        in a subquery, not parsed here. ``check_info_schema_query`` validates its
+        ``sql`` at config load. External access is disabled on the connection,
+        so even unvalidated SQL cannot read or write files.
 
         Args:
             sql: A single SELECT statement.
