@@ -1,6 +1,7 @@
 """Column checks that use the dbt Information Schema (column types and column-level lineage)."""
 
 import re
+from collections import deque
 from typing import TYPE_CHECKING, Any
 
 from dbt_bouncer.artifact_parsers.info_schema import VALUE_LINEAGE_KINDS
@@ -261,6 +262,7 @@ def check_model_column_types_match_inferred(model, ctx):
         inferred = row.get("data_type_inferred")
         declared_family = _type_family(declared)
         inferred_family = _type_family(inferred)
+        # Skip columns without both types, or with a type outside the known families.
         if declared_family and inferred_family and declared_family != inferred_family:
             mismatches.append(
                 f"`{row['column_name']}` (declared `{declared}`, inferred `{inferred}`)"
@@ -375,10 +377,10 @@ def check_model_public_columns_not_derived_from_meta(model, ctx, *, meta_key: st
     for key in sorted(info_schema.node_columns.get(model.unique_id, {})):
         column_name = _column_name(info_schema, model.unique_id, key)
         # Breadth-first walk upstream; `seen` stops cycles and repeated paths.
-        queue: list[tuple[str, str]] = [(model.unique_id, key)]
+        queue: deque[tuple[str, str]] = deque([(model.unique_id, key)])
         seen: set[tuple[str, str]] = set()
         while queue:
-            unique_id, column_key = queue.pop(0)
+            unique_id, column_key = queue.popleft()
             if (unique_id, column_key) in seen:
                 continue
             seen.add((unique_id, column_key))
