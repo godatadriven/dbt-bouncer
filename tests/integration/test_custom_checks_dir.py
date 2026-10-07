@@ -380,3 +380,23 @@ def test_baseline_does_not_record_a_crashing_check(
     assert result.exit_code == ExitCode.SUCCESS, result.output
     assert orjson.loads(baseline_file.read_bytes())["failures"] == []
     assert "were not recorded in the baseline" in caplog.text
+
+
+def test_custom_check_in_wrong_category_is_a_config_error(
+    caplog, cli_runner, custom_checks_config, tmp_path
+):
+    """A custom check's category is its directory, so `catalog/` checks go under `catalog_checks`.
+
+    Custom checks are not in the cached check map, so this covers the path that
+    loads their classes to find the category.
+    """
+    _write_custom_check(tmp_path, sub_dir="catalog")
+    config_file = custom_checks_config([{"name": "check_model_name_prefix"}])
+
+    result = _run(cli_runner, config_file)
+
+    assert result.exit_code == ExitCode.CONFIG_ERROR, result.output
+    assert (
+        "`check_model_name_prefix` is a `catalog_checks` check, but it is "
+        "configured under `manifest_checks`. Move it to `catalog_checks`."
+    ) in caplog.text
