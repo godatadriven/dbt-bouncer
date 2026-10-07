@@ -73,3 +73,16 @@ def test_table_files_skip_invalid_names(info_schema_dir):
         "dbt.project",
     ]
     assert InfoSchema.from_rows(models=[]).table_files == {}
+
+
+@pytest.mark.parametrize(
+    "sql",
+    [
+        pytest.param("COPY dbt.models TO 'models.csv'", id="copy"),
+        pytest.param("SELECT 1; SELECT 2", id="two_statements"),
+    ],
+)
+def test_query_rejects_non_select(info_schema_dir, sql):
+    """`query()` is public, so it validates its SQL itself, not only at config load."""
+    with pytest.raises(ValueError, match="exactly one SELECT"):
+        InfoSchema.from_directory(info_schema_dir).query(sql)

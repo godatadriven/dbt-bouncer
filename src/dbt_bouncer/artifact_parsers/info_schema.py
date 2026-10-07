@@ -30,6 +30,7 @@ __all__ = [
     "InfoSchema",
     "LineageEdge",
     "info_schema_dir",
+    "require_single_select",
 ]
 
 # The only Information Schema version dbt publishes so far. The directory name
@@ -52,6 +53,26 @@ def info_schema_dir(dbt_artifacts_dir: Path) -> Path:
 
     """
     return dbt_artifacts_dir / "info_schema" / f"v{INFO_SCHEMA_VERSION}"
+
+
+def require_single_select(sql: str) -> None:
+    """Reject SQL that is not exactly one SELECT statement.
+
+    The Information Schema database also has external access disabled; this
+    stops statements such as `COPY` or `ATTACH` before they run.
+
+    Raises:
+        ValueError: If `sql` does not parse, or is not a single SELECT.
+
+    """
+    import duckdb
+
+    try:
+        statements = duckdb.extract_statements(sql)
+    except duckdb.Error as e:
+        raise ValueError(f"`sql` is not valid SQL: {e}") from e
+    if len(statements) != 1 or statements[0].type != duckdb.StatementType.SELECT:
+        raise ValueError("`sql` must be exactly one SELECT statement.")
 
 
 @dataclass(frozen=True, slots=True)
@@ -184,10 +205,10 @@ class InfoSchema:
         Every value comes back as text, so results print as-is and time zone
         aware timestamps need no extra Python packages.
 
-        The caller must make sure that ``sql`` is a single SELECT: it is wrapped
-        in a subquery, not parsed here. ``check_info_schema_query`` validates its
-        ``sql`` at config load. External access is disabled on the connection,
-        so even unvalidated SQL cannot read or write files.
+        ``sql`` is checked to be a single SELECT before it runs (``require_single_select``
+        raises ``ValueError`` otherwise), so this method is safe to call from any path. ``check_info_schema_query`` also validates its
+        ``sql`` at config load, to fail before the run starts. External access is
+        disabled on the connection, so no SQL can read or write files.
 
         Args:
             sql: A single SELECT statement.
@@ -196,6 +217,7 @@ class InfoSchema:
             tuple[list[str], list[tuple[str | None, ...]]]: Column names and rows.
 
         """
+        require_single_select(sql)
         cursor = self.connection.execute(
             f"SELECT CAST(COLUMNS(*) AS VARCHAR) FROM ({sql.strip().rstrip(';')})"  # ruff: ignore[hardcoded-sql-expression] # nosec B608
         )

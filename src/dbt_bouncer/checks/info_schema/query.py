@@ -1,5 +1,6 @@
 """A check that runs custom SQL against the dbt Information Schema."""
 
+from dbt_bouncer.artifact_parsers.info_schema import require_single_select
 from dbt_bouncer.check_framework.decorator import check, fail
 
 # Failure messages list at most this many offending rows.
@@ -7,23 +8,8 @@ _MAX_ROWS_IN_MESSAGE = 10
 
 
 def _require_single_select(*, sql: str) -> None:
-    """Reject SQL that is not exactly one SELECT statement.
-
-    The Information Schema database also has external access disabled; this
-    stops statements such as `COPY` or `ATTACH` before the run starts.
-
-    Raises:
-        ValueError: If `sql` does not parse, or is not a single SELECT.
-
-    """
-    import duckdb
-
-    try:
-        statements = duckdb.extract_statements(sql)
-    except duckdb.Error as e:
-        raise ValueError(f"`sql` is not valid SQL: {e}") from e
-    if len(statements) != 1 or statements[0].type != duckdb.StatementType.SELECT:
-        raise ValueError("`sql` must be exactly one SELECT statement.")
+    """Reject `sql` at config load unless it is exactly one SELECT statement (see `require_single_select`)."""
+    require_single_select(sql)
 
 
 @check(code="IS001", validate=_require_single_select)
