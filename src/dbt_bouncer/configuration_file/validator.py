@@ -917,6 +917,90 @@ def _extract_configured_check_names(
     return configured_check_names
 
 
+def _check_category_by_name(
+    check_names: set[str], custom_checks_dir: Path | None
+) -> dict[str, str]:
+    """Map each known check name to the category key it belongs under.
+
+    Built-in checks come from the cached name-to-module map, which needs no
+    imports. Only names missing from it (custom and entry-point checks) load
+    their classes, whose category is their directory, as in
+    ``_create_conf_class``.
+
+    Returns:
+        dict[str, str]: Check name to category key, e.g. ``"catalog_checks"``.
+            Unknown names are left out; validation reports them separately.
+
+    """
+    from dbt_bouncer.configuration_file.parser import _get_category
+    from dbt_bouncer.utils import (
+        _get_check_module_map_cached,
+        get_check_objects_for_names,
+    )
+
+    module_map = _get_check_module_map_cached(custom_checks_dir)
+    categories = {
+        name: module_map[name]["category"]
+        for name in check_names
+        if module_map.get(name, {}).get("category")
+    }
+    unmapped = check_names - categories.keys()
+    if unmapped:
+        directory_to_category = {c.directory: c.value for c in CheckCategory}
+        for cls in get_check_objects_for_names(
+            frozenset(unmapped), custom_checks_dir=custom_checks_dir
+        ):
+            category = directory_to_category.get(_get_category(cls))
+            name_args = typing.get_args(cls.model_fields["name"].annotation)
+            if category and name_args and name_args[0] in unmapped:
+                categories[name_args[0]] = category
+    return categories
+
+
+def _reject_checks_in_wrong_category(
+    check_categories,
+    config_file_contents: dict[str, Any],
+    custom_checks_dir: Path | None,
+) -> None:
+    """Reject a check configured under another category's key.
+
+    Each category key only accepts its own checks. Without this, a key holding
+    nothing but misplaced checks skipped validation entirely, and the run
+    crashed later on the unvalidated entries.
+
+    Raises:
+        DbtBouncerConfigError: If any check is under the wrong category key.
+
+    """
+    entries = [
+        (category, index, entry["name"])
+        for category in check_categories
+        for index, entry in enumerate(config_file_contents.get(category) or [])
+        if isinstance(entry, dict) and isinstance(entry.get("name"), str)
+    ]
+    if not entries:
+        return
+    expected = _check_category_by_name(
+        {name for _, _, name in entries}, custom_checks_dir
+    )
+    details = [
+        {
+            "loc": (category, index, "name"),
+            "message": (
+                f"`{name}` is a `{expected[name]}` check, but it is configured "
+                f"under `{category}`. Move it to `{expected[name]}`."
+            ),
+        }
+        for category, index, name in entries
+        if expected.get(name, category) != category
+    ]
+    if details:
+        raise DbtBouncerConfigError(
+            "\n".join(f"{i + 1}. {d['message']}" for i, d in enumerate(details)),
+            details=details,
+        )
+
+
 def _build_conf_class(
     check_categories,
     configured_check_names: set[str],
@@ -1107,6 +1191,10 @@ def validate_conf(
 
     config_file_contents = apply_deprecated_check_name_aliases(config_file_contents)
     configured_check_names = _extract_configured_check_names(
+        check_categories, config_file_contents, custom_checks_dir
+    )
+    # Before the cache lookup: an earlier, wrongly accepted run may be cached.
+    _reject_checks_in_wrong_category(
         check_categories, config_file_contents, custom_checks_dir
     )
 

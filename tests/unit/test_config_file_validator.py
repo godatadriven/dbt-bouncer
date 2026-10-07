@@ -462,6 +462,49 @@ def test_validate_conf_incorrect_names():
     )
 
 
+@pytest.mark.parametrize(
+    "manifest_checks",
+    [
+        pytest.param(
+            [{"name": "check_column_names", "column_name_pattern": "x"}],
+            id="only_misplaced_check",
+        ),
+        pytest.param(
+            [
+                {"name": "check_model_description_populated"},
+                {"name": "check_column_names", "column_name_pattern": "x"},
+            ],
+            id="next_to_a_valid_check",
+        ),
+        pytest.param(
+            [{"code": "CA009", "column_name_pattern": "x"}],
+            id="rule_code",
+        ),
+    ],
+)
+def test_validate_conf_check_in_wrong_category(manifest_checks):
+    """A check under another category's key is a config error naming the right key.
+
+    Before, a category holding only misplaced checks skipped validation and the run
+    crashed later with an ``AttributeError``.
+    """
+    with pytest.raises(DbtBouncerConfigError) as excinfo:
+        validate_conf(
+            check_categories=["manifest_checks"],
+            config_file_contents={"manifest_checks": manifest_checks},
+        )
+
+    assert str(excinfo.value) == (
+        "1. `check_column_names` is a `catalog_checks` check, but it is configured "
+        "under `manifest_checks`. Move it to `catalog_checks`."
+    )
+    assert excinfo.value.details[0]["loc"] == (
+        "manifest_checks",
+        len(manifest_checks) - 1,
+        "name",
+    )
+
+
 def test_validate_conf_invalid_parameter_type():
     """A wrong parameter type surfaces Pydantic's detail rather than an empty error."""
     ctx = typer.Context(
