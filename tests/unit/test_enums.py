@@ -17,6 +17,7 @@ class TestCheckCategory:
         """Iteration order is the declaration order (alphabetical)."""
         assert [c.value for c in CheckCategory] == [
             "catalog_checks",
+            "info_schema_checks",
             "manifest_checks",
             "run_results_checks",
         ]

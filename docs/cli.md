@@ -530,7 +530,7 @@ Example output:
 #### `--category`, `-c`
 
 **Type:** Choice
-**Options:** `catalog_checks`, `manifest_checks`, `run_results_checks`
+**Options:** `catalog_checks`, `info_schema_checks`, `manifest_checks`, `run_results_checks`
 **Default:** None
 **Required:** No
 

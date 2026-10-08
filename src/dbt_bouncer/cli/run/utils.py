@@ -77,6 +77,7 @@ def _build_context(
         create_pr_comment_file=create_pr_comment_file,
         dry_run=dry_run,
         exposures=artifacts.exposures,
+        info_schema=artifacts.info_schema,
         macros=artifacts.macros,
         manifest_obj=artifacts.manifest_obj,
         models=artifacts.models,

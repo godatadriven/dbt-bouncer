@@ -196,9 +196,9 @@ dbt_project/target/compiled
 dbt_project/target/data
 dbt_project/target/ephemeral
 dbt_project/target/generic_tests
-dbt_project/target/info_schema
 # dbt 2.0 writes its Parquet artifacts (the docs v2 index) under target/private.
-# dbt-bouncer reads the JSON artifacts, so these stay out of the repository.
+# dbt-bouncer reads the JSON artifacts and `target/info_schema/v1` (committed for
+# `info_schema_checks`), so these stay out of the repository.
 dbt_project/target/private
 dbt_project/target/run
 dbt_project/target/schemas
@@ -241,13 +241,12 @@ tests/fixtures/dbt_112/target/partial_parse.msgpack
 tests/fixtures/dbt_112/target/run/
 tests/fixtures/dbt_112/target/perf_info.json
 tests/fixtures/dbt_112/target/semantic_manifest.json
-# dbt 2.0 emits extra per-node directories alongside the three JSON artifacts
-# dbt-bouncer consumes; only those three are committed (as for dbt_112).
+# dbt 2.0 emits extra per-node directories alongside the artifacts dbt-bouncer
+# consumes; only the three JSON artifacts and `info_schema/v1` are committed.
 tests/fixtures/dbt_20/target/compiled/
 tests/fixtures/dbt_20/target/data/
 tests/fixtures/dbt_20/target/ephemeral/
 tests/fixtures/dbt_20/target/generic_tests/
-tests/fixtures/dbt_20/target/info_schema/
 tests/fixtures/dbt_20/target/private/
 tests/fixtures/dbt_20/target/run/
 tests/fixtures/dbt_20/target/schemas/

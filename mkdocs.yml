@@ -41,6 +41,11 @@ nav:
               - checks/catalog/columns/description.md
               - checks/catalog/columns/naming.md
               - checks/catalog/columns/tests.md
+      - Information Schema:
+          - checks/info_schema/columns.md
+          - checks/info_schema/grain.md
+          - checks/info_schema/query.md
+          - checks/info_schema/sources.md
       - Manifest:
           - Exposures: checks/manifest/check_exposures.md
           - Lineage: checks/manifest/check_lineage.md

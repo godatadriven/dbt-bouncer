@@ -36,6 +36,7 @@ dbt-bouncer list --group manifest_checks
 | --- | --- | --- | --- |
 | `CA` | Catalog | `catalog_checks` | 11 |
 | `EX` | Exposures | `manifest_checks` | 6 |
+| `IS` | Information schema | `info_schema_checks` | 9 |
 | `LI` | Lineage | `manifest_checks` | 3 |
 | `MA` | Macros | `manifest_checks` | 10 |
 | `ME` | Metadata | `manifest_checks` | 1 |
@@ -74,6 +75,20 @@ dbt-bouncer list --group manifest_checks
 | `EX004` | `check_exposure_description_populated` | Exposures must have a populated description. |
 | `EX005` | `check_exposure_has_meta_keys` | The `meta` config for exposures must have the specified keys. |
 | `EX006` | `check_exposure_has_owner` | Exposures must have owner information populated. |
+
+## Information schema (`IS`)
+
+| Code | Check | Description |
+| --- | --- | --- |
+| `IS001` | `check_info_schema_query` | A SQL query against the dbt Information Schema must return no rows. |
+| `IS002` | `check_model_column_descriptions_propagated` | Columns that copy an upstream column must have a description when the upstream column has one. |
+| `IS003` | `check_model_column_meta_propagated` | Columns derived from an upstream column that sets a `meta` key must set the same key. |
+| `IS004` | `check_model_column_types_match_inferred` | The declared `data_type` of a column must match the type that the model SQL produces. |
+| `IS005` | `check_model_columns_have_lineage` | Each column of a model with upstream dependencies must have column-level lineage. |
+| `IS006` | `check_model_grain_is_tested` | The grain of a model must be covered by a uniqueness test. |
+| `IS007` | `check_model_has_grain` | Models must have a grain. |
+| `IS008` | `check_model_public_columns_not_derived_from_meta` | Public models must not expose columns derived from a column that sets a `meta` key. |
+| `IS009` | `check_source_columns_are_used` | Every column declared on a source must be used by at least one downstream model. |
 
 ## Lineage (`LI`)
 

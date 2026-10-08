@@ -23,6 +23,8 @@ classifiers = [
   "Programming Language :: Python :: 3.14",
 ]
 dependencies = [
+  # Reads the dbt 2.0 Information Schema (Parquet) for `info_schema_checks`. Imported lazily.
+  "duckdb (>=1.4,<2)",
   "jellyfish (>=1,<2)",
   "jinja2-simple-tags (<1)",
   "jinja2 (>=3,<4)",

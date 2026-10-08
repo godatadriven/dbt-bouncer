@@ -1804,6 +1804,121 @@
       "title": "CheckExposureHasOwner",
       "type": "object"
     },
+    "CheckInfoSchemaQuery": {
+      "additionalProperties": false,
+      "description": "A SQL query against the dbt Information Schema must return no rows.\n\n!!! info \"Rationale\"\n\n    Some project rules are easiest to express as a query, for example \"no model joins more than three sources\" or \"every metric has a label\". dbt 2.0 stores project metadata as tables in the dbt Information Schema, so a rule becomes a SELECT that returns the offending rows. This check runs such a query and fails when it returns any rows, with the same severity, selection and reporting as every other dbt-bouncer check. Queries written for dbt's own `dbt check` command can be reused by replacing `{{ info_schema('<table>') }}` with the table name, e.g. `dbt.models`.\n\n!!! note\n\n    This check requires the dbt Information Schema (dbt 2.0+, `--generate-info-schema`). Tables are named `<schema>.<table>` as in the Parquet file names, e.g. `dbt.models`, `dbt.column_lineage`, `dbt_rt.run_results`. See the [dbt Information Schema reference](https://docs.getdbt.com/reference/info-schema) for the available tables. The query runs in an in-memory DuckDB database with file access disabled.\n\nParameters:\n    sql (str): A single DuckDB SELECT statement. Each row returned is a failure.\n\nReceives:\n    info_schema (InfoSchema): The dbt Information Schema tables.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    info_schema_checks:\n        - name: check_info_schema_query\n          description: Public models must have a description.\n          sql: |\n              SELECT unique_id\n              FROM dbt.models\n              WHERE access = 'public'\n                AND coalesce(description, '') = ''\n    ```",
+      "properties": {
+        "code": {
+          "const": "IS001",
+          "default": "IS001",
+          "title": "Code",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to exclude. A list matches if any pattern matches.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to include. A list matches if any pattern matches.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_info_schema_query",
+          "default": "check_info_schema_query",
+          "title": "Name",
+          "type": "string"
+        },
+        "sql": {
+          "title": "Sql",
+          "type": "string"
+        }
+      },
+      "required": [
+        "sql"
+      ],
+      "title": "CheckInfoSchemaQuery",
+      "type": "object"
+    },
     "CheckLineagePermittedUpstreamModels": {
       "additionalProperties": false,
       "description": "Upstream models must have a path that matches the provided `upstream_path_pattern`.\n\n!!! info \"Rationale\"\n\n    A well-structured dbt project enforces clear layer boundaries \u2014 e.g. staging models only reference sources, intermediate models only reference staging or other intermediates, and marts only reference intermediates. Without this check, developers can inadvertently create cross-layer dependencies (a mart model directly referencing a staging model) that erode the project's modularity and make refactoring risky.\n\nParameters:\n    upstream_path_pattern (str): Regexp pattern to match the upstream model(s) path.\n\nReceives:\n    manifest_obj (ManifestObject): The manifest object.\n    model (ModelNode): The ModelNode object to check.\n    models (list[ModelNode]): List of ModelNode objects parsed from `manifest.json`.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_lineage_permitted_upstream_models\n          include: ^models/staging\n          upstream_path_pattern: $^\n        - name: check_lineage_permitted_upstream_models\n          include: ^models/intermediate\n          upstream_path_pattern: ^models/staging|^models/intermediate\n        - name: check_lineage_permitted_upstream_models\n          include: ^models/marts\n          upstream_path_pattern: ^models/staging|^models/intermediate\n    ```",
@@ -3764,6 +3879,114 @@
       "title": "CheckModelColumnDescriptionPopulated",
       "type": "object"
     },
+    "CheckModelColumnDescriptionsPropagated": {
+      "additionalProperties": false,
+      "description": "Columns that copy an upstream column must have a description when the upstream column has one.\n\n!!! info \"Rationale\"\n\n    A column that is passed through unchanged from an upstream model or source means the same thing downstream. When the upstream column is documented but the downstream column is not, the description is lost one step later in the DAG and users of the downstream model see an undocumented column. This check uses dbt's column-level lineage to find these columns, so you can copy the description or reference a shared `doc` block.\n\n!!! note\n\n    This check requires the dbt Information Schema (dbt 2.0+, `--generate-info-schema`). Only `copy` lineage edges are followed: a column that transforms its input (`mod`) can mean something different and is not checked.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    materialization (Literal[\"ephemeral\", \"incremental\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    info_schema_checks:\n        - name: check_model_column_descriptions_propagated\n          include: ^models/marts\n    ```",
+      "properties": {
+        "code": {
+          "const": "IS002",
+          "default": "IS002",
+          "title": "Code",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to exclude. A list matches if any pattern matches.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to include. A list matches if any pattern matches.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_model_column_descriptions_propagated",
+          "default": "check_model_column_descriptions_propagated",
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "title": "CheckModelColumnDescriptionsPropagated",
+      "type": "object"
+    },
     "CheckModelColumnHasSpecifiedTest": {
       "additionalProperties": false,
       "description": "Columns declared in a model's properties file that match the specified regexp pattern must have a specified test.\n\n!!! info \"Rationale\"\n\n    Naming conventions communicate expectations: a column named `is_active` implies it is boolean and never null; a column ending in `_id` implies it is a valid foreign key. Without enforcement, these implicit contracts go untested, and referential integrity issues or null values can silently corrupt downstream aggregations. This check bridges naming conventions and data quality by automatically requiring specific tests on columns that match a pattern, eliminating the manual overhead of reviewing every column individually.\n\nThis is the manifest-only analogue of `check_column_has_specified_test`, which requires `catalog.json`. It only evaluates columns declared in `model.columns`, i.e. columns present in the model's properties file; columns that exist in the warehouse but are not documented are invisible to this check. Unlike the catalog check it has no `case_sensitive` parameter: both the column names and the tests are read from `manifest.json`, so no cross-artifact casing mismatch is possible.\n\nParameters:\n    column_name_pattern (str): Regex pattern to match the column name.\n    test_name (str): Name of the test to check for.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n    tests (list[TestNode]): List of TestNode objects parsed from `manifest.json`.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    materialization (Literal[\"ephemeral\", \"incremental\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_model_column_has_specified_test\n          column_name_pattern: ^is_.*\n          test_name: not_null\n    ```",
@@ -3882,6 +4105,121 @@
         "test_name"
       ],
       "title": "CheckModelColumnHasSpecifiedTest",
+      "type": "object"
+    },
+    "CheckModelColumnMetaPropagated": {
+      "additionalProperties": false,
+      "description": "Columns derived from an upstream column that sets a `meta` key must set the same key.\n\n!!! info \"Rationale\"\n\n    Column `meta` often classifies data, for example `pii: true` or `contains_financial_data: true`. When a classified column flows into a downstream model, the downstream column holds the same data, but nothing in dbt copies the classification. Masking policies, access reviews and data catalogs that read the `meta` key then miss the downstream column. This check uses dbt's column-level lineage to make sure the classification follows the data.\n\n!!! note\n\n    This check requires the dbt Information Schema (dbt 2.0+, `--generate-info-schema`). It follows `copy` and `mod` lineage edges (the column value flows downstream), not `scan` edges (the column is only read, e.g. in a join). Column `meta` is read from `manifest.json`.\n\nParameters:\n    meta_key (str): The `meta` key to propagate, e.g. `pii`. A column is classified when the key has a truthy value.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    materialization (Literal[\"ephemeral\", \"incremental\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    info_schema_checks:\n        - name: check_model_column_meta_propagated\n          meta_key: pii\n    ```",
+      "properties": {
+        "code": {
+          "const": "IS003",
+          "default": "IS003",
+          "title": "Code",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to exclude. A list matches if any pattern matches.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to include. A list matches if any pattern matches.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_model_column_meta_propagated",
+          "default": "check_model_column_meta_propagated",
+          "title": "Name",
+          "type": "string"
+        },
+        "meta_key": {
+          "title": "Meta Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "meta_key"
+      ],
+      "title": "CheckModelColumnMetaPropagated",
       "type": "object"
     },
     "CheckModelColumnNameCompliesToColumnType": {
@@ -4281,6 +4619,234 @@
         "column_name_pattern"
       ],
       "title": "CheckModelColumnTypeCompliesToColumnName",
+      "type": "object"
+    },
+    "CheckModelColumnTypesMatchInferred": {
+      "additionalProperties": false,
+      "description": "The declared `data_type` of a column must match the type that the model SQL produces.\n\n!!! info \"Rationale\"\n\n    The `data_type` declared in YAML is what consumers rely on, and with an enforced contract dbt casts the column to that type. When the SQL produces a different type, for example an integer where a `double` is declared, the declaration hides a modelling mistake or a silent cast. dbt's static analysis infers the type that the SQL produces, so this check can compare the two without running the model.\n\n!!! note\n\n    This check requires the dbt Information Schema (dbt 2.0+, `--generate-info-schema`). Types are compared by family (boolean, date, decimal, float, integer, string, timestamp), so `bigint` and `Int64` match while `double` and `Int64` do not. Columns without both a declared and an inferred type, or with a type outside these families, are not checked.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    materialization (Literal[\"ephemeral\", \"incremental\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    info_schema_checks:\n        - name: check_model_column_types_match_inferred\n    ```",
+      "properties": {
+        "code": {
+          "const": "IS004",
+          "default": "IS004",
+          "title": "Code",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to exclude. A list matches if any pattern matches.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to include. A list matches if any pattern matches.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_model_column_types_match_inferred",
+          "default": "check_model_column_types_match_inferred",
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "title": "CheckModelColumnTypesMatchInferred",
+      "type": "object"
+    },
+    "CheckModelColumnsHaveLineage": {
+      "additionalProperties": false,
+      "description": "Each column of a model with upstream dependencies must have column-level lineage.\n\n!!! info \"Rationale\"\n\n    Column-level lineage powers impact analysis and the propagation checks in this category. A model that dbt's static analysis cannot analyse has no lineage at all, and a column declared in YAML that the SQL does not produce has no lineage either. This check reports both, so gaps in lineage are visible instead of silently weakening every check that depends on it.\n\n!!! note\n\n    This check requires the dbt Information Schema (dbt 2.0+, `--generate-info-schema`). Models without upstream dependencies are not checked. Ephemeral models are not checked either: dbt inlines them, so their lineage is recorded on the models that select from them. Columns built only from literals (e.g. `'web' as channel`) have no upstream column: exclude them with `exclude_column_name_pattern`.\n\nParameters:\n    exclude_column_name_pattern (str | None): Regex pattern to match column names that do not need lineage.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    materialization (Literal[\"ephemeral\", \"incremental\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    info_schema_checks:\n        - name: check_model_columns_have_lineage\n          exclude_column_name_pattern: ^_loaded_at$\n    ```",
+      "properties": {
+        "code": {
+          "const": "IS005",
+          "default": "IS005",
+          "title": "Code",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to exclude. A list matches if any pattern matches.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to include. A list matches if any pattern matches.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_model_columns_have_lineage",
+          "default": "check_model_columns_have_lineage",
+          "title": "Name",
+          "type": "string"
+        },
+        "exclude_column_name_pattern": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Exclude Column Name Pattern"
+        }
+      },
+      "title": "CheckModelColumnsHaveLineage",
       "type": "object"
     },
     "CheckModelColumnsHaveMetaKeys": {
@@ -6097,6 +6663,114 @@
       "title": "CheckModelFileName",
       "type": "object"
     },
+    "CheckModelGrainIsTested": {
+      "additionalProperties": false,
+      "description": "The grain of a model must be covered by a uniqueness test.\n\n!!! info \"Rationale\"\n\n    The grain is the set of columns that identifies one row of a model. Downstream joins and aggregations assume it holds: when it does not, duplicate rows silently inflate metrics. dbt records both the grain of each model and the columns that a uniqueness test covers, so this check can fail when a model declares a grain that no test enforces.\n\n!!! note\n\n    This check requires the dbt Information Schema (dbt 2.0+, `--generate-info-schema`). Models without a grain, and models missing from the Information Schema, are not checked: use `check_model_has_grain` to require a grain.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    materialization (Literal[\"ephemeral\", \"incremental\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    info_schema_checks:\n        - name: check_model_grain_is_tested\n          include: ^models/marts\n    ```",
+      "properties": {
+        "code": {
+          "const": "IS006",
+          "default": "IS006",
+          "title": "Code",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to exclude. A list matches if any pattern matches.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to include. A list matches if any pattern matches.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_model_grain_is_tested",
+          "default": "check_model_grain_is_tested",
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "title": "CheckModelGrainIsTested",
+      "type": "object"
+    },
     "CheckModelGrantPrivilege": {
       "additionalProperties": false,
       "description": "Model can have grant privileges that match the specified pattern.\n\n!!! info \"Rationale\"\n\n    Uncontrolled grant names can lead to excessive or incorrectly named privileges being applied to models, making it difficult to audit who has access to what. Enforcing a naming pattern for grants ensures consistency and makes security reviews straightforward.\n\nParameters:\n    privilege_pattern (str): Regex pattern to match the privilege.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    materialization (Literal[\"ephemeral\", \"incremental\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_model_grant_privilege\n          include: ^models/marts\n          privilege_pattern: ^select\n    ```",
@@ -6767,6 +7441,114 @@
         }
       },
       "title": "CheckModelHasExposure",
+      "type": "object"
+    },
+    "CheckModelHasGrain": {
+      "additionalProperties": false,
+      "description": "Models must have a grain.\n\n!!! info \"Rationale\"\n\n    A model without a known grain gives consumers no way to tell what one row represents, and no way to join to it safely. dbt derives the grain of each model from its configuration and its uniqueness tests, so a model without a grain usually lacks a primary key test.\n\n!!! note\n\n    This check requires the dbt Information Schema (dbt 2.0+, `--generate-info-schema`). Models missing from the Information Schema are not checked.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    materialization (Literal[\"ephemeral\", \"incremental\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    info_schema_checks:\n        - name: check_model_has_grain\n          include: ^models/marts\n    ```",
+      "properties": {
+        "code": {
+          "const": "IS007",
+          "default": "IS007",
+          "title": "Code",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to exclude. A list matches if any pattern matches.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to include. A list matches if any pattern matches.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_model_has_grain",
+          "default": "check_model_has_grain",
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "title": "CheckModelHasGrain",
       "type": "object"
     },
     "CheckModelHasLabelsKeys": {
@@ -9345,6 +10127,121 @@
         }
       },
       "title": "CheckModelPropertyFileLocation",
+      "type": "object"
+    },
+    "CheckModelPublicColumnsNotDerivedFromMeta": {
+      "additionalProperties": false,
+      "description": "Public models must not expose columns derived from a column that sets a `meta` key.\n\n!!! info \"Rationale\"\n\n    Public models are the interface that other teams and projects build on, so anything they expose spreads beyond the owning team. When a column classified with a `meta` key, for example `pii: true`, flows into a public model, possibly through several intermediate models, sensitive data leaves the team's control. This check walks dbt's column-level lineage upstream from every column of a public model and fails when any ancestor column sets the key.\n\n!!! note\n\n    This check requires the dbt Information Schema (dbt 2.0+, `--generate-info-schema`). It follows `copy` and `mod` lineage edges through any number of models, not `scan` edges. Column `meta` is read from `manifest.json`. Models that are not public are not checked.\n\nParameters:\n    meta_key (str): The `meta` key that marks a sensitive column, e.g. `pii`. A column is sensitive when the key has a truthy value.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    materialization (Literal[\"ephemeral\", \"incremental\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    info_schema_checks:\n        - name: check_model_public_columns_not_derived_from_meta\n          meta_key: pii\n    ```",
+      "properties": {
+        "code": {
+          "const": "IS008",
+          "default": "IS008",
+          "title": "Code",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to exclude. A list matches if any pattern matches.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to include. A list matches if any pattern matches.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_model_public_columns_not_derived_from_meta",
+          "default": "check_model_public_columns_not_derived_from_meta",
+          "title": "Name",
+          "type": "string"
+        },
+        "meta_key": {
+          "title": "Meta Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "meta_key"
+      ],
+      "title": "CheckModelPublicColumnsNotDerivedFromMeta",
       "type": "object"
     },
     "CheckModelSchemaName": {
@@ -12262,6 +13159,114 @@
       "title": "CheckSourceColumnsAreAllDocumented",
       "type": "object"
     },
+    "CheckSourceColumnsAreUsed": {
+      "additionalProperties": false,
+      "description": "Every column declared on a source must be used by at least one downstream model.\n\n!!! info \"Rationale\"\n\n    Source YAML is often generated once and never pruned, so it documents, tests and sometimes loads columns that no model reads. Unused columns cost ingestion and test time, and they suggest to readers that the data is in use. dbt's column-level lineage shows which source columns models actually read, so this check can list the declared columns that nothing uses.\n\n!!! note\n\n    This check requires the dbt Information Schema (dbt 2.0+, `--generate-info-schema`). A column counts as used when any lineage edge reads it, including joins and filters. When a downstream model has no column-level lineage (dbt's static analysis could not analyse it), the source is not checked, because its columns cannot be proven unused. Ephemeral downstream models are the exception: dbt records their lineage on the models that select from them. Sources without downstream models are not checked: use `check_source_not_orphaned` for those.\n\nReceives:\n    source (SourceNode): The SourceNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the source path. Source paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the source path. Only source paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    info_schema_checks:\n        - name: check_source_columns_are_used\n    ```",
+      "properties": {
+        "code": {
+          "const": "IS009",
+          "default": "IS009",
+          "title": "Code",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to exclude. A list matches if any pattern matches.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to include. A list matches if any pattern matches.",
+          "title": "Include"
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_source_columns_are_used",
+          "default": "check_source_columns_are_used",
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "title": "CheckSourceColumnsAreUsed",
+      "type": "object"
+    },
     "CheckSourceDescriptionPopulated": {
       "additionalProperties": false,
       "description": "Sources must have a populated description.\n\n!!! info \"Rationale\"\n\n    Sources represent the boundary between raw, external data and the curated dbt project. A populated description explains what the source is, where it comes from, and how it is loaded \u2014 context that is invaluable when debugging data issues or onboarding new team members. Without enforcing descriptions, sources accumulate as anonymous inputs that future maintainers cannot evaluate or trust, increasing the risk of misuse or redundant ingestion pipelines.\n\nParameters:\n    min_description_length (int | None): Minimum length required for the description to be considered populated.\n\nReceives:\n    source (SourceNode): The SourceNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the source path (i.e the .yml file where the source is configured). Source paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the source path (i.e the .yml file where the source is configured). Only source paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_source_description_populated\n    ```\n    ```yaml\n    manifest_checks:\n        - name: check_source_description_populated\n          min_description_length: 25 # Setting a stricter requirement for description length\n    ```",
@@ -15005,6 +16010,56 @@
         ]
       },
       "title": "Catalog Checks",
+      "type": "array"
+    },
+    "info_schema_checks": {
+      "default": [],
+      "items": {
+        "discriminator": {
+          "mapping": {
+            "check_info_schema_query": "#/$defs/CheckInfoSchemaQuery",
+            "check_model_column_descriptions_propagated": "#/$defs/CheckModelColumnDescriptionsPropagated",
+            "check_model_column_meta_propagated": "#/$defs/CheckModelColumnMetaPropagated",
+            "check_model_column_types_match_inferred": "#/$defs/CheckModelColumnTypesMatchInferred",
+            "check_model_columns_have_lineage": "#/$defs/CheckModelColumnsHaveLineage",
+            "check_model_grain_is_tested": "#/$defs/CheckModelGrainIsTested",
+            "check_model_has_grain": "#/$defs/CheckModelHasGrain",
+            "check_model_public_columns_not_derived_from_meta": "#/$defs/CheckModelPublicColumnsNotDerivedFromMeta",
+            "check_source_columns_are_used": "#/$defs/CheckSourceColumnsAreUsed"
+          },
+          "propertyName": "name"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/$defs/CheckInfoSchemaQuery"
+          },
+          {
+            "$ref": "#/$defs/CheckModelColumnDescriptionsPropagated"
+          },
+          {
+            "$ref": "#/$defs/CheckModelColumnMetaPropagated"
+          },
+          {
+            "$ref": "#/$defs/CheckModelColumnTypesMatchInferred"
+          },
+          {
+            "$ref": "#/$defs/CheckModelColumnsHaveLineage"
+          },
+          {
+            "$ref": "#/$defs/CheckModelGrainIsTested"
+          },
+          {
+            "$ref": "#/$defs/CheckModelHasGrain"
+          },
+          {
+            "$ref": "#/$defs/CheckModelPublicColumnsNotDerivedFromMeta"
+          },
+          {
+            "$ref": "#/$defs/CheckSourceColumnsAreUsed"
+          }
+        ]
+      },
+      "title": "Info Schema Checks",
       "type": "array"
     },
     "manifest_checks": {
