@@ -292,6 +292,8 @@
       
         
       
+        
+      
     
     
     
@@ -749,6 +751,8 @@
       
         
       
+        
+      
     
     
     
@@ -1165,7 +1169,7 @@ them on the command line, or with the <code>DBT_BOUNCER_*</code> variables descr
 <p><code>dbt-bouncer</code> converts all of these paths to the Linux/Mac form, hence when you are supplying values to <code>exclude</code> and <code>include</code> you should use the Linux/Mac form.</p>
 </div>
 <h3 id="only">Only<a class="headerlink" href="#only" title="Permanent link">#</a></h3>
-<p><code>dbt-bouncer</code> has checks for three categories: catalog_checks, manifest_checks and run_results_checks. Running <code>dbt-bouncer</code> runs all checks for all categories. If you want to limit <code>dbt-bouncer</code> to a subset of check categories then you can use the <code>--only</code> CLI flag. It takes a command-separated list of check categories to run. Examples:</p>
+<p><code>dbt-bouncer</code> has checks for four categories: catalog_checks, info_schema_checks, manifest_checks and run_results_checks. Running <code>dbt-bouncer</code> runs all checks for all categories. If you want to limit <code>dbt-bouncer</code> to a subset of check categories then you can use the <code>--only</code> CLI flag. It takes a command-separated list of check categories to run. Examples:</p>
 <div class="language-shell highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>dbt-bouncer<span class="w"> </span>--only<span class="w"> </span>manifest_checks
 </span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>dbt-bouncer<span class="w"> </span>--only<span class="w"> </span>catalog_checks,manifest_checks
 </span></code></pre></div>
