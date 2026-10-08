@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="320" viewBox="0 0 1200 320">
+  <rect width="1200" height="320" fill="#ffffff" rx="12"/>
+
+  <!-- Title -->
+  <text x="600" y="40" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="22" font-weight="bold" fill="#1a1a2e">dbt-bouncer Colour Palette</text>
+
+  <!-- Swatches: 7 colours, 140x140 each, 24px gap -->
+  <!-- Row offset: (1200 - 7*140 - 6*24) / 2 = 38 -->
+
+  <!-- 1. Brand orange #ff694a -->
+  <rect x="38" y="70" width="140" height="140" rx="10" fill="#ff694a"/>
+  <text x="108" y="232" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="13" font-weight="bold" fill="#1a1a2e">Brand orange</text>
+  <text x="108" y="252" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="13" fill="#555566">#ff694a</text>
+
+  <!-- 2. Dark background #1a1a2e -->
+  <rect x="202" y="70" width="140" height="140" rx="10" fill="#1a1a2e"/>
+  <text x="272" y="232" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="13" font-weight="bold" fill="#1a1a2e">Dark background</text>
+  <text x="272" y="252" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="13" fill="#555566">#1a1a2e</text>
+
+  <!-- 3. Logo circle fill #130912 -->
+  <rect x="366" y="70" width="140" height="140" rx="10" fill="#130912"/>
+  <text x="436" y="232" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="13" font-weight="bold" fill="#1a1a2e">Logo circle fill</text>
+  <text x="436" y="252" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="13" fill="#555566">#130912</text>
+
+  <!-- 4. Light text #fafafa -->
+  <rect x="530" y="70" width="140" height="140" rx="10" fill="#fafafa" stroke="#dddddd" stroke-width="1"/>
+  <text x="600" y="232" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="13" font-weight="bold" fill="#1a1a2e">Light text</text>
+  <text x="600" y="252" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="13" fill="#555566">#fafafa</text>
+
+  <!-- 5. Muted text (light) #555566 -->
+  <rect x="694" y="70" width="140" height="140" rx="10" fill="#555566"/>
+  <text x="764" y="232" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="13" font-weight="bold" fill="#1a1a2e">Muted (light)</text>
+  <text x="764" y="252" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="13" fill="#555566">#555566</text>
+
+  <!-- 6. Muted text (dark) #aaaacc -->
+  <rect x="858" y="70" width="140" height="140" rx="10" fill="#aaaacc"/>
+  <text x="928" y="232" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="13" font-weight="bold" fill="#1a1a2e">Muted (dark)</text>
+  <text x="928" y="252" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="13" fill="#555566">#aaaacc</text>
+
+  <!-- 7. White #ffffff -->
+  <rect x="1022" y="70" width="140" height="140" rx="10" fill="#ffffff" stroke="#dddddd" stroke-width="1"/>
+  <text x="1092" y="232" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="13" font-weight="bold" fill="#1a1a2e">White</text>
+  <text x="1092" y="252" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="13" fill="#555566">#ffffff</text>
+
+  <!-- Bottom accent bar -->
+  <rect x="0" y="314" width="1200" height="6" fill="#ff694a" rx="0"/>
+</svg>
