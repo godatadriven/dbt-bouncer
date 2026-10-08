@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = ">=3.11, <3.15"
 resolution-markers = [
     "python_full_version >= '3.14'",
@@ -367,7 +367,7 @@ sdist = { url = "https://files.pythonhosted.org/packages/55/6a/7585b1694cfe0eb77
 
 [[package]]
 name = "dbt-bouncer"
-version = "0.0.0"
+version = "4.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "duckdb" },
