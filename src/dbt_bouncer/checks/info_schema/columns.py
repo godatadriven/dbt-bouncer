@@ -285,7 +285,7 @@ def check_model_columns_have_lineage(
 
     !!! note
 
-        This check requires the dbt Information Schema (dbt 2.0+, `--generate-info-schema`). Models without upstream dependencies are not checked. Ephemeral models are not checked either: dbt inlines them, so their lineage is recorded on the models that select from them. Columns built only from literals (e.g. `'web' as channel`) have no upstream column: exclude them with `exclude_column_name_pattern`.
+        This check requires the dbt Information Schema (dbt 2.0+, `--generate-info-schema`). Models without upstream dependencies are not checked. Ephemeral models are not checked either: dbt inlines them, so their lineage is recorded on the models that select from them. Python models are not checked, because dbt's static analysis reads only SQL and cannot produce lineage for them. Columns built only from literals (e.g. `'web' as channel`) have no upstream column: exclude them with `exclude_column_name_pattern`.
 
     Parameters:
         exclude_column_name_pattern (str | None): Regex pattern to match column names that do not need lineage.
@@ -311,6 +311,9 @@ def check_model_columns_have_lineage(
     if not (model.depends_on and model.depends_on.nodes):
         return
     if model.config and model.config.materialized == "ephemeral":
+        return
+    # Static analysis reads only SQL, so Python models never have lineage.
+    if model.language == "python":
         return
     info_schema: "InfoSchema" = ctx.info_schema
     model_name = get_clean_model_name(model.unique_id)

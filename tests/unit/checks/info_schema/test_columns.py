@@ -230,6 +230,17 @@ class TestCheckModelColumnsHaveLineage:
             ctx_info_schema=InfoSchema.from_rows(node_columns=[_column(MODEL, "id")]),
         )
 
+    def test_python_model_passes(self):
+        check_passes(
+            "check_model_columns_have_lineage",
+            model={
+                "unique_id": MODEL,
+                "depends_on": {"nodes": [PARENT]},
+                "language": "python",
+            },
+            ctx_info_schema=InfoSchema.from_rows(node_columns=[_column(MODEL, "id")]),
+        )
+
     def test_model_without_parents_passes(self):
         check_passes(
             "check_model_columns_have_lineage",
