@@ -81,6 +81,9 @@ uv run dbt-bouncer --config-file ./dbt-bouncer-example.yml
 # #11792) and dbt-duckdb rejecting the `grants` config, which this project sets on purpose
 # to give dbt-bouncer a grants fixture. dbt 2.0 has no equivalent flag, so the strict
 # setting lives in dbt_project.yml and the legacy line opts out here.
+# `--only` leaves out `info_schema_checks`: dbt 1.x cannot write the Information Schema, so
+# dbt_project/target/info_schema is still the committed dbt 2.0 copy and does not match the
+# dbt 1.x manifest.
 [tasks.build-and-run-dbt-bouncer-dbt1]
 description = "Build the test project with the latest dbt-core 1.x release and run dbt-bouncer"
 run = """
@@ -90,7 +93,7 @@ WARN_RESET='{"error": []}'
 $DBT_1 deps --profiles-dir ./dbt_project --project-dir ./dbt_project
 $DBT_1 build --warn-error-options "$WARN_RESET" --profiles-dir ./dbt_project --project-dir ./dbt_project
 $DBT_1 docs generate --warn-error-options "$WARN_RESET" --profiles-dir ./dbt_project --project-dir ./dbt_project
-uv run dbt-bouncer --config-file ./dbt-bouncer-example.yml
+uv run dbt-bouncer --config-file ./dbt-bouncer-example.yml --only catalog_checks,manifest_checks,run_results_checks
 """
 
 # Parse-only probe of the dbt Fusion engine, which the `dbt` distribution provides.
