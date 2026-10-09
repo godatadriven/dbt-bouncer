@@ -154,31 +154,31 @@ The goal of a CI pipeline is to test the changes in a pull request but also to p
 1. By running `dbt parse`, dbt can generate a `manifest.json` without a database connection. We can then run our manifest checks via:
 
       ```shell
-      dbt-bouncer --only manifest_checks
+      dbt-bouncer run --only manifest_checks
       ```
 
 1. dbt requires models to be materialised before it can generate a `catalog.json` file. By running `dbt run --empty` we can materialise every model without processing any data. Once these materializations are performed we can run our catalog checks via:
 
       ```shell
-      dbt-bouncer --only catalog_checks
+      dbt-bouncer run --only catalog_checks
       ```
 
 1. Typically a CI pipeline will run a `dbt build` command with flags such as `--state` and/or `--defer`. After this command has completed we can run our run results checks via:
 
       ```shell
-      dbt-bouncer --only run_results_checks
+      dbt-bouncer run --only run_results_checks
       ```
 
    Additionally, you can use the `--check` flag to run only specific checks by name. This is useful for debugging or validating a single convention:
 
       ```shell
-      dbt-bouncer --check check_model_has_unique_test
+      dbt-bouncer run --check check_model_has_unique_test
       ```
 
    Multiple checks can be specified as a comma-separated list:
 
       ```shell
-      dbt-bouncer --check check_model_has_unique_test,check_model_description_populated
+      dbt-bouncer run --check check_model_has_unique_test,check_model_description_populated
       ```
 
    The `--check` and `--only` flags can be combined: `--only` restricts to the specified categories, then `--check` further narrows to only the named checks within those categories.
@@ -276,7 +276,7 @@ This is the recommended approach due to its simplicity and ability to update eac
 1. Run `dbt-bouncer`:
 
     ```shell
-    dbt-bouncer --config-file dbt-bouncer-config/dbt-bouncer.yml
+    dbt-bouncer run --config-file dbt-bouncer-config/dbt-bouncer.yml
     ```
 
 Your directory tree should look like this:
@@ -320,7 +320,7 @@ Alternatively, you can use a local hook to run automatically run `dbt-bouncer` b
   hooks:
     - id: dbt-bouncer
       name: dbt-bouncer
-      entry: dbt-bouncer # --config-file <PATH_TO_CONFIG_FILE>
+      entry: dbt-bouncer run # --config-file <PATH_TO_CONFIG_FILE>
       language: system
       pass_filenames: false
       always_run: true

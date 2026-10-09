@@ -133,7 +133,7 @@ CI will fail if `schema.json` is out of date.
 **Steps after writing:**
 
 1. Place in the appropriate submodule under `src/dbt_bouncer/checks/`
-2. Add to `dbt-bouncer-example.yml` and validate: `dbt-bouncer --config-file dbt-bouncer-example.yml`
+2. Add to `dbt-bouncer-example.yml` and validate: `dbt-bouncer run --config-file dbt-bouncer-example.yml`
 3. Write tests (happy + unhappy paths) in the mirror location under `tests/unit/checks/`
 4. Run `mise run test-unit` and `prek run --all-files`
 

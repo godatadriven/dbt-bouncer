@@ -102,7 +102,7 @@ When installed in this way, any changes you make to your local copy of the sourc
 With your virtualenv activated, the `dbt-bouncer` script should point back to the source code you've cloned on your machine. You can verify this by running `which dbt-bouncer`. This command should show you a path to an executable in your virtualenv. You can run `dbt-bouncer` using the provided example configuration file via:
 
 ```shell
-uv run dbt-bouncer --config-file dbt-bouncer-example.yml
+uv run dbt-bouncer run --config-file dbt-bouncer-example.yml
 ```
 
 ## Testing
@@ -244,7 +244,7 @@ def check_model_names(model, *, model_name_pattern: str):
     - Add `ctx` as a parameter only if the function needs access to the `CheckContext`.
     - Call `fail(message)` to signal a check failure.
     - Validate parameters in their type, not in the function body, so a misconfigured check is a config error at load time instead of an exception raised for every resource. Use `RegexPattern` (from `dbt_bouncer.types`) for regex parameters and `Annotated[int, Field(gt=0)]`-style constraints for bounds. For a rule that spans several parameters, pass `validate=` to `@check`: a callable that receives the keyword-only parameters as keyword arguments and raises `ValueError`.
-1. Add the check to `dbt-bouncer-example.yml` and run `dbt-bouncer --config-file dbt-bouncer-example.yml`.
+1. Add the check to `dbt-bouncer-example.yml` and run `dbt-bouncer run --config-file dbt-bouncer-example.yml`.
 1. Write tests using the test helpers:
 
 ```python

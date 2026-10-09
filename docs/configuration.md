@@ -213,11 +213,11 @@ To determine if a check accepts these arguments view the [Checks page](./checks/
 
 ### Only
 
-`dbt-bouncer` has checks for four categories: catalog_checks, info_schema_checks, manifest_checks and run_results_checks. Running `dbt-bouncer` runs all checks for all categories. If you want to limit `dbt-bouncer` to a subset of check categories then you can use the `--only` CLI flag. It takes a command-separated list of check categories to run. Examples:
+`dbt-bouncer` has checks for four categories: `catalog_checks`, `info_schema_checks`, `manifest_checks` and `run_results_checks`. Running `dbt-bouncer` runs all checks for all categories. If you want to limit `dbt-bouncer` to a subset of check categories then you can use the `--only` CLI flag. It takes a comma-separated list of check categories to run. Examples:
 
 ```shell
-dbt-bouncer --only manifest_checks
-dbt-bouncer --only catalog_checks,manifest_checks
+dbt-bouncer run --only manifest_checks
+dbt-bouncer run --only catalog_checks,manifest_checks
 ```
 
 For a detailed description see [here](./faq.md#how-to-configure-dbt-bouncer-for-use-in-a-ci-pipeline).

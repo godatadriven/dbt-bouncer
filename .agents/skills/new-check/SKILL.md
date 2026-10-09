@@ -93,7 +93,7 @@ Prefixes: `CA` catalog, `EX` exposure, `LI` lineage, `MA` macro, `ME` metadata, 
 ## 4. Register the Check
 
 - Add the check to `dbt-bouncer-example.yml`
-- Validate: `dbt-bouncer --config-file dbt-bouncer-example.yml`
+- Validate: `dbt-bouncer run --config-file dbt-bouncer-example.yml`
 - Ensure alphabetical ordering is maintained
 
 ## 5. Write Tests
