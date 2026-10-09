@@ -32,7 +32,7 @@
                     DBT_TOKEN_VALUE: ${{ secrets.DBT_TOKEN_VALUE }}
 
                 - name: Run `dbt-bouncer`
-                  run: uv run dbt-bouncer --config-file ./dbt-bouncer-example.yml
+                  run: uv run dbt-bouncer run --config-file ./dbt-bouncer-example.yml
 
         dbt-core:
             permissions:

@@ -25,7 +25,7 @@ pip install dbt-bouncer # or via any other package manager
 Run:
 
 ```shell
-dbt-bouncer --config-file <PATH_TO_CONFIG_FILE>
+dbt-bouncer run --config-file <PATH_TO_CONFIG_FILE>
 ```
 
 ```shell
@@ -37,11 +37,11 @@ Validating conf...
 `dbt-bouncer` also supports a verbose mode, run:
 
 ```shell
-dbt-bouncer --config-file <PATH_TO_CONFIG_FILE> -v
+dbt-bouncer run --config-file <PATH_TO_CONFIG_FILE> -v
 ```
 
 ```shell
-INFO: Running dbt-bouncer (0.0.0)...
+INFO: Running dbt-bouncer (X.X.X)...
 DEBUG: config_file=PosixPath('<PATH_TO_CONFIG_FILE>')
 DEBUG: config_file_source='COMMANDLINE'
 DEBUG: Config file passed via command line: <PATH_TO_CONFIG_FILE>
@@ -84,7 +84,7 @@ When parsing artifacts, `dbt-bouncer` displays a summary table of discovered res
 Run `dbt-bouncer` as a standalone Python executable using `uv`:
 
 ```shell
-uvx dbt-bouncer --config-file <PATH_TO_CONFIG_FILE>
+uvx dbt-bouncer run --config-file <PATH_TO_CONFIG_FILE>
 ```
 
 !!! tip "Trade-offs"
@@ -114,7 +114,7 @@ Alternatively, use a local hook (requires `dbt-bouncer` to be available in your 
   hooks:
     - id: dbt-bouncer
       name: dbt-bouncer
-      entry: dbt-bouncer # --config-file <PATH_TO_CONFIG_FILE>
+      entry: dbt-bouncer run # --config-file <PATH_TO_CONFIG_FILE>
       language: system
       pass_filenames: false
       always_run: true
@@ -201,6 +201,7 @@ Run `dbt-bouncer` via Docker:
 docker run --rm \
     --volume "$PWD":/app \
     ghcr.io/godatadriven/dbt-bouncer:vX.X.X \
+    run \
     --config-file /app/<PATH_TO_CONFIG_FILE>
 ```
 

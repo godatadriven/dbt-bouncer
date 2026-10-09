@@ -155,7 +155,7 @@ jobs:
 
           - name: Run benchmarks
             run: |
-              hyperfine --export-json benchmark_results.json --runs 10 'uv run dbt-bouncer --config-file dbt-bouncer-example.yml'
+              hyperfine --export-json benchmark_results.json --runs 10 'uv run dbt-bouncer run --config-file dbt-bouncer-example.yml'
 
           - name: Upload Benchmark Results
             uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
@@ -209,7 +209,7 @@ jobs:
             # dash, which rejects `-o pipefail`. No command below uses a pipe.
             runCmd: |
               set -eu
-              uv run dbt-bouncer --config-file dbt-bouncer-example.yml
+              uv run dbt-bouncer run --config-file dbt-bouncer-example.yml
               mise run test-dev-container
               mise run test-perf
 
