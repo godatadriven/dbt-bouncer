@@ -1345,7 +1345,7 @@
 <p>When installed in this way, any changes you make to your local copy of the source code will be reflected immediately in your next <code>dbt-bouncer</code> run.</p>
 <h3 id="running-dbt-bouncer">Running <code>dbt-bouncer</code><a class="headerlink" href="#running-dbt-bouncer" title="Permanent link">#</a></h3>
 <p>With your virtualenv activated, the <code>dbt-bouncer</code> script should point back to the source code you've cloned on your machine. You can verify this by running <code>which dbt-bouncer</code>. This command should show you a path to an executable in your virtualenv. You can run <code>dbt-bouncer</code> using the provided example configuration file via:</p>
-<div class="language-shell highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>uv<span class="w"> </span>run<span class="w"> </span>dbt-bouncer<span class="w"> </span>--config-file<span class="w"> </span>dbt-bouncer-example.yml
+<div class="language-shell highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>uv<span class="w"> </span>run<span class="w"> </span>dbt-bouncer<span class="w"> </span>run<span class="w"> </span>--config-file<span class="w"> </span>dbt-bouncer-example.yml
 </span></code></pre></div>
 <h2 id="testing">Testing<a class="headerlink" href="#testing" title="Permanent link">#</a></h2>
 <p>Once you're able to manually test that your code change is working as expected, it's important to run existing automated tests, as well as adding some new ones. These tests will ensure that:</p>
@@ -1451,7 +1451,7 @@
 <li>Validate parameters in their type, not in the function body, so a misconfigured check is a config error at load time instead of an exception raised for every resource. Use <code>RegexPattern</code> (from <code>dbt_bouncer.types</code>) for regex parameters and <code>Annotated[int, Field(gt=0)]</code>-style constraints for bounds. For a rule that spans several parameters, pass <code>validate=</code> to <code>@check</code>: a callable that receives the keyword-only parameters as keyword arguments and raises <code>ValueError</code>.</li>
 </ul>
 </li>
-<li>Add the check to <code>dbt-bouncer-example.yml</code> and run <code>dbt-bouncer --config-file dbt-bouncer-example.yml</code>.</li>
+<li>Add the check to <code>dbt-bouncer-example.yml</code> and run <code>dbt-bouncer run --config-file dbt-bouncer-example.yml</code>.</li>
 <li>Write tests using the test helpers:</li>
 </ol>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="c1"># tests/unit/checks/manifest/models/test_naming.py</span>

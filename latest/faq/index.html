@@ -1257,28 +1257,28 @@
 <ol>
 <li>
 <p>By running <code>dbt parse</code>, dbt can generate a <code>manifest.json</code> without a database connection. We can then run our manifest checks via:</p>
-<div class="language-shell highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>dbt-bouncer<span class="w"> </span>--only<span class="w"> </span>manifest_checks
+<div class="language-shell highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>dbt-bouncer<span class="w"> </span>run<span class="w"> </span>--only<span class="w"> </span>manifest_checks
 </span></code></pre></div>
 </li>
 <li>
 <p>dbt requires models to be materialised before it can generate a <code>catalog.json</code> file. By running <code>dbt run --empty</code> we can materialise every model without processing any data. Once these materializations are performed we can run our catalog checks via:</p>
-<div class="language-shell highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>dbt-bouncer<span class="w"> </span>--only<span class="w"> </span>catalog_checks
+<div class="language-shell highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>dbt-bouncer<span class="w"> </span>run<span class="w"> </span>--only<span class="w"> </span>catalog_checks
 </span></code></pre></div>
 </li>
 <li>
 <p>Typically a CI pipeline will run a <code>dbt build</code> command with flags such as <code>--state</code> and/or <code>--defer</code>. After this command has completed we can run our run results checks via:</p>
-<div class="language-shell highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>dbt-bouncer<span class="w"> </span>--only<span class="w"> </span>run_results_checks
+<div class="language-shell highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>dbt-bouncer<span class="w"> </span>run<span class="w"> </span>--only<span class="w"> </span>run_results_checks
 </span></code></pre></div>
 </li>
 </ol>
 <p>Additionally, you can use the <code>--check</code> flag to run only specific checks by name. This is useful for debugging or validating a single convention:</p>
 <div class="language-text highlight"><pre><span></span><code>  ```shell
-  dbt-bouncer --check check_model_has_unique_test
+  dbt-bouncer run --check check_model_has_unique_test
   ```
 </code></pre></div>
 <p>Multiple checks can be specified as a comma-separated list:</p>
 <div class="language-text highlight"><pre><span></span><code>  ```shell
-  dbt-bouncer --check check_model_has_unique_test,check_model_description_populated
+  dbt-bouncer run --check check_model_has_unique_test,check_model_description_populated
   ```
 </code></pre></div>
 <p>The <code>--check</code> and <code>--only</code> flags can be combined: <code>--only</code> restricts to the specified categories, then <code>--check</code> further narrows to only the named checks within those categories.</p>
@@ -1350,7 +1350,7 @@
 </li>
 <li>
 <p>Run <code>dbt-bouncer</code>:</p>
-<div class="language-shell highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>dbt-bouncer<span class="w"> </span>--config-file<span class="w"> </span>dbt-bouncer-config/dbt-bouncer.yml
+<div class="language-shell highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>dbt-bouncer<span class="w"> </span>run<span class="w"> </span>--config-file<span class="w"> </span>dbt-bouncer-config/dbt-bouncer.yml
 </span></code></pre></div>
 </li>
 </ol>
@@ -1385,7 +1385,7 @@
 </span><span id="__span-18-2"><a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="w">  </span><span class="nt">hooks</span><span class="p">:</span>
 </span><span id="__span-18-3"><a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dbt-bouncer</span>
 </span><span id="__span-18-4"><a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a><span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dbt-bouncer</span>
-</span><span id="__span-18-5"><a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a><span class="w">      </span><span class="nt">entry</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dbt-bouncer</span><span class="w"> </span><span class="c1"># --config-file &lt;PATH_TO_CONFIG_FILE&gt;</span>
+</span><span id="__span-18-5"><a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a><span class="w">      </span><span class="nt">entry</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dbt-bouncer run</span><span class="w"> </span><span class="c1"># --config-file &lt;PATH_TO_CONFIG_FILE&gt;</span>
 </span><span id="__span-18-6"><a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a><span class="w">      </span><span class="nt">language</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">system</span>
 </span><span id="__span-18-7"><a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a><span class="w">      </span><span class="nt">pass_filenames</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
 </span><span id="__span-18-8"><a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a><span class="w">      </span><span class="nt">always_run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>

@@ -1022,16 +1022,16 @@
 <div class="language-shell highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pip<span class="w"> </span>install<span class="w"> </span>dbt-bouncer<span class="w"> </span><span class="c1"># or via any other package manager</span>
 </span></code></pre></div>
 <p>Run:</p>
-<div class="language-shell highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>dbt-bouncer<span class="w"> </span>--config-file<span class="w"> </span>&lt;PATH_TO_CONFIG_FILE&gt;
+<div class="language-shell highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>dbt-bouncer<span class="w"> </span>run<span class="w"> </span>--config-file<span class="w"> </span>&lt;PATH_TO_CONFIG_FILE&gt;
 </span></code></pre></div>
 <div class="language-shell highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>Running<span class="w"> </span>dbt-bouncer<span class="w"> </span><span class="o">(</span>X.X.X<span class="o">)</span>...
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>Loaded<span class="w"> </span>config<span class="w"> </span>from<span class="w"> </span>&lt;PATH_TO_CONFIG_FILE&gt;...
 </span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>Validating<span class="w"> </span>conf...
 </span></code></pre></div>
 <p><code>dbt-bouncer</code> also supports a verbose mode, run:</p>
-<div class="language-shell highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>dbt-bouncer<span class="w"> </span>--config-file<span class="w"> </span>&lt;PATH_TO_CONFIG_FILE&gt;<span class="w"> </span>-v
+<div class="language-shell highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>dbt-bouncer<span class="w"> </span>run<span class="w"> </span>--config-file<span class="w"> </span>&lt;PATH_TO_CONFIG_FILE&gt;<span class="w"> </span>-v
 </span></code></pre></div>
-<div class="language-shell highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>INFO:<span class="w"> </span>Running<span class="w"> </span>dbt-bouncer<span class="w"> </span><span class="o">(</span><span class="m">0</span>.0.0<span class="o">)</span>...
+<div class="language-shell highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>INFO:<span class="w"> </span>Running<span class="w"> </span>dbt-bouncer<span class="w"> </span><span class="o">(</span>X.X.X<span class="o">)</span>...
 </span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>DEBUG:<span class="w"> </span><span class="nv">config_file</span><span class="o">=</span>PosixPath<span class="o">(</span><span class="s1">&#39;&lt;PATH_TO_CONFIG_FILE&gt;&#39;</span><span class="o">)</span>
 </span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>DEBUG:<span class="w"> </span><span class="nv">config_file_source</span><span class="o">=</span><span class="s1">&#39;COMMANDLINE&#39;</span>
 </span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>DEBUG:<span class="w"> </span>Config<span class="w"> </span>file<span class="w"> </span>passed<span class="w"> </span>via<span class="w"> </span><span class="nb">command</span><span class="w"> </span>line:<span class="w"> </span>&lt;PATH_TO_CONFIG_FILE&gt;
@@ -1066,7 +1066,7 @@
 <hr />
 <h3 id="running-as-an-executable-using-uv">Running as an executable using <a href="https://github.com/astral-sh/uv">uv</a><a class="headerlink" href="#running-as-an-executable-using-uv" title="Permanent link">#</a></h3>
 <p>Run <code>dbt-bouncer</code> as a standalone Python executable using <code>uv</code>:</p>
-<div class="language-shell highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>uvx<span class="w"> </span>dbt-bouncer<span class="w"> </span>--config-file<span class="w"> </span>&lt;PATH_TO_CONFIG_FILE&gt;
+<div class="language-shell highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>uvx<span class="w"> </span>dbt-bouncer<span class="w"> </span>run<span class="w"> </span>--config-file<span class="w"> </span>&lt;PATH_TO_CONFIG_FILE&gt;
 </span></code></pre></div>
 <div class="admonition tip">
 <p class="admonition-title">Trade-offs</p>
@@ -1088,7 +1088,7 @@
 </span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">  </span><span class="nt">hooks</span><span class="p">:</span>
 </span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dbt-bouncer</span>
 </span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dbt-bouncer</span>
-</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="w">      </span><span class="nt">entry</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dbt-bouncer</span><span class="w"> </span><span class="c1"># --config-file &lt;PATH_TO_CONFIG_FILE&gt;</span>
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="w">      </span><span class="nt">entry</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dbt-bouncer run</span><span class="w"> </span><span class="c1"># --config-file &lt;PATH_TO_CONFIG_FILE&gt;</span>
 </span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="w">      </span><span class="nt">language</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">system</span>
 </span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="w">      </span><span class="nt">pass_filenames</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
 </span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="w">      </span><span class="nt">always_run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
@@ -1158,7 +1158,8 @@
 <div class="language-shell highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span><span class="se">\</span>
 </span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="w">    </span>--volume<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$PWD</span><span class="s2">&quot;</span>:/app<span class="w"> </span><span class="se">\</span>
 </span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="w">    </span>ghcr.io/godatadriven/dbt-bouncer:vX.X.X<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="w">    </span>--config-file<span class="w"> </span>/app/&lt;PATH_TO_CONFIG_FILE&gt;
+</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="w">    </span>run<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="w">    </span>--config-file<span class="w"> </span>/app/&lt;PATH_TO_CONFIG_FILE&gt;
 </span></code></pre></div>
 <div class="admonition tip">
 <p class="admonition-title">Trade-offs</p>

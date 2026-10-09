@@ -1169,9 +1169,9 @@ them on the command line, or with the <code>DBT_BOUNCER_*</code> variables descr
 <p><code>dbt-bouncer</code> converts all of these paths to the Linux/Mac form, hence when you are supplying values to <code>exclude</code> and <code>include</code> you should use the Linux/Mac form.</p>
 </div>
 <h3 id="only">Only<a class="headerlink" href="#only" title="Permanent link">#</a></h3>
-<p><code>dbt-bouncer</code> has checks for four categories: catalog_checks, info_schema_checks, manifest_checks and run_results_checks. Running <code>dbt-bouncer</code> runs all checks for all categories. If you want to limit <code>dbt-bouncer</code> to a subset of check categories then you can use the <code>--only</code> CLI flag. It takes a command-separated list of check categories to run. Examples:</p>
-<div class="language-shell highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>dbt-bouncer<span class="w"> </span>--only<span class="w"> </span>manifest_checks
-</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>dbt-bouncer<span class="w"> </span>--only<span class="w"> </span>catalog_checks,manifest_checks
+<p><code>dbt-bouncer</code> has checks for four categories: <code>catalog_checks</code>, <code>info_schema_checks</code>, <code>manifest_checks</code> and <code>run_results_checks</code>. Running <code>dbt-bouncer</code> runs all checks for all categories. If you want to limit <code>dbt-bouncer</code> to a subset of check categories then you can use the <code>--only</code> CLI flag. It takes a comma-separated list of check categories to run. Examples:</p>
+<div class="language-shell highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>dbt-bouncer<span class="w"> </span>run<span class="w"> </span>--only<span class="w"> </span>manifest_checks
+</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>dbt-bouncer<span class="w"> </span>run<span class="w"> </span>--only<span class="w"> </span>catalog_checks,manifest_checks
 </span></code></pre></div>
 <p>For a detailed description see <a href=".././faq/#how-to-configure-dbt-bouncer-for-use-in-a-ci-pipeline">here</a>.</p>
 <h3 id="selector">Selector<a class="headerlink" href="#selector" title="Permanent link">#</a></h3>
