@@ -67,7 +67,7 @@ test -f ./dbt_project/target_info_schema/info_schema/v1/dbt.project.parquet
 rm -rf ./dbt_project/target/info_schema
 mv ./dbt_project/target_info_schema/info_schema ./dbt_project/target/info_schema
 rm -r ./dbt_project/target_info_schema
-uv run dbt-bouncer --config-file ./dbt-bouncer-example.yml
+uv run dbt-bouncer run --config-file ./dbt-bouncer-example.yml
 """
 
 # Legacy-line coverage: the project venv now resolves dbt 2.0, so this task pins the
@@ -93,7 +93,7 @@ WARN_RESET='{"error": []}'
 $DBT_1 deps --profiles-dir ./dbt_project --project-dir ./dbt_project
 $DBT_1 build --warn-error-options "$WARN_RESET" --profiles-dir ./dbt_project --project-dir ./dbt_project
 $DBT_1 docs generate --warn-error-options "$WARN_RESET" --profiles-dir ./dbt_project --project-dir ./dbt_project
-uv run dbt-bouncer --config-file ./dbt-bouncer-example.yml --only catalog_checks,manifest_checks,run_results_checks
+uv run dbt-bouncer run --config-file ./dbt-bouncer-example.yml --only catalog_checks,manifest_checks,run_results_checks
 """
 
 # Parse-only probe of the dbt Fusion engine, which the `dbt` distribution provides.
@@ -106,7 +106,7 @@ description = "Parse the test project with the dbt Fusion CLI and run manifest c
 run = [
   "uv run dbt deps --profiles-dir ./dbt_project --project-dir ./dbt_project",
   "uv run dbt parse --profiles-dir ./dbt_project --project-dir ./dbt_project",
-  "uv run dbt-bouncer --config-file ./.github/dbt-bouncer-fusion-probe.yml",
+  "uv run dbt-bouncer run --config-file ./.github/dbt-bouncer-fusion-probe.yml",
 ]
 
 [tasks.build-binary]
@@ -347,7 +347,7 @@ bencher run \
 	--dry-run \
 	--file results.json \
 	--format json \
-	"hyperfine --export-json results.json --runs 10 'dbt-bouncer --config-file dbt-bouncer-example.yml'"
+	"hyperfine --export-json results.json --runs 10 'dbt-bouncer run --config-file dbt-bouncer-example.yml'"
 """
 
 [tasks.test-unit]

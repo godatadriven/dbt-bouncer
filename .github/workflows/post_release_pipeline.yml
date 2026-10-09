@@ -103,7 +103,7 @@ jobs:
               run: pip install dbt-bouncer==$(echo "${{ github.ref }}" | cut -d "/" -f3)
 
             - name: Run `dbt-bouncer`
-              run: dbt-bouncer --config-file dbt-bouncer-example.yml
+              run: dbt-bouncer run --config-file dbt-bouncer-example.yml
 
             - name: Regenerate dbt artifacts and run `dbt-bouncer`
               if: matrix.operating-system == 'windows-2025'
