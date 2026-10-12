@@ -40,7 +40,10 @@ dependencies = [
 ]
 
 [project.urls]
-repository = "https://github.com/godatadriven/dbt-bouncer"
+Changelog = "https://github.com/godatadriven/dbt-bouncer/releases"
+Documentation = "https://godatadriven.github.io/dbt-bouncer/"
+Issues = "https://github.com/godatadriven/dbt-bouncer/issues"
+Repository = "https://github.com/godatadriven/dbt-bouncer"
 
 [project.scripts]
 dbt-bouncer = "dbt_bouncer.main:app"
