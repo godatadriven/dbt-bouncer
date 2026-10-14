@@ -155,14 +155,14 @@ def _check_applies_to_resource(
         bool: Whether the check should run against this resource.
 
     """
+    # `language` is optional in the manifest schema: treat a missing value as SQL.
+    if language is not None and language != (facts.resource.model.language or "sql"):
+        return False
+
     if (
         materialization is not None
         and materialization != facts.resource.model.config.materialized
     ):
-        return False
-
-    # `language` is optional in the manifest schema: treat a missing value as SQL.
-    if language is not None and language != (facts.resource.model.language or "sql"):
         return False
 
     skip_checks = facts.skip_checks
