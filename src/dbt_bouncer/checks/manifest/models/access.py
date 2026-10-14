@@ -61,6 +61,10 @@ def check_model_contract_enforced_for_public_model(model):
 
         Public models form the API surface of your dbt project. Without enforced contracts, column additions, removals, or type changes can silently break downstream consumers. This check ensures that every public model guarantees its schema, catching breaking changes at build time rather than in production.
 
+    !!! note
+
+        Python models are not checked, because dbt does not support contracts for Python models.
+
     Receives:
         model (ModelNode): The ModelNode object to check.
 
@@ -78,6 +82,9 @@ def check_model_contract_enforced_for_public_model(model):
         ```
 
     """
+    # dbt does not support contracts for Python models.
+    if model.language == "python":
+        return
     if (
         model.access
         and model.access.value == ModelAccess.PUBLIC
@@ -175,6 +182,10 @@ def check_model_has_contracts_enforced(model):
 
         Enforced contracts guarantee that a model's output schema — column names and types — is validated at build time. Without this, schema changes can silently break downstream consumers. Applying this check to a specific set of models (e.g. marts) provides a schema stability guarantee for those critical outputs.
 
+    !!! note
+
+        Python models are not checked, because dbt does not support contracts for Python models.
+
     Receives:
         model (ModelNode): The ModelNode object to check.
 
@@ -193,6 +204,9 @@ def check_model_has_contracts_enforced(model):
         ```
 
     """
+    # dbt does not support contracts for Python models.
+    if model.language == "python":
+        return
     if not model.contract or model.contract.enforced is not True:
         fail(
             f"`{get_clean_model_name(model.unique_id)}` does not have contracts enforced."
