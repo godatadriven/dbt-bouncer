@@ -131,9 +131,9 @@ class CheckToRun(TypedDict):
 def _check_applies_to_resource(
     check_name: str,
     check_code: str | None,
+    language: str | None,
     materialization: str | None,
     facts: "_ResourceFacts",
-    language: str | None = None,
 ) -> bool:
     """Decide whether a check runs against a resource, ignoring path filters.
 
@@ -145,11 +145,11 @@ def _check_applies_to_resource(
     Args:
         check_name: The check's configured name.
         check_code: The check's rule code, if it has one.
+        language: The required model language, or ``None`` when the check does
+            not filter on it (including every non-model resource).
         materialization: The required materialization, or ``None`` when the
             check does not filter on it (including every non-model resource).
         facts: The resource's precomputed facts.
-        language: The required model language, or ``None`` when the check does
-            not filter on it (including every non-model resource).
 
     Returns:
         bool: Whether the check should run against this resource.
@@ -416,7 +416,7 @@ def _iterating_check_entries(
     entries: list[CheckToRun] = []
     for facts in matcher.path_filtered_for(check, iterate_value):
         if not _check_applies_to_resource(
-            check_name, check_code, materialization, facts, language
+            check_name, check_code, language, materialization, facts
         ):
             continue
         entries.append(

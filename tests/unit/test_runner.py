@@ -1558,7 +1558,7 @@ def test_check_applies_materialization_mismatch():
     """Test that check doesn't run when materialization doesn't match."""
     assert (
         _check_applies_to_resource(
-            "test_check", None, "table", _facts(materialized="view")
+            "test_check", None, None, "table", _facts(materialized="view")
         )
         is False
     )
@@ -1568,7 +1568,7 @@ def test_check_applies_materialization_matches():
     """Test that check runs when materialization matches."""
     assert (
         _check_applies_to_resource(
-            "test_check", None, "view", _facts(materialized="view")
+            "test_check", None, None, "view", _facts(materialized="view")
         )
         is True
     )
@@ -1590,21 +1590,22 @@ def test_check_applies_language(language, model_language, expected):
     """Test that the language filter matches the model language."""
     assert (
         _check_applies_to_resource(
-            "test_check", None, None, _facts(language=model_language), language
+            "test_check", None, language, None, _facts(language=model_language)
         )
         is expected
     )
 
 
 def test_check_applies_non_model_resource():
-    """Test that the materialization filter is skipped for non-model resources.
+    """Test that the model-only filters are skipped for non-model resources.
 
-    The caller passes ``materialization=None`` for every non-model resource, so
-    a check configured with a materialization still runs against them.
+    The caller passes ``language=None`` and ``materialization=None`` for every
+    non-model resource, so a check configured with either still runs against
+    them.
     """
     assert (
         _check_applies_to_resource(
-            "test_check", None, None, _facts(path="macros/my_macro.sql")
+            "test_check", None, None, None, _facts(path="macros/my_macro.sql")
         )
         is True
     )
@@ -1614,7 +1615,7 @@ def test_check_applies_skipped_by_name():
     """Test that a resource's skip_checks meta skips the check by name."""
     assert (
         _check_applies_to_resource(
-            "test_check", None, None, _facts(skip_checks=["test_check"])
+            "test_check", None, None, None, _facts(skip_checks=["test_check"])
         )
         is False
     )
@@ -1624,7 +1625,7 @@ def test_check_applies_skipped_by_rule_code():
     """Test that a resource's skip_checks meta skips the check by rule code."""
     assert (
         _check_applies_to_resource(
-            "test_check", "MO123", None, _facts(skip_checks=["MO123"])
+            "test_check", "MO123", None, None, _facts(skip_checks=["MO123"])
         )
         is False
     )
@@ -1634,7 +1635,11 @@ def test_check_applies_unrelated_skip_checks():
     """Test that an unrelated skip_checks entry does not skip the check."""
     assert (
         _check_applies_to_resource(
-            "test_check", "MO123", None, _facts(skip_checks=["other_check", "MO999"])
+            "test_check",
+            "MO123",
+            None,
+            None,
+            _facts(skip_checks=["other_check", "MO999"]),
         )
         is True
     )
