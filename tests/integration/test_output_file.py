@@ -43,6 +43,17 @@ def _parse_csv(text: str) -> dict[str, str | None]:
     }
 
 
+def _parse_gitlab(text: str) -> dict[str, str | None]:
+    # Code Quality lists only failures, and its findings carry the check name
+    # rather than the per-run id.
+    return {
+        finding["check_name"]: finding["description"].removeprefix(
+            f"{finding['check_name']}: "
+        )
+        for finding in json.loads(text)
+    }
+
+
 def _parse_json(text: str) -> dict[str, str | None]:
     return {
         r["check_run_id"]: r["failure_message"] if r["outcome"] == "failed" else None
@@ -101,11 +112,28 @@ def _parse_tap(text: str) -> dict[str, str | None]:
 # Each parser returns `{check_run_id: failure message, or None if it passed}`.
 _PARSERS = {
     OutputFormat.CSV: _parse_csv,
+    OutputFormat.GITLAB: _parse_gitlab,
     OutputFormat.JSON: _parse_json,
     OutputFormat.JUNIT: _parse_junit,
     OutputFormat.SARIF: _parse_sarif,
     OutputFormat.TAP: _parse_tap,
 }
+
+
+def _expected(output_format, *, passing: bool) -> dict[str, str | None]:
+    """Build what `_PARSERS[output_format]` returns for these checks.
+
+    Returns:
+        dict[str, str | None]: The parsed failing (and passing) results.
+
+    """
+    if output_format is OutputFormat.GITLAB:
+        return {"check_model_names": _FAILING_MESSAGE}
+    expected: dict[str, str | None] = {_FAILING_ID: _FAILING_MESSAGE}
+    if passing:
+        expected[_PASSING_ID] = None
+    return expected
+
 
 _FORMATS = pytest.mark.parametrize(
     "output_format", list(_PARSERS), ids=[f.value for f in _PARSERS]
@@ -151,7 +179,7 @@ def test_output_file_records_every_result(
 
     assert result.exit_code == ExitCode.CHECK_ERRORS, result.output
     parsed = _PARSERS[output_format](output_file.read_text(encoding="utf-8"))
-    assert parsed == {_FAILING_ID: _FAILING_MESSAGE, _PASSING_ID: None}
+    assert parsed == _expected(output_format, passing=True)
 
 
 @_FORMATS
@@ -168,7 +196,7 @@ def test_output_only_failures_drops_passing_results(
 
     assert result.exit_code == ExitCode.CHECK_ERRORS, result.output
     parsed = _PARSERS[output_format](output_file.read_text(encoding="utf-8"))
-    assert parsed == {_FAILING_ID: _FAILING_MESSAGE}
+    assert parsed == _expected(output_format, passing=False)
 
 
 @_FORMATS

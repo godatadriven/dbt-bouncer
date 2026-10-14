@@ -1,6 +1,7 @@
 """Output formatters for dbt-bouncer check results."""
 
 import csv
+import hashlib
 import io
 from functools import lru_cache
 from typing import Any
@@ -15,7 +16,7 @@ def _format_results(results: list[dict[str, Any]], output_format: str) -> bytes:
 
     Args:
         results: List of check result dicts.
-        output_format: One of "csv", "json", "junit", "sarif", or "tap".
+        output_format: One of "csv", "gitlab", "json", "junit", "sarif", or "tap".
 
     Returns:
         bytes: Serialised results.
@@ -27,6 +28,8 @@ def _format_results(results: list[dict[str, Any]], output_format: str) -> bytes:
     match output_format:
         case "csv":
             return _format_csv(results)
+        case "gitlab":
+            return _format_gitlab(results)
         case "json":
             return orjson.dumps(results)
         case "junit":
@@ -63,6 +66,49 @@ def _format_csv(results: list[dict[str, Any]]) -> bytes:
     writer.writeheader()
     writer.writerows(results)
     return buf.getvalue().encode()
+
+
+def _format_gitlab(results: list[dict[str, Any]]) -> bytes:
+    """Serialise check results to GitLab Code Quality format.
+
+    See https://docs.gitlab.com/ci/testing/code_quality/#code-quality-report-format.
+    Code Quality has no notion of a passing check, so only results that did not
+    pass become findings. Every finding needs a location: dbt-bouncer checks
+    have no line info, so findings anchor at line 1, and context-only results
+    (no file_path) fall back to `dbt_project.yml`.
+
+    Args:
+        results: List of check result dicts.
+
+    Returns:
+        bytes: Code Quality JSON document.
+
+    """
+    findings = []
+    for result in results:
+        if result["outcome"] == CheckOutcome.SUCCESS:
+            continue
+        check_name = result["check_run_id"].split(":", 1)[0]
+        path = result.get("file_path") or "dbt_project.yml"
+        message = result.get("failure_message") or "Check failed"
+        severity = "minor" if result.get("severity") == CheckSeverity.WARN else "major"
+        # The fingerprint uses the check name and resource, not `check_run_id`,
+        # because its index shifts when the config is reordered, which would
+        # make every finding look new.
+        resource = result.get("unique_id") or path
+        fingerprint = hashlib.md5(
+            f"{check_name}::{resource}".encode(), usedforsecurity=False
+        ).hexdigest()
+        findings.append(
+            {
+                "check_name": check_name,
+                "description": f"{check_name}: {message}",
+                "severity": severity,
+                "fingerprint": fingerprint,
+                "location": {"path": path, "lines": {"begin": 1}},
+            }
+        )
+    return orjson.dumps(findings, option=orjson.OPT_INDENT_2)
 
 
 @lru_cache(maxsize=1)

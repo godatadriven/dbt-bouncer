@@ -161,7 +161,7 @@ jobs:
                 dry-run: false # optional, defaults to false
                 only: manifest_checks # optional, defaults to running all checks
                 output-file: results.json # optional, default does not save a results file
-                output-format: json # optional, one of: csv, json, junit, sarif, tap. Defaults to json
+                output-format: json # optional, one of: csv, gitlab, json, junit, sarif, tap. Defaults to json
                 output-only-failures: false # optional, defaults to false
                 preset: '' # optional, one of: minimal, standard, strict. Replaces config-file
                 send-pr-comment: true # optional, defaults to true
@@ -226,7 +226,7 @@ exit_code = run_bouncer(
     dry_run=False,  # optional, print which checks would run without executing
     only="",  # optional, comma-separated categories e.g. "manifest_checks"
     output_file=Path("results.json"),  # optional
-    output_format="json",  # optional, one of: "csv", "json", "junit", "sarif", "tap"
+    output_format="json",  # optional, one of: "csv", "gitlab", "json", "junit", "sarif", "tap"
     output_only_failures=False,  # optional, only include failures in output
     show_all_failures=False,  # optional, print all failures to console
     verbosity=0,  # optional, increase for more detailed output

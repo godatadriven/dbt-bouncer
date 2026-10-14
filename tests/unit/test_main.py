@@ -114,6 +114,7 @@ def _catalog_checks_count(include_pattern: str) -> int:
     ("output_format", "output_file_suffix", "is_json"),
     [
         ("csv", "coverage.csv", False),
+        ("gitlab", "code-quality.json", True),
         ("json", "coverage.json", True),
         ("junit", "coverage.xml", False),
         ("sarif", "coverage.sarif", True),
@@ -189,6 +190,10 @@ def test_cli_output_formats(output_format, output_file_suffix, is_json, tmp_path
             assert failed, "expected at least one failing SARIF result"
             location = failed[0]["locations"][0]["physicalLocation"]
             assert location["artifactLocation"]["uri"]
+        case "gitlab":
+            findings = json.loads(content)
+            assert findings, "expected at least one Code Quality finding"
+            assert findings[0]["location"]["path"]
         case "tap":
             assert content.startswith("TAP version 13")
     assert result.exit_code == 1  # checks fail due to invalid directories

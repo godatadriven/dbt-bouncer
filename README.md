@@ -88,7 +88,7 @@ All documentation can be found on `dbt-bouncer` [documentation website](https://
 - **Discovery** — browse every check with `dbt-bouncer list`, read one check in detail with `dbt-bouncer explain check_model_names`, or open the dashboard with `dbt-bouncer studio`.
 - **Config linting** — catch mistakes in your config before a run with `dbt-bouncer validate`.
 - **AI agent integration** — expose dbt-bouncer to Claude Code, Cursor and other agents over the Model Context Protocol with `dbt-bouncer mcp`.
-- **CI-friendly output** — write results as `csv`, `json`, `junit`, `sarif` or `tap`, and get distinct exit codes for check failures, config errors and artifact errors.
+- **CI-friendly output** — write results as `csv`, `gitlab`, `json`, `junit`, `sarif` or `tap`, and get distinct exit codes for check failures, config errors and artifact errors.
 - **Configuration anywhere** — set every `run` option in the config file, on the command line, or through a `DBT_BOUNCER_*` environment variable.
 
 See the [CLI reference](https://godatadriven.github.io/dbt-bouncer/cli/) for all subcommands and options.

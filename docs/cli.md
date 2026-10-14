@@ -172,7 +172,7 @@ dbt-bouncer run --output-file results/check-results.json
 #### `--output-format`
 
 **Type:** Choice
-**Options:** `csv`, `json`, `junit`, `sarif`, `tap`
+**Options:** `csv`, `gitlab`, `json`, `junit`, `sarif`, `tap`
 **Default:** `json`
 **Required:** No
 **Environment variable:** `DBT_BOUNCER_OUTPUT_FORMAT`
@@ -190,13 +190,35 @@ dbt-bouncer run --output-format junit --output-file results.xml
 
 # Output as SARIF for GitHub Code Scanning
 dbt-bouncer run --output-format sarif --output-file results.sarif
+
+# Output as a GitLab Code Quality report
+dbt-bouncer run --output-format gitlab --output-file code-quality.json
+```
+
+The `gitlab` format writes a [Code Quality report](https://docs.gitlab.com/ci/testing/code_quality/). The report includes only checks that did not pass. Upload it as a `codequality` report artifact to see the findings in the merge request:
+
+```yaml
+dbt-bouncer:
+  script:
+    - dbt-bouncer run --output-format gitlab --output-file code-quality.json
+  artifacts:
+    when: always # dbt-bouncer exits non-zero when checks fail
+    reports:
+      codequality: code-quality.json
+```
+
+File paths in the report are relative to the dbt project, while GitLab expects them relative to the repository root. If the dbt project lives in a subdirectory, prefix the paths before uploading, for example with `jq` in `after_script` (which still runs when checks fail):
+
+```bash
+jq --arg prefix "transform/" 'map(.location.path = $prefix + .location.path)' \
+  code-quality.json > code-quality.tmp && mv code-quality.tmp code-quality.json
 ```
 
 !!! warning "Do not parse the console table"
 
     The console results table is for humans. It truncates check names to fit the terminal width. Do not parse this table in scripts.
 
-    For machine-readable output, set `--output-file` and select a structured `--output-format`. The supported formats are `csv`, `json`, `junit`, `sarif`, and `tap`. Parse the output file instead of the console table.
+    For machine-readable output, set `--output-file` and select a structured `--output-format`. The supported formats are `csv`, `gitlab`, `json`, `junit`, `sarif`, and `tap`. Parse the output file instead of the console table.
 
 #### `--output-only-failures`
 

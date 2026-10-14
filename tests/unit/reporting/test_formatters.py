@@ -11,6 +11,7 @@ from junitparser import JUnitXml
 from dbt_bouncer.enums import CheckOutcome, CheckSeverity
 from dbt_bouncer.reporting.formatters import (
     _format_csv,
+    _format_gitlab,
     _format_junit,
     _format_results,
     _format_sarif,
@@ -68,6 +69,68 @@ def test_sarif_omits_location_when_no_file_path():
 
     assert "locations" not in entry
     assert "logicalLocations" not in entry
+
+
+def test_gitlab_reports_failure_at_file_line_1():
+    """A failed result becomes a major Code Quality finding on line 1."""
+    (finding,) = orjson.loads(_format_gitlab([_failed_result()]))
+
+    assert finding["check_name"] == "check_model_description_populated"
+    assert finding["description"] == (
+        "check_model_description_populated: Model has no description"
+    )
+    assert finding["severity"] == "major"
+    assert finding["location"] == {
+        "path": "models/staging/stg_orders.sql",
+        "lines": {"begin": 1},
+    }
+
+
+def test_gitlab_omits_passing_results():
+    """Code Quality has no passing state, so passes are left out."""
+    assert (
+        orjson.loads(_format_gitlab([_failed_result(outcome=CheckOutcome.SUCCESS)]))
+        == []
+    )
+
+
+def test_gitlab_maps_warn_to_minor_and_reports_internal_error():
+    """Warn failures are `minor`; a crashed check is still reported."""
+    warn, crashed = orjson.loads(
+        _format_gitlab(
+            [
+                _failed_result(severity=CheckSeverity.WARN),
+                _failed_result(outcome=CheckOutcome.INTERNAL_ERROR),
+            ]
+        )
+    )
+    assert warn["severity"] == "minor"
+    assert crashed["severity"] == "major"
+
+
+def test_gitlab_falls_back_to_dbt_project_yml_without_file_path():
+    """Code Quality requires a path, so context-only results use the project file."""
+    (finding,) = orjson.loads(
+        _format_gitlab([_failed_result(file_path=None, unique_id=None)])
+    )
+    assert finding["location"]["path"] == "dbt_project.yml"
+
+
+def test_gitlab_fingerprint_ignores_check_index():
+    """Reordering the config must not make every finding look new."""
+    first, reordered, other = orjson.loads(
+        _format_gitlab(
+            [
+                _failed_result(),
+                _failed_result(
+                    check_run_id="check_model_description_populated:7:stg_orders"
+                ),
+                _failed_result(unique_id="model.my_project.stg_customers"),
+            ]
+        )
+    )
+    assert first["fingerprint"] == reordered["fingerprint"]
+    assert first["fingerprint"] != other["fingerprint"]
 
 
 def test_junit_sets_file_attribute():
@@ -190,6 +253,10 @@ class TestFormatterProperties:
         # 3. SARIF
         sarif = orjson.loads(_format_results(results, "sarif"))
         assert len(sarif["runs"][0]["results"]) == len(results)
+
+        # 3b. GitLab Code Quality: only results that did not pass.
+        gitlab = orjson.loads(_format_results(results, "gitlab"))
+        assert len(gitlab) == sum(r["outcome"] != CheckOutcome.SUCCESS for r in results)
 
         # 4. TAP
         tap_text = _format_results(results, "tap").decode()
