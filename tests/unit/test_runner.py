@@ -1528,7 +1528,12 @@ def test_should_run_check_empty_include_list_runs_check():
     assert resource_in_path(check, resource) is True
 
 
-def _facts(materialized="view", skip_checks=None, path="models/staging/stg_orders.sql"):
+def _facts(
+    materialized="view",
+    skip_checks=None,
+    path="models/staging/stg_orders.sql",
+    language="sql",
+):
     """Build a _ResourceFacts for the non-path half of the match predicate.
 
     Returns:
@@ -1537,6 +1542,7 @@ def _facts(materialized="view", skip_checks=None, path="models/staging/stg_order
     """
     resource = MagicMock()
     resource.model.config.materialized = materialized
+    resource.model.language = language
     resource.original_file_path = path
     return _ResourceFacts(
         resource=resource,
@@ -1565,6 +1571,28 @@ def test_check_applies_materialization_matches():
             "test_check", None, "view", _facts(materialized="view")
         )
         is True
+    )
+
+
+@pytest.mark.parametrize(
+    ("language", "model_language", "expected"),
+    [
+        pytest.param("python", "python", True, id="python_matches"),
+        pytest.param("python", "sql", False, id="python_mismatch"),
+        pytest.param("sql", "sql", True, id="sql_matches"),
+        pytest.param("sql", "python", False, id="sql_mismatch"),
+        pytest.param("sql", None, True, id="missing_language_is_sql"),
+        pytest.param("python", None, False, id="missing_language_is_not_python"),
+        pytest.param(None, "python", True, id="no_filter"),
+    ],
+)
+def test_check_applies_language(language, model_language, expected):
+    """Test that the language filter matches the model language."""
+    assert (
+        _check_applies_to_resource(
+            "test_check", None, None, _facts(language=model_language), language
+        )
+        is expected
     )
 
 

@@ -133,13 +133,14 @@ def _check_applies_to_resource(
     check_code: str | None,
     materialization: str | None,
     facts: "_ResourceFacts",
+    language: str | None = None,
 ) -> bool:
     """Decide whether a check runs against a resource, ignoring path filters.
 
     Path include/exclude is handled separately (and memoised per pattern pair)
     because it depends only on the pattern and the path; what remains is the
-    per-pair part: the materialization filter and the resource's own
-    ``skip_checks`` meta.
+    per-pair part: the language and materialization filters and the resource's
+    own ``skip_checks`` meta.
 
     Args:
         check_name: The check's configured name.
@@ -147,6 +148,8 @@ def _check_applies_to_resource(
         materialization: The required materialization, or ``None`` when the
             check does not filter on it (including every non-model resource).
         facts: The resource's precomputed facts.
+        language: The required model language, or ``None`` when the check does
+            not filter on it (including every non-model resource).
 
     Returns:
         bool: Whether the check should run against this resource.
@@ -156,6 +159,10 @@ def _check_applies_to_resource(
         materialization is not None
         and materialization != facts.resource.model.config.materialized
     ):
+        return False
+
+    # `language` is optional in the manifest schema: treat a missing value as SQL.
+    if language is not None and language != (facts.resource.model.language or "sql"):
         return False
 
     skip_checks = facts.skip_checks
@@ -402,12 +409,14 @@ def _iterating_check_entries(
     check_code = getattr(check, "code", None)
     severity = check.severity
     id_prefix = f"{check_name}:{check.index}:"
-    materialization = check.materialization if iterate_value == "model" else None
+    is_model = iterate_value == "model"
+    language = check.language if is_model else None
+    materialization = check.materialization if is_model else None
 
     entries: list[CheckToRun] = []
     for facts in matcher.path_filtered_for(check, iterate_value):
         if not _check_applies_to_resource(
-            check_name, check_code, materialization, facts
+            check_name, check_code, materialization, facts, language
         ):
             continue
         entries.append(

@@ -94,6 +94,13 @@ class ModelAccess(StrEnum):
     PUBLIC = auto()
 
 
+class ModelLanguage(StrEnum):
+    """dbt model languages."""
+
+    PYTHON = auto()
+    SQL = auto()
+
+
 class OutputFormat(StrEnum):
     """Supported output formats for CLI and programmatic output."""
 

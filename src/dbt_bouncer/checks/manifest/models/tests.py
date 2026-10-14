@@ -34,6 +34,7 @@ def check_model_has_tests_by_name(
         description (str | None): Description of what the check does and why it is implemented.
         exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.
         include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.
+        language (Literal["python", "sql"] | None): Limit check to models written in the specified language.
         materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
@@ -103,6 +104,7 @@ def check_model_has_tests_by_type(
         description (str | None): Description of what the check does and why it is implemented.
         exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.
         include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.
+        language (Literal["python", "sql"] | None): Limit check to models written in the specified language.
         materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
@@ -172,6 +174,7 @@ def check_model_has_unique_test(
         description (str | None): Description of what the check does and why it is implemented.
         exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.
         include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.
+        language (Literal["python", "sql"] | None): Limit check to models written in the specified language.
         materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
@@ -235,6 +238,7 @@ def check_model_has_unit_tests(
         description (str | None): Description of what the check does and why it is implemented.
         exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.
         include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.
+        language (Literal["python", "sql"] | None): Limit check to models written in the specified language.
         materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 

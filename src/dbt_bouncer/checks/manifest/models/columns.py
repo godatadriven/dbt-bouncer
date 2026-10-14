@@ -117,6 +117,7 @@ def check_model_columns_have_relationship_tests(
         description (str | None): Description of what the check does and why it is implemented.
         exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.
         include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.
+        language (Literal["python", "sql"] | None): Limit check to models written in the specified language.
         materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
@@ -177,6 +178,7 @@ def check_model_columns_have_meta_keys(model, *, keys: NestedDict):
         description (str | None): Description of what the check does and why it is implemented.
         exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.
         include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.
+        language (Literal["python", "sql"] | None): Limit check to models written in the specified language.
         materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
@@ -219,6 +221,7 @@ def check_model_columns_have_types(model):
         description (str | None): Description of what the check does and why it is implemented.
         exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.
         include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.
+        language (Literal["python", "sql"] | None): Limit check to models written in the specified language.
         materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
@@ -304,6 +307,7 @@ def check_model_single_primary_key(model):
         description (str | None): Description of what the check does and why it is implemented.
         exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.
         include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.
+        language (Literal["python", "sql"] | None): Limit check to models written in the specified language.
         materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
@@ -358,6 +362,7 @@ def check_model_column_has_specified_test(
         description (str | None): Description of what the check does and why it is implemented.
         exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.
         include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.
+        language (Literal["python", "sql"] | None): Limit check to models written in the specified language.
         materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
@@ -419,6 +424,7 @@ def check_model_column_description_populated(
         description (str | None): Description of what the check does and why it is implemented.
         exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.
         include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.
+        language (Literal["python", "sql"] | None): Limit check to models written in the specified language.
         materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
@@ -480,6 +486,7 @@ def check_model_column_name_complies_to_column_type(
         description (str | None): Description of what the check does and why it is implemented.
         exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.
         include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.
+        language (Literal["python", "sql"] | None): Limit check to models written in the specified language.
         materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
@@ -567,6 +574,7 @@ def check_model_column_type_complies_to_column_name(
         description (str | None): Description of what the check does and why it is implemented.
         exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.
         include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.
+        language (Literal["python", "sql"] | None): Limit check to models written in the specified language.
         materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
@@ -646,6 +654,7 @@ def check_model_column_names(model, *, column_name_pattern: RegexPattern):
         description (str | None): Description of what the check does and why it is implemented.
         exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.
         include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.
+        language (Literal["python", "sql"] | None): Limit check to models written in the specified language.
         materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
