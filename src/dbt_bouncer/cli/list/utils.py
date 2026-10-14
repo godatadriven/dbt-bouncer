@@ -38,6 +38,7 @@ base_fields = frozenset(
         "exposures_by_unique_id",
         "include",
         "index",
+        "language",
         "macro",
         "manifest_obj",
         "materialization",

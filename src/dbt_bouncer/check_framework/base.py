@@ -6,7 +6,7 @@ from typing import Any, ClassVar
 
 from pydantic import BaseModel, ConfigDict, Field, PrivateAttr, field_validator
 
-from dbt_bouncer.enums import CheckSeverity, Materialization, RuleCode
+from dbt_bouncer.enums import CheckSeverity, Materialization, ModelLanguage, RuleCode
 from dbt_bouncer.types import validate_regex_patterns
 from dbt_bouncer.utils import is_description_populated
 
@@ -40,6 +40,10 @@ class BaseCheck(BaseModel):
     index: int | None = Field(
         default=None,
         description="Index to uniquely identify the check, calculated at runtime.",
+    )
+    language: ModelLanguage | None = Field(
+        default=None,
+        description="Limit check to models written in the specified language.",
     )
     materialization: Materialization | None = Field(
         default=None,

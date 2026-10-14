@@ -120,10 +120,13 @@ def test_skip_checks_with_rule_code() -> None:
     name, code = check_inst.name, check_inst.code
 
     # Not skipped
-    assert _check_applies_to_resource(name, code, None, facts([])) is True
+    assert _check_applies_to_resource(name, code, None, None, facts([])) is True
 
     # Skipped by name
-    assert _check_applies_to_resource(name, code, None, facts(["check_fake"])) is False
+    assert (
+        _check_applies_to_resource(name, code, None, None, facts(["check_fake"]))
+        is False
+    )
 
     # Skipped by rule code
-    assert _check_applies_to_resource(name, code, None, facts(["MO999"])) is False
+    assert _check_applies_to_resource(name, code, None, None, facts(["MO999"])) is False

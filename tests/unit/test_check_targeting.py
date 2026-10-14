@@ -1,8 +1,8 @@
 """Tests for which resources a check targets, resolved against a real manifest.
 
 `test_selectors.py` and the `resource_in_path` / `_check_applies_to_resource`
-tests in `test_runner.py` cover selectors, path patterns and materialization one
-at a time, against hand-built objects. These tests load the committed dbt_112
+tests in `test_runner.py` cover selectors, path patterns, language and
+materialization one at a time, against hand-built objects. These tests load the committed dbt_112
 fixture, build the context the way `run_bouncer` does, and assert the exact set
 of resources `_assemble_checks_to_run` hands to the executor. That catches
 mistakes in how the filters combine, and in graph walks over a real DAG.
@@ -302,7 +302,7 @@ class TestSelectorAgainstRealDag:
 
 
 class TestPathAndMaterializationFilters:
-    """`include`, `exclude`, `materialization` and `selector` narrowing together."""
+    """`include`, `exclude`, `language`, `materialization` and `selector` together."""
 
     @pytest.mark.parametrize(
         ("settings", "expected"),
@@ -330,6 +330,19 @@ class TestPathAndMaterializationFilters:
                 {"include": ["^models/marts", "^models/utilities/py_"]},
                 {"orders", "py_order_stats", *_CUSTOMERS},
                 id="include_list_is_a_union",
+            ),
+            pytest.param(
+                {"language": "python"}, {"py_order_stats"}, id="language_python"
+            ),
+            pytest.param(
+                {"language": "sql"},
+                _ALL_MODELS - {"py_order_stats"},
+                id="language_sql",
+            ),
+            pytest.param(
+                {"language": "python", "materialization": "view"},
+                set(),
+                id="language_and_materialization_intersect",
             ),
             pytest.param(
                 {"materialization": "incremental"},

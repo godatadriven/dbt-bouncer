@@ -1528,7 +1528,12 @@ def test_should_run_check_empty_include_list_runs_check():
     assert resource_in_path(check, resource) is True
 
 
-def _facts(materialized="view", skip_checks=None, path="models/staging/stg_orders.sql"):
+def _facts(
+    materialized="view",
+    skip_checks=None,
+    path="models/staging/stg_orders.sql",
+    language="sql",
+):
     """Build a _ResourceFacts for the non-path half of the match predicate.
 
     Returns:
@@ -1537,6 +1542,7 @@ def _facts(materialized="view", skip_checks=None, path="models/staging/stg_order
     """
     resource = MagicMock()
     resource.model.config.materialized = materialized
+    resource.model.language = language
     resource.original_file_path = path
     return _ResourceFacts(
         resource=resource,
@@ -1552,7 +1558,7 @@ def test_check_applies_materialization_mismatch():
     """Test that check doesn't run when materialization doesn't match."""
     assert (
         _check_applies_to_resource(
-            "test_check", None, "table", _facts(materialized="view")
+            "test_check", None, None, "table", _facts(materialized="view")
         )
         is False
     )
@@ -1562,21 +1568,44 @@ def test_check_applies_materialization_matches():
     """Test that check runs when materialization matches."""
     assert (
         _check_applies_to_resource(
-            "test_check", None, "view", _facts(materialized="view")
+            "test_check", None, None, "view", _facts(materialized="view")
         )
         is True
     )
 
 
-def test_check_applies_non_model_resource():
-    """Test that the materialization filter is skipped for non-model resources.
+@pytest.mark.parametrize(
+    ("language", "model_language", "expected"),
+    [
+        pytest.param("python", "python", True, id="python_matches"),
+        pytest.param("python", "sql", False, id="python_mismatch"),
+        pytest.param("sql", "sql", True, id="sql_matches"),
+        pytest.param("sql", "python", False, id="sql_mismatch"),
+        pytest.param("sql", None, True, id="missing_language_is_sql"),
+        pytest.param("python", None, False, id="missing_language_is_not_python"),
+        pytest.param(None, "python", True, id="no_filter"),
+    ],
+)
+def test_check_applies_language(language, model_language, expected):
+    """Test that the language filter matches the model language."""
+    assert (
+        _check_applies_to_resource(
+            "test_check", None, language, None, _facts(language=model_language)
+        )
+        is expected
+    )
 
-    The caller passes ``materialization=None`` for every non-model resource, so
-    a check configured with a materialization still runs against them.
+
+def test_check_applies_non_model_resource():
+    """Test that the model-only filters are skipped for non-model resources.
+
+    The caller passes ``language=None`` and ``materialization=None`` for every
+    non-model resource, so a check configured with either still runs against
+    them.
     """
     assert (
         _check_applies_to_resource(
-            "test_check", None, None, _facts(path="macros/my_macro.sql")
+            "test_check", None, None, None, _facts(path="macros/my_macro.sql")
         )
         is True
     )
@@ -1586,7 +1615,7 @@ def test_check_applies_skipped_by_name():
     """Test that a resource's skip_checks meta skips the check by name."""
     assert (
         _check_applies_to_resource(
-            "test_check", None, None, _facts(skip_checks=["test_check"])
+            "test_check", None, None, None, _facts(skip_checks=["test_check"])
         )
         is False
     )
@@ -1596,7 +1625,7 @@ def test_check_applies_skipped_by_rule_code():
     """Test that a resource's skip_checks meta skips the check by rule code."""
     assert (
         _check_applies_to_resource(
-            "test_check", "MO123", None, _facts(skip_checks=["MO123"])
+            "test_check", "MO123", None, None, _facts(skip_checks=["MO123"])
         )
         is False
     )
@@ -1606,7 +1635,11 @@ def test_check_applies_unrelated_skip_checks():
     """Test that an unrelated skip_checks entry does not skip the check."""
     assert (
         _check_applies_to_resource(
-            "test_check", "MO123", None, _facts(skip_checks=["other_check", "MO999"])
+            "test_check",
+            "MO123",
+            None,
+            None,
+            _facts(skip_checks=["other_check", "MO999"]),
         )
         is True
     )

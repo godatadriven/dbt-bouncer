@@ -211,6 +211,25 @@ To determine if a check accepts these arguments view the [Checks page](./checks/
 
     `dbt-bouncer` converts all of these paths to the Linux/Mac form, hence when you are supplying values to `exclude` and `include` you should use the Linux/Mac form.
 
+### Language and materialization
+
+Model checks accept two more optional arguments:
+
+- `language`: Run the check only on models written in this language, either `python` or `sql`.
+- `materialization`: Run the check only on models with this materialization, one of `ephemeral`, `incremental`, `table` or `view`.
+
+Each argument takes one value. A model must match every argument that is set, and these arguments combine with `exclude`, `include` and `selector` in the same way. Checks that do not iterate over models ignore both arguments.
+
+Use `language: sql` to skip Python models in a check that only applies to SQL. For example, to enforce a SQL coding rule on the raw code of SQL models only:
+
+```yaml
+manifest_checks:
+  - name: check_model_code_does_not_contain_regexp_pattern
+    description: Do not use `select *`.
+    language: sql
+    regexp_pattern: (?i)select\s+\*
+```
+
 ### Only
 
 `dbt-bouncer` has checks for four categories: `catalog_checks`, `info_schema_checks`, `manifest_checks` and `run_results_checks`. Running `dbt-bouncer` runs all checks for all categories. If you want to limit `dbt-bouncer` to a subset of check categories then you can use the `--only` CLI flag. It takes a comma-separated list of check categories to run. Examples:
