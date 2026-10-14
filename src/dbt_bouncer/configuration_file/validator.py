@@ -81,14 +81,19 @@ def apply_deprecated_check_name_aliases(config_file_contents: dict) -> dict:
 
     """
     for category, checks in config_file_contents.items():
-        if not category.endswith("_checks") or not isinstance(checks, list):
+        if not (
+            isinstance(category, str) and category.endswith("_checks")
+        ) or not isinstance(checks, list):
             continue
         for c in checks:
             if not isinstance(c, dict):
                 continue
-            new_name = DEPRECATED_CHECK_NAME_ALIASES.get(c.get("name"))
+            name_val = c.get("name")
+            if not isinstance(name_val, str):
+                continue
+            new_name = DEPRECATED_CHECK_NAME_ALIASES.get(name_val)
             if new_name is not None:
-                warn_deprecated_check_name(c["name"], new_name)
+                warn_deprecated_check_name(name_val, new_name)
                 c["name"] = new_name
     return config_file_contents
 
@@ -340,6 +345,16 @@ def lint_config_file(config_file_path: Path) -> list[dict[str, Any]]:
         )
         return issues
 
+    if not isinstance(data, Mapping):
+        issues.append(
+            {
+                "line": 1,
+                "message": f"Config file must contain a mapping, got {type(data).__name__}",
+                "severity": "error",
+            }
+        )
+        return issues
+
     registry = get_check_registry()
     valid_categories = set(CheckCategory)
     for category in valid_categories:
@@ -496,11 +511,13 @@ def lint_config_file_deep(config_file_path: Path) -> list[dict[str, Any]]:
     check_categories = [
         k
         for k in config_file_contents
-        if k.endswith("_checks") and config_file_contents.get(k) != []
+        if isinstance(k, str)
+        and k.endswith("_checks")
+        and config_file_contents.get(k) != []
     ]
 
     custom_checks_dir = None
-    if config_file_contents.get("custom_checks_dir"):
+    if isinstance(config_file_contents.get("custom_checks_dir"), str):
         custom_checks_dir = (
             Path(config_file_path).parent / config_file_contents["custom_checks_dir"]
         )
@@ -877,6 +894,17 @@ def _resolve_rule_code_entry(
     return added
 
 
+def _category_entries(config_file_contents: Mapping[str, Any], category: str) -> list:
+    """Return the entries under a check category, or ``[]`` if they are not a list.
+
+    Returns:
+        list: The category's entries.
+
+    """
+    entries = config_file_contents.get(category)
+    return entries if isinstance(entries, list) else []
+
+
 def _extract_configured_check_names(
     check_categories,
     config_file_contents: dict[str, Any],
@@ -899,16 +927,16 @@ def _extract_configured_check_names(
     entries = (
         entry
         for cat in check_categories
-        for entry in config_file_contents.get(cat, [])
+        for entry in _category_entries(config_file_contents, cat)
         if isinstance(entry, dict)
     )
     for entry in entries:
         # A rule code may appear under either key, so match on its shape.
         c_key = entry.get("name") or entry.get("code")
-        if not c_key:
+        if not c_key or not isinstance(c_key, str):
             continue
         configured_check_names.add(c_key)
-        if not isinstance(c_key, str) or not RULE_CODE_PATTERN.match(c_key):
+        if not RULE_CODE_PATTERN.match(c_key):
             # A plain check name needs no resolution, and the check's own `code`
             # field default fills the code in during validation.
             continue
@@ -976,7 +1004,7 @@ def _reject_checks_in_wrong_category(
     entries = [
         (category, index, entry["name"])
         for category in check_categories
-        for index, entry in enumerate(config_file_contents.get(category) or [])
+        for index, entry in enumerate(_category_entries(config_file_contents, category))
         if isinstance(entry, dict) and isinstance(entry.get("name"), str)
     ]
     if not entries:
@@ -1118,7 +1146,7 @@ def _extra_forbidden_detail(
         dict[str, Any]: The error location and its formatted message.
 
     """
-    extra_key = str(loc[-1])
+    extra_key = str(loc[-1]) if loc else ""
     candidates: set[str] = set()
     if len(loc) == 1:
         candidates = set(conf_class.model_fields)
@@ -1129,7 +1157,7 @@ def _extra_forbidden_detail(
             candidates = {
                 f for f in check_cls.model_fields if f not in ("index", resource_field)
             }
-    suggestion = _suggest_closest(extra_key, candidates)
+    suggestion = _suggest_closest(extra_key, candidates) if extra_key else ""
     message = f"{location}: {error['msg']}"
     if suggestion:
         message = f"{message}. {suggestion}"
@@ -1177,8 +1205,8 @@ def _config_validation_error_details(
 
 
 def validate_conf(
-    check_categories,  #: list[Literal["catalog_checks"], Literal["manifest_checks"], Literal["run_results_checks"]],
-    config_file_contents: dict[str, Any],
+    check_categories: Iterable[str] | Mapping[str, Any] | None = None,
+    config_file_contents: Mapping[str, Any] | None = None,
     custom_checks_dir: Path | None = None,
 ) -> "DbtBouncerConfBase":
     """Validate the configuration and return the Pydantic model.
@@ -1191,6 +1219,42 @@ def validate_conf(
 
     """
     logging.info("Validating conf...")
+
+    if config_file_contents is None:
+        match check_categories:
+            case Mapping():
+                config_file_contents = dict(check_categories)
+                check_categories = [
+                    k
+                    for k in config_file_contents
+                    if isinstance(k, str)
+                    and k.endswith("_checks")
+                    and config_file_contents.get(k) != []
+                ]
+            case None:
+                config_file_contents = {}
+                check_categories = []
+            case _:
+                raise DbtBouncerConfigError(
+                    f"Config must be a mapping, not {type(check_categories).__name__}.",
+                    details=[{"loc": (), "message": "Config must be a mapping"}],
+                )
+    elif not isinstance(config_file_contents, Mapping):
+        raise DbtBouncerConfigError(
+            f"Config must be a mapping, not {type(config_file_contents).__name__}.",
+            details=[{"loc": (), "message": "Config must be a mapping"}],
+        )
+    else:
+        config_file_contents = dict(config_file_contents)
+
+    if check_categories is None:
+        check_categories = [
+            k
+            for k in config_file_contents
+            if isinstance(k, str)
+            and k.endswith("_checks")
+            and config_file_contents.get(k) != []
+        ]
 
     config_file_contents = apply_deprecated_check_name_aliases(config_file_contents)
     configured_check_names = _extract_configured_check_names(
@@ -1207,19 +1271,25 @@ def validate_conf(
         from dbt_bouncer.version import version
 
         ver = version()
-        cache_key = compute_conf_cache_key(
-            ver,
-            config_file_contents,
-            list(check_categories),
-            custom_checks_dir=custom_checks_dir,
-        )
-        cache_path = get_cache_dir() / f"conf_{ver}_{cache_key}.json"
-        cached = _load_cached_conf(
-            cache_path, configured_check_names, custom_checks_dir
-        )
-        if cached is not None:
-            logging.debug("Loaded validated conf from cache: %s", cache_path)
-            return cached
+        try:
+            cache_key = compute_conf_cache_key(
+                ver,
+                config_file_contents,
+                list(check_categories),
+                custom_checks_dir=custom_checks_dir,
+            )
+        except (TypeError, ValueError):
+            # orjson cannot serialise some raw values (e.g. ints beyond 64 bits,
+            # non-string keys); skip the cache and validate uncached.
+            logging.debug("Conf cache key unavailable.", exc_info=True)
+        else:
+            cache_path = get_cache_dir() / f"conf_{ver}_{cache_key}.json"
+            cached = _load_cached_conf(
+                cache_path, configured_check_names, custom_checks_dir
+            )
+            if cached is not None:
+                logging.debug("Loaded validated conf from cache: %s", cache_path)
+                return cached
 
     DbtBouncerConf = _build_conf_class(  # ruff: ignore[non-lowercase-variable-in-function]
         check_categories, configured_check_names, custom_checks_dir

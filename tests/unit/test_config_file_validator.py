@@ -13,7 +13,9 @@ from hypothesis import given, settings
 from hypothesis import strategies as st
 from pydantic import PydanticUserError
 from typer.main import get_command
+from typer.testing import CliRunner
 
+from dbt_bouncer.configuration_file.parser import _get_category
 from dbt_bouncer.configuration_file.validator import (
     _get_stub_namespace,
     apply_deprecated_check_name_aliases,
@@ -21,9 +23,10 @@ from dbt_bouncer.configuration_file.validator import (
     load_config_file_contents,
     validate_conf,
 )
-from dbt_bouncer.enums import ConfigFileSource
+from dbt_bouncer.enums import ConfigFileSource, ExitCode
 from dbt_bouncer.exceptions import DbtBouncerConfigError
 from dbt_bouncer.main import app
+from dbt_bouncer.utils import get_check_registry
 
 
 def test_get_file_config_path_commandline(tmp_path):
@@ -1437,3 +1440,237 @@ def test_validate_conf_rejects_invalid_regex(config, monkeypatch):
 
     with pytest.raises(DbtBouncerConfigError, match="Invalid regex pattern"):
         validate_conf(check_categories=["manifest_checks"], config_file_contents=config)
+
+
+_CONFIG_LEAF = st.none() | st.booleans() | st.integers() | st.text()
+_CONFIG_RECURSIVE = st.recursive(
+    _CONFIG_LEAF,
+    lambda c: st.lists(c) | st.dictionaries(st.text(), c),
+    max_leaves=30,
+)
+_ARBITRARY_CONFIG_STRATEGY = st.fixed_dictionaries(
+    {},
+    optional={
+        "catalog_checks": _CONFIG_RECURSIVE,
+        "include": st.text(),
+        "manifest_checks": _CONFIG_RECURSIVE,
+        "run_results_checks": _CONFIG_RECURSIVE,
+        "severity": st.sampled_from(["error", "warn", "bogus"]),
+    },
+)
+
+
+@settings(max_examples=64, deadline=None)
+@given(_ARBITRARY_CONFIG_STRATEGY)
+def test_validate_conf_never_crashes(raw: dict[str, Any]):
+    """Config 'total function' test: validate_conf returns or raises DbtBouncerConfigError with a loc."""
+    exc: DbtBouncerConfigError | None = None
+    try:
+        conf = validate_conf(raw)
+        assert conf is not None
+    except DbtBouncerConfigError as e:
+        exc = e
+
+    if exc is not None:
+        assert exc.details is not None
+        assert len(exc.details) > 0
+        for d in exc.details:
+            assert "loc" in d
+            assert isinstance(d["loc"], tuple)
+
+
+@settings(max_examples=40, deadline=None)
+@given(_ARBITRARY_CONFIG_STRATEGY)
+def test_validate_cli_never_crashes(raw: dict[str, Any]):
+    """The validate CLI exits cleanly without crashing for any generated config."""
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        config_file = Path(tmp_dir) / "dbt-bouncer.yml"
+        config_file.write_text(yaml.safe_dump(raw), encoding="utf-8")
+
+        result = CliRunner().invoke(
+            app, ["validate", "--config-file", str(config_file)]
+        )
+        assert result.exit_code in (ExitCode.SUCCESS, ExitCode.CHECK_ERRORS)
+        assert result.exception is None or isinstance(result.exception, SystemExit)
+
+
+_INVALID_REGEX_PATTERNS = [
+    "[unclosed",
+    "(unclosed",
+    "*bad_quantifier",
+    "[a-",
+    "(?P<",
+    "\\",
+]
+
+_WRONG_TYPED_PARAM_VALUES = st.one_of(
+    st.none(),
+    st.booleans(),
+    st.integers(),
+    st.floats(allow_nan=False, allow_infinity=False),
+    st.sampled_from(_INVALID_REGEX_PATTERNS),
+    st.lists(st.integers(), max_size=3),
+    st.dictionaries(st.text(max_size=5), st.integers(), max_size=2),
+)
+
+_REGISTRY = get_check_registry()
+_MANIFEST_CHECK_NAMES = sorted(
+    name for name, cls in _REGISTRY.items() if _get_category(cls) == "manifest"
+)
+_CATALOG_CHECK_NAMES = sorted(
+    name for name, cls in _REGISTRY.items() if _get_category(cls) == "catalog"
+)
+_RUN_RESULTS_CHECK_NAMES = sorted(
+    name for name, cls in _REGISTRY.items() if _get_category(cls) == "run_results"
+)
+
+_MANIFEST_CHECK_ENTRY = st.fixed_dictionaries(
+    {"name": st.sampled_from(_MANIFEST_CHECK_NAMES)},
+    optional={
+        "exclude": st.one_of(
+            st.sampled_from(_INVALID_REGEX_PATTERNS), _WRONG_TYPED_PARAM_VALUES
+        ),
+        "include": st.one_of(
+            st.sampled_from(_INVALID_REGEX_PATTERNS), _WRONG_TYPED_PARAM_VALUES
+        ),
+        "model_name_pattern": _WRONG_TYPED_PARAM_VALUES,
+        "severity": _WRONG_TYPED_PARAM_VALUES,
+    },
+)
+
+_CATALOG_CHECK_ENTRY = st.fixed_dictionaries(
+    {"name": st.sampled_from(_CATALOG_CHECK_NAMES)},
+    optional={
+        "column_name_pattern": _WRONG_TYPED_PARAM_VALUES,
+        "exclude": st.one_of(
+            st.sampled_from(_INVALID_REGEX_PATTERNS), _WRONG_TYPED_PARAM_VALUES
+        ),
+        "include": st.one_of(
+            st.sampled_from(_INVALID_REGEX_PATTERNS), _WRONG_TYPED_PARAM_VALUES
+        ),
+        "severity": _WRONG_TYPED_PARAM_VALUES,
+    },
+)
+
+_RUN_RESULTS_CHECK_ENTRY = st.fixed_dictionaries(
+    {"name": st.sampled_from(_RUN_RESULTS_CHECK_NAMES)},
+    optional={
+        "exclude": st.one_of(
+            st.sampled_from(_INVALID_REGEX_PATTERNS), _WRONG_TYPED_PARAM_VALUES
+        ),
+        "include": st.one_of(
+            st.sampled_from(_INVALID_REGEX_PATTERNS), _WRONG_TYPED_PARAM_VALUES
+        ),
+        "max_execution_time": _WRONG_TYPED_PARAM_VALUES,
+        "severity": _WRONG_TYPED_PARAM_VALUES,
+    },
+)
+
+_REAL_CHECKS_WRONG_PARAMS_STRATEGY = st.fixed_dictionaries(
+    {},
+    optional={
+        "catalog_checks": st.lists(_CATALOG_CHECK_ENTRY, max_size=2),
+        "exclude": st.one_of(
+            st.sampled_from(_INVALID_REGEX_PATTERNS), _WRONG_TYPED_PARAM_VALUES
+        ),
+        "include": st.one_of(
+            st.sampled_from(_INVALID_REGEX_PATTERNS), _WRONG_TYPED_PARAM_VALUES
+        ),
+        "manifest_checks": st.lists(_MANIFEST_CHECK_ENTRY, max_size=2),
+        "run_results_checks": st.lists(_RUN_RESULTS_CHECK_ENTRY, max_size=2),
+        "severity": _WRONG_TYPED_PARAM_VALUES,
+    },
+)
+
+
+@settings(max_examples=50, deadline=None)
+@given(_REAL_CHECKS_WRONG_PARAMS_STRATEGY)
+def test_validate_conf_real_checks_wrong_typed_params_never_crashes(
+    raw: dict[str, Any],
+):
+    """Real check names with wrong-typed parameters either pass or raise DbtBouncerConfigError with loc."""
+    exc: DbtBouncerConfigError | None = None
+    try:
+        conf = validate_conf(raw)
+        assert conf is not None
+    except DbtBouncerConfigError as e:
+        exc = e
+
+    if exc is not None:
+        assert exc.details is not None
+        assert len(exc.details) > 0
+        assert all("loc" in d and isinstance(d["loc"], tuple) for d in exc.details)
+
+
+_INVALID_REGEX_STRATEGY = st.one_of(
+    st.fixed_dictionaries(
+        {
+            "include": st.sampled_from(_INVALID_REGEX_PATTERNS),
+            "manifest_checks": st.just([{"name": "check_model_description_populated"}]),
+        }
+    ),
+    st.fixed_dictionaries(
+        {
+            "exclude": st.sampled_from(_INVALID_REGEX_PATTERNS),
+            "manifest_checks": st.just([{"name": "check_model_description_populated"}]),
+        }
+    ),
+    st.fixed_dictionaries(
+        {
+            "manifest_checks": st.lists(
+                st.fixed_dictionaries(
+                    {
+                        "name": st.sampled_from(_MANIFEST_CHECK_NAMES),
+                        "include": st.sampled_from(_INVALID_REGEX_PATTERNS),
+                    }
+                ),
+                min_size=1,
+                max_size=2,
+            ),
+        }
+    ),
+    st.fixed_dictionaries(
+        {
+            "manifest_checks": st.lists(
+                st.fixed_dictionaries(
+                    {
+                        "name": st.sampled_from(_MANIFEST_CHECK_NAMES),
+                        "exclude": st.lists(
+                            st.sampled_from(_INVALID_REGEX_PATTERNS),
+                            min_size=1,
+                            max_size=2,
+                        ),
+                    }
+                ),
+                min_size=1,
+                max_size=2,
+            ),
+        }
+    ),
+)
+
+
+@settings(max_examples=30, deadline=None)
+@given(_INVALID_REGEX_STRATEGY)
+def test_invalid_regex_include_exclude_maps_to_exit_code_2(raw: dict[str, Any]):
+    """Invalid regexes for include/exclude fail validation with loc and map to exit code 2 (CONFIG_ERROR)."""
+    with pytest.raises(DbtBouncerConfigError) as exc_info:
+        validate_conf(raw)
+
+    assert exc_info.value.details is not None
+    assert any(
+        d.get("loc") and d["loc"][-1] in ("include", "exclude")
+        for d in exc_info.value.details
+    )
+
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        config_file = Path(tmp_dir) / "dbt-bouncer.yml"
+        config_file.write_text(yaml.safe_dump(raw), encoding="utf-8")
+
+        result_run = CliRunner().invoke(app, ["run", "--config-file", str(config_file)])
+        assert result_run.exit_code == ExitCode.CONFIG_ERROR
+
+        result_val = CliRunner().invoke(
+            app, ["validate", "--config-file", str(config_file)]
+        )
+        assert result_val.exit_code == ExitCode.CHECK_ERRORS
