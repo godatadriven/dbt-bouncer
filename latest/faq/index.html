@@ -1285,7 +1285,7 @@
 <p>By using this approach, and combining with your own unique constraints and desires, <code>dbt-bouncer</code> can be used efficiently as part of your CI pipeline.</p>
 <h2 id="how-do-i-get-machine-readable-results-to-parse-in-a-script">How do I get machine-readable results to parse in a script?<a class="headerlink" href="#how-do-i-get-machine-readable-results-to-parse-in-a-script" title="Permanent link">#</a></h2>
 <p>Do not parse the console results table. That table is for humans. It truncates check names to fit the terminal width.</p>
-<p>Set <code>--output-file</code> and select a structured <code>--output-format</code>. The supported formats are <code>csv</code>, <code>json</code>, <code>junit</code>, <code>sarif</code>, and <code>tap</code>.</p>
+<p>Set <code>--output-file</code> and select a structured <code>--output-format</code>. The supported formats are <code>csv</code>, <code>gitlab</code>, <code>json</code>, <code>junit</code>, <code>sarif</code>, and <code>tap</code>.</p>
 <div class="language-shell highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>dbt-bouncer<span class="w"> </span>run<span class="w"> </span>--output-file<span class="w"> </span>results/check-results.json<span class="w"> </span>--output-format<span class="w"> </span>json
 </span></code></pre></div>
 <p>Then read the output file in your script. See the <a href=".././cli/">CLI reference</a> for full option details.</p>
