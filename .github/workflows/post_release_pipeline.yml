@@ -23,6 +23,9 @@ jobs:
                 while [ $ELAPSED -lt $TIMEOUT ]; do
                   if curl -sf -A "dbt-bouncer-release-pipeline" "https://pypi.org/pypi/dbt-bouncer/$VERSION/json" > /dev/null 2>&1; then
                     echo "Package dbt-bouncer==$VERSION is available on PyPI."
+                    # The JSON API updates before the simple index/CDN, so give resolvers time to catch up.
+                    echo "Waiting a further 60s for the PyPI index to propagate..."
+                    sleep 60
                     exit 0
                   fi
                   echo "Not yet available, retrying in ${INTERVAL}s... (${ELAPSED}s elapsed)"
