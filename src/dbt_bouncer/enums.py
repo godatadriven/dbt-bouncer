@@ -98,6 +98,7 @@ class OutputFormat(StrEnum):
     """Supported output formats for CLI and programmatic output."""
 
     CSV = auto()
+    GITLAB = auto()
     JSON = auto()
     JUNIT = auto()
     SARIF = auto()
