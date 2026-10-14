@@ -220,13 +220,14 @@ Model checks accept two more optional arguments:
 
 Each argument takes one value. A model must match every argument that is set, and these arguments combine with `exclude`, `include` and `selector` in the same way. Checks that do not iterate over models ignore both arguments.
 
-Use `language: sql` to skip Python models in a check that only applies to SQL. For example, dbt does not support contracts for Python models:
+Use `language: sql` to skip Python models in a check that only applies to SQL. For example, to enforce a SQL coding rule on the raw code of SQL models only:
 
 ```yaml
 manifest_checks:
-  - name: check_model_has_contracts_enforced
-    include: ^models/marts
+  - name: check_model_code_does_not_contain_regexp_pattern
+    description: Do not use `select *`.
     language: sql
+    regexp_pattern: (?i)select\s+\*
 ```
 
 ### Only
