@@ -894,6 +894,17 @@ def _resolve_rule_code_entry(
     return added
 
 
+def _category_entries(config_file_contents: Mapping[str, Any], category: str) -> list:
+    """Return the entries under a check category, or ``[]`` if they are not a list.
+
+    Returns:
+        list: The category's entries.
+
+    """
+    entries = config_file_contents.get(category)
+    return entries if isinstance(entries, list) else []
+
+
 def _extract_configured_check_names(
     check_categories,
     config_file_contents: dict[str, Any],
@@ -916,11 +927,7 @@ def _extract_configured_check_names(
     entries = (
         entry
         for cat in check_categories
-        for entry in (
-            config_file_contents.get(cat)  # ty: ignore
-            if isinstance(config_file_contents.get(cat), list)
-            else []
-        )
+        for entry in _category_entries(config_file_contents, cat)
         if isinstance(entry, dict)
     )
     for entry in entries:
@@ -997,11 +1004,7 @@ def _reject_checks_in_wrong_category(
     entries = [
         (category, index, entry["name"])
         for category in check_categories
-        for index, entry in enumerate(
-            config_file_contents.get(category)  # ty: ignore
-            if isinstance(config_file_contents.get(category), list)
-            else []
-        )
+        for index, entry in enumerate(_category_entries(config_file_contents, category))
         if isinstance(entry, dict) and isinstance(entry.get("name"), str)
     ]
     if not entries:
@@ -1267,14 +1270,19 @@ def validate_conf(
         from dbt_bouncer.utils import compute_conf_cache_key, get_cache_dir
         from dbt_bouncer.version import version
 
+        ver = version()
         try:
-            ver = version()
             cache_key = compute_conf_cache_key(
                 ver,
                 config_file_contents,
                 list(check_categories),
                 custom_checks_dir=custom_checks_dir,
             )
+        except (TypeError, ValueError):
+            # orjson cannot serialise some raw values (e.g. ints beyond 64 bits,
+            # non-string keys); skip the cache and validate uncached.
+            logging.debug("Conf cache key unavailable.", exc_info=True)
+        else:
             cache_path = get_cache_dir() / f"conf_{ver}_{cache_key}.json"
             cached = _load_cached_conf(
                 cache_path, configured_check_names, custom_checks_dir
@@ -1282,9 +1290,6 @@ def validate_conf(
             if cached is not None:
                 logging.debug("Loaded validated conf from cache: %s", cache_path)
                 return cached
-        except Exception:
-            logging.debug("Conf cache lookup failed.", exc_info=True)
-            cache_path = None
 
     DbtBouncerConf = _build_conf_class(  # ruff: ignore[non-lowercase-variable-in-function]
         check_categories, configured_check_names, custom_checks_dir
