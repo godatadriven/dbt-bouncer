@@ -135,6 +135,15 @@ class TestCheckModelContractEnforcedForPublicModel:
                 check_fails,
                 id="public_contract_enforced_none",
             ),
+            pytest.param(
+                {
+                    "access": "public",
+                    "contract": {"enforced": False},
+                    "language": "python",
+                },
+                check_passes,
+                id="public_python_model_no_contract",
+            ),
         ],
     )
     def test_check_model_contract_enforced_for_public_model(
@@ -384,6 +393,11 @@ class TestCheckModelHasContractsEnforced:
                 {"contract": {"enforced": None}},
                 check_fails,
                 id="enforced_none",
+            ),
+            pytest.param(
+                {"contract": {"enforced": False}, "language": "python"},
+                check_passes,
+                id="python_model_no_contract",
             ),
         ],
     )
