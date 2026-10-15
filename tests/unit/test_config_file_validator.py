@@ -7,6 +7,7 @@ from typing import Any
 from unittest import mock
 
 import pytest
+import tomli_w
 import typer
 import yaml
 from hypothesis import given, settings
@@ -15,7 +16,7 @@ from pydantic import PydanticUserError
 from typer.main import get_command
 from typer.testing import CliRunner
 
-from dbt_bouncer.configuration_file.parser import _get_category
+from dbt_bouncer.configuration_file.parser import DbtBouncerConfBase, _get_category
 from dbt_bouncer.configuration_file.validator import (
     _get_stub_namespace,
     apply_deprecated_check_name_aliases,
@@ -1674,3 +1675,197 @@ def test_invalid_regex_include_exclude_maps_to_exit_code_2(raw: dict[str, Any]):
             app, ["validate", "--config-file", str(config_file)]
         )
         assert result_val.exit_code == ExitCode.CHECK_ERRORS
+
+
+_VALID_REGEX_PATTERNS = st.sampled_from(
+    [
+        ".*_test$",
+        "^dim_",
+        "^fct_",
+        "^int_",
+        "^models",
+        "^staging/.*",
+        "^stg_",
+    ]
+)
+
+_VALID_SELECTORS = st.sampled_from(
+    [
+        "name:stg_customers",
+        "package:dbt_utils",
+        "path:models/staging",
+        "tag:hourly",
+        "tag:nightly",
+    ]
+)
+
+_COMMON_CHECK_PARAMS = {
+    "description": st.sampled_from(["CI check", "Check convention", "Team standard"]),
+    "exclude": st.one_of(
+        _VALID_REGEX_PATTERNS,
+        st.lists(_VALID_REGEX_PATTERNS, min_size=1, max_size=2),
+    ),
+    "include": st.one_of(
+        _VALID_REGEX_PATTERNS,
+        st.lists(_VALID_REGEX_PATTERNS, min_size=1, max_size=2),
+    ),
+    "severity": st.sampled_from(["error", "warn"]),
+}
+
+_EQUIVALENCE_MANIFEST_CHECK = st.one_of(
+    st.fixed_dictionaries(
+        {"name": st.just("check_model_description_populated")},
+        optional={
+            "min_description_length": st.integers(min_value=1, max_value=50),
+            **_COMMON_CHECK_PARAMS,
+        },
+    ),
+    st.fixed_dictionaries(
+        {"name": st.just("check_model_has_unique_test")},
+        optional=_COMMON_CHECK_PARAMS,
+    ),
+    st.fixed_dictionaries(
+        {
+            "model_name_pattern": _VALID_REGEX_PATTERNS,
+            "name": st.just("check_model_names"),
+        },
+        optional=_COMMON_CHECK_PARAMS,
+    ),
+    st.fixed_dictionaries(
+        {
+            "name": st.just("check_model_has_tags"),
+            "tags": st.lists(
+                st.sampled_from(["daily", "hourly", "nightly"]), min_size=1, max_size=2
+            ),
+        },
+        optional={"criteria": st.sampled_from(["all", "any"]), **_COMMON_CHECK_PARAMS},
+    ),
+    st.fixed_dictionaries(
+        {
+            "include": _VALID_REGEX_PATTERNS,
+            "name": st.just("check_model_directories"),
+            "permitted_sub_directories": st.lists(
+                st.sampled_from(["intermediate", "marts", "staging"]),
+                min_size=1,
+                max_size=2,
+            ),
+        },
+        optional={k: v for k, v in _COMMON_CHECK_PARAMS.items() if k != "include"},
+    ),
+    st.fixed_dictionaries(
+        {"name": st.just("check_exposure_based_on_view")},
+        optional=_COMMON_CHECK_PARAMS,
+    ),
+)
+
+_EQUIVALENCE_CATALOG_CHECK = st.one_of(
+    st.fixed_dictionaries(
+        {"name": st.just("check_column_description_populated")},
+        optional={
+            "min_description_length": st.integers(min_value=1, max_value=50),
+            **_COMMON_CHECK_PARAMS,
+        },
+    ),
+    st.fixed_dictionaries(
+        {"name": st.just("check_source_columns_are_all_documented")},
+        optional={"case_sensitive": st.booleans(), **_COMMON_CHECK_PARAMS},
+    ),
+    st.fixed_dictionaries(
+        {"name": st.just("check_seed_columns_are_all_documented")},
+        optional={"case_sensitive": st.booleans(), **_COMMON_CHECK_PARAMS},
+    ),
+    st.fixed_dictionaries(
+        {
+            "max_bytes": st.integers(min_value=1000, max_value=100_000),
+            "name": st.just("check_seed_max_bytes"),
+        },
+        optional={
+            "byte_stat_keys": st.lists(
+                st.sampled_from(["bytes", "size"]), min_size=1, max_size=2
+            ),
+            **_COMMON_CHECK_PARAMS,
+        },
+    ),
+    st.fixed_dictionaries(
+        {
+            "max_row_count": st.integers(min_value=100, max_value=100_000),
+            "name": st.just("check_seed_max_row_count"),
+        },
+        optional={
+            "row_stat_keys": st.lists(
+                st.sampled_from(["row_count", "rows"]), min_size=1, max_size=2
+            ),
+            **_COMMON_CHECK_PARAMS,
+        },
+    ),
+)
+
+_EQUIVALENCE_RUN_RESULTS_CHECK = st.one_of(
+    st.fixed_dictionaries(
+        {
+            "max_execution_time_seconds": st.floats(
+                allow_infinity=False, allow_nan=False, min_value=0.5, max_value=300.0
+            ),
+            "name": st.just("check_run_results_max_execution_time"),
+        },
+        optional=_COMMON_CHECK_PARAMS,
+    ),
+    st.fixed_dictionaries(
+        {
+            "max_gigabytes_billed": st.floats(
+                allow_infinity=False, allow_nan=False, min_value=0.5, max_value=50.0
+            ),
+            "name": st.just("check_run_results_max_gigabytes_billed"),
+        },
+        optional=_COMMON_CHECK_PARAMS,
+    ),
+)
+
+_VALID_CONFIG_EQUIVALENCE_STRATEGY = st.fixed_dictionaries(
+    {},
+    optional={
+        "catalog_checks": st.lists(_EQUIVALENCE_CATALOG_CHECK, max_size=2),
+        "dbt_artifacts_dir": st.sampled_from(
+            ["build/target", "dbt_project/target", "target"]
+        ),
+        "exclude": _VALID_REGEX_PATTERNS,
+        "include": _VALID_REGEX_PATTERNS,
+        "manifest_checks": st.lists(_EQUIVALENCE_MANIFEST_CHECK, max_size=3),
+        "package_name": st.sampled_from(["analytics", "dbt_utils", "my_pkg"]),
+        "run_results_checks": st.lists(_EQUIVALENCE_RUN_RESULTS_CHECK, max_size=2),
+        "selector": _VALID_SELECTORS,
+        "severity": st.sampled_from(["error", "warn"]),
+    },
+)
+
+
+@settings(max_examples=50, deadline=None)
+@given(_VALID_CONFIG_EQUIVALENCE_STRATEGY)
+def test_config_equivalence_yaml_toml_pyproject(config: dict[str, Any]):
+    """YAML ≡ TOML ≡ pyproject equivalence.
+
+    Generate a valid config, serialise it three ways, and assert the validated
+    objects are equal.
+    """
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        tmp_path = Path(tmp_dir)
+        yaml_file = tmp_path / "dbt-bouncer.yml"
+        toml_file = tmp_path / "dbt-bouncer.toml"
+        pyproject_file = tmp_path / "pyproject.toml"
+
+        yaml_file.write_text(yaml.safe_dump(config, sort_keys=False))
+        toml_file.write_text(tomli_w.dumps(config))
+        pyproject_file.write_text(tomli_w.dumps({"tool": {"dbt-bouncer": config}}))
+
+        loaded_yaml = load_config_file_contents(yaml_file)
+        loaded_toml = load_config_file_contents(toml_file)
+        loaded_pyproject = load_config_file_contents(pyproject_file)
+
+        assert loaded_yaml == loaded_toml == loaded_pyproject
+
+        validated_yaml = validate_conf(config_file_contents=loaded_yaml)
+        validated_toml = validate_conf(config_file_contents=loaded_toml)
+        validated_pyproject = validate_conf(config_file_contents=loaded_pyproject)
+
+        assert isinstance(validated_yaml, DbtBouncerConfBase)
+        assert validated_yaml == validated_toml == validated_pyproject
