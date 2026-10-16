@@ -131,6 +131,21 @@ class DbtBouncerConfBase(BaseModel):
 
         return validate_selector_field(value)
 
+    def __eq__(self, other: Any) -> bool:
+        """Compare two bouncer config instances by their field values.
+
+        Ensures that instances of different dynamically-generated subclasses
+        (e.g. cold-path ``DbtBouncerConf`` and cached ``DbtBouncerConfLite``)
+        compare equal when their validated fields and checks are identical.
+
+        Returns:
+            bool: ``True`` if both instances have identical field values.
+
+        """
+        if isinstance(other, DbtBouncerConfBase):
+            return self.__dict__ == other.__dict__
+        return NotImplemented
+
 
 @lru_cache(maxsize=None)
 def create_bouncer_conf_class(

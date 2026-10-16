@@ -249,7 +249,10 @@ def load_config_file_contents(
                 return toml_cfg
 
             # pyproject.toml: config is under [tool.dbt-bouncer]
-            if toml_cfg.get("tool", {}).get("dbt-bouncer"):
+            if (
+                isinstance(toml_cfg.get("tool"), Mapping)
+                and "dbt-bouncer" in toml_cfg["tool"]
+            ):
                 return toml_cfg["tool"]["dbt-bouncer"]
             else:
                 logging.warning(
