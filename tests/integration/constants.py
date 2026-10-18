@@ -16,8 +16,19 @@ EXAMPLE_CONFIG = Path("dbt-bouncer-example.yml").resolve()
 # Every supported artifact format, oldest to newest. The low-numbered ones are
 # frozen fixtures that are no longer rebuilt, so they guard against a parser
 # change silently breaking older manifests.
-ARTIFACT_DIRS = sorted(p for p in FIXTURES_DIR.iterdir() if p.is_dir())
+ARTIFACT_DIRS = sorted(
+    p
+    for p in FIXTURES_DIR.iterdir()
+    if p.is_dir() and (p / "target" / "catalog.json").is_file()
+)
 ARTIFACT_IDS = [p.name for p in ARTIFACT_DIRS]
+
+ALL_ARTIFACT_DIRS = sorted(
+    p
+    for p in FIXTURES_DIR.iterdir()
+    if p.is_dir() and (p / "target" / "manifest.json").is_file()
+)
+ALL_ARTIFACT_IDS = [p.name for p in ALL_ARTIFACT_DIRS]
 
 # A check that fails on every model: no model name starts with "zzz_".
 FAILING_CHECK = [{"name": "check_model_names", "model_name_pattern": "^zzz_"}]

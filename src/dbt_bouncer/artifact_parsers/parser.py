@@ -355,6 +355,16 @@ def parse_dbt_artifacts(
             )
 
         catalog_dict = _load_json_artifact(catalog_path)
+        catalog_nodes_raw = catalog_dict.get("nodes") or {}
+        catalog_sources_raw = catalog_dict.get("sources") or {}
+        if not catalog_nodes_raw and not catalog_sources_raw:
+            raise DbtBouncerArtifactError(
+                f"`{catalog_path}` contains 0 nodes and 0 sources. "
+                "Introspection requires models to be built before generating the catalog "
+                "(e.g. `dbt build` before `dbt compile --write-catalog` on dbt 2.0, or before "
+                "`dbt docs generate` on dbt 1.x)."
+            )
+
         nodes_dict = manifest_dict.get("nodes", {})
         sources_dict = manifest_dict.get("sources", {})
 
