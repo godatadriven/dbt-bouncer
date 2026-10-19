@@ -97,6 +97,54 @@ def check_column_name_complies_to_column_type(
             )
 
 
+@check(code="CA009")
+def check_column_names(catalog_node, ctx, *, column_name_pattern: RegexPattern):
+    """Columns must have a name that matches the supplied regex.
+
+    !!! info "Rationale"
+
+        Consistent column naming is the foundation of a readable and maintainable dbt project. Inconsistent casing, abbreviations, or special characters make SQL harder to write, cause join errors, and confuse data consumers who query the warehouse directly. A single enforced naming pattern (e.g. `^[a-z_]*$` for snake_case) eliminates an entire class of stylistic bugs and ensures that columns look the same whether viewed in dbt docs, a BI tool, or a raw SQL editor.
+
+    Parameters:
+        column_name_pattern (str): Regexp the column name must match.
+
+    Receives:
+        catalog_node (CatalogNodeEntry): The CatalogNodeEntry object to check.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.
+        include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.
+        materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        catalog_checks:
+            - name: check_column_names
+              column_name_pattern: [a-z_] # Lowercase only, underscores allowed
+        ```
+
+    """
+    models_by_id = (
+        ctx.models_by_unique_id
+        if ctx.models_by_unique_id
+        else {m.unique_id: m for m in ctx.models}
+    )
+    if get_model_for_catalog_node(catalog_node, models_by_id) is not None:
+        non_complying_columns: list[str] = []
+        non_complying_columns.extend(
+            v.name
+            for _, v in catalog_node.columns.items()
+            if re.fullmatch(column_name_pattern.strip(), str(v.name)) is None
+        )
+
+        if non_complying_columns:
+            fail(
+                f"`{str(catalog_node.unique_id).split('.')[-1]}` has columns ({non_complying_columns}) that do not match the supplied regex: `{column_name_pattern.strip()}`."
+            )
+
+
 @check(code="CA010", validate=require_exactly_one_of_type_pattern_or_types)
 def check_column_type_complies_to_column_name(
     catalog_node,
@@ -182,52 +230,4 @@ def check_column_type_complies_to_column_name(
         if non_complying_columns:
             fail(
                 f"`{str(catalog_node.unique_id).split('.')[-1]}` has columns with types in {types} that don't comply with the specified naming pattern (`{column_name_pattern}`): {non_complying_columns}"
-            )
-
-
-@check(code="CA009")
-def check_column_names(catalog_node, ctx, *, column_name_pattern: RegexPattern):
-    """Columns must have a name that matches the supplied regex.
-
-    !!! info "Rationale"
-
-        Consistent column naming is the foundation of a readable and maintainable dbt project. Inconsistent casing, abbreviations, or special characters make SQL harder to write, cause join errors, and confuse data consumers who query the warehouse directly. A single enforced naming pattern (e.g. `^[a-z_]*$` for snake_case) eliminates an entire class of stylistic bugs and ensures that columns look the same whether viewed in dbt docs, a BI tool, or a raw SQL editor.
-
-    Parameters:
-        column_name_pattern (str): Regexp the column name must match.
-
-    Receives:
-        catalog_node (CatalogNodeEntry): The CatalogNodeEntry object to check.
-
-    Other Parameters:
-        description (str | None): Description of what the check does and why it is implemented.
-        exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.
-        include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.
-        materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
-        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
-
-    Example(s):
-        ```yaml
-        catalog_checks:
-            - name: check_column_names
-              column_name_pattern: [a-z_] # Lowercase only, underscores allowed
-        ```
-
-    """
-    models_by_id = (
-        ctx.models_by_unique_id
-        if ctx.models_by_unique_id
-        else {m.unique_id: m for m in ctx.models}
-    )
-    if get_model_for_catalog_node(catalog_node, models_by_id) is not None:
-        non_complying_columns: list[str] = []
-        non_complying_columns.extend(
-            v.name
-            for _, v in catalog_node.columns.items()
-            if re.fullmatch(column_name_pattern.strip(), str(v.name)) is None
-        )
-
-        if non_complying_columns:
-            fail(
-                f"`{str(catalog_node.unique_id).split('.')[-1]}` has columns ({non_complying_columns}) that do not match the supplied regex: `{column_name_pattern.strip()}`."
             )

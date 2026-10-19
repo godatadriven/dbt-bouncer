@@ -275,6 +275,123 @@ def check_macro_has_meta_keys(
         fail(f"`{macro.name}` {failure}")
 
 
+# Cache keyed by id(manifest_obj). Safe within a single bouncer run because the
+# manifest object is long-lived; id reuse after GC is theoretically possible but
+# not a practical concern here.
+_USED_MACROS_CACHE: dict[int, set[str]] = {}
+
+
+def _dispatches_to_own_name(macro: Any) -> bool:
+    """Whether a macro calls a dispatched implementation of its own name.
+
+    dbt's dispatch convention names implementations `<prefix>__<name>`, e.g.
+    `default__generate_schema_name` or `duckdb__apply_grants`. A macro that
+    depends on such an implementation of its own name is overriding a dbt
+    built-in, and is therefore invoked by dbt itself rather than by another
+    resource in the manifest.
+
+    Args:
+        macro: The macro object to inspect.
+
+    Returns:
+        True if the macro overrides a dispatched built-in.
+
+    """
+    depends_on = getattr(macro, "depends_on", None)
+    if depends_on is None or not hasattr(depends_on, "macros"):
+        return False
+
+    suffix = f"__{macro.name}"
+    for unique_id in depends_on.macros:
+        # `unique_id` is `macro.<package_name>.<macro_name>`.
+        dispatched_name = unique_id.rsplit(".", 1)[-1]
+        # `!= suffix` rejects an empty dispatch prefix.
+        if dispatched_name.endswith(suffix) and dispatched_name != suffix:
+            return True
+    return False
+
+
+def _get_used_macros(manifest_obj: Any) -> set[str]:
+    obj_id = id(manifest_obj)
+    if obj_id not in _USED_MACROS_CACHE:
+        used_macros = set()
+        manifest_data = getattr(manifest_obj, "manifest", manifest_obj)
+        for collection_name in [
+            "nodes",
+            "macros",
+            "sources",
+            "exposures",
+            "metrics",
+            "semantic_models",
+            "unit_tests",
+        ]:
+            collection = getattr(manifest_data, collection_name, {})
+            for item in collection.values():
+                if hasattr(item, "depends_on") and hasattr(item.depends_on, "macros"):
+                    used_macros.update(item.depends_on.macros)
+
+        # Add macros that override default dbt macros. dbt < 2.0 records the
+        # dispatch edge on the built-in itself (`macro.dbt.<name>` depends on
+        # `macro.dbt.default__<name>`), so the overridable names can be read
+        # straight off the `dbt` package.
+        overridable_dbt_macros = set()
+        macros_collection = getattr(manifest_data, "macros", {})
+        for item in macros_collection.values():
+            if (
+                getattr(item, "package_name", "") == "dbt"
+                and hasattr(item, "depends_on")
+                and hasattr(item.depends_on, "macros")
+                and f"macro.dbt.default__{item.name}" in item.depends_on.macros
+            ):
+                overridable_dbt_macros.add(item.name)
+
+        # dbt 2.0 omits `depends_on` for macros in the built-in `dbt` and
+        # adapter packages, leaving `overridable_dbt_macros` empty, so also
+        # detect an override from its own dispatch edge.
+        for item in macros_collection.values():
+            if item.name in overridable_dbt_macros or _dispatches_to_own_name(item):
+                used_macros.add(item.unique_id)
+
+        _USED_MACROS_CACHE[obj_id] = used_macros
+    return _USED_MACROS_CACHE[obj_id]
+
+
+@check(code="MA005")
+def check_macro_is_used(macro, ctx):
+    """Macros must be invoked by at least one other resource.
+
+    !!! info "Rationale"
+
+        Similar to orphaned models, macros are often written for a specific purpose and later abandoned, leaving behind technical debt and confusion. This check parses the manifest to find macros that are defined in the project but are never actually invoked by any model, test, or other macro. Keeps the macro directory lean and reduces the cognitive load for developers trying to understand the codebase.
+
+    !!! warning "Generate your manifest with `dbt compile`, not `dbt parse`, on dbt 2.0"
+
+        This check reads the macro-to-macro dependency graph (`depends_on.macros`). On dbt 2.0 (Fusion) a `dbt parse` run records no macro-to-macro dependencies at all, so any macro that is only ever invoked by another macro is reported as unused. Generate the manifest with `dbt compile` instead. Manifests from dbt 1.x are unaffected: `dbt parse` records the full macro graph there.
+
+    Receives:
+        macro (Macros): The Macros object to check.
+        ctx (CheckContext): The check context containing the manifest.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | list[str] | None): Regex pattern(s) to match the macro path. Macro paths that match any pattern will not be checked.
+        include (str | list[str] | None): Regex pattern(s) to match the macro path. Only macro paths that match any pattern will be checked.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_macro_is_used
+        ```
+
+    """
+    used_macros = _get_used_macros(ctx.manifest_obj)
+    if macro.unique_id not in used_macros:
+        fail(
+            f"Macro `{macro.unique_id}` is not invoked by any model, test, or other macro."
+        )
+
+
 @check(code="MA006")
 def check_macro_max_number_of_arguments(
     macro, *, max_number_of_arguments: Annotated[int, Field(gt=0)] = 4
@@ -496,120 +613,3 @@ def check_macro_property_file_location(macro):
             fail(
                 f"The properties file for `{macro.name}` (`{properties_yml_name}`) does not end with `__macros.yml`."
             )
-
-
-# Cache keyed by id(manifest_obj). Safe within a single bouncer run because the
-# manifest object is long-lived; id reuse after GC is theoretically possible but
-# not a practical concern here.
-_USED_MACROS_CACHE: dict[int, set[str]] = {}
-
-
-def _dispatches_to_own_name(macro: Any) -> bool:
-    """Whether a macro calls a dispatched implementation of its own name.
-
-    dbt's dispatch convention names implementations `<prefix>__<name>`, e.g.
-    `default__generate_schema_name` or `duckdb__apply_grants`. A macro that
-    depends on such an implementation of its own name is overriding a dbt
-    built-in, and is therefore invoked by dbt itself rather than by another
-    resource in the manifest.
-
-    Args:
-        macro: The macro object to inspect.
-
-    Returns:
-        True if the macro overrides a dispatched built-in.
-
-    """
-    depends_on = getattr(macro, "depends_on", None)
-    if depends_on is None or not hasattr(depends_on, "macros"):
-        return False
-
-    suffix = f"__{macro.name}"
-    for unique_id in depends_on.macros:
-        # `unique_id` is `macro.<package_name>.<macro_name>`.
-        dispatched_name = unique_id.rsplit(".", 1)[-1]
-        # `!= suffix` rejects an empty dispatch prefix.
-        if dispatched_name.endswith(suffix) and dispatched_name != suffix:
-            return True
-    return False
-
-
-def _get_used_macros(manifest_obj: Any) -> set[str]:
-    obj_id = id(manifest_obj)
-    if obj_id not in _USED_MACROS_CACHE:
-        used_macros = set()
-        manifest_data = getattr(manifest_obj, "manifest", manifest_obj)
-        for collection_name in [
-            "nodes",
-            "macros",
-            "sources",
-            "exposures",
-            "metrics",
-            "semantic_models",
-            "unit_tests",
-        ]:
-            collection = getattr(manifest_data, collection_name, {})
-            for item in collection.values():
-                if hasattr(item, "depends_on") and hasattr(item.depends_on, "macros"):
-                    used_macros.update(item.depends_on.macros)
-
-        # Add macros that override default dbt macros. dbt < 2.0 records the
-        # dispatch edge on the built-in itself (`macro.dbt.<name>` depends on
-        # `macro.dbt.default__<name>`), so the overridable names can be read
-        # straight off the `dbt` package.
-        overridable_dbt_macros = set()
-        macros_collection = getattr(manifest_data, "macros", {})
-        for item in macros_collection.values():
-            if (
-                getattr(item, "package_name", "") == "dbt"
-                and hasattr(item, "depends_on")
-                and hasattr(item.depends_on, "macros")
-                and f"macro.dbt.default__{item.name}" in item.depends_on.macros
-            ):
-                overridable_dbt_macros.add(item.name)
-
-        # dbt 2.0 omits `depends_on` for macros in the built-in `dbt` and
-        # adapter packages, leaving `overridable_dbt_macros` empty, so also
-        # detect an override from its own dispatch edge.
-        for item in macros_collection.values():
-            if item.name in overridable_dbt_macros or _dispatches_to_own_name(item):
-                used_macros.add(item.unique_id)
-
-        _USED_MACROS_CACHE[obj_id] = used_macros
-    return _USED_MACROS_CACHE[obj_id]
-
-
-@check(code="MA005")
-def check_macro_is_used(macro, ctx):
-    """Macros must be invoked by at least one other resource.
-
-    !!! info "Rationale"
-
-        Similar to orphaned models, macros are often written for a specific purpose and later abandoned, leaving behind technical debt and confusion. This check parses the manifest to find macros that are defined in the project but are never actually invoked by any model, test, or other macro. Keeps the macro directory lean and reduces the cognitive load for developers trying to understand the codebase.
-
-    !!! warning "Generate your manifest with `dbt compile`, not `dbt parse`, on dbt 2.0"
-
-        This check reads the macro-to-macro dependency graph (`depends_on.macros`). On dbt 2.0 (Fusion) a `dbt parse` run records no macro-to-macro dependencies at all, so any macro that is only ever invoked by another macro is reported as unused. Generate the manifest with `dbt compile` instead. Manifests from dbt 1.x are unaffected: `dbt parse` records the full macro graph there.
-
-    Receives:
-        macro (Macros): The Macros object to check.
-        ctx (CheckContext): The check context containing the manifest.
-
-    Other Parameters:
-        description (str | None): Description of what the check does and why it is implemented.
-        exclude (str | list[str] | None): Regex pattern(s) to match the macro path. Macro paths that match any pattern will not be checked.
-        include (str | list[str] | None): Regex pattern(s) to match the macro path. Only macro paths that match any pattern will be checked.
-        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
-
-    Example(s):
-        ```yaml
-        manifest_checks:
-            - name: check_macro_is_used
-        ```
-
-    """
-    used_macros = _get_used_macros(ctx.manifest_obj)
-    if macro.unique_id not in used_macros:
-        fail(
-            f"Macro `{macro.unique_id}` is not invoked by any model, test, or other macro."
-        )
