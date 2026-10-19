@@ -7,21 +7,21 @@ from dbt_bouncer.reporting.logger import configure_console_logging
 
 def main():
     """Assert that all checks are alphabetically sorted."""
-    for f in Path("src/dbt_bouncer/checks").glob("*/*.py"):
-        logging.info(f"Checking {f.name}...")
+    for f in sorted(Path("src/dbt_bouncer/checks").glob("**/*.py")):
+        logging.info(f"Checking {f}...")
         with Path.open(f, encoding="utf-8") as file:
             node = ast.parse(file.read())
 
-        class_names = [
-            class_.name
-            for class_ in [n for n in node.body if isinstance(n, ast.ClassDef)]
-            if class_.name.startswith("Check")
+        check_names = [
+            defn.name
+            for defn in node.body
+            if (isinstance(defn, ast.FunctionDef) and defn.name.startswith("check_"))
+            or (isinstance(defn, ast.ClassDef) and defn.name.startswith("Check"))
         ]
-        logging.debug(f"{class_names=}")
-        logging.debug(f"{sorted(class_names)=}")
-        logging.debug(class_names == sorted(class_names))
-        assert class_names == sorted(class_names), (
-            f"Class names are not sorted alphabetically in {f.name}"
+        logging.debug(f"{check_names=}")
+        logging.debug(f"{sorted(check_names)=}")
+        assert check_names == sorted(check_names), (
+            f"Check definitions are not sorted alphabetically in {f}: {check_names}"
         )
 
 

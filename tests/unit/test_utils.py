@@ -680,6 +680,7 @@ def test_load_entry_point_checks_skips_internal_entry_points():
 
     eps = [
         _make_fake_ep("catalog", None, module="dbt_bouncer.checks.catalog"),
+        _make_fake_ep("info_schema", None, module="dbt_bouncer.checks.info_schema"),
         _make_fake_ep("manifest", None, module="dbt_bouncer.checks.manifest"),
         _make_fake_ep("run_results", None, module="dbt_bouncer.checks.run_results"),
     ]

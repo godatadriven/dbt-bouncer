@@ -105,6 +105,7 @@ def main() -> None:
 
     # Import all check modules so every check class is registered.
     import dbt_bouncer.checks.catalog  # ruff: ignore[unused-import]
+    import dbt_bouncer.checks.info_schema  # ruff: ignore[unused-import]
     import dbt_bouncer.checks.manifest  # ruff: ignore[unused-import]
     import dbt_bouncer.checks.run_results  # ruff: ignore[unused-import]
     from dbt_bouncer.cli.list.utils import category_key

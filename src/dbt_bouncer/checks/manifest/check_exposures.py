@@ -65,6 +65,53 @@ def check_exposure_based_on_model(
         )
 
 
+@check(code="EX002")
+def check_exposure_based_on_non_public_models(exposure, ctx):
+    """Exposures should be based on public models only.
+
+    !!! info "Rationale"
+
+        Public access in dbt signals that a model is stable, well-tested, and safe to depend on externally. Exposures that reference protected or private models create implicit dependencies on implementation details that may change without warning, increasing the risk of broken dashboards or pipelines when internal models are refactored.
+
+    Receives:
+        exposure (ExposureNode): The ExposureNode object to check.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | list[str] | None): Regex pattern(s) to match the exposure path (i.e the .yml file where the exposure is configured). Exposure paths that match any pattern will not be checked.
+        include (str | list[str] | None): Regex pattern(s) to match the exposure path (i.e the .yml file where the exposure is configured). Only exposure paths that match any pattern will be checked.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_exposure_based_on_non_public_models
+        ```
+
+    """
+    models_by_id = (
+        ctx.models_by_unique_id
+        if ctx.models_by_unique_id
+        else {m.unique_id: m for m in ctx.models}
+    )
+    non_public_upstream_dependencies = []
+    for node_id in getattr(exposure.depends_on, "nodes", []) or []:
+        model_obj = models_by_id.get(node_id)
+        if (
+            model_obj
+            and model_obj.resource_type == "model"
+            and model_obj.package_name == exposure.package_name
+            and model_obj.access
+            and model_obj.access.value != ModelAccess.PUBLIC
+        ):
+            non_public_upstream_dependencies.append(model_obj.name)
+
+    if non_public_upstream_dependencies:
+        fail(
+            f"`{exposure.name}` is based on a model(s) that is not public: {non_public_upstream_dependencies}."
+        )
+
+
 @check(code="EX003")
 def check_exposure_based_on_view(
     exposure,
@@ -126,53 +173,6 @@ def check_exposure_based_on_view(
     if non_table_upstream_dependencies:
         fail(
             f"`{exposure.name}` is based on a model that is not a table: {non_table_upstream_dependencies}."
-        )
-
-
-@check(code="EX002")
-def check_exposure_based_on_non_public_models(exposure, ctx):
-    """Exposures should be based on public models only.
-
-    !!! info "Rationale"
-
-        Public access in dbt signals that a model is stable, well-tested, and safe to depend on externally. Exposures that reference protected or private models create implicit dependencies on implementation details that may change without warning, increasing the risk of broken dashboards or pipelines when internal models are refactored.
-
-    Receives:
-        exposure (ExposureNode): The ExposureNode object to check.
-
-    Other Parameters:
-        description (str | None): Description of what the check does and why it is implemented.
-        exclude (str | list[str] | None): Regex pattern(s) to match the exposure path (i.e the .yml file where the exposure is configured). Exposure paths that match any pattern will not be checked.
-        include (str | list[str] | None): Regex pattern(s) to match the exposure path (i.e the .yml file where the exposure is configured). Only exposure paths that match any pattern will be checked.
-        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
-
-    Example(s):
-        ```yaml
-        manifest_checks:
-            - name: check_exposure_based_on_non_public_models
-        ```
-
-    """
-    models_by_id = (
-        ctx.models_by_unique_id
-        if ctx.models_by_unique_id
-        else {m.unique_id: m for m in ctx.models}
-    )
-    non_public_upstream_dependencies = []
-    for node_id in getattr(exposure.depends_on, "nodes", []) or []:
-        model_obj = models_by_id.get(node_id)
-        if (
-            model_obj
-            and model_obj.resource_type == "model"
-            and model_obj.package_name == exposure.package_name
-            and model_obj.access
-            and model_obj.access.value != ModelAccess.PUBLIC
-        ):
-            non_public_upstream_dependencies.append(model_obj.name)
-
-    if non_public_upstream_dependencies:
-        fail(
-            f"`{exposure.name}` is based on a model(s) that is not public: {non_public_upstream_dependencies}."
         )
 
 
