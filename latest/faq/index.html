@@ -721,6 +721,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#how-fast-is-dbt-bouncer" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        How fast is <code>dbt-bouncer</code>?
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#how-do-i-onboard-an-existing-dbt-project" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -1083,14 +1094,14 @@
 
 <h1 id="frequently-asked-questions">Frequently Asked Questions<a class="headerlink" href="#frequently-asked-questions" title="Permanent link">#</a></h1>
 <h2 id="can-other-tools-perform-the-same-checks-as-dbt-bouncer">Can other tools perform the same checks as <code>dbt-bouncer</code>?<a class="headerlink" href="#can-other-tools-perform-the-same-checks-as-dbt-bouncer" title="Permanent link">#</a></h2>
-<p><code>dbt-bouncer</code> is designed to be the most complete and flexible way to enforce conventions in a dbt project: it ships <strong>120+ built-in checks</strong>, is configured via a <code>YAML</code> or <code>TOML</code> file format that dbt developers are already familiar with, never needs a database connection, can run checks against any of dbt's artifacts (manifest, catalog, and run results), can run both locally and in a CI pipeline, and lets you write custom checks in python.</p>
+<p><code>dbt-bouncer</code> is designed to be the most complete and flexible way to enforce conventions in a dbt project: it ships <strong>120+ built-in checks</strong>, is configured via a <code>YAML</code> or <code>TOML</code> file format that dbt developers are already familiar with, never needs a database connection, supports dbt 1.x and dbt 2.0, can run checks against any of dbt's artifacts (manifest, catalog, run results and the dbt 2.0 Information Schema), can run both locally and in a CI pipeline, and lets you write custom checks in Python or SQL.</p>
 <table>
 <thead>
 <tr>
 <th></th>
 <th><code>dbt-bouncer</code></th>
 <th><a href="https://github.com/dbt-checkpoint/dbt-checkpoint"><code>dbt-checkpoint</code></a></th>
-<th><a href="https://github.com/dbt-labs/dbt-project-evaluator"><code>dbt-project-evaluator</code></a></th>
+<th><a href="https://github.com/dbt-labs/dbt-project-evaluator"><code>dbt-project-evaluator</code></a> 2.x</th>
 <th><a href="https://github.com/PicnicSupermarket/dbt-score"><code>dbt-score</code></a></th>
 </tr>
 </thead>
@@ -1099,19 +1110,19 @@
 <td>Built-in checks</td>
 <td>120+</td>
 <td>Collection of <code>pre-commit</code> hooks</td>
-<td>Fixed set of SQL/Jinja tests</td>
+<td>28 native dbt checks</td>
 <td>Fixed set of model-only checks</td>
 </tr>
 <tr>
 <td>Configuration</td>
 <td><code>YAML</code> or <code>TOML</code> config file</td>
 <td><code>.pre-commit-config.yaml</code></td>
-<td><code>dbt_project.yml</code> + seed files (CSV)</td>
+<td><code>dbt_project.yml</code> (<code>checks:</code> and project variables)</td>
 <td><code>pyproject.toml</code></td>
 </tr>
 <tr>
 <td>Checks written in</td>
-<td>Python</td>
+<td>Python, or SQL against the dbt Information Schema</td>
 <td>Python</td>
 <td>SQL + Jinja</td>
 <td>Python</td>
@@ -1120,29 +1131,65 @@
 <td>Requires a database connection</td>
 <td>❌</td>
 <td>❌</td>
-<td>✅</td>
+<td>❌</td>
 <td>❌</td>
 </tr>
 <tr>
-<td>Checks any dbt artifact (manifest, catalog, run results)</td>
+<td>Supported dbt versions</td>
+<td>1.x and 2.0</td>
+<td>Not documented</td>
+<td>2.0 only (use 1.x of the package for dbt 1.x)</td>
+<td>Tested against 1.x, loads 2.0 manifests</td>
+</tr>
+<tr>
+<td>Checks any dbt artifact (manifest, catalog, run results, Information Schema)</td>
 <td>✅</td>
 <td>Manifest and catalog</td>
-<td>❌ (queries the database)</td>
+<td>Project metadata only</td>
 <td>Manifest only</td>
 </tr>
 <tr>
 <td>Where it runs</td>
 <td>Locally and in a CI pipeline</td>
 <td>Only as part of <code>pre-commit</code>/<code>prek</code></td>
-<td>Locally and in a CI pipeline</td>
+<td>Locally and in a CI pipeline, as part of <code>dbt check</code> and <code>dbt build</code></td>
 <td>Locally, from the command line</td>
 </tr>
 </tbody>
 </table>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
-<p><code>dbt-bouncer</code> can perform all the checks currently included in <code>dbt-checkpoint</code>, <code>dbt-project-evaluator</code> and <code>dbt-score</code>. If you see an existing check that is not possible with <code>dbt-bouncer</code>, open an <a href="https://github.com/godatadriven/dbt-bouncer/issues">issue</a> and we'll add it!</p>
+<p><code>dbt-bouncer</code> can perform all the checks currently included in <code>dbt-checkpoint</code>, <code>dbt-project-evaluator</code> and <code>dbt-score</code>. The rules of <code>dbt-project-evaluator</code> 2.x are SQL queries over the dbt Information Schema, and <a href=".././checks/info_schema/query/"><code>check_info_schema_query</code></a> runs any such query. If you see an existing check that is not possible with <code>dbt-bouncer</code>, open an <a href="https://github.com/godatadriven/dbt-bouncer/issues">issue</a> and we'll add it!</p>
 </div>
+<h2 id="how-fast-is-dbt-bouncer">How fast is <code>dbt-bouncer</code>?<a class="headerlink" href="#how-fast-is-dbt-bouncer" title="Permanent link">#</a></h2>
+<p><code>dbt-bouncer</code> reads the artifacts that dbt already writes, so it adds very little time to a CI pipeline. The comparison below uses a synthetic dbt project with 1,900 models and 400 sources, the same size as the project in the <a href="https://github.com/dbt-labs/dbt-project-evaluator/releases/tag/v2.0.0"><code>dbt-project-evaluator</code> 2.0.0 release notes</a>. Both tools ran the same 28 <code>dbt-project-evaluator</code> rules: <code>dbt check</code> ran the package, and <code>dbt-bouncer</code> ran the rendered SQL of each rule with <code>check_info_schema_query</code>. Both tools reported the same violations.</p>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th style="text-align: right;">Mean time</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>dbt check</code> (<code>dbt-project-evaluator</code> 2.0.0, parsing included)</td>
+<td style="text-align: right;">4.24 s</td>
+</tr>
+<tr>
+<td><code>dbt parse --generate-info-schema</code></td>
+<td style="text-align: right;">3.40 s</td>
+</tr>
+<tr>
+<td><code>dbt-bouncer run</code> (28 equivalent checks)</td>
+<td style="text-align: right;">0.57 s</td>
+</tr>
+<tr>
+<td><code>dbt parse --generate-info-schema</code>, then <code>dbt-bouncer run</code></td>
+<td style="text-align: right;">3.67 s</td>
+</tr>
+</tbody>
+</table>
+<p>From a clean start, <code>dbt-bouncer</code> with the parse step is about 13% faster than <code>dbt check</code>. Most CI pipelines already run <code>dbt parse</code> or <code>dbt build</code>, so the time that <code>dbt-bouncer</code> adds is the 0.57 s of the check run. The timings are the mean of 15 <a href="https://github.com/sharkdp/hyperfine">hyperfine</a> runs with dbt 2.0.8 and DuckDB, on a laptop with an Intel Core Ultra 9 185H.</p>
 <h2 id="how-do-i-onboard-an-existing-dbt-project">How do I onboard an existing dbt project?<a class="headerlink" href="#how-do-i-onboard-an-existing-dbt-project" title="Permanent link">#</a></h2>
 <p>An existing project usually fails many checks on the first run. Do not try to fix every failure first. Adopt the checks with a baseline, then reduce the backlog over time. A baseline records the current failures, so the run reports only failures that are new.</p>
 <p>Follow these steps:</p>
