@@ -2,20 +2,34 @@
 
 ## Can other tools perform the same checks as `dbt-bouncer`?
 
-`dbt-bouncer` is designed to be the most complete and flexible way to enforce conventions in a dbt project: it ships **120+ built-in checks**, is configured via a `YAML` or `TOML` file format that dbt developers are already familiar with, never needs a database connection, can run checks against any of dbt's artifacts (manifest, catalog, and run results), can run both locally and in a CI pipeline, and lets you write custom checks in python.
+`dbt-bouncer` is designed to be the most complete and flexible way to enforce conventions in a dbt project: it ships **120+ built-in checks**, is configured via a `YAML` or `TOML` file format that dbt developers are already familiar with, never needs a database connection, supports dbt 1.x and dbt 2.0, can run checks against any of dbt's artifacts (manifest, catalog, run results and the dbt 2.0 Information Schema), can run both locally and in a CI pipeline, and lets you write custom checks in Python or SQL.
 
-| | `dbt-bouncer` | [`dbt-checkpoint`](https://github.com/dbt-checkpoint/dbt-checkpoint) | [`dbt-project-evaluator`](https://github.com/dbt-labs/dbt-project-evaluator) | [`dbt-score`](https://github.com/PicnicSupermarket/dbt-score) |
+| | `dbt-bouncer` | [`dbt-checkpoint`](https://github.com/dbt-checkpoint/dbt-checkpoint) | [`dbt-project-evaluator`](https://github.com/dbt-labs/dbt-project-evaluator) 2.x | [`dbt-score`](https://github.com/PicnicSupermarket/dbt-score) |
 |--- |---|--- |--- |--- |
-| Built-in checks | 120+ | Collection of `pre-commit` hooks | Fixed set of SQL/Jinja tests | Fixed set of model-only checks |
-| Configuration | `YAML` or `TOML` config file | `.pre-commit-config.yaml` | `dbt_project.yml` + seed files (CSV) | `pyproject.toml` |
-| Checks written in | Python | Python | SQL + Jinja | Python |
-| Requires a database connection | ❌ | ❌ | ✅ | ❌ |
-| Checks any dbt artifact (manifest, catalog, run results) | ✅ | Manifest and catalog | ❌ (queries the database) | Manifest only |
-| Where it runs | Locally and in a CI pipeline | Only as part of `pre-commit`/`prek` | Locally and in a CI pipeline | Locally, from the command line |
+| Built-in checks | 120+ | Collection of `pre-commit` hooks | 28 native dbt checks | Fixed set of model-only checks |
+| Configuration | `YAML` or `TOML` config file | `.pre-commit-config.yaml` | `dbt_project.yml` (`checks:` and project variables) | `pyproject.toml` |
+| Checks written in | Python, or SQL against the dbt Information Schema | Python | SQL + Jinja | Python |
+| Requires a database connection | ❌ | ❌ | ❌ | ❌ |
+| Supported dbt versions | 1.x and 2.0 | Not documented | 2.0 only (use 1.x of the package for dbt 1.x) | Tested against 1.x, loads 2.0 manifests |
+| Checks any dbt artifact (manifest, catalog, run results, Information Schema) | ✅ | Manifest and catalog | Project metadata only | Manifest only |
+| Where it runs | Locally and in a CI pipeline | Only as part of `pre-commit`/`prek` | Locally and in a CI pipeline, as part of `dbt check` and `dbt build` | Locally, from the command line |
 
 !!! tip
 
-    `dbt-bouncer` can perform all the checks currently included in `dbt-checkpoint`, `dbt-project-evaluator` and `dbt-score`. If you see an existing check that is not possible with `dbt-bouncer`, open an [issue](https://github.com/godatadriven/dbt-bouncer/issues) and we'll add it!
+    `dbt-bouncer` can perform all the checks currently included in `dbt-checkpoint`, `dbt-project-evaluator` and `dbt-score`. The rules of `dbt-project-evaluator` 2.x are SQL queries over the dbt Information Schema, and [`check_info_schema_query`](./checks/info_schema/query.md) runs any such query. If you see an existing check that is not possible with `dbt-bouncer`, open an [issue](https://github.com/godatadriven/dbt-bouncer/issues) and we'll add it!
+
+## How fast is `dbt-bouncer`?
+
+`dbt-bouncer` reads the artifacts that dbt already writes, so it adds very little time to a CI pipeline. The comparison below uses a synthetic dbt project with 1,900 models and 400 sources, the same size as the project in the [`dbt-project-evaluator` 2.0.0 release notes](https://github.com/dbt-labs/dbt-project-evaluator/releases/tag/v2.0.0). Both tools ran the same 28 `dbt-project-evaluator` rules: `dbt check` ran the package, and `dbt-bouncer` ran the rendered SQL of each rule with `check_info_schema_query`. Both tools reported the same violations.
+
+| Command | Mean time |
+|--- |---:|
+| `dbt check` (`dbt-project-evaluator` 2.0.0, parsing included) | 4.24 s |
+| `dbt parse --generate-info-schema` | 3.40 s |
+| `dbt-bouncer run` (28 equivalent checks) | 0.57 s |
+| `dbt parse --generate-info-schema`, then `dbt-bouncer run` | 3.67 s |
+
+From a clean start, `dbt-bouncer` with the parse step is about 13% faster than `dbt check`. Most CI pipelines already run `dbt parse` or `dbt build`, so the time that `dbt-bouncer` adds is the 0.57 s of the check run. The timings are the mean of 15 [hyperfine](https://github.com/sharkdp/hyperfine) runs with dbt 2.0.8 and DuckDB, on a laptop with an Intel Core Ultra 9 185H.
 
 ## How do I onboard an existing dbt project?
 
