@@ -23,6 +23,7 @@ from tests.integration.constants import (
     DBT_PROJECT_TARGET,
 )
 
+# Update these when a new dbt line ships a new artifact schema version.
 _EXPECTED_CATALOG_SCHEMA = "https://schemas.getdbt.com/dbt/catalog/v1.json"
 _EXPECTED_MANIFEST_SCHEMA = "https://schemas.getdbt.com/dbt/manifest/v12.json"
 _EXPECTED_RUN_RESULTS_SCHEMA = "https://schemas.getdbt.com/dbt/run-results/v6.json"
@@ -106,7 +107,7 @@ def test_artifact_contract_matrix_run_bouncer(
         output_format=OutputFormat.JSON,
     )
 
-    assert exit_code != ExitCode.ARTIFACT_ERROR
+    assert exit_code in {ExitCode.SUCCESS, ExitCode.CHECK_ERRORS}
     assert results_file.exists()
 
     results = orjson.loads(results_file.read_bytes())
