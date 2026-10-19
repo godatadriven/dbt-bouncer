@@ -109,6 +109,27 @@ def test_parse_missing_catalog_names_the_generating_commands(tmp_path):
     assert "dbt-oss" in message
 
 
+def test_parse_empty_catalog_raises_artifact_error(tmp_path):
+    """An empty catalog.json (0 nodes, 0 sources) raises an artifact error."""
+    manifest = Path("tests/fixtures/dbt_20/target/manifest.json")
+    (tmp_path / "manifest.json").write_bytes(manifest.read_bytes())
+    (tmp_path / "catalog.json").write_bytes(b'{"nodes": {}, "sources": {}}')
+
+    bouncer_config = MagicMock()
+    bouncer_config.package_name = "dbt_bouncer_test_project"
+    bouncer_config.catalog_checks = [MagicMock()]
+    bouncer_config.info_schema_checks = []
+    bouncer_config.run_results_checks = []
+
+    with pytest.raises(DbtBouncerArtifactError) as excinfo:
+        parse_dbt_artifacts(bouncer_config, tmp_path)
+
+    message = str(excinfo.value)
+    assert "contains 0 nodes and 0 sources" in message
+    assert "dbt compile --write-catalog" in message
+    assert "dbt docs generate" in message
+
+
 def _manifest_with_group_owner(owner: dict) -> dict:
     """Return the test project's manifest with a single group using `owner`.
 
