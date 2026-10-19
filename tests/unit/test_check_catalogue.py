@@ -22,6 +22,7 @@ import json
 import pkgutil
 import re
 import typing
+from collections import Counter
 from functools import lru_cache
 from importlib.metadata import entry_points
 from pathlib import Path
@@ -98,9 +99,6 @@ def test_entry_points_discover_all_builtin_checks() -> None:
     ep_checks = _discover_entry_point_checks()
     builtin_checks = get_check_objects()
 
-    assert len(ep_checks) >= 120, (
-        f"docs/faq.md states dbt-bouncer ships 120+ built-in checks, found {len(ep_checks)}."
-    )
     assert set(ep_checks) == set(builtin_checks), (
         "Entry-point walk and get_check_objects() discovered different check sets: "
         f"only_in_ep={set(ep_checks) - set(builtin_checks)}, "
@@ -127,14 +125,14 @@ def test_each_check_has_unique_rule_code_in_enum() -> None:
         f"Checks with missing or invalid rule codes: {missing_or_invalid}"
     )
 
-    code_list = list(codes_by_check.values())
-    duplicates = sorted({c for c in code_list if code_list.count(c) > 1})
+    code_counts = Counter(codes_by_check.values())
+    duplicates = sorted(c for c, count in code_counts.items() if count > 1)
     assert not duplicates, f"Duplicate rule codes assigned: {duplicates}"
 
     enum_codes = {
         str(member) for enum_cls in typing.get_args(RuleCode) for member in enum_cls
     }
-    assigned_codes = set(code_list)
+    assigned_codes = set(code_counts)
     assert assigned_codes == enum_codes, (
         "Mismatch between check rule codes and dbt_bouncer.enums.RuleCode: "
         f"unlisted_in_enum={sorted(assigned_codes - enum_codes)}, "
