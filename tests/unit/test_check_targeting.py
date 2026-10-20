@@ -484,14 +484,19 @@ def _make_check_for_resource_type(resource_type: str):
         type[BaseCheck]: A check class targeting `resource_type`.
 
     """
+    import inspect
+
     from dbt_bouncer.check_framework.decorator import check
 
-    namespace: dict = {}
-    exec(  # ruff: ignore[exec-builtin]
-        f"def check_{resource_type}_noop({resource_type}): pass",
-        namespace,
+    def noop(*_args):
+        pass
+
+    noop.__name__ = f"check_{resource_type}_noop"
+    noop.__qualname__ = noop.__name__
+    noop.__signature__ = inspect.Signature(  # ty: ignore[unresolved-attribute]
+        [inspect.Parameter(resource_type, inspect.Parameter.POSITIONAL_OR_KEYWORD)]
     )
-    return check(namespace[f"check_{resource_type}_noop"])
+    return check(noop)
 
 
 _CHECKS_BY_RESOURCE_TYPE = {
