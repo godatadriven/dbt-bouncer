@@ -4,6 +4,7 @@ from types import SimpleNamespace
 
 import orjson
 import pytest
+import yaml
 from hypothesis import HealthCheck, settings
 
 from dbt_bouncer.artifact_parsers.parser import wrap_dict
@@ -89,3 +90,38 @@ def manifest_obj():
     manifest_json_path = Path("dbt_project") / "target/manifest.json"
     manifest_data = orjson.loads(manifest_json_path.read_bytes())
     return SimpleNamespace(manifest=wrap_dict(manifest_data))
+
+
+@pytest.fixture(scope="session")
+def dbt_112_target_dir() -> Path:
+    """Return the committed dbt 1.12 fixture artifacts as an absolute path.
+
+    Returns:
+        Path: The `tests/fixtures/dbt_112/target` directory.
+
+    """
+    return (Path(__file__).parent / "fixtures" / "dbt_112" / "target").resolve()
+
+
+@pytest.fixture
+def failing_config_file(dbt_112_target_dir: Path, tmp_path: Path) -> Path:
+    """Write a config whose single check fails on every model.
+
+    No model name starts with "zzz_", so `check_model_names` fails on all of them.
+
+    Returns:
+        Path: The config file path.
+
+    """
+    config_file = tmp_path / "custom-bouncer.yml"
+    config_file.write_text(
+        yaml.dump(
+            {
+                "dbt_artifacts_dir": str(dbt_112_target_dir),
+                "manifest_checks": [
+                    {"name": "check_model_names", "model_name_pattern": "^zzz_"}
+                ],
+            }
+        )
+    )
+    return config_file

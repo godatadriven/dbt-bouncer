@@ -1,10 +1,16 @@
 """Unit tests for dbt_bouncer.cli.explain."""
 
 import json
+from types import SimpleNamespace
+from typing import ClassVar
 
 from typer.testing import CliRunner
 
-from dbt_bouncer.cli.explain.utils import get_documentation_url
+from dbt_bouncer.cli.explain.utils import (
+    get_check_name,
+    get_documentation_url,
+    print_text_explanation,
+)
 from dbt_bouncer.enums import ExitCode
 from dbt_bouncer.main import app
 
@@ -89,3 +95,37 @@ def test_get_documentation_url_for_non_builtin_module():
         pass
 
     assert get_documentation_url(FakeCheck) is None  # type: ignore[arg-type]
+
+
+def test_get_check_name_falls_back_to_class_name():
+    """A class without a Literal ``name`` field is named after the class."""
+
+    class NoNameField:
+        model_fields: ClassVar[dict] = {}
+
+    class NonLiteralName:
+        model_fields: ClassVar[dict] = {"name": SimpleNamespace(annotation=str)}
+
+    assert get_check_name(NoNameField) == "NoNameField"  # type: ignore[arg-type]
+    assert get_check_name(NonLiteralName) == "NonLiteralName"  # type: ignore[arg-type]
+
+
+def test_print_text_explanation_minimal_payload(capsys):
+    """A payload without code, parameters or docs URL prints only the panel."""
+    print_text_explanation(
+        {
+            "category": "manifest",
+            "code": None,
+            "description": "A custom check.",
+            "docstring": "A custom check.",
+            "documentation_url": None,
+            "name": "check_custom",
+            "parameters": {},
+        }
+    )
+
+    output = capsys.readouterr().out
+    assert "check_custom" in output
+    assert "(None)" not in output
+    assert "Parameters" not in output
+    assert "Documentation:" not in output

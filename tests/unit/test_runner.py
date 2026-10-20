@@ -1643,3 +1643,109 @@ def test_check_applies_unrelated_skip_checks():
         )
         is True
     )
+
+
+def _undescribed_model_context() -> BouncerContext:
+    """Build a context with one undescribed model, so its description check fails.
+
+    Returns:
+        BouncerContext: A ready-to-run context with one failing check.
+
+    """
+    ctx = _no_match_context(dry_run=False)
+    unique_id = "model.dbt_bouncer_test_project.stg_payments"
+    ctx.models = [
+        SimpleNamespace(
+            model=wrap_dict(
+                {
+                    "config": {"meta": None},
+                    "description": "",
+                    "fqn": ["dbt_bouncer_test_project", "stg_payments"],
+                    "name": "stg_payments",
+                    "original_file_path": "models/staging/stg_payments.sql",
+                    "package_name": "dbt_bouncer_test_project",
+                    "resource_type": "model",
+                    "unique_id": unique_id,
+                },
+            ),
+            original_file_path="models/staging/stg_payments.sql",
+            unique_id=unique_id,
+        ),
+    ]
+    return ctx
+
+
+def test_collect_failures_no_checks_run():
+    """`collect_failures` returns nothing when no check matches a resource."""
+    from dbt_bouncer.runner import collect_failures
+
+    assert collect_failures(_no_match_context(dry_run=False)) == []
+
+
+def test_collect_failures_returns_raw_results():
+    """`collect_failures` runs the matched checks and returns their results."""
+    from dbt_bouncer.enums import CheckOutcome
+    from dbt_bouncer.runner import collect_failures
+
+    results = collect_failures(_undescribed_model_context())
+
+    assert [r["outcome"] for r in results] == [CheckOutcome.FAILED]
+
+
+def test_runner_accept_suppresses_known_failures():
+    """A failure whose fingerprint is accepted does not fail the run."""
+    from dbt_bouncer.enums import ExitCode
+    from dbt_bouncer.regression import fingerprint
+    from dbt_bouncer.runner import collect_failures
+
+    accepted = {fingerprint(r) for r in collect_failures(_undescribed_model_context())}
+
+    exit_code, failed_checks = runner(ctx=_undescribed_model_context(), accept=accepted)
+
+    assert exit_code == ExitCode.SUCCESS
+    assert failed_checks == []
+
+
+def test_get_resource_meta_falls_back_to_top_level_meta():
+    """Resources without `config.meta` fall back to their top-level `meta`."""
+    from dbt_bouncer.runner import _get_resource_meta
+
+    model_wrapper = SimpleNamespace(model=SimpleNamespace(meta={"owner": "a"}))
+    exposure = SimpleNamespace(meta={"owner": "b"})
+
+    assert _get_resource_meta(model_wrapper, "model", {}) == {"owner": "a"}
+    assert _get_resource_meta(exposure, "exposure", {}) == {"owner": "b"}
+
+
+def test_build_meta_by_unique_id_handles_unusual_nodes():
+    """Nodes without `unique_id` are skipped; nodes without `config` use `meta`."""
+    from dbt_bouncer.runner import _build_meta_by_unique_id
+
+    meta_by_unique_id = _build_meta_by_unique_id(
+        {
+            "models": [
+                SimpleNamespace(model=None),
+                SimpleNamespace(model=SimpleNamespace(name="no_unique_id")),
+                SimpleNamespace(
+                    model=SimpleNamespace(unique_id="model.p.m", meta={"owner": "a"})
+                ),
+            ],
+        }
+    )
+
+    assert meta_by_unique_id == {"model.p.m": {"owner": "a"}}
+
+
+def test_check_matcher_reuses_resolved_selector():
+    """A selector string is resolved once and reused for later checks."""
+    from dbt_bouncer.runner import _CheckMatcher
+
+    matcher = _CheckMatcher(
+        resource_map={},
+        meta_by_unique_id={},
+        manifest_obj=SimpleNamespace(manifest=SimpleNamespace()),
+    )
+
+    first = matcher._selector_for("tag:nightly")
+
+    assert matcher._selector_for("tag:nightly") is first

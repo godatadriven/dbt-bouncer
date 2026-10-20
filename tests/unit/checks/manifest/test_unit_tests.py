@@ -105,6 +105,32 @@ class TestCheckUnitTestCoverage:
                 check_fails,
                 id="75pct_coverage_not_met",
             ),
+            pytest.param(
+                None,
+                "^models/staging",
+                100,
+                [_MODEL_2_STAGING],
+                [
+                    # No upstream nodes, so it covers nothing.
+                    {
+                        **_UNIT_TEST_FOR_MODEL_2,
+                        "depends_on": {"macros": [], "nodes": []},
+                        "unique_id": "unit_test.package_name.model_2.unit_test_2",
+                    },
+                    # Depends on a model outside `include`, so it is not counted.
+                    {
+                        **_UNIT_TEST_FOR_MODEL_2,
+                        "depends_on": {
+                            "macros": [],
+                            "nodes": ["model.package_name.model_1"],
+                        },
+                        "unique_id": "unit_test.package_name.model_1.unit_test_3",
+                    },
+                    _UNIT_TEST_FOR_MODEL_2,
+                ],
+                check_passes,
+                id="unit_tests_without_relevant_nodes_ignored",
+            ),
         ],
     )
     def test_check_unit_test_coverage(
@@ -169,6 +195,15 @@ class TestCheckUnitTestExpectFormat:
                 },
                 check_fails,
                 id="expect_format_not_permitted",
+            ),
+            pytest.param(
+                ["csv", "dict", "sql"],
+                {
+                    "expect": {"rows": [{"id": 1}]},
+                    "given": [{"input": "ref(input_1)", "format": "csv"}],
+                },
+                check_fails,
+                id="expect_format_missing",
             ),
         ],
     )

@@ -1,5 +1,7 @@
 """Tests for the @check decorator."""
 
+import sys
+
 import pytest
 from pydantic import ValidationError
 
@@ -220,3 +222,40 @@ class TestCheckDecoratorValidate:
             name="check_decorator_with_params", min_length=-100
         )
         assert instance.min_length == -100
+
+
+class TestCheckDecoratorEdgeCases:
+    """Signature shapes and module states the common path does not exercise."""
+
+    def test_unannotated_keyword_param_accepts_any_value(self):
+        def check_decorator_unannotated(model, *, threshold):
+            """Unannotated keyword-only parameter."""
+
+        cls = check(check_decorator_unannotated)
+        instance = cls(name="check_decorator_unannotated", threshold=["any", 1])
+
+        assert instance.threshold == ["any", 1]
+
+    def test_module_missing_from_sys_modules_uses_stack_frame_fallback(
+        self, caplog, monkeypatch
+    ):
+        import logging
+
+        from dbt_bouncer.check_framework import decorator
+
+        def check_decorator_orphan(model):
+            """Pretend to live in a module that is not importable."""
+
+        check_decorator_orphan.__module__ = "module_not_in_sys_modules"
+        monkeypatch.delitem(sys.modules, "module_not_in_sys_modules", raising=False)
+
+        try:
+            with caplog.at_level(logging.DEBUG):
+                cls = check(check_decorator_orphan)
+        finally:
+            # `inspect.stack()[1]` is `check()` itself, so the fallback injects
+            # into the decorator module's globals; do not leak it to other tests.
+            vars(decorator).pop("CheckDecoratorOrphan", None)
+
+        assert cls.__name__ == "CheckDecoratorOrphan"
+        assert "injecting CheckDecoratorOrphan via stack frame fallback" in caplog.text

@@ -107,7 +107,7 @@ requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"
 
 [tool.coverage.report]
-exclude_lines = [
+exclude_also = [
   "if TYPE_CHECKING:",
 ]
 
@@ -115,6 +115,8 @@ exclude_lines = [
 # Statement coverage alone reports a partially-taken `if`/`except` as covered,
 # which hid ~126 untaken branches across the config validator and check registry.
 branch = true
+# Store paths relative to the repo so the PR coverage comment action can map them to source.
+relative_files = true
 
 [tool.dbt-bouncer]
 dbt_artifacts_dir = "dbt_project/target"

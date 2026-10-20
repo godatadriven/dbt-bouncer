@@ -173,7 +173,8 @@ def get_config_file_path(
         )
         return Path(config_file_path_via_env_var)
 
-    if config_file_source == ConfigFileSource.DEFAULT:
+    # Always true: COMMANDLINE returned above and the enum has no other member.
+    if config_file_source == ConfigFileSource.DEFAULT:  # pragma: no branch
         logging.debug(f"Using default value for config file: {config_file}")
         config_file_path = Path.cwd() / config_file
         if config_file_path.exists():

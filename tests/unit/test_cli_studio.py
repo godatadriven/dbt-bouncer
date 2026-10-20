@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import io
 import json
 from typing import TYPE_CHECKING
 
+import pytest
+from rich.console import Console
 from typer.testing import CliRunner
 
 from dbt_bouncer.cli.explain.utils import get_check_name
@@ -13,6 +16,7 @@ from dbt_bouncer.cli.studio.utils import (
     filter_checks,
     load_configured_checks,
     load_run_results,
+    render_studio_dashboard,
 )
 from dbt_bouncer.enums import ExitCode
 from dbt_bouncer.main import app
@@ -185,6 +189,20 @@ class TestStudioCommand:
         assert result.exit_code == 0
         assert "not found" in result.output
 
+    def test_studio_discovers_default_config_file(self, tmp_path: Path, monkeypatch):
+        """Without `--config-file`, a default config file in the cwd is used."""
+        monkeypatch.chdir(tmp_path)
+        (tmp_path / "dbt-bouncer.toml").write_text(
+            'manifest_checks = [{ name = "check_model_names" }]\n'
+        )
+
+        result = runner.invoke(
+            app, ["studio", "--search", "check_model_names"], env={"COLUMNS": "160"}
+        )
+
+        assert result.exit_code == 0
+        assert "1 active in project" in result.output
+
     def test_studio_no_matching_checks(self):
         """A search yielding no matches shows a clear warning panel."""
         result = runner.invoke(
@@ -264,3 +282,73 @@ class TestStudioUtils:
     def test_result_check_name_missing_returns_none(self):
         """A record with no identifying field returns None."""
         assert _result_check_name({"outcome": "failed"}) is None
+
+    def test_load_configured_checks_unsupported_suffix(self, tmp_path: Path):
+        """A file with an unsupported suffix yields no configured checks."""
+        json_file = tmp_path / "dbt-bouncer.json"
+        json_file.write_text('{"manifest_checks": [{"name": "check_model_names"}]}')
+        assert load_configured_checks(json_file) == set()
+
+    def test_load_configured_checks_skips_malformed_entries(self, tmp_path: Path):
+        """Non-check keys, non-list values and entries without a name are skipped."""
+        config = tmp_path / "dbt-bouncer.yml"
+        config.write_text(
+            "dbt_artifacts_dir: target\n"
+            "catalog_checks: not_a_list\n"
+            "manifest_checks:\n"
+            "  - just_a_string\n"
+            "  - description: no name here\n"
+            "  - name: check_model_names\n"
+        )
+        assert load_configured_checks(config) == {"check_model_names"}
+
+
+@pytest.fixture
+def custom_check_without_parameters():
+    """Return a check outside `dbt_bouncer.checks` with no extra parameters.
+
+    Returns:
+        type: A subclass of a built-in check that has no extra parameters, so
+        it has no documentation URL and no parameter list.
+
+    """
+    base_check = next(
+        c
+        for c in get_check_objects()
+        if get_check_name(c) == "check_lineage_seed_cannot_be_used"
+    )
+    # Subclassing moves `__module__` to this test module, as for a custom check.
+    return type("CheckCustom", (base_check,), {"__module__": __name__})
+
+
+class TestRenderStudioDashboard:
+    """Tests for render_studio_dashboard."""
+
+    def test_custom_check_spotlight_and_result_counts(
+        self, custom_check_without_parameters
+    ):
+        """A custom check renders without parameters, docs URL or error counts."""
+        buffer = io.StringIO()
+        console = Console(file=buffer, width=200)
+        name = get_check_name(custom_check_without_parameters)
+
+        render_studio_dashboard(
+            [custom_check_without_parameters],
+            console=console,
+            results=[
+                {
+                    "check_run_id": f"{name}:0:model_a",
+                    "outcome": "failed",
+                    "severity": "warn",
+                },
+                # A failed record with no identifiable check name is ignored.
+                {"outcome": "failed", "severity": "error"},
+            ],
+        )
+
+        output = buffer.getvalue()
+        assert "Configurable Parameters: None" in output
+        assert "Documentation URL" not in output
+        assert "1 warn" in output
+        # Warnings only: no error count precedes the warning count.
+        assert ", 1 warn" not in output

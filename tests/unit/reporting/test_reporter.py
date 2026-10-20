@@ -41,6 +41,27 @@ def test_report_dry_run_returns_zero():
     assert results == []
 
 
+def test_report_dry_run_without_iterate_cache_reports_none_resource(capsys):
+    """Omitting ``iterate_cache`` labels every check's resource type ``(none)``."""
+    checks: list[CheckToRun] = [
+        cast(
+            "CheckToRun",
+            {
+                "check": _FakeCheck(),
+                "check_run_id": "check_model_access:0:model.my_model",
+                "severity": "error",
+            },
+        ),
+    ]
+
+    reporter = Reporter(show_all_failures=False, create_pr_comment_file=False)
+    exit_code, results = reporter.report_dry_run(checks)
+
+    assert exit_code == 0
+    assert results == []
+    assert "(none)" in capsys.readouterr().out
+
+
 def test_report_results_all_pass():
     """All checks pass -- returns exit code 0."""
     results = [

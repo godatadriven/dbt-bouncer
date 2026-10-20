@@ -1944,6 +1944,30 @@ def test_cli_list_group_filter():
     assert "CheckSeedMaxBytes" in result.output
 
 
+def test_cli_list_json_output():
+    """Test that `dbt-bouncer list --output-format json` emits a JSON payload."""
+    runner = CliRunner()
+    result = runner.invoke(
+        app, ["list", "--group", "catalog_checks", "--output-format", "json"]
+    )
+
+    assert result.exit_code == 0
+    payload = json.loads(result.output)
+    assert list(payload) == ["catalog_checks"]
+    assert len(payload["catalog_checks"]) > 0
+
+
+def test_cli_version_flag():
+    """Test that `dbt-bouncer --version` prints the version and exits cleanly."""
+    from dbt_bouncer.version import version
+
+    runner = CliRunner()
+    result = runner.invoke(app, ["--version"])
+
+    assert result.exit_code == 0
+    assert result.output.strip() == version()
+
+
 def test_cli_run_command(tmp_path):
     """Test that `dbt-bouncer run` works the same as `dbt-bouncer`."""
     # Config file

@@ -82,11 +82,12 @@ def fail(message: str) -> NoReturn:
     raise DbtBouncerFailedCheckError(message)
 
 
-@overload
+# Overload stubs are typing-only; their bodies never execute.
+@overload  # pragma: no cover
 def check(fn: Callable[..., None]) -> type[BaseCheck]: ...
 
 
-@overload
+@overload  # pragma: no cover
 def check(
     fn: None = None,
     *,
