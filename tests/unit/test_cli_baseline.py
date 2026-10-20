@@ -2,11 +2,10 @@
 
 import importlib
 import logging
-from pathlib import Path, PurePath
+from pathlib import PurePath
 
 import orjson
 import pytest
-import yaml
 from typer.testing import CliRunner
 
 from dbt_bouncer.cli.baseline.utils import DEFAULT_BASELINE_FILE, write_baseline
@@ -18,32 +17,7 @@ from dbt_bouncer.main import app
 # to the command function rather than the module that holds `write_baseline`.
 baseline_module = importlib.import_module("dbt_bouncer.cli.baseline")
 
-# Resolved at import time, before any test chdirs into a tmp_path.
-DBT_112_TARGET = Path("tests/fixtures/dbt_112/target").resolve()
-# Fails on every model: no model name starts with "zzz_".
-FAILING_CHECK = {"name": "check_model_names", "model_name_pattern": "^zzz_"}
-
 runner = CliRunner()
-
-
-@pytest.fixture
-def failing_config_file(tmp_path) -> Path:
-    """Write a config whose single check fails on every model.
-
-    Returns:
-        Path: The config file path.
-
-    """
-    config_file = tmp_path / "custom-bouncer.yml"
-    config_file.write_text(
-        yaml.dump(
-            {
-                "dbt_artifacts_dir": str(DBT_112_TARGET),
-                "manifest_checks": [FAILING_CHECK],
-            }
-        )
-    )
-    return config_file
 
 
 def test_baseline_records_current_failures(failing_config_file, tmp_path):

@@ -237,6 +237,9 @@ def test_build_server_with_fastmcp_layout(monkeypatch):
     except ImportError:  # pragma: no cover - mcp<2 exercises this path natively
         pytest.skip("mcp<2 is installed, so the real FastMCP layout is used.")
 
+    # `build_server` picks its server class and rebuilds FastMCP's `Settings`
+    # only when `mcp.server.fastmcp` imports (the mcp<2 layout). mcp>=2 is
+    # installed, so stub that layout in `sys.modules` to reach both branches.
     rebuilds: list[bool] = []
     fastmcp_module = ModuleType("mcp.server.fastmcp")
     fastmcp_module.FastMCP = MCPServer  # type: ignore[attr-defined]

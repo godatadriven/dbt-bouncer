@@ -6,18 +6,12 @@ from unittest.mock import MagicMock, patch
 
 import orjson
 import pytest
-import yaml
 from typer.testing import CliRunner
 
 from dbt_bouncer.cli.run.utils import _build_context, detect_config_file_source
 from dbt_bouncer.enums import ConfigFileName, ConfigFileSource, ExitCode
 from dbt_bouncer.main import app
 from dbt_bouncer.regression import build_baseline
-
-# Resolved at import time, before any test chdirs into a tmp_path.
-DBT_112_TARGET = Path("tests/fixtures/dbt_112/target").resolve()
-# Fails on every model: no model name starts with "zzz_".
-FAILING_CHECK = {"name": "check_model_names", "model_name_pattern": "^zzz_"}
 
 
 class TestDetectConfigFileSource:
@@ -167,25 +161,6 @@ class TestRunWithBaselineAndState:
     """Tests for `run --baseline` / `--state` (`_resolve_accepted_fingerprints`)."""
 
     @pytest.fixture
-    def failing_config_file(self, tmp_path: Path) -> Path:
-        """Write a config whose single check fails on every model.
-
-        Returns:
-            Path: The config file path.
-
-        """
-        config_file = tmp_path / "custom-bouncer.yml"
-        config_file.write_text(
-            yaml.dump(
-                {
-                    "dbt_artifacts_dir": str(DBT_112_TARGET),
-                    "manifest_checks": [FAILING_CHECK],
-                }
-            )
-        )
-        return config_file
-
-    @pytest.fixture
     def empty_baseline_file(self, tmp_path: Path) -> Path:
         """Write a baseline that accepts no failures.
 
@@ -215,7 +190,10 @@ class TestRunWithBaselineAndState:
         assert result.exit_code == ExitCode.CHECK_ERRORS
 
     def test_baseline_and_state_combined(
-        self, empty_baseline_file: Path, failing_config_file: Path
+        self,
+        dbt_112_target_dir: Path,
+        empty_baseline_file: Path,
+        failing_config_file: Path,
     ):
         """`--state` against the same artifacts suppresses every failure."""
         result = self._invoke_run(
@@ -223,7 +201,7 @@ class TestRunWithBaselineAndState:
             "--baseline",
             PurePath(empty_baseline_file).as_posix(),
             "--state",
-            DBT_112_TARGET.as_posix(),
+            dbt_112_target_dir.as_posix(),
         )
 
         assert result.exit_code == ExitCode.SUCCESS, result.output
