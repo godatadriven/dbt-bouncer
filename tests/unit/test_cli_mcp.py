@@ -1,8 +1,9 @@
 """Unit tests for dbt_bouncer.cli.mcp."""
 
 import asyncio
+import sys
 from pathlib import Path
-from types import SimpleNamespace
+from types import ModuleType, SimpleNamespace
 
 import pytest
 from typer.testing import CliRunner
@@ -103,6 +104,20 @@ class TestReadProjectConfigTool:
         assert payload["valid"] is False
         assert "error" in payload
 
+    def test_custom_checks_dir_resolved_relative_to_config(self, tmp_path):
+        """A configured `custom_checks_dir` is resolved next to the config file."""
+        (tmp_path / "custom_checks").mkdir()
+        config_file = tmp_path / "dbt-bouncer.yml"
+        config_file.write_text(
+            "custom_checks_dir: custom_checks\n"
+            "manifest_checks:\n  - name: check_model_description_populated\n"
+        )
+
+        payload = mcp_server.read_project_config(str(config_file))
+
+        assert payload["valid"] is True
+        assert payload["config"]["custom_checks_dir"] == "custom_checks"
+
 
 class TestRunChecksTool:
     """Tests for the run_checks tool payload."""
@@ -183,6 +198,21 @@ class TestRunChecksTool:
         assert payload["failures"] == [{"check_run_id": "check_x:0:model_1"}]
         assert "ERROR=1" in payload["console_output_tail"]
 
+    def test_missing_output_file(self, monkeypatch):
+        """A run that writes no output file reports no failures."""
+
+        def fake_run(_cmd, **_kwargs):
+            return SimpleNamespace(returncode=2, stdout="", stderr="Config error\n")
+
+        monkeypatch.setattr(mcp_server.shutil, "which", lambda _: "/usr/bin/fake")
+        monkeypatch.setattr(mcp_server.subprocess, "run", fake_run)
+
+        payload = mcp_server.run_checks()
+
+        assert payload["exit_code"] == 2
+        assert payload["failures"] == []
+        assert payload["console_output_tail"] == "Config error"
+
 
 def test_build_server_registers_tools():
     """The MCP server registers all four tools."""
@@ -197,6 +227,45 @@ def test_build_server_registers_tools():
         "read_project_config",
         "run_checks",
     ]
+
+
+def test_build_server_with_fastmcp_layout(monkeypatch):
+    """With the mcp<2 module layout, FastMCP is used and its Settings rebuilt."""
+    pytest.importorskip("mcp")
+    try:
+        from mcp.server import MCPServer
+    except ImportError:  # pragma: no cover - mcp<2 exercises this path natively
+        pytest.skip("mcp<2 is installed, so the real FastMCP layout is used.")
+
+    # `build_server` picks its server class and rebuilds FastMCP's `Settings`
+    # only when `mcp.server.fastmcp` imports (the mcp<2 layout). mcp>=2 is
+    # installed, so stub that layout in `sys.modules` to reach both branches.
+    rebuilds: list[bool] = []
+    fastmcp_module = ModuleType("mcp.server.fastmcp")
+    fastmcp_module.FastMCP = MCPServer  # type: ignore[attr-defined]
+    fastmcp_server_module = ModuleType("mcp.server.fastmcp.server")
+    fastmcp_server_module.Settings = SimpleNamespace(  # type: ignore[attr-defined]
+        model_rebuild=lambda: rebuilds.append(True)
+    )
+    monkeypatch.setitem(sys.modules, "mcp.server.fastmcp", fastmcp_module)
+    monkeypatch.setitem(sys.modules, "mcp.server.fastmcp.server", fastmcp_server_module)
+
+    server = mcp_server.build_server()
+
+    assert isinstance(server, MCPServer)
+    assert rebuilds == [True]
+
+
+def test_mcp_command_runs_server(monkeypatch):
+    """The mcp command builds the server and serves it."""
+    calls: list[str] = []
+    fake_server = SimpleNamespace(run=lambda: calls.append("run"))
+    monkeypatch.setattr("dbt_bouncer.cli.mcp.server.build_server", lambda: fake_server)
+
+    result = runner.invoke(app, ["mcp"])
+
+    assert result.exit_code == 0
+    assert calls == ["run"]
 
 
 def test_mcp_command_without_dependency(monkeypatch):

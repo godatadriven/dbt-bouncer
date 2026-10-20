@@ -60,3 +60,15 @@ def test_init_command_custom_responses(tmp_path, monkeypatch):
     assert "check_model_description_populated" not in content
     assert "check_model_has_unique_test" in content
     assert "check_model_names" not in content
+
+
+def test_init_command_warns_when_no_checks_selected(tmp_path, monkeypatch):
+    """Declining every check still writes a config but warns it is empty."""
+    monkeypatch.chdir(tmp_path)
+    runner = CliRunner()
+    # default target, no descriptions, no unique tests, no naming
+    result = runner.invoke(app, ["init"], input="\nn\nn\nn\n")
+
+    assert result.exit_code == 0
+    assert "No checks selected" in result.stdout
+    assert (tmp_path / "dbt-bouncer.yml").exists()
