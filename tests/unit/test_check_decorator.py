@@ -236,8 +236,15 @@ class TestCheckDecoratorEdgeCases:
 
         assert instance.threshold == ["any", 1]
 
+    @pytest.mark.parametrize(
+        "decorate",
+        [
+            pytest.param(check, id="bare"),
+            pytest.param(check(code="MO999"), id="with_code"),
+        ],
+    )
     def test_module_missing_from_sys_modules_uses_stack_frame_fallback(
-        self, caplog, monkeypatch
+        self, caplog, decorate, monkeypatch
     ):
         import logging
 
@@ -251,10 +258,13 @@ class TestCheckDecoratorEdgeCases:
 
         try:
             with caplog.at_level(logging.DEBUG):
-                cls = check(check_decorator_orphan)
+                cls = decorate(check_decorator_orphan)
+            # The class lands in the module that applied the decorator (this one),
+            # never in the decorator module, whichever form of `@check` was used.
+            assert globals().get("CheckDecoratorOrphan") is cls
+            assert "CheckDecoratorOrphan" not in vars(decorator)
         finally:
-            # `inspect.stack()[1]` is `check()` itself, so the fallback injects
-            # into the decorator module's globals; do not leak it to other tests.
+            globals().pop("CheckDecoratorOrphan", None)
             vars(decorator).pop("CheckDecoratorOrphan", None)
 
         assert cls.__name__ == "CheckDecoratorOrphan"
