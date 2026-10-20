@@ -11,6 +11,7 @@ import sys
 from types import ModuleType
 
 import pytest
+from pydantic import BaseModel
 
 from dbt_bouncer import utils
 from dbt_bouncer.exceptions import DbtBouncerConfigError
@@ -128,6 +129,117 @@ class TestGetCheckObjectsForNames:
 
         assert result
         assert all(c.__module__ == FAKE_MAP["check_fake"]["module"] for c in result)
+
+    def test_custom_checks_and_duplicate_entry_points_are_deduplicated(
+        self, monkeypatch, tmp_path
+    ):
+        """Custom checks load on the fast path and a class seen twice is returned once."""
+        monkeypatch.setattr(
+            utils,
+            "_get_check_module_map_cached",
+            lambda _custom_checks_dir=None: FAKE_MAP,
+        )
+        custom_dirs: list = []
+        monkeypatch.setattr(
+            utils,
+            "_load_custom_checks",
+            lambda custom_checks_dir, _check_objects: custom_dirs.append(
+                custom_checks_dir
+            ),
+        )
+        # Simulate an entry point re-exporting a class that is already loaded.
+        monkeypatch.setattr(
+            utils,
+            "_load_entry_point_checks",
+            lambda check_objects: check_objects.append(check_objects[0]),
+        )
+
+        result = utils.get_check_objects_for_names(
+            frozenset({"check_fake"}), custom_checks_dir=tmp_path
+        )
+
+        assert custom_dirs == [tmp_path]
+        assert len(result) == len(set(result))
+
+
+class _CheckWithoutName(BaseModel):
+    """A `Check*` class with no `name` field and no `code`."""
+
+
+class _CheckWithUnparametrisedName(BaseModel):
+    """A `Check*` class whose `name` is a plain `str`, not a `Literal`."""
+
+    name: str = "check_unparametrised"
+
+
+class TestLoadCustomChecks:
+    """Tests for the custom-check file loader."""
+
+    def test_file_without_import_spec_is_skipped(self, monkeypatch, tmp_path):
+        """A file for which no import spec can be built loads nothing rather than raising."""
+        (tmp_path / "models").mkdir()
+        (tmp_path / "models" / "check_custom.py").write_text(
+            "class CheckX:\n    pass\n"
+        )
+        monkeypatch.setattr(
+            utils.importlib.util, "spec_from_file_location", lambda *_args: None
+        )
+        check_objects = []
+
+        utils._load_custom_checks(tmp_path, check_objects)
+
+        assert check_objects == []
+
+
+class TestBuildCheckModuleMap:
+    """Tests for the full scan behind the check-name -> module cache."""
+
+    def test_skips_unimportable_modules_and_nameless_classes(self, monkeypatch):
+        """Unimportable modules and classes without a `Literal` name are left out of the map."""
+        broken = "dbt_bouncer.checks.manifest.models.naming"
+        nameless = "dbt_bouncer.checks.manifest.models.code"
+        fake_module = ModuleType(nameless)
+        for cls in (_CheckWithoutName, _CheckWithUnparametrisedName):
+            # `_build_check_module_map` only picks up classes defined in the module.
+            fake_cls = type(cls.__name__.lstrip("_"), (cls,), {"__module__": nameless})
+            setattr(fake_module, fake_cls.__name__, fake_cls)
+        real_import_module = importlib.import_module
+
+        def _import_module(name, *args, **kwargs):
+            if name == broken:
+                raise ImportError(f"simulated failure importing {name}")
+            if name == nameless:
+                return fake_module
+            return real_import_module(name, *args, **kwargs)
+
+        monkeypatch.setattr(utils.importlib, "import_module", _import_module)
+
+        mapping = utils._build_check_module_map()
+
+        assert mapping
+        assert {entry["module"] for entry in mapping.values()}.isdisjoint(
+            {broken, nameless}
+        )
+
+
+class TestGetCheckRegistry:
+    """Tests for the name -> class registry."""
+
+    def test_classes_without_literal_name_or_code_are_not_registered(self, monkeypatch):
+        """A class with no usable `name` or `code` contributes no registry key."""
+        monkeypatch.setattr(
+            utils,
+            "get_check_objects",
+            lambda _custom_checks_dir=None: [
+                _CheckWithoutName,
+                _CheckWithUnparametrisedName,
+            ],
+        )
+        utils.get_check_registry.cache_clear()
+        try:
+            assert utils.get_check_registry() == {}
+        finally:
+            utils.get_check_registry.cache_clear()
 
 
 @pytest.fixture

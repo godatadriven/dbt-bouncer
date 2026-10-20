@@ -67,6 +67,35 @@ def test_create_github_comment_file_show_all_failures_true(monkeypatch, tmp_path
         assert len((tmp_path / "github-comment.md").read_text().split("\n")) == 38
 
 
+def test_create_github_comment_file_in_github_actions(monkeypatch):
+    """Inside GitHub Actions the comment is written to the container's `/app` mount."""
+    from pathlib import Path
+
+    monkeypatch.setenv("GITHUB_REPOSITORY", "owner/repo")
+    monkeypatch.setenv("GITHUB_RUN_ID", "123")
+    opened = mock.mock_open()
+
+    with mock.patch.object(Path, "open", opened):
+        create_github_comment_file(
+            [["check_model_description_populated", "models/a.sql", "message_1"]],
+            show_all_failures=False,
+        )
+
+    assert opened.call_args.args[0] == Path("/app/github-comment.md")
+    written = opened().write.call_args.args[0]
+    assert "https://github.com/owner/repo/actions/runs/123" in written
+
+
+def test_compile_pattern_invalid_regex_names_the_pattern():
+    """An invalid regex re-raises with the offending pattern in the message."""
+    import re
+
+    from dbt_bouncer.utils import compile_pattern
+
+    with pytest.raises(re.error, match=r"Invalid regex pattern '\(unclosed'"):
+        compile_pattern("(unclosed")
+
+
 @pytest.mark.parametrize(
     ("unique_id", "expected_model_name"),
     [
