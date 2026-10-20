@@ -454,3 +454,382 @@ class TestInvalidSelector:
         assert message in caplog.text
         assert "Traceback" not in result.output
         assert "Traceback" not in caplog.text
+
+
+# Expected `(staging_unique_id, marts_unique_id)` per `iterate_over` resource type
+# in the Windows-path fixture below.
+_WINDOWS_RESOURCE_IDS: dict[str, tuple[str, str]] = {
+    "catalog_node": ("model.pkg.stg_model", "model.pkg.mart_model"),
+    "catalog_source": ("source.pkg.raw.stg_source", "source.pkg.raw.mart_source"),
+    "exposure": ("exposure.pkg.stg_exposure", "exposure.pkg.mart_exposure"),
+    "macro": ("macro.pkg.stg_macro", "macro.pkg.mart_macro"),
+    "model": ("model.pkg.stg_model", "model.pkg.mart_model"),
+    "run_result": ("model.pkg.stg_model", "model.pkg.mart_model"),
+    "seed": ("seed.pkg.stg_seed", "seed.pkg.mart_seed"),
+    "semantic_model": (
+        "semantic_model.pkg.stg_semantic_model",
+        "semantic_model.pkg.mart_semantic_model",
+    ),
+    "snapshot": ("snapshot.pkg.stg_snapshot", "snapshot.pkg.mart_snapshot"),
+    "source": ("source.pkg.raw.stg_source", "source.pkg.raw.mart_source"),
+    "test": ("test.pkg.stg_test", "test.pkg.mart_test"),
+    "unit_test": ("unit_test.pkg.stg_model.stg_ut", "unit_test.pkg.mart_model.mart_ut"),
+}
+
+
+def _make_check_for_resource_type(resource_type: str):
+    """Build a minimal `@check` class whose `iterate_over` is `resource_type`.
+
+    Returns:
+        type[BaseCheck]: A check class targeting `resource_type`.
+
+    """
+    import inspect
+
+    from dbt_bouncer.check_framework.decorator import check
+
+    def noop(*_args):
+        pass
+
+    noop.__name__ = f"check_{resource_type}_noop"
+    noop.__qualname__ = noop.__name__
+    noop.__signature__ = inspect.Signature(  # ty: ignore[unresolved-attribute]
+        [inspect.Parameter(resource_type, inspect.Parameter.POSITIONAL_OR_KEYWORD)]
+    )
+    return check(noop)
+
+
+_CHECKS_BY_RESOURCE_TYPE = {
+    rt: _make_check_for_resource_type(rt) for rt in _WINDOWS_RESOURCE_IDS
+}
+
+
+@pytest.fixture(scope="module")
+def windows_artifacts_dir(tmp_path_factory) -> Path:
+    r"""Write artifacts where every resource has a Windows-style `original_file_path`.
+
+    Each resource type gets one staging resource at ``models\\staging\\x.sql`` and
+    one marts resource at ``models\\marts\\y.sql``.
+
+    Returns:
+        Path: Directory containing ``manifest.json``, ``catalog.json``, and
+        ``run_results.json``.
+
+    """
+    target = tmp_path_factory.mktemp("windows_target")
+    stg_path = "models\\staging\\x.sql"
+    mart_path = "models\\marts\\y.sql"
+
+    def _entry(uid: str, name: str, path: str, **extra) -> dict:
+        return {
+            "config": {"meta": {}},
+            "fqn": ["pkg", name],
+            "name": name,
+            "original_file_path": path,
+            "package_name": "pkg",
+            "tags": [],
+            "unique_id": uid,
+            **extra,
+        }
+
+    manifest = {
+        "child_map": {},
+        "exposures": {
+            "exposure.pkg.stg_exposure": _entry(
+                "exposure.pkg.stg_exposure", "stg_exposure", stg_path
+            ),
+            "exposure.pkg.mart_exposure": _entry(
+                "exposure.pkg.mart_exposure", "mart_exposure", mart_path
+            ),
+        },
+        "macros": {
+            "macro.pkg.stg_macro": _entry("macro.pkg.stg_macro", "stg_macro", stg_path),
+            "macro.pkg.mart_macro": _entry(
+                "macro.pkg.mart_macro", "mart_macro", mart_path
+            ),
+        },
+        "metadata": {
+            "dbt_schema_version": "https://schemas.getdbt.com/dbt/manifest/v12.json",
+            "dbt_version": "1.12.0",
+            "project_name": "pkg",
+        },
+        "nodes": {
+            "model.pkg.stg_model": _entry(
+                "model.pkg.stg_model", "stg_model", stg_path, resource_type="model"
+            ),
+            "model.pkg.mart_model": _entry(
+                "model.pkg.mart_model", "mart_model", mart_path, resource_type="model"
+            ),
+            "seed.pkg.stg_seed": _entry(
+                "seed.pkg.stg_seed", "stg_seed", stg_path, resource_type="seed"
+            ),
+            "seed.pkg.mart_seed": _entry(
+                "seed.pkg.mart_seed", "mart_seed", mart_path, resource_type="seed"
+            ),
+            "snapshot.pkg.stg_snapshot": _entry(
+                "snapshot.pkg.stg_snapshot",
+                "stg_snapshot",
+                stg_path,
+                resource_type="snapshot",
+            ),
+            "snapshot.pkg.mart_snapshot": _entry(
+                "snapshot.pkg.mart_snapshot",
+                "mart_snapshot",
+                mart_path,
+                resource_type="snapshot",
+            ),
+            "test.pkg.stg_test": _entry(
+                "test.pkg.stg_test", "stg_test", stg_path, resource_type="test"
+            ),
+            "test.pkg.mart_test": _entry(
+                "test.pkg.mart_test", "mart_test", mart_path, resource_type="test"
+            ),
+        },
+        "parent_map": {},
+        "semantic_models": {
+            "semantic_model.pkg.stg_semantic_model": _entry(
+                "semantic_model.pkg.stg_semantic_model",
+                "stg_semantic_model",
+                stg_path,
+            ),
+            "semantic_model.pkg.mart_semantic_model": _entry(
+                "semantic_model.pkg.mart_semantic_model",
+                "mart_semantic_model",
+                mart_path,
+            ),
+        },
+        "sources": {
+            "source.pkg.raw.stg_source": _entry(
+                "source.pkg.raw.stg_source",
+                "stg_source",
+                stg_path,
+                source_name="raw",
+            ),
+            "source.pkg.raw.mart_source": _entry(
+                "source.pkg.raw.mart_source",
+                "mart_source",
+                mart_path,
+                source_name="raw",
+            ),
+        },
+        "unit_tests": {
+            "unit_test.pkg.stg_model.stg_ut": _entry(
+                "unit_test.pkg.stg_model.stg_ut", "stg_ut", stg_path
+            ),
+            "unit_test.pkg.mart_model.mart_ut": _entry(
+                "unit_test.pkg.mart_model.mart_ut", "mart_ut", mart_path
+            ),
+        },
+    }
+    catalog = {
+        "metadata": {},
+        "nodes": {
+            "model.pkg.stg_model": {
+                "columns": {},
+                "metadata": {},
+                "stats": {},
+                "unique_id": "model.pkg.stg_model",
+            },
+            "model.pkg.mart_model": {
+                "columns": {},
+                "metadata": {},
+                "stats": {},
+                "unique_id": "model.pkg.mart_model",
+            },
+        },
+        "sources": {
+            "source.pkg.raw.stg_source": {
+                "columns": {},
+                "metadata": {},
+                "stats": {},
+                "unique_id": "source.pkg.raw.stg_source",
+            },
+            "source.pkg.raw.mart_source": {
+                "columns": {},
+                "metadata": {},
+                "stats": {},
+                "unique_id": "source.pkg.raw.mart_source",
+            },
+        },
+    }
+    run_results = {
+        "metadata": {},
+        "results": [
+            {"status": "pass", "unique_id": "model.pkg.stg_model"},
+            {"status": "pass", "unique_id": "model.pkg.mart_model"},
+        ],
+    }
+
+    (target / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+    (target / "catalog.json").write_text(json.dumps(catalog), encoding="utf-8")
+    (target / "run_results.json").write_text(json.dumps(run_results), encoding="utf-8")
+    return target
+
+
+def _windows_targeted_ids(
+    windows_artifacts_dir: Path,
+    resource_type: str,
+    *,
+    preserve_raw_wrapper_paths: bool = False,
+    **check_kwargs,
+) -> set[str]:
+    """Assemble checks for `resource_type` against the Windows-path fixture.
+
+    Args:
+        windows_artifacts_dir: Directory containing the Windows-path artifacts.
+        resource_type: The `iterate_over` resource type to test.
+        preserve_raw_wrapper_paths: When True, overwrite wrapper
+            `original_file_path` attributes back to raw backslash strings so
+            `_CheckMatcher.resources_for` must normalise them itself.
+        **check_kwargs: Filter arguments (`include`, `exclude`, `selector`).
+
+    Returns:
+        set[str]: The unique IDs of the targeted resources.
+
+    """
+    from types import SimpleNamespace
+
+    from dbt_bouncer.artifact_parsers.parser import parse_dbt_artifacts
+    from dbt_bouncer.context import BouncerContext
+
+    check_cls = _CHECKS_BY_RESOURCE_TYPE[resource_type]
+    check_instance = check_cls(index=0, **check_kwargs)
+
+    stub_conf = SimpleNamespace(
+        catalog_checks=[check_instance],
+        info_schema_checks=[],
+        manifest_checks=[check_instance],
+        package_name="pkg",
+        run_results_checks=[check_instance],
+    )
+    parsed = parse_dbt_artifacts(stub_conf, windows_artifacts_dir)
+
+    if preserve_raw_wrapper_paths:
+        for collection in (
+            parsed.catalog_nodes,
+            parsed.catalog_sources,
+            parsed.models,
+            parsed.run_results,
+            parsed.seeds,
+            parsed.semantic_models,
+            parsed.snapshots,
+            parsed.sources,
+            parsed.tests,
+        ):
+            for wrapper in collection:
+                wrapper.original_file_path = wrapper.original_file_path.replace(
+                    "/", "\\"
+                )
+
+    ctx = BouncerContext.model_construct(
+        bouncer_config=SimpleNamespace(manifest_checks=[check_instance]),
+        catalog_nodes=parsed.catalog_nodes,
+        catalog_sources=parsed.catalog_sources,
+        check_categories=["manifest_checks"],
+        create_pr_comment_file=False,
+        dry_run=False,
+        exposures=parsed.exposures,
+        info_schema=parsed.info_schema,
+        macros=parsed.macros,
+        manifest_obj=parsed.manifest_obj,
+        models=parsed.models,
+        output_file=None,
+        output_format="json",
+        output_only_failures=False,
+        run_results=parsed.run_results,
+        seeds=parsed.seeds,
+        semantic_models=parsed.semantic_models,
+        show_all_failures=False,
+        snapshots=parsed.snapshots,
+        sources=parsed.sources,
+        tests=parsed.tests,
+        unit_tests=parsed.unit_tests,
+    )
+    return {str(entry["unique_id"]) for entry in _assemble_checks_to_run(ctx)}
+
+
+class TestWindowsPathNormalisation:
+    r"""Windows paths (`models\\staging\\x.sql`) normalise to POSIX for targeting.
+
+    Covers `include`, `exclude`, and `path:` selectors across every resource
+    type (models, sources, unit tests, exposures, macros, seeds, snapshots,
+    semantic models, tests, catalog nodes, catalog sources, and run results).
+    """
+
+    def test_covers_every_runner_resource_type(self, windows_artifacts_dir):
+        """Every resource type in `_build_resource_map` is exercised by this suite."""
+        from types import SimpleNamespace
+
+        from dbt_bouncer.artifact_parsers.parser import parse_dbt_artifacts
+        from dbt_bouncer.context import BouncerContext
+        from dbt_bouncer.runner import _build_resource_map
+
+        stub_conf = SimpleNamespace(
+            catalog_checks=[],
+            info_schema_checks=[],
+            manifest_checks=[],
+            package_name="pkg",
+            run_results_checks=[],
+        )
+        parsed = parse_dbt_artifacts(stub_conf, windows_artifacts_dir)
+        ctx = BouncerContext.model_construct(**parsed._asdict())
+        expected_types = {key.removesuffix("s") for key in _build_resource_map(ctx)}
+
+        assert set(_WINDOWS_RESOURCE_IDS) == expected_types
+
+    @pytest.mark.parametrize("resource_type", sorted(_WINDOWS_RESOURCE_IDS))
+    @pytest.mark.parametrize("preserve_raw_wrapper_paths", [False, True])
+    def test_include_matches_windows_backslash_path(
+        self, preserve_raw_wrapper_paths, resource_type, windows_artifacts_dir
+    ):
+        r"""`include: ^models/staging` matches `models\\staging\\x.sql`."""
+        stg_id, _ = _WINDOWS_RESOURCE_IDS[resource_type]
+
+        targeted = _windows_targeted_ids(
+            windows_artifacts_dir,
+            resource_type,
+            preserve_raw_wrapper_paths=preserve_raw_wrapper_paths,
+            include="^models/staging",
+        )
+
+        assert targeted == {stg_id}
+
+    @pytest.mark.parametrize("resource_type", sorted(_WINDOWS_RESOURCE_IDS))
+    @pytest.mark.parametrize("preserve_raw_wrapper_paths", [False, True])
+    def test_exclude_matches_windows_backslash_path(
+        self, preserve_raw_wrapper_paths, resource_type, windows_artifacts_dir
+    ):
+        r"""`exclude: ^models/staging` excludes `models\\staging\\x.sql`."""
+        _, mart_id = _WINDOWS_RESOURCE_IDS[resource_type]
+
+        targeted = _windows_targeted_ids(
+            windows_artifacts_dir,
+            resource_type,
+            preserve_raw_wrapper_paths=preserve_raw_wrapper_paths,
+            exclude="^models/staging",
+        )
+
+        assert targeted == {mart_id}
+
+    @pytest.mark.parametrize("resource_type", sorted(_WINDOWS_RESOURCE_IDS))
+    @pytest.mark.parametrize(
+        "selector",
+        [
+            pytest.param("path:models/staging", id="directory"),
+            pytest.param("path:models/staging/*", id="glob"),
+            pytest.param("path:models/staging/x.sql", id="exact_file"),
+        ],
+    )
+    def test_path_selector_matches_windows_backslash_path(
+        self, resource_type, selector, windows_artifacts_dir
+    ):
+        r"""`path:` selectors with forward slashes match `models\\staging\\x.sql`."""
+        stg_id, _ = _WINDOWS_RESOURCE_IDS[resource_type]
+
+        targeted = _windows_targeted_ids(
+            windows_artifacts_dir,
+            resource_type,
+            selector=selector,
+        )
+
+        assert targeted == {stg_id}
