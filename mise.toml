@@ -350,6 +350,7 @@ bencher run \
 	"hyperfine --export-json results.json --runs 10 'dbt-bouncer run --config-file dbt-bouncer-example.yml'"
 """
 
+# CI gate: unit tests alone must reach 100% statement and branch coverage.
 [tasks.test-unit]
 description = "Run unit tests"
 run = """
@@ -359,6 +360,7 @@ uv run pytest \
 	--cov-report=term-missing:skip-covered \
 	--cov-report=xml:coverage-unit.xml \
 	--cov=src/dbt_bouncer/ \
+	--cov-fail-under=100 \
 	--numprocesses 5 \
 	./tests/unit
 """
