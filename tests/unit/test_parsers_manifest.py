@@ -139,6 +139,77 @@ def test_parse_empty_catalog_raises_artifact_error(tmp_path):
     assert "dbt docs generate" in message
 
 
+def _run_results_bouncer_config() -> MagicMock:
+    """Return a config mock that only requests run results checks.
+
+    Returns:
+        MagicMock: The bouncer config.
+
+    """
+    bouncer_config = MagicMock()
+    bouncer_config.package_name = "my_project"
+    bouncer_config.catalog_checks = []
+    bouncer_config.info_schema_checks = []
+    bouncer_config.run_results_checks = [MagicMock()]
+    return bouncer_config
+
+
+def _write_minimal_manifest(directory: Path) -> None:
+    """Write a manifest with one exposure and one unit test in `my_project`."""
+    (directory / "manifest.json").write_bytes(
+        orjson.dumps(
+            {
+                "exposures": {
+                    "exposure.my_project.dashboard": {
+                        "original_file_path": "models/exposures.yml",
+                        "package_name": "my_project",
+                    },
+                },
+                "metadata": {"dbt_version": "1.10.0", "project_name": "my_project"},
+                "unit_tests": {
+                    "unit_test.my_project.orders.test_orders": {
+                        "original_file_path": "models/orders.yml",
+                        "package_name": "my_project",
+                    },
+                },
+            }
+        )
+    )
+
+
+def test_parse_missing_run_results_raises_artifact_error(tmp_path):
+    """Requesting run results checks without a run_results.json raises an artifact error."""
+    _write_minimal_manifest(tmp_path)
+
+    with pytest.raises(DbtBouncerArtifactError, match=r"No run_results\.json found"):
+        parse_dbt_artifacts(_run_results_bouncer_config(), tmp_path)
+
+
+def test_parse_run_results_resolves_file_paths_per_resource_type(tmp_path):
+    """Run results resolve paths from exposures and unit tests, and skip other packages."""
+    _write_minimal_manifest(tmp_path)
+    (tmp_path / "run_results.json").write_bytes(
+        orjson.dumps(
+            {
+                "results": [
+                    {"unique_id": "exposure.my_project.dashboard"},
+                    {"unique_id": "model.other_project.orders"},
+                    {"unique_id": "test.my_project.not_in_manifest"},
+                    {"unique_id": "unit_test.my_project.orders.test_orders"},
+                ]
+            }
+        )
+    )
+
+    parsed = parse_dbt_artifacts(_run_results_bouncer_config(), tmp_path)
+
+    assert {r.unique_id: r.original_file_path for r in parsed.run_results} == {
+        "exposure.my_project.dashboard": "models/exposures.yml",
+        "test.my_project.not_in_manifest": "",
+        "unit_test.my_project.orders.test_orders": "models/orders.yml",
+    }
+
+
 def _manifest_with_group_owner(owner: dict) -> dict:
     """Return the test project's manifest with a single group using `owner`.
 

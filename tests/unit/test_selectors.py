@@ -452,6 +452,32 @@ class TestConfigMethod:
         assert selector.matches("source.my_project.raw.s") is False
 
 
+def test_closure_skips_ids_missing_from_edge_map():
+    """A seed absent from (or not indexable in) the edge map contributes nothing."""
+    assert _closure({"model.my_project.orphan"}, {}) == set()
+    assert _closure({"model.my_project.orphan"}, None) == set()
+
+
+def test_selector_ignores_missing_and_non_mapping_collections():
+    """Manifest collections that are absent or not mappings are skipped."""
+    manifest = SimpleNamespace(
+        nodes={"model.my_project.orders": _node("orders")},
+        sources=["not", "a", "mapping"],
+    )
+
+    selector = Selector("orders", manifest)
+
+    assert selector.matches("model.my_project.orders") is True
+
+
+def test_validate_selector_field_passes_none_through():
+    """An unset selector field is valid and returned unchanged."""
+    from dbt_bouncer.selectors import validate_selector_field
+
+    assert validate_selector_field(None) is None
+    assert validate_selector_field("tag:nightly") == "tag:nightly"
+
+
 def test_invalid_selector_rejected_at_config_time():
     """A syntactically invalid selector fails config validation."""
     from dbt_bouncer.configuration_file.validator import validate_conf

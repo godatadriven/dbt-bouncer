@@ -1926,3 +1926,253 @@ def test_config_warm_cache_roundtrip_equivalence(config: dict[str, Any]):
         for check_obj in getattr(warm, "manifest_checks", []):
             if check_obj.name == "check_model_has_meta_keys":
                 assert isinstance(check_obj.keys, NestedDict)
+
+
+def test_load_config_file_contents_rejects_unsupported_suffix(tmp_path):
+    """A config file that is not TOML or YAML raises a config error."""
+    config_file = tmp_path / "dbt-bouncer.json"
+    config_file.write_text("{}")
+
+    with pytest.raises(DbtBouncerConfigError, match=r"Got \.json"):
+        load_config_file_contents(config_file_path=config_file)
+
+
+def test_lint_config_file_yaml_error_without_problem_mark(monkeypatch, tmp_path):
+    """A YAML error with no source mark is reported against line 1."""
+    from dbt_bouncer.configuration_file import validator
+
+    config_file = tmp_path / "dbt-bouncer.yml"
+    config_file.write_text("manifest_checks: []\n")
+
+    def _raise(*_args, **_kwargs):
+        raise yaml.YAMLError("no mark here")
+
+    monkeypatch.setattr(validator.yaml, "load", _raise)
+
+    issues = validator.lint_config_file(config_file)
+
+    assert issues == [
+        {"line": 1, "message": "YAML syntax error: no mark here", "severity": "error"}
+    ]
+
+
+def test_lint_config_file_not_mapping(tmp_path):
+    """A YAML file whose top level is a list is reported, not crashed on."""
+    from dbt_bouncer.configuration_file.validator import lint_config_file
+
+    config_file = tmp_path / "dbt-bouncer.yml"
+    config_file.write_text("- name: check_model_names\n")
+
+    issues = lint_config_file(config_file)
+
+    assert len(issues) == 1
+    assert issues[0]["message"] == "Config file must contain a mapping, got list"
+
+
+def test_resolve_loc_line_invalid_yaml_and_scalar_walk(tmp_path):
+    """Unparseable YAML resolves to line 1; walking past a scalar stops the walk."""
+    from dbt_bouncer.configuration_file.validator import _resolve_loc_line
+
+    broken_file = tmp_path / "broken.yml"
+    broken_file.write_text("manifest_checks: [\n")
+    assert _resolve_loc_line(broken_file, ("manifest_checks",)) == 1
+
+    config_file = tmp_path / "dbt-bouncer.yml"
+    config_file.write_text("manifest_checks: []\nseverity: warn\n")
+    # `severity` is a scalar, so the trailing part cannot descend any further.
+    assert _resolve_loc_line(config_file, ("severity", "child")) == 2
+
+
+def test_lint_config_file_deep_unloadable_file(tmp_path):
+    """A file that cannot be loaded is reported as a single line-1 issue."""
+    from dbt_bouncer.configuration_file.validator import lint_config_file_deep
+
+    config_file = tmp_path / "dbt-bouncer.json"
+    config_file.write_text("{}")
+
+    issues = lint_config_file_deep(config_file)
+
+    assert len(issues) == 1
+    assert issues[0]["line"] == 1
+    assert "Got .json" in issues[0]["message"]
+
+
+def test_lint_config_file_deep_resolves_custom_checks_dir(monkeypatch, tmp_path):
+    """`custom_checks_dir` is resolved relative to the config file's directory."""
+    from dbt_bouncer.configuration_file import validator
+
+    config_file = tmp_path / "dbt-bouncer.yml"
+    config_file.write_text(
+        "custom_checks_dir: my_checks\n"
+        "manifest_checks:\n"
+        "  - name: check_model_description_populated\n"
+    )
+    captured: dict[str, Any] = {}
+
+    def _fake_validate_conf(**kwargs):
+        captured.update(kwargs)
+
+    monkeypatch.setattr(validator, "validate_conf", _fake_validate_conf)
+
+    assert validator.lint_config_file_deep(config_file) == []
+    assert captured["custom_checks_dir"] == tmp_path / "my_checks"
+
+
+def test_lint_config_file_deep_unexpected_exception(caplog, monkeypatch, tmp_path):
+    """An unexpected validation error is logged and reported, not raised."""
+    from dbt_bouncer.configuration_file import validator
+
+    config_file = tmp_path / "dbt-bouncer.yml"
+    config_file.write_text(
+        "manifest_checks:\n  - name: check_model_description_populated\n"
+    )
+
+    def _raise(**_kwargs):
+        raise RuntimeError("boom")
+
+    monkeypatch.setattr(validator, "validate_conf", _raise)
+
+    issues = validator.lint_config_file_deep(config_file)
+
+    assert issues == [
+        {
+            "line": 1,
+            "message": "Unexpected error during config validation: boom",
+            "severity": "error",
+        }
+    ]
+    assert "Unexpected error during config validation: boom" in caplog.text
+
+
+def test_find_root_model_in_annotation_union():
+    """A RootModel nested in a union annotation is found."""
+    from dbt_bouncer.check_framework.exceptions import NestedDict
+    from dbt_bouncer.configuration_file.validator import (
+        _find_root_model_in_annotation,
+    )
+
+    assert _find_root_model_in_annotation(int | NestedDict) is NestedDict
+    assert _find_root_model_in_annotation(int | str) is None
+
+
+@pytest.mark.parametrize(
+    "already_wrapped",
+    [
+        pytest.param(False, id="none"),
+        pytest.param(True, id="already_wrapped"),
+    ],
+)
+def test_construct_cached_check_leaves_none_and_wrapped_fields(already_wrapped):
+    """RootModel fields that are None or already wrapped are passed through."""
+    from dbt_bouncer.check_framework.exceptions import NestedDict
+    from dbt_bouncer.checks.manifest.models.meta import CheckModelHasMetaKeys
+    from dbt_bouncer.configuration_file.validator import _construct_cached_check
+
+    value = NestedDict.model_validate(["maturity"]) if already_wrapped else None
+    instance = _construct_cached_check(
+        CheckModelHasMetaKeys, {"name": "check_model_has_meta_keys", "keys": value}
+    )
+
+    assert instance.keys is value
+
+
+def test_resolve_rule_code_entry_edge_cases():
+    """Unknown keys resolve to nothing; classes without name or code add neither."""
+    from pydantic import BaseModel
+
+    from dbt_bouncer.configuration_file.validator import _resolve_rule_code_entry
+
+    class _NoNameNoCode(BaseModel):
+        pass
+
+    class _UnparametrisedName(BaseModel):
+        name: str = "check_x"
+
+    registry: dict[str, Any] = {
+        "XX001": _NoNameNoCode,
+        "XX002": _UnparametrisedName,
+    }
+
+    assert _resolve_rule_code_entry({}, "XX999", registry) == set()
+
+    entry: dict[str, Any] = {}
+    assert _resolve_rule_code_entry(entry, "XX001", registry) == set()
+    assert _resolve_rule_code_entry(entry, "XX002", registry) == set()
+    assert entry == {}
+
+
+def test_build_conf_class_fallback_imports_info_schema_checks():
+    """With no configured names, the fallback imports the info schema checks."""
+    from dbt_bouncer.configuration_file.validator import _build_conf_class
+
+    conf_class = _build_conf_class(["info_schema_checks"], set(), None)
+
+    assert "info_schema_checks" in conf_class.model_fields
+
+
+@pytest.mark.parametrize(
+    "loc",
+    [
+        pytest.param(("manifest_checks", 0), id="two_part_loc"),
+        pytest.param(
+            ("manifest_checks", 0, "check_not_registered", "bad_key"),
+            id="unregistered_check",
+        ),
+    ],
+)
+def test_extra_forbidden_detail_without_candidates(loc):
+    """No suggestion is offered when no candidate keys can be determined."""
+    from dbt_bouncer.configuration_file.validator import _extra_forbidden_detail
+
+    detail = _extra_forbidden_detail(
+        {"msg": "Extra inputs are not permitted"},
+        loc,
+        "location",
+        DbtBouncerConfBase,
+        {},
+    )
+
+    assert detail == {
+        "loc": loc,
+        "message": "location: Extra inputs are not permitted",
+    }
+
+
+def test_validate_conf_no_arguments_returns_default_conf(isolated_cache_dir):  # ruff: ignore[unused-function-argument]
+    """Calling `validate_conf()` with nothing yields a default config."""
+    conf = validate_conf()
+
+    assert isinstance(conf, DbtBouncerConfBase)
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        pytest.param({"check_categories": ["manifest_checks"]}, id="categories_list"),
+        pytest.param({"config_file_contents": ["not", "a", "mapping"]}, id="contents"),
+    ],
+)
+def test_validate_conf_rejects_non_mapping(kwargs):
+    """A non-mapping config raises a config error with structured details."""
+    with pytest.raises(DbtBouncerConfigError, match="Config must be a mapping") as e:
+        validate_conf(**kwargs)
+
+    assert e.value.details == [{"loc": (), "message": "Config must be a mapping"}]
+
+
+def test_validate_conf_skips_cache_when_key_unserialisable(isolated_cache_dir):
+    """A value orjson cannot serialise skips the cache instead of failing."""
+    conf = validate_conf(
+        config_file_contents={
+            "manifest_checks": [
+                {
+                    "name": "check_model_max_number_of_lines",
+                    # Beyond 64 bits, so orjson cannot hash it into a cache key.
+                    "max_number_of_lines": 2**70,
+                }
+            ]
+        }
+    )
+
+    assert conf.manifest_checks[0].max_number_of_lines == 2**70
+    assert list(isolated_cache_dir.glob("conf_*.json")) == []
