@@ -1,7 +1,7 @@
 """Unit tests for dbt_bouncer.enums."""
 
 import dbt_bouncer
-from dbt_bouncer.enums import CheckCategory, Criteria, ModelAccess
+from dbt_bouncer.enums import CheckCategory, Criteria, ModelAccess, OutputFormat
 
 
 class TestCheckCategory:
@@ -75,6 +75,21 @@ class TestStrEnumBehaviour:
         """A member is found in a collection of the equivalent plain strings."""
         assert CheckCategory.MANIFEST_CHECKS in {"manifest_checks", "catalog_checks"}
         assert "manifest_checks" in set(CheckCategory)
+
+
+class TestOutputFormat:
+    """Tests for the OutputFormat enum."""
+
+    def test_values_lists_every_member_in_declaration_order(self):
+        """`values()` returns every member, in declaration (alphabetical) order."""
+        assert OutputFormat.values() == [
+            "csv",
+            "gitlab",
+            "json",
+            "junit",
+            "sarif",
+            "tap",
+        ]
 
 
 class TestPublicApi:

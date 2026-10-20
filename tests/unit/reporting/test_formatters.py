@@ -4,6 +4,7 @@ import csv
 import io
 
 import orjson
+import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
 from junitparser import JUnitXml
@@ -30,6 +31,12 @@ def _failed_result(**overrides):
     }
     result.update(overrides)
     return result
+
+
+def test_format_results_rejects_unknown_output_format():
+    """An unrecognised output format raises a ValueError naming the format."""
+    with pytest.raises(ValueError, match="Unknown output format: yaml"):
+        _format_results([_failed_result()], "yaml")
 
 
 def test_sarif_includes_location_and_logical_location():
