@@ -1,0 +1,53 @@
+---
+name: Pull Request Coverage Comment
+
+# Posts the coverage comment for fork PRs. Their `pull_request` CI run has a
+# read-only token, so CI uploads the rendered comment as an artifact and this
+# trusted run posts it. Same-repo PRs are commented on directly by CI, so no
+# artifact exists for them and this job does nothing.
+on:  # zizmor: ignore[dangerous-triggers] Only downloads the comment artifact; never checks out or runs PR code.
+  workflow_run:
+    workflows: [CI pipeline]
+    types: [completed]
+
+concurrency:
+  # `github.ref` is always the default branch on `workflow_run`, so group by PR branch.
+  group: ${{ github.workflow }}-${{ github.event.workflow_run.head_branch }}
+  cancel-in-progress: true
+
+jobs:
+  coverage_comment:
+    # Runs on failure too: a failed coverage gate is when the comment is most useful.
+    if: >-
+      github.event.workflow_run.event == 'pull_request'
+      && github.event.workflow_run.conclusion != 'cancelled'
+      && github.event.workflow_run.conclusion != 'skipped'
+    permissions:
+      actions: read
+      contents: read
+      pull-requests: write
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      # DO NOT check out the repository here: the triggering run may be a fork PR.
+      - name: Check for a comment artifact
+        id: artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+        run: |
+          count=$(gh api "repos/${REPOSITORY}/actions/runs/${RUN_ID}/artifacts?name=python-coverage-comment-action" --jq '.total_count')
+          if [ "${count}" -gt 0 ]; then
+              echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+              echo "No comment artifact: CI commented directly or stopped before the unit tests."
+              echo "found=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Post coverage comment
+        if: steps.artifact.outputs.found == 'true'
+        uses: py-cov-action/python-coverage-comment-action@e5fb2218463c3377f3504b0c5b5646ed53da7a2f # v4.5
+        with:
+          GITHUB_PR_RUN_ID: ${{ github.event.workflow_run.id }}
+          GITHUB_TOKEN: ${{ github.token }}

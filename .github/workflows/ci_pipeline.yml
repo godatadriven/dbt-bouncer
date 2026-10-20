@@ -78,12 +78,11 @@ jobs:
     unit-tests:
         needs: [prek]
         runs-on: ${{ matrix.operating-system }}
-        # permissions:
-        #     checks: write
-        #     contents: write
-        #     id-token: write
-        #     issues: write
-        #     pull-requests: write
+        permissions:
+            contents: read
+            # Same-repo PRs get the coverage comment directly. Fork PRs get a
+            # read-only token, so `pull_request_coverage_comment.yml` posts theirs.
+            pull-requests: write
         strategy:
             fail-fast: false
             matrix:
@@ -116,6 +115,25 @@ jobs:
             - name: Run pytest (unit tests)
               if: matrix.operating-system != 'windows-2025'
               run: mise run test-unit
+
+            # Must run before the integration tests, which overwrite `.coverage`.
+            # Runs on failure too, so a failed coverage gate still shows the missed lines.
+            - name: Coverage comment
+              id: coverage_comment
+              if: ${{ !cancelled() && matrix.operating-system == 'ubuntu-24.04' && matrix.python-version == '3.11' }}
+              uses: py-cov-action/python-coverage-comment-action@e5fb2218463c3377f3504b0c5b5646ed53da7a2f # v4.5
+              with:
+                ACTIVITY: process_pr
+                GITHUB_TOKEN: ${{ github.token }}
+                MINIMUM_GREEN: 100
+                MINIMUM_ORANGE: 95
+
+            - name: Store the coverage comment for fork PRs
+              if: ${{ !cancelled() && steps.coverage_comment.outputs.COMMENT_FILE_WRITTEN == 'true' }}
+              uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+              with:
+                name: python-coverage-comment-action
+                path: python-coverage-comment-action.txt
 
             - name: Run pytest (integration tests)
               if: matrix.operating-system != 'windows-2025'
