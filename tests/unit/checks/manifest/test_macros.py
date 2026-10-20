@@ -220,6 +220,24 @@ class TestMacroLoopControls:
         )
 
 
+class TestTestSignatureWithoutParentheses:
+    """A `{% test name %}` signature with no parentheses declares no arguments.
+
+    dbt rejects this form, but the parser must not count the test name itself
+    as an argument.
+    """
+
+    def test_arguments_description_populated_finds_no_arguments(self):
+        check_passes(
+            "check_macro_arguments_description_populated",
+            macro={
+                # One documented argument, so the check compares the parsed names.
+                "arguments": [{"name": "model", "description": "The model to test."}],
+                "macro_sql": "{% test not_null_custom %}select 1{% endtest %}",
+            },
+        )
+
+
 class TestCheckMacroCodeDoesNotContainRegexpPattern:
     @pytest.mark.parametrize(
         ("macro_overrides", "regexp_pattern", "check_fn"),
