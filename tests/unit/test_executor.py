@@ -1,5 +1,7 @@
 """Tests for the Executor class."""
 
+import logging
+
 import pytest
 
 from dbt_bouncer.enums import CheckOutcome, CheckSeverity
@@ -90,6 +92,23 @@ def test_executor_unexpected_error_is_internal_error(severity):
     assert results[0]["outcome"] == CheckOutcome.INTERNAL_ERROR
     assert results[0]["severity"] == severity
     assert "encountered an error" in results[0]["failure_message"]
+
+
+def test_executor_unexpected_error_logs_traceback_when_debug_enabled(caplog):
+    """With debug logging on, a crashing check logs its full traceback."""
+    caplog.set_level(logging.DEBUG)
+    checks = [
+        {
+            "check": _CrashingCheck(),
+            "check_run_id": "check_a:0",
+            "severity": CheckSeverity.ERROR,
+        },
+    ]
+    results = Executor().run(checks)
+
+    assert results[0]["outcome"] == CheckOutcome.INTERNAL_ERROR
+    assert "Check check_a:0 raised unexpected error" in caplog.text
+    assert "ValueError: unexpected crash" in caplog.text
 
 
 def test_executor_empty_checks():
