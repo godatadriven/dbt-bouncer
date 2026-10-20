@@ -843,6 +843,20 @@ class TestCheckMacroPropertyFileLocation:
                 id="invalid_double_underscore",
             ),
             pytest.param(
+                {"patch_path": ""},
+                check_fails,
+                id="invalid_empty_patch_path",
+            ),
+            pytest.param(
+                {
+                    "original_file_path": "macros/dir1/macro_1.sql",
+                    "patch_path": "package_name://macros/dir1/dir1__macros.yml",
+                    "path": "macros/dir1/macro_1.sql",
+                },
+                check_fails,
+                id="invalid_nested_no_underscore",
+            ),
+            pytest.param(
                 {
                     "original_file_path": "macros/dir1/macro_1.sql",
                     "patch_path": None,
@@ -1063,6 +1077,22 @@ class TestCheckMacroIsUsed:
                 },
                 check_fails,
                 id="calls_dispatched_macro_of_another_name",
+            ),
+            pytest.param(
+                # dbt 2.0 omits `depends_on` for some macros; such a macro
+                # neither uses nor overrides anything.
+                {"unique_id": "macro.package_name.macro_1"},
+                {
+                    "macros": {
+                        "macro.package_name.macro_2": {
+                            "name": "macro_2",
+                            "package_name": "package_name",
+                            "unique_id": "macro.package_name.macro_2",
+                        },
+                    }
+                },
+                check_fails,
+                id="manifest_macro_without_depends_on",
             ),
         ],
     )

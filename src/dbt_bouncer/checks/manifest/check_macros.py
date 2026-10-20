@@ -89,8 +89,11 @@ def _parse_macro_argument_names(macro_sql: str) -> list[str]:
     # `jinja2.nodes.Assign` node with no `.nodes` attribute (see issue #927).
     signature_call = ast.body[0].nodes[0]  # ty: ignore[unresolved-attribute]
     # With autoescape enabled the signature is wrapped in an `escape(...)`
-    # call; unwrap it to reach the test's own call node.
-    if signature_call.args and isinstance(signature_call.args[0], nodes.Call):
+    # call; unwrap it to reach the test's own call node. A valid
+    # `{% test name(...) %}` signature is always wrapped.
+    if signature_call.args and isinstance(  # pragma: no branch
+        signature_call.args[0], nodes.Call
+    ):
         signature_call = signature_call.args[0]
     return [a.name for a in signature_call.args if isinstance(a, nodes.Name)]
 
@@ -586,7 +589,7 @@ def check_macro_property_file_location(macro):
     if macro.patch_path is None:
         fail(f"Macro `{macro.name}` is not defined in a `.yml` properties file.")
     clean_patch_path = clean_path_str(macro.patch_path)
-    if clean_patch_path is None:
+    if not clean_patch_path:
         fail(f"Macro `{macro.name}` has an invalid patch path.")
 
     patch_path = Path(clean_patch_path)

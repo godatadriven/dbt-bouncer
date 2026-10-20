@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from types import SimpleNamespace
 from typing import TYPE_CHECKING
 
 import pytest
@@ -80,6 +81,25 @@ class TestBuildCheckContext:
         )
         assert ctx.manifest_obj.manifest.metadata.dbt_version == "2.0.0"
 
+    def test_ctx_manifest_obj_prebuilt_is_used_as_is(self):
+        manifest_obj = _build_manifest_obj()
+        ctx = _build_check_context(ctx_manifest_obj=manifest_obj)
+        assert ctx.manifest_obj is manifest_obj
+
+    def test_non_ctx_kwargs_are_ignored(self):
+        ctx = _build_check_context(model_name_pattern="^stg_")
+        assert ctx.models == []
+
+    def test_non_list_ctx_value_is_passed_through(self):
+        models_by_unique_id = {"model.package_name.m1": object()}
+        ctx = _build_check_context(ctx_models_by_unique_id=models_by_unique_id)
+        assert ctx.models_by_unique_id is models_by_unique_id
+
+    def test_non_resource_list_is_passed_through_unwrapped(self):
+        info_schema = [{"table_name": "t1"}]
+        ctx = _build_check_context(ctx_info_schema=info_schema)
+        assert ctx.info_schema is info_schema
+
 
 class TestCheckPasses:
     def test_check_passes_with_valid_model(self):
@@ -109,6 +129,31 @@ class TestCheckFails:
                 "check_model_description_populated",
                 model={"description": "A good description that is long enough."},
             )
+
+    def test_check_fails_with_matching_message(self):
+        check_fails(
+            "check_model_description_populated",
+            match="does not have a populated description",
+            model={"description": ""},
+        )
+
+    def test_check_fails_raises_on_message_mismatch(self):
+        with pytest.raises(pytest.fail.Exception, match="did not match"):
+            check_fails(
+                "check_model_description_populated",
+                match="^this message is never raised$",
+                model={"description": ""},
+            )
+
+    def test_check_fails_accepts_prebuilt_resource(self):
+        # A non-dict resource is passed to the check unchanged.
+        check_fails(
+            "check_model_names",
+            model=SimpleNamespace(
+                name="fct_orders", unique_id="model.package_name.fct_orders"
+            ),
+            model_name_pattern="^stg_",
+        )
 
 
 class TestCheckWithParams:

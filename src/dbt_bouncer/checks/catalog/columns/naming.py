@@ -83,7 +83,8 @@ def check_column_name_complies_to_column_type(
                 f"`{str(catalog_node.unique_id).split('.')[-1]}` has columns matching `{column_name_pattern}` whose data type does not match `{type_pattern}`: {non_complying_columns}"
             )
 
-    elif types:
+    # `validate` guarantees `types` is set when `type_pattern` is not.
+    elif types:  # pragma: no branch
         non_complying_columns = [
             v.name
             for _, v in catalog_node.columns.items()
@@ -219,7 +220,8 @@ def check_column_type_complies_to_column_name(
                 f"`{str(catalog_node.unique_id).split('.')[-1]}` has columns with types matching `{type_pattern}` that don't comply with the specified naming pattern (`{column_name_pattern}`): {non_complying_columns}"
             )
 
-    elif types:
+    # `validate` guarantees `types` is set when `type_pattern` is not.
+    elif types:  # pragma: no branch
         non_complying_columns = [
             v.name
             for _, v in catalog_node.columns.items()

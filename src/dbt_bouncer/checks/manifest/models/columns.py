@@ -286,7 +286,8 @@ def check_model_column_name_complies_to_column_type(
                 f"`{get_clean_model_name(model.unique_id)}` has columns matching `{column_name_pattern}` whose declared data type does not match `{type_pattern}`: {non_complying_columns}"
             )
 
-    elif types:
+    # `validate` guarantees `types` is set when `type_pattern` is not.
+    elif types:  # pragma: no branch
         non_complying_columns = [
             col_name
             for col_name, data_type in typed_columns
@@ -422,7 +423,8 @@ def check_model_column_type_complies_to_column_name(
                 f"`{get_clean_model_name(model.unique_id)}` has columns with declared types matching `{type_pattern}` that don't comply with the specified naming pattern (`{column_name_pattern}`): {non_complying_columns}"
             )
 
-    elif types:
+    # `validate` guarantees `types` is set when `type_pattern` is not.
+    elif types:  # pragma: no branch
         non_complying_columns = [
             col_name
             for col_name, data_type in typed_columns
