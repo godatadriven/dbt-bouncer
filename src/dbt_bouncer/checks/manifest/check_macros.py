@@ -89,12 +89,13 @@ def _parse_macro_argument_names(macro_sql: str) -> list[str]:
     # `jinja2.nodes.Assign` node with no `.nodes` attribute (see issue #927).
     signature_call = ast.body[0].nodes[0]  # ty: ignore[unresolved-attribute]
     # With autoescape enabled the signature is wrapped in an `escape(...)`
-    # call; unwrap it to reach the test's own call node. A valid
-    # `{% test name(...) %}` signature is always wrapped.
-    if signature_call.args and isinstance(  # pragma: no branch
-        signature_call.args[0], nodes.Call
-    ):
-        signature_call = signature_call.args[0]
+    # call; unwrap it to reach the test's own call node.
+    if not (signature_call.args and isinstance(signature_call.args[0], nodes.Call)):
+        # `{% test name %}` with no parentheses declares no arguments (dbt
+        # rejects this form). Without this guard the test name itself would be
+        # returned as an argument.
+        return []
+    signature_call = signature_call.args[0]
     return [a.name for a in signature_call.args if isinstance(a, nodes.Name)]
 
 
