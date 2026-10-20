@@ -228,6 +228,13 @@ class TestCheckColumnsAreAllDocumented:
                 check_fails,
                 id="missing_column_in_model",
             ),
+            pytest.param(
+                # A catalog node with no matching manifest model is skipped.
+                {"unique_id": "model.package_name.model_not_in_manifest"},
+                [_MODEL_WITH_DESCRIPTIONS],
+                check_passes,
+                id="no_matching_model",
+            ),
         ],
     )
     def test_check_columns_are_all_documented(self, catalog_node, ctx_models, check_fn):

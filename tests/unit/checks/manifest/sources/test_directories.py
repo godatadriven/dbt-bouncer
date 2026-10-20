@@ -14,6 +14,17 @@ class TestCheckSourcePropertyFileLocation:
             },
         )
 
+    def test_correct_location_outside_staging(self):
+        # Outside `models/staging`, the expected substring uses every directory.
+        check_passes(
+            "check_source_property_file_location",
+            source={
+                "original_file_path": "models/marts/_models_marts__sources.yml",
+                "path": "models/marts/_models_marts__sources.yml",
+                "tags": ["tag_1"],
+            },
+        )
+
     @pytest.mark.parametrize(
         ("original_file_path", "path"),
         [

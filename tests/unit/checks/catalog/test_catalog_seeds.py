@@ -99,6 +99,22 @@ class TestCheckSeedMaxBytes:
                 check_passes,
                 id="non_seed_catalog_node_is_skipped",
             ),
+            pytest.param(
+                # A non-numeric value under an earlier key falls through to the next key.
+                _seed_catalog_node(
+                    {
+                        **_byte_stat(2048, key="num_bytes"),
+                        "bytes": {
+                            "id": "bytes",
+                            "include": True,
+                            "label": "Approximate Size",
+                            "value": "unknown",
+                        },
+                    }
+                ),
+                check_fails,
+                id="non_numeric_stat_falls_through_to_next_key",
+            ),
         ],
     )
     def test_check_seed_max_bytes(self, catalog_node, check_fn):
