@@ -1,13 +1,23 @@
 """Unit tests for dbt_bouncer.cli.run.utils."""
 
-from pathlib import Path
+from pathlib import Path, PurePath
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
+import orjson
 import pytest
+import yaml
+from typer.testing import CliRunner
 
 from dbt_bouncer.cli.run.utils import _build_context, detect_config_file_source
-from dbt_bouncer.enums import ConfigFileName, ConfigFileSource
+from dbt_bouncer.enums import ConfigFileName, ConfigFileSource, ExitCode
+from dbt_bouncer.main import app
+from dbt_bouncer.regression import build_baseline
+
+# Resolved at import time, before any test chdirs into a tmp_path.
+DBT_112_TARGET = Path("tests/fixtures/dbt_112/target").resolve()
+# Fails on every model: no model name starts with "zzz_".
+FAILING_CHECK = {"name": "check_model_names", "model_name_pattern": "^zzz_"}
 
 
 class TestDetectConfigFileSource:
@@ -151,3 +161,93 @@ class TestBuildContext:
         assert ctx.output_file == Path("out.json")
         assert ctx.output_only_failures is True
         assert ctx.show_all_failures is True
+
+
+class TestRunWithBaselineAndState:
+    """Tests for `run --baseline` / `--state` (`_resolve_accepted_fingerprints`)."""
+
+    @pytest.fixture
+    def failing_config_file(self, tmp_path: Path) -> Path:
+        """Write a config whose single check fails on every model.
+
+        Returns:
+            Path: The config file path.
+
+        """
+        config_file = tmp_path / "custom-bouncer.yml"
+        config_file.write_text(
+            yaml.dump(
+                {
+                    "dbt_artifacts_dir": str(DBT_112_TARGET),
+                    "manifest_checks": [FAILING_CHECK],
+                }
+            )
+        )
+        return config_file
+
+    @pytest.fixture
+    def empty_baseline_file(self, tmp_path: Path) -> Path:
+        """Write a baseline that accepts no failures.
+
+        Returns:
+            Path: The baseline file path.
+
+        """
+        baseline_file = tmp_path / "baseline.json"
+        baseline_file.write_bytes(orjson.dumps(build_baseline([])))
+        return baseline_file
+
+    @staticmethod
+    def _invoke_run(config_file: Path, *extra_args: str):
+        return CliRunner().invoke(
+            app,
+            ["run", "--config-file", PurePath(config_file).as_posix(), *extra_args],
+        )
+
+    def test_baseline_without_state_keeps_new_failures(
+        self, empty_baseline_file: Path, failing_config_file: Path
+    ):
+        """An empty baseline accepts nothing, so the failures still report."""
+        result = self._invoke_run(
+            failing_config_file, "--baseline", PurePath(empty_baseline_file).as_posix()
+        )
+
+        assert result.exit_code == ExitCode.CHECK_ERRORS
+
+    def test_baseline_and_state_combined(
+        self, empty_baseline_file: Path, failing_config_file: Path
+    ):
+        """`--state` against the same artifacts suppresses every failure."""
+        result = self._invoke_run(
+            failing_config_file,
+            "--baseline",
+            PurePath(empty_baseline_file).as_posix(),
+            "--state",
+            DBT_112_TARGET.as_posix(),
+        )
+
+        assert result.exit_code == ExitCode.SUCCESS, result.output
+
+    def test_state_not_a_directory_is_config_error(
+        self, failing_config_file: Path, tmp_path: Path
+    ):
+        """`--state` pointing at a non-directory exits with CONFIG_ERROR."""
+        result = self._invoke_run(
+            failing_config_file, "--state", PurePath(tmp_path / "missing").as_posix()
+        )
+
+        assert result.exit_code == ExitCode.CONFIG_ERROR
+
+    def test_state_without_artifacts_is_artifact_error(
+        self, caplog, failing_config_file: Path, tmp_path: Path
+    ):
+        """`--state` at a directory without artifacts names `--state` as the cause."""
+        empty_dir = tmp_path / "empty_target"
+        empty_dir.mkdir()
+
+        result = self._invoke_run(
+            failing_config_file, "--state", PurePath(empty_dir).as_posix()
+        )
+
+        assert result.exit_code == ExitCode.ARTIFACT_ERROR
+        assert "Failed to load the base artifacts from `--state" in caplog.text
