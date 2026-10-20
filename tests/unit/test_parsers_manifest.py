@@ -6,8 +6,17 @@ from unittest.mock import MagicMock
 
 import orjson
 import pytest
+from hypothesis import given, settings
+from hypothesis import strategies as st
 
-from dbt_bouncer.artifact_parsers.parser import parse_dbt_artifacts, wrap_dict
+from dbt_bouncer.artifact_parsers.parser import (
+    DictProxy,
+    ListProxy,
+    ProxyStr,
+    _wrap_value,
+    parse_dbt_artifacts,
+    wrap_dict,
+)
 from dbt_bouncer.exceptions import DbtBouncerArtifactError
 
 
@@ -225,3 +234,73 @@ def test_parse_truncated_secondary_artifact_raises_artifact_error(
 
     with pytest.raises(DbtBouncerArtifactError, match=re.escape(file_name)):
         parse_dbt_artifacts(_bouncer_config(**flags), tmp_path)
+
+
+_JSON_KEY = st.from_regex(r"[a-z][a-z0-9_]{0,10}", fullmatch=True)
+_JSON_LEAF = (
+    st.none()
+    | st.booleans()
+    | st.integers(min_value=-1000, max_value=1000)
+    | st.text(max_size=15)
+)
+_JSON_VALUE = st.recursive(
+    _JSON_LEAF,
+    lambda children: (
+        st.lists(children, max_size=4)
+        | st.dictionaries(_JSON_KEY, children, max_size=4)
+    ),
+    max_leaves=15,
+)
+
+
+class TestProxyProperties:
+    """Property-based tests for DictProxy, ListProxy, ProxyStr, and _wrap_value."""
+
+    @settings(max_examples=50)
+    @given(val=_JSON_VALUE)
+    def test_wrap_value_idempotence_and_proxy_types(self, val):
+        """_wrap_value is idempotent and wraps dict/list/str into their exact proxy subclasses."""
+        wrapped = _wrap_value(val)
+        wrapped_twice = _wrap_value(wrapped)
+        assert wrapped_twice == wrapped
+        assert type(wrapped_twice) is type(wrapped)
+
+        match val:
+            case dict():
+                assert isinstance(wrapped, DictProxy)
+            case list():
+                assert isinstance(wrapped, ListProxy)
+                assert list(wrapped) == val
+                assert wrapped[:] == val
+            case str():
+                assert isinstance(wrapped, ProxyStr)
+                assert wrapped.value == val == str(wrapped)
+
+    @settings(max_examples=50)
+    @given(d=st.dictionaries(_JSON_KEY, _JSON_VALUE, max_size=6))
+    def test_dict_proxy_mapping_equivalence_and_attribute_access(self, d):
+        """DictProxy preserves mapping semantics, attribute access, and trailing-underscore aliases."""
+        proxy = wrap_dict(d)
+        assert len(proxy) == len(d)
+        assert list(proxy.keys()) == list(d.keys())
+        assert dict(proxy.items()) == d
+        assert list(proxy.values()) == list(d.values())
+
+        for k, v in d.items():
+            assert proxy[k] == v
+            assert proxy.get(k) == v
+            if isinstance(v, str):
+                assert isinstance(proxy[k], ProxyStr)
+                assert proxy[k].value == v
+            if not hasattr(DictProxy, k):
+                assert getattr(proxy, k) == v
+                alias = f"{k}_"
+                if (
+                    not k.endswith("_")
+                    and alias not in d
+                    and not hasattr(DictProxy, alias)
+                ):
+                    assert getattr(proxy, alias) == v
+
+        assert proxy.__getattr__("__definitely_absent_key__") is None
+        assert proxy.get("__definitely_absent_key__", "fallback") == "fallback"

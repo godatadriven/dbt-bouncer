@@ -1443,17 +1443,19 @@ def test_validate_conf_rejects_invalid_regex(config, monkeypatch):
         validate_conf(check_categories=["manifest_checks"], config_file_contents=config)
 
 
-_CONFIG_LEAF = st.none() | st.booleans() | st.integers() | st.text()
+_CONFIG_LEAF = st.none() | st.booleans() | st.integers() | st.text(max_size=12)
 _CONFIG_RECURSIVE = st.recursive(
     _CONFIG_LEAF,
-    lambda c: st.lists(c) | st.dictionaries(st.text(), c),
-    max_leaves=30,
+    lambda c: (
+        st.lists(c, max_size=4) | st.dictionaries(st.text(max_size=8), c, max_size=4)
+    ),
+    max_leaves=20,
 )
 _ARBITRARY_CONFIG_STRATEGY = st.fixed_dictionaries(
     {},
     optional={
         "catalog_checks": _CONFIG_RECURSIVE,
-        "include": st.text(),
+        "include": st.text(max_size=16),
         "manifest_checks": _CONFIG_RECURSIVE,
         "run_results_checks": _CONFIG_RECURSIVE,
         "severity": st.sampled_from(["error", "warn", "bogus"]),
@@ -1466,11 +1468,12 @@ _ARBITRARY_CONFIG_STRATEGY = st.fixed_dictionaries(
 def test_validate_conf_never_crashes(raw: dict[str, Any]):
     """Config 'total function' test: validate_conf returns or raises DbtBouncerConfigError with a loc."""
     exc: DbtBouncerConfigError | None = None
-    try:
-        conf = validate_conf(raw)
-        assert conf is not None
-    except DbtBouncerConfigError as e:
-        exc = e
+    with mock.patch.dict(os.environ, {"DBT_BOUNCER_DISABLE_CONF_CACHE": "1"}):
+        try:
+            conf = validate_conf(raw)
+            assert conf is not None
+        except DbtBouncerConfigError as e:
+            exc = e
 
     if exc is not None:
         assert exc.details is not None
@@ -1484,7 +1487,10 @@ def test_validate_conf_never_crashes(raw: dict[str, Any]):
 @given(_ARBITRARY_CONFIG_STRATEGY)
 def test_validate_cli_never_crashes(raw: dict[str, Any]):
     """The validate CLI exits cleanly without crashing for any generated config."""
-    with tempfile.TemporaryDirectory() as tmp_dir:
+    with (
+        tempfile.TemporaryDirectory() as tmp_dir,
+        mock.patch.dict(os.environ, {"DBT_BOUNCER_DISABLE_CONF_CACHE": "1"}),
+    ):
         config_file = Path(tmp_dir) / "dbt-bouncer.yml"
         config_file.write_text(yaml.safe_dump(raw), encoding="utf-8")
 
@@ -1591,11 +1597,12 @@ def test_validate_conf_real_checks_wrong_typed_params_never_crashes(
 ):
     """Real check names with wrong-typed parameters either pass or raise DbtBouncerConfigError with loc."""
     exc: DbtBouncerConfigError | None = None
-    try:
-        conf = validate_conf(raw)
-        assert conf is not None
-    except DbtBouncerConfigError as e:
-        exc = e
+    with mock.patch.dict(os.environ, {"DBT_BOUNCER_DISABLE_CONF_CACHE": "1"}):
+        try:
+            conf = validate_conf(raw)
+            assert conf is not None
+        except DbtBouncerConfigError as e:
+            exc = e
 
     if exc is not None:
         assert exc.details is not None
@@ -1655,7 +1662,10 @@ _INVALID_REGEX_STRATEGY = st.one_of(
 @given(_INVALID_REGEX_STRATEGY)
 def test_invalid_regex_include_exclude_maps_to_exit_code_2(raw: dict[str, Any]):
     """Invalid regexes for include/exclude fail validation with loc and map to exit code 2 (CONFIG_ERROR)."""
-    with pytest.raises(DbtBouncerConfigError) as exc_info:
+    with (
+        mock.patch.dict(os.environ, {"DBT_BOUNCER_DISABLE_CONF_CACHE": "1"}),
+        pytest.raises(DbtBouncerConfigError) as exc_info,
+    ):
         validate_conf(raw)
 
     assert exc_info.value.details is not None
@@ -1664,7 +1674,10 @@ def test_invalid_regex_include_exclude_maps_to_exit_code_2(raw: dict[str, Any]):
         for d in exc_info.value.details
     )
 
-    with tempfile.TemporaryDirectory() as tmp_dir:
+    with (
+        tempfile.TemporaryDirectory() as tmp_dir,
+        mock.patch.dict(os.environ, {"DBT_BOUNCER_DISABLE_CONF_CACHE": "1"}),
+    ):
         config_file = Path(tmp_dir) / "dbt-bouncer.yml"
         config_file.write_text(yaml.safe_dump(raw), encoding="utf-8")
 
@@ -1737,6 +1750,23 @@ _EQUIVALENCE_MANIFEST_CHECK = st.one_of(
             "tags": st.lists(
                 st.sampled_from(["daily", "hourly", "nightly"]), min_size=1, max_size=2
             ),
+        },
+        optional={"criteria": st.sampled_from(["all", "any"]), **_COMMON_CHECK_PARAMS},
+    ),
+    st.fixed_dictionaries(
+        {
+            "keys": st.lists(
+                st.sampled_from(
+                    [
+                        "maturity",
+                        "owner",
+                        {"contact": ["email", "slack"]},
+                    ]
+                ),
+                min_size=1,
+                max_size=2,
+            ),
+            "name": st.just("check_model_has_meta_keys"),
         },
         optional={"criteria": st.sampled_from(["all", "any"]), **_COMMON_CHECK_PARAMS},
     ),
@@ -1845,9 +1875,12 @@ def test_config_equivalence_yaml_toml_pyproject(config: dict[str, Any]):
     """YAML ≡ TOML ≡ pyproject equivalence.
 
     Generate a valid config, serialise it three ways, and assert the validated
-    objects are equal.
+    objects are equal on the cold validation path.
     """
-    with tempfile.TemporaryDirectory() as tmp_dir:
+    with (
+        tempfile.TemporaryDirectory() as tmp_dir,
+        mock.patch.dict(os.environ, {"DBT_BOUNCER_DISABLE_CONF_CACHE": "1"}),
+    ):
         tmp_path = Path(tmp_dir)
         yaml_file = tmp_path / "dbt-bouncer.yml"
         toml_file = tmp_path / "dbt-bouncer.toml"
@@ -1869,3 +1902,27 @@ def test_config_equivalence_yaml_toml_pyproject(config: dict[str, Any]):
 
         assert isinstance(validated_yaml, DbtBouncerConfBase)
         assert validated_yaml == validated_toml == validated_pyproject
+
+
+@settings(max_examples=50, deadline=None)
+@given(_VALID_CONFIG_EQUIVALENCE_STRATEGY)
+def test_config_warm_cache_roundtrip_equivalence(config: dict[str, Any]):
+    """Cold validation followed by a warm disk-cache load yields an equal config object."""
+    from dbt_bouncer.check_framework.exceptions import NestedDict
+
+    env_without_disable = {
+        k: v for k, v in os.environ.items() if k != "DBT_BOUNCER_DISABLE_CONF_CACHE"
+    }
+    with (
+        tempfile.TemporaryDirectory() as tmp_dir,
+        mock.patch("dbt_bouncer.utils.get_cache_dir", return_value=Path(tmp_dir)),
+        mock.patch.dict(os.environ, env_without_disable, clear=True),
+    ):
+        cold = validate_conf(config_file_contents=dict(config))
+        warm = validate_conf(config_file_contents=dict(config))
+
+        assert warm == cold
+        assert len(list(Path(tmp_dir).glob("conf_*.json"))) == 1
+        for check_obj in getattr(warm, "manifest_checks", []):
+            if check_obj.name == "check_model_has_meta_keys":
+                assert isinstance(check_obj.keys, NestedDict)

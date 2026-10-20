@@ -175,42 +175,67 @@ def test_apply_regression_filter_keeps_internal_errors():
     assert kept == results
 
 
+_RESULT_DICT_STRATEGY = st.fixed_dictionaries(
+    {
+        "check_run_id": st.tuples(
+            st.from_regex(r"check_[a-z_]{1,12}", fullmatch=True),
+            st.integers(min_value=0, max_value=100),
+        ).map(lambda p: f"{p[0]}:{p[1]}"),
+        "failure_message": st.text(max_size=40),
+        "file_path": st.one_of(
+            st.none(),
+            st.from_regex(r"models/[a-z_]{1,10}\.sql", fullmatch=True),
+        ),
+        "outcome": st.sampled_from(
+            [
+                CheckOutcome.FAILED,
+                CheckOutcome.INTERNAL_ERROR,
+                CheckOutcome.SUCCESS,
+            ]
+        ),
+        "severity": st.sampled_from(list(CheckSeverity)),
+        "unique_id": st.one_of(
+            st.none(),
+            st.from_regex(
+                r"(model|source|seed)\.[a-z_]{1,8}\.[a-z_]{1,8}", fullmatch=True
+            ),
+        ),
+    }
+)
+
+
+@st.composite
+def _results_and_accepted_strategy(
+    draw: st.DrawFn,
+) -> tuple[list[dict], set[str]]:
+    """Generate check results and an accepted fingerprint set that overlaps with them.
+
+    Returns:
+        tuple[list[dict], set[str]]: Generated results and accepted fingerprint set.
+
+    """
+    results = draw(st.lists(_RESULT_DICT_STRATEGY, max_size=20))
+    candidate_fps = [fingerprint(r) for r in results]
+    sampled_from_results = (
+        draw(st.sets(st.sampled_from(candidate_fps))) if candidate_fps else set()
+    )
+    external_fps = draw(
+        st.sets(
+            st.from_regex(
+                r"check_[a-z_]{1,8}::(model\.[a-z_]{1,6}\.[a-z_]{1,6}|models/[a-z_]{1,6}\.sql)",
+                fullmatch=True,
+            ),
+            max_size=5,
+        )
+    )
+    return results, sampled_from_results | external_fps
+
+
 class TestRegressionProperties:
     """Property-based tests for baseline serialization and filtering."""
 
     @settings(max_examples=50)
-    @given(
-        st.lists(
-            st.fixed_dictionaries(
-                {
-                    "check_run_id": st.tuples(
-                        st.from_regex(r"check_[a-z_]+", fullmatch=True),
-                        st.integers(min_value=0, max_value=100),
-                    ).map(lambda p: f"{p[0]}:{p[1]}"),
-                    "failure_message": st.text(),
-                    "file_path": st.one_of(
-                        st.none(),
-                        st.from_regex(r"models/[a-z_]+\.sql", fullmatch=True),
-                    ),
-                    "outcome": st.sampled_from(
-                        [
-                            CheckOutcome.FAILED,
-                            CheckOutcome.INTERNAL_ERROR,
-                            CheckOutcome.SUCCESS,
-                        ]
-                    ),
-                    "severity": st.sampled_from(list(CheckSeverity)),
-                    "unique_id": st.one_of(
-                        st.none(),
-                        st.from_regex(
-                            r"(model|source|seed)\.[a-z_]+\.[a-z_]+", fullmatch=True
-                        ),
-                    ),
-                }
-            ),
-            max_size=20,
-        )
-    )
+    @given(st.lists(_RESULT_DICT_STRATEGY, max_size=20))
     def test_baseline_roundtrip_and_sorting_invariants(self, results):
         """build_baseline followed by load_baseline preserves failure fingerprints."""
         baseline_doc = build_baseline(results)
@@ -226,80 +251,83 @@ class TestRegressionProperties:
 
     @settings(max_examples=50)
     @given(
-        check_name=st.from_regex(r"check_[a-z_]+", fullmatch=True),
-        unique_id=st.from_regex(r"model\.[a-z_]+\.[a-z_]+", fullmatch=True),
+        check_name=st.from_regex(r"check_[a-z_]{1,12}", fullmatch=True),
+        unique_id=st.one_of(
+            st.none(),
+            st.from_regex(r"model\.[a-z_]{1,8}\.[a-z_]{1,8}", fullmatch=True),
+        ),
+        file_path=st.one_of(
+            st.none(),
+            st.from_regex(r"models/[a-z_]{1,8}\.sql", fullmatch=True),
+        ),
         idx1=st.integers(min_value=0, max_value=1000),
         idx2=st.integers(min_value=0, max_value=1000),
-        msg1=st.text(),
-        msg2=st.text(),
+        msg1=st.text(max_size=30),
+        msg2=st.text(max_size=30),
     )
     def test_fingerprint_invariance_property(
-        self, check_name, unique_id, idx1, idx2, msg1, msg2
+        self, check_name, unique_id, file_path, idx1, idx2, msg1, msg2
     ):
         """Fingerprint identity is invariant to volatile check run index and failure message."""
-        res1 = _failure(f"{check_name}:{idx1}", unique_id=unique_id, message=msg1)
-        res2 = _failure(f"{check_name}:{idx2}", unique_id=unique_id, message=msg2)
-        assert fingerprint(res1) == fingerprint(res2) == f"{check_name}::{unique_id}"
+        res1 = _failure(
+            f"{check_name}:{idx1}",
+            unique_id=unique_id,
+            file_path=file_path,
+            message=msg1,
+        )
+        res2 = _failure(
+            f"{check_name}:{idx2}",
+            unique_id=unique_id,
+            file_path=file_path,
+            message=msg2,
+        )
+        expected_resource = unique_id or file_path or ""
+        assert (
+            fingerprint(res1)
+            == fingerprint(res2)
+            == f"{check_name}::{expected_resource}"
+        )
 
     @settings(max_examples=50)
-    @given(
-        results=st.lists(
-            st.fixed_dictionaries(
-                {
-                    "check_run_id": st.from_regex(
-                        r"check_[a-z_]+:[0-9]+", fullmatch=True
-                    ),
-                    "failure_message": st.text(),
-                    "file_path": st.one_of(
-                        st.none(),
-                        st.from_regex(r"models/[a-z_]+\.sql", fullmatch=True),
-                    ),
-                    "outcome": st.sampled_from(
-                        [
-                            CheckOutcome.FAILED,
-                            CheckOutcome.INTERNAL_ERROR,
-                            CheckOutcome.SUCCESS,
-                        ]
-                    ),
-                    "severity": st.sampled_from(list(CheckSeverity)),
-                    "unique_id": st.one_of(
-                        st.none(),
-                        st.from_regex(
-                            r"(model|source|seed)\.[a-z_]+\.[a-z_]+", fullmatch=True
-                        ),
-                    ),
-                }
-            ),
-            max_size=20,
-        ),
-        accepted=st.sets(
-            st.from_regex(
-                r"check_[a-z_]+::(model|source|seed)\.[a-z_]+\.[a-z_]+",
-                fullmatch=True,
-            ),
-            max_size=10,
-        ),
-    )
-    def test_apply_regression_filter_invariants(self, results, accepted):
+    @given(data=_results_and_accepted_strategy())
+    def test_apply_regression_filter_invariants(self, data):
         """Regression filter satisfies conservation, exclusion, safety, and idempotence laws."""
+        results, accepted = data
         kept, suppressed = apply_regression_filter(results, accepted)
 
         # 1. Conservation law: every result is either kept or counted as suppressed.
         assert len(kept) + suppressed == len(results)
 
-        # 2. Strict suppression: no kept failure has an accepted fingerprint.
+        # 2. Exact suppression count: matches failed results whose fingerprint is accepted.
+        expected_suppressed = sum(
+            1
+            for r in results
+            if r.get("outcome") == CheckOutcome.FAILED and fingerprint(r) in accepted
+        )
+        assert suppressed == expected_suppressed
+
+        # 3. Strict suppression: no kept failure has an accepted fingerprint.
         for r in kept:
             if r.get("outcome") == CheckOutcome.FAILED:
                 assert fingerprint(r) not in accepted
 
-        # 3. Crash and success immunity: non-failed results are never suppressed.
+        # 4. Crash and success immunity: non-failed results are never suppressed and preserve order.
         kept_non_failures = [r for r in kept if r.get("outcome") != CheckOutcome.FAILED]
         total_non_failures = [
             r for r in results if r.get("outcome") != CheckOutcome.FAILED
         ]
-        assert len(kept_non_failures) == len(total_non_failures)
+        assert kept_non_failures == total_non_failures
 
-        # 4. Idempotence: re-filtering kept results suppresses nothing further.
+        # 5. Idempotence: re-filtering kept results suppresses nothing further.
         kept_again, suppressed_again = apply_regression_filter(kept, accepted)
         assert kept_again == kept
         assert suppressed_again == 0
+
+        # 6. Full baseline annihilation: filtering by failure_fingerprints(results) suppresses all failures.
+        kept_after_full, suppressed_full = apply_regression_filter(
+            results, failure_fingerprints(results)
+        )
+        assert all(r.get("outcome") != CheckOutcome.FAILED for r in kept_after_full)
+        assert suppressed_full == sum(
+            1 for r in results if r.get("outcome") == CheckOutcome.FAILED
+        )

@@ -120,6 +120,152 @@ def test_neutralize_jinja_unlexable_input_is_returned_unchanged():
     assert neutralize_jinja(code) == code
 
 
+_SQL_IDENT = st.from_regex(r"[a-z][a-z0-9_]{0,12}", fullmatch=True).filter(
+    lambda s: (
+        s
+        not in {
+            "add",
+            "all",
+            "alter",
+            "and",
+            "any",
+            "as",
+            "asc",
+            "between",
+            "by",
+            "case",
+            "cast",
+            "check",
+            "column",
+            "commit",
+            "constraint",
+            "create",
+            "cross",
+            "current",
+            "default",
+            "delete",
+            "desc",
+            "distinct",
+            "drop",
+            "else",
+            "end",
+            "escape",
+            "except",
+            "exists",
+            "false",
+            "fetch",
+            "for",
+            "foreign",
+            "from",
+            "full",
+            "function",
+            "grant",
+            "group",
+            "having",
+            "if",
+            "in",
+            "index",
+            "inner",
+            "insert",
+            "intersect",
+            "into",
+            "is",
+            "join",
+            "key",
+            "left",
+            "like",
+            "limit",
+            "natural",
+            "not",
+            "null",
+            "offset",
+            "on",
+            "or",
+            "order",
+            "outer",
+            "over",
+            "partition",
+            "primary",
+            " qualifiers",
+            "references",
+            "revoke",
+            "right",
+            "rollback",
+            "row",
+            "rows",
+            "select",
+            "set",
+            "some",
+            "table",
+            "then",
+            "to",
+            " trigger",
+            "true",
+            "truncate",
+            "union",
+            "unique",
+            "update",
+            "using",
+            "values",
+            "view",
+            "when",
+            "where",
+            "window",
+            "with",
+        }
+    )
+)
+
+_JINJA_EXPR = st.one_of(
+    _SQL_IDENT.map(lambda c: f"{{{{ {c} }}}}"),
+    _SQL_IDENT.map(lambda c: f"{{{{ my_macro('{c}') }}}}"),
+    _SQL_IDENT.map(lambda c: f"{{{{ {{'{c}': 1}}['{c}'] }}}}"),
+)
+
+
+@st.composite
+def _templated_sql_strategy(draw: st.DrawFn) -> str:
+    parts: list[str] = []
+    if draw(st.booleans()):
+        mat = draw(st.sampled_from(["ephemeral", "incremental", "table", "view"]))
+        parts.append(f'{{{{ config(materialized="{mat}") }}}}')
+    if draw(st.booleans()):
+        comment_body = draw(
+            st.text(
+                alphabet=st.characters(blacklist_characters="{#}%\r\n"),
+                max_size=25,
+            )
+        )
+        parts.append(f"{{# {comment_body} #}}")
+    if draw(st.booleans()):
+        tricky_lit = draw(st.sampled_from(["plain", "%}", "}}", "{%", "{{"]))
+        parts.append(f'{{% set x = "{tricky_lit}" %}}')
+
+    cols = draw(
+        st.lists(
+            st.one_of(_SQL_IDENT, _JINJA_EXPR),
+            min_size=1,
+            max_size=4,
+        )
+    )
+    select_clause = "SELECT " + ", ".join(cols)
+    if draw(st.booleans()):
+        extra_col = draw(_SQL_IDENT)
+        select_clause += f"\n{{%- if true -%}} , {extra_col} {{%- endif -%}}"
+
+    model_ref = draw(_SQL_IDENT)
+    rel_expr = draw(
+        st.sampled_from(
+            [
+                f"{{{{ ref('{model_ref}') }}}}",
+                f"{{{{ source('raw', '{model_ref}') }}}}",
+            ]
+        )
+    )
+    parts.append(f"{select_clause}\nFROM {rel_expr}")
+    return "\n".join(parts)
+
+
 class TestNeutralizeJinjaProperties:
     """Property-based tests for Jinja neutralization."""
 
@@ -136,3 +282,17 @@ class TestNeutralizeJinjaProperties:
         result = neutralize_jinja(text)
         assert isinstance(result, str)
         assert neutralize_jinja(result) == result
+
+    @settings(max_examples=50)
+    @given(sql=_templated_sql_strategy())
+    def test_templated_sql_neutralizes_delimiters_and_parses(self, sql: str):
+        """Well-formed Jinja SQL has all delimiters stripped and parses into an AST."""
+        neutralized = neutralize_jinja(sql)
+        for delimiter in ("{{", "}}", "{%", "%}", "{#", "#}"):
+            assert delimiter not in neutralized
+        assert neutralize_jinja(neutralized) == neutralized
+
+        parsed = parse_sql(neutralized)
+        assert parsed is not None
+        assert len(parsed) == 1
+        assert parse_sql(neutralized) is parsed

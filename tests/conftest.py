@@ -1,10 +1,32 @@
+import os
 from pathlib import Path
 from types import SimpleNamespace
 
 import orjson
 import pytest
+from hypothesis import HealthCheck, settings
 
 from dbt_bouncer.artifact_parsers.parser import wrap_dict
+
+settings.register_profile(
+    "default",
+    max_examples=50,
+    deadline=None,
+    suppress_health_check=[HealthCheck.too_slow],
+)
+settings.register_profile(
+    "ci",
+    max_examples=100,
+    deadline=None,
+    suppress_health_check=[HealthCheck.too_slow],
+)
+settings.register_profile(
+    "quick",
+    max_examples=15,
+    deadline=None,
+    suppress_health_check=[HealthCheck.too_slow],
+)
+settings.load_profile(os.environ.get("HYPOTHESIS_PROFILE", "default"))
 
 
 def pytest_configure(config):

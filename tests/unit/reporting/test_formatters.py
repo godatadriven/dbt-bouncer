@@ -239,39 +239,94 @@ class TestFormatterProperties:
     @settings(max_examples=50)
     @given(results=st.lists(_CHECK_RESULT_STRATEGY, max_size=15))
     def test_all_formatters_cardinality_and_parsing(self, results):
-        """All formatters preserve result cardinality and produce valid syntax under adversarial inputs."""
+        """All formatters preserve result cardinality, field fidelity, and valid syntax under adversarial inputs."""
         # 1. JSON
         json_bytes = _format_results(results, "json")
         parsed_json = orjson.loads(json_bytes)
         assert len(parsed_json) == len(results)
+        for item, orig in zip(parsed_json, results, strict=True):
+            assert item["check_run_id"] == orig["check_run_id"]
+            assert item["outcome"] == orig["outcome"]
+            assert item["severity"] == orig["severity"]
+            assert item["failure_message"] == orig["failure_message"]
+            assert item["file_path"] == orig["file_path"]
+            assert item["unique_id"] == orig["unique_id"]
 
         # 2. CSV
         csv_bytes = _format_results(results, "csv")
         csv_rows = list(csv.DictReader(io.StringIO(csv_bytes.decode())))
         assert len(csv_rows) == len(results)
+        for row, orig in zip(csv_rows, results, strict=True):
+            assert row["check_run_id"] == orig["check_run_id"]
+            assert row["outcome"] == str(orig["outcome"])
+            assert row["severity"] == str(orig["severity"])
+            assert row["failure_message"] == (orig["failure_message"] or "")
+            assert row["file_path"] == (orig["file_path"] or "")
+            assert row["unique_id"] == (orig["unique_id"] or "")
 
         # 3. SARIF
         sarif = orjson.loads(_format_results(results, "sarif"))
-        assert len(sarif["runs"][0]["results"]) == len(results)
+        sarif_results = sarif["runs"][0]["results"]
+        assert len(sarif_results) == len(results)
+        for entry, orig in zip(sarif_results, results, strict=True):
+            assert entry["ruleId"] == orig["check_run_id"]
+            if orig["outcome"] == CheckOutcome.SUCCESS:
+                assert entry["level"] == "none"
+                assert entry["message"]["text"] == "Check passed"
+            else:
+                expected_level = (
+                    "warning" if orig["severity"] == CheckSeverity.WARN else "error"
+                )
+                assert entry["level"] == expected_level
+                assert entry["message"]["text"] == (
+                    orig["failure_message"] or "Check failed"
+                )
+            assert ("locations" in entry) == bool(orig["file_path"])
+            assert ("logicalLocations" in entry) == bool(orig["unique_id"])
 
         # 3b. GitLab Code Quality: only results that did not pass.
         gitlab = orjson.loads(_format_results(results, "gitlab"))
-        assert len(gitlab) == sum(r["outcome"] != CheckOutcome.SUCCESS for r in results)
+        non_passing = [r for r in results if r["outcome"] != CheckOutcome.SUCCESS]
+        assert len(gitlab) == len(non_passing)
+        for finding, orig in zip(gitlab, non_passing, strict=True):
+            assert finding["check_name"] == orig["check_run_id"].split(":", 1)[0]
+            assert finding["severity"] in ("minor", "major")
+            assert len(finding["fingerprint"]) == 32
+            assert finding["location"]["path"] == (
+                orig["file_path"] or "dbt_project.yml"
+            )
+            assert finding["location"]["lines"] == {"begin": 1}
 
         # 4. TAP
         tap_text = _format_results(results, "tap").decode()
         lines = tap_text.splitlines()
         assert lines[0] == "TAP version 13"
         assert lines[1] == f"1..{len(results)}"
-        test_lines = [
-            line
-            for line in lines[2:]
-            if line.startswith("ok ") or line.startswith("not ok ")
-        ]
+        test_lines = []
+        for line in lines[2:]:
+            if line.startswith(("ok ", "not ok ")):
+                test_lines.append(line)
+            else:
+                assert line.startswith("  # ")
         assert len(test_lines) == len(results)
+        for idx, (tline, orig) in enumerate(
+            zip(test_lines, results, strict=True), start=1
+        ):
+            expected_prefix = (
+                f"ok {idx} - "
+                if orig["outcome"] == CheckOutcome.SUCCESS
+                else f"not ok {idx} - "
+            )
+            assert tline == f"{expected_prefix}{orig['check_run_id']}"
 
         # 5. JUnit XML
         junit_bytes = _format_results(results, "junit")
         xml = JUnitXml.fromstring(junit_bytes)
         testcases = [tc for suite in xml for tc in suite]
         assert len(testcases) == len(results)
+        for tc, orig in zip(testcases, results, strict=True):
+            assert tc.name == orig["check_run_id"]
+            if orig["outcome"] == CheckOutcome.SUCCESS:
+                assert tc.result == []
+            else:
+                assert len(tc.result) == 1
