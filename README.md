@@ -11,7 +11,7 @@
 | src/dbt\_bouncer/check\_framework/\_\_init\_\_.py           |        5 |        0 |        0 |        0 |     100% |           |
 | src/dbt\_bouncer/check\_framework/base.py                   |       38 |        0 |        2 |        0 |     100% |           |
 | src/dbt\_bouncer/check\_framework/context.py                |       59 |        0 |       16 |        0 |     100% |           |
-| src/dbt\_bouncer/check\_framework/decorator.py              |       71 |        0 |       22 |        0 |     100% |           |
+| src/dbt\_bouncer/check\_framework/decorator.py              |       74 |        0 |       26 |        0 |     100% |           |
 | src/dbt\_bouncer/check\_framework/exceptions.py             |        8 |        0 |        0 |        0 |     100% |           |
 | src/dbt\_bouncer/checks/catalog/check\_catalog\_seeds.py    |       49 |        0 |       30 |        0 |     100% |           |
 | src/dbt\_bouncer/checks/catalog/check\_catalog\_sources.py  |       16 |        0 |        8 |        0 |     100% |           |
@@ -25,7 +25,7 @@
 | src/dbt\_bouncer/checks/info\_schema/sources.py             |       11 |        0 |        4 |        0 |     100% |           |
 | src/dbt\_bouncer/checks/manifest/check\_exposures.py        |       50 |        0 |       24 |        0 |     100% |           |
 | src/dbt\_bouncer/checks/manifest/check\_lineage.py          |       20 |        0 |        6 |        0 |     100% |           |
-| src/dbt\_bouncer/checks/manifest/check\_macros.py           |      137 |        0 |       72 |        0 |     100% |           |
+| src/dbt\_bouncer/checks/manifest/check\_macros.py           |      138 |        0 |       72 |        0 |     100% |           |
 | src/dbt\_bouncer/checks/manifest/check\_metadata.py         |       10 |        0 |        2 |        0 |     100% |           |
 | src/dbt\_bouncer/checks/manifest/check\_seeds.py            |       40 |        0 |       12 |        0 |     100% |           |
 | src/dbt\_bouncer/checks/manifest/check\_semantic\_models.py |       14 |        0 |        8 |        0 |     100% |           |
@@ -93,7 +93,7 @@
 | src/dbt\_bouncer/types.py                                   |       19 |        0 |        4 |        0 |     100% |           |
 | src/dbt\_bouncer/utils.py                                   |      369 |        0 |      144 |        0 |     100% |           |
 | src/dbt\_bouncer/version.py                                 |        2 |        0 |        0 |        0 |     100% |           |
-| **TOTAL**                                                   | **5042** |    **0** | **1718** |    **0** | **100%** |           |
+| **TOTAL**                                                   | **5046** |    **0** | **1722** |    **0** | **100%** |           |
 
 
 ## Setup coverage badge
