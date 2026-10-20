@@ -484,13 +484,50 @@ def test_invalid_global_selector_rejected_at_config_time():
         )
 
 
-_IDENTIFIER = st.from_regex(r"[a-zA-Z][a-zA-Z0-9_]*", fullmatch=True)
-_METHODS = st.sampled_from(["fqn", "name", "package", "path", "tag"])
+_IDENTIFIER = st.from_regex(r"[a-zA-Z][a-zA-Z0-9_]{0,10}", fullmatch=True)
+_NAME_PATTERN = st.one_of(
+    _IDENTIFIER,
+    st.sampled_from(["a", "b", "c", "d", "e", "stg_*", "*_orders", "*a*", "model_?"]),
+)
+_PATH_PATTERN = st.sampled_from(
+    [
+        "models/staging",
+        "models/staging/",
+        "./models/staging",
+        "models/marts/*",
+        "models/*/a.sql",
+        "models/staging/a.sql",
+    ]
+)
+_FQN_PATTERN = st.sampled_from(
+    [
+        "my_project.*",
+        "my_project.staging.*",
+        "my_project.marts.a",
+        "*.marts.*",
+    ]
+)
+_TAG_VALUE = st.sampled_from(["finance", "hourly", "nightly", "staging"])
+_PACKAGE_VALUE = st.sampled_from(["my_project", "other_pkg"])
+_CONFIG_ATOM = st.sampled_from(
+    [
+        "config.materialized:table",
+        "config.materialized:view",
+        "config.enabled:true",
+        "config.enabled:false",
+        "config.tags:finance",
+        "config.tags:staging",
+    ]
+)
 
 _CORE_ATOM = st.one_of(
-    _IDENTIFIER,
-    st.tuples(_METHODS, _IDENTIFIER).map(lambda p: f"{p[0]}:{p[1]}"),
-    st.tuples(_IDENTIFIER, _IDENTIFIER).map(lambda p: f"config.{p[0]}:{p[1]}"),
+    _NAME_PATTERN,
+    _NAME_PATTERN.map(lambda v: f"name:{v}"),
+    _PATH_PATTERN.map(lambda v: f"path:{v}"),
+    _FQN_PATTERN.map(lambda v: f"fqn:{v}"),
+    _TAG_VALUE.map(lambda v: f"tag:{v}"),
+    _PACKAGE_VALUE.map(lambda v: f"package:{v}"),
+    _CONFIG_ATOM,
 )
 
 _DEGREE = st.integers(min_value=1, max_value=99).map(str)
@@ -529,6 +566,58 @@ def _directed_graphs(draw: st.DrawFn) -> dict[str, list[str]]:
         targets = draw(st.lists(st.sampled_from(_GRAPH_NODES), unique=True))
         graph[node] = targets
     return graph
+
+
+@st.composite
+def _arbitrary_manifest_strategy(draw: st.DrawFn) -> SimpleNamespace:
+    """Generate a manifest with arbitrary DAG edges and node metadata.
+
+    Returns:
+        SimpleNamespace: Generated fake manifest.
+
+    """
+    raw_graph = draw(_directed_graphs())
+    ids = {k: f"model.my_project.{k}" for k in _GRAPH_NODES}
+    parent_map: dict[str, list[str]] = {
+        ids[k]: [ids[p] for p in raw_graph[k]] for k in _GRAPH_NODES
+    }
+    child_map: dict[str, list[str]] = {ids[k]: [] for k in _GRAPH_NODES}
+    for child_uid, parent_uids in parent_map.items():
+        for parent_uid in parent_uids:
+            child_map[parent_uid].append(child_uid)
+
+    nodes = {}
+    for k in _GRAPH_NODES:
+        subdir = draw(st.sampled_from(["staging", "marts"]))
+        tags = draw(
+            st.lists(
+                st.sampled_from(["finance", "hourly", "nightly", "staging"]),
+                unique=True,
+                max_size=2,
+            )
+        )
+        mat = draw(st.sampled_from(["table", "view"]))
+        enabled = draw(st.booleans())
+        pkg = draw(st.sampled_from(["my_project", "other_pkg"]))
+        nodes[ids[k]] = SimpleNamespace(
+            config=SimpleNamespace(enabled=enabled, materialized=mat, tags=tags),
+            fqn=[pkg, subdir, k],
+            name=k,
+            original_file_path=f"models/{subdir}/{k}.sql",
+            package_name=pkg,
+            tags=tags,
+        )
+
+    return SimpleNamespace(
+        child_map=child_map,
+        exposures={},
+        macros={},
+        nodes=nodes,
+        parent_map=parent_map,
+        semantic_models={},
+        sources={},
+        unit_tests={},
+    )
 
 
 class TestSelectorProperties:
@@ -613,31 +702,55 @@ class TestSelectorProperties:
 
     @settings(max_examples=50)
     @given(
-        a=st.sampled_from(["a", "b", "c", "d", "e"]),
-        b=st.sampled_from(["a", "b", "c", "d", "e"]),
+        manifest=_arbitrary_manifest_strategy(),
+        expr_a=_CONJUNCTION,
+        expr_b=_CONJUNCTION,
+        atom_a=_wrapped_atom_strategy(),
+        atom_b=_wrapped_atom_strategy(),
     )
-    def test_selector_union_and_intersection_algebra(self, a: str, b: str):
-        """Space-separated selectors act as unions, and comma-separated selectors act as intersections."""
-        manifest = _build_diamond_manifest()
-        sel_a = Selector(a, manifest)._selected_ids
-        sel_b = Selector(b, manifest)._selected_ids
-        sel_union = Selector(f"{a} {b}", manifest)._selected_ids
-        sel_inter = Selector(f"{a},{b}", manifest)._selected_ids
-
+    def test_selector_union_and_intersection_algebra(
+        self,
+        manifest: SimpleNamespace,
+        expr_a: str,
+        expr_b: str,
+        atom_a: str,
+        atom_b: str,
+    ):
+        """Space-separated selectors act as unions, and comma-separated atoms act as intersections."""
+        sel_a = Selector(expr_a, manifest)._selected_ids
+        sel_b = Selector(expr_b, manifest)._selected_ids
+        sel_union = Selector(f"{expr_a} {expr_b}", manifest)._selected_ids
         assert sel_union == sel_a | sel_b
-        assert sel_inter == sel_a & sel_b
+
+        sel_atom_a = Selector(atom_a, manifest)._selected_ids
+        sel_atom_b = Selector(atom_b, manifest)._selected_ids
+        sel_inter = Selector(f"{atom_a},{atom_b}", manifest)._selected_ids
+        assert sel_inter == sel_atom_a & sel_atom_b
 
     @settings(max_examples=50)
-    @given(node=st.sampled_from(["a", "b", "c", "d", "e"]))
-    def test_selector_operator_subsumption_hierarchy(self, node: str):
-        """The @ operator subsumes single nodes, ancestor walks, and descendant walks."""
-        manifest = _build_diamond_manifest()
-        sel_base = Selector(node, manifest)._selected_ids
-        sel_anc = Selector(f"+{node}", manifest)._selected_ids
-        sel_desc = Selector(f"{node}+", manifest)._selected_ids
-        sel_both = Selector(f"+{node}+", manifest)._selected_ids
-        sel_at = Selector(f"@{node}", manifest)._selected_ids
+    @given(
+        manifest=_arbitrary_manifest_strategy(),
+        core=_CORE_ATOM,
+        d1=st.integers(min_value=1, max_value=4),
+        d2=st.integers(min_value=1, max_value=4),
+    )
+    def test_selector_operator_subsumption_hierarchy(
+        self, manifest: SimpleNamespace, core: str, d1: int, d2: int
+    ):
+        """Degree walks, unbounded walks, and @ operators form a monotonic subsumption hierarchy."""
+        min_d, max_d = sorted([d1, d2])
+        sel_base = Selector(core, manifest)._selected_ids
+        sel_min_anc = Selector(f"{min_d}+{core}", manifest)._selected_ids
+        sel_max_anc = Selector(f"{max_d}+{core}", manifest)._selected_ids
+        sel_anc = Selector(f"+{core}", manifest)._selected_ids
+        sel_min_desc = Selector(f"{core}+{min_d}", manifest)._selected_ids
+        sel_max_desc = Selector(f"{core}+{max_d}", manifest)._selected_ids
+        sel_desc = Selector(f"{core}+", manifest)._selected_ids
+        sel_both = Selector(f"+{core}+", manifest)._selected_ids
+        sel_at = Selector(f"@{core}", manifest)._selected_ids
 
-        assert sel_base <= sel_anc <= sel_at
-        assert sel_base <= sel_desc <= sel_at
-        assert sel_both <= sel_at
+        assert sel_base <= sel_min_anc <= sel_max_anc <= sel_anc <= sel_both <= sel_at
+        assert (
+            sel_base <= sel_min_desc <= sel_max_desc <= sel_desc <= sel_both <= sel_at
+        )
+        assert sel_anc | sel_desc == sel_both

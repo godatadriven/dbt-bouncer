@@ -227,9 +227,9 @@ def flatten(
             flatten(item, f"{i}", f"{path}{_SEPARATOR}{key}", flattened)
     else:
         for new_key, value in structure.items():
-            # Escape the separator in string keys to prevent path corruption
+            # Escape backslashes and the separator in string keys to prevent path corruption
             escaped_key = (
-                new_key.replace(_SEPARATOR, _ESCAPED_SEPARATOR)
+                new_key.replace("\\", "\\\\").replace(_SEPARATOR, _ESCAPED_SEPARATOR)
                 if isinstance(new_key, str)
                 else new_key
             )

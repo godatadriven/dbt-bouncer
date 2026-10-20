@@ -5,6 +5,8 @@ from unittest import mock
 from unittest.mock import MagicMock, patch
 
 import pytest
+from hypothesis import given, settings
+from hypothesis import strategies as st
 
 from dbt_bouncer.check_framework.base import BaseCheck
 from dbt_bouncer.enums import Criteria
@@ -12,6 +14,7 @@ from dbt_bouncer.exceptions import DbtBouncerConfigError
 from dbt_bouncer.utils import (
     _ESCAPED_SEPARATOR,
     _SEPARATOR,
+    clean_path_str,
     create_github_comment_file,
     find_meta_keys_criteria_failure,
     find_missing_meta_keys,
@@ -604,6 +607,7 @@ def test_flatten_key_with_separator():
     assert expected_key in flat_with_sep
     assert separator_key not in flat_with_sep
     assert separator_key in flat_nested
+    assert flatten({"a\\": {"b": 1}}) != flat_with_sep
 
 
 # -- Helpers for entry point tests --
@@ -829,3 +833,179 @@ def test_prune_stale_cache_files_keeps_only_active(tmp_path):
     assert unrelated.exists()
     assert not stale_a.exists()
     assert not stale_b.exists()
+
+
+_TRICKY_KEYS = st.one_of(
+    st.sampled_from(["a", "b", "a>b", "a\\", "a\\>b", ">", "\\", "0", "1"]),
+    st.text(max_size=6),
+)
+_FLATTEN_SCALAR = st.none() | st.booleans() | st.integers(min_value=-10, max_value=10)
+_FLATTEN_DICT_STRATEGY = st.dictionaries(
+    _TRICKY_KEYS,
+    st.recursive(
+        _FLATTEN_SCALAR,
+        lambda children: st.dictionaries(
+            _TRICKY_KEYS, children, min_size=1, max_size=3
+        ),
+        max_leaves=8,
+    ),
+    min_size=1,
+    max_size=3,
+)
+
+_META_KEY = st.sampled_from(["contact", "email", "maturity", "owner", "pii", "team"])
+_REQUIRED_META_ENTRY = st.one_of(
+    _META_KEY,
+    st.dictionaries(
+        _META_KEY,
+        st.lists(_META_KEY, min_size=1, max_size=2, unique=True),
+        min_size=1,
+        max_size=1,
+    ),
+)
+_META_VALUE = st.one_of(
+    st.none(),
+    st.text(max_size=5),
+    st.dictionaries(_META_KEY, st.text(max_size=5), max_size=3),
+)
+_PATH_REGEX = st.sampled_from(
+    [
+        "^models",
+        "^models/staging",
+        "^models/marts",
+        "^seeds",
+        r".*\.sql$",
+        "stg_",
+    ]
+)
+_REL_PATH = st.sampled_from(
+    [
+        "models/staging/stg_orders.sql",
+        "models/marts/fct_orders.sql",
+        "seeds/raw_customers.csv",
+        "macros/utils.sql",
+    ]
+)
+
+
+def _merge_meta(base: dict[str, Any], extra: dict[str, Any]) -> dict[str, Any]:
+    merged = dict(base)
+    for k, v in extra.items():
+        if k not in merged or (not isinstance(merged[k], dict) and isinstance(v, dict)):
+            merged[k] = v
+        elif isinstance(merged[k], dict) and isinstance(v, dict):
+            merged[k] = {**merged[k], **v}
+    return merged
+
+
+class TestUtilsProperties:
+    """Property-based tests for dbt_bouncer.utils helpers."""
+
+    @settings(max_examples=50)
+    @given(d1=_FLATTEN_DICT_STRATEGY, d2=_FLATTEN_DICT_STRATEGY)
+    def test_flatten_injectivity_and_collision_freedom(
+        self, d1: dict[str, Any], d2: dict[str, Any]
+    ):
+        """Distinct nested non-empty dictionaries never collide when flattened."""
+        flat1 = flatten(d1)
+        flat2 = flatten(d2)
+        assert len(flat1) >= 1
+        assert all(isinstance(k, str) and k.startswith(_SEPARATOR) for k in flat1)
+        if d1 != d2:
+            assert flat1 != flat2
+
+    @settings(max_examples=50)
+    @given(
+        meta_sub=st.dictionaries(_META_KEY, _META_VALUE, max_size=4),
+        meta_extra=st.dictionaries(_META_KEY, _META_VALUE, max_size=4),
+        required_keys=st.lists(_REQUIRED_META_ENTRY, min_size=1, max_size=4),
+    )
+    def test_find_missing_meta_keys_monotonicity_and_criteria_subsumption(
+        self,
+        meta_sub: dict[str, Any],
+        meta_extra: dict[str, Any],
+        required_keys: list[Any],
+    ):
+        """Adding keys to meta monotonically increases satisfied requirements, and ALL/ONE criteria subsume ANY."""
+        meta_super = _merge_meta(meta_sub, meta_extra)
+        missing_sub = set(find_missing_meta_keys(meta_sub, required_keys))
+        missing_super = set(find_missing_meta_keys(meta_super, required_keys))
+
+        # Every missing path in meta_super was already missing in meta_sub (either directly
+        # or under a missing parent key that was not yet expanded).
+        for m in missing_super:
+            assert m in missing_sub or any(
+                m.startswith(f"{parent}>") for parent in missing_sub
+            )
+
+        # Satisfied requirements only grow when adding keys to meta.
+        satisfied_sub = [
+            idx
+            for idx, entry in enumerate(required_keys)
+            if not find_missing_meta_keys(meta_sub, [entry])
+        ]
+        satisfied_super = [
+            idx
+            for idx, entry in enumerate(required_keys)
+            if not find_missing_meta_keys(meta_super, [entry])
+        ]
+        assert set(satisfied_sub) <= set(satisfied_super)
+
+        all_ok = (
+            find_meta_keys_criteria_failure(meta_sub, required_keys, Criteria.ALL)
+            is None
+        )
+        one_ok = (
+            find_meta_keys_criteria_failure(meta_sub, required_keys, Criteria.ONE)
+            is None
+        )
+        any_ok = (
+            find_meta_keys_criteria_failure(meta_sub, required_keys, Criteria.ANY)
+            is None
+        )
+
+        if all_ok:
+            assert any_ok
+            assert (
+                find_meta_keys_criteria_failure(meta_super, required_keys, Criteria.ALL)
+                is None
+            )
+        if one_ok:
+            assert any_ok
+        if any_ok:
+            assert (
+                find_meta_keys_criteria_failure(meta_super, required_keys, Criteria.ANY)
+                is None
+            )
+        if len(required_keys) == 1:
+            assert all_ok == one_ok == any_ok
+
+    @settings(max_examples=50)
+    @given(
+        raw_path=st.text(max_size=30),
+        rel_path=_REL_PATH,
+        p1=st.lists(_PATH_REGEX, min_size=1, max_size=3),
+        p2=st.lists(_PATH_REGEX, min_size=1, max_size=3),
+    )
+    def test_path_matching_laws(
+        self, raw_path: str, rel_path: str, p1: list[str], p2: list[str]
+    ):
+        """Path helpers obey normalisation idempotence, separator invariance, and union/duality laws."""
+        cleaned = clean_path_str(raw_path)
+        assert "\\" not in cleaned
+        assert clean_path_str(cleaned) == cleaned
+
+        win_path = rel_path.replace("/", "\\")
+        assert object_in_path(p1, rel_path) == object_in_path(p1, win_path)
+        assert object_excluded_by_path(p1, rel_path) == object_excluded_by_path(
+            p1, win_path
+        )
+
+        assert object_in_path(p1 + p2, rel_path) == (
+            object_in_path(p1, rel_path) or object_in_path(p2, rel_path)
+        )
+        assert object_excluded_by_path(p1, rel_path) == object_in_path(p1, rel_path)
+        assert object_in_path(None, rel_path) is True
+        assert object_in_path([], rel_path) is True
+        assert object_excluded_by_path(None, rel_path) is False
+        assert object_excluded_by_path([], rel_path) is False
