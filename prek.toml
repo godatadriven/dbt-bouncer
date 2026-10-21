@@ -7,35 +7,20 @@ exclude = { glob = "dist/**" }  # exclude the dist/ directory where packaged dis
 [priorities]
 checks = 30
 format = 20
-rewrite = 10
 
 [[repos]]
 repo = "builtin"
-hooks = [
-  { id = "trailing-whitespace", priority = 0 },
-  { id = "end-of-file-fixer", priority = 1 },
-  { id = "check-added-large-files", args = ["--maxkb=2000"], priority = "checks" },
-  { id = "check-json", priority = "checks" },
-  { id = "check-merge-conflict", priority = "checks" },
-  { id = "check-toml", priority = "checks" },
-  { id = "check-yaml", args = ["--unsafe"], priority = "checks" },
-  { id = "detect-private-key", priority = "checks" },
-]
+hooks = [{ id = "trailing-whitespace", priority = 0 }, { id = "end-of-file-fixer", priority = 1 }, { id = "check-added-large-files", args = ["--maxkb=2000"], priority = "checks" }, { id = "check-json", priority = "checks" }, { id = "check-merge-conflict", priority = "checks" }, { id = "check-toml", priority = "checks" }, { id = "check-yaml", args = ["--unsafe"], priority = "checks" }, { id = "detect-private-key", priority = "checks" }]
 
 [[repos]]
 repo = "https://github.com/pre-commit/pre-commit-hooks"
 rev = "v6.0.0"
-hooks = [
-  { id = "check-ast", priority = "checks" },
-  { id = "debug-statements", priority = "checks" },
-]
+hooks = [{ id = "check-ast", priority = "checks" }, { id = "debug-statements", priority = "checks" }]
 
 [[repos]]
 repo = "https://github.com/streetsidesoftware/cspell-cli"
 rev = "v10.3.0"
-hooks = [
-  { id = "cspell", files = { glob = ["docs/**", "*.md"] }, priority = "checks" },
-]
+hooks = [{ id = "cspell", files = { glob = ["docs/**", "[^/]*.md"] }, priority = "checks" }]
 
 [[repos]]
 repo = "local"
