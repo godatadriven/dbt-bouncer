@@ -110,19 +110,6 @@
               - name: Setup Python
                 uses: ./.github/actions/setup_python_env
 
-              # PR coverage comments measure unit tests only, so store main's
-              # unit-only coverage as their baseline before the combined run below.
-              - name: Run unit tests with coverage
-                run: mise run test-unit
-
-              - name: Store coverage data for PR comments
-                uses: py-cov-action/python-coverage-comment-action@e5fb2218463c3377f3504b0c5b5646ed53da7a2f # v4.5
-                with:
-                  ACTIVITY: save_coverage_data_files
-                  GITHUB_TOKEN: ${{ github.token }}
-                  MINIMUM_GREEN: 100
-                  MINIMUM_ORANGE: 95
-
               - name: Run tests with coverage
                 run: mise run test
 
@@ -153,6 +140,21 @@
                       git commit -m "ci: update coverage badge"
                       git push origin badges
                   fi
+
+              # PR coverage comments measure unit tests only, so store main's
+              # unit-only coverage as their baseline.
+              - name: Run unit tests with coverage
+                run: mise run test-unit
+
+              # Keep this step last: the action runs as root in Docker and
+              # re-checks out the workspace, leaving root-owned files behind.
+              - name: Store coverage data for PR comments
+                uses: py-cov-action/python-coverage-comment-action@e5fb2218463c3377f3504b0c5b5646ed53da7a2f # v4.5
+                with:
+                  ACTIVITY: save_coverage_data_files
+                  GITHUB_TOKEN: ${{ github.token }}
+                  MINIMUM_GREEN: 100
+                  MINIMUM_ORANGE: 95
 
       deploy-docs:
           # Serialise gh-pages pushes so concurrent merges do not race.
