@@ -6,21 +6,64 @@ exclude = { glob = "dist/**" }  # exclude the dist/ directory where packaged dis
 
 [priorities]
 checks = 30
-format = 20
 
 [[repos]]
 repo = "builtin"
-hooks = [{ id = "trailing-whitespace", priority = 0 }, { id = "end-of-file-fixer", priority = 1 }, { id = "check-added-large-files", args = ["--maxkb=2000"], priority = "checks" }, { id = "check-json", priority = "checks" }, { id = "check-merge-conflict", priority = "checks" }, { id = "check-toml", priority = "checks" }, { id = "check-yaml", args = ["--unsafe"], priority = "checks" }, { id = "detect-private-key", priority = "checks" }]
+
+[[repos.hooks]]
+id = "trailing-whitespace"
+priority = 0
+
+[[repos.hooks]]
+id = "end-of-file-fixer"
+priority = 1
+
+[[repos.hooks]]
+args = ["--maxkb=2000"]
+id = "check-added-large-files"
+priority = "checks"
+
+[[repos.hooks]]
+id = "check-json"
+priority = "checks"
+
+[[repos.hooks]]
+id = "check-merge-conflict"
+priority = "checks"
+
+[[repos.hooks]]
+id = "check-toml"
+priority = "checks"
+
+[[repos.hooks]]
+args = ["--unsafe"]
+id = "check-yaml"
+priority = "checks"
+
+[[repos.hooks]]
+id = "detect-private-key"
+priority = "checks"
 
 [[repos]]
 repo = "https://github.com/pre-commit/pre-commit-hooks"
 rev = "v6.0.0"
-hooks = [{ id = "check-ast", priority = "checks" }, { id = "debug-statements", priority = "checks" }]
+
+[[repos.hooks]]
+id = "check-ast"
+priority = "checks"
+
+[[repos.hooks]]
+id = "debug-statements"
+priority = "checks"
 
 [[repos]]
 repo = "https://github.com/streetsidesoftware/cspell-cli"
 rev = "v10.3.0"
-hooks = [{ id = "cspell", files = { glob = ["docs/**", "[^/]*.md"] }, priority = "checks" }]
+
+[[repos.hooks]]
+files = '^(docs/|[^/]+\.md$)'
+id = "cspell"
+priority = "checks"
 
 [[repos]]
 repo = "local"
@@ -59,7 +102,7 @@ id = "ruff-format"
 entry = "uv run ruff format --force-exclude --config pyproject.toml"
 language = "system"
 name = "ruff-format"
-priority = "format"
+priority = 20
 require_serial = true
 types_or = ["python", "pyi", "jupyter"]
 
@@ -68,7 +111,7 @@ id = "rumdl"
 entry = "uv run rumdl check --fix"
 language = "system"
 name = "rumdl"
-priority = "format"
+priority = 21
 require_serial = true
 types_or = ["markdown"]
 
@@ -77,7 +120,7 @@ id = "sqlfmt"
 entry = "uv run sqlfmt"
 language = "system"
 name = "sqlfmt"
-priority = "format"
+priority = 22
 require_serial = true
 types_or = ["sql", "jinja"]
 
@@ -87,7 +130,7 @@ entry = "uv run tombi format"
 exclude = { glob = "uv.lock" }  # uv owns this file's formatting; tombi reformats it and fights dependabot updates
 language = "system"
 name = "tombi"
-priority = "format"
+priority = 23
 require_serial = true
 types = ["toml"]
 
