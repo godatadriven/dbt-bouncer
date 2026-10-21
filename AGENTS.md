@@ -199,7 +199,7 @@ When drafting release notes, verify every item against the previous release tag 
 - Use `[project.optional-dependencies]` for dev deps, **not** `uv add --dev`
 - Do not manually edit generated fixture JSON files in `tests/fixtures/`
 - Maintain **alphabetical ordering** everywhere (checks, dependencies, lists)
-- Do not modify `.pre-commit-config.yaml` to fix lint errors
+- Do not modify `prek.toml` to fix lint errors
 - Append `# ty: ignore` to disable the `ty` type checker on a specific line
 - Suppress a ruff rule with `# ruff: ignore[rule-name]` (or `# ruff: file-ignore[rule-name]` for a whole file), **not** `# noqa: CODE`. Ruff runs with `preview = true`, so RUF105 flags `noqa` comments and RUF106 flags rule codes in place of rule names. Both autofix to the `ruff: ignore` form
 
