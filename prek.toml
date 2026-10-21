@@ -1,0 +1,195 @@
+# Configuration file for `prek`, a git hook framework written in Rust.
+# See https://prek.j178.dev for more information.
+#:schema https://www.schemastore.org/prek.json
+
+exclude = { glob = "dist/**" }  # exclude the dist/ directory where packaged distributables (like compiled .whl wheels and .tar.gz source distributions) are placed.
+
+[priorities]
+checks = 30
+format = 20
+rewrite = 10
+
+[[repos]]
+repo = "builtin"
+hooks = [
+  { id = "trailing-whitespace", priority = 0 },
+  { id = "end-of-file-fixer", priority = 1 },
+  { id = "check-added-large-files", args = ["--maxkb=2000"], priority = "checks" },
+  { id = "check-json", priority = "checks" },
+  { id = "check-merge-conflict", priority = "checks" },
+  { id = "check-toml", priority = "checks" },
+  { id = "check-yaml", args = ["--unsafe"], priority = "checks" },
+  { id = "detect-private-key", priority = "checks" },
+]
+
+[[repos]]
+repo = "https://github.com/pre-commit/pre-commit-hooks"
+rev = "v6.0.0"
+hooks = [
+  { id = "check-ast", priority = "checks" },
+  { id = "debug-statements", priority = "checks" },
+]
+
+[[repos]]
+repo = "https://github.com/streetsidesoftware/cspell-cli"
+rev = "v10.3.0"
+hooks = [
+  { id = "cspell", files = { glob = ["docs/**", "*.md"] }, priority = "checks" },
+]
+
+[[repos]]
+repo = "local"
+
+[[repos.hooks]]
+id = "matchify"
+# Runs before ruff-format so the rewritten match statements are formatted.
+entry = "uv run matchify"
+language = "system"
+name = "matchify"
+priority = 10
+require_serial = true
+types_or = ["python", "pyi"]
+
+[[repos.hooks]]
+id = "pyupgrade"
+entry = "uv run pyupgrade"
+language = "system"
+name = "pyupgrade"
+pass_filenames = true
+priority = 11
+require_serial = true
+types_or = ["python", "pyi"]
+
+[[repos.hooks]]
+id = "ruff"
+entry = "uv run ruff check --force-exclude --config pyproject.toml --fix"
+language = "system"
+name = "ruff"
+priority = 12
+require_serial = true
+types_or = ["python", "pyi", "jupyter"]
+
+[[repos.hooks]]
+id = "ruff-format"
+entry = "uv run ruff format --force-exclude --config pyproject.toml"
+language = "system"
+name = "ruff-format"
+priority = "format"
+require_serial = true
+types_or = ["python", "pyi", "jupyter"]
+
+[[repos.hooks]]
+id = "rumdl"
+entry = "uv run rumdl check --fix"
+language = "system"
+name = "rumdl"
+priority = "format"
+require_serial = true
+types_or = ["markdown"]
+
+[[repos.hooks]]
+id = "sqlfmt"
+entry = "uv run sqlfmt"
+language = "system"
+name = "sqlfmt"
+priority = "format"
+require_serial = true
+types_or = ["sql", "jinja"]
+
+[[repos.hooks]]
+id = "tombi"
+entry = "uv run tombi format"
+exclude = { glob = "uv.lock" }  # uv owns this file's formatting; tombi reformats it and fights dependabot updates
+language = "system"
+name = "tombi"
+priority = "format"
+require_serial = true
+types = ["toml"]
+
+[[repos.hooks]]
+id = "alphabetical-checks"
+args = []
+entry = "uv run python ./scripts/assert_alphabetical_checks.py"
+language = "system"
+name = "alphabetical-checks"
+priority = "checks"
+require_serial = true
+types_or = ["python", "pyi"]
+
+[[repos.hooks]]
+id = "bandit"
+entry = "uv run bandit -r ./src"
+language = "system"
+name = "bandit"
+pass_filenames = false
+priority = "checks"
+require_serial = true
+
+[[repos.hooks]]
+id = "rule-codes-doc-check"
+entry = '''
+uv run python scripts/generate_rule_codes_doc.py
+git diff --exit-code docs/checks/rule_codes.md || {
+  echo 'docs/checks/rule_codes.md is out of date. Run "mise run generate-rule-codes-doc" and commit the result.'
+  exit 1
+}
+'''
+files = {
+  glob = [
+    "docs/checks/rule_codes.md",
+    "scripts/generate_rule_codes_doc.py",
+    "src/dbt_bouncer/checks/**",
+    "src/dbt_bouncer/enums.py",
+  ]
+}
+language = "system"
+name = "rule-codes-doc-check"
+pass_filenames = false
+priority = "checks"
+require_serial = true
+shell = "bash"
+
+[[repos.hooks]]
+id = "schema-check"
+entry = '''
+uv run python scripts/generate_schema.py
+git diff --exit-code schema.json || {
+  echo 'schema.json is out of date. Run "mise run generate-schema" and commit the result.'
+  exit 1
+}
+'''
+files = {
+  glob = [
+    "schema.json",
+    "scripts/generate_schema.py",
+    "src/dbt_bouncer/checks/**",
+    "src/dbt_bouncer/configuration_file/**",
+  ]
+}
+language = "system"
+name = "schema-check"
+pass_filenames = false
+priority = "checks"
+require_serial = true
+shell = "bash"
+
+[[repos.hooks]]
+id = "ty"
+args = ["check", "./src"]
+entry = "uv run ty"
+language = "system"
+name = "ty"
+pass_filenames = false
+priority = "checks"
+require_serial = true
+types_or = ["python", "pyi"]
+
+[[repos.hooks]]
+id = "uv-lock"
+entry = "uv lock --locked"
+files = { glob = ["pyproject.toml", "uv.lock"] }
+language = "system"
+name = "uv-lock"
+pass_filenames = false
+priority = "checks"
+require_serial = true
