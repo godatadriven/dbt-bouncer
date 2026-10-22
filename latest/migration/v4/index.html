@@ -1296,7 +1296,7 @@
 </span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>`--check` or `--only` filters.
 </span></code></pre></div>
 <p><code>--dry-run</code> is exempt. It reports the empty plan instead.</p>
-<p>If a pipeline of yours deliberately runs dbt-bouncer against a project with no matching resources, either narrow the step so it does not run, or accept exit code <code>4</code> explicitly.</p>
+<p>If a pipeline of yours deliberately runs dbt-bouncer against a project with no matching resources, either narrow the step so it does not run, accept exit code <code>4</code> explicitly, or pass <code>--allow-zero-checks</code> to exit with <code>0</code>.</p>
 <h2 id="informational-and-additive-changes">Informational and additive changes<a class="headerlink" href="#informational-and-additive-changes" title="Permanent link">#</a></h2>
 <p>The following changes do not require any action on your part, but are worth knowing about.</p>
 <h3 id="distinct-exit-codes-for-config-and-artifact-errors">Distinct exit codes for config and artifact errors<a class="headerlink" href="#distinct-exit-codes-for-config-and-artifact-errors" title="Permanent link">#</a></h3>
