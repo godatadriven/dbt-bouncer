@@ -45,6 +45,7 @@ class BouncerContext(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True, ignored_types=(cached_property,)
     )
+    allow_zero_checks: bool = False
     bouncer_config: DbtBouncerConfBase
     catalog_nodes: list[CatalogNodeWrapper]
     catalog_sources: list[CatalogSourceWrapper]

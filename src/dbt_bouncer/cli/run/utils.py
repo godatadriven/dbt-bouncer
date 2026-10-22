@@ -53,6 +53,7 @@ def _build_context(
     output_file: Path | None,
     output_format: str,
     output_only_failures: bool,
+    allow_zero_checks: bool = False,
     dry_run: bool = False,
     show_all_failures: bool = False,
 ) -> BouncerContext:
@@ -70,6 +71,7 @@ def _build_context(
     )
 
     return BouncerContext.model_construct(
+        allow_zero_checks=allow_zero_checks,
         bouncer_config=bouncer_config,
         catalog_nodes=artifacts.catalog_nodes,
         catalog_sources=artifacts.catalog_sources,
@@ -354,6 +356,7 @@ def _context_from_config(
     check_categories: list[str],
     config_file_path: PurePath,
     *,
+    allow_zero_checks: bool = False,
     create_pr_comment_file: bool = False,
     dry_run: bool = False,
     output_file: Path | None = None,
@@ -374,6 +377,7 @@ def _context_from_config(
         else OutputFormat(output_format.lower()).value
     )
     return _build_context(
+        allow_zero_checks=allow_zero_checks,
         bouncer_config=bouncer_config,
         check_categories=check_categories,
         create_pr_comment_file=create_pr_comment_file,
@@ -482,6 +486,7 @@ def run_bouncer(
     config_file_source: ConfigFileSource | None = None,
     baseline: Path | None = None,
     state: Path | None = None,
+    allow_zero_checks: bool = False,
 ) -> int:
     """Programmatic entrypoint for dbt-bouncer.
 
@@ -500,6 +505,7 @@ def run_bouncer(
         config_file_source: Source of the config file.
         baseline: Path to a baseline file. Failures listed in it are suppressed.
         state: Directory of dbt artifacts from a previous run. Failures present in that base run are suppressed.
+        allow_zero_checks: If True, a run that matches no resources returns `ExitCode.SUCCESS` instead of `ExitCode.NO_CHECKS_RUN`.
 
     An invalid `--only` value, a missing or invalid config file, or a missing
     baseline file propagate as `DbtBouncerConfigError`. A missing or unsupported
@@ -508,7 +514,7 @@ def run_bouncer(
     Returns:
         int: `ExitCode.SUCCESS` if all checks passed, `ExitCode.CHECK_ERRORS` if one
             or more checks failed, `ExitCode.NO_CHECKS_RUN` if the config matched no
-            resources and no checks ran.
+            resources and no checks ran (unless `allow_zero_checks` is True).
 
     """
     configure_console_logging(verbosity)
@@ -532,6 +538,7 @@ def run_bouncer(
         bouncer_config,
         check_categories,
         config_file_path,
+        allow_zero_checks=allow_zero_checks,
         create_pr_comment_file=create_pr_comment_file,
         dry_run=dry_run,
         output_file=output_file,

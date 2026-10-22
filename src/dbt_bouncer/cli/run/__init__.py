@@ -14,6 +14,14 @@ from dbt_bouncer.exceptions import DbtBouncerArtifactError, DbtBouncerConfigErro
 
 @app.command(name="run")
 def run(
+    allow_zero_checks: Annotated[
+        bool,
+        typer.Option(
+            envvar="DBT_BOUNCER_ALLOW_ZERO_CHECKS",
+            help="Exit with code 0 instead of 4 when no checks run because the config matched no resources. Useful for dbt Slim CI, where a PR can change no models.",
+            rich_help_panel="Check Selection",
+        ),
+    ] = False,
     config_file: Annotated[
         Path | None,
         typer.Option(help="Location of the config file (YML, YAML, or TOML)."),
@@ -145,6 +153,7 @@ def run(
 
     try:
         exit_code = run_bouncer(
+            allow_zero_checks=allow_zero_checks,
             baseline=baseline,
             check=check,
             config_file=config_file,
