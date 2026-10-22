@@ -1,5 +1,5 @@
 # Keep default in sync with .python-version
-ARG PYTHON_VERSION=3.11.14
+ARG PYTHON_VERSION=3.14.8
 FROM python:${PYTHON_VERSION}-slim AS base
 
 ARG USER_ID=1001
