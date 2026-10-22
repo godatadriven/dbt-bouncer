@@ -1,6 +1,11 @@
 name: 'dbt-bouncer'
 description: 'Configure and enforce conventions for your dbt project.'
 inputs:
+  allow-zero-checks:
+    default: 'false'
+    description: >-
+      Exit with code 0 instead of 4 when no checks run because the config matched no resources. Useful for dbt Slim CI, where a PR can change no models.
+    required: false
   baseline:
     default: ''
     description: >-
@@ -84,6 +89,7 @@ runs:
       shell: bash
       env:
         GITHUB_TOKEN: ${{ github.token }}
+        INPUT_ALLOW_ZERO_CHECKS: ${{ inputs.allow-zero-checks }}
         INPUT_BASELINE: ${{ inputs.baseline }}
         INPUT_CHECK: ${{ inputs.check }}
         INPUT_CONFIG_FILE: ${{ inputs.config-file }}
@@ -116,6 +122,7 @@ runs:
           args+=(--no-create-pr-comment-file)
         fi
 
+        [[ "$INPUT_ALLOW_ZERO_CHECKS" != "false" ]] && args+=(--allow-zero-checks)
         [[ -n "$INPUT_BASELINE" ]] && args+=(--baseline "/app/$INPUT_BASELINE")
         [[ -n "$INPUT_CHECK" ]] && args+=(--check "$INPUT_CHECK")
         [[ "$INPUT_DRY_RUN" != "false" ]] && args+=(--dry-run)
