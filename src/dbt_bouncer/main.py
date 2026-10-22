@@ -44,6 +44,13 @@ def _tune_gc_for_cli() -> None:
 @app.callback(invoke_without_command=True)
 def main_callback(
     ctx: typer.Context,
+    allow_zero_checks: Annotated[
+        bool,
+        typer.Option(
+            envvar="DBT_BOUNCER_ALLOW_ZERO_CHECKS",
+            help="Exit with code 0 instead of 4 when no checks run because the config matched no resources. Useful for dbt Slim CI, where a PR can change no models.",
+        ),
+    ] = False,
     config_file: Annotated[
         Path,
         typer.Option(help="Location of the config file (YML, YAML, or TOML)."),
@@ -164,6 +171,7 @@ def main_callback(
     if ctx.invoked_subcommand is None:
         ctx.invoke(
             run,
+            allow_zero_checks=allow_zero_checks,
             baseline=baseline,
             check=check,
             config_file=config_file,

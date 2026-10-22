@@ -540,6 +540,14 @@ def runner(
     # non-zero so the mistake is not hidden by a green "all checks passed"
     # summary. The dry-run path is exempt; it reports the empty plan later.
     if not checks_to_run and not ctx.dry_run:
+        # Slim CI (`state:modified+`) legitimately produces artifacts with no
+        # matching resources when a PR changes no models.
+        if ctx.allow_zero_checks:
+            logging.warning(
+                "No checks were run. Exiting with code 0 because "
+                "`--allow-zero-checks` is set."
+            )
+            return (ExitCode.SUCCESS, [])
         logging.error(
             "No checks were run. A config that matches no resources exits without "
             "running anything. Check the `package_name`, the config file, the dbt "
