@@ -34,8 +34,6 @@ run = "uv sync --extra=dev --group=docs"
 
 # --- Artifacts / schema ------------------------------------------------------
 
-# On GitHub the `dbt build` command often returns "leaked semaphores" errors.
-#
 # dbt 2.0 removed `--write-catalog` from `build`. The flag lives on `compile` and on
 # `docs generate`, and both of those write an EMPTY run_results.json. Neither command
 # alone produces all three artifacts, so this runs two steps:
@@ -53,48 +51,73 @@ run = "uv sync --extra=dev --group=docs"
 # --project-dir. Explicit --profiles-dir/--project-dir for CI correctness.
 [tasks.build-and-run-dbt-bouncer]
 description = "Run dbt deps, build, write the catalog and run dbt-bouncer"
-run = """
-uv run dbt deps --profiles-dir ./dbt_project --project-dir ./dbt_project
-uv run dbt build --profiles-dir ./dbt_project --project-dir ./dbt_project
-uv run dbt compile --write-catalog --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_catalog
-mv ./dbt_project/target_catalog/catalog.json ./dbt_project/target/catalog.json
-rm -r ./dbt_project/target_catalog
-# Strict static analysis (needed for column types and lineage) exits 1 on deliberate quirks in
-# the test project but still writes the Information Schema; `test -f` guards against an empty run.
-# See build-artifacts-20.
-uv run dbt compile --static-analysis strict --generate-info-schema --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_info_schema || true
-test -f ./dbt_project/target_info_schema/info_schema/v1/dbt.project.parquet
-rm -rf ./dbt_project/target/info_schema
-mv ./dbt_project/target_info_schema/info_schema ./dbt_project/target/info_schema
-rm -r ./dbt_project/target_info_schema
-uv run dbt-bouncer run --config-file ./dbt-bouncer-example.yml
-"""
+shell = "bash -c"
+run = '''
+set -e
+case "$usage_dbt" in
+  dbt-core*)
+    mise run build-and-run-dbt-bouncer-dbt1 --dbt "$usage_dbt"
+    ;;
+  *)
+    rm -f ./dbt.duckdb ./dbt.duckdb.wal
+    uv run dbt deps --profiles-dir ./dbt_project --project-dir ./dbt_project
+    uv run dbt build --profiles-dir ./dbt_project --project-dir ./dbt_project
+    uv run dbt compile --write-catalog --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_catalog
+    mv ./dbt_project/target_catalog/catalog.json ./dbt_project/target/catalog.json
+    rm -r ./dbt_project/target_catalog
+    # Strict static analysis (needed for column types and lineage) exits 1 on deliberate quirks in
+    # the test project but still writes the Information Schema; `test -f` guards against an empty run.
+    # See build-artifacts-20.
+    uv run dbt compile --static-analysis strict --generate-info-schema --profiles-dir ./dbt_project --project-dir ./dbt_project --target-path ./target_info_schema || true
+    test -f ./dbt_project/target_info_schema/info_schema/v1/dbt.project.parquet
+    rm -rf ./dbt_project/target/info_schema
+    mv ./dbt_project/target_info_schema/info_schema ./dbt_project/target/info_schema
+    rm -r ./dbt_project/target_info_schema
+    uv run dbt-bouncer run --config-file ./dbt-bouncer-example.yml
+    ;;
+esac
+'''
+usage = '''
+flag "--dbt" help="dbt package requirement to build artifacts with (e.g. 'dbt-core==1.10.*', 'dbt-core==1.12.*', 'dbt>=2,<3')" default="dbt>=2,<3" {
+    arg <DBT>
+}
+'''
 
-# Legacy-line coverage: the project venv now resolves dbt 2.0, so this task pins the
-# latest dbt-core 1.x release in an isolated uvx environment instead of overwriting the
+# Legacy-line coverage: the project venv now resolves dbt 2.0, so this task runs a
+# dbt-core 1.x release in an isolated uvx environment instead of overwriting the
 # venv. dbt 1.x has no `--write-catalog` flag, so the catalog comes from `docs generate`,
 # which dbt 2.0 in turn cannot use for a JSON catalog. The two lines therefore need
-# separate tasks. `dbt-core~=1.0` means ">=1.0,<2.0", so this tracks the newest 1.x.
+# separate tasks. By default `dbt-core~=1.0` means ">=1.0,<2.0", tracking the newest 1.x;
+# `--dbt` can also pin a specific minor series (e.g. `dbt-core==1.10.*`).
 # WARN_RESET undoes the project's `warn_error_options: error: all`, which exists to fail
-# the dbt 2.0 build on any new warning. dbt 1.x emits two warnings that dbt 2.0 does not,
-# and neither is a defect: a known false positive on custom generic tests (dbt-core issue
-# #11792) and dbt-duckdb rejecting the `grants` config, which this project sets on purpose
-# to give dbt-bouncer a grants fixture. dbt 2.0 has no equivalent flag, so the strict
-# setting lives in dbt_project.yml and the legacy line opts out here.
+# the dbt 2.0 build on any new warning. dbt 1.x emits warnings that dbt 2.0 does not
+# (and 1.10 does not recognise the `InvalidConfig` silence entry), neither of which is a
+# defect: a known false positive on custom generic tests (dbt-core issue #11792) and
+# dbt-duckdb rejecting the `grants` config, which this project sets on purpose to give
+# dbt-bouncer a grants fixture. dbt 2.0 has no equivalent flag, so the strict setting
+# lives in dbt_project.yml and the legacy line opts out here.
 # `--only` leaves out `info_schema_checks`: dbt 1.x cannot write the Information Schema, so
 # dbt_project/target/info_schema is still the committed dbt 2.0 copy and does not match the
 # dbt 1.x manifest.
 [tasks.build-and-run-dbt-bouncer-dbt1]
-description = "Build the test project with the latest dbt-core 1.x release and run dbt-bouncer"
-run = """
+description = "Build the test project with a dbt-core 1.x release and run dbt-bouncer"
+shell = "bash -c"
+run = '''
+set -e
+rm -f ./dbt.duckdb ./dbt.duckdb.wal
 PYTHON_INTERPRETER_CONSTRAINT=$(cat .python-version)
-DBT_1="uvx --python ==${PYTHON_INTERPRETER_CONSTRAINT} --with dbt-duckdb~=1.10.0 --from dbt-core~=1.0 dbt"
+DBT_1="uvx --python ==${PYTHON_INTERPRETER_CONSTRAINT} --with dbt-duckdb~=1.10.0 --from ${usage_dbt} dbt"
 WARN_RESET='{"error": []}'
-$DBT_1 deps --profiles-dir ./dbt_project --project-dir ./dbt_project
+$DBT_1 deps --warn-error-options "$WARN_RESET" --profiles-dir ./dbt_project --project-dir ./dbt_project
 $DBT_1 build --warn-error-options "$WARN_RESET" --profiles-dir ./dbt_project --project-dir ./dbt_project
 $DBT_1 docs generate --warn-error-options "$WARN_RESET" --profiles-dir ./dbt_project --project-dir ./dbt_project
 uv run dbt-bouncer run --config-file ./dbt-bouncer-example.yml --only catalog_checks,manifest_checks,run_results_checks
-"""
+'''
+usage = '''
+flag "--dbt" help="dbt-core 1.x package requirement" default="dbt-core~=1.0" {
+    arg <DBT>
+}
+'''
 
 # Parse-only probe of the dbt Fusion engine, which the `dbt` distribution provides.
 # It covers a code path the other tasks do not: `dbt parse` needs no database, so it

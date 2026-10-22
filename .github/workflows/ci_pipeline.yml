@@ -76,7 +76,7 @@ jobs:
 
     unit-tests:
         needs: [prek]
-        runs-on: ${{ matrix.operating-system }}
+        runs-on: ${{ matrix.os || 'ubuntu-26.04' }}
         permissions:
             contents: read
             # Same-repo PRs get the coverage comment directly. Fork PRs get a
@@ -85,41 +85,46 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                operating-system:
-                  - ubuntu-26.04
-                  - windows-2025
-                python-version:
+                dbt:
+                    - 'dbt-core==1.10.*'
+                    - 'dbt-core==1.12.*'
+                    - 'dbt>=2,<3'
+                os:
+                    - ubuntu-26.04
+                python:
                     - '3.11'
-                    - '3.12'
-                    - '3.13'
                     - '3.14'
+                include:
+                    - os: windows-2025
+                      python: '3.14'
+                      dbt: 'dbt-core==1.12.*'
         steps:
             - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
               with:
                 persist-credentials: false
 
             - name: checkout-merge
-              if: matrix.operating-system != 'windows-2025'
+              if: matrix.os != 'windows-2025'
               uses: check-spelling/checkout-merge@c9cfe4b33a6ceb6c13136887a6fd3a3ed6443f28 # v0.0.8
 
             - name: Setup Python
               uses: ./.github/actions/setup_python_env
               with:
-                python-version: ${{ matrix.python-version }}
+                python-version: ${{ matrix.python }}
 
             - name: Run pytest (Windows)
-              if: matrix.operating-system == 'windows-2025'
+              if: matrix.os == 'windows-2025'
               run: mise run test-windows
 
             - name: Run pytest (unit tests)
-              if: matrix.operating-system != 'windows-2025'
+              if: matrix.os != 'windows-2025'
               run: mise run test-unit
 
             # Must run before the integration tests, which overwrite `.coverage`.
             # Runs on failure too, so a failed coverage gate still shows the missed lines.
             - name: Coverage comment
               id: coverage_comment
-              if: ${{ !cancelled() && matrix.operating-system == 'ubuntu-26.04' && matrix.python-version == '3.11' }}
+              if: ${{ !cancelled() && matrix.os == 'ubuntu-26.04' && matrix.python == '3.11' && matrix.dbt == 'dbt>=2,<3' }}
               uses: py-cov-action/python-coverage-comment-action@e5fb2218463c3377f3504b0c5b5646ed53da7a2f # v4.5
               with:
                 ACTIVITY: process_pr
@@ -135,19 +140,18 @@ jobs:
                 path: python-coverage-comment-action.txt
 
             - name: Run pytest (integration tests)
-              if: matrix.operating-system != 'windows-2025'
+              if: matrix.os != 'windows-2025'
               run: mise run test-integration
 
             - name: Regenerate dbt artifacts and run `dbt-bouncer`
-              if: matrix.operating-system == 'windows-2025'
+              if: matrix.os == 'windows-2025'
               run: |
                 $env:Path += ';C:\Users\runneradmin\.local\bin'
-                mise run build-and-run-dbt-bouncer
+                mise run build-and-run-dbt-bouncer --dbt "${{ matrix.dbt }}"
 
             - name: Regenerate dbt artifacts and run `dbt-bouncer`
-              if: matrix.operating-system != 'windows-2025'
-              run: |
-                  (r=3;while ! mise run build-and-run-dbt-bouncer ; do ((--r))||exit;done)
+              if: matrix.os != 'windows-2025'
+              run: mise run build-and-run-dbt-bouncer --dbt "${{ matrix.dbt }}"
 
     benchmark-pr-branch:
         needs: [prek]

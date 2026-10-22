@@ -223,18 +223,23 @@
       pip-tests:
         permissions:
           contents: read
-        runs-on: ${{ matrix.operating-system }}
+        runs-on: ${{ matrix.os || 'ubuntu-26.04' }}
         strategy:
             fail-fast: false
             matrix:
-                operating-system:
-                  - ubuntu-26.04
-                  - windows-2025
-                python-version:
+                dbt:
+                    - 'dbt-core==1.10.*'
+                    - 'dbt-core==1.12.*'
+                    - 'dbt>=2,<3'
+                os:
+                    - ubuntu-26.04
+                python:
                     - '3.11'
-                    - '3.12'
-                    - '3.13'
                     - '3.14'
+                include:
+                    - os: windows-2025
+                      python: '3.14'
+                      dbt: 'dbt-core==1.12.*'
         steps:
             - name: Checkout
               uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -244,7 +249,7 @@
             - name: Setup Python
               uses: ./.github/actions/setup_python_env
               with:
-                python-version: ${{ matrix.python-version }}
+                python-version: ${{ matrix.python }}
 
             - name: Install `dbt-bouncer`
               run: pip install git+https://github.com/godatadriven/dbt-bouncer.git@${{ github.sha }}
@@ -253,12 +258,11 @@
               run: dbt-bouncer run --config-file dbt-bouncer-example.yml
 
             - name: Regenerate dbt artifacts and run `dbt-bouncer`
-              if: matrix.operating-system == 'windows-2025'
+              if: matrix.os == 'windows-2025'
               run: |
                 $env:Path += ';C:\Users\runneradmin\.local\bin'
-                mise run build-and-run-dbt-bouncer
+                mise run build-and-run-dbt-bouncer --dbt "${{ matrix.dbt }}"
 
             - name: Regenerate dbt artifacts and run `dbt-bouncer`
-              if: matrix.operating-system != 'windows-2025'
-              run: |
-                (r=3;while ! mise run build-and-run-dbt-bouncer ; do ((--r))||exit;done)
+              if: matrix.os != 'windows-2025'
+              run: mise run build-and-run-dbt-bouncer --dbt "${{ matrix.dbt }}"

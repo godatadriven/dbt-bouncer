@@ -4,4 +4,6 @@ dbt_bouncer:
    dev:
      type: duckdb
      path: ./dbt.duckdb
-     threads: 8
+     # Single thread avoids DuckDB write-lock contention and Python multiprocessing
+     # leaked-semaphore errors in CI.
+     threads: 1
