@@ -1,4 +1,6 @@
-FROM python:3.11.14-slim AS base
+# Keep default in sync with .python-version
+ARG PYTHON_VERSION=3.11.14
+FROM python:${PYTHON_VERSION}-slim AS base
 
 ARG USER_ID=1001
 ARG GROUP_ID=1001

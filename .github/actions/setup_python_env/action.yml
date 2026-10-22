@@ -31,6 +31,7 @@ runs:
           VERSION=$(cat .python-version)
         fi
         echo "python-version=$VERSION" >> "$GITHUB_OUTPUT"
+        echo "UV_PYTHON=$VERSION" >> "$GITHUB_ENV"
 
     - name: Setup Python
       id: setup-python
