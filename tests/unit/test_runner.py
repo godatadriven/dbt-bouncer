@@ -634,7 +634,9 @@ def test_runner_success():
     assert results[0] == 0
 
 
-def _no_match_context(*, dry_run: bool) -> BouncerContext:
+def _no_match_context(
+    *, dry_run: bool, allow_zero_checks: bool = False
+) -> BouncerContext:
     """Build a context whose model check matches no resources.
 
     The config has one model check, but the ``models`` list is empty, so the
@@ -651,6 +653,7 @@ def _no_match_context(*, dry_run: bool) -> BouncerContext:
     DbtBouncerConf = DbtBouncerConf()  # ruff: ignore[non-lowercase-variable-in-function]
     return BouncerContext.model_construct(
         **{
+            "allow_zero_checks": allow_zero_checks,
             "bouncer_config": DbtBouncerConf(
                 **{
                     "manifest_checks": [
@@ -725,6 +728,22 @@ def test_runner_no_checks_run(caplog):
     assert results[0] == ExitCode.NO_CHECKS_RUN
     assert results[1] == []
     assert "No checks were run" in caplog.text
+
+
+def test_runner_no_checks_run_allow_zero_checks(caplog):
+    """`allow_zero_checks` turns a run that matches no resources into `SUCCESS`.
+
+    dbt Slim CI builds only modified resources, so a PR that changes no models
+    legitimately produces artifacts that match nothing.
+    """
+    from dbt_bouncer.enums import ExitCode
+
+    configure_console_logging(verbosity=0)
+    results = runner(ctx=_no_match_context(dry_run=False, allow_zero_checks=True))
+
+    assert results[0] == ExitCode.SUCCESS
+    assert results[1] == []
+    assert "`--allow-zero-checks` is set" in caplog.text
 
 
 def test_runner_no_checks_run_dry_run():

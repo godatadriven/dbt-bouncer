@@ -167,6 +167,53 @@ def test_config_matching_no_resources_exits_no_checks_run(
     assert "No checks were run." in caplog.text
 
 
+@pytest.mark.parametrize(
+    ("argv", "env"),
+    [
+        pytest.param(["run", "--allow-zero-checks"], {}, id="run-flag"),
+        pytest.param(["--allow-zero-checks"], {}, id="legacy-flag"),
+        pytest.param(
+            ["run"], {"DBT_BOUNCER_ALLOW_ZERO_CHECKS": "true"}, id="run-env-var"
+        ),
+    ],
+)
+def test_config_matching_no_resources_allow_zero_checks_exits_success(
+    argv, caplog, cli_runner, env, write_checks_config
+):
+    """`--allow-zero-checks` exits SUCCESS when the config matches no resources."""
+    config_file = write_checks_config(
+        [{**_FAILING_CHECK, "include": r"models/does_not_exist/.*\.sql"}]
+    )
+
+    result = cli_runner.invoke(
+        app,
+        [*argv, "--config-file", PurePath(config_file).as_posix()],
+        env=env,
+    )
+
+    assert result.exit_code == ExitCode.SUCCESS, result.output
+    assert "`--allow-zero-checks` is set" in caplog.text
+
+
+def test_config_matching_resources_allow_zero_checks_still_fails(
+    cli_runner, write_checks_config
+):
+    """`--allow-zero-checks` does not mask a failing check."""
+    config_file = write_checks_config([_FAILING_CHECK])
+
+    result = cli_runner.invoke(
+        app,
+        [
+            "run",
+            "--allow-zero-checks",
+            "--config-file",
+            PurePath(config_file).as_posix(),
+        ],
+    )
+
+    assert result.exit_code == ExitCode.CHECK_ERRORS, result.output
+
+
 def test_missing_config_file_exits_config_error(caplog, cli_runner, tmp_path):
     """A `--config-file` that does not exist exits CONFIG_ERROR."""
     result = cli_runner.invoke(
