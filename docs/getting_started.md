@@ -155,6 +155,7 @@ jobs:
 
             - uses: godatadriven/dbt-bouncer@vX.X
               with:
+                allow-zero-checks: false # optional, exit 0 instead of 4 when no checks run (dbt Slim CI)
                 baseline: '' # optional, path to a baseline file, so only new failures fail the run
                 check: '' # optional, comma-separated check names to run
                 config-file: ./<PATH_TO_CONFIG_FILE>
@@ -222,6 +223,7 @@ from dbt_bouncer import run_bouncer
 
 exit_code = run_bouncer(
     config_file=Path("path/to/dbt-bouncer.yml"),
+    allow_zero_checks=False,  # optional, return 0 instead of 4 when no checks run
     check="",  # optional, comma-separated check names to run
     dry_run=False,  # optional, print which checks would run without executing
     only="",  # optional, comma-separated categories e.g. "manifest_checks"

@@ -16,6 +16,23 @@ All the main CLI options (`--check`, `--only`, `--output-file`, etc.) work with 
 
 ### Options
 
+#### `--allow-zero-checks`
+
+**Type:** Flag
+**Default:** False
+**Required:** No
+**Environment variable:** `DBT_BOUNCER_ALLOW_ZERO_CHECKS`
+
+When passed, a run that matches no resources exits with code `0` instead of `4` (`NO_CHECKS_RUN`). dbt-bouncer logs a warning instead of an error.
+
+Use this flag with dbt Slim CI. A Slim CI job builds only modified resources (for example, `dbt build --select state:modified+`). If a PR changes no models, the artifacts contain no matching resources and dbt-bouncer exits with code `4`.
+
+**Example:**
+
+```bash
+dbt-bouncer run --allow-zero-checks
+```
+
 #### `--config-file`
 
 **Type:** Path
@@ -281,6 +298,7 @@ Every `run` option can also be set with an environment variable. This is useful 
 
 | Option | Environment variable |
 | --- | --- |
+| `--allow-zero-checks` | `DBT_BOUNCER_ALLOW_ZERO_CHECKS` |
 | `--baseline` | `DBT_BOUNCER_BASELINE` |
 | `--check` | `DBT_BOUNCER_CHECK` |
 | `--dry-run` | `DBT_BOUNCER_DRY_RUN` |
@@ -657,6 +675,6 @@ Example client configuration (Claude Code, `.mcp.json`):
 - `1` (`CHECK_ERRORS`): At least one check with `error` severity has failed, or raised an unexpected error instead of passing or failing (reported with the outcome `internal_error`). Check the logs for more information.
 - `2` (`CONFIG_ERROR`): The config file is missing, empty, not valid YAML/TOML, or invalid (e.g. an invalid `--only` value, an invalid regex in `include`/`exclude` or a check parameter, or a check parameter out of range).
 - `3` (`ARTIFACT_ERROR`): A required dbt artifact (`manifest.json`, `catalog.json`, `run_results.json`) is missing, cannot be decoded (e.g. truncated by an interrupted dbt run), or was generated with an unsupported dbt version.
-- `4` (`NO_CHECKS_RUN`): No checks ran because the config matched no resources. Check the `package_name`, the config file, the dbt artifacts, and any `--check` or `--only` filters.
+- `4` (`NO_CHECKS_RUN`): No checks ran because the config matched no resources. Check the `package_name`, the config file, the dbt artifacts, and any `--check` or `--only` filters. Pass `--allow-zero-checks` to exit with `0` instead, for example in dbt Slim CI.
 
 These codes apply to both `dbt-bouncer run` and `dbt-bouncer validate` (which only ever returns `SUCCESS`, `CHECK_ERRORS`, or `CONFIG_ERROR` — for `validate`, `CHECK_ERRORS` means lint issues were found in the config file, not that dbt checks failed).
