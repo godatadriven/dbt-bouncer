@@ -169,7 +169,7 @@ There are two layers of performance coverage:
    mise run test-benchmark
    ```
 
-   Change the manifest size with `mise run test-benchmark --models 5000` (the `mise` task defaults to `1000` to keep local runs quick). Running `pytest` directly instead reads `DBT_BOUNCER_BENCH_MODELS`, falling back to `5000` when it is unset. In CI, the emitted `pytest_benchmark_results.json` is tracked by Bencher (`python_pytest` adapter, `ubuntu-24.04-pytest` testbed) so parse-time and check-assembly regressions fail PRs — the same mechanism as the hyperfine track.
+   Change the manifest size with `mise run test-benchmark --models 5000` (the `mise` task defaults to `1000` to keep local runs quick). Running `pytest` directly instead reads `DBT_BOUNCER_BENCH_MODELS`, falling back to `5000` when it is unset. In CI, the emitted `pytest_benchmark_results.json` is tracked by Bencher (`python_pytest` adapter, `ubuntu-26.04-pytest` testbed) so parse-time and check-assembly regressions fail PRs — the same mechanism as the hyperfine track.
 
    To see how the end-to-end run scales with project size, run the sweep:
 

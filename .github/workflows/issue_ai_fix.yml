@@ -14,7 +14,7 @@ jobs:
     permissions:
       contents: read
       issues: write
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 15
     steps:
       - name: React to command
@@ -131,7 +131,7 @@ jobs:
       contents: write
       issues: write
       pull-requests: write
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 15
     env:
       GH_TOKEN: ${{ secrets.PAT_GITHUB }}

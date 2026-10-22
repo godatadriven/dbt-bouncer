@@ -13,7 +13,7 @@ jobs:
       contents: read
       id-token: write
       pull-requests: write
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 15
     steps:
       # Check out only the composite action from the default branch so the

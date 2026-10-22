@@ -14,7 +14,7 @@
         dbt-cloud:
             permissions:
               contents: read
-            runs-on: ubuntu-24.04
+            runs-on: ubuntu-26.04
             steps:
                 - name: Checkout
                   uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -37,7 +37,7 @@
         dbt-core:
             permissions:
               contents: read
-            runs-on: ubuntu-24.04
+            runs-on: ubuntu-26.04
             steps:
                 - name: Checkout
                   uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -57,7 +57,7 @@
         dbt-2:
             permissions:
               contents: read
-            runs-on: ubuntu-24.04
+            runs-on: ubuntu-26.04
             steps:
                 - name: Checkout
                   uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7

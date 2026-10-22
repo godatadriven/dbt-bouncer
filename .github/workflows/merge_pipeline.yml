@@ -16,7 +16,7 @@
         permissions:
           checks: write
           contents: read
-        runs-on: ubuntu-24.04
+        runs-on: ubuntu-26.04
         steps:
           - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
             with:
@@ -42,7 +42,7 @@
                 --project dbt-bouncer \
                 --token '${{ secrets.BENCHER_API_TOKEN }}' \
                 --branch main \
-                --testbed ubuntu-24.04 \
+                --testbed ubuntu-26.04 \
                 --threshold-measure latency \
                 --threshold-test t_test \
                 --threshold-max-sample-size 64 \
@@ -59,7 +59,7 @@
         permissions:
           checks: write
           contents: read
-        runs-on: ubuntu-24.04
+        runs-on: ubuntu-26.04
         steps:
           - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
             with:
@@ -80,7 +80,7 @@
                 --project dbt-bouncer \
                 --token '${{ secrets.BENCHER_API_TOKEN }}' \
                 --branch main \
-                --testbed ubuntu-24.04-pytest \
+                --testbed ubuntu-26.04-pytest \
                 --threshold-measure latency \
                 --threshold-test t_test \
                 --threshold-max-sample-size 64 \
@@ -100,7 +100,7 @@
           concurrency:
             group: coverage-badge
             cancel-in-progress: true
-          runs-on: ubuntu-24.04
+          runs-on: ubuntu-26.04
           steps:
               - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
                 with:
@@ -163,7 +163,7 @@
             cancel-in-progress: false
           permissions:
             contents: write
-          runs-on: ubuntu-24.04
+          runs-on: ubuntu-26.04
           steps:
               - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
@@ -182,7 +182,7 @@
       docker-tests:
         permissions:
           contents: read
-        runs-on: ubuntu-24.04
+        runs-on: ubuntu-26.04
         steps:
             - name: Checkout
               uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -228,7 +228,7 @@
             fail-fast: false
             matrix:
                 operating-system:
-                  - ubuntu-24.04
+                  - ubuntu-26.04
                   - windows-2025
                 python-version:
                     - '3.11'

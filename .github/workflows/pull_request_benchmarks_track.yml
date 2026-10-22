@@ -15,7 +15,7 @@ jobs:
     permissions:
       checks: write
       pull-requests: write
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - name: Download Benchmark Results
         uses: dawidd6/action-download-artifact@57aa996fc1713cc1579039614f4645a7f4841fd4 # v23
@@ -60,7 +60,7 @@ jobs:
             --start-point-hash "$PR_BASE_SHA" \
             --start-point-clone-thresholds \
             --start-point-reset \
-            --testbed ubuntu-24.04 \
+            --testbed ubuntu-26.04 \
             --err \
             --adapter shell_hyperfine \
             --format json \
@@ -81,7 +81,7 @@ jobs:
             --start-point-hash "$PR_BASE_SHA" \
             --start-point-clone-thresholds \
             --start-point-reset \
-            --testbed ubuntu-24.04-pytest \
+            --testbed ubuntu-26.04-pytest \
             --err \
             --adapter python_pytest \
             --average median \
