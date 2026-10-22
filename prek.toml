@@ -154,6 +154,28 @@ priority = "checks"
 require_serial = true
 
 [[repos.hooks]]
+id = "python-version-sync"
+# The dev container build cannot pass PYTHON_VERSION, so the ARG defaults must match .python-version.
+entry = '''
+expected="ARG PYTHON_VERSION=$(cat .python-version)"
+status=0
+for dockerfile in Dockerfile .devcontainer/Dockerfile; do
+  grep -qxF "$expected" "$dockerfile" || {
+    echo "$dockerfile must contain \"$expected\" to match .python-version."
+    status=1
+  }
+done
+exit $status
+'''
+files = { glob = [".devcontainer/Dockerfile", ".python-version", "Dockerfile"] }
+language = "system"
+name = "python-version-sync"
+pass_filenames = false
+priority = "checks"
+require_serial = true
+shell = "bash"
+
+[[repos.hooks]]
 id = "rule-codes-doc-check"
 entry = '''
 uv run python scripts/generate_rule_codes_doc.py
