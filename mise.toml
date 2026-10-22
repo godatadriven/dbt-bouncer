@@ -9,6 +9,9 @@
 # `uv` remains the Python package manager; mise pins/installs the tools (uv
 # included) and runs the tasks.
 
+# Older releases trust the compromised eMudhra intermediates (CVE-2026-111943).
+min_version = "2026.10.17"
+
 [tools]
 # Python is intentionally NOT managed by mise. `uv` reads `.python-version`
 # natively for the project venv, and CI's setup-python provides the matrix
