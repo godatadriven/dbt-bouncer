@@ -198,3 +198,5 @@ dbt_bouncer = ["presets/*.yml"]
 
 [tool.uv]
 package = true
+# Older releases trust the compromised eMudhra intermediates (CVE-2026-111943).
+required-version = ">=0.13.4"
