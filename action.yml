@@ -145,7 +145,7 @@ runs:
           --env GITHUB_TOKEN \
           --volume "$GITHUB_WORKSPACE":/app \
           --workdir /app \
-          ghcr.io/godatadriven/dbt-bouncer:v0.0.0 \
+          ghcr.io/godatadriven/dbt-bouncer:v4.3.0 \
           "${args[@]}"
 
     - name: Send PR comment
