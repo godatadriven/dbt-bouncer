@@ -16,13 +16,12 @@ env:
   DBT_PROJECT_DIR: dbt_project
   IMAGE_NAME: ${{ github.repository }}
   REGISTRY: ghcr.io
-  UV_SYSTEM_PYTHON: 1
 
 jobs:
     prek:
         permissions:
           contents: read
-        runs-on: ubuntu-24.04
+        runs-on: ubuntu-26.04
         steps:
             - name: Checkout
               uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -54,7 +53,7 @@ jobs:
         needs: [prek]
         permissions:
           contents: read
-        runs-on: ubuntu-24.04
+        runs-on: ubuntu-26.04
         steps:
             - name: Checkout
               uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -87,7 +86,7 @@ jobs:
             fail-fast: false
             matrix:
                 operating-system:
-                  - ubuntu-24.04
+                  - ubuntu-26.04
                   - windows-2025
                 python-version:
                     - '3.11'
@@ -120,7 +119,7 @@ jobs:
             # Runs on failure too, so a failed coverage gate still shows the missed lines.
             - name: Coverage comment
               id: coverage_comment
-              if: ${{ !cancelled() && matrix.operating-system == 'ubuntu-24.04' && matrix.python-version == '3.11' }}
+              if: ${{ !cancelled() && matrix.operating-system == 'ubuntu-26.04' && matrix.python-version == '3.11' }}
               uses: py-cov-action/python-coverage-comment-action@e5fb2218463c3377f3504b0c5b5646ed53da7a2f # v4.5
               with:
                 ACTIVITY: process_pr
@@ -154,7 +153,7 @@ jobs:
         needs: [prek]
         permissions:
           contents: read
-        runs-on: ubuntu-24.04
+        runs-on: ubuntu-26.04
         steps:
           - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
             with:
@@ -185,7 +184,7 @@ jobs:
         needs: [prek]
         permissions:
           contents: read
-        runs-on: ubuntu-24.04
+        runs-on: ubuntu-26.04
         steps:
           - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
             with:
@@ -207,7 +206,7 @@ jobs:
       needs: [prek]
       permissions:
         contents: read
-      runs-on: ubuntu-24.04
+      runs-on: ubuntu-26.04
       steps:
         - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
           with:
@@ -235,7 +234,7 @@ jobs:
         needs: [prek]
         permissions:
           contents: read
-        runs-on: ubuntu-24.04
+        runs-on: ubuntu-26.04
         steps:
             - name: Checkout
               uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -285,7 +284,7 @@ jobs:
         needs: [prek]
         permissions:
           contents: read
-        runs-on: ubuntu-24.04
+        runs-on: ubuntu-26.04
         env:
             # Must match the image tag hardcoded in `action.yml`. It is spelled out
             # rather than built from `github.repository` so that a fork run builds
@@ -434,7 +433,7 @@ jobs:
       needs: [prek]
       permissions:
         contents: read
-      runs-on: ubuntu-24.04
+      runs-on: ubuntu-26.04
       steps:
           - name: Checkout
             uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7

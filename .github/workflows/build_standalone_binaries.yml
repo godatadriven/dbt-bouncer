@@ -30,7 +30,7 @@ jobs:
         # Intel runners are deprecated and queue without ever starting. Intel Mac
         # users install via pip or pipx.
         include:
-          - os: ubuntu-24.04
+          - os: ubuntu-26.04
             target: linux-x86_64
             binary_name: dbt-bouncer-linux-x86_64
           - os: macos-14
@@ -47,7 +47,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
-          python-version: "3.11"
+          python-version-file: ".python-version"
 
       - name: Setup uv
         uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
