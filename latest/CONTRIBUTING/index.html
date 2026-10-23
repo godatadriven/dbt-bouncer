@@ -1393,7 +1393,7 @@
 </ol>
 <div class="language-shell highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>mise<span class="w"> </span>run<span class="w"> </span>test-benchmark
 </span></code></pre></div>
-<p>Change the manifest size with <code>mise run test-benchmark --models 5000</code> (the <code>mise</code> task defaults to <code>1000</code> to keep local runs quick). Running <code>pytest</code> directly instead reads <code>DBT_BOUNCER_BENCH_MODELS</code>, falling back to <code>5000</code> when it is unset. In CI, the emitted <code>pytest_benchmark_results.json</code> is tracked by Bencher (<code>python_pytest</code> adapter, <code>ubuntu-24.04-pytest</code> testbed) so parse-time and check-assembly regressions fail PRs — the same mechanism as the hyperfine track.</p>
+<p>Change the manifest size with <code>mise run test-benchmark --models 5000</code> (the <code>mise</code> task defaults to <code>1000</code> to keep local runs quick). Running <code>pytest</code> directly instead reads <code>DBT_BOUNCER_BENCH_MODELS</code>, falling back to <code>5000</code> when it is unset. In CI, the emitted <code>pytest_benchmark_results.json</code> is tracked by Bencher (<code>python_pytest</code> adapter, <code>ubuntu-26.04-pytest</code> testbed) so parse-time and check-assembly regressions fail PRs — the same mechanism as the hyperfine track.</p>
 <p>To see how the end-to-end run scales with project size, run the sweep:</p>
 <div class="language-shell highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>mise<span class="w"> </span>run<span class="w"> </span>test-benchmark-aggregate
 </span></code></pre></div>
