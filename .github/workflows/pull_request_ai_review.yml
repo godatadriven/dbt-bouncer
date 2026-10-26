@@ -9,6 +9,10 @@ on:
 jobs:
   ai_review:
     if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'pull_request'
+    outputs:
+      head_sha: ${{ steps.pr_outputs.outputs.head_sha }}
+      pr_number: ${{ steps.pr_outputs.outputs.pr_number }}
+      skip: ${{ steps.export.outputs.skip }}
     permissions:
       contents: read
       id-token: write
@@ -29,6 +33,14 @@ jobs:
       - name: Export PR Event Data
         id: export
         uses: ./_pr_resolver/.github/actions/resolve-pr-from-workflow-run
+
+      # Expose the resolved PR to the dependabot_auto_merge job.
+      - name: Export PR outputs
+        id: pr_outputs
+        if: steps.export.outputs.skip != 'true'
+        run: |-
+          echo "head_sha=${PR_HEAD_SHA}" >> "$GITHUB_OUTPUT"
+          echo "pr_number=${PR_NUMBER}" >> "$GITHUB_OUTPUT"
 
       - name: Checkout PR Head
         if: steps.export.outputs.skip != 'true'
@@ -227,3 +239,67 @@ jobs:
           else
             gh pr comment "$PR_NUMBER" --body-file "$COMMENT_FILE"
           fi
+
+
+  # Approve and enable auto-merge on Dependabot PRs whose AI review has no
+  # 🔴/🟡 findings. GitHub then merges once every required check passes. This
+  # lives here, not in its own workflow_run workflow, because a run chained off
+  # this workflow reports main's SHA and cannot resolve the PR.
+  dependabot_auto_merge:
+    needs: ai_review
+    # The workflow_run actor is whoever triggered CI, so a human push to a
+    # Dependabot branch does not qualify.
+    if: needs.ai_review.outputs.skip == 'false' && github.event.workflow_run.actor.login == 'dependabot[bot]'
+    permissions:
+      pull-requests: read
+    runs-on: ubuntu-26.04
+    timeout-minutes: 5
+    env:
+      HEAD_SHA: ${{ needs.ai_review.outputs.head_sha }}
+      PR_NUMBER: ${{ needs.ai_review.outputs.pr_number }}
+    steps:
+      - name: Check AI review findings
+        id: findings
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |-
+          eligible() { echo "eligible=$1" >> "$GITHUB_OUTPUT"; }
+
+          AUTHOR=$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}" --jq '.user.login')
+          if [ "$AUTHOR" != "dependabot[bot]" ]; then
+            echo "::notice::PR #${PR_NUMBER} author is ${AUTHOR}, not dependabot[bot]. Skipping."
+            eligible false
+            exit 0
+          fi
+
+          # Only trust the comment posted by this workflow (github-actions[bot]).
+          gh api --paginate "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" \
+            --jq '.[] | select(.user.login == "github-actions[bot]" and (.body | contains("ai-pr-review-marker"))) | .body' \
+            > /tmp/ai-review.md
+
+          if [ ! -s /tmp/ai-review.md ]; then
+            echo "::notice::No AI review comment found. Skipping."
+            eligible false
+          elif grep -q "Claude analysis was not available" /tmp/ai-review.md; then
+            echo "::notice::AI review fell back to a file list. Skipping."
+            eligible false
+          elif grep -qE "🔴|🟡" /tmp/ai-review.md; then
+            echo "::notice::AI review has 🔴 or 🟡 findings. Skipping."
+            eligible false
+          else
+            eligible true
+          fi
+
+      # PAT_GITHUB belongs to the code owner, so its approval satisfies the
+      # code-owner review rule (a github-actions[bot] approval does not). A merge
+      # made with GITHUB_TOKEN also would not trigger the push-to-main workflows.
+      - name: Approve and enable auto-merge
+        if: steps.findings.outputs.eligible == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.PAT_GITHUB }}
+        run: |-
+          gh pr review "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --approve \
+            --body "Auto-approved: CI passed and the AI review has no 🔴 or 🟡 findings."
+          # --match-head-commit stops the merge if Dependabot pushes again.
+          gh pr merge "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --auto --squash \
+            --match-head-commit "$HEAD_SHA"
