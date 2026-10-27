@@ -53,7 +53,7 @@ def check_source_property_file_location(source):
 
     - be located in a `staging/` directory directly below a model path, or in one of its subdirectories (e.g. `models/staging/stripe/`),
     - start with an underscore,
-    - contain the name of each subdirectory below `staging/`, each prefixed with an underscore (e.g. `_stripe`),
+    - contain the name of each subdirectory below `staging/`, each prefixed with an underscore (e.g. `_stripe`). A file directly in `staging/` has no subdirectory, so this rule does not apply to it,
     - end with `__sources.yml`.
 
     For example, `models/staging/stripe/_stripe__sources.yml` passes, while `models/marts/stripe/_stripe__sources.yml` fails because it is outside `models/staging/`. Any model path set in `model-paths` works, not only `models`.
