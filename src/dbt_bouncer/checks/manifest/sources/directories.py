@@ -84,8 +84,12 @@ def check_source_property_file_location(source):
     # dbt only reads source YAML from `model-paths`, so the first part is always
     # the model path. It is not checked, so any `model-paths` value works.
     if not (len(original_path.parts) > 2 and original_path.parts[1] == "staging"):
+        # With no parent directory, parts[0] is the file name, not a model path.
+        model_path = (
+            original_path.parts[0] if len(original_path.parts) > 1 else "<model path>"
+        )
         fail(
-            f"The properties file for `{display}` (`{original_path.as_posix()}`) is not located in `{original_path.parts[0]}/staging/`."
+            f"The properties file for `{display}` (`{original_path.as_posix()}`) is not located in `{model_path}/staging/`."
         )
 
     subdir_parts = original_path.parent.parts[2:]

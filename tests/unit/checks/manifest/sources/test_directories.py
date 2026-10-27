@@ -38,6 +38,7 @@ class TestCheckSourcePropertyFileLocation:
         "original_file_path",
         [
             pytest.param("models/_sources.yml", id="models_root"),
+            pytest.param("_sources.yml", id="no_parent_directory"),
             pytest.param("models/marts/_models_marts__sources.yml", id="marts"),
             pytest.param(
                 "models/marts/my_model/_my_model__sources.yml", id="marts_subdir"
@@ -55,7 +56,7 @@ class TestCheckSourcePropertyFileLocation:
                 "path": original_file_path,
                 "tags": ["tag_1"],
             },
-            match=r"is not located in `\w+/staging/`",
+            match=r"is not located in `(\w+|<model path>)/staging/`",
         )
 
     @pytest.mark.parametrize(
