@@ -49,9 +49,18 @@ def check_source_file_name(source, *, file_name_pattern: RegexPattern):
 def check_source_property_file_location(source):
     """Source properties files must follow the guidance provided by dbt [here](https://docs.getdbt.com/best-practices/how-we-structure/1-guide-overview).
 
+    The properties file must:
+
+    - be located in a `staging/` directory directly below a model path, or in one of its subdirectories (e.g. `models/staging/stripe/`),
+    - start with an underscore,
+    - contain the name of each subdirectory below `staging/`, each prefixed with an underscore (e.g. `_stripe`). A file directly in `staging/` has no subdirectory, so this rule does not apply to it,
+    - end with `__sources.yml`.
+
+    For example, `models/staging/stripe/_stripe__sources.yml` passes, while `models/marts/stripe/_stripe__sources.yml` fails because it is outside `models/staging/`. Any model path set in `model-paths` works, not only `models`.
+
     !!! info "Rationale"
 
-        dbt's official project structure guide recommends placing source properties files in the staging layer alongside the models that consume them, with a predictable naming convention (e.g. `_<layer>__sources.yml`). Following this convention makes it immediately obvious where to find a source's configuration, prevents properties files from being scattered across arbitrary directories, and ensures that new team members can navigate the project without guesswork. This check codifies the convention so it is enforced automatically rather than relied upon by convention alone.
+        [dbt's official project structure guide](https://docs.getdbt.com/best-practices/how-we-structure/1-guide-overview) recommends placing source properties files in the staging layer alongside the models that consume them, named after the source subdirectory (e.g. `_stripe__sources.yml`). Following this convention makes it immediately obvious where to find a source's configuration, prevents properties files from being scattered across arbitrary directories, and ensures that new team members can navigate the project without guesswork. This check codifies the convention so it is enforced automatically rather than relied upon by convention alone.
 
     Receives:
         source (SourceNode): The SourceNode object to check.
@@ -70,19 +79,22 @@ def check_source_property_file_location(source):
 
     """
     original_path = Path(clean_path_str(source.original_file_path))
+    display = f"{source.source_name}.{source.name}"
 
-    if (
-        len(original_path.parts) > 2
-        and original_path.parts[0] == "models"
-        and original_path.parts[1] == "staging"
-    ):
-        subdir_parts = original_path.parent.parts[2:]
-    else:
-        subdir_parts = original_path.parent.parts
+    # dbt only reads source YAML from `model-paths`, so the first part is always
+    # the model path. It is not checked, so any `model-paths` value works.
+    if not (len(original_path.parts) > 2 and original_path.parts[1] == "staging"):
+        # With no parent directory, parts[0] is the file name, not a model path.
+        model_path = (
+            original_path.parts[0] if len(original_path.parts) > 1 else "<model path>"
+        )
+        fail(
+            f"The properties file for `{display}` (`{original_path.as_posix()}`) is not located in `{model_path}/staging/`."
+        )
 
+    subdir_parts = original_path.parent.parts[2:]
     expected_substring = "_" + "_".join(subdir_parts) if subdir_parts else ""
     properties_yml_name = original_path.name
-    display = f"{source.source_name}.{source.name}"
 
     if not properties_yml_name.startswith("_"):
         fail(

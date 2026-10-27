@@ -14,15 +14,49 @@ class TestCheckSourcePropertyFileLocation:
             },
         )
 
-    def test_correct_location_outside_staging(self):
-        # Outside `models/staging`, the expected substring uses every directory.
+    def test_correct_location_staging_root(self):
         check_passes(
             "check_source_property_file_location",
             source={
-                "original_file_path": "models/marts/_models_marts__sources.yml",
-                "path": "models/marts/_models_marts__sources.yml",
+                "original_file_path": "models/staging/_staging__sources.yml",
+                "path": "models/staging/_staging__sources.yml",
                 "tags": ["tag_1"],
             },
+        )
+
+    def test_correct_location_custom_model_path(self):
+        check_passes(
+            "check_source_property_file_location",
+            source={
+                "original_file_path": "transformations/staging/crm/_crm__sources.yml",
+                "path": "transformations/staging/crm/_crm__sources.yml",
+                "tags": ["tag_1"],
+            },
+        )
+
+    @pytest.mark.parametrize(
+        "original_file_path",
+        [
+            pytest.param("models/_sources.yml", id="models_root"),
+            pytest.param("_sources.yml", id="no_parent_directory"),
+            pytest.param("models/marts/_models_marts__sources.yml", id="marts"),
+            pytest.param(
+                "models/marts/my_model/_my_model__sources.yml", id="marts_subdir"
+            ),
+            pytest.param(
+                "transformations/marts/_marts__sources.yml", id="custom_model_path"
+            ),
+        ],
+    )
+    def test_outside_staging(self, original_file_path):
+        check_fails(
+            "check_source_property_file_location",
+            source={
+                "original_file_path": original_file_path,
+                "path": original_file_path,
+                "tags": ["tag_1"],
+            },
+            match=r"is not located in `(\w+|<model path>)/staging/`",
         )
 
     @pytest.mark.parametrize(
