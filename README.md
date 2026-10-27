@@ -46,7 +46,7 @@
 | src/dbt\_bouncer/checks/manifest/models/versioning.py       |       29 |        0 |       14 |        0 |     100% |           |
 | src/dbt\_bouncer/checks/manifest/sources/\_\_init\_\_.py    |        0 |        0 |        0 |        0 |     100% |           |
 | src/dbt\_bouncer/checks/manifest/sources/description.py     |       15 |        0 |        4 |        0 |     100% |           |
-| src/dbt\_bouncer/checks/manifest/sources/directories.py     |       26 |        0 |       10 |        0 |     100% |           |
+| src/dbt\_bouncer/checks/manifest/sources/directories.py     |       27 |        0 |       10 |        0 |     100% |           |
 | src/dbt\_bouncer/checks/manifest/sources/freshness.py       |       11 |        0 |        4 |        0 |     100% |           |
 | src/dbt\_bouncer/checks/manifest/sources/lineage.py         |       36 |        0 |       10 |        0 |     100% |           |
 | src/dbt\_bouncer/checks/manifest/sources/loader.py          |        5 |        0 |        2 |        0 |     100% |           |
@@ -93,7 +93,7 @@
 | src/dbt\_bouncer/types.py                                   |       19 |        0 |        4 |        0 |     100% |           |
 | src/dbt\_bouncer/utils.py                                   |      369 |        0 |      144 |        0 |     100% |           |
 | src/dbt\_bouncer/version.py                                 |        2 |        0 |        0 |        0 |     100% |           |
-| **TOTAL**                                                   | **5050** |    **0** | **1724** |    **0** | **100%** |           |
+| **TOTAL**                                                   | **5051** |    **0** | **1724** |    **0** | **100%** |           |
 
 
 ## Setup coverage badge
