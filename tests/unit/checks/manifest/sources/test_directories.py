@@ -24,6 +24,16 @@ class TestCheckSourcePropertyFileLocation:
             },
         )
 
+    def test_correct_location_custom_model_path(self):
+        check_passes(
+            "check_source_property_file_location",
+            source={
+                "original_file_path": "transformations/staging/crm/_crm__sources.yml",
+                "path": "transformations/staging/crm/_crm__sources.yml",
+                "tags": ["tag_1"],
+            },
+        )
+
     @pytest.mark.parametrize(
         "original_file_path",
         [
@@ -31,6 +41,9 @@ class TestCheckSourcePropertyFileLocation:
             pytest.param("models/marts/_models_marts__sources.yml", id="marts"),
             pytest.param(
                 "models/marts/my_model/_my_model__sources.yml", id="marts_subdir"
+            ),
+            pytest.param(
+                "transformations/marts/_marts__sources.yml", id="custom_model_path"
             ),
         ],
     )
@@ -42,7 +55,7 @@ class TestCheckSourcePropertyFileLocation:
                 "path": original_file_path,
                 "tags": ["tag_1"],
             },
-            match=r"is not located in `models/staging/`",
+            match=r"is not located in `\w+/staging/`",
         )
 
     @pytest.mark.parametrize(
