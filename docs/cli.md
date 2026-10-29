@@ -48,6 +48,23 @@ Specifies the location of the YAML configuration file containing your dbt-bounce
 dbt-bouncer run --config-file config/checks.yml
 ```
 
+#### `--create-pr-comment-file`
+
+**Type:** Flag
+**Default:** False
+**Required:** No
+**Environment variable:** `DBT_BOUNCER_CREATE_PR_COMMENT_FILE`
+
+When passed and at least one check fails, writes `github-comment.md` to the current directory. The file holds a markdown table of the failed checks (check name, file, severity and failure message), ready to post as a pull request comment. The table lists the first 25 failures, unless `--show-all-failures` is passed.
+
+The [GitHub Action](getting_started.md#github-actions) sets this flag and posts the comment for you. In other CI setups, post the file yourself, for example with `gh pr comment --body-file github-comment.md`.
+
+**Example:**
+
+```bash
+dbt-bouncer run --create-pr-comment-file
+```
+
 #### `--dry-run`
 
 **Type:** Flag
@@ -301,6 +318,7 @@ Every `run` option can also be set with an environment variable. This is useful 
 | `--allow-zero-checks` | `DBT_BOUNCER_ALLOW_ZERO_CHECKS` |
 | `--baseline` | `DBT_BOUNCER_BASELINE` |
 | `--check` | `DBT_BOUNCER_CHECK` |
+| `--create-pr-comment-file` | `DBT_BOUNCER_CREATE_PR_COMMENT_FILE` |
 | `--dry-run` | `DBT_BOUNCER_DRY_RUN` |
 | `--only` | `DBT_BOUNCER_ONLY` |
 | `--output-file` | `DBT_BOUNCER_OUTPUT_FILE` |

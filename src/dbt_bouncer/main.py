@@ -59,8 +59,7 @@ def main_callback(
         bool,
         typer.Option(
             envvar="DBT_BOUNCER_CREATE_PR_COMMENT_FILE",
-            hidden=True,
-            help="Create a `github-comment.md` file that will be sent to GitHub as a PR comment. Defaults to True when `dbt-bouncer` is run as a GitHub Action.",
+            help="Write the failed checks to `github-comment.md` in the current directory, as a markdown PR comment. The GitHub Action sets this by default.",
         ),
     ] = False,
     check: Annotated[
