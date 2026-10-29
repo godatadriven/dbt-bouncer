@@ -91,9 +91,9 @@
 | src/dbt\_bouncer/sql\_utils.py                              |       51 |        0 |       18 |        0 |     100% |           |
 | src/dbt\_bouncer/testing.py                                 |       92 |        0 |       26 |        0 |     100% |           |
 | src/dbt\_bouncer/types.py                                   |       19 |        0 |        4 |        0 |     100% |           |
-| src/dbt\_bouncer/utils.py                                   |      369 |        0 |      144 |        0 |     100% |           |
+| src/dbt\_bouncer/utils.py                                   |      368 |        0 |      142 |        0 |     100% |           |
 | src/dbt\_bouncer/version.py                                 |        2 |        0 |        0 |        0 |     100% |           |
-| **TOTAL**                                                   | **5051** |    **0** | **1724** |    **0** | **100%** |           |
+| **TOTAL**                                                   | **5050** |    **0** | **1722** |    **0** | **100%** |           |
 
 
 ## Setup coverage badge
