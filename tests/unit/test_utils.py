@@ -33,13 +33,13 @@ def test_create_github_comment_file(monkeypatch, tmp_path):
 
     with mock.patch.dict(os.environ, clear=True):
         failed_checks = [
-            ["check_model_description_populated", "models/a.sql", "message_1"],
-            ["check_model_description_populated", "models/b.sql", "message_2"],
+            ["check_model_description_populated", "models/a.sql", "error", "message_1"],
+            ["check_model_description_populated", "models/b.sql", "warn", "message_2"],
         ]
         create_github_comment_file(failed_checks, show_all_failures=False)
         assert (
             (tmp_path / "github-comment.md").read_text()
-            == "## **Failed `dbt-bouncer`** checks\n\n\n| Check name | File | Failure message |\n| :--- | :--- | :--- |\n| check_model_description_populated | models/a.sql | message_1 |\n| check_model_description_populated | models/b.sql | message_2 |\n\n\nSent from this [GitHub Action workflow run](https://github.com/None/actions/runs/None)."
+            == "## **Failed `dbt-bouncer`** checks\n\n\n| Check name | File | Severity | Failure message |\n| :--- | :--- | :--- | :--- |\n| check_model_description_populated | models/a.sql | error | message_1 |\n| check_model_description_populated | models/b.sql | warn | message_2 |\n\n\nSent from this [GitHub Action workflow run](https://github.com/None/actions/runs/None)."
         )
 
 
@@ -48,7 +48,12 @@ def test_create_github_comment_file_show_all_failures_false(monkeypatch, tmp_pat
 
     with mock.patch.dict(os.environ, clear=True):
         failed_checks = [
-            ["check_model_description_populated", f"models/m_{i}.sql", f"message_{i}"]
+            [
+                "check_model_description_populated",
+                f"models/m_{i}.sql",
+                "error",
+                f"message_{i}",
+            ]
             for i in range(1, 31)
         ]
         create_github_comment_file(failed_checks, show_all_failures=False)
@@ -60,30 +65,54 @@ def test_create_github_comment_file_show_all_failures_true(monkeypatch, tmp_path
 
     with mock.patch.dict(os.environ, clear=True):
         failed_checks = [
-            ["check_model_description_populated", f"models/m_{i}.sql", f"message_{i}"]
+            [
+                "check_model_description_populated",
+                f"models/m_{i}.sql",
+                "error",
+                f"message_{i}",
+            ]
             for i in range(1, 31)
         ]
         create_github_comment_file(failed_checks, show_all_failures=True)
         assert len((tmp_path / "github-comment.md").read_text().split("\n")) == 38
 
 
-def test_create_github_comment_file_in_github_actions(monkeypatch):
-    """Inside GitHub Actions the comment is written to the container's `/app` mount."""
-    from pathlib import Path
-
+def test_create_github_comment_file_in_github_actions(monkeypatch, tmp_path):
+    """On a GitHub runner the comment is still written to the working directory."""
+    monkeypatch.chdir(tmp_path)
     monkeypatch.setenv("GITHUB_REPOSITORY", "owner/repo")
     monkeypatch.setenv("GITHUB_RUN_ID", "123")
-    opened = mock.mock_open()
 
-    with mock.patch.object(Path, "open", opened):
-        create_github_comment_file(
-            [["check_model_description_populated", "models/a.sql", "message_1"]],
-            show_all_failures=False,
-        )
+    create_github_comment_file(
+        [["check_model_description_populated", "models/a.sql", "error", "message_1"]],
+        show_all_failures=False,
+    )
 
-    assert opened.call_args.args[0] == Path("/app/github-comment.md")
-    written = opened().write.call_args.args[0]
+    written = (tmp_path / "github-comment.md").read_text()
     assert "https://github.com/owner/repo/actions/runs/123" in written
+
+
+def test_create_github_comment_file_escapes_pipes_and_newlines(monkeypatch, tmp_path):
+    """A pipe or newline in a cell does not break the markdown table row."""
+    monkeypatch.chdir(tmp_path)
+
+    create_github_comment_file(
+        [
+            [
+                "check_model_names",
+                "models/a.sql",
+                "error",
+                "Must match `^(stg|int)_`.\nSee docs.",
+            ]
+        ],
+        show_all_failures=False,
+    )
+
+    written = (tmp_path / "github-comment.md").read_text()
+    assert (
+        "| check_model_names | models/a.sql | error | Must match `^(stg\\|int)_`. See docs. |"
+        in written
+    )
 
 
 def test_compile_pattern_invalid_regex_names_the_pattern():

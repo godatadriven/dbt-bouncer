@@ -34,8 +34,7 @@ _SHOW_ALL = pytest.mark.parametrize(
 def _comment_file_in_tmp_path(monkeypatch, tmp_path):
     """Write any PR comment into `tmp_path`, and log at the default level.
 
-    The comment goes to `/app/github-comment.md` when `GITHUB_REPOSITORY` is set,
-    which it is on GitHub Actions, and to `./github-comment.md` otherwise.
+    The comment always goes to `./github-comment.md`, on GitHub Actions too.
     """
     monkeypatch.delenv("GITHUB_REPOSITORY", raising=False)
     monkeypatch.delenv("LOG_LEVEL", raising=False)
@@ -148,7 +147,7 @@ def test_no_pr_comment_file_when_every_check_passes(
 def test_pr_comment_file_lists_the_failure(
     args, cli_runner, env, tmp_path, write_checks_config
 ):
-    """The PR comment holds a markdown table row per failure: name, file and message."""
+    """The PR comment holds a markdown table row per failure: name, file, severity and message."""
     check = {**FAILING_CHECK[0], "include": r"models/marts/finance/orders\.sql"}
 
     result = _run(cli_runner, write_checks_config([check]), *args, env=env)
@@ -156,9 +155,9 @@ def test_pr_comment_file_lists_the_failure(
     assert result.exit_code == ExitCode.CHECK_ERRORS, result.output
     comment = (tmp_path / _COMMENT_FILE).read_text(encoding="utf-8")
     assert comment.startswith(_COMMENT_HEADER)
-    assert "| Check name | File | Failure message |" in comment
+    assert "| Check name | File | Severity | Failure message |" in comment
     assert _comment_rows(tmp_path) == [
-        "| check_model_names:0:orders | models/marts/finance/orders.sql | "
+        "| check_model_names:0:orders | models/marts/finance/orders.sql | error | "
         "`orders` does not match the supplied regex `^zzz_`. |"
     ]
     assert "**Note:**" not in comment

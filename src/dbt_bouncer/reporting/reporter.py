@@ -231,6 +231,7 @@ class Reporter:
                         [
                             str(f["check_run_id"]),
                             str(f.get("file_path") or ""),
+                            str(f.get("severity", "")).lower(),
                             str(f.get("failure_message", "")),
                         ]
                         for f in failed_checks

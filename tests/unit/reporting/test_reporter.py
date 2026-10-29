@@ -284,12 +284,13 @@ def test_report_results_creates_pr_comment_file():
     with patch("dbt_bouncer.reporting.reporter.create_github_comment_file") as mock_gh:
         reporter.report_results(results)
         mock_gh.assert_called_once()
-        # Each row is [check_run_id, file_path, failure_message].
+        # Each row is [check_run_id, file_path, severity, failure_message].
         rows = mock_gh.call_args.kwargs["failed_checks"]
         assert rows == [
             [
                 "check_model_access:0:model.my_model",
                 "models/staging/my_model.sql",
+                "error",
                 "Access should be private",
             ]
         ]

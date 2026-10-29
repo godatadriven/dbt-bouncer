@@ -40,10 +40,16 @@ def clean_path_str(path: str) -> str:
 def create_github_comment_file(
     failed_checks: list[list[str]], show_all_failures: bool
 ) -> None:
-    """Create a markdown file containing a comment for GitHub."""
+    """Create `github-comment.md` in the current working directory.
+
+    Each row of `failed_checks` is `[check name, file, severity, failure message]`.
+    The file is written relative to the working directory, so it works on any CI
+    runner. The GitHub Action runs the container with `--workdir /app`, the
+    repository mount, so there the file lands in the workspace too.
+    """
     md_formatted_comment = make_markdown_table(
         [
-            ["Check name", "File", "Failure message"],
+            ["Check name", "File", "Severity", "Failure message"],
             *sorted(failed_checks if show_all_failures else failed_checks[:25]),
         ],
     )
@@ -55,13 +61,9 @@ def create_github_comment_file(
 
     logging.debug(f"{md_formatted_comment=}")
 
-    if os.environ.get("GITHUB_REPOSITORY", None) is not None:
-        comment_file = "/app/github-comment.md"
-    else:
-        comment_file = "github-comment.md"
-
+    comment_file = Path.cwd() / "github-comment.md"
     logging.info(f"Writing comment for GitHub to {comment_file}...")
-    with Path.open(Path(comment_file), "w", encoding="utf-8") as f:
+    with Path.open(comment_file, "w", encoding="utf-8") as f:
         f.write(md_formatted_comment)
 
 
@@ -1053,7 +1055,9 @@ def make_markdown_table(array: list[list[str]]) -> str:
 
     markdown += nl
     for entry in array[1:]:
-        markdown += f"| {' | '.join(entry)} |{nl}"
+        # A pipe or newline in a cell (e.g. a regex in a failure message) would break the row.
+        cells = [cell.replace("|", "\\|").replace("\n", " ") for cell in entry]
+        markdown += f"| {' | '.join(cells)} |{nl}"
 
     return markdown
 

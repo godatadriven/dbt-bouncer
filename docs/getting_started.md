@@ -187,6 +187,31 @@ A config file resolves artifact paths relative to its own directory. A preset ha
 
 We recommend pinning both a major and minor version number.
 
+#### Without the action
+
+If you install `dbt-bouncer` in the job yourself (for example with `uv` or `pip`), pass `--create-pr-comment-file` and post the file with the `gh` CLI:
+
+```yaml
+    run-dbt-bouncer:
+        permissions:
+            pull-requests: write # Required to write a comment on the PR
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v6
+
+            - name: Run dbt-bouncer
+              id: dbt-bouncer
+              run: uvx dbt-bouncer run --create-pr-comment-file
+
+            - name: Comment the failed checks on the PR
+              if: failure() && steps.dbt-bouncer.outcome == 'failure' && hashFiles('github-comment.md') != ''
+              env:
+                GH_TOKEN: ${{ github.token }}
+              run: gh pr comment "${{ github.event.pull_request.number }}" --body-file github-comment.md
+```
+
+`dbt-bouncer` writes `github-comment.md` to the current directory, and only when a check fails.
+
 !!! tip "Trade-offs"
     **Best for:** enforcing conventions on every PR regardless of local developer setup — cannot be bypassed by individual contributors. Supports automated PR comments with violation details.
 
