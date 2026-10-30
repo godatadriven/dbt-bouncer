@@ -7,7 +7,11 @@ import orjson
 import pytest
 
 from dbt_bouncer.enums import CheckOutcome, CheckSeverity
-from dbt_bouncer.reporting.reporter import Reporter
+from dbt_bouncer.reporting.reporter import (
+    _DEFAULT_NON_TTY_WIDTH,
+    Reporter,
+    _make_console,
+)
 
 if TYPE_CHECKING:
     from dbt_bouncer.runner import CheckToRun
@@ -266,6 +270,133 @@ def test_report_results_does_not_substitute_emoji_shortcodes(capsys, monkeypatch
     out = capsys.readouterr().out
     assert ":100:" in out
     assert "\U0001f4af" not in out
+
+
+def _column_text(table_output: str, column: int) -> str:
+    """Reassemble one column of a rendered rich table.
+
+    A folded cell spans several lines, so the value cannot be found with a plain
+    substring search. Split every row on the `│` separators, take the cell at
+    `column` (1-based, as index 0 is the text before the first border) and
+    concatenate the fragments.
+
+    Returns:
+        str: The column's text with the fold line breaks removed.
+
+    """
+    return "".join(
+        line.split("│")[column].strip()
+        for line in table_output.splitlines()
+        if line.count("│") > column
+    )
+
+
+def test_make_console_uses_default_width_when_not_a_tty(monkeypatch):
+    """Without a terminal or `COLUMNS`, the console is wider than rich's 80 default.
+
+    Under pytest stdout is captured, so `Console.is_terminal` is False and rich
+    would otherwise assume 80 columns and squeeze the results table.
+    """
+    monkeypatch.delenv("COLUMNS", raising=False)
+
+    console = _make_console()
+
+    assert console.is_terminal is False
+    assert console.width == _DEFAULT_NON_TTY_WIDTH
+
+
+def test_make_console_ignores_force_color_when_not_a_tty(monkeypatch):
+    """`FORCE_COLOR` must not disable the width fallback.
+
+    rich treats `FORCE_COLOR` as "this is a terminal" for colour purposes, but
+    it still cannot detect a width from a pipe and falls back to 80 columns.
+    CI commonly sets `FORCE_COLOR`, so the TTY check must look at stdout itself.
+    """
+    monkeypatch.delenv("COLUMNS", raising=False)
+    monkeypatch.setenv("FORCE_COLOR", "1")
+
+    console = _make_console()
+
+    assert console.is_terminal is True
+    assert console.width == _DEFAULT_NON_TTY_WIDTH
+
+
+def test_make_console_honours_columns_env_var(monkeypatch):
+    """`COLUMNS` takes precedence over the non-TTY default width."""
+    monkeypatch.setenv("COLUMNS", "200")
+
+    console = _make_console()
+
+    # rich subtracts one column on legacy Windows consoles.
+    assert console.width == 200 - console.legacy_windows
+
+
+def test_make_console_disables_emoji(monkeypatch):
+    """Both console variants keep `emoji=False` (see the `:100:` regression)."""
+    monkeypatch.delenv("COLUMNS", raising=False)
+    assert _make_console()._emoji is False
+
+    monkeypatch.setenv("COLUMNS", "200")
+    assert _make_console()._emoji is False
+
+
+def test_report_results_does_not_truncate_long_values(capsys, monkeypatch):
+    """Long check IDs, paths and messages are folded onto extra lines, not cut.
+
+    rich's default column overflow is `ellipsis`, which replaces any single
+    token wider than its column with `…`; with `no_wrap=True` the whole cell is
+    cut. Both hid the exact information needed to act on a failure (which
+    model, which file) in CI logs, where stdout is not a terminal.
+    """
+    monkeypatch.delenv("COLUMNS", raising=False)
+
+    check_run_id = "check_model_has_unique_test:0:model.my_project.fct_revenue_recognition_schedule"
+    file_path = "models/marts/finance/revenue/fct_revenue_recognition_schedule.sql"
+    column_name = "customer_identifier_hash_with_a_deliberately_long_column_name"
+    results = [
+        {
+            "check_run_id": check_run_id,
+            "failure_message": f"`fct_revenue_recognition_schedule` has columns without a description: ['{column_name}'].",
+            "file_path": file_path,
+            "outcome": CheckOutcome.FAILED,
+            "severity": CheckSeverity.ERROR,
+        },
+    ]
+    reporter = Reporter(show_all_failures=True, create_pr_comment_file=False)
+    reporter.report_results(results)
+
+    out = capsys.readouterr().out
+    assert "\u2026" not in out
+    assert check_run_id in _column_text(out, 1)
+    assert file_path in _column_text(out, 2)
+    assert column_name in _column_text(out, 4)
+
+
+def test_report_dry_run_does_not_truncate_long_check_names(capsys, monkeypatch):
+    """The dry-run table folds long check names instead of cutting them."""
+    monkeypatch.setenv("COLUMNS", "60")
+
+    # The table shows the check's class name, so build a subclass whose name is
+    # wider than the 60-column console.
+    long_name = "CheckModelHasADeliberatelyVeryLongNameThatExceedsTheConsoleWidth"
+    long_check = type(long_name, (_FakeCheck,), {})
+    checks: list[CheckToRun] = [
+        cast(
+            "CheckToRun",
+            {
+                "check": long_check(),
+                "check_run_id": f"{long_name}:0:model.my_model",
+                "severity": "error",
+            },
+        ),
+    ]
+
+    reporter = Reporter(show_all_failures=False, create_pr_comment_file=False)
+    reporter.report_dry_run(checks, iterate_cache={long_check: frozenset({"model"})})
+
+    out = capsys.readouterr().out
+    assert "\u2026" not in out
+    assert long_name in _column_text(out, 1)
 
 
 def test_report_results_creates_pr_comment_file():

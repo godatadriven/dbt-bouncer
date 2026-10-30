@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import logging
+import os
+import sys
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -20,6 +22,30 @@ if TYPE_CHECKING:
     from dbt_bouncer.runner import CheckToRun
 
 __all__ = ["Reporter"]
+
+# Width used when stdout is not a terminal and `COLUMNS` is unset. rich falls
+# back to 80 columns in that case, which squeezes the results table so hard
+# that the file and failure message columns can disappear entirely.
+_DEFAULT_NON_TTY_WIDTH = 120
+
+
+def _make_console() -> Console:
+    """Build the console used for the results tables.
+
+    rich reads the terminal size when stdout is a TTY and honours the `COLUMNS`
+    environment variable everywhere. When neither applies (CI logs, output piped
+    to a file) it assumes 80 columns, so use a generous fixed width instead.
+
+    `emoji=False` is deliberate: check run IDs contain `:<index>:` segments
+    that rich would otherwise substitute with emoji shortcodes (e.g. `:100:`).
+
+    Returns:
+        Console: A console sized so table cells are not squeezed or truncated.
+
+    """
+    if sys.stdout.isatty() or os.environ.get("COLUMNS"):
+        return Console(emoji=False)
+    return Console(emoji=False, width=_DEFAULT_NON_TTY_WIDTH)
 
 
 class Reporter:
@@ -81,7 +107,7 @@ class Reporter:
             )
             counts[check_name, resource_type] += 1
 
-        console = Console(emoji=False)
+        console = _make_console()
         table = Table(
             title="[bold cyan]Dry run — checks that would execute[/bold cyan]",
             title_justify="left",
@@ -90,7 +116,7 @@ class Reporter:
             show_header=True,
             header_style="bold cyan",
         )
-        table.add_column("Check name", justify="left", style="cyan", no_wrap=True)
+        table.add_column("Check name", justify="left", style="cyan", overflow="fold")
         table.add_column("Resource type", justify="center")
         table.add_column("Count", justify="right")
         for (check_name, resource_type), count in sorted(counts.items()):
@@ -152,7 +178,7 @@ class Reporter:
             num_checks_error > 0 or num_checks_warn > 0 or num_checks_internal_error > 0
         )
 
-        console = Console(emoji=False)
+        console = _make_console()
 
         if num_checks_internal_error > 0:
             (logging.error if num_checks_internal_error_blocking else logging.warning)(
@@ -198,10 +224,16 @@ class Reporter:
                 show_header=True,
                 header_style=f"bold {border_color}",
             )
-            table.add_column("Check name", justify="left", style="cyan", no_wrap=True)
-            table.add_column("File", justify="left", style="magenta")
+            # `overflow="fold"` wraps a single long token (a check run ID, a
+            # file path, a `model.project.name` ID) onto extra lines instead of
+            # cutting it with an ellipsis, so the table never hides the
+            # information needed to act on a failure.
+            table.add_column(
+                "Check name", justify="left", style="cyan", overflow="fold"
+            )
+            table.add_column("File", justify="left", style="magenta", overflow="fold")
             table.add_column("Severity", justify="center", width=10)
-            table.add_column("Failure message", justify="left")
+            table.add_column("Failure message", justify="left", overflow="fold")
 
             checks_to_display = (
                 failed_checks if self.show_all_failures else failed_checks[:25]

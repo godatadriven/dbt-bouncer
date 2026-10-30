@@ -201,7 +201,7 @@ By using this approach, and combining with your own unique constraints and desir
 
 ## How do I get machine-readable results to parse in a script?
 
-Do not parse the console results table. That table is for humans. It truncates check names to fit the terminal width.
+Do not parse the console results table. That table is for humans. Long values are wrapped onto extra lines to fit the terminal width.
 
 Set `--output-file` and select a structured `--output-format`. The supported formats are `csv`, `gitlab`, `json`, `junit`, `sarif`, and `tap`.
 

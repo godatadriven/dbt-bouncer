@@ -250,7 +250,7 @@ jq --arg prefix "transform/" 'map(.location.path = $prefix + .location.path)' \
 
 !!! warning "Do not parse the console table"
 
-    The console results table is for humans. It truncates check names to fit the terminal width. Do not parse this table in scripts.
+    The console results table is for humans. Long values are wrapped onto extra lines to fit the terminal width, so a single value can span several lines. Do not parse this table in scripts.
 
     For machine-readable output, set `--output-file` and select a structured `--output-format`. The supported formats are `csv`, `gitlab`, `json`, `junit`, `sarif`, and `tap`. Parse the output file instead of the console table.
 
@@ -350,6 +350,18 @@ DBT_BOUNCER_OUTPUT_ONLY_FAILURES=true \
 DBT_BOUNCER_ONLY=manifest_checks \
   pre-commit run dbt-bouncer --all-files
 ```
+
+### Console table width
+
+The results table is sized to the terminal. When standard output is not a terminal — CI
+logs, or output piped to a file — the width cannot be detected, so the table is rendered
+at 120 columns. Set the standard `COLUMNS` environment variable to use a different width:
+
+```bash
+COLUMNS=200 dbt-bouncer run | tee dbt-bouncer.log
+```
+
+Values that do not fit their column are wrapped onto extra lines, never cut off.
 
 ## validate
 
