@@ -311,7 +311,8 @@ def test_make_console_honours_columns_env_var(monkeypatch):
 
     console = _make_console()
 
-    assert console.width == 200
+    # rich subtracts one column on legacy Windows consoles.
+    assert console.width == 200 - console.legacy_windows
 
 
 def test_make_console_disables_emoji(monkeypatch):

@@ -340,6 +340,17 @@ read by `validate`, `list` or `explain`.
 `--config-file` is the exception to the table: it is read from `DBT_BOUNCER_CONFIG_FILE`,
 but with its own precedence rules, described under [Config file](configuration.md).
 
+**Example** — getting machine-readable output from the pre-commit hook, which accepts no
+arguments of your own:
+
+```bash
+DBT_BOUNCER_OUTPUT_FILE=results.json \
+DBT_BOUNCER_OUTPUT_FORMAT=json \
+DBT_BOUNCER_OUTPUT_ONLY_FAILURES=true \
+DBT_BOUNCER_ONLY=manifest_checks \
+  pre-commit run dbt-bouncer --all-files
+```
+
 ### Console table width
 
 The results table is sized to the terminal. When standard output is not a terminal — CI
@@ -351,17 +362,6 @@ COLUMNS=200 dbt-bouncer run | tee dbt-bouncer.log
 ```
 
 Values that do not fit their column are wrapped onto extra lines, never cut off.
-
-**Example** — getting machine-readable output from the pre-commit hook, which accepts no
-arguments of your own:
-
-```bash
-DBT_BOUNCER_OUTPUT_FILE=results.json \
-DBT_BOUNCER_OUTPUT_FORMAT=json \
-DBT_BOUNCER_OUTPUT_ONLY_FAILURES=true \
-DBT_BOUNCER_ONLY=manifest_checks \
-  pre-commit run dbt-bouncer --all-files
-```
 
 ## validate
 
