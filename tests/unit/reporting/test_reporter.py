@@ -305,6 +305,22 @@ def test_make_console_uses_default_width_when_not_a_tty(monkeypatch):
     assert console.width == _DEFAULT_NON_TTY_WIDTH
 
 
+def test_make_console_ignores_force_color_when_not_a_tty(monkeypatch):
+    """`FORCE_COLOR` must not disable the width fallback.
+
+    rich treats `FORCE_COLOR` as "this is a terminal" for colour purposes, but
+    it still cannot detect a width from a pipe and falls back to 80 columns.
+    CI commonly sets `FORCE_COLOR`, so the TTY check must look at stdout itself.
+    """
+    monkeypatch.delenv("COLUMNS", raising=False)
+    monkeypatch.setenv("FORCE_COLOR", "1")
+
+    console = _make_console()
+
+    assert console.is_terminal is True
+    assert console.width == _DEFAULT_NON_TTY_WIDTH
+
+
 def test_make_console_honours_columns_env_var(monkeypatch):
     """`COLUMNS` takes precedence over the non-TTY default width."""
     monkeypatch.setenv("COLUMNS", "200")

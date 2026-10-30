@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 import os
+import sys
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -42,9 +43,8 @@ def _make_console() -> Console:
         Console: A console sized so table cells are not squeezed or truncated.
 
     """
-    console = Console(emoji=False)
-    if console.is_terminal or os.environ.get("COLUMNS"):
-        return console
+    if sys.stdout.isatty() or os.environ.get("COLUMNS"):
+        return Console(emoji=False)
     return Console(emoji=False, width=_DEFAULT_NON_TTY_WIDTH)
 
 
