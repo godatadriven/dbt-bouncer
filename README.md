@@ -85,7 +85,7 @@
 | src/dbt\_bouncer/reporting/\_\_init\_\_.py                  |        0 |        0 |        0 |        0 |     100% |           |
 | src/dbt\_bouncer/reporting/formatters.py                    |       95 |        0 |       40 |        0 |     100% |           |
 | src/dbt\_bouncer/reporting/logger.py                        |       39 |        0 |        6 |        0 |     100% |           |
-| src/dbt\_bouncer/reporting/reporter.py                      |       96 |        0 |       30 |        0 |     100% |           |
+| src/dbt\_bouncer/reporting/reporter.py                      |      103 |        0 |       32 |        0 |     100% |           |
 | src/dbt\_bouncer/runner.py                                  |      172 |        0 |       56 |        0 |     100% |           |
 | src/dbt\_bouncer/selectors.py                               |      141 |        0 |       66 |        0 |     100% |           |
 | src/dbt\_bouncer/sql\_utils.py                              |       51 |        0 |       18 |        0 |     100% |           |
@@ -93,7 +93,7 @@
 | src/dbt\_bouncer/types.py                                   |       19 |        0 |        4 |        0 |     100% |           |
 | src/dbt\_bouncer/utils.py                                   |      368 |        0 |      142 |        0 |     100% |           |
 | src/dbt\_bouncer/version.py                                 |        2 |        0 |        0 |        0 |     100% |           |
-| **TOTAL**                                                   | **5050** |    **0** | **1722** |    **0** | **100%** |           |
+| **TOTAL**                                                   | **5057** |    **0** | **1724** |    **0** | **100%** |           |
 
 
 ## Setup coverage badge
