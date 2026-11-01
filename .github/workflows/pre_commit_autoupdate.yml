@@ -19,7 +19,7 @@ jobs:
             - name: Setup Python
               uses: ./.github/actions/setup_python_env
 
-            - run: uv run prek auto-update
+            - run: uv run prek update
 
             - name: Check for changes
               id: diff
@@ -36,4 +36,4 @@ jobs:
                   labels: dependencies
                   title: "build: pre-commit autoupdate"
                   body: |
-                      Automated pre-commit hook version updates via `pre-commit autoupdate`.
+                      Automated pre-commit hook version updates via `prek update`.
