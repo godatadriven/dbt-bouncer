@@ -18,13 +18,13 @@ jobs:
     runs-on: ubuntu-26.04
     steps:
       - name: Download Benchmark Results
-        uses: dawidd6/action-download-artifact@57aa996fc1713cc1579039614f4645a7f4841fd4 # v23
+        uses: dawidd6/action-download-artifact@eab87c9830c39eff17e5a6eadb20bfb4bc880477 # v27
         with:
           name: ${{ env.BENCHMARK_RESULTS }}
           run_id: ${{ github.event.workflow_run.id }}
 
       - name: Download pytest Benchmark Results
-        uses: dawidd6/action-download-artifact@57aa996fc1713cc1579039614f4645a7f4841fd4 # v23
+        uses: dawidd6/action-download-artifact@eab87c9830c39eff17e5a6eadb20bfb4bc880477 # v27
         with:
           name: ${{ env.PYTEST_BENCHMARK_RESULTS }}
           run_id: ${{ github.event.workflow_run.id }}
@@ -45,7 +45,7 @@ jobs:
         uses: ./_pr_resolver/.github/actions/resolve-pr-from-workflow-run
 
       - if: steps.export.outputs.skip != 'true'
-        uses: bencherdev/bencher@4c83b25441d145ee273adaf74be30f2382e6ba85 # v0.6.11
+        uses: bencherdev/bencher@f80847436d7157936b40525db4c2a1064124f04a # v0.6.13
 
       - name: Track Benchmarks with Bencher
         if: steps.export.outputs.skip != 'true'
