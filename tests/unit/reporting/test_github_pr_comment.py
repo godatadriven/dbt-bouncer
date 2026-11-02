@@ -72,6 +72,7 @@ def pr_env(monkeypatch, tmp_path: Path) -> None:
     )
     monkeypatch.delenv("GH_TOKEN", raising=False)
     monkeypatch.delenv("GITHUB_API_URL", raising=False)
+    monkeypatch.delenv("GITHUB_SERVER_URL", raising=False)
     monkeypatch.setenv("GITHUB_EVENT_PATH", str(event_file))
     monkeypatch.setenv("GITHUB_REPOSITORY", "owner/repo")
     monkeypatch.setenv("GITHUB_RUN_ID", "99")
@@ -150,17 +151,28 @@ class TestSyncGithubPrComment:
 
         assert [m for m, _ in fake.calls] == ["GET", "POST"]
 
-    def test_edits_latest_marked_comment_across_pages(self):
-        """Comments are paged, and the latest marked comment is the one edited."""
-        comments = [{"body": "noise", "id": i} for i in range(150)]
-        comments[10]["body"] = f"{MARKER}\nolder"
-        comments[120]["body"] = f"{MARKER}\nnewer"
+    def test_finds_marked_comment_on_a_later_page(self):
+        """Comments are paged, and paging stops at the first marked comment."""
+        comments = [{"body": "noise", "id": i} for i in range(250)]
+        comments[120]["body"] = f"{MARKER}\nfirst"
+        comments[130]["body"] = f"{MARKER}\nduplicate"
         fake = FakeGitHub(comments)
 
         _sync(fake, [FAILED_RESULT])
 
         assert [m for m, _ in fake.calls] == ["GET", "GET", "PATCH"]
         assert fake.calls[2][1].endswith("/issues/comments/120")
+
+    def test_passed_body_without_run_id_has_no_link(self, monkeypatch):
+        """Without `GITHUB_RUN_ID`, the passed comment has no broken run link."""
+        monkeypatch.delenv("GITHUB_RUN_ID")
+        fake = FakeGitHub([{"body": f"{MARKER}\nold", "id": 5}])
+
+        _sync(fake, [PASSED_RESULT])
+
+        body = fake.comments[0]["body"]
+        assert "All checks passed as of commit `abc123`." in body
+        assert "actions/runs" not in body
 
     def test_uses_github_api_url(self, monkeypatch):
         """GitHub Enterprise Server is reached through `GITHUB_API_URL`."""

@@ -134,8 +134,9 @@ runs:
         [[ -n "$INPUT_STATE" ]] && args+=(--state "/app/$INPUT_STATE")
         [[ "$INPUT_VERBOSE" != "false" ]] && args+=(-v)
 
-        # GITHUB_API_URL, GITHUB_REF, GITHUB_REPOSITORY and GITHUB_RUN_ID are set
-        # by the runner already, so they pass through by name. GITHUB_TOKEN comes
+        # GITHUB_API_URL, GITHUB_REF, GITHUB_REPOSITORY, GITHUB_RUN_ID and
+        # GITHUB_SERVER_URL are set by the runner already, so they pass through
+        # by name. GITHUB_TOKEN comes
         # from `env:`. The event file lives outside the workspace, so it is
         # mounted separately for `--github-pr-comment` to find the PR number.
         docker run --rm \
@@ -146,6 +147,7 @@ runs:
           --env GITHUB_REF \
           --env GITHUB_REPOSITORY \
           --env GITHUB_RUN_ID \
+          --env GITHUB_SERVER_URL \
           --env GITHUB_TOKEN \
           --volume "$GITHUB_EVENT_PATH":/github/event.json:ro \
           --volume "$GITHUB_WORKSPACE":/app \

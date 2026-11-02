@@ -43,6 +43,7 @@ class _PullRequest:
     head_sha: str
     number: int
     repository: str
+    run_url: str | None
     token: str
 
 
@@ -57,16 +58,20 @@ def build_marker(comment_key: str) -> str:
     return f"<!-- dbt-bouncer-pr-comment: {re.sub(r'-{2,}', '-', comment_key)} -->"
 
 
-def _passed_body(head_sha: str) -> str:
+def _passed_body(pull_request: _PullRequest) -> str:
     """Build the comment body for a run where every check passed.
 
     Returns:
         str: The markdown comment body.
 
     """
-    run_url = f"https://github.com/{os.environ.get('GITHUB_REPOSITORY')}/actions/runs/{os.environ.get('GITHUB_RUN_ID')}"
-    commit = f" as of commit `{head_sha}`" if head_sha else ""
-    return f"## **Passed `dbt-bouncer`** checks\n\nAll checks passed{commit}. Sent from this [GitHub Action workflow run]({run_url})."
+    commit = f" as of commit `{pull_request.head_sha}`" if pull_request.head_sha else ""
+    source = (
+        f" Sent from this [GitHub Action workflow run]({pull_request.run_url})."
+        if pull_request.run_url
+        else ""
+    )
+    return f"## **Passed `dbt-bouncer`** checks\n\nAll checks passed{commit}.{source}"
 
 
 def _read_pull_request() -> _PullRequest | None:
@@ -101,11 +106,14 @@ def _read_pull_request() -> _PullRequest | None:
         )
         return None
 
+    run_id = os.environ.get("GITHUB_RUN_ID")
+    server_url = os.environ.get("GITHUB_SERVER_URL", "https://github.com").rstrip("/")
     return _PullRequest(
         api_url=os.environ.get("GITHUB_API_URL", _DEFAULT_API_URL).rstrip("/"),
         head_sha=str((pull_request.get("head") or {}).get("sha") or ""),
         number=int(pull_request["number"]),
         repository=repository,
+        run_url=f"{server_url}/{repository}/actions/runs/{run_id}" if run_id else None,
         token=token,
     )
 
@@ -141,13 +149,15 @@ def _github_request(
 
 
 def _find_comment_id(pull_request: _PullRequest, marker: str) -> int | None:
-    """Find the latest comment on the pull request that starts with `marker`.
+    """Find the first comment on the pull request that starts with `marker`.
+
+    Each run edits that one comment, so normally only one has the marker. Paging
+    stops at the first match.
 
     Returns:
         int | None: The comment ID, or `None` if no comment has the marker.
 
     """
-    comment_id = None
     page = 1
     while True:
         comments = _github_request(
@@ -158,9 +168,9 @@ def _find_comment_id(pull_request: _PullRequest, marker: str) -> int | None:
         for comment in comments:
             # `startswith`, not `in`: a reply that quotes the comment starts with `>`.
             if str(comment.get("body") or "").startswith(marker):
-                comment_id = int(comment["id"])
+                return int(comment["id"])
         if len(comments) < _COMMENTS_PER_PAGE:
-            return comment_id
+            return None
         page += 1
 
 
@@ -206,7 +216,7 @@ def sync_github_pr_comment(
         if failed_checks:
             body = build_github_comment_body(failed_checks, show_all_failures)
         elif comment_id is not None:
-            body = _passed_body(pull_request.head_sha)
+            body = _passed_body(pull_request)
         else:
             logging.info("All checks passed and no earlier PR comment exists.")
             return
