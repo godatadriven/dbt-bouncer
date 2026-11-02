@@ -8,7 +8,11 @@ import orjson
 import pytest
 from typer.testing import CliRunner
 
-from dbt_bouncer.cli.run.utils import _build_context, detect_config_file_source
+from dbt_bouncer.cli.run.utils import (
+    _build_context,
+    _pr_comment_key,
+    detect_config_file_source,
+)
 from dbt_bouncer.enums import ConfigFileName, ConfigFileSource, ExitCode
 from dbt_bouncer.main import app
 from dbt_bouncer.regression import build_baseline
@@ -229,3 +233,71 @@ class TestRunWithBaselineAndState:
 
         assert result.exit_code == ExitCode.ARTIFACT_ERROR
         assert "Failed to load the base artifacts from `--state" in caplog.text
+
+
+class TestRunGithubPrComment:
+    """Tests for `run --github-pr-comment`."""
+
+    @staticmethod
+    def _invoke_run(config_file: Path, *extra_args: str):
+        return CliRunner().invoke(
+            app,
+            ["run", "--config-file", PurePath(config_file).as_posix(), *extra_args],
+        )
+
+    @patch("dbt_bouncer.reporting.github_pr_comment.sync_github_pr_comment")
+    def test_flag_syncs_comment_with_results(
+        self, mock_sync: MagicMock, failing_config_file: Path
+    ):
+        """The flag sends the failed results and keeps the exit code."""
+        result = self._invoke_run(failing_config_file, "--github-pr-comment")
+
+        assert result.exit_code == ExitCode.CHECK_ERRORS
+        mock_sync.assert_called_once()
+        results = mock_sync.call_args.args[0]
+        assert any(r["outcome"] != "success" for r in results)
+        assert mock_sync.call_args.kwargs["comment_key"].endswith(
+            failing_config_file.name
+        )
+
+    @patch("dbt_bouncer.reporting.github_pr_comment.sync_github_pr_comment")
+    def test_no_flag_does_not_sync(
+        self, mock_sync: MagicMock, failing_config_file: Path
+    ):
+        """Without the flag, no comment is sent."""
+        self._invoke_run(failing_config_file)
+
+        mock_sync.assert_not_called()
+
+    @patch("dbt_bouncer.reporting.github_pr_comment.sync_github_pr_comment")
+    def test_dry_run_does_not_sync(
+        self, mock_sync: MagicMock, failing_config_file: Path
+    ):
+        """A dry run executes no checks, so it sends no comment."""
+        result = self._invoke_run(
+            failing_config_file, "--github-pr-comment", "--dry-run"
+        )
+
+        assert result.exit_code == ExitCode.SUCCESS
+        mock_sync.assert_not_called()
+
+
+class TestPrCommentKey:
+    """Tests for `_pr_comment_key`."""
+
+    def test_relative_to_working_directory(self, monkeypatch, tmp_path: Path):
+        """A config inside the working directory is keyed by its relative path."""
+        monkeypatch.chdir(tmp_path)
+        (tmp_path / "ci").mkdir()
+
+        assert (
+            _pr_comment_key(tmp_path / "ci" / "dbt-bouncer.yml") == "ci/dbt-bouncer.yml"
+        )
+
+    def test_outside_working_directory(self, monkeypatch, tmp_path: Path):
+        """A config outside the working directory (a preset) is keyed by its name."""
+        work_dir = tmp_path / "work"
+        work_dir.mkdir()
+        monkeypatch.chdir(work_dir)
+
+        assert _pr_comment_key(tmp_path / "presets" / "strict.yml") == "strict.yml"

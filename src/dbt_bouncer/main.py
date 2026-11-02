@@ -62,6 +62,13 @@ def main_callback(
             help="Write the failed checks to `github-comment.md` in the current directory, as a markdown PR comment. The GitHub Action sets this by default.",
         ),
     ] = False,
+    github_pr_comment: Annotated[
+        bool,
+        typer.Option(
+            envvar="DBT_BOUNCER_GITHUB_PR_COMMENT",
+            help="In a GitHub Actions pull request run, create or update one PR comment with the failed checks. Later runs edit the same comment, and a passing run marks it as passed. Needs `GITHUB_TOKEN` and `pull-requests: write`.",
+        ),
+    ] = False,
     check: Annotated[
         str,
         typer.Option(
@@ -176,6 +183,7 @@ def main_callback(
             config_file=config_file,
             create_pr_comment_file=create_pr_comment_file,
             dry_run=dry_run,
+            github_pr_comment=github_pr_comment,
             only=only,
             output_file=output_file,
             output_format=output_format,

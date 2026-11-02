@@ -165,7 +165,7 @@ jobs:
                 output-format: json # optional, one of: csv, gitlab, json, junit, sarif, tap. Defaults to json
                 output-only-failures: false # optional, defaults to false
                 preset: '' # optional, one of: minimal, standard, strict. Replaces config-file
-                send-pr-comment: true # optional, defaults to true
+                send-pr-comment: true # optional, defaults to true. Keeps one PR comment, edited on each run
                 show-all-failures: false # optional, defaults to false
                 state: '' # optional, directory of base artifacts, so only new failures fail the run
                 verbose: false # optional, defaults to false
@@ -189,7 +189,7 @@ We recommend pinning both a major and minor version number.
 
 #### Without the action
 
-If you install `dbt-bouncer` in the job yourself (for example with `uv` or `pip`), pass `--create-pr-comment-file` and post the file with the `gh` CLI:
+If you install `dbt-bouncer` in the job yourself (for example with `uv` or `pip`), pass `--github-pr-comment` and give the step a token:
 
 ```yaml
     run-dbt-bouncer:
@@ -200,17 +200,12 @@ If you install `dbt-bouncer` in the job yourself (for example with `uv` or `pip`
             - uses: actions/checkout@v6
 
             - name: Run dbt-bouncer
-              id: dbt-bouncer
-              run: uvx dbt-bouncer run --create-pr-comment-file
-
-            - name: Comment the failed checks on the PR
-              if: failure() && steps.dbt-bouncer.outcome == 'failure' && hashFiles('github-comment.md') != ''
               env:
-                GH_TOKEN: ${{ github.token }}
-              run: gh pr comment "${{ github.event.pull_request.number }}" --body-file github-comment.md
+                GITHUB_TOKEN: ${{ github.token }}
+              run: uvx dbt-bouncer run --github-pr-comment
 ```
 
-`dbt-bouncer` writes `github-comment.md` to the current directory, and only when a check fails.
+`dbt-bouncer` keeps one comment on the PR. Later runs edit that comment, and a passing run marks it as passed. See `--github-pr-comment` in the [CLI reference](cli.md).
 
 !!! tip "Trade-offs"
     **Best for:** enforcing conventions on every PR regardless of local developer setup — cannot be bypassed by individual contributors. Supports automated PR comments with violation details.

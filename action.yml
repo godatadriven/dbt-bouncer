@@ -49,7 +49,7 @@ inputs:
   send-pr-comment:
     default: 'true'
     description: |
-      true: Send a comment to the GitHub PR with a list of failed checks.
+      true: Keep one comment on the GitHub PR with the failed checks. Later runs edit the same comment, and a passing run marks it as passed. The job needs `pull-requests: write`.
       false: Do not send a comment.
     required: false
   show-all-failures:
@@ -117,7 +117,7 @@ runs:
         fi
 
         if [[ "$INPUT_SEND_PR_COMMENT" = "true" ]]; then
-          args+=(--create-pr-comment-file)
+          args+=(--create-pr-comment-file --github-pr-comment)
         else
           args+=(--no-create-pr-comment-file)
         fi
@@ -134,29 +134,23 @@ runs:
         [[ -n "$INPUT_STATE" ]] && args+=(--state "/app/$INPUT_STATE")
         [[ "$INPUT_VERBOSE" != "false" ]] && args+=(-v)
 
-        # GITHUB_REF, GITHUB_REPOSITORY and GITHUB_RUN_ID are set by the runner
-        # already, so they pass through by name. GITHUB_TOKEN comes from `env:`.
+        # GITHUB_API_URL, GITHUB_REF, GITHUB_REPOSITORY, GITHUB_RUN_ID and
+        # GITHUB_SERVER_URL are set by the runner already, so they pass through
+        # by name. GITHUB_TOKEN comes
+        # from `env:`. The event file lives outside the workspace, so it is
+        # mounted separately for `--github-pr-comment` to find the PR number.
         docker run --rm \
           --env CREATE_DBT_BOUNCER_CONFIG_FILE=false \
           --env DBT_PROJECT_DIR \
+          --env GITHUB_API_URL \
+          --env GITHUB_EVENT_PATH=/github/event.json \
           --env GITHUB_REF \
           --env GITHUB_REPOSITORY \
           --env GITHUB_RUN_ID \
+          --env GITHUB_SERVER_URL \
           --env GITHUB_TOKEN \
+          --volume "$GITHUB_EVENT_PATH":/github/event.json:ro \
           --volume "$GITHUB_WORKSPACE":/app \
           --workdir /app \
           ghcr.io/godatadriven/dbt-bouncer:v0.0.0 \
           "${args[@]}"
-
-    - name: Send PR comment
-      if: always() && inputs.send-pr-comment == 'true' && steps.run-dbt-bouncer.outcome != 'success'
-      shell: bash
-      env:
-        GH_TOKEN: ${{ github.token }}
-        PR_NUMBER: ${{ github.event.number }}
-        REPO: ${{ github.repository }}
-      run: |
-        set -euo pipefail
-        gh pr comment "$PR_NUMBER" \
-          --repo "$REPO" \
-          --body-file github-comment.md
