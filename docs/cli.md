@@ -57,7 +57,7 @@ dbt-bouncer run --config-file config/checks.yml
 
 When passed and at least one check fails, writes `github-comment.md` to the current directory. The file holds a markdown table of the failed checks (check name, file, severity and failure message), ready to post as a pull request comment. The table lists the first 25 failures, unless `--show-all-failures` is passed.
 
-The [GitHub Action](getting_started.md#github-actions) sets this flag and posts the comment for you. In other CI setups, post the file yourself, for example with `gh pr comment --body-file github-comment.md`.
+The [GitHub Action](getting_started.md#github-actions) sets this flag. On GitHub Actions, use `--github-pr-comment` (below) to post the comment. In other CI setups, post the file yourself.
 
 **Example:**
 
@@ -91,6 +91,31 @@ Example output:
 ╰────────────────────────────────────────────────────────────╯
 
 Dry run complete. 2524 check(s) would run.
+```
+
+#### `--github-pr-comment`
+
+**Type:** Flag
+**Default:** False
+**Required:** No
+**Environment variable:** `DBT_BOUNCER_GITHUB_PR_COMMENT`
+
+When passed in a GitHub Actions run for a pull request, `dbt-bouncer` keeps one comment on the pull request with the failed checks:
+
+- If a check fails or warns, `dbt-bouncer` creates the comment, or edits the comment from an earlier run.
+- If all checks pass and a comment from an earlier run exists, `dbt-bouncer` edits it to say that the checks passed.
+- If all checks pass and no earlier comment exists, `dbt-bouncer` posts nothing.
+
+A hidden marker with the config file path identifies the comment. Two jobs with different config files keep separate comments.
+
+The flag needs `GITHUB_TOKEN` (or `GH_TOKEN`) in the environment and `pull-requests: write` permission. `dbt-bouncer` reads the pull request number from `GITHUB_EVENT_PATH` and calls the API at `GITHUB_API_URL`, so GitHub Enterprise Server works too. If the comment cannot be sent, `dbt-bouncer` logs a warning. The exit code does not change.
+
+The [GitHub Action](getting_started.md#github-actions) sets this flag when `send-pr-comment` is `true`.
+
+**Example:**
+
+```bash
+dbt-bouncer run --github-pr-comment
 ```
 
 #### `--check`
@@ -320,6 +345,7 @@ Every `run` option can also be set with an environment variable. This is useful 
 | `--check` | `DBT_BOUNCER_CHECK` |
 | `--create-pr-comment-file` | `DBT_BOUNCER_CREATE_PR_COMMENT_FILE` |
 | `--dry-run` | `DBT_BOUNCER_DRY_RUN` |
+| `--github-pr-comment` | `DBT_BOUNCER_GITHUB_PR_COMMENT` |
 | `--only` | `DBT_BOUNCER_ONLY` |
 | `--output-file` | `DBT_BOUNCER_OUTPUT_FILE` |
 | `--output-format` | `DBT_BOUNCER_OUTPUT_FORMAT` |

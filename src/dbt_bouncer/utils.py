@@ -37,15 +37,16 @@ def clean_path_str(path: str) -> str:
     return path.replace("\\", "/") if path is not None else ""
 
 
-def create_github_comment_file(
+def build_github_comment_body(
     failed_checks: list[list[str]], show_all_failures: bool
-) -> None:
-    """Create `github-comment.md` in the current working directory.
+) -> str:
+    """Build the markdown body of the PR comment that lists failed checks.
 
     Each row of `failed_checks` is `[check name, file, severity, failure message]`.
-    The file is written relative to the working directory, so it works on any CI
-    runner. The GitHub Action runs the container with `--workdir /app`, the
-    repository mount, so there the file lands in the workspace too.
+
+    Returns:
+        str: The markdown comment body.
+
     """
     md_formatted_comment = make_markdown_table(
         [
@@ -60,11 +61,23 @@ def create_github_comment_file(
         md_formatted_comment += f"\n\n**Note:** Only the first 25 failed checks (of {len(failed_checks)}) are shown."
 
     logging.debug(f"{md_formatted_comment=}")
+    return md_formatted_comment
 
+
+def create_github_comment_file(
+    failed_checks: list[list[str]], show_all_failures: bool
+) -> None:
+    """Create `github-comment.md` in the current working directory.
+
+    Each row of `failed_checks` is `[check name, file, severity, failure message]`.
+    The file is written relative to the working directory, so it works on any CI
+    runner. The GitHub Action runs the container with `--workdir /app`, the
+    repository mount, so there the file lands in the workspace too.
+    """
     comment_file = Path.cwd() / "github-comment.md"
     logging.info(f"Writing comment for GitHub to {comment_file}...")
     with Path.open(comment_file, "w", encoding="utf-8") as f:
-        f.write(md_formatted_comment)
+        f.write(build_github_comment_body(failed_checks, show_all_failures))
 
 
 def get_nested_value(

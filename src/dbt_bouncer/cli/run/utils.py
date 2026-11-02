@@ -11,6 +11,7 @@ from dbt_bouncer.enums import (
     CheckCategory,
     ConfigFileName,
     ConfigFileSource,
+    ExitCode,
     OutputFormat,
     PresetName,
 )
@@ -487,6 +488,7 @@ def run_bouncer(
     baseline: Path | None = None,
     state: Path | None = None,
     allow_zero_checks: bool = False,
+    github_pr_comment: bool = False,
 ) -> int:
     """Programmatic entrypoint for dbt-bouncer.
 
@@ -506,6 +508,7 @@ def run_bouncer(
         baseline: Path to a baseline file. Failures listed in it are suppressed.
         state: Directory of dbt artifacts from a previous run. Failures present in that base run are suppressed.
         allow_zero_checks: If True, a run that matches no resources returns `ExitCode.SUCCESS` instead of `ExitCode.NO_CHECKS_RUN`.
+        github_pr_comment: If True, create or update one comment on the GitHub pull request with the failed checks.
 
     An invalid `--only` value, a missing or invalid config file, or a missing
     baseline file propagate as `DbtBouncerConfigError`. A missing or unsupported
@@ -549,5 +552,30 @@ def run_bouncer(
 
     from dbt_bouncer.runner import runner
 
-    results = runner(ctx=ctx, accept=accept)
-    return results[0]
+    exit_code, check_results = runner(ctx=ctx, accept=accept)
+
+    # A dry run executes nothing, and a run with no checks has nothing to report.
+    if github_pr_comment and not dry_run and exit_code != ExitCode.NO_CHECKS_RUN:
+        from dbt_bouncer.reporting.github_pr_comment import sync_github_pr_comment
+
+        sync_github_pr_comment(
+            check_results,
+            comment_key=_pr_comment_key(config_file_path),
+            show_all_failures=show_all_failures,
+        )
+
+    return exit_code
+
+
+def _pr_comment_key(config_file_path: PurePath) -> str:
+    """Identify the PR comment of one config, stable across runs of the same PR.
+
+    Returns:
+        str: The config path relative to the working directory, else its file name.
+
+    """
+    try:
+        return Path(config_file_path).resolve().relative_to(Path.cwd()).as_posix()
+    except ValueError:
+        # A preset ships inside the package, outside the working directory.
+        return config_file_path.name
