@@ -67,7 +67,7 @@
 | src/dbt\_bouncer/cli/mcp/\_\_init\_\_.py                    |       12 |        0 |        0 |        0 |     100% |           |
 | src/dbt\_bouncer/cli/mcp/server.py                          |       86 |        0 |       20 |        0 |     100% |           |
 | src/dbt\_bouncer/cli/run/\_\_init\_\_.py                    |       20 |        0 |        0 |        0 |     100% |           |
-| src/dbt\_bouncer/cli/run/utils.py                           |      140 |        0 |       48 |        0 |     100% |           |
+| src/dbt\_bouncer/cli/run/utils.py                           |      148 |        0 |       50 |        0 |     100% |           |
 | src/dbt\_bouncer/cli/studio/\_\_init\_\_.py                 |       31 |        0 |       10 |        0 |     100% |           |
 | src/dbt\_bouncer/cli/studio/utils.py                        |      143 |        0 |       68 |        0 |     100% |           |
 | src/dbt\_bouncer/cli/utils.py                               |        5 |        0 |        0 |        0 |     100% |           |
@@ -84,6 +84,7 @@
 | src/dbt\_bouncer/regression.py                              |       40 |        0 |       10 |        0 |     100% |           |
 | src/dbt\_bouncer/reporting/\_\_init\_\_.py                  |        0 |        0 |        0 |        0 |     100% |           |
 | src/dbt\_bouncer/reporting/formatters.py                    |       95 |        0 |       40 |        0 |     100% |           |
+| src/dbt\_bouncer/reporting/github\_pr\_comment.py           |       90 |        0 |       20 |        0 |     100% |           |
 | src/dbt\_bouncer/reporting/logger.py                        |       39 |        0 |        6 |        0 |     100% |           |
 | src/dbt\_bouncer/reporting/reporter.py                      |      103 |        0 |       32 |        0 |     100% |           |
 | src/dbt\_bouncer/runner.py                                  |      172 |        0 |       56 |        0 |     100% |           |
@@ -91,9 +92,9 @@
 | src/dbt\_bouncer/sql\_utils.py                              |       51 |        0 |       18 |        0 |     100% |           |
 | src/dbt\_bouncer/testing.py                                 |       92 |        0 |       26 |        0 |     100% |           |
 | src/dbt\_bouncer/types.py                                   |       19 |        0 |        4 |        0 |     100% |           |
-| src/dbt\_bouncer/utils.py                                   |      368 |        0 |      142 |        0 |     100% |           |
+| src/dbt\_bouncer/utils.py                                   |      370 |        0 |      142 |        0 |     100% |           |
 | src/dbt\_bouncer/version.py                                 |        2 |        0 |        0 |        0 |     100% |           |
-| **TOTAL**                                                   | **5057** |    **0** | **1724** |    **0** | **100%** |           |
+| **TOTAL**                                                   | **5157** |    **0** | **1746** |    **0** | **100%** |           |
 
 
 ## Setup coverage badge
