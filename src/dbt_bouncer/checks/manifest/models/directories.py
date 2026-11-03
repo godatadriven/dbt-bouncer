@@ -29,7 +29,7 @@ def check_model_directories(
         description (str | None): Description of what the check does and why it is implemented.
         exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.
         language (Literal["python", "sql"] | None): Limit check to models written in the specified language.
-        materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
+        materialization (Literal["dynamic_table", "ephemeral", "incremental", "materialized_view", "table", "view"] | None): Limit check to models with the specified materialization.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Example(s):
@@ -98,7 +98,7 @@ def check_model_file_name(model, *, file_name_pattern: RegexPattern):
         exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.
         include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.
         language (Literal["python", "sql"] | None): Limit check to models written in the specified language.
-        materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
+        materialization (Literal["dynamic_table", "ephemeral", "incremental", "materialized_view", "table", "view"] | None): Limit check to models with the specified materialization.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Example(s):
@@ -137,7 +137,7 @@ def check_model_has_properties_file(model):
         exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.
         include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.
         language (Literal["python", "sql"] | None): Limit check to models written in the specified language.
-        materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
+        materialization (Literal["dynamic_table", "ephemeral", "incremental", "materialized_view", "table", "view"] | None): Limit check to models with the specified materialization.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Example(s):
@@ -174,7 +174,7 @@ def check_model_property_file_location(
         exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.
         include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.
         language (Literal["python", "sql"] | None): Limit check to models written in the specified language.
-        materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
+        materialization (Literal["dynamic_table", "ephemeral", "incremental", "materialized_view", "table", "view"] | None): Limit check to models with the specified materialization.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Example(s):
@@ -265,7 +265,7 @@ def check_model_schema_name(model, *, schema_name_pattern: RegexPattern):
         exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.
         include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.
         language (Literal["python", "sql"] | None): Limit check to models written in the specified language.
-        materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
+        materialization (Literal["dynamic_table", "ephemeral", "incremental", "materialized_view", "table", "view"] | None): Limit check to models with the specified materialization.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Example(s):

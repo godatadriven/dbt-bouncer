@@ -116,7 +116,7 @@ def check_column_names(catalog_node, ctx, *, column_name_pattern: RegexPattern):
         description (str | None): Description of what the check does and why it is implemented.
         exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.
         include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.
-        materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
+        materialization (Literal["dynamic_table", "ephemeral", "incremental", "materialized_view", "table", "view"] | None): Limit check to models with the specified materialization.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Example(s):

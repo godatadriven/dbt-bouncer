@@ -653,6 +653,24 @@ class TestCheckModelMaterializationPermitted:
         ("model_override", "permitted_materializations", "check_fn"),
         [
             pytest.param(
+                {"config": {"materialized": "dynamic_table"}},
+                ["dynamic_table"],
+                check_passes,
+                id="dynamic_table_permitted",
+            ),
+            pytest.param(
+                {"config": {"materialized": "dynamic_table"}},
+                ["table"],
+                check_fails,
+                id="dynamic_table_not_permitted",
+            ),
+            pytest.param(
+                {"config": {"materialized": "materialized_view"}},
+                ["materialized_view", "view"],
+                check_passes,
+                id="materialized_view_permitted",
+            ),
+            pytest.param(
                 {"config": {"materialized": "view"}},
                 ["view"],
                 check_passes,

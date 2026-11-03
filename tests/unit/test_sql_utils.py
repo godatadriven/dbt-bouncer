@@ -139,7 +139,18 @@ _JINJA_EXPR = st.one_of(
 def _templated_sql_strategy(draw: st.DrawFn) -> str:
     parts: list[str] = []
     if draw(st.booleans()):
-        mat = draw(st.sampled_from(["ephemeral", "incremental", "table", "view"]))
+        mat = draw(
+            st.sampled_from(
+                [
+                    "dynamic_table",
+                    "ephemeral",
+                    "incremental",
+                    "materialized_view",
+                    "table",
+                    "view",
+                ]
+            )
+        )
         parts.append(f'{{{{ config(materialized="{mat}") }}}}')
     if draw(st.booleans()):
         comment_body = draw(

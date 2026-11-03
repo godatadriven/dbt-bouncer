@@ -420,9 +420,15 @@ class TestCheckModelMaterializationByFanout:
     @pytest.mark.parametrize(
         ("materialized", "num_children", "check_fn"),
         [
+            pytest.param(
+                "dynamic_table", 3, check_passes, id="dynamic_table_is_durable"
+            ),
             pytest.param("view", 2, check_passes, id="few_downstreams"),
             pytest.param("table", 3, check_passes, id="durable_materialization"),
             pytest.param("incremental", 3, check_passes, id="incremental_is_durable"),
+            pytest.param(
+                "materialized_view", 3, check_passes, id="materialized_view_is_durable"
+            ),
             pytest.param("view", 3, check_fails, id="view_with_many_downstreams"),
             pytest.param(
                 "ephemeral", 3, check_fails, id="ephemeral_with_many_downstreams"
