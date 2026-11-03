@@ -5,13 +5,13 @@
 | Name                                                        |    Stmts |     Miss |   Branch |   BrPart |    Cover |   Missing |
 |------------------------------------------------------------ | -------: | -------: | -------: | -------: | -------: | --------: |
 | src/dbt\_bouncer/\_\_init\_\_.py                            |       13 |        0 |        4 |        0 |     100% |           |
-| src/dbt\_bouncer/artifact\_parsers/info\_schema.py          |      107 |        0 |       24 |        0 |     100% |           |
+| src/dbt\_bouncer/artifact\_parsers/info\_schema.py          |      113 |        0 |       28 |        0 |     100% |           |
 | src/dbt\_bouncer/artifact\_parsers/parser.py                |      178 |        0 |       58 |        0 |     100% |           |
 | src/dbt\_bouncer/artifact\_types.py                         |      195 |        0 |        0 |        0 |     100% |           |
 | src/dbt\_bouncer/check\_framework/\_\_init\_\_.py           |        5 |        0 |        0 |        0 |     100% |           |
 | src/dbt\_bouncer/check\_framework/base.py                   |       38 |        0 |        2 |        0 |     100% |           |
 | src/dbt\_bouncer/check\_framework/context.py                |       59 |        0 |       16 |        0 |     100% |           |
-| src/dbt\_bouncer/check\_framework/decorator.py              |       74 |        0 |       26 |        0 |     100% |           |
+| src/dbt\_bouncer/check\_framework/decorator.py              |      122 |        0 |       40 |        0 |     100% |           |
 | src/dbt\_bouncer/check\_framework/exceptions.py             |        8 |        0 |        0 |        0 |     100% |           |
 | src/dbt\_bouncer/checks/catalog/check\_catalog\_seeds.py    |       49 |        0 |       30 |        0 |     100% |           |
 | src/dbt\_bouncer/checks/catalog/check\_catalog\_sources.py  |       16 |        0 |        8 |        0 |     100% |           |
@@ -92,9 +92,9 @@
 | src/dbt\_bouncer/sql\_utils.py                              |       51 |        0 |       18 |        0 |     100% |           |
 | src/dbt\_bouncer/testing.py                                 |       92 |        0 |       26 |        0 |     100% |           |
 | src/dbt\_bouncer/types.py                                   |       19 |        0 |        4 |        0 |     100% |           |
-| src/dbt\_bouncer/utils.py                                   |      370 |        0 |      142 |        0 |     100% |           |
+| src/dbt\_bouncer/utils.py                                   |      378 |        0 |      144 |        0 |     100% |           |
 | src/dbt\_bouncer/version.py                                 |        2 |        0 |        0 |        0 |     100% |           |
-| **TOTAL**                                                   | **5157** |    **0** | **1746** |    **0** | **100%** |           |
+| **TOTAL**                                                   | **5219** |    **0** | **1766** |    **0** | **100%** |           |
 
 
 ## Setup coverage badge
