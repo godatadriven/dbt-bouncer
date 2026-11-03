@@ -152,5 +152,5 @@ runs:
           --volume "$GITHUB_EVENT_PATH":/github/event.json:ro \
           --volume "$GITHUB_WORKSPACE":/app \
           --workdir /app \
-          ghcr.io/godatadriven/dbt-bouncer:v0.0.0 \
+          ghcr.io/godatadriven/dbt-bouncer:v4.6.1 \
           "${args[@]}"
