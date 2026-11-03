@@ -51,10 +51,14 @@ from __future__ import annotations
 
 import inspect
 import sys
-from typing import TYPE_CHECKING, Any, Literal, NoReturn, overload
+import threading
+from contextlib import contextmanager
+from contextvars import ContextVar
+from typing import TYPE_CHECKING, Any, Literal, NoReturn, cast, overload
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
+    from collections.abc import Callable, Iterator
+    from types import ModuleType
 
 from pydantic import Field, create_model, model_validator
 
@@ -63,6 +67,144 @@ from dbt_bouncer.check_framework.exceptions import DbtBouncerFailedCheckError
 
 # Names reserved for resource / context injection, not user params.
 _RESERVED_PARAMS = frozenset({"ctx"})
+
+# Building a check class costs ~0.8 ms, and check modules are imported whole, so
+# a run used to build every check in each module it touched. While this holds a
+# set of check names or rule codes, ``@check`` builds only those classes and
+# defers the rest until something asks for them (see ``build_only``).
+_requested_checks: ContextVar[frozenset[str] | None] = ContextVar(
+    "_requested_checks", default=None
+)
+
+# Module attribute mapping each deferred class name to its ``@check`` arguments.
+_DEFERRED_CHECKS_ATTR = "__dbt_bouncer_deferred_checks__"
+
+# Guards building a deferred class, so two threads cannot build one check twice.
+_materialise_lock = threading.RLock()
+
+
+@contextmanager
+def build_only(check_names: frozenset[str]) -> Iterator[None]:
+    """Build only the named checks while importing check modules.
+
+    Within this block, ``@check`` builds a class only when its name or rule code
+    is in ``check_names``. Every other check in the module is deferred: its
+    class is built on first access to the module attribute, or by
+    ``materialise_deferred_checks``. Modules imported before the block are not
+    affected.
+
+    Args:
+        check_names: The check names and rule codes to build.
+
+    Yields:
+        None
+
+    """
+    token = _requested_checks.set(check_names)
+    try:
+        yield
+    finally:
+        _requested_checks.reset(token)
+
+
+def materialise_deferred_checks(
+    module: ModuleType, check_names: frozenset[str] | None = None
+) -> None:
+    """Build the deferred check classes of a module.
+
+    Each built class is set on the module under its class name and its function
+    name, exactly as an eager ``@check`` does.
+
+    Args:
+        module: A module that may hold deferred checks.
+        check_names: Build only checks with these names or rule codes. ``None``
+            builds every deferred check.
+
+    """
+    deferred = module.__dict__.get(_DEFERRED_CHECKS_ATTR)
+    if not deferred:
+        return
+    for class_name, (fn, code, _validate) in list(deferred.items()):
+        if (
+            check_names is None
+            or fn.__name__ in check_names
+            or (code is not None and code in check_names)
+        ):
+            _materialise_deferred_check(module, class_name)
+
+
+def _materialise_deferred_check(
+    module: ModuleType, class_name: str
+) -> type[BaseCheck] | None:
+    """Build one deferred check class, or return ``None`` if it is not deferred.
+
+    Returns:
+        type[BaseCheck] | None: The built class.
+
+    """
+    with _materialise_lock:
+        deferred = module.__dict__.get(_DEFERRED_CHECKS_ATTR) or {}
+        if class_name not in deferred:
+            # Another thread built it, or it was never deferred.
+            existing = module.__dict__.get(class_name)
+            return existing if isinstance(existing, type) else None
+        fn, code, validate = deferred[class_name]
+        cls = _build_check_class(fn, code=code, validate=validate)
+        setattr(module, fn.__name__, cls)
+        del deferred[class_name]
+        return cls
+
+
+def _module_getattr(module: ModuleType) -> Callable[[str], Any]:
+    """Return a PEP 562 module ``__getattr__`` that builds deferred checks on access.
+
+    Returns:
+        Callable[[str], Any]: The ``__getattr__`` function for ``module``.
+
+    """
+
+    def module_getattr(name: str) -> Any:
+        cls = _materialise_deferred_check(module, name)
+        if cls is None:
+            raise AttributeError(
+                f"module {module.__name__!r} has no attribute {name!r}"
+            )
+        return cls
+
+    return module_getattr
+
+
+def _build_or_defer(
+    fn: Callable[..., None],
+    code: str | None,
+    validate: Callable[..., None] | None,
+) -> type[BaseCheck]:
+    """Build the check class now, unless ``build_only`` excludes it.
+
+    A deferred check returns the plain function. The module keeps it under the
+    function name until the class is built, which then replaces it.
+
+    Returns:
+        type[BaseCheck]: The generated class (or, when deferred, the function).
+
+    """
+    requested = _requested_checks.get()
+    module = sys.modules.get(fn.__module__)
+    name = fn.__name__  # ty: ignore[unresolved-attribute]
+    if (
+        requested is None
+        or module is None
+        or name in requested
+        or (code is not None and code in requested)
+    ):
+        return _build_check_class(fn, code=code, validate=validate)
+    deferred = module.__dict__.setdefault(_DEFERRED_CHECKS_ATTR, {})
+    deferred[_to_pascal_case(name)] = (fn, code, validate)
+    if "__getattr__" not in module.__dict__:
+        module.__getattr__ = _module_getattr(module)  # ty: ignore[invalid-assignment]
+    # The function stands in until the class is built. Nothing in a check module
+    # uses the decorated name at import time, so the stand-in is never called.
+    return cast("type[BaseCheck]", fn)
 
 
 def fail(message: str) -> NoReturn:
@@ -127,12 +269,12 @@ def check(
     if fn is None:
         # Called as @check() or @check(code="MO001") — return decorator.
         def wrapper(f: Callable[..., None]) -> type[BaseCheck]:
-            return _build_check_class(f, code=code, validate=validate)
+            return _build_or_defer(f, code=code, validate=validate)
 
         return wrapper
 
     # Called as bare @check — fn is the decorated function.
-    return _build_check_class(fn, code=code, validate=validate)
+    return _build_or_defer(fn, code=code, validate=validate)
 
 
 def _build_check_class(
