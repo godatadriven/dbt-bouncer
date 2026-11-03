@@ -281,12 +281,35 @@ def test_find_meta_keys_criteria_failure(meta, criteria, fails):
         ("1.6.1", "1.6.0", True),
         ("1.5.9", "1.6.0", False),
         ("2024.11.06+2a3d725", "1.6.0", True),
+        ("2.0.0-preview.218", "1.10.0", True),
+        ("1.10.0b1", "1.10.0", True),
+        ("1.9", "1.10.0", False),
+        ("v1.11.2", "1.10.0", True),
     ],
 )
 def test_get_package_version_number(version_a, version_b, expectation):
     assert (
         get_package_version_number(version_a) >= get_package_version_number(version_b)
     ) == expectation
+
+
+@pytest.mark.parametrize(
+    ("version_string", "expected"),
+    [
+        ("1.10", (1, 10, 0)),
+        ("2", (2, 0, 0)),
+        ("1.2.3.4", (1, 2, 3)),
+        ("2024.11.06+2a3d725", (2024, 11, 6)),
+    ],
+)
+def test_get_package_version_number_pads_and_truncates(version_string, expected):
+    assert get_package_version_number(version_string) == expected
+
+
+@pytest.mark.parametrize("version_string", ["", "garbage", "preview-2.0"])
+def test_get_package_version_number_rejects_invalid(version_string):
+    with pytest.raises(ValueError, match="Invalid version"):
+        get_package_version_number(version_string)
 
 
 @pytest.mark.parametrize(

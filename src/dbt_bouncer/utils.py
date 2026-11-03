@@ -22,8 +22,6 @@ from dbt_bouncer.exceptions import DbtBouncerConfigError
 from dbt_bouncer.types import MetaConfig, MissingMetaKeys, RequiredMetaKey
 
 if TYPE_CHECKING:
-    from semver import Version
-
     from dbt_bouncer.check_framework.base import BaseCheck
 
 
@@ -956,24 +954,35 @@ def get_model_for_catalog_node(
     return model if model is not None and model.resource_type == "model" else None
 
 
+# The leading release segment of a version string, e.g. `2.0.0` in `v2.0.0-preview.218`.
+_RELEASE_PATTERN = re.compile(r"\s*v?(\d+(?:\.\d+)*)")
+
+
 @lru_cache
-def get_package_version_number(version_string: str) -> "Version":
-    """Dbt Cloud no longer uses version numbers that comply with semantic versioning, e.g. "2024.11.06+2a3d725".
-    This function is used to convert the version number to a version object that can be used to compare versions.
+def get_package_version_number(version_string: str) -> tuple[int, int, int]:
+    """Convert a dbt version string to a comparable `(major, minor, patch)` tuple.
+
+    dbt Cloud versions do not follow semantic versioning (e.g. "2024.11.06+2a3d725"),
+    and dbt 2.0 previews carry a suffix (e.g. "2.0.0-preview.218"). Only the leading
+    release numbers are kept: a missing minor or patch counts as 0, and pre-release
+    or local suffixes are ignored.
 
     Args:
         version_string (str): The version number to convert.
 
     Returns:
-            Version: The version object.
+        tuple[int, int, int]: The major, minor and patch numbers.
 
-    """  # ruff: ignore[missing-blank-line-after-summary]
-    from packaging.version import Version as PyPIVersion
-    from semver import Version
+    Raises:
+        ValueError: If `version_string` does not start with a release number.
 
-    p = PyPIVersion(version_string)
-
-    return Version(*p.release)
+    """
+    match = _RELEASE_PATTERN.match(version_string)
+    if match is None:
+        raise ValueError(f"Invalid version: {version_string!r}")
+    release = [int(part) for part in match.group(1).split(".")[:3]]
+    major, minor, patch = release + [0] * (3 - len(release))
+    return major, minor, patch
 
 
 def is_description_populated(description: str, min_description_length: int) -> bool:

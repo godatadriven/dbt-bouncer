@@ -247,9 +247,13 @@ def parse_dbt_artifacts(
         raise DbtBouncerArtifactError(
             f"`{manifest_path}` has no `metadata.dbt_version`, so it is not a dbt manifest."
         )
-    if not get_package_version_number(dbt_version) >= get_package_version_number(
-        "1.10.0"
-    ):
+    try:
+        manifest_version = get_package_version_number(dbt_version)
+    except ValueError as e:
+        raise DbtBouncerArtifactError(
+            f"`{manifest_path}` has an invalid `metadata.dbt_version`: {e}."
+        ) from e
+    if manifest_version < get_package_version_number("1.10.0"):
         raise DbtBouncerArtifactError(
             f"The supplied `manifest.json` was generated with dbt version {dbt_version}, "
             "this is below the minimum supported version of 1.10.0."
