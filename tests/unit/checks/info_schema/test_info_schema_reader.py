@@ -115,3 +115,11 @@ def test_connection_restores_default_thread_count(info_schema_dir):
     )
     with pytest.raises(duckdb.Error):
         connection.execute("SET threads = 1")
+
+
+def test_directory_without_tables_has_empty_database(tmp_path):
+    """A directory with no table files still gives a working, locked connection."""
+    info_schema = InfoSchema(directory=tmp_path)
+
+    assert info_schema.query("SELECT 1 AS one") == (["one"], [("1",)])
+    assert info_schema.table("dbt.models") == []
