@@ -216,7 +216,7 @@ To determine if a check accepts these arguments view the [Checks page](./checks/
 Model checks accept two more optional arguments:
 
 - `language`: Run the check only on models written in this language, either `python` or `sql`.
-- `materialization`: Run the check only on models with this materialization, one of `ephemeral`, `incremental`, `table` or `view`.
+- `materialization`: Run the check only on models with this materialization, one of `dynamic_table`, `ephemeral`, `incremental`, `materialized_view`, `table` or `view`.
 
 Each argument takes one value. A model must match every argument that is set, and these arguments combine with `exclude`, `include` and `selector` in the same way. Checks that do not iterate over models ignore both arguments.
 

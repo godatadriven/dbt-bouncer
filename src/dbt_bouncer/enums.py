@@ -80,8 +80,10 @@ class ListOutputFormat(StrEnum):
 class Materialization(StrEnum):
     """dbt materialization strategies."""
 
+    DYNAMIC_TABLE = auto()
     EPHEMERAL = auto()
     INCREMENTAL = auto()
+    MATERIALIZED_VIEW = auto()
     TABLE = auto()
     VIEW = auto()
 

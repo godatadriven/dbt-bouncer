@@ -34,7 +34,7 @@ def check_model_depends_on_macros(
         exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.
         include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.
         language (Literal["python", "sql"] | None): Limit check to models written in the specified language.
-        materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
+        materialization (Literal["dynamic_table", "ephemeral", "incremental", "materialized_view", "table", "view"] | None): Limit check to models with the specified materialization.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Example(s):
@@ -93,7 +93,7 @@ def check_model_depends_on_multiple_sources(model):
         exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.
         include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.
         language (Literal["python", "sql"] | None): Limit check to models written in the specified language.
-        materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
+        materialization (Literal["dynamic_table", "ephemeral", "incremental", "materialized_view", "table", "view"] | None): Limit check to models with the specified materialization.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Example(s):
@@ -129,7 +129,7 @@ def check_model_does_not_directly_join_to_source(model):
         exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.
         include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.
         language (Literal["python", "sql"] | None): Limit check to models written in the specified language.
-        materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
+        materialization (Literal["dynamic_table", "ephemeral", "incremental", "materialized_view", "table", "view"] | None): Limit check to models with the specified materialization.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Example(s):
@@ -169,7 +169,7 @@ def check_model_does_not_rejoin_upstream_concepts(model, ctx):
         exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.
         include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.
         language (Literal["python", "sql"] | None): Limit check to models written in the specified language.
-        materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
+        materialization (Literal["dynamic_table", "ephemeral", "incremental", "materialized_view", "table", "view"] | None): Limit check to models with the specified materialization.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Example(s):
@@ -221,7 +221,7 @@ def check_model_has_exposure(model, ctx):
         exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.
         include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.
         language (Literal["python", "sql"] | None): Limit check to models written in the specified language.
-        materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
+        materialization (Literal["dynamic_table", "ephemeral", "incremental", "materialized_view", "table", "view"] | None): Limit check to models with the specified materialization.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Example(s):
@@ -261,7 +261,7 @@ def check_model_has_no_upstream_dependencies(model):
         exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.
         include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.
         language (Literal["python", "sql"] | None): Limit check to models written in the specified language.
-        materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
+        materialization (Literal["dynamic_table", "ephemeral", "incremental", "materialized_view", "table", "view"] | None): Limit check to models with the specified materialization.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Example(s):
@@ -296,12 +296,13 @@ def check_model_materialization_by_fanout(
         A model consumed by many downstream models but materialized as a view
         re-executes its full query logic on every downstream build, multiplying
         warehouse compute and increasing overall pipeline latency. Hub models
-        with high fanout should be persisted as tables or incremental models so
-        that downstream builds read pre-computed results rather than re-running
-        the same transformations repeatedly.
+        with high fanout should be persisted (dynamic tables, incremental
+        models, materialized views or tables) so that downstream builds read
+        pre-computed results rather than re-running the same transformations
+        repeatedly.
 
     Parameters:
-        materializations (list[str] | None): Accepted durable materializations for models above the fanout threshold.
+        materializations (list[str] | None): Accepted durable materializations for models above the fanout threshold. Default: `dynamic_table`, `incremental`, `materialized_view`, `table`.
         min_downstream_models (int | None): The minimum number of downstream models that triggers this check.
 
     Receives:
@@ -313,7 +314,7 @@ def check_model_materialization_by_fanout(
         exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.
         include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.
         language (Literal["python", "sql"] | None): Limit check to models written in the specified language.
-        materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
+        materialization (Literal["dynamic_table", "ephemeral", "incremental", "materialized_view", "table", "view"] | None): Limit check to models with the specified materialization.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Example(s):
@@ -331,7 +332,12 @@ def check_model_materialization_by_fanout(
         ```
 
     """
-    materializations = materializations or ["incremental", "table"]
+    materializations = materializations or [
+        "dynamic_table",
+        "incremental",
+        "materialized_view",
+        "table",
+    ]
     num_downstream_models = len(ctx.children_by_unique_id.get(model.unique_id, []))
     materialized = model.config.materialized if model.config else None
     if (
@@ -438,7 +444,7 @@ def check_model_max_chained_views(
         exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.
         include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.
         language (Literal["python", "sql"] | None): Limit check to models written in the specified language.
-        materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
+        materialization (Literal["dynamic_table", "ephemeral", "incremental", "materialized_view", "table", "view"] | None): Limit check to models with the specified materialization.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Example(s):
@@ -500,7 +506,7 @@ def check_model_max_fanout(
         exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.
         include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.
         language (Literal["python", "sql"] | None): Limit check to models written in the specified language.
-        materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
+        materialization (Literal["dynamic_table", "ephemeral", "incremental", "materialized_view", "table", "view"] | None): Limit check to models with the specified materialization.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Example(s):
@@ -546,7 +552,7 @@ def check_model_max_upstream_dependencies(
         exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.
         include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.
         language (Literal["python", "sql"] | None): Limit check to models written in the specified language.
-        materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
+        materialization (Literal["dynamic_table", "ephemeral", "incremental", "materialized_view", "table", "view"] | None): Limit check to models with the specified materialization.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Example(s):
@@ -607,7 +613,7 @@ def check_model_min_downstream_models(
         exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.
         include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.
         language (Literal["python", "sql"] | None): Limit check to models written in the specified language.
-        materialization (Literal["ephemeral", "incremental", "table", "view"] | None): Limit check to models with the specified materialization.
+        materialization (Literal["dynamic_table", "ephemeral", "incremental", "materialized_view", "table", "view"] | None): Limit check to models with the specified materialization.
         severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
 
     Example(s):
