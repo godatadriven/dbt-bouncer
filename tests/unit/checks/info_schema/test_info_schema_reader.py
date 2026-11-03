@@ -86,3 +86,40 @@ def test_query_rejects_non_select(info_schema_dir, sql):
     """`query()` is public, so it validates its SQL itself, not only at config load."""
     with pytest.raises(ValueError, match="exactly one SELECT"):
         InfoSchema.from_directory(info_schema_dir).query(sql)
+
+
+def test_directory_path_with_single_quote(tmp_path):
+    """The batched load quotes each path as a SQL literal, so a `'` must be escaped."""
+    directory = write_info_schema(tmp_path / "plain" / "v1")
+    quoted_parent = tmp_path / "o'brien"
+    quoted_parent.mkdir()
+    directory = directory.rename(quoted_parent / "v1")
+
+    info_schema = InfoSchema.from_directory(directory)
+
+    assert info_schema.table("dbt.project")[0]["project_name"] == "demo"
+    assert len(info_schema.table("dbt.models")) == 2
+
+
+def test_connection_restores_default_thread_count(info_schema_dir):
+    """Tables load single-threaded, but queries keep DuckDB's default thread count."""
+    default_threads = (
+        duckdb.connect().execute("SELECT current_setting('threads')").fetchone()
+    )
+
+    connection = InfoSchema.from_directory(info_schema_dir).connection
+
+    assert (
+        connection.execute("SELECT current_setting('threads')").fetchone()
+        == default_threads
+    )
+    with pytest.raises(duckdb.Error):
+        connection.execute("SET threads = 1")
+
+
+def test_directory_without_tables_has_empty_database(tmp_path):
+    """A directory with no table files still gives a working, locked connection."""
+    info_schema = InfoSchema(directory=tmp_path)
+
+    assert info_schema.query("SELECT 1 AS one") == (["one"], [("1",)])
+    assert info_schema.table("dbt.models") == []
