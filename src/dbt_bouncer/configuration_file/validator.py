@@ -651,8 +651,6 @@ def _construct_cached_check(
 
     """
     fields = _coerced_fields(cls)
-    if not fields:
-        return cls.model_construct(**data)
 
     # Shallow-copy before mutating: the caller's dict (``item["data"]`` in the
     # cache payload) is not ours to modify in place.
