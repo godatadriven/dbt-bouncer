@@ -186,15 +186,24 @@ class InfoSchema:
             )
         import duckdb
 
-        con = duckdb.connect(":memory:")
+        # The files are small, so the load is dominated by per-statement and
+        # thread-pool start-up cost: load single-threaded, in one batch, then
+        # restore the default thread count for the queries.
+        con = duckdb.connect(":memory:", config={"threads": 1})
+        statements: list[str] = []
+        for schema in sorted({name.split(".")[0] for name in self.table_files}):
+            statements.append(f'CREATE SCHEMA "{schema}"')
         for name, parquet_file in self.table_files.items():
             schema, table = name.split(".")
-            con.execute(f'CREATE SCHEMA IF NOT EXISTS "{schema}"')
-            # Identifiers come from the allow-list regex above; the path is a bound parameter.
-            con.execute(
-                f'CREATE TABLE "{schema}"."{table}" AS SELECT * FROM read_parquet(?)',  # ruff: ignore[hardcoded-sql-expression] # nosec B608
-                [parquet_file.as_posix()],
+            # Identifiers come from the allow-list regex above. A multi-statement
+            # batch cannot bind parameters, so the path is a quoted literal.
+            path_literal = "'" + parquet_file.as_posix().replace("'", "''") + "'"
+            statements.append(
+                f'CREATE TABLE "{schema}"."{table}" AS SELECT * FROM read_parquet({path_literal})'  # ruff: ignore[hardcoded-sql-expression] # nosec B608
             )
+        if statements:
+            con.execute(";\n".join(statements))
+        con.execute("RESET threads")
         con.execute("SET enable_external_access = false")
         con.execute("SET lock_configuration = true")
         return con
