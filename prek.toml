@@ -71,7 +71,7 @@ repo = "local"
 [[repos.hooks]]
 id = "matchify"
 # Runs before ruff-format so the rewritten match statements are formatted.
-entry = "uv run matchify"
+entry = "uv run matchify --write"
 language = "system"
 name = "matchify"
 priority = 10
