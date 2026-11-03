@@ -292,7 +292,11 @@ def _reject_class_based_check(cls: type, source: str) -> None:
 
 
 def _extract_checks_from_module(
-    module: Any, module_name: str, check_objects: list[type["BaseCheck"]]
+    module: Any,
+    module_name: str,
+    check_objects: list[type["BaseCheck"]],
+    *,
+    materialise: bool = True,
 ) -> None:
     """Extract Check* classes from a loaded module.
 
@@ -306,8 +310,15 @@ def _extract_checks_from_module(
             out imported classes).
         check_objects: A list to which discovered check classes will be
             appended.
+        materialise: Build the module's deferred checks first, so that every
+            check is found. ``get_check_objects_for_names`` passes ``False``
+            because it wants only the checks it built.
 
     """
+    if materialise:
+        from dbt_bouncer.check_framework.decorator import materialise_deferred_checks
+
+        materialise_deferred_checks(module)
     for name, obj in inspect.getmembers(module):
         if (
             inspect.isclass(obj)
@@ -511,6 +522,8 @@ def _build_check_module_map() -> dict[str, dict[str, str]]:
             ``{"check_model_names": {"module": "dbt_bouncer.checks.manifest.models.naming", "category": "manifest_checks"}}``.
 
     """
+    from dbt_bouncer.check_framework.decorator import materialise_deferred_checks
+
     checks_dir = Path(__file__).parent / "checks"
     mapping: dict[str, dict[str, str]] = {}
 
@@ -530,6 +543,7 @@ def _build_check_module_map() -> dict[str, dict[str, str]]:
             module = importlib.import_module(module_name)
         except ImportError:
             continue
+        materialise_deferred_checks(module)
 
         for name, obj in inspect.getmembers(module):
             if (
@@ -776,10 +790,22 @@ def get_check_objects_for_names(
     needed_modules: set[str] = {module_map[n]["module"] for n in check_names}
     check_objects: list[type["BaseCheck"]] = []
 
+    from dbt_bouncer.check_framework.decorator import (
+        build_only,
+        materialise_deferred_checks,
+    )
+
     for module_name in sorted(needed_modules):
         try:
-            module = importlib.import_module(module_name)
-            _extract_checks_from_module(module, module_name, check_objects)
+            # Build only the requested checks. A check module holds many checks,
+            # and building each class is the main cost of loading the config.
+            with build_only(check_names):
+                module = importlib.import_module(module_name)
+            # The module can come from an earlier import that deferred these checks.
+            materialise_deferred_checks(module, check_names)
+            _extract_checks_from_module(
+                module, module_name, check_objects, materialise=False
+            )
         except ImportError:
             logging.warning(f"Failed to import check module: {module_name}")
             logging.debug("Check module import traceback:", exc_info=True)
