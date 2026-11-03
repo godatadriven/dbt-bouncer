@@ -10,22 +10,23 @@ env:
     DBT_PROJECT_DIR: dbt_project
 
 jobs:
+    # Gate so the matrix does not start before the release exists at all. Each
+    # downstream job still retries its own install: PyPI's CDN edges propagate
+    # independently, so a pass on this runner says nothing about other runners.
     pypi-pause:
         runs-on: ubuntu-26.04
         steps:
             - name: Wait for PyPI package availability
               run: |
-                VERSION=$(echo "${GITHUB_REF}" | cut -d "/" -f3 | sed 's/^v//')
+                VERSION="${GITHUB_REF_NAME#v}"
                 echo "Waiting for dbt-bouncer==$VERSION on PyPI..."
                 TIMEOUT=600
                 INTERVAL=30
                 ELAPSED=0
                 while [ $ELAPSED -lt $TIMEOUT ]; do
-                  if curl -sf -A "dbt-bouncer-release-pipeline" "https://pypi.org/pypi/dbt-bouncer/$VERSION/json" > /dev/null 2>&1; then
+                  # Poll the simple index (what pip/uv read), not the JSON API, which updates first.
+                  if curl -sf -A "dbt-bouncer-release-pipeline" -H "Cache-Control: no-cache" "https://pypi.org/simple/dbt-bouncer/" | grep -q "dbt_bouncer-${VERSION}-"; then
                     echo "Package dbt-bouncer==$VERSION is available on PyPI."
-                    # The JSON API updates before the simple index/CDN, so give resolvers time to catch up.
-                    echo "Waiting a further 60s for the PyPI index to propagate..."
-                    sleep 60
                     exit 0
                   fi
                   echo "Not yet available, retrying in ${INTERVAL}s... (${ELAPSED}s elapsed)"
@@ -46,11 +47,23 @@ jobs:
               with:
                 persist-credentials: false
 
+            # The image runs `uvx dbt-bouncer==<version>` at start-up, so it needs this runner's PyPI CDN edge to serve the release.
+            - name: Wait until the image can install `dbt-bouncer`
+              run: |
+                for attempt in $(seq 1 10); do
+                  if docker run --rm --entrypoint uvx "ghcr.io/godatadriven/dbt-bouncer:${GITHUB_REF_NAME}" "dbt-bouncer==${GITHUB_REF_NAME#v}" --version; then
+                    exit 0
+                  fi
+                  echo "Attempt ${attempt}/10 failed, retrying in 30s..."
+                  sleep 30
+                done
+                exit 1
+
             - name: Run Docker test
               run: |
                 docker run --rm \
                   --volume "$PWD":/app \
-                  ghcr.io/godatadriven/dbt-bouncer:$(echo "${GITHUB_REF}" | cut -d "/" -f3) \
+                  "ghcr.io/godatadriven/dbt-bouncer:${GITHUB_REF_NAME}" \
                   --config-file /app/dbt-bouncer-example.yml
 
     github-action-test:
@@ -60,7 +73,19 @@ jobs:
         runs-on: ubuntu-26.04
         steps:
             - name: Checkout
-              run: git clone https://github.com/godatadriven/dbt-bouncer.git --branch $(echo "${GITHUB_REF}" | cut -d "/" -f3) --depth 1
+              run: git clone https://github.com/godatadriven/dbt-bouncer.git --branch "${GITHUB_REF_NAME}" --depth 1
+
+            # The action's image runs `uvx dbt-bouncer==<version>` at start-up, so it needs this runner's PyPI CDN edge to serve the release.
+            - name: Wait until the image can install `dbt-bouncer`
+              run: |
+                for attempt in $(seq 1 10); do
+                  if docker run --rm --entrypoint uvx "ghcr.io/godatadriven/dbt-bouncer:${GITHUB_REF_NAME}" "dbt-bouncer==${GITHUB_REF_NAME#v}" --version; then
+                    exit 0
+                  fi
+                  echo "Attempt ${attempt}/10 failed, retrying in 30s..."
+                  sleep 30
+                done
+                exit 1
 
             - name: Run `dbt-bouncer`
               uses: ./dbt-bouncer
@@ -95,15 +120,19 @@ jobs:
               with:
                 python-version: ${{ matrix.python-version }}
 
+            # Retry because each runner can hit a PyPI CDN edge that still serves the old index.
+            # `--no-cache-dir` matters: pip caches the simple index page, so a retry would otherwise re-read the stale copy.
             - name: Install `dbt-bouncer`
-              if: matrix.operating-system == 'windows-2025'
+              shell: bash
               run: |
-                $env:DBT_BOUNCER_VERSION = $("${{ github.ref }}" -Split "/")[2].TrimStart("v")
-                pip install "dbt-bouncer==$env:DBT_BOUNCER_VERSION"
-
-            - name: Install `dbt-bouncer`
-              if: matrix.operating-system != 'windows-2025'
-              run: pip install dbt-bouncer==$(echo "${{ github.ref }}" | cut -d "/" -f3)
+                for attempt in $(seq 1 10); do
+                  if pip install --no-cache-dir "dbt-bouncer==${GITHUB_REF_NAME#v}"; then
+                    exit 0
+                  fi
+                  echo "Attempt ${attempt}/10 failed, retrying in 30s..."
+                  sleep 30
+                done
+                exit 1
 
             - name: Run `dbt-bouncer`
               run: dbt-bouncer run --config-file dbt-bouncer-example.yml
