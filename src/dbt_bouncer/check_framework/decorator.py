@@ -79,7 +79,10 @@ _requested_checks: ContextVar[frozenset[str] | None] = ContextVar(
 # Module attribute mapping each deferred class name to its ``@check`` arguments.
 _DEFERRED_CHECKS_ATTR = "__dbt_bouncer_deferred_checks__"
 
-# Guards building a deferred class, so two threads cannot build one check twice.
+# Guards building a deferred class. Checks execute sequentially, but
+# ``run_bouncer`` is a public API, and a caller can load configs from several
+# threads. Without the lock, two threads could build one check twice, and the
+# module would then hold a different class from the one a caller already uses.
 _materialise_lock = threading.RLock()
 
 
