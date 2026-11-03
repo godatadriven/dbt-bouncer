@@ -1000,6 +1000,48 @@ def test_construct_cached_check_rewraps_nested_dict_field():
     assert instance.keys.model_dump() == ["maturity"]
 
 
+def test_construct_cached_check_converts_enum_fields():
+    """Enum fields must be enum members after ``model_construct``, as on a cold run."""
+    from dbt_bouncer.checks.manifest.models.code import (
+        CheckModelMaterializationPermitted,
+    )
+    from dbt_bouncer.configuration_file.validator import _construct_cached_check
+    from dbt_bouncer.enums import CheckSeverity, Materialization
+
+    instance = _construct_cached_check(
+        CheckModelMaterializationPermitted,
+        {
+            "name": "check_model_materialization_permitted",
+            "materialization": "table",
+            "permitted_materializations": ["view", "ephemeral"],
+            "severity": "warn",
+        },
+    )
+
+    assert instance.materialization is Materialization.TABLE
+    assert instance.permitted_materializations == [
+        Materialization.VIEW,
+        Materialization.EPHEMERAL,
+    ]
+    assert all(
+        isinstance(m, Materialization) for m in instance.permitted_materializations
+    )
+    assert instance.severity is CheckSeverity.WARN
+
+
+def test_construct_cached_check_keeps_none_enum_field():
+    """An optional enum field that is ``None`` in the cache stays ``None``."""
+    from dbt_bouncer.checks.manifest.models.code import CheckModelMaxNumberOfLines
+    from dbt_bouncer.configuration_file.validator import _construct_cached_check
+
+    instance = _construct_cached_check(
+        CheckModelMaxNumberOfLines,
+        {"name": "check_model_max_number_of_lines", "materialization": None},
+    )
+
+    assert instance.materialization is None
+
+
 def test_construct_cached_check_does_not_mutate_input():
     """The ``data`` dict passed in must not be mutated.
 
@@ -1061,6 +1103,43 @@ def test_validate_conf_invalid_cache_falls_back_to_cold_path(isolated_cache_dir)
 
     assert len(bouncer_config.manifest_checks) == 1
     assert bouncer_config.manifest_checks[0].name == "check_model_has_unique_test"
+
+
+def test_validate_conf_invalid_enum_in_cache_falls_back_to_cold_path(
+    isolated_cache_dir,
+):
+    """A cached enum value that is no longer valid is ignored, not raised."""
+    from dbt_bouncer.enums import Materialization
+
+    config = {
+        "manifest_checks": [
+            {
+                "name": "check_model_materialization_permitted",
+                "permitted_materializations": ["view"],
+            }
+        ]
+    }
+    ctx = typer.Context(
+        get_command(app),
+        obj={"config_file_path": "", "custom_checks_dir": None},
+    )
+    with ctx:
+        validate_conf(
+            check_categories=["manifest_checks"],
+            config_file_contents=dict(config),
+        )
+        (cache_file,) = isolated_cache_dir.glob("conf_*.json")
+        cache_file.write_text(
+            cache_file.read_text().replace('"view"', '"not_a_materialization"')
+        )
+        bouncer_config = validate_conf(
+            check_categories=["manifest_checks"],
+            config_file_contents=dict(config),
+        )
+
+    assert bouncer_config.manifest_checks[0].permitted_materializations == [
+        Materialization.VIEW
+    ]
 
 
 CUSTOM_CHECK_SOURCE = '''\
@@ -1739,6 +1818,18 @@ _EQUIVALENCE_MANIFEST_CHECK = st.one_of(
     ),
     st.fixed_dictionaries(
         {
+            "name": st.just("check_model_materialization_permitted"),
+            "permitted_materializations": st.lists(
+                st.sampled_from(["ephemeral", "incremental", "table", "view"]),
+                min_size=1,
+                max_size=3,
+                unique=True,
+            ),
+        },
+        optional=_COMMON_CHECK_PARAMS,
+    ),
+    st.fixed_dictionaries(
+        {
             "model_name_pattern": _VALID_REGEX_PATTERNS,
             "name": st.just("check_model_names"),
         },
@@ -1904,6 +1995,23 @@ def test_config_equivalence_yaml_toml_pyproject(config: dict[str, Any]):
         assert validated_yaml == validated_toml == validated_pyproject
 
 
+def _field_types(check: Any) -> dict[str, Any]:
+    """Map each field of ``check`` to its type, or the item types for a list.
+
+    Returns:
+        dict[str, Any]: The field types.
+
+    """
+    types_by_field: dict[str, Any] = {}
+    for name in type(check).model_fields:
+        value = getattr(check, name)
+        if isinstance(value, list):
+            types_by_field[name] = [type(item) for item in value]
+        else:
+            types_by_field[name] = type(value)
+    return types_by_field
+
+
 @settings(max_examples=50, deadline=None)
 @given(_VALID_CONFIG_EQUIVALENCE_STRATEGY)
 def test_config_warm_cache_roundtrip_equivalence(config: dict[str, Any]):
@@ -1922,6 +2030,13 @@ def test_config_warm_cache_roundtrip_equivalence(config: dict[str, Any]):
         warm = validate_conf(config_file_contents=dict(config))
 
         assert warm == cold
+        # `==` cannot see a StrEnum that came back as a plain string, so also
+        # compare the type of every check field, and of every item in a list.
+        for category in ("manifest_checks", "run_results_checks"):
+            for warm_check, cold_check in zip(
+                getattr(warm, category, []), getattr(cold, category, []), strict=True
+            ):
+                assert _field_types(warm_check) == _field_types(cold_check)
         assert len(list(Path(tmp_dir).glob("conf_*.json"))) == 1
         for check_obj in getattr(warm, "manifest_checks", []):
             if check_obj.name == "check_model_has_meta_keys":
@@ -2044,15 +2159,20 @@ def test_lint_config_file_deep_unexpected_exception(caplog, monkeypatch, tmp_pat
     assert "Unexpected error during config validation: boom" in caplog.text
 
 
-def test_find_root_model_in_annotation_union():
-    """A RootModel nested in a union annotation is found."""
-    from dbt_bouncer.check_framework.exceptions import NestedDict
-    from dbt_bouncer.configuration_file.validator import (
-        _find_root_model_in_annotation,
-    )
+def test_mentions_type_finds_nested_annotations():
+    """A RootModel or Enum nested in a union or a list annotation is found."""
+    from enum import Enum
 
-    assert _find_root_model_in_annotation(int | NestedDict) is NestedDict
-    assert _find_root_model_in_annotation(int | str) is None
+    from pydantic import RootModel
+
+    from dbt_bouncer.check_framework.exceptions import NestedDict
+    from dbt_bouncer.configuration_file.validator import _mentions_type
+    from dbt_bouncer.enums import Materialization
+
+    assert _mentions_type(int | NestedDict, RootModel)
+    assert not _mentions_type(int | str, RootModel)
+    assert _mentions_type(list[Materialization] | None, Enum)
+    assert not _mentions_type(list[str] | None, Enum)
 
 
 @pytest.mark.parametrize(

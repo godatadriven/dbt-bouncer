@@ -717,6 +717,31 @@ class TestCheckModelMaterializationPermitted:
             ),
         )
 
+    def test_failure_message_from_warm_config_cache(self):
+        # The warm config cache rebuilds checks with `model_construct`, so
+        # `permitted_materializations` holds plain strings, not enum members.
+        from dbt_bouncer.check_framework.exceptions import DbtBouncerFailedCheckError
+        from dbt_bouncer.configuration_file.validator import _construct_cached_check
+        from dbt_bouncer.testing import (
+            _build_check_context,
+            _build_resource,
+            _get_check_class,
+        )
+
+        check = _construct_cached_check(
+            _get_check_class("check_model_materialization_permitted"),
+            {
+                "name": "check_model_materialization_permitted",
+                "permitted_materializations": ["view"],
+            },
+        )
+        check.model = _build_resource("model", {"config": {"materialized": "table"}})
+        check.set_context(_build_check_context())
+        with pytest.raises(
+            DbtBouncerFailedCheckError, match=r"expected one of \['view'\]\."
+        ):
+            check.execute()
+
     def test_invalid_materialization_rejected(self):
         with pytest.raises(ValueError, match="'ephemeral'"):
             _run_check(
