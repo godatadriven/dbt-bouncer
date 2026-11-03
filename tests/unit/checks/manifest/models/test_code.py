@@ -671,6 +671,12 @@ class TestCheckModelMaterializationPermitted:
                 id="materialized_view_permitted",
             ),
             pytest.param(
+                {"config": {"materialized": "materialized_view"}},
+                ["view"],
+                check_fails,
+                id="materialized_view_not_permitted",
+            ),
+            pytest.param(
                 {"config": {"materialized": "view"}},
                 ["view"],
                 check_passes,
