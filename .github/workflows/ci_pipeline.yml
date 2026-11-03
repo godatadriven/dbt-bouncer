@@ -45,9 +45,9 @@ jobs:
 
             - name: Run prek
               run: |
-                git diff --name-status origin/main..HEAD > changed_files.txt
+                git diff --name-only --diff-filter=d origin/main..HEAD > changed_files.txt
                 cat changed_files.txt
-                cat changed_files.txt | xargs uv run prek run --show-diff-on-failure --files
+                cat changed_files.txt | xargs --no-run-if-empty uv run prek run --show-diff-on-failure --files
 
     schema-check:
         needs: [prek]
