@@ -2,9 +2,9 @@ import logging
 import os
 import re
 import tomllib
-import types
 import typing
 from collections.abc import Iterable, Mapping
+from enum import Enum
 from functools import lru_cache
 from pathlib import Path, PurePath
 from typing import TYPE_CHECKING, Any
@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING, Any
 import jellyfish
 import typer
 import yaml
-from pydantic import RootModel, ValidationError
+from pydantic import RootModel, TypeAdapter, ValidationError
 
 from dbt_bouncer.enums import CheckCategory, ConfigFileName, ConfigFileSource
 from dbt_bouncer.exceptions import DbtBouncerConfigError
@@ -575,59 +575,54 @@ def _get_stub_namespace() -> dict[str, Any]:
 
 _CONF_CACHE_FORMAT_VERSION = 1
 
-_root_model_fields_cache: dict[type, tuple[tuple[str, type[RootModel]], ...]] = {}
+_coerced_fields_cache: dict[type, tuple[tuple[str, TypeAdapter], ...]] = {}
 
 
-def _find_root_model_in_annotation(annotation: Any) -> type[RootModel] | None:
-    """Walk ``annotation`` and return the first ``RootModel`` subclass found.
-
-    Handles plain types, ``X | None`` (PEP 604 union) and ``Optional[X]`` /
-    ``Union[X, ...]``. Used to identify check fields whose JSON-mode dump must
-    be re-coerced into a typed Pydantic instance after ``model_construct``.
+def _mentions_type(annotation: Any, base: type) -> bool:
+    """Whether ``annotation`` is, or contains, a subclass of ``base``.
 
     Returns:
-        type[RootModel] | None: The RootModel subclass, or ``None`` if the
-        annotation does not contain one.
+        bool: ``True`` for e.g. ``base``, ``list[base]`` or ``base | None``.
 
     """
-    if isinstance(annotation, type) and issubclass(annotation, RootModel):
-        return annotation
-
-    if typing.get_origin(annotation) in (typing.Union, types.UnionType):
-        for arg in typing.get_args(annotation):
-            found = _find_root_model_in_annotation(arg)
-            if found is not None:
-                return found
-
-    return None
+    if isinstance(annotation, type) and issubclass(annotation, base):
+        return True
+    return any(_mentions_type(arg, base) for arg in typing.get_args(annotation))
 
 
-def _root_model_fields(
-    cls: type["BaseCheck"],
-) -> tuple[tuple[str, type[RootModel]], ...]:
-    """Return the ``(field_name, RootModel_subclass)`` pairs for ``cls``.
-
-    Cached per class — model_fields are immutable after class creation, so the
-    lookup only runs once even when the cache contains many entries of the
-    same check type.
+@lru_cache(maxsize=None)
+def _type_adapter(annotation: Any) -> TypeAdapter:
+    """Return a ``TypeAdapter`` for ``annotation``, built once per annotation.
 
     Returns:
-        tuple[tuple[str, type[RootModel]], ...]: Pairs to re-coerce after
+        TypeAdapter: The adapter.
+
+    """
+    return TypeAdapter(annotation)
+
+
+def _coerced_fields(cls: type["BaseCheck"]) -> tuple[tuple[str, TypeAdapter], ...]:
+    """Return ``(field_name, adapter)`` pairs for the fields of ``cls`` to coerce.
+
+    These are the fields typed with an ``Enum`` or a ``RootModel`` (e.g.
+    ``NestedDict``), which the cache stores as raw JSON values. Cached per
+    class, because ``model_fields`` does not change after class creation.
+
+    Returns:
+        tuple[tuple[str, TypeAdapter], ...]: Pairs to coerce after
         ``cls.model_construct``.
 
     """
-    cached = _root_model_fields_cache.get(cls)
-    if cached is not None:
-        return cached
-
-    pairs: list[tuple[str, type[RootModel]]] = []
-    for name, field in cls.model_fields.items():
-        rm = _find_root_model_in_annotation(field.annotation)
-        if rm is not None:
-            pairs.append((name, rm))
-    result = tuple(pairs)
-    _root_model_fields_cache[cls] = result
-    return result
+    cached = _coerced_fields_cache.get(cls)
+    if cached is None:
+        cached = tuple(
+            (name, _type_adapter(field.annotation))
+            for name, field in cls.model_fields.items()
+            if _mentions_type(field.annotation, Enum)
+            or _mentions_type(field.annotation, RootModel)
+        )
+        _coerced_fields_cache[cls] = cached
+    return cached
 
 
 def _construct_cached_check(
@@ -641,27 +636,28 @@ def _construct_cached_check(
     the cache only stores primitive field values extracted from a valid
     instance by ``_dump_check_for_cache``.
 
-    The one wrinkle is that ``model_construct`` does not coerce primitives
-    back into ``RootModel`` instances. Check fields typed as ``NestedDict``
-    are JSON-dumped as raw lists/dicts/strings, so we re-wrap them manually
-    before construction. ``StrEnum`` fields (``severity``, ``materialization``)
-    compare equal to their raw strings, so they need no coercion.
+    The one wrinkle is that ``model_construct`` does not coerce primitives.
+    Fields typed with a ``RootModel`` (e.g. ``NestedDict``) or an ``Enum``
+    (e.g. ``severity``, ``permitted_materializations``) are JSON-dumped as raw
+    values, so a ``TypeAdapter`` for each field's annotation converts them back
+    before construction. A check then gets the same values on a warm run as on
+    a cold run. The adapters build a small schema per annotation, not the
+    check class's discriminated-union schema. A cached value that is no longer
+    valid raises ``pydantic.ValidationError`` (a ``ValueError``), and
+    ``_load_cached_conf`` then rebuilds the config.
 
     Returns:
         BaseCheck: The reconstructed check instance.
 
     """
-    rm_fields = _root_model_fields(cls)
-    if not rm_fields:
-        return cls.model_construct(**data)
+    fields = _coerced_fields(cls)
 
     # Shallow-copy before mutating: the caller's dict (``item["data"]`` in the
     # cache payload) is not ours to modify in place.
     data = {**data}
-    for fname, rm_cls in rm_fields:
-        value = data.get(fname)
-        if value is not None and not isinstance(value, rm_cls):
-            data[fname] = rm_cls.model_validate(value)
+    for fname, adapter in fields:
+        if data.get(fname) is not None:
+            data[fname] = adapter.validate_python(data[fname])
 
     return cls.model_construct(**data)
 
@@ -733,8 +729,8 @@ def _load_cached_conf(
     only fields that need explicit re-coercion are ``RootModel`` subclasses
     (e.g. ``NestedDict``) which JSON-dump to primitives; those are wrapped
     back into typed instances by ``_construct_cached_check`` before
-    construction. ``StrEnum`` fields compare equal to their raw string forms,
-    so they need no coercion.
+    construction. Enum fields, which JSON-dump to raw strings, are converted
+    back into enum members there too.
 
     Returns:
         The cached config, or ``None`` if the cache is missing, corrupt, or
@@ -788,7 +784,18 @@ def _load_cached_conf(
                     item["_qualname"],
                 )
                 return None
-            out.append(_construct_cached_check(cls, item["data"]))
+            try:
+                out.append(_construct_cached_check(cls, item["data"]))
+            except ValueError:
+                # A cached enum value that is no longer a member, e.g. after an
+                # enum change on an editable install.
+                logging.debug(
+                    "Conf cache has an invalid value for %s.%s; rebuilding.",
+                    item["_module"],
+                    item["_qualname"],
+                    exc_info=True,
+                )
+                return None
         materialised[cat] = out
 
     return _get_lite_conf_class().model_construct(**materialised)
