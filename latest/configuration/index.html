@@ -1183,7 +1183,7 @@ them on the command line, or with the <code>DBT_BOUNCER_*</code> variables descr
 <p>Model checks accept two more optional arguments:</p>
 <ul>
 <li><code>language</code>: Run the check only on models written in this language, either <code>python</code> or <code>sql</code>.</li>
-<li><code>materialization</code>: Run the check only on models with this materialization, one of <code>ephemeral</code>, <code>incremental</code>, <code>table</code> or <code>view</code>.</li>
+<li><code>materialization</code>: Run the check only on models with this materialization, one of <code>dynamic_table</code>, <code>ephemeral</code>, <code>incremental</code>, <code>materialized_view</code>, <code>table</code> or <code>view</code>.</li>
 </ul>
 <p>Each argument takes one value. A model must match every argument that is set, and these arguments combine with <code>exclude</code>, <code>include</code> and <code>selector</code> in the same way. Checks that do not iterate over models ignore both arguments.</p>
 <p>Use <code>language: sql</code> to skip Python models in a check that only applies to SQL. For example, to enforce a SQL coding rule on the raw code of SQL models only:</p>

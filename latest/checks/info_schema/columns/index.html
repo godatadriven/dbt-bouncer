@@ -2034,7 +2034,7 @@
           <tr class="doc-section-item">
             <td><code>materialization</code></td>
             <td>
-                  <code><span title="Literal">Literal</span>[<span title="ephemeral">ephemeral</span>, <span title="incremental">incremental</span>, <span title="table">table</span>, <span title="view">view</span>] | None</code>
+                  <code><span title="Literal">Literal</span>[<span title="dynamic_table">dynamic_table</span>, <span title="ephemeral">ephemeral</span>, <span title="incremental">incremental</span>, <span title="materialized_view">materialized_view</span>, <span title="table">table</span>, <span title="view">view</span>] | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -2137,7 +2137,7 @@
 </span><span id="__span-0-136"><a id="__codelineno-0-136" name="__codelineno-0-136"></a><span class="sd">        exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.</span>
 </span><span id="__span-0-137"><a id="__codelineno-0-137" name="__codelineno-0-137"></a><span class="sd">        include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.</span>
 </span><span id="__span-0-138"><a id="__codelineno-0-138" name="__codelineno-0-138"></a><span class="sd">        language (Literal[&quot;python&quot;, &quot;sql&quot;] | None): Limit check to models written in the specified language.</span>
-</span><span id="__span-0-139"><a id="__codelineno-0-139" name="__codelineno-0-139"></a><span class="sd">        materialization (Literal[&quot;ephemeral&quot;, &quot;incremental&quot;, &quot;table&quot;, &quot;view&quot;] | None): Limit check to models with the specified materialization.</span>
+</span><span id="__span-0-139"><a id="__codelineno-0-139" name="__codelineno-0-139"></a><span class="sd">        materialization (Literal[&quot;dynamic_table&quot;, &quot;ephemeral&quot;, &quot;incremental&quot;, &quot;materialized_view&quot;, &quot;table&quot;, &quot;view&quot;] | None): Limit check to models with the specified materialization.</span>
 </span><span id="__span-0-140"><a id="__codelineno-0-140" name="__codelineno-0-140"></a><span class="sd">        severity (Literal[&quot;error&quot;, &quot;warn&quot;] | None): Severity level of the check. Default: `error`.</span>
 </span><span id="__span-0-141"><a id="__codelineno-0-141" name="__codelineno-0-141"></a>
 </span><span id="__span-0-142"><a id="__codelineno-0-142" name="__codelineno-0-142"></a><span class="sd">    Example(s):</span>
@@ -2312,7 +2312,7 @@
           <tr class="doc-section-item">
             <td><code>materialization</code></td>
             <td>
-                  <code><span title="Literal">Literal</span>[<span title="ephemeral">ephemeral</span>, <span title="incremental">incremental</span>, <span title="table">table</span>, <span title="view">view</span>] | None</code>
+                  <code><span title="Literal">Literal</span>[<span title="dynamic_table">dynamic_table</span>, <span title="ephemeral">ephemeral</span>, <span title="incremental">incremental</span>, <span title="materialized_view">materialized_view</span>, <span title="table">table</span>, <span title="view">view</span>] | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -2418,7 +2418,7 @@
 </span><span id="__span-0-195"><a id="__codelineno-0-195" name="__codelineno-0-195"></a><span class="sd">        exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.</span>
 </span><span id="__span-0-196"><a id="__codelineno-0-196" name="__codelineno-0-196"></a><span class="sd">        include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.</span>
 </span><span id="__span-0-197"><a id="__codelineno-0-197" name="__codelineno-0-197"></a><span class="sd">        language (Literal[&quot;python&quot;, &quot;sql&quot;] | None): Limit check to models written in the specified language.</span>
-</span><span id="__span-0-198"><a id="__codelineno-0-198" name="__codelineno-0-198"></a><span class="sd">        materialization (Literal[&quot;ephemeral&quot;, &quot;incremental&quot;, &quot;table&quot;, &quot;view&quot;] | None): Limit check to models with the specified materialization.</span>
+</span><span id="__span-0-198"><a id="__codelineno-0-198" name="__codelineno-0-198"></a><span class="sd">        materialization (Literal[&quot;dynamic_table&quot;, &quot;ephemeral&quot;, &quot;incremental&quot;, &quot;materialized_view&quot;, &quot;table&quot;, &quot;view&quot;] | None): Limit check to models with the specified materialization.</span>
 </span><span id="__span-0-199"><a id="__codelineno-0-199" name="__codelineno-0-199"></a><span class="sd">        severity (Literal[&quot;error&quot;, &quot;warn&quot;] | None): Severity level of the check. Default: `error`.</span>
 </span><span id="__span-0-200"><a id="__codelineno-0-200" name="__codelineno-0-200"></a>
 </span><span id="__span-0-201"><a id="__codelineno-0-201" name="__codelineno-0-201"></a><span class="sd">    Example(s):</span>
@@ -2559,7 +2559,7 @@
           <tr class="doc-section-item">
             <td><code>materialization</code></td>
             <td>
-                  <code><span title="Literal">Literal</span>[<span title="ephemeral">ephemeral</span>, <span title="incremental">incremental</span>, <span title="table">table</span>, <span title="view">view</span>] | None</code>
+                  <code><span title="Literal">Literal</span>[<span title="dynamic_table">dynamic_table</span>, <span title="ephemeral">ephemeral</span>, <span title="incremental">incremental</span>, <span title="materialized_view">materialized_view</span>, <span title="table">table</span>, <span title="view">view</span>] | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -2653,7 +2653,7 @@
 </span><span id="__span-0-248"><a id="__codelineno-0-248" name="__codelineno-0-248"></a><span class="sd">        exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.</span>
 </span><span id="__span-0-249"><a id="__codelineno-0-249" name="__codelineno-0-249"></a><span class="sd">        include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.</span>
 </span><span id="__span-0-250"><a id="__codelineno-0-250" name="__codelineno-0-250"></a><span class="sd">        language (Literal[&quot;python&quot;, &quot;sql&quot;] | None): Limit check to models written in the specified language.</span>
-</span><span id="__span-0-251"><a id="__codelineno-0-251" name="__codelineno-0-251"></a><span class="sd">        materialization (Literal[&quot;ephemeral&quot;, &quot;incremental&quot;, &quot;table&quot;, &quot;view&quot;] | None): Limit check to models with the specified materialization.</span>
+</span><span id="__span-0-251"><a id="__codelineno-0-251" name="__codelineno-0-251"></a><span class="sd">        materialization (Literal[&quot;dynamic_table&quot;, &quot;ephemeral&quot;, &quot;incremental&quot;, &quot;materialized_view&quot;, &quot;table&quot;, &quot;view&quot;] | None): Limit check to models with the specified materialization.</span>
 </span><span id="__span-0-252"><a id="__codelineno-0-252" name="__codelineno-0-252"></a><span class="sd">        severity (Literal[&quot;error&quot;, &quot;warn&quot;] | None): Severity level of the check. Default: `error`.</span>
 </span><span id="__span-0-253"><a id="__codelineno-0-253" name="__codelineno-0-253"></a>
 </span><span id="__span-0-254"><a id="__codelineno-0-254" name="__codelineno-0-254"></a><span class="sd">    Example(s):</span>
@@ -2820,7 +2820,7 @@
           <tr class="doc-section-item">
             <td><code>materialization</code></td>
             <td>
-                  <code><span title="Literal">Literal</span>[<span title="ephemeral">ephemeral</span>, <span title="incremental">incremental</span>, <span title="table">table</span>, <span title="view">view</span>] | None</code>
+                  <code><span title="Literal">Literal</span>[<span title="dynamic_table">dynamic_table</span>, <span title="ephemeral">ephemeral</span>, <span title="incremental">incremental</span>, <span title="materialized_view">materialized_view</span>, <span title="table">table</span>, <span title="view">view</span>] | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -2940,7 +2940,7 @@
 </span><span id="__span-0-301"><a id="__codelineno-0-301" name="__codelineno-0-301"></a><span class="sd">        exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.</span>
 </span><span id="__span-0-302"><a id="__codelineno-0-302" name="__codelineno-0-302"></a><span class="sd">        include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.</span>
 </span><span id="__span-0-303"><a id="__codelineno-0-303" name="__codelineno-0-303"></a><span class="sd">        language (Literal[&quot;python&quot;, &quot;sql&quot;] | None): Limit check to models written in the specified language.</span>
-</span><span id="__span-0-304"><a id="__codelineno-0-304" name="__codelineno-0-304"></a><span class="sd">        materialization (Literal[&quot;ephemeral&quot;, &quot;incremental&quot;, &quot;table&quot;, &quot;view&quot;] | None): Limit check to models with the specified materialization.</span>
+</span><span id="__span-0-304"><a id="__codelineno-0-304" name="__codelineno-0-304"></a><span class="sd">        materialization (Literal[&quot;dynamic_table&quot;, &quot;ephemeral&quot;, &quot;incremental&quot;, &quot;materialized_view&quot;, &quot;table&quot;, &quot;view&quot;] | None): Limit check to models with the specified materialization.</span>
 </span><span id="__span-0-305"><a id="__codelineno-0-305" name="__codelineno-0-305"></a><span class="sd">        severity (Literal[&quot;error&quot;, &quot;warn&quot;] | None): Severity level of the check. Default: `error`.</span>
 </span><span id="__span-0-306"><a id="__codelineno-0-306" name="__codelineno-0-306"></a>
 </span><span id="__span-0-307"><a id="__codelineno-0-307" name="__codelineno-0-307"></a><span class="sd">    Example(s):</span>
@@ -3122,7 +3122,7 @@
           <tr class="doc-section-item">
             <td><code>materialization</code></td>
             <td>
-                  <code><span title="Literal">Literal</span>[<span title="ephemeral">ephemeral</span>, <span title="incremental">incremental</span>, <span title="table">table</span>, <span title="view">view</span>] | None</code>
+                  <code><span title="Literal">Literal</span>[<span title="dynamic_table">dynamic_table</span>, <span title="ephemeral">ephemeral</span>, <span title="incremental">incremental</span>, <span title="materialized_view">materialized_view</span>, <span title="table">table</span>, <span title="view">view</span>] | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3236,7 +3236,7 @@
 </span><span id="__span-0-367"><a id="__codelineno-0-367" name="__codelineno-0-367"></a><span class="sd">        exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.</span>
 </span><span id="__span-0-368"><a id="__codelineno-0-368" name="__codelineno-0-368"></a><span class="sd">        include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.</span>
 </span><span id="__span-0-369"><a id="__codelineno-0-369" name="__codelineno-0-369"></a><span class="sd">        language (Literal[&quot;python&quot;, &quot;sql&quot;] | None): Limit check to models written in the specified language.</span>
-</span><span id="__span-0-370"><a id="__codelineno-0-370" name="__codelineno-0-370"></a><span class="sd">        materialization (Literal[&quot;ephemeral&quot;, &quot;incremental&quot;, &quot;table&quot;, &quot;view&quot;] | None): Limit check to models with the specified materialization.</span>
+</span><span id="__span-0-370"><a id="__codelineno-0-370" name="__codelineno-0-370"></a><span class="sd">        materialization (Literal[&quot;dynamic_table&quot;, &quot;ephemeral&quot;, &quot;incremental&quot;, &quot;materialized_view&quot;, &quot;table&quot;, &quot;view&quot;] | None): Limit check to models with the specified materialization.</span>
 </span><span id="__span-0-371"><a id="__codelineno-0-371" name="__codelineno-0-371"></a><span class="sd">        severity (Literal[&quot;error&quot;, &quot;warn&quot;] | None): Severity level of the check. Default: `error`.</span>
 </span><span id="__span-0-372"><a id="__codelineno-0-372" name="__codelineno-0-372"></a>
 </span><span id="__span-0-373"><a id="__codelineno-0-373" name="__codelineno-0-373"></a><span class="sd">    Example(s):</span>
