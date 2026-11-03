@@ -74,9 +74,9 @@
 | src/dbt\_bouncer/cli/validate/\_\_init\_\_.py               |       28 |        0 |        8 |        0 |     100% |           |
 | src/dbt\_bouncer/configuration\_file/\_\_init\_\_.py        |        0 |        0 |        0 |        0 |     100% |           |
 | src/dbt\_bouncer/configuration\_file/parser.py              |       57 |        0 |       10 |        0 |     100% |           |
-| src/dbt\_bouncer/configuration\_file/validator.py           |      464 |        0 |      196 |        0 |     100% |           |
+| src/dbt\_bouncer/configuration\_file/validator.py           |      457 |        0 |      184 |        0 |     100% |           |
 | src/dbt\_bouncer/context.py                                 |       62 |        0 |        0 |        0 |     100% |           |
-| src/dbt\_bouncer/enums.py                                   |      230 |        0 |        0 |        0 |     100% |           |
+| src/dbt\_bouncer/enums.py                                   |      232 |        0 |        0 |        0 |     100% |           |
 | src/dbt\_bouncer/exceptions.py                              |        6 |        0 |        0 |        0 |     100% |           |
 | src/dbt\_bouncer/executor.py                                |       53 |        0 |       16 |        0 |     100% |           |
 | src/dbt\_bouncer/main.py                                    |       26 |        0 |        4 |        0 |     100% |           |
@@ -94,7 +94,7 @@
 | src/dbt\_bouncer/types.py                                   |       19 |        0 |        4 |        0 |     100% |           |
 | src/dbt\_bouncer/utils.py                                   |      378 |        0 |      144 |        0 |     100% |           |
 | src/dbt\_bouncer/version.py                                 |        2 |        0 |        0 |        0 |     100% |           |
-| **TOTAL**                                                   | **5219** |    **0** | **1766** |    **0** | **100%** |           |
+| **TOTAL**                                                   | **5214** |    **0** | **1754** |    **0** | **100%** |           |
 
 
 ## Setup coverage badge

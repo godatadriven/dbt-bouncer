@@ -67,7 +67,7 @@
             <a id="nextFileLink" class="nav" href="z_65d053e6d5d591c0_versioning_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.17.0">coverage.py v7.17.0</a>,
-            created at 2026-11-03 12:24 +0000
+            created at 2026-11-03 12:58 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -119,7 +119,7 @@
     <p class="pln"><span class="n"><a id="t35" href="#t35">35</a></span><span class="t"><span class="str">        exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t36" href="#t36">36</a></span><span class="t"><span class="str">        include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t37" href="#t37">37</a></span><span class="t"><span class="str">        language (Literal[&quot;python&quot;, &quot;sql&quot;] | None): Limit check to models written in the specified language.</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t38" href="#t38">38</a></span><span class="t"><span class="str">        materialization (Literal[&quot;ephemeral&quot;, &quot;incremental&quot;, &quot;table&quot;, &quot;view&quot;] | None): Limit check to models with the specified materialization.</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t38" href="#t38">38</a></span><span class="t"><span class="str">        materialization (Literal[&quot;dynamic_table&quot;, &quot;ephemeral&quot;, &quot;incremental&quot;, &quot;materialized_view&quot;, &quot;table&quot;, &quot;view&quot;] | None): Limit check to models with the specified materialization.</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t39" href="#t39">39</a></span><span class="t"><span class="str">        severity (Literal[&quot;error&quot;, &quot;warn&quot;] | None): Severity level of the check. Default: `error`.</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t40" href="#t40">40</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t41" href="#t41">41</a></span><span class="t"><span class="str">    Example(s):</span>&nbsp;</span><span class="r"></span></p>
@@ -189,7 +189,7 @@
     <p class="pln"><span class="n"><a id="t105" href="#t105">105</a></span><span class="t"><span class="str">        exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t106" href="#t106">106</a></span><span class="t"><span class="str">        include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t107" href="#t107">107</a></span><span class="t"><span class="str">        language (Literal[&quot;python&quot;, &quot;sql&quot;] | None): Limit check to models written in the specified language.</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t108" href="#t108">108</a></span><span class="t"><span class="str">        materialization (Literal[&quot;ephemeral&quot;, &quot;incremental&quot;, &quot;table&quot;, &quot;view&quot;] | None): Limit check to models with the specified materialization.</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t108" href="#t108">108</a></span><span class="t"><span class="str">        materialization (Literal[&quot;dynamic_table&quot;, &quot;ephemeral&quot;, &quot;incremental&quot;, &quot;materialized_view&quot;, &quot;table&quot;, &quot;view&quot;] | None): Limit check to models with the specified materialization.</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t109" href="#t109">109</a></span><span class="t"><span class="str">        severity (Literal[&quot;error&quot;, &quot;warn&quot;] | None): Severity level of the check. Default: `error`.</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t110" href="#t110">110</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t111" href="#t111">111</a></span><span class="t"><span class="str">    Example(s):</span>&nbsp;</span><span class="r"></span></p>
@@ -259,7 +259,7 @@
     <p class="pln"><span class="n"><a id="t175" href="#t175">175</a></span><span class="t"><span class="str">        exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t176" href="#t176">176</a></span><span class="t"><span class="str">        include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t177" href="#t177">177</a></span><span class="t"><span class="str">        language (Literal[&quot;python&quot;, &quot;sql&quot;] | None): Limit check to models written in the specified language.</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t178" href="#t178">178</a></span><span class="t"><span class="str">        materialization (Literal[&quot;ephemeral&quot;, &quot;incremental&quot;, &quot;table&quot;, &quot;view&quot;] | None): Limit check to models with the specified materialization.</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t178" href="#t178">178</a></span><span class="t"><span class="str">        materialization (Literal[&quot;dynamic_table&quot;, &quot;ephemeral&quot;, &quot;incremental&quot;, &quot;materialized_view&quot;, &quot;table&quot;, &quot;view&quot;] | None): Limit check to models with the specified materialization.</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t179" href="#t179">179</a></span><span class="t"><span class="str">        severity (Literal[&quot;error&quot;, &quot;warn&quot;] | None): Severity level of the check. Default: `error`.</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t180" href="#t180">180</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t181" href="#t181">181</a></span><span class="t"><span class="str">    Example(s):</span>&nbsp;</span><span class="r"></span></p>
@@ -323,7 +323,7 @@
     <p class="pln"><span class="n"><a id="t239" href="#t239">239</a></span><span class="t"><span class="str">        exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t240" href="#t240">240</a></span><span class="t"><span class="str">        include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t241" href="#t241">241</a></span><span class="t"><span class="str">        language (Literal[&quot;python&quot;, &quot;sql&quot;] | None): Limit check to models written in the specified language.</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t242" href="#t242">242</a></span><span class="t"><span class="str">        materialization (Literal[&quot;ephemeral&quot;, &quot;incremental&quot;, &quot;table&quot;, &quot;view&quot;] | None): Limit check to models with the specified materialization.</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t242" href="#t242">242</a></span><span class="t"><span class="str">        materialization (Literal[&quot;dynamic_table&quot;, &quot;ephemeral&quot;, &quot;incremental&quot;, &quot;materialized_view&quot;, &quot;table&quot;, &quot;view&quot;] | None): Limit check to models with the specified materialization.</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t243" href="#t243">243</a></span><span class="t"><span class="str">        severity (Literal[&quot;error&quot;, &quot;warn&quot;] | None): Severity level of the check. Default: `error`.</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t244" href="#t244">244</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t245" href="#t245">245</a></span><span class="t"><span class="str">    Example(s):</span>&nbsp;</span><span class="r"></span></p>
@@ -410,7 +410,7 @@
             <a class="nav" href="z_65d053e6d5d591c0_versioning_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.17.0">coverage.py v7.17.0</a>,
-            created at 2026-11-03 12:24 +0000
+            created at 2026-11-03 12:58 +0000
         </p>
     </div>
 </footer>
