@@ -37,7 +37,7 @@ dbt-bouncer list --group manifest_checks
 | `CA` | Catalog | `catalog_checks` | 11 |
 | `EX` | Exposures | `manifest_checks` | 6 |
 | `IS` | Information schema | `info_schema_checks` | 9 |
-| `LI` | Lineage | `manifest_checks` | 3 |
+| `LI` | Lineage | `manifest_checks` | 4 |
 | `MA` | Macros | `manifest_checks` | 10 |
 | `ME` | Metadata | `manifest_checks` | 1 |
 | `MO` | Models | `manifest_checks` | 58 |
@@ -97,6 +97,7 @@ dbt-bouncer list --group manifest_checks
 | `LI001` | `check_lineage_permitted_upstream_models` | Upstream models must have a path that matches the provided `upstream_path_pattern`. |
 | `LI002` | `check_lineage_seed_cannot_be_used` | Seed cannot be referenced in models with a path that matches the specified `include` config. |
 | `LI003` | `check_lineage_source_cannot_be_used` | Sources cannot be referenced in models with a path that matches the specified `include` config. |
+| `LI004` | `check_lineage_permitted_upstream_sources` | Upstream sources must resolve to a database and/or schema that matches the provided patterns. |
 
 ## Macros (`MA`)
 
