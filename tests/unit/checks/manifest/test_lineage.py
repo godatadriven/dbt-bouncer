@@ -96,6 +96,99 @@ class TestCheckLineagePermittedUpstreamModels:
         )
 
 
+_MART_MODEL = {
+    "depends_on": {
+        "nodes": [
+            "model.package_name.int_model_1",
+            "source.package_name.domain__orders.orders",
+        ]
+    },
+    "original_file_path": "models/marts/mart_model.sql",
+    "path": "marts/mart_model.sql",
+}
+
+
+def _upstream_source(database: str | None, schema: str) -> dict:
+    return {
+        "database": database,
+        "fqn": ["package_name", "domain__orders", "orders"],
+        "identifier": "orders",
+        "name": "orders",
+        "schema": schema,
+        "source_name": "domain__orders",
+        "unique_id": "source.package_name.domain__orders.orders",
+    }
+
+
+class TestCheckLineagePermittedUpstreamSources:
+    @pytest.mark.parametrize(
+        ("model_overrides", "ctx_sources", "patterns", "check_fn"),
+        [
+            pytest.param(
+                _MART_MODEL,
+                [_upstream_source("dmn_sales", "domain__marts")],
+                {"database_pattern": "^dmn", "schema_pattern": "^domain__"},
+                check_passes,
+                id="database_and_schema_match",
+            ),
+            pytest.param(
+                _MART_MODEL,
+                [_upstream_source("raw", "domain__marts")],
+                {"schema_pattern": "^domain__"},
+                check_passes,
+                id="schema_only_match",
+            ),
+            pytest.param(
+                {**_MART_MODEL, "depends_on": {"nodes": []}},
+                [_upstream_source("raw", "crm")],
+                {"database_pattern": "^dmn"},
+                check_passes,
+                id="no_source_dependency",
+            ),
+            pytest.param(
+                _MART_MODEL,
+                [_upstream_source("raw", "domain__marts")],
+                {"database_pattern": "^dmn", "schema_pattern": "^domain__"},
+                check_fails,
+                id="database_mismatch",
+            ),
+            pytest.param(
+                _MART_MODEL,
+                [_upstream_source("dmn_sales", "staging")],
+                {"database_pattern": "^dmn", "schema_pattern": "^domain__"},
+                check_fails,
+                id="schema_mismatch",
+            ),
+            pytest.param(
+                _MART_MODEL,
+                [_upstream_source(None, "domain__marts")],
+                {"database_pattern": "^dmn"},
+                check_fails,
+                id="missing_database",
+            ),
+        ],
+    )
+    def test_check_lineage_permitted_upstream_sources(
+        self, model_overrides, ctx_sources, patterns, check_fn
+    ):
+        check_fn(
+            "check_lineage_permitted_upstream_sources",
+            model=model_overrides,
+            ctx_sources=ctx_sources,
+            **patterns,
+        )
+
+    def test_requires_database_or_schema_pattern(self):
+        with pytest.raises(
+            ValueError, match=r"database_pattern.*schema_pattern.*must be supplied"
+        ):
+            check_passes(
+                "check_lineage_permitted_upstream_sources",
+                model=_MART_MODEL,
+                ctx_sources=[_upstream_source("dmn_sales", "domain__marts")],
+            )
+
+
 class TestCheckLineageSeedCannotBeUsed:
     @pytest.mark.parametrize(
         ("model_overrides", "check_fn"),
