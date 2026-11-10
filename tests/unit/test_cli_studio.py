@@ -50,10 +50,18 @@ class TestStudioCommand:
 
     def test_studio_filter_by_category(self):
         """Filtering by category limits checks to that category."""
-        result = runner.invoke(app, ["studio", "--category", "manifest_checks"])
+        result = runner.invoke(
+            app,
+            ["studio", "--category", "manifest_checks"],
+            env={"COLUMNS": "400"},
+        )
 
         assert result.exit_code == 0
-        assert "manifest" in result.output
+        assert "category: manifest_checks" in result.output
+        # The filter must keep the checks of the category, not drop all of them.
+        assert "No checks matched your filter criteria" not in result.output
+        assert "check_model_names" in result.output
+        assert "check_column_description_populated" not in result.output
 
     def test_studio_invalid_category_exits_config_error(self):
         """An invalid category exits with CONFIG_ERROR and lists valid choices."""

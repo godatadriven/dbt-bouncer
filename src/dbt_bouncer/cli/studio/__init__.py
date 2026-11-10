@@ -84,7 +84,13 @@ def studio(
         key=lambda c: (category_key(c), c.__name__),
     )
 
-    filtered = filter_checks(checks, category=category, search=search)
+    # `--category` takes the config key (`manifest_checks`). The module path of
+    # a check holds the short form (`manifest`), which `filter_checks` compares.
+    filtered = filter_checks(
+        checks,
+        category=CheckCategory(category).directory if category else None,
+        search=search,
+    )
 
     # Resolve config file if provided or if default exists
     configured_checks: set[str] = set()
