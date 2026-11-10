@@ -377,7 +377,7 @@ def parse_dbt_artifacts(
                 catalog_node=DictProxy(v),
             )
             for k, v in catalog_dict.get("nodes", {}).items()
-            if k.split(".")[-2] == target_package
+            if k.split(".")[1] == target_package
         ]
         project_catalog_sources: list[SimpleNamespace] = [
             _make_wrapper(

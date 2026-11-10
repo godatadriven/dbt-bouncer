@@ -86,7 +86,7 @@ def _run_results_count() -> int:
 def _catalog_checks_count(include_pattern: str) -> int:
     """Count catalog nodes whose manifest path matches *include_pattern*.
 
-    Mirrors the parser's package filter: ``k.split(".")[-2] == project_name``
+    Mirrors the parser's package filter: ``k.split(".")[1] == project_name``
     (see ``artifact_parsers/parser.py``).
 
     Returns:
@@ -102,7 +102,7 @@ def _catalog_checks_count(include_pattern: str) -> int:
     nodes_dict = m.get("nodes", {})
     count = 0
     for uid in catalog.get("nodes", {}):
-        if uid.split(".")[-2] != pname:
+        if uid.split(".")[1] != pname:
             continue
         mnode = nodes_dict.get(uid)
         if mnode and re.search(include_pattern, mnode.get("original_file_path", "")):
