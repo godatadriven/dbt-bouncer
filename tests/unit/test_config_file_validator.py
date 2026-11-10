@@ -643,6 +643,39 @@ def test_lint_config_file_deprecated_check_name_is_not_an_error(tmp_path, caplog
     assert "deprecated" in caplog.text
 
 
+def test_lint_config_file_reports_the_line_of_each_check(tmp_path):
+    """An issue carries the line of its check in the file, not its list index."""
+    from dbt_bouncer.configuration_file.validator import lint_config_file
+
+    config_file = tmp_path / "dbt-bouncer.yml"
+    config_file.write_text(
+        "# A comment\n"  # line 1
+        "dbt_artifacts_dir: target\n"  # line 2
+        "\n"  # line 3
+        "manifest_checks:\n"  # line 4
+        "  - name: check_model_names\n"  # line 5
+        "    model_name_pattern: ^stg_\n"  # line 6
+        "  - name: check_model_does_not_exist\n"  # line 7
+        "  - description: no name\n"  # line 8
+        "  - just a string\n"  # line 9
+        "  - name: [check_model_names]\n"  # line 10
+        "run_results_checks: not a list\n"  # line 11
+    )
+
+    lines_by_message = {
+        issue["message"].split(".")[0]: issue["line"]
+        for issue in lint_config_file(config_file)
+    }
+
+    assert lines_by_message == {
+        "'run_results_checks' must be a list, got str": 11,
+        "Check 'name' must be a string, got list": 10,
+        "Check is missing required 'name' or 'code' field": 8,
+        "Check must be a dictionary, got str": 9,
+        "Unknown check name 'check_model_does_not_exist'": 7,
+    }
+
+
 def test_lint_config_file_missing_name(tmp_path):
     """Test lint_config_file with missing name field."""
     from dbt_bouncer.configuration_file.validator import lint_config_file
