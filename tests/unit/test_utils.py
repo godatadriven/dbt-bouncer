@@ -1067,3 +1067,55 @@ class TestUtilsProperties:
         assert object_in_path([], rel_path) is True
         assert object_excluded_by_path(None, rel_path) is False
         assert object_excluded_by_path([], rel_path) is False
+
+
+def test_prune_expired_conf_cache_files_deletes_only_old_conf_files(tmp_path):
+    """Only ``conf_*.json`` files past the maximum age are deleted."""
+    import time
+
+    from dbt_bouncer.utils import (
+        _CONF_CACHE_MAX_AGE_SECONDS,
+        prune_expired_conf_cache_files,
+    )
+
+    expired_mtime = time.time() - _CONF_CACHE_MAX_AGE_SECONDS - 60
+    expired = tmp_path / "conf_0.0.0_aaaaaaaaaaaaaaaa.json"
+    expired_other_version = tmp_path / "conf_1.2.3_bbbbbbbbbbbbbbbb.json"
+    expired_keep = tmp_path / "conf_0.0.0_cccccccccccccccc.json"
+    expired_registry = tmp_path / "check_registry_0.0.0_dddddddd.json"
+    recent = tmp_path / "conf_0.0.0_eeeeeeeeeeeeeeee.json"
+    # A recent file from another version stays: another project can use it.
+    recent_other_version = tmp_path / "conf_1.2.3_ffffffffffffffff.json"
+    for f in (
+        expired,
+        expired_other_version,
+        expired_keep,
+        expired_registry,
+        recent,
+        recent_other_version,
+    ):
+        f.write_bytes(b"{}")
+    for f in (expired, expired_other_version, expired_keep, expired_registry):
+        os.utime(f, (expired_mtime, expired_mtime))
+
+    prune_expired_conf_cache_files(tmp_path, keep=expired_keep)
+
+    assert not expired.exists()
+    assert not expired_other_version.exists()
+    assert expired_keep.exists()
+    assert expired_registry.exists()
+    assert recent.exists()
+    assert recent_other_version.exists()
+
+
+def test_get_cache_dir_honours_env_var(monkeypatch, tmp_path):
+    """``DBT_BOUNCER_CACHE_DIR`` replaces the default cache location."""
+    from pathlib import Path
+
+    from dbt_bouncer.utils import get_cache_dir
+
+    monkeypatch.setenv("DBT_BOUNCER_CACHE_DIR", str(tmp_path))
+    assert get_cache_dir() == tmp_path
+
+    monkeypatch.delenv("DBT_BOUNCER_CACHE_DIR")
+    assert get_cache_dir() == Path.home() / ".cache" / "dbt-bouncer"

@@ -10,6 +10,7 @@ import os
 import pkgutil
 import re
 import sys
+import time
 import typing
 from collections.abc import Mapping
 from functools import lru_cache
@@ -684,9 +685,13 @@ def get_cache_dir() -> Path:
     """Return the on-disk cache directory used by dbt-bouncer.
 
     Returns:
-        Path: ``~/.cache/dbt-bouncer/``.
+        Path: The ``DBT_BOUNCER_CACHE_DIR`` env var if it is set, otherwise
+            ``~/.cache/dbt-bouncer/``.
 
     """
+    override = os.environ.get("DBT_BOUNCER_CACHE_DIR")
+    if override:
+        return Path(override)
     return Path.home() / ".cache" / "dbt-bouncer"
 
 
@@ -752,6 +757,35 @@ def _prune_stale_cache_files(cache_dir: Path, keep: Path) -> None:
             continue
         with contextlib.suppress(OSError):
             f.unlink()
+
+
+# A conf cache file not written for this long is deleted on the next cache write.
+_CONF_CACHE_MAX_AGE_SECONDS = 30 * 24 * 60 * 60
+
+
+def prune_expired_conf_cache_files(cache_dir: Path, keep: Path) -> None:
+    """Delete ``conf_*.json`` files in ``cache_dir`` that are past the maximum age.
+
+    Why: every distinct config file content gets its own cache file, so each
+    edit of a config leaves a file behind that is never read again.
+
+    Pruning is by age only, not by dbt-bouncer version. Two projects that pin
+    different versions share this directory, and a prune by version would make
+    each one delete the other's files on every run.
+
+    Args:
+        cache_dir: Directory holding cached conf files.
+        keep: The freshly-written cache file to retain.
+
+    """
+    cutoff = time.time() - _CONF_CACHE_MAX_AGE_SECONDS
+    for f in cache_dir.glob("conf_*.json"):
+        if f == keep:
+            continue
+        # Another process can delete the file between the glob and the stat.
+        with contextlib.suppress(OSError):
+            if f.stat().st_mtime < cutoff:
+                f.unlink()
 
 
 def get_check_objects_for_names(
