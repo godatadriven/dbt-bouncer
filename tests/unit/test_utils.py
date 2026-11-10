@@ -564,6 +564,36 @@ class CheckCustomExample:
         assert len(check_objects) == 1
         assert check_objects[0].__name__ == "CheckCustomExample"
 
+    def test_module_name_is_stable_across_processes(self, monkeypatch, tmp_path):
+        """The module name must not use `hash()`, which is salted per process.
+
+        The conf cache stores the module name. A name that changes in each
+        process means the cache never hits when `custom_checks_dir` is set.
+        """
+        import builtins
+        import itertools
+
+        from dbt_bouncer.utils import _load_custom_checks
+
+        manifest_dir = tmp_path / "custom_checks" / "manifest"
+        manifest_dir.mkdir(parents=True)
+        (manifest_dir / "check_custom.py").write_text(
+            "class CheckCustomExample:\n    pass\n"
+        )
+
+        # Simulate a new process: every `hash()` call returns a new value.
+        salted = itertools.count(1)
+        monkeypatch.setattr(builtins, "hash", lambda _: next(salted), raising=True)
+
+        module_names = []
+        for _ in range(2):
+            check_objects: list[Any] = []
+            _load_custom_checks(tmp_path / "custom_checks", check_objects)
+            module_names.append(check_objects[0].__module__)
+
+        assert module_names[0] == module_names[1]
+        assert module_names[0].startswith("custom_check_check_custom_")
+
     def test_raises_on_invalid_check_file(self, tmp_path):
         """Test that a DbtBouncerConfigError is raised when a custom check file fails to import."""
         from dbt_bouncer.utils import _load_custom_checks

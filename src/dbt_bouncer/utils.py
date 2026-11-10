@@ -372,10 +372,11 @@ def _load_custom_checks(
             )
 
         for check_file in custom_check_files:
-            # Use a unique module name to avoid conflicts
-            unique_module_name = (
-                f"custom_check_{check_file.stem}_{abs(hash(str(check_file)))}"
-            )
+            # Use a unique module name to avoid conflicts. The name is stored in
+            # the conf cache, so it must be the same in every process: built-in
+            # `hash()` of a str is salted per process.
+            path_digest = hashlib.sha256(str(check_file).encode()).hexdigest()[:16]
+            unique_module_name = f"custom_check_{check_file.stem}_{path_digest}"
 
             try:
                 spec = importlib.util.spec_from_file_location(
