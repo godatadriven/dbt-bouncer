@@ -299,6 +299,7 @@ class Reporter:
         if self.output_file is not None:
             coverage_file = Path().cwd() / self.output_file
             logging.info(f"Saving coverage file to `{coverage_file}`.")
+            coverage_file.parent.mkdir(parents=True, exist_ok=True)
             coverage_file.write_bytes(
                 _format_results(results_to_save, self.output_format)
             )

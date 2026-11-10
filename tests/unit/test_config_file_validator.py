@@ -58,15 +58,30 @@ def test_get_file_config_path_env_var(tmp_path):
     config_file.write_text("test: 1")
 
     with mock.patch.dict(os.environ, clear=True) and pytest.MonkeyPatch.context() as mp:
-        custom_config_file_path = "/dir/my_custom_config_file.yml"
-        mp.setenv("DBT_BOUNCER_CONFIG_FILE", custom_config_file_path)
+        custom_config_file = tmp_path / "my_custom_config_file.yml"
+        custom_config_file.write_text("test: 2")
+        mp.setenv("DBT_BOUNCER_CONFIG_FILE", str(custom_config_file))
 
         config_file_path = get_config_file_path(
             config_file=str(config_file),
             config_file_source=ConfigFileSource.DEFAULT,
         )
 
-    assert config_file_path == Path(custom_config_file_path)
+    assert config_file_path == custom_config_file
+
+
+def test_get_file_config_path_env_var_missing_file_raises(monkeypatch, tmp_path):
+    """A missing file named by the env var is a config error, not a traceback."""
+    monkeypatch.setenv("DBT_BOUNCER_CONFIG_FILE", str(tmp_path / "missing.yml"))
+
+    with pytest.raises(
+        DbtBouncerConfigError,
+        match=r"Config file not found: .*missing\.yml .*DBT_BOUNCER_CONFIG_FILE",
+    ):
+        get_config_file_path(
+            config_file="dbt-bouncer.yml",
+            config_file_source=ConfigFileSource.DEFAULT,
+        )
 
 
 _CONFIG_SOURCES = ["cli", "env", "yml", "yaml", "toml", "pyproject"]
@@ -84,6 +99,8 @@ def test_get_config_file_path_precedence_cascade(present: set[str]):
             cli_file.write_text("cli: 1")
 
         env_val = str(tmp_path / "env_config.yml") if "env" in present else None
+        if env_val:
+            Path(env_val).write_text("env: 1")
 
         if "yml" in present:
             (tmp_path / "dbt-bouncer.yml").write_text("yml: 1")

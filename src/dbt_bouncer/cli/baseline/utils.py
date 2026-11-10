@@ -81,6 +81,7 @@ def write_baseline(
     document = build_baseline(results)
 
     target = output_file or Path(DEFAULT_BASELINE_FILE)
+    target.parent.mkdir(parents=True, exist_ok=True)
     target.write_bytes(orjson.dumps(document, option=orjson.OPT_INDENT_2))
     logging.info(f"Wrote baseline to `{target}`.")
 

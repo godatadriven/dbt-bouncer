@@ -171,6 +171,11 @@ def get_config_file_path(
         logging.debug(
             f"Config file passed via environment variable: {config_file_path_via_env_var}"
         )
+        if not Path(config_file_path_via_env_var).exists():
+            raise DbtBouncerConfigError(
+                f"Config file not found: {config_file_path_via_env_var} "
+                "(from the `DBT_BOUNCER_CONFIG_FILE` environment variable)"
+            )
         return Path(config_file_path_via_env_var)
 
     # Always true: COMMANDLINE returned above and the enum has no other member.
