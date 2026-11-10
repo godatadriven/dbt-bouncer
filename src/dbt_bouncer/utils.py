@@ -389,13 +389,8 @@ def _load_custom_checks(
                     _extract_checks_from_module(
                         module, unique_module_name, check_objects
                     )
-            except (
-                AttributeError,
-                ImportError,
-                ModuleNotFoundError,
-                OSError,
-                SyntaxError,
-            ) as e:
+            # User code runs at import, so it can raise any exception type.
+            except Exception as e:
                 # A configured custom check that cannot import must fail the run.
                 # A silent skip keeps the run green while the check never loads.
                 logging.debug("Custom check load traceback:", exc_info=True)

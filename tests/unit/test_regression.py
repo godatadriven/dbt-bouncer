@@ -11,6 +11,7 @@ from hypothesis import strategies as st
 from dbt_bouncer.enums import CheckOutcome, CheckSeverity
 from dbt_bouncer.exceptions import DbtBouncerConfigError
 from dbt_bouncer.regression import (
+    BASELINE_VERSION,
     apply_regression_filter,
     build_baseline,
     failure_fingerprints,
@@ -120,6 +121,22 @@ def test_load_baseline_version_mismatch_raises(tmp_path):
     path = tmp_path / "baseline.json"
     path.write_bytes(orjson.dumps({"version": 999, "failures": []}))
     with pytest.raises(DbtBouncerConfigError, match="expects version"):
+        load_baseline(path)
+
+
+@pytest.mark.parametrize(
+    "failures",
+    [
+        pytest.param(None, id="null"),
+        pytest.param({"fingerprint": "abc"}, id="object"),
+        pytest.param(["abc"], id="list_of_strings"),
+    ],
+)
+def test_load_baseline_malformed_failures_raises(tmp_path, failures):
+    """A `failures` value that is not a list of objects is a config error."""
+    path = tmp_path / "baseline.json"
+    path.write_bytes(orjson.dumps({"version": BASELINE_VERSION, "failures": failures}))
+    with pytest.raises(DbtBouncerConfigError, match="not a list of objects"):
         load_baseline(path)
 
 

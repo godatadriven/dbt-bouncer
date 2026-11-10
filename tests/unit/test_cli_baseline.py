@@ -44,6 +44,35 @@ def test_baseline_records_current_failures(failing_config_file, tmp_path):
     assert f"Wrote {len(document['failures'])} failure(s)" in result.output
 
 
+@pytest.mark.parametrize("command", ["baseline", "run"])
+def test_output_file_parent_directory_is_created(
+    command, failing_config_file, tmp_path
+):
+    """`--output-file` in a directory that does not exist yet is written.
+
+    Without this, the command fails with a traceback after all checks ran.
+    """
+    output_file = tmp_path / "new_dir" / "nested" / "output.json"
+
+    result = runner.invoke(
+        app,
+        [
+            command,
+            "--config-file",
+            PurePath(failing_config_file).as_posix(),
+            "--output-file",
+            PurePath(output_file).as_posix(),
+        ],
+        env={"COLUMNS": "400"},
+    )
+
+    expected_exit_code = (
+        ExitCode.SUCCESS if command == "baseline" else ExitCode.CHECK_ERRORS
+    )
+    assert result.exit_code == expected_exit_code, result.output
+    assert orjson.loads(output_file.read_bytes())
+
+
 def test_write_baseline_excludes_internal_errors(
     caplog, failing_config_file, monkeypatch, tmp_path
 ):

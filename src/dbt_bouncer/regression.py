@@ -121,11 +121,19 @@ def load_baseline(path: Path) -> set[str]:
             f"Baseline file `{path}` has version `{version}`, but this dbt-bouncer expects version `{BASELINE_VERSION}`. Regenerate it with `dbt-bouncer baseline`."
         )
 
+    failures = document.get("failures", [])
+    if not isinstance(failures, list) or not all(
+        isinstance(entry, dict) for entry in failures
+    ):
+        raise DbtBouncerConfigError(
+            f"Baseline file `{path}` has a `failures` value that is not a list of objects. Regenerate it with `dbt-bouncer baseline`."
+        )
+
     # Skip entries missing a fingerprint so a hand-edited file fails safe rather
     # than raising a KeyError.
     return {
         fingerprint_value
-        for entry in document.get("failures", [])
+        for entry in failures
         if (fingerprint_value := entry.get("fingerprint"))
     }
 
