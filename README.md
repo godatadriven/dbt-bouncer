@@ -6,7 +6,7 @@
 |------------------------------------------------------------ | -------: | -------: | -------: | -------: | -------: | --------: |
 | src/dbt\_bouncer/\_\_init\_\_.py                            |       13 |        0 |        4 |        0 |     100% |           |
 | src/dbt\_bouncer/artifact\_parsers/info\_schema.py          |      113 |        0 |       28 |        0 |     100% |           |
-| src/dbt\_bouncer/artifact\_parsers/parser.py                |      178 |        0 |       58 |        0 |     100% |           |
+| src/dbt\_bouncer/artifact\_parsers/parser.py                |      182 |        0 |       58 |        0 |     100% |           |
 | src/dbt\_bouncer/artifact\_types.py                         |      195 |        0 |        0 |        0 |     100% |           |
 | src/dbt\_bouncer/check\_framework/\_\_init\_\_.py           |        5 |        0 |        0 |        0 |     100% |           |
 | src/dbt\_bouncer/check\_framework/base.py                   |       38 |        0 |        2 |        0 |     100% |           |
@@ -57,7 +57,7 @@
 | src/dbt\_bouncer/checks/run\_results/check\_run\_results.py |       18 |        0 |        6 |        0 |     100% |           |
 | src/dbt\_bouncer/cli/\_\_init\_\_.py                        |        3 |        0 |        0 |        0 |     100% |           |
 | src/dbt\_bouncer/cli/baseline/\_\_init\_\_.py               |       26 |        0 |        0 |        0 |     100% |           |
-| src/dbt\_bouncer/cli/baseline/utils.py                      |       29 |        0 |        2 |        0 |     100% |           |
+| src/dbt\_bouncer/cli/baseline/utils.py                      |       30 |        0 |        2 |        0 |     100% |           |
 | src/dbt\_bouncer/cli/explain/\_\_init\_\_.py                |       25 |        0 |        6 |        0 |     100% |           |
 | src/dbt\_bouncer/cli/explain/utils.py                       |       57 |        0 |       18 |        0 |     100% |           |
 | src/dbt\_bouncer/cli/init/\_\_init\_\_.py                   |       42 |        0 |        8 |        0 |     100% |           |
@@ -74,19 +74,19 @@
 | src/dbt\_bouncer/cli/validate/\_\_init\_\_.py               |       28 |        0 |        8 |        0 |     100% |           |
 | src/dbt\_bouncer/configuration\_file/\_\_init\_\_.py        |        0 |        0 |        0 |        0 |     100% |           |
 | src/dbt\_bouncer/configuration\_file/parser.py              |       57 |        0 |       10 |        0 |     100% |           |
-| src/dbt\_bouncer/configuration\_file/validator.py           |      457 |        0 |      184 |        0 |     100% |           |
+| src/dbt\_bouncer/configuration\_file/validator.py           |      459 |        0 |      186 |        0 |     100% |           |
 | src/dbt\_bouncer/context.py                                 |       62 |        0 |        0 |        0 |     100% |           |
 | src/dbt\_bouncer/enums.py                                   |      232 |        0 |        0 |        0 |     100% |           |
 | src/dbt\_bouncer/exceptions.py                              |        6 |        0 |        0 |        0 |     100% |           |
 | src/dbt\_bouncer/executor.py                                |       53 |        0 |       16 |        0 |     100% |           |
 | src/dbt\_bouncer/main.py                                    |       26 |        0 |        4 |        0 |     100% |           |
 | src/dbt\_bouncer/presets/\_\_init\_\_.py                    |       14 |        0 |        2 |        0 |     100% |           |
-| src/dbt\_bouncer/regression.py                              |       40 |        0 |       10 |        0 |     100% |           |
+| src/dbt\_bouncer/regression.py                              |       43 |        0 |       12 |        0 |     100% |           |
 | src/dbt\_bouncer/reporting/\_\_init\_\_.py                  |        0 |        0 |        0 |        0 |     100% |           |
 | src/dbt\_bouncer/reporting/formatters.py                    |       95 |        0 |       40 |        0 |     100% |           |
 | src/dbt\_bouncer/reporting/github\_pr\_comment.py           |       90 |        0 |       20 |        0 |     100% |           |
 | src/dbt\_bouncer/reporting/logger.py                        |       39 |        0 |        6 |        0 |     100% |           |
-| src/dbt\_bouncer/reporting/reporter.py                      |      103 |        0 |       32 |        0 |     100% |           |
+| src/dbt\_bouncer/reporting/reporter.py                      |      104 |        0 |       32 |        0 |     100% |           |
 | src/dbt\_bouncer/runner.py                                  |      172 |        0 |       56 |        0 |     100% |           |
 | src/dbt\_bouncer/selectors.py                               |      141 |        0 |       66 |        0 |     100% |           |
 | src/dbt\_bouncer/sql\_utils.py                              |       51 |        0 |       18 |        0 |     100% |           |
@@ -94,7 +94,7 @@
 | src/dbt\_bouncer/types.py                                   |       19 |        0 |        4 |        0 |     100% |           |
 | src/dbt\_bouncer/utils.py                                   |      378 |        0 |      144 |        0 |     100% |           |
 | src/dbt\_bouncer/version.py                                 |        2 |        0 |        0 |        0 |     100% |           |
-| **TOTAL**                                                   | **5214** |    **0** | **1754** |    **0** | **100%** |           |
+| **TOTAL**                                                   | **5225** |    **0** | **1758** |    **0** | **100%** |           |
 
 
 ## Setup coverage badge
