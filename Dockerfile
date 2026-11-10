@@ -5,6 +5,8 @@ ARG PYTHON_VERSION=3.14.8
 # environment. The image then starts without a network call, and every start
 # of one image tag runs the same dependency versions.
 FROM python:${PYTHON_VERSION}-slim AS build
+# Pinned for reproducible builds. Raise by hand: it must satisfy `required-version`
+# under `[tool.uv]` in `pyproject.toml`.
 COPY --from=ghcr.io/astral-sh/uv:0.13.6 /uv /bin/
 ENV UV_COMPILE_BYTECODE=1 \
     UV_HTTP_TIMEOUT=100 \
