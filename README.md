@@ -79,7 +79,7 @@
 | src/dbt\_bouncer/enums.py                                   |      232 |        0 |        0 |        0 |     100% |           |
 | src/dbt\_bouncer/exceptions.py                              |        6 |        0 |        0 |        0 |     100% |           |
 | src/dbt\_bouncer/executor.py                                |       53 |        0 |       16 |        0 |     100% |           |
-| src/dbt\_bouncer/main.py                                    |       26 |        0 |        4 |        0 |     100% |           |
+| src/dbt\_bouncer/main.py                                    |       33 |        0 |        8 |        0 |     100% |           |
 | src/dbt\_bouncer/presets/\_\_init\_\_.py                    |       14 |        0 |        2 |        0 |     100% |           |
 | src/dbt\_bouncer/regression.py                              |       43 |        0 |       12 |        0 |     100% |           |
 | src/dbt\_bouncer/reporting/\_\_init\_\_.py                  |        0 |        0 |        0 |        0 |     100% |           |
@@ -92,9 +92,9 @@
 | src/dbt\_bouncer/sql\_utils.py                              |       51 |        0 |       18 |        0 |     100% |           |
 | src/dbt\_bouncer/testing.py                                 |       92 |        0 |       26 |        0 |     100% |           |
 | src/dbt\_bouncer/types.py                                   |       19 |        0 |        4 |        0 |     100% |           |
-| src/dbt\_bouncer/utils.py                                   |      378 |        0 |      144 |        0 |     100% |           |
+| src/dbt\_bouncer/utils.py                                   |      379 |        0 |      144 |        0 |     100% |           |
 | src/dbt\_bouncer/version.py                                 |        2 |        0 |        0 |        0 |     100% |           |
-| **TOTAL**                                                   | **5225** |    **0** | **1758** |    **0** | **100%** |           |
+| **TOTAL**                                                   | **5233** |    **0** | **1762** |    **0** | **100%** |           |
 
 
 ## Setup coverage badge
