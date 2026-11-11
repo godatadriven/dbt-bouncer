@@ -1,4 +1,6 @@
 import os
+import shutil
+import tempfile
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -17,6 +19,22 @@ settings.register_profile("ci", max_examples=100, **_HYPOTHESIS_COMMON_SETTINGS)
 settings.register_profile("default", max_examples=50, **_HYPOTHESIS_COMMON_SETTINGS)
 settings.register_profile("quick", max_examples=15, **_HYPOTHESIS_COMMON_SETTINGS)
 settings.load_profile(os.environ.get("HYPOTHESIS_PROFILE", "default"))
+
+
+# Keep the test run out of the developer's real `~/.cache/dbt-bouncer`: the suite
+# validates thousands of distinct configs, and each one writes a cache file.
+# Set at import time so that xdist workers and CLI subprocesses inherit it.
+_OWNS_TEST_CACHE_DIR = "DBT_BOUNCER_CACHE_DIR" not in os.environ
+if _OWNS_TEST_CACHE_DIR:
+    os.environ["DBT_BOUNCER_CACHE_DIR"] = tempfile.mkdtemp(
+        prefix="dbt-bouncer-test-cache-"
+    )
+
+
+def pytest_sessionfinish():
+    # An xdist worker inherits the variable, so only the creating process deletes.
+    if _OWNS_TEST_CACHE_DIR:
+        shutil.rmtree(os.environ["DBT_BOUNCER_CACHE_DIR"], ignore_errors=True)
 
 
 def pytest_configure(config):

@@ -889,6 +889,12 @@ def _write_cached_conf(cache_path: Path, bouncer_config: "DbtBouncerConfBase") -
         tmp.replace(cache_path)
     except OSError:
         logging.debug("Conf cache write failed.", exc_info=True)
+        return
+
+    # Only on a write (a cache miss), so a warm run does not scan the directory.
+    from dbt_bouncer.utils import prune_expired_conf_cache_files
+
+    prune_expired_conf_cache_files(cache_path.parent, keep=cache_path)
 
 
 def _resolve_rule_code_entry(
