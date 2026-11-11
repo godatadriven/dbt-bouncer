@@ -47,17 +47,13 @@ jobs:
               with:
                 persist-credentials: false
 
-            # The image runs `uvx dbt-bouncer==<version>` at start-up, so it needs this runner's PyPI CDN edge to serve the release.
-            - name: Wait until the image can install `dbt-bouncer`
+            # dbt-bouncer is installed in the image at build time, so this needs no PyPI access.
+            - name: Check that the image holds the released version
               run: |
-                for attempt in $(seq 1 10); do
-                  if docker run --rm --entrypoint uvx "ghcr.io/godatadriven/dbt-bouncer:${GITHUB_REF_NAME}" "dbt-bouncer==${GITHUB_REF_NAME#v}" --version; then
-                    exit 0
-                  fi
-                  echo "Attempt ${attempt}/10 failed, retrying in 30s..."
-                  sleep 30
-                done
-                exit 1
+                set -euo pipefail
+                image_version="$(docker run --rm --network none "ghcr.io/godatadriven/dbt-bouncer:${GITHUB_REF_NAME}" --version)"
+                echo "Image version: ${image_version}"
+                [ "${image_version}" = "${GITHUB_REF_NAME#v}" ]
 
             - name: Run Docker test
               run: |
@@ -74,18 +70,6 @@ jobs:
         steps:
             - name: Checkout
               run: git clone https://github.com/godatadriven/dbt-bouncer.git --branch "${GITHUB_REF_NAME}" --depth 1
-
-            # The action's image runs `uvx dbt-bouncer==<version>` at start-up, so it needs this runner's PyPI CDN edge to serve the release.
-            - name: Wait until the image can install `dbt-bouncer`
-              run: |
-                for attempt in $(seq 1 10); do
-                  if docker run --rm --entrypoint uvx "ghcr.io/godatadriven/dbt-bouncer:${GITHUB_REF_NAME}" "dbt-bouncer==${GITHUB_REF_NAME#v}" --version; then
-                    exit 0
-                  fi
-                  echo "Attempt ${attempt}/10 failed, retrying in 30s..."
-                  sleep 30
-                done
-                exit 1
 
             - name: Run `dbt-bouncer`
               uses: ./dbt-bouncer
