@@ -2250,6 +2250,150 @@
       "title": "CheckLineagePermittedUpstreamModels",
       "type": "object"
     },
+    "CheckLineagePermittedUpstreamSources": {
+      "additionalProperties": false,
+      "description": "Upstream sources must resolve to a database and/or schema that matches the provided patterns.\n\n!!! info \"Rationale\"\n\n    In a multi-project (dbt mesh) setup, one project often reads the output of another project through sources. Each layer must only read from the layers of other projects that it is permitted to use, e.g. a marts model must only read from the marts layer of an upstream domain. The source path cannot express this, but the resolved database and schema of the source can.\n\nParameters:\n    database_pattern (str | None): Regexp pattern to match the resolved database of the upstream source(s).\n    schema_pattern (str | None): Regexp pattern to match the resolved schema of the upstream source(s).\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n    sources (list[SourceNode]): List of SourceNode objects parsed from `manifest.json`.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\n!!! note\n\n    At least one of `database_pattern` or `schema_pattern` must be supplied. If both are supplied, an upstream source must match both. A source with no database (e.g. on adapters without a database concept) does not match `database_pattern`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_lineage_permitted_upstream_sources\n          include: ^models/marts|^models/consumption\n          database_pattern: ^dmn\n          schema_pattern: ^domain__\n    ```",
+      "properties": {
+        "code": {
+          "const": "LI004",
+          "default": "LI004",
+          "title": "Code",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to exclude. A list matches if any pattern matches.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to include. A list matches if any pattern matches.",
+          "title": "Include"
+        },
+        "language": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ModelLanguage"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models written in the specified language."
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_lineage_permitted_upstream_sources",
+          "default": "check_lineage_permitted_upstream_sources",
+          "title": "Name",
+          "type": "string"
+        },
+        "database_pattern": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Database Pattern"
+        },
+        "schema_pattern": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Schema Pattern"
+        }
+      },
+      "title": "CheckLineagePermittedUpstreamSources",
+      "type": "object"
+    },
     "CheckLineageSeedCannotBeUsed": {
       "additionalProperties": false,
       "description": "Seed cannot be referenced in models with a path that matches the specified `include` config.\n\n!!! info \"Rationale\"\n\n    Seeds are designed for small, static reference data (e.g. country codes, status mappings). Referencing seeds in intermediate or mart layers can indicate that data which should come from a source or staging model is instead being managed as a CSV file, making it harder to audit, version, and scale.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_lineage_seed_cannot_be_used\n          include: ^models/intermediate|^models/marts\n    ```",
@@ -17719,6 +17863,7 @@
             "check_exposure_has_meta_keys": "#/$defs/CheckExposureHasMetaKeys",
             "check_exposure_has_owner": "#/$defs/CheckExposureHasOwner",
             "check_lineage_permitted_upstream_models": "#/$defs/CheckLineagePermittedUpstreamModels",
+            "check_lineage_permitted_upstream_sources": "#/$defs/CheckLineagePermittedUpstreamSources",
             "check_lineage_seed_cannot_be_used": "#/$defs/CheckLineageSeedCannotBeUsed",
             "check_lineage_source_cannot_be_used": "#/$defs/CheckLineageSourceCannotBeUsed",
             "check_macro_arguments_description_populated": "#/$defs/CheckMacroArgumentsDescriptionPopulated",
@@ -17854,6 +17999,9 @@
           },
           {
             "$ref": "#/$defs/CheckLineagePermittedUpstreamModels"
+          },
+          {
+            "$ref": "#/$defs/CheckLineagePermittedUpstreamSources"
           },
           {
             "$ref": "#/$defs/CheckLineageSeedCannotBeUsed"
