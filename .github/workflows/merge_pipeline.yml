@@ -55,7 +55,7 @@
                 --format json \
                 --github-actions '${{ secrets.GITHUB_TOKEN }}' \
                 --file results.json \
-                "hyperfine --export-json results.json --runs 10 'dbt-bouncer run --config-file dbt-bouncer-example.yml'"
+                "hyperfine --export-json results.json --runs 10 --warmup 1 'dbt-bouncer run --config-file dbt-bouncer-example.yml'"
 
       benchmark-micro-main-branch:
         permissions:
