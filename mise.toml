@@ -350,7 +350,7 @@ bencher run \
 	--dry-run \
 	--file results.json \
 	--format json \
-	"hyperfine --export-json results.json --runs 10 'dbt-bouncer run --config-file dbt-bouncer-example.yml'"
+	"hyperfine --export-json results.json --runs 10 --warmup 1 'dbt-bouncer run --config-file dbt-bouncer-example.yml'"
 """
 
 # CI gate: unit tests alone must reach 100% statement and branch coverage.

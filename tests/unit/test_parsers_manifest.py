@@ -278,6 +278,11 @@ def _bouncer_config(*, catalog: bool = False, run_results: bool = False):
         pytest.param(b"", "may be truncated", id="empty"),
         pytest.param(b"[1, 2]", "expected a JSON object, got list", id="not_object"),
         pytest.param(b"{}", "no `metadata.dbt_version`", id="no_metadata"),
+        pytest.param(
+            b'{"metadata": {"dbt_version": "garbage"}}',
+            "not a version number: `garbage`",
+            id="unparseable_version",
+        ),
     ],
 )
 def test_parse_unusable_manifest_raises_artifact_error(tmp_path, contents, match):

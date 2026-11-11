@@ -580,6 +580,17 @@ class CheckCustomExample:
         with pytest.raises(DbtBouncerConfigError, match=r"check_broken\.py"):
             _load_custom_checks(custom_dir, check_objects)
 
+    def test_raises_on_any_exception_in_check_file(self, tmp_path):
+        """Any exception at import of a custom check file is a config error."""
+        from dbt_bouncer.utils import _load_custom_checks
+
+        manifest_dir = tmp_path / "custom_checks" / "manifest"
+        manifest_dir.mkdir(parents=True)
+        (manifest_dir / "check_name_error.py").write_text("undefined_name\n")
+
+        with pytest.raises(DbtBouncerConfigError, match=r"check_name_error\.py"):
+            _load_custom_checks(tmp_path / "custom_checks", [])
+
     def test_raises_on_broken_import_in_check_file(self, tmp_path):
         """Test that a DbtBouncerConfigError is raised when a custom check file has a broken import."""
         from dbt_bouncer.utils import _load_custom_checks

@@ -170,9 +170,16 @@ jobs:
             with:
               tool: hyperfine@1.20
 
+          # Bencher names a benchmark after the hyperfine command string, so this
+          # string must be identical to the one in `merge_pipeline.yml`. If the two
+          # differ, a PR result has no `main` baseline to compare against. Both
+          # pipelines run the locked `.venv` install directly, without `uv run`.
+          # `--warmup 1`: the first run on a fresh runner is slow (cold file cache, no
+          # `.pyc` files, no conf cache). One discarded run keeps it out of the mean.
           - name: Run benchmarks
             run: |
-              hyperfine --export-json benchmark_results.json --runs 10 'uv run dbt-bouncer run --config-file dbt-bouncer-example.yml'
+              export PATH="$PWD/.venv/bin:$PATH"
+              hyperfine --export-json benchmark_results.json --runs 10 --warmup 1 'dbt-bouncer run --config-file dbt-bouncer-example.yml'
 
           - name: Upload Benchmark Results
             uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7

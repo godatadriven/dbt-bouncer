@@ -123,7 +123,7 @@ def filter_checks(
 
     Args:
         checks: List of check classes.
-        category: Optional check category string.
+        category: Optional category in its short form, for example `manifest`.
         search: Optional search substring.
 
     Returns:
