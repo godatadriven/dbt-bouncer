@@ -16,7 +16,7 @@ import dbt_bouncer.cli.studio  # ruff: ignore[unused-import] — triggers @app.c
 import dbt_bouncer.cli.validate  # ruff: ignore[unused-import] — triggers @app.command registration
 from dbt_bouncer.cli import app
 from dbt_bouncer.cli.run import run
-from dbt_bouncer.enums import ConfigFileName, OutputFormat, PresetName
+from dbt_bouncer.enums import ConfigFileName, ExitCode, OutputFormat, PresetName
 from dbt_bouncer.version import version as get_version
 
 
@@ -39,6 +39,36 @@ def _tune_gc_for_cli() -> None:
     import gc
 
     gc.set_threshold(20_000, 25, 25)
+
+
+def _reject_root_options_before_subcommand(ctx: typer.Context) -> None:
+    """Fail when an option comes before the subcommand on the command line.
+
+    The root options exist so that `dbt-bouncer --config-file x.yml` still runs
+    the checks. With a subcommand, the subcommand parses its own options, so a
+    root option would be dropped silently: `dbt-bouncer --config-file x.yml run`
+    would run the default config file. Values from environment variables are
+    not rejected, because the subcommand reads the same variables.
+
+    Raises:
+        Exit: If an option was passed on the command line before the subcommand.
+
+    """
+    misplaced = sorted(
+        param.opts[0]
+        for param in ctx.command.params
+        if param.name is not None
+        # Compared by name: Typer vendors Click, so `ParameterSource` has no
+        # import path that works for every supported Typer version.
+        and getattr(ctx.get_parameter_source(param.name), "name", None) == "COMMANDLINE"
+    )
+    if misplaced:
+        typer.echo(
+            f"Error: {', '.join(misplaced)} must come after the subcommand, "
+            f"for example `dbt-bouncer {ctx.invoked_subcommand} {misplaced[0]} ...`.",
+            err=True,
+        )
+        raise typer.Exit(ExitCode.CONFIG_ERROR)
 
 
 @app.callback(invoke_without_command=True)
@@ -169,6 +199,9 @@ def main_callback(
     if version:
         typer.echo(get_version())
         raise typer.Exit()
+
+    if ctx.invoked_subcommand is not None:
+        _reject_root_options_before_subcommand(ctx)
 
     # After the early exits: `--version` and `--help` do no allocation-heavy work,
     # so they have nothing to gain from retuning the collector.
