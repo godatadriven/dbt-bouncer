@@ -380,3 +380,29 @@ class TestProxyProperties:
 
         assert proxy.__getattr__("__definitely_absent_key__") is None
         assert proxy.get("__definitely_absent_key__", "fallback") == "fallback"
+
+
+def test_parse_catalog_filters_nodes_on_package_segment(tmp_path):
+    """Versioned models are kept, and another package's nodes are dropped.
+
+    A versioned unique_id is `model.<package>.<name>.v<N>`, so the package is
+    the second segment, not the second-to-last.
+    """
+    target_dir = Path("dbt_project") / "target"
+    (tmp_path / "manifest.json").write_bytes(
+        (target_dir / "manifest.json").read_bytes()
+    )
+    catalog = orjson.loads((target_dir / "catalog.json").read_bytes())
+    versioned_id = "model.dbt_bouncer_test_project.customers.v1"
+    assert versioned_id in catalog["nodes"]
+    # A versioned model in another package, named after this project.
+    foreign_id = "model.other_package.dbt_bouncer_test_project.v1"
+    catalog["nodes"][foreign_id] = catalog["nodes"][versioned_id]
+    (tmp_path / "catalog.json").write_bytes(orjson.dumps(catalog))
+
+    parsed = parse_dbt_artifacts(_bouncer_config(catalog=True), tmp_path)
+
+    unique_ids = {node.unique_id for node in parsed.catalog_nodes}
+    assert versioned_id in unique_ids
+    assert foreign_id not in unique_ids
+    assert len(unique_ids) == len(catalog["nodes"]) - 1
