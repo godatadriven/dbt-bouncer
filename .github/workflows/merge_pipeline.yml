@@ -25,9 +25,6 @@
           - name: Setup Python
             uses: ./.github/actions/setup_python_env
 
-          - name: Install `dbt-bouncer`
-            run: pip install git+https://github.com/godatadriven/dbt-bouncer.git@${{ github.sha }}
-
           - name: Install bencher
             uses: bencherdev/bencher@f80847436d7157936b40525db4c2a1064124f04a # v0.6.13
 
@@ -36,11 +33,16 @@
             with:
               tool: hyperfine@1.20
 
+          # Bencher names a benchmark after the hyperfine command string, so this
+          # string must be identical to the one in `ci_pipeline.yml`. Both pipelines
+          # run the locked `.venv` install that "Setup Python" creates.
           - name: Track base branch benchmarks with Bencher
+            env:
+              BENCHER_API_TOKEN: ${{ secrets.BENCHER_API_TOKEN }}
             run: |
+              export PATH="$PWD/.venv/bin:$PATH"
               bencher run \
                 --project dbt-bouncer \
-                --token '${{ secrets.BENCHER_API_TOKEN }}' \
                 --branch main \
                 --testbed ubuntu-26.04 \
                 --threshold-measure latency \
@@ -53,7 +55,7 @@
                 --format json \
                 --github-actions '${{ secrets.GITHUB_TOKEN }}' \
                 --file results.json \
-                "hyperfine --export-json results.json --runs 10 'dbt-bouncer run --config-file dbt-bouncer-example.yml'"
+                "hyperfine --export-json results.json --runs 10 --warmup 1 'dbt-bouncer run --config-file dbt-bouncer-example.yml'"
 
       benchmark-micro-main-branch:
         permissions:
@@ -75,10 +77,11 @@
             run: mise run test-benchmark
 
           - name: Track base branch code-level benchmarks with Bencher
+            env:
+              BENCHER_API_TOKEN: ${{ secrets.BENCHER_API_TOKEN }}
             run: |
               bencher run \
                 --project dbt-bouncer \
-                --token '${{ secrets.BENCHER_API_TOKEN }}' \
                 --branch main \
                 --testbed ubuntu-26.04-pytest \
                 --threshold-measure latency \
@@ -195,12 +198,6 @@
 
             - name: Set up Docker Buildx
               uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4
-
-            - name: Modify Dockerfile to use local dbt-bouncer version
-              run: |
-                set -euo pipefail
-                sed -i -E 's/ENTRYPOINT \["uvx", "dbt-bouncer==0.0.0"\]/ENTRYPOINT \["uvx", "."\]/' Dockerfile
-                sed -i -E '/ENTRYPOINT/i\COPY . .' ./Dockerfile
 
             - name: Build image
               uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0

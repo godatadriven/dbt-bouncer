@@ -76,7 +76,11 @@
                 run: uv run ./scripts/version_update.py --new-version $(uv version --short)
 
               # Need to re-install dbt-bouncer so version bump is visible when `dbt-bouncer --version` is called
+              # The first `mise run` of this job installs the `mise.toml` tools through
+              # the GitHub API. The token avoids the unauthenticated rate limit.
               - name: Re-install dbt-bouncer
+                env:
+                  MISE_GITHUB_TOKEN: ${{ github.token }}
                 run: mise run install
 
               - name: Run unit tests

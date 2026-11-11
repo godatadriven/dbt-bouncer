@@ -170,9 +170,16 @@ jobs:
             with:
               tool: hyperfine@1.20
 
+          # Bencher names a benchmark after the hyperfine command string, so this
+          # string must be identical to the one in `merge_pipeline.yml`. If the two
+          # differ, a PR result has no `main` baseline to compare against. Both
+          # pipelines run the locked `.venv` install directly, without `uv run`.
+          # `--warmup 1`: the first run on a fresh runner is slow (cold file cache, no
+          # `.pyc` files, no conf cache). One discarded run keeps it out of the mean.
           - name: Run benchmarks
             run: |
-              hyperfine --export-json benchmark_results.json --runs 10 'uv run dbt-bouncer run --config-file dbt-bouncer-example.yml'
+              export PATH="$PWD/.venv/bin:$PATH"
+              hyperfine --export-json benchmark_results.json --runs 10 --warmup 1 'dbt-bouncer run --config-file dbt-bouncer-example.yml'
 
           - name: Upload Benchmark Results
             uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
@@ -251,12 +258,6 @@ jobs:
             - name: Set up Docker Buildx
               uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4
 
-            - name: Modify Dockerfile to use local dbt-bouncer version
-              run: |
-                set -euo pipefail
-                sed -i -E 's/ENTRYPOINT \["uvx", "dbt-bouncer==0.0.0"\]/ENTRYPOINT \["uvx", "."\]/' Dockerfile
-                sed -i -E '/ENTRYPOINT/i\COPY . .' ./Dockerfile
-
             - name: Build image
               uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
               with:
@@ -305,12 +306,6 @@ jobs:
 
             - name: Set up Docker Buildx
               uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4
-
-            - name: Modify Dockerfile to use local dbt-bouncer version
-              run: |
-                set -euo pipefail
-                sed -i -E 's/ENTRYPOINT \["uvx", "dbt-bouncer==0.0.0"\]/ENTRYPOINT \["uvx", "."\]/' Dockerfile
-                sed -i -E '/ENTRYPOINT/i\COPY . .' ./Dockerfile
 
             - name: Build image under the tag the action pulls
               uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0

@@ -564,6 +564,36 @@ class CheckCustomExample:
         assert len(check_objects) == 1
         assert check_objects[0].__name__ == "CheckCustomExample"
 
+    def test_module_name_is_stable_across_processes(self, monkeypatch, tmp_path):
+        """The module name must not use `hash()`, which is salted per process.
+
+        The conf cache stores the module name. A name that changes in each
+        process means the cache never hits when `custom_checks_dir` is set.
+        """
+        import builtins
+        import itertools
+
+        from dbt_bouncer.utils import _load_custom_checks
+
+        manifest_dir = tmp_path / "custom_checks" / "manifest"
+        manifest_dir.mkdir(parents=True)
+        (manifest_dir / "check_custom.py").write_text(
+            "class CheckCustomExample:\n    pass\n"
+        )
+
+        # Simulate a new process: every `hash()` call returns a new value.
+        salted = itertools.count(1)
+        monkeypatch.setattr(builtins, "hash", lambda _: next(salted), raising=True)
+
+        module_names = []
+        for _ in range(2):
+            check_objects: list[Any] = []
+            _load_custom_checks(tmp_path / "custom_checks", check_objects)
+            module_names.append(check_objects[0].__module__)
+
+        assert module_names[0] == module_names[1]
+        assert module_names[0].startswith("custom_check_check_custom_")
+
     def test_raises_on_invalid_check_file(self, tmp_path):
         """Test that a DbtBouncerConfigError is raised when a custom check file fails to import."""
         from dbt_bouncer.utils import _load_custom_checks
@@ -579,6 +609,17 @@ class CheckCustomExample:
         # A configured custom check that cannot import must fail the run.
         with pytest.raises(DbtBouncerConfigError, match=r"check_broken\.py"):
             _load_custom_checks(custom_dir, check_objects)
+
+    def test_raises_on_any_exception_in_check_file(self, tmp_path):
+        """Any exception at import of a custom check file is a config error."""
+        from dbt_bouncer.utils import _load_custom_checks
+
+        manifest_dir = tmp_path / "custom_checks" / "manifest"
+        manifest_dir.mkdir(parents=True)
+        (manifest_dir / "check_name_error.py").write_text("undefined_name\n")
+
+        with pytest.raises(DbtBouncerConfigError, match=r"check_name_error\.py"):
+            _load_custom_checks(tmp_path / "custom_checks", [])
 
     def test_raises_on_broken_import_in_check_file(self, tmp_path):
         """Test that a DbtBouncerConfigError is raised when a custom check file has a broken import."""
@@ -1067,3 +1108,55 @@ class TestUtilsProperties:
         assert object_in_path([], rel_path) is True
         assert object_excluded_by_path(None, rel_path) is False
         assert object_excluded_by_path([], rel_path) is False
+
+
+def test_prune_expired_conf_cache_files_deletes_only_old_conf_files(tmp_path):
+    """Only ``conf_*.json`` files past the maximum age are deleted."""
+    import time
+
+    from dbt_bouncer.utils import (
+        _CONF_CACHE_MAX_AGE_SECONDS,
+        prune_expired_conf_cache_files,
+    )
+
+    expired_mtime = time.time() - _CONF_CACHE_MAX_AGE_SECONDS - 60
+    expired = tmp_path / "conf_0.0.0_aaaaaaaaaaaaaaaa.json"
+    expired_other_version = tmp_path / "conf_1.2.3_bbbbbbbbbbbbbbbb.json"
+    expired_keep = tmp_path / "conf_0.0.0_cccccccccccccccc.json"
+    expired_registry = tmp_path / "check_registry_0.0.0_dddddddd.json"
+    recent = tmp_path / "conf_0.0.0_eeeeeeeeeeeeeeee.json"
+    # A recent file from another version stays: another project can use it.
+    recent_other_version = tmp_path / "conf_1.2.3_ffffffffffffffff.json"
+    for f in (
+        expired,
+        expired_other_version,
+        expired_keep,
+        expired_registry,
+        recent,
+        recent_other_version,
+    ):
+        f.write_bytes(b"{}")
+    for f in (expired, expired_other_version, expired_keep, expired_registry):
+        os.utime(f, (expired_mtime, expired_mtime))
+
+    prune_expired_conf_cache_files(tmp_path, keep=expired_keep)
+
+    assert not expired.exists()
+    assert not expired_other_version.exists()
+    assert expired_keep.exists()
+    assert expired_registry.exists()
+    assert recent.exists()
+    assert recent_other_version.exists()
+
+
+def test_get_cache_dir_honours_env_var(monkeypatch, tmp_path):
+    """``DBT_BOUNCER_CACHE_DIR`` replaces the default cache location."""
+    from pathlib import Path
+
+    from dbt_bouncer.utils import get_cache_dir
+
+    monkeypatch.setenv("DBT_BOUNCER_CACHE_DIR", str(tmp_path))
+    assert get_cache_dir() == tmp_path
+
+    monkeypatch.delenv("DBT_BOUNCER_CACHE_DIR")
+    assert get_cache_dir() == Path.home() / ".cache" / "dbt-bouncer"

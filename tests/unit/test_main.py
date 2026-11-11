@@ -86,7 +86,7 @@ def _run_results_count() -> int:
 def _catalog_checks_count(include_pattern: str) -> int:
     """Count catalog nodes whose manifest path matches *include_pattern*.
 
-    Mirrors the parser's package filter: ``k.split(".")[-2] == project_name``
+    Mirrors the parser's package filter: ``k.split(".")[1] == project_name``
     (see ``artifact_parsers/parser.py``).
 
     Returns:
@@ -102,7 +102,7 @@ def _catalog_checks_count(include_pattern: str) -> int:
     nodes_dict = m.get("nodes", {})
     count = 0
     for uid in catalog.get("nodes", {}):
-        if uid.split(".")[-2] != pname:
+        if uid.split(".")[1] != pname:
             continue
         mnode = nodes_dict.get(uid)
         if mnode and re.search(include_pattern, mnode.get("original_file_path", "")):
@@ -1966,6 +1966,37 @@ def test_cli_version_flag():
 
     assert result.exit_code == 0
     assert result.output.strip() == version()
+
+
+@pytest.mark.parametrize(
+    ("args", "expected_options"),
+    [
+        pytest.param(
+            ["--config-file", "other.yml", "run"], "--config-file", id="one-option"
+        ),
+        pytest.param(
+            ["-v", "--output-format", "json", "list"],
+            "--output-format, -v",
+            id="several-options",
+        ),
+    ],
+)
+def test_cli_rejects_root_options_before_subcommand(args, expected_options):
+    """An option before the subcommand is an error, it is not dropped silently."""
+    result = CliRunner().invoke(app, args)
+
+    assert result.exit_code == ExitCode.CONFIG_ERROR
+    assert f"Error: {expected_options} must come after the subcommand" in result.output
+    assert f"`dbt-bouncer {args[-1]} " in result.output
+
+
+def test_cli_accepts_env_var_options_with_subcommand(monkeypatch):
+    """An option set by an environment variable is read by the subcommand too."""
+    monkeypatch.setenv("DBT_BOUNCER_VERBOSITY", "1")
+
+    result = CliRunner().invoke(app, ["list"])
+
+    assert result.exit_code == ExitCode.SUCCESS
 
 
 def test_cli_run_command(tmp_path):

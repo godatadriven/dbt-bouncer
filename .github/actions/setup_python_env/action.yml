@@ -50,7 +50,13 @@ runs:
       with:
         install: false
 
+    # `mise run` installs the tools from `mise.toml` first, and it resolves them
+    # through the GitHub API. Without a token those calls share the rate limit of
+    # the runner's IP address, and a 403 fails the job. Later `mise run` steps
+    # find the tools installed, so only this step needs the token.
     - name: Install dependencies
       if: inputs.install-python-deps == 'true'
       shell: bash
+      env:
+        MISE_GITHUB_TOKEN: ${{ github.token }}
       run: mise run install

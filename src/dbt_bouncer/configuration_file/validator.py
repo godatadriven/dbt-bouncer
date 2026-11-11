@@ -171,6 +171,11 @@ def get_config_file_path(
         logging.debug(
             f"Config file passed via environment variable: {config_file_path_via_env_var}"
         )
+        if not Path(config_file_path_via_env_var).exists():
+            raise DbtBouncerConfigError(
+                f"Config file not found: {config_file_path_via_env_var} "
+                "(from the `DBT_BOUNCER_CONFIG_FILE` environment variable)"
+            )
         return Path(config_file_path_via_env_var)
 
     # Always true: COMMANDLINE returned above and the enum has no other member.
@@ -367,7 +372,7 @@ def lint_config_file(config_file_path: Path) -> list[dict[str, Any]]:
             if not isinstance(checks, list):
                 issues.append(
                     {
-                        "line": 1,
+                        "line": _resolve_loc_line(config_file_path, (category,)),
                         "message": f"'{category}' must be a list, got {type(checks).__name__}",
                         "severity": "error",
                     }
@@ -378,7 +383,9 @@ def lint_config_file(config_file_path: Path) -> list[dict[str, Any]]:
                 if not isinstance(check, dict):
                     issues.append(
                         {
-                            "line": idx + 1,
+                            "line": _resolve_loc_line(
+                                config_file_path, (category, idx)
+                            ),
                             "message": f"Check must be a dictionary, got {type(check).__name__}",
                             "severity": "error",
                         }
@@ -391,7 +398,9 @@ def lint_config_file(config_file_path: Path) -> list[dict[str, Any]]:
                 if not raw_name:
                     issues.append(
                         {
-                            "line": idx + 1,
+                            "line": _resolve_loc_line(
+                                config_file_path, (category, idx)
+                            ),
                             "message": "Check is missing required 'name' or 'code' field",
                             "severity": "error",
                         }
@@ -406,7 +415,9 @@ def lint_config_file(config_file_path: Path) -> list[dict[str, Any]]:
                 if not isinstance(raw_name, str):
                     issues.append(
                         {
-                            "line": idx + 1,
+                            "line": _resolve_loc_line(
+                                config_file_path, (category, idx)
+                            ),
                             "message": (
                                 f"Check 'name' must be a string, got "
                                 f"{type(raw_name).__name__}"
@@ -433,7 +444,9 @@ def lint_config_file(config_file_path: Path) -> list[dict[str, Any]]:
                     suggestion = f" Did you mean '{best_match}'?" if best_match else ""
                     issues.append(
                         {
-                            "line": idx + 1,
+                            "line": _resolve_loc_line(
+                                config_file_path, (category, idx)
+                            ),
                             "message": f"Unknown check name '{check_name}'.{suggestion}",
                             "severity": "error",
                         }
@@ -876,6 +889,12 @@ def _write_cached_conf(cache_path: Path, bouncer_config: "DbtBouncerConfBase") -
         tmp.replace(cache_path)
     except OSError:
         logging.debug("Conf cache write failed.", exc_info=True)
+        return
+
+    # Only on a write (a cache miss), so a warm run does not scan the directory.
+    from dbt_bouncer.utils import prune_expired_conf_cache_files
+
+    prune_expired_conf_cache_files(cache_path.parent, keep=cache_path)
 
 
 def _resolve_rule_code_entry(

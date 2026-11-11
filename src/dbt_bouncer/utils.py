@@ -10,6 +10,7 @@ import os
 import pkgutil
 import re
 import sys
+import time
 import typing
 from collections.abc import Mapping
 from functools import lru_cache
@@ -372,10 +373,11 @@ def _load_custom_checks(
             )
 
         for check_file in custom_check_files:
-            # Use a unique module name to avoid conflicts
-            unique_module_name = (
-                f"custom_check_{check_file.stem}_{abs(hash(str(check_file)))}"
-            )
+            # Use a unique module name to avoid conflicts. The name is stored in
+            # the conf cache, so it must be the same in every process: built-in
+            # `hash()` of a str is salted per process.
+            path_digest = hashlib.sha256(str(check_file).encode()).hexdigest()[:16]
+            unique_module_name = f"custom_check_{check_file.stem}_{path_digest}"
 
             try:
                 spec = importlib.util.spec_from_file_location(
@@ -389,13 +391,8 @@ def _load_custom_checks(
                     _extract_checks_from_module(
                         module, unique_module_name, check_objects
                     )
-            except (
-                AttributeError,
-                ImportError,
-                ModuleNotFoundError,
-                OSError,
-                SyntaxError,
-            ) as e:
+            # User code runs at import, so it can raise any exception type.
+            except Exception as e:
                 # A configured custom check that cannot import must fail the run.
                 # A silent skip keeps the run green while the check never loads.
                 logging.debug("Custom check load traceback:", exc_info=True)
@@ -684,9 +681,13 @@ def get_cache_dir() -> Path:
     """Return the on-disk cache directory used by dbt-bouncer.
 
     Returns:
-        Path: ``~/.cache/dbt-bouncer/``.
+        Path: The ``DBT_BOUNCER_CACHE_DIR`` env var if it is set, otherwise
+            ``~/.cache/dbt-bouncer/``.
 
     """
+    override = os.environ.get("DBT_BOUNCER_CACHE_DIR")
+    if override:
+        return Path(override)
     return Path.home() / ".cache" / "dbt-bouncer"
 
 
@@ -752,6 +753,35 @@ def _prune_stale_cache_files(cache_dir: Path, keep: Path) -> None:
             continue
         with contextlib.suppress(OSError):
             f.unlink()
+
+
+# A conf cache file not written for this long is deleted on the next cache write.
+_CONF_CACHE_MAX_AGE_SECONDS = 30 * 24 * 60 * 60
+
+
+def prune_expired_conf_cache_files(cache_dir: Path, keep: Path) -> None:
+    """Delete ``conf_*.json`` files in ``cache_dir`` that are past the maximum age.
+
+    Why: every distinct config file content gets its own cache file, so each
+    edit of a config leaves a file behind that is never read again.
+
+    Pruning is by age only, not by dbt-bouncer version. Two projects that pin
+    different versions share this directory, and a prune by version would make
+    each one delete the other's files on every run.
+
+    Args:
+        cache_dir: Directory holding cached conf files.
+        keep: The freshly-written cache file to retain.
+
+    """
+    cutoff = time.time() - _CONF_CACHE_MAX_AGE_SECONDS
+    for f in cache_dir.glob("conf_*.json"):
+        if f == keep:
+            continue
+        # Another process can delete the file between the glob and the stat.
+        with contextlib.suppress(OSError):
+            if f.stat().st_mtime < cutoff:
+                f.unlink()
 
 
 def get_check_objects_for_names(
