@@ -585,3 +585,59 @@ class TestCheckModelNumberOfGrants:
             model={"config": {"grants": {"select": ["u1"], "insert": ["u2"]}}},
             match=match_pattern,
         )
+
+
+class TestCheckModelHasGroup:
+    @pytest.mark.parametrize(
+        ("groups", "model_override", "check_fn"),
+        [
+            pytest.param(None, {"group": "finance"}, check_passes, id="any_group"),
+            pytest.param(
+                ["finance", "marketing"],
+                {"group": "finance"},
+                check_passes,
+                id="permitted_group",
+            ),
+            pytest.param(None, {"group": None}, check_fails, id="no_group"),
+            pytest.param(None, {"group": ""}, check_fails, id="empty_group"),
+            pytest.param(
+                ["marketing"],
+                {"group": "finance"},
+                check_fails,
+                id="group_not_permitted",
+            ),
+            pytest.param(
+                ["finance"], {"group": None}, check_fails, id="no_group_with_list"
+            ),
+        ],
+    )
+    def test_check_model_has_group(self, groups, model_override, check_fn):
+        kwargs = {} if groups is None else {"groups": groups}
+        check_fn("check_model_has_group", model=model_override, **kwargs)
+
+    def test_empty_groups_rejected_at_config_load(self):
+        with pytest.raises(ValidationError, match="at least 1 item"):
+            check_passes("check_model_has_group", model={"group": "finance"}, groups=[])
+
+    @pytest.mark.parametrize(
+        ("groups", "model_override", "match_pattern"),
+        [
+            pytest.param(
+                None,
+                {"group": None, "unique_id": "model.package_name.model_1"},
+                "`model_1` is not assigned to a group",
+                id="no_group",
+            ),
+            pytest.param(
+                ["marketing"],
+                {"group": "finance", "unique_id": "model.package_name.model_1"},
+                r"`model_1` is assigned to group `finance`, which is not one of the permitted groups: \['marketing'\]",
+                id="group_not_permitted",
+            ),
+        ],
+    )
+    def test_failure_message(self, groups, model_override, match_pattern):
+        kwargs = {} if groups is None else {"groups": groups}
+        check_fails(
+            "check_model_has_group", model=model_override, match=match_pattern, **kwargs
+        )

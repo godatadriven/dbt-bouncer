@@ -226,6 +226,10 @@ manifest_checks:
   - name: check_model_has_exposure
     include: ^models/marts/finance
     exclude: ^models/marts/finance/customers_v[12].sql
+  - name: check_model_has_group
+    groups:
+      - finance
+    include: ^models/marts/finance
   - name: check_model_has_labels_keys
     include: ^models/staging/crm/stg_customers.sql
     keys:

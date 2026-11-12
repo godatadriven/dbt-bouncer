@@ -8331,6 +8331,142 @@
       "title": "CheckModelHasGrain",
       "type": "object"
     },
+    "CheckModelHasGroup": {
+      "additionalProperties": false,
+      "description": "Models must be assigned to a group.\n\n!!! info \"Rationale\"\n\n    Groups give every model a named owner and are the basis for `private` access: only models in the same group can reference a private model. A model without a group has no accountable owner, and cannot be made private. Requiring a group, optionally from a permitted list, keeps ownership explicit as the project grows.\n\nParameters:\n    groups (list[str] | None): The permitted group names. If not provided, any group is accepted.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    language (Literal[\"python\", \"sql\"] | None): Limit check to models written in the specified language.\n    materialization (Literal[\"dynamic_table\", \"ephemeral\", \"incremental\", \"materialized_view\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_model_has_group\n    ```\n    ```yaml\n    manifest_checks:\n        # Marts must be owned by one of the permitted groups\n        - name: check_model_has_group\n          groups:\n            - finance\n            - marketing\n          include: ^models/marts\n    ```",
+      "properties": {
+        "code": {
+          "const": "MO059",
+          "default": "MO059",
+          "title": "Code",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of what the check does and why it is implemented.",
+          "title": "Description"
+        },
+        "exclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to exclude. A list matches if any pattern matches.",
+          "title": "Exclude"
+        },
+        "include": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regexp(s) to match which paths to include. A list matches if any pattern matches.",
+          "title": "Include"
+        },
+        "language": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ModelLanguage"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models written in the specified language."
+        },
+        "materialization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Materialization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Limit check to models with the specified materialization."
+        },
+        "selector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "dbt-style node selector limiting which resources the check runs against (e.g. 'tag:finance', '+orders', 'stg_*,tag:critical').",
+          "title": "Selector"
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckSeverity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "error",
+          "description": "Severity of the check, one of 'error' or 'warn'."
+        },
+        "name": {
+          "const": "check_model_has_group",
+          "default": "check_model_has_group",
+          "title": "Name",
+          "type": "string"
+        },
+        "groups": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Groups"
+        }
+      },
+      "title": "CheckModelHasGroup",
+      "type": "object"
+    },
     "CheckModelHasLabelsKeys": {
       "additionalProperties": false,
       "description": "The `labels` config for models must have the specified keys.\n\n!!! info \"Rationale\"\n\n    Labels are key-value pairs attached to warehouse resources (e.g. BigQuery table labels) that drive cost attribution, governance workflows, and access control. Requiring specific label keys ensures that ownership and environment metadata are consistently populated across all models, enabling automated billing reports and policy enforcement that depend on those labels being present.\n\nParameters:\n    keys (NestedDict): A list (that may contain sub-lists) of required keys.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    language (Literal[\"python\", \"sql\"] | None): Limit check to models written in the specified language.\n    materialization (Literal[\"dynamic_table\", \"ephemeral\", \"incremental\", \"materialized_view\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_model_has_labels_keys\n          keys:\n            - env\n            - team\n    ```",
@@ -17761,6 +17897,7 @@
             "check_model_has_constraints": "#/$defs/CheckModelHasConstraints",
             "check_model_has_contracts_enforced": "#/$defs/CheckModelHasContractsEnforced",
             "check_model_has_exposure": "#/$defs/CheckModelHasExposure",
+            "check_model_has_group": "#/$defs/CheckModelHasGroup",
             "check_model_has_labels_keys": "#/$defs/CheckModelHasLabelsKeys",
             "check_model_has_meta_keys": "#/$defs/CheckModelHasMetaKeys",
             "check_model_has_no_upstream_dependencies": "#/$defs/CheckModelHasNoUpstreamDependencies",
@@ -17980,6 +18117,9 @@
           },
           {
             "$ref": "#/$defs/CheckModelHasExposure"
+          },
+          {
+            "$ref": "#/$defs/CheckModelHasGroup"
           },
           {
             "$ref": "#/$defs/CheckModelHasLabelsKeys"
