@@ -10528,7 +10528,7 @@
     },
     "CheckModelMaxUpstreamDependencies": {
       "additionalProperties": false,
-      "description": "Limit the number of upstream dependencies a model has.\n\n!!! info \"Rationale\"\n\n    A model that depends on too many upstream models, sources, or macros is likely doing too much in one place. Limiting upstream dependencies encourages splitting large transformations into smaller, testable units, which improves build times, reduces coupling, and makes the DAG easier to reason about.\n\nParameters:\n    max_upstream_macros (int | None): The maximum number of permitted upstream macros.\n    max_upstream_models (int | None): The maximum number of permitted upstream models.\n    max_upstream_sources (int | None): The maximum number of permitted upstream sources.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    language (Literal[\"python\", \"sql\"] | None): Limit check to models written in the specified language.\n    materialization (Literal[\"dynamic_table\", \"ephemeral\", \"incremental\", \"materialized_view\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        - name: check_model_max_upstream_dependencies\n          max_upstream_models: 3\n    ```",
+      "description": "Limit the number of upstream dependencies a model has.\n\n!!! info \"Rationale\"\n\n    A model that depends on too many upstream models, sources, or macros is likely doing too much in one place. Limiting upstream dependencies encourages splitting large transformations into smaller, testable units, which improves build times, reduces coupling, and makes the DAG easier to reason about.\n\n!!! tip \"Prefer `max_upstream_nodes`\"\n\n    `max_upstream_nodes` limits the total number of upstream nodes of every resource type (models, seeds, snapshots, sources and any other node). A model cannot avoid the limit by depending on a resource type that has no limit of its own. Use the per-type parameters only when a resource type needs a stricter limit, for example `max_upstream_sources: 1`.\n\n!!! note\n\n    If `max_upstream_nodes` is not set, `max_upstream_models` defaults to `5` and `max_upstream_sources` defaults to `1`. If `max_upstream_nodes` is set, only the per-type limits you set are applied. Macros are not nodes, so `max_upstream_macros` always applies.\n\nParameters:\n    max_upstream_macros (int): The maximum number of permitted upstream macros. Default: `5`.\n    max_upstream_models (int | None): The maximum number of permitted upstream models.\n    max_upstream_nodes (int | None): The maximum number of permitted upstream nodes of all resource types. Recommended.\n    max_upstream_seeds (int | None): The maximum number of permitted upstream seeds. Default: no limit.\n    max_upstream_snapshots (int | None): The maximum number of permitted upstream snapshots. Default: no limit.\n    max_upstream_sources (int | None): The maximum number of permitted upstream sources.\n\nReceives:\n    model (ModelNode): The ModelNode object to check.\n\nOther Parameters:\n    description (str | None): Description of what the check does and why it is implemented.\n    exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.\n    include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.\n    language (Literal[\"python\", \"sql\"] | None): Limit check to models written in the specified language.\n    materialization (Literal[\"dynamic_table\", \"ephemeral\", \"incremental\", \"materialized_view\", \"table\", \"view\"] | None): Limit check to models with the specified materialization.\n    severity (Literal[\"error\", \"warn\"] | None): Severity level of the check. Default: `error`.\n\nExample(s):\n    ```yaml\n    manifest_checks:\n        # Recommended: limit the total number of upstream nodes\n        - name: check_model_max_upstream_dependencies\n          max_upstream_nodes: 5\n    ```\n    ```yaml\n    manifest_checks:\n        # A total limit, with a stricter limit for sources\n        - name: check_model_max_upstream_dependencies\n          max_upstream_nodes: 8\n          max_upstream_sources: 1\n    ```\n    ```yaml\n    manifest_checks:\n        - name: check_model_max_upstream_dependencies\n          max_upstream_models: 3\n          max_upstream_seeds: 2\n          max_upstream_snapshots: 1\n    ```",
       "properties": {
         "code": {
           "const": "MO035",
@@ -10649,16 +10649,69 @@
           "type": "integer"
         },
         "max_upstream_models": {
-          "default": 5,
-          "exclusiveMinimum": 0,
-          "title": "Max Upstream Models",
-          "type": "integer"
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Upstream Models"
+        },
+        "max_upstream_nodes": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Upstream Nodes"
+        },
+        "max_upstream_seeds": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Upstream Seeds"
+        },
+        "max_upstream_snapshots": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Upstream Snapshots"
         },
         "max_upstream_sources": {
-          "default": 1,
-          "exclusiveMinimum": 0,
-          "title": "Max Upstream Sources",
-          "type": "integer"
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Upstream Sources"
         }
       },
       "title": "CheckModelMaxUpstreamDependencies",
