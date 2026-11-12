@@ -252,6 +252,7 @@ name = "check_model_max_number_of_lines"
 
 [[manifest_checks]]
 name = "check_model_max_upstream_dependencies"
+max_upstream_nodes = 5
 
 [[manifest_checks]]
 name = "check_model_number_of_grants"
