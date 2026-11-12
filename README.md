@@ -38,7 +38,7 @@
 | src/dbt\_bouncer/checks/manifest/models/columns.py          |      152 |        0 |       76 |        0 |     100% |           |
 | src/dbt\_bouncer/checks/manifest/models/description.py      |       56 |        0 |       26 |        0 |     100% |           |
 | src/dbt\_bouncer/checks/manifest/models/directories.py      |       67 |        0 |       34 |        0 |     100% |           |
-| src/dbt\_bouncer/checks/manifest/models/lineage.py          |      106 |        0 |       46 |        0 |     100% |           |
+| src/dbt\_bouncer/checks/manifest/models/lineage.py          |      107 |        0 |       48 |        0 |     100% |           |
 | src/dbt\_bouncer/checks/manifest/models/meta.py             |       17 |        0 |        4 |        0 |     100% |           |
 | src/dbt\_bouncer/checks/manifest/models/naming.py           |       21 |        0 |        8 |        0 |     100% |           |
 | src/dbt\_bouncer/checks/manifest/models/tags.py             |       17 |        0 |       10 |        0 |     100% |           |
@@ -94,7 +94,7 @@
 | src/dbt\_bouncer/types.py                                   |       19 |        0 |        4 |        0 |     100% |           |
 | src/dbt\_bouncer/utils.py                                   |      392 |        0 |      152 |        0 |     100% |           |
 | src/dbt\_bouncer/version.py                                 |        2 |        0 |        0 |        0 |     100% |           |
-| **TOTAL**                                                   | **5249** |    **0** | **1770** |    **0** | **100%** |           |
+| **TOTAL**                                                   | **5250** |    **0** | **1772** |    **0** | **100%** |           |
 
 
 ## Setup coverage badge
