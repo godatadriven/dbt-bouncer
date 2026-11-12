@@ -30,6 +30,8 @@ models:
       +access: public
       +materialized: table
       +schema: marts
+      finance:
+        +group: finance
     staging:
       +access: protected
       crm:

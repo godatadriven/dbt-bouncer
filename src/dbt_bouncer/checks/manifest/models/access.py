@@ -218,6 +218,55 @@ def check_model_has_contracts_enforced(model):
         )
 
 
+@check(code="MO059")
+def check_model_has_group(
+    model, *, groups: Annotated[list[str], Field(min_length=1)] | None = None
+):
+    """Models must be assigned to a group.
+
+    !!! info "Rationale"
+
+        Groups give every model a named owner and are the basis for `private` access: only models in the same group can reference a private model. A model without a group has no accountable owner, and cannot be made private. Requiring a group, optionally from a permitted list, keeps ownership explicit as the project grows.
+
+    Parameters:
+        groups (list[str] | None): The permitted group names. If not provided, any group is accepted.
+
+    Receives:
+        model (ModelNode): The ModelNode object to check.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.
+        include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.
+        language (Literal["python", "sql"] | None): Limit check to models written in the specified language.
+        materialization (Literal["dynamic_table", "ephemeral", "incremental", "materialized_view", "table", "view"] | None): Limit check to models with the specified materialization.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_model_has_group
+        ```
+        ```yaml
+        manifest_checks:
+            # Marts must be owned by one of the permitted groups
+            - name: check_model_has_group
+              groups:
+                - finance
+                - marketing
+              include: ^models/marts
+        ```
+
+    """
+    model_name = get_clean_model_name(model.unique_id)
+    if not model.group:
+        fail(f"`{model_name}` is not assigned to a group.")
+    if groups is not None and model.group not in groups:
+        fail(
+            f"`{model_name}` is assigned to group `{model.group}`, which is not one of the permitted groups: {groups}."
+        )
+
+
 def _min_privileges_not_above_max(
     *, max_number_of_privileges: int, min_number_of_privileges: int
 ) -> None:
