@@ -44,6 +44,7 @@ def check_model_directories(
         ```
         ```yaml
         # Restrict sub-directories within `./models/staging`
+        manifest_checks:
         - name: check_model_directories
           include: ^models/staging
           permitted_sub_directories:

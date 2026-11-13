@@ -123,7 +123,7 @@ def check_column_names(catalog_node, ctx, *, column_name_pattern: RegexPattern):
         ```yaml
         catalog_checks:
             - name: check_column_names
-              column_name_pattern: [a-z_] # Lowercase only, underscores allowed
+              column_name_pattern: "^[a-z_]*$" # Lowercase only, underscores allowed
         ```
 
     """
