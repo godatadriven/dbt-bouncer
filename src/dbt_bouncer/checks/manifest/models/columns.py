@@ -329,7 +329,7 @@ def check_model_column_names(model, *, column_name_pattern: RegexPattern):
         ```yaml
         manifest_checks:
             - name: check_model_column_names
-              column_name_pattern: [a-z_] # Lowercase only, underscores allowed
+              column_name_pattern: "^[a-z_]*$" # Lowercase only, underscores allowed
         ```
 
     """

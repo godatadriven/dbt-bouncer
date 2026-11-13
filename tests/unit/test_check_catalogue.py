@@ -12,15 +12,19 @@ check satisfies the project's catalogue invariants:
    ``mkdocs.yml`` and an entry in ``docs/checks/rule_codes.md``.
 5. Every check has a ``Test<CheckClassName>`` test class in its mirror file under
    ``tests/unit/checks/`` exercising both passing and failing cases.
+6. Every ``yaml`` example in a check's docstring is a valid config.
+7. Every check is named in ``dbt-bouncer-example.yml``, commented out or not.
 """
 
 from __future__ import annotations
 
 import ast
 import importlib
+import inspect
 import json
 import pkgutil
 import re
+import textwrap
 import typing
 from collections import Counter
 from functools import lru_cache
@@ -28,15 +32,24 @@ from importlib.metadata import entry_points
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+import yaml
+
 from dbt_bouncer.cli.explain.utils import get_check_name
 from dbt_bouncer.cli.list.utils import category_key
+from dbt_bouncer.configuration_file.validator import validate_conf
 from dbt_bouncer.enums import CheckCategory, RuleCode
+from dbt_bouncer.exceptions import DbtBouncerConfigError
 from dbt_bouncer.utils import _extract_checks_from_module, get_check_objects
 
 if TYPE_CHECKING:
     from dbt_bouncer.check_framework.base import BaseCheck
 
 _CHECKS_MODULE_PREFIX = "dbt_bouncer.checks."
+_DOCSTRING_YAML_BLOCK = re.compile(r"```yaml\n(.*?)```", re.DOTALL)
+# Matches `- name: check_x` and the commented-out `# - name: check_x` form.
+_EXAMPLE_CONFIG_CHECK_NAME = re.compile(
+    r"^\s*(?:#\s*)?-\s*name:\s*(check_\w+)", re.MULTILINE
+)
 
 
 @lru_cache(maxsize=1)
@@ -254,3 +267,41 @@ def test_each_check_has_passing_and_failing_unit_tests() -> None:
             )
 
     assert not errors, "Unit test coverage gaps:\n" + "\n".join(errors)
+
+
+def test_each_docstring_example_is_a_valid_config() -> None:
+    """Every ``yaml`` example in a check's docstring passes config validation.
+
+    These examples are published on the docs site and printed by
+    ``dbt-bouncer explain``, so users copy them verbatim.
+    """
+    errors: list[str] = []
+    for cls in _discover_entry_point_checks():
+        name = get_check_name(cls)
+        blocks = _DOCSTRING_YAML_BLOCK.findall(inspect.getdoc(cls) or "")
+        for i, block in enumerate(blocks, start=1):
+            contents = yaml.safe_load(textwrap.dedent(block))
+            try:
+                validate_conf(config_file_contents=contents)
+            except DbtBouncerConfigError as e:
+                errors.append(f"{name} (example {i}): {str(e).strip()}")
+
+    assert not errors, "Invalid docstring examples:\n" + "\n".join(errors)
+
+
+def test_each_check_is_named_in_example_config() -> None:
+    """Every check is named in ``dbt-bouncer-example.yml``, commented out or not.
+
+    Checks that need an adapter-specific artifact appear commented out, so a
+    commented ``- name:`` line counts.
+    """
+    example_text = Path("dbt-bouncer-example.yml").read_text(encoding="utf-8")
+    named = set(_EXAMPLE_CONFIG_CHECK_NAME.findall(example_text))
+    check_names = {get_check_name(cls) for cls in _discover_entry_point_checks()}
+
+    assert not check_names - named, (
+        f"Checks missing from dbt-bouncer-example.yml: {sorted(check_names - named)}"
+    )
+    assert not named - check_names, (
+        f"dbt-bouncer-example.yml names unknown checks: {sorted(named - check_names)}"
+    )
