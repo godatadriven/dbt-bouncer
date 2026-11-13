@@ -98,8 +98,8 @@ docs = [
   "mike @ git+https://github.com/squidfunk/mike.git@2d4ad799442f4592db8ad53b179bfb33db8c69ac",
   "mkdocstrings-python<3",
   "pymdown-extensions>=10,<13",
-  # Zensical is pre-1.0; constrain to the patch series to avoid surprise breakage.
-  "zensical~=0.0.43"
+  # Zensical is pre-1.0 (beta); constrain to the 0.1 series to avoid surprise breakage.
+  "zensical~=0.1.1"
 ]
 
 [build-system]
