@@ -3433,7 +3433,7 @@
         <p>Example(s):
     <div class="language-yaml highlight"><pre><span></span><code><span id="manifest.models.columns.check_model_column_names--__span-0-1"><a id="manifest.models.columns.check_model_column_names--__codelineno-0-1" name="manifest.models.columns.check_model_column_names--__codelineno-0-1" href="#manifest.models.columns.check_model_column_names--__codelineno-0-1"></a><span class="nt">manifest_checks</span><span class="p">:</span>
 </span><span id="manifest.models.columns.check_model_column_names--__span-0-2"><a id="manifest.models.columns.check_model_column_names--__codelineno-0-2" name="manifest.models.columns.check_model_column_names--__codelineno-0-2" href="#manifest.models.columns.check_model_column_names--__codelineno-0-2"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check_model_column_names</span>
-</span><span id="manifest.models.columns.check_model_column_names--__span-0-3"><a id="manifest.models.columns.check_model_column_names--__codelineno-0-3" name="manifest.models.columns.check_model_column_names--__codelineno-0-3" href="#manifest.models.columns.check_model_column_names--__codelineno-0-3"></a><span class="w">      </span><span class="nt">column_name_pattern</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">a-z_</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="c1"># Lowercase only, underscores allowed</span>
+</span><span id="manifest.models.columns.check_model_column_names--__span-0-3"><a id="manifest.models.columns.check_model_column_names--__codelineno-0-3" name="manifest.models.columns.check_model_column_names--__codelineno-0-3" href="#manifest.models.columns.check_model_column_names--__codelineno-0-3"></a><span class="w">      </span><span class="nt">column_name_pattern</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;^[a-z_]*$&quot;</span><span class="w"> </span><span class="c1"># Lowercase only, underscores allowed</span>
 </span></code></pre></div></p>
 
 
@@ -3510,7 +3510,7 @@
 </span><span id="__span-0-329"><a id="__codelineno-0-329" name="__codelineno-0-329"></a><span class="sd">        ```yaml</span>
 </span><span id="__span-0-330"><a id="__codelineno-0-330" name="__codelineno-0-330"></a><span class="sd">        manifest_checks:</span>
 </span><span id="__span-0-331"><a id="__codelineno-0-331" name="__codelineno-0-331"></a><span class="sd">            - name: check_model_column_names</span>
-</span><span id="__span-0-332"><a id="__codelineno-0-332" name="__codelineno-0-332"></a><span class="sd">              column_name_pattern: [a-z_] # Lowercase only, underscores allowed</span>
+</span><span id="__span-0-332"><a id="__codelineno-0-332" name="__codelineno-0-332"></a><span class="sd">              column_name_pattern: &quot;^[a-z_]*$&quot; # Lowercase only, underscores allowed</span>
 </span><span id="__span-0-333"><a id="__codelineno-0-333" name="__codelineno-0-333"></a><span class="sd">        ```</span>
 </span><span id="__span-0-334"><a id="__codelineno-0-334" name="__codelineno-0-334"></a>
 </span><span id="__span-0-335"><a id="__codelineno-0-335" name="__codelineno-0-335"></a><span class="sd">    &quot;&quot;&quot;</span>
