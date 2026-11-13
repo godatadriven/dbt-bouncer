@@ -677,8 +677,15 @@ class TestCheckModelMaxFanout:
             )
 
 
-def _upstream(*, macros: int = 0, models: int = 0, sources: int = 0) -> dict:
-    """Build a model with the given number of upstream macros, models and sources.
+def _upstream(
+    *,
+    macros: int = 0,
+    models: int = 0,
+    seeds: int = 0,
+    snapshots: int = 0,
+    sources: int = 0,
+) -> dict:
+    """Build a model with the given number of upstream dependencies of each type.
 
     Returns:
         dict: A manifest model node dict.
@@ -688,6 +695,8 @@ def _upstream(*, macros: int = 0, models: int = 0, sources: int = 0) -> dict:
         "stg_model_1",
         macros=[f"macro.package_name.macro_{i}" for i in range(1, macros + 1)],
         nodes=[f"model.package_name.stg_model_{i}" for i in range(1, models + 1)]
+        + [f"seed.package_name.seed_{i}" for i in range(1, seeds + 1)]
+        + [f"snapshot.package_name.snapshot_{i}" for i in range(1, snapshots + 1)]
         + [f"source.package_name.source_{i}" for i in range(1, sources + 1)],
     )
 
@@ -724,78 +733,170 @@ class TestCheckModelMaxUpstreamDependencies:
         )
 
     @pytest.mark.parametrize(
-        ("model", "match"),
+        ("model", "check_fn"),
         [
             pytest.param(
+                _upstream(macros=5, models=5, sources=1),
+                check_passes,
+                id="at_default_limits",
+            ),
+            # Seeds and snapshots have no limit unless one is set.
+            pytest.param(
+                _upstream(seeds=9, snapshots=9),
+                check_passes,
+                id="seeds_and_snapshots_unlimited",
+            ),
+            pytest.param(_upstream(macros=6), check_fails, id="default_macro_limit"),
+            pytest.param(_upstream(models=6), check_fails, id="default_model_limit"),
+            pytest.param(_upstream(sources=2), check_fails, id="default_source_limit"),
+        ],
+    )
+    def test_defaults(self, model, check_fn):
+        check_fn("check_model_max_upstream_dependencies", model=model)
+
+    @pytest.mark.parametrize(
+        ("kwargs", "model", "check_fn"),
+        [
+            pytest.param(
+                {"max_upstream_seeds": 2},
+                _upstream(seeds=2),
+                check_passes,
+                id="seeds_at_limit",
+            ),
+            pytest.param(
+                {"max_upstream_seeds": 2},
+                _upstream(seeds=3),
+                check_fails,
+                id="exceeds_seed_limit",
+            ),
+            pytest.param(
+                {"max_upstream_snapshots": 2},
+                _upstream(snapshots=2),
+                check_passes,
+                id="snapshots_at_limit",
+            ),
+            pytest.param(
+                {"max_upstream_snapshots": 2},
+                _upstream(snapshots=3),
+                check_fails,
+                id="exceeds_snapshot_limit",
+            ),
+        ],
+    )
+    def test_seed_and_snapshot_limits(self, kwargs, model, check_fn):
+        check_fn("check_model_max_upstream_dependencies", model=model, **kwargs)
+
+    @pytest.mark.parametrize(
+        ("kwargs", "model", "check_fn"),
+        [
+            pytest.param(
+                {"max_upstream_nodes": 4},
+                _upstream(models=1, seeds=1, snapshots=1, sources=1),
+                check_passes,
+                id="nodes_at_limit",
+            ),
+            pytest.param(
+                {"max_upstream_nodes": 4},
+                _upstream(models=2, seeds=1, snapshots=1, sources=1),
+                check_fails,
+                id="exceeds_node_limit_across_types",
+            ),
+            # Macros are not nodes.
+            pytest.param(
+                {"max_upstream_nodes": 1},
+                _upstream(macros=5, models=1),
+                check_passes,
+                id="macros_not_counted_as_nodes",
+            ),
+            pytest.param(
+                {"max_upstream_nodes": 10},
+                _upstream(macros=6),
+                check_fails,
+                id="macro_default_still_applies",
+            ),
+            # The default model and source limits do not apply when
+            # `max_upstream_nodes` is set.
+            pytest.param(
+                {"max_upstream_nodes": 10},
+                _upstream(models=6, sources=2),
+                check_passes,
+                id="per_type_defaults_dropped",
+            ),
+            pytest.param(
+                {"max_upstream_nodes": 10, "max_upstream_sources": 1},
+                _upstream(models=6, sources=2),
+                check_fails,
+                id="explicit_per_type_limit_still_applies",
+            ),
+        ],
+    )
+    def test_max_upstream_nodes(self, kwargs, model, check_fn):
+        check_fn("check_model_max_upstream_dependencies", model=model, **kwargs)
+
+    @pytest.mark.parametrize(
+        ("kwargs", "model", "match"),
+        [
+            pytest.param(
+                {},
                 _upstream(macros=6),
                 r"has 6 upstream macros, which is more than the permitted maximum of 5\.",
                 id="macros",
             ),
             pytest.param(
+                {},
                 _upstream(models=6),
                 r"has 6 upstream models, which is more than the permitted maximum of 5\.",
                 id="models",
             ),
             pytest.param(
+                {"max_upstream_nodes": 3},
+                _upstream(models=2, seeds=2),
+                r"has 4 upstream nodes, which is more than the permitted maximum of 3\.",
+                id="nodes",
+            ),
+            pytest.param(
+                {"max_upstream_seeds": 1},
+                _upstream(seeds=2),
+                r"has 2 upstream seeds, which is more than the permitted maximum of 1\.",
+                id="seeds",
+            ),
+            pytest.param(
+                {"max_upstream_snapshots": 1},
+                _upstream(snapshots=2),
+                r"has 2 upstream snapshots, which is more than the permitted maximum of 1\.",
+                id="snapshots",
+            ),
+            pytest.param(
+                {},
                 _upstream(sources=2),
                 r"has 2 upstream sources, which is more than the permitted maximum of 1\.",
                 id="sources",
             ),
         ],
     )
-    def test_failure_messages(self, model, match):
+    def test_failure_messages(self, kwargs, model, match):
         check_fails(
-            "check_model_max_upstream_dependencies",
-            max_upstream_macros=5,
-            max_upstream_models=5,
-            max_upstream_sources=1,
-            model=model,
-            match=match,
+            "check_model_max_upstream_dependencies", model=model, match=match, **kwargs
         )
 
     @pytest.mark.parametrize(
-        "kwargs",
+        "parameter",
         [
-            pytest.param(
-                {
-                    "max_upstream_macros": 0,
-                    "max_upstream_models": 5,
-                    "max_upstream_sources": 1,
-                },
-                id="max_upstream_macros_zero",
-            ),
-            pytest.param(
-                {
-                    "max_upstream_macros": -1,
-                    "max_upstream_models": 5,
-                    "max_upstream_sources": 1,
-                },
-                id="max_upstream_macros_negative",
-            ),
-            pytest.param(
-                {
-                    "max_upstream_macros": 5,
-                    "max_upstream_models": 0,
-                    "max_upstream_sources": 1,
-                },
-                id="max_upstream_models_zero",
-            ),
-            pytest.param(
-                {
-                    "max_upstream_macros": 5,
-                    "max_upstream_models": 5,
-                    "max_upstream_sources": 0,
-                },
-                id="max_upstream_sources_zero",
-            ),
+            "max_upstream_macros",
+            "max_upstream_models",
+            "max_upstream_nodes",
+            "max_upstream_seeds",
+            "max_upstream_snapshots",
+            "max_upstream_sources",
         ],
     )
-    def test_raises_value_error(self, kwargs):
+    @pytest.mark.parametrize("value", [0, -1])
+    def test_raises_value_error(self, parameter, value):
         with pytest.raises(ValueError, match="greater than 0"):
             _run_check(
                 "check_model_max_upstream_dependencies",
                 model={"depends_on": {"macros": [], "nodes": []}},
-                **kwargs,
+                **{parameter: value},
             )
 
 

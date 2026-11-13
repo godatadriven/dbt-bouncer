@@ -1,0 +1,7 @@
+version: 2
+
+groups:
+  - name: finance
+    owner:
+      name: Finance Analytics
+      email: finance.analytics@example.com

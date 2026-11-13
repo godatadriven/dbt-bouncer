@@ -1,5 +1,6 @@
 """Checks related to model upstream dependencies and lineage."""
 
+from collections import Counter
 from typing import Annotated
 
 from pydantic import Field
@@ -525,13 +526,22 @@ def check_model_max_fanout(
         )
 
 
+# Per-type limits applied when `max_upstream_nodes` is not set. They keep the
+# behaviour the check had before `max_upstream_nodes` existed.
+_DEFAULT_MAX_UPSTREAM_MODELS = 5
+_DEFAULT_MAX_UPSTREAM_SOURCES = 1
+
+
 @check(code="MO035")
 def check_model_max_upstream_dependencies(
     model,
     *,
     max_upstream_macros: Annotated[int, Field(gt=0)] = 5,
-    max_upstream_models: Annotated[int, Field(gt=0)] = 5,
-    max_upstream_sources: Annotated[int, Field(gt=0)] = 1,
+    max_upstream_models: Annotated[int, Field(gt=0)] | None = None,
+    max_upstream_nodes: Annotated[int, Field(gt=0)] | None = None,
+    max_upstream_seeds: Annotated[int, Field(gt=0)] | None = None,
+    max_upstream_snapshots: Annotated[int, Field(gt=0)] | None = None,
+    max_upstream_sources: Annotated[int, Field(gt=0)] | None = None,
 ):
     """Limit the number of upstream dependencies a model has.
 
@@ -539,9 +549,20 @@ def check_model_max_upstream_dependencies(
 
         A model that depends on too many upstream models, sources, or macros is likely doing too much in one place. Limiting upstream dependencies encourages splitting large transformations into smaller, testable units, which improves build times, reduces coupling, and makes the DAG easier to reason about.
 
+    !!! tip "Prefer `max_upstream_nodes`"
+
+        `max_upstream_nodes` limits the total number of upstream nodes of every resource type (models, seeds, snapshots, sources and any other node). A model cannot avoid the limit by depending on a resource type that has no limit of its own. Use the per-type parameters only when a resource type needs a stricter limit, for example `max_upstream_sources: 1`.
+
+    !!! note
+
+        If `max_upstream_nodes` is not set, `max_upstream_models` defaults to `5` and `max_upstream_sources` defaults to `1`. If `max_upstream_nodes` is set, only the per-type limits you set are applied. Macros are not nodes, so `max_upstream_macros` always applies.
+
     Parameters:
-        max_upstream_macros (int | None): The maximum number of permitted upstream macros.
+        max_upstream_macros (int): The maximum number of permitted upstream macros. Default: `5`.
         max_upstream_models (int | None): The maximum number of permitted upstream models.
+        max_upstream_nodes (int | None): The maximum number of permitted upstream nodes of all resource types. Recommended.
+        max_upstream_seeds (int | None): The maximum number of permitted upstream seeds. Default: no limit.
+        max_upstream_snapshots (int | None): The maximum number of permitted upstream snapshots. Default: no limit.
         max_upstream_sources (int | None): The maximum number of permitted upstream sources.
 
     Receives:
@@ -558,34 +579,50 @@ def check_model_max_upstream_dependencies(
     Example(s):
         ```yaml
         manifest_checks:
+            # Recommended: limit the total number of upstream nodes
+            - name: check_model_max_upstream_dependencies
+              max_upstream_nodes: 5
+        ```
+        ```yaml
+        manifest_checks:
+            # A total limit, with a stricter limit for sources
+            - name: check_model_max_upstream_dependencies
+              max_upstream_nodes: 8
+              max_upstream_sources: 1
+        ```
+        ```yaml
+        manifest_checks:
             - name: check_model_max_upstream_dependencies
               max_upstream_models: 3
+              max_upstream_seeds: 2
+              max_upstream_snapshots: 1
         ```
 
     """
     depends_on = model.depends_on
-    if depends_on:
-        num_upstream_macros = len(list(getattr(depends_on, "macros", []) or []))
-        nodes = getattr(depends_on, "nodes", []) or []
-        num_upstream_models = len([m for m in nodes if m.split(".")[0] == "model"])
-        num_upstream_sources = len([m for m in nodes if m.split(".")[0] == "source"])
-    else:
-        num_upstream_macros = 0
-        num_upstream_models = 0
-        num_upstream_sources = 0
+    macros = list(getattr(depends_on, "macros", []) or []) if depends_on else []
+    nodes = list(getattr(depends_on, "nodes", []) or []) if depends_on else []
+    nodes_by_type = Counter(node.split(".")[0] for node in nodes)
 
-    if num_upstream_macros > max_upstream_macros:
-        fail(
-            f"`{get_clean_model_name(model.unique_id)}` has {num_upstream_macros} upstream macros, which is more than the permitted maximum of {max_upstream_macros}."
-        )
-    if num_upstream_models > max_upstream_models:
-        fail(
-            f"`{get_clean_model_name(model.unique_id)}` has {num_upstream_models} upstream models, which is more than the permitted maximum of {max_upstream_models}."
-        )
-    if num_upstream_sources > max_upstream_sources:
-        fail(
-            f"`{get_clean_model_name(model.unique_id)}` has {num_upstream_sources} upstream sources, which is more than the permitted maximum of {max_upstream_sources}."
-        )
+    if max_upstream_nodes is None:
+        if max_upstream_models is None:
+            max_upstream_models = _DEFAULT_MAX_UPSTREAM_MODELS
+        if max_upstream_sources is None:
+            max_upstream_sources = _DEFAULT_MAX_UPSTREAM_SOURCES
+
+    limits = [
+        ("macros", len(macros), max_upstream_macros),
+        ("models", nodes_by_type["model"], max_upstream_models),
+        ("nodes", len(nodes), max_upstream_nodes),
+        ("seeds", nodes_by_type["seed"], max_upstream_seeds),
+        ("snapshots", nodes_by_type["snapshot"], max_upstream_snapshots),
+        ("sources", nodes_by_type["source"], max_upstream_sources),
+    ]
+    for dependency_type, count, limit in limits:
+        if limit is not None and count > limit:
+            fail(
+                f"`{get_clean_model_name(model.unique_id)}` has {count} upstream {dependency_type}, which is more than the permitted maximum of {limit}."
+            )
 
 
 @check(code="MO050")

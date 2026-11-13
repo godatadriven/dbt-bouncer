@@ -221,6 +221,11 @@ include = "^models/marts/finance"
 exclude = "^models/marts/finance/customers_v[12].sql"
 
 [[manifest_checks]]
+name = "check_model_has_group"
+groups = ["finance"]
+include = "^models/marts/finance"
+
+[[manifest_checks]]
 name = "check_model_has_meta_keys"
 keys = ["maturity"]
 
@@ -252,6 +257,7 @@ name = "check_model_max_number_of_lines"
 
 [[manifest_checks]]
 name = "check_model_max_upstream_dependencies"
+max_upstream_nodes = 5
 
 [[manifest_checks]]
 name = "check_model_number_of_grants"

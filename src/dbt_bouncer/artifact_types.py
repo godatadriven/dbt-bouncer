@@ -165,6 +165,7 @@ class ModelNode(Protocol):
     contract: Contract
     depends_on: DependsOn
     description: str
+    group: str | None
     language: str | None
     latest_version: int | None
     meta: dict[str, Any]
