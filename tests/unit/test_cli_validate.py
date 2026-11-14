@@ -172,3 +172,98 @@ class TestValidateCommand:
 
         assert result.exit_code == ExitCode.CHECK_ERRORS
         assert "severtiy" in result.output
+
+
+class TestValidateConfigDiscovery:
+    """`validate` finds the config file the same way `run` does."""
+
+    def test_discovers_dbt_bouncer_yaml(self, tmp_path, monkeypatch):
+        """Without `--config-file`, a `dbt-bouncer.yaml` file is found."""
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.delenv("DBT_BOUNCER_CONFIG_FILE", raising=False)
+        _write_yaml(
+            tmp_path / "dbt-bouncer.yaml",
+            {"manifest_checks": [{"name": "check_model_description_populated"}]},
+        )
+
+        result = runner.invoke(app, ["validate"])
+
+        assert result.exit_code == ExitCode.SUCCESS, result.output
+        assert "dbt-bouncer.yaml" in result.output
+
+    def test_discovers_dbt_bouncer_toml(self, tmp_path, monkeypatch):
+        """Without `--config-file`, a `dbt-bouncer.toml` file is found."""
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.delenv("DBT_BOUNCER_CONFIG_FILE", raising=False)
+        (tmp_path / "dbt-bouncer.toml").write_text(
+            '[[manifest_checks]]\nname = "check_model_description_populated"\n'
+        )
+
+        result = runner.invoke(app, ["validate"])
+
+        assert result.exit_code == ExitCode.SUCCESS, result.output
+        assert "dbt-bouncer.toml" in result.output
+
+    def test_discovers_pyproject_toml_section(self, tmp_path, monkeypatch):
+        """Without `--config-file`, a `[tool.dbt-bouncer]` section is found."""
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.delenv("DBT_BOUNCER_CONFIG_FILE", raising=False)
+        (tmp_path / "pyproject.toml").write_text(
+            "[[tool.dbt-bouncer.manifest_checks]]\n"
+            'name = "check_model_description_populated"\n'
+        )
+
+        result = runner.invoke(app, ["validate"])
+
+        assert result.exit_code == ExitCode.SUCCESS, result.output
+        assert "pyproject.toml" in result.output
+
+    def test_pyproject_toml_without_section_exits_config_error(
+        self, tmp_path, monkeypatch
+    ):
+        """A `pyproject.toml` with no `[tool.dbt-bouncer]` section is not a config."""
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.delenv("DBT_BOUNCER_CONFIG_FILE", raising=False)
+        (tmp_path / "pyproject.toml").write_text('[project]\nname = "x"\n')
+
+        result = runner.invoke(app, ["validate"])
+
+        assert result.exit_code == ExitCode.CONFIG_ERROR
+
+    def test_discovers_config_from_env_var(self, tmp_path, monkeypatch):
+        """`DBT_BOUNCER_CONFIG_FILE` points `validate` at the config file."""
+        monkeypatch.chdir(tmp_path)
+        config_file = tmp_path / "nested" / "bouncer.yml"
+        config_file.parent.mkdir()
+        _write_yaml(
+            config_file,
+            {"manifest_checks": [{"name": "check_model_description_populated"}]},
+        )
+        monkeypatch.setenv("DBT_BOUNCER_CONFIG_FILE", str(config_file))
+
+        result = runner.invoke(app, ["validate"])
+
+        assert result.exit_code == ExitCode.SUCCESS, result.output
+
+    def test_env_var_pointing_to_missing_file_exits_config_error(
+        self, tmp_path, monkeypatch
+    ):
+        """A missing file named by `DBT_BOUNCER_CONFIG_FILE` exits CONFIG_ERROR."""
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.setenv("DBT_BOUNCER_CONFIG_FILE", str(tmp_path / "missing.yml"))
+
+        result = runner.invoke(app, ["validate"])
+
+        assert result.exit_code == ExitCode.CONFIG_ERROR
+
+    def test_missing_explicit_config_file_exits_config_error(
+        self, tmp_path, monkeypatch
+    ):
+        """A missing file passed via `--config-file` exits CONFIG_ERROR."""
+        monkeypatch.chdir(tmp_path)
+
+        result = runner.invoke(
+            app, ["validate", "--config-file", str(tmp_path / "missing.yml")]
+        )
+
+        assert result.exit_code == ExitCode.CONFIG_ERROR

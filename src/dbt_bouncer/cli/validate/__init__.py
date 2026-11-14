@@ -8,8 +8,9 @@ import typer
 from rich.console import Console
 
 from dbt_bouncer.cli import app
-from dbt_bouncer.cli.utils import resolve_config_path
+from dbt_bouncer.cli.run.utils import detect_config_file_source
 from dbt_bouncer.enums import ConfigFileName, ExitCode
+from dbt_bouncer.exceptions import DbtBouncerConfigError
 from dbt_bouncer.reporting.logger import configure_console_logging
 
 
@@ -27,6 +28,11 @@ def validate(
     keys, unknown check parameters, and mistyped values are reported with line
     numbers.
 
+    The config file is found the same way `dbt-bouncer run` finds it: the
+    `--config-file` flag, the `DBT_BOUNCER_CONFIG_FILE` environment variable,
+    `dbt-bouncer.yml`, `dbt-bouncer.yaml`, `dbt-bouncer.toml`, then a
+    `[tool.dbt-bouncer]` section in `pyproject.toml`.
+
     Raises:
         Exit: With code SUCCESS if the config file is valid, CHECK_ERRORS if issues
             are found, or CONFIG_ERROR if the config file is not found.
@@ -36,16 +42,29 @@ def validate(
 
     configure_console_logging(verbosity=0)
 
-    config_path = resolve_config_path(config_file)
-
-    if not config_path.exists():
-        logging.error(f"Config file not found: {config_path}")
-        raise typer.Exit(ExitCode.CONFIG_ERROR)
-
     from dbt_bouncer.configuration_file.validator import (
+        get_config_file_path,
         lint_config_file,
         lint_config_file_deep,
+        load_config_file_contents,
     )
+
+    try:
+        config_path = Path(
+            get_config_file_path(
+                config_file=config_file or Path(ConfigFileName.DBT_BOUNCER_YML),
+                config_file_source=detect_config_file_source(config_file),
+            )
+        )
+        # A `pyproject.toml` without a `[tool.dbt-bouncer]` section means no
+        # config was found, not that the config is invalid.
+        if config_path.name == ConfigFileName.PYPROJECT_TOML:
+            load_config_file_contents(
+                config_path, allow_default_config_file_creation=False
+            )
+    except DbtBouncerConfigError as e:
+        logging.error(str(e))
+        raise typer.Exit(ExitCode.CONFIG_ERROR) from e
 
     issues = lint_config_file(config_path)
 
@@ -55,7 +74,9 @@ def validate(
         issues = lint_config_file_deep(config_path)
 
     if not issues:
-        console.print("[bold green]Configuration file is valid![/bold green] ✅")
+        console.print(
+            f"[bold green]Configuration file is valid![/bold green] ✅ ({config_path})"
+        )
         raise typer.Exit(ExitCode.SUCCESS)
     else:
         console.print(

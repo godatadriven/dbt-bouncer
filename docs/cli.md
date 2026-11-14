@@ -404,10 +404,12 @@ It will report:
 - Incorrect configuration types (e.g., if a check category is not a list)
 - Everything `dbt-bouncer run` would reject: unknown keys, unknown check parameters, and mistyped parameter values — with a "Did you mean" suggestion for the closest valid name
 
+Without `--config-file`, `validate` looks for the config file in the same places as `dbt-bouncer run`: the `DBT_BOUNCER_CONFIG_FILE` environment variable, then `dbt-bouncer.yml`, `dbt-bouncer.yaml`, and `dbt-bouncer.toml` in the current directory, then a `[tool.dbt-bouncer]` section in `pyproject.toml` (in the current or a parent directory).
+
 Example output for a valid config:
 
 ```text
-Config file is valid!
+Configuration file is valid! ✅ (dbt-bouncer.yml)
 ```
 
 Example output for issues:
@@ -426,7 +428,7 @@ Found 2 issue(s) in config file:
 **Default:** `dbt-bouncer.yml`
 **Required:** No
 
-Specifies the location of the YAML configuration file to validate.
+Specifies the location of the configuration file (YML, YAML, or TOML) to validate.
 
 **Example:**
 
