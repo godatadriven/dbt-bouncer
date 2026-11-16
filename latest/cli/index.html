@@ -1743,8 +1743,9 @@ at 120 columns. Set the standard <code>COLUMNS</code> environment variable to us
 <li>Incorrect configuration types (e.g., if a check category is not a list)</li>
 <li>Everything <code>dbt-bouncer run</code> would reject: unknown keys, unknown check parameters, and mistyped parameter values — with a "Did you mean" suggestion for the closest valid name</li>
 </ul>
+<p>Without <code>--config-file</code>, <code>validate</code> looks for the config file in the same places as <code>dbt-bouncer run</code>: the <code>DBT_BOUNCER_CONFIG_FILE</code> environment variable, then <code>dbt-bouncer.yml</code>, <code>dbt-bouncer.yaml</code>, and <code>dbt-bouncer.toml</code> in the current directory, then a <code>[tool.dbt-bouncer]</code> section in <code>pyproject.toml</code> (in the current or a parent directory).</p>
 <p>Example output for a valid config:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>Config file is valid!
+<div class="language-text highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>Configuration file is valid! ✅ (dbt-bouncer.yml)
 </span></code></pre></div>
 <p>Example output for issues:</p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>Found 2 issue(s) in config file:
@@ -1756,7 +1757,7 @@ at 120 columns. Set the standard <code>COLUMNS</code> environment variable to us
 <p><strong>Type:</strong> Path
 <strong>Default:</strong> <code>dbt-bouncer.yml</code>
 <strong>Required:</strong> No</p>
-<p>Specifies the location of the YAML configuration file to validate.</p>
+<p>Specifies the location of the configuration file (YML, YAML, or TOML) to validate.</p>
 <p><strong>Example:</strong></p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>dbt-bouncer<span class="w"> </span>validate<span class="w"> </span>--config-file<span class="w"> </span>config/checks.yml
 </span></code></pre></div>
