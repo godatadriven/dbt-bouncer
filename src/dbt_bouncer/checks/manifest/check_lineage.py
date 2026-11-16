@@ -1,3 +1,5 @@
+from typing import Any
+
 from dbt_bouncer.check_framework.decorator import check, fail
 from dbt_bouncer.types import RegexPattern
 from dbt_bouncer.utils import clean_path_str, compile_pattern, get_clean_model_name
@@ -68,6 +70,97 @@ def check_lineage_permitted_upstream_models(
     if not_permitted_upstream_models:
         fail(
             f"`{get_clean_model_name(model.unique_id)}` references upstream models that are not permitted: {[m.split('.')[-1] for m in not_permitted_upstream_models]}."
+        )
+
+
+def _require_database_or_schema_pattern(
+    *, database_pattern: str | None, schema_pattern: str | None, **_: Any
+) -> None:
+    """Require at least one of `database_pattern` or `schema_pattern`.
+
+    Raises:
+        ValueError: If neither is supplied.
+
+    """
+    if database_pattern is None and schema_pattern is None:
+        raise ValueError(
+            "At least one of 'database_pattern' or 'schema_pattern' must be supplied."
+        )
+
+
+@check(code="LI004", validate=_require_database_or_schema_pattern)
+def check_lineage_permitted_upstream_sources(
+    model,
+    ctx,
+    *,
+    database_pattern: RegexPattern | None = None,
+    schema_pattern: RegexPattern | None = None,
+):
+    """Upstream sources must resolve to a database and/or schema that matches the provided patterns.
+
+    !!! info "Rationale"
+
+        In a multi-project (dbt mesh) setup, one project often reads the output of another project through sources. Each layer must only read from the layers of other projects that it is permitted to use, e.g. a marts model must only read from the marts layer of an upstream domain. The source path cannot express this, but the resolved database and schema of the source can.
+
+    Parameters:
+        database_pattern (str | None): Regexp pattern to match the resolved database of the upstream source(s).
+        schema_pattern (str | None): Regexp pattern to match the resolved schema of the upstream source(s).
+
+    Receives:
+        model (ModelNode): The ModelNode object to check.
+        sources (list[SourceNode]): List of SourceNode objects parsed from `manifest.json`.
+
+    Other Parameters:
+        description (str | None): Description of what the check does and why it is implemented.
+        exclude (str | list[str] | None): Regex pattern(s) to match the model path. Model paths that match any pattern will not be checked.
+        include (str | list[str] | None): Regex pattern(s) to match the model path. Only model paths that match any pattern will be checked.
+        severity (Literal["error", "warn"] | None): Severity level of the check. Default: `error`.
+
+    !!! note
+
+        At least one of `database_pattern` or `schema_pattern` must be supplied. If both are supplied, an upstream source must match both. A source with no database (e.g. on adapters without a database concept) does not match `database_pattern`.
+
+    Example(s):
+        ```yaml
+        manifest_checks:
+            - name: check_lineage_permitted_upstream_sources
+              include: ^models/marts|^models/consumption
+              database_pattern: ^dmn
+              schema_pattern: ^domain__
+        ```
+
+    """
+    # In a live runner `ctx.sources` holds wrapped objects, so prefer the
+    # unwrapped lookup. The unit-test harness only fills `ctx.sources`.
+    sources_by_id = (
+        ctx.sources_by_unique_id
+        if ctx.sources_by_unique_id
+        else {s.unique_id: s for s in ctx.sources}
+    )
+    # Map each supplied pattern to the SourceNode field it applies to.
+    patterns = {
+        field_name: compile_pattern(pattern.strip())
+        for field_name, pattern in (
+            ("database", database_pattern),
+            ("schema_", schema_pattern),
+        )
+        if pattern is not None
+    }
+    not_permitted_upstream_sources = []
+    for upstream_id in getattr(model.depends_on, "nodes", []) or []:
+        source = sources_by_id.get(upstream_id)
+        if source is None:
+            continue
+        if any(
+            compiled.match(getattr(source, field_name, None) or "") is None
+            for field_name, compiled in patterns.items()
+        ):
+            not_permitted_upstream_sources.append(
+                f"{source.source_name}.{source.name} ({source.database}.{source.schema_})"
+            )
+    if not_permitted_upstream_sources:
+        fail(
+            f"`{get_clean_model_name(model.unique_id)}` references upstream sources that are not permitted: {not_permitted_upstream_sources}."
         )
 
 

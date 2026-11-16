@@ -103,6 +103,9 @@ manifest_checks:
   - name: check_lineage_permitted_upstream_models
     include: ^models/marts
     upstream_path_pattern: ^models/staging|^models/intermediate
+  - name: check_lineage_permitted_upstream_sources
+    include: ^models/staging
+    database_pattern: ^dbt$
   - name: check_lineage_seed_cannot_be_used
     include: ^models/intermediate|^models/marts
   - name: check_lineage_source_cannot_be_used
