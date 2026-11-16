@@ -74,8 +74,10 @@ def validate(
         issues = lint_config_file_deep(config_path)
 
     if not issues:
+        # `soft_wrap` stops Rich from splitting a long path across lines.
         console.print(
-            f"[bold green]Configuration file is valid![/bold green] ✅ ({config_path})"
+            f"[bold green]Configuration file is valid![/bold green] ✅ ({config_path})",
+            soft_wrap=True,
         )
         raise typer.Exit(ExitCode.SUCCESS)
     else:
