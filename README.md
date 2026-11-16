@@ -71,7 +71,7 @@
 | src/dbt\_bouncer/cli/studio/\_\_init\_\_.py                 |       31 |        0 |       10 |        0 |     100% |           |
 | src/dbt\_bouncer/cli/studio/utils.py                        |      143 |        0 |       68 |        0 |     100% |           |
 | src/dbt\_bouncer/cli/utils.py                               |        5 |        0 |        0 |        0 |     100% |           |
-| src/dbt\_bouncer/cli/validate/\_\_init\_\_.py               |       28 |        0 |        8 |        0 |     100% |           |
+| src/dbt\_bouncer/cli/validate/\_\_init\_\_.py               |       32 |        0 |        8 |        0 |     100% |           |
 | src/dbt\_bouncer/configuration\_file/\_\_init\_\_.py        |        0 |        0 |        0 |        0 |     100% |           |
 | src/dbt\_bouncer/configuration\_file/parser.py              |       57 |        0 |       10 |        0 |     100% |           |
 | src/dbt\_bouncer/configuration\_file/validator.py           |      462 |        0 |      186 |        0 |     100% |           |
@@ -94,7 +94,7 @@
 | src/dbt\_bouncer/types.py                                   |       19 |        0 |        4 |        0 |     100% |           |
 | src/dbt\_bouncer/utils.py                                   |      392 |        0 |      152 |        0 |     100% |           |
 | src/dbt\_bouncer/version.py                                 |        2 |        0 |        0 |        0 |     100% |           |
-| **TOTAL**                                                   | **5259** |    **0** | **1776** |    **0** | **100%** |           |
+| **TOTAL**                                                   | **5263** |    **0** | **1776** |    **0** | **100%** |           |
 
 
 ## Setup coverage badge
