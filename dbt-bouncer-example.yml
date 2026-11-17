@@ -105,7 +105,7 @@ manifest_checks:
     upstream_path_pattern: ^models/staging|^models/intermediate
   - name: check_lineage_permitted_upstream_sources
     include: ^models/staging
-    database_pattern: ^dbt$
+    schema_pattern: ^main$ # The database name differs between the local DuckDB build and dbt Cloud
   - name: check_lineage_seed_cannot_be_used
     include: ^models/intermediate|^models/marts
   - name: check_lineage_source_cannot_be_used
