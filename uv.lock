@@ -424,7 +424,7 @@ requires-dist = [
     { name = "altair", marker = "extra == 'dev'", specifier = ">=6.0,<7" },
     { name = "bandit", marker = "extra == 'dev'", specifier = "~=1.0" },
     { name = "dbt", marker = "extra == 'dev'", specifier = ">=2,<2.1" },
-    { name = "duckdb", specifier = ">=1.4,<2" },
+    { name = "duckdb", specifier = ">=1.4,<3" },
     { name = "hypothesis", marker = "extra == 'dev'", specifier = ">=6,<7" },
     { name = "jellyfish", specifier = ">=1,<2" },
     { name = "jinja2", specifier = ">=3,<4" },
