@@ -3,7 +3,7 @@ name = "dbt-bouncer"
 version = "0.0.0"
 description = "Configure and enforce conventions for your dbt project."
 readme = "README.md"
-requires-python = ">=3.11,<3.15"
+requires-python = ">=3.11,<3.16"
 license = "MIT"
 authors = [{ name = "Padraic Slattery", email = "pgoslatara@gmail.com" }]
 maintainers = [{ name = "Padraic Slattery", email = "pgoslatara@gmail.com" }]
@@ -21,6 +21,7 @@ classifiers = [
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: 3.14",
+  "Programming Language :: Python :: 3.15",
 ]
 dependencies = [
   # Reads the dbt 2.0 Information Schema (Parquet) for `info_schema_checks`. Imported lazily.
