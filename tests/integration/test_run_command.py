@@ -70,7 +70,7 @@ def test_run_writes_coverage_file(
     with coverage_file.open("r", encoding="utf-8") as f:
         coverage = json.load(f)
     assert len(coverage) > 1
-    assert f"Saving coverage file to `{coverage_file}`".replace(
+    assert f"Saving results file to `{coverage_file}`".replace(
         "\\", "/"
     ) in caplog.text.replace("\\", "/")
     assert result.exit_code == 1

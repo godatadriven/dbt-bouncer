@@ -4,11 +4,51 @@ import csv
 import hashlib
 import io
 from functools import lru_cache
+from pathlib import Path
 from typing import Any
 
 import orjson
 
-from dbt_bouncer.enums import CheckOutcome, CheckSeverity
+from dbt_bouncer.enums import CheckOutcome, CheckSeverity, OutputFormat
+
+_COMPOUND_EXTENSION_TO_FORMAT: dict[tuple[str, str], OutputFormat] = {
+    (".sarif", ".json"): OutputFormat.SARIF,
+}
+
+_EXTENSION_TO_FORMAT: dict[str, OutputFormat] = {
+    ".csv": OutputFormat.CSV,
+    ".json": OutputFormat.JSON,
+    ".junit": OutputFormat.JUNIT,
+    ".sarif": OutputFormat.SARIF,
+    ".tap": OutputFormat.TAP,
+    ".xml": OutputFormat.JUNIT,
+}
+
+
+def infer_output_format(output_file: Path) -> OutputFormat:
+    """Infer an output format from ``output_file``'s extension, defaulting to JSON.
+
+    Recognises ``.csv``, ``.json``, ``.junit``, ``.sarif``, ``.sarif.json``,
+    ``.tap``, and ``.xml`` (case-insensitively). Any other or missing extension
+    falls back to ``OutputFormat.JSON``.
+
+    Args:
+        output_file: Path to the output file.
+
+    Returns:
+        OutputFormat: The inferred format, or ``OutputFormat.JSON``.
+
+    """
+    suffixes = [s.lower() for s in output_file.suffixes]
+    if len(suffixes) >= 2:
+        compound = _COMPOUND_EXTENSION_TO_FORMAT.get((suffixes[-2], suffixes[-1]))
+        if compound is not None:
+            return compound
+    if suffixes:
+        inferred = _EXTENSION_TO_FORMAT.get(suffixes[-1])
+        if inferred is not None:
+            return inferred
+    return OutputFormat.JSON
 
 
 def _format_results(results: list[dict[str, Any]], output_format: str) -> bytes:

@@ -191,9 +191,9 @@ def test_report_results_output_only_failures_includes_internal_errors(tmp_path):
     assert saved[0]["outcome"] == "internal_error"
 
 
-def test_report_results_saves_coverage_file(tmp_path):
-    """Output file is written when configured."""
-    output_file = tmp_path / "coverage.json"
+def test_report_results_saves_results_file(caplog, tmp_path):
+    """Output file is written when configured, logging it as a results file."""
+    output_file = tmp_path / "results.json"
     results = [
         {
             "check_run_id": "check_model_access:0:model.my_model",
@@ -208,9 +208,50 @@ def test_report_results_saves_coverage_file(tmp_path):
         output_file=output_file,
         output_format="json",
     )
-    reporter.report_results(results)
+    with caplog.at_level("INFO"):
+        reporter.report_results(results)
 
     assert output_file.exists()
+    assert f"Saving results file to `{output_file}` (format: json)." in caplog.text
+    assert "coverage file" not in caplog.text
+
+
+def test_report_results_infers_format_from_extension(tmp_path):
+    """Omitting `output_format` infers the format from `output_file`'s extension."""
+    output_file = tmp_path / "results.sarif"
+    results = [
+        {
+            "check_run_id": "check_model_access:0:model.my_model",
+            "failure_message": None,
+            "outcome": CheckOutcome.SUCCESS,
+            "severity": CheckSeverity.ERROR,
+        },
+    ]
+    reporter = Reporter(output_file=output_file)
+    reporter.report_results(results)
+
+    saved = orjson.loads(output_file.read_bytes())
+    assert saved["version"] == "2.1.0"
+    assert saved["runs"][0]["tool"]["driver"]["name"] == "dbt-bouncer"
+
+
+def test_report_results_explicit_format_overrides_extension(tmp_path):
+    """An explicit `output_format` wins over `output_file`'s extension."""
+    output_file = tmp_path / "results.sarif"
+    results = [
+        {
+            "check_run_id": "check_model_access:0:model.my_model",
+            "failure_message": None,
+            "outcome": CheckOutcome.SUCCESS,
+            "severity": CheckSeverity.ERROR,
+        },
+    ]
+    reporter = Reporter(output_file=output_file, output_format="json")
+    reporter.report_results(results)
+
+    saved = orjson.loads(output_file.read_bytes())
+    assert isinstance(saved, list)
+    assert saved[0]["check_run_id"] == "check_model_access:0:model.my_model"
 
 
 def test_report_results_escapes_rich_markup_in_console(capsys, monkeypatch):

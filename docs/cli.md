@@ -232,25 +232,21 @@ dbt-bouncer run --output-file results/check-results.json
 
 **Type:** Choice
 **Options:** `csv`, `gitlab`, `json`, `junit`, `sarif`, `tap`
-**Default:** `json`
+**Default:** Inferred from `--output-file` extension (`.csv`, `.json`, `.junit`, `.sarif`, `.sarif.json`, `.tap`, `.xml`), otherwise `json`
 **Required:** No
 **Environment variable:** `DBT_BOUNCER_OUTPUT_FORMAT`
 
-Specifies the format for the output file. Requires `--output-file` to be set.
+Specifies the format for the output file. Requires `--output-file` to be set; passing `--output-format` without `--output-file` logs a warning and writes no file. When omitted, the format is inferred from the `--output-file` extension (falling back to `json`). Passing `--output-format` explicitly overrides the inferred format (needed for formats like `gitlab` that use a `.json` file).
 
 **Examples:**
 
 ```bash
-# Output as JSON (default)
-dbt-bouncer run --output-format json
+# Format inferred from the file extension (JSON, JUnit XML, SARIF, CSV, TAP)
+dbt-bouncer run --output-file results.json
+dbt-bouncer run --output-file results.xml
+dbt-bouncer run --output-file results.sarif
 
-# Output as JUnit XML for CI integration
-dbt-bouncer run --output-format junit --output-file results.xml
-
-# Output as SARIF for GitHub Code Scanning
-dbt-bouncer run --output-format sarif --output-file results.sarif
-
-# Output as a GitLab Code Quality report
+# Output as a GitLab Code Quality report (explicit format required)
 dbt-bouncer run --output-format gitlab --output-file code-quality.json
 ```
 

@@ -16,6 +16,7 @@ from dbt_bouncer.enums import (
     PresetName,
 )
 from dbt_bouncer.exceptions import DbtBouncerConfigError
+from dbt_bouncer.reporting.formatters import infer_output_format
 from dbt_bouncer.reporting.logger import configure_console_logging
 from dbt_bouncer.version import version as get_version
 
@@ -352,6 +353,44 @@ def _artifacts_dir(
     )
 
 
+def _resolve_output_format(
+    output_file: Path | None,
+    output_format: OutputFormat | str | None,
+    *,
+    warn_without_file: bool = True,
+) -> str:
+    """Resolve the output format from an explicit value or ``output_file``'s extension.
+
+    When ``output_format`` is omitted, infer the format from ``output_file``'s
+    extension (falling back to ``json``). When ``output_format`` is given
+    without ``output_file``, log a warning because no file will be written.
+
+    Args:
+        output_file: Path to the output file, or ``None``.
+        output_format: Explicit output format, or ``None`` to infer.
+        warn_without_file: Whether to warn when ``output_format`` is given
+            without ``output_file``.
+
+    Returns:
+        str: The normalised output format string (e.g. ``"json"``, ``"sarif"``).
+
+    """
+    if output_format is not None:
+        normalized = (
+            output_format.value
+            if isinstance(output_format, OutputFormat)
+            else OutputFormat(output_format.lower()).value
+        )
+        if output_file is None and warn_without_file:
+            logging.warning(
+                f"`--output-format {normalized}` was provided without `--output-file`, so no output file will be written. Pass `--output-file` to save results."
+            )
+        return normalized
+    if output_file is not None:
+        return infer_output_format(output_file).value
+    return OutputFormat.JSON.value
+
+
 def _context_from_config(
     bouncer_config: DbtBouncerConfBase,
     check_categories: list[str],
@@ -361,7 +400,7 @@ def _context_from_config(
     create_pr_comment_file: bool = False,
     dry_run: bool = False,
     output_file: Path | None = None,
-    output_format: OutputFormat = OutputFormat.JSON,
+    output_format: OutputFormat | str | None = None,
     output_only_failures: bool = False,
     show_all_failures: bool = False,
     dbt_artifacts_dir: Path | None = None,
@@ -372,10 +411,8 @@ def _context_from_config(
         BouncerContext: Ready-to-run context.
 
     """
-    normalized_output_format = (
-        output_format.value
-        if isinstance(output_format, OutputFormat)
-        else OutputFormat(output_format.lower()).value
+    normalized_output_format = _resolve_output_format(
+        output_file, output_format, warn_without_file=False
     )
     return _build_context(
         allow_zero_checks=allow_zero_checks,
@@ -479,7 +516,7 @@ def run_bouncer(
     dry_run: bool = False,
     only: str = "",
     output_file: Path | None = None,
-    output_format: OutputFormat = OutputFormat.JSON,
+    output_format: OutputFormat | str | None = None,
     output_only_failures: bool = False,
     preset: PresetName | None = None,
     show_all_failures: bool = False,
@@ -499,7 +536,7 @@ def run_bouncer(
         dry_run: If True, print which checks would run without executing them.
         only: Limit the checks run to specific categories.
         output_file: Location of the file where check metadata will be saved.
-        output_format: Format for the output file, requires output_file (csv, gitlab, json, junit, sarif, tap).
+        output_format: Format for the output file, requires output_file (csv, gitlab, json, junit, sarif, tap). Inferred from output_file extension when omitted, defaulting to json.
         output_only_failures: Only failures will be included in the output file.
         preset: Use a bundled preset config (minimal, standard, strict) instead of a config file. Ignored when an explicit `--config-file` is provided.
         show_all_failures: All failures will be printed to the console.
@@ -523,6 +560,8 @@ def run_bouncer(
     configure_console_logging(verbosity)
     logging.info(f"Running dbt-bouncer ({get_version()})...")
 
+    resolved_output_format = _resolve_output_format(output_file, output_format)
+
     only_parsed = _parse_only(only)
     check_names = _parse_check_names(check)
 
@@ -545,7 +584,7 @@ def run_bouncer(
         create_pr_comment_file=create_pr_comment_file,
         dry_run=dry_run,
         output_file=output_file,
-        output_format=output_format,
+        output_format=resolved_output_format,
         output_only_failures=output_only_failures,
         show_all_failures=show_all_failures,
     )

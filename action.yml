@@ -34,8 +34,8 @@ inputs:
     description: 'Name of the file where check metadata will be saved.'
     required: false
   output-format:
-    default: 'json'
-    description: 'Format for the output file (requires output-file). One of: csv, gitlab, json, junit, sarif, tap. Defaults to json.'
+    default: ''
+    description: 'Format for the output file (requires output-file). One of: csv, gitlab, json, junit, sarif, tap. Inferred from output-file extension when omitted, defaulting to json.'
     required: false
   output-only-failures:
     default: 'false'
@@ -128,7 +128,7 @@ runs:
         [[ "$INPUT_DRY_RUN" != "false" ]] && args+=(--dry-run)
         [[ -n "$INPUT_ONLY" ]] && args+=(--only "$INPUT_ONLY")
         [[ -n "$INPUT_OUTPUT_FILE" ]] && args+=(--output-file "/app/$INPUT_OUTPUT_FILE")
-        [[ "$INPUT_OUTPUT_FORMAT" != "json" ]] && args+=(--output-format "$INPUT_OUTPUT_FORMAT")
+        [[ -n "$INPUT_OUTPUT_FORMAT" ]] && args+=(--output-format "$INPUT_OUTPUT_FORMAT")
         [[ "$INPUT_OUTPUT_ONLY_FAILURES" != "false" ]] && args+=(--output-only-failures)
         [[ "$INPUT_SHOW_ALL_FAILURES" != "false" ]] && args+=(--show-all-failures)
         [[ -n "$INPUT_STATE" ]] && args+=(--state "/app/$INPUT_STATE")
