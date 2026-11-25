@@ -5,10 +5,13 @@ from pathlib import Path
 import yaml
 
 from dbt_bouncer.cli.init.utils import (
+    YAML_SCHEMA_MODELINE,
     InitConfig,
     build_initial_config,
     write_config_file,
+    write_preset_config_file,
 )
+from dbt_bouncer.enums import PresetName
 
 
 class TestBuildInitialConfig:
@@ -175,3 +178,38 @@ class TestWriteConfigFile:
         content = path.read_text()
         assert "new" in content
         assert "old" not in content
+
+    def test_emits_yaml_schema_modeline(self, tmp_path, monkeypatch):
+        """write_config_file starts with the yaml-language-server schema modeline."""
+        monkeypatch.chdir(tmp_path)
+
+        path = write_config_file({"dbt_artifacts_dir": "target", "manifest_checks": []})
+
+        assert path.read_text().splitlines()[0] == YAML_SCHEMA_MODELINE
+
+    def test_writes_to_custom_output_file_and_creates_parents(self, tmp_path):
+        """write_config_file respects output_file and creates missing parent directories."""
+        custom_path = tmp_path / "nested" / "dir" / "dbt-bouncer.yaml"
+
+        result = write_config_file(
+            {"dbt_artifacts_dir": "target", "manifest_checks": []},
+            output_file=custom_path,
+        )
+
+        assert result == custom_path
+        assert custom_path.exists()
+        assert custom_path.read_text().splitlines()[0] == YAML_SCHEMA_MODELINE
+
+
+class TestWritePresetConfigFile:
+    """Tests for write_preset_config_file."""
+
+    def test_writes_to_custom_output_file_and_creates_parents(self, tmp_path):
+        """write_preset_config_file respects output_file and creates missing parent directories."""
+        custom_path = tmp_path / "configs" / "dbt-bouncer.yaml"
+
+        result = write_preset_config_file(PresetName.MINIMAL, output_file=custom_path)
+
+        assert result == custom_path
+        assert custom_path.exists()
+        assert custom_path.read_text().splitlines()[0] == YAML_SCHEMA_MODELINE

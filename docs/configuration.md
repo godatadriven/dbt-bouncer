@@ -65,6 +65,8 @@ For more example config files, see [here](https://github.com/godatadriven/dbt-bo
 
 A [JSON Schema](https://json-schema.org/) is published for the `dbt-bouncer` config file format. When configured, your editor can provide autocomplete for check names and parameters, inline validation of typos and incorrect types, and hover documentation for each field.
 
+Files created with `dbt-bouncer init` (both interactively and with `--preset`) automatically include a `# yaml-language-server: $schema=...` header on line 1, giving zero-config autocomplete in VS Code (with the Red Hat YAML extension), Neovim, and JetBrains IDEs. If you write a config file by hand, you can add that comment or configure your editor as below.
+
 ### VS Code
 
 Install the [YAML extension](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml) by Red Hat, then add the following to your VS Code settings (`.vscode/settings.json`):

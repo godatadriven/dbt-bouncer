@@ -1,5 +1,6 @@
 from typer.testing import CliRunner
 
+from dbt_bouncer.cli.init.utils import YAML_SCHEMA_MODELINE
 from dbt_bouncer.main import app
 
 
@@ -13,7 +14,11 @@ def test_init_command_creates_file(tmp_path, monkeypatch):
     assert result.exit_code == 0
     config_file = tmp_path / "dbt-bouncer.yml"
     assert config_file.exists()
-    assert "dbt_artifacts_dir: target" in config_file.read_text()
+    content = config_file.read_text()
+    assert content.splitlines()[0] == YAML_SCHEMA_MODELINE
+    assert "dbt_artifacts_dir: target" in content
+    assert "dbt-bouncer validate" in result.stdout
+    assert "--config-file" not in result.stdout
 
 
 def test_init_command_fails_if_file_exists(tmp_path, monkeypatch):
@@ -72,3 +77,36 @@ def test_init_command_warns_when_no_checks_selected(tmp_path, monkeypatch):
     assert result.exit_code == 0
     assert "No checks selected" in result.stdout
     assert (tmp_path / "dbt-bouncer.yml").exists()
+
+
+def test_init_command_custom_output_file(tmp_path, monkeypatch):
+    """--output-file writes to a custom path, creates parent dirs, and updates the validate hint."""
+    monkeypatch.chdir(tmp_path)
+    runner = CliRunner()
+    custom_path = tmp_path / "config" / "dbt-bouncer.yaml"
+
+    result = runner.invoke(
+        app, ["init", "--output-file", str(custom_path)], input="\n\n\n\n"
+    )
+
+    assert result.exit_code == 0, result.stdout
+    assert custom_path.exists()
+    assert custom_path.read_text().splitlines()[0] == YAML_SCHEMA_MODELINE
+    assert not (tmp_path / "dbt-bouncer.yml").exists()
+    assert f"dbt-bouncer validate --config-file {custom_path}" in result.stdout
+
+
+def test_init_command_force_overwrites_without_prompt(tmp_path, monkeypatch):
+    """--force and -y overwrite an existing file without asking for confirmation."""
+    monkeypatch.chdir(tmp_path)
+    config_file = tmp_path / "dbt-bouncer.yml"
+    runner = CliRunner()
+
+    for flag in ("--force", "-y"):
+        config_file.write_text("old content")
+        # Only the 4 interactive prompts; no overwrite confirmation input
+        result = runner.invoke(app, ["init", flag], input="\n\n\n\n")
+
+        assert result.exit_code == 0, result.stdout
+        assert "old content" not in config_file.read_text()
+        assert config_file.read_text().splitlines()[0] == YAML_SCHEMA_MODELINE

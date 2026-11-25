@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/godatadriven/dbt-bouncer/main/schema.json
 # dbt-bouncer "minimal" preset.
 #
 # A small, high-signal starting point. Every check here works without
