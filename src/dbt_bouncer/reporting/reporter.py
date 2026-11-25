@@ -14,8 +14,8 @@ from rich.markup import escape
 from rich.panel import Panel
 from rich.table import Table
 
-from dbt_bouncer.enums import CheckOutcome, CheckSeverity, OutputFormat
-from dbt_bouncer.reporting.formatters import _format_results, infer_output_format
+from dbt_bouncer.enums import CheckOutcome, CheckSeverity
+from dbt_bouncer.reporting.formatters import _format_results
 from dbt_bouncer.utils import create_github_comment_file
 
 if TYPE_CHECKING:
@@ -57,7 +57,7 @@ class Reporter:
         show_all_failures: bool = False,
         create_pr_comment_file: bool = False,
         output_file: Path | None = None,
-        output_format: str | None = None,
+        output_format: str = "json",
         output_only_failures: bool = False,
     ) -> None:
         """Initialize the Reporter.
@@ -66,23 +66,14 @@ class Reporter:
             show_all_failures: Whether to display all failures (not just first 25).
             create_pr_comment_file: Whether to create a GitHub PR comment file.
             output_file: Path to save structured check results.
-            output_format: Output format for the results file (inferred from
-                `output_file` extension when omitted, defaulting to `json`).
+            output_format: Output format for the results file.
             output_only_failures: Whether to save only failed checks to the output file.
 
         """
         self.show_all_failures = show_all_failures
         self.create_pr_comment_file = create_pr_comment_file
         self.output_file = output_file
-        self.output_format = (
-            output_format
-            if output_format is not None
-            else (
-                infer_output_format(output_file).value
-                if output_file is not None
-                else OutputFormat.JSON.value
-            )
-        )
+        self.output_format = output_format
         self.output_only_failures = output_only_failures
 
     def report_dry_run(

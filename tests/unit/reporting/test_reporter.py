@@ -216,27 +216,8 @@ def test_report_results_saves_results_file(caplog, tmp_path):
     assert "coverage file" not in caplog.text
 
 
-def test_report_results_infers_format_from_extension(tmp_path):
-    """Omitting `output_format` infers the format from `output_file`'s extension."""
-    output_file = tmp_path / "results.sarif"
-    results = [
-        {
-            "check_run_id": "check_model_access:0:model.my_model",
-            "failure_message": None,
-            "outcome": CheckOutcome.SUCCESS,
-            "severity": CheckSeverity.ERROR,
-        },
-    ]
-    reporter = Reporter(output_file=output_file)
-    reporter.report_results(results)
-
-    saved = orjson.loads(output_file.read_bytes())
-    assert saved["version"] == "2.1.0"
-    assert saved["runs"][0]["tool"]["driver"]["name"] == "dbt-bouncer"
-
-
-def test_report_results_explicit_format_overrides_extension(tmp_path):
-    """An explicit `output_format` wins over `output_file`'s extension."""
+def test_report_results_uses_given_format_not_extension(tmp_path):
+    """`Reporter` writes the given format; extension inference happens in `run_bouncer`."""
     output_file = tmp_path / "results.sarif"
     results = [
         {

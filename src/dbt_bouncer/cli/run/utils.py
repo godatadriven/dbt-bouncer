@@ -353,11 +353,23 @@ def _artifacts_dir(
     )
 
 
+def _normalize_output_format(output_format: OutputFormat | str) -> str:
+    """Normalise an output format enum or case-insensitive string to its value.
+
+    Returns:
+        str: The output format value (e.g. ``"json"``, ``"sarif"``).
+
+    """
+    return (
+        output_format.value
+        if isinstance(output_format, OutputFormat)
+        else OutputFormat(output_format.lower()).value
+    )
+
+
 def _resolve_output_format(
     output_file: Path | None,
     output_format: OutputFormat | str | None,
-    *,
-    warn_without_file: bool = True,
 ) -> str:
     """Resolve the output format from an explicit value or ``output_file``'s extension.
 
@@ -368,20 +380,14 @@ def _resolve_output_format(
     Args:
         output_file: Path to the output file, or ``None``.
         output_format: Explicit output format, or ``None`` to infer.
-        warn_without_file: Whether to warn when ``output_format`` is given
-            without ``output_file``.
 
     Returns:
         str: The normalised output format string (e.g. ``"json"``, ``"sarif"``).
 
     """
     if output_format is not None:
-        normalized = (
-            output_format.value
-            if isinstance(output_format, OutputFormat)
-            else OutputFormat(output_format.lower()).value
-        )
-        if output_file is None and warn_without_file:
+        normalized = _normalize_output_format(output_format)
+        if output_file is None:
             logging.warning(
                 f"`--output-format {normalized}` was provided without `--output-file`, so no output file will be written. Pass `--output-file` to save results."
             )
@@ -400,7 +406,7 @@ def _context_from_config(
     create_pr_comment_file: bool = False,
     dry_run: bool = False,
     output_file: Path | None = None,
-    output_format: OutputFormat | str | None = None,
+    output_format: OutputFormat | str = OutputFormat.JSON,
     output_only_failures: bool = False,
     show_all_failures: bool = False,
     dbt_artifacts_dir: Path | None = None,
@@ -411,9 +417,8 @@ def _context_from_config(
         BouncerContext: Ready-to-run context.
 
     """
-    normalized_output_format = _resolve_output_format(
-        output_file, output_format, warn_without_file=False
-    )
+    # Callers pass an already-resolved format; `run_bouncer` owns inference.
+    normalized_output_format = _normalize_output_format(output_format)
     return _build_context(
         allow_zero_checks=allow_zero_checks,
         bouncer_config=bouncer_config,
