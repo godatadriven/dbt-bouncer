@@ -6,6 +6,7 @@ import pytest
 from typer.testing import CliRunner
 
 from dbt_bouncer import presets
+from dbt_bouncer.cli.init.utils import YAML_SCHEMA_MODELINE
 from dbt_bouncer.cli.run.utils import _resolve_config_contents
 from dbt_bouncer.enums import ConfigFileSource, PresetName
 from dbt_bouncer.exceptions import DbtBouncerConfigError
@@ -31,9 +32,11 @@ def test_load_preset_contents_has_checks(preset):
 
 @pytest.mark.parametrize("preset", PRESET_NAMES)
 def test_read_preset_text_preserves_comments(preset):
-    """The raw preset text keeps the header comments for scaffolding."""
+    """The raw preset text keeps the schema modeline and header comments for scaffolding."""
     text = read_preset_text(preset)
-    assert text.startswith(f'# dbt-bouncer "{preset}" preset.')
+    lines = text.splitlines()
+    assert lines[0] == YAML_SCHEMA_MODELINE
+    assert lines[1] == f'# dbt-bouncer "{preset}" preset.'
 
 
 @pytest.mark.parametrize("preset", PRESET_NAMES)
@@ -99,3 +102,32 @@ def test_init_preset_declines_overwrite(tmp_path, monkeypatch):
 
     assert result.exit_code == 1
     assert "old content" in config_file.read_text()
+
+
+def test_init_preset_force_overwrites_without_prompt(tmp_path, monkeypatch):
+    """`init --preset --force` / `-y` overwrites an existing file non-interactively."""
+    monkeypatch.chdir(tmp_path)
+    config_file = tmp_path / "dbt-bouncer.yml"
+
+    for flag in ("--force", "-y"):
+        config_file.write_text("old content")
+        result = CliRunner().invoke(app, ["init", "--preset", "minimal", flag])
+
+        assert result.exit_code == 0, result.output
+        assert config_file.read_text() == read_preset_text("minimal")
+
+
+def test_init_preset_custom_output_file(tmp_path, monkeypatch):
+    """`init --preset --output-file` writes to a custom path and updates the validate hint."""
+    monkeypatch.chdir(tmp_path)
+    custom_file = tmp_path / "configs" / "dbt-bouncer.yaml"
+
+    result = CliRunner().invoke(
+        app, ["init", "--preset", "standard", "--output-file", str(custom_file)]
+    )
+
+    assert result.exit_code == 0, result.output
+    assert custom_file.exists()
+    assert custom_file.read_text() == read_preset_text("standard")
+    assert not (tmp_path / "dbt-bouncer.yml").exists()
+    assert f"dbt-bouncer validate --config-file {custom_file}" in result.output

@@ -473,11 +473,44 @@ It asks a series of questions and writes a starter configuration file based on y
 - Whether to check that all models have a unique test
 - Whether to enforce naming conventions for staging models
 
-If a `dbt-bouncer.yml` file already exists, you will be prompted before it is overwritten.
+Generated files include a `# yaml-language-server: $schema=...` header at the top so editors with YAML schema support provide autocomplete and validation out of the box.
 
-### `--preset`
+If the target file already exists, you will be prompted before it is overwritten unless `--force` / `-y` is passed.
 
-Instead of the interactive questions, `init --preset <name>` writes a bundled preset to `dbt-bouncer.yml` non-interactively. The comments in the preset are kept, so you get an editable, documented starting point.
+### Options
+
+#### `--force`, `-y`
+
+**Type:** Flag
+**Default:** False
+**Required:** No
+
+Overwrite an existing config file without prompting. Useful for non-interactive scripts.
+
+```bash
+dbt-bouncer init --preset standard --force
+```
+
+#### `--output-file`
+
+**Type:** Path
+**Default:** `dbt-bouncer.yml`
+**Required:** No
+
+Path where the generated configuration file should be written. Parent directories are created automatically if needed.
+
+```bash
+dbt-bouncer init --preset standard --output-file config/dbt-bouncer.yaml
+```
+
+#### `--preset`
+
+**Type:** Choice
+**Options:** `minimal`, `standard`, `strict`
+**Default:** None
+**Required:** No
+
+Instead of the interactive questions, `init --preset <name>` writes a bundled preset to the config file non-interactively. The comments and schema header in the preset are kept, so you get an editable, documented starting point.
 
 ```bash
 dbt-bouncer init --preset standard

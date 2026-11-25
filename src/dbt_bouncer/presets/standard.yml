@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/godatadriven/dbt-bouncer/main/schema.json
 # dbt-bouncer "standard" preset.
 #
 # A balanced set of documentation, testing, and source-hygiene checks for a
