@@ -1573,22 +1573,18 @@
 <h4 id="-output-format"><code>--output-format</code><a class="headerlink" href="#-output-format" title="Permanent link">#</a></h4>
 <p><strong>Type:</strong> Choice
 <strong>Options:</strong> <code>csv</code>, <code>gitlab</code>, <code>json</code>, <code>junit</code>, <code>sarif</code>, <code>tap</code>
-<strong>Default:</strong> <code>json</code>
+<strong>Default:</strong> Inferred from <code>--output-file</code> extension (<code>.csv</code>, <code>.json</code>, <code>.junit</code>, <code>.sarif</code>, <code>.sarif.json</code>, <code>.tap</code>, <code>.xml</code>), otherwise <code>json</code>
 <strong>Required:</strong> No
 <strong>Environment variable:</strong> <code>DBT_BOUNCER_OUTPUT_FORMAT</code></p>
-<p>Specifies the format for the output file. Requires <code>--output-file</code> to be set.</p>
+<p>Specifies the format for the output file. Requires <code>--output-file</code> to be set; passing <code>--output-format</code> without <code>--output-file</code> logs a warning and writes no file. When omitted, the format is inferred from the <code>--output-file</code> extension (falling back to <code>json</code>). Passing <code>--output-format</code> explicitly overrides the inferred format (needed for formats like <code>gitlab</code> that use a <code>.json</code> file).</p>
 <p><strong>Examples:</strong></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="c1"># Output as JSON (default)</span>
-</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>dbt-bouncer<span class="w"> </span>run<span class="w"> </span>--output-format<span class="w"> </span>json
-</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>
-</span><span id="__span-13-4"><a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="c1"># Output as JUnit XML for CI integration</span>
-</span><span id="__span-13-5"><a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>dbt-bouncer<span class="w"> </span>run<span class="w"> </span>--output-format<span class="w"> </span>junit<span class="w"> </span>--output-file<span class="w"> </span>results.xml
-</span><span id="__span-13-6"><a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>
-</span><span id="__span-13-7"><a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a><span class="c1"># Output as SARIF for GitHub Code Scanning</span>
-</span><span id="__span-13-8"><a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a>dbt-bouncer<span class="w"> </span>run<span class="w"> </span>--output-format<span class="w"> </span>sarif<span class="w"> </span>--output-file<span class="w"> </span>results.sarif
-</span><span id="__span-13-9"><a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a>
-</span><span id="__span-13-10"><a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a><span class="c1"># Output as a GitLab Code Quality report</span>
-</span><span id="__span-13-11"><a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a>dbt-bouncer<span class="w"> </span>run<span class="w"> </span>--output-format<span class="w"> </span>gitlab<span class="w"> </span>--output-file<span class="w"> </span>code-quality.json
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="c1"># Format inferred from the file extension (JSON, JUnit XML, SARIF, CSV, TAP)</span>
+</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>dbt-bouncer<span class="w"> </span>run<span class="w"> </span>--output-file<span class="w"> </span>results.json
+</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>dbt-bouncer<span class="w"> </span>run<span class="w"> </span>--output-file<span class="w"> </span>results.xml
+</span><span id="__span-13-4"><a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>dbt-bouncer<span class="w"> </span>run<span class="w"> </span>--output-file<span class="w"> </span>results.sarif
+</span><span id="__span-13-5"><a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>
+</span><span id="__span-13-6"><a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="c1"># Output as a GitLab Code Quality report (explicit format required)</span>
+</span><span id="__span-13-7"><a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>dbt-bouncer<span class="w"> </span>run<span class="w"> </span>--output-format<span class="w"> </span>gitlab<span class="w"> </span>--output-file<span class="w"> </span>code-quality.json
 </span></code></pre></div>
 <p>The <code>gitlab</code> format writes a <a href="https://docs.gitlab.com/ci/testing/code_quality/">Code Quality report</a>. The report includes only checks that did not pass. Upload it as a <code>codequality</code> report artifact to see the findings in the merge request:</p>
 <div class="language-yaml highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="nt">dbt-bouncer</span><span class="p">:</span>
