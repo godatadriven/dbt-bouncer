@@ -65,8 +65,8 @@ class Reporter:
         Args:
             show_all_failures: Whether to display all failures (not just first 25).
             create_pr_comment_file: Whether to create a GitHub PR comment file.
-            output_file: Path to save structured output (JSON/SARIF).
-            output_format: Output format for the coverage file.
+            output_file: Path to save structured check results.
+            output_format: Output format for the results file.
             output_only_failures: Whether to save only failed checks to the output file.
 
         """
@@ -297,10 +297,12 @@ class Reporter:
         )
 
         if self.output_file is not None:
-            coverage_file = Path().cwd() / self.output_file
-            logging.info(f"Saving coverage file to `{coverage_file}`.")
-            coverage_file.parent.mkdir(parents=True, exist_ok=True)
-            coverage_file.write_bytes(
+            output_file = Path().cwd() / self.output_file
+            logging.info(
+                f"Saving results file to `{output_file}` (format: {self.output_format})."
+            )
+            output_file.parent.mkdir(parents=True, exist_ok=True)
+            output_file.write_bytes(
                 _format_results(results_to_save, self.output_format)
             )
 

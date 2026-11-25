@@ -11,9 +11,10 @@ from typer.testing import CliRunner
 from dbt_bouncer.cli.run.utils import (
     _build_context,
     _pr_comment_key,
+    _resolve_output_format,
     detect_config_file_source,
 )
-from dbt_bouncer.enums import ConfigFileName, ConfigFileSource, ExitCode
+from dbt_bouncer.enums import ConfigFileName, ConfigFileSource, ExitCode, OutputFormat
 from dbt_bouncer.main import app
 from dbt_bouncer.regression import build_baseline
 
@@ -301,3 +302,45 @@ class TestPrCommentKey:
         monkeypatch.chdir(work_dir)
 
         assert _pr_comment_key(tmp_path / "presets" / "strict.yml") == "strict.yml"
+
+
+class TestResolveOutputFormat:
+    """Tests for `_resolve_output_format`."""
+
+    def test_neither_file_nor_format_defaults_to_json_without_warning(self, caplog):
+        """Omitting both options defaults to json without logging a warning."""
+        with caplog.at_level("WARNING"):
+            assert _resolve_output_format(None, None) == "json"
+        assert caplog.records == []
+
+    def test_infers_format_from_file_extension(self, caplog):
+        """Omitting `output_format` infers the format from `output_file`."""
+        with caplog.at_level("WARNING"):
+            assert _resolve_output_format(Path("results.sarif"), None) == "sarif"
+            assert _resolve_output_format(Path("results.xml"), None) == "junit"
+            assert _resolve_output_format(Path("results.out"), None) == "json"
+        assert caplog.records == []
+
+    def test_explicit_format_overrides_extension(self, caplog):
+        """An explicit `output_format` overrides the extension."""
+        with caplog.at_level("WARNING"):
+            assert (
+                _resolve_output_format(Path("results.sarif"), OutputFormat.JSON)
+                == "json"
+            )
+            assert _resolve_output_format(Path("results.json"), "SARIF") == "sarif"
+        assert caplog.records == []
+
+    def test_format_without_file_warns(self, caplog):
+        """Setting `output_format` without `output_file` logs a warning."""
+        with caplog.at_level("WARNING"):
+            assert _resolve_output_format(None, OutputFormat.SARIF) == "sarif"
+        assert (
+            "`--output-format sarif` was provided without `--output-file`"
+            in caplog.text
+        )
+
+    def test_invalid_format_raises_value_error(self):
+        """An unrecognised string format raises ValueError."""
+        with pytest.raises(ValueError, match="not-a-format"):
+            _resolve_output_format(Path("results.json"), "not-a-format")

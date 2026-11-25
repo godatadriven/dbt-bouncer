@@ -258,3 +258,115 @@ def test_warn_severity_is_carried_into_junit_and_sarif(
     assert failure.get("type") == "warn"
     (entry,) = json.loads(sarif_file.read_text(encoding="utf-8"))["runs"][0]["results"]
     assert entry["level"] == "warning"
+
+
+@pytest.mark.parametrize(
+    ("file_name", "expected_format"),
+    [
+        ("results.csv", OutputFormat.CSV),
+        ("results.json", OutputFormat.JSON),
+        ("results.junit", OutputFormat.JUNIT),
+        ("results.xml", OutputFormat.JUNIT),
+        ("results.sarif", OutputFormat.SARIF),
+        ("results.sarif.json", OutputFormat.SARIF),
+        ("results.tap", OutputFormat.TAP),
+        ("results.out", OutputFormat.JSON),
+    ],
+)
+def test_output_format_inferred_from_output_file_extension(
+    cli_runner, expected_format, file_name, tmp_path, write_checks_config
+):
+    """`--output-file` without `--output-format` infers the format from the extension."""
+    config_file = write_checks_config([_PASSING_CHECK, _FAILING_CHECK])
+    output_file = tmp_path / file_name
+
+    result = cli_runner.invoke(
+        app,
+        [
+            "run",
+            "--config-file",
+            PurePath(config_file).as_posix(),
+            "--output-file",
+            str(output_file),
+        ],
+    )
+
+    assert result.exit_code == ExitCode.CHECK_ERRORS, result.output
+    parsed = _PARSERS[expected_format](output_file.read_text(encoding="utf-8"))
+    assert parsed == _expected(expected_format, passing=True)
+
+
+def test_explicit_output_format_overrides_extension(
+    cli_runner, tmp_path, write_checks_config
+):
+    """Explicit `--output-format` takes precedence over the `--output-file` extension."""
+    config_file = write_checks_config([_PASSING_CHECK, _FAILING_CHECK])
+    output_file = tmp_path / "results.sarif"
+
+    result = _run(cli_runner, config_file, output_file, OutputFormat.JSON)
+
+    assert result.exit_code == ExitCode.CHECK_ERRORS, result.output
+    assert _parse_json(output_file.read_text(encoding="utf-8")) == _expected(
+        OutputFormat.JSON, passing=True
+    )
+
+
+@pytest.mark.parametrize(
+    ("argv_prefix", "fmt"),
+    [
+        (["run"], "sarif"),
+        (["run"], "json"),
+        ([], "sarif"),
+    ],
+    ids=["run-sarif", "run-json", "legacy-sarif"],
+)
+def test_output_format_without_output_file_warns(
+    argv_prefix, caplog, cli_runner, fmt, write_checks_config
+):
+    """Passing `--output-format` without `--output-file` logs a warning."""
+    config_file = write_checks_config([_PASSING_CHECK])
+
+    result = cli_runner.invoke(
+        app,
+        [
+            *argv_prefix,
+            "--config-file",
+            PurePath(config_file).as_posix(),
+            "--output-format",
+            fmt,
+        ],
+    )
+
+    assert result.exit_code == ExitCode.SUCCESS, result.output
+    assert (
+        f"`--output-format {fmt}` was provided without `--output-file`" in caplog.text
+    )
+
+
+def test_output_format_env_var_without_output_file_warns(
+    caplog, cli_runner, write_checks_config
+):
+    """Setting `DBT_BOUNCER_OUTPUT_FORMAT` without `--output-file` logs a warning."""
+    config_file = write_checks_config([_PASSING_CHECK])
+
+    result = cli_runner.invoke(
+        app,
+        ["run", "--config-file", PurePath(config_file).as_posix()],
+        env={"DBT_BOUNCER_OUTPUT_FORMAT": "sarif"},
+    )
+
+    assert result.exit_code == ExitCode.SUCCESS, result.output
+    assert "`--output-format sarif` was provided without `--output-file`" in caplog.text
+
+
+def test_no_output_options_does_not_warn(caplog, cli_runner, write_checks_config):
+    """Omitting both `--output-file` and `--output-format` emits no output warning."""
+    config_file = write_checks_config([_PASSING_CHECK])
+
+    result = cli_runner.invoke(
+        app,
+        ["run", "--config-file", PurePath(config_file).as_posix()],
+    )
+
+    assert result.exit_code == ExitCode.SUCCESS, result.output
+    assert "--output-format" not in caplog.text

@@ -135,13 +135,13 @@ def main_callback(
         ),
     ] = None,
     output_format: Annotated[
-        OutputFormat,
+        OutputFormat | None,
         typer.Option(
             case_sensitive=False,
             envvar="DBT_BOUNCER_OUTPUT_FORMAT",
-            help="Format for the output file (requires --output-file). Choices: csv, gitlab, json, junit, sarif, tap. Defaults to json.",
+            help="Format for the output file (requires --output-file). Choices: csv, gitlab, json, junit, sarif, tap. Inferred from --output-file extension when omitted, defaulting to json.",
         ),
-    ] = OutputFormat.JSON,
+    ] = None,
     output_only_failures: Annotated[
         bool,
         typer.Option(

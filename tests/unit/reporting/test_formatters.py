@@ -2,6 +2,7 @@
 
 import csv
 import io
+from pathlib import Path
 
 import orjson
 import pytest
@@ -9,7 +10,7 @@ from hypothesis import given, settings
 from hypothesis import strategies as st
 from junitparser import JUnitXml
 
-from dbt_bouncer.enums import CheckOutcome, CheckSeverity
+from dbt_bouncer.enums import CheckOutcome, CheckSeverity, OutputFormat
 from dbt_bouncer.reporting.formatters import (
     _format_csv,
     _format_gitlab,
@@ -17,6 +18,7 @@ from dbt_bouncer.reporting.formatters import (
     _format_results,
     _format_sarif,
     _format_tap,
+    infer_output_format,
 )
 
 
@@ -37,6 +39,31 @@ def test_format_results_rejects_unknown_output_format():
     """An unrecognised output format raises a ValueError naming the format."""
     with pytest.raises(ValueError, match="Unknown output format: yaml"):
         _format_results([_failed_result()], "yaml")
+
+
+@pytest.mark.parametrize(
+    ("file_name", "expected"),
+    [
+        ("results.csv", OutputFormat.CSV),
+        ("results.CSV", OutputFormat.CSV),
+        ("results.json", OutputFormat.JSON),
+        ("results.junit", OutputFormat.JUNIT),
+        ("results.xml", OutputFormat.JUNIT),
+        ("results.XML", OutputFormat.JUNIT),
+        ("results.junit.xml", OutputFormat.JUNIT),
+        ("results.sarif", OutputFormat.SARIF),
+        ("results.SARIF", OutputFormat.SARIF),
+        ("results.sarif.json", OutputFormat.SARIF),
+        ("results.SARIF.JSON", OutputFormat.SARIF),
+        ("results.tap", OutputFormat.TAP),
+        ("results.out", OutputFormat.JSON),
+        ("results", OutputFormat.JSON),
+        ("dir.sarif/results.json", OutputFormat.JSON),
+    ],
+)
+def test_infer_output_format(file_name, expected):
+    """Output format is inferred from the file extension, defaulting to JSON."""
+    assert infer_output_format(Path(file_name)) is expected
 
 
 def test_sarif_includes_location_and_logical_location():

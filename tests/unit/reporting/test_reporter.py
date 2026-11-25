@@ -191,9 +191,9 @@ def test_report_results_output_only_failures_includes_internal_errors(tmp_path):
     assert saved[0]["outcome"] == "internal_error"
 
 
-def test_report_results_saves_coverage_file(tmp_path):
-    """Output file is written when configured."""
-    output_file = tmp_path / "coverage.json"
+def test_report_results_saves_results_file(caplog, tmp_path):
+    """Output file is written when configured, logging it as a results file."""
+    output_file = tmp_path / "results.json"
     results = [
         {
             "check_run_id": "check_model_access:0:model.my_model",
@@ -208,9 +208,31 @@ def test_report_results_saves_coverage_file(tmp_path):
         output_file=output_file,
         output_format="json",
     )
-    reporter.report_results(results)
+    with caplog.at_level("INFO"):
+        reporter.report_results(results)
 
     assert output_file.exists()
+    assert f"Saving results file to `{output_file}` (format: json)." in caplog.text
+    assert "coverage file" not in caplog.text
+
+
+def test_report_results_uses_given_format_not_extension(tmp_path):
+    """`Reporter` writes the given format; extension inference happens in `run_bouncer`."""
+    output_file = tmp_path / "results.sarif"
+    results = [
+        {
+            "check_run_id": "check_model_access:0:model.my_model",
+            "failure_message": None,
+            "outcome": CheckOutcome.SUCCESS,
+            "severity": CheckSeverity.ERROR,
+        },
+    ]
+    reporter = Reporter(output_file=output_file, output_format="json")
+    reporter.report_results(results)
+
+    saved = orjson.loads(output_file.read_bytes())
+    assert isinstance(saved, list)
+    assert saved[0]["check_run_id"] == "check_model_access:0:model.my_model"
 
 
 def test_report_results_escapes_rich_markup_in_console(capsys, monkeypatch):
