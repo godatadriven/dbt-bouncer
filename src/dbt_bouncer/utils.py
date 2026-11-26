@@ -1,5 +1,7 @@
 """Re-usable functions for dbt-bouncer."""
 
+from __future__ import annotations
+
 import contextlib
 import hashlib
 import importlib
@@ -20,12 +22,12 @@ from typing import TYPE_CHECKING, Any
 
 from dbt_bouncer.enums import CheckCategory, Criteria
 from dbt_bouncer.exceptions import DbtBouncerConfigError
-from dbt_bouncer.types import MetaConfig, MissingMetaKeys, RequiredMetaKey
 
 if TYPE_CHECKING:
     from semver import Version
 
     from dbt_bouncer.check_framework.base import BaseCheck
+    from dbt_bouncer.types import MetaConfig, MissingMetaKeys, RequiredMetaKey
 
 
 def clean_path_str(path: str) -> str:
@@ -132,7 +134,7 @@ def require_exactly_one_of_type_pattern_or_types(
         raise ValueError("Only one of 'type_pattern' or 'types' can be supplied.")
 
 
-def resource_in_path(check: "BaseCheck", resource: Any) -> bool:
+def resource_in_path(check: BaseCheck, resource: Any) -> bool:
     """Validate that a check is applicable to a specific resource path.
 
     Returns:
@@ -295,7 +297,7 @@ def _reject_class_based_check(cls: type, source: str) -> None:
 def _extract_checks_from_module(
     module: Any,
     module_name: str,
-    check_objects: list[type["BaseCheck"]],
+    check_objects: list[type[BaseCheck]],
     *,
     materialise: bool = True,
 ) -> None:
@@ -333,7 +335,7 @@ def _extract_checks_from_module(
 
 
 def _load_custom_checks(
-    custom_checks_dir: Path, check_objects: list[type["BaseCheck"]]
+    custom_checks_dir: Path, check_objects: list[type[BaseCheck]]
 ) -> None:
     """Load custom check classes from a directory.
 
@@ -436,7 +438,7 @@ def _check_entry_point_names() -> tuple[str, ...]:
     return tuple(sorted(ep.name for ep in _check_entry_points()))
 
 
-def _load_entry_point_checks(check_objects: list[type["BaseCheck"]]) -> None:
+def _load_entry_point_checks(check_objects: list[type[BaseCheck]]) -> None:
     """Load check classes from installed packages via entry points.
 
     Scans the ``dbt_bouncer.checks`` entry point group. Each entry point
@@ -567,7 +569,7 @@ def _build_check_module_map() -> dict[str, dict[str, str]]:
     return mapping
 
 
-def _hash_py_tree(h: "hashlib._Hash", root: Path) -> None:
+def _hash_py_tree(h: hashlib._Hash, root: Path) -> None:
     """Update ``h`` with relative paths and mtimes of all ``.py`` files under ``root``.
 
     Args:
@@ -728,8 +730,11 @@ def _get_check_module_map_cached(
 
     try:
         cache_dir.mkdir(parents=True, exist_ok=True)
-        cache_file.write_bytes(orjson.dumps(mapping))
-        _prune_stale_cache_files(cache_dir, keep=cache_file)
+        tmp_file = cache_dir / f".{cache_file.name}.{os.getpid()}.tmp"
+        tmp_file.write_bytes(orjson.dumps(mapping))
+        tmp_file.replace(cache_file)
+        if custom_checks_dir is None:
+            _prune_stale_cache_files(cache_dir, keep=cache_file)
     except OSError:
         pass  # Can't write cache (e.g. read-only filesystem), continue without it
 
@@ -787,7 +792,7 @@ def prune_expired_conf_cache_files(cache_dir: Path, keep: Path) -> None:
 def get_check_objects_for_names(
     check_names: frozenset[str],
     custom_checks_dir: Path | None = None,
-) -> list[type["BaseCheck"]]:
+) -> list[type[BaseCheck]]:
     """Get check classes for a specific set of check names.
 
     Uses a disk-cached name-to-module mapping to import only the modules that
@@ -818,7 +823,7 @@ def get_check_objects_for_names(
 
     # Import only the needed modules
     needed_modules: set[str] = {module_map[n]["module"] for n in check_names}
-    check_objects: list[type["BaseCheck"]] = []
+    check_objects: list[type[BaseCheck]] = []
 
     from dbt_bouncer.check_framework.decorator import (
         build_only,
@@ -847,7 +852,7 @@ def get_check_objects_for_names(
 
     # Deduplicate
     seen: set[type] = set()
-    unique: list[type["BaseCheck"]] = []
+    unique: list[type[BaseCheck]] = []
     for cls in check_objects:
         if cls not in seen:
             seen.add(cls)
@@ -863,7 +868,7 @@ def get_check_objects_for_names(
 def get_check_objects(
     custom_checks_dir: Path | None = None,
     check_categories: frozenset[str] | None = None,
-) -> list[type["BaseCheck"]]:
+) -> list[type[BaseCheck]]:
     """Get list of Check* classes.
 
     This function dynamically discovers and loads check classes from three
@@ -897,7 +902,7 @@ def get_check_objects(
         list[type[BaseCheck]]: List of Check* classes.
 
     """
-    check_objects: list[type["BaseCheck"]] = []
+    check_objects: list[type[BaseCheck]] = []
 
     # 1. Load internal checks
     checks_dir = Path(__file__).parent / "checks"
@@ -937,7 +942,7 @@ def get_check_objects(
 
     # Deduplicate (same class could be found via internal scan + entry points)
     seen: set[type] = set()
-    unique_checks: list[type["BaseCheck"]] = []
+    unique_checks: list[type[BaseCheck]] = []
     for cls in check_objects:
         if cls not in seen:
             seen.add(cls)
@@ -952,7 +957,7 @@ def get_check_objects(
 @lru_cache
 def get_check_registry(
     custom_checks_dir: Path | None = None,
-) -> dict[str, type["BaseCheck"]]:
+) -> dict[str, type[BaseCheck]]:
     """Return a registry mapping check names to their classes.
 
     The name used as key is the ``name`` Literal field value on each check class
@@ -966,7 +971,7 @@ def get_check_registry(
         dict[str, type[BaseCheck]]: Mapping of check name → class.
 
     """
-    registry: dict[str, type["BaseCheck"]] = {}
+    registry: dict[str, type[BaseCheck]] = {}
     for cls in get_check_objects(custom_checks_dir):
         # Each check class has a `name: Literal["check_..."]` field annotation.
         # Pydantic stores the Literal type in the annotation; extract the value
@@ -980,6 +985,39 @@ def get_check_registry(
         if code_val is not None:
             registry[code_val] = cls
     return registry
+
+
+def lookup_check_class(
+    check: str,
+    custom_checks_dir: Path | None = None,
+) -> type[BaseCheck] | None:
+    """Resolve a single check by name or rule code without loading all checks.
+
+    Uses the disk-cached check module map to import only the single module
+    owning ``check``. Falls back to the full registry when ``check`` is not in
+    the built-in map (e.g. custom checks, third-party entry points, or typos).
+
+    Args:
+        check: Check name (e.g. ``"check_model_names"``) or rule code
+            (e.g. ``"MO038"``).
+        custom_checks_dir: Optional directory containing custom checks.
+
+    Returns:
+        type[BaseCheck] | None: The matching check class, or ``None`` if unknown.
+
+    """
+    module_map = _get_check_module_map_cached(custom_checks_dir)
+    if check in module_map:
+        for cls in get_check_objects_for_names(
+            frozenset({check}), custom_checks_dir=custom_checks_dir
+        ):
+            name_field = cls.model_fields.get("name")
+            name_args = typing.get_args(name_field.annotation) if name_field else ()
+            if (name_args and name_args[0] == check) or getattr(
+                cls, "code", None
+            ) == check:
+                return cls
+    return get_check_registry(custom_checks_dir).get(check)
 
 
 def get_clean_model_name(unique_id: str) -> str:
@@ -1013,7 +1051,7 @@ def get_model_for_catalog_node(
 
 
 @lru_cache
-def get_package_version_number(version_string: str) -> "Version":
+def get_package_version_number(version_string: str) -> Version:
     """Dbt Cloud no longer uses version numbers that comply with semantic versioning, e.g. "2024.11.06+2a3d725".
     This function is used to convert the version number to a version object that can be used to compare versions.
 

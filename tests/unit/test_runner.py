@@ -1727,13 +1727,19 @@ def test_runner_accept_suppresses_known_failures():
 
 def test_get_resource_meta_falls_back_to_top_level_meta():
     """Resources without `config.meta` fall back to their top-level `meta`."""
-    from dbt_bouncer.runner import _get_resource_meta
+    from dbt_bouncer.runner import _get_resource_meta, _run_id_suffix
 
     model_wrapper = SimpleNamespace(model=SimpleNamespace(meta={"owner": "a"}))
+    dict_model_wrapper = SimpleNamespace(model={"meta": {"owner": "c"}})
     exposure = SimpleNamespace(meta={"owner": "b"})
 
     assert _get_resource_meta(model_wrapper, "model", {}) == {"owner": "a"}
+    assert _get_resource_meta(dict_model_wrapper, "model", {}) == {"owner": "c"}
     assert _get_resource_meta(exposure, "exposure", {}) == {"owner": "b"}
+
+    # Wrapper without top-level unique_id falls back to the inner node's unique_id.
+    no_top_uid = SimpleNamespace(model={"unique_id": "model.pkg.my_model"})
+    assert _run_id_suffix(no_top_uid, "model") == "my_model"
 
 
 def test_build_meta_by_unique_id_handles_unusual_nodes():
@@ -1744,6 +1750,7 @@ def test_build_meta_by_unique_id_handles_unusual_nodes():
         {
             "models": [
                 SimpleNamespace(model=None),
+                SimpleNamespace(model={"name": "dict_without_unique_id"}),
                 SimpleNamespace(model=SimpleNamespace(name="no_unique_id")),
                 SimpleNamespace(
                     model=SimpleNamespace(unique_id="model.p.m", meta={"owner": "a"})
@@ -1766,5 +1773,7 @@ def test_check_matcher_reuses_resolved_selector():
     )
 
     first = matcher._selector_for("tag:nightly")
+    second = matcher._selector_for("tag:daily")
 
     assert matcher._selector_for("tag:nightly") is first
+    assert second is not first

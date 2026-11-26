@@ -1160,3 +1160,36 @@ def test_get_cache_dir_honours_env_var(monkeypatch, tmp_path):
 
     monkeypatch.delenv("DBT_BOUNCER_CACHE_DIR")
     assert get_cache_dir() == Path.home() / ".cache" / "dbt-bouncer"
+
+
+def test_get_nested_value():
+    """get_nested_value traverses nested dicts and returns default on missing/non-dict steps."""
+    from dbt_bouncer.utils import get_nested_value
+
+    data = {"a": {"b": {"c": 42}}, "scalar": "not-a-dict"}
+    assert get_nested_value(data, ["a", "b", "c"]) == 42
+    assert get_nested_value(data, ["a", "missing", "c"], "fallback") == "fallback"
+    assert get_nested_value(data, ["scalar", "child"], "fallback") == "fallback"
+    assert get_nested_value(data, ["a", "b", "missing"], None) is None
+
+
+def test_lookup_check_class_falls_back_on_stale_module_map(monkeypatch):
+    """If the cached module map points to a module lacking the check, fall back to the registry."""
+    import dbt_bouncer.utils as utils_mod
+
+    monkeypatch.setattr(
+        utils_mod,
+        "_get_check_module_map_cached",
+        lambda _dir=None: {
+            "check_stale_entry": {
+                "module": "dbt_bouncer.checks.manifest.models.naming",
+                "category": "manifest_checks",
+            }
+        },
+    )
+    monkeypatch.setattr(
+        utils_mod,
+        "get_check_objects_for_names",
+        lambda *_args, **_kwargs: [],
+    )
+    assert utils_mod.lookup_check_class("check_stale_entry") is None

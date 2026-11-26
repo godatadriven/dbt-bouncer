@@ -7,7 +7,6 @@ from typing import Annotated
 import typer
 
 from dbt_bouncer.cli import app
-from dbt_bouncer.cli.run.utils import detect_config_file_source, run_bouncer
 from dbt_bouncer.enums import ConfigFileName, ExitCode, OutputFormat, PresetName
 from dbt_bouncer.exceptions import DbtBouncerArtifactError, DbtBouncerConfigError
 
@@ -155,6 +154,8 @@ def run(
             file is missing/invalid, or a required dbt artifact is missing/unsupported.
 
     """
+    from dbt_bouncer.cli.run.utils import detect_config_file_source, run_bouncer
+
     config_file_source = detect_config_file_source(config_file)
 
     try:

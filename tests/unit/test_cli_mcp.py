@@ -1,6 +1,8 @@
 """Unit tests for dbt_bouncer.cli.mcp."""
 
 import asyncio
+import os
+import shutil
 import sys
 from pathlib import Path
 from types import ModuleType, SimpleNamespace
@@ -13,6 +15,14 @@ from dbt_bouncer.enums import ExitCode
 from dbt_bouncer.main import app
 
 runner = CliRunner()
+
+
+@pytest.fixture(autouse=True)
+def _reset_mcp_artifact_cache():
+    """Keep the in-memory MCP artifact cache isolated per test."""
+    mcp_server.clear_artifact_cache()
+    yield
+    mcp_server.clear_artifact_cache()
 
 
 class TestListChecksTool:
@@ -119,99 +129,269 @@ class TestReadProjectConfigTool:
         assert payload["config"]["custom_checks_dir"] == "custom_checks"
 
 
+def _write_test_project_config(
+    tmp_path: Path,
+    artifacts_dir: Path,
+    body: str,
+    filename: str = "dbt-bouncer.yml",
+) -> Path:
+    cfg = tmp_path / filename
+    cfg.write_text(f"dbt_artifacts_dir: {artifacts_dir.as_posix()}\n{body}")
+    return cfg
+
+
 class TestRunChecksTool:
-    """Tests for the run_checks tool payload."""
+    """Tests for the in-process cached run_checks tool payload."""
 
-    def test_executable_missing(self, monkeypatch):
-        """A missing dbt-bouncer executable returns an error payload."""
-        monkeypatch.setattr(mcp_server.shutil, "which", lambda _: None)
+    def test_passing_run_and_stdout_isolation(self, tmp_path, capsys):
+        """A clean in-process run passes and writes nothing to real stdout."""
+        artifacts_dir = Path("dbt_project/target").resolve()
+        cfg = _write_test_project_config(
+            tmp_path,
+            artifacts_dir,
+            "manifest_checks:\n  - name: check_model_description_populated\n",
+        )
 
-        payload = mcp_server.run_checks()
+        payload = mcp_server.run_checks(config_file=str(cfg))
 
-        assert "error" in payload
+        captured = capsys.readouterr()
+        assert captured.out == ""
+        assert payload["exit_code"] == 0
+        assert payload["passed"] is True
+        assert payload["failures"] == []
+        assert payload["console_output_tail"] != ""
 
-    def test_dash_prefixed_argument_rejected(self, monkeypatch):
-        """A value starting with '-' is rejected before the subprocess runs."""
-        monkeypatch.setattr(mcp_server.shutil, "which", lambda _: "/usr/bin/fake")
+    def test_failing_run_with_filters(self, tmp_path):
+        """Failing checks surface in `failures` and honour `only` and `check`."""
+        artifacts_dir = Path("dbt_project/target").resolve()
+        cfg = _write_test_project_config(
+            tmp_path,
+            artifacts_dir,
+            (
+                "catalog_checks:\n"
+                "  - name: check_column_names\n"
+                "    column_name_pattern: '^[a-z_0-9]*$'\n"
+                "manifest_checks:\n"
+                "  - name: check_model_names\n"
+                "    model_name_pattern: '^never_matches_anything$'\n"
+                "  - name: check_model_description_populated\n"
+            ),
+        )
 
-        def fail_if_called(*_args, **_kwargs):  # pragma: no cover - must not run
-            raise AssertionError("subprocess.run must not be reached")
+        payload = mcp_server.run_checks(
+            config_file=str(cfg),
+            only="manifest_checks",
+            check="check_model_names",
+        )
 
-        monkeypatch.setattr(mcp_server.subprocess, "run", fail_if_called)
+        assert payload["exit_code"] == int(ExitCode.CHECK_ERRORS)
+        assert payload["passed"] is False
+        assert len(payload["failures"]) > 0
+        assert all(
+            f["check_run_id"].startswith("check_model_names:")
+            for f in payload["failures"]
+        )
 
-        payload = mcp_server.run_checks(config_file="--output-file")
-
-        assert "config_file" in payload["error"]
-
-    def test_timeout_returns_error_payload(self, monkeypatch):
-        """A hung subprocess surfaces as an error payload, not an exception."""
-
-        def fake_run(cmd, **_kwargs):
-            raise mcp_server.subprocess.TimeoutExpired(cmd=cmd, timeout=120)
-
-        monkeypatch.setattr(mcp_server.shutil, "which", lambda _: "/usr/bin/fake")
-        monkeypatch.setattr(mcp_server.subprocess, "run", fake_run)
-
-        payload = mcp_server.run_checks()
-
-        assert "did not finish" in payload["error"]
-
-    def test_passing_run(self, monkeypatch):
-        """A clean run maps to passed=True with no failures."""
-
-        def fake_run(cmd, **_kwargs):
-            output_file = Path(cmd[cmd.index("--output-file") + 1])
-            output_file.write_text("[]")
-            return SimpleNamespace(returncode=0, stdout="Done. SUCCESS=5\n", stderr="")
-
-        monkeypatch.setattr(mcp_server.shutil, "which", lambda _: "/usr/bin/fake")
-        monkeypatch.setattr(mcp_server.subprocess, "run", fake_run)
+    def test_default_config_resolution(self, tmp_path, monkeypatch):
+        """Omitting config_file resolves dbt-bouncer.yml in the working directory."""
+        artifacts_dir = Path("dbt_project/target").resolve()
+        _write_test_project_config(
+            tmp_path,
+            artifacts_dir,
+            "manifest_checks:\n  - name: check_model_description_populated\n",
+        )
+        monkeypatch.chdir(tmp_path)
 
         payload = mcp_server.run_checks()
 
         assert payload["exit_code"] == 0
         assert payload["passed"] is True
+
+    def test_config_error_returns_config_error_exit_code(self, tmp_path):
+        """A missing config file maps to CONFIG_ERROR without raising."""
+        payload = mcp_server.run_checks(config_file=str(tmp_path / "missing.yml"))
+
+        assert payload["exit_code"] == int(ExitCode.CONFIG_ERROR)
+        assert payload["passed"] is False
         assert payload["failures"] == []
+        assert "not found" in payload["console_output_tail"]
 
-    def test_subprocess_invocation(self, monkeypatch):
-        """The subprocess result and output file map into the payload."""
-
-        def fake_run(cmd, **_kwargs):
-            output_file = Path(cmd[cmd.index("--output-file") + 1])
-            output_file.write_text('[{"check_run_id": "check_x:0:model_1"}]')
-            assert "--config-file" in cmd
-            assert "--only" in cmd
-            assert "--check" in cmd
-            return SimpleNamespace(returncode=1, stdout="Done. ERROR=1\n", stderr="")
-
-        monkeypatch.setattr(mcp_server.shutil, "which", lambda _: "/usr/bin/fake")
-        monkeypatch.setattr(mcp_server.subprocess, "run", fake_run)
-
-        payload = mcp_server.run_checks(
-            config_file="dbt-bouncer.yml",
-            only="manifest_checks",
-            check="check_x",
+    def test_artifact_error_returns_artifact_error_exit_code(self, tmp_path):
+        """Missing artifacts map to ARTIFACT_ERROR without raising."""
+        empty_target = tmp_path / "empty_target"
+        empty_target.mkdir()
+        cfg = _write_test_project_config(
+            tmp_path,
+            empty_target,
+            "manifest_checks:\n  - name: check_model_description_populated\n",
         )
 
-        assert payload["exit_code"] == 1
+        payload = mcp_server.run_checks(config_file=str(cfg))
+
+        assert payload["exit_code"] == int(ExitCode.ARTIFACT_ERROR)
         assert payload["passed"] is False
-        assert payload["failures"] == [{"check_run_id": "check_x:0:model_1"}]
-        assert "ERROR=1" in payload["console_output_tail"]
-
-    def test_missing_output_file(self, monkeypatch):
-        """A run that writes no output file reports no failures."""
-
-        def fake_run(_cmd, **_kwargs):
-            return SimpleNamespace(returncode=2, stdout="", stderr="Config error\n")
-
-        monkeypatch.setattr(mcp_server.shutil, "which", lambda _: "/usr/bin/fake")
-        monkeypatch.setattr(mcp_server.subprocess, "run", fake_run)
-
-        payload = mcp_server.run_checks()
-
-        assert payload["exit_code"] == 2
         assert payload["failures"] == []
-        assert payload["console_output_tail"] == "Config error"
+        assert "manifest.json" in payload["console_output_tail"]
+
+    def test_caches_parsed_artifacts_and_invalidates_on_mtime_change(
+        self, tmp_path, monkeypatch
+    ):
+        """Repeated calls reuse parsed artifacts until an artifact file changes."""
+        import dbt_bouncer.artifact_parsers.parser as parser_mod
+
+        target = tmp_path / "target"
+        target.mkdir()
+        shutil.copy(Path("dbt_project/target/manifest.json"), target / "manifest.json")
+        shutil.copy(Path("dbt_project/target/catalog.json"), target / "catalog.json")
+        shutil.copy(
+            Path("dbt_project/target/run_results.json"), target / "run_results.json"
+        )
+        shutil.copytree(Path("dbt_project/target/info_schema"), target / "info_schema")
+
+        cfg = _write_test_project_config(
+            tmp_path,
+            target,
+            (
+                "catalog_checks:\n"
+                "  - name: check_column_names\n"
+                "    column_name_pattern: '^[a-z_0-9]*$'\n"
+                "info_schema_checks:\n"
+                "  - name: check_info_schema_query\n"
+                "    sql: 'SELECT 1 WHERE 1 = 0'\n"
+                "manifest_checks:\n"
+                "  - name: check_model_description_populated\n"
+                "run_results_checks:\n"
+                "  - name: check_run_results_max_execution_time\n"
+                "    max_execution_time_seconds: 60\n"
+            ),
+        )
+
+        parse_calls = 0
+        real_parse = parser_mod.parse_dbt_artifacts
+
+        def counting_parse(*args, **kwargs):
+            nonlocal parse_calls
+            parse_calls += 1
+            return real_parse(*args, **kwargs)
+
+        monkeypatch.setattr(parser_mod, "parse_dbt_artifacts", counting_parse)
+
+        # First call parses all configured artifacts.
+        first = mcp_server.run_checks(config_file=str(cfg))
+        assert first["passed"] is True
+        assert parse_calls == 1
+
+        # Second identical call hits the in-memory cache.
+        second = mcp_server.run_checks(config_file=str(cfg))
+        assert second["passed"] is True
+        assert parse_calls == 1
+
+        # Subset category call still hits the cache.
+        subset = mcp_server.run_checks(config_file=str(cfg), only="manifest_checks")
+        assert subset["passed"] is True
+        assert parse_calls == 1
+
+        # Bumping manifest.json mtime invalidates the cache.
+        manifest_path = target / "manifest.json"
+        st = manifest_path.stat()
+        os.utime(manifest_path, ns=(st.st_atime_ns, st.st_mtime_ns + 1_000_000))
+
+        third = mcp_server.run_checks(config_file=str(cfg))
+        assert third["passed"] is True
+        assert parse_calls == 2
+
+    def test_cache_upgrades_and_evicts_oldest_entry(self, tmp_path, monkeypatch):
+        """Requesting new artifact types upgrades the entry; exceeding max size evicts oldest."""
+        import dbt_bouncer.artifact_parsers.parser as parser_mod
+
+        real_parse = parser_mod.parse_dbt_artifacts
+        parse_calls = 0
+
+        def counting_parse(*args, **kwargs):
+            nonlocal parse_calls
+            parse_calls += 1
+            return real_parse(*args, **kwargs)
+
+        monkeypatch.setattr(parser_mod, "parse_dbt_artifacts", counting_parse)
+
+        # Create 2 distinct targets and lower the cache cap to 1 to test eviction.
+        monkeypatch.setattr(mcp_server, "_MAX_ARTIFACT_CACHE_ENTRIES", 1)
+        t1 = tmp_path / "t1"
+        t2 = tmp_path / "t2"
+        for t in (t1, t2):
+            t.mkdir()
+            shutil.copy(Path("dbt_project/target/manifest.json"), t / "manifest.json")
+            shutil.copy(Path("dbt_project/target/catalog.json"), t / "catalog.json")
+
+        cfg1_manifest = _write_test_project_config(
+            tmp_path,
+            t1,
+            "manifest_checks:\n  - name: check_model_description_populated\n",
+            filename="c1_m.yml",
+        )
+        cfg1_catalog = _write_test_project_config(
+            tmp_path,
+            t1,
+            (
+                "catalog_checks:\n"
+                "  - name: check_column_names\n"
+                "    column_name_pattern: '^[a-z_0-9]*$'\n"
+            ),
+            filename="c1_c.yml",
+        )
+        cfg2_manifest = _write_test_project_config(
+            tmp_path,
+            t2,
+            "manifest_checks:\n  - name: check_model_description_populated\n",
+            filename="c2_m.yml",
+        )
+
+        # Populate cache with t1 (manifest only).
+        assert mcp_server.run_checks(config_file=str(cfg1_manifest))["passed"] is True
+        assert parse_calls == 1
+
+        # Same dir, now needing catalog -> upgrades entry in-place without evicting.
+        assert mcp_server.run_checks(config_file=str(cfg1_catalog))["passed"] is True
+        assert parse_calls == 2
+
+        # Different dir exceeds cap=1 -> evicts t1 and caches t2.
+        assert mcp_server.run_checks(config_file=str(cfg2_manifest))["passed"] is True
+        assert parse_calls == 3
+        assert len(mcp_server._ARTIFACT_CACHE) == 1
+
+    def test_info_schema_signature_missing_dir_and_unreadable_file(
+        self, tmp_path, monkeypatch
+    ):
+        """Missing info_schema directory returns None; unstat-able parquet files are skipped."""
+        assert mcp_server._info_schema_signature(tmp_path) is None
+
+        schema_dir = tmp_path / "info_schema" / "v1"
+        schema_dir.mkdir(parents=True)
+        (schema_dir / "dbt.project.parquet").write_bytes(b"")
+        monkeypatch.setattr(mcp_server, "_file_signature", lambda _p: None)
+        assert mcp_server._info_schema_signature(tmp_path) == ()
+
+    def test_get_or_parse_artifacts_skips_caching_when_manifest_missing_stat(
+        self, tmp_path, monkeypatch
+    ):
+        """If manifest cannot be statted before parse, the result is returned without caching."""
+        import dbt_bouncer.artifact_parsers.parser as parser_mod
+
+        fake_artifacts = SimpleNamespace()
+        monkeypatch.setattr(
+            parser_mod, "parse_dbt_artifacts", lambda **_kwargs: fake_artifacts
+        )
+        cfg = SimpleNamespace(
+            package_name=None,
+            catalog_checks=[],
+            run_results_checks=[],
+            info_schema_checks=[],
+        )
+
+        result = mcp_server._get_or_parse_artifacts(cfg, tmp_path)  # type: ignore[arg-type]
+
+        assert result is fake_artifacts
+        assert mcp_server._ARTIFACT_CACHE == {}
 
 
 def test_build_server_registers_tools():

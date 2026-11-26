@@ -1,18 +1,11 @@
 """List command package."""
 
-import json
 from typing import Annotated
 
 import typer
 
 from dbt_bouncer.cli import app
-from dbt_bouncer.cli.list.utils import (
-    build_checks_payload,
-    category_key,
-    print_text_checks,
-)
 from dbt_bouncer.enums import CheckCategory, ListOutputFormat
-from dbt_bouncer.utils import get_check_objects
 
 
 @app.command(name="list")
@@ -35,6 +28,15 @@ def list_checks(
     ] = ListOutputFormat.TEXT,
 ) -> None:
     """List all available dbt-bouncer checks, grouped by category."""
+    import json
+
+    from dbt_bouncer.cli.list.utils import (
+        build_checks_payload,
+        category_key,
+        print_text_checks,
+    )
+    from dbt_bouncer.utils import get_check_objects
+
     category_labels = {c.directory: c.value for c in CheckCategory}
 
     selected_categories = frozenset({group.value}) if group is not None else None

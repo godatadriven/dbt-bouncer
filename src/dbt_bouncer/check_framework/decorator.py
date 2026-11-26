@@ -344,17 +344,44 @@ def _build_check_class(
         else:
             fields[param_name] = (annotation, ...)
 
-    # Build the execute() method that delegates to the user function.
-    def execute(self: BaseCheck) -> None:
-        kwargs: dict[str, Any] = {p: getattr(self, p) for p in param_names}
-        args: list[Any] = []
-        # Testing `iterate_over` rather than `has_resource_param` (the same
-        # condition) lets a type checker narrow away the `None`.
-        if iterate_over is not None:
-            args.append(getattr(self, iterate_over))
+    # Build a specialized execute() method that delegates directly to the user
+    # function without per-call list/dict/getattr overhead. Reading `_ctx` from
+    # `__pydantic_private__` bypasses Pydantic's `PrivateAttr` `__getattr__` on
+    # every check execution.
+    param_tuple = tuple(param_names)
+    if iterate_over is not None:
         if wants_ctx:
-            args.append(self._ctx)
-        fn(*args, **kwargs)
+            if param_tuple:
+
+                def execute(self: BaseCheck) -> None:
+                    d = self.__dict__
+                    ctx = (self.__pydantic_private__ or {}).get("_ctx")
+                    fn(d[iterate_over], ctx, **{p: d[p] for p in param_tuple})
+            else:
+
+                def execute(self: BaseCheck) -> None:
+                    ctx = (self.__pydantic_private__ or {}).get("_ctx")
+                    fn(self.__dict__[iterate_over], ctx)
+        elif param_tuple:
+
+            def execute(self: BaseCheck) -> None:
+                d = self.__dict__
+                fn(d[iterate_over], **{p: d[p] for p in param_tuple})
+        else:
+
+            def execute(self: BaseCheck) -> None:
+                fn(self.__dict__[iterate_over])
+    elif wants_ctx:
+
+        def execute(self: BaseCheck) -> None:
+            d = self.__dict__
+            ctx = (self.__pydantic_private__ or {}).get("_ctx")
+            fn(ctx, **{p: d[p] for p in param_tuple})
+    else:
+
+        def execute(self: BaseCheck) -> None:
+            d = self.__dict__
+            fn(**{p: d[p] for p in param_tuple})
 
     validators: dict[str, Any] = {}
     if validate is not None:

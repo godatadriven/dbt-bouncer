@@ -5,11 +5,6 @@ import typing
 from typing import TYPE_CHECKING, Any, TypedDict
 
 from pydantic_core import PydanticUndefined
-from rich import box
-from rich.console import Console
-from rich.panel import Panel
-from rich.table import Table
-from rich.text import Text
 
 from dbt_bouncer.cli.list.utils import base_fields, category_key
 
@@ -122,6 +117,12 @@ def print_text_explanation(payload: ExplainDict) -> None:
             :func:`build_explain_payload`.
 
     """
+    from rich import box
+    from rich.console import Console
+    from rich.panel import Panel
+    from rich.table import Table
+    from rich.text import Text
+
     console = Console()
 
     code = payload["code"]

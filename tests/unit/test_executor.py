@@ -162,3 +162,33 @@ def test_executor_carries_file_path_and_unique_id():
     # Missing keys default to None rather than raising.
     assert results[1]["file_path"] is None
     assert results[1]["unique_id"] is None
+
+
+def test_executor_binds_resource_when_inner_resource_absent():
+    """When `inner_resource` is absent, Executor falls back to `set_resource`."""
+    bound: list[tuple[object, str]] = []
+
+    class _ResourceCheck:
+        description = None
+
+        def set_resource(self, resource, iterate_value):
+            bound.append((resource, iterate_value))
+
+        def execute(self):
+            pass
+
+    wrapper = {"model": "my_model"}
+    results = Executor().run(
+        [
+            {
+                "check": _ResourceCheck(),
+                "check_run_id": "check_a:0:my_model",
+                "iterate_value": "model",
+                "resource": wrapper,
+                "severity": CheckSeverity.ERROR,
+            }
+        ]
+    )
+
+    assert results[0]["outcome"] == CheckOutcome.SUCCESS
+    assert bound == [(wrapper, "model")]

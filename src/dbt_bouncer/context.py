@@ -72,7 +72,12 @@ class BouncerContext(BaseModel):
     @cached_property
     def exposures_by_unique_id(self) -> dict[str, ExposureNode]:
         """A dict of exposure objects keyed by unique_id."""
-        return {e.unique_id: e for e in self.exposures}
+        return {
+            (
+                dict.__getitem__(e, "unique_id") if isinstance(e, dict) else e.unique_id
+            ): e
+            for e in self.exposures
+        }
 
     @cached_property
     def models_flat(self) -> list[ModelNode]:
@@ -82,7 +87,7 @@ class BouncerContext(BaseModel):
     @cached_property
     def models_by_unique_id(self) -> dict[str, ModelNode]:
         """A dict of unwrapped model objects keyed by unique_id."""
-        return {m.model.unique_id: m.model for m in self.models}
+        return {m.unique_id: m.model for m in self.models}
 
     @cached_property
     def run_results_flat(self) -> list[RunResultEntry]:
@@ -107,12 +112,12 @@ class BouncerContext(BaseModel):
     @cached_property
     def sources_by_unique_id(self) -> dict[str, SourceNode]:
         """A dict of unwrapped source objects keyed by unique_id."""
-        return {s.source.unique_id: s.source for s in self.sources}
+        return {s.unique_id: s.source for s in self.sources}
 
     @cached_property
     def tests_by_unique_id(self) -> dict[str, TestNode]:
         """A dict of unwrapped test objects keyed by unique_id."""
-        return {t.test.unique_id: t.test for t in self.tests}
+        return {t.unique_id: t.test for t in self.tests}
 
     @cached_property
     def tests_flat(self) -> list[TestNode]:

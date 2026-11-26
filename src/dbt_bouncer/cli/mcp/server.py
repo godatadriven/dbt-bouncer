@@ -4,28 +4,169 @@ The payload functions in this module are plain Python and independently
 testable; :func:`build_server` wraps them as MCP tools. Only
 :func:`build_server` imports the optional ``mcp`` dependency.
 
-The ``run_checks`` tool shells out to the ``dbt-bouncer`` executable instead
-of calling ``run_bouncer()`` in-process: the stdio MCP transport owns this
-process's stdout, and an in-process run would corrupt the protocol stream
-with log lines and progress output.
+``run_checks`` executes checks in-process with stdout/stderr redirected into a
+buffer (serialized under a lock) so the stdio MCP transport stream stays clean,
+and caches parsed dbt artifacts in memory keyed by file modification times and
+sizes so repeated agent edit-check iterations skip disk reads and JSON decoding.
 """
 
 from __future__ import annotations
 
-import json
+import contextlib
+import io
 import logging
-import shutil
-
-# The subprocess module is used deliberately: an in-process run would corrupt
-# the MCP stdio protocol stream (see module docstring).
-import subprocess  # ruff: ignore[suspicious-subprocess-import] # nosec B404
-import tempfile
+import threading
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-# Two minutes: comfortably above a full run on a very large dbt project,
-# small enough that a hung subprocess does not stall the agent forever.
-_RUN_TIMEOUT_SECONDS = 120
+if TYPE_CHECKING:
+    from dbt_bouncer.artifact_parsers.parser import ParsedArtifacts
+    from dbt_bouncer.configuration_file.parser import DbtBouncerConfBase
+
+# Bounded cache size so a long-lived MCP server switching across projects does
+# not hold parsed manifests indefinitely.
+_MAX_ARTIFACT_CACHE_ENTRIES = 4
+
+# Serialises in-process runs because stdout/stderr redirection and root logger
+# configuration are process-global.
+_RUN_LOCK = threading.Lock()
+
+
+@dataclass(frozen=True, slots=True)
+class _CachedArtifacts:
+    """In-memory parsed artifacts paired with their on-disk file signatures."""
+
+    manifest_sig: tuple[int, int]
+    catalog_sig: tuple[int, int] | None
+    run_results_sig: tuple[int, int] | None
+    info_schema_sig: tuple[tuple[str, int, int], ...] | None
+    artifacts: ParsedArtifacts
+
+
+_ARTIFACT_CACHE: dict[tuple[Path, str | None], _CachedArtifacts] = {}
+
+
+def clear_artifact_cache() -> None:
+    """Clear the in-memory MCP artifact cache."""
+    with _RUN_LOCK:
+        _ARTIFACT_CACHE.clear()
+
+
+def _file_signature(path: Path) -> tuple[int, int] | None:
+    """Return ``(mtime_ns, size)`` for *path*, or ``None`` if it cannot be statted.
+
+    Returns:
+        tuple[int, int] | None: File stat signature, or ``None``.
+
+    """
+    try:
+        st = path.stat()
+    except OSError:
+        return None
+    return (st.st_mtime_ns, st.st_size)
+
+
+def _info_schema_signature(
+    dbt_artifacts_dir: Path,
+) -> tuple[tuple[str, int, int], ...] | None:
+    """Return stat signatures for all Parquet files under ``info_schema/v1``.
+
+    Returns:
+        tuple[tuple[str, int, int], ...] | None: Sorted ``(name, mtime_ns, size)``
+            entries, or ``None`` if the directory does not exist.
+
+    """
+    from dbt_bouncer.artifact_parsers.info_schema import info_schema_dir
+
+    schema_dir = info_schema_dir(dbt_artifacts_dir)
+    if not schema_dir.is_dir():
+        return None
+    sigs: list[tuple[str, int, int]] = []
+    for p in sorted(schema_dir.glob("*.parquet")):
+        sig = _file_signature(p)
+        if sig is not None:
+            sigs.append((p.name, sig[0], sig[1]))
+    return tuple(sigs)
+
+
+def _get_or_parse_artifacts(
+    bouncer_config: DbtBouncerConfBase,
+    dbt_artifacts_dir: Path,
+) -> ParsedArtifacts:
+    """Return cached parsed artifacts when on-disk files are unchanged, else re-parse.
+
+    Args:
+        bouncer_config: Validated dbt-bouncer configuration.
+        dbt_artifacts_dir: Directory containing dbt artifacts.
+
+    Returns:
+        ParsedArtifacts: Parsed dbt artifacts ready for check execution.
+
+    """
+    from dbt_bouncer.artifact_parsers.parser import parse_dbt_artifacts
+
+    resolved_dir = dbt_artifacts_dir.resolve()
+    need_catalog = bool(getattr(bouncer_config, "catalog_checks", None))
+    need_run_results = bool(getattr(bouncer_config, "run_results_checks", None))
+    need_info_schema = bool(getattr(bouncer_config, "info_schema_checks", None))
+
+    manifest_sig = _file_signature(resolved_dir / "manifest.json")
+    catalog_sig = (
+        _file_signature(resolved_dir / "catalog.json") if need_catalog else None
+    )
+    run_results_sig = (
+        _file_signature(resolved_dir / "run_results.json") if need_run_results else None
+    )
+    info_schema_sig = _info_schema_signature(resolved_dir) if need_info_schema else None
+
+    cache_key = (resolved_dir, bouncer_config.package_name)
+    cached = _ARTIFACT_CACHE.get(cache_key)
+    if (
+        cached is not None
+        and manifest_sig is not None
+        and cached.manifest_sig == manifest_sig
+        and (
+            not need_catalog
+            or (catalog_sig is not None and cached.catalog_sig == catalog_sig)
+        )
+        and (
+            not need_run_results
+            or (
+                run_results_sig is not None
+                and cached.run_results_sig == run_results_sig
+            )
+        )
+        and (
+            not need_info_schema
+            or (
+                info_schema_sig is not None
+                and cached.info_schema_sig == info_schema_sig
+            )
+        )
+    ):
+        return cached.artifacts
+
+    artifacts = parse_dbt_artifacts(
+        bouncer_config=bouncer_config,
+        dbt_artifacts_dir=dbt_artifacts_dir,
+    )
+
+    if manifest_sig is not None:
+        if len(_ARTIFACT_CACHE) >= _MAX_ARTIFACT_CACHE_ENTRIES and (
+            cache_key not in _ARTIFACT_CACHE
+        ):
+            oldest_key = next(iter(_ARTIFACT_CACHE))
+            del _ARTIFACT_CACHE[oldest_key]
+        _ARTIFACT_CACHE[cache_key] = _CachedArtifacts(
+            manifest_sig=manifest_sig,
+            catalog_sig=catalog_sig,
+            run_results_sig=run_results_sig,
+            info_schema_sig=info_schema_sig,
+            artifacts=artifacts,
+        )
+
+    return artifacts
 
 
 def list_checks(category: str | None = None) -> dict[str, Any]:
@@ -73,10 +214,9 @@ def explain_check(check: str) -> dict[str, Any]:
     # Delegate to the `explain` subcommand's payload builder (#1070) so both
     # surfaces describe a check identically.
     from dbt_bouncer.cli.explain.utils import build_explain_payload
-    from dbt_bouncer.utils import get_check_registry
+    from dbt_bouncer.utils import lookup_check_class
 
-    registry = get_check_registry()
-    check_class = registry.get(check)
+    check_class = lookup_check_class(check)
     if check_class is None:
         return {
             "error": f"Unknown check name or rule code '{check}'. Use the list_checks tool to see all checks."
@@ -166,8 +306,9 @@ def run_checks(
     """Run dbt-bouncer checks against the project's dbt artifacts.
 
     Requires dbt artifacts to exist (at minimum ``manifest.json``, generated
-    with ``dbt parse``). Runs in a subprocess so the MCP stdio stream stays
-    clean.
+    with ``dbt parse``). Runs in-process with stdout/stderr captured so the MCP
+    stdio stream stays clean, reusing cached parsed artifacts when files on
+    disk have not changed.
 
     Args:
         config_file: Path to the config file. When omitted, the standard
@@ -181,67 +322,100 @@ def run_checks(
         failed checks, and the tail of the console output.
 
     """
-    executable = shutil.which("dbt-bouncer")
-    if executable is None:
-        return {
-            "error": "The `dbt-bouncer` executable was not found on PATH. Install it with `pip install dbt-bouncer`."
-        }
+    from dbt_bouncer.cli.run.utils import (
+        _artifacts_dir,
+        _parse_check_names,
+        _parse_only,
+        _prepare_bouncer_config,
+        _resolve_config_file_source,
+    )
+    from dbt_bouncer.cli.utils import resolve_config_path
+    from dbt_bouncer.context import BouncerContext
+    from dbt_bouncer.enums import CheckOutcome, ExitCode, OutputFormat
+    from dbt_bouncer.exceptions import DbtBouncerArtifactError, DbtBouncerConfigError
+    from dbt_bouncer.reporting.logger import configure_console_logging
+    from dbt_bouncer.runner import runner
 
-    # These values come from the calling agent and are passed as option values
-    # to the subprocess. There is no shell, so they cannot inject shell syntax,
-    # but a leading dash would be misread by the CLI parser as another flag.
-    # Reject that up front with a clear error rather than a cryptic parse failure.
-    for label, value in (
-        ("config_file", config_file),
-        ("only", only),
-        ("check", check),
-    ):
-        if value and value.startswith("-"):
-            return {
-                "error": f"Invalid {label} value '{value}': must not start with '-'."
-            }
+    buf = io.StringIO()
+    exit_code: int = ExitCode.SUCCESS
+    failures: list[dict[str, Any]] = []
 
-    with tempfile.TemporaryDirectory() as tmp_dir:
-        output_file = Path(tmp_dir) / "results.json"
-        cmd = [
-            executable,
-            "run",
-            "--output-file",
-            str(output_file),
-            "--output-only-failures",
-        ]
-        if config_file:
-            cmd.extend(["--config-file", config_file])
-        if only:
-            cmd.extend(["--only", only])
-        if check:
-            cmd.extend(["--check", check])
-
+    with _RUN_LOCK:
+        root_logger = logging.getLogger("")
+        saved_handlers = list(root_logger.handlers)
+        saved_level = root_logger.level
         try:
-            # No shell, fixed argument list, executable resolved via
-            # shutil.which — not user-controlled input.
-            completed = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] # nosec B603
-                cmd,
-                capture_output=True,
-                text=True,
-                timeout=_RUN_TIMEOUT_SECONDS,
-                check=False,
-            )
-        except subprocess.TimeoutExpired:
-            return {
-                "error": f"dbt-bouncer did not finish within {_RUN_TIMEOUT_SECONDS} seconds."
-            }
+            with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(buf):
+                configure_console_logging(verbosity=0)
+                try:
+                    only_parsed = _parse_only(only)
+                    check_names = _parse_check_names(check)
+                    resolved_config = resolve_config_path(
+                        Path(config_file) if config_file else None
+                    )
+                    config_file_source = _resolve_config_file_source(
+                        resolved_config, None
+                    )
+                    bouncer_config, check_categories, config_file_path = (
+                        _prepare_bouncer_config(
+                            resolved_config,
+                            config_file_source,
+                            only_parsed,
+                            check_names,
+                            preset=None,
+                        )
+                    )
+                    artifacts = _get_or_parse_artifacts(
+                        bouncer_config=bouncer_config,
+                        dbt_artifacts_dir=_artifacts_dir(
+                            bouncer_config, config_file_path
+                        ),
+                    )
+                    ctx = BouncerContext.model_construct(
+                        allow_zero_checks=False,
+                        bouncer_config=bouncer_config,
+                        catalog_nodes=artifacts.catalog_nodes,
+                        catalog_sources=artifacts.catalog_sources,
+                        check_categories=check_categories,
+                        create_pr_comment_file=False,
+                        dry_run=False,
+                        exposures=artifacts.exposures,
+                        info_schema=artifacts.info_schema,
+                        macros=artifacts.macros,
+                        manifest_obj=artifacts.manifest_obj,
+                        models=artifacts.models,
+                        output_file=None,
+                        output_format=OutputFormat.JSON.value,
+                        output_only_failures=True,
+                        run_results=artifacts.run_results,
+                        seeds=artifacts.seeds,
+                        semantic_models=artifacts.semantic_models,
+                        show_all_failures=False,
+                        snapshots=artifacts.snapshots,
+                        sources=artifacts.sources,
+                        tests=artifacts.tests,
+                        unit_tests=artifacts.unit_tests,
+                    )
+                    exit_code, results = runner(ctx=ctx)
+                    failures = [
+                        r for r in results if r["outcome"] != CheckOutcome.SUCCESS
+                    ]
+                except DbtBouncerConfigError as e:
+                    logging.error(str(e))
+                    exit_code = int(ExitCode.CONFIG_ERROR)
+                except DbtBouncerArtifactError as e:
+                    logging.error(str(e))
+                    exit_code = int(ExitCode.ARTIFACT_ERROR)
+        finally:
+            root_logger.handlers = saved_handlers
+            root_logger.setLevel(saved_level)
 
-        failures: list[dict[str, Any]] = []
-        if output_file.exists():
-            failures = json.loads(output_file.read_text())
-
-    console_output = (completed.stdout + completed.stderr).strip()
+    console_output = buf.getvalue().strip()
     return {
         "console_output_tail": "\n".join(console_output.splitlines()[-15:]),
-        "exit_code": completed.returncode,
+        "exit_code": int(exit_code),
         "failures": failures,
-        "passed": completed.returncode == 0,
+        "passed": exit_code == 0,
     }
 
 

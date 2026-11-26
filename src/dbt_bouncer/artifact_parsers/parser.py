@@ -39,6 +39,8 @@ class ProxyStr(str):
 class DictProxy(dict):
     """Dict subclass with attribute access and lazy proxy wrapping."""
 
+    __slots__ = ()
+
     def __getattr__(self, name: str) -> Any:
         """Look up *name* as a dict key, falling back to underscore-stripped alias.
 
@@ -107,6 +109,8 @@ class DictProxy(dict):
 class ListProxy(list):
     """List subclass with lazy proxy wrapping of elements."""
 
+    __slots__ = ()
+
     def __getitem__(self, key: Any) -> Any:  # type: ignore[invalid-method-override]
         """Return proxy-wrapped element(s) at *key*.
 
@@ -149,22 +153,6 @@ def _wrap_value(value: Any) -> Any:
     """
     wrapper = _WRAPPERS.get(value.__class__)
     return value if wrapper is None else wrapper(value)
-
-
-def _make_wrapper(
-    unique_id: str, original_file_path: str, **kwargs: Any
-) -> SimpleNamespace:
-    """Create a lightweight resource wrapper compatible with DbtBouncer* wrappers.
-
-    Returns:
-        SimpleNamespace: Wrapper with unique_id, original_file_path, and resource attrs.
-
-    """
-    return SimpleNamespace(
-        original_file_path=original_file_path,
-        unique_id=unique_id,
-        **kwargs,
-    )
 
 
 def wrap_dict(data: dict[str, Any]) -> DictProxy:
@@ -292,33 +280,33 @@ def parse_dbt_artifacts(
         match v.get("resource_type"):
             case "model":
                 project_models.append(
-                    _make_wrapper(
-                        unique_id=k, original_file_path=ofp, model=DictProxy(v)
+                    SimpleNamespace(
+                        original_file_path=ofp, unique_id=k, model=DictProxy(v)
                     )
                 )
             case "seed":
                 project_seeds.append(
-                    _make_wrapper(
-                        unique_id=k, original_file_path=ofp, seed=DictProxy(v)
+                    SimpleNamespace(
+                        original_file_path=ofp, unique_id=k, seed=DictProxy(v)
                     )
                 )
             case "snapshot":
                 project_snapshots.append(
-                    _make_wrapper(
-                        unique_id=k, original_file_path=ofp, snapshot=DictProxy(v)
+                    SimpleNamespace(
+                        original_file_path=ofp, unique_id=k, snapshot=DictProxy(v)
                     )
                 )
             case "test":
                 project_tests.append(
-                    _make_wrapper(
-                        unique_id=k, original_file_path=ofp, test=DictProxy(v)
+                    SimpleNamespace(
+                        original_file_path=ofp, unique_id=k, test=DictProxy(v)
                     )
                 )
 
     project_semantic_models: list[SimpleNamespace] = [
-        _make_wrapper(
-            unique_id=k,
+        SimpleNamespace(
             original_file_path=clean_path_str(v.get("original_file_path", "")),
+            unique_id=k,
             semantic_model=DictProxy(v),
         )
         for k, v in manifest_dict.get("semantic_models", {}).items()
@@ -326,9 +314,9 @@ def parse_dbt_artifacts(
     ]
 
     project_sources: list[SimpleNamespace] = [
-        _make_wrapper(
-            unique_id=k,
+        SimpleNamespace(
             original_file_path=clean_path_str(v.get("original_file_path", "")),
+            unique_id=k,
             source=DictProxy(v),
         )
         for k, v in manifest_dict.get("sources", {}).items()
@@ -374,22 +362,22 @@ def parse_dbt_artifacts(
         sources_dict = manifest_dict.get("sources", {})
 
         project_catalog_nodes: list[SimpleNamespace] = [
-            _make_wrapper(
-                unique_id=k,
+            SimpleNamespace(
                 original_file_path=clean_path_str(nodes_dict[k]["original_file_path"])
                 if k in nodes_dict
                 else "",
+                unique_id=k,
                 catalog_node=DictProxy(v),
             )
             for k, v in catalog_dict.get("nodes", {}).items()
             if k.split(".")[1] == target_package
         ]
         project_catalog_sources: list[SimpleNamespace] = [
-            _make_wrapper(
-                unique_id=k,
+            SimpleNamespace(
                 original_file_path=clean_path_str(sources_dict[k]["original_file_path"])
                 if k in sources_dict
                 else "",
+                unique_id=k,
                 catalog_source=DictProxy(v),
             )
             for k, v in catalog_dict.get("sources", {}).items()
@@ -428,9 +416,9 @@ def parse_dbt_artifacts(
             else:
                 ofp = ""
             project_run_results.append(
-                _make_wrapper(
-                    unique_id=uid,
+                SimpleNamespace(
                     original_file_path=ofp,
+                    unique_id=uid,
                     run_result=DictProxy(r),
                 )
             )

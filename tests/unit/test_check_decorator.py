@@ -269,3 +269,19 @@ class TestCheckDecoratorEdgeCases:
 
         assert cls.__name__ == "CheckDecoratorOrphan"
         assert "injecting CheckDecoratorOrphan via stack frame fallback" in caplog.text
+
+
+def test_global_check_without_resource_or_ctx():
+    """A check with neither a resource parameter nor ctx executes cleanly."""
+    from dbt_bouncer.check_framework.decorator import check
+
+    called: list[str] = []
+
+    @check
+    def check_global_no_args(*, label: str = "ok") -> None:
+        """Pass with no resource or ctx."""
+        called.append(label)
+
+    instance = check_global_no_args(label="ran")
+    instance.execute()
+    assert called == ["ran"]

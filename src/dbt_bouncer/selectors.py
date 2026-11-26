@@ -144,29 +144,50 @@ class SelectorAtom:
             bool: True when the resource matches.
 
         """
+        is_dict = isinstance(node, dict)
         if self.method == "name":
             # Fall back to the last unique-ID segment for resources whose
             # manifest entry carries no ``name`` attribute (e.g. proxy objects
             # for exotic resource types) — intentional, so name atoms still
             # work everywhere.
-            name = getattr(node, "name", None) or unique_id.split(".")[-1]
+            name = (
+                dict.get(node, "name") if is_dict else getattr(node, "name", None)
+            ) or unique_id.split(".")[-1]
             return fnmatch(str(name), self.value)
         if self.method == "tag":
-            tags = getattr(node, "tags", None) or []
+            tags = (
+                dict.get(node, "tags") if is_dict else getattr(node, "tags", None)
+            ) or []
             return self.value in [str(t) for t in tags]
         if self.method == "package":
-            return str(getattr(node, "package_name", "")) == self.value
+            pkg = (
+                dict.get(node, "package_name", "")
+                if is_dict
+                else getattr(node, "package_name", "")
+            )
+            return str(pkg) == self.value
         if self.method == "path":
-            path = clean_path_str(str(getattr(node, "original_file_path", "")))
+            raw_path = (
+                dict.get(node, "original_file_path", "")
+                if is_dict
+                else getattr(node, "original_file_path", "")
+            )
+            path = clean_path_str(str(raw_path))
             if any(c in self.value for c in "*?["):
                 value = self.value.rstrip("/")
                 return fnmatch(path, value) or fnmatch(path, f"{value}/*")
             return PurePosixPath(path).is_relative_to(self.value)
         if self.method == "config":
-            config = getattr(node, "config", None)
+            config = (
+                dict.get(node, "config") if is_dict else getattr(node, "config", None)
+            )
             if config is None or self.config_key is None:
                 return False
-            actual = getattr(config, self.config_key, None)
+            actual = (
+                dict.get(config, self.config_key)
+                if isinstance(config, dict)
+                else getattr(config, self.config_key, None)
+            )
             if actual is None:
                 return False
             if isinstance(actual, bool):
@@ -175,7 +196,7 @@ class SelectorAtom:
                 return self.value in [str(item) for item in actual]
             return str(actual) == self.value
         # self.method == "fqn"
-        fqn = getattr(node, "fqn", None)
+        fqn = dict.get(node, "fqn") if is_dict else getattr(node, "fqn", None)
         if not fqn:
             return False
         return fnmatch(".".join(str(part) for part in fqn), self.value)
@@ -278,21 +299,42 @@ class Selector:
 
     _closure = staticmethod(_closure)
 
-    def __init__(self, raw: str, manifest: Any) -> None:
+    def __init__(
+        self,
+        raw: str,
+        manifest: Any,
+        *,
+        _resources: list[tuple[str, Any]] | None = None,
+    ) -> None:
         """Parse ``raw`` and resolve it against ``manifest``.
 
         Args:
             raw: The selector string.
             manifest: The parsed ``manifest.json`` object (must expose the
                 resource collections plus ``parent_map``/``child_map``).
+            _resources: Optional pre-extracted ``(unique_id, node)`` pairs shared
+                across multiple selectors resolved against the same manifest.
 
         """
         self.raw = raw
         groups = parse_selector(raw)
 
-        resources = list(self._iter_manifest_resources(manifest))
-        parent_map = getattr(manifest, "parent_map", None) or {}
-        child_map = getattr(manifest, "child_map", None) or {}
+        resources = (
+            _resources
+            if _resources is not None
+            else list(self._iter_manifest_resources(manifest))
+        )
+        is_dict = isinstance(manifest, dict)
+        parent_map = (
+            dict.get(manifest, "parent_map")
+            if is_dict
+            else getattr(manifest, "parent_map", None)
+        ) or {}
+        child_map = (
+            dict.get(manifest, "child_map")
+            if is_dict
+            else getattr(manifest, "child_map", None)
+        ) or {}
 
         selected: set[str] = set()
         for group in groups:
@@ -326,15 +368,21 @@ class Selector:
     def _iter_manifest_resources(manifest: Any) -> Iterator[tuple[str, Any]]:
         """Yield ``(unique_id, resource)`` pairs from all manifest collections.
 
+        Reads raw dict entries when ``manifest`` is a dict (e.g. ``DictProxy``)
+        to avoid allocating proxy wrappers for every node during selection.
+
         Yields:
             tuple[str, Any]: The unique ID and resource object.
 
         """
+        is_dict = isinstance(manifest, dict)
         for attr in _MANIFEST_COLLECTIONS:
-            collection = getattr(manifest, attr, None)
-            if collection is None or not hasattr(collection, "items"):
+            collection = (
+                dict.get(manifest, attr) if is_dict else getattr(manifest, attr, None)
+            )
+            if not isinstance(collection, dict):
                 continue
-            for uid, node in collection.items():
+            for uid, node in dict.items(collection):
                 yield str(uid), node
 
     def matches(self, unique_id: str | None) -> bool:
