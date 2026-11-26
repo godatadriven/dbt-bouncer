@@ -271,17 +271,72 @@ class TestCheckDecoratorEdgeCases:
         assert "injecting CheckDecoratorOrphan via stack frame fallback" in caplog.text
 
 
-def test_global_check_without_resource_or_ctx():
-    """A check with neither a resource parameter nor ctx executes cleanly."""
+@pytest.mark.parametrize("has_resource", [False, True])
+@pytest.mark.parametrize("wants_ctx", [False, True])
+@pytest.mark.parametrize("has_params", [False, True])
+def test_specialized_execute_covers_all_signature_shapes(
+    has_resource: bool, wants_ctx: bool, has_params: bool
+):
+    """All specialized execute() closures pass resource, ctx, and params identically."""
     from dbt_bouncer.check_framework.decorator import check
 
-    called: list[str] = []
+    recorded: list[tuple[object, object, str | None]] = []
 
-    @check
-    def check_global_no_args(*, label: str = "ok") -> None:
-        """Pass with no resource or ctx."""
-        called.append(label)
+    match (has_resource, wants_ctx, has_params):
+        case (False, False, False):
 
-    instance = check_global_no_args(label="ran")
+            @check
+            def check_shape() -> None:
+                recorded.append((None, None, None))
+        case (False, False, True):
+
+            @check
+            def check_shape(*, label: str = "x") -> None:
+                recorded.append((None, None, label))
+        case (False, True, False):
+
+            @check
+            def check_shape(ctx) -> None:
+                recorded.append((None, ctx, None))
+        case (False, True, True):
+
+            @check
+            def check_shape(ctx, *, label: str = "x") -> None:
+                recorded.append((None, ctx, label))
+        case (True, False, False):
+
+            @check
+            def check_shape(model) -> None:
+                recorded.append((model, None, None))
+        case (True, False, True):
+
+            @check
+            def check_shape(model, *, label: str = "x") -> None:
+                recorded.append((model, None, label))
+        case (True, True, False):
+
+            @check
+            def check_shape(model, ctx) -> None:
+                recorded.append((model, ctx, None))
+        case (True, True, True):
+
+            @check
+            def check_shape(model, ctx, *, label: str = "x") -> None:
+                recorded.append((model, ctx, label))
+
+    instance = check_shape(label="val") if has_params else check_shape()
+    fake_ctx = object()
+    fake_model = object()
+    instance.set_context(fake_ctx)
+    if has_resource:
+        instance.set_resource({"model": fake_model}, "model")
+
     instance.execute()
-    assert called == ["ran"]
+
+    assert recorded == [
+        (
+            fake_model if has_resource else None,
+            fake_ctx if wants_ctx else None,
+            "val" if has_params else None,
+        )
+    ]

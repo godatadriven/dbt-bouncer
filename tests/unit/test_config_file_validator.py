@@ -2362,14 +2362,18 @@ def test_lint_config_file_reuses_registry_and_accepts_registry_only_check(
         "  - name: check_typo_two\n"
     )
 
-    monkeypatch.setattr(
-        validator_mod,
-        "get_check_registry",
-        lambda: {"check_plugin_only": object, "check_model_names": object},
-    )
+    registry_calls = 0
+
+    def counting_registry():
+        nonlocal registry_calls
+        registry_calls += 1
+        return {"check_plugin_only": object, "check_model_names": object}
+
+    monkeypatch.setattr(validator_mod, "get_check_registry", counting_registry)
 
     issues = validator_mod.lint_config_file(cfg)
 
+    assert registry_calls == 1
     assert len(issues) == 2
     assert "check_typo_one" in issues[0]["message"]
     assert "check_typo_two" in issues[1]["message"]

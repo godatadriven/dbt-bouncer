@@ -8,6 +8,8 @@ from pathlib import Path
 from types import ModuleType, SimpleNamespace
 
 import pytest
+from hypothesis import given, settings
+from hypothesis import strategies as st
 from typer.testing import CliRunner
 
 from dbt_bouncer.cli.mcp import server as mcp_server
@@ -140,6 +142,22 @@ def _write_test_project_config(
     return cfg
 
 
+def _copy_target_artifacts(dst: Path, *, with_info_schema: bool = False) -> Path:
+    """Copy committed dbt_project target artifacts into *dst*.
+
+    Returns:
+        Path: The populated artifact directory *dst*.
+
+    """
+    src = Path("dbt_project/target")
+    dst.mkdir(parents=True, exist_ok=True)
+    for name in ("manifest.json", "catalog.json", "run_results.json"):
+        shutil.copy(src / name, dst / name)
+    if with_info_schema:
+        shutil.copytree(src / "info_schema", dst / "info_schema")
+    return dst
+
+
 class TestRunChecksTool:
     """Tests for the in-process cached run_checks tool payload."""
 
@@ -239,15 +257,7 @@ class TestRunChecksTool:
         """Repeated calls reuse parsed artifacts until an artifact file changes."""
         import dbt_bouncer.artifact_parsers.parser as parser_mod
 
-        target = tmp_path / "target"
-        target.mkdir()
-        shutil.copy(Path("dbt_project/target/manifest.json"), target / "manifest.json")
-        shutil.copy(Path("dbt_project/target/catalog.json"), target / "catalog.json")
-        shutil.copy(
-            Path("dbt_project/target/run_results.json"), target / "run_results.json"
-        )
-        shutil.copytree(Path("dbt_project/target/info_schema"), target / "info_schema")
-
+        target = _copy_target_artifacts(tmp_path / "target", with_info_schema=True)
         cfg = _write_test_project_config(
             tmp_path,
             target,
@@ -276,88 +286,26 @@ class TestRunChecksTool:
 
         monkeypatch.setattr(parser_mod, "parse_dbt_artifacts", counting_parse)
 
-        # First call parses all configured artifacts.
-        first = mcp_server.run_checks(config_file=str(cfg))
-        assert first["passed"] is True
-        assert parse_calls == 1
-
-        # Second identical call hits the in-memory cache.
-        second = mcp_server.run_checks(config_file=str(cfg))
-        assert second["passed"] is True
-        assert parse_calls == 1
-
-        # Subset category call still hits the cache.
-        subset = mcp_server.run_checks(config_file=str(cfg), only="manifest_checks")
-        assert subset["passed"] is True
+        # First call parses; identical and subset calls hit the cache.
+        assert mcp_server.run_checks(config_file=str(cfg))["passed"] is True
+        assert mcp_server.run_checks(config_file=str(cfg))["passed"] is True
+        assert (
+            mcp_server.run_checks(config_file=str(cfg), only="manifest_checks")[
+                "passed"
+            ]
+            is True
+        )
         assert parse_calls == 1
 
         # Bumping manifest.json mtime invalidates the cache.
         manifest_path = target / "manifest.json"
-        st = manifest_path.stat()
-        os.utime(manifest_path, ns=(st.st_atime_ns, st.st_mtime_ns + 1_000_000))
+        st_info = manifest_path.stat()
+        os.utime(
+            manifest_path, ns=(st_info.st_atime_ns, st_info.st_mtime_ns + 1_000_000)
+        )
 
-        third = mcp_server.run_checks(config_file=str(cfg))
-        assert third["passed"] is True
+        assert mcp_server.run_checks(config_file=str(cfg))["passed"] is True
         assert parse_calls == 2
-
-    def test_cache_upgrades_and_evicts_oldest_entry(self, tmp_path, monkeypatch):
-        """Requesting new artifact types upgrades the entry; exceeding max size evicts oldest."""
-        import dbt_bouncer.artifact_parsers.parser as parser_mod
-
-        real_parse = parser_mod.parse_dbt_artifacts
-        parse_calls = 0
-
-        def counting_parse(*args, **kwargs):
-            nonlocal parse_calls
-            parse_calls += 1
-            return real_parse(*args, **kwargs)
-
-        monkeypatch.setattr(parser_mod, "parse_dbt_artifacts", counting_parse)
-
-        # Create 2 distinct targets and lower the cache cap to 1 to test eviction.
-        monkeypatch.setattr(mcp_server, "_MAX_ARTIFACT_CACHE_ENTRIES", 1)
-        t1 = tmp_path / "t1"
-        t2 = tmp_path / "t2"
-        for t in (t1, t2):
-            t.mkdir()
-            shutil.copy(Path("dbt_project/target/manifest.json"), t / "manifest.json")
-            shutil.copy(Path("dbt_project/target/catalog.json"), t / "catalog.json")
-
-        cfg1_manifest = _write_test_project_config(
-            tmp_path,
-            t1,
-            "manifest_checks:\n  - name: check_model_description_populated\n",
-            filename="c1_m.yml",
-        )
-        cfg1_catalog = _write_test_project_config(
-            tmp_path,
-            t1,
-            (
-                "catalog_checks:\n"
-                "  - name: check_column_names\n"
-                "    column_name_pattern: '^[a-z_0-9]*$'\n"
-            ),
-            filename="c1_c.yml",
-        )
-        cfg2_manifest = _write_test_project_config(
-            tmp_path,
-            t2,
-            "manifest_checks:\n  - name: check_model_description_populated\n",
-            filename="c2_m.yml",
-        )
-
-        # Populate cache with t1 (manifest only).
-        assert mcp_server.run_checks(config_file=str(cfg1_manifest))["passed"] is True
-        assert parse_calls == 1
-
-        # Same dir, now needing catalog -> upgrades entry in-place without evicting.
-        assert mcp_server.run_checks(config_file=str(cfg1_catalog))["passed"] is True
-        assert parse_calls == 2
-
-        # Different dir exceeds cap=1 -> evicts t1 and caches t2.
-        assert mcp_server.run_checks(config_file=str(cfg2_manifest))["passed"] is True
-        assert parse_calls == 3
-        assert len(mcp_server._ARTIFACT_CACHE) == 1
 
     def test_info_schema_signature_missing_dir_and_unreadable_file(
         self, tmp_path, monkeypatch
@@ -392,6 +340,144 @@ class TestRunChecksTool:
 
         assert result is fake_artifacts
         assert mcp_server._ARTIFACT_CACHE == {}
+
+
+_CACHE_OP_STRATEGY = st.tuples(
+    st.integers(min_value=0, max_value=2),  # project index (3 dirs, cap=2)
+    st.booleans(),  # need_catalog
+    st.booleans(),  # need_run_results
+    st.booleans(),  # need_info_schema
+    st.sampled_from(
+        [None, "manifest.json", "catalog.json", "run_results.json", "info_schema"]
+    ),  # file to mutate before the call
+)
+
+
+class TestMcpArtifactCacheProperties:
+    """Property-based state-machine tests for the MCP in-memory artifact cache."""
+
+    @settings(max_examples=40)
+    @given(ops=st.lists(_CACHE_OP_STRATEGY, min_size=1, max_size=12))
+    def test_artifact_cache_freshness_reuse_and_bounded_size(
+        self, tmp_path_factory, ops
+    ):
+        """Under arbitrary project/category/mutation sequences, the cache never returns stale data, never exceeds its cap, and reuses valid entries."""
+        import dbt_bouncer.artifact_parsers.parser as parser_mod
+
+        mcp_server.clear_artifact_cache()
+        max_entries = 2
+
+        root = tmp_path_factory.mktemp("mcp_cache_prop")
+        projects: list[Path] = []
+        # Track monotonically increasing synthetic version per (project, file)
+        # so changing a file changes its size (guaranteed distinct stat signature).
+        versions: list[dict[str, int]] = []
+        for idx in range(3):
+            pdir = root / f"proj_{idx}"
+            (pdir / "info_schema" / "v1").mkdir(parents=True)
+            v = {
+                "manifest.json": 1,
+                "catalog.json": 1,
+                "run_results.json": 1,
+                "info_schema": 1,
+            }
+            (pdir / "manifest.json").write_bytes(b"m")
+            (pdir / "catalog.json").write_bytes(b"c")
+            (pdir / "run_results.json").write_bytes(b"r")
+            (pdir / "info_schema" / "v1" / "dbt.project.parquet").write_bytes(b"i")
+            projects.append(pdir)
+            versions.append(v)
+
+        parse_calls = 0
+
+        def fake_parse(bouncer_config, dbt_artifacts_dir):
+            nonlocal parse_calls
+            parse_calls += 1
+            idx = projects.index(dbt_artifacts_dir)
+            return SimpleNamespace(
+                project_idx=idx,
+                manifest_ver=versions[idx]["manifest.json"],
+                catalog_ver=versions[idx]["catalog.json"]
+                if bouncer_config.catalog_checks
+                else None,
+                run_results_ver=versions[idx]["run_results.json"]
+                if bouncer_config.run_results_checks
+                else None,
+                info_schema_ver=versions[idx]["info_schema"]
+                if bouncer_config.info_schema_checks
+                else None,
+            )
+
+        # Reference model of what should be in the bounded cache.
+        model_cache: dict[int, tuple[int, int | None, int | None, int | None]] = {}
+
+        with pytest.MonkeyPatch.context() as mp:
+            mp.setattr(mcp_server, "_MAX_ARTIFACT_CACHE_ENTRIES", max_entries)
+            mp.setattr(parser_mod, "parse_dbt_artifacts", fake_parse)
+
+            for proj_idx, need_cat, need_rr, need_is, mutate in ops:
+                pdir = projects[proj_idx]
+                if mutate is not None:
+                    versions[proj_idx][mutate] += 1
+                    payload = b"x" * versions[proj_idx][mutate]
+                    if mutate == "info_schema":
+                        (
+                            pdir / "info_schema" / "v1" / "dbt.project.parquet"
+                        ).write_bytes(payload)
+                    else:
+                        (pdir / mutate).write_bytes(payload)
+
+                cfg = SimpleNamespace(
+                    package_name=None,
+                    catalog_checks=[object()] if need_cat else [],
+                    run_results_checks=[object()] if need_rr else [],
+                    info_schema_checks=[object()] if need_is else [],
+                )
+
+                expected_hit = False
+                if proj_idx in model_cache:
+                    m_ver, c_ver, r_ver, i_ver = model_cache[proj_idx]
+                    expected_hit = (
+                        m_ver == versions[proj_idx]["manifest.json"]
+                        and (
+                            not need_cat or c_ver == versions[proj_idx]["catalog.json"]
+                        )
+                        and (
+                            not need_rr
+                            or r_ver == versions[proj_idx]["run_results.json"]
+                        )
+                        and (not need_is or i_ver == versions[proj_idx]["info_schema"])
+                    )
+
+                calls_before = parse_calls
+                result = mcp_server._get_or_parse_artifacts(cfg, pdir)  # type: ignore[arg-type]
+
+                if expected_hit:
+                    assert parse_calls == calls_before
+                else:
+                    assert parse_calls == calls_before + 1
+                    if len(model_cache) >= max_entries and proj_idx not in model_cache:
+                        del model_cache[next(iter(model_cache))]
+                    model_cache[proj_idx] = (
+                        versions[proj_idx]["manifest.json"],
+                        versions[proj_idx]["catalog.json"] if need_cat else None,
+                        versions[proj_idx]["run_results.json"] if need_rr else None,
+                        versions[proj_idx]["info_schema"] if need_is else None,
+                    )
+
+                # Returned artifacts must always reflect the latest version of every requested file.
+                assert result.manifest_ver == versions[proj_idx]["manifest.json"]
+                if need_cat:
+                    assert result.catalog_ver == versions[proj_idx]["catalog.json"]
+                if need_rr:
+                    assert (
+                        result.run_results_ver == versions[proj_idx]["run_results.json"]
+                    )
+                if need_is:
+                    assert result.info_schema_ver == versions[proj_idx]["info_schema"]
+
+                # Cache size never exceeds its configured bound.
+                assert len(mcp_server._ARTIFACT_CACHE) <= max_entries
 
 
 def test_build_server_registers_tools():

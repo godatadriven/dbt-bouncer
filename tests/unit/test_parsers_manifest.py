@@ -348,8 +348,10 @@ class TestProxyProperties:
                 assert isinstance(wrapped, ListProxy)
                 assert list(wrapped) == val
                 assert wrapped[:] == val
+                for idx, expected_item in enumerate(val):
+                    assert wrapped[idx] == expected_item
                 if val:
-                    assert wrapped[0] == val[0]
+                    assert wrapped[-1] == val[-1]
             case str():
                 assert isinstance(wrapped, ProxyStr)
                 assert wrapped.value == val == str(wrapped)

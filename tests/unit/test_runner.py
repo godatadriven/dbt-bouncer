@@ -1777,3 +1777,201 @@ def test_check_matcher_reuses_resolved_selector():
 
     assert matcher._selector_for("tag:nightly") is first
     assert second is not first
+
+
+class TestRunnerOptimizationProperties:
+    """Property-based equivalence tests for runner fast paths."""
+
+    def test_extract_skip_checks_matches_get_nested_value(self):
+        """`_extract_skip_checks` agrees with `get_nested_value` across arbitrary meta dicts."""
+        from hypothesis import given, settings
+        from hypothesis import strategies as st
+
+        from dbt_bouncer.runner import _extract_skip_checks
+        from dbt_bouncer.utils import get_nested_value
+
+        skip_names = st.sampled_from(["check_a", "check_b", "MO001", "SO002"])
+        skip_value = st.one_of(
+            st.none(),
+            st.lists(skip_names, max_size=4),
+        )
+        bouncer_value = st.one_of(
+            st.none(),
+            st.integers(),
+            st.text(max_size=5),
+            st.dictionaries(
+                st.sampled_from(["skip_checks", "other"]),
+                skip_value,
+                max_size=2,
+            ),
+        )
+        meta_strategy = st.dictionaries(
+            st.sampled_from(["dbt-bouncer", "owner", "maturity"]),
+            bouncer_value,
+            max_size=3,
+        )
+
+        @settings(max_examples=50)
+        @given(meta=meta_strategy)
+        def _check(meta):
+            expected_raw = get_nested_value(meta, ["dbt-bouncer", "skip_checks"], [])
+            expected = frozenset(expected_raw) if expected_raw else frozenset()
+            assert _extract_skip_checks(meta) == expected
+
+        _check()
+
+    def test_path_filtered_for_matches_path_helpers(self):
+        """Pre-compiled regex filtering in `_CheckMatcher` matches `object_in_path`/`object_excluded_by_path`."""
+        from hypothesis import given, settings
+        from hypothesis import strategies as st
+
+        from dbt_bouncer.runner import _CheckMatcher
+        from dbt_bouncer.utils import object_excluded_by_path, object_in_path
+
+        path_atom = st.sampled_from(
+            [
+                "models/staging/crm/stg_orders.sql",
+                "models\\staging\\crm\\stg_customers.sql",
+                "models/intermediate/int_payments.sql",
+                "models/marts/finance/fct_revenue.sql",
+                "models\\marts\\dim_users.sql",
+            ]
+        )
+        regex_atom = st.sampled_from(
+            [
+                "^models/staging",
+                "^models/marts",
+                ".*crm.*",
+                ".*finance.*",
+                " ^models/intermediate ",
+            ]
+        )
+        pattern_spec = st.one_of(
+            st.none(),
+            regex_atom,
+            st.lists(regex_atom, max_size=3),
+        )
+
+        @settings(max_examples=50)
+        @given(
+            paths=st.lists(path_atom, min_size=1, max_size=6),
+            include=pattern_spec,
+            exclude=pattern_spec,
+        )
+        def _check(paths, include, exclude):
+            models = [
+                SimpleNamespace(
+                    model=wrap_dict(
+                        {
+                            "config": {"meta": {}},
+                            "original_file_path": p,
+                            "unique_id": f"model.pkg.m_{i}",
+                        }
+                    ),
+                    original_file_path=p,
+                    unique_id=f"model.pkg.m_{i}",
+                )
+                for i, p in enumerate(paths)
+            ]
+            matcher = _CheckMatcher({"models": models}, None, None)
+            fake_check = SimpleNamespace(
+                include=include, exclude=exclude, selector=None
+            )
+
+            actual = [
+                f.unique_id for f in matcher.path_filtered_for(fake_check, "model")
+            ]
+            expected = [
+                m.unique_id
+                for m in models
+                if object_in_path(include, m.original_file_path)
+                and not object_excluded_by_path(exclude, m.original_file_path)
+            ]
+            assert actual == expected
+
+        _check()
+
+    def test_dict_and_object_resource_meta_and_suffix_equivalence(self):
+        """`_get_resource_meta` and `_run_id_suffix` agree on DictProxy and SimpleNamespace resources."""
+        from hypothesis import given, settings
+        from hypothesis import strategies as st
+
+        from dbt_bouncer.runner import _get_resource_meta, _run_id_suffix
+
+        meta_dict = st.one_of(
+            st.none(),
+            st.dictionaries(
+                st.sampled_from(["owner", "dbt-bouncer"]),
+                st.sampled_from(["team", {"skip_checks": ["MO001"]}]),
+                max_size=2,
+            ),
+        )
+        resource_types = st.sampled_from(
+            [
+                "catalog_node",
+                "catalog_source",
+                "exposure",
+                "macro",
+                "model",
+                "run_result",
+                "seed",
+                "semantic_model",
+                "snapshot",
+                "source",
+                "test",
+                "unit_test",
+            ]
+        )
+
+        @settings(max_examples=50)
+        @given(
+            iterate_value=resource_types,
+            has_config=st.booleans(),
+            cfg_meta=meta_dict,
+            top_meta=meta_dict,
+            name_parts=st.lists(
+                st.sampled_from(["stg_orders", "customers", "v1", "v2"]),
+                min_size=1,
+                max_size=2,
+            ),
+        )
+        def _check(iterate_value, has_config, cfg_meta, top_meta, name_parts):
+            uid = f"{iterate_value}.pkg.{'.'.join(name_parts)}"
+            meta_by_uid = {uid: top_meta or {}}
+
+            raw_node: dict = {"unique_id": uid, "meta": top_meta}
+            if has_config:
+                raw_node["config"] = {"meta": cfg_meta}
+            ns_node = SimpleNamespace(
+                unique_id=uid,
+                meta=top_meta,
+                **({"config": SimpleNamespace(meta=cfg_meta)} if has_config else {}),
+            )
+
+            if iterate_value in {
+                "catalog_node",
+                "catalog_source",
+                "model",
+                "run_result",
+                "seed",
+                "semantic_model",
+                "snapshot",
+                "source",
+                "test",
+            }:
+                dict_res = SimpleNamespace(
+                    unique_id=uid, **{iterate_value: wrap_dict(raw_node)}
+                )
+                ns_res = SimpleNamespace(unique_id=uid, **{iterate_value: ns_node})
+            else:
+                dict_res = wrap_dict(raw_node)
+                ns_res = ns_node
+
+            assert _get_resource_meta(
+                dict_res, iterate_value, meta_by_uid
+            ) == _get_resource_meta(ns_res, iterate_value, meta_by_uid)
+            assert _run_id_suffix(dict_res, iterate_value) == _run_id_suffix(
+                ns_res, iterate_value
+            )
+
+        _check()

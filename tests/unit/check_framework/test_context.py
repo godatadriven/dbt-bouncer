@@ -145,3 +145,159 @@ class TestSourcesByRelation:
         assert ctx.sources_by_relation["dev", "raw", "table_1"] == [
             "source.pkg.source_1.table_1",
         ]
+
+
+class TestCheckContextProperties:
+    """Property-based tests for lazy CheckContext reverse-lookup indexes."""
+
+    def test_dict_and_namespace_indexes_are_equivalent_and_lazy(self):
+        """Lazy indexes match across DictProxy and SimpleNamespace and only build on access."""
+        from hypothesis import given, settings
+        from hypothesis import strategies as st
+
+        from dbt_bouncer.artifact_parsers.parser import wrap_dict
+
+        node_ids = ["model.pkg.a", "model.pkg.b", "model.pkg.c", "source.pkg.s.t"]
+        deps_strategy = st.none() | st.lists(st.sampled_from(node_ids), max_size=4)
+
+        @settings(max_examples=50)
+        @given(
+            model_deps=st.lists(deps_strategy, max_size=5),
+            test_specs=st.lists(
+                st.tuples(st.none() | st.sampled_from(node_ids), deps_strategy),
+                max_size=5,
+            ),
+            unit_test_deps=st.lists(deps_strategy, max_size=4),
+            source_specs=st.lists(
+                st.tuples(
+                    st.sampled_from(["dev", "prod"]),
+                    st.sampled_from(["raw", "stg"]),
+                    st.sampled_from(["t1", "t2"]),
+                    st.booleans(),
+                ),
+                max_size=5,
+            ),
+        )
+        def _check(model_deps, test_specs, unit_test_deps, source_specs):
+            ns_models = [
+                _node(f"model.pkg.m{i}", depends_on_nodes=deps)
+                for i, deps in enumerate(model_deps)
+            ]
+            dict_models = [
+                wrap_dict(
+                    {
+                        "unique_id": f"model.pkg.m{i}",
+                        **(
+                            {"depends_on": {"nodes": list(deps)}}
+                            if deps is not None
+                            else {}
+                        ),
+                    }
+                )
+                for i, deps in enumerate(model_deps)
+            ]
+
+            ns_tests = [
+                _node(
+                    f"test.pkg.t{i}",
+                    attached_node=attached,
+                    depends_on_nodes=deps,
+                )
+                for i, (attached, deps) in enumerate(test_specs)
+            ]
+            dict_tests = [
+                wrap_dict(
+                    {
+                        "unique_id": f"test.pkg.t{i}",
+                        "attached_node": attached,
+                        **(
+                            {"depends_on": {"nodes": list(deps)}}
+                            if deps is not None
+                            else {}
+                        ),
+                    }
+                )
+                for i, (attached, deps) in enumerate(test_specs)
+            ]
+
+            ns_uts = [
+                _node(f"unit_test.pkg.ut{i}", depends_on_nodes=deps)
+                for i, deps in enumerate(unit_test_deps)
+            ]
+            dict_uts = [
+                wrap_dict(
+                    {
+                        "unique_id": f"unit_test.pkg.ut{i}",
+                        **(
+                            {"depends_on": {"nodes": list(deps)}}
+                            if deps is not None
+                            else {}
+                        ),
+                    }
+                )
+                for i, deps in enumerate(unit_test_deps)
+            ]
+
+            ns_sources = []
+            dict_sources = []
+            for i, (db, schema, ident, wrapped) in enumerate(source_specs):
+                uid = f"source.pkg.s{i}.{ident}"
+                ns_inner = SimpleNamespace(
+                    unique_id=uid, database=db, schema=schema, identifier=ident
+                )
+                dict_inner = wrap_dict(
+                    {
+                        "unique_id": uid,
+                        "database": db,
+                        "schema": schema,
+                        "identifier": ident,
+                    }
+                )
+                ns_sources.append(
+                    SimpleNamespace(source=ns_inner) if wrapped else ns_inner
+                )
+                dict_sources.append(
+                    SimpleNamespace(source=dict_inner) if wrapped else dict_inner
+                )
+
+            ctx_ns = CheckContext(
+                models=ns_models,
+                sources=ns_sources,
+                tests=ns_tests,
+                unit_tests=ns_uts,
+            )
+            ctx_dict = CheckContext(
+                models=dict_models,
+                sources=dict_sources,
+                tests=dict_tests,
+                unit_tests=dict_uts,
+            )
+
+            # Accessing children_by_unique_id must not eagerly build other indexes.
+            assert ctx_dict._children_by_unique_id is None
+            children_dict = ctx_dict.children_by_unique_id
+            assert ctx_dict._tests_by_attached_node is None
+            assert ctx_dict._tests_by_depends_on_node is None
+            assert ctx_dict._unit_tests_by_depends_on_node is None
+            assert ctx_dict._sources_by_relation is None
+            assert ctx_dict.children_by_unique_id is children_dict
+
+            def _to_uids(mapping: dict) -> dict[str, list[str]]:
+                return {
+                    k: [item.unique_id for item in items]
+                    for k, items in mapping.items()
+                }
+
+            assert _to_uids(children_dict) == _to_uids(ctx_ns.children_by_unique_id)
+            assert _to_uids(ctx_dict.tests_by_attached_node) == _to_uids(
+                ctx_ns.tests_by_attached_node
+            )
+            assert _to_uids(ctx_dict.tests_by_depends_on_node) == _to_uids(
+                ctx_ns.tests_by_depends_on_node
+            )
+            assert _to_uids(ctx_dict.unit_tests_by_depends_on_node) == _to_uids(
+                ctx_ns.unit_tests_by_depends_on_node
+            )
+            assert ctx_dict.sources_by_relation == ctx_ns.sources_by_relation
+
+        _check()

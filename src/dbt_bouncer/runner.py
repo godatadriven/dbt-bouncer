@@ -124,9 +124,15 @@ def _get_resource_meta(
     else:
         node = resource
 
+    if iterate_value in {"macro", "test"}:
+        meta = (
+            dict.get(node, "meta")
+            if isinstance(node, dict)
+            else getattr(node, "meta", None)
+        )
+        return meta or {}
+
     if isinstance(node, dict):
-        if iterate_value in {"macro", "test"}:
-            return dict.get(node, "meta") or {}
         cfg = dict.get(node, "config")
         if isinstance(cfg, dict):
             return dict.get(cfg, "meta") or {}
