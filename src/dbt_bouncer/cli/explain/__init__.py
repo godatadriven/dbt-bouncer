@@ -1,6 +1,5 @@
 """Explain command package."""
 
-import json
 from pathlib import Path
 from typing import Annotated
 
@@ -38,19 +37,21 @@ def explain_check(
         Exit: With code CONFIG_ERROR when the check name or rule code is unknown.
 
     """
-    import jellyfish
-    from rich.console import Console
+    import json
 
     from dbt_bouncer.cli.explain.utils import (
         build_explain_payload,
         print_text_explanation,
     )
-    from dbt_bouncer.utils import get_check_registry
+    from dbt_bouncer.utils import get_check_registry, lookup_check_class
 
-    registry = get_check_registry(custom_checks_dir)
-    check_class = registry.get(check)
+    check_class = lookup_check_class(check, custom_checks_dir)
 
     if check_class is None:
+        import jellyfish
+        from rich.console import Console
+
+        registry = get_check_registry(custom_checks_dir)
         best_match = min(
             registry.keys(),
             key=lambda k: jellyfish.levenshtein_distance(k, check),

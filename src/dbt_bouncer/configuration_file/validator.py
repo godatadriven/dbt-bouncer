@@ -364,7 +364,10 @@ def lint_config_file(config_file_path: Path) -> list[dict[str, Any]]:
         )
         return issues
 
-    registry = get_check_registry()
+    from dbt_bouncer.utils import _get_check_module_map_cached
+
+    known_names = _get_check_module_map_cached()
+    registry: dict[str, type[BaseCheck]] | None = None
     valid_categories = set(CheckCategory)
     for category in valid_categories:
         if category in data:
@@ -433,24 +436,29 @@ def lint_config_file(config_file_path: Path) -> list[dict[str, Any]]:
                     warn_deprecated_check_name(
                         check_name, DEPRECATED_CHECK_NAME_ALIASES[check_name]
                     )
-                elif check_name not in registry:
-                    best_match = min(
-                        registry.keys(),
-                        key=lambda k, target=check_name: jellyfish.levenshtein_distance(
-                            k, target
-                        ),
-                        default=None,
-                    )
-                    suggestion = f" Did you mean '{best_match}'?" if best_match else ""
-                    issues.append(
-                        {
-                            "line": _resolve_loc_line(
-                                config_file_path, (category, idx)
+                elif check_name not in known_names:
+                    if registry is None:
+                        registry = get_check_registry()
+                    if check_name not in registry:
+                        best_match = min(
+                            registry.keys(),
+                            key=lambda k, target=check_name: (
+                                jellyfish.levenshtein_distance(k, target)
                             ),
-                            "message": f"Unknown check name '{check_name}'.{suggestion}",
-                            "severity": "error",
-                        }
-                    )
+                            default=None,
+                        )
+                        suggestion = (
+                            f" Did you mean '{best_match}'?" if best_match else ""
+                        )
+                        issues.append(
+                            {
+                                "line": _resolve_loc_line(
+                                    config_file_path, (category, idx)
+                                ),
+                                "message": f"Unknown check name '{check_name}'.{suggestion}",
+                                "severity": "error",
+                            }
+                        )
 
     return issues
 

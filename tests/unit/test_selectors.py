@@ -780,3 +780,45 @@ class TestSelectorProperties:
             sel_base <= sel_min_desc <= sel_max_desc <= sel_desc <= sel_both <= sel_at
         )
         assert sel_anc | sel_desc == sel_both
+
+    @settings(max_examples=50)
+    @given(manifest=_arbitrary_manifest_strategy(), expr=_VALID_SELECTOR)
+    def test_dict_proxy_and_shared_resources_match_namespace_manifest(
+        self, manifest: SimpleNamespace, expr: str
+    ):
+        """Selector evaluation via the raw-dict fast path and shared `_resources` matches SimpleNamespace."""
+        from dbt_bouncer.artifact_parsers.parser import wrap_dict
+
+        dict_manifest = wrap_dict(
+            {
+                "child_map": manifest.child_map,
+                "exposures": {},
+                "macros": {},
+                "nodes": {
+                    uid: {
+                        "config": {
+                            "enabled": n.config.enabled,
+                            "materialized": n.config.materialized,
+                            "tags": list(n.config.tags),
+                        },
+                        "fqn": list(n.fqn),
+                        "name": n.name,
+                        "original_file_path": n.original_file_path,
+                        "package_name": n.package_name,
+                        "tags": list(n.tags),
+                    }
+                    for uid, n in manifest.nodes.items()
+                },
+                "parent_map": manifest.parent_map,
+                "semantic_models": {},
+                "sources": {},
+                "unit_tests": {},
+            }
+        )
+        expected = Selector(expr, manifest)._selected_ids
+        from_dict = Selector(expr, dict_manifest)._selected_ids
+        shared = list(Selector._iter_manifest_resources(dict_manifest))
+        from_shared = Selector(expr, dict_manifest, _resources=shared)._selected_ids
+
+        assert from_dict == expected
+        assert from_shared == expected

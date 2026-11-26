@@ -2346,3 +2346,34 @@ def test_validate_conf_skips_cache_when_key_unserialisable(isolated_cache_dir):
 
     assert conf.manifest_checks[0].max_number_of_lines == 2**70
     assert list(isolated_cache_dir.glob("conf_*.json")) == []
+
+
+def test_lint_config_file_reuses_registry_and_accepts_registry_only_check(
+    tmp_path, monkeypatch
+):
+    """lint_config_file loads the full registry once for multiple misses and accepts plugin checks."""
+    import dbt_bouncer.configuration_file.validator as validator_mod
+
+    cfg = tmp_path / "dbt-bouncer.yml"
+    cfg.write_text(
+        "manifest_checks:\n"
+        "  - name: check_plugin_only\n"
+        "  - name: check_typo_one\n"
+        "  - name: check_typo_two\n"
+    )
+
+    registry_calls = 0
+
+    def counting_registry():
+        nonlocal registry_calls
+        registry_calls += 1
+        return {"check_plugin_only": object, "check_model_names": object}
+
+    monkeypatch.setattr(validator_mod, "get_check_registry", counting_registry)
+
+    issues = validator_mod.lint_config_file(cfg)
+
+    assert registry_calls == 1
+    assert len(issues) == 2
+    assert "check_typo_one" in issues[0]["message"]
+    assert "check_typo_two" in issues[1]["message"]

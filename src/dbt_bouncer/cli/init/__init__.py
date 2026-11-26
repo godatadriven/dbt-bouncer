@@ -1,19 +1,17 @@
 """Init command package."""
 
+from __future__ import annotations
+
 from pathlib import Path
-from typing import Annotated
+from typing import TYPE_CHECKING, Annotated
 
 import typer
-from rich.console import Console
 
 from dbt_bouncer.cli import app
-from dbt_bouncer.cli.init.utils import (
-    build_initial_config,
-    count_preset_checks,
-    write_config_file,
-    write_preset_config_file,
-)
 from dbt_bouncer.enums import ConfigFileName, PresetName
+
+if TYPE_CHECKING:
+    from rich.console import Console
 
 
 def _confirm_overwrite(console: Console, config_path: Path) -> None:
@@ -33,6 +31,11 @@ def _confirm_overwrite(console: Console, config_path: Path) -> None:
 
 def _init_from_preset(console: Console, preset: PresetName) -> None:
     """Scaffold a config file from a bundled preset, non-interactively."""
+    from dbt_bouncer.cli.init.utils import (
+        count_preset_checks,
+        write_preset_config_file,
+    )
+
     config_path = Path(ConfigFileName.DBT_BOUNCER_YML)
     _confirm_overwrite(console, config_path)
 
@@ -66,6 +69,10 @@ def init(
     In both paths, `_confirm_overwrite` aborts if the file exists and the user
     declines to overwrite it.
     """
+    from rich.console import Console
+
+    from dbt_bouncer.cli.init.utils import build_initial_config, write_config_file
+
     console = Console()
 
     if preset is not None:

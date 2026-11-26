@@ -16,7 +16,6 @@ from dbt_bouncer.enums import (
     PresetName,
 )
 from dbt_bouncer.exceptions import DbtBouncerConfigError
-from dbt_bouncer.reporting.formatters import infer_output_format
 from dbt_bouncer.reporting.logger import configure_console_logging
 from dbt_bouncer.version import version as get_version
 
@@ -393,6 +392,8 @@ def _resolve_output_format(
             )
         return normalized
     if output_file is not None:
+        from dbt_bouncer.reporting.formatters import infer_output_format
+
         return infer_output_format(output_file).value
     return OutputFormat.JSON.value
 

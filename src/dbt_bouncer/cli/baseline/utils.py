@@ -6,16 +6,6 @@ import logging
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from dbt_bouncer.cli.run.utils import (
-    _context_from_config,
-    _parse_check_names,
-    _parse_only,
-    _prepare_bouncer_config,
-    _resolve_config_file_source,
-)
-from dbt_bouncer.cli.utils import resolve_config_path
-from dbt_bouncer.reporting.logger import configure_console_logging
-
 if TYPE_CHECKING:
     from pathlib import PurePath
 
@@ -51,8 +41,17 @@ def write_baseline(
     """
     import orjson
 
+    from dbt_bouncer.cli.run.utils import (
+        _context_from_config,
+        _parse_check_names,
+        _parse_only,
+        _prepare_bouncer_config,
+        _resolve_config_file_source,
+    )
+    from dbt_bouncer.cli.utils import resolve_config_path
     from dbt_bouncer.enums import CheckOutcome
     from dbt_bouncer.regression import build_baseline
+    from dbt_bouncer.reporting.logger import configure_console_logging
     from dbt_bouncer.runner import collect_failures
 
     configure_console_logging(verbosity)

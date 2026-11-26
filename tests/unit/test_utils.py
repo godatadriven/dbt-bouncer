@@ -1109,6 +1109,65 @@ class TestUtilsProperties:
         assert object_excluded_by_path(None, rel_path) is False
         assert object_excluded_by_path([], rel_path) is False
 
+    @settings(max_examples=50)
+    @given(
+        data=st.recursive(
+            st.none() | st.booleans() | st.integers(-50, 50) | st.text(max_size=6),
+            lambda children: st.dictionaries(
+                st.sampled_from(["a", "b", "c", "d"]), children, max_size=3
+            ),
+            max_leaves=10,
+        ),
+        keys=st.lists(st.sampled_from(["a", "b", "c", "d"]), min_size=1, max_size=4),
+        leaf=st.integers(-100, 100) | st.text(max_size=8),
+    )
+    def test_get_nested_value_matches_reference_walk_and_round_trips(
+        self, data: Any, keys: list[str], leaf: Any
+    ):
+        """get_nested_value matches a reference dict walk and round-trips freshly nested paths."""
+        from dbt_bouncer.utils import get_nested_value
+
+        sentinel = object()
+        expected: Any = data
+        for key in keys:
+            if isinstance(expected, dict) and key in expected:
+                expected = expected[key]
+            else:
+                expected = sentinel
+                break
+
+        assert get_nested_value(data, keys, sentinel) is expected
+
+        # Round-trip: inserting `leaf` at `keys` always retrieves `leaf`.
+        built: Any = leaf
+        for key in reversed(keys):
+            built = {key: built}
+        assert get_nested_value(built, keys, sentinel) == leaf
+
+    @settings(max_examples=50)
+    @given(
+        candidate=st.one_of(
+            st.sampled_from(
+                [
+                    "check_model_names",
+                    "MO038",
+                    "check_source_names",
+                    "SO008",
+                    "check_column_names",
+                    "CO003",
+                    "check_run_results_max_execution_time",
+                    "RR001",
+                ]
+            ),
+            st.text(min_size=1, max_size=20),
+        )
+    )
+    def test_lookup_check_class_matches_full_registry(self, candidate: str):
+        """Fast targeted check lookup always agrees with the full check registry."""
+        from dbt_bouncer.utils import get_check_registry, lookup_check_class
+
+        assert lookup_check_class(candidate) is get_check_registry().get(candidate)
+
 
 def test_prune_expired_conf_cache_files_deletes_only_old_conf_files(tmp_path):
     """Only ``conf_*.json`` files past the maximum age are deleted."""
@@ -1160,3 +1219,25 @@ def test_get_cache_dir_honours_env_var(monkeypatch, tmp_path):
 
     monkeypatch.delenv("DBT_BOUNCER_CACHE_DIR")
     assert get_cache_dir() == Path.home() / ".cache" / "dbt-bouncer"
+
+
+def test_lookup_check_class_falls_back_on_stale_module_map(monkeypatch):
+    """If the cached module map points to a module lacking the check, fall back to the registry."""
+    import dbt_bouncer.utils as utils_mod
+
+    monkeypatch.setattr(
+        utils_mod,
+        "_get_check_module_map_cached",
+        lambda _dir=None: {
+            "check_stale_entry": {
+                "module": "dbt_bouncer.checks.manifest.models.naming",
+                "category": "manifest_checks",
+            }
+        },
+    )
+    monkeypatch.setattr(
+        utils_mod,
+        "get_check_objects_for_names",
+        lambda *_args, **_kwargs: [],
+    )
+    assert utils_mod.lookup_check_class("check_stale_entry") is None

@@ -5,11 +5,9 @@ from pathlib import Path
 from typing import Annotated
 
 import typer
-from rich.console import Console
 
 from dbt_bouncer.cli import app
 from dbt_bouncer.cli.baseline.utils import DEFAULT_BASELINE_FILE, write_baseline
-from dbt_bouncer.cli.run.utils import detect_config_file_source
 from dbt_bouncer.enums import ConfigFileName, ExitCode
 from dbt_bouncer.exceptions import DbtBouncerArtifactError, DbtBouncerConfigError
 
@@ -57,6 +55,10 @@ def baseline(
             config is invalid, or ARTIFACT_ERROR if a dbt artifact is missing.
 
     """
+    from rich.console import Console
+
+    from dbt_bouncer.cli.run.utils import detect_config_file_source
+
     console = Console()
     config_file_source = detect_config_file_source(config_file)
 

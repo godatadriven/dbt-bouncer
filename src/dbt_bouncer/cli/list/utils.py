@@ -3,10 +3,6 @@
 import itertools
 from typing import TYPE_CHECKING, TypedDict
 
-from rich import box
-from rich.console import Console
-from rich.table import Table
-
 if TYPE_CHECKING:
     from dbt_bouncer.check_framework.base import BaseCheck
 
@@ -127,6 +123,10 @@ def print_text_checks(checks_payload: dict[str, list[CheckDict]]) -> None:
             :func:`build_checks_payload`.
 
     """
+    from rich import box
+    from rich.console import Console
+    from rich.table import Table
+
     console = Console()
     for label, checks in checks_payload.items():
         table = Table(

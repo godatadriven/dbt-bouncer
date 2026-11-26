@@ -5,13 +5,10 @@ from pathlib import Path
 from typing import Annotated
 
 import typer
-from rich.console import Console
 
 from dbt_bouncer.cli import app
-from dbt_bouncer.cli.run.utils import detect_config_file_source
 from dbt_bouncer.enums import ConfigFileName, ExitCode
 from dbt_bouncer.exceptions import DbtBouncerConfigError
-from dbt_bouncer.reporting.logger import configure_console_logging
 
 
 @app.command(name="validate")
@@ -38,16 +35,20 @@ def validate(
             are found, or CONFIG_ERROR if the config file is not found.
 
     """
-    console = Console()
+    from rich.console import Console
 
-    configure_console_logging(verbosity=0)
-
+    from dbt_bouncer.cli.run.utils import detect_config_file_source
     from dbt_bouncer.configuration_file.validator import (
         get_config_file_path,
         lint_config_file,
         lint_config_file_deep,
         load_config_file_contents,
     )
+    from dbt_bouncer.reporting.logger import configure_console_logging
+
+    console = Console()
+
+    configure_console_logging(verbosity=0)
 
     try:
         config_path = Path(
