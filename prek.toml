@@ -19,8 +19,28 @@ id = "end-of-file-fixer"
 priority = 1
 
 [[repos.hooks]]
+id = "fix-byte-order-marker"
+priority = 2
+
+[[repos.hooks]]
+id = "mixed-line-ending"
+priority = 3
+
+[[repos.hooks]]
 args = ["--maxkb=2000"]
 id = "check-added-large-files"
+priority = "checks"
+
+[[repos.hooks]]
+id = "check-case-conflict"
+priority = "checks"
+
+[[repos.hooks]]
+id = "check-executables-have-shebangs"
+priority = "checks"
+
+[[repos.hooks]]
+id = "check-illegal-windows-names"
 priority = "checks"
 
 [[repos.hooks]]
@@ -32,7 +52,23 @@ id = "check-merge-conflict"
 priority = "checks"
 
 [[repos.hooks]]
+id = "check-shebang-scripts-are-executable"
+priority = "checks"
+
+[[repos.hooks]]
+id = "check-symlinks"
+priority = "checks"
+
+[[repos.hooks]]
 id = "check-toml"
+priority = "checks"
+
+[[repos.hooks]]
+id = "check-vcs-permalinks"
+priority = "checks"
+
+[[repos.hooks]]
+id = "check-xml"
 priority = "checks"
 
 [[repos.hooks]]
@@ -41,7 +77,15 @@ id = "check-yaml"
 priority = "checks"
 
 [[repos.hooks]]
+id = "destroyed-symlinks"
+priority = "checks"
+
+[[repos.hooks]]
 id = "detect-private-key"
+priority = "checks"
+
+[[repos.hooks]]
+id = "forbid-new-submodules"
 priority = "checks"
 
 [[repos]]

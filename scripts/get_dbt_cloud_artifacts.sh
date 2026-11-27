@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 set -euo
 
 RESPONSE=$(curl -H "Authorization: Token $DBT_TOKEN_VALUE" -H "Content-Type:application/json" -d '{"cause":"Triggered by GitHub Actions"}' https://cloud.getdbt.com/api/v2/accounts/$DBT_ACCOUNT_ID/jobs/$DBT_CLOUD_JOB_ID/run/);
