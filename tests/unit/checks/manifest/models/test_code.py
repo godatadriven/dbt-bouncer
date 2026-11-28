@@ -309,6 +309,28 @@ class TestCheckModelDoesNotUseCartesianJoin:
     @pytest.mark.parametrize(
         "raw_code",
         [
+            pytest.param("SELECT 1 FROM a JOIN b", id="bare"),
+            pytest.param("SELECT 1 FROM a /* CROSS */ JOIN b", id="comment"),
+            pytest.param(
+                "SELECT 1 FROM a CROSS JOIN b JOIN c", id="after_explicit_cross_join"
+            ),
+            pytest.param(
+                "SELECT 1 FROM a JOIN (SELECT x FROM t CROSS JOIN u) AS s",
+                id="subquery_with_cross_join",
+            ),
+        ],
+    )
+    def test_bare_join_is_not_an_allowed_cross_join(self, raw_code):
+        check_fails(
+            "check_model_does_not_use_cartesian_join",
+            model={"raw_code": raw_code},
+            allow_explicit_cross_join=True,
+            match=r"uses a `JOIN` without an `ON` or `USING` clause\.",
+        )
+
+    @pytest.mark.parametrize(
+        "raw_code",
+        [
             pytest.param("SELECT 1 FROM a JOIN b ON 1 = b.id", id="literal_on_left"),
             pytest.param("SELECT 1 FROM a JOIN b ON b.id = 1", id="literal_on_right"),
         ],

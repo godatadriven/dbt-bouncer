@@ -1,6 +1,7 @@
 """Checks related to model source code content and structure."""
 
 import re
+from itertools import pairwise
 from typing import TYPE_CHECKING, Annotated
 
 from pydantic import Field
@@ -182,8 +183,37 @@ def check_model_code_does_not_contain_regexp_pattern(
         )
 
 
+def _is_written_cross_join(join: "exp.Join", sql: str) -> bool:
+    """Whether ``sql`` spells out ``CROSS JOIN`` (or ``CROSS APPLY``) for ``join``.
+
+    sqlglot 30.32+ also sets ``kind="CROSS"`` on a bare ``JOIN`` that has no
+    ``ON``/``USING``, so the AST alone cannot tell the two apart.
+
+    Returns:
+        bool: ``False`` only if the join was written without the ``CROSS`` keyword.
+
+    """
+    from sqlglot import exp
+    from sqlglot.tokens import Tokenizer, TokenType
+
+    starts = [
+        i.meta["start"] for i in join.this.find_all(exp.Identifier) if "start" in i.meta
+    ]
+    if not starts:
+        return True
+
+    # The last JOIN/APPLY before the joined relation is the one that introduced it.
+    tokens = [t for t in Tokenizer().tokenize(sql) if t.start < min(starts)]
+    for token, previous in pairwise(reversed(tokens)):
+        if token.token_type == TokenType.APPLY:
+            return True
+        if token.token_type == TokenType.JOIN:
+            return previous.token_type == TokenType.CROSS
+    return True
+
+
 def _cartesian_join_failure(
-    join: "exp.Join", model_name: str, allow_explicit_cross_join: bool
+    join: "exp.Join", sql: str, model_name: str, allow_explicit_cross_join: bool
 ) -> str | None:
     """Return a failure message if ``join`` is a Cartesian join, else ``None``.
 
@@ -191,7 +221,9 @@ def _cartesian_join_failure(
         str | None: The failure reason, or ``None`` if the join is constrained.
 
     """
-    is_cross = (join.kind or "").upper() == "CROSS"
+    is_cross = (join.kind or "").upper() == "CROSS" and _is_written_cross_join(
+        join, sql
+    )
     on_clause = join.args.get("on")
     using_clause = join.args.get("using")
     # A `NATURAL JOIN` joins on the columns the two relations share, so it
@@ -271,7 +303,8 @@ def check_model_does_not_use_cartesian_join(
     if not _is_sql_model(model):
         return
 
-    parsed = parse_sql(neutralize_jinja(model.raw_code or ""))
+    sql = neutralize_jinja(model.raw_code or "")
+    parsed = parse_sql(sql)
     if parsed is None:
         # Fallback: best-effort regex on Jinja-stripped raw code.
         cleaned = _strip_sql_comments(model.raw_code or "")
@@ -287,7 +320,7 @@ def check_model_does_not_use_cartesian_join(
     for statement in parsed:
         for join in statement.find_all(exp.Join):
             message = _cartesian_join_failure(
-                join, model_name, allow_explicit_cross_join
+                join, sql, model_name, allow_explicit_cross_join
             )
             if message is not None:
                 fail(message)
